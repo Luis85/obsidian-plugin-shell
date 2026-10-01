@@ -98,7 +98,10 @@ test('typed shared process runner remains the canonical compatibility implementa
 });
 
 test('framework process adapter uses the shared Node spawn lifecycle', async t => {
-  const source = await readFile(join(root, 'scripts/framework/process.ts'), 'utf8');
+  // Stage D relocated the policy adapter; the former path only re-exports it.
+  const shim = await readFile(join(root, 'scripts/framework/process.ts'), 'utf8');
+  assert.equal(shim.trim(), "export * from '../../bin/adapters/framework/process.ts';");
+  const source = await readFile(join(root, 'bin/adapters/framework/process.ts'), 'utf8');
   assert.doesNotMatch(source, /node:child_process|StringDecoder/);
   assert.match(source, /runNodeProcess/);
 

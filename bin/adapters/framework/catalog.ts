@@ -114,10 +114,10 @@ export function descriptor(id: string): Command {
   const error = new OperationError('UNKNOWN_COMMAND', `Unknown command: ${id}.${didYouMean(found, value => `"${value}"`)} Use help.`, found.length === 1 ? `node bin/app help ${found[0]}` : 'node bin/app help');
   error.details = { suggestions: found }; throw error;
 }
-export function parseCliArguments(argv: string[]): Request {
-  argv = argv.map(arg => arg === '-h' ? '--help' : arg === '-V' ? '--version' : arg);
-  if (argv[0] === '--version') argv = ['version', ...argv.slice(1)];
-  requireThat(argv.length <= 100 && argv.every(arg => arg.length <= 4096 && !arg.includes('\0')), 'ARGUMENT_LIMIT', 'Too many or oversized arguments.');
+const aliases = new Map([['-h', '--help'], ['-V', '--version']]);
+const safeArgument = (arg: string) => arg.length <= 4096 && !arg.includes('\0');
+/** Splits argv into positional words and options known to any command; values follow their option. */
+function scanArguments(argv: string[]): { positional: string[]; options: Values } {
   const positional: string[] = [], options: Values = {};
   const available: Record<string, 'value' | 'flag'> = { ...common };
   for (const item of commands) Object.assign(available, item.options);
@@ -127,23 +127,38 @@ export function parseCliArguments(argv: string[]): Request {
     const key = arg.slice(2);
     if (!Object.hasOwn(available, key)) throw unknownOption(arg, Object.keys(available));
     requireThat(!Object.hasOwn(options, key), 'INVALID_OPTION', `Repeated option: ${arg}.`);
-    if (available[key] === 'flag') options[key] = true;
-    else { const value = argv[++i]; requireThat(value !== undefined && !value.startsWith('--'), 'MISSING_VALUE', `Supply a value for ${arg}.`); options[key] = value; }
+    if (available[key] === 'flag') { options[key] = true; continue; }
+    const value = argv[++i]; requireThat(value !== undefined && !value.startsWith('--'), 'MISSING_VALUE', `Supply a value for ${arg}.`); options[key] = value;
   }
-  const name = commands.map(item => item.id).sort((a, b) => b.length - a.length)
-    .find(id => id.split(' ').every((word, i) => positional[i] === word)) ?? (positional.length ? positional.slice(0, 2).join(' ') : 'help');
+  return { positional, options };
+}
+/** The longest command id whose words prefix the positional arguments; otherwise the first two words, or help. */
+function commandName(positional: string[]): string {
+  const known = commands.map(item => item.id).sort((a, b) => b.length - a.length).find(id => id.split(' ').every((word, i) => positional[i] === word));
+  return known ?? (positional.length ? positional.slice(0, 2).join(' ') : 'help');
+}
+export function parseCliArguments(argv: string[]): Request {
+  argv = argv.map(arg => aliases.get(arg) ?? arg);
+  if (argv[0] === '--version') argv = ['version', ...argv.slice(1)];
+  requireThat(argv.length <= 100 && argv.every(safeArgument), 'ARGUMENT_LIMIT', 'Too many or oversized arguments.');
+  const { positional, options } = scanArguments(argv);
+  const name = commandName(positional);
   const entry = descriptor(name), args = positional.slice(name === 'help' && positional.length === 0 ? 0 : name.split(' ').length);
   return validateFields(entry, args, options);
 }
+function validOptionValue(kind: 'value' | 'flag' | undefined, value: Values[string]): boolean {
+  return kind === 'flag' ? value === true : typeof value === 'string' && safeArgument(value);
+}
+const validTimeout = (value: unknown) => typeof value === 'string' && /^\d+$/.test(value) && Number(value) > 0 && Number(value) <= 3_600_000;
 function validateFields(entry: Command, args: string[], options: Values): Request {
-  requireThat(args.length <= entry.maxArgs && args.every(arg => arg.length <= 4096 && !arg.includes('\0') && !arg.startsWith('--')), 'INVALID_ARGUMENT', `Invalid arguments for ${entry.id}.`);
+  requireThat(args.length <= entry.maxArgs && args.every(arg => safeArgument(arg) && !arg.startsWith('--')), 'INVALID_ARGUMENT', `Invalid arguments for ${entry.id}.`);
   const allowed = parameterKinds(entry);
   for (const [key, value] of Object.entries(options)) {
     if (!Object.hasOwn(allowed, key)) throw unknownOption(`--${key}`, Object.keys(allowed), entry.id);
-    requireThat(allowed[key] === 'flag' ? value === true : typeof value === 'string' && value.length <= 4096 && !value.includes('\0'), 'INVALID_OPTION', `Invalid value for --${key}.`);
+    requireThat(validOptionValue(allowed[key], value), 'INVALID_OPTION', `Invalid value for --${key}.`);
   }
   if (options.apply !== undefined) requireThat(typeof options.apply === 'string' && /^[a-f0-9]{64}$/.test(options.apply), 'INVALID_PLAN_HASH', 'Supply a SHA-256 plan hash.');
-  if (options.timeout !== undefined) requireThat(typeof options.timeout === 'string' && /^\d+$/.test(options.timeout) && Number(options.timeout) > 0 && Number(options.timeout) <= 3_600_000, 'INVALID_TIMEOUT', 'Timeout must be 1..3600000 milliseconds.');
+  if (options.timeout !== undefined) requireThat(validTimeout(options.timeout), 'INVALID_TIMEOUT', 'Timeout must be 1..3600000 milliseconds.');
   return { command: entry.id, args: [...args], options: { ...options } };
 }
 function unknownOption(arg: string, available: string[], command?: string): OperationError {
