@@ -151,7 +151,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D47:** Framework-kit distribution filtering, text adaptation and reviewed ownership refresh moved to `bin/adapters/framework/distribution.ts`; the former framework path is compatibility-only. Maker coverage locks prototype/starter exclusion, required vendor retention, normalized README/link rewriting, analyzer entry filtering and hash-bound ownership refresh/refusal.
 - **D47a (CI repair):** The relocated framework contracts re-export `ResultStatus`, documentation planning exposes its concrete file-plan shape again, and the accumulated relocation parity suite is split at test boundaries into bounded files sharing one support module. The 450-line test limit and all quality thresholds remain unchanged.
 - **D47b (CI repair):** Split parity files now import their shared fixture surface on one line, keeping every split below the existing 450-code-line baseline without duplicating helper implementations or weakening source limits.
-- **Remaining D48–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D48:** Prototype-registry integrity checks moved to `bin/adapters/framework/prototype-integrity.ts`; the former framework path is compatibility-only. Direct maker coverage preserves empty/unmanaged workspace success, orphaned-manifest refusal, registry-race refusal and cancellation semantics.
+- **Remaining D49–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
