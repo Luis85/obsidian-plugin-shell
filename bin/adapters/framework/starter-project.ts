@@ -14,6 +14,7 @@ import { completeDefinition } from '../../../scripts/starters/processes.ts';
 import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
 import { planProject } from '../../../scripts/compiler/adapters/project-plan.ts';
 import { exists } from './files.ts';
+import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
@@ -69,8 +70,9 @@ interface Placement { directory: string; vault: string; target: string }
 /** The nearest existing folder (the start or an ancestor) that holds a `.obsidian` directory. */
 export async function enclosingVault(start: string): Promise<string | null> {
   for (let current = resolve(start); ; current = dirname(current)) {
+    // Only an existing directory can hold the marker; probing below a file would fail with ENOTDIR.
     const marker = join(current, defaultVaultConfigDirectory);
-    if (await exists(marker) && (await lstat(marker)).isDirectory()) return current;
+    if ((await statIfPresent(current))?.isDirectory() && (await statIfPresent(marker))?.isDirectory()) return current;
     if (dirname(current) === current) return null;
   }
 }
