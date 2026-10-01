@@ -17,6 +17,12 @@ const MAX_TOTAL_BYTES = 12_000_000;
 function safeName(name: string): boolean {
   return /^[a-z][a-z0-9-]*$/.test(name);
 }
+const atomicFolder: Record<ComponentTemplate['atomicLevel'], string> = {
+  atom: 'atoms', molecule: 'molecules', organism: 'organisms', template: 'layouts', page: 'pages',
+};
+function expectedRelativePath(template: ComponentTemplate): string {
+  return atomicFolder[template.atomicLevel] + '/' + template.id.split('.').slice(1).join('-') + '.json';
+}
 
 async function scanFolder(folder: string, displayRoot: string, origin: ComponentTemplateEntry['origin']): Promise<ComponentTemplateEntry[]> {
   if (!await exists(folder)) return [];
@@ -46,6 +52,8 @@ async function scanFolder(folder: string, displayRoot: string, origin: Component
       const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
       const template = validateComponentTemplate(parseDesignData(decoded));
       const local = relative ? relative + '/' + entry.name : entry.name;
+      requireThat(local === expectedRelativePath(template), 'TEMPLATE_SOURCE',
+        template.id + ' must live at ' + displayRoot + '/' + expectedRelativePath(template) + '.');
       result.push({ template, file: displayRoot + '/' + local, sha256: hash(bytes), origin });
     }
   }

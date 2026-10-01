@@ -97,6 +97,9 @@ test('component-template validation accepts the complete contract and rejects ma
     { ...baseTemplate(), id: 'Fixture' },
     { ...baseTemplate(), templateType: 'widget' },
     { ...baseTemplate(), atomicLevel: 'particle' },
+    { ...baseTemplate(), id: 'molecule.fixture' },
+    { ...baseTemplate(), id: 'page.fixture', atomicLevel: 'page' },
+    { ...baseTemplate(), templateType: 'component-with-children', children: [], slots: [{ id: 'main', role: 'content', accepts: ['atom'] }] },
     { ...baseTemplate(), states: ['hover'] },
     { ...baseTemplate(), tags: ['fixture', 'fixture'] },
     { ...baseTemplate(), props: [{ name: 'Bad-name', type: 'string', required: false }] },
@@ -171,6 +174,11 @@ test('repository merges the framework baseline, allows project overrides and ref
     const overridden = merged.find(entry => entry.template.id === 'atom.button');
     assert.equal(overridden?.template.name, 'Project Button');
     assert.equal(overridden?.origin, 'project');
+
+    await mkdir(join(root, 'configs/templates/pages'), { recursive: true });
+    await writeFile(join(root, 'configs/templates/pages/misplaced.json'), JSON.stringify(source));
+    await assert.rejects(loadComponentTemplates(root, frameworkRoot), /must live at/);
+    await rm(join(root, 'configs/templates/pages/misplaced.json'));
 
     await assert.rejects(
       loadComponentTemplates(root, frameworkRoot, [source]),

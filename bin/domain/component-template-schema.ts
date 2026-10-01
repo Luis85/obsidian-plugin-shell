@@ -125,12 +125,25 @@ export function buildComponentTemplateSchema(
             design: { oneOf: [recipeDesign, pageDesign] },
           },
         },
-        else: { properties: { design: { oneOf: [catalogDesign, recipeDesign, compositionDesign] } } },
+        else: {
+          properties: {
+            atomicLevel: { enum: ['atom', 'molecule', 'organism', 'template'] },
+            design: { oneOf: [catalogDesign, recipeDesign, compositionDesign] },
+          },
+        },
       },
       {
         if: { properties: { templateType: { const: 'component' } }, required: ['templateType'] },
         then: { properties: { children: { maxItems: 0 }, slots: { maxItems: 0 } } },
       },
+      {
+        if: { properties: { atomicLevel: { const: 'atom' } }, required: ['atomicLevel'] },
+        then: { properties: { templateType: { const: 'component' } } },
+      },
+      ...atomicLevels.map(level => ({
+        if: { properties: { atomicLevel: { const: level } }, required: ['atomicLevel'] },
+        then: { properties: { id: { pattern: '^' + level + '\\.' } } },
+      })),
       {
         if: { properties: { templateType: { const: 'component-with-children' } }, required: ['templateType'] },
         then: {

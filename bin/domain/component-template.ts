@@ -233,12 +233,19 @@ export function validateComponentTemplate(value: unknown): ComponentTemplate {
   requireSketch(/^\d+\.\d+\.\d+$/.test(version), 'TEMPLATE_INVALID', 'Template version must be semantic x.y.z.');
   requireSketch(TEMPLATE_TYPES.includes(row.templateType as ComponentTemplateType), 'TEMPLATE_INVALID', 'Unknown template type.');
   requireSketch(ATOMIC_LEVELS.includes(row.atomicLevel as AtomicLevel), 'TEMPLATE_INVALID', 'Unknown atomic level.');
+  const atomicLevel = row.atomicLevel as AtomicLevel;
+  const id = identifier(row.id);
+  requireSketch(id.startsWith(atomicLevel + '.'), 'TEMPLATE_INVALID',
+    'Template ID prefix must match its Atomic Design level: ' + atomicLevel + '.*.');
   const states = strings(row.states, 'state', 8);
   requireSketch(states.every(state => VISUAL_STATES.includes(state)), 'TEMPLATE_INVALID', 'Template states must use the visual IR state vocabulary.');
   const children = readChildren(row.children);
   const slots = readSlots(row.slots);
   const templateType = row.templateType as ComponentTemplateType;
-  requireSketch(!templateType.startsWith('page') || row.atomicLevel === 'page', 'TEMPLATE_INVALID', 'Page templates use the page atomic level.');
+  requireSketch(templateType.startsWith('page') === (atomicLevel === 'page'), 'TEMPLATE_INVALID',
+    'Only page templates use the page atomic level.');
+  requireSketch(atomicLevel !== 'atom' || templateType === 'component', 'TEMPLATE_INVALID',
+    'Atoms are leaf components and cannot declare child or brick composition.');
   requireSketch(templateType !== 'page-with-bricks' || slots.length > 0, 'TEMPLATE_INVALID', 'A page-with-bricks template needs at least one named slot.');
   requireSketch(templateType !== 'component-with-children' || children.length > 0 || slots.length > 0,
     'TEMPLATE_INVALID', 'A component-with-children template needs children or slots.');
@@ -253,11 +260,11 @@ export function validateComponentTemplate(value: unknown): ComponentTemplate {
   return {
     schemaVersion: 1,
     ...(row.$schema === undefined ? {} : { $schema: text(row.$schema, '$schema', 500) }),
-    id: identifier(row.id),
+    id,
     name: text(row.name, 'name', 120),
     version,
     templateType,
-    atomicLevel: row.atomicLevel as AtomicLevel,
+    atomicLevel,
     category: text(row.category, 'category', 120),
     description: text(row.description, 'description', 2000),
     tags: strings(row.tags, 'tag'),
