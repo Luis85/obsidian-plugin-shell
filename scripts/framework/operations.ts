@@ -16,7 +16,7 @@ import { suggestions, didYouMean } from './suggest.ts';
 import { capabilityCatalog } from '../operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
-import { fileOperation } from './operation-files.ts';
+import { fileOperation } from '../../bin/adapters/framework/file-operation.ts';
 import { processOperation } from './operation-process.ts';
 import { readOperation } from './operation-read.ts';
 

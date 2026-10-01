@@ -248,3 +248,40 @@ test('relocated framework CLI composition root preserves machine success and par
   assert.equal(failed.status, 'failed');
   assert.equal(failed.diagnostics[0].code, 'UNKNOWN_COMMAND');
 });
+
+
+test('relocated reviewed file-operation adapter plans and applies setup through the framework CLI', async () => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-file-operation-')));
+  try {
+    await writeFile(join(root, 'project.json'), await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    const capture = () => {
+      let text = '';
+      return {
+        stream: { isTTY: false, write(value) { text += String(value); return true; } },
+        read: () => text,
+      };
+    };
+    const run = async argv => {
+      const output = capture(), error = capture();
+      const code = await frameworkMain(argv, frameworkRoot, {
+        input: Readable.from([]),
+        output: output.stream,
+        error: error.stream,
+        env: { CI: 'true' },
+      });
+      return { code, result: JSON.parse(output.read()), stderr: error.read() };
+    };
+    const base = ['setup', '--id', 'field-notes', '--name', 'Field Notes', '--author', 'Example', '--root', root, '--json', '--no-interaction'];
+    const preview = await run(base);
+    assert.equal(preview.code, 0, preview.stderr);
+    assert.equal(preview.result.status, 'planned');
+    assert.match(preview.result.data.planHash, /^[a-f0-9]{64}$/);
+
+    const applied = await run([...base, '--apply', preview.result.data.planHash]);
+    assert.equal(applied.code, 0, applied.stderr);
+    assert.ok(['applied', 'unchanged'].includes(applied.result.status), JSON.stringify(applied.result));
+    assert.equal(typeof await readFile(join(root, 'shell.config.json'), 'utf8'), 'string');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
