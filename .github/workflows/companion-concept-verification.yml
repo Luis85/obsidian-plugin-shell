@@ -2,6 +2,8 @@ name: Companion concept source verification
 on:
   pull_request:
     paths: &concept-inputs
+      - 'configs/starters/**'
+      - 'scripts/starters/**'
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
@@ -204,8 +206,12 @@ jobs:
           node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
           node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
           node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
-      - name: Build the integrated companion and export its complete v6 definition
-        run: node scripts/concepts/build-mvp.mjs
+      - name: Build the empty companion and explicitly derive golden qualification input
+        run: |
+          node scripts/concepts/build-mvp.mjs
+          node scripts/concepts/export-golden-project.mjs
+      - name: Verify empty startup and external starter lifecycle
+        run: node tests/concepts/starter-workspace.browser.mjs
       - name: Exercise real editor actions, full JSON round trip and offline assets
         run: |
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py
@@ -254,6 +260,7 @@ jobs:
           set -o pipefail
           mkdir -p reports/journey-native
           node scripts/concepts/build-mvp.mjs 2>&1 | tee reports/journey-native/definition-build.log
+          node scripts/concepts/export-golden-project.mjs 2>&1 | tee reports/journey-native/golden-source.log
           node scripts/companion/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
       - name: Exercise create, edit, reopen and independent leaves against the generated plugin
         env:

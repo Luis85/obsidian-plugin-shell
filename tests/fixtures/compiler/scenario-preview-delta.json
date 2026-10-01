@@ -21,7 +21,7 @@
     {
       "path": "{sourceRoot}/presentation/composables/use-visual.ts",
       "before": "c407ad9e6653d753fc817b2118c552e27d3400c1daed9f4956a51eb8e9abe14b",
-      "after": "ab289cf3a047c077fd6b6ab8f22e19779d0bb7ae82403ed198e2af594e63a0a8"
+      "after": "d49f53dd204b8c937f3c32c17d23b5866ebdb102ec670ef8c0ff305f3fecaa3f"
     }
   ],
   "cases": [

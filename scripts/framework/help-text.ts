@@ -28,6 +28,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'prototypes', title: 'Prototype versions and variants', commands: prototypeCommands.map(command => command.id) },
+  { id: 'starters', title: 'External project starters', commands: ['starters list', 'starters show', 'starters validate', 'starters schema', 'starters add', 'starters edit', 'starters run', 'starters pack', 'starters coverage'] },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
@@ -53,7 +54,14 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  'require-model-coverage': { description: 'Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model.' },
   resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
+  values: { description: 'Project-relative JSON file containing declared starter input values.' },
+  answers: { description: 'Inline JSON input values; cannot be combined with --values.' },
+  run: { description: 'Comma-separated declared processes to run after creation, with fresh --trust-processes.' },
+  'trust-processes': { description: 'Explicitly trust the reviewed project code and declared process steps; never portable approval.' },
+  process: { description: 'One or more comma-separated process IDs from the generated starter receipt.' },
+  project: { description: 'Generated project directory containing .workbench/starter.json.' },
   variant: { description: 'Saved variant slug inside the selected prototype version.' },
   'with-prototype': { description: 'Prototype slug of the comparison reference snapshot.' },
   'with-version': { description: 'Version slug of the comparison reference snapshot.' },
@@ -94,7 +102,7 @@ const specific: Record<string, OptionHelp> = {
   'config-dir': { description: 'Host configuration directory name inside the test vault.', default: '.obsidian' },
   resolve: { description: 'Which side wins a configured/imported identity conflict.', values: ['project', 'import'] },
   blank: { description: 'Create an inert minimal design instead of importing one.' },
-  starter: { description: 'Starter ID (see new --list).' },
+  starter: { description: 'Starter ID (see new --list). A project starter (generator project) runs without <dir> via new --starter <id> or new guide --starter <id>.' },
   list: { description: 'List the available entries instead of creating one.' },
   install: { description: 'After writing, run npm ci and project verification in the new folder.' },
   recover: { description: 'After inspecting an interrupted attempt, explicitly acknowledge uncertain previous effects. No automatic retry.' },
@@ -138,6 +146,15 @@ const usage: Record<string, string> = {
   make: 'node bin/app make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'starters coverage': ['node bin/app starters coverage feature-showcase --json', 'node bin/app starters coverage feature-showcase --require-model-coverage --json'],
+  'starters list': ['node bin/app starters list --json'],
+  'starters show': ['node bin/app starters show webapp --json'],
+  'starters validate': ['node bin/app starters validate --json'],
+  'starters schema': ['node bin/app starters schema --json'],
+  'starters add': ['node bin/app starters add --input my-starter.json --dry-run'],
+  'starters edit': ['node bin/app starters edit webapp --input edited-webapp.json --plan-out starter-edit.plan.json'],
+  'starters pack': ['node bin/app starters pack --out ./workbench-starters.zip --yes'],
+  'starters run': ['node bin/app starters run --project ../my-app --process verify,build --dry-run', 'node bin/app starters run --project ../my-app --process build --yes --trust-processes --apply <planHash>'],
   'prototypes list': ['node bin/app prototypes list --json'],
   'prototypes compare': ['node bin/app prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json'],
   'prototypes prototype-details': ['node bin/app prototypes prototype-details exploration --name "Product exploration" --description "Compare navigation variants" --dry-run'],
@@ -225,7 +242,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
-  if (entry.effect === 'process') return ['dry-run', ...(['setup resume', 'docs recover'].includes(entry.id) ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'setup resume', 'docs recover'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
+  if (entry.effect === 'process') return ['dry-run', ...(['setup resume', 'starters run', 'docs recover'].includes(entry.id) ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'starters pack', 'starters run', 'setup resume', 'docs recover'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release' || entry.id === 'project measure') return ['dry-run', ...shared];
   return shared;
@@ -250,6 +267,7 @@ export function commandHelp(entry: Command): CommandHelp {
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
   for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && ['dev', 'storybook dev'].includes(entry.id) ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
+  if (entry.id === 'starters run') optionHelp.apply!.description = 'Plan hash from the reviewed preview. Without it, --yes --trust-processes plans and runs in one step and cannot detect changes made since an earlier review.';
   const argument = entry.maxArgs ? ' [arguments]' : '';
   return { group, usage: usage[entry.id] ?? `node bin/app ${entry.id}${argument}${Object.keys(entry.options).length ? ' [options]' : ''}`, examples: [...(examples[entry.id] ?? [])], optionHelp };
 }

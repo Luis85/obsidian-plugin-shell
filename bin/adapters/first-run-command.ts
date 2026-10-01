@@ -6,7 +6,7 @@ import { firstRunPlan, firstRunReport } from './first-run-plan.ts';
 import { executeFirstRun } from './first-run.ts';
 import type { CommandContext } from './commands.ts';
 export async function firstRunCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>) {
-  requireSketch(!['project', 'out', 'guide', 'kind', 'preset', 'framework', 'targets'].some(key => args.flags[key]), 'FIRST_RUN_OPTION', 'First run uses the saved application path. Configure options with a first-run JSON request.');
+  requireSketch(!['project', 'out', 'guide', 'kind', 'starter'].some(key => args.flags[key]), 'FIRST_RUN_OPTION', 'First run uses the saved application path. Configure options with a first-run JSON request.');
   if (['schema', 'status'].includes(args.action)) requireSketch(!args.flags.input && !args.flags.apply, 'FIRST_RUN_OPTION', 'Discovery and status are read-only.');
   if (args.action === 'schema') return { schema: firstRunSchema, defaults: firstRunDefaults, example: { schemaVersion: 1, mode: 'showcase', openBrowser: false } };
   if (args.action === 'status') {

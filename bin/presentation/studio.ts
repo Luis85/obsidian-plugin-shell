@@ -1,7 +1,5 @@
 import { firstRunWizard } from './first-run.ts';
 import { editBricks } from './brick-editor.ts';
-import { requireSketch } from '../domain/errors.ts';
-import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
 import { savedProjectSelection } from '../adapters/project-selection.ts';
 import { projectWizard } from './project-wizard.ts';
 import { brainstormWizard } from './brainstorm.ts';
@@ -18,7 +16,8 @@ import { editPage } from './page-editor.ts';
 import { review } from './review.ts';
 import { workspaceContext } from './context.ts';
 import { choose, input, titleInput, confirm, reportError, type Prompts } from './prompts.ts';
-export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal }
+import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
+export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime }
 async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
   const snapshot = await readSnapshot(options.root, options.project);
   return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
@@ -54,11 +53,6 @@ async function library(ui: Prompts, workspace: Workspace): Promise<void> {
 async function generate(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const out = await input(ui, 'Boilerplate output folder', options.out ?? `generated/${workspace.document.project.id}`);
   const selection = await savedProjectSelection(options.root);
-  const catalog = await loadLegacyCatalog(), legacy = await savedLegacySelection(options.root, catalog);
-  requireSketch(!selection || !legacy, 'PROJECT_CONFIG_CONFLICT', 'Both project.config.json and shell.project.json exist; reconcile the project selection before generating.');
-  if (legacy) {
-    await review(ui, await presetBoilerplatePlan(options.root, options.frameworkRoot, out, workspace.document, legacy, catalog, options.signal), options.signal); return;
-  }
   const kind = await choose(ui, 'Output kind', selection ? [{ id: 'project', label: selection.targets.join(' + ') + ' / ' + selection.framework }] : [
     { id: 'obsidian-plugin', label: 'Obsidian plugin' }, { id: 'clickdummy', label: 'Offline clickdummy source' },
   ], selection ? 'project' : options.kind ?? 'obsidian-plugin');
@@ -68,8 +62,8 @@ async function generate(ui: Prompts, options: StudioOptions, workspace: Workspac
   await review(ui, plan, options.signal);
 }
 interface StudioAction { label: string; run: () => unknown }
-function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace): Record<string, StudioAction> {
-  return {
+export function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace): Record<string, StudioAction> {
+  const actions: Record<string, StudioAction> = {
     new: { label: 'Sketch a new page', run: async () => {
       const result = workspace.edit([{ op: 'page.add', title: await titleInput(ui, 'Page title') }]);
       await editPage(ui, workspace, result.created[0]!);
@@ -91,8 +85,14 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },
     redo: { label: 'Redo last edit', run: () => workspace.redo() },
-    'new-project': { label: 'Create another project from a preset', run: () => projectWizard(ui, options) },
+    'new-project': { label: 'Create another project from a project starter', run: () => projectWizard(ui, options) },
   };
+  for (const contribution of options.plugins?.tuiActions ?? []) {
+    actions['plugin-' + contribution.id] = { label: contribution.label, run: () => contribution.run({
+      ...options.plugins!.commandContext, project: options.project, ui, workspace,
+    }) };
+  }
+  return actions;
 }
 export async function studio(ui: Prompts, options: StudioOptions): Promise<Workspace> {
   const snapshot = await readSnapshot(options.root, options.project);

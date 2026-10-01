@@ -12,7 +12,7 @@ The **visual authoring experience** helps users describe and connect pages, reus
 
 These are capabilities and delivery surfaces within Workbench, not alternative public product names. A generated consumer owns its source and must remain usable without an installed authoring interface or maintainer checkout. Design-only authoring remains legitimate; it does not require every downstream build tool.
 
-Keep three choices separate: where Workbench authoring runs, what runtime the user's project targets, and which supported frontend that project selects. Creating a webapp is not the same as making Workbench itself a hosted service. The existing [preset catalog](bin/guides/project-presets.json) also includes website, CLI and hybrid choices; their existence neither changes the primary UI focus nor guarantees equal generation fidelity across targets.
+Keep three choices separate: where Workbench authoring runs, what runtime the user's project targets, and which supported frontend that project selects. Creating a webapp is not the same as making Workbench itself a hosted service. The installed [project starters](bin/PROJECT-STARTERS.md) also include website, CLI and hybrid choices; their existence neither changes the primary UI focus nor guarantees equal generation fidelity across targets.
 
 ## Choose the right entry
 
@@ -50,13 +50,13 @@ The product name is Workbench, but the executable is `app.mjs` (run it as `node 
 
 **Describe → configure → import or choose a starter → compose → review and validate → generate source and documentation → implement, test and evolve.**
 
-This is the product direction, not a claim that every step is complete in every target. In particular, the requested configurable user settings, typed Markdown project-document workflows and separately distributed JSON starters retain their explicit [product requirements and boundaries](docs/product/PRODUCT-PRINCIPLES.md). An existing preset catalog does not prove those workflows are finished.
+This is the product direction, not a claim that every step is complete in every target. In particular, the requested configurable user settings, typed Markdown project-document workflows and separately distributed JSON starters retain their explicit [product requirements and boundaries](docs/product/PRODUCT-PRINCIPLES.md). Existing project starters do not prove those workflows are finished.
 
 “Manage” includes identity, reuse, revisions, dependency impact and safe regeneration. Documentation must preserve authored intent and make ownership clear; a generated folder structure alone is not complete product documentation.
 
 ## Evidence and qualification boundaries
 
-The [compiler implementation](scripts/compiler/index.ts) emits readiness states with bundle, typecheck and tests initially `not-run`, and product acceptance `not-inferred`. Its project-preset path describes a navigable starting scaffold that still needs visual component and business-action implementation. Compilation success does not establish a complete product.
+The [compiler implementation](scripts/compiler/index.ts) emits readiness states with bundle, typecheck and tests initially `not-run`, and product acceptance `not-inferred`. Its project-starter path describes a navigable starting scaffold that still needs visual component and business-action implementation. Compilation success does not establish a complete product.
 
 The [authoring guide](docs/concepts/companion/README.md) distinguishes the current browser concept, the retained v5 fixtures and the independently generated clickdummy. None is a substitute for full native Workbench acceptance. Preserve separate evidence for authored definitions, generated source, built previews, behavior tests, native operation and user acceptance.
 

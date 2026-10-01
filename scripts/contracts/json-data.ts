@@ -9,6 +9,7 @@ interface JsonLimits {
 
 const operationLimits: Readonly<JsonLimits> = Object.freeze({ bytes: MAX_JSON_BYTES, entries: 20000, depth: 32 });
 const designLimits: Readonly<JsonLimits> = Object.freeze({ bytes: 4_000_000, entries: 120000, depth: 40 });
+const utf8Bytes = (value: string): number => new TextEncoder().encode(value).length;
 const forbidden = new Set(['__proto__', 'prototype', 'constructor']);
 
 function fail(): never { throw new Error('JSON_DATA_INVALID'); }
@@ -16,7 +17,7 @@ function fail(): never { throw new Error('JSON_DATA_INVALID'); }
 function primitive(value: unknown): number | undefined {
   if (value === null || typeof value === 'boolean') return 4;
   if (typeof value === 'number' && Number.isFinite(value)) return 24;
-  if (typeof value === 'string') return Buffer.byteLength(value, 'utf8') + 2;
+  if (typeof value === 'string') return utf8Bytes(value) + 2;
   return undefined;
 }
 
@@ -44,7 +45,7 @@ function checkData(value: unknown, limits: Readonly<JsonLimits>): true {
       if (array && key === 'length') continue;
       if (!Object.hasOwn(field, 'value') || !field.enumerable || forbidden.has(key)) fail();
       if (array && !/^(0|[1-9][0-9]*)$/.test(key)) fail();
-      bytes += Buffer.byteLength(key, 'utf8') + 4;
+      bytes += utf8Bytes(key) + 4;
       visit(field.value, depth + 1);
       if (bytes > limits.bytes) fail();
     }
@@ -61,7 +62,7 @@ export function assertJsonData(value: unknown): true {
 }
 
 function parseData(text: unknown, limits: Readonly<JsonLimits>): unknown {
-  if (typeof text !== 'string' || Buffer.byteLength(text, 'utf8') > limits.bytes) fail();
+  if (typeof text !== 'string' || utf8Bytes(text) > limits.bytes) fail();
   const value: unknown = JSON.parse(text);
   checkData(value, limits);
   return value;
@@ -74,4 +75,9 @@ export function parseJsonData(text: unknown): unknown {
 /** Larger authored design/traceability data; never use this profile for operation requests or approvals. */
 export function parseDesignData(text: unknown): unknown {
   return parseData(text, designLimits);
+}
+
+/** In-memory counterpart of parseDesignData; operation request limits remain unchanged. */
+export function assertDesignData(value: unknown): true {
+  return checkData(value, designLimits);
 }

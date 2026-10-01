@@ -62,11 +62,12 @@ type CompilerArtifact = Awaited<ReturnType<typeof compile>>['artifacts'][number]
 interface GeneratedPackage {
   entries: Entry[]; compiler: Record<string, unknown> | null; sourceReceiptSha256: string | null;
 }
+/** The compiler contract is text or base64; any other runtime value fails closed instead of becoming UTF-8. */
 function artifactEncoding(item: CompilerArtifact): 'base64' | undefined {
   const encoding: unknown = 'encoding' in item ? item.encoding : undefined;
-  requireSketch(encoding === undefined || encoding === 'utf8' || encoding === 'base64',
+  requireSketch(encoding === undefined || encoding === 'base64',
     'BRAINSTORM_ENCODING', 'Unsupported compiler artifact encoding.');
-  return encoding === 'base64' ? encoding : undefined;
+  return encoding === undefined ? undefined : 'base64';
 }
 function artifactBytes(item: CompilerArtifact): Buffer {
   return Buffer.from(item.content, artifactEncoding(item) ?? 'utf8');
@@ -145,14 +146,13 @@ function handoff(request: FeatureBrainstorm, out: string, conceptPath: string,
     '## Generated source',
     compiler ? '- Generated source: ' + out + '/source (full-project compiler output, not scoped native acceptance).' :
       '- No source was requested. Use a new reviewed brainstorm or the existing shell generator after importing the feature.',
-    compiler ? '- Compiler evidence: ' + JSON.stringify(compiler) : '', '',
+    ...(compiler ? ['- Compiler evidence: ' + JSON.stringify(compiler)] : []), '',
     '## Execution (separate approval; no implicit npm or browser processes)',
-    request.verification === 'none' ? '- No automated verification requested.' :
+    ...(request.verification === 'none' ? ['- No automated verification requested.'] : [
       '- Request a fresh verification plan: node bin/app brainstorm verify --out ' + out + ' --json',
-    request.verification === 'none' ? '' :
-      '- After reviewing the scripts, pinned toolchain and process effects, repeat with --apply <fresh-planHash> --json.',
-    '- Project/native acceptance and publication remain separate from compilation and local test/build results.', '',
-  ].filter((line, index, array) => line !== '' || array[index - 1] !== '').join('\n') + '\n';
+      '- After reviewing the scripts, pinned toolchain and process effects, repeat with --apply <fresh-planHash> --json.']),
+    '- Project/native acceptance and publication remain separate from compilation and local test/build results.',
+  ].join('\n') + '\n';
 }
 function absoluteInput(context: CommandContext, name: string) {
   const path = projectPath(name);

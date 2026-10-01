@@ -9,7 +9,7 @@ import { parseCliArguments } from './framework/catalog.ts';
 import { executeOperation } from './framework/operations.ts';
 import { projectRoot, exists } from '../../scripts/framework/files.ts';
 import { failure, type Context } from './framework/contracts.ts';
-import { invocationDirectory } from '../../scripts/framework/starter-project.ts';
+import { invocationDirectory, starterInvocation } from '../../scripts/framework/starter-project.ts';
 import { guidedStarter } from '../../scripts/framework/starter-terminal.ts';
 import { renderCliResult, type CliOutputStream } from '../presentation/terminal/cli-output.ts';
 import { interactiveRun } from '../presentation/terminal/cli-interactive.ts';
@@ -60,10 +60,12 @@ export async function main(argv: string[], frameworkRoot: string, io: FrameworkC
     if (command === 'new' && typeof request.options.from === 'string') {
       request = { ...request, options: { ...request.options, from: invocationDirectory(request.options.from) } };
     }
+    const starters = command === 'new' || command.startsWith('starters ') ? starterInvocation(request, frameworkRoot) : null;
+    if (starters) request = starters.request;
     const root = discovery
       ? resolve(selected)
-      : command === 'new' && typeof request.options.root !== 'string'
-        ? frameworkRoot
+      : starters
+        ? starters.root
         : await projectRoot(selected, typeof request.options.root === 'string');
     const context: Context = {
       root,

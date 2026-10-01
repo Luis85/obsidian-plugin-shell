@@ -1,5 +1,5 @@
 import { storybookFlags } from './storybook-options.ts';
-/** One-command project creation from a reviewed built-in starter. It composes the
+/** One-command project creation from a reviewed local JSON starter. It composes the
  * existing catalog loader, identity-only customization and project compiler/plan
  * engine; it never has its own template, hashing or file-writing rules. */
 import type { NativeProjectIntegrations } from '../companion/native-contract.mjs';
@@ -7,13 +7,15 @@ import { mkdtemp, writeFile, rm, lstat, readdir, realpath } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { loadStarterCatalog } from '../companion/starter-files.mjs';
-import { customizeStarter } from '../companion/starter-contract.mjs';
+import { listStarters } from '../starters/operations.ts';
+import { definitionProjectPlan } from '../starters/project.ts';
+import { completeDefinition } from '../starters/processes.ts';
 import { companionRelativeFolder } from '../companion/project-contract.mjs';
 import { planProject } from '../companion/compiler/plan.ts';
 import { exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { npmEntry, runNode } from './process.ts';
-import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { OperationError, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { exportedProject } from './project-from.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
@@ -27,13 +29,11 @@ async function templateRoot(context: Context): Promise<string> {
 }
 export async function starterCatalog(context: Context): Promise<{ template: string; catalog: StarterCatalog }> {
   const template = await templateRoot(context);
-  const catalog: StarterCatalog = await loadStarterCatalog(template);
+  const catalog: StarterCatalog = await loadStarterCatalog(context.root);
   return { template, catalog };
 }
 export async function starterListing(context: Context): Promise<Result> {
-  const { catalog } = await starterCatalog(context);
-  return result('new', { integrity: 'catalog-sha256-verified', starters: catalog.starters.map(entry => ({ id: entry.id, title: entry.name,
-    category: entry.category, difficulty: entry.level, description: entry.summary, version: entry.version, sha256: entry.sha256 })) });
+  return listStarters(context, 'new');
 }
 /** The shared ID rule (plugin-id.ts) that `check submission` also applies; the project contract validates the rest. */
 export { pluginIdProblem };
@@ -47,6 +47,20 @@ export function derivedName(id: string): string {
 export function invocationDirectory(path: string, environment: NodeJS.ProcessEnv = process.env, cwd = process.cwd()): string {
   const base = environment.npm_lifecycle_event === 'new' && environment.INIT_CWD ? environment.INIT_CWD : cwd;
   return resolve(base, path);
+}
+const invocationPaths: Readonly<Record<string, readonly string[]>> = { new: ['values'], 'starters add': ['input'], 'starters edit': ['input'], 'starters pack': ['out'], 'starters run': ['project'] };
+/** Starter commands read the pack extracted beside shell.mjs unless --root names another starter workspace.
+ * Without --root their path options still resolve from the invoking shell, as they did when that was the root. */
+export function starterInvocation(request: Request, frameworkRoot: string): { request: Request; root: string } {
+  const selected = request.options.root;
+  if (typeof selected === 'string') return { request, root: resolve(selected) };
+  const options = { ...request.options };
+  if (request.command === 'starters run' && options.project === undefined) options.project = '.';
+  for (const key of invocationPaths[request.command] ?? []) {
+    const value = options[key];
+    if (typeof value === 'string' && value !== '-') options[key] = invocationDirectory(value);
+  }
+  return { request: { ...request, options }, root: frameworkRoot };
 }
 interface Placement { directory: string; vault: string; target: string }
 /** Map <dir> onto the generator's vault/target contract without creating anything:
@@ -83,8 +97,10 @@ export async function starterProjectPlan(request: Request, context: Context) {
   const from = request.options.from !== undefined;
   requireThat(!from || (request.options.extension === undefined && request.options.extensions === undefined), 'NATIVE_OPTIONS_REQUIRE_STARTER', 'Use native options with --starter, or edit design.nativeIntegrations in the exported JSON.');
   requireThat(!from || request.options.starter === undefined, 'SOURCE_CONFLICT', 'Use either --starter <id> or --from <project.json>, not both.');
+  requireThat(!from || ['values', 'answers', 'run', 'trust-processes'].every(key => request.options[key] === undefined), 'STARTER_OPTION', 'Definition inputs/processes require --starter, not --from.');
   const place = await placement(context, request.args[0], request.options['inside-vault'] === true);
-  const created = from ? await fromExport(request, context) : await fromStarter(request, context, place.directory);
+  if (!from) return definitionProjectPlan(request, context, place, await templateRoot(context));
+  const created = await fromExport(request, context);
   const scratch = await mkdtemp(join(tmpdir(), 'shell-new-'));
   try {
     const input = join(scratch, 'project.json');
@@ -104,27 +120,14 @@ async function fromExport(request: Request, context: Context) {
   const warning = explicit ? null : exportedIdWarning(exported.document.project.id);
   return { template: await templateRoot(context), document: exported.document, origin: { source: exported.source }, warnings: warning ? [warning] : [] };
 }
-async function fromStarter(request: Request, context: Context, directory: string) {
-  const { template, catalog } = await starterCatalog(context);
-  const starterId = stringOption(request.options, 'starter');
-  requireThat(starterId, 'STARTER_REQUIRED', 'Supply --starter <id> (list them with new --list) or --from <project.json> (a companion export).');
-  const entry = catalog.starters.find(item => item.id === starterId);
-  requireThat(entry, 'STARTER_UNKNOWN', `Unknown starter ${starterId}; list the reviewed starters with new --list.`);
-  const id = stringOption(request.options, 'id') ?? derivedId(directory, entry.document.project.id);
-  const problem = pluginIdProblem(id); if (problem) throw new OperationError('INVALID_PLUGIN_ID', `Invalid plugin ID "${id}". ${problem}`, 'Pass --id <plugin-id>.');
-  const author = stringOption(request.options, 'author');
-  // Scoped declaration options and identity only; never globally rewrite authored domain labels.
-  const extension = stringOption(request.options, 'extension'); const extensions = stringOption(request.options, 'extensions');
-  const document = customizeStarter(catalog, entry.id, { id, name: stringOption(request.options, 'name') ?? derivedName(id), ...(author === undefined ? {} : { author }), ...(extension === undefined ? {} : { extension }), ...(extensions === undefined ? {} : { extensions }) });
-  return { template, document, origin: { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 } }, warnings: [] as string[] };
-}
 function nextSteps(directory: string): string[] {
   return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch'];
 }
 /** Adds guidance, and only after a written project runs the explicitly requested install/verify. */
 export async function completeStarterProject(outcome: Result, request: Request, context: Context): Promise<Result> {
   if (!['planned', 'applied', 'blocked'].includes(outcome.status)) return outcome;
-  const data = outcome.data as { summary: StarterSummary };
+  const data = outcome.data as { summary: StarterSummary & { recipe?: unknown } };
+  if (data.summary.recipe) return completeDefinition(outcome, request, context);
   const directory = data.summary.directory, steps = nextSteps(directory);
   const guide = { readme: join(directory, 'README.md'), implementation: join(directory, 'PROJECT-IMPLEMENTATION.md') };
   if (outcome.status !== 'applied') return { ...outcome, data: { ...data, written: false, next: 'Nothing has been written. To create the project, confirm when asked or re-run with --yes (or --apply <planHash>).' } };

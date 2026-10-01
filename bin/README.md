@@ -27,11 +27,12 @@ guide includes reviewed path migration and configured canonical-project behavior
 
 ## Create a project
 
-Run `node bin/app new` (or `node bin/app` without a saved project) to choose a
-project preset, select a compatible frontend, and start the prototype interview.
-Plugin, webapp, website, CLI and hybrid targets generate matching source adapters;
-design agreement and file-write approval remain separate. See the
-[project preset and agent guide](PROJECT-PRESETS.md) for the eight presets,
+Run `node bin/app new` (or `node bin/app` without a saved project) to choose an
+installed project starter and start the prototype interview. Running a starter is the
+only way to create a project; each starter fixes its targets and frontend. Plugin,
+webapp, website, CLI and hybrid targets generate matching source adapters; design
+agreement and file-write approval remain separate. See the
+[project starter and agent guide](PROJECT-STARTERS.md) for the shipped starters,
 noninteractive requests, generated artifacts and build-qualification boundaries.
 
 ## Make a page
@@ -220,6 +221,6 @@ must meet 90%/85%. Missing coverage inputs fail closed. Tests retain 450 code li
 Full `verify`, normal/fast `shell check`, compiled kits and generated workspaces all
 include maker checks. The dedicated CI job uses the exact pinned toolchain.
 
-## Integrated preset compatibility
+## Project starters
 
-`new` now discovers the eight named presets documented in [PROJECT-PRESETS.md](PROJECT-PRESETS.md). The earlier five-family `prototypeRequest`/`frontend` request format is still accepted by `new --input` and `new validate`; its historical reference is [LEGACY-PROJECT-PRESETS.md](LEGACY-PROJECT-PRESETS.md). Existing `shell.project.json` projects retain their original emitter during sketch regeneration. New projects use the strict `project.config.json` sidecar. A workspace containing both sidecars is rejected rather than silently choosing one. Both formats retain plan hashes and default-No writes.
+`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` beside `shell.mjs`, `generator.kind: "project"`). Projects use the strict `project.config.json` sidecar, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.

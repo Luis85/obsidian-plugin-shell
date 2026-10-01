@@ -1,5 +1,5 @@
 import { literal, type Model } from '../../../companion/compiler/model.ts';
-import type { ProjectSelection } from '../../domain/project-presets.ts';
+import type { ProjectSelection } from '../../domain/project-starter.ts';
 /** All user-authored content is data, never interpolated into identifiers or markup. */
 export function coreSource(model: Model): string {
   const pages = model.screens.filter(page => !['group', 'action'].includes(page.kind)).map(page => ({
@@ -11,12 +11,13 @@ export function findPage(id: string): Page | undefined { return project.pages.fi
 export const scaffoldNotice = 'Starting scaffold: navigation works; domain actions and acceptance remain to be implemented.';
 `;
 }
-export function browserSource(selection: ProjectSelection, id: string): string {
+export function browserSource(selection: ProjectSelection, id: string, host: 'webapp' | 'website' | 'preview'): string {
   return `import { mount } from '../../ui/mount.ts';
 import '../../ui/styles.css';
 const candidate = document.querySelector<HTMLElement>('[data-project-root]');
 if (!candidate) throw new Error('PROJECT_ROOT_MISSING');
 const root: HTMLElement = candidate;
+root.dataset.appHost = ${literal(host)};
 root.dataset.pluginUi = ${literal(id)};
 root.classList.add(${literal(id)}, ${literal('ps--' + id)});
 let stopped = false;
@@ -52,6 +53,7 @@ class ProjectView extends ItemView {
     const generation = ++this.generation;
     this.closeSurface();
     const surface = this.contentEl.createDiv();
+    surface.dataset.appHost = 'obsidian-plugin';
     surface.dataset.pluginUi = ${literal(id)};
     surface.classList.add(${literal(id)}, ${literal('ps--' + id)});
     try {
@@ -101,13 +103,20 @@ function invalid(message: string) { return { exitCode: 2, value: { protocolVersi
 `;
 }
 export const cliEntry = `import { run } from './commands.ts';
-const result = run(process.argv.slice(2));
-const machine = process.argv.includes('--json');
-const stream = machine || result.exitCode === 0 ? process.stdout : process.stderr;
-stream.write((machine ? JSON.stringify(result.value) : result.text) + '\\n');
-process.exitCode = result.exitCode;
+import { activatePlugins } from '../../core/plugin-runtime.ts';
+const deactivate = activatePlugins('terminal-app');
+try {
+  const result = run(process.argv.slice(2));
+  const machine = process.argv.includes('--json');
+  const stream = machine || result.exitCode === 0 ? process.stdout : process.stderr;
+  stream.write((machine ? JSON.stringify(result.value) : result.text) + '\\n');
+  process.exitCode = result.exitCode;
+} finally {
+  deactivate();
+}
 `;
 export const vanillaMount = `import { project, scaffoldNotice, type Page } from '../core/project.ts';
+import { activatePlugins, visualHost } from '../core/plugin-runtime.ts';
 export async function mount(root: HTMLElement): Promise<() => void> {
   const doc = root.ownerDocument;
   const heading = doc.createElement('h1'); heading.textContent = project.title;
@@ -130,18 +139,22 @@ export async function mount(root: HTMLElement): Promise<() => void> {
   }
   root.replaceChildren(heading, note, nav, main);
   if (project.pages[0]) show(project.pages[0], false); else main.textContent = 'No pages yet.';
+  let deactivate: () => void;
+  try { deactivate = activatePlugins(visualHost(root), root); }
+  catch (error) { for (const remove of listeners) remove(); root.replaceChildren(); throw error; }
   let closed = false;
-  return () => { if (closed) return; closed = true; for (const remove of listeners) remove(); root.replaceChildren(); };
+  return () => { if (closed) return; closed = true; try { deactivate(); } finally { for (const remove of listeners) remove(); root.replaceChildren(); } };
 }
 `;
 export const vueMount = `import { createApp } from 'vue';
 import { createPinia, disposePinia } from 'pinia';
 import ui from '@nuxt/ui/vue-plugin';
 import Starter from './Starter.vue';
+import { activatePlugins, visualHost } from '../core/plugin-runtime.ts';
 export async function mount(root: HTMLElement): Promise<() => void> {
-  const pinia = createPinia(); const app = createApp(Starter); let closed = false;
-  const cleanup = () => { if (closed) return; closed = true; try { app.unmount(); } finally { disposePinia(pinia); } };
-  try { app.use(pinia); app.use(ui); app.mount(root); return cleanup; }
+  const pinia = createPinia(); const app = createApp(Starter); let closed = false; let deactivate = () => {};
+  const cleanup = () => { if (closed) return; closed = true; try { deactivate(); } finally { try { app.unmount(); } finally { disposePinia(pinia); } } };
+  try { app.use(pinia); app.use(ui); app.mount(root); deactivate = activatePlugins(visualHost(root), root); return cleanup; }
   catch (error) { cleanup(); throw error; }
 }
 `;
@@ -165,15 +178,17 @@ async function select(id: string) { current.value = id; await nextTick(); main.v
 export const angularMount = `import { createApplication } from '@angular/platform-browser';
 import { createComponent } from '@angular/core';
 import { Starter } from './Starter.ts';
+import { activatePlugins, visualHost } from '../core/plugin-runtime.ts';
 export async function mount(root: HTMLElement): Promise<() => void> {
   const app = await createApplication();
-  let release: (() => void) | undefined;
+  let release: (() => void) | undefined; let deactivate = () => {};
   try {
     const component = createComponent(Starter, { hostElement: root, environmentInjector: app.injector });
     release = () => { app.detachView(component.hostView); component.destroy(); };
     app.attachView(component.hostView); component.changeDetectorRef.detectChanges();
+    deactivate = activatePlugins(visualHost(root), root);
     let closed = false;
-    return () => { if (closed) return; closed = true; try { release?.(); } finally { app.destroy(); } };
-  } catch (error) { try { release?.(); } finally { app.destroy(); } throw error; }
+    return () => { if (closed) return; closed = true; try { deactivate(); } finally { try { release?.(); } finally { app.destroy(); } } };
+  } catch (error) { try { deactivate(); } finally { try { release?.(); } finally { app.destroy(); } } throw error; }
 }
 `;

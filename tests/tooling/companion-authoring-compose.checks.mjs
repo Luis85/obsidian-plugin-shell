@@ -10,39 +10,44 @@ const root = new URL('../../', import.meta.url);
 const base = await readFile(new URL('docs/concepts/companion/index.html', root), 'utf8');
 const graphStyle = await readFile(new URL('docs/concepts/companion/vendor/vue-flow.scoped.css', root), 'utf8');
 const bridge = await readFile(new URL('scripts/concepts/mvp-bridge.js', root), 'utf8');
+const startup = await readFile(new URL('scripts/concepts/starter-workspace.js', root), 'utf8');
 function program(html) { return [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].find(m => m[1].includes('function render()'))[1]; }
 function declaration(source, name) {
   const ast = ts.createSourceFile('composed.js', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
   return ast.statements.find(s => ts.isFunctionDeclaration(s) && s.name?.text === name)?.getText(ast);
 }
 test('modern export does not reinterpret immutable legacy starter bytes as v6', async () => {
-  const composed = program(composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle));
+  const html = composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle, startup), composed = program(html);
   const catalog = JSON.parse(await readFile(new URL('docs/concepts/companion/starters/catalog.json', root), 'utf8'));
   for (const entry of catalog.starters) entry.document = JSON.parse(await readFile(new URL('docs/concepts/companion/starters/' + entry.file, root), 'utf8'));
-  const context = vm.createContext({ validateCompanionDocument, COMPANION_VERSION: 6, STARTER_CATALOG_VERSION: 1 });
+  // Current runtime starts empty: starter definitions are external JSON, never embedded seed data.
+  assert.match(html, /<script type="application\/json" id="project-starters-data">\{"schemaVersion":1,"starters":\[\]\}<\/script>/);
+  assert.doesNotMatch(html, /id="companion-visual-seed"/);
+  const context = vm.createContext({ validateCompanionDocument, validateAuthoringDocument: value => validateAuthoringDocument(structuredClone(value)), COMPANION_VERSION: 6, STARTER_CATALOG_VERSION: 1 });
   const fields = /const STARTER_FIELDS = ([^;]+);/.exec(composed)[0];
   const validate = vm.runInContext(fields + '\n' + ['starterAssert','starterText','validateStarterCatalog'].map(n => declaration(composed,n)).join('\n') + '\nvalidateStarterCatalog;', context);
   assert.equal(validate(catalog), catalog);
+  // The retained v5 bytes are validated as v5 and never relabeled to the current version.
   assert.ok(catalog.starters.every(s => s.document.schemaVersion === COMPANION_VERSION));
   const bad = structuredClone(catalog); bad.starters[0].document.schemaVersion = 6;
   assert.throws(() => validate(bad));
   assert.match(composed, /const COMPANION_VERSION = 6;/);
-  assert.match(declaration(composed, 'validateStarterCatalog'), /entry.document.schemaVersion === 5/);
+  assert.match(declaration(composed, 'validateStarterCatalog'), /\[5, 6\]\.includes\(entry\.document\.schemaVersion\)/);
 });
 test('missing scoped graph styles fail closed; declarations and keyframes survive remapping', () => {
-  assert.throws(() => composeMvp(base, '', '', bridge), /MVP_ASSEMBLY/);
-  const html = composeMvp(base, '', '', bridge, graphStyle);
+  assert.throws(() => composeMvp(base, '', '', bridge, undefined, startup), /MVP_ASSEMBLY/);
+  const html = composeMvp(base, '', '', bridge, graphStyle, startup);
   assert.ok(html.includes(graphStyle.replaceAll('#vf-root','#jm-root')));
   assert.match(html, /#jm-root \.vue-flow__container \{\s*position: absolute;/);
 });
 test('composition leaves the legacy artifact unchanged and escapes embedded script terminators', () => {
-  const html = composeMvp(base, 'var test="</script>";', '', bridge, graphStyle);
+  const html = composeMvp(base, 'var test="</script>";', '', bridge, graphStyle, startup);
   assert.match(html, /var test="<\\\/script>"/);
   assert.equal(program(base).includes('const COMPANION_VERSION = 5;'), true);
 });
 
 test('current companion transfer preserves both optional tooling switches without enabling either', async () => {
-  const composed = program(composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle));
+  const composed = program(composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle, startup));
   const input = migrateAuthoringDocument(JSON.parse(await readFile(new URL('docs/concepts/companion/starters/quick-capture.companion.json', root), 'utf8'))).document;
   // The browser bundle validates within one realm. Re-home this VM fixture's plain data before
   // crossing into the real host-realm contract; production prototype/accessor checks stay strict.

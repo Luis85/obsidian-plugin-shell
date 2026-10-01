@@ -10,6 +10,20 @@ Start with the [product vision](docs/product/PRODUCT-VISION.md), [product princi
 
 **Implementation boundary:** Workbench builds on the reusable shell, CLI, compiler and authoring concept in PR #5. A generated scaffold is not a finished application, and the browser authoring concept is not the fully accepted native product. Existing `shell.mjs` commands, package/manifest IDs, schema names and `companion` paths remain unchanged. Generated projects retain the user's chosen identity.
 
+## Companion and UI-feature starters
+
+The current Companion build opens without a preloaded project or starter library.
+Choose **Start Blank** or import a separately installed starter JSON, review its
+inputs, then enter setup. `configs/starters/companion-plugin.json` is the canonical
+Companion development model; `configs/starters/feature-showcase.json` exercises the
+catalogued visual controls and actions with explicit mock scenarios.
+
+Run `node bin/app starters coverage feature-showcase --json` to inspect model
+coverage. This is not native acceptance: the golden Companion still has unbound
+business interactions and missing native authoring adapters. See the
+[Companion starter guide](docs/development/COMPANION-STARTERS.md) for the exact
+workflow, generated checks, fixture boundaries and remaining parity work.
+
 ## Reusable Obsidian foundation
 
 The guide below retains the existing framework checkout workflow and its milestone history. It is not the complete cross-target Workbench specification. Evidence remains tied to the dates and candidates in its linked records.
@@ -25,7 +39,7 @@ the reviewed starters. The target must be a new or empty folder outside this che
 npm run new -- --list                                   # starters: id, difficulty, summary
 npm run new -- ../my-plugin --starter quick-capture     # preview only; nothing is written
 npm run new -- ../my-plugin --starter quick-capture --id my-capture --name "My Capture" --yes
-npm run new -- ../my-plugin --starter blank --yes --install   # also runs npm ci + verify:project
+npm run new -- ../my-plugin --starter blank --yes --install --trust-processes   # explicitly run the JSON first-run recipe
 npm run new -- ../my-plugin --from my-plugin.companion.json   # any project JSON exported by the companion
 ```
 

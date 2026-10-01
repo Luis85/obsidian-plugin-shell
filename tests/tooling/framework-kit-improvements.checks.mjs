@@ -9,6 +9,7 @@ import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../scripts/framework/zip.ts';
+import { assembleStarterPack } from '../../scripts/starters/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args, expected = 0) {
   const result = spawnSync(process.execPath, [join(dir, 'app.mjs'), ...args, '--json'], {
@@ -24,10 +25,14 @@ test('extracted kit discovers v6 schema, sets up a starter, resumes generation a
   t.after(() => rm(dir, { recursive: true, force: true }));
   const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler());
   await extractArchive(zip(files), dir);
+  const args = ['setup', '--starter', 'quick-capture', '--id', 'folio', '--name', 'Folio', '--author', 'Example'];
+  const bare = await readdir(dir);
+  // The shell ZIP bundles no starters; the separate pack is extracted beside shell.mjs as the kit README instructs.
+  assert.equal(cli(dir, args, 1).diagnostics[0].code, 'STARTER_UNKNOWN'); assert.deepEqual(await readdir(dir), bare);
+  await extractArchive(zip(await assembleStarterPack({ root, frameworkRoot: root })), dir);
   const initial = await readdir(dir);
   assert.equal(cli(dir, ['project', 'schema']).data.$id, 'urn:obsidian-plugin-shell:companion-project:6');
   assert.deepEqual(await readdir(dir), initial);
-  const args = ['setup', '--starter', 'quick-capture', '--id', 'folio', '--name', 'Folio', '--author', 'Example'];
   const preview = cli(dir, args); assert.equal(preview.status, 'planned');
   assert.deepEqual(await readdir(dir), initial);
   assert.equal(cli(dir, [...args, '--apply', preview.data.planHash]).status, 'applied');

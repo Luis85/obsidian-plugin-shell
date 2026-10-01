@@ -5,6 +5,7 @@ import { action } from './primitives.mjs';
 import { component } from './ui.mjs';
 import { customMaker, runCustom, styleRecipe, localeRecipe } from './extra-recipes.mjs';
 import { settingRecipe } from './setting.mjs';
+import { pluginRecipe } from './plugin-recipe.mjs';
 
 async function feature(context, input) {
   const { owner, entity, preset, backend } = input;
@@ -35,6 +36,7 @@ export const builtinHandlers = Object.freeze({
   style: (context, { owner, name, options }) => styleRecipe(context, owner, name, slug(options['--view'], 'existing view name (--view)')),
   locale: (context, { name }) => localeRecipe(context, name),
   maker: (context, { name }) => customMaker(context, name),
+  plugin: (context, { name }) => pluginRecipe(context, name),
 });
 export async function dispatchMaker(context, input) {
   if (Object.hasOwn(builtinHandlers, input.maker)) await builtinHandlers[input.maker](context, input);

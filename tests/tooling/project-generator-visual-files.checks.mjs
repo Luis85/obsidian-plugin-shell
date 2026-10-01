@@ -18,6 +18,7 @@ const read = async path => migrateCompanionDocument(JSON.parse(await readFile(ne
 const fixture = await read('../fixtures/companion/detail-v3.json'), self = await read('../../docs/concepts/companion/companion-project.json');
 const clone = () => structuredClone(fixture);
 const files = async d => new Map((await projectFiles(root, projectModel(d))).map(e => [e.path, e.content]));
+const generatedVisualTests = entries => [...entries].filter(([path]) => /\/visual\/definitions(?:-\d+)?\.test\.ts$/.test(path)).map(([, text]) => text).join('\n');
 const store = d => d.design.visualDesigns;
 const libraryPage = d => store(d).pages[1].root[0];
 const review = d => store(d).components[0], confirm = d => review(d).template[0].children.find(n => n.id === 'vn-5');
@@ -40,7 +41,7 @@ test('compiler emits layouts, slots, typed props, source ports, hooks and tracea
   assert.match(entries.get(code + 'application/interactions/vi-14.ts'), /NotImplementedError\("vp-8", "vi-14"\)/);
   assert.match(entries.get(code + 'application/visual-interactions.ts'), /case "vi-14": return E0\(request, sources\);/);
   assert.match(entries.get(code + 'presentation/components/screens/import-project.vue'), /import Detail from '\.\.\/details\/vp-8\.vue';/);
-  assert.match(entries.get('tests/project/visual/definitions.test.ts'), /f\.navigate\.mock\.calls\.map\(\(\[target\]\) => target\)\)\.toEqual\(\["node-17"\]\)/);
+  assert.match(generatedVisualTests(entries), /f\.navigate\.mock\.calls\.map\(\(\[target\]\) => target\)\)\.toEqual\(\["node-17"\]\)/);
   assert.match(entries.get('tests/project/acceptance/vi-14.test.ts'), /it\.todo\("\[vi-14\] Review selected file/);
   assert.match(entries.get('tests/project/ui-effects/vp-15.checks.mjs'), /Generated executable model tests/);
   const trace = JSON.parse(entries.get('design/visual-traceability.json'));
@@ -56,7 +57,7 @@ test('custom folders keep all emitted imports relative and authored text inert',
   assert.ok(entries.has('product/code/generated/presentation/components/details/vp-8.vue'));
   assert.doesNotMatch(entries.get('product/code/generated/presentation/components/details/vp-8.vue'), /injected|dangerous/);
   const spec = entries.get('product/code/generated/domain/visual/vp-8.ts'); assert.ok(!spec.includes('</script>')); assert.match(spec, /\\u003c/);
-  assert.match(entries.get('product/specs/project/visual/definitions.test.ts'), /from "\.\.\/\.\.\/\.\.\/code\/generated\/presentation\/components\/details\/vp-8\.vue"/);
+  assert.match(generatedVisualTests(entries), /from "\.\.\/\.\.\/\.\.\/code\/generated\/presentation\/components\/details\/vp-8\.vue"/);
 });
 test('elements and Nuxt UI components without form semantics bind designed listeners', async () => {
   const d = clone(), kinds = ['u-table', 'u-tabs', 'u-separator', 'u-avatar', 'u-alert'];
@@ -72,7 +73,7 @@ test('elements and Nuxt UI components without form semantics bind designed liste
 test('generated value assertions read the real control state instead of serialized markup', async () => {
   const d = clone(); libraryPage(d).children.push(nuxt('vn-41', 'u-input'), nuxt('vn-42', 'u-checkbox'), nuxt('vn-43', 'u-button', [act('vi-44', 'click', [{ kind: 'set-value', nodeId: 'vn-41', value: 'typed' }, { kind: 'set-value', nodeId: 'vn-42', value: true }])]));
   store(d).nextId = 45;
-  const test = (await files(d)).get('tests/project/visual/definitions.test.ts');
+  const test = generatedVisualTests(await files(d));
   assert.ok(test.includes('expect(marked(wrapper.element, "vn-41").value).toBe("typed");'), test);
   assert.ok(test.includes('expect(marked(wrapper.element, "vn-42").getAttribute(\'aria-checked\')).toBe("true");'), test);
   assert.ok(!test.includes('toContain("true")'));
@@ -80,7 +81,7 @@ test('generated value assertions read the real control state instead of serializ
 test('interactions sharing one event are dispatched once and asserted in declaration order', async () => {
   const d = clone(), open = libraryPage(d).children.find(n => n.id === 'vn-18');
   open.events.unshift(act('vi-40', 'click', [{ kind: 'set-state', state: 'empty' }])); store(d).nextId = 41;
-  const test = (await files(d)).get('tests/project/visual/definitions.test.ts');
+  const test = generatedVisualTests(await files(d));
   assert.ok(test.includes('.slice(-2)).toEqual(["vi-40","vi-19"]);'), test);
   assert.ok(test.includes('expect(wrapper.attributes(\'data-design-state\')).toBe("empty");'));
 });
@@ -141,4 +142,15 @@ test('a retained pre-visual domain/detail-runtime.ts still type-checks against t
   await writeFile(join(dir, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', strict: true, noEmit: true, allowImportingTsExtensions: true, allowJs: true, skipLibCheck: true, types: [] }, include: ['domain/**/*.ts'] }));
   const run = spawnSync(process.execPath, [tsc, '--project', join(dir, 'tsconfig.json')], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stdout + run.stderr);
+});
+
+test('large visual models generate bounded test modules without dropping cases', async () => {
+  const entries = await files(self);
+  const modules = [...entries].filter(([path]) => /\/visual\/definitions(?:-\d+)?\.test\.ts$/.test(path));
+  assert.ok(modules.length > 1);
+  for (const [path, content] of modules) assert.ok(content.split('\n').length <= 400, path);
+  const joined = generatedVisualTests(entries);
+  for (const spec of visualSpecs(projectModel(self))) {
+    assert.ok(joined.includes('describe(' + JSON.stringify(spec.id + ' ' + (spec.kind === 'page' ? spec.name : spec.exportName))), spec.id);
+  }
 });

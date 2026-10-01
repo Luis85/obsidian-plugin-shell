@@ -2,16 +2,19 @@
 
 ## Scope and result
 
-This extension builds on PR #5's maker, project presets, Companion v6 document,
+This extension builds on PR #5's maker, project starters, Companion v6 document,
 prototype interview, dedicated compiler and ownership-aware writer. It is not a
-replacement generator and does not change legacy `new`/framework `setup` behavior.
+replacement generator and does not change framework `setup` behavior.
 
 Use `project-setup` to prepare a new Angular **webapp** in an existing Git worktree
-that is also an Obsidian vault. The selected preset is the existing
-`webapp-vanilla` with the explicitly supported `angular` framework override.
-The current catalog pins Angular 22.0.0. A release uses its tested catalog, not an
-unreviewed live `latest` dependency lookup. This change does not publish a release;
-use a kit built from the implementing commit until shipment is separately approved.
+that is also an Obsidian vault. Setup runs the installed `webapp-angular` project
+starter by ID, read from `configs/starters/` beside `shell.mjs` like every starter;
+extract the separate starters ZIP there first. Setup fails closed when that starter
+is missing or does not select Angular with a webapp target. The shipped starter pins
+Angular 22.0.0; `project.config.json` records the starter ID, version and SHA-256.
+A release uses its tested starter definition, not an unreviewed live `latest`
+dependency lookup. This change does not publish a release; use a kit built from the
+implementing commit until shipment is separately approved.
 
 After approval the project has a canonical editable specification, preserved PRD
 source material, a project/product brief, persisted path/preferences settings, and

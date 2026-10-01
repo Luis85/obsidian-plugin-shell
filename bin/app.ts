@@ -15,15 +15,18 @@ import { ask } from '../scripts/shared/input.ts';
 import { failure } from './adapters/framework/contracts.ts';
 import { result as operationResult, type ResultStatus } from '../scripts/contracts/result.ts';
 import { SketchError } from './domain/errors.ts';
-import { parseArguments, execute, option, makerHelp, type Arguments, type CommandContext } from './adapters/commands.ts';
+import { parseArguments, execute, option, type Arguments, type CommandContext } from './adapters/commands.ts';
 import { studio, prototypeWizard } from './presentation/studio.ts';
 import { TerminalSession } from './presentation/tui/session.ts';
 import { useTerminal, useColor } from './presentation/tui/mode.ts';
 import { safe, Back, type Prompts } from './presentation/prompts.ts';
 import { routeArguments } from './adapters/router.ts';
+import { commands as frameworkCommands } from './adapters/framework/catalog.ts';
+import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } from '../plugins/runtime.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
+  if (!['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm'].includes(args.command)) return false;
   if (env.CI && env.CI !== 'false') return false;
   const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
   return Boolean(io.input.isTTY && io.error.isTTY && !blocked && !args.action);
@@ -66,8 +69,7 @@ async function shouldCreate(args: Arguments, context: CommandContext, options: S
 }
 async function createInteractive(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
     if (['guide', 'project', 'kind'].some(key => args.flags[key])) throw new SketchError('PROJECT_OPTION', 'New project creation does not accept a baseline or legacy output kind.');
-    return await projectWizard(ui, { ...context, out: options.out, preset: option(args, 'preset') || undefined,
-    framework: option(args, 'framework') || undefined, targets: args.flags.targets ? option(args, 'targets').split(',') : undefined });
+    return await projectWizard(ui, { ...context, out: options.out, starter: option(args, 'starter') || undefined });
 
 }
 function errorResult(command: string, error: unknown) {
@@ -78,7 +80,8 @@ function errorResult(command: string, error: unknown) {
 }
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
-  const routed = routeArguments(argv);
+  const routed = routeArguments(argv, { pluginCommands: new Set(pluginCliCommands().map(entry => entry.id)),
+    frameworkRoots: new Set(frameworkCommands.map(entry => entry.id.split(' ')[0]!)) });
   if (routed.surface === 'framework') {
     const { main: frameworkMain } = await import('./adapters/framework-cli.ts');
     return frameworkMain(routed.args, frameworkRoot);
@@ -92,16 +95,21 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
 /** The maker surface itself, without routing; its help and failures stay on the supplied streams. */
 export async function makerMain(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
   const controller = new AbortController(), stop = () => controller.abort();
+  let plugins: WorkbenchPluginRuntime | undefined;
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
   const machine = argv.includes('--json'); let command = 'maker';
   try {
-    const args = parseArguments(argv); command = args.command;
-    const context = { root: resolve(option(args, 'root', process.cwd())), frameworkRoot, input: io.input, signal: controller.signal, progress: (message: string) => { io.error.write(safe(message)); } };
+    const args = parseArguments(argv, pluginCliCommands()); command = args.command;
+    const root = resolve(option(args, 'root', process.cwd()));
+    const progress = (message: string) => { io.error.write(safe(message)); };
+    plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress,
+      onError: code => progress(code + '\n') });
+    const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await execute(args, context);
     const result = operationResult(command, data, (data.status ?? 'ok') as ResultStatus);
     if (machine) io.output.write(JSON.stringify(result) + '\n');
-    else if (data.help) io.output.write(makerHelp);
+    else if (data.help) io.output.write(safe(String(data.help)));
     else io.output.write(safe(JSON.stringify(result, null, 2)) + '\n');
     return 0;
   } catch (error) {
@@ -109,7 +117,11 @@ export async function makerMain(argv: string[], frameworkRoot: string, io: IO = 
     if (machine) io.output.write(JSON.stringify(result) + '\n');
     else io.error.write(result.diagnostics.map(item => `${item.code}: ${safe(item.message)}`).join('\n') + '\n');
     return result.status === 'cancelled' ? 130 : 1;
-  } finally { process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop); }
+  } finally {
+    try { plugins?.dispose(); } finally {
+      process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop);
+    }
+  }
 }
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
   process.exitCode = await main(process.argv.slice(2), fileURLToPath(new URL('../', import.meta.url)));

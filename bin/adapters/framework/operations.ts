@@ -1,4 +1,6 @@
 import { resolve } from 'node:path';
+import { packStarterOperation, readStarterOperation } from '../../../scripts/starters/operations.ts';
+import { starterProcessOperation } from '../../../scripts/starters/processes.ts';
 import { airshipOperation } from '../../../scripts/framework/airship.ts';
 import { buildClickdummy } from '../../../scripts/framework/clickdummy.ts';
 import { checkOperation } from '../../../scripts/framework/check.ts';
@@ -54,6 +56,9 @@ export async function executeOperation(input: Request, context: Context): Promis
         approvals: 'never portable',
       });
     }
+    if (command === 'starters pack') return await packStarterOperation(request, context);
+    if (command === 'starters run') return await starterProcessOperation(request, context);
+    if (command.startsWith('starters ') && descriptor(command).effect === 'read') return await readStarterOperation(request, context);
     if (command.startsWith('docs ') && descriptor(command).effect !== 'plan') return await docsRead(request, context);
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
     if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {
