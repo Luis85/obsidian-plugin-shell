@@ -76,6 +76,8 @@ import { docsRead as relocatedDocsRead, docsPlan as relocatedDocsPlan } from '..
 import * as legacyDocs from '../../scripts/framework/docs.ts';
 import { fixtureOperation as relocatedFixtureOperation } from '../../bin/adapters/framework/fixtures.ts';
 import * as legacyFixtures from '../../scripts/framework/fixtures.ts';
+import { guidedSetup as relocatedGuidedSetup, continueSetup as relocatedContinueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
+import * as legacySetupTerminal from '../../scripts/framework/setup-terminal.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1726,4 +1728,82 @@ test('relocated fixture adapter preserves approval, target, reset and cancellati
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+
+test('relocated setup terminal preserves interview and separately approved continuation flow', async () => {
+  assert.equal(legacySetupTerminal.guidedSetup, relocatedGuidedSetup);
+  assert.equal(legacySetupTerminal.continueSetup, relocatedContinueSetup);
+
+  const prompts = [];
+  const answers = ['blank', '', '', 'Example Author', 'yes'];
+  const writes = [];
+  const dependencies = {
+    readConfiguration: async () => null,
+    starterCatalog: async () => ({ catalog: { starters: [{ id: 'blank', name: 'Blank', level: 'basic' }] } }),
+    derivedId: () => 'derived-id',
+    derivedName: id => id === 'derived-id' ? 'Derived Id' : 'Unexpected',
+    setupDocumentation: async (_mode, value) => value,
+  };
+  const guided = await relocatedGuidedSetup(
+    { command: 'setup', args: [], options: {} },
+    { root: '/project', frameworkRoot },
+    async query => { prompts.push(query); return answers.shift(); },
+    value => writes.push(value),
+    dependencies,
+  );
+  assert.equal(guided.options.starter, 'blank');
+  assert.equal(guided.options.id, 'derived-id');
+  assert.equal(guided.options.name, 'Derived Id');
+  assert.equal(guided.options.author, 'Example Author');
+  assert.equal(guided.options.airship, true);
+  assert.ok(writes.some(value => value.includes('GitHub is optional')));
+  assert.equal(prompts.length, 5);
+
+  const rendered = [];
+  const calls = [];
+  const continuationAnswers = ['yes', 'yes', 'yes', 'yes', 'yes'];
+  const execute = async request => {
+    calls.push(request);
+    if (request.command === 'generate') {
+      return { ...operationResult('generate', { planHash: 'b'.repeat(64) }, 'planned') };
+    }
+    if (request.command === 'setup status') {
+      return operationResult('setup status', { resumeHash: 'a'.repeat(64) });
+    }
+    return operationResult(request.command, {}, 'applied');
+  };
+  const documentationModes = [];
+  const completed = await relocatedContinueSetup(
+    { root: '/project', frameworkRoot },
+    execute,
+    async () => continuationAnswers.shift(),
+    value => rendered.push(value),
+    operationResult('setup', {}, 'applied'),
+    {
+      ...dependencies,
+      setupDocumentation: async (mode, value) => { documentationModes.push(mode); return value; },
+    },
+  );
+  assert.equal(completed.status, 'applied');
+  assert.deepEqual(documentationModes, ['import', 'export']);
+  assert.deepEqual(calls.filter(call => call.command === 'setup resume').map(call => call.options.stage),
+    ['generate', 'install', 'verify', 'preview']);
+  assert.equal(calls.find(call => call.command === 'setup resume' && call.options.stage === 'generate').options.apply, 'b'.repeat(64));
+  assert.ok(rendered.length >= 5);
+
+  const declinedModes = [];
+  const declined = await relocatedContinueSetup(
+    { root: '/project', frameworkRoot },
+    async () => { throw new Error('declined flow must not execute a stage'); },
+    async () => 'no',
+    () => {},
+    operationResult('setup', {}, 'applied'),
+    {
+      ...dependencies,
+      setupDocumentation: async (mode, value) => { declinedModes.push(mode); return value; },
+    },
+  );
+  assert.equal(declined.status, 'applied');
+  assert.deepEqual(declinedModes, ['import', 'export']);
 });

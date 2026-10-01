@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D40 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D41 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -142,7 +142,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D38:** Clickdummy build orchestration moved to `bin/adapters/framework/clickdummy.ts`; the relocated dispatcher imports it locally and the former framework path is compatibility-only. Host dependencies are injectable for contract tests only, while maker coverage locks dry-run, generated-project refusal, fixed worker paths, replace/timeout forwarding, output-limit refusal and receipt validation without launching a compiler.
 - **D39:** Documentation schema/status/validate/recover and plan adaptation moved to `bin/adapters/framework/docs.ts`; the dispatcher imports read commands locally and the former framework path is compatibility-only. Lazy application-doc adapters remain behind the same boundary, while maker coverage verifies schema isolation, recovery apply/dry-run semantics, blocked validation, status and export/import plan forwarding without filesystem writes.
 - **D40:** Test-data fixture planning/apply adaptation moved to `bin/adapters/framework/fixtures.ts`; the dispatcher imports it locally and the former framework path is compatibility-only. Maker coverage locks input/config/target refusal, hash-bound approval, isolated-vault identity, cancellation, reset planning and applied/unchanged outcomes using injected fixture storage only.
-- **Remaining D41–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D41:** Setup terminal guidance moved to `bin/presentation/terminal/setup-terminal.ts`; the framework CLI imports it locally and the former framework path is compatibility-only. Prompt confirmation now uses the shared yes/no policy, while injected dependency coverage locks starter/default identity intake, optional Airship choice, separately approved generate/install/verify/preview stages, generation plan hashes and decline-to-export behavior.
+- **Remaining D42–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
