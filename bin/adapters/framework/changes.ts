@@ -109,10 +109,10 @@ export async function vaultPlan(context: Context) {
 export async function releaseVersionPlan(request: Request, context: Context) {
   const version = stringOption(request.options, 'version'), notes = stringOption(request.options, 'notes-file');
   requireThat(version && notes, 'RELEASE_INPUT_REQUIRED', 'Supply --version and --notes-file.');
-  const { prepareVersion } = await import('../release/prepare.mjs');
+  const { prepareVersion } = await import('../../../scripts/release/prepare.mjs');
   const prepared = await prepareVersion(context.root, version, (await readBounded(resolve(context.root, notes))).toString('utf8'));
   const config = await readConfiguration(context.root);
-  const entries = prepared.plan.changes.map(change => ({ path: change.path, content: change.content }));
+  const entries = prepared.plan.changes.map((change: { path: string; content: string | null }) => ({ path: change.path, content: change.content }));
   if (config) entries.push({ path: configFile, content: json({ ...config, project: { ...config.project, version } }) });
   const plan = await createFilePlan(context.root, entries);
   for (const change of prepared.plan.changes) requireThat(plan.changes.find(entry => entry.path === change.path)?.beforeHash === change.beforeHash, 'PLAN_STALE', 'Release inputs changed while planning.');
