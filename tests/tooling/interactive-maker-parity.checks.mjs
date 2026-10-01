@@ -78,6 +78,14 @@ import { fixtureOperation as relocatedFixtureOperation } from '../../bin/adapter
 import * as legacyFixtures from '../../scripts/framework/fixtures.ts';
 import { guidedSetup as relocatedGuidedSetup, continueSetup as relocatedContinueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
 import * as legacySetupTerminal from '../../scripts/framework/setup-terminal.ts';
+import { guidedStarter as relocatedGuidedStarter, starterText as relocatedStarterText } from '../../bin/presentation/terminal/starter-terminal.ts';
+import * as legacyStarterTerminal from '../../scripts/framework/starter-terminal.ts';
+import { renderHuman as relocatedRenderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
+import * as legacyTerminalRender from '../../scripts/framework/terminal-render.ts';
+import { setupSnapshot as relocatedSetupSnapshot } from '../../bin/adapters/framework/setup-state.ts';
+import * as legacySetupState from '../../scripts/framework/setup-state.ts';
+import { setupProgress as relocatedSetupProgress } from '../../bin/adapters/framework/setup-progress.ts';
+import * as legacySetupProgress from '../../scripts/framework/setup-progress.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1803,4 +1811,195 @@ test('relocated setup terminal preserves interview and separately approved conti
   );
   assert.equal(declined.status, 'applied');
   assert.deepEqual(declinedModes, ['import', 'export']);
+});
+
+
+test('relocated starter terminal preserves compatibility, from-short-circuit and human rendering', async () => {
+  assert.equal(legacyStarterTerminal.guidedStarter, relocatedGuidedStarter);
+  assert.equal(legacyStarterTerminal.starterText, relocatedStarterText);
+
+  const from = await relocatedGuidedStarter(
+    { command: 'new', args: [], options: { from: 'source.json' } },
+    { root: frameworkRoot, frameworkRoot },
+    async query => {
+      assert.match(query, /New project directory/);
+      return 'consumer';
+    },
+    () => {},
+  );
+  assert.equal(from.options.from, 'source.json');
+  assert.ok(from.args[0].endsWith('consumer'));
+
+  assert.equal(relocatedStarterText(operationResult('new', null, 'failed')), null);
+  assert.equal(relocatedStarterText(operationResult('new', null, 'cancelled')), 'new: cancelled; nothing was written.\n');
+
+  const listing = relocatedStarterText(operationResult('new', {
+    starters: [{ id: 'cli', title: 'CLI', category: 'utility', difficulty: 'basic', description: 'Command utility.' }],
+  }));
+  assert.match(listing, /Installed JSON starters/);
+  assert.match(listing, /cli/);
+
+  const review = relocatedStarterText(operationResult('new', {
+    planHash: 'a'.repeat(64),
+    summary: {
+      starter: { id: 'cli', title: 'CLI', version: '1.0.0', sha256: 'b'.repeat(64) },
+      identity: { id: 'demo', name: 'Demo', author: 'Example' },
+      directory: '/tmp/demo', vault: '/tmp', files: 4, acceptanceTodos: 2, warnings: ['boundary'],
+    },
+    conflicts: [], next: 'Review.', nextSteps: ['Install'],
+    guide: { readme: 'README.md', implementation: 'IMPLEMENTATION.md' },
+    install: { npm: { exitCode: 0 } },
+  }, 'planned'));
+  assert.match(review, /new: planned/);
+  assert.match(review, /Plan hash/);
+  assert.match(review, /npm: exit 0/);
+  assert.match(review, /Next steps:/);
+});
+
+
+test('relocated terminal renderer preserves compatibility and generic/check views', () => {
+  assert.equal(legacyTerminalRender.renderHuman, relocatedRenderHuman);
+  const style = { color: false, unicode: false };
+  const generic = relocatedRenderHuman(operationResult('inspect', { one: 1, nested: { two: 'value' } }), style);
+  assert.match(generic.text, /inspect: ok/);
+  assert.match(generic.text, /nested\.two/);
+  assert.equal(generic.diagnosticsShown, false);
+
+  const check = relocatedRenderHuman(operationResult('check', {
+    scope: 'shell-repository', mode: 'full',
+    steps: [{ id: 'types', command: 'tsc', status: 'passed', durationMs: 12, exitCode: 0 }],
+    summary: { passed: 1, failed: 0, skipped: 0, durationMs: 12 },
+  }), style);
+  assert.match(check.text, /types/);
+  assert.match(check.text, /All check steps passed/);
+  assert.equal(check.diagnosticsShown, true);
+});
+
+
+test('relocated setup-state fingerprinting preserves identity, source and generation bindings', async () => {
+  assert.equal(legacySetupState.setupSnapshot, relocatedSetupSnapshot);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-setup-state-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const setup = await frameworkOperation({
+      command: 'setup',
+      args: [],
+      options: { id: 'snapshot-demo', name: 'Snapshot Demo', author: 'Example', blank: true, yes: true },
+    }, context);
+    assert.equal(setup.status, 'applied', JSON.stringify(setup));
+
+    const first = await relocatedSetupSnapshot(context);
+    assert.ok(first.files >= 2);
+    assert.ok(first.bytes > 0);
+    assert.equal(first.kitVerified, false);
+    assert.equal(first.generated, false);
+    assert.match(first.fingerprint, /^[a-f0-9]{64}$/);
+    assert.match(first.binding, /^[a-f0-9]{64}$/);
+
+    await mkdir(join(root, 'src'), { recursive: true });
+    await writeFile(join(root, 'src/extra.ts'), 'export const extra = 1;\n');
+    const changed = await relocatedSetupSnapshot(context);
+    assert.notEqual(changed.fingerprint, first.fingerprint);
+    assert.equal(changed.binding, first.binding);
+
+    await mkdir(join(root, '.companion'), { recursive: true });
+    await writeFile(join(root, '.companion/generation.json'), JSON.stringify({
+      version: 1,
+      projectId: 'snapshot-demo',
+      files: [{ path: 'design/project.json' }],
+    }));
+    const generated = await relocatedSetupSnapshot(context);
+    assert.equal(generated.generated, true);
+    assert.notEqual(generated.fingerprint, changed.fingerprint);
+
+    await writeFile(join(root, '.companion/generation.json'), '{}');
+    await assert.rejects(relocatedSetupSnapshot(context), error => error.code === 'SETUP_GENERATION_INVALID');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated setup-progress preserves status, approval and persisted attempt semantics', async () => {
+  assert.equal(legacySetupProgress.setupProgress, relocatedSetupProgress);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-setup-progress-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const setup = await frameworkOperation({
+      command: 'setup', args: [],
+      options: { id: 'progress-demo', name: 'Progress Demo', author: 'Example', blank: true, yes: true },
+    }, context);
+    assert.equal(setup.status, 'applied', JSON.stringify(setup));
+
+    const status = await relocatedSetupProgress(
+      { command: 'setup status', args: [], options: {} },
+      context,
+      async () => { throw new Error('status must not execute a stage'); },
+    );
+    assert.equal(status.status, 'ok');
+    assert.match(status.data.resumeHash, /^[a-f0-9]{64}$/);
+    assert.deepEqual(status.data.attempts, []);
+
+    const planned = await relocatedSetupProgress(
+      { command: 'setup resume', args: [], options: { stage: 'generate' } },
+      context,
+      async () => { throw new Error('unapproved resume must not execute a stage'); },
+    );
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.execution, 'not-run');
+
+    await assert.rejects(
+      relocatedSetupProgress(
+        { command: 'setup resume', args: [], options: { stage: 'unknown' } },
+        context,
+        async () => operationResult('generate', {}),
+      ),
+      error => error.code === 'SETUP_STAGE_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedSetupProgress(
+        { command: 'setup resume', args: [], options: { stage: 'generate', yes: true, 'resume-hash': '0'.repeat(64) } },
+        context,
+        async () => operationResult('generate', {}),
+      ),
+      error => error.code === 'SETUP_INPUT_CHANGED',
+    );
+
+    let calls = 0;
+    const applied = await relocatedSetupProgress(
+      { command: 'setup resume', args: [], options: { stage: 'generate', yes: true, 'resume-hash': status.data.resumeHash } },
+      context,
+      async request => {
+        calls++;
+        assert.equal(request.command, 'generate');
+        return operationResult('generate', { synthetic: true }, 'applied');
+      },
+    );
+    assert.equal(applied.status, 'applied');
+    assert.equal(calls, 1);
+    assert.equal(applied.data.selectedStage, 'generate');
+    assert.equal(applied.data.attempt.status, 'applied');
+
+    const after = await relocatedSetupProgress(
+      { command: 'setup status', args: [], options: {} },
+      context,
+      async () => { throw new Error('status must not execute'); },
+    );
+    assert.equal(after.data.attempts.length, 1);
+    assert.equal(after.data.attempts[0].stage, 'generate');
+
+    const controller = new AbortController();
+    controller.abort();
+    await assert.rejects(
+      relocatedSetupProgress(
+        { command: 'setup resume', args: [], options: { stage: 'generate', yes: true, 'resume-hash': after.data.resumeHash } },
+        { ...context, signal: controller.signal },
+        async () => operationResult('generate', {}),
+      ),
+      error => error.code === 'CANCELLED',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
