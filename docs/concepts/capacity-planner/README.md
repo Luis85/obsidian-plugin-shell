@@ -2,7 +2,7 @@
 
 This concept is an additive prototype on PR #62 (`feat/cli-release-journey`) in `Luis85/obsidian-plugin-shell`. It does not change the Companion schema, production runtime, framework configuration, repository quality thresholds, or any retired migration path.
 
-Open `index.html` directly in a current browser. The artifact is self-contained: no remote scripts, fonts, images, APIs, or network requests are required.
+Open `index.html` directly in a current browser. The artifact is self-contained: no remote scripts, fonts, images, APIs, or network requests are required. The assembler gzip-compresses the compiled script/CSS into the HTML and expands it with the browser's `DecompressionStream`; this is still fully offline.
 
 See [REVIEW.md](REVIEW.md) for the comprehensive product review, changes made in the polishing pass, and remaining production decisions.
 
@@ -50,7 +50,7 @@ A partial final iteration is prorated by its calendar-day fraction. Holidays, pe
 - Missing `availableFte` in an older v1 export is normalized from its existing planned FTE.
 - Invalid/future browser storage is not overwritten automatically during startup fallback.
 - User-provided names/titles are escaped before HTML rendering.
-- The CSP blocks network connections and uses a generated SHA-256 script hash.
+- The CSP blocks network connections and uses generated SHA-256 script hashes.
 
 ## Source and deterministic build
 
@@ -62,7 +62,7 @@ A partial final iteration is prorated by its calendar-day fraction. Holidays, pe
 - `source/app.ts` — small event/composition entrypoint
 - `source/styles.css` — prototype visual system
 - `source/frame.html` — offline HTML frame and CSP
-- `source/build.mjs` — dependency-free module assembler
+- `source/build.mjs` — dependency-free module assembler and gzip packer
 - `source/tsconfig.json` — TypeScript check configuration
 - `tests/browser_journeys.py` — optional Chromium/Playwright journey
 
@@ -93,7 +93,8 @@ Passed:
 
 - deterministic build and `--check`;
 - Node strip-types syntax checks for all four TypeScript modules;
-- browser journey: baseline 5-role / 8-iteration rendering;
+- browser journey against the compressed self-contained artifact;
+- baseline 5-role / 8-iteration rendering;
 - iteration-total and planning-check rendering;
 - deliberate FTE-envelope breach;
 - task editing;
@@ -104,6 +105,11 @@ Passed:
 - no browser console/page errors.
 
 The available local machine does not provide the repository-qualified Node 24.21.0 + pinned TypeScript 6.0.3 environment, so repository TypeScript qualification remains explicitly **not run** locally.
+
+Generated `index.html` after the polishing pass:
+
+- size: 25,191 bytes
+- SHA-256: `35032ff9d95cb63bbd4363d9a08016f72b3a91ba4e019aa354a3987455ba9ceb`
 
 ## Scope boundary
 
