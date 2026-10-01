@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import { join } from 'node:path';
 import type { Readable, Writable } from 'node:stream';
+import { terminateProcessTree } from './framework/process-tree.ts';
 
 const MAX_OUTPUT_BYTES = 1024 * 1024;
 const MAX_ARGS = 64;
@@ -90,27 +91,26 @@ async function tool(name: string, input: unknown, run: McpRunner) {
   try {
     const args = exactArgs(options.args);
     const timeoutMs = options.timeoutMs === undefined ? 120000 : options.timeoutMs;
-    if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 600000) throw new Error('timeoutMs must be 1000-600000.');
+    if (typeof timeoutMs !== 'number' || !Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 600000) {
+      throw new Error('timeoutMs must be 1000-600000.');
+    }
     const stdin = options.stdin;
     if (stdin !== undefined && (typeof stdin !== 'string' || stdin.length > MAX_STDIN_LENGTH || stdin.includes('\0'))) {
       throw new Error('stdin must be a bounded string without NUL bytes.');
     }
-    const value = await run(args, timeoutMs, stdin as string | undefined);
+    const value = await run(args, timeoutMs, typeof stdin === 'string' ? stdin : undefined);
     return textResult(value, value.exitCode !== 0 || value.timedOut || value.overflow);
   } catch (cause) {
     return textResult({ code: 'INVALID_INPUT', message: cause instanceof Error ? cause.message : 'Invalid tool input.' }, true);
   }
 }
 
-export async function mcpResponse(message: JsonRpc, run: McpRunner): Promise<Record<string, unknown> | null> {
-  if (!message || message.jsonrpc !== '2.0' || typeof message.method !== 'string') return error(message?.id ?? null, -32600, 'Invalid JSON-RPC request.');
-  if (message.method === 'notifications/initialized' || message.method === 'notifications/cancelled' || message.id === undefined) return null;
-  const params = record(message.params);
-  if (message.method === 'server/discover') return result(message.id, { supportedVersions, capabilities, ttlMs: 0, cacheScope: 'private' }, true);
-  if (message.method === 'initialize') {
-    const requested = params.protocolVersion;
-    return result(message.id, { protocolVersion: typeof requested === 'string' && legacyProtocols.has(requested) ? requested : '2025-11-25', capabilities, serverInfo });
-  }
+function initializeResponse(message: JsonRpc, params: Record<string, unknown>) {
+  const requested = params.protocolVersion;
+  const protocolVersion = typeof requested === 'string' && legacyProtocols.has(requested) ? requested : '2025-11-25';
+  return result(message.id, { protocolVersion, capabilities, serverInfo });
+}
+async function operationalResponse(message: JsonRpc, params: Record<string, unknown>, run: McpRunner) {
   const isModern = modern(message);
   if (message.method === 'ping') return result(message.id, {}, isModern);
   if (message.method === 'tools/list') return result(message.id, { tools: workbenchMcpTools }, isModern);
@@ -119,18 +119,36 @@ export async function mcpResponse(message: JsonRpc, run: McpRunner): Promise<Rec
   if (typeof name !== 'string') return error(message.id, -32602, 'Tool name is required.');
   return result(message.id, await tool(name, params.arguments ?? {}, run), isModern);
 }
+export async function mcpResponse(message: JsonRpc, run: McpRunner): Promise<Record<string, unknown> | null> {
+  if (!message || message.jsonrpc !== '2.0' || typeof message.method !== 'string') return error(message?.id ?? null, -32600, 'Invalid JSON-RPC request.');
+  if (message.method === 'notifications/initialized' || message.method === 'notifications/cancelled' || message.id === undefined) return null;
+  const params = record(message.params);
+  if (message.method === 'server/discover') return result(message.id, { supportedVersions, capabilities, ttlMs: 0, cacheScope: 'private' }, true);
+  if (message.method === 'initialize') return initializeResponse(message, params);
+  return operationalResponse(message, params, run);
+}
 
 export function runWorkbench(root: string, args: string[], timeoutMs: number, stdin?: string): Promise<RunResult> {
   return new Promise(resolveRun => {
     const child = spawn(process.execPath, [join(root, 'bin/app'), ...args], {
-      cwd: root, shell: false, windowsHide: true, env: { ...process.env, NO_COLOR: '1' }, stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: root, shell: false, windowsHide: true, detached: process.platform !== 'win32',
+      env: { ...process.env, NO_COLOR: '1' }, stdio: ['pipe', 'pipe', 'pipe'],
     });
     let stdout = '', stderr = '', bytes = 0, settled = false, timedOut = false, overflow = false;
-    let timer: ReturnType<typeof setTimeout>;
-    const settle = (value: RunResult) => { if (!settled) { settled = true; clearTimeout(timer); resolveRun(value); } };
+    let forceTimer: ReturnType<typeof setTimeout> | undefined;
+    const stop = () => {
+      terminateProcessTree(child, 'SIGTERM');
+      forceTimer ??= setTimeout(() => terminateProcessTree(child, 'SIGKILL'), 3000);
+      forceTimer.unref();
+    };
+    const timer = setTimeout(() => { timedOut = true; stop(); }, timeoutMs); timer.unref();
+    const settle = (value: RunResult) => {
+      if (settled) return;
+      settled = true; clearTimeout(timer); if (forceTimer) clearTimeout(forceTimer); resolveRun(value);
+    };
     const collect = (target: 'stdout' | 'stderr', chunk: Buffer) => {
       bytes += chunk.length;
-      if (bytes > MAX_OUTPUT_BYTES) { overflow = true; child.kill(); return; }
+      if (bytes > MAX_OUTPUT_BYTES) { if (!overflow) { overflow = true; stop(); } return; }
       if (target === 'stdout') stdout += chunk.toString('utf8'); else stderr += chunk.toString('utf8');
     };
     child.stdout.on('data', chunk => collect('stdout', chunk)); child.stderr.on('data', chunk => collect('stderr', chunk));
@@ -138,7 +156,6 @@ export function runWorkbench(root: string, args: string[], timeoutMs: number, st
     child.stdin.end(stdin ?? '');
     child.once('error', cause => settle({ exitCode: 1, signal: null, stdout, stderr, error: cause.message, timedOut, overflow }));
     child.once('close', (code, signal) => settle({ exitCode: code ?? 1, signal, stdout, stderr, timedOut, overflow }));
-    timer = setTimeout(() => { timedOut = true; child.kill(); }, timeoutMs);
   });
 }
 
