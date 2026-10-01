@@ -18,7 +18,7 @@ import { result, failure, requireThat, stringOption, type Context, type Request,
 import { runNode } from './process.ts';
 import { fileOperation } from '../../bin/adapters/framework/file-operation.ts';
 import { processOperation } from './operation-process.ts';
-import { readOperation } from './operation-read.ts';
+import { readOperation } from '../../bin/adapters/framework/read-operation.ts';
 
 /** Programmatic adapter shared by the terminal and future companion. No prompt or process-global cwd change. */
 export async function executeOperation(input: Request, context: Context): Promise<Result> {

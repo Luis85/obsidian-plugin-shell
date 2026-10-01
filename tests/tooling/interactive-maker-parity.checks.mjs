@@ -285,3 +285,42 @@ test('relocated reviewed file-operation adapter plans and applies setup through 
     await rm(root, { recursive: true, force: true });
   }
 });
+
+
+test('relocated read-operation adapter preserves version, concept schema and configuration reads', async () => {
+  const capture = () => {
+    let text = '';
+    return {
+      stream: { isTTY: false, write(value) { text += String(value); return true; } },
+      read: () => text,
+    };
+  };
+  const run = async argv => {
+    const output = capture(), error = capture();
+    const code = await frameworkMain(argv, frameworkRoot, {
+      input: Readable.from([]),
+      output: output.stream,
+      error: error.stream,
+      env: { CI: 'true' },
+    });
+    return { code, result: JSON.parse(output.read()), stderr: error.read() };
+  };
+
+  const version = await run(['version', '--json']);
+  assert.equal(version.code, 0, version.stderr);
+  assert.equal(version.result.status, 'ok');
+  assert.equal(version.result.data.distribution, 'source');
+  assert.equal(version.result.data.protocolVersion, 1);
+
+  const concept = await run(['concept', 'schema', '--json']);
+  assert.equal(concept.code, 0, concept.stderr);
+  assert.equal(concept.result.command, 'concept schema');
+  assert.equal(concept.result.status, 'ok');
+  assert.equal(typeof concept.result.data, 'object');
+
+  const config = await run(['config', 'get', '--root', frameworkRoot, '--json', '--no-interaction']);
+  assert.equal(config.code, 0, config.stderr);
+  assert.equal(config.result.command, 'config get');
+  assert.equal(config.result.status, 'ok');
+  assert.equal(config.result.data.source, 'shell.config.json');
+});
