@@ -44,6 +44,10 @@ import { supportSnapshot as relocatedSupportSnapshot, supportReport as relocated
 import * as legacySupportReport from '../../scripts/framework/support-report.ts';
 import { status as relocatedStatus, releaseCheck as relocatedReleaseCheck } from '../../bin/adapters/framework/inspection.ts';
 import * as legacyInspection from '../../scripts/framework/inspection.ts';
+import { portableFile as relocatedPortableFile } from '../../bin/adapters/framework/archive-path.ts';
+import * as legacyArchivePath from '../../scripts/framework/archive-path.ts';
+import { zip as relocatedZip } from '../../bin/adapters/framework/zip.ts';
+import * as legacyZip from '../../scripts/framework/zip.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -867,4 +871,34 @@ test('relocated inspection covers generated identity, traceability, doctor drift
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+
+test('relocated archive helpers preserve portable paths and deterministic ZIP bytes', () => {
+  assert.equal(legacyArchivePath.portableFile, relocatedPortableFile);
+  assert.equal(legacyZip.zip, relocatedZip);
+
+  for (const path of ['README.md', 'docs/guide.md', 'assets/icon-2.svg']) assert.equal(relocatedPortableFile(path), true, path);
+  for (const path of ['', '../escape', 'a/../b', 'a//b', 'a\\b', 'CON', 'folder/trailing.', 'folder/trailing ']) {
+    assert.equal(relocatedPortableFile(path), false, path);
+  }
+
+  const first = relocatedZip([
+    { path: 'b.txt', bytes: Buffer.from('B') },
+    { path: 'a.txt', bytes: Buffer.from('A') },
+  ]);
+  const second = relocatedZip([
+    { path: 'a.txt', bytes: Buffer.from('A') },
+    { path: 'b.txt', bytes: Buffer.from('B') },
+  ]);
+  assert.deepEqual(first, second);
+  assert.equal(first.readUInt32LE(0), 0x04034b50);
+  assert.equal(first.readUInt32LE(first.length - 22), 0x06054b50);
+
+  assert.throws(() => relocatedZip([]), error => error.code === 'ARCHIVE_LIMIT');
+  assert.throws(() => relocatedZip([{ path: '../unsafe.txt', bytes: Buffer.from('x') }]), error => error.code === 'ARCHIVE_PATH');
+  assert.throws(() => relocatedZip([
+    { path: 'A.txt', bytes: Buffer.from('one') },
+    { path: 'a.txt', bytes: Buffer.from('two') },
+  ]), error => error.code === 'ARCHIVE_PATH');
 });
