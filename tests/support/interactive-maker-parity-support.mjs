@@ -90,6 +90,8 @@ import { kitManifest as relocatedKitManifest, listFiles as relocatedListKitFiles
 import * as legacyKitIntegrity from '../../scripts/framework/kit-integrity.ts';
 import { included as relocatedDistributedIncluded, standaloneSource as relocatedStandaloneSource, updateOwnership as relocatedUpdateOwnership } from '../../bin/adapters/framework/distribution.ts';
 import * as legacyDistribution from '../../scripts/framework/distribution.ts';
+import { derivedId as relocatedStarterDerivedId, derivedName as relocatedStarterDerivedName, invocationDirectory as relocatedInvocationDirectory } from '../../bin/adapters/framework/starter-project.ts';
+import * as legacyStarterProject from '../../scripts/framework/starter-project.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -248,6 +250,10 @@ export {
   relocatedStandaloneSource,
   relocatedUpdateOwnership,
   legacyDistribution,
+  relocatedStarterDerivedId,
+  relocatedStarterDerivedName,
+  relocatedInvocationDirectory,
+  legacyStarterProject,
   test,
   frameworkRoot,
   scripted,
