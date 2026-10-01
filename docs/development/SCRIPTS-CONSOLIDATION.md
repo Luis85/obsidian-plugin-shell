@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D64 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D65 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -169,7 +169,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D62a (CI repair):** Relocation cleanup fixes the release-preparation import depth, authorizes maker-host use of the already-reviewed shared process/files/concurrency contracts, removes six transient compatibility wrappers with zero consumers, and drops genuinely unused support/re-export surface. Documentation status keeps its lazy runtime boundary with an explicit adapter contract regression; analyzer rules and thresholds remain unchanged.
 - **D63:** New-project/starter orchestration moved to `bin/adapters/framework/starter-project.ts`. Framework CLI, planning, dispatcher, setup-source and terminal prompting now import it locally; the former framework path is compatibility-only. Maker parity coverage locks helper identity plus derived ID/name and invocation-directory semantics.
 - **D64:** Framework-kit assembly, packaging and upgrade planning moved to `bin/adapters/framework/kit.ts`. Process execution and reviewed planning now import it locally; the former framework path is compatibility-only. Existing maker distribution qualification exercises real kit assembly, and a parity regression locks the compatibility surface.
-- **Remaining D65–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D65:** The daily `check` gate moved to `bin/adapters/framework/check.ts`; the dispatcher imports it locally and the former framework path is compatibility-only. Maker coverage now exercises full/fast step planning, changed/unavailable Git selection, step continuation and failure metadata, dry-run, cancellation, output-tail normalization and shim identity.
+- **Remaining D66–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
