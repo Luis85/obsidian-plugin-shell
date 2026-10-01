@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D34 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D35 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -135,7 +135,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D32:** Data-only `new --from` project intake moved to `bin/adapters/framework/project-from.ts`. The former framework path is compatibility-only; maker coverage locks bounded source loading, identity overrides, missing/malformed/future-schema refusal and plugin-ID validation.
 - **D33:** Optional Storybook lifecycle moved to `bin/adapters/framework/storybook.ts` and the relocated dispatcher imports it locally. The former framework path is compatibility-only; injected-executor coverage locks status, disabled refusal, install plan/apply, installed check, dev dry-run and lock-mismatch behavior without launching external tooling.
 - **D34:** The relocated framework dispatcher now consumes `bin/adapters/framework/help-text.ts` directly. Help/capabilities no longer bounce through the compatibility path, while the existing parity and rendering regressions remain the behavior guardrails.
-- **Remaining D35–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D35:** Version discovery in `bin/adapters/framework/read-operation.ts` now uses the relocated filesystem adapter directly; the last dynamic hop through `scripts/framework/files.ts` is removed without changing the command surface.
+- **Remaining D36–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
