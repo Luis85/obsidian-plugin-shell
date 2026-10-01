@@ -90,7 +90,8 @@ async function ownershipEntries(context: Context, selected: Configuration, track
   const old = previousReceipt.files === undefined ? {} : object(previousReceipt.files);
   const before = await createFilePlan(context.root, tracked);
   for (const change of before.changes) requireThat(change.beforeHash === null || change.beforeHash === old[change.path], 'IMPORT_OWNERSHIP', `Preserve edited or foreign design file: ${change.path}. Export/reconcile it before importing.`);
-  const receipt = { path: receiptPath, content: json({ schemaVersion: 1, files: Object.fromEntries(tracked.map(entry => [entry.path, hash(entry.content)])) }) };
+  const current = Object.fromEntries(tracked.map(entry => [entry.path, hash(entry.content)]));
+  const receipt = { path: receiptPath, content: json({ schemaVersion: 1, files: { ...old, ...current } }) };
   const generation = await generationEntry(context, selected, tracked, old);
   return generation ? [receipt, generation] : [receipt];
 }

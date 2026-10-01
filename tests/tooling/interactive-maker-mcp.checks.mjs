@@ -79,6 +79,27 @@ async function feed(input) {
   input.end();
 }
 
+test('enabling MCP later preserves prior setup ownership instead of replacing the intake receipt', async () => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-mcp-later-')));
+  try {
+    await mkdir(join(root, 'bin'), { recursive: true }); await writeFile(join(root, 'bin/app'), '#!/usr/bin/env node\n');
+    const context = { root, frameworkRoot };
+    const initial = await executeOperation({ command: 'setup', args: [], options: {
+      id: 'later-mcp', name: 'Later MCP', author: 'Example', blank: true, yes: true,
+    } }, context);
+    assert.equal(initial.status, 'applied', JSON.stringify(initial));
+    const before = JSON.parse(await readFile(join(root, '.framework/intake.json'), 'utf8')).files;
+    assert.ok(before['design/project.json']); assert.ok(before['.framework/imported-project.json']);
+
+    const enabled = await executeOperation({ command: 'setup', args: [], options: { mcp: true, yes: true } }, context);
+    assert.equal(enabled.status, 'applied', JSON.stringify(enabled));
+    const after = JSON.parse(await readFile(join(root, '.framework/intake.json'), 'utf8')).files;
+    assert.equal(after['design/project.json'], before['design/project.json']);
+    assert.equal(after['.framework/imported-project.json'], before['.framework/imported-project.json']);
+    for (const path of ['.mcp.json', '.codex/config.toml', '.claude/settings.local.json']) assert.match(after[path], /^[a-f0-9]{64}$/);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
 test('the real runner delegates to bin/app and modern setup owns Claude/Codex project registrations', async () => {
   const execution = await runWorkbench(frameworkRoot, ['version', '--json'], 15000);
   assert.equal(execution.exitCode, 0, execution.stderr);
