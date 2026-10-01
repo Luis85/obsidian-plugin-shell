@@ -5,7 +5,7 @@ import { sha256 } from '../../../scripts/shared/hash.ts';
 import { exists } from '../../../scripts/shared/fs-presence.ts';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
-import { configuration, configFile, type Configuration } from '../../../scripts/framework/configuration.ts';
+import { configuration, configFile, type Configuration } from './configuration.ts';
 import { requireThat, OperationError } from './contracts.ts';
 export const hash = (bytes: string | Uint8Array): string => sha256(bytes);
 export { exists };

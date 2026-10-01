@@ -25,6 +25,8 @@ import { failure as frameworkFailure, stringOption as frameworkStringOption, Ope
 import { CompilerError, CompilationFailure, diagnostic as compilerDiagnostic } from '../../scripts/compiler/domain/diagnostics.ts';
 import { hash as relocatedHash, readBounded as relocatedReadBounded, projectRoot as relocatedProjectRoot, exists as relocatedExists } from '../../bin/adapters/framework/files.ts';
 import * as legacyFrameworkFiles from '../../scripts/framework/files.ts';
+import { configuration as relocatedConfiguration, defaults as relocatedDefaults, identity as relocatedIdentity, resolveImport as relocatedResolveImport } from '../../bin/adapters/framework/configuration.ts';
+import * as legacyFrameworkConfiguration from '../../scripts/framework/configuration.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -530,4 +532,29 @@ test('relocated framework filesystem adapter preserves root discovery, bounded r
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+
+test('relocated framework configuration preserves defaults, validation and compatibility identity', () => {
+  assert.equal(legacyFrameworkConfiguration.configuration, relocatedConfiguration);
+  assert.equal(legacyFrameworkConfiguration.defaults, relocatedDefaults);
+  assert.equal(legacyFrameworkConfiguration.identity, relocatedIdentity);
+  assert.equal(legacyFrameworkConfiguration.resolveImport, relocatedResolveImport);
+
+  const project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '1.2.3', description: 'Demo' };
+  const config = relocatedDefaults(project);
+  assert.equal(config.schemaVersion, 1);
+  assert.deepEqual(config.paths, {
+    codebaseFolder: 'src', testsFolder: 'tests', testVaultFolder: '.test-vault', configDirectory: '.obsidian',
+  });
+  assert.throws(() => relocatedIdentity({ ...project, id: 'Invalid ID' }), error => error.code === 'INVALID_IDENTITY');
+  assert.throws(() => relocatedConfiguration({
+    ...config, paths: { ...config.paths, testsFolder: 'src/tests' },
+  }), error => error.code === 'CONFIG_OVERLAP');
+
+  const imported = { project: { ...project, name: 'Imported' }, settings: { codebaseFolder: 'app', testsFolder: 'spec' } };
+  assert.throws(() => relocatedResolveImport(config, imported), error => error.code === 'IMPORT_CONFLICT');
+  const resolved = relocatedResolveImport(config, imported, 'project');
+  assert.equal(resolved.config, config);
+  assert.equal(resolved.document.project.name, 'Field Notes');
 });
