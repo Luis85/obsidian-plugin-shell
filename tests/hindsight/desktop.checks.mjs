@@ -132,14 +132,17 @@ test('shell memory and help memory work without framework dependencies, Git or P
 
 function launcherFixture(f) {
   const source = join(f.root, 'tooling'); mkdirSync(source);
-  for (const file of launcherPlan(f.p).files.filter(file => file.name !== 'package.json')) writeFileSync(join(source, file.name), '// reviewed fixture\n');
+  for (const file of launcherPlan(f.p).files.filter(file => file.name !== 'package.json')) {
+    const path = join(source, file.name); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '// reviewed fixture\n');
+  }
   return source;
 }
 test('launcher plan is pure and staged snapshots are reusable without checkout paths in registration', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source);
   assert.deepEqual(readdirSync(f.home), []); stageLauncher(f.p, plan);
   assert.equal(readFileSync(join(plan.directory, 'cli.ts'), 'utf8'), '// reviewed fixture\n');
-  stageLauncher(f.p, plan); assert.equal(readdirSync(dirname(plan.directory)).length, 1);
+  assert.equal(readFileSync(join(plan.directory, '../shared/hash.ts'), 'utf8'), '// reviewed fixture\n');
+  stageLauncher(f.p, plan); assert.deepEqual(readdirSync(dirname(plan.directory)).sort(), ['hindsight', 'shared']);
   const entry = mcpEntry(f.repo, 'claude-code', f.p); assert.ok(entry.args[1].startsWith(join(f.state, 'launchers')));
 });
 test('changed launcher source invalidates its plan before creating a snapshot', t => {

@@ -123,6 +123,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D22:** Measurement statistics/timing moved to `bin/adapters/framework/measurement.ts`. Project measurement imports it locally, the former framework path is compatibility-only, and maker coverage locks summary math, warmup/sample accounting and synchronous-only execution.
 - **D23:** Support-report projection/collection moved to `bin/adapters/framework/support-report.ts`. Both the framework CLI fallback and read dispatcher import it locally, the former framework path is compatibility-only, and maker coverage verifies diagnostic allowlisting, privacy non-disclosure and blocked/cancelled unavailable outcomes.
 - **D24:** Project status/doctor and release-readiness inspection moved to `bin/adapters/framework/inspection.ts`. Support-report and read-operation import it locally, the former framework path is compatibility-only, and maker coverage verifies empty-project diagnostics plus non-authorizing blocked release readiness.
+- **D24a (CI repair):** Hindsight launcher snapshots now fingerprint and atomically stage the typed shared hash dependency beside the snapshot's `hindsight/` sources. Desktop registrations remain content-addressed and old snapshots never depend on a mutable global helper.
 - **Remaining D25–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
