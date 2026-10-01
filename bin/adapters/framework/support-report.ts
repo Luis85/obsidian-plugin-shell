@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { exists, readJson, readBounded } from './files.ts';
-import { status } from '../../../scripts/framework/inspection.ts';
+import { status } from './inspection.ts';
 import { result, requireThat, type Context, type Result } from './contracts.ts';
 
 const safeCodes = new Set(['CONFIG_MISSING', 'IDENTITY_DRIFT', 'DEPENDENCIES_MISSING', 'NODE_UNSUPPORTED',

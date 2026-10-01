@@ -42,6 +42,8 @@ import { sampleSummary as relocatedSampleSummary, measureOperation as relocatedM
 import * as legacyMeasurement from '../../scripts/framework/measurement.ts';
 import { supportSnapshot as relocatedSupportSnapshot, supportReport as relocatedSupportReport, unavailableSupport as relocatedUnavailableSupport } from '../../bin/adapters/framework/support-report.ts';
 import * as legacySupportReport from '../../scripts/framework/support-report.ts';
+import { status as relocatedStatus, releaseCheck as relocatedReleaseCheck } from '../../bin/adapters/framework/inspection.ts';
+import * as legacyInspection from '../../scripts/framework/inspection.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -774,4 +776,32 @@ test('relocated support report preserves allowlist privacy and unavailable outco
   const cancelled = await relocatedSupportReport({ root: frameworkRoot, frameworkRoot, signal: controller.signal });
   assert.equal(cancelled.status, 'cancelled');
   assert.equal(cancelled.diagnostics[0].code, 'CANCELLED');
+});
+
+
+test('relocated inspection preserves status and blocked release-readiness diagnostics', async () => {
+  assert.equal(legacyInspection.status, relocatedStatus);
+  assert.equal(legacyInspection.releaseCheck, relocatedReleaseCheck);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-inspection-')));
+  try {
+    const context = { root, frameworkRoot };
+    const status = await relocatedStatus(context);
+    assert.equal(status.status, 'ok');
+    assert.equal(status.data.generated, false);
+    assert.equal(status.data.imported, false);
+    assert.equal(status.data.dependencies, false);
+    assert.equal(status.data.next, 'setup');
+    assert.ok(status.diagnostics.some(item => item.code === 'CONFIG_MISSING'));
+    assert.ok(status.diagnostics.some(item => item.code === 'DEPENDENCIES_MISSING'));
+
+    const release = await relocatedReleaseCheck(context);
+    assert.equal(release.status, 'blocked');
+    assert.ok(release.diagnostics.some(item => item.code === 'BUILD_IDENTITY'));
+    assert.ok(release.diagnostics.some(item => item.code === 'ASSET_MISSING'));
+    assert.ok(release.diagnostics.some(item => item.code === 'RELEASE_EVIDENCE_REQUIRED'));
+    assert.equal(release.data.publication, 'not-authorized');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

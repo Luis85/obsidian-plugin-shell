@@ -4,7 +4,7 @@ import { inspectSitemapSummary } from '../../../scripts/companion/sitemap/summar
 import { handoutRead } from './handout-adapter.ts';
 import { inspectDesign } from '../../../scripts/framework/changes.ts';
 import { readConfiguration, exists } from './files.ts';
-import { status, releaseCheck } from '../../../scripts/framework/inspection.ts';
+import { status, releaseCheck } from './inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
 import { measureProject } from './project-measure.ts';
 import { projectContractOperation } from './project-contract.ts';
