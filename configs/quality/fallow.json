@@ -1,7 +1,6 @@
 {
   "entry": [
     "scripts/handout.mjs",
-    "scripts/agent/workbench-mcp.mjs",
     "scripts/concepts/export-golden-project.mjs",
     "scripts/concepts/starter-workspace.js",
     "scripts/compiler/index.ts",

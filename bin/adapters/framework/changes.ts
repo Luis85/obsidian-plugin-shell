@@ -99,6 +99,16 @@ function checkStartOptions(options: Options, input: string | undefined): void {
   requireThat(!(options.airship || options['no-airship']) || input || options.blank, 'AIRSHIP_DESIGN_REQUIRED', 'Use --input/--starter/--blank, or airship enable/disable on an existing design.');
   requireThat(!(input && options.blank), 'SETUP_START_CONFLICT', 'Choose --input or --blank, not both.');
 }
+/** The opt-in local Workbench MCP configuration, written only by setup and only with a bin/app launcher. */
+async function mcpEntries(request: Request, context: Context): Promise<Entry[]> {
+  if (request.command !== 'setup' || request.options.mcp !== true) return [];
+  requireThat(await exists(join(context.root, 'bin/app')), 'MCP_SERVER_MISSING', 'This project has no bin/app launcher for the local Workbench MCP.');
+  return setupMcpFiles();
+}
+function agentMcpSummary(options: Options) {
+  const enabled = options.mcp === true;
+  return { enabled, clients: enabled ? ['claude-code', 'codex'] : [] };
+}
 export async function configurationPlan(request: Request, context: Context) {
   const previous = await readConfiguration(context.root), options = request.options;
   requireThat(!(options.mcp && options['no-mcp']), 'MCP_OPTION_CONFLICT', 'Choose --mcp or --no-mcp, not both.');
@@ -114,18 +124,14 @@ export async function configurationPlan(request: Request, context: Context) {
   requireThat(selected, 'IDENTITY_REQUIRED', 'Supply --id, --name and --author, or --input <project.json>.');
   if (request.command === 'project import') requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
   await protectIdentity(context, selected);
-  if (request.command === 'setup' && options.mcp === true) {
-    requireThat(await exists(join(context.root, 'bin/app')), 'MCP_SERVER_MISSING', 'This project has no bin/app launcher for the local Workbench MCP.');
-    entries.push(...setupMcpFiles());
-  }
+  entries.push(...await mcpEntries(request, context));
   entries.push({ path: configFile, content: json(selected) });
   entries.push(...await ownershipEntries(context, selected, entries.filter(entry => entry.path !== configFile)));
   // A created handout becomes human-owned; keep it outside the intake ownership receipt.
   if (request.command === 'setup') entries.push(...(await prepareHandout(context.root, { virtualFiles: { [configFile]: json(selected) } })).entries);
   const plan = await createFilePlan(context.root, entries);
   return { plan, summary: { configuration: selected, imported: Boolean(input) && intake.origin === null, starter: intake.origin, blank: options.blank === true,
-    agentMcp: { enabled: options.mcp === true, clients: options.mcp === true ? ['claude-code', 'codex'] : [] },
-    next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
+    agentMcp: agentMcpSummary(options), next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
 }
 export async function vaultPlan(context: Context) {
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup first.');

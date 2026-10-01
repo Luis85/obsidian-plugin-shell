@@ -1,7 +1,7 @@
 const json = value => JSON.stringify(value, null, 2) + '\n';
-export const workbenchMcpServer = 'workbench';
+const workbenchMcpServer = 'workbench';
 
-export function projectMcpFiles() {
+function projectMcpFiles() {
   return [
     {
       path: '.mcp.json',
