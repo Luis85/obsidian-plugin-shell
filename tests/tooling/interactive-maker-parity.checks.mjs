@@ -34,6 +34,8 @@ import * as legacyProcessTree from '../../scripts/framework/process-tree.ts';
 import { handoutPlan as relocatedHandoutPlan, handoutRead as relocatedHandoutRead } from '../../bin/adapters/framework/handout-adapter.ts';
 import * as legacyHandoutAdapter from '../../scripts/framework/handout-adapter.ts';
 import { applyFilePlan as applySharedFilePlan } from '../../scripts/shared/file-plan.ts';
+import { projectContractOperation as relocatedProjectContractOperation } from '../../bin/adapters/framework/project-contract.ts';
+import * as legacyProjectContract from '../../scripts/framework/project-contract.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -635,4 +637,30 @@ test('relocated handout adapter preserves reviewed plan and blocked readiness se
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+
+test('relocated project contract preserves schema publication and stdin validation', async () => {
+  assert.equal(legacyProjectContract.projectContractOperation, relocatedProjectContractOperation);
+  const context = { root: frameworkRoot, frameworkRoot };
+
+  const schema = await relocatedProjectContractOperation({ command: 'project schema', args: [], options: {} }, context);
+  assert.equal(schema.status, 'ok');
+  assert.equal(schema.command, 'project schema');
+  assert.equal(typeof schema.data, 'object');
+  await assert.rejects(
+    relocatedProjectContractOperation({ command: 'project schema', args: [], options: { version: '5' } }, context),
+    error => error.code === 'SCHEMA_VERSION',
+  );
+
+  const inputText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
+  const validated = await relocatedProjectContractOperation(
+    { command: 'project validate', args: [], options: { input: '-' } },
+    { ...context, inputText },
+  );
+  assert.equal(validated.status, 'ok');
+  assert.equal(validated.data.valid, true);
+  assert.equal(validated.data.normalizedVersion, 6);
+  assert.equal(validated.data.contentIncluded, false);
+  assert.match(validated.data.inputSha256, /^[a-f0-9]{64}$/);
 });

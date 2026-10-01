@@ -7,7 +7,7 @@ import { readConfiguration, exists } from './files.ts';
 import { status, releaseCheck } from '../../../scripts/framework/inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
 import { measureProject } from '../../../scripts/framework/project-measure.ts';
-import { projectContractOperation } from '../../../scripts/framework/project-contract.ts';
+import { projectContractOperation } from './project-contract.ts';
 import { prototypesRead, prototypesCompare } from '../../../scripts/framework/prototypes.ts';
 import { inspectStyles } from '../../../scripts/framework/styles.ts';
 import { inspectConcept } from '../../../scripts/framework/concepts.ts';
