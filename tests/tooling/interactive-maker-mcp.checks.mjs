@@ -47,7 +47,10 @@ test('MCP delegates exact Workbench arguments and validates unsafe inputs', asyn
 
 test('stdio and app entrypoint serve MCP without a second executable', async () => {
   for (const invoke of [
-    () => runMcpServer(frameworkRoot, streams().io, ok),
+    () => {
+      const value = streams();
+      return Promise.all([runMcpServer(frameworkRoot, value.io, ok), feed(value.input)]).then(([code]) => code);
+    },
     () => {
       const value = streams();
       return Promise.all([appMain(['mcp'], frameworkRoot, { ...value.io, error: value.error }), feed(value.input)]).then(([code]) => code);
