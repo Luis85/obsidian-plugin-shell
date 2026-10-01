@@ -60,6 +60,8 @@ import { helpText as relocatedHelpText } from '../../bin/presentation/terminal/t
 import * as legacyTerminalHelp from '../../scripts/framework/terminal-help.ts';
 import { setupDocumentation as relocatedSetupDocumentation } from '../../bin/presentation/terminal/docs-setup.ts';
 import * as legacyDocsSetup from '../../scripts/framework/docs-setup.ts';
+import { docsParserFiles as relocatedDocsParserFiles } from '../../bin/adapters/framework/docs-vendor.ts';
+import * as legacyDocsVendor from '../../scripts/framework/docs-vendor.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1073,4 +1075,34 @@ test('relocated documentation setup preserves decline, cancel and hash-bound app
   }, async () => yes.shift(), () => {});
   assert.equal(outcome, applied);
   assert.deepEqual(calls[1].options, { apply: 'abc123', yes: true });
+});
+
+
+test('relocated documentation parser packaging preserves exact pin and allowlist semantics', async () => {
+  assert.equal(legacyDocsVendor.docsParserFiles, relocatedDocsParserFiles);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-docs-vendor-')));
+  try {
+    await writeFile(join(root, 'package.json'), JSON.stringify({ dependencies: { yaml: '2.9.1' } }));
+    await mkdir(join(root, 'node_modules/yaml/dist'), { recursive: true });
+    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.1' }));
+    await writeFile(join(root, 'node_modules/yaml/LICENSE'), 'license');
+    await writeFile(join(root, 'node_modules/yaml/dist/index.js'), 'export const yaml = true;\n');
+    await writeFile(join(root, 'node_modules/yaml/dist/schema.json'), '{}');
+    await writeFile(join(root, 'node_modules/yaml/dist/readme.md'), 'not packaged');
+
+    const files = await relocatedDocsParserFiles(root);
+    const paths = files.map(file => file.path).sort();
+    assert.deepEqual(paths, [
+      '.framework/compiled/node_modules/yaml/LICENSE',
+      '.framework/compiled/node_modules/yaml/dist/index.js',
+      '.framework/compiled/node_modules/yaml/dist/schema.json',
+      '.framework/compiled/node_modules/yaml/package.json',
+    ]);
+    assert.equal(files.find(file => file.path.endsWith('/LICENSE')).bytes.toString('utf8'), 'license');
+
+    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.0' }));
+    await assert.rejects(relocatedDocsParserFiles(root), error => error.code === 'DOCS_PARSER_VERSION');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
