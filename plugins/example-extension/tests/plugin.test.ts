@@ -215,3 +215,54 @@ void test('plugin event bus bounds recursive dispatch without crashing the invoc
   assert.ok(errors.includes('WORKBENCH_PLUGIN_EVENT_RECURSION'));
   runtime.dispose();
 });
+
+
+void test('plugin template catalog exposes merged discovery and undoable instantiation', async () => {
+  const templatePlugin = {
+    ...enabled,
+    manifest: { ...enabled.manifest, id: 'template-extension' },
+    cli: [],
+    tui: [],
+    frameworks: [],
+    starters: [],
+    componentTemplates: [{
+      schemaVersion: 1,
+      id: 'atom.extension-chip',
+      name: 'Extension Chip',
+      version: '1.0.0',
+      templateType: 'component',
+      atomicLevel: 'atom',
+      category: 'Data display',
+      description: 'Plugin-contributed compact status chip.',
+      tags: ['plugin', 'chip'],
+      recommendedFor: ['webapp'],
+      useWhen: ['An extension needs compact status.'],
+      avoidWhen: ['Plain text is sufficient.'],
+      capabilities: ['status'],
+      states: ['default', 'disabled'],
+      props: [],
+      events: [],
+      children: [],
+      slots: [],
+      design: { kind: 'catalog', entryId: 'u-badge' },
+      accessibility: {
+        notes: 'Expose readable text and sufficient contrast.',
+        keyboard: ['No keyboard interaction is required for a passive chip.'],
+        aria: ['Use visible text as the accessible name.'],
+      },
+    }],
+  } satisfies WorkbenchPluginObject;
+  const input = Readable.from([]);
+  const runtime = await createPluginRuntime({
+    root: process.cwd(), frameworkRoot: process.cwd(), input, registry: [templatePlugin],
+  });
+  const all = await runtime.commandContext.templates.list();
+  assert.ok(all.some(template => template.id === 'atom.button'));
+  assert.equal((await runtime.commandContext.templates.get('atom.extension-chip'))?.name, 'Extension Chip');
+  const workspace = new Workspace(newDocument('Template extension'), null);
+  const added = await runtime.commandContext.templates.instantiate(workspace, 'atom.extension-chip', 'Status');
+  assert.equal(added.kind, 'component');
+  assert.ok(workspace.document.design.library.some(item => item.templateId === 'atom.extension-chip'));
+  assert.equal(workspace.undo(), true);
+  runtime.dispose();
+});

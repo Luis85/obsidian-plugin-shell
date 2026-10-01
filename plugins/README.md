@@ -37,4 +37,4 @@ See [Workbench plugin development](../docs/development/WORKBENCH-PLUGINS.md). Ge
 
 ## Component templates
 
-Plugins may contribute validated `componentTemplates` and can read the merged baseline/project/plugin catalog through `context.templates.list()` and `context.templates.get(id)`. Template contributions remain inert JSON; they do not execute plugin code when listed, documented or instantiated.
+Plugins may contribute validated `componentTemplates` and can read the merged baseline/project/plugin catalog through `context.templates.list()` and `context.templates.get(id)`, then instantiate through the same validated catalog with `context.templates.instantiate(workspace, id, name)`. Template contributions remain inert JSON; they do not execute plugin code when listed, documented or instantiated.

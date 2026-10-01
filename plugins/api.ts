@@ -34,6 +34,7 @@ export interface PluginEventBus {
 export interface ComponentTemplateCatalogApi {
   list(): Promise<readonly ComponentTemplate[]>;
   get(id: string): Promise<ComponentTemplate | undefined>;
+  instantiate(workspace: Workspace, id: string, name?: string): Promise<{ kind: 'page' | 'component'; id: string; templateId: string }>;
 }
 export interface PluginCommandContext {
   readonly root: string;
