@@ -72,6 +72,8 @@ import { airshipEnvironment as relocatedAirshipEnvironment, airshipOperation as 
 import * as legacyAirship from '../../scripts/framework/airship.ts';
 import { buildClickdummy as relocatedBuildClickdummy } from '../../bin/adapters/framework/clickdummy.ts';
 import * as legacyClickdummy from '../../scripts/framework/clickdummy.ts';
+import { docsRead as relocatedDocsRead, docsPlan as relocatedDocsPlan } from '../../bin/adapters/framework/docs.ts';
+import * as legacyDocs from '../../scripts/framework/docs.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1478,4 +1480,103 @@ test('relocated clickdummy build preserves fixed paths, reviewed execution and r
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+
+test('relocated documentation adapter preserves schema, read and plan command semantics', async () => {
+  assert.equal(legacyDocs.docsRead, relocatedDocsRead);
+  assert.equal(legacyDocs.docsPlan, relocatedDocsPlan);
+  const context = { root: frameworkRoot, frameworkRoot };
+
+  const schema = await relocatedDocsRead(
+    { command: 'docs schema', args: [], options: {} },
+    context,
+    {
+      documentationStatus: async () => { throw new Error('schema must not load documentation status'); },
+      recoverDocuments: async () => { throw new Error('schema must not load recovery'); },
+    },
+  );
+  assert.equal(schema.status, 'ok');
+  assert.equal(schema.data.doc_schema, 1);
+  assert.ok(schema.data.types.includes('page'));
+  assert.ok(schema.data.required.includes('title'));
+
+  const calls = [];
+  const recovered = await relocatedDocsRead(
+    { command: 'docs recover', args: [], options: { yes: true, apply: 'abc' } },
+    context,
+    {
+      recoverDocuments: async (root, apply, hash) => {
+        calls.push(['recover', root, apply, hash]);
+        return { data: { recovery: 'ready' }, status: 'planned' };
+      },
+    },
+  );
+  assert.equal(recovered.status, 'planned');
+  assert.deepEqual(calls[0], ['recover', frameworkRoot, true, 'abc']);
+
+  const dryRecovery = await relocatedDocsRead(
+    { command: 'docs recover', args: [], options: { yes: true, 'dry-run': true } },
+    context,
+    {
+      recoverDocuments: async (root, apply, hash) => {
+        calls.push(['recover-dry', root, apply, hash]);
+        return { data: {}, status: 'planned' };
+      },
+    },
+  );
+  assert.equal(dryRecovery.status, 'planned');
+  assert.equal(calls.at(-1)[2], false);
+
+  const blocked = await relocatedDocsRead(
+    { command: 'docs validate', args: ['docs/application'], options: {} },
+    context,
+    {
+      documentationStatus: async (root, args, validate) => {
+        calls.push(['status', root, args, validate]);
+        return { conflicts: [], missing: ['page:one'] };
+      },
+    },
+  );
+  assert.equal(blocked.status, 'blocked');
+  assert.deepEqual(calls.at(-1), ['status', frameworkRoot, ['docs/application'], true]);
+
+  const status = await relocatedDocsRead(
+    { command: 'docs status', args: [], options: {} },
+    context,
+    { documentationStatus: async () => ({ conflicts: [], missing: [] }) },
+  );
+  assert.equal(status.status, 'ok');
+
+  const planned = { plan: 'docs' };
+  const exportPlan = await relocatedDocsPlan(
+    { command: 'docs export', args: ['page-one'], options: { out: 'specs', resolutions: 'choices.json' } },
+    context,
+    {
+      documentationPlan: async (root, args, mode, options) => {
+        calls.push(['plan', root, args, mode, options]);
+        return planned;
+      },
+    },
+  );
+  assert.equal(exportPlan, planned);
+  assert.deepEqual(calls.at(-1), [
+    'plan',
+    frameworkRoot,
+    ['page-one'],
+    'export',
+    { out: 'specs', resolutions: 'choices.json' },
+  ]);
+
+  await relocatedDocsPlan(
+    { command: 'docs import', args: [], options: {} },
+    context,
+    {
+      documentationPlan: async (root, args, mode, options) => {
+        calls.push(['import-plan', root, args, mode, options]);
+        return planned;
+      },
+    },
+  );
+  assert.equal(calls.at(-1)[3], 'import');
 });

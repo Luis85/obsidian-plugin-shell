@@ -6,7 +6,7 @@ import { buildClickdummy } from './clickdummy.ts';
 import { checkOperation } from '../../../scripts/framework/check.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
-import { docsRead } from '../../../scripts/framework/docs.ts';
+import { docsRead } from './docs.ts';
 import { fixtureOperation } from '../../../scripts/framework/fixtures.ts';
 import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
