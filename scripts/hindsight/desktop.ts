@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve, relative } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { digest, object, requireThat, type Identity, type JsonObject } from './policy.ts';
-import { launcherEntry, launcherPlan, stageLauncher, type LauncherPlan } from './launcher.ts';
+import { launcherPlan, stageLauncher, type LauncherPlan } from './launcher.ts';
 import { readText, readConfig, saveText, run, type Paths } from './io.ts';
 const CLIENTS = ['claude-code', 'codex', 'claude-desktop'] as const;
 export type DesktopClient = typeof CLIENTS[number];
@@ -17,7 +17,7 @@ function configPath(p: Paths, client: DesktopClient, platform = process.platform
   return platform === 'darwin' ? join(p.home, 'Library/Application Support/Claude/claude_desktop_config.json') : join(process.env.APPDATA || join(p.home, 'AppData/Roaming'), 'Claude/claude_desktop_config.json');
 }
 export function mcpEntry(repo: Identity, client: DesktopClient, p: Paths): JsonObject {
-  const script = join(launcherPlan(p).directory, launcherEntry);
+  const script = join(launcherPlan(p).directory, 'cli.ts');
   const agent = client === 'codex' ? 'codex' : 'claude-code';
   return { command: process.execPath, args: ['--experimental-strip-types', script, 'mcp', '--agent', agent, ...(client === 'claude-desktop' ? ['--root', repo.root] : [])] };
 }
@@ -35,7 +35,7 @@ function owned(value: unknown, p: Paths, expected: JsonObject): boolean {
   if ([5, 7].includes(args.length) && args[0] === '--experimental-strip-types' && typeof args[1] === 'string'
       && args[2] === 'mcp' && args[3] === '--agent' && ['claude-code', 'codex'].includes(String(args[4]))) {
     const path = relative(join(p.state, 'launchers'), resolve(args[1])).replaceAll('\\', '/');
-    if (/^[a-f0-9]{64}\/cli\.ts$/.test(path) && (args.length === 5 || (args[5] === '--root' && typeof args[6] === 'string'))) return true;
+    if (/^[a-f0-9]{64}\/hindsight\/cli\.ts$/.test(path) && (args.length === 5 || (args[5] === '--root' && typeof args[6] === 'string'))) return true;
   }
   return args.length === 1 && [join(dirname(p.installer), 'mcp-server.js'), join(p.home, '.hindsight/coding-agents/dist/mcp-server.js')].includes(String(args[0]));
 }

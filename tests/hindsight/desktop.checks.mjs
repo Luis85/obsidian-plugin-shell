@@ -153,20 +153,21 @@ test('shell memory and help memory work without framework dependencies, Git or P
 function launcherFixture(f) {
   const source = join(f.root, 'tooling'); mkdirSync(source);
   for (const file of launcherPlan(f.p).files.filter(file => file.name !== 'package.json')) {
-    mkdirSync(dirname(join(source, file.name)), { recursive: true }); writeFileSync(join(source, file.name), '// reviewed fixture\n');
+    const path = join(source, file.name); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '// reviewed fixture\n');
   }
   return source;
 }
 test('launcher plan is pure and staged snapshots are reusable without checkout paths in registration', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source);
   assert.deepEqual(readdirSync(f.home), []); stageLauncher(f.p, plan);
-  assert.equal(readFileSync(join(plan.directory, 'hindsight/cli.ts'), 'utf8'), '// reviewed fixture\n');
-  stageLauncher(f.p, plan); assert.equal(readdirSync(dirname(plan.directory)).length, 1);
+  assert.equal(readFileSync(join(plan.directory, 'cli.ts'), 'utf8'), '// reviewed fixture\n');
+  assert.equal(readFileSync(join(plan.directory, '../shared/hash.ts'), 'utf8'), '// reviewed fixture\n');
+  stageLauncher(f.p, plan); assert.deepEqual(readdirSync(dirname(plan.directory)).sort(), ['companion', 'hindsight', 'shared']);
   const entry = mcpEntry(f.repo, 'claude-code', f.p); assert.ok(entry.args[1].startsWith(join(f.state, 'launchers')));
 });
 test('changed launcher source invalidates its plan before creating a snapshot', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source);
-  writeFileSync(join(source, 'hindsight/cli.ts'), '// changed\n'); fails(() => stageLauncher(f.p, plan), 'PLAN_CHANGED');
+  writeFileSync(join(source, 'cli.ts'), '// changed\n'); fails(() => stageLauncher(f.p, plan), 'PLAN_CHANGED');
   assert.equal(existsSync(plan.directory), false); assert.deepEqual(readdirSync(f.home), []);
 });
 test('the staged launcher is self-contained: every relative import resolves to a staged file', t => {
@@ -179,7 +180,7 @@ test('the staged launcher is self-contained: every relative import resolves to a
 });
 test('modified existing snapshot is preserved and rejected instead of silently overwritten', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source); stageLauncher(f.p, plan);
-  const file = join(plan.directory, 'hindsight/cli.ts'); writeFileSync(file, '// local edit\n');
+  const file = join(plan.directory, 'cli.ts'); writeFileSync(file, '// local edit\n');
   fails(() => stageLauncher(f.p, plan), 'LAUNCHER_CHANGED'); assert.equal(readFileSync(file, 'utf8'), '// local edit\n');
 });
 test('MCP discovery rejects invalid UTF-8 instead of accepting replacement characters', async t => {
