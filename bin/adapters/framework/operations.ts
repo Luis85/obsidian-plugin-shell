@@ -7,7 +7,7 @@ import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
 import { docsRead } from '../../../scripts/framework/docs.ts';
 import { fixtureOperation } from '../../../scripts/framework/fixtures.ts';
 import { commandHelp, helpIndex } from '../../../scripts/framework/help-text.ts';
-import { operationSchemas } from '../../../scripts/framework/schemas.ts';
+import { operationSchemas } from './schema.ts';
 import { setupProgress } from '../../../scripts/framework/setup-progress.ts';
 import { starterListing, completeStarterProject } from '../../../scripts/framework/starter-project.ts';
 import { storybookOperation } from '../../../scripts/framework/storybook.ts';

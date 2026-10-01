@@ -20,6 +20,7 @@ import { executeOperation as frameworkOperation } from '../../bin/adapters/frame
 import { descriptor as frameworkDescriptor, parameterKinds as frameworkParameterKinds, parseCliArguments as parseFrameworkArguments } from '../../bin/adapters/framework/catalog.ts';
 import { suggestions as frameworkSuggestions, didYouMean as frameworkDidYouMean } from '../../bin/adapters/framework/suggest.ts';
 import { prototypeCommands } from '../../bin/adapters/framework/prototype-catalog.ts';
+import { operationSchemas } from '../../bin/adapters/framework/schema.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -446,4 +447,19 @@ test('relocated parser support preserves prototype catalog and typo suggestions'
   assert.deepEqual(frameworkSuggestions('plan', ['plan inspect', 'plan apply', 'status']), ['plan apply', 'plan inspect']);
   assert.equal(frameworkDidYouMean(['status']), ' Did you mean status?');
   assert.equal(frameworkDidYouMean([], value => `"${value}"`), '');
+});
+
+
+test('relocated operation schema covers every framework command and canonical result envelope', () => {
+  const schema = operationSchemas();
+  assert.equal(schema.protocolVersion, 1);
+  assert.equal(schema.request.$schema, 'https://json-schema.org/draft/2020-12/schema');
+  assert.ok(schema.request.oneOf.length > 50);
+  const commands = new Set(schema.request.oneOf.map(entry => entry.properties.command.const));
+  for (const command of ['help', 'setup', 'prototypes generate', 'build', 'release operate']) assert.ok(commands.has(command), command);
+  const setup = schema.request.oneOf.find(entry => entry.properties.command.const === 'setup');
+  assert.equal(setup.properties.options.properties.json.const, true);
+  assert.equal(setup.properties.options.properties.timeout.pattern, '^[0-9]+$');
+  assert.deepEqual(schema.result.properties.status.enum, ['ok', 'planned', 'applied', 'unchanged', 'blocked', 'cancelled', 'failed']);
+  assert.deepEqual(schema.result.properties.diagnostics.items.required, ['code', 'message']);
 });
