@@ -41,7 +41,7 @@ concurrency:
 jobs:
   source:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -68,6 +68,10 @@ jobs:
               records.append({'path': str(path), 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)})
           print(json.dumps({'status': 'passed', 'scope': 'Python syntax only; no execution or JS complexity claim', 'files': records}))
           PYTHON
+      - name: Install exact locked dependencies for the schema 6 contract bundle
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
       - name: Check exact offline concept assembly
         run: python3 scripts/concepts/build-companion.py --check
       - name: Exercise assembly, inventory and tamper rejection
