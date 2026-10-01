@@ -1,5 +1,5 @@
 import { setupSource } from './setup-source.ts';
-import { prepareHandout } from '../../../scripts/framework/handout-workspace.ts';
+import { prepareHandout } from './handout-workspace.ts';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve } from 'node:path';
