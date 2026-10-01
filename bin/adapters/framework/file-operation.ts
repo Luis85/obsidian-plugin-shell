@@ -1,5 +1,5 @@
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
-import { applyOperation, loadPlan, planOperation, saveOperationPlan } from '../../../scripts/framework/planning.ts';
+import { applyOperation, loadPlan, planOperation, saveOperationPlan } from './planning.ts';
 
 export async function fileOperation(request: Request, context: Context): Promise<Result> {
   const stored = request.command.startsWith('plan ');

@@ -165,7 +165,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D59:** The data-only 20-section/69-question handout catalog moved to `bin/adapters/framework/handout-questions.ts`; the former framework path is compatibility-only. Maker coverage locks catalog identity, unique stable IDs and the existing 49-required/20-optional review split before relocating validation logic.
 - **D60:** Handout snapshot/render/parse/readiness/refresh policy moved to `bin/adapters/framework/handout-model.ts`; it consumes the relocated question catalog locally and the former framework path is compatibility-only. Maker coverage carries the established readiness, structural-corruption, source-staleness, approval, showcase, escaping and refresh regression matrix.
 - **D61:** Handout filesystem/source collection and create/refresh/inspect preparation moved to `bin/adapters/framework/handout-workspace.ts`; change planning and the handout command adapter consume it locally and the former framework path is compatibility-only. Maker coverage locks deterministic read-only preparation, human-owned preservation, path/settings/PRD overrides, virtual configuration fingerprints, staleness, symlink/input bounds and BOM semantics.
-- **Remaining D62–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D62:** The central reviewed-plan orchestrator moved to `bin/adapters/framework/planning.ts`; file-operation consumes it locally and the former framework path is compatibility-only. Already-relocated docs/prototypes/handout/changes/generation/concepts/styles services are local while starter, kit-upgrade and maker engines remain explicit compatibility dependencies. Maker coverage locks plan hashing, stale approval, save/load replay protection, setup/vault/handout/style routing and cancellation.
+- **Remaining D63–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
