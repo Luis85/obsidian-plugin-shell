@@ -19,10 +19,10 @@
     "webapp"
   ],
   "useWhen": [
-    "The application needs this common UI pattern."
+    "Users need to compare a small set of categorical values at a glance."
   ],
   "avoidWhen": [
-    "A simpler native control already communicates the interaction."
+    "Exact tabular comparison is more important than visual magnitude, or the data is primarily time-series."
   ],
   "capabilities": [
     "categorical-comparison",
@@ -37,17 +37,16 @@
   "children": [],
   "slots": [],
   "design": {
-    "kind": "composition",
-    "tag": "section",
-    "layout": "stack"
+    "kind": "recipe",
+    "recipeId": "recipe-bar-chart"
   },
   "accessibility": {
-    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "notes": "Keep category names and numeric values visible in text so the comparison does not rely on bar length or color alone.",
     "keyboard": [
-      "All interactive controls remain keyboard reachable."
+      "The baseline chart is read-only; interactive drill-down actions must be keyboard reachable when added."
     ],
     "aria": [
-      "Prefer native semantics and explicit accessible names."
+      "Expose each category and value as readable text and preserve the chart title as its accessible context."
     ]
   }
 }

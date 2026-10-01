@@ -81,7 +81,12 @@ test('component-template validation accepts the complete contract and rejects ma
     events: [{ name: 'activate', payloadType: 'void', description: 'Action requested.' }],
   });
   assert.equal(valid.id, 'atom.fixture');
-  assert.equal(componentTemplateSchema().title, 'Workbench component template');
+  const schema = componentTemplateSchema();
+  assert.equal(schema.title, 'Workbench component template');
+  assert.equal(schema.$id, 'urn:workbench:component-template:1');
+  assert.equal(schema.properties.props.items.additionalProperties, false);
+  assert.equal(schema.properties.design.oneOf.length, 4);
+  assert.equal(schema.properties.accessibility.additionalProperties, false);
 
   const failures = [
     { ...baseTemplate(), unknown: true },
@@ -222,6 +227,10 @@ test('instantiation covers catalog, recipe, composition and both page shapes on 
   assert.equal(composition.kind, 'component');
   const recipe = instantiateComponentTemplate(document, templates, 'molecule.empty-state');
   assert.equal(recipe.kind, 'component');
+  const barChart = instantiateComponentTemplate(document, templates, 'organism.bar-chart');
+  assert.equal(barChart.kind, 'component');
+  const barDefinition = document.design.visualDesigns.components.find(item => item.id === barChart.id);
+  assert.ok(JSON.stringify(barDefinition?.template).includes('"entryId":"u-progress"'));
   const pageWithSlots = instantiateComponentTemplate(document, templates, 'page.dashboard', 'Overview');
   assert.equal(pageWithSlots.kind, 'page');
   const recipePage = instantiateComponentTemplate(document, templates, 'page.welcome');
