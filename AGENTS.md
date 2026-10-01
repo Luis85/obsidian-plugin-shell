@@ -78,10 +78,9 @@ assembles the component tree. `check:presentation` enforces this concern boundar
 
 Companion project JSON is **schema 6 only**. Reject schema 1–5 with a clear
 diagnostic; never add migration or compatibility readers (the retired formats'
-history is in Git). The checked-in `docs/concepts/companion/index.html`,
-`companion-project.json` and their assembly inputs are only the v5 build base of
-`npm run companion:build` until that build is v6-native: not a supported format or
-a general test fixture. Use `configs/starters` documents instead.
+history is in Git). `docs/concepts/companion/index.html` is the generated schema 6
+build base of `npm run companion:build`; it embeds no project or starter data.
+Use `configs/starters` documents as project inputs and test fixtures.
 
 Validate unknown stored data, serialize preference writes, preserve corrupt/future data, and keep preview free of writes. Never overwrite conflicting notes, retry uncertain writes blindly, or turn failed opening into another create operation.
 
