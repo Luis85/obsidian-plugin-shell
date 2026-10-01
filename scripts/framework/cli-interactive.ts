@@ -4,7 +4,7 @@ import { descriptor } from './catalog.ts';
 import { executeOperation } from './operations.ts';
 import type { Context, Request, Result } from './contracts.ts';
 import { parseConfirmation } from '../shared/confirmation.ts';
-import { renderCliResult } from './cli-output.ts';
+import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
 
 async function confirm(message: string, signal?: AbortSignal): Promise<boolean> {
   return parseConfirmation(await ask(stdin, stderr, message + ' [y/N] ', signal)) === true;

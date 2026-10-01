@@ -9,7 +9,7 @@ import { projectRoot, exists } from './files.ts';
 import { failure, type Context } from './contracts.ts';
 import { invocationDirectory } from './starter-project.ts';
 import { guidedStarter, starterText } from './starter-terminal.ts';
-import { renderCliResult } from './cli-output.ts';
+import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
 import { interactiveRun } from './cli-interactive.ts';
 export async function main(argv: string[], frameworkRoot: string): Promise<number> {
   // Preserve the published workspace compiler's raw JSON protocol and --help entry.

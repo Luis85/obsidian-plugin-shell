@@ -12,6 +12,7 @@ import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data
 import { result as operationResult } from '../../scripts/contracts/result.ts';
 import { ask, readInput } from '../../scripts/shared/input.ts';
 import { routeArguments } from '../../bin/adapters/router.ts';
+import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -138,4 +139,35 @@ test('single bin router preserves launcher surface ownership and aliases', () =>
     [['help', 'memory', '--json'], 'memory', ['--help', '--json']],
   ];
   for (const [argv, surface, args] of cases) assert.deepEqual(routeArguments(argv), { surface, args }, argv.join(' '));
+});
+
+
+test('relocated framework CLI output preserves machine and human result channels', () => {
+  const capture = () => {
+    let text = '';
+    return {
+      stream: { isTTY: false, write(value) { text += String(value); return true; } },
+      read: () => text,
+    };
+  };
+  const machineOut = capture(), machineErr = capture();
+  const machine = operationResult('status', { ready: true });
+  renderCliResult(machine, true, { output: machineOut.stream, error: machineErr.stream, env: {} });
+  assert.equal(machineOut.read(), JSON.stringify(machine) + '\n');
+  assert.equal(machineErr.read(), '');
+
+  const humanOut = capture(), humanErr = capture();
+  const failed = {
+    ...operationResult('inspect', { reason: 'example' }, 'failed'),
+    diagnostics: [{ code: 'EXAMPLE_FAILURE', message: 'Example failed.', next: 'status' }],
+  };
+  renderCliResult(failed, false, { output: humanOut.stream, error: humanErr.stream, env: {} });
+  assert.match(humanOut.read(), /^inspect: failed/m);
+  assert.match(humanErr.read(), /EXAMPLE_FAILURE: Example failed\./);
+  assert.match(humanErr.read(), /Next: node bin\/app status/);
+
+  const newOut = capture(), newErr = capture();
+  renderCliResult(operationResult('new', null, 'cancelled'), false, { output: newOut.stream, error: newErr.stream, env: {} });
+  assert.equal(newOut.read(), 'new: cancelled; nothing was written.\n');
+  assert.equal(newErr.read(), '');
 });

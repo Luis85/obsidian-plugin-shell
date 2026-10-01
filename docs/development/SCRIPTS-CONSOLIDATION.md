@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D3 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D4 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -102,7 +102,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D1:** Command-surface routing and legacy aliases moved from `app.mjs` into the typed `bin/adapters/router.ts`. `app.mjs` now only selects compiled/source `bin/app` (or re-execs Node with type stripping); `bin/app.ts` delegates framework and memory surfaces to their existing owners. The routing table has direct maker coverage.
 - **D2:** The framework CLI composition root is split before relocation: result rendering/diagnostics live in `cli-output.ts`, reviewed interactive plan application lives in `cli-interactive.ts`, and `cli.ts` is reduced to root discovery, setup/new guidance and command orchestration. Behavior remains behind the existing framework CLI tests.
 - **D3:** `operations.ts` is split by effect before relocation: reviewed file-plan execution, trusted project-process execution and read-only inspection now live in `operation-files.ts`, `operation-process.ts` and `operation-read.ts`. The public dispatcher retains command classification, discovery, special adapters and release authorization.
-- **Remaining D4–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D4:** Framework CLI result rendering moved into `bin/presentation/terminal/cli-output.ts`. Framework orchestration imports the relocated adapter directly; the old path is a compatibility re-export. Output streams are injectable so maker production coverage verifies JSON-channel isolation, human diagnostics and legacy `new` cancellation rendering without weakening thresholds.
+- **Remaining D5–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
