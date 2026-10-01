@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, realpath, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { obsidianRead } from '../../scripts/framework/obsidian-cli.ts';
+import { obsidianRead } from '../../bin/adapters/framework/obsidian-cli.ts';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 
 async function fixture(t) {
