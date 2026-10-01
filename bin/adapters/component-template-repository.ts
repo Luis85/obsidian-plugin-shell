@@ -64,6 +64,14 @@ async function baselineFolder(frameworkRoot: string): Promise<{ path: string; di
   return null;
 }
 
+function uniqueSource(entries: readonly LoadedComponentTemplate[], label: string): void {
+  const ids = new Set<string>();
+  for (const entry of entries) {
+    requireThat(!ids.has(entry.template.id), 'TEMPLATE_DUPLICATE', label + ' defines ' + entry.template.id + ' more than once.');
+    ids.add(entry.template.id);
+  }
+}
+
 export async function loadComponentTemplates(
   root: string,
   frameworkRoot: string,
@@ -71,17 +79,20 @@ export async function loadComponentTemplates(
 ): Promise<LoadedComponentTemplate[]> {
   const baseline = await baselineFolder(frameworkRoot);
   const project = resolve(root, TEMPLATE_FOLDER);
-  const sources: LoadedComponentTemplate[] = [];
-  if (baseline) sources.push(...await scanFolder(baseline.path, baseline.display, 'baseline'));
-  if ((!baseline || resolve(project) !== resolve(baseline.path)) && await exists(project)) {
-    sources.push(...await scanFolder(project, TEMPLATE_FOLDER, 'project'));
-  }
+  const baselineEntries = baseline ? await scanFolder(baseline.path, baseline.display, 'baseline') : [];
+  const projectEntries = (!baseline || resolve(project) !== resolve(baseline.path)) && await exists(project)
+    ? await scanFolder(project, TEMPLATE_FOLDER, 'project') : [];
+  uniqueSource(baselineEntries, 'Framework baseline');
+  uniqueSource(projectEntries, 'Project template library');
+  const merged = new Map(baselineEntries.map(entry => [entry.template.id, entry]));
+  for (const entry of projectEntries) merged.set(entry.template.id, entry);
   for (const raw of contributed) {
     const template = validateComponentTemplate(structuredClone(raw));
+    requireThat(!merged.has(template.id), 'TEMPLATE_PLUGIN_COLLISION', 'Plugin template collides with installed template ' + template.id + '.');
     const bytes = Buffer.from(JSON.stringify(template, null, 2) + '\n');
-    sources.push({ template, file: 'plugin:' + template.id, sha256: hash(bytes), origin: 'plugin' });
+    merged.set(template.id, { template, file: 'plugin:' + template.id, sha256: hash(bytes), origin: 'plugin' });
   }
-  sources.sort((a, b) => a.template.id.localeCompare(b.template.id, 'en'));
+  const sources = [...merged.values()].sort((a, b) => a.template.id.localeCompare(b.template.id, 'en'));
   validateComponentTemplateCatalog(sources.map(entry => entry.template));
   return sources;
 }
