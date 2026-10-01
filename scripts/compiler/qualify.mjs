@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
 import { createHash } from 'node:crypto';
-import { planProject, applyProject } from '../companion/compiler/plan.ts';
+import { planProject, applyProject } from './adapters/project-plan.ts';
 import { compileProject, loadTemplateSnapshot } from './index.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const npm=process.env.QUALIFIED_NPM;
