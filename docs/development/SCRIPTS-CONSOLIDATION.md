@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D36 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D37 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -137,7 +137,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D34:** The relocated framework dispatcher now consumes `bin/adapters/framework/help-text.ts` directly. Help/capabilities no longer bounce through the compatibility path, while the existing parity and rendering regressions remain the behavior guardrails.
 - **D35:** Version discovery in `bin/adapters/framework/read-operation.ts` now uses the relocated filesystem adapter directly; the last dynamic hop through `scripts/framework/files.ts` is removed without changing the command surface.
 - **D36:** Airship enable/disable file planning moved to `bin/adapters/framework/airship-plan.ts`. The former framework path is compatibility-only; maker coverage locks option overrides, enable/disable outputs, customized-config refusal and generation/intake ownership guards without installing or launching tooling.
-- **Remaining D37–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D37:** Airship status/install/doctor/start execution moved to `bin/adapters/framework/airship.ts`, and the dispatcher imports it locally. Process execution is injectable for contract tests only; maker coverage locks opt-in, environment scrubbing, pinned install verification, safe doctor/start arguments, config conflict and wrong-version refusal without network calls.
+- **Remaining D38–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

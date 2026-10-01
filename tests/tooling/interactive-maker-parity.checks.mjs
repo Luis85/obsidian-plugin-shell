@@ -68,6 +68,8 @@ import { storybookOperation as relocatedStorybookOperation } from '../../bin/ada
 import * as legacyStorybook from '../../scripts/framework/storybook.ts';
 import { airshipPlan as relocatedAirshipPlan } from '../../bin/adapters/framework/airship-plan.ts';
 import * as legacyAirshipPlan from '../../scripts/framework/airship-plan.ts';
+import { airshipEnvironment as relocatedAirshipEnvironment, airshipOperation as relocatedAirshipOperation } from '../../bin/adapters/framework/airship.ts';
+import * as legacyAirship from '../../scripts/framework/airship.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1291,6 +1293,107 @@ test('relocated Airship planning preserves reviewed enable/disable and ownership
     await assert.rejects(
       relocatedAirshipPlan({ command: 'airship enable', args: [], options: {} }, context),
       error => error.code === 'AIRSHIP_OWNERSHIP',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated Airship execution preserves opt-in, pinned install and safe launch policy', async () => {
+  assert.equal(legacyAirship.airshipEnvironment, relocatedAirshipEnvironment);
+  assert.equal(legacyAirship.airshipOperation, relocatedAirshipOperation);
+  assert.deepEqual(relocatedAirshipEnvironment({ AIRSHIP_TOKEN: 'secret', airship_extra: 'x', OTHER: 'keep' }), {
+    AIRSHIP_TOKEN: undefined, airship_extra: undefined,
+  });
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-airship-operation-')));
+  try {
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await mkdir(join(root, 'design'));
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+    const context = { root, frameworkRoot };
+
+    const status = await relocatedAirshipOperation({ command: 'airship status', args: [], options: {} }, context);
+    assert.equal(status.status, 'ok');
+    assert.equal(status.data.enabled, false);
+    assert.equal(status.data.installedVersion, null);
+
+    await assert.rejects(
+      relocatedAirshipOperation({ command: 'airship install', args: [], options: { yes: true } }, context),
+      error => error.code === 'AIRSHIP_DISABLED',
+    );
+
+    source.tooling = { ...(source.tooling ?? {}), airship: {
+      enabled: true, agent: 'codex', targetPort: 6200, port: 6201,
+    } };
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+
+    const planned = await relocatedAirshipOperation({ command: 'airship install', args: [], options: {} }, context);
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.requires, '--yes');
+    assert.equal(planned.data.execution, 'not-run');
+
+    const calls = [];
+    const executor = {
+      npm: async () => '/virtual/npm-cli.js',
+      run: async (ctx, entry, args, timeout, env) => {
+        calls.push({ ctx, entry, args, timeout, env });
+        if (args[0] === 'install') {
+          const pkg = join(root, '.airship-tooling/node_modules/@airshiplabs/cli/package.json');
+          await mkdir(join(root, '.airship-tooling/node_modules/@airshiplabs/cli'), { recursive: true });
+          await writeFile(pkg, JSON.stringify({ name: '@airshiplabs/cli', version: '0.3.0' }));
+        }
+        return { exitCode: 0, signal: null, truncated: false, stdout: '' };
+      },
+    };
+    const installed = await relocatedAirshipOperation(
+      { command: 'airship install', args: [], options: { yes: true, timeout: '12345' } }, context, executor,
+    );
+    assert.equal(installed.status, 'applied');
+    assert.equal(installed.data.installedVersion, '0.3.0');
+    assert.equal(calls[0].entry, '/virtual/npm-cli.js');
+    assert.equal(calls[0].timeout, 12345);
+    assert.deepEqual(calls[0].args.slice(0, 3), ['install', '--prefix', '.airship-tooling']);
+    assert.equal(calls[0].env.AIRSHIP_TOKEN, undefined);
+
+    const airshipConfig = {
+      target: 6200, port: 6201, host: '127.0.0.1', agent: 'codex',
+      mode: 'canvas', safe: true, commit: false, open: false,
+    };
+    await writeFile(join(root, 'airship.config.json'), JSON.stringify(airshipConfig));
+    const binary = join(root, '.airship-tooling/node_modules/@airshiplabs/cli/dist/index.js');
+    await mkdir(join(root, '.airship-tooling/node_modules/@airshiplabs/cli/dist'), { recursive: true });
+    await writeFile(binary, 'export {};\n');
+
+    const doctor = await relocatedAirshipOperation(
+      { command: 'airship doctor', args: [], options: { yes: true } }, context, executor,
+    );
+    assert.equal(doctor.status, 'ok');
+    assert.equal(calls.at(-1).entry, '.airship-tooling/node_modules/@airshiplabs/cli/dist/index.js');
+    assert.deepEqual(calls.at(-1).args, ['doctor', '--cwd', root, '--target', '6200', '--agent', 'codex']);
+
+    const start = await relocatedAirshipOperation(
+      { command: 'airship start', args: [], options: { yes: true, timeout: '2222' } }, context, executor,
+    );
+    assert.equal(start.status, 'ok');
+    assert.equal(calls.at(-1).timeout, 2222);
+    assert.deepEqual(calls.at(-1).args, [
+      '--cwd', root, '--target', '6200', '--port', '6201', '--host', '127.0.0.1',
+      '--agent', 'codex', '--safe', '--no-commit',
+    ]);
+
+    await writeFile(join(root, 'airship.config.json'), JSON.stringify({ ...airshipConfig, port: 9999 }));
+    await assert.rejects(
+      relocatedAirshipOperation({ command: 'airship doctor', args: [], options: { yes: true } }, context, executor),
+      error => error.code === 'AIRSHIP_CONFIG_CONFLICT',
+    );
+
+    await writeFile(join(root, '.airship-tooling/node_modules/@airshiplabs/cli/package.json'),
+      JSON.stringify({ name: '@airshiplabs/cli', version: '0.2.0' }));
+    await assert.rejects(
+      relocatedAirshipOperation({ command: 'airship doctor', args: [], options: { yes: true } }, context, executor),
+      error => error.code === 'AIRSHIP_NOT_INSTALLED',
     );
   } finally {
     await rm(root, { recursive: true, force: true });

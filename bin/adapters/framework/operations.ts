@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import { packStarterOperation, readStarterOperation } from '../../../scripts/starters/operations.ts';
 import { starterProcessOperation } from '../../../scripts/starters/processes.ts';
-import { airshipOperation } from '../../../scripts/framework/airship.ts';
+import { airshipOperation } from './airship.ts';
 import { buildClickdummy } from '../../../scripts/framework/clickdummy.ts';
 import { checkOperation } from '../../../scripts/framework/check.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
