@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D22 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D23 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -121,7 +121,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D20:** Project schema publication and read-only validation/migration moved to `bin/adapters/framework/project-contract.ts`. Read operations import it locally, the former framework path is compatibility-only, and maker coverage verifies current schema publication plus stdin validation with bounded digest/count output.
 - **D21:** Project model measurement moved to `bin/adapters/framework/project-measure.ts`. Read operations import it locally, the former framework path is compatibility-only, and maker coverage verifies dry-run behavior, sample-count refusal and a minimal local four-operation measurement without network or writes.
 - **D22:** Measurement statistics/timing moved to `bin/adapters/framework/measurement.ts`. Project measurement imports it locally, the former framework path is compatibility-only, and maker coverage locks summary math, warmup/sample accounting and synchronous-only execution.
-- **Remaining D23–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D23:** Support-report projection/collection moved to `bin/adapters/framework/support-report.ts`. Both the framework CLI fallback and read dispatcher import it locally, the former framework path is compatibility-only, and maker coverage verifies diagnostic allowlisting, privacy non-disclosure and blocked/cancelled unavailable outcomes.
+- **Remaining D24–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

@@ -40,6 +40,8 @@ import { measureProject as relocatedMeasureProject } from '../../bin/adapters/fr
 import * as legacyProjectMeasure from '../../scripts/framework/project-measure.ts';
 import { sampleSummary as relocatedSampleSummary, measureOperation as relocatedMeasureOperation } from '../../bin/adapters/framework/measurement.ts';
 import * as legacyMeasurement from '../../scripts/framework/measurement.ts';
+import { supportSnapshot as relocatedSupportSnapshot, supportReport as relocatedSupportReport, unavailableSupport as relocatedUnavailableSupport } from '../../bin/adapters/framework/support-report.ts';
+import * as legacySupportReport from '../../scripts/framework/support-report.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -729,4 +731,47 @@ test('relocated measurement helper preserves deterministic statistics and synchr
     relocatedMeasureOperation(() => Promise.resolve('async'), 3, undefined, () => clock++),
     error => error.code === 'MEASUREMENT_ASYNC',
   );
+});
+
+
+test('relocated support report preserves allowlist privacy and unavailable outcomes', async () => {
+  assert.equal(legacySupportReport.supportSnapshot, relocatedSupportSnapshot);
+  assert.equal(legacySupportReport.supportReport, relocatedSupportReport);
+  assert.equal(legacySupportReport.unavailableSupport, relocatedUnavailableSupport);
+
+  const observation = {
+    ...operationResult('doctor', {
+      generated: false,
+      imported: true,
+      dependencies: true,
+      designStale: null,
+      acceptanceObligations: 2,
+    }),
+    diagnostics: [
+      { code: 'CONFIG_MISSING', message: 'secret authored message' },
+      { code: 'UNLISTED_PRIVATE_CODE', message: '/private/path/should-not-leak' },
+    ],
+  };
+  const snapshot = relocatedSupportSnapshot(observation);
+  assert.deepEqual(snapshot.diagnosticCodes, ['CONFIG_MISSING', 'OTHER']);
+  assert.deepEqual(snapshot.observations, {
+    generated: false, imported: true, dependenciesPresent: true, designStale: null, acceptanceObligations: 2,
+  });
+  assert.deepEqual(snapshot.privacy, {
+    authoredContent: false, identities: false, paths: false, hashes: false, rawErrors: false, network: false,
+  });
+  const serialized = JSON.stringify(snapshot);
+  assert.equal(serialized.includes('secret authored message'), false);
+  assert.equal(serialized.includes('/private/path'), false);
+
+  assert.equal(relocatedUnavailableSupport(false).status, 'blocked');
+  assert.equal(relocatedUnavailableSupport(false).diagnostics[0].code, 'SUPPORT_UNAVAILABLE');
+  assert.equal(relocatedUnavailableSupport(true).status, 'cancelled');
+  assert.equal(relocatedUnavailableSupport(true).diagnostics[0].code, 'CANCELLED');
+
+  const controller = new AbortController();
+  controller.abort();
+  const cancelled = await relocatedSupportReport({ root: frameworkRoot, frameworkRoot, signal: controller.signal });
+  assert.equal(cancelled.status, 'cancelled');
+  assert.equal(cancelled.diagnostics[0].code, 'CANCELLED');
 });
