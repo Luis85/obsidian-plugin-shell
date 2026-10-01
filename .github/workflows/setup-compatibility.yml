@@ -32,8 +32,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     # Fresh setup runs every verify gate once. The integrated Windows tooling
     # suites alone approach 30 minutes; retain time for coverage and npm controls.
+    # Ubuntu now needs 26-30 minutes for the same gates, so it gets 45.
     # This is a job budget, not a test deadline or product performance threshold.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 30 }}
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 45 }}
     strategy:
       fail-fast: false
       matrix:
