@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { setupOptions, resumeOptions, setupHelp } from './setup/options.mjs';
 import { planIdentity } from './setup/identity.mjs';
+import { planLocalMcp } from './setup/mcp.mjs';
 import { readJournal } from './setup/journal.mjs';
 import { executeSetup, setupStages } from './setup/execute.mjs';
 import { projectInstallEnvironment } from './shared/npm-install.mjs';
@@ -31,17 +32,24 @@ async function setup() {
         const answer = await prompt.question(`${key} [${planned.identity[key] ?? 'optional owner/repo'}]: `);
         if (answer.trim()) options[key] = answer.trim();
       }
+      if (!options.explicitKeys.some(key => key === 'mcp' || key === 'no-mcp')) {
+        options.mcp = /^y(es)?$/i.test((await prompt.question('Enable project-local Workbench MCP for Claude Code and Codex? [y/N] ')).trim());
+      }
       options.identityRequested = ['id', 'name', 'description', 'author', 'repo', 'version'].some(key => options[key] !== undefined);
       planned = await planIdentity(root, options, previous);
     } finally { prompt.close(); }
   }
+  const agentMcp = await planLocalMcp(root, Boolean(options.mcp), existing?.agentMcp);
+  planned = { ...planned, agentMcp };
   const plan = { status: 'planned', identity: planned.identity, profile: options.profile,
     lifecycleHooks: { reviewedAllowlist: Object.entries(pkg.allowScripts).filter(([, allowed]) => allowed === true).map(([name]) => name),
       persistentPolicyPreserved: true, installation: 'npm ci may replace node_modules; registry/network access and reviewed dependency hooks are part of the selected install stage' },
     files: planned.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash })),
+    agentMcp: { enabled: agentMcp.enabled, server: agentMcp.server, transport: agentMcp.transport, clients: agentMcp.clients, files: agentMcp.files },
     migration: planned.migration ? { from: planned.migration.from, to: planned.migration.to, oldInstallationPreserved: true,
       files: planned.migration.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path: `.dev-vault/.obsidian/plugins/${path}`, status, beforeHash, afterHash })) } : null,
     stages: setupStages(options), exclusions: ['No personal vault, host install, global packages, PATH edits, Restricted Mode changes, enabling plugins, publishing, or dependency upgrades',
+      'MCP opt-in writes project-local client configuration only; Claude Code/Codex installation, authentication and project trust stay user-owned',
       'Only root package-lock identity metadata changes; resolved dependency entries are retained', 'Multi-file edits, dependency installation and caches are separate stages, not one globally atomic transaction'],
   };
   const progress = options.json ? stderr : stdout;
@@ -58,8 +66,9 @@ async function setup() {
   const handoff = { status: result.status, identity: result.identity, toolchain: result.toolchain, profile: options.profile,
     inputFingerprint: result.fingerprint, lockHash: result.lockHash,
     scope: { staticServiceArtifactChecks: options['defer-verify'] ? 'deferred: run npm run verify' : 'verified', servedBrowser: 'not-run', nativeHost: 'not-run', release: 'not-run' },
-    stages: result.stages, migration: result.migration, journal: '.template-state/setup.json',
+    stages: result.stages, migration: result.migration, agentMcp: result.agentMcp, journal: '.template-state/setup.json',
     vault: options.profile === 'native' ? resolve('.dev-vault') : null,
+    agentNext: result.agentMcp.enabled ? 'Restart or reopen Claude Code/Codex, trust the project configuration, then inspect the workbench MCP tools. Client authentication remains separate.' : null,
     next: options.profile === 'native' ? `Open the contained vault and deliberately enable ${planned.identity.name}. Old migrated installation remains preserved and disabled.` : 'Run npm run dev:ui. Browser/native/device/release qualification remains separately scoped.' };
   console.log(options.json ? JSON.stringify(handoff) : `Setup completed.\n${JSON.stringify(handoff, null, 2)}`);
 }
