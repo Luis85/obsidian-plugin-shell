@@ -70,6 +70,8 @@ import { airshipPlan as relocatedAirshipPlan } from '../../bin/adapters/framewor
 import * as legacyAirshipPlan from '../../scripts/framework/airship-plan.ts';
 import { airshipEnvironment as relocatedAirshipEnvironment, airshipOperation as relocatedAirshipOperation } from '../../bin/adapters/framework/airship.ts';
 import * as legacyAirship from '../../scripts/framework/airship.ts';
+import { buildClickdummy as relocatedBuildClickdummy } from '../../bin/adapters/framework/clickdummy.ts';
+import * as legacyClickdummy from '../../scripts/framework/clickdummy.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1394,6 +1396,84 @@ test('relocated Airship execution preserves opt-in, pinned install and safe laun
     await assert.rejects(
       relocatedAirshipOperation({ command: 'airship doctor', args: [], options: { yes: true } }, context, executor),
       error => error.code === 'AIRSHIP_NOT_INSTALLED',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated clickdummy build preserves fixed paths, reviewed execution and receipt checks', async () => {
+  assert.equal(legacyClickdummy.buildClickdummy, relocatedBuildClickdummy);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-clickdummy-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const calls = [];
+    const dependencies = {
+      exists: async path => { calls.push(['exists', path]); return true; },
+      inspectDesign: async (ctx, input) => {
+        calls.push(['inspect', ctx.root, input]);
+        return { model: { project: { name: 'Workbench demo' } } };
+      },
+      runNode: async (ctx, entry, args, timeout) => {
+        calls.push(['run', ctx.root, entry, args, timeout]);
+        return {
+          exitCode: 0,
+          signal: null,
+          truncated: false,
+          stdout: JSON.stringify({ status: 'built-not-browser-verified', output: 'clickdummy.html' }),
+        };
+      },
+    };
+
+    const planned = await relocatedBuildClickdummy(
+      { command: 'clickdummy build', args: [], options: { 'dry-run': true } },
+      context,
+      dependencies,
+    );
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.execution, 'not-run');
+    assert.deepEqual(calls, []);
+
+    const built = await relocatedBuildClickdummy(
+      { command: 'clickdummy build', args: [], options: { replace: true, timeout: '1234' } },
+      context,
+      dependencies,
+    );
+    assert.equal(built.status, 'ok');
+    assert.equal(built.data.acceptance, 'not-inferred');
+    assert.equal(built.data.receipt.status, 'built-not-browser-verified');
+    const run = calls.find(call => call[0] === 'run');
+    assert.equal(run[2], '.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs');
+    assert.equal(run[4], 1234);
+    assert.ok(run[3].includes('--replace'));
+    assert.ok(run[3].includes('Workbench demo'));
+
+    await assert.rejects(
+      relocatedBuildClickdummy(
+        { command: 'clickdummy build', args: [], options: {} },
+        context,
+        { ...dependencies, exists: async () => false },
+      ),
+      error => error.code === 'CLICKDUMMY_PROJECT_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedBuildClickdummy(
+        { command: 'clickdummy build', args: [], options: {} },
+        context,
+        { ...dependencies, runNode: async () => ({ exitCode: 0, signal: null, truncated: true, stdout: '' }) },
+      ),
+      error => error.code === 'CLICKDUMMY_OUTPUT_LIMIT',
+    );
+
+    await assert.rejects(
+      relocatedBuildClickdummy(
+        { command: 'clickdummy build', args: [], options: {} },
+        context,
+        { ...dependencies, runNode: async () => ({ exitCode: 0, signal: null, truncated: false, stdout: '{"status":"unexpected"}' }) },
+      ),
+      error => error.code === 'CLICKDUMMY_RECEIPT',
     );
   } finally {
     await rm(root, { recursive: true, force: true });

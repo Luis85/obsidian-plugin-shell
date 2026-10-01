@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D37a on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D38 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -139,7 +139,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D36:** Airship enable/disable file planning moved to `bin/adapters/framework/airship-plan.ts`. The former framework path is compatibility-only; maker coverage locks option overrides, enable/disable outputs, customized-config refusal and generation/intake ownership guards without installing or launching tooling.
 - **D37:** Airship status/install/doctor/start execution moved to `bin/adapters/framework/airship.ts`, and the dispatcher imports it locally. Process execution is injectable for contract tests only; maker coverage locks opt-in, environment scrubbing, pinned install verification, safe doctor/start arguments, config conflict and wrong-version refusal without network calls.
 - **D37a (CI repair):** The relocated Storybook option adapter now resolves the compiler contract from its actual repository location. Framework typecheck had failed across CI because the move retained the pre-relocation relative import depth; this repair changes only that type import.
-- **Remaining D38–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D38:** Clickdummy build orchestration moved to `bin/adapters/framework/clickdummy.ts`; the relocated dispatcher imports it locally and the former framework path is compatibility-only. Host dependencies are injectable for contract tests only, while maker coverage locks dry-run, generated-project refusal, fixed worker paths, replace/timeout forwarding, output-limit refusal and receipt validation without launching a compiler.
+- **Remaining D39–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
