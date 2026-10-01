@@ -10,7 +10,9 @@ export async function fixture() {
   await mkdir(join(root, 'scripts'), { recursive: true });
   for (const name of ['setup.mjs', 'setup', 'shared']) await cp(join(source, 'scripts', name), join(root, 'scripts', name), { recursive: true });
   await mkdir(join(root, 'scripts/agent'), { recursive: true });
-  await cp(join(source, 'scripts/agent/workbench-mcp.mjs'), join(root, 'scripts/agent/workbench-mcp.mjs'));
+  await cp(join(source, 'scripts/agent/mcp-config.mjs'), join(root, 'scripts/agent/mcp-config.mjs'));
+  await mkdir(join(root, 'bin'), { recursive: true });
+  await cp(join(source, 'bin/app'), join(root, 'bin/app'));
   const manifest = { id: 'original-plugin', name: 'Original Plugin', description: 'Fixture identity', author: 'Author', version: '1.0.0', minAppVersion: '1.13.7', isDesktopOnly: true };
   const pkg = { name: manifest.id, version: manifest.version, type: 'module', license: 'MIT', scripts: { setup: 'node scripts/setup.mjs' }, dependencies: { sample: '1.2.3' }, allowScripts: { 'sample@1.2.3': false } };
   const lock = { name: pkg.name, version: pkg.version, lockfileVersion: 3, packages: { '': { name: pkg.name, version: pkg.version, dependencies: pkg.dependencies, license: pkg.license },

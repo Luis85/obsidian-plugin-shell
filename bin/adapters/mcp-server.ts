@@ -39,7 +39,10 @@ export const workbenchMcpTools = [
 
 type RunResult = { exitCode: number; signal: string | null; stdout: string; stderr: string; timedOut: boolean; overflow: boolean; error?: string };
 export type McpRunner = (args: string[], timeoutMs: number) => Promise<RunResult>;
-type JsonRpc = { jsonrpc?: unknown; id?: unknown; method?: unknown; params?: any };
+type JsonRpc = { jsonrpc?: unknown; id?: unknown; method?: unknown; params?: unknown };
+function record(value: unknown): Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
 type McpIo = { input: Readable; output: Writable };
 
 function textResult(value: unknown, isError = false) {
@@ -53,23 +56,25 @@ function exactArgs(value: unknown): string[] {
   return value;
 }
 function modern(message: JsonRpc): boolean {
-  return message.method === 'server/discover' || message.params?._meta?.['io.modelcontextprotocol/protocolVersion'] === '2026-07-28';
+  const meta = record(record(message.params)._meta);
+  return message.method === 'server/discover' || meta['io.modelcontextprotocol/protocolVersion'] === '2026-07-28';
 }
 function result(id: unknown, value: Record<string, unknown>, isModern = false) {
   const body = isModern ? { ...value, resultType: value.resultType ?? 'complete',
-    _meta: { ...(value._meta as object ?? {}), 'io.modelcontextprotocol/serverInfo': serverInfo } } : value;
+    _meta: { ...record(value._meta), 'io.modelcontextprotocol/serverInfo': serverInfo } } : value;
   return { jsonrpc: '2.0', id, result: body };
 }
 function error(id: unknown, code: number, message: string) {
   return { jsonrpc: '2.0', id, error: { code, message } };
 }
-async function tool(name: string, input: any, run: McpRunner) {
+async function tool(name: string, input: unknown, run: McpRunner) {
+  const options = record(input);
   if (name === 'workbench_capabilities') {
     const value = await run(['capabilities', '--json'], 120000);
     return textResult(value, value.exitCode !== 0);
   }
   if (name === 'workbench_help') {
-    const topic = input?.topic;
+    const topic = options.topic;
     if (topic !== undefined && (typeof topic !== 'string' || !topic.trim() || topic.length > 120 || topic.includes('\0'))) {
       return textResult({ code: 'INVALID_INPUT', message: 'topic must be a bounded nonempty string.' }, true);
     }
@@ -78,8 +83,8 @@ async function tool(name: string, input: any, run: McpRunner) {
   }
   if (name !== 'workbench_execute') return textResult({ code: 'UNKNOWN_TOOL', message: 'Unknown Workbench MCP tool.' }, true);
   try {
-    const args = exactArgs(input?.args);
-    const timeoutMs = input?.timeoutMs === undefined ? 120000 : input.timeoutMs;
+    const args = exactArgs(options.args);
+    const timeoutMs = options.timeoutMs === undefined ? 120000 : options.timeoutMs;
     if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 600000) throw new Error('timeoutMs must be 1000-600000.');
     const value = await run(args, timeoutMs);
     return textResult(value, value.exitCode !== 0 || value.timedOut || value.overflow);
@@ -88,21 +93,22 @@ async function tool(name: string, input: any, run: McpRunner) {
   }
 }
 
-export async function mcpResponse(message: JsonRpc, run: McpRunner): Promise<Record<string, any> | null> {
+export async function mcpResponse(message: JsonRpc, run: McpRunner): Promise<Record<string, unknown> | null> {
   if (!message || message.jsonrpc !== '2.0' || typeof message.method !== 'string') return error(message?.id ?? null, -32600, 'Invalid JSON-RPC request.');
   if (message.method === 'notifications/initialized' || message.method === 'notifications/cancelled' || message.id === undefined) return null;
+  const params = record(message.params);
   if (message.method === 'server/discover') return result(message.id, { supportedVersions, capabilities, ttlMs: 0, cacheScope: 'private' }, true);
   if (message.method === 'initialize') {
-    const requested = message.params?.protocolVersion;
-    return result(message.id, { protocolVersion: legacyProtocols.has(requested) ? requested : '2025-11-25', capabilities, serverInfo });
+    const requested = params.protocolVersion;
+    return result(message.id, { protocolVersion: typeof requested === 'string' && legacyProtocols.has(requested) ? requested : '2025-11-25', capabilities, serverInfo });
   }
   const isModern = modern(message);
   if (message.method === 'ping') return result(message.id, {}, isModern);
   if (message.method === 'tools/list') return result(message.id, { tools: workbenchMcpTools }, isModern);
   if (message.method !== 'tools/call') return error(message.id, -32601, 'Method not found.');
-  const name = message.params?.name;
+  const name = params.name;
   if (typeof name !== 'string') return error(message.id, -32602, 'Tool name is required.');
-  return result(message.id, await tool(name, message.params?.arguments ?? {}, run), isModern);
+  return result(message.id, await tool(name, params.arguments ?? {}, run), isModern);
 }
 
 export function runWorkbench(root: string, args: string[], timeoutMs: number): Promise<RunResult> {
@@ -129,7 +135,7 @@ export async function runMcpServer(root: string, io: McpIo, run: McpRunner = (ar
   const lines = createInterface({ input: io.input, crlfDelay: Infinity });
   for await (const line of lines) {
     if (!line.trim()) continue;
-    let response: Record<string, any> | null;
+    let response: Record<string, unknown> | null;
     try { response = await mcpResponse(JSON.parse(line), run); }
     catch { response = error(null, -32700, 'Parse error.'); }
     if (response) io.output.write(JSON.stringify(response) + '\n');
