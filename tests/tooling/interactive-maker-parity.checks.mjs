@@ -58,6 +58,8 @@ import { commandHelp as relocatedCommandHelp, helpIndex as relocatedHelpIndex } 
 import * as legacyHelpText from '../../scripts/framework/help-text.ts';
 import { helpText as relocatedHelpText } from '../../bin/presentation/terminal/terminal-help.ts';
 import * as legacyTerminalHelp from '../../scripts/framework/terminal-help.ts';
+import { setupDocumentation as relocatedSetupDocumentation } from '../../bin/presentation/terminal/docs-setup.ts';
+import * as legacyDocsSetup from '../../scripts/framework/docs-setup.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1028,4 +1030,47 @@ test('relocated CLI help metadata and tiered rendering preserve command guidance
     goldenPath: index.goldenPath, groups: [{ id: 'inspect', title: 'Inspect', commands: ['status'] }] });
   assert.match(all, /Inspect/);
   assert.match(all, /status/);
+});
+
+
+test('relocated documentation setup preserves decline, cancel and hash-bound apply flow', async () => {
+  assert.equal(legacyDocsSetup.setupDocumentation, relocatedSetupDocumentation);
+  const context = { root: frameworkRoot, frameworkRoot };
+  const current = operationResult('setup', { ready: true }, 'ok');
+
+  let executeCalls = 0;
+  const declined = await relocatedSetupDocumentation('import', current, context, async () => {
+    executeCalls++; return operationResult('docs import', null, 'planned');
+  }, async () => 'no', () => {});
+  assert.equal(declined, current);
+  assert.equal(executeCalls, 0);
+
+  const noPlan = operationResult('docs export', { reason: 'blocked' }, 'blocked');
+  const renderedNoPlan = [];
+  const stopped = await relocatedSetupDocumentation('export', current, context, async request => {
+    assert.equal(request.command, 'docs export');
+    return noPlan;
+  }, async () => 'yes', value => renderedNoPlan.push(value));
+  assert.equal(stopped, noPlan);
+  assert.deepEqual(renderedNoPlan, [noPlan]);
+
+  const planned = operationResult('docs import', { planHash: 'abc123' }, 'planned');
+  const renderedCancelled = [];
+  const answers = ['yes', 'docs/application', 'no'];
+  const cancelled = await relocatedSetupDocumentation('import', current, context, async request => {
+    assert.deepEqual(request.args, ['docs/application']);
+    return planned;
+  }, async () => answers.shift(), value => renderedCancelled.push(value));
+  assert.equal(cancelled.status, 'cancelled');
+  assert.deepEqual(renderedCancelled, [planned]);
+
+  const calls = [];
+  const applied = operationResult('docs export', { written: ['docs/application/index.md'] }, 'applied');
+  const yes = ['yes', 'yes'];
+  const outcome = await relocatedSetupDocumentation('export', current, context, async request => {
+    calls.push(request);
+    return calls.length === 1 ? planned : applied;
+  }, async () => yes.shift(), () => {});
+  assert.equal(outcome, applied);
+  assert.deepEqual(calls[1].options, { apply: 'abc123', yes: true });
 });
