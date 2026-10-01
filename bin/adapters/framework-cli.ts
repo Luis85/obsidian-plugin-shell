@@ -8,7 +8,7 @@ import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments } from './framework/catalog.ts';
 import { executeOperation } from './framework/operations.ts';
 import { projectRoot, exists } from './framework/files.ts';
-import { failure, type Context } from './framework/contracts.ts';
+import { failure, type Context, type Request, type Result } from './framework/contracts.ts';
 import { invocationDirectory, starterInvocation } from './framework/starter-project.ts';
 import { guidedStarter } from '../presentation/terminal/starter-terminal.ts';
 import { renderCliResult, type CliOutputStream } from '../presentation/terminal/cli-output.ts';
@@ -27,21 +27,86 @@ async function interactivePlanConfirm(io: FrameworkCliIO, message: string, signa
   return parseConfirmation(await ask(io.input, io.error as never, message + ' [y/N] ', signal)) === true;
 }
 
+/** The published workspace compiler keeps its raw JSON protocol and --help entry. */
+function rawGeneratorInvocation(argv: string[]): boolean {
+  if (argv[0] !== 'generate' || argv.includes('--json')) return false;
+  const workspace = argv.includes('--target') && argv.includes('--input') && !argv.includes('--scope');
+  return workspace || (argv.length === 2 && argv[1] === '--help');
+}
+async function runRawGenerator(argv: string[], io: FrameworkCliIO): Promise<number> {
+  try {
+    const { generatorCli } = await import('../../scripts/companion/compiler/cli.ts');
+    await generatorCli(argv.slice(1));
+    return Number(process.exitCode ?? 0);
+  } catch (error) {
+    io.error.write((error instanceof Error ? error.message : 'Generation failed.') + '\n');
+    return 1;
+  }
+}
+const discoveryCommands = ['help', 'capabilities', 'schema', 'version', 'compiler explain', 'project schema', 'docs schema'];
+/** Discovery commands describe the CLI itself and never need a project root. */
+function isDiscovery(request: Request): boolean {
+  if (request.options.help || discoveryCommands.includes(request.command)) return true;
+  return request.command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!));
+}
+/** `new` resolves its target and --from source relative to the invoking shell, not the npm script directory. */
+function normalizeNew(request: Request): Request {
+  if (request.command !== 'new') return request;
+  const args = request.args[0] ? [invocationDirectory(request.args[0])] : request.args;
+  const options = typeof request.options.from === 'string' ? { ...request.options, from: invocationDirectory(request.options.from) } : request.options;
+  return { ...request, args, options };
+}
+async function resolveInvocation(argv: string[], frameworkRoot: string): Promise<{ request: Request; root: string }> {
+  const parsed = normalizeNew(parseCliArguments(argv));
+  const selected = typeof parsed.options.root === 'string' ? parsed.options.root : process.cwd();
+  const starters = parsed.command === 'new' || parsed.command.startsWith('starters ') ? starterInvocation(parsed, frameworkRoot) : null;
+  const request = starters?.request ?? parsed;
+  // Discovery is decided on the parsed request, as before starter resolution.
+  if (isDiscovery(parsed)) return { request, root: resolve(selected) };
+  if (starters) return { request, root: starters.root };
+  return { request, root: await projectRoot(selected, typeof request.options.root === 'string') };
+}
+function isInteractive(io: FrameworkCliIO, machine: boolean, request: Request): boolean {
+  const flags = request.options;
+  return Boolean(io.input.isTTY && io.error.isTTY && !machine && !flags['no-interaction'] && !flags.yes && !flags.help);
+}
+const guidedSetupRun = (request: Request) => request.command === 'setup' && !request.options['dry-run'];
+/** Terminal interviews fill only missing setup/new answers before the reviewed operation runs. */
+async function guidedRequest(request: Request, context: Context, io: FrameworkCliIO, signal: AbortSignal): Promise<Request> {
+  const prompt = (query: string) => ask(io.input, io.error as never, query, signal);
+  const write = (text: string) => { io.error.write(text); };
+  if (guidedSetupRun(request)) return guidedSetup(request, context, prompt, write);
+  if (request.command === 'new' && !request.options.list) return guidedStarter(request, context, prompt, write);
+  return request;
+}
+/** After an interactive setup in a kit project, each further stage is offered with its own approval. */
+async function continueInteractiveSetup(request: Request, outcome: Result, context: Context, io: FrameworkCliIO, signal: AbortSignal): Promise<Result> {
+  if (!guidedSetupRun(request) || !['applied', 'unchanged'].includes(outcome.status)) return outcome;
+  if (!await exists(join(context.root, '.framework/kit.json')) || !await exists(join(context.root, 'design/project.json'))) return outcome;
+  return continueSetup(context, executeOperation, query => ask(io.input, io.error as never, query, signal), value => renderCliResult(value, false, io), outcome);
+}
+function exitCode(outcome: Result): number {
+  if (outcome.status === 'failed' || outcome.status === 'blocked') return 1;
+  return outcome.status === 'cancelled' ? 130 : 0;
+}
+async function runOperation(argv: string[], frameworkRoot: string, io: FrameworkCliIO, machine: boolean, controller: AbortController, named: (command: string) => void): Promise<Result> {
+  const invocation = await resolveInvocation(argv, frameworkRoot);
+  let request = invocation.request;
+  named(request.command);
+  const context: Context = { root: invocation.root, frameworkRoot, signal: controller.signal, progress: text => { io.error.write(text); } };
+  if (request.options.input === '-') context.inputText = await readInput(io.input, controller.signal);
+  if (!isInteractive(io, machine, request)) return executeOperation(request, context);
+  request = await guidedRequest(request, context, io, controller.signal);
+  const outcome = await interactiveRun(request, context, {
+    confirm: (message, signal) => interactivePlanConfirm(io, message, signal),
+    render: value => renderCliResult(value, false, io),
+  });
+  return continueInteractiveSetup(request, outcome, context, io, controller.signal);
+}
+
 /** Framework command composition root. Prompts/progress are isolated from the machine stdout result channel. */
 export async function main(argv: string[], frameworkRoot: string, io: FrameworkCliIO = processIO): Promise<number> {
-  // Preserve the published workspace compiler's raw JSON protocol and --help entry.
-  if (argv[0] === 'generate' && (argv.includes('--target') && argv.includes('--input') && !argv.includes('--scope')
-      || (argv.length === 2 && argv[1] === '--help')) && !argv.includes('--json')) {
-    try {
-      const { generatorCli } = await import('../../scripts/companion/compiler/cli.ts');
-      await generatorCli(argv.slice(1));
-      return Number(process.exitCode ?? 0);
-    } catch (error) {
-      io.error.write((error instanceof Error ? error.message : 'Generation failed.') + '\n');
-      return 1;
-    }
-  }
-
+  if (rawGeneratorInvocation(argv)) return runRawGenerator(argv, io);
   const supportRequested = argv.some((value, index) => value === 'support' && argv[index + 1] === 'report');
   const machine = argv.includes('--json');
   const controller = new AbortController();
@@ -50,58 +115,9 @@ export async function main(argv: string[], frameworkRoot: string, io: FrameworkC
   process.once('SIGTERM', stop);
   let command = 'unknown';
   try {
-    let request = parseCliArguments(argv);
-    command = request.command;
-    const discovery = request.options.help
-      || ['help', 'capabilities', 'schema', 'version', 'compiler explain', 'project schema', 'docs schema'].includes(command)
-      || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
-    const selected = typeof request.options.root === 'string' ? request.options.root : process.cwd();
-    if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };
-    if (command === 'new' && typeof request.options.from === 'string') {
-      request = { ...request, options: { ...request.options, from: invocationDirectory(request.options.from) } };
-    }
-    const starters = command === 'new' || command.startsWith('starters ') ? starterInvocation(request, frameworkRoot) : null;
-    if (starters) request = starters.request;
-    const root = discovery
-      ? resolve(selected)
-      : starters
-        ? starters.root
-        : await projectRoot(selected, typeof request.options.root === 'string');
-    const context: Context = {
-      root,
-      frameworkRoot,
-      signal: controller.signal,
-      progress: text => { io.error.write(text); },
-    };
-    if (request.options.input === '-') context.inputText = await readInput(io.input, controller.signal);
-    const interactive = Boolean(io.input.isTTY && io.error.isTTY && !machine
-      && !request.options['no-interaction'] && !request.options.yes && !request.options.help);
-    if (interactive && command === 'setup' && !request.options['dry-run']) {
-      request = await guidedSetup(request, context,
-        query => ask(io.input, io.error as never, query, controller.signal),
-        text => { io.error.write(text); });
-    }
-    if (interactive && command === 'new' && !request.options.list) {
-      request = await guidedStarter(request, context,
-        query => ask(io.input, io.error as never, query, controller.signal),
-        text => { io.error.write(text); });
-    }
-    let outcome = interactive
-      ? await interactiveRun(request, context, {
-          confirm: (message, signal) => interactivePlanConfirm(io, message, signal),
-          render: value => renderCliResult(value, false, io),
-        })
-      : await executeOperation(request, context);
-    if (interactive && command === 'setup' && !request.options['dry-run']
-        && ['applied', 'unchanged'].includes(outcome.status)) {
-      if (await exists(join(context.root, '.framework/kit.json')) && await exists(join(context.root, 'design/project.json'))) {
-        outcome = await continueSetup(context, executeOperation,
-          query => ask(io.input, io.error as never, query, controller.signal),
-          value => renderCliResult(value, false, io), outcome);
-      }
-    }
+    const outcome = await runOperation(argv, frameworkRoot, io, machine, controller, name => { command = name; });
     renderCliResult(outcome, machine, io);
-    return outcome.status === 'failed' || outcome.status === 'blocked' ? 1 : outcome.status === 'cancelled' ? 130 : 0;
+    return exitCode(outcome);
   } catch (error) {
     const outcome = supportRequested ? unavailableSupport(controller.signal.aborted) : failure(command, error);
     renderCliResult(outcome, machine, io);
