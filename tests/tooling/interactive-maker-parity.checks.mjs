@@ -48,6 +48,8 @@ import { portableFile as relocatedPortableFile } from '../../bin/adapters/framew
 import * as legacyArchivePath from '../../scripts/framework/archive-path.ts';
 import { zip as relocatedZip } from '../../bin/adapters/framework/zip.ts';
 import * as legacyZip from '../../scripts/framework/zip.ts';
+import { pluginIdWordProblem as relocatedPluginIdWordProblem, derivedPluginId as relocatedDerivedPluginId, pluginIdProblem as relocatedPluginIdProblem, exportedIdProblem as relocatedExportedIdProblem, exportedIdWarning as relocatedExportedIdWarning } from '../../bin/adapters/framework/plugin-id.ts';
+import * as legacyPluginId from '../../scripts/framework/plugin-id.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -901,4 +903,34 @@ test('relocated archive helpers preserve portable paths and deterministic ZIP by
     { path: 'A.txt', bytes: Buffer.from('one') },
     { path: 'a.txt', bytes: Buffer.from('two') },
   ]), error => error.code === 'ARCHIVE_PATH');
+});
+
+
+test('relocated plugin ID policy preserves creation, derivation and export review rules', () => {
+  assert.equal(legacyPluginId.pluginIdWordProblem, relocatedPluginIdWordProblem);
+  assert.equal(legacyPluginId.derivedPluginId, relocatedDerivedPluginId);
+  assert.equal(legacyPluginId.pluginIdProblem, relocatedPluginIdProblem);
+  assert.equal(legacyPluginId.exportedIdProblem, relocatedExportedIdProblem);
+  assert.equal(legacyPluginId.exportedIdWarning, relocatedExportedIdWarning);
+
+  assert.match(relocatedPluginIdWordProblem('obsidian-notes'), /obsidian/);
+  assert.match(relocatedPluginIdWordProblem('notes-plugin'), /end with/);
+  assert.match(relocatedPluginIdWordProblem('plugin-notes'), /contain/);
+  assert.equal(relocatedPluginIdWordProblem('field-notes'), null);
+
+  assert.equal(relocatedDerivedPluginId('Field Notes', 'blank'), 'field-notes');
+  assert.equal(relocatedDerivedPluginId('my-plugin', 'quick-capture'), 'my-quick-capture');
+  assert.equal(relocatedDerivedPluginId('plugin', 'quick-capture'), 'quick-capture');
+  assert.equal(relocatedDerivedPluginId('plugin', 'x'), 'my-project');
+
+  assert.match(relocatedPluginIdProblem('Invalid ID'), /lowercase letters/);
+  assert.match(relocatedPluginIdProblem('obsidian-notes'), /community review/);
+  assert.equal(relocatedPluginIdProblem('field-notes'), null);
+
+  assert.match(relocatedExportedIdProblem('Invalid ID'), /lowercase letters/);
+  assert.match(relocatedExportedIdProblem('obsidian-notes'), /community review/);
+  assert.equal(relocatedExportedIdProblem('notes-plugin'), null);
+  assert.match(relocatedExportedIdWarning('notes-plugin'), /fail check submission/);
+  assert.equal(relocatedExportedIdWarning('field-notes'), null);
+  assert.equal(relocatedExportedIdWarning('Invalid ID'), null);
 });

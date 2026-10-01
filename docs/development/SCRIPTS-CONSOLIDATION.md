@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D25 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D26 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -126,7 +126,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D24a (CI repair):** Hindsight launcher snapshots now fingerprint and atomically stage the typed shared hash dependency beside the snapshot's `hindsight/` sources. Desktop registrations remain content-addressed and old snapshots never depend on a mutable global helper.
 - **D24b (CI repair):** Maker qualification now exercises generated-project inspection branches introduced by Stage D: configured/generated identity, installed dependencies, traceability obligations, doctor toolchain drift, stale generation detection and complete release assets. Thresholds remain unchanged.
 - **D25:** Portable archive-path validation and deterministic ZIP assembly moved to `bin/adapters/framework/archive-path.ts` and `zip.ts`. Former framework paths are compatibility-only; maker coverage locks portable-name rejection, case-insensitive duplicate refusal and byte-deterministic archives.
-- **Remaining D26–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D26:** Plugin-ID formatting, reserved-word policy, derivation and exported-ID review moved to `bin/adapters/framework/plugin-id.ts`. The former framework path is compatibility-only and maker coverage locks creation versus exported-project semantics.
+- **Remaining D27–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
