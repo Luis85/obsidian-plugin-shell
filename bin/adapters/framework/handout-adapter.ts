@@ -1,6 +1,6 @@
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { stringOption, requireThat, result, type Request, type Context } from './contracts.ts';
-import { prepareHandout, prepareHandoutRefresh, inspectHandout } from '../../../scripts/framework/handout-workspace.ts';
+import { prepareHandout, prepareHandoutRefresh, inspectHandout } from './handout-workspace.ts';
 
 /** Use the existing shared plan/apply protocol; this adapter never runs project processes. */
 export async function handoutPlan(request: Request, context: Context) {

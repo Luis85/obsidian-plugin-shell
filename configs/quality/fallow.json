@@ -625,7 +625,10 @@
           "cli-result-contract",
           "cli-confirmation-contract",
           "cli-file-plan-contract",
-          "cli-input-contract"
+          "cli-input-contract",
+          "cli-process-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract"
         ]
       },
       {

@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { planProject } from '../../../scripts/companion/compiler/plan.ts';
 import { readConfiguration, readBounded, hash, exists } from './files.ts';
 import { designFile, object } from './configuration.ts';
-import { inspectDesign } from '../../../scripts/framework/changes.ts';
+import { inspectDesign } from './changes.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
 import { managedGenerationPlan } from './prototype-generation.ts';

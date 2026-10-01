@@ -21,7 +21,9 @@ import { keyOf } from '../../scripts/application-docs/domain/contracts.ts';
 import { parseMarkdown, renderMarkdown } from '../../scripts/application-docs/adapters/markdown.ts';
 import { journalHook, recoverDocuments } from '../../scripts/application-docs/adapters/recovery.ts';
 import { documentationDigest as digest } from '../../scripts/application-docs/adapters/filesystem.ts';
+import { documentationStatus } from '../../scripts/application-docs/adapters/plan.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
+test('documentation status adapter remains an explicit lazy-load contract', () => { assert.equal(typeof documentationStatus, 'function'); });
 async function directory(t) { const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-docs-'))); t.after(() => rm(dir, { recursive: true, force: true })); return dir; }
 async function write(path, value) { await mkdir(dirname(path), { recursive: true }); await writeFile(path, value); }
 async function fixture(t, project = projectFixture().project) {
