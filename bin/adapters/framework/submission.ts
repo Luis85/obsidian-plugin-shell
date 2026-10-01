@@ -4,7 +4,7 @@
  * Every rule cites its source. The Community directory scan also runs policy, vulnerability and
  * malware checks that are not reproduced here, so a pass is not a review outcome.
  */
-import { join } from 'node:path';
+import { isAbsolute, join, relative, sep } from 'node:path';
 import { exists, readBounded } from './files.ts';
 import { runNode } from './process.ts';
 import { pluginIdWordProblem } from './plugin-id.ts';
@@ -114,10 +114,15 @@ async function text(path: string): Promise<string | null> {
 }
 interface LintFile { filePath: string; messages: Array<{ ruleId: string | null; severity: number; line?: number }> }
 type RuleCounts = Map<string, { count: number; first: string }>;
+/** Project files are reported as portable root-relative paths on every platform; files outside the root keep their full path. */
+function displayPath(root: string, filePath: string): string {
+  const path = relative(root, filePath);
+  return path.startsWith('..') || isAbsolute(path) ? filePath : path.split(sep).join('/');
+}
 function countRules(report: LintFile[], root: string): RuleCounts {
   const counts: RuleCounts = new Map();
   for (const file of report) {
-    const path = file.filePath.startsWith(root) ? file.filePath.slice(root.length + 1) : file.filePath;
+    const path = displayPath(root, file.filePath);
     for (const message of file.messages) {
       const id = message.ruleId ?? 'parse-error', entry = counts.get(id) ?? { count: 0, first: `${path}:${message.line ?? 0}` };
       entry.count++; counts.set(id, entry);
