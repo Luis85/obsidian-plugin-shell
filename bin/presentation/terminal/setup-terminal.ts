@@ -56,6 +56,11 @@ async function askAirship(options: Options, prompt: Prompt): Promise<void> {
   const answer = await prompt('Enable optional Airship development tooling? No installation or launch is performed. [y/N] ');
   if (parseConfirmation(answer) === true) options.airship = true;
 }
+async function askMcp(options: Options, prompt: Prompt): Promise<void> {
+  if (options.mcp !== undefined || options['no-mcp'] !== undefined) return;
+  const answer = await prompt('Enable the project-local Workbench MCP for Claude Code and Codex? This writes project settings but installs no client. [y/N] ');
+  if (parseConfirmation(answer) === true) options.mcp = true;
+}
 
 /** Terminal-only interview. Headless/API callers use explicit source/identity arguments. */
 export async function guidedSetup(
@@ -70,6 +75,7 @@ export async function guidedSetup(
   if (!options.input && !options.starter && !options.blank && !previous) await chooseSource(options, context, prompt, write, dependencies);
   if (!options.input && !previous) await askIdentity(options, context, prompt, dependencies);
   await askAirship(options, prompt);
+  await askMcp(options, prompt);
   write('GitHub is optional. Setup stays local and preserves every existing remote. Use your reviewed Git client to connect later.\n');
   return { ...request, options };
 }
