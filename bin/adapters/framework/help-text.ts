@@ -298,6 +298,9 @@ const optionOverrides: OptionOverride[] = [
   [prototypeOption('name'), describe('Prototype or variant display name; its folder slug stays unchanged.')],
   [option('prototypes prototype-details', 'description'), describe('Prototype description; changing it does not change folder slugs or saved designs.')],
   [option('new', 'from'), describe('Project JSON exported by the companion (instead of --starter).')],
+  [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown.'; doc.default = 'docs/generated/component-library'; }],
+  [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
+  [option('templates instantiate', 'name'), describe('Optional instance/component/page title override; the template name is the default.')],
 ];
 function optionDoc(entry: Command, name: string): OptionHelp {
   const doc = { ...(specific[name] ?? { description: '' }) };

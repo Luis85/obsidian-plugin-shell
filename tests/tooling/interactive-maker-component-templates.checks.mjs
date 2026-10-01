@@ -370,3 +370,28 @@ test('TUI browser uses the active plugin runtime template catalog', async () => 
   await browseComponentTemplates(ui, workspace, { root: frameworkRoot, frameworkRoot, plugins });
   assert.ok(workspace.document.design.library.some(item => item.templateId === 'atom.runtime-chip'));
 });
+
+
+test('TUI browser exposes the four user-facing template categories', async () => {
+  const workspace = new Workspace(newDocument('Category TUI'), null);
+  const decisions = ['pages-with-bricks', 'page.dashboard', 'no', 'back'];
+  const seen = [];
+  const ui = {
+    write() {},
+    ask: async () => '',
+    rich: {
+      async select(title, choices) {
+        seen.push({ title, ids: choices.map(choice => choice.id) });
+        const next = decisions.shift();
+        assert.ok(choices.some(choice => choice.id === next), 'category choice ' + next + ' is available');
+        return next;
+      },
+      async text({ initial }) { return initial; },
+    },
+  };
+  await browseComponentTemplates(ui, workspace, { root: frameworkRoot, frameworkRoot });
+  assert.ok(seen[0].ids.includes('components'));
+  assert.ok(seen[0].ids.includes('components-with-children'));
+  assert.ok(seen[0].ids.includes('pages'));
+  assert.ok(seen[0].ids.includes('pages-with-bricks'));
+});

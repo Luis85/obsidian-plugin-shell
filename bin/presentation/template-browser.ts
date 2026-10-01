@@ -10,7 +10,25 @@ interface TemplateBrowserOptions {
   plugins?: WorkbenchPluginRuntime;
 }
 
-const levels = ['all', 'atom', 'molecule', 'organism', 'template', 'page'] as const;
+const filters = [
+  { id: 'all', label: 'All templates' },
+  { id: 'components', label: 'Components' },
+  { id: 'components-with-children', label: 'Components with children' },
+  { id: 'pages', label: 'Pages' },
+  { id: 'pages-with-bricks', label: 'Pages with bricks' },
+  { id: 'atom', label: 'Atoms' },
+  { id: 'molecule', label: 'Molecules' },
+  { id: 'organism', label: 'Organisms' },
+  { id: 'template', label: 'Layouts / templates' },
+] as const;
+function matchesFilter(template: { templateType: string; atomicLevel: string }, filter: string): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'components') return template.templateType === 'component';
+  if (filter === 'components-with-children') return template.templateType === 'component-with-children';
+  if (filter === 'pages') return template.templateType === 'page';
+  if (filter === 'pages-with-bricks') return template.templateType === 'page-with-bricks';
+  return template.atomicLevel === filter;
+}
 
 export async function browseComponentTemplates(
   ui: Prompts,
@@ -21,13 +39,13 @@ export async function browseComponentTemplates(
     ? [...await options.plugins.commandContext.templates.list()]
     : (await loadComponentTemplates(options.root, options.frameworkRoot, pluginComponentTemplates())).map(entry => entry.template);
   while (true) {
-    const level = await choose(ui, 'Template library', [
-      ...levels.map(id => ({ id, label: id === 'all' ? 'All templates' : id })),
+    const filter = await choose(ui, 'Template library', [
+      ...filters.map(item => ({ id: item.id, label: item.label })),
       { id: 'back', label: 'Back' },
     ]);
-    if (level === 'back') return;
+    if (filter === 'back') return;
 
-    const selected = templates.filter(template => level === 'all' || template.atomicLevel === level);
+    const selected = templates.filter(template => matchesFilter(template, filter));
     const id = await choose(ui, 'Choose a template', [
       ...selected.map(template => ({
         id: template.id,
