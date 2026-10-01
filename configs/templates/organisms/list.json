@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.list",
+  "name": "List",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "organism",
+  "category": "Data display",
+  "description": "Vertical collection of reusable rows.",
+  "tags": [
+    "organism",
+    "data-display",
+    "list",
+    "collection"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "collection",
+    "list"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "molecule.list-item"
+    },
+    {
+      "template": "molecule.list-item"
+    },
+    {
+      "template": "molecule.list-item"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "composition",
+    "tag": "section",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

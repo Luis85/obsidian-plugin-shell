@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "molecule.progress-summary",
+  "name": "Progress Summary",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "molecule",
+  "category": "Feedback",
+  "description": "Progress bar paired with a compact status label.",
+  "tags": [
+    "molecule",
+    "feedback",
+    "progress",
+    "summary"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "progress-summary"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "atom.progress"
+    },
+    {
+      "template": "atom.badge"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "composition",
+    "tag": "div",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

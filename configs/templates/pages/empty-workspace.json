@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "page.empty-workspace",
+  "name": "Empty Workspace",
+  "version": "1.0.0",
+  "templateType": "page",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Empty first-use page with explanation and a clear next action.",
+  "tags": [
+    "page",
+    "pages",
+    "empty",
+    "onboarding"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin",
+    "editor"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "empty-workspace",
+    "onboarding"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "recipe",
+    "recipeId": "recipe-empty-state"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

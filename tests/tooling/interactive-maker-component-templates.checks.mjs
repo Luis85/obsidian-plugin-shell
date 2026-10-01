@@ -200,6 +200,10 @@ test('catalog search, summaries, trees and coverage expose the shared discovery 
   assert.equal(coverage.baselineComplete, true);
   assert.equal(coverage.documentation.complete, true);
   assert.deepEqual(coverage.missingCategories, []);
+  for (const id of ['atom.textarea', 'molecule.date-range', 'organism.form', 'organism.command-palette', 'organism.list',
+    'organism.kpi-grid', 'template.content-sidebar', 'page.overview', 'page.error', 'page.command-center']) {
+    assert.ok(entries.some(entry => entry.template.id === id), 'baseline contains ' + id);
+  }
 });
 
 test('documentation is deterministic and keeps JSON authoritative', async () => {
