@@ -9,5 +9,5 @@
     "allowImportingTsExtensions": true,
     "skipLibCheck": false
   },
-  "include": ["app.ts"]
+  "include": ["*.ts"]
 }

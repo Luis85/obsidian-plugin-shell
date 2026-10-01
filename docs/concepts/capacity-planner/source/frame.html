@@ -30,7 +30,7 @@
           <span class="pill" id="unit-pill"></span>
           <span class="pill" id="storage-pill">Local prototype</span>
         </div>
-        <div class="section-note" style="margin-top:6px">Plan FTE by iteration, compare PT/hours and budget, then drag estimated tasks into capacity.</div>
+        <div class="section-note" style="margin-top:6px">Plan available versus planned FTE, PT/hours, cost and task load across iterations.</div>
       </div>
       <div>
         <button id="edit-plan-btn" type="button">Plan settings</button>
@@ -39,6 +39,7 @@
       </div>
     </section>
     <section class="kpis" id="kpis" aria-label="Plan summary"></section>
+    <section class="planning-checks" id="checks" aria-label="Planning checks"></section>
     <section class="workspace">
       <aside class="sidebar" aria-labelledby="backlog-heading">
         <div class="sidebar-head">
@@ -46,12 +47,13 @@
           <span class="pill" id="backlog-count">0</span>
           <button type="button" id="sidebar-add-task" aria-label="Add task">+</button>
         </div>
+        <div class="sidebar-search"><label for="task-search">Find unassigned task</label><input id="task-search" type="search" placeholder="Filter by title" autocomplete="off"></div>
         <div class="task-list" id="backlog"></div>
       </aside>
       <section class="board-card" aria-labelledby="board-heading">
         <div class="board-toolbar">
           <h2 id="board-heading">Role capacity by iteration</h2>
-          <span class="section-note">Lane height reflects total allocated role capacity</span>
+          <span class="section-note">Lane height reflects total planned role capacity</span>
           <div class="legend" aria-label="Capacity legend">
             <span><i class="dot open"></i>capacity</span><span><i class="dot"></i>within</span><span><i class="dot over"></i>over</span>
           </div>

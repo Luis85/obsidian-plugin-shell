@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jFEEP5eSwkaa3YyuzshhsfPPwj10ur2wpNp64kNUsFM='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lMNs5YCZQCT9IuxE1RMbpZX+djuQqk/IffpYjokwP+c='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'">
 <meta name="description" content="Offline capacity-planner concept for resource, FTE, iteration, task, budget, project-day and hour planning.">
 <title>Capacity Planner · Companion concept</title>
 <style>:root{
@@ -11,7 +11,7 @@
   --bg:#111317;--panel:#181b21;--panel2:#20242c;--panel3:#272c35;--line:#343a45;
   --text:#f4f6f8;--muted:#9aa3af;--soft:#c7cdd6;--accent:#8b7cf6;--accent2:#aea3ff;
   --green:#5dca91;--amber:#f2bd5b;--red:#ef7272;--blue:#6fb2ff;--shadow:0 18px 50px rgba(0,0,0,.28);
-  --radius:14px;--role-col:240px;--iter-col:194px;
+  --radius:14px;--role-col:260px;--iter-col:194px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -72,8 +72,8 @@ small,.muted{color:var(--muted)}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;background:var(--green)}
 .dot.over{background:var(--red)}
 .dot.open{background:var(--blue)}
-.timeline-scroll{overflow:auto;max-height:calc(100vh - 285px);min-height:390px}
-.timeline{min-width:calc(var(--role-col) + 8 * var(--iter-col))}
+.timeline-scroll{overflow:auto;max-height:calc(100vh - 390px);min-height:420px}
+.timeline{width:max-content;min-width:100%}
 .timeline-row{display:grid;grid-template-columns:var(--role-col) repeat(var(--iteration-count),var(--iter-col))}
 .timeline-head{position:sticky;top:0;z-index:20;background:#15181d;border-bottom:1px solid var(--line)}
 .corner{position:sticky;left:0;z-index:24;background:#15181d;border-right:1px solid var(--line);padding:10px 12px;display:flex;align-items:end}
@@ -133,7 +133,38 @@ dialog::backdrop{background:rgba(5,7,10,.7);backdrop-filter:blur(4px)}
   .timeline-scroll{max-height:560px}
   .form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}
 }
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}</style>
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Capacity Planner product-polish extensions */
+.positive{color:var(--green)}
+.negative,.bad-text{color:var(--red)}
+.warn-text{color:var(--amber)}
+.planning-checks{display:grid;grid-template-columns:160px repeat(4,minmax(180px,1fr));gap:8px;align-items:stretch}
+.checks-title{border:1px solid var(--line);border-radius:var(--radius);background:#15181d;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.checks-title strong{font-size:12px}.checks-title span{font-size:10px;color:var(--muted)}
+.check-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:9px 11px;display:grid;gap:2px;min-width:0}
+.check-card.good{border-left:3px solid var(--green)}.check-card.warn{border-left:3px solid var(--amber)}.check-card.bad{border-left:3px solid var(--red)}
+.check-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.check-card strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.check-card span{font-size:10px;color:var(--muted);line-height:1.3}
+.sidebar-search{display:grid;gap:5px;padding:9px 10px 0}.sidebar-search label{font-size:10px;color:var(--muted)}.sidebar-search input{width:100%;padding:7px 9px}
+.iteration-summary-row{position:sticky;top:68px;z-index:18;background:#181b21;border-bottom:1px solid var(--line);box-shadow:0 8px 16px rgba(0,0,0,.14)}
+.iteration-summary-label{position:sticky;left:0;z-index:22;background:#181b21;border-right:1px solid var(--line);padding:9px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.iteration-summary-label strong{font-size:11px}.iteration-summary-label span{font-size:10px;color:var(--muted)}
+.iteration-total{padding:8px 9px;border-right:1px solid var(--line);display:grid;gap:1px;background:#181b21;min-height:82px}
+.iteration-total.has-issue{background:#211f1d}.iteration-total strong{font-size:11px}.iteration-total span{font-size:10px;color:var(--muted)}.iteration-total em{font-size:9px;color:var(--amber);font-style:normal;margin-top:2px}
+.role-actions{margin-left:auto;display:flex;gap:5px}.role-actions button{font-size:10px;padding:4px 6px;margin-left:0}.role-name-line>strong{min-width:0}
+.cell-badges{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:0 0 auto}.fte-badge{font-size:9px;border-radius:999px;padding:2px 5px;background:#3b311d;color:#ffd98d;border:1px solid #69572f}
+.capacity-cell.envelope-over{box-shadow:inset 0 2px 0 var(--amber)}
+.cell-tasks .compact-actions{display:flex;margin-top:1px;gap:4px}.cell-tasks .compact-actions button{font-size:9px;padding:3px 5px;min-width:0}
+.cell-tasks .task-card{gap:5px}.cell-tasks .task-card:focus-within{border-color:#666078}
+.metric-preview{border:1px solid var(--line);background:#15181d;border-radius:9px;padding:9px 10px;display:grid;gap:2px;align-content:center}.metric-preview span{font-size:10px;color:var(--muted)}.metric-preview strong{font-size:12px}.metric-preview small{font-size:10px}
+.callout.subtle{border-color:#3a4652;background:#19212a;color:#bfd0df}
+.danger-zone{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:12px;margin-top:2px}.danger-zone>div{display:grid;gap:2px;flex:1}.danger-zone strong{font-size:11px}.danger-zone span{font-size:10px;color:var(--muted)}
+.assignment-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;border:1px solid var(--line);border-radius:10px;padding:9px;background:#15181d}.assignment-preview.good{border-left:3px solid var(--green)}.assignment-preview.bad{border-left:3px solid var(--red)}.assignment-preview>div{display:grid;gap:2px}.assignment-preview span{font-size:9px;color:var(--muted)}.assignment-preview strong{font-size:12px}.assignment-preview p{grid-column:1/-1;margin:3px 0 0;color:#ffb6b6;font-size:10px}
+.board-empty{margin:20px;min-width:420px}
+@media(max-width:1250px){.planning-checks{grid-template-columns:140px repeat(2,1fr)}.checks-title{grid-row:span 2}.timeline-scroll{max-height:calc(100vh - 440px)}}
+@media(max-width:760px){.planning-checks{grid-template-columns:1fr 1fr}.checks-title{grid-column:1/-1;grid-row:auto}.iteration-summary-row{top:68px}.assignment-preview{grid-template-columns:1fr}.assignment-preview p{grid-column:auto}.danger-zone{align-items:flex-start;flex-direction:column}.timeline-scroll{max-height:520px}}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -157,7 +188,7 @@ dialog::backdrop{background:rgba(5,7,10,.7);backdrop-filter:blur(4px)}
           <span class="pill" id="unit-pill"></span>
           <span class="pill" id="storage-pill">Local prototype</span>
         </div>
-        <div class="section-note" style="margin-top:6px">Plan FTE by iteration, compare PT/hours and budget, then drag estimated tasks into capacity.</div>
+        <div class="section-note" style="margin-top:6px">Plan available versus planned FTE, PT/hours, cost and task load across iterations.</div>
       </div>
       <div>
         <button id="edit-plan-btn" type="button">Plan settings</button>
@@ -166,6 +197,7 @@ dialog::backdrop{background:rgba(5,7,10,.7);backdrop-filter:blur(4px)}
       </div>
     </section>
     <section class="kpis" id="kpis" aria-label="Plan summary"></section>
+    <section class="planning-checks" id="checks" aria-label="Planning checks"></section>
     <section class="workspace">
       <aside class="sidebar" aria-labelledby="backlog-heading">
         <div class="sidebar-head">
@@ -173,12 +205,13 @@ dialog::backdrop{background:rgba(5,7,10,.7);backdrop-filter:blur(4px)}
           <span class="pill" id="backlog-count">0</span>
           <button type="button" id="sidebar-add-task" aria-label="Add task">+</button>
         </div>
+        <div class="sidebar-search"><label for="task-search">Find unassigned task</label><input id="task-search" type="search" placeholder="Filter by title" autocomplete="off"></div>
         <div class="task-list" id="backlog"></div>
       </aside>
       <section class="board-card" aria-labelledby="board-heading">
         <div class="board-toolbar">
           <h2 id="board-heading">Role capacity by iteration</h2>
-          <span class="section-note">Lane height reflects total allocated role capacity</span>
+          <span class="section-note">Lane height reflects total planned role capacity</span>
           <div class="legend" aria-label="Capacity legend">
             <span><i class="dot open"></i>capacity</span><span><i class="dot"></i>within</span><span><i class="dot over"></i>over</span>
           </div>
@@ -195,581 +228,410 @@ dialog::backdrop{background:rgba(5,7,10,.7);backdrop-filter:blur(4px)}
 <div id="notice" role="status" aria-live="polite" aria-atomic="true"></div>
 <noscript>This offline prototype needs JavaScript enabled to demonstrate its interactions.</noscript>
 <script>(() => {
-  "use strict";
+"use strict";
+const modules = Object.create(null);
+modules["core"] = (() => {
+const VERSION = 1;
+const STORAGE_KEY = "capacity-planner.prototype.v1";
+function $(selector, root = document) {
+  const element = root.querySelector(selector);
+  if (!element) throw new Error(`Missing prototype element: ${selector}`);
+  return element;
+}
+const dialog = $("#dialog");
+const notice = $("#notice");
+const importInput = $("#workspace-import");
+let noticeTimer = 0;
+let storageStatus = "demo";
 
-  const VERSION = 1;
-  const STORAGE_KEY = "capacity-planner.prototype.v1";
-  function $                                 (selector        , root             = document)    {
-    const element = root.querySelector   (selector);
-    if (!element) throw new Error(`Missing prototype element: ${selector}`);
-    return element;
+const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+})[char]);
+const euro = new Intl.NumberFormat("de-DE", { style:"currency", currency:"EUR", maximumFractionDigits:0 });
+const num = new Intl.NumberFormat("de-DE", { maximumFractionDigits:1 });
+
+function parseDate(value) {
+  const [y,m,d] = String(value).split("-").map(Number);
+  if (!y || !m || !d) return null;
+  const date = new Date(Date.UTC(y,m-1,d));
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+function dateText(value) {
+  const date = parseDate(value);
+  return date ? new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(date) : "—";
+}
+function iso(date) { return date.toISOString().slice(0,10); }
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+function inclusiveDays(start, end) { return Math.round((end - start) / 86400000) + 1; }
+function uid(prefix) { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`; }
+function clone(value) { return JSON.parse(JSON.stringify(value)); }
+
+function makeIterations(plan) {
+  const start = parseDate(plan.start);
+  const due = parseDate(plan.due);
+  if (!start || !due || due < start) return [];
+  const chunk = Math.max(1, Number(plan.iterationWeeks) || 2) * 7;
+  const result = [];
+  let cursor = start;
+  let index = 1;
+  while (cursor <= due && result.length < 80) {
+    const rawEnd = addDays(cursor, chunk - 1);
+    const end = rawEnd > due ? due : rawEnd;
+    result.push({id:`it-${iso(cursor)}`,index,name:`Iteration ${index}`,start:iso(cursor),end:iso(end),weeks:inclusiveDays(cursor,end)/7});
+    cursor = addDays(end,1);
+    index += 1;
   }
-  const dialog = $                   ("#dialog");
-  const notice = $             ("#notice");
-  const importInput = $                  ("#workspace-import");
-  let noticeTimer = 0;
-  let draggedTaskId = null;
+  return result;
+}
 
-  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[char]);
+function nextPlanDates() {
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
+  const toMonday = (8 - today.getUTCDay()) % 7;
+  const start = addDays(today,toMonday);
+  return {start:iso(start),due:iso(addDays(start,16*7-1))};
+}
 
-  const euro = new Intl.NumberFormat("de-DE", { style:"currency", currency:"EUR", maximumFractionDigits:0 });
-  const num = new Intl.NumberFormat("de-DE", { maximumFractionDigits:1 });
+function baseState() {
+  const plan = {id:"plan-demo",name:"Custom Order Platform",budget:280000,start:"2026-10-05",due:"2027-01-22",iterationWeeks:2,daysPerWeek:5,hoursPerDay:8,unitName:"SP",hoursPerUnit:6};
+  const its = makeIterations(plan);
+  const all = (value) => Object.fromEntries(its.map(it=>[it.id,value]));
+  const range = (values) => Object.fromEntries(its.map((it,i)=>[it.id,values[i] ?? 0]));
+  return {
+    schema:"capacity-planner.workspace",version:VERSION,plan,
+    roles:[
+      {id:"role-dm",name:"Delivery Manager",dayRate:950,availableFte:.5,fteByIteration:all(.4)},
+      {id:"role-ba",name:"Business Analyst",dayRate:850,availableFte:1,fteByIteration:range([.8,.8,.8,.4,.4,0,0,0])},
+      {id:"role-ux",name:"UX / UI",dayRate:800,availableFte:1,fteByIteration:range([.7,.7,.7,.7,.3,.3,0,0])},
+      {id:"role-dev",name:"Software Engineering",dayRate:900,availableFte:2,fteByIteration:all(2)},
+      {id:"role-qa",name:"QA Engineer",dayRate:780,availableFte:1,fteByIteration:range([0,0,.4,.4,.8,.8,.8,.6])}
+    ],
+    tasks:[
+      {id:"task-1",title:"Kick-off and delivery setup",units:5,roleId:"role-dm",iterationId:its[0]?.id ?? null},
+      {id:"task-2",title:"Domain discovery and backlog",units:8,roleId:"role-ba",iterationId:its[0]?.id ?? null},
+      {id:"task-3",title:"Experience map and key flows",units:8,roleId:"role-ux",iterationId:its[0]?.id ?? null},
+      {id:"task-4",title:"Core order service",units:21,roleId:"role-dev",iterationId:its[1]?.id ?? null},
+      {id:"task-5",title:"Pricing and validation rules",units:13,roleId:"role-dev",iterationId:its[2]?.id ?? null},
+      {id:"task-6",title:"Order-management UI",units:13,roleId:"role-dev",iterationId:its[3]?.id ?? null},
+      {id:"task-7",title:"Automation foundation",units:8,roleId:"role-qa",iterationId:its[3]?.id ?? null},
+      {id:"task-8",title:"Release hardening",units:10,roleId:null,iterationId:null},
+      {id:"task-9",title:"Operational handover",units:5,roleId:null,iterationId:null}
+    ]
+  };
+}
 
-  function parseDate(value) {
-    const [y,m,d] = String(value).split("-").map(Number);
-    if (!y || !m || !d) return null;
-    const date = new Date(Date.UTC(y,m-1,d));
-    return Number.isFinite(date.getTime()) ? date : null;
+function validate(candidate) {
+  if (!candidate || candidate.schema !== "capacity-planner.workspace" || candidate.version !== VERSION) return "Unsupported workspace schema or version.";
+  if (!candidate.plan || typeof candidate.plan.name !== "string" || !candidate.plan.name.trim()) return "Plan is missing.";
+  if (typeof candidate.plan.unitName !== "string" || !candidate.plan.unitName.trim()) return "Task estimate unit is missing.";
+  const start = parseDate(candidate.plan.start), due = parseDate(candidate.plan.due);
+  if (!start || !due || due < start) return "Plan dates are invalid.";
+  const ranges = {budget:[0,1e9],iterationWeeks:[.25,12],daysPerWeek:[1,7],hoursPerDay:[.25,24],hoursPerUnit:[0,10000]};
+  for (const [key,[min,max]] of Object.entries(ranges)) {
+    const value = Number(candidate.plan[key]);
+    if (!Number.isFinite(value) || value < min || value > max) return `Plan value ${key} is invalid.`;
   }
-
-  function dateText(value) {
-    const date = parseDate(value);
-    return date ? new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(date) : "—";
+  if (!Array.isArray(candidate.roles) || !Array.isArray(candidate.tasks)) return "Roles or tasks are missing.";
+  const roleIds = new Set();
+  for (const role of candidate.roles) {
+    if (!role?.id || typeof role.name !== "string" || !role.name.trim() || roleIds.has(role.id)) return "Role identity is invalid.";
+    roleIds.add(role.id);
+    if (!Number.isFinite(Number(role.dayRate)) || Number(role.dayRate) < 0) return `Day rate for ${role.name} is invalid.`;
+    if (role.availableFte !== undefined && (!Number.isFinite(Number(role.availableFte)) || Number(role.availableFte) < 0 || Number(role.availableFte) > 20)) return `FTE envelope for ${role.name} is invalid.`;
+    if (!role.fteByIteration || typeof role.fteByIteration !== "object") return `FTE plan for ${role.name} is invalid.`;
+    for (const value of Object.values(role.fteByIteration)) if (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 20) return `FTE value for ${role.name} is invalid.`;
   }
-
-  function iso(date) {
-    return date.toISOString().slice(0,10);
+  const taskIds = new Set();
+  for (const task of candidate.tasks) {
+    if (!task?.id || typeof task.title !== "string" || !task.title.trim() || taskIds.has(task.id)) return "Task identity is invalid.";
+    taskIds.add(task.id);
+    if (!Number.isFinite(Number(task.units)) || Number(task.units) < 0) return `Estimate for ${task.title} is invalid.`;
+    if (task.roleId && !roleIds.has(task.roleId)) return `Task ${task.title} refers to a missing role.`;
   }
+  return null;
+}
 
-  function addDays(date, days) {
-    const next = new Date(date);
-    next.setUTCDate(next.getUTCDate() + days);
-    return next;
-  }
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) { storageStatus="demo"; return baseState(); }
+    const candidate = JSON.parse(raw);
+    if (validate(candidate)) { storageStatus="invalid"; return baseState(); }
+    storageStatus="saved"; return candidate;
+  } catch { storageStatus="unavailable"; return baseState(); }
+}
 
-  function inclusiveDays(start, end) {
-    return Math.round((end - start) / 86400000) + 1;
-  }
+const stateRef = {state:load(),taskFilter:"",draggedTaskId:null};
+function renderStorageStatus() {
+  const pill = $("#storage-pill");
+  const labels = {saved:"Saved locally",demo:"Demo · not saved",invalid:"Stored data invalid · demo shown",unavailable:"In-memory only"};
+  pill.textContent = labels[storageStatus] || "In-memory only";
+  pill.className = `pill ${storageStatus === "invalid" ? "warning" : storageStatus === "saved" ? "positive" : ""}`;
+}
+function save() {
+  try { localStorage.setItem(STORAGE_KEY,JSON.stringify(stateRef.state)); storageStatus="saved"; }
+  catch { storageStatus="unavailable"; }
+  renderStorageStatus();
+}
+function announce(message) {
+  clearTimeout(noticeTimer); notice.textContent=message; notice.classList.add("show");
+  noticeTimer=window.setTimeout(()=>notice.classList.remove("show"),2600);
+}
+function iterations() { return makeIterations(stateRef.state.plan); }
+function capacityFor(role,iteration) {
+  const fte=Number(role.fteByIteration?.[iteration.id] ?? 0),pt=fte*iteration.weeks*Number(stateRef.state.plan.daysPerWeek),hours=pt*Number(stateRef.state.plan.hoursPerDay),cost=pt*Number(role.dayRate||0);
+  return {fte,pt,hours,cost};
+}
+function taskHours(task) { return Number(task.units||0)*Number(stateRef.state.plan.hoursPerUnit||0); }
+function tasksFor(roleId,iterationId) { return stateRef.state.tasks.filter(task=>task.roleId===roleId && task.iterationId===iterationId); }
+function roleTotals(role) {
+  return iterations().reduce((acc,it)=>{const c=capacityFor(role,it);acc.pt+=c.pt;acc.hours+=c.hours;acc.cost+=c.cost;acc.fteWeeks+=c.fte*it.weeks;acc.weeks+=it.weeks;acc.peakFte=Math.max(acc.peakFte,c.fte);if(c.fte>Number(role.availableFte||0)+.001)acc.envelopeBreaches+=1;return acc;},{pt:0,hours:0,cost:0,fteWeeks:0,weeks:0,peakFte:0,envelopeBreaches:0});
+}
+function iterationTotals(iteration) {
+  const totals={pt:0,hours:0,cost:0,load:0,plannedFte:0,availableFte:0,envelopeBreaches:0,overloadCells:0};
+  for(const role of stateRef.state.roles){const c=capacityFor(role,iteration),load=tasksFor(role.id,iteration.id).reduce((sum,t)=>sum+taskHours(t),0);totals.pt+=c.pt;totals.hours+=c.hours;totals.cost+=c.cost;totals.load+=load;totals.plannedFte+=c.fte;totals.availableFte+=Number(role.availableFte||0);if(c.fte>Number(role.availableFte||0)+.001)totals.envelopeBreaches+=1;if(load>c.hours+.001)totals.overloadCells+=1;}
+  return totals;
+}
+function planTotals() {
+  const role=stateRef.state.roles.reduce((acc,r)=>{const t=roleTotals(r);acc.pt+=t.pt;acc.hours+=t.hours;acc.cost+=t.cost;acc.envelopeBreaches+=t.envelopeBreaches;return acc;},{pt:0,hours:0,cost:0,envelopeBreaches:0});
+  const scheduled=stateRef.state.tasks.filter(t=>t.roleId&&t.iterationId).reduce((sum,t)=>sum+taskHours(t),0),backlogTasks=stateRef.state.tasks.filter(t=>!t.roleId||!t.iterationId),backlog=backlogTasks.reduce((sum,t)=>sum+taskHours(t),0),overloadCells=iterations().reduce((sum,it)=>sum+iterationTotals(it).overloadCells,0);
+  return {...role,scheduled,backlog,backlogCount:backlogTasks.length,overloadCells};
+}
+function reconcile(withNotice=true) {
+  const validIterations=new Set(iterations().map(it=>it.id));let moved=0;
+  for(const role of stateRef.state.roles){role.fteByIteration=Object.fromEntries(Object.entries(role.fteByIteration||{}).filter(([id])=>validIterations.has(id)));if(!Number.isFinite(Number(role.availableFte))){const values=Object.values(role.fteByIteration).map(Number).filter(Number.isFinite);role.availableFte=Math.max(0,...values);}}
+  for(const task of stateRef.state.tasks){if(task.iterationId&&!validIterations.has(task.iterationId)){task.roleId=null;task.iterationId=null;moved+=1;}if(task.roleId&&!stateRef.state.roles.some(r=>r.id===task.roleId)){task.roleId=null;task.iterationId=null;moved+=1;}}
+  if(moved&&withNotice)announce(`${moved} task${moved===1?"":"s"} moved back to backlog after plan changes.`);
+}
 
-  function uid(prefix) {
-    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-  }
+return {VERSION,STORAGE_KEY,$,dialog,notice,importInput,esc,euro,num,parseDate,dateText,iso,addDays,inclusiveDays,uid,clone,makeIterations,nextPlanDates,baseState,validate,stateRef,renderStorageStatus,save,announce,iterations,capacityFor,taskHours,tasksFor,roleTotals,iterationTotals,planTotals,reconcile};
+})();
+modules["render"] = (() => {
+const {$,announce,capacityFor,dateText,esc,euro,iterationTotals,iterations,num,planTotals,reconcile,renderStorageStatus,roleTotals,save,stateRef,taskHours,tasksFor} = modules["core"];
 
-  function makeIterations(plan) {
-    const start = parseDate(plan.start);
-    const due = parseDate(plan.due);
-    if (!start || !due || due < start) return [];
-    const chunk = Math.max(1, Number(plan.iterationWeeks) || 2) * 7;
-    const result = [];
-    let cursor = start;
-    let index = 1;
-    while (cursor <= due && result.length < 80) {
-      const rawEnd = addDays(cursor, chunk - 1);
-      const end = rawEnd > due ? due : rawEnd;
-      result.push({
-        id: `it-${iso(cursor)}`,
-        index,
-        name: `Iteration ${index}`,
-        start: iso(cursor),
-        end: iso(end),
-        weeks: inclusiveDays(cursor, end) / 7
-      });
-      cursor = addDays(end, 1);
-      index += 1;
-    }
-    return result;
-  }
+function taskCard(task,compact=false) {
+  const assigned=task.roleId&&task.iterationId,label=`${task.title}, ${num.format(task.units)} ${stateRef.state.plan.unitName}, ${num.format(taskHours(task))} hours${assigned?", assigned":", unassigned"}`;
+  const actions=compact
+    ? `<div class="task-actions compact-actions"><button type="button" data-action="assign-task" data-task-id="${esc(task.id)}">Move</button><button type="button" data-action="edit-task" data-task-id="${esc(task.id)}">Edit</button><button type="button" data-action="unassign-task" data-task-id="${esc(task.id)}">Backlog</button></div>`
+    : `<div class="task-actions"><button type="button" data-action="assign-task" data-task-id="${esc(task.id)}">${assigned?"Move":"Assign"}</button><button type="button" data-action="edit-task" data-task-id="${esc(task.id)}">Edit</button>${assigned?`<button type="button" data-action="unassign-task" data-task-id="${esc(task.id)}">Backlog</button>`:""}<button type="button" data-action="delete-task" data-task-id="${esc(task.id)}">Delete</button></div>`;
+  return `<article class="task-card" draggable="true" data-task-id="${esc(task.id)}" tabindex="0" aria-label="${esc(label)}" aria-keyshortcuts="Enter Space" title="Drag to move, or press Enter for assignment"><div class="task-title">${esc(task.title)}</div><div class="task-meta"><span>${num.format(task.units)} ${esc(stateRef.state.plan.unitName)}</span><span>·</span><span>${num.format(taskHours(task))} h</span></div>${actions}</article>`;
+}
 
-  function baseState() {
-    const plan = {
-      id:"plan-demo",
-      name:"Custom Order Platform",
-      budget:280000,
-      start:"2026-10-05",
-      due:"2027-01-22",
-      iterationWeeks:2,
-      daysPerWeek:5,
-      hoursPerDay:8,
-      unitName:"SP",
-      hoursPerUnit:6
-    };
-    const iterations = makeIterations(plan);
-    const all = (value) => Object.fromEntries(iterations.map(it => [it.id,value]));
-    const range = (values) => Object.fromEntries(iterations.map((it,i) => [it.id, values[i] ?? 0]));
-    return {
-      schema:"capacity-planner.workspace",
-      version:VERSION,
-      plan,
-      roles:[
-        {id:"role-dm",name:"Delivery Manager",dayRate:950,fteByIteration:all(.4)},
-        {id:"role-ba",name:"Business Analyst",dayRate:850,fteByIteration:range([.8,.8,.8,.4,.4,0,0,0])},
-        {id:"role-ux",name:"UX / UI",dayRate:800,fteByIteration:range([.7,.7,.7,.7,.3,.3,0,0])},
-        {id:"role-dev",name:"Software Engineering",dayRate:900,fteByIteration:all(2)},
-        {id:"role-qa",name:"QA Engineer",dayRate:780,fteByIteration:range([0,0,.4,.4,.8,.8,.8,.6])}
-      ],
-      tasks:[
-        {id:"task-1",title:"Kick-off and delivery setup",units:5,roleId:"role-dm",iterationId:iterations[0]?.id ?? null},
-        {id:"task-2",title:"Domain discovery and backlog",units:8,roleId:"role-ba",iterationId:iterations[0]?.id ?? null},
-        {id:"task-3",title:"Experience map and key flows",units:8,roleId:"role-ux",iterationId:iterations[0]?.id ?? null},
-        {id:"task-4",title:"Core order service",units:21,roleId:"role-dev",iterationId:iterations[1]?.id ?? null},
-        {id:"task-5",title:"Pricing and validation rules",units:13,roleId:"role-dev",iterationId:iterations[2]?.id ?? null},
-        {id:"task-6",title:"Order-management UI",units:13,roleId:"role-dev",iterationId:iterations[3]?.id ?? null},
-        {id:"task-7",title:"Automation foundation",units:8,roleId:"role-qa",iterationId:iterations[3]?.id ?? null},
-        {id:"task-8",title:"Release hardening",units:10,roleId:null,iterationId:null},
-        {id:"task-9",title:"Operational handover",units:5,roleId:null,iterationId:null}
-      ]
-    };
-  }
+function renderKpis() {
+  const totals=planTotals(),budget=Number(stateRef.state.plan.budget),remaining=budget-totals.cost,use=budget>0?totals.cost/budget:(totals.cost>0?Infinity:0),util=totals.hours>0?totals.scheduled/totals.hours:0;
+  $("#kpis").innerHTML=`
+    <div class="kpi"><div class="label">Budget</div><div class="value">${euro.format(budget)}</div><div class="sub">Resource-plan ceiling</div><div class="budget-track"><span class="${use>1?"over":""}" style="width:${Math.min(100,Number.isFinite(use)?use*100:100)}%"></span></div></div>
+    <div class="kpi"><div class="label">Planned role cost</div><div class="value">${euro.format(totals.cost)}</div><div class="sub">${Number.isFinite(use)?num.format(use*100):"∞"}% of budget</div></div>
+    <div class="kpi"><div class="label">Remaining</div><div class="value ${remaining<0?"negative":"positive"}">${euro.format(remaining)}</div><div class="sub">${remaining<0?"Plan exceeds budget":"Unallocated budget"}</div></div>
+    <div class="kpi"><div class="label">Planned capacity</div><div class="value">${num.format(totals.pt)} PT</div><div class="sub">${num.format(totals.hours)} capacity hours</div></div>
+    <div class="kpi"><div class="label">Scheduled load</div><div class="value">${num.format(totals.scheduled)} h</div><div class="sub">${num.format(util*100)}% of planned capacity</div></div>
+    <div class="kpi"><div class="label">Unassigned load</div><div class="value">${num.format(totals.backlog)} h</div><div class="sub">${totals.backlogCount} backlog task${totals.backlogCount===1?"":"s"}</div></div>`;
+}
 
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
+function renderChecks() {
+  const totals=planTotals(),budget=Number(stateRef.state.plan.budget),remaining=budget-totals.cost;
+  const cards=[
+    {label:"Budget",tone:remaining<0?"bad":budget===0?"warn":"good",value:remaining<0?`${euro.format(Math.abs(remaining))} over`:budget===0?"No budget set":`${euro.format(remaining)} free`,detail:remaining<0?"Reduce planned FTE or rates, or revise the budget.":"Planned role cost versus resource budget."},
+    {label:"FTE envelope",tone:totals.envelopeBreaches?"warn":"good",value:totals.envelopeBreaches?`${totals.envelopeBreaches} breach${totals.envelopeBreaches===1?"":"es"}`:"Within limits",detail:totals.envelopeBreaches?"Planned FTE exceeds the role's envelope in one or more iterations.":"All role allocations fit their FTE envelope."},
+    {label:"Task load",tone:totals.overloadCells?"bad":"good",value:totals.overloadCells?`${totals.overloadCells} overloaded cell${totals.overloadCells===1?"":"s"}`:"Within capacity",detail:totals.overloadCells?"Estimated task hours exceed planned role capacity.":"Assigned task load fits planned role capacity."},
+    {label:"Backlog",tone:totals.backlogCount?"warn":"good",value:totals.backlogCount?`${totals.backlogCount} unassigned`:"Fully scheduled",detail:totals.backlogCount?`${num.format(totals.backlog)} h still needs a role and iteration.`:"Every task has a role and iteration."}
+  ];
+  $("#checks").innerHTML=`<div class="checks-title"><strong>Planning checks</strong><span>Explicit conditions, not a health score</span></div>${cards.map(card=>`<div class="check-card ${card.tone}"><div class="check-label">${card.label}</div><strong>${card.value}</strong><span>${card.detail}</span></div>`).join("")}`;
+}
 
-  function validate(candidate     ) {
-    if (!candidate || candidate.schema !== "capacity-planner.workspace" || candidate.version !== VERSION) return "Unsupported workspace schema or version.";
-    if (!candidate.plan || typeof candidate.plan.name !== "string") return "Plan is missing.";
-    const start = parseDate(candidate.plan.start), due = parseDate(candidate.plan.due);
-    if (!start || !due || due < start) return "Plan dates are invalid.";
-    for (const key of ["budget","iterationWeeks","daysPerWeek","hoursPerDay","hoursPerUnit"]) {
-      const value = Number(candidate.plan[key]);
-      if (!Number.isFinite(value) || value < 0) return `Plan value ${key} is invalid.`;
-    }
-    if (!Array.isArray(candidate.roles) || !Array.isArray(candidate.tasks)) return "Roles or tasks are missing.";
-    const roleIds = new Set();
-    for (const role of candidate.roles) {
-      if (!role?.id || typeof role.name !== "string" || roleIds.has(role.id)) return "Role identity is invalid.";
-      roleIds.add(role.id);
-      if (!Number.isFinite(Number(role.dayRate)) || Number(role.dayRate) < 0) return `Day rate for ${role.name} is invalid.`;
-      if (!role.fteByIteration || typeof role.fteByIteration !== "object") return `FTE plan for ${role.name} is invalid.`;
-      for (const value of Object.values(role.fteByIteration)) {
-        if (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 20) return `FTE value for ${role.name} is invalid.`;
-      }
-    }
-    const taskIds = new Set();
-    for (const task of candidate.tasks) {
-      if (!task?.id || typeof task.title !== "string" || taskIds.has(task.id)) return "Task identity is invalid.";
-      taskIds.add(task.id);
-      if (!Number.isFinite(Number(task.units)) || Number(task.units) < 0) return `Estimate for ${task.title} is invalid.`;
-      if (task.roleId && !roleIds.has(task.roleId)) return `Task ${task.title} refers to a missing role.`;
-    }
-    return null;
-  }
+function renderBacklog() {
+  const all=stateRef.state.tasks.filter(task=>!task.roleId||!task.iterationId),query=stateRef.taskFilter.trim().toLowerCase(),items=query?all.filter(task=>task.title.toLowerCase().includes(query)):all;
+  $("#backlog-count").textContent=query?`${items.length}/${all.length}`:String(all.length);
+  $("#backlog").innerHTML=items.length?items.map(task=>taskCard(task)).join(""):`<div class="empty">${all.length?"No tasks match this filter.":"All tasks are assigned."}<br><small>${all.length?"Try another search.":"Assigned tasks can be moved back here."}</small></div>`;
+}
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return baseState();
-      const candidate = JSON.parse(raw);
-      return validate(candidate) ? baseState() : candidate;
-    } catch {
-      return baseState();
-    }
-  }
+function renderTimeline() {
+  const its=iterations(),timeline=$("#timeline"),totalsByRole=stateRef.state.roles.map(role=>roleTotals(role)),maxHours=Math.max(1,...totalsByRole.map(t=>t.hours));
+  timeline.style.setProperty("--iteration-count",String(Math.max(1,its.length)));
+  const head=`<div class="timeline-row timeline-head" style="--iteration-count:${Math.max(1,its.length)}"><div class="corner"><div><strong>Roles / swimlanes</strong><div class="capacity-detail">Planned FTE → PT → hours → cost</div></div></div>${its.map(it=>`<div class="iter-head"><strong>${esc(it.name)}</strong><span>${dateText(it.start)} – ${dateText(it.end)}</span><span>${num.format(it.weeks)} weeks</span></div>`).join("")}</div>`;
+  const summary=`<div class="timeline-row iteration-summary-row" style="--iteration-count:${Math.max(1,its.length)}"><div class="iteration-summary-label"><strong>Iteration totals</strong><span>All roles · planned / envelope</span></div>${its.map(it=>{const t=iterationTotals(it),util=t.hours>0?t.load/t.hours:(t.load>0?Infinity:0),hasIssue=t.envelopeBreaches||t.overloadCells;return `<div class="iteration-total ${hasIssue?"has-issue":""}" aria-label="${esc(it.name)} totals"><strong>${num.format(t.plannedFte)} / ${num.format(t.availableFte)} FTE</strong><span>${num.format(t.pt)} PT · ${num.format(t.hours)} h</span><span>${euro.format(t.cost)}</span><span class="${t.overloadCells?"bad-text":""}">${num.format(t.load)} h tasks · ${Number.isFinite(util)?num.format(util*100):"∞"}%</span>${t.envelopeBreaches?`<em>${t.envelopeBreaches} FTE envelope breach${t.envelopeBreaches===1?"":"es"}</em>`:""}</div>`;}).join("")}</div>`;
+  const rows=stateRef.state.roles.map((role,index)=>{
+    const totals=totalsByRole[index],laneHeight=Math.round(126+94*(totals.hours/maxHours)),avgFte=totals.weeks>0?totals.fteWeeks/totals.weeks:0;
+    return `<div class="timeline-row role-row" style="--iteration-count:${Math.max(1,its.length)};--lane-height:${laneHeight}px"><div class="role-summary"><div class="role-name-line"><strong title="${esc(role.name)}">${esc(role.name)}</strong><div class="role-actions"><button type="button" data-action="allocate-role" data-role-id="${esc(role.id)}">Plan FTE</button><button type="button" data-action="role-settings" data-role-id="${esc(role.id)}" aria-label="Edit ${esc(role.name)}">Edit</button></div></div><div class="capacity-detail">Avg ${num.format(avgFte)} planned · ${num.format(role.availableFte)} FTE envelope/week</div><div class="capacity-detail">${euro.format(role.dayRate)}/PT${totals.envelopeBreaches?` · <span class="warn-text">${totals.envelopeBreaches} envelope breach${totals.envelopeBreaches===1?"":"es"}</span>`:""}</div><div class="role-totals"><span><strong>${num.format(totals.pt)}</strong> PT</span><span><strong>${num.format(totals.hours)}</strong> h</span><span>${euro.format(totals.cost)}</span><span>Peak ${num.format(totals.peakFte)} FTE</span></div><div class="lane-scale" title="Relative total planned capacity"><span style="width:${Math.max(5,totals.hours/maxHours*100)}%"></span></div></div>${its.map(it=>renderCell(role,it)).join("")}</div>`;
+  }).join("");
+  timeline.innerHTML=head+summary+(stateRef.state.roles.length?rows:`<div class="empty board-empty">Add a role to start capacity planning.</div>`);
+}
 
-  let state      = load();
+function renderCell(role,it) {
+  const c=capacityFor(role,it),cellTasks=tasksFor(role.id,it.id),load=cellTasks.reduce((sum,t)=>sum+taskHours(t),0),util=c.hours>0?load/c.hours:(load>0?Infinity:0),over=load>c.hours+.001,envelopeOver=c.fte>Number(role.availableFte||0)+.001;
+  const aria=`${role.name}, ${it.name}: ${num.format(c.fte)} planned FTE of ${num.format(role.availableFte)} envelope, ${num.format(c.pt)} PT, ${num.format(c.hours)} capacity hours, ${num.format(load)} task hours`;
+  return `<div class="capacity-cell ${over?"overloaded":""} ${envelopeOver?"envelope-over":""}" data-role-id="${esc(role.id)}" data-iteration-id="${esc(it.id)}" role="group" aria-label="${esc(aria)}"><div class="cell-head"><div><div class="capacity-amount">${num.format(c.fte)} / ${num.format(role.availableFte)} FTE · ${num.format(c.pt)} PT</div><div class="capacity-detail">${num.format(c.hours)} h · ${euro.format(c.cost)}</div></div><div class="cell-badges"><span class="util ${over?"over":""}">${Number.isFinite(util)?num.format(util*100):"∞"}%</span>${envelopeOver?`<span class="fte-badge">FTE over</span>`:""}</div></div><div class="cell-meter" aria-hidden="true"><span class="${over?"over":""}" style="width:${Math.min(100,Number.isFinite(util)?util*100:100)}%"></span></div><div class="cell-tasks">${cellTasks.length?cellTasks.map(t=>taskCard(t,true)).join(""):`<div class="cell-empty">${c.fte>0?"Drop tasks here":role.availableFte>0?"No planned FTE":"No FTE envelope"}</div>`}</div></div>`;
+}
 
-  function save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      $("#storage-pill").textContent = "Saved locally";
-    } catch {
-      $("#storage-pill").textContent = "In-memory only";
-    }
-  }
+function render() {
+  reconcile(false);
+  const its=iterations();
+  $("#app-plan-title").textContent=stateRef.state.plan.name;$("#plan-heading").textContent=stateRef.state.plan.name;
+  $("#date-pill").textContent=`${dateText(stateRef.state.plan.start)} → ${dateText(stateRef.state.plan.due)}`;
+  $("#iteration-pill").textContent=`${its.length} iterations · ${num.format(stateRef.state.plan.iterationWeeks)} week cadence`;
+  $("#unit-pill").textContent=`1 ${stateRef.state.plan.unitName} = ${num.format(stateRef.state.plan.hoursPerUnit)} h`;
+  renderStorageStatus();renderKpis();renderChecks();renderBacklog();renderTimeline();wireDrag();
+}
 
-  function announce(message) {
-    clearTimeout(noticeTimer);
-    notice.textContent = message;
-    notice.classList.add("show");
-    noticeTimer = window.setTimeout(() => notice.classList.remove("show"), 2200);
-  }
-
-  function iterations() {
-    return makeIterations(state.plan);
-  }
-
-  function capacityFor(role, iteration) {
-    const fte = Number(role.fteByIteration?.[iteration.id] ?? 0);
-    const pt = fte * iteration.weeks * Number(state.plan.daysPerWeek);
-    const hours = pt * Number(state.plan.hoursPerDay);
-    const cost = pt * Number(role.dayRate || 0);
-    return {fte,pt,hours,cost};
-  }
-
-  function taskHours(task) {
-    return Number(task.units || 0) * Number(state.plan.hoursPerUnit || 0);
-  }
-
-  function tasksFor(roleId, iterationId) {
-    return state.tasks.filter(task => task.roleId === roleId && task.iterationId === iterationId);
-  }
-
-  function roleTotals(role) {
-    return iterations().reduce((acc,it) => {
-      const c = capacityFor(role,it);
-      acc.pt += c.pt; acc.hours += c.hours; acc.cost += c.cost; acc.fte += c.fte;
-      return acc;
-    }, {pt:0,hours:0,cost:0,fte:0});
-  }
-
-  function planTotals() {
-    const role = state.roles.reduce((acc,r) => {
-      const t = roleTotals(r);
-      acc.pt += t.pt; acc.hours += t.hours; acc.cost += t.cost;
-      return acc;
-    }, {pt:0,hours:0,cost:0});
-    const scheduled = state.tasks.filter(t => t.roleId && t.iterationId).reduce((sum,t) => sum + taskHours(t),0);
-    const backlog = state.tasks.filter(t => !t.roleId || !t.iterationId).reduce((sum,t) => sum + taskHours(t),0);
-    return {...role,scheduled,backlog};
-  }
-
-  function taskCard(task, compact = false) {
-    const assigned = task.roleId && task.iterationId;
-    return `<article class="task-card" draggable="true" data-task-id="${esc(task.id)}" tabindex="0" aria-label="${esc(task.title)}, ${num.format(task.units)} ${esc(state.plan.unitName)}">
-      <div class="task-title">${esc(task.title)}</div>
-      <div class="task-meta">
-        <span>${num.format(task.units)} ${esc(state.plan.unitName)}</span>
-        <span>·</span><span>${num.format(taskHours(task))} h</span>
-      </div>
-      ${compact ? "" : `<div class="task-actions"><button type="button" data-action="assign-task" data-task-id="${esc(task.id)}">${assigned ? "Move" : "Assign"}</button>${assigned ? `<button type="button" data-action="unassign-task" data-task-id="${esc(task.id)}">Backlog</button>` : ""}<button type="button" data-action="delete-task" data-task-id="${esc(task.id)}">Delete</button></div>`}
-    </article>`;
-  }
-
-  function renderKpis() {
-    const totals = planTotals();
-    const budget = Number(state.plan.budget);
-    const remaining = budget - totals.cost;
-    const use = budget > 0 ? totals.cost / budget : 0;
-    const util = totals.hours > 0 ? totals.scheduled / totals.hours : 0;
-    $("#kpis").innerHTML = `
-      <div class="kpi"><div class="label">Budget</div><div class="value">${euro.format(budget)}</div><div class="sub">Commercial ceiling</div><div class="budget-track"><span class="${use>1?"over":""}" style="width:${Math.min(100,use*100)}%"></span></div></div>
-      <div class="kpi"><div class="label">Planned role cost</div><div class="value">${euro.format(totals.cost)}</div><div class="sub">${num.format(use*100)}% of budget</div></div>
-      <div class="kpi"><div class="label">Remaining</div><div class="value" style="color:${remaining<0?"var(--red)":"var(--green)"}">${euro.format(remaining)}</div><div class="sub">${remaining<0?"Plan exceeds budget":"Unplanned budget"}</div></div>
-      <div class="kpi"><div class="label">Capacity</div><div class="value">${num.format(totals.pt)} PT</div><div class="sub">${num.format(totals.hours)} assigned hours</div></div>
-      <div class="kpi"><div class="label">Scheduled load</div><div class="value">${num.format(totals.scheduled)} h</div><div class="sub">${num.format(util*100)}% of role capacity</div></div>
-      <div class="kpi"><div class="label">Backlog load</div><div class="value">${num.format(totals.backlog)} h</div><div class="sub">${state.tasks.filter(t=>!t.roleId||!t.iterationId).length} unassigned tasks</div></div>`;
-  }
-
-  function renderBacklog() {
-    const items = state.tasks.filter(task => !task.roleId || !task.iterationId);
-    $("#backlog-count").textContent = String(items.length);
-    $("#backlog").innerHTML = items.length ? items.map(task => taskCard(task)).join("") : `<div class="empty">All tasks are assigned.<br><small>Drag an assigned task back here to unassign it.</small></div>`;
-  }
-
-  function renderTimeline() {
-    const its = iterations();
-    const timeline = $("#timeline");
-    timeline.style.setProperty("--iteration-count", String(Math.max(1,its.length)));
-    const totalsByRole = state.roles.map(role => roleTotals(role));
-    const maxHours = Math.max(1,...totalsByRole.map(t => t.hours));
-
-    const head = `<div class="timeline-row timeline-head" style="--iteration-count:${Math.max(1,its.length)}">
-      <div class="corner"><div><strong>Roles / swimlanes</strong><div class="capacity-detail">FTE → PT → hours</div></div></div>
-      ${its.map(it => `<div class="iter-head"><strong>${esc(it.name)}</strong><span>${dateText(it.start)} – ${dateText(it.end)}</span><span>${num.format(it.weeks)} weeks</span></div>`).join("")}
-    </div>`;
-
-    const rows = state.roles.map((role,index) => {
-      const totals = totalsByRole[index];
-      const laneHeight = Math.round(112 + 105 * (totals.hours / maxHours));
-      const avgFte = its.length ? totals.fte / its.length : 0;
-      return `<div class="timeline-row role-row" style="--iteration-count:${Math.max(1,its.length)};--lane-height:${laneHeight}px">
-        <div class="role-summary">
-          <div class="role-name-line"><strong title="${esc(role.name)}">${esc(role.name)}</strong><button type="button" data-action="allocate-role" data-role-id="${esc(role.id)}">Plan FTE</button></div>
-          <div class="capacity-detail">Avg ${num.format(avgFte)} FTE/week · ${euro.format(role.dayRate)}/PT</div>
-          <div class="role-totals"><span><strong>${num.format(totals.pt)}</strong> PT</span><span><strong>${num.format(totals.hours)}</strong> h</span><span>${euro.format(totals.cost)}</span><span>${num.format(totals.hours/maxHours*100)}% scale</span></div>
-          <div class="lane-scale" title="Relative total capacity"><span style="width:${Math.max(5,totals.hours/maxHours*100)}%"></span></div>
-        </div>
-        ${its.map(it => {
-          const c = capacityFor(role,it);
-          const cellTasks = tasksFor(role.id,it.id);
-          const load = cellTasks.reduce((sum,t) => sum + taskHours(t),0);
-          const util = c.hours > 0 ? load / c.hours : (load > 0 ? Infinity : 0);
-          const over = load > c.hours + .001;
-          return `<div class="capacity-cell ${over?"overloaded":""}" data-role-id="${esc(role.id)}" data-iteration-id="${esc(it.id)}">
-            <div class="cell-head">
-              <div><div class="capacity-amount">${num.format(c.fte)} FTE · ${num.format(c.pt)} PT</div><div class="capacity-detail">${num.format(c.hours)} h capacity</div></div>
-              <span class="util ${over?"over":""}">${Number.isFinite(util)?num.format(util*100):"∞"}%</span>
-            </div>
-            <div class="cell-meter" aria-hidden="true"><span class="${over?"over":""}" style="width:${Math.min(100,Number.isFinite(util)?util*100:100)}%"></span></div>
-            <div class="cell-tasks">${cellTasks.length ? cellTasks.map(t => taskCard(t,true)).join("") : `<div class="cell-empty">${c.fte>0?"Drop tasks here":"0 FTE — still droppable"}</div>`}</div>
-          </div>`;
-        }).join("")}
-      </div>`;
-    }).join("");
-
-    timeline.innerHTML = head + (state.roles.length ? rows : `<div class="empty" style="margin:20px">Add a role to start capacity planning.</div>`);
-  }
-
-  function render() {
-    reconcile(false);
-    const its = iterations();
-    $("#app-plan-title").textContent = state.plan.name;
-    $("#plan-heading").textContent = state.plan.name;
-    $("#date-pill").textContent = `${dateText(state.plan.start)} → ${dateText(state.plan.due)}`;
-    $("#iteration-pill").textContent = `${its.length} iterations · ${num.format(state.plan.iterationWeeks)} week cadence`;
-    $("#unit-pill").textContent = `1 ${state.plan.unitName} = ${num.format(state.plan.hoursPerUnit)} h`;
-    renderKpis(); renderBacklog(); renderTimeline(); wireDrag();
-  }
-
-  function reconcile(withNotice = true) {
-    const validIterations = new Set(iterations().map(it => it.id));
-    let moved = 0;
-    for (const role of state.roles) {
-      role.fteByIteration = Object.fromEntries(Object.entries(role.fteByIteration || {}).filter(([id]) => validIterations.has(id)));
-    }
-    for (const task of state.tasks) {
-      if (task.iterationId && !validIterations.has(task.iterationId)) {
-        task.roleId = null; task.iterationId = null; moved += 1;
-      }
-      if (task.roleId && !state.roles.some(r => r.id === task.roleId)) {
-        task.roleId = null; task.iterationId = null; moved += 1;
-      }
-    }
-    if (moved && withNotice) announce(`${moved} task${moved===1?"":"s"} moved back to backlog after plan changes.`);
-  }
-
-  function wireDrag() {
-    document.querySelectorAll             (".task-card").forEach(card => {
-      card.addEventListener("dragstart", event => {
-        draggedTaskId = card.dataset.taskId;
-        card.classList.add("dragging");
-        event.dataTransfer?.setData("text/plain", draggedTaskId || "");
-        if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
-      });
-      card.addEventListener("dragend", () => {
-        draggedTaskId = null;
-        card.classList.remove("dragging");
-        document.querySelectorAll(".drop-active").forEach(el => el.classList.remove("drop-active"));
-      });
-    });
-    document.querySelectorAll             (".capacity-cell").forEach(cell => {
-      cell.addEventListener("dragover", event => {
-        event.preventDefault();
-        cell.classList.add("drop-active");
-        if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
-      });
-      cell.addEventListener("dragleave", () => cell.classList.remove("drop-active"));
-      cell.addEventListener("drop", event => {
-        event.preventDefault();
-        cell.classList.remove("drop-active");
-        const id = event.dataTransfer?.getData("text/plain") || draggedTaskId;
-        assignTask(id, cell.dataset.roleId, cell.dataset.iterationId);
-      });
-    });
-    $("#backlog").addEventListener("dragover", event => {
-      event.preventDefault();
-      if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
-    });
-    $("#backlog").addEventListener("drop", event => {
-      event.preventDefault();
-      const id = event.dataTransfer?.getData("text/plain") || draggedTaskId;
-      unassignTask(id);
-    });
-  }
-
-  function assignTask(taskId, roleId, iterationId) {
-    const task = state.tasks.find(t => t.id === taskId);
-    if (!task || !state.roles.some(r=>r.id===roleId) || !iterations().some(i=>i.id===iterationId)) return;
-    task.roleId = roleId; task.iterationId = iterationId;
-    save(); render(); announce(`${task.title} assigned.`);
-  }
-
-  function unassignTask(taskId) {
-    const task = state.tasks.find(t=>t.id===taskId);
-    if (!task) return;
-    task.roleId = null; task.iterationId = null;
-    save(); render(); announce(`${task.title} moved to backlog.`);
-  }
-
-  function openDialog(title, body, onSubmit, submitText = "Save") {
-    dialog.innerHTML = `<form method="dialog" id="dialog-form">
-      <div class="dialog-head"><h2 id="dialog-title">${esc(title)}</h2><button type="button" data-dialog-close aria-label="Close dialog">×</button></div>
-      <div class="dialog-body">${body}</div>
-      <div class="dialog-foot"><button type="button" data-dialog-close>Cancel</button><button class="primary" value="default" type="submit">${esc(submitText)}</button></div>
-    </form>`;
-    dialog.querySelectorAll("[data-dialog-close]").forEach(btn => btn.addEventListener("click",()=>dialog.close()));
-    $("#dialog-form",dialog).addEventListener("submit", event => {
-      event.preventDefault();
-      const form = event.currentTarget                   ;
-      const ok = onSubmit(new FormData(form), form);
-      if (ok !== false) dialog.close();
-    });
-    dialog.showModal();
-    window.setTimeout(() => dialog.querySelector("input,select,button")?.focus(),0);
-  }
-
-  function planDialog(isNew) {
-    const p = state.plan;
-    openDialog(isNew ? "New resource plan" : "Plan settings", `
-      <div class="form-grid">
-        <label class="wide">Plan name<input name="name" required maxlength="80" value="${isNew?"New delivery plan":esc(p.name)}"></label>
-        <label>Budget (€)<input name="budget" type="number" min="0" step="1000" required value="${isNew?"200000":esc(p.budget)}"></label>
-        <label>Iteration length (weeks)<input name="iterationWeeks" type="number" min=".25" max="12" step=".25" required value="${isNew?"2":esc(p.iterationWeeks)}"></label>
-        <label>Start<input name="start" type="date" required value="${isNew?"2026-10-05":esc(p.start)}"></label>
-        <label>Due<input name="due" type="date" required value="${isNew?"2027-01-22":esc(p.due)}"></label>
-        <label>Working days / FTE week<input name="daysPerWeek" type="number" min="1" max="7" step=".5" required value="${isNew?"5":esc(p.daysPerWeek)}"></label>
-        <label>Hours / project day<input name="hoursPerDay" type="number" min=".25" max="24" step=".25" required value="${isNew?"8":esc(p.hoursPerDay)}"></label>
-        <label>Task estimate unit name<input name="unitName" maxlength="12" required value="${isNew?"SP":esc(p.unitName)}"></label>
-        <label>Hours / estimate unit<input name="hoursPerUnit" type="number" min="0" step=".25" required value="${isNew?"6":esc(p.hoursPerUnit)}"></label>
-      </div>
-      ${isNew ? `<div class="callout">Creating a new plan replaces the current in-browser workspace. Export first if you need the current state.</div>` : ""}
-      <div class="formula">Prototype calculation: PT = FTE/week × iteration weeks × working days/week. Hours = PT × hours/day. Cost = PT × role day rate. Calendar holidays are not modeled.</div>
-    `, data => {
-      const candidate = {
-        ...p,
-        id:isNew?uid("plan"):p.id,
-        name:String(data.get("name")||"").trim(),
-        budget:Number(data.get("budget")),
-        iterationWeeks:Number(data.get("iterationWeeks")),
-        start:String(data.get("start")),
-        due:String(data.get("due")),
-        daysPerWeek:Number(data.get("daysPerWeek")),
-        hoursPerDay:Number(data.get("hoursPerDay")),
-        unitName:String(data.get("unitName")||"").trim(),
-        hoursPerUnit:Number(data.get("hoursPerUnit"))
-      };
-      if (!candidate.name || !candidate.unitName || !parseDate(candidate.start) || !parseDate(candidate.due) || parseDate(candidate.due) < parseDate(candidate.start)) {
-        announce("Enter a valid plan name, unit and date range."); return false;
-      }
-      if (isNew) state = {schema:"capacity-planner.workspace",version:VERSION,plan:candidate,roles:[],tasks:[]};
-      else state.plan = candidate;
-      reconcile(true); save(); render(); announce(isNew ? "New resource plan created." : "Plan settings updated.");
-      return true;
-    }, isNew ? "Create plan" : "Apply");
-  }
-
-  function roleDialog() {
-    openDialog("Add role", `
-      <div class="form-grid">
-        <label class="wide">Role name<input name="name" required maxlength="60" placeholder="e.g. Software Engineer"></label>
-        <label>Day rate (€ / PT)<input name="dayRate" type="number" min="0" step="10" required value="850"></label>
-        <label>Initial FTE / week<input name="fte" type="number" min="0" max="20" step=".1" required value="1"></label>
-      </div>
-      <div class="formula">Initial FTE applies to all current iterations. Use “Plan FTE” on the role lane to change a range later.</div>
-    `, data => {
-      const name = String(data.get("name")||"").trim();
-      const dayRate = Number(data.get("dayRate")), fte = Number(data.get("fte"));
-      if (!name || !Number.isFinite(dayRate) || dayRate < 0 || !Number.isFinite(fte) || fte < 0 || fte > 20) { announce("Enter a valid role, day rate and FTE."); return false; }
-      state.roles.push({id:uid("role"),name,dayRate,fteByIteration:Object.fromEntries(iterations().map(it=>[it.id,fte]))});
-      save(); render(); announce(`${name} added.`);
-      return true;
-    }, "Add role");
-  }
-
-  function allocateDialog(roleId) {
-    const role = state.roles.find(r=>r.id===roleId);
-    const its = iterations();
-    if (!role || !its.length) return;
-    const options = its.map(it=>`<option value="${esc(it.id)}">${esc(it.name)} · ${dateText(it.start)}</option>`).join("");
-    openDialog(`Plan FTE · ${role.name}`, `
-      <div class="form-grid">
-        <label>From iteration<select name="from">${options}</select></label>
-        <label>Through iteration<select name="through">${options}</select></label>
-        <label>FTE / week<input name="fte" type="number" min="0" max="20" step=".1" required value="${esc(role.fteByIteration[its[0].id] ?? 1)}"></label>
-        <label>Day rate (€ / PT)<input name="dayRate" type="number" min="0" step="10" required value="${esc(role.dayRate)}"></label>
-      </div>
-      <div class="formula">The same FTE value is applied to every selected iteration. Set 0 FTE to clear capacity while retaining the role.</div>
-    `, data => {
-      const from = its.findIndex(it=>it.id===data.get("from"));
-      const through = its.findIndex(it=>it.id===data.get("through"));
-      const fte = Number(data.get("fte")), dayRate = Number(data.get("dayRate"));
-      if (from < 0 || through < from || !Number.isFinite(fte) || fte < 0 || fte > 20 || !Number.isFinite(dayRate) || dayRate < 0) { announce("Choose a valid iteration range and FTE."); return false; }
-      for (let i=from;i<=through;i++) role.fteByIteration[its[i].id] = fte;
-      role.dayRate = dayRate;
-      save(); render(); announce(`${role.name}: ${num.format(fte)} FTE applied to iterations ${from+1}–${through+1}.`);
-      return true;
-    }, "Apply range");
-    const from = dialog.querySelector                   ('[name="from"]');
-    const through = dialog.querySelector                   ('[name="through"]');
-    if (through) through.selectedIndex = its.length - 1;
-  }
-
-  function taskDialog() {
-    openDialog("Add task", `
-      <div class="form-grid">
-        <label class="wide">Task title<input name="title" required maxlength="100" placeholder="Outcome or deliverable"></label>
-        <label>Estimate (${esc(state.plan.unitName)})<input name="units" type="number" min="0" step=".25" required value="5"></label>
-      </div>
-      <div class="formula">At the current conversion, 5 ${esc(state.plan.unitName)} = ${num.format(5*state.plan.hoursPerUnit)} h. The unit name and conversion are configurable in Plan settings.</div>
-    `, data => {
-      const title = String(data.get("title")||"").trim(), units = Number(data.get("units"));
-      if (!title || !Number.isFinite(units) || units < 0) { announce("Enter a valid title and estimate."); return false; }
-      state.tasks.push({id:uid("task"),title,units,roleId:null,iterationId:null});
-      save(); render(); announce(`${title} added to backlog.`);
-      return true;
-    }, "Add task");
-  }
-
-  function assignmentDialog(taskId) {
-    const task = state.tasks.find(t=>t.id===taskId);
-    const its = iterations();
-    if (!task || !state.roles.length || !its.length) { announce("Add at least one role and iteration first."); return; }
-    const roleOptions = state.roles.map(role=>`<option value="${esc(role.id)}" ${task.roleId===role.id?"selected":""}>${esc(role.name)}</option>`).join("");
-    const iterOptions = its.map(it=>`<option value="${esc(it.id)}" ${task.iterationId===it.id?"selected":""}>${esc(it.name)} · ${dateText(it.start)}</option>`).join("");
-    openDialog(`Assign task · ${task.title}`, `
-      <div class="form-grid">
-        <label>Role<select name="roleId">${roleOptions}</select></label>
-        <label>Iteration<select name="iterationId">${iterOptions}</select></label>
-      </div>
-      <div class="formula">${num.format(task.units)} ${esc(state.plan.unitName)} = ${num.format(taskHours(task))} h. Capacity warnings update after assignment.</div>
-    `, data => {
-      assignTask(task.id,String(data.get("roleId")),String(data.get("iterationId")));
-      return true;
-    }, "Assign");
-  }
-
-  function deleteTask(taskId) {
-    const task = state.tasks.find(t=>t.id===taskId);
-    if (!task) return;
-    if (!window.confirm(`Delete task "${task.title}" from this prototype workspace?`)) return;
-    state.tasks = state.tasks.filter(t=>t.id!==taskId);
-    save(); render(); announce("Task deleted.");
-  }
-
-  function exportWorkspace() {
-    const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${state.plan.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "capacity-plan"}.json`;
-    document.body.appendChild(anchor); anchor.click(); anchor.remove();
-    URL.revokeObjectURL(url);
-    announce("Workspace exported.");
-  }
-
-  async function importWorkspace(file) {
-    try {
-      const text = await file.text();
-      const candidate = JSON.parse(text);
-      const error = validate(candidate);
-      if (error) { announce(error); return; }
-      if (!window.confirm(`Replace the current workspace with "${candidate.plan.name}"?`)) return;
-      state = clone(candidate);
-      reconcile(true); save(); render(); announce("Workspace imported.");
-    } catch {
-      announce("Import failed. Choose a valid JSON workspace.");
-    } finally {
-      importInput.value = "";
-    }
-  }
-
-  document.addEventListener("click", event => {
-    const target = (event.target                  )?.closest                   ("button");
-    if (!target) return;
-    const action = target.dataset.action;
-    if (action === "allocate-role") allocateDialog(target.dataset.roleId);
-    if (action === "assign-task") assignmentDialog(target.dataset.taskId);
-    if (action === "unassign-task") unassignTask(target.dataset.taskId);
-    if (action === "delete-task") deleteTask(target.dataset.taskId);
+function wireTaskCards(root=document) {
+  root.querySelectorAll(".task-card").forEach(card=>{
+    card.addEventListener("dragstart",event=>{stateRef.draggedTaskId=card.dataset.taskId;card.classList.add("dragging");event.dataTransfer?.setData("text/plain",stateRef.draggedTaskId||"");if(event.dataTransfer)event.dataTransfer.effectAllowed="move";});
+    card.addEventListener("dragend",()=>{stateRef.draggedTaskId=null;card.classList.remove("dragging");document.querySelectorAll(".drop-active").forEach(el=>el.classList.remove("drop-active"));});
   });
-
-  $("#new-plan-btn").addEventListener("click",()=>planDialog(true));
-  $("#edit-plan-btn").addEventListener("click",()=>planDialog(false));
-  $("#add-role-btn").addEventListener("click",roleDialog);
-  $("#add-task-btn").addEventListener("click",taskDialog);
-  $("#sidebar-add-task").addEventListener("click",taskDialog);
-  $("#export-btn").addEventListener("click",exportWorkspace);
-  $("#import-btn").addEventListener("click",()=>importInput.click());
-  importInput.addEventListener("change",()=>{ if(importInput.files?.[0]) importWorkspace(importInput.files[0]); });
-  dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && dialog.open) dialog.close();
+}
+function wireDrag() {
+  wireTaskCards(document);
+  document.querySelectorAll(".capacity-cell").forEach(cell=>{
+    cell.addEventListener("dragover",event=>{event.preventDefault();cell.classList.add("drop-active");if(event.dataTransfer)event.dataTransfer.dropEffect="move";});
+    cell.addEventListener("dragleave",()=>cell.classList.remove("drop-active"));
+    cell.addEventListener("drop",event=>{event.preventDefault();cell.classList.remove("drop-active");assignTask(event.dataTransfer?.getData("text/plain")||stateRef.draggedTaskId,cell.dataset.roleId,cell.dataset.iterationId);});
   });
+  $("#backlog").addEventListener("dragover",event=>{event.preventDefault();if(event.dataTransfer)event.dataTransfer.dropEffect="move";});
+  $("#backlog").addEventListener("drop",event=>{event.preventDefault();unassignTask(event.dataTransfer?.getData("text/plain")||stateRef.draggedTaskId);});
+}
+function assignTask(taskId,roleId,iterationId) {
+  const task=stateRef.state.tasks.find(t=>t.id===taskId);
+  if(!task||!stateRef.state.roles.some(r=>r.id===roleId)||!iterations().some(i=>i.id===iterationId))return;
+  task.roleId=roleId;task.iterationId=iterationId;save();render();announce(`${task.title} assigned.`);
+}
+function unassignTask(taskId) {
+  const task=stateRef.state.tasks.find(t=>t.id===taskId);if(!task)return;
+  task.roleId=null;task.iterationId=null;save();render();announce(`${task.title} moved to backlog.`);
+}
 
-  render();
-  save();
+return {renderBacklog,render,wireTaskCards,assignTask,unassignTask};
+})();
+modules["dialogs"] = (() => {
+const {$,VERSION,announce,capacityFor,clone,dateText,dialog,esc,euro,importInput,iterations,nextPlanDates,num,parseDate,reconcile,save,stateRef,taskHours,tasksFor,uid,validate} = modules["core"];
+const {assignTask,render} = modules["render"];
+
+function openDialog(title,body,onSubmit,submitText="Save") {
+  dialog.innerHTML=`<form method="dialog" id="dialog-form"><div class="dialog-head"><h2 id="dialog-title">${esc(title)}</h2><button type="button" data-dialog-close aria-label="Close dialog">×</button></div><div class="dialog-body">${body}</div><div class="dialog-foot"><button type="button" data-dialog-close>Cancel</button><button class="primary" value="default" type="submit">${esc(submitText)}</button></div></form>`;
+  dialog.querySelectorAll("[data-dialog-close]").forEach(btn=>btn.addEventListener("click",()=>dialog.close()));
+  $("#dialog-form",dialog).addEventListener("submit",event=>{event.preventDefault();const ok=onSubmit(new FormData(event.currentTarget),event.currentTarget);if(ok!==false)dialog.close();});
+  dialog.showModal();window.setTimeout(()=>dialog.querySelector("input,select,button")?.focus(),0);
+}
+
+function planDialog(isNew) {
+  const p=stateRef.state.plan,defaults=nextPlanDates();
+  openDialog(isNew?"New resource plan":"Plan settings",`
+    <div class="form-grid"><label class="wide">Plan name<input name="name" required maxlength="80" value="${isNew?"New delivery plan":esc(p.name)}"></label><label>Budget (€)<input name="budget" type="number" min="0" step="1000" required value="${isNew?"200000":esc(p.budget)}"></label><label>Iteration length (weeks)<input name="iterationWeeks" type="number" min=".25" max="12" step=".25" required value="${isNew?"2":esc(p.iterationWeeks)}"></label><label>Start<input name="start" type="date" required value="${isNew?defaults.start:esc(p.start)}"></label><label>Due<input name="due" type="date" required value="${isNew?defaults.due:esc(p.due)}"></label><label>Working days / FTE week<input name="daysPerWeek" type="number" min="1" max="7" step=".5" required value="${isNew?"5":esc(p.daysPerWeek)}"></label><label>Hours / project day<input name="hoursPerDay" type="number" min=".25" max="24" step=".25" required value="${isNew?"8":esc(p.hoursPerDay)}"></label><label>Task estimate unit name<input name="unitName" maxlength="12" required value="${isNew?"SP":esc(p.unitName)}"></label><label>Hours / estimate unit<input name="hoursPerUnit" type="number" min="0" step=".25" required value="${isNew?"6":esc(p.hoursPerUnit)}"></label></div>
+    ${isNew?`<div class="callout">Creating a new plan replaces the current in-browser workspace. Export first if you need the current state.</div>`:`<div class="callout subtle">Changing the start date or iteration cadence can invalidate existing task placements. Affected tasks are returned to the backlog instead of being silently remapped.</div>`}
+    <div class="formula">PT = FTE/week × iteration weeks × working days/week. Hours = PT × hours/day. Cost = PT × role day rate. A partial final iteration is prorated by its calendar-day fraction; holidays and personal leave are not modeled.</div>`,data=>{
+      const candidate={...p,id:isNew?uid("plan"):p.id,name:String(data.get("name")||"").trim(),budget:Number(data.get("budget")),iterationWeeks:Number(data.get("iterationWeeks")),start:String(data.get("start")),due:String(data.get("due")),daysPerWeek:Number(data.get("daysPerWeek")),hoursPerDay:Number(data.get("hoursPerDay")),unitName:String(data.get("unitName")||"").trim(),hoursPerUnit:Number(data.get("hoursPerUnit"))};
+      const probe={schema:"capacity-planner.workspace",version:VERSION,plan:candidate,roles:isNew?[]:stateRef.state.roles,tasks:isNew?[]:stateRef.state.tasks},error=validate(probe);
+      if(error){announce(error);return false;}
+      if(isNew&&(stateRef.state.roles.length||stateRef.state.tasks.length)&&!window.confirm("Create a new resource plan and replace the current workspace?"))return false;
+      if(isNew)stateRef.state={schema:"capacity-planner.workspace",version:VERSION,plan:candidate,roles:[],tasks:[]};else stateRef.state.plan=candidate;
+      reconcile(true);save();render();announce(isNew?"New resource plan created.":"Plan settings updated.");return true;
+    },isNew?"Create plan":"Apply");
+}
+
+function roleDialog() {
+  openDialog("Add role",`<div class="form-grid"><label class="wide">Role name<input name="name" required maxlength="60" placeholder="e.g. Software Engineer"></label><label>Day rate (€ / PT)<input name="dayRate" type="number" min="0" step="10" required value="850"></label><label>FTE envelope / week<input name="availableFte" type="number" min="0" max="20" step=".1" required value="1"></label><label>Initial planned FTE / week<input name="fte" type="number" min="0" max="20" step=".1" required value="1"></label></div><div class="formula">The FTE envelope is the role capacity available to this plan. Planned FTE is what the plan consumes. Planning above the envelope is allowed but visibly flagged.</div>`,data=>{
+    const name=String(data.get("name")||"").trim(),dayRate=Number(data.get("dayRate")),availableFte=Number(data.get("availableFte")),fte=Number(data.get("fte"));
+    if(!name||!Number.isFinite(dayRate)||dayRate<0||!Number.isFinite(availableFte)||availableFte<0||availableFte>20||!Number.isFinite(fte)||fte<0||fte>20){announce("Enter a valid role, day rate and FTE values.");return false;}
+    stateRef.state.roles.push({id:uid("role"),name,dayRate,availableFte,fteByIteration:Object.fromEntries(iterations().map(it=>[it.id,fte]))});save();render();announce(`${name} added${fte>availableFte?" with an FTE envelope warning":""}.`);return true;
+  },"Add role");
+}
+
+function roleSettingsDialog(roleId) {
+  const role=stateRef.state.roles.find(r=>r.id===roleId);if(!role)return;
+  openDialog(`Role settings · ${role.name}`,`<div class="form-grid"><label class="wide">Role name<input name="name" required maxlength="60" value="${esc(role.name)}"></label><label>Day rate (€ / PT)<input name="dayRate" type="number" min="0" step="10" required value="${esc(role.dayRate)}"></label><label>FTE envelope / week<input name="availableFte" type="number" min="0" max="20" step=".1" required value="${esc(role.availableFte)}"></label></div><div class="formula">Changing the FTE envelope does not rewrite the plan. Existing allocations above the new envelope remain visible as warnings.</div><div class="danger-zone"><div><strong>Remove role</strong><span>Assigned tasks return to the backlog; tasks are not deleted.</span></div><button type="button" class="danger" data-action="delete-role" data-role-id="${esc(role.id)}">Remove role</button></div>`,data=>{
+    const name=String(data.get("name")||"").trim(),dayRate=Number(data.get("dayRate")),availableFte=Number(data.get("availableFte"));
+    if(!name||!Number.isFinite(dayRate)||dayRate<0||!Number.isFinite(availableFte)||availableFte<0||availableFte>20){announce("Enter valid role settings.");return false;}
+    role.name=name;role.dayRate=dayRate;role.availableFte=availableFte;save();render();announce(`${name} updated.`);return true;
+  },"Save role");
+}
+
+function deleteRole(roleId) {
+  const role=stateRef.state.roles.find(r=>r.id===roleId);if(!role)return;
+  const affected=stateRef.state.tasks.filter(t=>t.roleId===roleId).length;
+  if(!window.confirm(`Remove role "${role.name}"? ${affected?`${affected} assigned task${affected===1?"":"s"} will return to the backlog.`:"No tasks are assigned to it."}`))return;
+  for(const task of stateRef.state.tasks)if(task.roleId===roleId){task.roleId=null;task.iterationId=null;}
+  stateRef.state.roles=stateRef.state.roles.filter(r=>r.id!==roleId);if(dialog.open)dialog.close();save();render();announce(`${role.name} removed${affected?`; ${affected} task${affected===1?"":"s"} returned to backlog`:""}.`);
+}
+
+function allocateDialog(roleId) {
+  const role=stateRef.state.roles.find(r=>r.id===roleId),its=iterations();if(!role||!its.length)return;
+  const options=its.map(it=>`<option value="${esc(it.id)}">${esc(it.name)} · ${dateText(it.start)}</option>`).join("");
+  openDialog(`Plan FTE · ${role.name}`,`<div class="form-grid"><label>From iteration<select name="from">${options}</select></label><label>Through iteration<select name="through">${options}</select></label><label>Planned FTE / week<input name="fte" type="number" min="0" max="20" step=".1" required value="${esc(role.fteByIteration[its[0].id]??Math.min(1,role.availableFte))}"></label><div class="metric-preview"><span>FTE envelope</span><strong>${num.format(role.availableFte)} FTE / week</strong><small>${euro.format(role.dayRate)} / PT</small></div></div><div class="formula">The same planned FTE is applied to every selected iteration. Set 0 to clear planned capacity while retaining the role. Values above ${num.format(role.availableFte)} FTE are allowed and flagged.</div>`,data=>{
+    const from=its.findIndex(it=>it.id===data.get("from")),through=its.findIndex(it=>it.id===data.get("through")),fte=Number(data.get("fte"));if(from<0||through<from||!Number.isFinite(fte)||fte<0||fte>20){announce("Choose a valid iteration range and FTE.");return false;}
+    for(let i=from;i<=through;i++)role.fteByIteration[its[i].id]=fte;save();render();announce(`${role.name}: ${num.format(fte)} FTE applied to iterations ${from+1}–${through+1}${fte>role.availableFte?"; staffing envelope exceeded":""}.`);return true;
+  },"Apply range");
+  const from=$("[name=\"from\"]",dialog),through=$("[name=\"through\"]",dialog);through.selectedIndex=its.length-1;from.addEventListener("change",()=>{if(through.selectedIndex<from.selectedIndex)through.selectedIndex=from.selectedIndex;});
+}
+
+function taskDialog(taskId=null) {
+  const task=taskId?stateRef.state.tasks.find(t=>t.id===taskId):null;
+  openDialog(task?`Edit task · ${task.title}`:"Add task",`<div class="form-grid"><label class="wide">Task title<input name="title" required maxlength="100" placeholder="Outcome or deliverable" value="${task?esc(task.title):""}"></label><label>Estimate (${esc(stateRef.state.plan.unitName)})<input name="units" type="number" min="0" step=".25" required value="${task?esc(task.units):"5"}"></label>${task&&task.roleId?`<div class="metric-preview"><span>Current placement</span><strong>${esc(stateRef.state.roles.find(r=>r.id===task.roleId)?.name||"Role")}</strong><small>${esc(iterations().find(it=>it.id===task.iterationId)?.name||"Iteration")}</small></div>`:""}</div><div class="formula">At the current conversion, the estimate equals ${num.format((task?task.units:5)*stateRef.state.plan.hoursPerUnit)} h. Changing the estimate immediately updates capacity warnings.</div>${task?`<div class="danger-zone"><div><strong>Delete task</strong><span>Deletion removes the task from this prototype workspace.</span></div><button type="button" class="danger" data-action="delete-task" data-task-id="${esc(task.id)}">Delete task</button></div>`:""}`,data=>{
+    const title=String(data.get("title")||"").trim(),units=Number(data.get("units"));if(!title||!Number.isFinite(units)||units<0){announce("Enter a valid title and estimate.");return false;}
+    if(task){task.title=title;task.units=units;}else stateRef.state.tasks.push({id:uid("task"),title,units,roleId:null,iterationId:null});save();render();announce(task?`${title} updated.`:`${title} added to backlog.`);return true;
+  },task?"Save task":"Add task");
+}
+
+function assignmentDialog(taskId) {
+  const task=stateRef.state.tasks.find(t=>t.id===taskId),its=iterations();if(!task||!stateRef.state.roles.length||!its.length){announce("Add at least one role and iteration first.");return;}
+  const roleOptions=stateRef.state.roles.map(role=>`<option value="${esc(role.id)}" ${task.roleId===role.id?"selected":""}>${esc(role.name)}</option>`).join(""),iterOptions=its.map(it=>`<option value="${esc(it.id)}" ${task.iterationId===it.id?"selected":""}>${esc(it.name)} · ${dateText(it.start)}</option>`).join("");
+  openDialog(`Assign task · ${task.title}`,`<div class="form-grid"><label>Role<select name="roleId">${roleOptions}</select></label><label>Iteration<select name="iterationId">${iterOptions}</select></label></div><div id="assignment-preview" class="assignment-preview"></div><div class="formula">${num.format(task.units)} ${esc(stateRef.state.plan.unitName)} = ${num.format(taskHours(task))} h. Overload is allowed for scenario exploration but remains visibly flagged.</div>`,data=>{assignTask(task.id,String(data.get("roleId")),String(data.get("iterationId")));return true;},"Assign");
+  const roleSelect=$("[name=\"roleId\"]",dialog),iterationSelect=$("[name=\"iterationId\"]",dialog),preview=$("#assignment-preview",dialog);
+  const updatePreview=()=>{const role=stateRef.state.roles.find(r=>r.id===roleSelect.value),it=its.find(i=>i.id===iterationSelect.value);if(!role||!it)return;const c=capacityFor(role,it),existing=tasksFor(role.id,it.id).filter(t=>t.id!==task.id).reduce((sum,t)=>sum+taskHours(t),0),projected=existing+taskHours(task),util=c.hours>0?projected/c.hours:(projected>0?Infinity:0),over=projected>c.hours+.001;preview.className=`assignment-preview ${over?"bad":"good"}`;preview.innerHTML=`<div><span>Projected task load</span><strong>${num.format(projected)} / ${num.format(c.hours)} h</strong></div><div><span>Utilization</span><strong>${Number.isFinite(util)?num.format(util*100):"∞"}%</strong></div><div><span>Planned FTE</span><strong>${num.format(c.fte)} / ${num.format(role.availableFte)}</strong></div>${over?`<p>Assignment exceeds planned capacity by ${num.format(projected-c.hours)} h.</p>`:""}`;};
+  roleSelect.addEventListener("change",updatePreview);iterationSelect.addEventListener("change",updatePreview);updatePreview();
+}
+
+function deleteTask(taskId) {
+  const task=stateRef.state.tasks.find(t=>t.id===taskId);if(!task)return;if(!window.confirm(`Delete task "${task.title}" from this prototype workspace?`))return;
+  stateRef.state.tasks=stateRef.state.tasks.filter(t=>t.id!==taskId);if(dialog.open)dialog.close();save();render();announce("Task deleted.");
+}
+function exportWorkspace() {
+  const blob=new Blob([JSON.stringify(stateRef.state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),anchor=document.createElement("a");anchor.href=url;anchor.download=`${stateRef.state.plan.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"capacity-plan"}.json`;document.body.appendChild(anchor);anchor.click();anchor.remove();URL.revokeObjectURL(url);announce("Workspace exported.");
+}
+async function importWorkspace(file) {
+  try{const text=await file.text(),candidate=JSON.parse(text),error=validate(candidate);if(error){announce(error);return;}if(!window.confirm(`Replace the current workspace with "${candidate.plan.name}"?`))return;stateRef.state=clone(candidate);reconcile(true);save();render();announce("Workspace imported.");}catch{announce("Import failed. Choose a valid JSON workspace.");}finally{importInput.value="";}
+}
+
+return {planDialog,roleDialog,roleSettingsDialog,deleteRole,allocateDialog,taskDialog,assignmentDialog,deleteTask,exportWorkspace,importWorkspace};
+})();
+modules["app"] = (() => {
+const {$,dialog,importInput,stateRef} = modules["core"];
+const {render,renderBacklog,unassignTask,wireTaskCards} = modules["render"];
+const {allocateDialog,assignmentDialog,deleteRole,deleteTask,exportWorkspace,importWorkspace,planDialog,roleDialog,roleSettingsDialog,taskDialog} = modules["dialogs"];
+
+document.addEventListener("click",event=>{
+  const target=event.target?.closest?.("button");
+  if(!target)return;
+  const action=target.dataset.action;
+  if(action==="allocate-role")allocateDialog(target.dataset.roleId);
+  if(action==="role-settings")roleSettingsDialog(target.dataset.roleId);
+  if(action==="delete-role")deleteRole(target.dataset.roleId);
+  if(action==="assign-task")assignmentDialog(target.dataset.taskId);
+  if(action==="edit-task")taskDialog(target.dataset.taskId);
+  if(action==="unassign-task")unassignTask(target.dataset.taskId);
+  if(action==="delete-task")deleteTask(target.dataset.taskId);
+});
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"&&dialog.open){dialog.close();return;}
+  const card=event.target?.closest?.(".task-card");
+  if(card&&(event.key==="Enter"||event.key===" ")&&!event.target.closest?.("button")){event.preventDefault();assignmentDialog(card.dataset.taskId);}
+});
+$("#new-plan-btn").addEventListener("click",()=>planDialog(true));
+$("#edit-plan-btn").addEventListener("click",()=>planDialog(false));
+$("#add-role-btn").addEventListener("click",roleDialog);
+$("#add-task-btn").addEventListener("click",()=>taskDialog());
+$("#sidebar-add-task").addEventListener("click",()=>taskDialog());
+$("#task-search").addEventListener("input",event=>{stateRef.taskFilter=event.target.value;renderBacklog();wireTaskCards($("#backlog"));});
+$("#export-btn").addEventListener("click",exportWorkspace);
+$("#import-btn").addEventListener("click",()=>importInput.click());
+importInput.addEventListener("change",()=>{if(importInput.files?.[0])importWorkspace(importInput.files[0]);});
+dialog.addEventListener("click",event=>{if(event.target===dialog)dialog.close();});
+render();
+
+return {};
+})();
 })();</script>
 </body>
 </html>
