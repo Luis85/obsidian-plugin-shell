@@ -221,10 +221,12 @@ void test('plugin template catalog exposes merged discovery and undoable instant
   const templatePlugin = {
     ...enabled,
     manifest: { ...enabled.manifest, id: 'template-extension' },
+    events: [],
     cli: [],
     tui: [],
     frameworks: [],
     starters: [],
+    activate: undefined,
     componentTemplates: [{
       schemaVersion: 1,
       id: 'atom.extension-chip',
