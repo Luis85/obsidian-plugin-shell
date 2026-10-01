@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { conceptSchema } from '../../../scripts/companion/concepts/contract.ts';
 import { inspectSitemapSummary } from '../../../scripts/companion/sitemap/summary.ts';
-import { handoutRead } from '../../../scripts/framework/handout-adapter.ts';
+import { handoutRead } from './handout-adapter.ts';
 import { inspectDesign } from '../../../scripts/framework/changes.ts';
 import { readConfiguration, exists } from './files.ts';
 import { status, releaseCheck } from '../../../scripts/framework/inspection.ts';

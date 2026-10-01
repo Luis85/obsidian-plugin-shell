@@ -31,6 +31,9 @@ import { npmEntry as relocatedNpmEntry, runNode as relocatedRunNode } from '../.
 import * as legacyFrameworkProcess from '../../scripts/framework/process.ts';
 import { terminateProcessTree as relocatedTerminateProcessTree } from '../../bin/adapters/framework/process-tree.ts';
 import * as legacyProcessTree from '../../scripts/framework/process-tree.ts';
+import { handoutPlan as relocatedHandoutPlan, handoutRead as relocatedHandoutRead } from '../../bin/adapters/framework/handout-adapter.ts';
+import * as legacyHandoutAdapter from '../../scripts/framework/handout-adapter.ts';
+import { applyFilePlan as applySharedFilePlan } from '../../scripts/shared/file-plan.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -600,6 +603,36 @@ test('relocated framework process policy preserves npm selection and child execu
   } finally {
     if (previousQualified === undefined) delete process.env.QUALIFIED_NPM;
     else process.env.QUALIFIED_NPM = previousQualified;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated handout adapter preserves reviewed plan and blocked readiness semantics', async () => {
+  assert.equal(legacyHandoutAdapter.handoutPlan, relocatedHandoutPlan);
+  assert.equal(legacyHandoutAdapter.handoutRead, relocatedHandoutRead);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-handout-adapter-')));
+  try {
+    await mkdir(join(root, 'docs/prds'), { recursive: true });
+    await writeFile(join(root, 'docs/prds/example.md'), '# Example PRD\n');
+    const context = { root, frameworkRoot };
+    const request = { command: 'handout generate', args: [], options: {} };
+    const planned = await relocatedHandoutPlan(request, context);
+    assert.equal(planned.conflicts.length, 0);
+    assert.ok(planned.plan.changes.some(change => change.path === 'PROJECT-SETUP-HANDOUT.md' && change.status === 'create'));
+
+    const applied = await applySharedFilePlan(planned.plan);
+    assert.deepEqual(applied.written, ['PROJECT-SETUP-HANDOUT.md']);
+
+    const validated = await relocatedHandoutRead({ command: 'handout validate', args: [], options: {} }, context);
+    assert.equal(validated.status, 'blocked');
+    assert.ok(validated.diagnostics.some(item => item.code === 'HANDOUT_REQUIRED_OPEN'));
+
+    const inspected = await relocatedHandoutRead({ command: 'handout inspect', args: [], options: {} }, context);
+    assert.equal(inspected.status, 'blocked');
+    assert.ok(Array.isArray(inspected.data.answers));
+  } finally {
     await rm(root, { recursive: true, force: true });
   }
 });

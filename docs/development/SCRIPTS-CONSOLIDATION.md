@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D18 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D19 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -117,7 +117,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D16:** Framework configuration parsing, defaults and import-conflict resolution moved to `bin/adapters/framework/configuration.ts`. The relocated filesystem adapter imports it locally, the former framework path is compatibility-only, and maker coverage verifies portable defaults, invalid identity/overlap refusal and explicit import-resolution semantics.
 - **D17:** Framework npm discovery and public Node-process policy moved to `bin/adapters/framework/process.ts`. Dispatcher/process-operation imports are local, `scripts/framework/process.ts` is compatibility-only, and maker coverage verifies explicit npm selection, success/failure metadata, invalid timeout, missing tools and pre-start cancellation.
 - **D18:** Owned child process-tree termination moved to `bin/adapters/framework/process-tree.ts`; the process policy imports it locally and the former framework path is compatibility-only. A real hanging child timeout regression drives the relocated termination path while preserving bounded failure metadata.
-- **Remaining D19–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D19:** Handout planning/read adaptation moved to `bin/adapters/framework/handout-adapter.ts`. Read operations import it locally, `scripts/framework/handout-adapter.ts` is compatibility-only, and maker coverage creates/applies a real handout plan then verifies blocked validation/inspection readiness.
+- **Remaining D20–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
