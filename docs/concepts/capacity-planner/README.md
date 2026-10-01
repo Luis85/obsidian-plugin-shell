@@ -107,8 +107,8 @@ The available local machine does not provide the repository-qualified Node 24.21
 
 Generated `index.html` after the polishing pass:
 
-- size: 59,760 bytes
-- SHA-256: `72cbb16e3baf488ea189fc82e067c2f604f46dfc302598283302641494083720`
+- size: 25,191 bytes
+- SHA-256: `35032ff9d95cb63bbd4363d9a08016f72b3a91ba4e019aa354a3987455ba9ceb`
 
 ## Scope boundary
 
