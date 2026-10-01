@@ -18,10 +18,11 @@ import {
 import { documentText, openDocument } from '../../domain/document.ts';
 import { instantiateComponentTemplate } from '../../domain/template-instantiation.ts';
 import { loadComponentTemplates } from '../component-template-repository.ts';
+import { pluginComponentTemplates } from '../../../plugins/template-contributions.ts';
 import { result, requireThat, stringOption, type Context, type Request } from './contracts.ts';
 
 async function library(context: Context) {
-  return loadComponentTemplates(context.root, context.frameworkRoot);
+  return loadComponentTemplates(context.root, context.frameworkRoot, pluginComponentTemplates());
 }
 
 function queryFrom(request: Request): ComponentTemplateQuery {
