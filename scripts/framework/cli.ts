@@ -10,7 +10,7 @@ import { failure, type Context } from './contracts.ts';
 import { invocationDirectory } from './starter-project.ts';
 import { guidedStarter, starterText } from './starter-terminal.ts';
 import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
-import { interactiveRun } from './cli-interactive.ts';
+import { interactiveRun } from '../../bin/presentation/terminal/cli-interactive.ts';
 export async function main(argv: string[], frameworkRoot: string): Promise<number> {
   // Preserve the published workspace compiler's raw JSON protocol and --help entry.
   if (argv[0] === 'generate' && (argv.includes('--target') && argv.includes('--input') && !argv.includes('--scope') || (argv.length === 2 && argv[1] === '--help')) && !argv.includes('--json')) {

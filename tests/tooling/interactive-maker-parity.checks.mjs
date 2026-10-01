@@ -13,6 +13,7 @@ import { result as operationResult } from '../../scripts/contracts/result.ts';
 import { ask, readInput } from '../../scripts/shared/input.ts';
 import { routeArguments } from '../../bin/adapters/router.ts';
 import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
+import { interactiveRun } from '../../bin/presentation/terminal/cli-interactive.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -170,4 +171,43 @@ test('relocated framework CLI output preserves machine and human result channels
   renderCliResult(operationResult('new', null, 'cancelled'), false, { output: newOut.stream, error: newErr.stream, env: {} });
   assert.equal(newOut.read(), 'new: cancelled; nothing was written.\n');
   assert.equal(newErr.read(), '');
+});
+
+
+test('relocated interactive plan adapter preserves review, apply and cancellation semantics', async () => {
+  const request = { command: 'example', args: [], options: {} };
+  const context = { root: frameworkRoot, frameworkRoot };
+  const planned = operationResult('example', { planHash: 'abc123' }, 'planned');
+  const applied = operationResult('example', { written: ['one'] }, 'applied');
+  const calls = [], rendered = [];
+  const accepted = await interactiveRun(request, context, {
+    execute: async value => { calls.push(value); return calls.length === 1 ? planned : applied; },
+    commandEffect: () => 'plan',
+    confirm: async message => { assert.equal(message, 'Apply this reviewed plan?'); return true; },
+    render: value => rendered.push(value),
+  });
+  assert.equal(accepted, applied);
+  assert.deepEqual(rendered, [planned]);
+  assert.equal(calls.length, 2);
+  assert.deepEqual(calls[1].options, { apply: 'abc123', yes: true });
+
+  let cancelledCalls = 0;
+  const cancelled = await interactiveRun(request, context, {
+    execute: async () => { cancelledCalls++; return planned; },
+    commandEffect: () => 'plan',
+    confirm: async () => false,
+    render: () => {},
+  });
+  assert.equal(cancelled.status, 'cancelled');
+  assert.equal(cancelledCalls, 1);
+
+  let dryRunConfirmed = false;
+  const dryRun = await interactiveRun({ ...request, options: { 'dry-run': true } }, context, {
+    execute: async () => planned,
+    commandEffect: () => 'plan',
+    confirm: async () => { dryRunConfirmed = true; return true; },
+    render: () => { throw new Error('dry-run must not render an apply prompt'); },
+  });
+  assert.equal(dryRun, planned);
+  assert.equal(dryRunConfirmed, false);
 });
