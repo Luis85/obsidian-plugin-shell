@@ -3,7 +3,7 @@ import { lstat, readdir } from 'node:fs/promises';
 import { readBounded, readConfiguration, exists, hash } from './files.ts';
 import { designFile, configFile } from './configuration.ts';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
-import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
+import { verifyKit } from './kit-integrity.ts';
 import { requireThat, type Context } from './contracts.ts';
 
 /** Fingerprint code as well as design: an edited or newly added consumer file invalidates prior progress. */
