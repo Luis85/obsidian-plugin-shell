@@ -129,7 +129,7 @@ function load() {
     const candidate = JSON.parse(raw);
     if (validate(candidate)) { storageStatus="invalid"; return baseState(); }
     storageStatus="saved"; return candidate;
-  } catch { storageStatus="unavailble"; return baseState(); }
+  } catch { storageStatus="unavailable"; return baseState(); }
 }
 
 export const stateRef = {state:load(),taskFilter:"",draggedTaskId:null};
@@ -170,7 +170,7 @@ export function planTotals() {
 }
 export function reconcile(withNotice=true) {
   const validIterations=new Set(iterations().map(it=>it.id));let moved=0;
-  for(const role of stateRef.state.roles){role.fteByIteration=Object.fromEntries(Object.entries(role.fteByIteration||{}).filter(([id])=>validIterations.has(id)));if(!Number.isFinite(Number(role.availableFte))){const values=Object.values(role.fteByIteration).map(Number).filter(Number.isFinite);role.availableFte=Math.max(0,...values)}}
+  for(const role of stateRef.state.roles){role.fteByIteration=Object.fromEntries(Object.entries(role.fteByIteration||{}).filter(([id])=>validIterations.has(id)));if(!Number.isFinite(Number(role.availableFte))){const values=Object.values(role.fteByIteration).map(Number).filter(Number.isFinite);role.availableFte=Math.max(0,...values);}}
   for(const task of stateRef.state.tasks){if(task.iterationId&&!validIterations.has(task.iterationId)){task.roleId=null;task.iterationId=null;moved+=1;}if(task.roleId&&!stateRef.state.roles.some(r=>r.id===task.roleId)){task.roleId=null;task.iterationId=null;moved+=1;}}
   if(moved&&withNotice)announce(`${moved} task${moved===1?"":"s"} moved back to backlog after plan changes.`);
 }
