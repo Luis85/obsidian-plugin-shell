@@ -3,7 +3,7 @@ import { conceptSchema } from '../../../scripts/companion/concepts/contract.ts';
 import { inspectSitemapSummary } from '../../../scripts/companion/sitemap/summary.ts';
 import { handoutRead } from './handout-adapter.ts';
 import { inspectDesign } from '../../../scripts/framework/changes.ts';
-import { readConfiguration, exists } from './files.ts';
+import { readConfiguration, readJson, exists } from './files.ts';
 import { status, releaseCheck } from './inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
 import { measureProject } from './project-measure.ts';
@@ -25,7 +25,6 @@ export async function readOperation(request: Request, context: Context): Promise
   if (request.command === 'concept inspect') return result(request.command, await inspectConcept(request, context));
   if (request.command === 'version') {
     const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
-    const { readJson } = await import('../../../scripts/framework/files.ts');
     const metadata = await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')) as { version?: string };
     return result(request.command, {
       frameworkVersion: metadata.version,

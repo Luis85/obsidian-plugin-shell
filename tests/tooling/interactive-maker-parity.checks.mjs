@@ -44,6 +44,32 @@ import { supportSnapshot as relocatedSupportSnapshot, supportReport as relocated
 import * as legacySupportReport from '../../scripts/framework/support-report.ts';
 import { status as relocatedStatus, releaseCheck as relocatedReleaseCheck } from '../../bin/adapters/framework/inspection.ts';
 import * as legacyInspection from '../../scripts/framework/inspection.ts';
+import { portableFile as relocatedPortableFile } from '../../bin/adapters/framework/archive-path.ts';
+import * as legacyArchivePath from '../../scripts/framework/archive-path.ts';
+import { zip as relocatedZip } from '../../bin/adapters/framework/zip.ts';
+import * as legacyZip from '../../scripts/framework/zip.ts';
+import { pluginIdWordProblem as relocatedPluginIdWordProblem, derivedPluginId as relocatedDerivedPluginId, pluginIdProblem as relocatedPluginIdProblem, exportedIdProblem as relocatedExportedIdProblem, exportedIdWarning as relocatedExportedIdWarning } from '../../bin/adapters/framework/plugin-id.ts';
+import * as legacyPluginId from '../../scripts/framework/plugin-id.ts';
+import { storybookFlags as relocatedStorybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
+import * as legacyStorybookOptions from '../../scripts/framework/storybook-options.ts';
+import { terminalStyle as relocatedTerminalStyle, marker as relocatedMarker, bold as relocatedBold, rows as relocatedRows, duration as relocatedDuration, runnable as relocatedRunnable, nextLine as relocatedNextLine } from '../../bin/presentation/terminal/terminal-style.ts';
+import * as legacyTerminalStyle from '../../scripts/framework/terminal-style.ts';
+import { commandHelp as relocatedCommandHelp, helpIndex as relocatedHelpIndex } from '../../bin/adapters/framework/help-text.ts';
+import * as legacyHelpText from '../../scripts/framework/help-text.ts';
+import { helpText as relocatedHelpText } from '../../bin/presentation/terminal/terminal-help.ts';
+import * as legacyTerminalHelp from '../../scripts/framework/terminal-help.ts';
+import { setupDocumentation as relocatedSetupDocumentation } from '../../bin/presentation/terminal/docs-setup.ts';
+import * as legacyDocsSetup from '../../scripts/framework/docs-setup.ts';
+import { docsParserFiles as relocatedDocsParserFiles } from '../../bin/adapters/framework/docs-vendor.ts';
+import * as legacyDocsVendor from '../../scripts/framework/docs-vendor.ts';
+import { exportedProject as relocatedExportedProject } from '../../bin/adapters/framework/project-from.ts';
+import * as legacyProjectFrom from '../../scripts/framework/project-from.ts';
+import { storybookOperation as relocatedStorybookOperation } from '../../bin/adapters/framework/storybook.ts';
+import * as legacyStorybook from '../../scripts/framework/storybook.ts';
+import { airshipPlan as relocatedAirshipPlan } from '../../bin/adapters/framework/airship-plan.ts';
+import * as legacyAirshipPlan from '../../scripts/framework/airship-plan.ts';
+import { airshipEnvironment as relocatedAirshipEnvironment, airshipOperation as relocatedAirshipOperation } from '../../bin/adapters/framework/airship.ts';
+import * as legacyAirship from '../../scripts/framework/airship.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -811,6 +837,560 @@ test('relocated inspection preserves status and blocked release-readiness diagno
     assert.ok(release.diagnostics.some(item => item.code === 'ASSET_MISSING'));
     assert.ok(release.diagnostics.some(item => item.code === 'RELEASE_EVIDENCE_REQUIRED'));
     assert.equal(release.data.publication, 'not-authorized');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated inspection covers generated identity, traceability, doctor drift and stale design branches', async () => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-inspection-generated-')));
+  try {
+    const project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '1.2.3', description: 'Demo' };
+    const config = relocatedDefaults(project);
+    await writeFile(join(root, 'shell.config.json'), JSON.stringify(config));
+    await writeFile(join(root, 'manifest.json'), JSON.stringify({ id: project.id, version: project.version }));
+    await mkdir(join(root, '.companion'));
+    await mkdir(join(root, 'node_modules/typescript'), { recursive: true });
+    await writeFile(join(root, 'node_modules/typescript/package.json'), '{}');
+    await mkdir(join(root, 'design'));
+    const designPath = join(root, 'design/project.json');
+    await writeFile(designPath, '{"schemaVersion":6}\n');
+    await writeFile(join(root, '.companion/generation.json'), JSON.stringify({ inputHash: relocatedHash(await readFile(designPath)) }));
+    await writeFile(join(root, 'design/traceability.json'), JSON.stringify({
+      requirements: [{ id: 'R1', verification: 'pending' }, { id: 'R2', verification: 'verified' }],
+    }));
+    await writeFile(join(root, '.nvmrc'), '0.0.1\n');
+
+    const context = { root, frameworkRoot: root };
+    const doctor = await relocatedStatus(context, 'doctor');
+    assert.equal(doctor.data.generated, true);
+    assert.equal(doctor.data.imported, true);
+    assert.equal(doctor.data.dependencies, true);
+    assert.equal(doctor.data.designStale, false);
+    assert.equal(doctor.data.acceptanceObligations, 1);
+    assert.equal(doctor.data.next, 'npm run check');
+    assert.ok(doctor.diagnostics.some(item => item.code === 'ACCEPTANCE_PENDING'));
+    assert.ok(doctor.diagnostics.some(item => item.code === 'NODE_UNQUALIFIED'));
+    assert.equal(doctor.diagnostics.some(item => item.code === 'DEPENDENCIES_MISSING'), false);
+
+    await writeFile(join(root, 'manifest.json'), JSON.stringify({ id: 'other-id', version: project.version }));
+    await writeFile(designPath, '{"schemaVersion":6,"changed":true}\n');
+    const stale = await relocatedStatus(context);
+    assert.equal(stale.data.designStale, true);
+    assert.equal(stale.data.next, 'generate');
+    assert.ok(stale.diagnostics.some(item => item.code === 'IDENTITY_DRIFT'));
+    assert.ok(stale.diagnostics.some(item => item.code === 'DESIGN_GENERATION_STALE'));
+
+    await mkdir(join(root, 'dist'));
+    await writeFile(join(root, 'dist/manifest.json'), JSON.stringify({ id: 'other-id', version: project.version }));
+    await writeFile(join(root, 'dist/main.js'), 'export {};\n');
+    const release = await relocatedReleaseCheck(context);
+    assert.equal(release.status, 'blocked');
+    assert.equal(release.diagnostics.some(item => item.code === 'BUILD_IDENTITY'), false);
+    assert.equal(release.diagnostics.some(item => item.code === 'ASSET_MISSING'), false);
+    assert.ok(release.diagnostics.some(item => item.code === 'RELEASE_EVIDENCE_REQUIRED'));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated archive helpers preserve portable paths and deterministic ZIP bytes', () => {
+  assert.equal(legacyArchivePath.portableFile, relocatedPortableFile);
+  assert.equal(legacyZip.zip, relocatedZip);
+
+  for (const path of ['README.md', 'docs/guide.md', 'assets/icon-2.svg']) assert.equal(relocatedPortableFile(path), true, path);
+  for (const path of ['', '../escape', 'a/../b', 'a//b', 'a\\b', 'CON', 'folder/trailing.', 'folder/trailing ']) {
+    assert.equal(relocatedPortableFile(path), false, path);
+  }
+
+  const first = relocatedZip([
+    { path: 'b.txt', bytes: Buffer.from('B') },
+    { path: 'a.txt', bytes: Buffer.from('A') },
+  ]);
+  const second = relocatedZip([
+    { path: 'a.txt', bytes: Buffer.from('A') },
+    { path: 'b.txt', bytes: Buffer.from('B') },
+  ]);
+  assert.deepEqual(first, second);
+  assert.equal(first.readUInt32LE(0), 0x04034b50);
+  assert.equal(first.readUInt32LE(first.length - 22), 0x06054b50);
+
+  assert.throws(() => relocatedZip([]), error => error.code === 'ARCHIVE_LIMIT');
+  assert.throws(() => relocatedZip([{ path: '../unsafe.txt', bytes: Buffer.from('x') }]), error => error.code === 'ARCHIVE_PATH');
+  assert.throws(() => relocatedZip([
+    { path: 'A.txt', bytes: Buffer.from('one') },
+    { path: 'a.txt', bytes: Buffer.from('two') },
+  ]), error => error.code === 'ARCHIVE_PATH');
+});
+
+
+test('relocated plugin ID policy preserves creation, derivation and export review rules', () => {
+  assert.equal(legacyPluginId.pluginIdWordProblem, relocatedPluginIdWordProblem);
+  assert.equal(legacyPluginId.derivedPluginId, relocatedDerivedPluginId);
+  assert.equal(legacyPluginId.pluginIdProblem, relocatedPluginIdProblem);
+  assert.equal(legacyPluginId.exportedIdProblem, relocatedExportedIdProblem);
+  assert.equal(legacyPluginId.exportedIdWarning, relocatedExportedIdWarning);
+
+  assert.match(relocatedPluginIdWordProblem('obsidian-notes'), /obsidian/);
+  assert.match(relocatedPluginIdWordProblem('notes-plugin'), /end with/);
+  assert.match(relocatedPluginIdWordProblem('plugin-notes'), /contain/);
+  assert.equal(relocatedPluginIdWordProblem('field-notes'), null);
+
+  assert.equal(relocatedDerivedPluginId('Field Notes', 'blank'), 'field-notes');
+  assert.equal(relocatedDerivedPluginId('my-plugin', 'quick-capture'), 'my-quick-capture');
+  assert.equal(relocatedDerivedPluginId('plugin', 'quick-capture'), 'quick-capture');
+  assert.equal(relocatedDerivedPluginId('plugin', 'x'), 'my-project');
+
+  assert.match(relocatedPluginIdProblem('Invalid ID'), /lowercase letters/);
+  assert.match(relocatedPluginIdProblem('obsidian-notes'), /community review/);
+  assert.equal(relocatedPluginIdProblem('field-notes'), null);
+
+  assert.match(relocatedExportedIdProblem('Invalid ID'), /lowercase letters/);
+  assert.match(relocatedExportedIdProblem('obsidian-notes'), /community review/);
+  assert.equal(relocatedExportedIdProblem('notes-plugin'), null);
+  assert.match(relocatedExportedIdWarning('notes-plugin'), /fail check submission/);
+  assert.equal(relocatedExportedIdWarning('field-notes'), null);
+  assert.equal(relocatedExportedIdWarning('Invalid ID'), null);
+});
+
+
+test('relocated Storybook option policy preserves explicit on/off semantics', () => {
+  assert.equal(legacyStorybookOptions.storybookFlags, relocatedStorybookFlags);
+  assert.equal(relocatedStorybookFlags({}), undefined);
+  assert.deepEqual(relocatedStorybookFlags({ storybook: 'on' }), { enabled: true });
+  assert.deepEqual(relocatedStorybookFlags({ storybook: 'off' }), { enabled: false });
+  assert.deepEqual(relocatedStorybookFlags({ 'storybook-stories': 'on' }), { generateStories: true });
+  assert.deepEqual(relocatedStorybookFlags({ storybook: 'on', 'storybook-stories': 'off' }), {
+    enabled: true, generateStories: false,
+  });
+  assert.throws(() => relocatedStorybookFlags({ storybook: 'yes' }), error => error.code === 'STORYBOOK_OPTION_INVALID');
+  assert.throws(() => relocatedStorybookFlags({ 'storybook-stories': true }), error => error.code === 'INVALID_OPTION');
+});
+
+
+test('relocated terminal style preserves plain/rich formatting and runnable hints', () => {
+  assert.equal(legacyTerminalStyle.terminalStyle, relocatedTerminalStyle);
+  assert.equal(legacyTerminalStyle.runnable, relocatedRunnable);
+
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: false }, {}), { color: false, unicode: false });
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: true }, { TERM: 'xterm' }), { color: true, unicode: true });
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: true }, { TERM: 'dumb' }), { color: false, unicode: false });
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: true }, { TERM: 'xterm', NO_COLOR: '1' }), { color: false, unicode: false });
+
+  const plain = { color: false, unicode: false };
+  const rich = { color: true, unicode: true };
+  assert.equal(relocatedMarker(plain, 'pass'), '[ok]  ');
+  assert.match(relocatedMarker(rich, 'fail'), /^\u001b\[31m✗/);
+  assert.equal(relocatedBold(plain, 'Title'), 'Title');
+  assert.match(relocatedBold(rich, 'Title'), /\u001b\[1mTitle/);
+  assert.equal(relocatedRows([['A', 1], ['Long', 'value'], ['Skip', null]]), '  A     1\n  Long  value\n');
+  assert.equal(relocatedDuration(999), '999ms');
+  assert.equal(relocatedDuration(1500), '1.5s');
+  assert.equal(relocatedRunnable('status'), 'node bin/app status');
+  assert.equal(relocatedRunnable('npm ci'), 'npm ci');
+  assert.equal(relocatedNextLine(plain, 'status'), 'Next: node bin/app status\n');
+  assert.equal(relocatedNextLine(plain, null), '');
+});
+
+
+test('relocated CLI help metadata and tiered rendering preserve command guidance', () => {
+  assert.equal(legacyHelpText.commandHelp, relocatedCommandHelp);
+  assert.equal(legacyHelpText.helpIndex, relocatedHelpIndex);
+  assert.equal(legacyTerminalHelp.helpText, relocatedHelpText);
+
+  const statusDescriptor = frameworkDescriptor('status');
+  const statusHelp = relocatedCommandHelp(statusDescriptor);
+  assert.equal(statusHelp.group, 'inspect');
+  assert.match(statusHelp.usage, /status/);
+  assert.ok(statusHelp.examples.length > 0);
+  statusHelp.examples.push('mutated');
+  assert.equal(relocatedCommandHelp(statusDescriptor).examples.includes('mutated'), false);
+
+  const devHelp = relocatedCommandHelp(frameworkDescriptor('dev'));
+  assert.deepEqual(devHelp.optionHelp.profile.values, ['obsidian', 'ui']);
+  assert.equal(devHelp.optionHelp.timeout.default, '3600000');
+
+  const resumeHelp = relocatedCommandHelp(frameworkDescriptor('setup resume'));
+  assert.deepEqual(resumeHelp.optionHelp.stage.values, ['generate', 'install', 'verify', 'preview']);
+  const schemaHelp = relocatedCommandHelp(frameworkDescriptor('project schema'));
+  assert.deepEqual(schemaHelp.optionHelp.version.values, ['6']);
+  assert.equal(schemaHelp.optionHelp.version.default, '6');
+
+  const index = relocatedHelpIndex();
+  assert.ok(index.commandCount > 20);
+  assert.ok(index.groups.some(group => group.id === 'inspect'));
+  const page = { ...statusHelp, id: statusDescriptor.id, summary: statusDescriptor.summary,
+    effect: statusDescriptor.effect, options: statusDescriptor.options };
+  const plain = { color: false, unicode: false };
+
+  const command = relocatedHelpText(plain, { scope: 'command', commands: [page],
+    goldenPath: index.goldenPath, groups: index.groups });
+  assert.match(command, /Usage/);
+  assert.match(command, /Common options/);
+  assert.match(command, /Effect: read/);
+
+  const golden = relocatedHelpText(plain, { scope: 'golden-path', commands: [page],
+    goldenPath: index.goldenPath, groups: index.groups });
+  assert.match(golden, /Golden path/);
+  assert.match(golden, /More commands/);
+
+  const all = relocatedHelpText(plain, { scope: 'all', commands: [page],
+    goldenPath: index.goldenPath, groups: [{ id: 'inspect', title: 'Inspect', commands: ['status'] }] });
+  assert.match(all, /Inspect/);
+  assert.match(all, /status/);
+});
+
+
+test('relocated documentation setup preserves decline, cancel and hash-bound apply flow', async () => {
+  assert.equal(legacyDocsSetup.setupDocumentation, relocatedSetupDocumentation);
+  const context = { root: frameworkRoot, frameworkRoot };
+  const current = operationResult('setup', { ready: true }, 'ok');
+
+  let executeCalls = 0;
+  const declined = await relocatedSetupDocumentation('import', current, context, async () => {
+    executeCalls++; return operationResult('docs import', null, 'planned');
+  }, async () => 'no', () => {});
+  assert.equal(declined, current);
+  assert.equal(executeCalls, 0);
+
+  const noPlan = operationResult('docs export', { reason: 'blocked' }, 'blocked');
+  const renderedNoPlan = [];
+  const stopped = await relocatedSetupDocumentation('export', current, context, async request => {
+    assert.equal(request.command, 'docs export');
+    return noPlan;
+  }, async () => 'yes', value => renderedNoPlan.push(value));
+  assert.equal(stopped, noPlan);
+  assert.deepEqual(renderedNoPlan, [noPlan]);
+
+  const planned = operationResult('docs import', { planHash: 'abc123' }, 'planned');
+  const renderedCancelled = [];
+  const answers = ['yes', 'docs/application', 'no'];
+  const cancelled = await relocatedSetupDocumentation('import', current, context, async request => {
+    assert.deepEqual(request.args, ['docs/application']);
+    return planned;
+  }, async () => answers.shift(), value => renderedCancelled.push(value));
+  assert.equal(cancelled.status, 'cancelled');
+  assert.deepEqual(renderedCancelled, [planned]);
+
+  const calls = [];
+  const applied = operationResult('docs export', { written: ['docs/application/index.md'] }, 'applied');
+  const yes = ['yes', 'yes'];
+  const outcome = await relocatedSetupDocumentation('export', current, context, async request => {
+    calls.push(request);
+    return calls.length === 1 ? planned : applied;
+  }, async () => yes.shift(), () => {});
+  assert.equal(outcome, applied);
+  assert.deepEqual(calls[1].options, { apply: 'abc123', yes: true });
+});
+
+
+test('relocated documentation parser packaging preserves exact pin and allowlist semantics', async () => {
+  assert.equal(legacyDocsVendor.docsParserFiles, relocatedDocsParserFiles);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-docs-vendor-')));
+  try {
+    await writeFile(join(root, 'package.json'), JSON.stringify({ dependencies: { yaml: '2.9.1' } }));
+    await mkdir(join(root, 'node_modules/yaml/dist'), { recursive: true });
+    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.1' }));
+    await writeFile(join(root, 'node_modules/yaml/LICENSE'), 'license');
+    await writeFile(join(root, 'node_modules/yaml/dist/index.js'), 'export const yaml = true;\n');
+    await writeFile(join(root, 'node_modules/yaml/dist/schema.json'), '{}');
+    await writeFile(join(root, 'node_modules/yaml/dist/readme.md'), 'not packaged');
+
+    const files = await relocatedDocsParserFiles(root);
+    const paths = files.map(file => file.path).sort();
+    // The YAML runtime is bundled into app.js; only its license ships beside the bundle.
+    assert.deepEqual(paths, ['.framework/compiled/licenses/yaml.LICENSE']);
+    assert.equal(files[0].bytes.toString('utf8'), 'license');
+
+    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.0' }));
+    await assert.rejects(relocatedDocsParserFiles(root), error => error.code === 'DOCS_PARSER_VERSION');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated exported-project intake preserves bounded data and identity semantics', async () => {
+  assert.equal(legacyProjectFrom.exportedProject, relocatedExportedProject);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-project-from-')));
+  try {
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await writeFile(join(root, 'project.json'), JSON.stringify(source));
+    const context = { root, frameworkRoot };
+    const baseRequest = { command: 'new', args: [], options: { from: 'project.json' } };
+
+    const loaded = await relocatedExportedProject(baseRequest, context, () => null);
+    assert.equal(loaded.document.schemaVersion, source.schemaVersion);
+    assert.equal(loaded.source.file, 'project.json');
+    assert.match(loaded.source.sha256, /^[a-f0-9]{64}$/);
+
+    const overridden = await relocatedExportedProject({
+      ...baseRequest, options: { ...baseRequest.options, id: 'field-notes', name: 'Field Notes', author: 'Example' },
+    }, context, () => null);
+    assert.equal(overridden.document.project.id, 'field-notes');
+    assert.equal(overridden.document.project.name, 'Field Notes');
+    assert.equal(overridden.document.project.author, 'Example');
+
+    await assert.rejects(relocatedExportedProject({ command: 'new', args: [], options: {} }, context, () => null),
+      error => error.code === 'PROJECT_FILE_REQUIRED');
+    await assert.rejects(relocatedExportedProject({ ...baseRequest, options: { from: 'missing.json' } }, context, () => null),
+      error => error.code === 'PROJECT_FILE_NOT_FOUND');
+
+    await writeFile(join(root, 'bad.json'), '{');
+    await assert.rejects(relocatedExportedProject({ ...baseRequest, options: { from: 'bad.json' } }, context, () => null),
+      error => error.code === 'PROJECT_JSON_MALFORMED');
+
+    await writeFile(join(root, 'future.json'), JSON.stringify({ ...source, schemaVersion: Number(source.schemaVersion) + 100 }));
+    await assert.rejects(relocatedExportedProject({ ...baseRequest, options: { from: 'future.json' } }, context, () => null),
+      error => error.code === 'PROJECT_VERSION_UNSUPPORTED');
+
+    await assert.rejects(relocatedExportedProject(baseRequest, context, () => 'reserved ID'),
+      error => error.code === 'INVALID_PLUGIN_ID');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated Storybook lifecycle preserves planning, install and execution boundaries', async () => {
+  assert.equal(legacyStorybook.storybookOperation, relocatedStorybookOperation);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-storybook-')));
+  try {
+    const context = { root, frameworkRoot };
+    const status = await relocatedStorybookOperation({ command: 'storybook status', args: [], options: {} }, context);
+    assert.equal(status.status, 'ok');
+    assert.equal(status.data.enabled, false);
+    assert.equal(status.data.configuration, false);
+    assert.equal(status.data.lock, 'absent');
+
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook unknown', args: [], options: {} }, context),
+      error => error.code === 'STORYBOOK_COMMAND_UNKNOWN',
+    );
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook install', args: [], options: {} }, context),
+      error => error.code === 'STORYBOOK_DISABLED',
+    );
+
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    source.tooling = { ...(source.tooling ?? {}), storybook: { enabled: true, generateStories: true } };
+    await mkdir(join(root, 'design'));
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+    await mkdir(join(root, 'storybook'));
+    await writeFile(join(root, 'storybook/package.json'), JSON.stringify({ devDependencies: { storybook: '1.0.0' } }));
+
+    const installPlan = await relocatedStorybookOperation({ command: 'storybook install', args: [], options: {} }, context);
+    assert.equal(installPlan.status, 'planned');
+    assert.deepEqual(installPlan.data.args, ['install', '--no-fund']);
+    assert.equal(installPlan.data.firstInstall, true);
+
+    const calls = [];
+    const executor = {
+      npm: async () => '/virtual/npm-cli.js',
+      run: async (ctx, entry, args, timeout, env) => {
+        calls.push({ ctx, entry, args, timeout, env });
+        return { exitCode: 0, signal: null, truncated: false, stdout: '' };
+      },
+    };
+    const installed = await relocatedStorybookOperation(
+      { command: 'storybook install', args: [], options: { yes: true } }, context, executor,
+    );
+    assert.equal(installed.status, 'applied');
+    assert.equal(calls[0].ctx.root, join(root, 'storybook'));
+    assert.equal(calls[0].entry, '/virtual/npm-cli.js');
+    assert.deepEqual(calls[0].args, ['install', '--no-fund']);
+
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook check', args: [], options: {} }, context, executor),
+      error => error.code === 'STORYBOOK_INSTALL_REQUIRED',
+    );
+
+    const lock = {
+      packages: {
+        '': { devDependencies: { storybook: '1.0.0' } },
+        'node_modules/storybook': { version: '1.0.0' },
+      },
+    };
+    await writeFile(join(root, 'storybook/package-lock.json'), JSON.stringify(lock));
+    await mkdir(join(root, 'storybook/node_modules/storybook/dist/bin'), { recursive: true });
+    await writeFile(join(root, 'storybook/node_modules/storybook/dist/bin/dispatcher.js'), 'export {};\n');
+
+    const checked = await relocatedStorybookOperation({ command: 'storybook check', args: [], options: {} }, context, executor);
+    assert.equal(checked.status, 'ok');
+    assert.equal(calls.at(-1).entry, 'storybook/node_modules/vue-tsc/bin/vue-tsc.js');
+    assert.deepEqual(calls.at(-1).args, ['--noEmit', '--project', 'storybook/tsconfig.json']);
+
+    const dev = await relocatedStorybookOperation(
+      { command: 'storybook dev', args: [], options: { 'dry-run': true } }, context, executor,
+    );
+    assert.equal(dev.status, 'planned');
+    assert.ok(dev.data.args.includes('--no-open'));
+    assert.equal(dev.data.execution, 'not-run');
+
+    lock.packages[''].devDependencies.storybook = '2.0.0';
+    await writeFile(join(root, 'storybook/package-lock.json'), JSON.stringify(lock));
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook build', args: [], options: {} }, context, executor),
+      error => error.code === 'STORYBOOK_LOCK_MISMATCH',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated Airship planning preserves reviewed enable/disable and ownership safeguards', async () => {
+  assert.equal(legacyAirshipPlan.airshipPlan, relocatedAirshipPlan);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-airship-plan-')));
+  try {
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await mkdir(join(root, 'design'));
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+    const context = { root, frameworkRoot };
+
+    const enabled = await relocatedAirshipPlan({
+      command: 'airship enable', args: [], options: { agent: 'codex', 'target-port': '6200', port: '6201' },
+    }, context);
+    assert.equal(enabled.conflicts.length, 0);
+    assert.equal(enabled.summary.airship.enabled, true);
+    assert.equal(enabled.summary.airship.agent, 'codex');
+    assert.equal(enabled.summary.airship.targetPort, 6200);
+    assert.equal(enabled.summary.airship.port, 6201);
+    assert.ok(enabled.plan.changes.some(change => change.path === 'design/project.json'));
+    assert.ok(enabled.plan.changes.some(change => change.path === 'airship.config.json'));
+    assert.match(enabled.summary.next, /airship install --yes/);
+
+    const disabled = await relocatedAirshipPlan({ command: 'airship disable', args: [], options: {} }, context);
+    assert.equal(disabled.summary.airship.enabled, false);
+    assert.equal(disabled.plan.changes.some(change => change.path === 'airship.config.json'), false);
+    assert.match(disabled.summary.next, /Stop existing sessions/);
+
+    await writeFile(join(root, 'airship.config.json'), JSON.stringify({ custom: true }));
+    await assert.rejects(
+      relocatedAirshipPlan({ command: 'airship enable', args: [], options: {} }, context),
+      error => error.code === 'AIRSHIP_CONFIG_CONFLICT',
+    );
+    await rm(join(root, 'airship.config.json'));
+
+    await mkdir(join(root, '.companion'));
+    await writeFile(join(root, '.companion/generation.json'), JSON.stringify({
+      version: 1, projectId: source.project.id, files: [],
+    }));
+    await assert.rejects(
+      relocatedAirshipPlan({ command: 'airship enable', args: [], options: {} }, context),
+      error => error.code === 'AIRSHIP_OWNERSHIP',
+    );
+    await rm(join(root, '.companion/generation.json'));
+
+    await mkdir(join(root, '.framework'));
+    await writeFile(join(root, '.framework/intake.json'), JSON.stringify({ schemaVersion: 1, files: {} }));
+    await assert.rejects(
+      relocatedAirshipPlan({ command: 'airship enable', args: [], options: {} }, context),
+      error => error.code === 'AIRSHIP_OWNERSHIP',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated Airship execution preserves opt-in, pinned install and safe launch policy', async () => {
+  assert.equal(legacyAirship.airshipEnvironment, relocatedAirshipEnvironment);
+  assert.equal(legacyAirship.airshipOperation, relocatedAirshipOperation);
+  assert.deepEqual(relocatedAirshipEnvironment({ AIRSHIP_TOKEN: 'secret', airship_extra: 'x', OTHER: 'keep' }), {
+    AIRSHIP_TOKEN: undefined, airship_extra: undefined,
+  });
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-airship-operation-')));
+  try {
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await mkdir(join(root, 'design'));
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+    const context = { root, frameworkRoot };
+
+    const status = await relocatedAirshipOperation({ command: 'airship status', args: [], options: {} }, context);
+    assert.equal(status.status, 'ok');
+    assert.equal(status.data.enabled, false);
+    assert.equal(status.data.installedVersion, null);
+
+    await assert.rejects(
+      relocatedAirshipOperation({ command: 'airship install', args: [], options: { yes: true } }, context),
+      error => error.code === 'AIRSHIP_DISABLED',
+    );
+
+    source.tooling = { ...(source.tooling ?? {}), airship: {
+      enabled: true, agent: 'codex', targetPort: 6200, port: 6201,
+    } };
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+
+    const planned = await relocatedAirshipOperation({ command: 'airship install', args: [], options: {} }, context);
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.requires, '--yes');
+    assert.equal(planned.data.execution, 'not-run');
+
+    const calls = [];
+    const executor = {
+      npm: async () => '/virtual/npm-cli.js',
+      run: async (ctx, entry, args, timeout, env) => {
+        calls.push({ ctx, entry, args, timeout, env });
+        if (args[0] === 'install') {
+          const pkg = join(root, '.airship-tooling/node_modules/@airshiplabs/cli/package.json');
+          await mkdir(join(root, '.airship-tooling/node_modules/@airshiplabs/cli'), { recursive: true });
+          await writeFile(pkg, JSON.stringify({ name: '@airshiplabs/cli', version: '0.3.0' }));
+        }
+        return { exitCode: 0, signal: null, truncated: false, stdout: '' };
+      },
+    };
+    const installed = await relocatedAirshipOperation(
+      { command: 'airship install', args: [], options: { yes: true, timeout: '12345' } }, context, executor,
+    );
+    assert.equal(installed.status, 'applied');
+    assert.equal(installed.data.installedVersion, '0.3.0');
+    assert.equal(calls[0].entry, '/virtual/npm-cli.js');
+    assert.equal(calls[0].timeout, 12345);
+    assert.deepEqual(calls[0].args.slice(0, 3), ['install', '--prefix', '.airship-tooling']);
+    assert.equal(calls[0].env.AIRSHIP_TOKEN, undefined);
+
+    const airshipConfig = {
+      target: 6200, port: 6201, host: '127.0.0.1', agent: 'codex',
+      mode: 'canvas', safe: true, commit: false, open: false,
+    };
+    await writeFile(join(root, 'airship.config.json'), JSON.stringify(airshipConfig));
+    const binary = join(root, '.airship-tooling/node_modules/@airshiplabs/cli/dist/index.js');
+    await mkdir(join(root, '.airship-tooling/node_modules/@airshiplabs/cli/dist'), { recursive: true });
+    await writeFile(binary, 'export {};\n');
+
+    const doctor = await relocatedAirshipOperation(
+      { command: 'airship doctor', args: [], options: { yes: true } }, context, executor,
+    );
+    assert.equal(doctor.status, 'ok');
+    assert.equal(calls.at(-1).entry, '.airship-tooling/node_modules/@airshiplabs/cli/dist/index.js');
+    assert.deepEqual(calls.at(-1).args, ['doctor', '--cwd', root, '--target', '6200', '--agent', 'codex']);
+
+    const start = await relocatedAirshipOperation(
+      { command: 'airship start', args: [], options: { yes: true, timeout: '2222' } }, context, executor,
+    );
+    assert.equal(start.status, 'ok');
+    assert.equal(calls.at(-1).timeout, 2222);
+    assert.deepEqual(calls.at(-1).args, [
+      '--cwd', root, '--target', '6200', '--port', '6201', '--host', '127.0.0.1',
+      '--agent', 'codex', '--safe', '--no-commit',
+    ]);
+
+    await writeFile(join(root, 'airship.config.json'), JSON.stringify({ ...airshipConfig, port: 9999 }));
+    await assert.rejects(
+      relocatedAirshipOperation({ command: 'airship doctor', args: [], options: { yes: true } }, context, executor),
+      error => error.code === 'AIRSHIP_CONFIG_CONFLICT',
+    );
+
+    await writeFile(join(root, '.airship-tooling/node_modules/@airshiplabs/cli/package.json'),
+      JSON.stringify({ name: '@airshiplabs/cli', version: '0.2.0' }));
+    await assert.rejects(
+      relocatedAirshipOperation({ command: 'airship doctor', args: [], options: { yes: true } }, context, executor),
+      error => error.code === 'AIRSHIP_NOT_INSTALLED',
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D24 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D37a on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -124,7 +124,22 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D23:** Support-report projection/collection moved to `bin/adapters/framework/support-report.ts`. Both the framework CLI fallback and read dispatcher import it locally, the former framework path is compatibility-only, and maker coverage verifies diagnostic allowlisting, privacy non-disclosure and blocked/cancelled unavailable outcomes.
 - **D24:** Project status/doctor and release-readiness inspection moved to `bin/adapters/framework/inspection.ts`. Support-report and read-operation import it locally, the former framework path is compatibility-only, and maker coverage verifies empty-project diagnostics plus non-authorizing blocked release readiness.
 - **D24a (CI repair):** Hindsight launcher snapshots now fingerprint and atomically stage the typed shared hash dependency beside the snapshot's `hindsight/` sources. Desktop registrations remain content-addressed and old snapshots never depend on a mutable global helper.
-- **Remaining D25–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D24b (CI repair):** Maker qualification now exercises generated-project inspection branches introduced by Stage D: configured/generated identity, installed dependencies, traceability obligations, doctor toolchain drift, stale generation detection and complete release assets. Thresholds remain unchanged.
+- **D25:** Portable archive-path validation and deterministic ZIP assembly moved to `bin/adapters/framework/archive-path.ts` and `zip.ts`. Former framework paths are compatibility-only; maker coverage locks portable-name rejection, case-insensitive duplicate refusal and byte-deterministic archives.
+- **D26:** Plugin-ID formatting, reserved-word policy, derivation and exported-ID review moved to `bin/adapters/framework/plugin-id.ts`. The former framework path is compatibility-only and maker coverage locks creation versus exported-project semantics.
+- **D27:** Storybook option parsing moved to `bin/adapters/framework/storybook-options.ts`. The former framework path is compatibility-only and maker coverage locks absent, explicit on/off and invalid-option semantics.
+- **D28:** Terminal style primitives and runnable next-step formatting moved to `bin/presentation/terminal/terminal-style.ts`. Relocated CLI output imports them locally, the former framework path is compatibility-only, and maker coverage locks TTY/NO_COLOR, marker, rows, duration and command-hint behavior.
+- **D29:** Command help metadata and tiered human help rendering moved to `bin/adapters/framework/help-text.ts` and `bin/presentation/terminal/terminal-help.ts`. Former framework paths are compatibility-only; maker coverage locks fresh-copy metadata, profile/stage/schema option guidance and command/golden/all rendering.
+- **D30:** Interactive documentation setup flow moved to `bin/presentation/terminal/docs-setup.ts`. It now shares the canonical yes/no parser instead of local regexes; the former framework path is compatibility-only and maker coverage locks decline, blocked/no-plan, cancellation and hash-bound apply behavior.
+- **D31:** Documentation-parser packaging moved to `bin/adapters/framework/docs-vendor.ts`. The former framework path is compatibility-only; maker coverage verifies exact YAML version pinning and packaging only JS/JSON/license assets into the compiled kit.
+- **D32:** Data-only `new --from` project intake moved to `bin/adapters/framework/project-from.ts`. The former framework path is compatibility-only; maker coverage locks bounded source loading, identity overrides, missing/malformed/future-schema refusal and plugin-ID validation.
+- **D33:** Optional Storybook lifecycle moved to `bin/adapters/framework/storybook.ts` and the relocated dispatcher imports it locally. The former framework path is compatibility-only; injected-executor coverage locks status, disabled refusal, install plan/apply, installed check, dev dry-run and lock-mismatch behavior without launching external tooling.
+- **D34:** The relocated framework dispatcher now consumes `bin/adapters/framework/help-text.ts` directly. Help/capabilities no longer bounce through the compatibility path, while the existing parity and rendering regressions remain the behavior guardrails.
+- **D35:** Version discovery in `bin/adapters/framework/read-operation.ts` now uses the relocated filesystem adapter directly; the last dynamic hop through `scripts/framework/files.ts` is removed without changing the command surface.
+- **D36:** Airship enable/disable file planning moved to `bin/adapters/framework/airship-plan.ts`. The former framework path is compatibility-only; maker coverage locks option overrides, enable/disable outputs, customized-config refusal and generation/intake ownership guards without installing or launching tooling.
+- **D37:** Airship status/install/doctor/start execution moved to `bin/adapters/framework/airship.ts`, and the dispatcher imports it locally. Process execution is injectable for contract tests only; maker coverage locks opt-in, environment scrubbing, pinned install verification, safe doctor/start arguments, config conflict and wrong-version refusal without network calls.
+- **D37a (CI repair):** The relocated Storybook option adapter now resolves the compiler contract from its actual repository location. Framework typecheck had failed across CI because the move retained the pre-relocation relative import depth; this repair changes only that type import.
+- **Remaining D38–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
