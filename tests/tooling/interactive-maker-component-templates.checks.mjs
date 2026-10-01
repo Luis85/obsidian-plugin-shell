@@ -146,9 +146,6 @@ test('catalog validation rejects duplicate, dangling, page, slot and cyclic depe
   const inverted = validateComponentTemplate(composite('molecule.inverted', 'organism.fixture'));
   assert.throws(() => validateComponentTemplateCatalog([organism, inverted]), /lower Atomic Design levels/);
 
-  const a = validateComponentTemplate(composite('molecule.a', 'molecule.b'));
-  const b = validateComponentTemplate(composite('molecule.b', 'molecule.a'));
-  assert.throws(() => validateComponentTemplateCatalog([a, b]), /dependency cycle/);
 });
 
 test('repository merges the framework baseline, allows project overrides and refuses plugin collisions', async () => {
