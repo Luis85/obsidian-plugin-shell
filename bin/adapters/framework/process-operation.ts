@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { dependencyReadiness } from '../../../scripts/compiler/adapters/dependencies.ts';
 import { profiles } from './catalog.ts';
-import { result, requireThat, stringOption, type Context, type Request, type Result } from '../../../scripts/framework/contracts.ts';
+import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { exists, readBounded } from '../../../scripts/framework/files.ts';
 import { packKit } from '../../../scripts/framework/kit.ts';
 import { npmEntry, runNode } from '../../../scripts/framework/process.ts';

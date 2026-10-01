@@ -14,7 +14,7 @@ import { storybookOperation } from '../../../scripts/framework/storybook.ts';
 import { submissionCheck } from '../../../scripts/framework/submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 import { capabilityCatalog } from '../../../scripts/operations/catalog.mjs';
-import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from '../../../scripts/framework/contracts.ts';
+import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from '../../../scripts/framework/process.ts';
 import { fileOperation } from './file-operation.ts';
 import { processOperation } from './process-operation.ts';

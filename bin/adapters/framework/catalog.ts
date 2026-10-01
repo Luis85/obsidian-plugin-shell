@@ -1,5 +1,5 @@
 import { prototypeCommands } from './prototype-catalog.ts';
-import { requireThat, OperationError, type Request, type Values } from '../../../scripts/framework/contracts.ts';
+import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
 import { assertJsonData } from '../../../scripts/contracts/json-data.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 export interface Command {

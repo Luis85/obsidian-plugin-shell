@@ -21,6 +21,8 @@ import { descriptor as frameworkDescriptor, parameterKinds as frameworkParameter
 import { suggestions as frameworkSuggestions, didYouMean as frameworkDidYouMean } from '../../bin/adapters/framework/suggest.ts';
 import { prototypeCommands } from '../../bin/adapters/framework/prototype-catalog.ts';
 import { operationSchemas } from '../../bin/adapters/framework/schema.ts';
+import { failure as frameworkFailure, stringOption as frameworkStringOption, OperationError as FrameworkOperationError, requireThat as frameworkRequireThat } from '../../bin/adapters/framework/contracts.ts';
+import { CompilerError, CompilationFailure, diagnostic as compilerDiagnostic } from '../../scripts/compiler/domain/diagnostics.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -462,4 +464,45 @@ test('relocated operation schema covers every framework command and canonical re
   assert.equal(setup.properties.options.properties.timeout.pattern, '^[0-9]+$');
   assert.deepEqual(schema.result.properties.status.enum, ['ok', 'planned', 'applied', 'unchanged', 'blocked', 'cancelled', 'failed']);
   assert.deepEqual(schema.result.properties.diagnostics.items.required, ['code', 'message']);
+});
+
+
+test('relocated framework contracts preserve option, failure and compiler diagnostic semantics', () => {
+  assert.equal(frameworkStringOption({}, 'profile'), undefined);
+  assert.equal(frameworkStringOption({ profile: 'browser' }, 'profile'), 'browser');
+  assert.throws(() => frameworkStringOption({ profile: true }, 'profile'), error => error.code === 'INVALID_OPTION');
+  frameworkRequireThat(true, 'IGNORED', 'ignored');
+  assert.throws(() => frameworkRequireThat(false, 'REQUIRED', 'Required.'), error => error.code === 'REQUIRED');
+
+  const operation = new FrameworkOperationError('EXAMPLE', 'Example failed.', 'status');
+  operation.details = { safe: true };
+  const failed = frameworkFailure('example', operation);
+  assert.equal(failed.status, 'failed');
+  assert.deepEqual(failed.data, { safe: true });
+  assert.deepEqual(failed.diagnostics, [{ code: 'EXAMPLE', message: 'Example failed.', next: 'status' }]);
+
+  assert.equal(frameworkFailure('example', new FrameworkOperationError('CANCELLED', 'Cancelled.')).status, 'cancelled');
+  assert.equal(frameworkFailure('example', new Error('PLAN_STALE: changed')).diagnostics[0].code, 'PLAN_STALE');
+  assert.equal(frameworkFailure('example', 'not an error').diagnostics[0].code, 'OPERATION_FAILED');
+
+  const reportError = new Error('PLAN_FAILED');
+  Object.defineProperty(reportError, 'report', { value: {
+    status: 'failed',
+    written: ['a', 42, 'b'],
+    preserved: ['c'],
+    recoveryPath: '.codex-authoring.lock',
+    get cause() { throw new Error('must not execute'); },
+  } });
+  assert.deepEqual(frameworkFailure('example', reportError).data, {
+    recovery: { status: 'failed', written: ['a', 'b'], preserved: ['c'], recoveryPath: '.codex-authoring.lock' },
+    automaticRetry: false,
+  });
+
+  const cancelledDiagnostic = compilerDiagnostic('COMPILER_CANCELLED', 'emit', 'Cancelled compiler.');
+  assert.equal(frameworkFailure('compiler check', new CompilerError(cancelledDiagnostic)).status, 'cancelled');
+  const diagnostics = [
+    compilerDiagnostic('COMPILER_SCHEMA_INVALID', 'validate', 'Invalid one.'),
+    compilerDiagnostic('COMPILER_REFERENCE_MISSING', 'resolve', 'Missing two.'),
+  ];
+  assert.deepEqual(frameworkFailure('compiler check', new CompilationFailure(diagnostics)).diagnostics, diagnostics);
 });
