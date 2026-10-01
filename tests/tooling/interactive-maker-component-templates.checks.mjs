@@ -278,7 +278,7 @@ test('framework template commands share discovery and reviewed file-plan boundar
     }, context);
     assert.equal(applied.status, 'applied');
     const document = openDocument(JSON.parse(await readFile(join(root, 'project.json'), 'utf8')));
-    assert.ok(document.design.surfaces.some(surface => surface.title === 'Overview'));
+    assert.ok(document.design.nodes.some(surface => surface.label === 'Overview'));
 
     const missing = await executeOperation({ command: 'templates show', args: ['atom.nope'], options: {} }, context);
     assert.equal(missing.status, 'failed');
