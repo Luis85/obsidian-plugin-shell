@@ -7,7 +7,8 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { studio, prototypeWizard } from '../../bin/presentation/studio.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { checkSteps } from '../../scripts/framework/check.ts';
+import { checkSteps, runCheckSteps, checkOperation, outputTail } from '../../bin/adapters/framework/check.ts';
+import * as legacyFrameworkCheck from '../../scripts/framework/check.ts';
 import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { result as operationResult } from '../../scripts/contracts/result.ts';
 import { ask, readInput } from '../../scripts/shared/input.ts';
@@ -126,6 +127,10 @@ export {
   execute,
   parseArguments,
   checkSteps,
+  runCheckSteps,
+  checkOperation,
+  outputTail,
+  legacyFrameworkCheck,
   assertJsonData,
   parseJsonData,
   operationResult,
