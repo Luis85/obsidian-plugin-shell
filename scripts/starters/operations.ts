@@ -18,8 +18,11 @@ export async function listStarters(context: Context, command = 'starters list') 
 export async function readStarterOperation(request: Request, context: Context) {
   if (request.command === 'starters list') return listStarters(context);
   if (request.command === 'starters schema') {
-    const root = await exists(join(context.frameworkRoot, '.framework/compiled/scripts/starters/starter.schema.json')) ? join(context.frameworkRoot, '.framework/compiled') : context.frameworkRoot;
-    return result(request.command, JSON.parse((await readBounded(join(root, 'scripts/starters/starter.schema.json'))).toString('utf8')));
+    // A release kit keeps the schema as template data beside its bundled CLI; a checkout reads its own source.
+    const schema = 'scripts/starters/starter.schema.json';
+    let root = context.frameworkRoot;
+    for (const kit of ['.framework/compiled', '.framework/template']) if (await exists(join(context.frameworkRoot, kit, schema))) { root = join(context.frameworkRoot, kit); break; }
+    return result(request.command, JSON.parse((await readBounded(join(root, schema))).toString('utf8')));
   }
   const definitions = await loadDefinitions(context.root);
   const id = request.args[0], selected = definitions.filter(entry => !id || entry.definition.id === id);

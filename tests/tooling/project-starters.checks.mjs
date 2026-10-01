@@ -85,7 +85,7 @@ for(const [label,fields,pattern] of [
  ['absolute source',{codebaseFolder:'/tmp/src'},/relative/],['traversal source',{codebaseFolder:'../src'},/relative/],['host folder',{testsFolder:'.obsidian'},/reserved|protected/i],['overlapping paths',{codebaseFolder:'app',testsFolder:'APP/tests'},/overlap/i],['tooling collision',{codebaseFolder:'scripts'},/tooling/i],['unknown choice',{runScript:'evil'},/Unknown configuration/],
 ])test('refuses '+label+' without altering the catalog',()=>{const before=JSON.stringify(catalog);assert.throws(()=>customizeStarter(catalog,fields===null?'missing':'quick-capture',{...choices,...fields}),pattern);assert.equal(JSON.stringify(catalog),before);});
 for(const [label,mutate] of [
- ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id='blank'],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
+ ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id=c.starters[0].id],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
 test('catalog rejects a valid legacy v4 built-in: starters ship current visual designs',()=>{
  const c=structuredClone(catalog),d=c.starters[0].document;d.schemaVersion=4;d.design.schema=4;delete d.design.visualDesigns;d.design.detailDesigns={schema:2,nextId:1,documents:[],revisions:[]};
@@ -103,7 +103,7 @@ for(const [label,change] of [
 test('an edited valid definition has a new hash without needing a catalog rewrite',()=>temporary(async folder=>{
  const f=join(folder,'configs/starters');await mkdir(f,{recursive:true});await cp(join(root,'configs/starters'),f,{recursive:true});
  const before=await loadStarterCatalog(folder),p=join(f,'blank.json');await writeFile(p,(await readFile(p,'utf8'))+' ');
- const after=await loadStarterCatalog(folder);assert.notEqual(after.starters[0].sha256,before.starters[0].sha256);
+ const after=await loadStarterCatalog(folder),blank=c=>c.starters.find(s=>s.id==='blank');assert.notEqual(blank(after).sha256,blank(before).sha256);
 }));
 test('an installation may omit blank and have no bundled fallback',()=>{
  const c=structuredClone(catalog);c.starters=c.starters.filter(s=>s.id!=='blank');assert.equal(validateStarterCatalog(c),c);

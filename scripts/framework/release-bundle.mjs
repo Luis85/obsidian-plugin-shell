@@ -43,6 +43,13 @@ export async function bundleReleaseCli(frameworkRoot) {
     plugins: [{
       name: 'release-template-locations',
       setup(builder) {
+        // A Workbench plugin's config.json is editable kit data (enable/disable), not bundled code: read it beside app.js.
+        builder.onLoad({ filter: /[\\/]plugins[\\/][^\\/]+[\\/]config\.json$/ }, async ({ path }) => {
+          const file = relative(root, path).split(sep).join('/');
+          if (!/^plugins\/[^/]+\/config\.json$/.test(file)) return undefined;
+          return { loader: 'js', contents: "import { readFileSync } from 'node:fs';\nexport default JSON.parse(readFileSync(new URL(" +
+            JSON.stringify('./' + file) + ", import.meta.url), 'utf8'));\n" };
+        });
         builder.onLoad({ filter: /\.(?:[cm]?js|ts)$/ }, async ({ path }) => {
           const relativePath = relative(root, path);
           if (!relativePath || relativePath === 'node_modules' || relativePath.startsWith('node_modules' + sep) ||

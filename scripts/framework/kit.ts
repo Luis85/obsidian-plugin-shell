@@ -38,6 +38,8 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     const bytes = skill.get(path) ?? standaloneSource(path, original);
     add('.framework/template/' + path, bytes);
     // Templates stay editable source data; runtime code is shipped only in the bundled CLI.
+    // The bundle reads each Workbench plugin's config.json beside app.js, so enabling a plugin stays a data edit.
+    if (/^plugins\/[^/]+\/config\.json$/.test(path)) add('.framework/compiled/' + path, original);
   }
   const ownership = files.find(file => file.path === '.framework/template/scripts/examples/ownership.json')!;
   const shipped = new Map(files.filter(file => file.path.startsWith('.framework/template/')).map(file => [file.path.slice('.framework/template/'.length), file.bytes]));

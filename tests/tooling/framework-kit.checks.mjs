@@ -33,8 +33,9 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok((await verifyKit(dir)).files.length > 100);
   const pluginConfigPath = join(dir, '.framework/compiled/plugins/example-extension/config.json');
   const pluginConfig = await readFile(pluginConfigPath, 'utf8');
-  assert.ok(files.some(file => file.path === '.framework/compiled/plugins/runtime.js'));
-  assert.ok(files.some(file => file.path === '.framework/compiled/plugins/example-extension/src/index.js'));
+  // Plugin code is bundled into app.js; its config.json stays editable data beside the bundle.
+  assert.ok(files.some(file => file.path === '.framework/compiled/app.js'));
+  assert.ok(!files.some(file => file.path === '.framework/compiled/plugins/runtime.js'));
   await writeFile(pluginConfigPath, JSON.stringify({ ...JSON.parse(pluginConfig), enabled: true }, null, 2) + '\n');
   let output = cli(dir, ['example', 'send', '--message', 'Compiled extension', '--json']);
   assert.equal(output.status, 0, output.stderr + output.stdout);

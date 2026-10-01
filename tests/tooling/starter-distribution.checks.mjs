@@ -38,9 +38,9 @@ test('distribution boundaries exclude canonical and legacy definitions from shel
 });
 test('standalone starter ZIP is deterministic and loads after independent extraction', async t => {
   const directory = await temp(t), files = await assembleStarterPack({ root, frameworkRoot: root });
-  assert.equal(files.length, 25); assert.ok(files.every(file => /^configs\/starters\/[a-z-]+\.json$/.test(file.path)));
+  assert.equal(files.length, 26); assert.ok(files.every(file => /^configs\/starters\/[a-z-]+\.json$/.test(file.path)));
   const first = zip(files), second = zip(await assembleStarterPack({ root, frameworkRoot: root })); assert.deepEqual(first, second);
-  await extractArchive(first, directory); const loaded = await loadDefinitions(directory, []); assert.equal(loaded.length, 25);
+  await extractArchive(first, directory); const loaded = await loadDefinitions(directory, []); assert.equal(loaded.length, 26);
   for (const entry of loaded) assert.deepEqual(entry.bytes, files.find(file => file.path === entry.file).bytes);
 });
 test('pack preview is read-only and publishing/overwriting archives is never implicit', async t => {
@@ -67,7 +67,7 @@ test('extracted compiled shell contains no starter data; a separate pack enables
   const bare = cli(['starters', 'list']); assert.equal(bare.code, 0, JSON.stringify(bare)); assert.deepEqual(bare.result.data.starters, []);
   const emptyNew = cli(['new', '../missing-product', '--starter', 'blank']); assert.equal(emptyNew.code, 1); assert.equal(emptyNew.result.diagnostics[0].code, 'STARTER_UNKNOWN');
   await extractArchive(zip(await assembleStarterPack({ root, frameworkRoot: root })), shellRoot);
-  assert.equal(cli(['new', '--list']).result.data.starters.length, 25);
+  assert.equal(cli(['new', '--list']).result.data.starters.length, 26);
   const direct = cli(['new', '../direct-project', '--starter', 'plugin-angular']); assert.equal(direct.code, 1); assert.equal(direct.result.diagnostics[0].code, 'STARTER_KIND');
   const guided = cli(['new', 'guide', '--starter', 'plugin-angular']); assert.equal(guided.code, 0, JSON.stringify(guided)); assert.equal(guided.result.data.selection.framework, 'angular');
   assert.equal(cli(['starters', 'schema']).result.data.title, 'Workbench starter definition');

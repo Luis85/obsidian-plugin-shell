@@ -15173,9 +15173,11 @@ const STARTER_CATALOG_VERSION = 1;
 const STARTER_FIELDS = ['id', 'name', 'category', 'level', 'summary', 'outcome', 'includes', 'implementation', 'tags', 'version', 'file', 'sha256', 'document'];
 function starterAssert(ok, message) { if (!ok) throw Error('STARTER_INVALID: ' + message); }
 function starterText(value, limit = 400) { return typeof value === 'string' && value.trim().length > 0 && value.length <= limit && !/[\u0000-\u001f]/.test(value); }
+/** v6 documents use the authoring contract; a v5 projection carries optional development tooling outside its frozen envelope. */
 function starterDocument(value) {
+  if (value?.schemaVersion === 6) { validateAuthoringDocument(value); return value; }
   const legacy = structuredClone(value);
-  const tooling = legacy.tooling; delete legacy.tooling;
+  const tooling = legacy?.tooling; if (legacy) delete legacy.tooling;
   validateCompanionDocument(legacy); validateTooling(tooling);
   return value;
 }

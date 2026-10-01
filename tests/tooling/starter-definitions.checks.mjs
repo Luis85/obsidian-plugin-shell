@@ -21,8 +21,8 @@ async function seed(dir, definition = reference, name = definition.id) {
   await mkdir(join(dir, 'configs/starters'), { recursive: true });
   await writeFile(join(dir, 'configs/starters', name + '.json'), JSON.stringify(definition));
 }
-test('all twenty-five standalone definitions validate and carry their metadata, source and process contracts', async () => {
-  const entries = await loadFileDefinitions(root); assert.equal(entries.length, 25);
+test('all twenty-six standalone definitions validate and carry their metadata, source and process contracts', async () => {
+  const entries = await loadFileDefinitions(root); assert.equal(entries.length, 26);
   assert.deepEqual(entries.map(entry => entry.definition.id), entries.map(entry => entry.definition.id).sort());
   assert.equal(entries.filter(entry => entry.definition.generator.kind === 'project').length, 11, 'eight former presets, two hybrid frameworks and the Angular setup');
   for (const { definition, file, sha256 } of entries) {
