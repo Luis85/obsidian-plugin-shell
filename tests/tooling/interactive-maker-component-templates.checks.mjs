@@ -86,6 +86,8 @@ test('component-template validation accepts the complete contract and rejects ma
   assert.equal(schema.$id, 'urn:workbench:component-template:1');
   assert.equal(schema.properties.props.items.additionalProperties, false);
   assert.equal(schema.properties.design.oneOf.length, 4);
+  assert.ok(schema.properties.design.oneOf[0].properties.entryId.enum.includes('u-table'));
+  assert.ok(schema.properties.design.oneOf[1].properties.recipeId.enum.includes('recipe-bar-chart'));
   assert.equal(schema.properties.accessibility.additionalProperties, false);
 
   const failures = [
