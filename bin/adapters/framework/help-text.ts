@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
 /**
  * Explanatory help metadata for the command catalog: groups, the golden path, examples and
@@ -103,7 +104,7 @@ const specific: Record<string, OptionHelp> = {
   source: { description: 'Source folder.', default: 'src' },
   tests: { description: 'Tests folder.', default: 'tests' },
   'test-vault': { description: 'Isolated test-vault folder.', default: '.test-vault' },
-  'config-dir': { description: 'Host configuration directory name inside the test vault.', default: '.obsidian' },
+  'config-dir': { description: 'Host configuration directory name inside the test vault.', default: defaultVaultConfigDirectory },
   resolve: { description: 'Which side wins a configured/imported identity conflict.', values: ['project', 'import'] },
   blank: { description: 'Create an inert minimal design instead of importing one.' },
   starter: { description: 'Starter ID (see new --list). A project starter (generator project) runs without <dir> via new --starter <id> or new guide --starter <id>.' },
@@ -111,7 +112,7 @@ const specific: Record<string, OptionHelp> = {
   install: { description: 'After writing, run npm ci and project verification in the new folder.' },
   recover: { description: 'After inspecting an interrupted attempt, explicitly acknowledge uncertain previous effects. No automatic retry.' },
   'resume-hash': { description: 'Exact current input/progress digest returned by setup status or setup resume preview.' },
-  'inside-vault': { description: 'Allow a target inside a folder that contains .obsidian/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder.' },
+  'inside-vault': { description: `Allow a target inside a folder that contains ${defaultVaultConfigDirectory}/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder.` },
   vault: { description: 'Existing folder that contains the generation target (compatibility mode).' },
   target: { description: 'Target folder relative to --vault (compatibility mode).' },
   extension: { description: 'Custom file suffix without a dot (lowercase, 1–16 letters/digits). Core Obsidian extensions are refused.' },

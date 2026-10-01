@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 /** Data-only prototype meeting contract. Defaults are suggestions, never approvals. */
 export interface HandoutQuestion { id: string; required: boolean; question: string; hint: string; default: string }
 export interface HandoutSection { title: string; description: string; questions: HandoutQuestion[] }
@@ -129,7 +130,7 @@ export const handoutSections: HandoutSection[] = [
     questions: [
       {"id": "setup.root", "required": true, "question": "Which existing directory is the project root and what must be preserved?", "hint": "Confirm that Git is already set up and, when relevant, this folder is the open Obsidian vault. Never reinitialize Git or change remotes as part of prototyping.", "default": "<TBD>"},
       {"id": "setup.paths", "required": true, "question": "What are the exact project-relative paths?", "hint": "List user settings, PRDs, typed docs for pages/components/interactions/journeys, design JSON, source, tests, assets, fixtures, reports, starters and prototype output.", "default": "<TBD>"},
-      {"id": "setup.preservation", "required": true, "question": "What may the agent create or modify, and what is protected?", "hint": "State write scope, overwrite policy and recovery strategy. Include existing notes, .git, real .obsidian settings and edited generated files.", "default": "Create new prototype-owned files through reviewed plans. Preserve PRD originals, Git/remotes, personal notes, real .obsidian settings and edited/foreign files. Stop on conflicts."},
+      {"id": "setup.preservation", "required": true, "question": "What may the agent create or modify, and what is protected?", "hint": `State write scope, overwrite policy and recovery strategy. Include existing notes, .git, real ${defaultVaultConfigDirectory} settings and edited generated files.`, "default": `Create new prototype-owned files through reviewed plans. Preserve PRD originals, Git/remotes, personal notes, real ${defaultVaultConfigDirectory} settings and edited/foreign files. Stop on conflicts.`},
       {"id": "setup.preferences", "required": false, "question": "Which reusable user preferences should be saved?", "hint": "Examples: language, defaults, theme alignment, docs locations and first-run preference. Preferences never carry execution authorization.", "default": "First-run preference: skip. Keep configurable paths/preferences in configs/user-settings.json when supported."},
     ],
   },

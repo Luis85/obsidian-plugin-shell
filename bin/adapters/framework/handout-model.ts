@@ -31,6 +31,7 @@ function metadata(snapshot: HandoutSnapshot): string {
   return '<!-- workbench-handout-snapshot: ' + JSON.stringify(snapshot).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e') + ' -->';
 }
 function singleLine(value: string): string {
+  // oxlint-disable-next-line no-control-regex
   return value.replace(/[\r\n\u0000-\u001f]+/g, ' ').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('`', '&#96;').trim();
 }
 export function renderHandout(snapshot: HandoutSnapshot, suggestions: Record<string, Suggestion> = {}): string {
@@ -113,7 +114,7 @@ export function parseAnswers(text: string): { answers: HandoutAnswer[]; diagnost
       seenFields.add(field);
       active[field] = entry[2]!.trim(); continue;
     }
-    if (/^  - Guidance:/.test(line)) { field = undefined; continue; }
+    if (line.startsWith('  - Guidance:')) { field = undefined; continue; }
     if (field && /^\s{4,}\S/.test(line)) active[field] += '\n' + line.trim();
   }
   if (fence) diagnostics.push({ code: 'HANDOUT_FENCE', message: 'Unclosed fenced code block; remaining checklist cannot be validated.' });

@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { storybookFlags } from './storybook-options.ts';
 /** One-command project creation from a reviewed local JSON starter. It composes the
  * existing catalog loader, identity-only customization and project compiler/plan
@@ -68,7 +69,7 @@ interface Placement { directory: string; vault: string; target: string }
 /** The nearest existing folder (the start or an ancestor) that holds a `.obsidian` directory. */
 export async function enclosingVault(start: string): Promise<string | null> {
   for (let current = resolve(start); ; current = dirname(current)) {
-    const marker = join(current, '.obsidian');
+    const marker = join(current, defaultVaultConfigDirectory);
     if (await exists(marker) && (await lstat(marker)).isDirectory()) return current;
     if (dirname(current) === current) return null;
   }

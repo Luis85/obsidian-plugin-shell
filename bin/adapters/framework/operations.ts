@@ -7,7 +7,7 @@ import { checkOperation } from './check.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
-import { obsidianRead } from '../../../scripts/framework/obsidian-cli.ts';
+import { obsidianRead } from './obsidian-cli.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
