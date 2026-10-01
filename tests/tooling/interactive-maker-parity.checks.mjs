@@ -1,4 +1,4 @@
-import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, readdir, tmpdir, join, resolve, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, legacyFrameworkFiles, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, legacyFrameworkConfiguration, relocatedNpmEntry, relocatedRunNode, legacyFrameworkProcess, relocatedTerminateProcessTree, legacyProcessTree, relocatedHandoutPlan, relocatedHandoutRead, legacyHandoutAdapter, applySharedFilePlan, relocatedProjectContractOperation, legacyProjectContract, relocatedMeasureProject, legacyProjectMeasure, relocatedSampleSummary, relocatedMeasureOperation, legacyMeasurement, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, legacySupportReport, relocatedStatus, relocatedReleaseCheck, legacyInspection, relocatedPortableFile, legacyArchivePath, relocatedZip, legacyZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, legacyPluginId, relocatedStorybookFlags, legacyStorybookOptions, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, legacyTerminalStyle, relocatedCommandHelp, relocatedHelpIndex, legacyHelpText, relocatedHelpText, legacyTerminalHelp, relocatedSetupDocumentation, legacyDocsSetup, relocatedDocsParserFiles, legacyDocsVendor, relocatedExportedProject, legacyProjectFrom, relocatedStorybookOperation, legacyStorybook, relocatedAirshipPlan, legacyAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, legacyAirship, relocatedBuildClickdummy, legacyClickdummy, relocatedDocsRead, relocatedDocsPlan, legacyDocs, relocatedFixtureOperation, legacyFixtures, relocatedGuidedSetup, relocatedContinueSetup, legacySetupTerminal, relocatedGuidedStarter, relocatedStarterText, legacyStarterTerminal, relocatedRenderHuman, legacyTerminalRender, relocatedSetupSnapshot, legacySetupState, relocatedSetupProgress, legacySetupProgress, relocatedKitManifest, relocatedListKitFiles, relocatedVerifyKit, relocatedBootstrapFiles, legacyKitIntegrity, relocatedDistributedIncluded, relocatedStandaloneSource, relocatedUpdateOwnership, legacyDistribution, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
+import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, readdir, tmpdir, join, resolve, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, runCheckSteps, checkOperation, outputTail, legacyFrameworkCheck, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, legacyFrameworkFiles, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, legacyFrameworkConfiguration, relocatedNpmEntry, relocatedRunNode, legacyFrameworkProcess, relocatedTerminateProcessTree, legacyProcessTree, relocatedHandoutPlan, relocatedHandoutRead, legacyHandoutAdapter, applySharedFilePlan, relocatedProjectContractOperation, legacyProjectContract, relocatedMeasureProject, legacyProjectMeasure, relocatedSampleSummary, relocatedMeasureOperation, legacyMeasurement, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, legacySupportReport, relocatedStatus, relocatedReleaseCheck, legacyInspection, relocatedPortableFile, legacyArchivePath, relocatedZip, legacyZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, legacyPluginId, relocatedStorybookFlags, legacyStorybookOptions, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, legacyTerminalStyle, relocatedCommandHelp, relocatedHelpIndex, legacyHelpText, relocatedHelpText, legacyTerminalHelp, relocatedSetupDocumentation, legacyDocsSetup, relocatedDocsParserFiles, legacyDocsVendor, relocatedExportedProject, legacyProjectFrom, relocatedStorybookOperation, legacyStorybook, relocatedAirshipPlan, legacyAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, legacyAirship, relocatedBuildClickdummy, legacyClickdummy, relocatedDocsRead, relocatedDocsPlan, legacyDocs, relocatedFixtureOperation, legacyFixtures, relocatedGuidedSetup, relocatedContinueSetup, legacySetupTerminal, relocatedGuidedStarter, relocatedStarterText, legacyStarterTerminal, relocatedRenderHuman, legacyTerminalRender, relocatedSetupSnapshot, legacySetupState, relocatedSetupProgress, legacySetupProgress, relocatedKitManifest, relocatedListKitFiles, relocatedVerifyKit, relocatedBootstrapFiles, legacyKitIntegrity, relocatedDistributedIncluded, relocatedStandaloneSource, relocatedUpdateOwnership, legacyDistribution, relocatedStarterDerivedId, relocatedStarterDerivedName, relocatedInvocationDirectory, legacyStarterProject, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
 
 test('complete interactive and agent sessions produce byte-identical sketch and prototype packages', { timeout: 180000 }, async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-parity-'));
@@ -304,3 +304,86 @@ test('relocated read-operation adapter preserves version, concept schema and con
   assert.equal(config.result.data.source, 'shell.config.json');
 });
 
+
+
+test('relocated starter orchestration preserves compatibility helpers', () => {
+  assert.equal(legacyStarterProject.derivedId, relocatedStarterDerivedId);
+  assert.equal(legacyStarterProject.derivedName, relocatedStarterDerivedName);
+  assert.equal(legacyStarterProject.invocationDirectory, relocatedInvocationDirectory);
+  assert.equal(relocatedStarterDerivedId('/tmp/My Project', 'blank'), 'my-project');
+  assert.equal(relocatedStarterDerivedName('my-project'), 'My Project');
+  assert.equal(relocatedInvocationDirectory('child', { npm_lifecycle_event: 'new', INIT_CWD: '/workspace' }, '/ignored'), resolve('/workspace/child'));
+});
+
+
+test('relocated daily check gate preserves compatibility and execution semantics', async () => {
+  assert.equal(legacyFrameworkCheck.checkSteps, checkSteps);
+  assert.equal(legacyFrameworkCheck.runCheckSteps, runCheckSteps);
+  assert.equal(legacyFrameworkCheck.checkOperation, checkOperation);
+  assert.equal(legacyFrameworkCheck.outputTail, outputTail);
+  assert.equal(outputTail('a\n\u001b[31mb\u001b[0m\nc', 2), 'b\nc');
+
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-check-gate-'));
+  try {
+    await mkdir(join(root, 'bin'), { recursive: true });
+    await mkdir(join(root, 'src'), { recursive: true });
+    await writeFile(join(root, 'bin/app.ts'), 'export {};');
+    await writeFile(join(root, 'tsconfig.maker.json'), '{}');
+    await writeFile(join(root, 'src/a.ts'), 'export const a = 1;');
+
+    const full = await checkSteps(root, false);
+    assert.ok(full.steps.some(step => step.id === 'maker-types'));
+    assert.ok(full.steps.some(step => step.id === 'maker-tests'));
+
+    const changed = await checkSteps(root, true, async (_root, args) => args[0] === 'diff' ? 'M\0src/a.ts\0' : '');
+    assert.deepEqual(changed.changes.files, ['src/a.ts']);
+    assert.deepEqual(changed.steps.find(step => step.id === 'test').args.slice(0, 3), ['related', '--run', '--passWithNoTests']);
+
+    const unavailable = await checkSteps(root, true, async () => null);
+    assert.equal(unavailable.changes.source, 'unavailable');
+    assert.deepEqual(unavailable.steps.find(step => step.id === 'test').args, ['run']);
+
+    const progress = [];
+    const fakeRun = async (_context, entry) => {
+      if (entry === 'fail.mjs') {
+        const error = new FrameworkOperationError('PROCESS_FAILED', 'failed');
+        error.details = { execution: { exitCode: 7 } };
+        throw error;
+      }
+      if (entry === 'missing.mjs') throw new FrameworkOperationError('TOOL_MISSING', 'missing');
+      return { exitCode: 0, signal: null, truncated: false, stdout: '' };
+    };
+    const outcomes = await runCheckSteps([
+      { id: 'pass', display: 'pass', entry: 'pass.mjs', args: [] },
+      { id: 'fail', display: 'fail', entry: 'fail.mjs', args: [] },
+      { id: 'skip', display: 'skip', entry: 'skip.mjs', args: [], skip: 'not needed' },
+      { id: 'missing', display: 'missing', entry: 'missing.mjs', args: [] },
+    ], { root, frameworkRoot, progress: text => progress.push(text) }, 1000, fakeRun);
+    assert.deepEqual(outcomes.map(step => [step.id, step.status]), [['pass', 'passed'], ['fail', 'failed'], ['skip', 'skipped'], ['missing', 'failed']]);
+    assert.equal(outcomes[1].exitCode, 7);
+    assert.equal(outcomes[3].code, 'TOOL_MISSING');
+    assert.ok(progress.every(text => text.startsWith('check: ')));
+
+    const dry = await checkOperation(
+      { command: 'check', args: [], options: { 'dry-run': true } },
+      { root, frameworkRoot },
+      fakeRun,
+      async () => null,
+    );
+    assert.equal(dry.status, 'planned');
+    assert.equal(dry.data.execution, 'not-run');
+
+    const controller = new AbortController();
+    controller.abort();
+    const cancelled = await checkOperation(
+      { command: 'check', args: [], options: {} },
+      { root, frameworkRoot, signal: controller.signal },
+      fakeRun,
+      async () => null,
+    );
+    assert.equal(cancelled.status, 'cancelled');
+    assert.ok(cancelled.data.steps.every(step => step.status === 'skipped'));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

@@ -3,7 +3,7 @@ import { dependencyReadiness } from '../../../scripts/compiler/adapters/dependen
 import { profiles } from './catalog.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { exists, readBounded } from './files.ts';
-import { packKit } from '../../../scripts/framework/kit.ts';
+import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
 import { projectConfigs } from '../../../scripts/shared/project-configs.mjs';
 

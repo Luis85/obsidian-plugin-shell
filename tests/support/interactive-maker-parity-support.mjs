@@ -7,7 +7,8 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { studio, prototypeWizard } from '../../bin/presentation/studio.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { checkSteps } from '../../scripts/framework/check.ts';
+import { checkSteps, runCheckSteps, checkOperation, outputTail } from '../../bin/adapters/framework/check.ts';
+import * as legacyFrameworkCheck from '../../scripts/framework/check.ts';
 import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { result as operationResult } from '../../scripts/contracts/result.ts';
 import { ask, readInput } from '../../scripts/shared/input.ts';
@@ -90,6 +91,8 @@ import { kitManifest as relocatedKitManifest, listFiles as relocatedListKitFiles
 import * as legacyKitIntegrity from '../../scripts/framework/kit-integrity.ts';
 import { included as relocatedDistributedIncluded, standaloneSource as relocatedStandaloneSource, updateOwnership as relocatedUpdateOwnership } from '../../bin/adapters/framework/distribution.ts';
 import * as legacyDistribution from '../../scripts/framework/distribution.ts';
+import { derivedId as relocatedStarterDerivedId, derivedName as relocatedStarterDerivedName, invocationDirectory as relocatedInvocationDirectory } from '../../bin/adapters/framework/starter-project.ts';
+import * as legacyStarterProject from '../../scripts/framework/starter-project.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -124,6 +127,10 @@ export {
   execute,
   parseArguments,
   checkSteps,
+  runCheckSteps,
+  checkOperation,
+  outputTail,
+  legacyFrameworkCheck,
   assertJsonData,
   parseJsonData,
   operationResult,
@@ -248,6 +255,10 @@ export {
   relocatedStandaloneSource,
   relocatedUpdateOwnership,
   legacyDistribution,
+  relocatedStarterDerivedId,
+  relocatedStarterDerivedName,
+  relocatedInvocationDirectory,
+  legacyStarterProject,
   test,
   frameworkRoot,
   scripted,
