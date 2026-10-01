@@ -13,7 +13,7 @@ import { conceptImportPlan } from './concepts.ts';
 import { editStarterPlan } from '../../../scripts/starters/operations.ts';
 import { starterProjectPlan } from './starter-project.ts';
 import { styleExportPlan } from './styles.ts';
-import { upgradePlan } from '../../../scripts/framework/kit.ts';
+import { upgradePlan } from './kit.ts';
 import { configFile, object } from './configuration.ts';
 import { readConfiguration, readJson, readBounded, hash, exists } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
