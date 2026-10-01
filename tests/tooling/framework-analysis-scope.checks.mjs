@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFile, access } from 'node:fs/promises';
+import { readFile, access, readdir } from 'node:fs/promises';
 const root=new URL('../../',import.meta.url);
 const config=JSON.parse(await readFile(new URL('.fallowrc.json',root),'utf8'));
 // Configuration consistency only. The unchanged full analyzer gate separately executes the pinned Fallow binary.
@@ -123,5 +123,21 @@ test('legacy core entries remain compatibility-only shims over typed owners', as
     const executable = source.split('\n').map(line => line.trim())
       .filter(line => line && !line.startsWith('//'));
     assert.deepEqual(executable, [`export * from '${target}';`], path);
+  }
+});
+
+
+test('Stage D leaves scripts/framework as compatibility-only entries', async () => {
+  const directory = new URL('scripts/framework/', root);
+  const files = (await readdir(directory)).filter(name => name.endsWith('.ts')).sort();
+  assert.ok(files.length > 40, 'expected the retained compatibility surface');
+  for (const name of files) {
+    const source = await readFile(new URL(name, directory), 'utf8');
+    const executable = source.split('\n').map(line => line.trim())
+      .filter(line => line && !line.startsWith('//'));
+    assert.ok(source.length < 500, `${name} still contains a substantive implementation`);
+    assert.ok(executable.length >= 1, `${name} is an empty compatibility entry`);
+    assert.ok(executable.every(line => line.startsWith('export ')), `${name}: ${executable.join(' | ')}`);
+    assert.ok(source.includes('../../bin/') || source.includes('../shared/'), `${name} does not delegate to a relocated owner`);
   }
 });
