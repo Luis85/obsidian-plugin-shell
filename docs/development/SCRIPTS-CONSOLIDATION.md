@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D32 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D33 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -133,7 +133,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D30:** Interactive documentation setup flow moved to `bin/presentation/terminal/docs-setup.ts`. It now shares the canonical yes/no parser instead of local regexes; the former framework path is compatibility-only and maker coverage locks decline, blocked/no-plan, cancellation and hash-bound apply behavior.
 - **D31:** Documentation-parser packaging moved to `bin/adapters/framework/docs-vendor.ts`. The former framework path is compatibility-only; maker coverage verifies exact YAML version pinning and packaging only JS/JSON/license assets into the compiled kit.
 - **D32:** Data-only `new --from` project intake moved to `bin/adapters/framework/project-from.ts`. The former framework path is compatibility-only; maker coverage locks bounded source loading, identity overrides, missing/malformed/future-schema refusal and plugin-ID validation.
-- **Remaining D33–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D33:** Optional Storybook lifecycle moved to `bin/adapters/framework/storybook.ts` and the relocated dispatcher imports it locally. The former framework path is compatibility-only; injected-executor coverage locks status, disabled refusal, install plan/apply, installed check, dev dry-run and lock-mismatch behavior without launching external tooling.
+- **Remaining D34–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

@@ -64,6 +64,8 @@ import { docsParserFiles as relocatedDocsParserFiles } from '../../bin/adapters/
 import * as legacyDocsVendor from '../../scripts/framework/docs-vendor.ts';
 import { exportedProject as relocatedExportedProject } from '../../bin/adapters/framework/project-from.ts';
 import * as legacyProjectFrom from '../../scripts/framework/project-from.ts';
+import { storybookOperation as relocatedStorybookOperation } from '../../bin/adapters/framework/storybook.ts';
+import * as legacyStorybook from '../../scripts/framework/storybook.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1146,6 +1148,93 @@ test('relocated exported-project intake preserves bounded data and identity sema
 
     await assert.rejects(relocatedExportedProject(baseRequest, context, () => 'reserved ID'),
       error => error.code === 'INVALID_PLUGIN_ID');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated Storybook lifecycle preserves planning, install and execution boundaries', async () => {
+  assert.equal(legacyStorybook.storybookOperation, relocatedStorybookOperation);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-storybook-')));
+  try {
+    const context = { root, frameworkRoot };
+    const status = await relocatedStorybookOperation({ command: 'storybook status', args: [], options: {} }, context);
+    assert.equal(status.status, 'ok');
+    assert.equal(status.data.enabled, false);
+    assert.equal(status.data.configuration, false);
+    assert.equal(status.data.lock, 'absent');
+
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook unknown', args: [], options: {} }, context),
+      error => error.code === 'STORYBOOK_COMMAND_UNKNOWN',
+    );
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook install', args: [], options: {} }, context),
+      error => error.code === 'STORYBOOK_DISABLED',
+    );
+
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    source.tooling = { ...(source.tooling ?? {}), storybook: { enabled: true, generateStories: true } };
+    await mkdir(join(root, 'design'));
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+    await mkdir(join(root, 'storybook'));
+    await writeFile(join(root, 'storybook/package.json'), JSON.stringify({ devDependencies: { storybook: '1.0.0' } }));
+
+    const installPlan = await relocatedStorybookOperation({ command: 'storybook install', args: [], options: {} }, context);
+    assert.equal(installPlan.status, 'planned');
+    assert.deepEqual(installPlan.data.args, ['install', '--no-fund']);
+    assert.equal(installPlan.data.firstInstall, true);
+
+    const calls = [];
+    const executor = {
+      npm: async () => '/virtual/npm-cli.js',
+      run: async (ctx, entry, args, timeout, env) => {
+        calls.push({ ctx, entry, args, timeout, env });
+        return { exitCode: 0, signal: null, truncated: false, stdout: '' };
+      },
+    };
+    const installed = await relocatedStorybookOperation(
+      { command: 'storybook install', args: [], options: { yes: true } }, context, executor,
+    );
+    assert.equal(installed.status, 'applied');
+    assert.equal(calls[0].ctx.root, join(root, 'storybook'));
+    assert.equal(calls[0].entry, '/virtual/npm-cli.js');
+    assert.deepEqual(calls[0].args, ['install', '--no-fund']);
+
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook check', args: [], options: {} }, context, executor),
+      error => error.code === 'STORYBOOK_INSTALL_REQUIRED',
+    );
+
+    const lock = {
+      packages: {
+        '': { devDependencies: { storybook: '1.0.0' } },
+        'node_modules/storybook': { version: '1.0.0' },
+      },
+    };
+    await writeFile(join(root, 'storybook/package-lock.json'), JSON.stringify(lock));
+    await mkdir(join(root, 'storybook/node_modules/storybook/dist/bin'), { recursive: true });
+    await writeFile(join(root, 'storybook/node_modules/storybook/dist/bin/dispatcher.js'), 'export {};\n');
+
+    const checked = await relocatedStorybookOperation({ command: 'storybook check', args: [], options: {} }, context, executor);
+    assert.equal(checked.status, 'ok');
+    assert.equal(calls.at(-1).entry, 'storybook/node_modules/vue-tsc/bin/vue-tsc.js');
+    assert.deepEqual(calls.at(-1).args, ['--noEmit', '--project', 'storybook/tsconfig.json']);
+
+    const dev = await relocatedStorybookOperation(
+      { command: 'storybook dev', args: [], options: { 'dry-run': true } }, context, executor,
+    );
+    assert.equal(dev.status, 'planned');
+    assert.ok(dev.data.args.includes('--no-open'));
+    assert.equal(dev.data.execution, 'not-run');
+
+    lock.packages[''].devDependencies.storybook = '2.0.0';
+    await writeFile(join(root, 'storybook/package-lock.json'), JSON.stringify(lock));
+    await assert.rejects(
+      relocatedStorybookOperation({ command: 'storybook build', args: [], options: {} }, context, executor),
+      error => error.code === 'STORYBOOK_LOCK_MISMATCH',
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

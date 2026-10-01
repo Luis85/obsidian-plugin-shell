@@ -12,7 +12,7 @@ import { commandHelp, helpIndex } from '../../../scripts/framework/help-text.ts'
 import { operationSchemas } from './schema.ts';
 import { setupProgress } from '../../../scripts/framework/setup-progress.ts';
 import { starterListing, completeStarterProject } from '../../../scripts/framework/starter-project.ts';
-import { storybookOperation } from '../../../scripts/framework/storybook.ts';
+import { storybookOperation } from './storybook.ts';
 import { submissionCheck } from '../../../scripts/framework/submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 import { capabilityCatalog } from '../../../scripts/operations/catalog.mjs';
