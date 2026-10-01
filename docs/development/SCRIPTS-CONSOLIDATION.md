@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D14 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D15 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -113,7 +113,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D12:** Prototype command definitions and typo-suggestion policy moved beside the relocated catalog in `bin/adapters/framework/`. Catalog/dispatcher imports are now local, both former framework paths are compatibility-only, and maker coverage locks prototype effects plus deterministic typo suggestions.
 - **D13:** Machine-readable operation schema generation moved to `bin/adapters/framework/schema.ts`; the dispatcher imports it locally and `scripts/framework/schemas.ts` is compatibility-only. Maker coverage verifies command coverage, common option constraints and the canonical result envelope.
 - **D14:** Framework request/context types, option validation and bounded failure adaptation moved to `bin/adapters/framework/contracts.ts`. Relocated CLI modules import it locally, `scripts/framework/contracts.ts` is compatibility-only, and maker coverage locks operation/compiler errors plus safe recovery metadata extraction.
-- **Remaining D15–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D15:** Framework filesystem/root-discovery services moved to `bin/adapters/framework/files.ts`. The relocated CLI/read/process adapters import it locally, `scripts/framework/files.ts` is compatibility-only, and maker coverage verifies bounded reads, hashing, lstat presence and implicit/explicit project-root discovery.
+- **Remaining D16–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

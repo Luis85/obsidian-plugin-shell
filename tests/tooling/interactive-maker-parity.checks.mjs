@@ -23,6 +23,8 @@ import { prototypeCommands } from '../../bin/adapters/framework/prototype-catalo
 import { operationSchemas } from '../../bin/adapters/framework/schema.ts';
 import { failure as frameworkFailure, stringOption as frameworkStringOption, OperationError as FrameworkOperationError, requireThat as frameworkRequireThat } from '../../bin/adapters/framework/contracts.ts';
 import { CompilerError, CompilationFailure, diagnostic as compilerDiagnostic } from '../../scripts/compiler/domain/diagnostics.ts';
+import { hash as relocatedHash, readBounded as relocatedReadBounded, projectRoot as relocatedProjectRoot, exists as relocatedExists } from '../../bin/adapters/framework/files.ts';
+import * as legacyFrameworkFiles from '../../scripts/framework/files.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -505,4 +507,27 @@ test('relocated framework contracts preserve option, failure and compiler diagno
     compilerDiagnostic('COMPILER_REFERENCE_MISSING', 'resolve', 'Missing two.'),
   ];
   assert.deepEqual(frameworkFailure('compiler check', new CompilationFailure(diagnostics)).diagnostics, diagnostics);
+});
+
+
+test('relocated framework filesystem adapter preserves root discovery, bounded reads and compatibility identity', async () => {
+  assert.equal(legacyFrameworkFiles.readBounded, relocatedReadBounded);
+  assert.equal(legacyFrameworkFiles.projectRoot, relocatedProjectRoot);
+  assert.equal(legacyFrameworkFiles.exists, relocatedExists);
+  assert.equal(legacyFrameworkFiles.hash, relocatedHash);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-files-')));
+  try {
+    await mkdir(join(root, 'nested'));
+    await writeFile(join(root, 'app.mjs'), 'export {};\n');
+    await writeFile(join(root, 'payload.txt'), 'bounded payload\n');
+    assert.equal(await relocatedProjectRoot(join(root, 'nested')), root);
+    assert.equal(await relocatedProjectRoot(root, true), root);
+    assert.equal((await relocatedReadBounded(join(root, 'payload.txt'))).toString('utf8'), 'bounded payload\n');
+    assert.equal(relocatedHash('bounded payload\n').length, 64);
+    assert.equal(await relocatedExists(join(root, 'payload.txt')), true);
+    assert.equal(await relocatedExists(join(root, 'missing.txt')), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

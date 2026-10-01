@@ -3,7 +3,7 @@ import { conceptSchema } from '../../../scripts/companion/concepts/contract.ts';
 import { inspectSitemapSummary } from '../../../scripts/companion/sitemap/summary.ts';
 import { handoutRead } from '../../../scripts/framework/handout-adapter.ts';
 import { inspectDesign } from '../../../scripts/framework/changes.ts';
-import { readConfiguration, exists } from '../../../scripts/framework/files.ts';
+import { readConfiguration, exists } from './files.ts';
 import { status, releaseCheck } from '../../../scripts/framework/inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
 import { measureProject } from '../../../scripts/framework/project-measure.ts';

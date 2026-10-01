@@ -7,7 +7,7 @@ import { ask, readInput } from '../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments } from './framework/catalog.ts';
 import { executeOperation } from './framework/operations.ts';
-import { projectRoot, exists } from '../../scripts/framework/files.ts';
+import { projectRoot, exists } from './framework/files.ts';
 import { failure, type Context } from './framework/contracts.ts';
 import { invocationDirectory } from '../../scripts/framework/starter-project.ts';
 import { guidedStarter } from '../../scripts/framework/starter-terminal.ts';
