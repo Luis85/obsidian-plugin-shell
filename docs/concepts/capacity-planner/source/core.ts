@@ -1,5 +1,6 @@
-export const VERSION = 1;
-export const STORAGE_KEY = "capacity-planner.prototype.v1";
+export const VERSION = 2;
+export const STORAGE_KEY = "capacity-planner.prototype.v2";
+
 export function $(selector, root = document) {
   const element = root.querySelector(selector);
   if (!element) throw new Error(`Missing prototype element: ${selector}`);
@@ -16,6 +17,7 @@ export const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => 
 })[char]);
 export const euro = new Intl.NumberFormat("de-DE", { style:"currency", currency:"EUR", maximumFractionDigits:0 });
 export const num = new Intl.NumberFormat("de-DE", { maximumFractionDigits:1 });
+export const pct = (value) => `${num.format(Number(value || 0) * 100)}%`;
 
 export function parseDate(value) {
   const [y,m,d] = String(value).split("-").map(Number);
@@ -23,154 +25,167 @@ export function parseDate(value) {
   const date = new Date(Date.UTC(y,m-1,d));
   return Number.isFinite(date.getTime()) ? date : null;
 }
+export function iso(date) { return date.toISOString().slice(0,10); }
+export function addDays(date, days) { const next=new Date(date); next.setUTCDate(next.getUTCDate()+days); return next; }
+export function inclusiveDays(start,end) { return Math.round((end-start)/86400000)+1; }
 export function dateText(value) {
-  const date = parseDate(value);
+  const date=parseDate(value);
   return date ? new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(date) : "—";
 }
-export function iso(date) { return date.toISOString().slice(0,10); }
-export function addDays(date, days) {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-export function inclusiveDays(start, end) { return Math.round((end - start) / 86400000) + 1; }
 export function uid(prefix) { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`; }
 export function clone(value) { return JSON.parse(JSON.stringify(value)); }
+export function slug(value) { return String(value||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "item"; }
+export function nowIso() { return new Date().toISOString(); }
 
-export function makeIterations(plan) {
-  const start = parseDate(plan.start);
-  const due = parseDate(plan.due);
-  if (!start || !due || due < start) return [];
-  const chunk = Math.max(1, Number(plan.iterationWeeks) || 2) * 7;
-  const result = [];
-  let cursor = start;
-  let index = 1;
-  while (cursor <= due && result.length < 80) {
-    const rawEnd = addDays(cursor, chunk - 1);
-    const end = rawEnd > due ? due : rawEnd;
-    result.push({id:`it-${iso(cursor)}`,index,name:`Iteration ${index}`,start:iso(cursor),end:iso(end),weeks:inclusiveDays(cursor,end)/7});
-    cursor = addDays(end,1);
-    index += 1;
+export function generateIterations(startValue,dueValue,weeks=2) {
+  const start=parseDate(startValue),due=parseDate(dueValue);
+  if(!start||!due||due<start)return[];
+  const chunk=Math.max(1,Number(weeks)||2)*7,result=[];
+  let cursor=start,index=1;
+  while(cursor<=due&&result.length<100){
+    const rawEnd=addDays(cursor,chunk-1),end=rawEnd>due?due:rawEnd;
+    result.push({id:`it-${iso(cursor)}`,index,name:`Iteration ${index}`,start:iso(cursor),end:iso(end)});
+    cursor=addDays(end,1);index+=1;
   }
   return result;
 }
-
 export function nextPlanDates() {
-  const now = new Date();
-  const today = new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
-  const toMonday = (8 - today.getUTCDay()) % 7;
-  const start = addDays(today,toMonday);
+  const now=new Date(),today=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
+  const start=addDays(today,(8-today.getUTCDay())%7);
   return {start:iso(start),due:iso(addDays(start,16*7-1))};
 }
 
-export function baseState() {
-  const plan = {id:"plan-demo",name:"Custom Order Platform",budget:280000,start:"2026-10-05",due:"2027-01-22",iterationWeeks:2,daysPerWeek:5,hoursPerDay:8,unitName:"SP",hoursPerUnit:6};
-  const its = makeIterations(plan);
-  const all = (value) => Object.fromEntries(its.map(it=>[it.id,value]));
-  const range = (values) => Object.fromEntries(its.map((it,i)=>[it.id,values[i] ?? 0]));
+function makeLaborPlan(iterations, values) {
+  const byIteration={};
+  iterations.forEach((it,index)=>{byIteration[it.id]=Array.isArray(values)?Number(values[index]??0):Number(values||0);});
+  return byIteration;
+}
+function baseProject() {
+  const start="2026-10-05",due="2027-01-22",iterations=generateIterations(start,due,2);
   return {
-    schema:"capacity-planner.workspace",version:VERSION,plan,
+    id:"project-demo",name:"Custom Order Platform",orderValue:420000,hoursPerDay:8,
+    workingDays:[1,2,3,4,5],unitName:"SP",hoursPerUnit:6,timelineOwner:"shared-project",
+    timeline:{start,due,iterationWeeks:2},iterations,
+    holidays:[{id:"holiday-1",date:"2026-12-25",name:"Christmas Day"},{id:"holiday-2",date:"2027-01-01",name:"New Year"}],
     roles:[
-      {id:"role-dm",name:"Delivery Manager",dayRate:950,availableFte:.5,fteByIteration:all(.4)},
-      {id:"role-ba",name:"Business Analyst",dayRate:850,availableFte:1,fteByIteration:range([.8,.8,.8,.4,.4,0,0,0])},
-      {id:"role-ux",name:"UX / UI",dayRate:800,availableFte:1,fteByIteration:range([.7,.7,.7,.7,.3,.3,0,0])},
-      {id:"role-dev",name:"Software Engineering",dayRate:900,availableFte:2,fteByIteration:all(2)},
-      {id:"role-qa",name:"QA Engineer",dayRate:780,availableFte:1,fteByIteration:range([0,0,.4,.4,.8,.8,.8,.6])}
+      {id:"role-dm",name:"Delivery Manager",dayRate:950,manualFte:.5,budgetCap:60000},
+      {id:"role-ba",name:"Business Analyst",dayRate:850,manualFte:1,budgetCap:65000},
+      {id:"role-ux",name:"UX / UI",dayRate:800,manualFte:1,budgetCap:55000},
+      {id:"role-dev",name:"Software Engineering",dayRate:900,manualFte:2,budgetCap:150000},
+      {id:"role-qa",name:"QA Engineer",dayRate:780,manualFte:1,budgetCap:65000}
+    ],
+    people:[
+      {id:"person-alex",name:"Alex",roleId:"role-dm",baseFte:.5,availabilityByIteration:{},leave:[]},
+      {id:"person-sam",name:"Sam",roleId:"role-ba",baseFte:1,availabilityByIteration:{},leave:[]},
+      {id:"person-mia",name:"Mia",roleId:"role-ux",baseFte:1,availabilityByIteration:{},leave:[]},
+      {id:"person-lin",name:"Lin",roleId:"role-dev",baseFte:1,availabilityByIteration:{},leave:[]},
+      {id:"person-jordan",name:"Jordan",roleId:"role-dev",baseFte:1,availabilityByIteration:{},leave:[{id:"leave-1",start:"2026-12-21",end:"2027-01-03",label:"Year-end leave"}]},
+      {id:"person-priya",name:"Priya",roleId:"role-qa",baseFte:1,availabilityByIteration:{},leave:[]}
     ],
     tasks:[
-      {id:"task-1",title:"Kick-off and delivery setup",units:5,roleId:"role-dm",iterationId:its[0]?.id ?? null},
-      {id:"task-2",title:"Domain discovery and backlog",units:8,roleId:"role-ba",iterationId:its[0]?.id ?? null},
-      {id:"task-3",title:"Experience map and key flows",units:8,roleId:"role-ux",iterationId:its[0]?.id ?? null},
-      {id:"task-4",title:"Core order service",units:21,roleId:"role-dev",iterationId:its[1]?.id ?? null},
-      {id:"task-5",title:"Pricing and validation rules",units:13,roleId:"role-dev",iterationId:its[2]?.id ?? null},
-      {id:"task-6",title:"Order-management UI",units:13,roleId:"role-dev",iterationId:its[3]?.id ?? null},
-      {id:"task-7",title:"Automation foundation",units:8,roleId:"role-qa",iterationId:its[3]?.id ?? null},
-      {id:"task-8",title:"Release hardening",units:10,roleId:null,iterationId:null},
-      {id:"task-9",title:"Operational handover",units:5,roleId:null,iterationId:null}
-    ]
+      {id:"task-1",title:"Kick-off and delivery setup",units:5},
+      {id:"task-2",title:"Domain discovery and backlog",units:8},
+      {id:"task-3",title:"Experience map and key flows",units:8},
+      {id:"task-4",title:"Core order service",units:21},
+      {id:"task-5",title:"Pricing and validation rules",units:13},
+      {id:"task-6",title:"Order-management UI",units:13},
+      {id:"task-7",title:"Automation foundation",units:8},
+      {id:"task-8",title:"Release hardening",units:10},
+      {id:"task-9",title:"Operational handover",units:5}
+    ],
+    actuals:[
+      {id:"actual-1",taskId:"task-1",roleId:"role-dm",personId:"person-alex",iterationId:iterations[0].id,hours:18},
+      {id:"actual-2",taskId:"task-2",roleId:"role-ba",personId:"person-sam",iterationId:iterations[0].id,hours:30},
+      {id:"actual-3",taskId:"task-4",roleId:"role-dev",personId:"person-lin",iterationId:iterations[1].id,hours:32}
+    ],
+    persistence:{basePath:"Projects/Custom Order Platform",projectPath:"Project",scenarioPath:"Capacity Plans",iterationPath:"Iterations",rolePath:"Roles",personPath:"People",taskPath:"Tasks",baselinePath:"Baselines",auditPath:"Audit",conflictPolicy:"warn"}
   };
 }
+function baseScenario(project) {
+  const its=project.iterations;
+  return {
+    id:"scenario-baseline",name:"Baseline Delivery Plan",status:"draft",budget:280000,contingencyPct:8,targetMarginPct:25,createdAt:nowIso(),
+    rolePlans:{
+      "role-dm":{fteByIteration:makeLaborPlan(its,.4),rateByIteration:{}},
+      "role-ba":{fteByIteration:makeLaborPlan(its,[.8,.8,.8,.4,.4,0,0,0]),rateByIteration:{}},
+      "role-ux":{fteByIteration:makeLaborPlan(its,[.7,.7,.7,.7,.3,.3,0,0]),rateByIteration:{}},
+      "role-dev":{fteByIteration:makeLaborPlan(its,2),rateByIteration:{}},
+      "role-qa":{fteByIteration:makeLaborPlan(its,[0,0,.4,.4,.8,.8,.8,.6]),rateByIteration:{}}
+    },
+    allocations:[
+      {id:"alloc-1",taskId:"task-1",roleId:"role-dm",personId:"person-alex",iterationId:its[0].id,hours:30},
+      {id:"alloc-2",taskId:"task-2",roleId:"role-ba",personId:"person-sam",iterationId:its[0].id,hours:48},
+      {id:"alloc-3",taskId:"task-3",roleId:"role-ux",personId:"person-mia",iterationId:its[0].id,hours:48},
+      {id:"alloc-4",taskId:"task-4",roleId:"role-dev",personId:"person-lin",iterationId:its[1].id,hours:84},
+      {id:"alloc-5",taskId:"task-4",roleId:"role-dev",personId:"person-jordan",iterationId:its[2].id,hours:42},
+      {id:"alloc-6",taskId:"task-5",roleId:"role-dev",personId:"person-lin",iterationId:its[2].id,hours:78},
+      {id:"alloc-7",taskId:"task-6",roleId:"role-dev",personId:"person-jordan",iterationId:its[3].id,hours:54},
+      {id:"alloc-8",taskId:"task-6",roleId:"role-ux",personId:"person-mia",iterationId:its[3].id,hours:24},
+      {id:"alloc-9",taskId:"task-7",roleId:"role-qa",personId:"person-priya",iterationId:its[3].id,hours:48}
+    ],
+    nonLaborCosts:[{id:"cost-cloud",name:"Cloud environments",planned:12000,actual:4000},{id:"cost-security",name:"External security review",planned:8000,actual:0}]
+  };
+}
+export function baseState() {
+  const project=baseProject(),scenario=baseScenario(project),at=nowIso();
+  return {schema:"capacity-planner.workspace",version:VERSION,id:"workspace-demo",revision:1,updatedAt:at,project,scenarios:[scenario],activeScenarioId:scenario.id,baselines:[],audit:[{id:"audit-1",at,revision:1,action:"workspace.created",detail:"Demo workspace created"}]};
+}
+
+export function activeScenario(state=stateRef.state) { return state.scenarios.find(item=>item.id===state.activeScenarioId) || state.scenarios[0]; }
+export function roleById(id,state=stateRef.state){return state.project.roles.find(role=>role.id===id);}
+export function personById(id,state=stateRef.state){return state.project.people.find(person=>person.id===id);}
+export function taskById(id,state=stateRef.state){return state.project.tasks.find(task=>task.id===id);}
+export function iterationById(id,state=stateRef.state){return state.project.iterations.find(it=>it.id===id);}
 
 export function validate(candidate) {
-  if (!candidate || candidate.schema !== "capacity-planner.workspace" || candidate.version !== VERSION) return "Unsupported workspace schema or version.";
-  if (!candidate.plan || typeof candidate.plan.name !== "string" || !candidate.plan.name.trim()) return "Plan is missing.";
-  if (typeof candidate.plan.unitName !== "string" || !candidate.plan.unitName.trim()) return "Task estimate unit is missing.";
-  const start = parseDate(candidate.plan.start), due = parseDate(candidate.plan.due);
-  if (!start || !due || due < start) return "Plan dates are invalid.";
-  const ranges = {budget:[0,1e9],iterationWeeks:[.25,12],daysPerWeek:[1,7],hoursPerDay:[.25,24],hoursPerUnit:[0,10000]};
-  for (const [key,[min,max]] of Object.entries(ranges)) {
-    const value = Number(candidate.plan[key]);
-    if (!Number.isFinite(value) || value < min || value > max) return `Plan value ${key} is invalid.`;
-  }
-  if (!Array.isArray(candidate.roles) || !Array.isArray(candidate.tasks)) return "Roles or tasks are missing.";
-  const roleIds = new Set();
-  for (const role of candidate.roles) {
-    if (!role?.id || typeof role.name !== "string" || !role.name.trim() || roleIds.has(role.id)) return "Role identity is invalid.";
-    roleIds.add(role.id);
-    if (!Number.isFinite(Number(role.dayRate)) || Number(role.dayRate) < 0) return `Day rate for ${role.name} is invalid.`;
-    if (role.availableFte !== undefined && (!Number.isFinite(Number(role.availableFte)) || Number(role.availableFte) < 0 || Number(role.availableFte) > 20)) return `FTE envelope for ${role.name} is invalid.`;
-    if (!role.fteByIteration || typeof role.fteByIteration !== "object") return `FTE plan for ${role.name} is invalid.`;
-    for (const value of Object.values(role.fteByIteration)) if (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 20) return `FTE value for ${role.name} is invalid.`;
-  }
-  const taskIds = new Set();
-  for (const task of candidate.tasks) {
-    if (!task?.id || typeof task.title !== "string" || !task.title.trim() || taskIds.has(task.id)) return "Task identity is invalid.";
-    taskIds.add(task.id);
-    if (!Number.isFinite(Number(task.units)) || Number(task.units) < 0) return `Estimate for ${task.title} is invalid.`;
-    if (task.roleId && !roleIds.has(task.roleId)) return `Task ${task.title} refers to a missing role.`;
-  }
+  if(!candidate||candidate.schema!=="capacity-planner.workspace"||candidate.version!==VERSION)return"Unsupported capacity-planner workspace version.";
+  if(!candidate.id||!candidate.project||!Array.isArray(candidate.scenarios)||!candidate.scenarios.length)return"Workspace structure is incomplete.";
+  if(!candidate.project.name||!Array.isArray(candidate.project.iterations)||!candidate.project.iterations.length)return"Project timeline is missing.";
+  if(!Array.isArray(candidate.project.roles)||!Array.isArray(candidate.project.people)||!Array.isArray(candidate.project.tasks))return"Project resources are incomplete.";
+  if(!candidate.scenarios.some(item=>item.id===candidate.activeScenarioId))return"Active resource plan is missing.";
+  const ids=(items)=>{const set=new Set();for(const item of items){if(!item?.id||set.has(item.id))return false;set.add(item.id);}return true;};
+  if(!ids(candidate.project.iterations)||!ids(candidate.project.roles)||!ids(candidate.project.people)||!ids(candidate.project.tasks)||!ids(candidate.scenarios))return"Duplicate or missing identities detected.";
   return null;
 }
-
 function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) { storageStatus="demo"; return baseState(); }
-    const candidate = JSON.parse(raw);
-    if (validate(candidate)) { storageStatus="invalid"; return baseState(); }
-    storageStatus="saved"; return candidate;
-  } catch { storageStatus="unavailable"; return baseState(); }
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw){storageStatus="demo";return baseState();}
+    const candidate=JSON.parse(raw),error=validate(candidate);
+    if(error){storageStatus="invalid";return baseState();}
+    storageStatus="saved";return candidate;
+  }catch{storageStatus="unavailable";return baseState();}
 }
-
-export const stateRef = {state:load(),taskFilter:"",draggedTaskId:null};
+export const stateRef={state:load(),taskFilter:"",dragged:null,dirty:false,lastSavedAt:null};
 export function renderStorageStatus() {
-  const pill = $("#storage-pill");
-  const labels = {saved:"Saved locally",demo:"Demo · not saved",invalid:"Stored data invalid · demo shown",unavailable:"In-memory only"};
-  pill.textContent = labels[storageStatus] || "In-memory only";
-  pill.className = `pill ${storageStatus === "invalid" ? "warning" : storageStatus === "saved" ? "positive" : ""}`;
+  const pill=$("#storage-pill"),labels={saved:"Saved",demo:"Demo · not saved",dirty:"Unsaved changes",invalid:"Stored data invalid · demo shown",unavailable:"In-memory only"};
+  const key=stateRef.dirty?"dirty":storageStatus;
+  pill.textContent=labels[key]||"In-memory only";pill.className=`pill ${key==="invalid"||key==="dirty"?"warning":key==="saved"?"positive":""}`;
+  const revision=$("#revision-pill");revision.textContent=`r${stateRef.state.revision}`;
 }
 export function save() {
-  try { localStorage.setItem(STORAGE_KEY,JSON.stringify(stateRef.state)); storageStatus="saved"; }
-  catch { storageStatus="unavailable"; }
-  renderStorageStatus();
+  let persisted=false;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(stateRef.state));storageStatus="saved";stateRef.dirty=false;stateRef.lastSavedAt=nowIso();persisted=true;}
+  catch{storageStatus="unavailable";}
+  renderStorageStatus();return persisted;
 }
-export function announce(message) {
-  clearTimeout(noticeTimer); notice.textContent=message; notice.classList.add("show");
-  noticeTimer=window.setTimeout(()=>notice.classList.remove("show"),2600);
+export function markDirty(){stateRef.dirty=true;renderStorageStatus();}
+export function commit(action,detail,{persist=true}={}) {
+  stateRef.state.revision=Number(stateRef.state.revision||0)+1;stateRef.state.updatedAt=nowIso();
+  stateRef.state.audit.unshift({id:uid("audit"),at:stateRef.state.updatedAt,revision:stateRef.state.revision,action,detail:String(detail||"")});
+  if(stateRef.state.audit.length>300)stateRef.state.audit.length=300;
+  stateRef.dirty=true;if(persist)save();else renderStorageStatus();
 }
-export function iterations() { return makeIterations(stateRef.state.plan); }
-export function capacityFor(role,iteration) {
-  const fte=Number(role.fteByIteration?.[iteration.id] ?? 0),pt=fte*iteration.weeks*Number(stateRef.state.plan.daysPerWeek),hours=pt*Number(stateRef.state.plan.hoursPerDay),cost=pt*Number(role.dayRate||0);
-  return {fte,pt,hours,cost};
-}
-export function taskHours(task) { return Number(task.units||0)*Number(stateRef.state.plan.hoursPerUnit||0); }
-export function tasksFor(roleId,iterationId) { return stateRef.state.tasks.filter(task=>task.roleId===roleId && task.iterationId===iterationId); }
-export function roleTotals(role) {
-  return iterations().reduce((acc,it)=>{const c=capacityFor(role,it);acc.pt+=c.pt;acc.hours+=c.hours;acc.cost+=c.cost;acc.fteWeeks+=c.fte*it.weeks;acc.weeks+=it.weeks;acc.peakFte=Math.max(acc.peakFte,c.fte);if(c.fte>Number(role.availableFte||0)+.001)acc.envelopeBreaches+=1;return acc;},{pt:0,hours:0,cost:0,fteWeeks:0,weeks:0,peakFte:0,envelopeBreaches:0});
-}
-export function iterationTotals(iteration) {
-  const totals={pt:0,hours:0,cost:0,load:0,plannedFte:0,availableFte:0,envelopeBreaches:0,overloadCells:0};
-  for(const role of stateRef.state.roles){const c=capacityFor(role,iteration),load=tasksFor(role.id,iteration.id).reduce((sum,t)=>sum+taskHours(t),0);totals.pt+=c.pt;totals.hours+=c.hours;totals.cost+=c.cost;totals.load+=load;totals.plannedFte+=c.fte;totals.availableFte+=Number(role.availableFte||0);if(c.fte>Number(role.availableFte||0)+.001)totals.envelopeBreaches+=1;if(load>c.hours+.001)totals.overloadCells+=1;}
-  return totals;
-}
-export function planTotals() {
-  const role=stateRef.state.roles.reduce((acc,r)=>{const t=roleTotals(r);acc.pt+=t.pt;acc.hours+=t.hours;acc.cost+=t.cost;acc.envelopeBreaches+=t.envelopeBreaches;return acc;},{pt:0,hours:0,cost:0,envelopeBreaches:0});
-  const scheduled=stateRef.state.tasks.filter(t=>t.roleId&&t.iterationId).reduce((sum,t)=>sum+taskHours(t),0),backlogTasks=stateRef.state.tasks.filter(t=>!t.roleId||!t.iterationId),backlog=backlogTasks.reduce((sum,t)=>sum+taskHours(t),0),overloadCells=iterations().reduce((sum,it)=>sum+iterationTotals(it).overloadCells,0);
-  return {...role,scheduled,backlog,backlogCount:backlogTasks.length,overloadCells};
-}
-export function reconcile(withNotice=true) {
-  const validIterations=new Set(iterations().map(it=>it.id));let moved=0;
-  for(const role of stateRef.state.roles){role.fteByIteration=Object.fromEntries(Object.entries(role.fteByIteration||{}).filter(([id])=>validIterations.has(id)));if(!Number.isFinite(Number(role.availableFte))){const values=Object.values(role.fteByIteration).map(Number).filter(Number.isFinite);role.availableFte=Math.max(0,...values);}}
-  for(const task of stateRef.state.tasks){if(task.iterationId&&!validIterations.has(task.iterationId)){task.roleId=null;task.iterationId=null;moved+=1;}if(task.roleId&&!stateRef.state.roles.some(r=>r.id===task.roleId)){task.roleId=null;task.iterationId=null;moved+=1;}}
-  if(moved&&withNotice)announce(`${moved} task${moved===1?"":"s"} moved back to backlog after plan changes.`);
+export function announce(message) { clearTimeout(noticeTimer);notice.textContent=message;notice.classList.add("show");noticeTimer=window.setTimeout(()=>notice.classList.remove("show"),3000); }
+
+export function reconcileTimeline() {
+  const valid=new Set(stateRef.state.project.iterations.map(it=>it.id));let removed=0;
+  for(const scenario of stateRef.state.scenarios){
+    for(const plan of Object.values(scenario.rolePlans||{})){
+      plan.fteByIteration=Object.fromEntries(Object.entries(plan.fteByIteration||{}).filter(([id])=>valid.has(id)));
+      plan.rateByIteration=Object.fromEntries(Object.entries(plan.rateByIteration||{}).filter(([id])=>valid.has(id)));
+    }
+    const before=scenario.allocations.length;scenario.allocations=scenario.allocations.filter(item=>valid.has(item.iterationId));removed+=before-scenario.allocations.length;
+  }
+  stateRef.state.project.actuals=stateRef.state.project.actuals.filter(item=>valid.has(item.iterationId));
+  return removed;
 }

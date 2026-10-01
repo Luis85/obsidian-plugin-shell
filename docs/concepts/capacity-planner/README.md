@@ -1,115 +1,125 @@
-# Capacity Planner — self-contained resource-planning prototype
+# Capacity Planner — resource planning, scenarios, staffing and reforecasting prototype
 
-This concept is an additive prototype on PR #62 (`feat/cli-release-journey`) in `Luis85/obsidian-plugin-shell`. It does not change the Companion schema, production runtime, framework configuration, repository quality thresholds, or any retired migration path.
+This concept is additive work for PR #62 (`feat/cli-release-journey`) in `Luis85/obsidian-plugin-shell`. It stays under `docs/concepts/capacity-planner` and does not change the Companion schema, production runtime, repository thresholds, or any retired Companion migration path.
 
-Open `index.html` directly in a current browser. The artifact is self-contained: no remote scripts, fonts, images, APIs, or network requests are required.
+Open `index.html` in a current browser. The artifact is self-contained and offline: no remote scripts, fonts, images, APIs or network requests are required.
 
-See [REVIEW.md](REVIEW.md) for the comprehensive product review, changes made in the polishing pass, and remaining production decisions.
+## What this iteration covers
 
-## Scenario
+The Capacity Planner now models the full planning loop requested for a custom-software order:
 
-A delivery manager receives a custom-software order with a resource budget and role/FTE envelope. The planner supports this flow:
+1. One **project** owns canonical iterations, roles, people, tasks, holidays, actuals and persistence settings.
+2. A project owns multiple named **resource plans / scenarios**. New plans can be blank or cloned from the active plan; switching plans never duplicates canonical project facts.
+3. Iterations have one explicit authority: Capacity Project or upstream Iteration Planner. Scenarios reference shared iteration IDs and never own competing dates.
+4. Named people are assigned to roles. Working weekdays, project holidays, leave and per-iteration FTE overrides derive actual role availability.
+5. Scenario staffing plans planned FTE and optional iteration-specific rate overrides against that people-derived availability.
+6. Tasks can be split across several role × iteration × person allocations. Remaining estimate stays visible until fully allocated.
+7. Project actuals are recorded against allocations and are shared across every scenario. Forecasting separates actual cost, remaining allocated work (ETC) and EAC/forecast.
+8. Commercial planning includes order value, resource budget, contingency, target margin, non-labor planned/actual costs, rate changes and role budget buckets.
+9. Baselines are immutable snapshots. They can be approved, compared with the live plan and restored only as a new scenario.
+10. Every mutation increments a revision and writes an audit entry. Imports compare revision tokens and follow the configured conflict policy.
+11. Obsidian persistence settings define canonical target paths. The prototype exports those entities as a real Markdown ZIP with frontmatter rather than pretending browser local storage is native vault persistence.
+12. UI colors consume Obsidian-style host tokens first, with offline fallbacks for the standalone prototype.
 
-1. Create a resource plan with name, EUR budget, start/due dates and iteration cadence.
-2. Generate the project timeline from that date range.
-3. Define roles with day rate and FTE envelope.
-4. Apply planned FTE/week to one iteration or a contiguous iteration range.
-5. Compare planned FTE with the role envelope and see PT, hours and cost at role, iteration and whole-plan level.
-6. Capture tasks using a user-configurable estimation unit and hours/unit planning conversion.
-7. Drag tasks to role/iteration cells or use the keyboard/button assignment path with projected-capacity preview.
-8. See explicit planning checks for budget, staffing-envelope breaches, task overload and unassigned work.
-9. Edit/remove roles and tasks without silently deleting assigned work; role removal returns work to backlog.
-10. Export/import the complete prototype workspace as JSON. Local browser storage is best-effort only.
+## Save behavior and no-op prevention
 
-A populated custom-software-delivery example is included so the capacity behavior and warning states are visible immediately.
+The prototype now has an explicit **Save** button. Mutating actions also autosave when browser storage is available.
+
+If browser storage is unavailable, Save is not a dead control: it downloads a complete workspace JSON backup. The dialog helper no longer uses `method="dialog"`; every Create/Save/Apply action uses a normal submit handler, native validity checks, an explicit state mutation and an observable success result.
+
+Two regressions guard this:
+
+- `tests/browser_journeys.py` exercises the main product flows, downloads and dynamic action buttons in Chromium.
+- `tests/static_actions.py` fails if a rendered `data-action` has no delegated handler or a static button has no listener.
 
 ## Calculation model
 
-- `PT = planned FTE/week × iteration duration in weeks × working days/FTE week`
-- `hours = PT × hours/project day`
-- `planned role cost = PT × role day rate`
-- `task hours = estimate units × configured hours/unit`
+Availability is based on exact project working dates:
 
-The default task unit is `SP`, but the name and hours-per-unit planning conversion are configurable. This is a workload-planning approximation, not a claim that story points inherently convert to hours.
+- project weekdays minus project holidays;
+- person base FTE or iteration override;
+- minus working-day leave;
+- summed to a role envelope when named people exist;
+- otherwise the role's manual fallback FTE is used.
 
-A partial final iteration is prorated by its calendar-day fraction. Holidays, personal absence, overtime, rate bands and exact working calendars are not modeled in this concept.
+Scenario planning uses:
 
-## Interaction and integrity rules
+- `planned PT = planned FTE × project working days in iteration`;
+- `planned hours = PT × hours/project day`;
+- `planned labor cost = PT × iteration rate (override or role default)`;
+- `task estimate hours = units × configured hours/unit`;
+- `ETC = max(allocated task hours − actual hours, 0)` at role/iteration level;
+- `forecast internal cost = actual labor + ETC labor + forecast non-labor`;
+- `forecast incl. contingency = forecast internal cost × (1 + contingency%)`;
+- `forecast margin = order value − forecast incl. contingency`.
 
-- A role's **FTE envelope** and its **planned FTE** are separate values.
-- Planning above the FTE envelope or assigning tasks above planned capacity is allowed for scenario exploration, but explicitly flagged.
-- Roles are swimlanes; lane height scales with total planned role capacity.
-- Each role/iteration cell shows planned/envelope FTE, PT, hours, cost, task load and utilization.
-- Iteration totals summarize capacity and cost across roles.
-- Planning checks are explicit conditions, not a health/productivity score.
-- Drag/drop always has button and keyboard alternatives.
-- Assigned task cards retain Move, Edit and Backlog actions; Enter/Space opens assignment.
-- Changing dates/cadence returns invalid placements to backlog instead of silently remapping them.
-- Removing a role returns its assigned tasks to backlog.
-- Import validates the complete candidate before replacement.
-- Missing `availableFte` in an older v1 export is normalized from its existing planned FTE.
-- Invalid/future browser storage is not overwritten automatically during startup fallback.
-- User-provided names/titles are escaped before HTML rendering.
-- The CSP blocks network connections and uses a generated SHA-256 script hash.
+The estimate-unit conversion remains an explicit planning approximation. A unit named `SP` does not claim that story points intrinsically convert to hours.
 
-## Source and deterministic build
+## Source
 
-`index.html` is generated from:
+`index.html` is built deterministically from:
 
-- `source/core.ts` — workspace model, validation, calculations, persistence boundary
-- `source/render.ts` — KPIs, planning checks, timeline, iteration/role cells, drag/drop
-- `source/dialogs.ts` — plan, role, FTE, task, import/export interactions
-- `source/app.ts` — small event/composition entrypoint
-- `source/styles.css` — prototype visual system
-- `source/frame.html` — offline HTML frame and CSP
-- `source/build.mjs` — dependency-free module assembler
-- `source/tsconfig.json` — TypeScript check configuration
-- `tests/browser_journeys.py` — optional Chromium/Playwright journey
+- `source/core.ts` — workspace model, revisions, persistence boundary and shared timeline data
+- `source/metrics.ts` — calendar availability, staffing, allocation, actual and forecast calculations
+- `source/persistence.ts` — JSON import/export, revision conflict policy, Markdown/frontmatter generation and ZIP packaging
+- `source/render.ts` — KPIs, planning checks, task backlog, capacity matrix and baseline comparison
+- `source/dialogs-common.ts` — normal-form dialog lifecycle and validation
+- `source/dialogs-plan.ts` — plans/scenarios and canonical timeline authority
+- `source/dialogs-team.ts` — roles, people, leave, availability, FTE and rate planning
+- `source/dialogs-work.ts` — tasks, multi-slice allocation and actuals
+- `source/dialogs-governance.ts` — commercials, baselines, audit, comparison and Obsidian persistence
+- `source/app.ts` — action routing and composition
+- `source/styles.css` / `source/frame.html` — standalone shell using host-token fallbacks
+- `source/build.mjs` — dependency-free deterministic assembler
+- `tests/browser_journeys.py` / `tests/static_actions.py` — behavior and no-op regression checks
 
-Each handwritten TypeScript module is below the repository's 400-code-line ceiling.
+Every handwritten TypeScript module remains below the repository's 400-code-line ceiling.
 
-Using the repository-qualified Node/npm/TypeScript versions:
+## Build and verify
+
+Using the repository-qualified toolchain:
 
 ```sh
 node docs/concepts/capacity-planner/source/build.mjs
 node docs/concepts/capacity-planner/source/build.mjs --check
 node node_modules/typescript/bin/tsc --noEmit --project docs/concepts/capacity-planner/source/tsconfig.json
-```
-
-Optional browser journey, when Python Playwright and Chromium are provisioned:
-
-```sh
+python docs/concepts/capacity-planner/tests/static_actions.py
 python docs/concepts/capacity-planner/tests/browser_journeys.py
-# or set CHROMIUM_PATH=/path/to/chromium
 ```
 
-Do not substitute a global TypeScript 5.x installation for the repository-pinned TypeScript 6.0.3.
+Do not substitute global TypeScript 5.x for the repository-pinned TypeScript 6.0.3.
 
-## Verification performed for this pass
+## Verification for this pass
 
-Local environment: Node 22.16.0 and Chromium 144.0.7559.96.
+Local environment: Node 22.16.0, Python 3.13.5, Chromium 144.
 
 Passed:
 
-- deterministic build and `--check`;
-- Node strip-types syntax checks for all four TypeScript modules;
-- browser journey: baseline 5-role / 8-iteration rendering;
-- iteration-total and planning-check rendering;
-- deliberate FTE-envelope breach;
-- task editing;
-- live overload preview and overloaded assignment;
-- keyboard assignment from an assigned task;
-- unassigned-task filtering;
+- deterministic build and byte-for-byte `--check`;
+- all ten TypeScript modules through Node's strip-types/assembly path;
+- static action wiring: every delegated action and every static button has a handler;
+- explicit Save fallback download when storage is unavailable;
+- New plan creation and plan settings persistence;
+- canonical timeline/project save and upstream Iteration Planner authority switch;
+- role creation, named-person staffing and per-iteration availability;
+- FTE planning and rate override;
+- task creation, split allocation, drag/drop allocation and actuals;
+- commercial non-labor cost planning;
+- baseline creation, approval and restore-as-new-plan;
+- plan comparison, duplication/archive management and scenario switching;
+- audit/revision history;
+- persistence path save and Markdown ZIP export;
+- workspace JSON export and import file-chooser wiring;
 - narrow/mobile rendering;
 - no browser console/page errors.
 
-The available local machine does not provide the repository-qualified Node 24.21.0 + pinned TypeScript 6.0.3 environment, so repository TypeScript qualification remains explicitly **not run** locally.
+Local Node is not the repository-qualified Node 24.21.0 and the local environment does not provide the pinned TypeScript 6.0.3 package, so repository TypeScript qualification remains explicitly not claimed locally.
 
-Generated `index.html` after the polishing pass:
+Generated artifact for this pass:
 
-- size: 25,191 bytes
-- SHA-256: `35032ff9d95cb63bbd4363d9a08016f72b3a91ba4e019aa354a3987455ba9ceb`
+- size: 41,233 bytes
+- SHA-256: `337e488d7805bf6a7a219e895264abba5fb5786cb4f4cb2a99848ef61f8653d0`
 
 ## Scope boundary
 
-This remains a design/interaction concept under `docs/concepts`. It is not a production Companion feature, native Obsidian integration, accounting system, staffing commitment or time-booking system. See `REVIEW.md` for the unresolved production decisions, especially shared iteration authority with the existing Iteration Planner, multi-plan scenarios, calendars/leave, task spanning, actuals/reforecasting and canonical Markdown/frontmatter persistence.
+This is still a design/interaction concept, not production vault code. It now makes the product decisions and persistence contract concrete, but native Obsidian writes, real integration with an installed Iteration Planner, multi-process conflict detection and repository-qualified runtime behavior belong to the implementation phase. The prototype does not claim payroll/accounting correctness or replace an ERP/time-booking system.

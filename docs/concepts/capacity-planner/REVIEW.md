@@ -1,117 +1,118 @@
-# Capacity Planner — comprehensive product review and polishing pass
+# Capacity Planner — closure of the comprehensive product review
 
-Review baseline: PR #62, `feat/cli-release-journey`, head `2e5f9295537bd0ca07ff3b400a46ed4168fca7eb` at the start of this pass.
+This pass closes the ten product decisions left open by the previous review and fixes the reported no-op Save/New-plan experience. The concept is now a coherent project-capacity model rather than a collection of independent planning widgets.
 
-This review treats the concept as a delivery-manager planning surface for a custom-software order: a fixed EUR resource budget, role/FTE envelope, iteration timeline, planned FTE, PT/hours/cost, and estimated work assigned to role swimlanes. It evaluates the prototype as a product concept rather than as a production accounting or workforce-management system.
+## Product model after this pass
 
-## Review result
+### Project facts versus scenario assumptions
 
-The first version proved the core interaction, but four concepts were too closely collapsed: available staffing, planned staffing, task load and commercial budget. That made the calculations technically visible while leaving the manager to infer whether a plan was actually feasible. The polishing pass separates those concepts and makes the important exceptions explicit.
+The key architectural decision is separation of facts from assumptions.
 
-The revised model now answers four different questions without turning them into a synthetic score:
+**Project facts** are shared by every resource plan:
 
-1. **Budget:** does planned role cost fit the resource budget?
-2. **Staffing:** does planned FTE fit the role's FTE envelope?
-3. **Workload:** do estimated task hours fit the planned capacity for that role and iteration?
-4. **Completeness:** how much estimated work is still unassigned?
+- project identity and order value;
+- canonical iterations and timeline authority;
+- working weekdays and holidays;
+- role catalog and role commercial defaults;
+- named people, leave and availability overrides;
+- task catalog;
+- actual effort;
+- persistence paths and conflict policy;
+- audit/revision history.
 
-## Product-perspective review
+**Scenario assumptions** are plan-specific:
 
-| Perspective | Baseline finding | Improvement in this pass |
-| --- | --- | --- |
-| User / job fit | The manager could plan FTE and tasks, but had to mentally compare staffing feasibility. | Added an explicit role **FTE envelope** distinct from planned FTE. |
-| Product model | `fteByIteration` represented both what existed and what was planned. | Roles now own a stable envelope; iteration allocations remain the planned consumption. |
-| Commercial planning | Total cost and remaining budget were visible, but iteration cost was not. | Added cost to every role/iteration cell and an iteration-level commercial roll-up. |
-| Capacity planning | PT/hours were visible per role/cell, but there was no cross-role iteration summary. | Added sticky **Iteration totals** with planned/envelope FTE, PT, hours, cost and task utilization. |
-| Decision support | Problems were discoverable only by inspecting cells/KPIs. | Added **Planning checks** for budget, FTE envelope, task overload and backlog. These are conditions, not a health score. |
-| Task planning | Tasks could be added/assigned/deleted but not edited. | Added task editing while preserving placement; estimate changes immediately affect capacity checks. |
-| Task assignment | Assignment dialog did not show the consequence before saving. | Added projected load, utilization and planned/envelope FTE preview with explicit overload warning. |
-| Role lifecycle | Roles could be added and have FTE/rate changed indirectly, but could not be renamed or removed. | Added role settings, envelope/rate/name editing and safe removal that returns tasks to backlog. |
-| Keyboard accessibility | Backlog tasks had an assignment button; compact assigned cards lost the equivalent action path. | Assigned cards now expose Move/Edit/Backlog actions and Enter/Space opens assignment. |
-| Drag/drop accessibility | Drag/drop had a dialog alternative only from unassigned cards. | All task locations now retain button/keyboard alternatives. |
-| Information architecture | The board led directly from six KPIs to a dense matrix. | Added a small exception layer between summary and detailed matrix; iteration roll-up is kept with the matrix. |
-| Scannability | Role rows mixed average FTE, totals and a relative scale without showing staffing envelope. | Role summaries now show weighted-average planned FTE, envelope, rate, PT/hours/cost and peak FTE. |
-| Calculation clarity | “Capacity” KPI said “assigned hours,” although it represented capacity. | Renamed to **Planned capacity** and corrected supporting copy. |
-| Calculation quality | Average FTE treated a short final iteration as equal to a full iteration. | Average FTE is now time-weighted using FTE-weeks. |
-| Timeline behavior | CSS assumed eight iterations for minimum width. | Timeline width is content-driven; arbitrary generated iteration counts no longer inherit an eight-column visual floor. |
-| Backlog usability | The sidebar becomes slow to scan as task count grows. | Added an unassigned-task title filter with visible filtered/total count. |
-| Data safety | Invalid/future local storage fell back to demo and the initial save could immediately overwrite it. | Startup no longer auto-saves the fallback. Invalid stored data is surfaced and remains untouched until the user makes an explicit mutation. |
-| Destructive actions | “New resource plan” replaced the workspace after a warning but without a second guard. | Added explicit replacement confirmation when the workspace contains roles/tasks. |
-| Import safety | Candidate state was validated before replacement. | Retained; old v1 exports without an FTE envelope are normalized from their existing planned FTE rather than rejected. |
-| Responsive behavior | The core layout stacked acceptably; the matrix remained horizontally scrollable. | Planning checks, assignment previews and destructive controls now also adapt at narrow widths. |
-| Source maintainability | The first prototype kept all behavior in one large source file. | Split into `core.ts`, `render.ts`, `dialogs.ts`, and a small `app.ts`; each handwritten TS module is below the repository's 400-code-line ceiling. |
-| Testability | The first pass had ad-hoc browser smoke evidence only. | Added a repeatable optional Playwright journey covering envelope warnings, overload preview, assignment, keyboard access, filtering and narrow layout. |
+- resource budget;
+- contingency and margin target;
+- planned FTE per role/iteration;
+- iteration-specific rate overrides;
+- task allocation slices;
+- non-labor planned/actual values;
+- draft/approved status.
 
-## Interaction walkthrough after the pass
+This prevents cloning a resource plan from creating a second truth for iteration dates, people or actuals.
 
-### 1. Establish the commercial and planning frame
+## Closure of the previous remaining items
 
-The manager creates or edits the resource plan with budget, date range, iteration cadence, project-day assumptions and task estimate unit. Changing the calendar explicitly warns that placements may become invalid; affected tasks return to backlog rather than being silently reassigned.
+| Previous open item | Decision and implementation in this pass |
+| --- | --- |
+| Multiple plans / scenarios | A project now owns multiple named resource plans. New Plan can clone the active plan or start blank. Plans can be selected, compared, duplicated and archived. |
+| Iteration authority | Iterations moved to the project layer. `timelineOwner` explicitly identifies Capacity Project or upstream Iteration Planner authority. Upstream mode accepts stable iteration IDs as canonical JSON; scenarios never own dates. |
+| Variable role availability | Exact working dates use configured weekdays minus project holidays. People contribute base FTE or iteration override; working-day leave reduces available hours. Role availability is derived from active people, with manual FTE only as a fallback. |
+| People versus roles | Named people are first-class project entities assigned to roles. Task slices may optionally name a person, enabling person-level overload checks while still permitting role-level planning. |
+| Task span | Tasks now have multiple allocation slices. A single estimate may span roles, iterations and people; remaining estimate stays in Unallocated Work until fully distributed. |
+| Actuals and reforecasting | Actual hours are project facts shared across plans. Forecast separates actual labor, remaining allocated work (ETC), forecast non-labor and contingency. EAC/forecast and margin update as actuals arrive. |
+| Commercial depth | Added order value, plan budget, contingency, target margin, non-labor planned/actual costs, role budget buckets and iteration-specific rate overrides. |
+| Collaboration/versioning | Every mutation increments a revision and appends an audit record. Baselines are immutable snapshots with optional approval and restore-as-new-plan. Import compares revision tokens and supports warn or block-older conflict policy. This is the prototype's explicit single-file concurrency contract. |
+| Obsidian persistence | Configurable canonical paths now exist for project, scenarios, iterations, roles, people, tasks, baselines and audit. The prototype generates real Markdown/frontmatter bytes and packages them as an offline ZIP. Native vault writes remain an implementation adapter, not simulated browser writes. |
+| Host theming | Prototype variables consume Obsidian-style host tokens first and use local fallbacks only when hosted standalone. Production should connect the same semantic variables through the repo's Nuxt UI/Obsidian style pipeline. |
 
-### 2. Define the role envelope
+## No-op and save defect review
 
-A role now has:
+The previous dialog pattern used `method="dialog"` together with an intercepted submit event. Although the flow could work in some browser states, it was unnecessarily ambiguous and produced the reported experience that Save/Create controls did nothing.
 
-- name;
-- day rate in EUR/PT;
-- FTE envelope per week;
-- planned FTE by iteration.
+The new dialog contract uses:
 
-The envelope describes the role capacity available to this plan. Planned FTE is the amount the resource plan consumes. The prototype allows an intentional over-envelope scenario, but makes it visible at cell, role, iteration and whole-plan levels.
+1. a normal `<form>`;
+2. a normal submit button;
+3. explicit `reportValidity()`;
+4. an explicit mutation callback;
+5. revision/audit update;
+6. persistence attempt;
+7. rerender and visible status message.
 
-### 3. Plan FTE across iterations
+There is also a top-level **Save** button. When local storage works it persists the workspace. When browser storage is unavailable, Save downloads the current JSON workspace instead. It therefore never silently succeeds without a durable result.
 
-`Plan FTE` still applies one FTE/week value to a contiguous iteration range. The dialog shows the role's envelope and rate and automatically prevents an invalid From/Through ordering. FTE above the envelope is permitted for scenario exploration and flagged after application.
+A static no-op gate scans all source-rendered `data-action` values and static frame buttons. A browser journey then performs the main actions and checks the resulting state or download. This prevents future visual controls from being added without behavior.
 
-### 4. Read the plan at three levels
+## Product perspectives
 
-The UI now provides three planning resolutions:
+### Delivery management
 
-- **Plan:** budget, cost, remaining budget, PT/hours, scheduled load and unassigned load.
-- **Iteration:** aggregate planned/envelope FTE, PT, hours, cost and task load.
-- **Role × iteration:** planned/envelope FTE, PT, hours, cost, task utilization and assigned tasks.
+The manager can answer, per project, plan, role, iteration and person:
 
-This reduces the need to manually sum the matrix when the manager needs an iteration-level answer.
+- what capacity exists;
+- what capacity is planned;
+- what work is allocated;
+- where staffing or work exceeds capacity;
+- what has actually been spent;
+- what remains to complete the allocated plan;
+- whether the forecast fits the resource budget;
+- whether forecast margin meets the commercial target;
+- what changed from the approved baseline.
 
-### 5. Schedule work with consequence preview
+### Resource management
 
-Tasks retain a configurable unit and the configured hours/unit approximation. Before assignment, the dialog shows the projected task load and whether it will exceed the chosen role/iteration's planned capacity. Over-allocation is still allowed because the planner is a scenario tool, not a transaction gate.
+Availability is no longer a manually typed role envelope when named staff exists. People, FTE patterns, leave and holidays derive the envelope. Role-level fallback remains useful for early-stage planning before staffing names are known.
 
-### 6. Repair the plan
+### Work planning
 
-The manager can edit estimates, rename roles, change role envelope/rates, move tasks, return work to backlog, remove roles safely, or change FTE ranges. Planning checks update immediately so repair is observable without introducing a composite score.
+Task estimates remain independent from allocations. This avoids forcing a work item into one role/iteration just to use the capacity matrix. Partial allocations preserve the unallocated remainder and make handoffs/splits explicit.
 
-## Calculation and domain notes
+### Finance / commercial management
 
-The current prototype deliberately keeps the original transparent model:
+The planner now distinguishes order value, internal resource budget, planned labor, actual labor, ETC labor, non-labor costs, contingency and margin. The concept is still not an accounting ledger, but it no longer collapses all commercial reasoning into one budget number.
 
-- `PT = planned FTE/week × iteration duration in weeks × working days/FTE week`
-- `hours = PT × hours/project day`
-- `planned role cost = PT × role day rate`
-- `task hours = estimate units × configured hours/unit`
+### Governance
 
-A partial final iteration is still prorated by its calendar-day fraction. This is acceptable for the interaction concept but should not be treated as a payroll or detailed staffing calendar.
+Baseline snapshots are immutable. Approval attaches to the snapshot, not to mutable live plan data. Restore creates a new scenario, preserving the audit trail. Revision tokens and conflict policy make import replacement behavior explicit.
 
-The estimate-unit conversion is explicitly a planning approximation. A unit named `SP` does not imply that story points inherently convert to hours.
+### Obsidian / implementation fit
 
-## Remaining product decisions before production integration
+The standalone browser does not pretend to have vault APIs. Instead it produces the exact file paths and Markdown/frontmatter payloads the future Obsidian adapter would write. That makes persistence inspectable without coupling the concept to a fake native API.
 
-These are intentionally not hidden behind prototype behavior:
+### Accessibility and interaction
 
-- **Multiple plans / scenarios:** the prototype still has one active plan per workspace. Production should decide whether a project owns multiple named resource plans, versions or compareable scenarios.
-- **Iteration authority:** the existing Iteration Planner and Capacity Planner should not create competing canonical iteration records. Production integration should share iteration IDs/calendar data or establish one clear upstream owner.
-- **Variable role availability:** the FTE envelope is constant per role in this concept. Leave, holidays, onboarding, part-time patterns and iteration-specific availability need a calendar/availability model if required.
-- **People versus roles:** this concept intentionally plans roles, not named individuals. Assigning people to the role envelope is a separate staffing problem.
-- **Task span:** one task occupies one role × iteration. Multi-role work, work spanning several iterations, splits and dependencies are not yet represented.
-- **Actuals and reforecasting:** actual effort/cost, ETC/EAC, time booking and plan-versus-actual are out of scope.
-- **Commercial depth:** margin, contingency, non-labor cost, rate changes and role-specific budget buckets are not modeled.
-- **Calendar precision:** public holidays, personal absence and exact working-day calendars are not modeled.
-- **Collaboration/versioning:** multi-user edits, approvals, plan baselines, audit history and conflict resolution need an explicit product decision.
-- **Obsidian persistence:** the production feature still needs the repository's Markdown/frontmatter ownership, paths and canonical entity rules rather than browser local storage.
-- **Host theming:** this standalone concept uses its own offline visual system; production should consume the Obsidian/Nuxt UI token pipeline rather than copy these colors verbatim.
+Primary workflows have button alternatives to drag/drop. Dialog submit behavior is standard form behavior. Status changes are textual as well as color-coded. The matrix remains horizontally scrollable; narrow layouts keep Save/New Plan and planning checks visible.
 
-## Verification boundary
+## Validation boundary
 
-The pass was exercised as a self-contained browser artifact with Chromium. The journey checks cover baseline rendering, FTE-envelope breach visibility, task estimate editing, overload preview and assignment, keyboard assignment access, backlog filtering and narrow layout. Browser console/page errors are treated as failures.
+The pass has strong browser-prototype evidence but is not production qualification. Specifically not claimed:
 
-This review does not claim native Obsidian qualification, multi-user behavior, accounting correctness, calendar correctness or repository-pinned TypeScript qualification. Those require the production integration and the repository's qualified toolchain.
+- native Obsidian file writes;
+- live synchronization with the existing Iteration Planner;
+- multi-process locking across two Obsidian clients;
+- payroll, invoice or accounting compliance;
+- repository-pinned TypeScript 6.0.3 qualification in the local environment.
+
+Those are implementation/qualification concerns rather than unresolved product-model decisions.
