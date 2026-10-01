@@ -9,7 +9,7 @@ import {
 } from '../../scripts/companion/visual/visual-ir.mjs';
 import { visualCatalogEntry, visualExpand } from '../../scripts/companion/visual/visual-catalog.mjs';
 import { addComponent } from './components.ts';
-import { addPage, pageFor } from './pages.ts';
+import { addPage, pageFor, surfaceFor } from './pages.ts';
 import { requireSketch, title } from './errors.ts';
 import { validateComponentTemplateCatalog, type ComponentTemplate } from './component-template.ts';
 import type { SketchDocument } from './document.ts';
@@ -146,7 +146,20 @@ function pageFromTemplate(
   requireSketch(template.design.kind === 'page', 'TEMPLATE_KIND', 'Page template uses an unsupported design.');
 
   const created = new Map<string, string>();
-  const children = template.children.map(child => ({ child, target: catalog.get(child.template)! }));
+  const children = template.children.map(child => {
+    const childTemplate = catalog.get(child.template)!;
+    return { child, target: childTemplate,
+      componentId: componentFromTemplate(document, childTemplate, catalog, created) };
+  });
+  const surface = surfaceFor(document, id);
+  requireSketch(Array.isArray(surface.components), 'TEMPLATE_PAGE_REFERENCES',
+    'Page template target has an invalid component reference list.');
+  for (const row of children) {
+    const definition = store.components.find(component => component.id === row.componentId)!;
+    if (!surface.components.some(value => value && typeof value === 'object' && 'id' in value && value.id === definition.libraryId)) {
+      surface.components.push({ id: definition.libraryId, slot: row.child.slot ?? 'content', variant: 'default' });
+    }
+  }
   const regions = template.slots.map(slot => visualElement(
     visualAllocate(store, 'vn'),
     regionTag(slot.role),
@@ -158,7 +171,7 @@ function pageFromTemplate(
         .filter(row => row.child.slot === slot.id)
         .map(row => visualProject(
           visualAllocate(store, 'vn'),
-          componentFromTemplate(document, row.target, catalog, created),
+          row.componentId,
           { name: row.target.name },
         )),
     },
@@ -167,7 +180,7 @@ function pageFromTemplate(
     .filter(row => !row.child.slot)
     .map(row => visualProject(
       visualAllocate(store, 'vn'),
-      componentFromTemplate(document, row.target, catalog, created),
+      row.componentId,
       { name: row.target.name },
     ));
 
