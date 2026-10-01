@@ -31,7 +31,7 @@ export const workbenchMcpTools = [
     description: 'List the Workbench CLI capabilities available in this project without changing project state.',
     inputSchema: { type: 'object', additionalProperties: false, properties: {} },
     outputSchema: executionOutputSchema,
-    annotations: { title: 'Workbench read', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    annotations: { title: 'List Workbench capabilities', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     name: 'workbench_help',
@@ -40,7 +40,7 @@ export const workbenchMcpTools = [
       topic: { type: 'string', minLength: 1, maxLength: 120 },
     } },
     outputSchema: executionOutputSchema,
-    annotations: { title: 'Workbench read', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    annotations: { title: 'Read Workbench help', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     name: 'workbench_execute',
