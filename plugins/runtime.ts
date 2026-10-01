@@ -5,6 +5,7 @@ import { loadComponentTemplates } from '../bin/adapters/component-template-repos
 import { pluginComponentTemplates } from './template-contributions.ts';
 import { commands as frameworkCommands } from '../scripts/framework/catalog.ts';
 import type {
+  ComponentTemplateCatalogApi,
   PluginCliCommand,
   PluginCommandContext,
   PluginEventBus,
@@ -153,7 +154,7 @@ class EventBus implements PluginEventBus {
   }
 }
 
-function templateCatalog(options: RuntimeOptions, plugins: readonly WorkbenchPluginObject[]) {
+function templateCatalog(options: RuntimeOptions, plugins: readonly WorkbenchPluginObject[]): ComponentTemplateCatalogApi {
   const contributed = pluginComponentTemplates(plugins);
   return Object.freeze({
     async list() {
