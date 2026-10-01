@@ -10,7 +10,7 @@ import { executeOperation } from './framework/operations.ts';
 import { projectRoot, exists } from './framework/files.ts';
 import { failure, type Context } from './framework/contracts.ts';
 import { invocationDirectory, starterInvocation } from '../../scripts/framework/starter-project.ts';
-import { guidedStarter } from '../../scripts/framework/starter-terminal.ts';
+import { guidedStarter } from '../presentation/terminal/starter-terminal.ts';
 import { renderCliResult, type CliOutputStream } from '../presentation/terminal/cli-output.ts';
 import { interactiveRun } from '../presentation/terminal/cli-interactive.ts';
 

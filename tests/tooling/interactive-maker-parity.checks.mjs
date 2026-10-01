@@ -78,6 +78,8 @@ import { fixtureOperation as relocatedFixtureOperation } from '../../bin/adapter
 import * as legacyFixtures from '../../scripts/framework/fixtures.ts';
 import { guidedSetup as relocatedGuidedSetup, continueSetup as relocatedContinueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
 import * as legacySetupTerminal from '../../scripts/framework/setup-terminal.ts';
+import { guidedStarter as relocatedGuidedStarter, starterText as relocatedStarterText } from '../../bin/presentation/terminal/starter-terminal.ts';
+import * as legacyStarterTerminal from '../../scripts/framework/starter-terminal.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1806,4 +1808,47 @@ test('relocated setup terminal preserves interview and separately approved conti
   );
   assert.equal(declined.status, 'applied');
   assert.deepEqual(declinedModes, ['import', 'export']);
+});
+
+
+test('relocated starter terminal preserves compatibility, from-short-circuit and human rendering', async () => {
+  assert.equal(legacyStarterTerminal.guidedStarter, relocatedGuidedStarter);
+  assert.equal(legacyStarterTerminal.starterText, relocatedStarterText);
+
+  const from = await relocatedGuidedStarter(
+    { command: 'new', args: [], options: { from: 'source.json' } },
+    { root: frameworkRoot, frameworkRoot },
+    async query => {
+      assert.match(query, /New project directory/);
+      return 'consumer';
+    },
+    () => {},
+  );
+  assert.equal(from.options.from, 'source.json');
+  assert.ok(from.args[0].endsWith('consumer'));
+
+  assert.equal(relocatedStarterText(operationResult('new', null, 'failed')), null);
+  assert.equal(relocatedStarterText(operationResult('new', null, 'cancelled')), 'new: cancelled; nothing was written.\n');
+
+  const listing = relocatedStarterText(operationResult('new', {
+    starters: [{ id: 'cli', title: 'CLI', category: 'utility', difficulty: 'basic', description: 'Command utility.' }],
+  }));
+  assert.match(listing, /Installed JSON starters/);
+  assert.match(listing, /cli/);
+
+  const review = relocatedStarterText(operationResult('new', {
+    planHash: 'a'.repeat(64),
+    summary: {
+      starter: { id: 'cli', title: 'CLI', version: '1.0.0', sha256: 'b'.repeat(64) },
+      identity: { id: 'demo', name: 'Demo', author: 'Example' },
+      directory: '/tmp/demo', vault: '/tmp', files: 4, acceptanceTodos: 2, warnings: ['boundary'],
+    },
+    conflicts: [], next: 'Review.', nextSteps: ['Install'],
+    guide: { readme: 'README.md', implementation: 'IMPLEMENTATION.md' },
+    install: { npm: { exitCode: 0 } },
+  }, 'planned'));
+  assert.match(review, /new: planned/);
+  assert.match(review, /Plan hash/);
+  assert.match(review, /npm: exit 0/);
+  assert.match(review, /Next steps:/);
 });
