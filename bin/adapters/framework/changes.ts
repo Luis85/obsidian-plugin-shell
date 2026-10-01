@@ -1,5 +1,6 @@
 import { setupSource } from './setup-source.ts';
 import { prepareHandout } from './handout-workspace.ts';
+import { setupMcpFiles } from '../../../scripts/agent/mcp-config.mjs';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve } from 'node:path';
@@ -73,7 +74,7 @@ async function designImport(options: Options, intake: Intake, context: Context, 
 /** Re-owns the design in an existing generation receipt; the old design must match that receipt. */
 async function generationEntry(context: Context, selected: Configuration, tracked: Entry[], old: Record<string, unknown>): Promise<Entry | null> {
   const generation = '.companion/generation.json';
-  if (!await exists(join(context.root, generation))) return null;
+  if (!tracked.some(entry => entry.path === designFile) || !await exists(join(context.root, generation))) return null;
   const previousGeneration = object(await readJson(join(context.root, generation)));
   requireThat(previousGeneration.version === 1 && previousGeneration.projectId === selected.project.id && Array.isArray(previousGeneration.files), 'GENERATION_OWNERSHIP', 'Invalid generation ownership record.');
   const ownedDesigns = (previousGeneration.files as unknown[]).map(object).filter(file => file.path === designFile);
@@ -89,7 +90,8 @@ async function ownershipEntries(context: Context, selected: Configuration, track
   const old = previousReceipt.files === undefined ? {} : object(previousReceipt.files);
   const before = await createFilePlan(context.root, tracked);
   for (const change of before.changes) requireThat(change.beforeHash === null || change.beforeHash === old[change.path], 'IMPORT_OWNERSHIP', `Preserve edited or foreign design file: ${change.path}. Export/reconcile it before importing.`);
-  const receipt = { path: receiptPath, content: json({ schemaVersion: 1, files: Object.fromEntries(tracked.map(entry => [entry.path, hash(entry.content)])) }) };
+  const current = Object.fromEntries(tracked.map(entry => [entry.path, hash(entry.content)]));
+  const receipt = { path: receiptPath, content: json({ schemaVersion: 1, files: { ...old, ...current } }) };
   const generation = await generationEntry(context, selected, tracked, old);
   return generation ? [receipt, generation] : [receipt];
 }
@@ -99,6 +101,7 @@ function checkStartOptions(options: Options, input: string | undefined): void {
 }
 export async function configurationPlan(request: Request, context: Context) {
   const previous = await readConfiguration(context.root), options = request.options;
+  requireThat(!(options.mcp && options['no-mcp']), 'MCP_OPTION_CONFLICT', 'Choose --mcp or --no-mcp, not both.');
   let selected = await requestedConfiguration(request, context, previous);
   const entries: Entry[] = [];
   const intake: Intake = request.command === 'setup' ? await setupSource(request, context, selected) : { input: stringOption(options, 'input'), context, origin: null };
@@ -111,12 +114,18 @@ export async function configurationPlan(request: Request, context: Context) {
   requireThat(selected, 'IDENTITY_REQUIRED', 'Supply --id, --name and --author, or --input <project.json>.');
   if (request.command === 'project import') requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
   await protectIdentity(context, selected);
+  if (request.command === 'setup' && options.mcp === true) {
+    requireThat(await exists(join(context.root, 'bin/app')), 'MCP_SERVER_MISSING', 'This project has no bin/app launcher for the local Workbench MCP.');
+    entries.push(...setupMcpFiles());
+  }
   entries.push({ path: configFile, content: json(selected) });
   entries.push(...await ownershipEntries(context, selected, entries.filter(entry => entry.path !== configFile)));
   // A created handout becomes human-owned; keep it outside the intake ownership receipt.
   if (request.command === 'setup') entries.push(...(await prepareHandout(context.root, { virtualFiles: { [configFile]: json(selected) } })).entries);
   const plan = await createFilePlan(context.root, entries);
-  return { plan, summary: { configuration: selected, imported: Boolean(input) && intake.origin === null, starter: intake.origin, blank: options.blank === true, next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
+  return { plan, summary: { configuration: selected, imported: Boolean(input) && intake.origin === null, starter: intake.origin, blank: options.blank === true,
+    agentMcp: { enabled: options.mcp === true, clients: options.mcp === true ? ['claude-code', 'codex'] : [] },
+    next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
 }
 export async function vaultPlan(context: Context) {
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup first.');

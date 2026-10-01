@@ -80,6 +80,11 @@ function errorResult(command: string, error: unknown) {
 }
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
+  if (argv[0] === 'mcp') {
+    if (argv.length !== 1) { io.error.write('MCP_USAGE: use node bin/app mcp with no additional arguments.\n'); return 1; }
+    const { runMcpServer } = await import('./adapters/mcp-server.ts');
+    return runMcpServer(frameworkRoot, { input: io.input, output: io.output });
+  }
   const routed = routeArguments(argv, { pluginCommands: new Set(pluginCliCommands().map(entry => entry.id)),
     frameworkRoots: new Set(frameworkCommands.map(entry => entry.id.split(' ')[0]!)) });
   if (routed.surface === 'framework') {
