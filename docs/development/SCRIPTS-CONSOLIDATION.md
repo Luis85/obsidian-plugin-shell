@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D28 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D29 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -129,7 +129,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D26:** Plugin-ID formatting, reserved-word policy, derivation and exported-ID review moved to `bin/adapters/framework/plugin-id.ts`. The former framework path is compatibility-only and maker coverage locks creation versus exported-project semantics.
 - **D27:** Storybook option parsing moved to `bin/adapters/framework/storybook-options.ts`. The former framework path is compatibility-only and maker coverage locks absent, explicit on/off and invalid-option semantics.
 - **D28:** Terminal style primitives and runnable next-step formatting moved to `bin/presentation/terminal/terminal-style.ts`. Relocated CLI output imports them locally, the former framework path is compatibility-only, and maker coverage locks TTY/NO_COLOR, marker, rows, duration and command-hint behavior.
-- **Remaining D29–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D29:** Command help metadata and tiered human help rendering moved to `bin/adapters/framework/help-text.ts` and `bin/presentation/terminal/terminal-help.ts`. Former framework paths are compatibility-only; maker coverage locks fresh-copy metadata, profile/stage/schema option guidance and command/golden/all rendering.
+- **Remaining D30–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

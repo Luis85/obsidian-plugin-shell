@@ -54,6 +54,10 @@ import { storybookFlags as relocatedStorybookFlags } from '../../bin/adapters/fr
 import * as legacyStorybookOptions from '../../scripts/framework/storybook-options.ts';
 import { terminalStyle as relocatedTerminalStyle, marker as relocatedMarker, bold as relocatedBold, rows as relocatedRows, duration as relocatedDuration, runnable as relocatedRunnable, nextLine as relocatedNextLine } from '../../bin/presentation/terminal/terminal-style.ts';
 import * as legacyTerminalStyle from '../../scripts/framework/terminal-style.ts';
+import { commandHelp as relocatedCommandHelp, helpIndex as relocatedHelpIndex } from '../../bin/adapters/framework/help-text.ts';
+import * as legacyHelpText from '../../scripts/framework/help-text.ts';
+import { helpText as relocatedHelpText } from '../../bin/presentation/terminal/terminal-help.ts';
+import * as legacyTerminalHelp from '../../scripts/framework/terminal-help.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -976,4 +980,52 @@ test('relocated terminal style preserves plain/rich formatting and runnable hint
   assert.equal(relocatedRunnable('npm ci'), 'npm ci');
   assert.equal(relocatedNextLine(plain, 'status'), 'Next: node bin/app status\n');
   assert.equal(relocatedNextLine(plain, null), '');
+});
+
+
+test('relocated CLI help metadata and tiered rendering preserve command guidance', () => {
+  assert.equal(legacyHelpText.commandHelp, relocatedCommandHelp);
+  assert.equal(legacyHelpText.helpIndex, relocatedHelpIndex);
+  assert.equal(legacyTerminalHelp.helpText, relocatedHelpText);
+
+  const statusDescriptor = frameworkDescriptor('status');
+  const statusHelp = relocatedCommandHelp(statusDescriptor);
+  assert.equal(statusHelp.group, 'inspect');
+  assert.match(statusHelp.usage, /status/);
+  assert.ok(statusHelp.examples.length > 0);
+  statusHelp.examples.push('mutated');
+  assert.equal(relocatedCommandHelp(statusDescriptor).examples.includes('mutated'), false);
+
+  const devHelp = relocatedCommandHelp(frameworkDescriptor('dev'));
+  assert.deepEqual(devHelp.optionHelp.profile.values, ['obsidian', 'ui']);
+  assert.equal(devHelp.optionHelp.timeout.default, '3600000');
+
+  const resumeHelp = relocatedCommandHelp(frameworkDescriptor('setup resume'));
+  assert.deepEqual(resumeHelp.optionHelp.stage.values, ['generate', 'install', 'verify', 'preview']);
+  const schemaHelp = relocatedCommandHelp(frameworkDescriptor('project schema'));
+  assert.deepEqual(schemaHelp.optionHelp.version.values, ['6']);
+  assert.equal(schemaHelp.optionHelp.version.default, '6');
+
+  const index = relocatedHelpIndex();
+  assert.ok(index.commandCount > 20);
+  assert.ok(index.groups.some(group => group.id === 'inspect'));
+  const page = { ...statusHelp, id: statusDescriptor.id, summary: statusDescriptor.summary,
+    effect: statusDescriptor.effect, options: statusDescriptor.options };
+  const plain = { color: false, unicode: false };
+
+  const command = relocatedHelpText(plain, { scope: 'command', commands: [page],
+    goldenPath: index.goldenPath, groups: index.groups });
+  assert.match(command, /Usage/);
+  assert.match(command, /Common options/);
+  assert.match(command, /Effect: read/);
+
+  const golden = relocatedHelpText(plain, { scope: 'golden-path', commands: [page],
+    goldenPath: index.goldenPath, groups: index.groups });
+  assert.match(golden, /Golden path/);
+  assert.match(golden, /More commands/);
+
+  const all = relocatedHelpText(plain, { scope: 'all', commands: [page],
+    goldenPath: index.goldenPath, groups: [{ id: 'inspect', title: 'Inspect', commands: ['status'] }] });
+  assert.match(all, /Inspect/);
+  assert.match(all, /status/);
 });
