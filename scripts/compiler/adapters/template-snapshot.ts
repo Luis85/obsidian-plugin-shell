@@ -7,7 +7,7 @@ import { prototypeSkillFiles } from '../../companion/prototype-skill.mjs';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
 
-const roots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'configs'];
+const roots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
 const rootFiles = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','DESIGN-CONSTRAINTS.md','PROJECT-SETUP-HANDOUT.md','app.mjs','shell.mjs'];
 /** Read once into immutable data. Rendering never reopens a template or scans a directory. */
 export async function loadTemplateSnapshot(root: string, signal?: AbortSignal): Promise<TemplateSnapshot> {

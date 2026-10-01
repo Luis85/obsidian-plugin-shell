@@ -2,9 +2,11 @@
   "extends": "./tsconfig.framework.json",
   "compilerOptions": {
     "erasableSyntaxOnly": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true
   },
   "include": [
-    "../../bin/**/*.ts"
+    "../../bin/**/*.ts",
+    "../../plugins/**/*.ts"
   ]
 }

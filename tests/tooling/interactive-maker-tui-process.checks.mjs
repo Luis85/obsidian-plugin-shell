@@ -35,7 +35,7 @@ test('process composition opens both TUI entrypoints and restores them on cancel
     for (const command of ['studio', 'new', 'sketch', 'prototype']) {
       let triggered = false;
       const f = streams((screen, input) => {
-        if (!triggered && (screen.includes('What kind of project') || screen.includes('Project title') || screen.includes('Prototype title'))) {
+        if (!triggered && (screen.includes('Which project starter') || screen.includes('Project title') || screen.includes('Prototype title'))) {
           triggered = true; queueMicrotask(() => input.write('\x03'));
         }
       });

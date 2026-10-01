@@ -1,0 +1,6 @@
+{
+  "id": "example-extension",
+  "name": "Example Workbench extension",
+  "version": "1.0.0",
+  "description": "Disabled reference plugin showing events, CLI/TUI contributions and a React starter adapter."
+}

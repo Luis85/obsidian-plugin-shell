@@ -28,13 +28,13 @@ async function fixture(work) {
   try { return await work(folder); } finally { await rm(folder, { recursive: true, force: true }); }
 }
 
-test('[CAP-01] catalog enumerates the actual sixteen maker handlers and preserves legacy parsing', () => {
+test('[CAP-01] catalog enumerates the actual seventeen maker handlers and preserves legacy parsing', () => {
   const catalog = capabilityCatalog();
   assert.deepEqual(catalog.makers.map(item => item.id), builtinRecipes);
   assert.deepEqual([...builtinRecipes].sort(), Object.keys(builtinHandlers).sort());
   assert.deepEqual([...builtinRecipes].sort(), [
     'command', 'component', 'context-menu', 'entity', 'event', 'feature',
-    'file-extension', 'listener', 'locale', 'maker', 'modal', 'setting',
+    'file-extension', 'listener', 'locale', 'maker', 'modal', 'plugin', 'setting',
     'store', 'style', 'usecase', 'view',
   ]);
   assert.equal(validateCatalog(catalog), true);

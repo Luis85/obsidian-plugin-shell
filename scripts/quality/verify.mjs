@@ -26,9 +26,11 @@ const commands = [
   process.env.SHELL_EVIDENCE_TOOLING === '1'
     ? ['scripts/testing/evidence-cli.mjs', 'run', 'tooling']
     : toolingStep,
+  ['scripts/testing/suites.mjs', 'workbench-plugins'],
+  ['scripts/quality/check-workbench-plugins.mjs'],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['scripts/quality/lint-source.mjs'],
-  ['node_modules/eslint/bin/eslint.js', '-c', 'configs/lint/eslint.config.mjs', 'src', 'bin', '--max-warnings', '0'],
+  ['node_modules/eslint/bin/eslint.js', '-c', 'configs/lint/eslint.config.mjs', 'src', 'bin', 'plugins', '--max-warnings', '0'],
   ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'configs/types/tsconfig.maker.json'],
   ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'configs/testing/vitest.maker.config.mjs'],
   ['scripts/quality/maker-coverage.mjs'],

@@ -14112,6 +14112,7 @@ const VISUAL_SCHEMA = 3;
 const VISUAL_CATALOG = Object.freeze({ id: 'nuxt-ui', version: 1 });
 const VISUAL_TAGS = Object.freeze(['div', 'section', 'header', 'main', 'footer', 'nav', 'aside', 'button', 'input', 'label', 'p', 'h1', 'h2', 'h3', 'span', 'ul', 'li', 'img']);
 const VISUAL_TEXT_ROLES = Object.freeze(['h1', 'h2', 'h3', 'p', 'span']);
+const VISUAL_ACTION_KINDS = Object.freeze(['emit', 'navigate', 'set-state', 'toggle', 'focus', 'set-value', 'source']);
 const VISUAL_STATES = Object.freeze(['default', 'loading', 'empty', 'error', 'disabled']);
 const VISUAL_PROP_TYPES = Object.freeze(['string', 'number', 'boolean']);
 const VISUAL_PAYLOAD_TYPES = Object.freeze(['void', 'string', 'number', 'boolean', 'unknown']);
@@ -14219,7 +14220,7 @@ const visualCatalog = Object.freeze([
   vcatEntry('u-avatar', 'Avatar', 'UAvatar', 'Data', 'User or entity identity', [vcatP('src', 'string'), vcatP('alt', 'string'), vcatP('text', 'string')], [], [], 'avatar'),
   vcatEntry('u-tabs', 'Tabs', 'UTabs', 'Navigation', 'Peer surface navigation', [vcatP('items', 'array'), vcatP('modelValue', 'string')], [], [['update:modelValue', 'string']], 'tabs'),
   vcatEntry('u-breadcrumb', 'Breadcrumb', 'UBreadcrumb', 'Navigation', 'Hierarchical location', [vcatP('items', 'array')], [], [], 'breadcrumb'),
-  vcatEntry('u-dropdown-menu', 'Dropdown Menu', 'UDropdownMenu', 'Navigation', 'Context actions', [vcatP('items', 'array')], ['default'], [], 'menu'),
+  vcatEntry('u-dropdown-menu', 'Dropdown Menu', 'UDropdownMenu', 'Navigation', 'Context actions; item:select emits inert {id, label, path} data', [vcatP('items', 'array')], ['default'], [['item:select', 'object']], 'menu'),
   vcatEntry('u-command-palette', 'Command Palette', 'UCommandPalette', 'Navigation', 'Keyboard-first command discovery', [vcatP('groups', 'array'), vcatP('placeholder', 'string')], [], [['update:modelValue', 'unknown']], 'menu'),
   vcatEntry('u-modal', 'Modal', 'UModal', 'Overlays', 'Focused modal workflow', [vcatP('open', 'boolean'), vcatP('title', 'string'), vcatP('description', 'string')], ['body', 'footer'], [['update:open', 'boolean']], 'overlay'),
   vcatEntry('u-drawer', 'Drawer', 'UDrawer', 'Overlays', 'Contextual side or bottom workflow', [vcatP('open', 'boolean'), vcatP('title', 'string')], ['body', 'footer'], [['update:open', 'boolean']], 'overlay'),
@@ -15167,7 +15168,7 @@ function toolingSchema() {
 
 return validateTooling;
 })();
-/** Built-in starters are data, not installable code or a second project format. */
+/** External starter projections are data. The retained browser fixture uses v5; current consumers also validate v6. */
 const STARTER_CATALOG_VERSION = 1;
 const STARTER_FIELDS = ['id', 'name', 'category', 'level', 'summary', 'outcome', 'includes', 'implementation', 'tags', 'version', 'file', 'sha256', 'document'];
 function starterAssert(ok, message) { if (!ok) throw Error('STARTER_INVALID: ' + message); }
@@ -15181,7 +15182,7 @@ function starterDocument(value) {
 function validateStarterCatalog(value) {
   starterAssert(value && value.schemaVersion === STARTER_CATALOG_VERSION && Array.isArray(value.starters), 'Unsupported catalog.');
   starterAssert(Object.keys(value).every(k => ['schemaVersion', 'starters'].includes(k)), 'Unknown catalog field.');
-  starterAssert(value.starters.length > 0 && value.starters.length <= 24, 'Catalog size.');
+  starterAssert(value.starters.length <= 256, 'Catalog size.');
   const ids = new Set();
   for (const entry of value.starters) {
     starterAssert(entry && typeof entry === 'object' && Object.keys(entry).every(k => STARTER_FIELDS.includes(k)), 'Unknown starter field.');
@@ -15190,11 +15191,11 @@ function validateStarterCatalog(value) {
     starterAssert(/^\d+\.\d+\.\d+$/.test(entry.version), 'Starter version.');
     starterAssert(['Foundation', 'Everyday', 'Advanced'].includes(entry.level), 'Unknown difficulty.');
     starterAssert(entry.file === entry.id + '.companion.json' && /^[a-f0-9]{64}$/.test(entry.sha256), 'Invalid local source identity.');
-    for (const key of ['includes', 'implementation', 'tags']) starterAssert(Array.isArray(entry[key]) && entry[key].length > 0 && entry[key].length <= 12 && entry[key].every(v => starterText(v)), 'Invalid ' + key + '.');
+    for (const key of ['includes', 'implementation', 'tags']) starterAssert(Array.isArray(entry[key]) && entry[key].length > 0 && entry[key].length <= 32 && entry[key].every(v => starterText(v)), 'Invalid ' + key + '.');
     starterDocument(entry.document);
-    starterAssert(entry.document.schemaVersion === COMPANION_VERSION, 'Built-ins require project v' + COMPANION_VERSION + '.');
+    starterAssert([5, 6].includes(entry.document.schemaVersion), 'Starters require project v5 or v6.');
   }
-  starterAssert(ids.has('blank'), 'Start Blank must always be available.');
+  // Empty installations and a single custom starter are valid; no bundled blank fallback.
   return value;
 }
 function customizeStarter(catalog, id, fields) {
@@ -15216,8 +15217,8 @@ function customizeStarter(catalog, id, fields) {
     document.design.nativeIntegrations.contextMenus[0].extensions = fields.extensions.split(',');
   }
   // Provenance is informational Markdown, not a schema extension or execution authority.
-  document.notes.push('# Project starter\n\nBuilt-in: ' + entry.id + ' @ ' + entry.version + '\nSource SHA-256: ' + entry.sha256 + '\n\nThis project is an independent editable copy. Catalog updates never overwrite it. No execution approvals, credentials, machine paths, test results or plugin installation are imported.\n');
-  return starterDocument(document);
+  document.notes.push('# Project starter\n\nDefinition: ' + entry.id + ' @ ' + entry.version + '\nSource SHA-256: ' + entry.sha256 + '\n\nThis project is an independent editable copy. Catalog updates never overwrite it. No execution approvals, credentials, machine paths, test results or plugin installation are imported.\n');
+  return document.schemaVersion === 6 ? parseAuthoringDocument(JSON.stringify(document)) : starterDocument(JSON.parse(JSON.stringify(document)));
 }
 
 const LIBRARY_LIMIT=64;

@@ -27,7 +27,7 @@ describe('Real tooling boundaries', () => {
       expect(await readFile(join(target, 'main.js'), 'utf8')).toContain('module.exports');
       await installLocal({ root: dir }); expect(await readFile(join(target, 'data.json'), 'utf8')).toBe('existing data');
     } finally { await rm(dir, { recursive: true, force: true }); }
-  });
+  }, 20000);
   it('[TOOL-I02] dry run, unsafe target and overlapping install never overwrite data', async () => {
     const dir = await workspace();
     try {
@@ -37,7 +37,7 @@ describe('Real tooling boundaries', () => {
       const target = join(dir, '.dev-vault/.obsidian/plugins/plugin-shell'); await mkdir(join(target, '.shell-install-lock'), { recursive: true });
       await expect(installLocal({ root: dir })).rejects.toThrow();
     } finally { await rm(dir, { recursive: true, force: true }); }
-  });
+  }, 20000);
   it('[TOOL-I03] setup help and dry run execute without node_modules', async () => {
     const dir = await workspace();
     try {

@@ -1,0 +1,7 @@
+{
+  "name": "vaul-vue",
+  "version": "0.4.1",
+  "source": "https://github.com/unovue/vaul-vue/blob/vaul-vue%400.4.1/LICENSE",
+  "reason": "The pinned package files list includes README.md and dist but omits LICENSE. Retain the exact upstream version license, never waive the notice gate.",
+  "sha256": "ba02930e278b4ed6b564150a261b50319b5cef2a965b7470ae13498ece835944"
+}

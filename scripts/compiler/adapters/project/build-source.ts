@@ -32,7 +32,8 @@ async function buildVisual(target, directory) {
   const plugin = target === 'plugin';
   const entry = config.framework === 'angular' ? '.compiled/src/targets/' + target + '/main.js' : 'src/targets/' + target + '/main.ts';
   await build({ ...shared, configFile: false, root,
-    define: { ...(shared.define ?? {}), ...(config.framework === 'angular' ? { ngDevMode: false, ngJitMode: false } : {}) },
+    // Libraries such as React read process.env.NODE_ENV; a browser bundle is always a production build.
+    define: { 'process.env.NODE_ENV': JSON.stringify('production'), ...(shared.define ?? {}), ...(config.framework === 'angular' ? { ngDevMode: false, ngJitMode: false } : {}) },
     plugins: [...linker, ...(shared.plugins ?? []), projectLicenses()],
     build: { ...(shared.build ?? {}), target: 'es2022', outDir: directory, emptyOutDir: true, sourcemap: false,
       assetsInlineLimit: Number.MAX_SAFE_INTEGER, cssCodeSplit: false,

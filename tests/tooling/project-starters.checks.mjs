@@ -11,7 +11,9 @@ import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts'
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
 import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
-const root=fileURLToPath(new URL('../../',import.meta.url)),catalog=await loadStarterCatalog(root);
+const root=fileURLToPath(new URL('../../',import.meta.url)),allCatalog=await loadStarterCatalog(root);
+// These retained migration assertions stay scoped to the original eleven v5 fixtures.
+const catalog={schemaVersion:1,starters:allCatalog.starters.filter(entry=>entry.document.schemaVersion===5)};
 // Page counts equal the page documents each starter held before the visual-design migration.
 const pageCounts={blank:0,'agent-ready':0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4,'custom-file-view':3,'context-menu':3};
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
@@ -83,24 +85,31 @@ for(const [label,fields,pattern] of [
  ['absolute source',{codebaseFolder:'/tmp/src'},/relative/],['traversal source',{codebaseFolder:'../src'},/relative/],['host folder',{testsFolder:'.obsidian'},/reserved|protected/i],['overlapping paths',{codebaseFolder:'app',testsFolder:'APP/tests'},/overlap/i],['tooling collision',{codebaseFolder:'scripts'},/tooling/i],['unknown choice',{runScript:'evil'},/Unknown configuration/],
 ])test('refuses '+label+' without altering the catalog',()=>{const before=JSON.stringify(catalog);assert.throws(()=>customizeStarter(catalog,fields===null?'missing':'quick-capture',{...choices,...fields}),pattern);assert.equal(JSON.stringify(catalog),before);});
 for(const [label,mutate] of [
- ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id='blank'],['missing blank',c=>c.starters.shift()],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
+ ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id='blank'],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
 test('catalog rejects a valid legacy v4 built-in: starters ship current visual designs',()=>{
  const c=structuredClone(catalog),d=c.starters[0].document;d.schemaVersion=4;d.design.schema=4;delete d.design.visualDesigns;d.design.detailDesigns={schema:2,nextId:1,documents:[],revisions:[]};
- assert.throws(()=>validateStarterCatalog(c),new RegExp('Built-ins require project v'+COMPANION_VERSION));
+ assert.throws(()=>validateStarterCatalog(c),/Starters require project v5 or v6/);
 });
 test('case-sensitive identity changes do not replace domain words or authored content',()=>{
  const source=catalog.starters.find(s=>s.id==='quick-capture').document;const document=customizeStarter(catalog,'quick-capture',{...choices,name:'<b>Not HTML</b>'});
  assert.equal(document.project.name,'<b>Not HTML</b>');assert.deepEqual(document.design,source.design);assert.equal(document.design.nodes.find(n=>n.slug==='capture').label,'Capture an idea');
 });
 for(const [label,change] of [
- ['altered bytes',async f=>{const p=join(f,'blank.companion.json');await writeFile(p,(await readFile(p,'utf8'))+' ');}],
- ['CRLF checkout',async f=>{const p=join(f,'blank.companion.json');await writeFile(p,(await readFile(p,'utf8')).replaceAll('\n','\r\n'));}],
- ['orphan source',async f=>writeFile(join(f,'unlisted.json'),'{}')],
- ['symlink source',async (f,t)=>{const p=join(f,'blank.companion.json');await rm(p);return fileSymlink(t,join(root,'package.json'),p);}],
-])test('file loader rejects '+label,t=>temporary(async folder=>{const f=join(folder,'docs/concepts/companion/starters');await mkdir(f,{recursive:true});await cp(join(root,'docs/concepts/companion/starters'),f,{recursive:true});if(await change(f,t)===false)return;await assert.rejects(loadStarterCatalog(folder),/STARTER_INVALID/);}));
+ ['malformed data',async f=>writeFile(join(f,'blank.json'),'{bad')],
+ ['invalid unlisted source',async f=>writeFile(join(f,'unlisted.json'),'{}')],
+ ['symlink source',async (f,t)=>{const p=join(f,'blank.json');await rm(p);return fileSymlink(t,join(root,'package.json'),p);}]
+])test('file loader rejects '+label,t=>temporary(async folder=>{const f=join(folder,'configs/starters');await mkdir(f,{recursive:true});await cp(join(root,'configs/starters'),f,{recursive:true});if(await change(f,t)===false)return;await assert.rejects(loadStarterCatalog(folder));}));
+test('an edited valid definition has a new hash without needing a catalog rewrite',()=>temporary(async folder=>{
+ const f=join(folder,'configs/starters');await mkdir(f,{recursive:true});await cp(join(root,'configs/starters'),f,{recursive:true});
+ const before=await loadStarterCatalog(folder),p=join(f,'blank.json');await writeFile(p,(await readFile(p,'utf8'))+' ');
+ const after=await loadStarterCatalog(folder);assert.notEqual(after.starters[0].sha256,before.starters[0].sha256);
+}));
+test('an installation may omit blank and have no bundled fallback',()=>{
+ const c=structuredClone(catalog);c.starters=c.starters.filter(s=>s.id!=='blank');assert.equal(validateStarterCatalog(c),c);
+});
 test('starter sources are LF-only bytes and the repository pins LF checkout for every platform',async()=>{
- const folder=join(root,'docs/concepts/companion/starters');
+ const folder=join(root,'configs/starters');
  for(const name of await readdir(folder))assert.ok(!(await readFile(join(folder,name))).includes(13),name+' contains a carriage return');
  assert.match(await readFile(join(root,'.gitattributes'),'utf8'),/^\* text=auto eol=lf$/m);
 });

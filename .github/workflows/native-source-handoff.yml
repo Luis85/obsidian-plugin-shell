@@ -6,6 +6,8 @@ on:
       - 'scripts/framework/distribution.ts'
       - 'scripts/companion/compiler/framework-docs.ts'
       - 'scripts/compiler/adapters/template-snapshot.ts'
+      - 'scripts/starters/**'
+      - 'configs/starters/**'
       - 'tests/tooling/project-generator-native-handoff.checks.mjs'
       - 'tests/suites.json'
       - '.github/workflows/native-source-handoff.yml'

@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "reviewedFrom": "c969f28fea7e5e8cb425d50e580b4d0bcf4da3d5",
+  "scope": "Reviewed visual interaction runtime delta layered on the unchanged scenario, preview and product goldens: shared visual action kinds, generated runtime tests for menu selection, two-way overlay state, typed and JSON-file controls, the local icon test setup and bounded definition-suite parts that retain every generated case. The matching use-visual.ts runtime bytes are reviewed in scenario-preview-delta.json (after ab289cf3a047c077fd6b6ab8f22e19779d0bb7ae82403ed198e2af594e63a0a8 -> d49f53dd). The companion-project.json entries are layered above self-project-collection-delta.json: they start from that layer's reviewed output for input e3e9ee82 and are reversed before it.",
+  "shared": [
+    {
+      "path": "{sourceRoot}/domain/visual/visual-ir.d.mts",
+      "before": "3188b35dca0da5a9204b1900b55c05414ed118a937b386de840c113c5292ab22",
+      "after": "ce19bdc561ad909a93752f408a6388a305b582aae25c8bd490cb2263c29bcd87"
+    },
+    {
+      "path": "{sourceRoot}/domain/visual/visual-ir.mjs",
+      "before": "9d89dc1e5ac5170360114cf13b34147c1cbf137635f5c4740afbcccab2f077ab",
+      "after": "b29e9ec7ae8d56561960af73225f094235267bd877d017776295566e7eec1da1"
+    },
+    {
+      "path": "{testRoot}/ui-bootstrap.mjs",
+      "before": null,
+      "after": "64ce060c5817ff95e13b4937eadb997f7eb7756aa0feaaef422bf8f73ea81310"
+    },
+    {
+      "path": "{testRoot}/visual-runtime.test.ts",
+      "before": "760f78691fb003aad07a81f7f181cc682a51baffb796a44f16a015eb7b1b4299",
+      "after": "42f560b8548ba9e4f4289f2bd8aae9c5771cd95d14f9ff2dbbb48822e7533ea8"
+    }
+  ],
+  "cases": [
+    {
+      "source": "docs/concepts/companion/starters/blank.companion.json",
+      "files": []
+    },
+    {
+      "source": "docs/concepts/companion/starters/command-utility.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "46eb6c5b2c580df532bd194f31e6f291ccde2da7e97e11a1a03a0c12876d3872",
+          "after": "972515741b6c70ae522ac5c57291b309481ec9cdca0344f1858c33e57cbf816d"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/context-menu.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "21452fdf7d0cafbf3bc0b3ce441f559438bcc7bd202a7e09fa1f351e24035d7f",
+          "after": "b39b2c83c915626f033837756241201b93fd8c986136eb474d4800f02f3d03b5"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/custom-file-view.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "56286659d31884ff73b04f44b3c6cb3f96fec640bf33e5749b8a0b6afc40180b",
+          "after": "98aa9f1b95252be40bc461cc2395de9a10e721b923a4381588ef030281a4cf91"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/daily-journal.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions-2.test.ts",
+          "before": null,
+          "after": "4ba1d2cf3ef909f3e4bc11b068d5d010a938ef4d00deb866ace28784d120e392"
+        },
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "d48e1bc901c6046c456e0acf5841862e9b9954023977f1a89a8f5b3bcd0eec25",
+          "after": "6fa51880216ef44591979a8b50ac5551dd1be77bd0f3c1ffd7dc321d45d21580"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/import-integration.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions-2.test.ts",
+          "before": null,
+          "after": "fb77ed8c39bfda02f9e4cc336827815ca910547e308672abb2e771993e74f6b3"
+        },
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "c7364b56a0160d87af751390f5accb8ea0ceb8731ae2a696480df539ff318af3",
+          "after": "452eac1d02a9bbf739359f9b32e308f7b7415130482f452314b2f959c3e6c4a1"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/knowledge-collection.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions-2.test.ts",
+          "before": null,
+          "after": "77fee65299b459fc9061b8ad0dee67d34683ad19abca57369e19172e8225915c"
+        },
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "678dc173d88768ccbed64b79c2b1abc3e0531268e98f2960dcfba45041fe5240",
+          "after": "107bd10eeaa8c71bc2b58ae92f8258943659c455f8d2646d3cf278408baa1198"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/note-inspector.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "9ceaaab392b2dcb80a8fe566bf0e100484266d7997db834188f3c3235a15798c",
+          "after": "b0db304e7045c6cb275e9969c021f9c6d85b3f748b7a03028f78c09f5367e3ef"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/quick-capture.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions-2.test.ts",
+          "before": null,
+          "after": "ccf7ae986dd78c964be8614ecda38ac12b67ff333cc920539430d830b968072e"
+        },
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "63b1288c19a1293e80a4fdb691076c8f43a50e8571f4fcbb199536a529cad433",
+          "after": "0a9c61ff4453d9cb84574cca600b9232251b35ab0777244819f94e0c9bec64cf"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/tasks-projects.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions-2.test.ts",
+          "before": null,
+          "after": "e577fb075a17c38c1b0cb991fb612fe9e3cfdca2b6c910f7ce4011276c2d50e8"
+        },
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "679c48f0f724f7be297ddb85a6a1e11c38217c8a8c882a5b8487df17f74b7746",
+          "after": "96a3a9ab0cf236e6feeeed4cb3277dc994cb5d79d9457b300aa7db4fdafd74e5"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/vault-dashboard.companion.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions-2.test.ts",
+          "before": null,
+          "after": "f8e80958b63a3eea1242061efcecd952975224863ad1c7552f8ce209d8f17d9f"
+        },
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "6be33d1111b1805a6c5ffe7567e92a2af80594e15ea5fb4271da76bee6136277",
+          "after": "5295efdac295deda2a6fa9141570ded746ad9821628bd2a8d62aca780c7e0125"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/companion-project.json",
+      "files": [
+        {
+          "path": "{testRoot}/visual/definitions-10.test.ts",
+          "before": null,
+          "after": "5cdec86c514f92071dba523133bc30e8bb975773f846b3224a769a2434a69230"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-11.test.ts",
+          "before": null,
+          "after": "a4686172d6339e182ddf3840a949c7306919a7632f80b134cf3e4c4ffb559283"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-12.test.ts",
+          "before": null,
+          "after": "0fd0fe966290fb6cb3366ecc36625b41b975950cd10bcfdb6f109827455f685b"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-13.test.ts",
+          "before": null,
+          "after": "f7d9cced19f8d0af7a6a0d46717e0776c3828078b710f9fb840b389e61090f84"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-14.test.ts",
+          "before": null,
+          "after": "139c24785b1df7a360651133b7ebb8ac233a7643efeacbe67889b3110cf4035c"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-15.test.ts",
+          "before": null,
+          "after": "41df03121ecc4f9029a4174213bb28a2e284fa5305b2575306a1422ed0afd245"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-16.test.ts",
+          "before": null,
+          "after": "a14c33a3dbc8a4c3b0735fe851c2097403bce775290db7de3d8c083a9ade7047"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-17.test.ts",
+          "before": null,
+          "after": "0631f29bdde034e08e56d9ef84f09a45eacce63bfecab60a855408660840f7ff"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-18.test.ts",
+          "before": null,
+          "after": "7f60ad0c865c2b8ea5c48bb8a779c14fd9983de3d5b5aed415112470e31b2507"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-19.test.ts",
+          "before": null,
+          "after": "3f54f24d9337e352eda5eb6e9b3edbdbb9f53f545baca6f86f034f5060123099"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-2.test.ts",
+          "before": null,
+          "after": "45dbe4bf8f9837afec01b50a7b30ba94df5448b8df31f5c3287a003dd812d514"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-3.test.ts",
+          "before": null,
+          "after": "46fd0069677aa9ab739ed86e4a1341d091d748fae611351cd7e6a7cf6df2b100"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-4.test.ts",
+          "before": null,
+          "after": "887ed30732e45d0bfa9d4248cdc6874cb37a3a315b75eb99fc995a64968cf751"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-5.test.ts",
+          "before": null,
+          "after": "67b6b718b438307efa974d878521ba4716bc81e60fd6b5aabd410b188ac47c0e"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-6.test.ts",
+          "before": null,
+          "after": "004b0a98345e799bf10f471996bea4aa1432448880ffddca3672be4163368daf"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-7.test.ts",
+          "before": null,
+          "after": "e64b6a327677fbdc1d775e97822ee576f810e2ce5f2521bb1b1d8ba9313d63b8"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-8.test.ts",
+          "before": null,
+          "after": "55f3c9948e519305513eb7ee4ae516e85af0262748a220b5a5031f65bdaf3cce"
+        },
+        {
+          "path": "{testRoot}/visual/definitions-9.test.ts",
+          "before": null,
+          "after": "0bb7dc3b7336e4daadd16b1adc198a57e794849998abf0936ddea686fe6113e1"
+        },
+        {
+          "path": "{testRoot}/visual/definitions.test.ts",
+          "before": "eb9724f2c197570084aea80775229a10ff52a9589dbd37bdd3bce92295226efc",
+          "after": "97d4b919d93f964cdf2d8f47025ec3a4f3ad1ae77552c7257f7daef497f1cb31"
+        }
+      ]
+    }
+  ]
+}

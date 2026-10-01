@@ -11,8 +11,7 @@ import { executeFirstRun } from '../../bin/adapters/first-run.ts';
 import { settingsPlan } from '../../bin/adapters/user-settings.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { claimFirstRun, assertNoFirstRun } from '../../bin/adapters/first-run-lock.ts';
-import { resolveProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
-import { loadProjectCatalog } from '../../bin/adapters/projects.ts';
+import { projectStarter } from '../../bin/adapters/projects.ts';
 import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const json = value => JSON.stringify(value, null, 2) + '\n';
@@ -25,7 +24,7 @@ async function fixture(root, code = '') {
   assert.equal(spawnSync('git', ['init', root]).status, 0);
   await mkdir(join(root, '.obsidian')); await writeFile(join(root, '.obsidian/app.json'), 'preserve');
   const app = join(root, 'apps/product'); await mkdir(join(app, '.maker'), { recursive: true });
-  const selection = resolveProjectSelection(await loadProjectCatalog(), { schemaVersion: 1, catalogVersion: 1, preset: 'webapp-vanilla', framework: 'angular' });
+  const { selection } = await projectStarter(frameworkRoot, 'webapp-angular');
   await writeFile(join(app, 'project.config.json'), json(selection));
   await writeFile(join(app, '.nvmrc'), process.versions.node + '\n');
   await writeFile(join(app, '.maker/receipt.json'), json({ schemaVersion: 1, files: [] }));

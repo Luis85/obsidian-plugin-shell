@@ -1,5 +1,5 @@
 /** Resolve partial-Ivy dependencies at build time, never by loading a JIT compiler in the host.
- * Babel 7.29.0 matches the resolved Angular 22 consumer lock used by preset qualification.
+ * Babel 7.29.0 matches the resolved Angular 22 consumer lock used by project starter qualification.
  * Contract: https://angular.dev/tools/libraries/creating-libraries#consuming-partial-ivy-code-outside-the-angular-cli
  */
 export const angularBabelVersion = '7.29.0';

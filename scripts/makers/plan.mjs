@@ -14,7 +14,7 @@ export async function planMaker(root, { maker, name, options }, { beforeFinalize
   const allowed = new Set(recipeOptions(maker));
   for (const option of Object.keys(options))
     if (!allowed.has(option)) throw new Error(`${option} is not supported by the ${maker} recipe`);
-  const owner = ['maker', 'locale'].includes(maker)
+  const owner = ['maker', 'locale', 'plugin'].includes(maker)
     ? undefined
     : slug(maker === 'feature' ? name : options['--feature'], 'feature name (--feature is required)');
   const entity = ['entity', 'feature'].includes(maker)
@@ -88,6 +88,13 @@ export async function planMaker(root, { maker, name, options }, { beforeFinalize
     ...metadata,
     plan,
     checks: [
+      ...(maker === 'plugin'
+        ? [
+            { command: 'node', args: ['scripts/quality/check-workbench-plugins.mjs'] },
+            { command: 'node', args: ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'tsconfig.maker.json'] },
+            { command: 'node', args: ['scripts/testing/suites.mjs', 'workbench-plugins'] },
+          ]
+        : []),
       {
         command: 'node',
         args: ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],

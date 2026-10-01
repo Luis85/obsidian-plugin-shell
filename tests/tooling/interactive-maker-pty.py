@@ -180,7 +180,7 @@ def cancel(node, repo, target, evidence, mode):
 def new_project(node, repo, target, agent, evidence):
     terminal = Terminal(node, repo, target, "new")
     try:
-        terminal.expect("What kind of project are you creating?")
+        terminal.expect("Which project starter do you want to run?")
         terminal.send("/cli\r", "Prototype title")
         terminal.send("PTY project\r", "Problem to explore")
         labels = ["Who will use it?", "Observable outcome", "Pages or command journeys",
@@ -197,7 +197,7 @@ def new_project(node, repo, target, agent, evidence):
         terminal.send("\r", "Apply this reviewed plan?")
         terminal.send("\x1b[B\r")
         result = terminal.finish(0)
-        request = {"schemaVersion": 1, "catalogVersion": 1, "preset": "cli",
+        request = {"schemaVersion": 2, "starter": "cli",
                    "interview": {"schemaVersion": 1, "guideId": "project-prototype", "guideVersion": 1,
                                         "answers": {"title": "PTY project", "approved": True}}}
         command = [node, "--experimental-strip-types", str(repo / "app.mjs"), "new", "--root", str(agent),

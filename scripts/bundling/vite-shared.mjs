@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue';
 import ui from '@nuxt/ui/vite';
 import { journeyFlow } from './journey-flow.mjs';
 import { cssOwnership } from './css-ownership.mjs';
+import { localIcons } from './local-icons.mjs';
 const root = process.cwd();
 const profile = JSON.parse(readFileSync(resolve(root, 'scripts/bundling/ui-adaptation.json'), 'utf8'));
 const replacements = new Map(Object.keys(profile.replaced).map((p, index) => [resolve(root, p).replaceAll('\\', '/'), index]));
@@ -28,7 +29,7 @@ export function sharedConfig() {
     plugins: [journeyFlow(root), staticVendor(), vue(), ui({ root, router: false, colorMode: false, autoImport: false, components: false,
       experimental: { componentDetection: true },
       theme: { prefix: 'ps', colors: ['primary', 'secondary', 'success', 'info', 'warning', 'error'] },
-      icon: { mode: 'svg', clientBundle: { icons: ['lucide:layout-dashboard', 'lucide:file-plus-2', 'lucide:radio', 'lucide:sliders-horizontal', 'lucide:panel-top', 'lucide:scan-text', 'lucide:file-check-2', 'lucide:arrow-up-right', 'lucide:bell', 'lucide:message-square-warning', 'lucide:x', 'lucide:check', 'lucide:loader-circle', 'lucide:ellipsis-vertical'] } },
+      icon: { mode: 'svg', clientBundle: { icons: localIcons } },
     })],
     css: { postcss: { plugins: [cssOwnership(identity.id)] } },
     define: { 'process.env.NODE_ENV': JSON.stringify('production'), 'import.meta.dev': false, __VUE_OPTIONS_API__: true, __VUE_PROD_DEVTOOLS__: false },

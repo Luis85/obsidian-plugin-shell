@@ -16,6 +16,7 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   }
   await visit(resolve(root, 'src'));
   if ((await readdir(root)).includes('bin')) await visit(resolve(root, 'bin'));
+  if ((await readdir(root)).includes('plugins')) await visit(resolve(root, 'plugins'));
   files.sort();
   if (!files.length) throw new Error('LINT_SOURCE_EMPTY');
   // The project's own rules win; a bare source tree (archive probe) uses this framework's reviewed rules.
@@ -24,7 +25,7 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   for (let offset = 0; offset < files.length; offset += 100) {
     await runNode(tool, ['-c', config, ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
   }
-  return { status: 'passed', files: files.length, scope: 'every owned src/bin JS/TS/Vue input, explicit paths' };
+  return { status: 'passed', files: files.length, scope: 'every owned src/bin/plugins JS/TS/Vue input, explicit paths' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await lintOwnedSource())); }

@@ -34,14 +34,29 @@ jobs:
       - name: TypeScript and both source linters
         run: |
           node "$QUALIFIED_NPM" run typecheck:maker
-          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs bin --max-warnings 0
-          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json bin --no-ignore --deny-warnings
+          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs bin plugins --max-warnings 0
+          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json bin plugins --no-ignore --deny-warnings
+          node "$QUALIFIED_NPM" run check:plugins
       - name: Interactive, agent, compiler and safe-write contracts
         if: ${{ !cancelled() }}
         run: |
           mkdir -p reports/maker
           set -o pipefail
           node "$QUALIFIED_NPM" run test:maker 2>&1 | tee reports/maker/tests.log
+          node "$QUALIFIED_NPM" run test:plugins 2>&1 | tee reports/maker/plugins.log
+      - name: Qualify plugin-provided React starter
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: |
+          cp plugins/example-extension/config.json "$RUNNER_TEMP/example-extension-config.json"
+          trap 'cp "$RUNNER_TEMP/example-extension-config.json" plugins/example-extension/config.json' EXIT
+          node --input-type=module - <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const path = 'plugins/example-extension/config.json';
+          const config = JSON.parse(await readFile(path, 'utf8'));
+          await writeFile(path, JSON.stringify({ ...config, enabled: true }, null, 2) + '\n');
+          NODE
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node scripts/compiler/qualify-project-starters.mjs --starter webapp-react --execute
       - name: Actual pseudo-terminal authoring and restoration
         if: ${{ !cancelled() && runner.os != 'Windows' }}
         run: node "$QUALIFIED_NPM" run test:maker:pty
@@ -68,6 +83,7 @@ jobs:
             reports/maker
             reports/maker-pty
             reports/maker-coverage
+            reports/project-starters/webapp-react
             reports/maintainability
             reports/analyzer
           if-no-files-found: ignore

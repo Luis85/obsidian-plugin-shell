@@ -22,7 +22,7 @@ export default ts.config(
     plugins: { obsidianmd: obsidian },
     rules: pluginRules,
   },
-  { files: ['bin/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
+  { files: ['bin/**/*.ts', 'plugins/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
   // Extensionless launcher: lint it as an ES module (the package "type" decides how Node loads it).
   { files: ['bin/app'], languageOptions: { sourceType: 'module' } },

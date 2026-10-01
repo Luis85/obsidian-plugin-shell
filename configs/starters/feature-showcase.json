@@ -1,0 +1,5126 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "feature-showcase",
+  "name": "Workbench Feature Showcase",
+  "category": "Workbench",
+  "level": "Advanced",
+  "summary": "Interactive examples of all catalog primitives, control kinds, local action kinds and UI states, with explicit parity diagnostics.",
+  "outcome": "Generate an editable UI showcase with deterministic read fixtures; inspect remaining native authoring and menu-action gaps.",
+  "tags": [
+    "showcase",
+    "fixtures",
+    "reference"
+  ],
+  "includes": [
+    "All 22 pinned Nuxt UI primitives",
+    "All 10 control kinds and seven local action kinds",
+    "Five UI states and three responsive layout modes",
+    "Props, slots, events, variants and a pinned component revision",
+    "Routes, journeys, source fixtures and native integration declarations"
+  ],
+  "implementation": [
+    "Inspect modeled coverage separately from behavioral and native acceptance.",
+    "Menu item action callbacks remain unsupported in the current catalog and are explicitly disabled.",
+    "Real persistence and full native Companion authoring are not implemented by this example."
+  ],
+  "version": "1.0.0",
+  "inputs": [
+    {
+      "id": "id",
+      "label": "Project ID",
+      "type": "string",
+      "required": true,
+      "default": "feature-showcase"
+    },
+    {
+      "id": "name",
+      "label": "Project name",
+      "type": "string",
+      "required": true,
+      "default": "Workbench Feature Showcase"
+    },
+    {
+      "id": "author",
+      "label": "Author",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "description",
+      "label": "Description",
+      "type": "string",
+      "required": false,
+      "default": "Interactive UI capability examples with deterministic fixtures. Native authoring parity is reported separately."
+    },
+    {
+      "id": "version",
+      "label": "Project version",
+      "type": "string",
+      "required": true,
+      "default": "0.1.0"
+    },
+    {
+      "id": "codebaseFolder",
+      "label": "Source folder",
+      "type": "string",
+      "required": true,
+      "default": "src"
+    },
+    {
+      "id": "testsFolder",
+      "label": "Tests folder",
+      "type": "string",
+      "required": true,
+      "default": "tests"
+    }
+  ],
+  "generator": {
+    "kind": "companion",
+    "document": {
+      "kind": "obsidian-companion-project",
+      "schemaVersion": 6,
+      "executable": false,
+      "project": {
+        "id": "feature-showcase",
+        "name": "Workbench Feature Showcase",
+        "author": "",
+        "version": "0.1.0",
+        "description": "Interactive UI capability examples with deterministic fixtures. Native authoring parity is reported separately."
+      },
+      "settings": {
+        "codebaseFolder": "src",
+        "testsFolder": "tests"
+      },
+      "design": {
+        "schema": 6,
+        "blueprint": "blank",
+        "goal": "Explore UI controls, local interaction actions, component contracts and fixture-backed sources.",
+        "platform": "desktop",
+        "nodes": [
+          {
+            "id": "node-1",
+            "slug": "workspace",
+            "label": "Feature showcase",
+            "kind": "view",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": null,
+            "nav": false,
+            "command": true,
+            "ribbon": true,
+            "entry": true,
+            "instance": "reuse",
+            "patterns": [
+              "open-view"
+            ],
+            "goal": "Feature showcase",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-2",
+            "slug": "forms",
+            "label": "Form controls",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Form controls",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-3",
+            "slug": "interactions",
+            "label": "Local interactions",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Local interactions",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-4",
+            "slug": "records",
+            "label": "Fixture records",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Fixture records",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-5",
+            "slug": "navigation",
+            "label": "Navigation widgets",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Navigation widgets",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-6",
+            "slug": "overlays",
+            "label": "Dialogs and drawers",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Dialogs and drawers",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-7",
+            "slug": "feedback",
+            "label": "Feedback and states",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Feedback and states",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-8",
+            "slug": "components",
+            "label": "Reusable components",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Reusable components",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-9",
+            "slug": "journeys",
+            "label": "Journey Lens",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [],
+            "goal": "Journey Lens",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-10",
+            "slug": "preferences",
+            "label": "Preferences",
+            "kind": "settings",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": null,
+            "nav": false,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [
+              "settings"
+            ],
+            "goal": "Preferences",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          }
+        ],
+        "links": [
+          {
+            "id": "edge-11",
+            "from": "node-1",
+            "to": "node-2",
+            "kind": "navigate",
+            "label": "Open Form controls"
+          },
+          {
+            "id": "edge-12",
+            "from": "node-1",
+            "to": "node-3",
+            "kind": "navigate",
+            "label": "Open Local interactions"
+          },
+          {
+            "id": "edge-13",
+            "from": "node-1",
+            "to": "node-4",
+            "kind": "navigate",
+            "label": "Open Fixture records"
+          },
+          {
+            "id": "edge-14",
+            "from": "node-1",
+            "to": "node-5",
+            "kind": "navigate",
+            "label": "Open Navigation widgets"
+          },
+          {
+            "id": "edge-15",
+            "from": "node-1",
+            "to": "node-6",
+            "kind": "navigate",
+            "label": "Open Dialogs and drawers"
+          },
+          {
+            "id": "edge-16",
+            "from": "node-1",
+            "to": "node-7",
+            "kind": "navigate",
+            "label": "Open Feedback and states"
+          },
+          {
+            "id": "edge-17",
+            "from": "node-1",
+            "to": "node-8",
+            "kind": "navigate",
+            "label": "Open Reusable components"
+          },
+          {
+            "id": "edge-18",
+            "from": "node-1",
+            "to": "node-9",
+            "kind": "navigate",
+            "label": "Open Journey Lens"
+          }
+        ],
+        "nextId": 19,
+        "library": [
+          {
+            "id": "showcase-card",
+            "name": "ShowcaseCard",
+            "category": "Data display",
+            "preview": "brick",
+            "description": "Reusable card with an emitted selection, configurable title and slot.",
+            "props": "title:string\nselected:boolean",
+            "events": "select:string",
+            "slots": "actions",
+            "variants": "default, selected",
+            "a11y": "Name the selection target; do not rely on color.",
+            "version": "1.0.0",
+            "revision": 1,
+            "status": "ready",
+            "origin": "starter",
+            "replacement": "",
+            "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+            "contentSpec": {
+              "schema": 1,
+              "kind": "detail",
+              "title": "RecordCard",
+              "purpose": "A selectable summary of a note-backed record.",
+              "content": "",
+              "region": "content"
+            },
+            "tags": [
+              "application",
+              "data display"
+            ]
+          }
+        ],
+        "prds": [],
+        "librarySchema": 3,
+        "canvas": {
+          "schema": 1,
+          "layout": "vertical",
+          "positions": {},
+          "pan": {
+            "x": 32,
+            "y": 28
+          },
+          "zoom": 1,
+          "snap": true,
+          "collapsed": [],
+          "edges": "selected",
+          "custom": false,
+          "arrangedFor": "",
+          "fitted": false
+        },
+        "semantic": {
+          "schema": 1,
+          "nextId": 5,
+          "entities": [
+            {
+              "id": "er-entity-1",
+              "slug": "capture-item",
+              "name": "Capture Item",
+              "folder": "Starter/CaptureItem",
+              "description": "Proposed note contract; native persistence is an implementation point.",
+              "section": null,
+              "properties": [
+                {
+                  "id": "er-property-2",
+                  "key": "title",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "id": "er-property-3",
+                  "key": "status",
+                  "type": "text",
+                  "required": false
+                },
+                {
+                  "id": "er-property-4",
+                  "key": "url",
+                  "type": "text",
+                  "required": false
+                }
+              ]
+            }
+          ],
+          "relationships": [],
+          "sections": [],
+          "canvas": {
+            "positions": {
+              "er-entity-1": {
+                "x": 60,
+                "y": 60
+              }
+            },
+            "viewport": {
+              "x": 40,
+              "y": 40,
+              "zoom": 1
+            },
+            "snap": true
+          }
+        },
+        "dataSources": {
+          "schema": 1,
+          "nextId": 4,
+          "sources": [
+            {
+              "id": "ds-source-1",
+              "slug": "starter-records",
+              "name": "Note records",
+              "kind": "vault",
+              "status": "active",
+              "description": "Declarative port only. No live source is contacted. Native adapter must be implemented.",
+              "locator": "vault://active",
+              "auth": "none",
+              "credentialRef": "",
+              "operations": [
+                {
+                  "id": "ds-operation-2",
+                  "slug": "list-records",
+                  "name": "List records",
+                  "direction": "read",
+                  "method": "adapter",
+                  "resource": "Starter/CaptureItem",
+                  "description": "Retrieve declared records through an explicit read-only application port.",
+                  "input": {
+                    "mode": "none",
+                    "entity": null,
+                    "many": false,
+                    "fields": [],
+                    "schema": null
+                  },
+                  "output": {
+                    "mode": "entity",
+                    "entity": "er-entity-1",
+                    "many": true,
+                    "fields": [],
+                    "schema": null
+                  }
+                }
+              ]
+            }
+          ],
+          "flows": [
+            {
+              "id": "ds-flow-3",
+              "source": "ds-source-1",
+              "operation": "ds-operation-2",
+              "card": "node-4",
+              "direction": "read",
+              "label": "Read synthetic records",
+              "trigger": "manual",
+              "notes": "Explicit read; generated preview uses synthetic fixtures. Real adapters fail until supplied."
+            }
+          ],
+          "positions": {
+            "ds-source-1": {
+              "x": 900,
+              "y": 80
+            }
+          },
+          "testing": {
+            "schema": 1,
+            "seed": 42,
+            "referenceDate": "2026-01-01T00:00:00.000Z",
+            "locale": "en",
+            "count": 3,
+            "recipes": [
+              {
+                "source": "ds-source-1",
+                "operation": "ds-operation-2",
+                "enabled": true,
+                "behavior": "list",
+                "dataset": "capture-item",
+                "keyField": "id",
+                "scenario": "populated",
+                "latencyMs": 0,
+                "errorStatus": 503,
+                "rules": []
+              }
+            ]
+          }
+        },
+        "designSystem": {
+          "schema": 1,
+          "name": "Companion workbench design system",
+          "description": "Host-friendly tokens for scoped Nuxt UI styles, component previews and generated detail surfaces. Published component revisions retain their own reviewed token snapshot.",
+          "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+          "fonts": [
+            {
+              "id": "interface",
+              "name": "Interface",
+              "source": "interface",
+              "families": "",
+              "fallback": "system-ui",
+              "usage": "Navigation, controls and labels.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "body",
+              "name": "Reading",
+              "source": "text",
+              "families": "",
+              "fallback": "sans-serif",
+              "usage": "Descriptions and long-form content.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "code",
+              "name": "Code",
+              "source": "mono",
+              "families": "",
+              "fallback": "monospace",
+              "usage": "Identifiers, paths and code samples.",
+              "license": "Host font preference. No font files are embedded."
+            }
+          ],
+          "typography": [
+            {
+              "id": "page-title",
+              "name": "Page title",
+              "font": "interface",
+              "size": 24,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.25,
+              "letterSpacing": 0,
+              "usage": "One primary heading per view."
+            },
+            {
+              "id": "section-title",
+              "name": "Section title",
+              "font": "interface",
+              "size": 18,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Group related controls or content."
+            },
+            {
+              "id": "body",
+              "name": "Body",
+              "font": "body",
+              "size": 16,
+              "unit": "px",
+              "weight": 400,
+              "lineHeight": 1.5,
+              "letterSpacing": 0,
+              "usage": "Main descriptive copy."
+            },
+            {
+              "id": "label",
+              "name": "Label",
+              "font": "interface",
+              "size": 14,
+              "unit": "px",
+              "weight": 500,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Form labels; do not rely on placeholders."
+            }
+          ],
+          "spacing": [
+            {
+              "id": "xs",
+              "name": "XS",
+              "value": 4,
+              "unit": "px",
+              "usage": "Related inline items"
+            },
+            {
+              "id": "sm",
+              "name": "SM",
+              "value": 8,
+              "unit": "px",
+              "usage": "Within a control group"
+            },
+            {
+              "id": "md",
+              "name": "MD",
+              "value": 16,
+              "unit": "px",
+              "usage": "Between related blocks"
+            },
+            {
+              "id": "lg",
+              "name": "LG",
+              "value": 24,
+              "unit": "px",
+              "usage": "Between sections"
+            },
+            {
+              "id": "xl",
+              "name": "XL",
+              "value": 32,
+              "unit": "px",
+              "usage": "Major content separation"
+            }
+          ],
+          "sizes": [
+            {
+              "id": "control",
+              "name": "Control height",
+              "value": 36,
+              "unit": "px",
+              "usage": "Proposed default, not an accessibility guarantee."
+            },
+            {
+              "id": "icon",
+              "name": "Icon",
+              "value": 18,
+              "unit": "px",
+              "usage": "Glyph size, not the clickable target."
+            },
+            {
+              "id": "inspector",
+              "name": "Inspector width",
+              "value": 320,
+              "unit": "px",
+              "usage": "Preferred width; adapt for narrower panes."
+            }
+          ],
+          "radii": [
+            {
+              "id": "control",
+              "name": "Control radius",
+              "value": 6,
+              "unit": "px",
+              "usage": "Inputs and compact actions."
+            },
+            {
+              "id": "surface",
+              "name": "Surface radius",
+              "value": 12,
+              "unit": "px",
+              "usage": "Standalone panels."
+            }
+          ],
+          "colors": [
+            {
+              "id": "background",
+              "name": "Background",
+              "light": "#FFFFFF",
+              "dark": "#1E1E24",
+              "host": "--background-primary",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "text",
+              "name": "Primary text",
+              "light": "#202027",
+              "dark": "#ECECF2",
+              "host": "--text-normal",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "muted",
+              "name": "Secondary text",
+              "light": "#595964",
+              "dark": "#B6B6C4",
+              "host": "--text-muted",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent",
+              "name": "Accent",
+              "light": "#6550B9",
+              "dark": "#B7A3FF",
+              "host": "--interactive-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent-text",
+              "name": "Text on accent",
+              "light": "#FFFFFF",
+              "dark": "#17131F",
+              "host": "--text-on-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            }
+          ],
+          "guidelines": [
+            {
+              "id": "interaction",
+              "name": "Interaction states",
+              "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+            },
+            {
+              "id": "components",
+              "name": "Component usage",
+              "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+            }
+          ],
+          "frontend": {
+            "schema": 1,
+            "target": "nuxt-ui",
+            "colorPolicy": "host",
+            "bindings": {}
+          }
+        },
+        "storymaps": {
+          "schema": 1,
+          "nextId": 1,
+          "maps": []
+        },
+        "visualDesigns": {
+          "schema": 3,
+          "nextId": 198,
+          "catalog": {
+            "id": "nuxt-ui",
+            "version": 1
+          },
+          "pages": [
+            {
+              "id": "vp-1",
+              "ownerId": "node-1",
+              "name": "Feature showcase",
+              "root": [
+                {
+                  "id": "vn-33",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-32",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Feature showcase"
+                      }
+                    },
+                    {
+                      "id": "vn-11",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Choose an example. All data below is synthetic. Process execution and real persistence remain separate."
+                      }
+                    },
+                    {
+                      "id": "vn-30",
+                      "kind": "element",
+                      "tag": "section",
+                      "attrs": {},
+                      "children": [
+                        {
+                          "id": "vn-13",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Form controls"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-12",
+                              "event": "click",
+                              "label": "Form controls",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-2"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Form controls"
+                        },
+                        {
+                          "id": "vn-15",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Local interactions"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-14",
+                              "event": "click",
+                              "label": "Local interactions",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-3"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Local interactions"
+                        },
+                        {
+                          "id": "vn-17",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Fixture records"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-16",
+                              "event": "click",
+                              "label": "Fixture records",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-4"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Fixture records"
+                        },
+                        {
+                          "id": "vn-19",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Navigation widgets"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-18",
+                              "event": "click",
+                              "label": "Navigation widgets",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-5"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Navigation widgets"
+                        },
+                        {
+                          "id": "vn-21",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Dialogs and drawers"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-20",
+                              "event": "click",
+                              "label": "Dialogs and drawers",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-6"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Dialogs and drawers"
+                        },
+                        {
+                          "id": "vn-23",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Feedback and states"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-22",
+                              "event": "click",
+                              "label": "Feedback and states",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-7"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Feedback and states"
+                        },
+                        {
+                          "id": "vn-25",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Reusable components"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-24",
+                              "event": "click",
+                              "label": "Reusable components",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-8"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Reusable components"
+                        },
+                        {
+                          "id": "vn-27",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Journey Lens"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-26",
+                              "event": "click",
+                              "label": "Journey Lens",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-9"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Journey Lens"
+                        },
+                        {
+                          "id": "vn-29",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Preferences"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-28",
+                              "event": "click",
+                              "label": "Preferences",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-10"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Preferences"
+                        }
+                      ],
+                      "events": [],
+                      "name": "Example group",
+                      "layout": {
+                        "mode": "grid",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-31",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-alert"
+                      },
+                      "props": {
+                        "title": {
+                          "kind": "literal",
+                          "value": "UI examples, not native authoring completion"
+                        },
+                        "description": {
+                          "kind": "literal",
+                          "value": "The coverage report identifies the native editor and business-handler gaps. No placeholder is counted as accepted behavior."
+                        },
+                        "color": {
+                          "kind": "literal",
+                          "value": "info"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Acceptance boundary"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-1",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-2",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-3",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-4",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-5",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-2",
+              "ownerId": "node-2",
+              "name": "Form controls",
+              "root": [
+                {
+                  "id": "vn-70",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-67",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Form controls"
+                      }
+                    },
+                    {
+                      "id": "vn-66",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Edit a value to see its live binding. File input accepts bounded local JSON; it never executes content."
+                      }
+                    },
+                    {
+                      "id": "vn-34",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-form"
+                      },
+                      "props": {
+                        "state": {
+                          "kind": "literal",
+                          "value": {
+                            "name": "Ada Example"
+                          }
+                        }
+                      },
+                      "slots": {
+                        "default": [
+                          {
+                            "id": "vn-37",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "text"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldtext"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-36",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-input"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": "Ada Example"
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "text control",
+                                  "control": {
+                                    "kind": "text"
+                                  }
+                                },
+                                {
+                                  "id": "vn-38",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-36"
+                                  },
+                                  "name": "text live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "text field"
+                          },
+                          {
+                            "id": "vn-40",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "textarea"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldtextarea"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-39",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-textarea"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": "A synthetic multiline note."
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "textarea control",
+                                  "control": {
+                                    "kind": "textarea"
+                                  }
+                                },
+                                {
+                                  "id": "vn-41",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-39"
+                                  },
+                                  "name": "textarea live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "textarea field"
+                          },
+                          {
+                            "id": "vn-43",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "number"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldnumber"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-42",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-input"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": 42
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "number control",
+                                  "control": {
+                                    "kind": "number"
+                                  }
+                                },
+                                {
+                                  "id": "vn-44",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-42"
+                                  },
+                                  "name": "number live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "number field"
+                          },
+                          {
+                            "id": "vn-46",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "checkbox"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldcheckbox"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-45",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-checkbox"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": true
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "checkbox control",
+                                  "control": {
+                                    "kind": "checkbox"
+                                  }
+                                },
+                                {
+                                  "id": "vn-47",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-45"
+                                  },
+                                  "name": "checkbox live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "checkbox field"
+                          },
+                          {
+                            "id": "vn-49",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "date"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fielddate"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-48",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-input"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": "2026-01-01"
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "date control",
+                                  "control": {
+                                    "kind": "date"
+                                  }
+                                },
+                                {
+                                  "id": "vn-50",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-48"
+                                  },
+                                  "name": "date live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "date field"
+                          },
+                          {
+                            "id": "vn-52",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "datetime-local"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fielddatetimelocal"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-51",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-input"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": "2026-01-01T09:00"
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "datetime-local control",
+                                  "control": {
+                                    "kind": "datetime-local"
+                                  }
+                                },
+                                {
+                                  "id": "vn-53",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-51"
+                                  },
+                                  "name": "datetime-local live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "datetime-local field"
+                          },
+                          {
+                            "id": "vn-55",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "select"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldselect"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-54",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-select"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": "alpha"
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "select control",
+                                  "control": {
+                                    "kind": "select",
+                                    "options": [
+                                      {
+                                        "label": "Alpha",
+                                        "value": "alpha"
+                                      },
+                                      {
+                                        "label": "Beta",
+                                        "value": "beta"
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "id": "vn-56",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-54"
+                                  },
+                                  "name": "select live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "select field"
+                          },
+                          {
+                            "id": "vn-58",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "json-file"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldjsonfile"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-57",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-input"
+                                  },
+                                  "props": {},
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "json-file control",
+                                  "control": {
+                                    "kind": "json-file"
+                                  }
+                                },
+                                {
+                                  "id": "vn-59",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-57"
+                                  },
+                                  "name": "json-file live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "json-file field"
+                          },
+                          {
+                            "id": "vn-61",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "json-editor"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldjsoneditor"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-60",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-textarea"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": "{\"title\":\"Example\"}"
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "json-editor control",
+                                  "control": {
+                                    "kind": "json-editor"
+                                  }
+                                },
+                                {
+                                  "id": "vn-62",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-60"
+                                  },
+                                  "name": "json-editor live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "json-editor field"
+                          },
+                          {
+                            "id": "vn-64",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-form-field"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "markdown-editor"
+                              },
+                              "name": {
+                                "kind": "literal",
+                                "value": "fieldmarkdowneditor"
+                              }
+                            },
+                            "slots": {
+                              "default": [
+                                {
+                                  "id": "vn-63",
+                                  "kind": "component",
+                                  "ref": {
+                                    "kind": "nuxt-ui",
+                                    "entryId": "u-textarea"
+                                  },
+                                  "props": {
+                                    "modelValue": {
+                                      "kind": "literal",
+                                      "value": "# Example\nEditable Markdown."
+                                    }
+                                  },
+                                  "slots": {},
+                                  "events": [],
+                                  "name": "markdown-editor control",
+                                  "control": {
+                                    "kind": "markdown-editor"
+                                  }
+                                },
+                                {
+                                  "id": "vn-65",
+                                  "kind": "text",
+                                  "role": "p",
+                                  "value": {
+                                    "kind": "state",
+                                    "nodeId": "vn-63"
+                                  },
+                                  "name": "markdown-editor live value"
+                                }
+                              ]
+                            },
+                            "events": [],
+                            "name": "markdown-editor field"
+                          }
+                        ]
+                      },
+                      "events": [
+                        {
+                          "id": "vi-35",
+                          "event": "submit",
+                          "label": "Show submitted form",
+                          "actions": [
+                            {
+                              "kind": "set-state",
+                              "state": "default"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Fixture form"
+                    },
+                    {
+                      "id": "vn-69",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-68",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-6",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-7",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-8",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-9",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-10",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-3",
+              "ownerId": "node-3",
+              "name": "Local interactions",
+              "root": [
+                {
+                  "id": "vn-86",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-83",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Local interactions"
+                      }
+                    },
+                    {
+                      "id": "vn-71",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-input"
+                      },
+                      "props": {
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": "Original value"
+                        },
+                        "placeholder": {
+                          "kind": "literal",
+                          "value": "Editable draft"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Interaction draft"
+                    },
+                    {
+                      "id": "vn-73",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "state",
+                        "nodeId": "vn-71"
+                      },
+                      "name": "Draft echo"
+                    },
+                    {
+                      "id": "vn-72",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "This panel can be toggled."
+                      },
+                      "name": "Toggle target"
+                    },
+                    {
+                      "id": "vn-82",
+                      "kind": "element",
+                      "tag": "section",
+                      "attrs": {},
+                      "children": [
+                        {
+                          "id": "vn-75",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Set example value"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-74",
+                              "event": "click",
+                              "label": "Set example value",
+                              "actions": [
+                                {
+                                  "kind": "set-value",
+                                  "nodeId": "vn-71",
+                                  "value": "Changed by action"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Set example value"
+                        },
+                        {
+                          "id": "vn-77",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Focus draft"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-76",
+                              "event": "click",
+                              "label": "Focus draft",
+                              "actions": [
+                                {
+                                  "kind": "focus",
+                                  "nodeId": "vn-71"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Focus draft"
+                        },
+                        {
+                          "id": "vn-79",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Toggle panel"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-78",
+                              "event": "click",
+                              "label": "Toggle panel",
+                              "actions": [
+                                {
+                                  "kind": "toggle",
+                                  "nodeId": "vn-72"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Toggle panel"
+                        },
+                        {
+                          "id": "vn-81",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Open form controls"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-80",
+                              "event": "click",
+                              "label": "Open form controls",
+                              "actions": [
+                                {
+                                  "kind": "navigate",
+                                  "surfaceId": "node-2"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Open form controls"
+                        }
+                      ],
+                      "events": [],
+                      "name": "Example group",
+                      "layout": {
+                        "mode": "row",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-85",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-84",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-11",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-12",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-13",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-14",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-15",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-4",
+              "ownerId": "node-4",
+              "name": "Fixture records",
+              "root": [
+                {
+                  "id": "vn-96",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-93",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Fixture records"
+                      }
+                    },
+                    {
+                      "id": "vn-90",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "The preview resolves these rows through its synthetic source adapter. Native real-data access requires the application port."
+                      }
+                    },
+                    {
+                      "id": "vn-92",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Refresh fixture records"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-91",
+                          "event": "click",
+                          "label": "Refresh fixture records",
+                          "actions": [
+                            {
+                              "kind": "source",
+                              "sourceId": "ds-source-1",
+                              "operationId": "ds-operation-2",
+                              "input": {
+                                "kind": "none"
+                              }
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Refresh fixture records"
+                    },
+                    {
+                      "id": "vn-87",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-table"
+                      },
+                      "props": {
+                        "columns": {
+                          "kind": "literal",
+                          "value": [
+                            {
+                              "accessorKey": "title",
+                              "header": "Title"
+                            },
+                            {
+                              "accessorKey": "status",
+                              "header": "Status"
+                            }
+                          ]
+                        },
+                        "data": {
+                          "kind": "source",
+                          "sourceId": "ds-source-1",
+                          "operationId": "ds-operation-2",
+                          "field": ""
+                        }
+                      },
+                      "slots": {
+                        "empty": [
+                          {
+                            "id": "vn-88",
+                            "kind": "text",
+                            "role": "p",
+                            "value": {
+                              "kind": "literal",
+                              "value": "No records for this fixture."
+                            }
+                          }
+                        ]
+                      },
+                      "events": [
+                        {
+                          "id": "vi-89",
+                          "event": "select",
+                          "label": "Record selected",
+                          "actions": [
+                            {
+                              "kind": "set-state",
+                              "state": "default"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Synthetic records"
+                    },
+                    {
+                      "id": "vn-95",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-94",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-16",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": [
+                    {
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "value": [
+                        {
+                          "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                          "title": "Review the prototype",
+                          "status": "new",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        },
+                        {
+                          "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                          "title": "Try the controls",
+                          "status": "reviewed",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "scenario-17",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": [
+                    {
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "value": [
+                        {
+                          "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                          "title": "Review the prototype",
+                          "status": "new",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        },
+                        {
+                          "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                          "title": "Try the controls",
+                          "status": "reviewed",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "scenario-18",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": [
+                    {
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "value": []
+                    }
+                  ]
+                },
+                {
+                  "id": "scenario-19",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": [
+                    {
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "value": [
+                        {
+                          "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                          "title": "Review the prototype",
+                          "status": "new",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        },
+                        {
+                          "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                          "title": "Try the controls",
+                          "status": "reviewed",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "scenario-20",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": [
+                    {
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "value": [
+                        {
+                          "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                          "title": "Review the prototype",
+                          "status": "new",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        },
+                        {
+                          "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                          "title": "Try the controls",
+                          "status": "reviewed",
+                          "url": "local-example",
+                          "type": "capture-item"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-5",
+              "ownerId": "node-5",
+              "name": "Navigation widgets",
+              "root": [
+                {
+                  "id": "vn-109",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-106",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Navigation widgets"
+                      }
+                    },
+                    {
+                      "id": "vn-104",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-breadcrumb"
+                      },
+                      "props": {
+                        "items": {
+                          "kind": "literal",
+                          "value": [
+                            {
+                              "label": "Showcase"
+                            },
+                            {
+                              "label": "Navigation"
+                            }
+                          ]
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Location"
+                    },
+                    {
+                      "id": "vn-99",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-tabs"
+                      },
+                      "props": {
+                        "items": {
+                          "kind": "literal",
+                          "value": [
+                            {
+                              "label": "Overview",
+                              "value": "overview"
+                            },
+                            {
+                              "label": "Details",
+                              "value": "details"
+                            }
+                          ]
+                        },
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": "overview"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-98",
+                          "event": "update:modelValue",
+                          "label": "Tab selection feedback",
+                          "actions": [
+                            {
+                              "kind": "set-value",
+                              "nodeId": "vn-97",
+                              "value": "A different tab was selected"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Example tabs"
+                    },
+                    {
+                      "id": "vn-97",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-input"
+                      },
+                      "props": {
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": "Select a tab or command"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Navigation feedback"
+                    },
+                    {
+                      "id": "vn-103",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-command-palette"
+                      },
+                      "props": {
+                        "placeholder": {
+                          "kind": "literal",
+                          "value": "Search example commands"
+                        },
+                        "groups": {
+                          "kind": "literal",
+                          "value": [
+                            {
+                              "id": "examples",
+                              "label": "Examples",
+                              "items": [
+                                {
+                                  "id": "forms",
+                                  "label": "Form controls"
+                                },
+                                {
+                                  "id": "records",
+                                  "label": "Fixture records"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-102",
+                          "event": "update:modelValue",
+                          "label": "Command selection feedback",
+                          "actions": [
+                            {
+                              "kind": "set-value",
+                              "nodeId": "vn-97",
+                              "value": "A command was selected"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Command example"
+                    },
+                    {
+                      "id": "vn-100",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-dropdown-menu"
+                      },
+                      "props": {
+                        "items": {
+                          "kind": "literal",
+                          "value": [
+                            {
+                              "id": "forms",
+                              "label": "Open forms"
+                            },
+                            {
+                              "id": "unavailable",
+                              "label": "Unavailable example",
+                              "disabled": true
+                            }
+                          ]
+                        }
+                      },
+                      "slots": {
+                        "default": [
+                          {
+                            "id": "vn-101",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-button"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "Inspect menu contract"
+                              }
+                            },
+                            "slots": {},
+                            "events": [],
+                            "name": "Menu trigger"
+                          }
+                        ]
+                      },
+                      "events": [
+                        {
+                          "id": "vi-197",
+                          "event": "item:select",
+                          "label": "Open forms from menu",
+                          "notes": "Runtime maps menu selection into inert item data. Disabled items do not execute.",
+                          "acceptance": "Selecting Open forms navigates to the forms surface.",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-2"
+                            }
+                          ]
+                        }
+                      ],
+                      "name": "Menu presentation"
+                    },
+                    {
+                      "id": "vn-105",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Menu item callbacks have no declarative action adapter in catalog v1; the item is explicitly disabled rather than pretending to execute."
+                      }
+                    },
+                    {
+                      "id": "vn-108",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-107",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-21",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-22",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-23",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-24",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-25",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-6",
+              "ownerId": "node-6",
+              "name": "Dialogs and drawers",
+              "root": [
+                {
+                  "id": "vn-131",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-128",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Dialogs and drawers"
+                      }
+                    },
+                    {
+                      "id": "vn-110",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-checkbox"
+                      },
+                      "props": {
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": false
+                        },
+                        "label": {
+                          "kind": "literal",
+                          "value": "Example dialog open"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Example dialog open control"
+                    },
+                    {
+                      "id": "vn-118",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Open Example dialog"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-117",
+                          "event": "click",
+                          "label": "Open Example dialog",
+                          "actions": [
+                            {
+                              "kind": "set-value",
+                              "nodeId": "vn-110",
+                              "value": true
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Open Example dialog"
+                    },
+                    {
+                      "id": "vn-112",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-modal"
+                      },
+                      "props": {
+                        "open": {
+                          "kind": "state",
+                          "nodeId": "vn-110"
+                        },
+                        "title": {
+                          "kind": "literal",
+                          "value": "Example dialog"
+                        }
+                      },
+                      "slots": {
+                        "body": [
+                          {
+                            "id": "vn-113",
+                            "kind": "text",
+                            "role": "p",
+                            "value": {
+                              "kind": "literal",
+                              "value": "Edit this synthetic content."
+                            }
+                          },
+                          {
+                            "id": "vn-114",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-input"
+                            },
+                            "props": {
+                              "modelValue": {
+                                "kind": "literal",
+                                "value": "Example content"
+                              }
+                            },
+                            "slots": {},
+                            "events": [],
+                            "name": "Example dialog content"
+                          }
+                        ],
+                        "footer": [
+                          {
+                            "id": "vn-116",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-button"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "Close Example dialog"
+                              }
+                            },
+                            "slots": {},
+                            "events": [
+                              {
+                                "id": "vi-115",
+                                "event": "click",
+                                "label": "Close Example dialog",
+                                "actions": [
+                                  {
+                                    "kind": "set-value",
+                                    "nodeId": "vn-110",
+                                    "value": false
+                                  }
+                                ],
+                                "notes": "Local declarative interaction; no external process permission.",
+                                "acceptance": "The configured UI effect is observable without a backend."
+                              }
+                            ],
+                            "name": "Close Example dialog"
+                          }
+                        ]
+                      },
+                      "events": [],
+                      "name": "Example dialog"
+                    },
+                    {
+                      "id": "vn-119",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-checkbox"
+                      },
+                      "props": {
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": false
+                        },
+                        "label": {
+                          "kind": "literal",
+                          "value": "Example drawer open"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Example drawer open control"
+                    },
+                    {
+                      "id": "vn-127",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Open Example drawer"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-126",
+                          "event": "click",
+                          "label": "Open Example drawer",
+                          "actions": [
+                            {
+                              "kind": "set-value",
+                              "nodeId": "vn-119",
+                              "value": true
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Open Example drawer"
+                    },
+                    {
+                      "id": "vn-121",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-drawer"
+                      },
+                      "props": {
+                        "open": {
+                          "kind": "state",
+                          "nodeId": "vn-119"
+                        },
+                        "title": {
+                          "kind": "literal",
+                          "value": "Example drawer"
+                        }
+                      },
+                      "slots": {
+                        "body": [
+                          {
+                            "id": "vn-122",
+                            "kind": "text",
+                            "role": "p",
+                            "value": {
+                              "kind": "literal",
+                              "value": "Edit this synthetic content."
+                            }
+                          },
+                          {
+                            "id": "vn-123",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-input"
+                            },
+                            "props": {
+                              "modelValue": {
+                                "kind": "literal",
+                                "value": "Example content"
+                              }
+                            },
+                            "slots": {},
+                            "events": [],
+                            "name": "Example drawer content"
+                          }
+                        ],
+                        "footer": [
+                          {
+                            "id": "vn-125",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-button"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "Close Example drawer"
+                              }
+                            },
+                            "slots": {},
+                            "events": [
+                              {
+                                "id": "vi-124",
+                                "event": "click",
+                                "label": "Close Example drawer",
+                                "actions": [
+                                  {
+                                    "kind": "set-value",
+                                    "nodeId": "vn-119",
+                                    "value": false
+                                  }
+                                ],
+                                "notes": "Local declarative interaction; no external process permission.",
+                                "acceptance": "The configured UI effect is observable without a backend."
+                              }
+                            ],
+                            "name": "Close Example drawer"
+                          }
+                        ]
+                      },
+                      "events": [],
+                      "name": "Example drawer"
+                    },
+                    {
+                      "id": "vn-130",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-129",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-26",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-27",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-28",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-29",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-30",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-7",
+              "ownerId": "node-7",
+              "name": "Feedback and states",
+              "root": [
+                {
+                  "id": "vn-159",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-156",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Feedback and states"
+                      }
+                    },
+                    {
+                      "id": "vn-155",
+                      "kind": "element",
+                      "tag": "section",
+                      "attrs": {},
+                      "children": [
+                        {
+                          "id": "vn-146",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Show default"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-145",
+                              "event": "click",
+                              "label": "Show default",
+                              "actions": [
+                                {
+                                  "kind": "set-state",
+                                  "state": "default"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Show default"
+                        },
+                        {
+                          "id": "vn-148",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Show loading"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-147",
+                              "event": "click",
+                              "label": "Show loading",
+                              "actions": [
+                                {
+                                  "kind": "set-state",
+                                  "state": "loading"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Show loading"
+                        },
+                        {
+                          "id": "vn-150",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Show empty"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-149",
+                              "event": "click",
+                              "label": "Show empty",
+                              "actions": [
+                                {
+                                  "kind": "set-state",
+                                  "state": "empty"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Show empty"
+                        },
+                        {
+                          "id": "vn-152",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Show error"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-151",
+                              "event": "click",
+                              "label": "Show error",
+                              "actions": [
+                                {
+                                  "kind": "set-state",
+                                  "state": "error"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Show error"
+                        },
+                        {
+                          "id": "vn-154",
+                          "kind": "component",
+                          "ref": {
+                            "kind": "nuxt-ui",
+                            "entryId": "u-button"
+                          },
+                          "props": {
+                            "label": {
+                              "kind": "literal",
+                              "value": "Show disabled"
+                            }
+                          },
+                          "slots": {},
+                          "events": [
+                            {
+                              "id": "vi-153",
+                              "event": "click",
+                              "label": "Show disabled",
+                              "actions": [
+                                {
+                                  "kind": "set-state",
+                                  "state": "disabled"
+                                }
+                              ],
+                              "notes": "Local declarative interaction; no external process permission.",
+                              "acceptance": "The configured UI effect is observable without a backend."
+                            }
+                          ],
+                          "name": "Show disabled"
+                        }
+                      ],
+                      "events": [],
+                      "name": "Example group",
+                      "layout": {
+                        "mode": "row",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-132",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-alert"
+                      },
+                      "props": {
+                        "title": {
+                          "kind": "literal",
+                          "value": "State: default"
+                        },
+                        "description": {
+                          "kind": "literal",
+                          "value": "Visible only in default state"
+                        },
+                        "color": {
+                          "kind": "literal",
+                          "value": "info"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "default feedback",
+                      "visibleIn": [
+                        "default"
+                      ]
+                    },
+                    {
+                      "id": "vn-133",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-alert"
+                      },
+                      "props": {
+                        "title": {
+                          "kind": "literal",
+                          "value": "State: loading"
+                        },
+                        "description": {
+                          "kind": "literal",
+                          "value": "Visible only in loading state"
+                        },
+                        "color": {
+                          "kind": "literal",
+                          "value": "info"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "loading feedback",
+                      "visibleIn": [
+                        "loading"
+                      ]
+                    },
+                    {
+                      "id": "vn-134",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-alert"
+                      },
+                      "props": {
+                        "title": {
+                          "kind": "literal",
+                          "value": "State: empty"
+                        },
+                        "description": {
+                          "kind": "literal",
+                          "value": "Visible only in empty state"
+                        },
+                        "color": {
+                          "kind": "literal",
+                          "value": "info"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "empty feedback",
+                      "visibleIn": [
+                        "empty"
+                      ]
+                    },
+                    {
+                      "id": "vn-135",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-alert"
+                      },
+                      "props": {
+                        "title": {
+                          "kind": "literal",
+                          "value": "State: error"
+                        },
+                        "description": {
+                          "kind": "literal",
+                          "value": "Visible only in error state"
+                        },
+                        "color": {
+                          "kind": "literal",
+                          "value": "error"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "error feedback",
+                      "visibleIn": [
+                        "error"
+                      ]
+                    },
+                    {
+                      "id": "vn-136",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-alert"
+                      },
+                      "props": {
+                        "title": {
+                          "kind": "literal",
+                          "value": "State: disabled"
+                        },
+                        "description": {
+                          "kind": "literal",
+                          "value": "Visible only in disabled state"
+                        },
+                        "color": {
+                          "kind": "literal",
+                          "value": "info"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "disabled feedback",
+                      "visibleIn": [
+                        "disabled"
+                      ]
+                    },
+                    {
+                      "id": "vn-137",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-card"
+                      },
+                      "props": {},
+                      "slots": {
+                        "header": [
+                          {
+                            "id": "vn-138",
+                            "kind": "text",
+                            "role": "h2",
+                            "value": {
+                              "kind": "literal",
+                              "value": "Status summary"
+                            }
+                          }
+                        ],
+                        "default": [
+                          {
+                            "id": "vn-139",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-avatar"
+                            },
+                            "props": {
+                              "text": {
+                                "kind": "literal",
+                                "value": "AE"
+                              },
+                              "alt": {
+                                "kind": "literal",
+                                "value": "Ada Example"
+                              }
+                            },
+                            "slots": {},
+                            "events": [],
+                            "name": "Synthetic avatar"
+                          },
+                          {
+                            "id": "vn-140",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-badge"
+                            },
+                            "props": {
+                              "label": {
+                                "kind": "literal",
+                                "value": "Fixture"
+                              },
+                              "color": {
+                                "kind": "literal",
+                                "value": "info"
+                              }
+                            },
+                            "slots": {},
+                            "events": [],
+                            "name": "Status badge"
+                          },
+                          {
+                            "id": "vn-141",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-progress"
+                            },
+                            "props": {
+                              "modelValue": {
+                                "kind": "literal",
+                                "value": 65
+                              },
+                              "max": {
+                                "kind": "literal",
+                                "value": 100
+                              }
+                            },
+                            "slots": {},
+                            "events": [],
+                            "name": "Example progress"
+                          },
+                          {
+                            "id": "vn-142",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-skeleton"
+                            },
+                            "props": {},
+                            "slots": {},
+                            "events": [],
+                            "name": "Loading sample",
+                            "visibleIn": [
+                              "loading"
+                            ]
+                          },
+                          {
+                            "id": "vn-143",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-separator"
+                            },
+                            "props": {},
+                            "slots": {},
+                            "events": [],
+                            "name": "Section separator"
+                          },
+                          {
+                            "id": "vn-144",
+                            "kind": "component",
+                            "ref": {
+                              "kind": "nuxt-ui",
+                              "entryId": "u-switch"
+                            },
+                            "props": {
+                              "modelValue": {
+                                "kind": "literal",
+                                "value": true
+                              },
+                              "label": {
+                                "kind": "literal",
+                                "value": "Show hints"
+                              }
+                            },
+                            "slots": {},
+                            "events": [],
+                            "name": "Example preference"
+                          }
+                        ]
+                      },
+                      "events": [],
+                      "name": "Feedback summary"
+                    },
+                    {
+                      "id": "vn-158",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-157",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-31",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-32",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-33",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-34",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-35",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-8",
+              "ownerId": "node-8",
+              "name": "Reusable components",
+              "root": [
+                {
+                  "id": "vn-181",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-178",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Reusable components"
+                      }
+                    },
+                    {
+                      "id": "vn-174",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-input"
+                      },
+                      "props": {
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": "No card selected"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Selected card feedback"
+                    },
+                    {
+                      "id": "vn-175",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "project",
+                        "componentId": "vc-160",
+                        "revisionId": "vr-173"
+                      },
+                      "props": {
+                        "title": {
+                          "kind": "literal",
+                          "value": "Pinned reusable card"
+                        }
+                      },
+                      "slots": {
+                        "actions": [
+                          {
+                            "id": "vn-176",
+                            "kind": "text",
+                            "role": "p",
+                            "value": {
+                              "kind": "literal",
+                              "value": "Consumer-provided slot content"
+                            }
+                          }
+                        ]
+                      },
+                      "events": [
+                        {
+                          "id": "vi-177",
+                          "event": "select",
+                          "label": "Observe emitted selection",
+                          "actions": [
+                            {
+                              "kind": "set-value",
+                              "nodeId": "vn-174",
+                              "value": "Card selected through its emitted event"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Pinned card instance"
+                    },
+                    {
+                      "id": "vn-180",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-179",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-36",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-37",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-38",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-39",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-40",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-9",
+              "ownerId": "node-9",
+              "name": "Journey Lens",
+              "root": [
+                {
+                  "id": "vn-190",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-187",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Journey Lens"
+                      }
+                    },
+                    {
+                      "id": "vn-186",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "This surface uses the shipped Journey Lens native editor binding."
+                      }
+                    },
+                    {
+                      "id": "vn-189",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-188",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-41",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-42",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-43",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-44",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-45",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            },
+            {
+              "id": "vp-10",
+              "ownerId": "node-10",
+              "name": "Preferences",
+              "root": [
+                {
+                  "id": "vn-196",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-193",
+                      "kind": "text",
+                      "role": "h1",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Preferences"
+                      }
+                    },
+                    {
+                      "id": "vn-191",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-switch"
+                      },
+                      "props": {
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": true
+                        },
+                        "label": {
+                          "kind": "literal",
+                          "value": "Show example hints"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Show example hints"
+                    },
+                    {
+                      "id": "vn-192",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-input"
+                      },
+                      "props": {
+                        "modelValue": {
+                          "kind": "literal",
+                          "value": "My showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [],
+                      "name": "Example project label"
+                    },
+                    {
+                      "id": "vn-195",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Back to showcase"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-194",
+                          "event": "click",
+                          "label": "Back to showcase",
+                          "actions": [
+                            {
+                              "kind": "navigate",
+                              "surfaceId": "node-1"
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Back to showcase"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-46",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-47",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-48",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-49",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-50",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Synthetic examples. Model coverage is not proof of native acceptance."
+            }
+          ],
+          "components": [
+            {
+              "id": "vc-160",
+              "libraryId": "showcase-card",
+              "exportName": "ShowcaseCard",
+              "description": "Reusable card with an emitted selection, configurable title and slot.",
+              "props": [
+                {
+                  "name": "title",
+                  "type": "string",
+                  "required": false,
+                  "default": "Example card"
+                },
+                {
+                  "name": "selected",
+                  "type": "boolean",
+                  "required": false,
+                  "default": false
+                }
+              ],
+              "slots": [
+                {
+                  "name": "actions",
+                  "required": false
+                }
+              ],
+              "emits": [
+                {
+                  "name": "select",
+                  "payloadType": "string"
+                }
+              ],
+              "variants": [
+                {
+                  "id": "default",
+                  "name": "Default",
+                  "values": {
+                    "selected": false
+                  }
+                },
+                {
+                  "id": "selected",
+                  "name": "Selected",
+                  "values": {
+                    "selected": true
+                  }
+                }
+              ],
+              "template": [
+                {
+                  "id": "vn-166",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-161",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "prop",
+                        "name": "title"
+                      }
+                    },
+                    {
+                      "id": "vn-162",
+                      "kind": "slot",
+                      "name": "actions",
+                      "fallback": [
+                        {
+                          "id": "vn-163",
+                          "kind": "text",
+                          "role": "p",
+                          "value": {
+                            "kind": "literal",
+                            "value": "Default slot content"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "vn-165",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Select card"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-164",
+                          "event": "click",
+                          "label": "Select card",
+                          "actions": [
+                            {
+                              "kind": "emit",
+                              "event": "select",
+                              "payload": {
+                                "kind": "prop",
+                                "name": "title"
+                              }
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Select card"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-51",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-52",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-53",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-54",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-55",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ]
+            }
+          ],
+          "layouts": [
+            {
+              "id": "vl-182",
+              "name": "Showcase content layout",
+              "description": "Reusable responsive content region.",
+              "scope": "region",
+              "category": "custom",
+              "root": [
+                {
+                  "id": "vn-185",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-183",
+                      "kind": "slot",
+                      "name": "content",
+                      "fallback": [
+                        {
+                          "id": "vn-184",
+                          "kind": "text",
+                          "role": "p",
+                          "value": {
+                            "kind": "literal",
+                            "value": "Place content here"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "slots": [
+                {
+                  "name": "content",
+                  "required": false
+                }
+              ]
+            }
+          ],
+          "revisions": [
+            {
+              "id": "vr-173",
+              "componentId": "vc-160",
+              "version": "1.0.0",
+              "contract": {
+                "props": [
+                  {
+                    "name": "title",
+                    "type": "string",
+                    "required": false,
+                    "default": "Example card"
+                  },
+                  {
+                    "name": "selected",
+                    "type": "boolean",
+                    "required": false,
+                    "default": false
+                  }
+                ],
+                "slots": [
+                  {
+                    "name": "actions",
+                    "required": false
+                  }
+                ],
+                "emits": [
+                  {
+                    "name": "select",
+                    "payloadType": "string"
+                  }
+                ],
+                "variants": [
+                  {
+                    "id": "default",
+                    "name": "Default",
+                    "values": {
+                      "selected": false
+                    }
+                  },
+                  {
+                    "id": "selected",
+                    "name": "Selected",
+                    "values": {
+                      "selected": true
+                    }
+                  }
+                ]
+              },
+              "template": [
+                {
+                  "id": "vn-167",
+                  "kind": "element",
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-168",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "prop",
+                        "name": "title"
+                      }
+                    },
+                    {
+                      "id": "vn-169",
+                      "kind": "slot",
+                      "name": "actions",
+                      "fallback": [
+                        {
+                          "id": "vn-170",
+                          "kind": "text",
+                          "role": "p",
+                          "value": {
+                            "kind": "literal",
+                            "value": "Default slot content"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "vn-171",
+                      "kind": "component",
+                      "ref": {
+                        "kind": "nuxt-ui",
+                        "entryId": "u-button"
+                      },
+                      "props": {
+                        "label": {
+                          "kind": "literal",
+                          "value": "Select card"
+                        }
+                      },
+                      "slots": {},
+                      "events": [
+                        {
+                          "id": "vi-172",
+                          "event": "click",
+                          "label": "Select card",
+                          "actions": [
+                            {
+                              "kind": "emit",
+                              "event": "select",
+                              "payload": {
+                                "kind": "prop",
+                                "name": "title"
+                              }
+                            }
+                          ],
+                          "notes": "Local declarative interaction; no external process permission.",
+                          "acceptance": "The configured UI effect is observable without a backend."
+                        }
+                      ],
+                      "name": "Select card"
+                    }
+                  ],
+                  "events": [],
+                  "name": "Example group",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-56",
+                  "name": "default fixture",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-57",
+                  "name": "loading fixture",
+                  "state": "loading",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-58",
+                  "name": "empty fixture",
+                  "state": "empty",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-59",
+                  "name": "error fixture",
+                  "state": "error",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-60",
+                  "name": "disabled fixture",
+                  "state": "disabled",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                }
+              ]
+            }
+          ]
+        },
+        "nativeIntegrations": {
+          "schemaVersion": 1,
+          "fileTypes": [
+            {
+              "id": "folio",
+              "name": "Folio document",
+              "extension": "folio",
+              "format": "json",
+              "initialContent": "{\n  \"schemaVersion\": 1,\n  \"title\": \"Untitled\",\n  \"notes\": \"\"\n}\n"
+            }
+          ],
+          "contextMenus": [
+            {
+              "id": "inspect-file",
+              "name": "Inspect file details",
+              "extensions": [
+                "md"
+              ]
+            }
+          ]
+        },
+        "sitemap": {
+          "schema": 1,
+          "routes": [
+            {
+              "id": "route-workspace",
+              "surface": "node-1",
+              "path": "/"
+            },
+            {
+              "id": "route-forms",
+              "surface": "node-2",
+              "path": "/forms"
+            },
+            {
+              "id": "route-interactions",
+              "surface": "node-3",
+              "path": "/interactions"
+            },
+            {
+              "id": "route-records",
+              "surface": "node-4",
+              "path": "/records"
+            },
+            {
+              "id": "route-navigation",
+              "surface": "node-5",
+              "path": "/navigation"
+            },
+            {
+              "id": "route-overlays",
+              "surface": "node-6",
+              "path": "/overlays"
+            },
+            {
+              "id": "route-feedback",
+              "surface": "node-7",
+              "path": "/feedback"
+            },
+            {
+              "id": "route-components",
+              "surface": "node-8",
+              "path": "/components"
+            },
+            {
+              "id": "route-journeys",
+              "surface": "node-9",
+              "path": "/journeys"
+            }
+          ],
+          "journeys": [
+            {
+              "id": "journey-explore",
+              "name": "Explore UI features",
+              "steps": [
+                {
+                  "id": "step-home",
+                  "surface": "node-1",
+                  "via": null
+                },
+                {
+                  "id": "step-forms",
+                  "surface": "node-2",
+                  "via": "edge-11"
+                }
+              ]
+            }
+          ]
+        },
+        "features": {
+          "schema": 1,
+          "items": [
+            {
+              "id": "feature-showcase",
+              "name": "Explore UI capabilities",
+              "surfaces": [
+                "node-1",
+                "node-2",
+                "node-3",
+                "node-4",
+                "node-5",
+                "node-6",
+                "node-7",
+                "node-8",
+                "node-9",
+                "node-10"
+              ],
+              "entryPoints": [
+                "node-1"
+              ],
+              "components": [
+                "showcase-card"
+              ],
+              "requirements": [],
+              "dependsOn": []
+            }
+          ]
+        },
+        "editors": {
+          "schema": 1,
+          "bindings": [
+            {
+              "surface": "node-9",
+              "editor": "journey-lens"
+            }
+          ]
+        }
+      },
+      "notes": [
+        "# Showcase scope\n\nThis project demonstrates the shipped visual compiler contract, not completion of native Companion authoring. Every example is editable. Use the coverage report to inspect unsupported authoring adapters and unbound interactions. Fixture execution is local and separate from real business persistence."
+      ]
+    }
+  },
+  "files": [
+    {
+      "path": "SHOWCASE.md",
+      "content": "# Workbench feature showcase\n\nEdit the definition in configs/starters/feature-showcase.json before generation. Inspect generated design/project.json afterwards. Use npm run verify:project and npm run build:clickdummy to check the generated project. Synthetic read data is local. Menu item callbacks and full native authoring parity remain explicit gaps; see starters coverage.\n"
+    }
+  ],
+  "processes": [
+    {
+      "id": "install",
+      "label": "Install dependencies",
+      "description": "Explicitly install the generated lockfile; no global packages.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "ci",
+            "--no-fund"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "label": "Verify generated project",
+      "description": "Run generated build, types and tests. Native acceptance is separate.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "verify:project"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "build-preview",
+      "label": "Build offline UI preview",
+      "description": "Compile generated Vue source into the standalone clickdummy; not the authoring HTML.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "build:clickdummy"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "showcase",
+      "label": "Preview generated source",
+      "description": "Foreground, loopback-only fixture preview. Stop with Ctrl+C.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "dev:preview"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    }
+  ],
+  "firstRun": [
+    "install",
+    "verify",
+    "build-preview"
+  ],
+  "nextSteps": [
+    "npm run verify:project",
+    "npm run build:clickdummy",
+    "npm run dev:preview"
+  ]
+}

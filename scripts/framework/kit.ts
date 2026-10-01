@@ -10,7 +10,7 @@ import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
 import { included, standaloneSource, updateOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
-const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'configs'];
+const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
 const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md', 'app.mjs', 'shell.mjs'];
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {

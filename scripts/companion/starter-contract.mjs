@@ -1,5 +1,6 @@
-/** Built-in starters are data, not installable code or a second project format. */
-import { validateCompanionDocument, validateCompanionFolders, COMPANION_VERSION } from './project-contract.mjs';
+/** External starter projections are data. The retained browser fixture uses v5; current consumers also validate v6. */
+import { validateCompanionDocument, validateCompanionFolders } from './project-contract.mjs';
+import { validateAuthoringDocument, parseAuthoringDocument } from './authoring-contract.ts';
 import { validateTooling } from './tooling-contract.mjs';
 export const STARTER_CATALOG_VERSION = 1;
 const STARTER_FIELDS = ['id', 'name', 'category', 'level', 'summary', 'outcome', 'includes', 'implementation', 'tags', 'version', 'file', 'sha256', 'document'];
@@ -14,7 +15,7 @@ function starterDocument(value) {
 export function validateStarterCatalog(value) {
   starterAssert(value && value.schemaVersion === STARTER_CATALOG_VERSION && Array.isArray(value.starters), 'Unsupported catalog.');
   starterAssert(Object.keys(value).every(k => ['schemaVersion', 'starters'].includes(k)), 'Unknown catalog field.');
-  starterAssert(value.starters.length > 0 && value.starters.length <= 24, 'Catalog size.');
+  starterAssert(value.starters.length <= 256, 'Catalog size.');
   const ids = new Set();
   for (const entry of value.starters) {
     starterAssert(entry && typeof entry === 'object' && Object.keys(entry).every(k => STARTER_FIELDS.includes(k)), 'Unknown starter field.');
@@ -23,11 +24,11 @@ export function validateStarterCatalog(value) {
     starterAssert(/^\d+\.\d+\.\d+$/.test(entry.version), 'Starter version.');
     starterAssert(['Foundation', 'Everyday', 'Advanced'].includes(entry.level), 'Unknown difficulty.');
     starterAssert(entry.file === entry.id + '.companion.json' && /^[a-f0-9]{64}$/.test(entry.sha256), 'Invalid local source identity.');
-    for (const key of ['includes', 'implementation', 'tags']) starterAssert(Array.isArray(entry[key]) && entry[key].length > 0 && entry[key].length <= 12 && entry[key].every(v => starterText(v)), 'Invalid ' + key + '.');
+    for (const key of ['includes', 'implementation', 'tags']) starterAssert(Array.isArray(entry[key]) && entry[key].length > 0 && entry[key].length <= 32 && entry[key].every(v => starterText(v)), 'Invalid ' + key + '.');
     starterDocument(entry.document);
-    starterAssert(entry.document.schemaVersion === COMPANION_VERSION, 'Built-ins require project v' + COMPANION_VERSION + '.');
+    starterAssert([5, 6].includes(entry.document.schemaVersion), 'Starters require project v5 or v6.');
   }
-  starterAssert(ids.has('blank'), 'Start Blank must always be available.');
+  // Empty installations and a single custom starter are valid; no bundled blank fallback.
   return value;
 }
 export function customizeStarter(catalog, id, fields) {
@@ -49,6 +50,6 @@ export function customizeStarter(catalog, id, fields) {
     document.design.nativeIntegrations.contextMenus[0].extensions = fields.extensions.split(',');
   }
   // Provenance is informational Markdown, not a schema extension or execution authority.
-  document.notes.push('# Project starter\n\nBuilt-in: ' + entry.id + ' @ ' + entry.version + '\nSource SHA-256: ' + entry.sha256 + '\n\nThis project is an independent editable copy. Catalog updates never overwrite it. No execution approvals, credentials, machine paths, test results or plugin installation are imported.\n');
-  return starterDocument(document);
+  document.notes.push('# Project starter\n\nDefinition: ' + entry.id + ' @ ' + entry.version + '\nSource SHA-256: ' + entry.sha256 + '\n\nThis project is an independent editable copy. Catalog updates never overwrite it. No execution approvals, credentials, machine paths, test results or plugin installation are imported.\n');
+  return document.schemaVersion === 6 ? parseAuthoringDocument(JSON.stringify(document)) : starterDocument(JSON.parse(JSON.stringify(document)));
 }
