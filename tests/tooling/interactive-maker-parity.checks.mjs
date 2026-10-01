@@ -82,6 +82,8 @@ import { guidedStarter as relocatedGuidedStarter, starterText as relocatedStarte
 import * as legacyStarterTerminal from '../../scripts/framework/starter-terminal.ts';
 import { renderHuman as relocatedRenderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
 import * as legacyTerminalRender from '../../scripts/framework/terminal-render.ts';
+import { setupSnapshot as relocatedSetupSnapshot } from '../../bin/adapters/framework/setup-state.ts';
+import * as legacySetupState from '../../scripts/framework/setup-state.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1872,4 +1874,48 @@ test('relocated terminal renderer preserves compatibility and generic/check view
   assert.match(check.text, /types/);
   assert.match(check.text, /All check steps passed/);
   assert.equal(check.diagnosticsShown, true);
+});
+
+
+test('relocated setup-state fingerprinting preserves identity, source and generation bindings', async () => {
+  assert.equal(legacySetupState.setupSnapshot, relocatedSetupSnapshot);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-setup-state-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const setup = await frameworkOperation({
+      command: 'setup',
+      args: [],
+      options: { id: 'snapshot-demo', name: 'Snapshot Demo', author: 'Example', blank: true, yes: true },
+    }, context);
+    assert.equal(setup.status, 'applied', JSON.stringify(setup));
+
+    const first = await relocatedSetupSnapshot(context);
+    assert.ok(first.files >= 2);
+    assert.ok(first.bytes > 0);
+    assert.equal(first.kitVerified, false);
+    assert.equal(first.generated, false);
+    assert.match(first.fingerprint, /^[a-f0-9]{64}$/);
+    assert.match(first.binding, /^[a-f0-9]{64}$/);
+
+    await mkdir(join(root, 'src'), { recursive: true });
+    await writeFile(join(root, 'src/extra.ts'), 'export const extra = 1;\n');
+    const changed = await relocatedSetupSnapshot(context);
+    assert.notEqual(changed.fingerprint, first.fingerprint);
+    assert.equal(changed.binding, first.binding);
+
+    await mkdir(join(root, '.companion'), { recursive: true });
+    await writeFile(join(root, '.companion/generation.json'), JSON.stringify({
+      version: 1,
+      projectId: 'snapshot-demo',
+      files: [{ path: 'design/project.json' }],
+    }));
+    const generated = await relocatedSetupSnapshot(context);
+    assert.equal(generated.generated, true);
+    assert.notEqual(generated.fingerprint, changed.fingerprint);
+
+    await writeFile(join(root, '.companion/generation.json'), '{}');
+    await assert.rejects(relocatedSetupSnapshot(context), error => error.code === 'SETUP_GENERATION_INVALID');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

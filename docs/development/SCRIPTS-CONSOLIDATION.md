@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D43 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D44 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -145,7 +145,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D41:** Setup terminal guidance moved to `bin/presentation/terminal/setup-terminal.ts`; the framework CLI imports it locally and the former framework path is compatibility-only. Prompt confirmation now uses the shared yes/no policy, while injected dependency coverage locks starter/default identity intake, optional Airship choice, separately approved generate/install/verify/preview stages, generation plan hashes and decline-to-export behavior.
 - **D42:** Legacy `new` terminal prompting and summary rendering moved to `bin/presentation/terminal/starter-terminal.ts`; framework CLI/output import it locally and the former framework path is compatibility-only. Optional Airship confirmation now uses the shared yes/no policy; maker coverage locks compatibility identity, `--from` short-circuiting, cancellation/failure rendering and listing/review output.
 - **D43:** Generic framework human-result rendering moved to `bin/presentation/terminal/terminal-render.ts`; CLI output now consumes the terminal renderer locally and the former framework path is compatibility-only. Maker coverage locks compatibility identity plus generic and check-result rendering while the canonical JSON result remains authoritative.
-- **Remaining D44–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D44:** Setup-state source/design/generation fingerprinting moved to `bin/adapters/framework/setup-state.ts`; the former framework path is compatibility-only. Maker coverage drives a real blank setup, source inventory changes, valid generation receipt binding and invalid receipt refusal so setup-progress can relocate against a local snapshot service.
+- **Remaining D45–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
