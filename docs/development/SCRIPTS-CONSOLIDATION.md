@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D46 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D47 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -148,7 +148,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D44:** Setup-state source/design/generation fingerprinting moved to `bin/adapters/framework/setup-state.ts`; the former framework path is compatibility-only. Maker coverage drives a real blank setup, source inventory changes, valid generation receipt binding and invalid receipt refusal so setup-progress can relocate against a local snapshot service.
 - **D45:** Audited setup status/resume orchestration moved to `bin/adapters/framework/setup-progress.ts`; the dispatcher imports it locally and the former framework path is compatibility-only. Maker coverage locks read-only status, explicit stage approval/resume hashes, invalid-stage/input refusal, persisted running/final attempt recording and pre-stage cancellation.
 - **D46:** Kit manifest parsing, source inventory and fingerprint verification moved to `bin/adapters/framework/kit-integrity.ts`; setup-state consumes the local verifier and the former framework path is compatibility-only. Maker coverage locks modern/legacy bootstrap manifests, deterministic file inventory, full minimal-kit verification and tamper refusal.
-- **Remaining D47–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D47:** Framework-kit distribution filtering, text adaptation and reviewed ownership refresh moved to `bin/adapters/framework/distribution.ts`; the former framework path is compatibility-only. Maker coverage locks prototype/starter exclusion, required vendor retention, normalized README/link rewriting, analyzer entry filtering and hash-bound ownership refresh/refusal.
+- **Remaining D48–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

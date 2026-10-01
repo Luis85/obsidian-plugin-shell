@@ -88,6 +88,8 @@ import { setupProgress as relocatedSetupProgress } from '../../bin/adapters/fram
 import * as legacySetupProgress from '../../scripts/framework/setup-progress.ts';
 import { kitManifest as relocatedKitManifest, listFiles as relocatedListKitFiles, verifyKit as relocatedVerifyKit, bootstrapFiles as relocatedBootstrapFiles } from '../../bin/adapters/framework/kit-integrity.ts';
 import * as legacyKitIntegrity from '../../scripts/framework/kit-integrity.ts';
+import { included as relocatedDistributedIncluded, standaloneSource as relocatedStandaloneSource, updateOwnership as relocatedUpdateOwnership } from '../../bin/adapters/framework/distribution.ts';
+import * as legacyDistribution from '../../scripts/framework/distribution.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -2065,4 +2067,47 @@ test('relocated kit integrity preserves manifest, inventory and tamper checks', 
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+
+test('relocated distribution policy preserves filtering, adaptation and ownership refresh', () => {
+  assert.equal(legacyDistribution.included, relocatedDistributedIncluded);
+  assert.equal(legacyDistribution.standaloneSource, relocatedStandaloneSource);
+  assert.equal(legacyDistribution.updateOwnership, relocatedUpdateOwnership);
+
+  assert.equal(relocatedDistributedIncluded('src/main.ts'), true);
+  assert.equal(relocatedDistributedIncluded('configs/starters/blank.json'), false);
+  assert.equal(relocatedDistributedIncluded('docs/concepts/companion/vendor/vue-flow-core.iife.js'), true);
+
+  const readme = Buffer.from('# Reviewed\r\n\r\nSee [prototype](docs/concepts/companion/index.html).\r\n');
+  const adapted = relocatedStandaloneSource('README.md', readme);
+  const textValue = adapted.toString('utf8');
+  assert.match(textValue, /^# Framework developer kit/);
+  assert.doesNotMatch(textValue, /\r/);
+  assert.match(textValue, /prototype \(prototype asset not included in this kit\)/);
+
+  const analyzer = Buffer.from(JSON.stringify({
+    entry: ['src/main.ts', 'configs/starters/blank.json', 'docs/concepts/companion/index.html'],
+    rules: {},
+  }));
+  const analyzerResult = JSON.parse(relocatedStandaloneSource('.fallowrc.json', analyzer).toString('utf8'));
+  assert.deepEqual(analyzerResult.entry, ['src/main.ts']);
+
+  const reviewed = Buffer.from('# Reviewed framework README\n');
+  const shipped = relocatedStandaloneSource('README.md', reviewed);
+  const metadata = Buffer.from(JSON.stringify({
+    files: [{ path: 'README.md', sha256: relocatedHash(reviewed) }],
+  }));
+  const updated = JSON.parse(relocatedUpdateOwnership(
+    new Map([['README.md', reviewed]]),
+    new Map([['README.md', shipped]]),
+    metadata,
+  ).toString('utf8'));
+  assert.equal(updated.files[0].sha256, relocatedHash(shipped));
+
+  assert.throws(() => relocatedUpdateOwnership(
+    new Map([['README.md', Buffer.from('# Edited\n')]]),
+    new Map([['README.md', shipped]]),
+    metadata,
+  ), error => error.code === 'KIT_OWNERSHIP');
 });
