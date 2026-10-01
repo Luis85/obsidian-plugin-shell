@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { planProject, applyProject } from '../companion/compiler/plan.ts';
+import { planProject, applyProject } from './adapters/project-plan.ts';
 import { migrateAuthoringDocument } from '../companion/authoring-contract.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), npm = process.env.QUALIFIED_NPM;
 if (!npm) throw Error('QUALIFIED_NPM_REQUIRED: no implicit global installation.');
