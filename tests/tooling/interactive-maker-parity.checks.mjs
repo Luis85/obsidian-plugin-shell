@@ -17,6 +17,7 @@ import { interactiveRun } from '../../bin/presentation/terminal/cli-interactive.
 import { main as frameworkMain } from '../../bin/adapters/framework-cli.ts';
 import { processOperation } from '../../bin/adapters/framework/process-operation.ts';
 import { executeOperation as frameworkOperation } from '../../bin/adapters/framework/operations.ts';
+import { descriptor as frameworkDescriptor, parameterKinds as frameworkParameterKinds, parseCliArguments as parseFrameworkArguments } from '../../bin/adapters/framework/catalog.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -408,4 +409,29 @@ test('relocated framework dispatcher preserves discovery and nonexecuting effect
   const schema = await frameworkOperation({ command: 'schema', args: [], options: {} }, context);
   assert.equal(schema.status, 'ok');
   assert.equal(schema.data.protocolVersion, 1);
+});
+
+
+test('relocated framework catalog preserves parsing, validation and suggestions', () => {
+  assert.equal(parseFrameworkArguments([]).command, 'help');
+  assert.equal(parseFrameworkArguments(['-V']).command, 'version');
+  assert.deepEqual(parseFrameworkArguments(['config', 'get', '--json']), {
+    command: 'config get',
+    args: [],
+    options: { json: true },
+  });
+  assert.equal(frameworkDescriptor('test').effect, 'process');
+  const kinds = frameworkParameterKinds(frameworkDescriptor('build'));
+  assert.equal(kinds.json, 'flag');
+  assert.equal(kinds.timeout, 'value');
+
+  assert.throws(() => parseFrameworkArguments(['unknown']), error => error.code === 'UNKNOWN_COMMAND');
+  assert.throws(() => parseFrameworkArguments(['status', '--json', '--json']), error => error.code === 'INVALID_OPTION');
+  assert.throws(() => parseFrameworkArguments(['status', '--apply', 'not-a-hash']), error => error.code === 'INVALID_PLAN_HASH');
+  assert.throws(() => parseFrameworkArguments(['status', '--timeout', '3600001']), error => error.code === 'INVALID_TIMEOUT');
+  assert.throws(() => parseFrameworkArguments(['status', '--jsoon']), error => {
+    assert.equal(error.code, 'INVALID_OPTION');
+    assert.ok(error.details.suggestions.includes('--json'));
+    return true;
+  });
 });

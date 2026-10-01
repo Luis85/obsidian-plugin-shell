@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { airshipOperation } from '../../../scripts/framework/airship.ts';
 import { buildClickdummy } from '../../../scripts/framework/clickdummy.ts';
 import { checkOperation } from '../../../scripts/framework/check.ts';
-import { commands, descriptor, parameterKinds, validateRequest } from '../../../scripts/framework/catalog.ts';
+import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
 import { docsRead } from '../../../scripts/framework/docs.ts';
 import { fixtureOperation } from '../../../scripts/framework/fixtures.ts';
