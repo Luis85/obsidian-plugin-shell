@@ -43,9 +43,17 @@ function componentFromTemplate(
   if (existing) return existing;
   requireSketch(!template.templateType.startsWith('page'), 'TEMPLATE_KIND', 'A page template cannot be used as a component child.');
 
+  const store = document.design.visualDesigns;
+  const canonical = override === undefined || override === template.name;
+  if (canonical) {
+    const library = document.design.library.find(item => item.templateId === template.id && item.version === template.version
+      && (item.templateCanonical === true || (item.templateCanonical === undefined && item.name === template.name)));
+    const definition = library && store.components.find(item => item.libraryId === library.id);
+    if (definition) { created.set(template.id, definition.id); return definition.id; }
+  }
+
   const id = addComponent(document, override ?? template.name);
   created.set(template.id, id);
-  const store = document.design.visualDesigns;
   const definition = store.components.find(item => item.id === id)!;
   const library = document.design.library.find(item => item.id === definition.libraryId)!;
 
@@ -61,6 +69,7 @@ function componentFromTemplate(
   library.version = template.version;
   library.origin = 'template';
   library.templateId = template.id;
+  library.templateCanonical = canonical;
   library.atomicLevel = template.atomicLevel;
   library.props = template.props.map(prop => prop.name).join(', ');
   library.events = template.events.map(event => event.name).join(', ');

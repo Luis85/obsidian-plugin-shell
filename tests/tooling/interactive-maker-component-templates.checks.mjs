@@ -235,6 +235,12 @@ test('instantiation covers catalog, recipe, composition and both page shapes on 
 
   const atom = instantiateComponentTemplate(document, templates, 'atom.button', 'Run');
   assert.equal(atom.kind, 'component');
+  const canonicalButton = instantiateComponentTemplate(document, templates, 'atom.button');
+  assert.notEqual(canonicalButton.id, atom.id);
+  const beforeButtonReuse = document.design.library.length;
+  const reusedButton = instantiateComponentTemplate(document, templates, 'atom.button');
+  assert.equal(reusedButton.id, canonicalButton.id);
+  assert.equal(document.design.library.length, beforeButtonReuse);
   const catalogComposite = instantiateComponentTemplate(document, templates, 'molecule.form-field');
   assert.equal(catalogComposite.kind, 'component');
   const composition = instantiateComponentTemplate(document, templates, 'organism.website-header');
@@ -247,6 +253,10 @@ test('instantiation covers catalog, recipe, composition and both page shapes on 
   assert.ok(JSON.stringify(barDefinition?.template).includes('"entryId":"u-progress"'));
   const pageWithSlots = instantiateComponentTemplate(document, templates, 'page.dashboard', 'Overview');
   assert.equal(pageWithSlots.kind, 'page');
+  const beforePageReuse = document.design.library.length;
+  const secondDashboard = instantiateComponentTemplate(document, templates, 'page.dashboard', 'Overview Two');
+  assert.equal(secondDashboard.kind, 'page');
+  assert.equal(document.design.library.length, beforePageReuse);
   const recipePage = instantiateComponentTemplate(document, templates, 'page.welcome');
   assert.equal(recipePage.kind, 'page');
 
