@@ -8,7 +8,7 @@ import { commands, descriptor, parameterKinds, validateRequest } from './catalog
 import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
 import { docsRead } from '../../../scripts/framework/docs.ts';
 import { fixtureOperation } from '../../../scripts/framework/fixtures.ts';
-import { commandHelp, helpIndex } from '../../../scripts/framework/help-text.ts';
+import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
 import { setupProgress } from '../../../scripts/framework/setup-progress.ts';
 import { starterListing, completeStarterProject } from '../../../scripts/framework/starter-project.ts';
