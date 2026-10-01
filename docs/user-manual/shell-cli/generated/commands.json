@@ -102,6 +102,16 @@
       ]
     },
     {
+      "id": "obsidian-cli",
+      "title": "Optional Obsidian CLI",
+      "commands": [
+        "obsidian status",
+        "obsidian files",
+        "obsidian read",
+        "obsidian prepare"
+      ]
+    },
+    {
       "id": "storybook",
       "title": "Optional Storybook",
       "commands": [
@@ -122,6 +132,13 @@
         "airship install",
         "airship start",
         "airship doctor"
+      ]
+    },
+    {
+      "id": "agent-mcp",
+      "title": "Optional local agent MCP",
+      "commands": [
+        "mcp"
       ]
     },
     {
@@ -967,6 +984,200 @@
       ],
       "parserOnlyOptions": [
         "plan-out"
+      ]
+    },
+    {
+      "id": "obsidian status",
+      "summary": "Verify the official Obsidian CLI (1.12.7+) and inspect one explicitly selected vault.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "obsidian-cli",
+      "usage": "node bin/app obsidian status --obsidian-vault <name-or-id> [--json]",
+      "examples": [
+        "node bin/app obsidian status --obsidian-vault \"My Vault\" --json"
+      ],
+      "options": [
+        {
+          "name": "obsidian-vault",
+          "kind": "value",
+          "description": "Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "obsidian files",
+      "summary": "List Markdown files in one explicitly selected vault; never falls back to the active vault.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "obsidian-cli",
+      "usage": "node bin/app obsidian files --obsidian-vault <name-or-id> [--obsidian-folder <folder>] [--json]",
+      "examples": [
+        "node bin/app obsidian files --obsidian-vault \"My Vault\" --obsidian-folder docs/application --json"
+      ],
+      "options": [
+        {
+          "name": "obsidian-vault",
+          "kind": "value",
+          "description": "Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly."
+        },
+        {
+          "name": "obsidian-folder",
+          "kind": "value",
+          "description": "Optional vault-relative folder for Markdown listing."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "obsidian read",
+      "summary": "Read one non-hidden Markdown file from the explicitly selected vault.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "obsidian-cli",
+      "usage": "node bin/app obsidian read --obsidian-vault <name-or-id> --obsidian-path <note.md> [--json]",
+      "examples": [
+        "node bin/app obsidian read --obsidian-vault \"My Vault\" --obsidian-path docs/application/project.md --json"
+      ],
+      "options": [
+        {
+          "name": "obsidian-vault",
+          "kind": "value",
+          "description": "Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly."
+        },
+        {
+          "name": "obsidian-path",
+          "kind": "value",
+          "description": "Vault-relative, non-hidden Markdown file path to read."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "obsidian prepare",
+      "summary": "Scan configured documentation paths through the official CLI and propose existing reviewed docs-import commands.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "obsidian-cli",
+      "usage": "node bin/app obsidian prepare --obsidian-vault <name-or-id> [--json]",
+      "examples": [
+        "node bin/app obsidian prepare --obsidian-vault \"My Vault\" --json"
+      ],
+      "options": [
+        {
+          "name": "obsidian-vault",
+          "kind": "value",
+          "description": "Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
       ]
     },
     {
@@ -3571,6 +3782,56 @@
       ]
     },
     {
+      "id": "mcp",
+      "summary": "Start the project-local stdio MCP bridge; setup must opt in and client trust/approval stays external.",
+      "effect": "process",
+      "maxArgs": 0,
+      "group": "agent-mcp",
+      "usage": "node bin/app mcp",
+      "examples": [
+        "node bin/app mcp"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "timeout",
+          "kind": "value",
+          "description": "Child-process timeout in milliseconds (1..3600000).",
+          "default": "600000"
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "plan-out",
+        "yes"
+      ]
+    },
+    {
       "id": "schema",
       "summary": "Machine-readable operation request/result contracts.",
       "effect": "read",
@@ -4105,6 +4366,16 @@
           "name": "no-airship",
           "kind": "flag",
           "description": "Explicitly disable Airship in an imported or new project."
+        },
+        {
+          "name": "mcp",
+          "kind": "flag",
+          "description": "Enable the project-local Workbench MCP for Claude Code and Codex (setup-owned config; client trust and tool approval stay external)."
+        },
+        {
+          "name": "no-mcp",
+          "kind": "flag",
+          "description": "Remove unchanged setup-owned MCP configuration; edited files are preserved and refused. Without either flag setup preserves the current state."
         },
         {
           "name": "dry-run",
@@ -5374,7 +5645,7 @@
             "native",
             "obsidian"
           ],
-          "default": "unit (project when vitest.project.config.mjs exists)"
+          "default": "unit (project when configs/testing/vitest.project.config.mjs exists)"
         },
         {
           "name": "dry-run",
