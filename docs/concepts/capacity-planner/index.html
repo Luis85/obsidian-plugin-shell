@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jFEEP5eSwkaa3YyuzshhsfPPwj10ur2wpNp64kNUsFM='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'">
+<meta name="description" content="Offline capacity-planner concept for resource, FTE, iteration, task, budget, project-day and hour planning.">
+<title>Capacity Planner · Companion concept</title>
+<style>:root{
+  color-scheme:dark;
+  --bg:#111317;--panel:#181b21;--panel2:#20242c;--panel3:#272c35;--line:#343a45;
+  --text:#f4f6f8;--muted:#9aa3af;--soft:#c7cdd6;--accent:#8b7cf6;--accent2:#aea3ff;
+  --green:#5dca91;--amber:#f2bd5b;--red:#ef7272;--blue:#6fb2ff;--shadow:0 18px 50px rgba(0,0,0,.28);
+  --radius:14px;--role-col:240px;--iter-col:194px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button,input,select{border:1px solid var(--line);background:#171a20;color:var(--text);border-radius:8px}
+button{cursor:pointer;padding:8px 11px}
+button:hover{border-color:#545d6c;background:#20242b}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:650}
+button.primary:hover{background:#9a8df9}
+button.ghost{background:transparent}
+button.danger{color:#ffc3c3;border-color:#754343;background:#2c1e21}
+input,select{padding:8px 9px;min-width:0}
+label{display:grid;gap:5px;color:var(--soft);font-size:12px}
+strong{font-weight:700}
+small,.muted{color:var(--muted)}
+.skip-link{position:fixed;left:12px;top:-80px;z-index:1000;background:#fff;color:#111;padding:8px 12px;border-radius:8px}
+.skip-link:focus{top:12px}
+.shell{min-height:100vh}
+.appbar{position:sticky;top:0;z-index:40;height:56px;border-bottom:1px solid var(--line);background:rgba(17,19,23,.94);backdrop-filter:blur(14px);display:flex;align-items:center;gap:14px;padding:0 18px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(145deg,var(--accent),#4c3dc6);display:grid;place-items:center;font-weight:800}
+.brand h1{font-size:15px;margin:0;white-space:nowrap}
+.plan-title{color:var(--muted);border-left:1px solid var(--line);padding-left:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.appbar-actions{margin-left:auto;display:flex;gap:8px}
+.main{padding:18px;display:grid;gap:14px}
+.toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+.plan-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.pill{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 9px;color:var(--soft);font-size:12px}
+.pill.warning{border-color:#806430;color:#ffd98d;background:#2b2518}
+.pill.positive{border-color:#33624a;color:#a7ecc5;background:#17271f}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(135px,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 13px;min-width:0}
+.kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.kpi .value{font-size:20px;font-weight:750;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .sub{margin-top:3px;font-size:11px;color:var(--muted)}
+.budget-track{height:4px;background:#2c3038;border-radius:99px;margin-top:8px;overflow:hidden}
+.budget-track span{display:block;height:100%;background:var(--green)}
+.budget-track span.over{background:var(--red)}
+.workspace{display:grid;grid-template-columns:282px minmax(0,1fr);gap:12px;align-items:start}
+.sidebar{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:sticky;top:70px;max-height:calc(100vh - 88px);display:flex;flex-direction:column}
+.sidebar-head{padding:12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.sidebar-head h2{font-size:13px;margin:0}
+.sidebar-head button{margin-left:auto}
+.task-list{padding:10px;display:grid;gap:8px;overflow:auto}
+.task-card{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:9px;display:grid;gap:7px;cursor:grab}
+.task-card:active{cursor:grabbing}
+.task-card.dragging{opacity:.5}
+.task-title{font-weight:650;line-height:1.3}
+.task-meta{display:flex;gap:6px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.task-actions{display:flex;gap:6px}
+.task-actions button{font-size:11px;padding:5px 7px}
+.empty{padding:22px 14px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
+.board-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.board-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.board-toolbar h2{font-size:13px;margin:0}
+.board-toolbar .legend{display:flex;gap:10px;color:var(--muted);font-size:11px;margin-left:auto}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;background:var(--green)}
+.dot.over{background:var(--red)}
+.dot.open{background:var(--blue)}
+.timeline-scroll{overflow:auto;max-height:calc(100vh - 285px);min-height:390px}
+.timeline{min-width:calc(var(--role-col) + 8 * var(--iter-col))}
+.timeline-row{display:grid;grid-template-columns:var(--role-col) repeat(var(--iteration-count),var(--iter-col))}
+.timeline-head{position:sticky;top:0;z-index:20;background:#15181d;border-bottom:1px solid var(--line)}
+.corner{position:sticky;left:0;z-index:24;background:#15181d;border-right:1px solid var(--line);padding:10px 12px;display:flex;align-items:end}
+.iter-head{padding:10px;border-right:1px solid var(--line);min-height:68px}
+.iter-head strong{display:block;font-size:12px}
+.iter-head span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.role-row{border-bottom:1px solid var(--line);min-height:var(--lane-height)}
+.role-summary{position:sticky;left:0;z-index:10;background:#1a1d23;border-right:1px solid var(--line);padding:11px;display:flex;flex-direction:column;gap:7px}
+.role-name-line{display:flex;gap:7px;align-items:center}
+.role-name-line strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.role-name-line button{margin-left:auto;font-size:11px;padding:4px 6px}
+.role-totals{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:11px}
+.role-totals span{background:#14171b;border:1px solid #2b3038;border-radius:7px;padding:5px 6px}
+.lane-scale{margin-top:auto;height:5px;background:#292e36;border-radius:99px;overflow:hidden}
+.lane-scale span{display:block;height:100%;background:var(--accent)}
+.capacity-cell{position:relative;border-right:1px solid var(--line);padding:8px;display:flex;flex-direction:column;gap:7px;min-height:var(--lane-height);background:#191c22}
+.capacity-cell:nth-child(even){background:#1b1e24}
+.capacity-cell.drop-active{outline:2px solid var(--accent2);outline-offset:-3px;background:#232238}
+.capacity-cell.overloaded{background:linear-gradient(180deg,#251c20,#1b1e24)}
+.cell-head{display:flex;align-items:flex-start;gap:6px;min-height:30px}
+.capacity-amount{font-size:11px;color:var(--soft);font-weight:600}
+.capacity-detail{font-size:10px;color:var(--muted)}
+.util{margin-left:auto;font-size:10px;border-radius:999px;padding:2px 5px;background:#202936;color:#9ac8ff}
+.util.over{background:#3a2024;color:#ffb6b6}
+.cell-meter{height:3px;background:#303640;border-radius:99px;overflow:hidden}
+.cell-meter span{display:block;height:100%;background:var(--blue);max-width:100%}
+.cell-meter span.over{background:var(--red)}
+.cell-tasks{display:grid;gap:5px;align-content:start}
+.cell-tasks .task-card{padding:7px;background:#222630;cursor:grab}
+.cell-tasks .task-actions{display:none}
+.cell-empty{font-size:10px;color:#6f7885;padding:8px 4px;border:1px dashed #30353e;border-radius:7px;text-align:center}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);padding:0;box-shadow:var(--shadow);width:min(620px,calc(100vw - 28px));max-height:calc(100vh - 32px)}
+dialog::backdrop{background:rgba(5,7,10,.7);backdrop-filter:blur(4px)}
+.dialog-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.dialog-head h2{font-size:15px;margin:0}
+.dialog-head button{margin-left:auto}
+.dialog-body{padding:16px;display:grid;gap:13px;overflow:auto}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.form-grid .wide{grid-column:1/-1}
+.dialog-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.callout{border:1px solid #4d4730;background:#272417;border-radius:9px;padding:9px 10px;color:#e7d599;font-size:12px}
+.formula{font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+#notice{position:fixed;right:16px;bottom:16px;z-index:100;background:#252a32;border:1px solid #49515e;border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);max-width:360px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.15s}
+#notice.show{opacity:1;transform:none}
+.section-note{font-size:11px;color:var(--muted)}
+@media(max-width:1100px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .workspace{grid-template-columns:240px minmax(0,1fr)}
+}
+@media(max-width:760px){
+  .appbar{padding:0 10px}.plan-title{display:none}.appbar-actions .desktop-only{display:none}
+  .main{padding:10px}
+  .toolbar{grid-template-columns:1fr}.toolbar>div:last-child{display:flex;gap:6px;flex-wrap:wrap}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .workspace{grid-template-columns:1fr}
+  .sidebar{position:static;max-height:270px}
+  .timeline-scroll{max-height:560px}
+  .form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="shell">
+  <header class="appbar">
+    <div class="brand"><div class="logo" aria-hidden="true">C</div><h1>Capacity Planner</h1></div>
+    <div class="plan-title" id="app-plan-title">Resource plan</div>
+    <div class="appbar-actions">
+      <button class="ghost desktop-only" id="export-btn" type="button">Export</button>
+      <button class="ghost desktop-only" id="import-btn" type="button">Import</button>
+      <button class="primary" id="new-plan-btn" type="button">New resource plan</button>
+    </div>
+  </header>
+  <main class="main" id="main">
+    <section class="toolbar" aria-labelledby="plan-heading">
+      <div>
+        <div class="plan-meta">
+          <strong id="plan-heading">Resource plan</strong>
+          <span class="pill" id="date-pill"></span>
+          <span class="pill" id="iteration-pill"></span>
+          <span class="pill" id="unit-pill"></span>
+          <span class="pill" id="storage-pill">Local prototype</span>
+        </div>
+        <div class="section-note" style="margin-top:6px">Plan FTE by iteration, compare PT/hours and budget, then drag estimated tasks into capacity.</div>
+      </div>
+      <div>
+        <button id="edit-plan-btn" type="button">Plan settings</button>
+        <button id="add-role-btn" type="button">Add role</button>
+        <button id="add-task-btn" type="button">Add task</button>
+      </div>
+    </section>
+    <section class="kpis" id="kpis" aria-label="Plan summary"></section>
+    <section class="workspace">
+      <aside class="sidebar" aria-labelledby="backlog-heading">
+        <div class="sidebar-head">
+          <h2 id="backlog-heading">Unassigned tasks</h2>
+          <span class="pill" id="backlog-count">0</span>
+          <button type="button" id="sidebar-add-task" aria-label="Add task">+</button>
+        </div>
+        <div class="task-list" id="backlog"></div>
+      </aside>
+      <section class="board-card" aria-labelledby="board-heading">
+        <div class="board-toolbar">
+          <h2 id="board-heading">Role capacity by iteration</h2>
+          <span class="section-note">Lane height reflects total allocated role capacity</span>
+          <div class="legend" aria-label="Capacity legend">
+            <span><i class="dot open"></i>capacity</span><span><i class="dot"></i>within</span><span><i class="dot over"></i>over</span>
+          </div>
+        </div>
+        <div class="timeline-scroll" id="timeline-scroll">
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+<dialog id="dialog" aria-labelledby="dialog-title"></dialog>
+<input id="workspace-import" type="file" accept="application/json,.json" hidden aria-label="Import capacity planner workspace">
+<div id="notice" role="status" aria-live="polite" aria-atomic="true"></div>
+<noscript>This offline prototype needs JavaScript enabled to demonstrate its interactions.</noscript>
+<script>(() => {
+  "use strict";
+
+  const VERSION = 1;
+  const STORAGE_KEY = "capacity-planner.prototype.v1";
+  function $                                 (selector        , root             = document)    {
+    const element = root.querySelector   (selector);
+    if (!element) throw new Error(`Missing prototype element: ${selector}`);
+    return element;
+  }
+  const dialog = $                   ("#dialog");
+  const notice = $             ("#notice");
+  const importInput = $                  ("#workspace-import");
+  let noticeTimer = 0;
+  let draggedTaskId = null;
+
+  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[char]);
+
+  const euro = new Intl.NumberFormat("de-DE", { style:"currency", currency:"EUR", maximumFractionDigits:0 });
+  const num = new Intl.NumberFormat("de-DE", { maximumFractionDigits:1 });
+
+  function parseDate(value) {
+    const [y,m,d] = String(value).split("-").map(Number);
+    if (!y || !m || !d) return null;
+    const date = new Date(Date.UTC(y,m-1,d));
+    return Number.isFinite(date.getTime()) ? date : null;
+  }
+
+  function dateText(value) {
+    const date = parseDate(value);
+    return date ? new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(date) : "—";
+  }
+
+  function iso(date) {
+    return date.toISOString().slice(0,10);
+  }
+
+  function addDays(date, days) {
+    const next = new Date(date);
+    next.setUTCDate(next.getUTCDate() + days);
+    return next;
+  }
+
+  function inclusiveDays(start, end) {
+    return Math.round((end - start) / 86400000) + 1;
+  }
+
+  function uid(prefix) {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
+  }
+
+  function makeIterations(plan) {
+    const start = parseDate(plan.start);
+    const due = parseDate(plan.due);
+    if (!start || !due || due < start) return [];
+    const chunk = Math.max(1, Number(plan.iterationWeeks) || 2) * 7;
+    const result = [];
+    let cursor = start;
+    let index = 1;
+    while (cursor <= due && result.length < 80) {
+      const rawEnd = addDays(cursor, chunk - 1);
+      const end = rawEnd > due ? due : rawEnd;
+      result.push({
+        id: `it-${iso(cursor)}`,
+        index,
+        name: `Iteration ${index}`,
+        start: iso(cursor),
+        end: iso(end),
+        weeks: inclusiveDays(cursor, end) / 7
+      });
+      cursor = addDays(end, 1);
+      index += 1;
+    }
+    return result;
+  }
+
+  function baseState() {
+    const plan = {
+      id:"plan-demo",
+      name:"Custom Order Platform",
+      budget:280000,
+      start:"2026-10-05",
+      due:"2027-01-22",
+      iterationWeeks:2,
+      daysPerWeek:5,
+      hoursPerDay:8,
+      unitName:"SP",
+      hoursPerUnit:6
+    };
+    const iterations = makeIterations(plan);
+    const all = (value) => Object.fromEntries(iterations.map(it => [it.id,value]));
+    const range = (values) => Object.fromEntries(iterations.map((it,i) => [it.id, values[i] ?? 0]));
+    return {
+      schema:"capacity-planner.workspace",
+      version:VERSION,
+      plan,
+      roles:[
+        {id:"role-dm",name:"Delivery Manager",dayRate:950,fteByIteration:all(.4)},
+        {id:"role-ba",name:"Business Analyst",dayRate:850,fteByIteration:range([.8,.8,.8,.4,.4,0,0,0])},
+        {id:"role-ux",name:"UX / UI",dayRate:800,fteByIteration:range([.7,.7,.7,.7,.3,.3,0,0])},
+        {id:"role-dev",name:"Software Engineering",dayRate:900,fteByIteration:all(2)},
+        {id:"role-qa",name:"QA Engineer",dayRate:780,fteByIteration:range([0,0,.4,.4,.8,.8,.8,.6])}
+      ],
+      tasks:[
+        {id:"task-1",title:"Kick-off and delivery setup",units:5,roleId:"role-dm",iterationId:iterations[0]?.id ?? null},
+        {id:"task-2",title:"Domain discovery and backlog",units:8,roleId:"role-ba",iterationId:iterations[0]?.id ?? null},
+        {id:"task-3",title:"Experience map and key flows",units:8,roleId:"role-ux",iterationId:iterations[0]?.id ?? null},
+        {id:"task-4",title:"Core order service",units:21,roleId:"role-dev",iterationId:iterations[1]?.id ?? null},
+        {id:"task-5",title:"Pricing and validation rules",units:13,roleId:"role-dev",iterationId:iterations[2]?.id ?? null},
+        {id:"task-6",title:"Order-management UI",units:13,roleId:"role-dev",iterationId:iterations[3]?.id ?? null},
+        {id:"task-7",title:"Automation foundation",units:8,roleId:"role-qa",iterationId:iterations[3]?.id ?? null},
+        {id:"task-8",title:"Release hardening",units:10,roleId:null,iterationId:null},
+        {id:"task-9",title:"Operational handover",units:5,roleId:null,iterationId:null}
+      ]
+    };
+  }
+
+  function clone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function validate(candidate     ) {
+    if (!candidate || candidate.schema !== "capacity-planner.workspace" || candidate.version !== VERSION) return "Unsupported workspace schema or version.";
+    if (!candidate.plan || typeof candidate.plan.name !== "string") return "Plan is missing.";
+    const start = parseDate(candidate.plan.start), due = parseDate(candidate.plan.due);
+    if (!start || !due || due < start) return "Plan dates are invalid.";
+    for (const key of ["budget","iterationWeeks","daysPerWeek","hoursPerDay","hoursPerUnit"]) {
+      const value = Number(candidate.plan[key]);
+      if (!Number.isFinite(value) || value < 0) return `Plan value ${key} is invalid.`;
+    }
+    if (!Array.isArray(candidate.roles) || !Array.isArray(candidate.tasks)) return "Roles or tasks are missing.";
+    const roleIds = new Set();
+    for (const role of candidate.roles) {
+      if (!role?.id || typeof role.name !== "string" || roleIds.has(role.id)) return "Role identity is invalid.";
+      roleIds.add(role.id);
+      if (!Number.isFinite(Number(role.dayRate)) || Number(role.dayRate) < 0) return `Day rate for ${role.name} is invalid.`;
+      if (!role.fteByIteration || typeof role.fteByIteration !== "object") return `FTE plan for ${role.name} is invalid.`;
+      for (const value of Object.values(role.fteByIteration)) {
+        if (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 20) return `FTE value for ${role.name} is invalid.`;
+      }
+    }
+    const taskIds = new Set();
+    for (const task of candidate.tasks) {
+      if (!task?.id || typeof task.title !== "string" || taskIds.has(task.id)) return "Task identity is invalid.";
+      taskIds.add(task.id);
+      if (!Number.isFinite(Number(task.units)) || Number(task.units) < 0) return `Estimate for ${task.title} is invalid.`;
+      if (task.roleId && !roleIds.has(task.roleId)) return `Task ${task.title} refers to a missing role.`;
+    }
+    return null;
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return baseState();
+      const candidate = JSON.parse(raw);
+      return validate(candidate) ? baseState() : candidate;
+    } catch {
+      return baseState();
+    }
+  }
+
+  let state      = load();
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      $("#storage-pill").textContent = "Saved locally";
+    } catch {
+      $("#storage-pill").textContent = "In-memory only";
+    }
+  }
+
+  function announce(message) {
+    clearTimeout(noticeTimer);
+    notice.textContent = message;
+    notice.classList.add("show");
+    noticeTimer = window.setTimeout(() => notice.classList.remove("show"), 2200);
+  }
+
+  function iterations() {
+    return makeIterations(state.plan);
+  }
+
+  function capacityFor(role, iteration) {
+    const fte = Number(role.fteByIteration?.[iteration.id] ?? 0);
+    const pt = fte * iteration.weeks * Number(state.plan.daysPerWeek);
+    const hours = pt * Number(state.plan.hoursPerDay);
+    const cost = pt * Number(role.dayRate || 0);
+    return {fte,pt,hours,cost};
+  }
+
+  function taskHours(task) {
+    return Number(task.units || 0) * Number(state.plan.hoursPerUnit || 0);
+  }
+
+  function tasksFor(roleId, iterationId) {
+    return state.tasks.filter(task => task.roleId === roleId && task.iterationId === iterationId);
+  }
+
+  function roleTotals(role) {
+    return iterations().reduce((acc,it) => {
+      const c = capacityFor(role,it);
+      acc.pt += c.pt; acc.hours += c.hours; acc.cost += c.cost; acc.fte += c.fte;
+      return acc;
+    }, {pt:0,hours:0,cost:0,fte:0});
+  }
+
+  function planTotals() {
+    const role = state.roles.reduce((acc,r) => {
+      const t = roleTotals(r);
+      acc.pt += t.pt; acc.hours += t.hours; acc.cost += t.cost;
+      return acc;
+    }, {pt:0,hours:0,cost:0});
+    const scheduled = state.tasks.filter(t => t.roleId && t.iterationId).reduce((sum,t) => sum + taskHours(t),0);
+    const backlog = state.tasks.filter(t => !t.roleId || !t.iterationId).reduce((sum,t) => sum + taskHours(t),0);
+    return {...role,scheduled,backlog};
+  }
+
+  function taskCard(task, compact = false) {
+    const assigned = task.roleId && task.iterationId;
+    return `<article class="task-card" draggable="true" data-task-id="${esc(task.id)}" tabindex="0" aria-label="${esc(task.title)}, ${num.format(task.units)} ${esc(state.plan.unitName)}">
+      <div class="task-title">${esc(task.title)}</div>
+      <div class="task-meta">
+        <span>${num.format(task.units)} ${esc(state.plan.unitName)}</span>
+        <span>·</span><span>${num.format(taskHours(task))} h</span>
+      </div>
+      ${compact ? "" : `<div class="task-actions"><button type="button" data-action="assign-task" data-task-id="${esc(task.id)}">${assigned ? "Move" : "Assign"}</button>${assigned ? `<button type="button" data-action="unassign-task" data-task-id="${esc(task.id)}">Backlog</button>` : ""}<button type="button" data-action="delete-task" data-task-id="${esc(task.id)}">Delete</button></div>`}
+    </article>`;
+  }
+
+  function renderKpis() {
+    const totals = planTotals();
+    const budget = Number(state.plan.budget);
+    const remaining = budget - totals.cost;
+    const use = budget > 0 ? totals.cost / budget : 0;
+    const util = totals.hours > 0 ? totals.scheduled / totals.hours : 0;
+    $("#kpis").innerHTML = `
+      <div class="kpi"><div class="label">Budget</div><div class="value">${euro.format(budget)}</div><div class="sub">Commercial ceiling</div><div class="budget-track"><span class="${use>1?"over":""}" style="width:${Math.min(100,use*100)}%"></span></div></div>
+      <div class="kpi"><div class="label">Planned role cost</div><div class="value">${euro.format(totals.cost)}</div><div class="sub">${num.format(use*100)}% of budget</div></div>
+      <div class="kpi"><div class="label">Remaining</div><div class="value" style="color:${remaining<0?"var(--red)":"var(--green)"}">${euro.format(remaining)}</div><div class="sub">${remaining<0?"Plan exceeds budget":"Unplanned budget"}</div></div>
+      <div class="kpi"><div class="label">Capacity</div><div class="value">${num.format(totals.pt)} PT</div><div class="sub">${num.format(totals.hours)} assigned hours</div></div>
+      <div class="kpi"><div class="label">Scheduled load</div><div class="value">${num.format(totals.scheduled)} h</div><div class="sub">${num.format(util*100)}% of role capacity</div></div>
+      <div class="kpi"><div class="label">Backlog load</div><div class="value">${num.format(totals.backlog)} h</div><div class="sub">${state.tasks.filter(t=>!t.roleId||!t.iterationId).length} unassigned tasks</div></div>`;
+  }
+
+  function renderBacklog() {
+    const items = state.tasks.filter(task => !task.roleId || !task.iterationId);
+    $("#backlog-count").textContent = String(items.length);
+    $("#backlog").innerHTML = items.length ? items.map(task => taskCard(task)).join("") : `<div class="empty">All tasks are assigned.<br><small>Drag an assigned task back here to unassign it.</small></div>`;
+  }
+
+  function renderTimeline() {
+    const its = iterations();
+    const timeline = $("#timeline");
+    timeline.style.setProperty("--iteration-count", String(Math.max(1,its.length)));
+    const totalsByRole = state.roles.map(role => roleTotals(role));
+    const maxHours = Math.max(1,...totalsByRole.map(t => t.hours));
+
+    const head = `<div class="timeline-row timeline-head" style="--iteration-count:${Math.max(1,its.length)}">
+      <div class="corner"><div><strong>Roles / swimlanes</strong><div class="capacity-detail">FTE → PT → hours</div></div></div>
+      ${its.map(it => `<div class="iter-head"><strong>${esc(it.name)}</strong><span>${dateText(it.start)} – ${dateText(it.end)}</span><span>${num.format(it.weeks)} weeks</span></div>`).join("")}
+    </div>`;
+
+    const rows = state.roles.map((role,index) => {
+      const totals = totalsByRole[index];
+      const laneHeight = Math.round(112 + 105 * (totals.hours / maxHours));
+      const avgFte = its.length ? totals.fte / its.length : 0;
+      return `<div class="timeline-row role-row" style="--iteration-count:${Math.max(1,its.length)};--lane-height:${laneHeight}px">
+        <div class="role-summary">
+          <div class="role-name-line"><strong title="${esc(role.name)}">${esc(role.name)}</strong><button type="button" data-action="allocate-role" data-role-id="${esc(role.id)}">Plan FTE</button></div>
+          <div class="capacity-detail">Avg ${num.format(avgFte)} FTE/week · ${euro.format(role.dayRate)}/PT</div>
+          <div class="role-totals"><span><strong>${num.format(totals.pt)}</strong> PT</span><span><strong>${num.format(totals.hours)}</strong> h</span><span>${euro.format(totals.cost)}</span><span>${num.format(totals.hours/maxHours*100)}% scale</span></div>
+          <div class="lane-scale" title="Relative total capacity"><span style="width:${Math.max(5,totals.hours/maxHours*100)}%"></span></div>
+        </div>
+        ${its.map(it => {
+          const c = capacityFor(role,it);
+          const cellTasks = tasksFor(role.id,it.id);
+          const load = cellTasks.reduce((sum,t) => sum + taskHours(t),0);
+          const util = c.hours > 0 ? load / c.hours : (load > 0 ? Infinity : 0);
+          const over = load > c.hours + .001;
+          return `<div class="capacity-cell ${over?"overloaded":""}" data-role-id="${esc(role.id)}" data-iteration-id="${esc(it.id)}">
+            <div class="cell-head">
+              <div><div class="capacity-amount">${num.format(c.fte)} FTE · ${num.format(c.pt)} PT</div><div class="capacity-detail">${num.format(c.hours)} h capacity</div></div>
+              <span class="util ${over?"over":""}">${Number.isFinite(util)?num.format(util*100):"∞"}%</span>
+            </div>
+            <div class="cell-meter" aria-hidden="true"><span class="${over?"over":""}" style="width:${Math.min(100,Number.isFinite(util)?util*100:100)}%"></span></div>
+            <div class="cell-tasks">${cellTasks.length ? cellTasks.map(t => taskCard(t,true)).join("") : `<div class="cell-empty">${c.fte>0?"Drop tasks here":"0 FTE — still droppable"}</div>`}</div>
+          </div>`;
+        }).join("")}
+      </div>`;
+    }).join("");
+
+    timeline.innerHTML = head + (state.roles.length ? rows : `<div class="empty" style="margin:20px">Add a role to start capacity planning.</div>`);
+  }
+
+  function render() {
+    reconcile(false);
+    const its = iterations();
+    $("#app-plan-title").textContent = state.plan.name;
+    $("#plan-heading").textContent = state.plan.name;
+    $("#date-pill").textContent = `${dateText(state.plan.start)} → ${dateText(state.plan.due)}`;
+    $("#iteration-pill").textContent = `${its.length} iterations · ${num.format(state.plan.iterationWeeks)} week cadence`;
+    $("#unit-pill").textContent = `1 ${state.plan.unitName} = ${num.format(state.plan.hoursPerUnit)} h`;
+    renderKpis(); renderBacklog(); renderTimeline(); wireDrag();
+  }
+
+  function reconcile(withNotice = true) {
+    const validIterations = new Set(iterations().map(it => it.id));
+    let moved = 0;
+    for (const role of state.roles) {
+      role.fteByIteration = Object.fromEntries(Object.entries(role.fteByIteration || {}).filter(([id]) => validIterations.has(id)));
+    }
+    for (const task of state.tasks) {
+      if (task.iterationId && !validIterations.has(task.iterationId)) {
+        task.roleId = null; task.iterationId = null; moved += 1;
+      }
+      if (task.roleId && !state.roles.some(r => r.id === task.roleId)) {
+        task.roleId = null; task.iterationId = null; moved += 1;
+      }
+    }
+    if (moved && withNotice) announce(`${moved} task${moved===1?"":"s"} moved back to backlog after plan changes.`);
+  }
+
+  function wireDrag() {
+    document.querySelectorAll             (".task-card").forEach(card => {
+      card.addEventListener("dragstart", event => {
+        draggedTaskId = card.dataset.taskId;
+        card.classList.add("dragging");
+        event.dataTransfer?.setData("text/plain", draggedTaskId || "");
+        if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+      });
+      card.addEventListener("dragend", () => {
+        draggedTaskId = null;
+        card.classList.remove("dragging");
+        document.querySelectorAll(".drop-active").forEach(el => el.classList.remove("drop-active"));
+      });
+    });
+    document.querySelectorAll             (".capacity-cell").forEach(cell => {
+      cell.addEventListener("dragover", event => {
+        event.preventDefault();
+        cell.classList.add("drop-active");
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+      });
+      cell.addEventListener("dragleave", () => cell.classList.remove("drop-active"));
+      cell.addEventListener("drop", event => {
+        event.preventDefault();
+        cell.classList.remove("drop-active");
+        const id = event.dataTransfer?.getData("text/plain") || draggedTaskId;
+        assignTask(id, cell.dataset.roleId, cell.dataset.iterationId);
+      });
+    });
+    $("#backlog").addEventListener("dragover", event => {
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    });
+    $("#backlog").addEventListener("drop", event => {
+      event.preventDefault();
+      const id = event.dataTransfer?.getData("text/plain") || draggedTaskId;
+      unassignTask(id);
+    });
+  }
+
+  function assignTask(taskId, roleId, iterationId) {
+    const task = state.tasks.find(t => t.id === taskId);
+    if (!task || !state.roles.some(r=>r.id===roleId) || !iterations().some(i=>i.id===iterationId)) return;
+    task.roleId = roleId; task.iterationId = iterationId;
+    save(); render(); announce(`${task.title} assigned.`);
+  }
+
+  function unassignTask(taskId) {
+    const task = state.tasks.find(t=>t.id===taskId);
+    if (!task) return;
+    task.roleId = null; task.iterationId = null;
+    save(); render(); announce(`${task.title} moved to backlog.`);
+  }
+
+  function openDialog(title, body, onSubmit, submitText = "Save") {
+    dialog.innerHTML = `<form method="dialog" id="dialog-form">
+      <div class="dialog-head"><h2 id="dialog-title">${esc(title)}</h2><button type="button" data-dialog-close aria-label="Close dialog">×</button></div>
+      <div class="dialog-body">${body}</div>
+      <div class="dialog-foot"><button type="button" data-dialog-close>Cancel</button><button class="primary" value="default" type="submit">${esc(submitText)}</button></div>
+    </form>`;
+    dialog.querySelectorAll("[data-dialog-close]").forEach(btn => btn.addEventListener("click",()=>dialog.close()));
+    $("#dialog-form",dialog).addEventListener("submit", event => {
+      event.preventDefault();
+      const form = event.currentTarget                   ;
+      const ok = onSubmit(new FormData(form), form);
+      if (ok !== false) dialog.close();
+    });
+    dialog.showModal();
+    window.setTimeout(() => dialog.querySelector("input,select,button")?.focus(),0);
+  }
+
+  function planDialog(isNew) {
+    const p = state.plan;
+    openDialog(isNew ? "New resource plan" : "Plan settings", `
+      <div class="form-grid">
+        <label class="wide">Plan name<input name="name" required maxlength="80" value="${isNew?"New delivery plan":esc(p.name)}"></label>
+        <label>Budget (€)<input name="budget" type="number" min="0" step="1000" required value="${isNew?"200000":esc(p.budget)}"></label>
+        <label>Iteration length (weeks)<input name="iterationWeeks" type="number" min=".25" max="12" step=".25" required value="${isNew?"2":esc(p.iterationWeeks)}"></label>
+        <label>Start<input name="start" type="date" required value="${isNew?"2026-10-05":esc(p.start)}"></label>
+        <label>Due<input name="due" type="date" required value="${isNew?"2027-01-22":esc(p.due)}"></label>
+        <label>Working days / FTE week<input name="daysPerWeek" type="number" min="1" max="7" step=".5" required value="${isNew?"5":esc(p.daysPerWeek)}"></label>
+        <label>Hours / project day<input name="hoursPerDay" type="number" min=".25" max="24" step=".25" required value="${isNew?"8":esc(p.hoursPerDay)}"></label>
+        <label>Task estimate unit name<input name="unitName" maxlength="12" required value="${isNew?"SP":esc(p.unitName)}"></label>
+        <label>Hours / estimate unit<input name="hoursPerUnit" type="number" min="0" step=".25" required value="${isNew?"6":esc(p.hoursPerUnit)}"></label>
+      </div>
+      ${isNew ? `<div class="callout">Creating a new plan replaces the current in-browser workspace. Export first if you need the current state.</div>` : ""}
+      <div class="formula">Prototype calculation: PT = FTE/week × iteration weeks × working days/week. Hours = PT × hours/day. Cost = PT × role day rate. Calendar holidays are not modeled.</div>
+    `, data => {
+      const candidate = {
+        ...p,
+        id:isNew?uid("plan"):p.id,
+        name:String(data.get("name")||"").trim(),
+        budget:Number(data.get("budget")),
+        iterationWeeks:Number(data.get("iterationWeeks")),
+        start:String(data.get("start")),
+        due:String(data.get("due")),
+        daysPerWeek:Number(data.get("daysPerWeek")),
+        hoursPerDay:Number(data.get("hoursPerDay")),
+        unitName:String(data.get("unitName")||"").trim(),
+        hoursPerUnit:Number(data.get("hoursPerUnit"))
+      };
+      if (!candidate.name || !candidate.unitName || !parseDate(candidate.start) || !parseDate(candidate.due) || parseDate(candidate.due) < parseDate(candidate.start)) {
+        announce("Enter a valid plan name, unit and date range."); return false;
+      }
+      if (isNew) state = {schema:"capacity-planner.workspace",version:VERSION,plan:candidate,roles:[],tasks:[]};
+      else state.plan = candidate;
+      reconcile(true); save(); render(); announce(isNew ? "New resource plan created." : "Plan settings updated.");
+      return true;
+    }, isNew ? "Create plan" : "Apply");
+  }
+
+  function roleDialog() {
+    openDialog("Add role", `
+      <div class="form-grid">
+        <label class="wide">Role name<input name="name" required maxlength="60" placeholder="e.g. Software Engineer"></label>
+        <label>Day rate (€ / PT)<input name="dayRate" type="number" min="0" step="10" required value="850"></label>
+        <label>Initial FTE / week<input name="fte" type="number" min="0" max="20" step=".1" required value="1"></label>
+      </div>
+      <div class="formula">Initial FTE applies to all current iterations. Use “Plan FTE” on the role lane to change a range later.</div>
+    `, data => {
+      const name = String(data.get("name")||"").trim();
+      const dayRate = Number(data.get("dayRate")), fte = Number(data.get("fte"));
+      if (!name || !Number.isFinite(dayRate) || dayRate < 0 || !Number.isFinite(fte) || fte < 0 || fte > 20) { announce("Enter a valid role, day rate and FTE."); return false; }
+      state.roles.push({id:uid("role"),name,dayRate,fteByIteration:Object.fromEntries(iterations().map(it=>[it.id,fte]))});
+      save(); render(); announce(`${name} added.`);
+      return true;
+    }, "Add role");
+  }
+
+  function allocateDialog(roleId) {
+    const role = state.roles.find(r=>r.id===roleId);
+    const its = iterations();
+    if (!role || !its.length) return;
+    const options = its.map(it=>`<option value="${esc(it.id)}">${esc(it.name)} · ${dateText(it.start)}</option>`).join("");
+    openDialog(`Plan FTE · ${role.name}`, `
+      <div class="form-grid">
+        <label>From iteration<select name="from">${options}</select></label>
+        <label>Through iteration<select name="through">${options}</select></label>
+        <label>FTE / week<input name="fte" type="number" min="0" max="20" step=".1" required value="${esc(role.fteByIteration[its[0].id] ?? 1)}"></label>
+        <label>Day rate (€ / PT)<input name="dayRate" type="number" min="0" step="10" required value="${esc(role.dayRate)}"></label>
+      </div>
+      <div class="formula">The same FTE value is applied to every selected iteration. Set 0 FTE to clear capacity while retaining the role.</div>
+    `, data => {
+      const from = its.findIndex(it=>it.id===data.get("from"));
+      const through = its.findIndex(it=>it.id===data.get("through"));
+      const fte = Number(data.get("fte")), dayRate = Number(data.get("dayRate"));
+      if (from < 0 || through < from || !Number.isFinite(fte) || fte < 0 || fte > 20 || !Number.isFinite(dayRate) || dayRate < 0) { announce("Choose a valid iteration range and FTE."); return false; }
+      for (let i=from;i<=through;i++) role.fteByIteration[its[i].id] = fte;
+      role.dayRate = dayRate;
+      save(); render(); announce(`${role.name}: ${num.format(fte)} FTE applied to iterations ${from+1}–${through+1}.`);
+      return true;
+    }, "Apply range");
+    const from = dialog.querySelector                   ('[name="from"]');
+    const through = dialog.querySelector                   ('[name="through"]');
+    if (through) through.selectedIndex = its.length - 1;
+  }
+
+  function taskDialog() {
+    openDialog("Add task", `
+      <div class="form-grid">
+        <label class="wide">Task title<input name="title" required maxlength="100" placeholder="Outcome or deliverable"></label>
+        <label>Estimate (${esc(state.plan.unitName)})<input name="units" type="number" min="0" step=".25" required value="5"></label>
+      </div>
+      <div class="formula">At the current conversion, 5 ${esc(state.plan.unitName)} = ${num.format(5*state.plan.hoursPerUnit)} h. The unit name and conversion are configurable in Plan settings.</div>
+    `, data => {
+      const title = String(data.get("title")||"").trim(), units = Number(data.get("units"));
+      if (!title || !Number.isFinite(units) || units < 0) { announce("Enter a valid title and estimate."); return false; }
+      state.tasks.push({id:uid("task"),title,units,roleId:null,iterationId:null});
+      save(); render(); announce(`${title} added to backlog.`);
+      return true;
+    }, "Add task");
+  }
+
+  function assignmentDialog(taskId) {
+    const task = state.tasks.find(t=>t.id===taskId);
+    const its = iterations();
+    if (!task || !state.roles.length || !its.length) { announce("Add at least one role and iteration first."); return; }
+    const roleOptions = state.roles.map(role=>`<option value="${esc(role.id)}" ${task.roleId===role.id?"selected":""}>${esc(role.name)}</option>`).join("");
+    const iterOptions = its.map(it=>`<option value="${esc(it.id)}" ${task.iterationId===it.id?"selected":""}>${esc(it.name)} · ${dateText(it.start)}</option>`).join("");
+    openDialog(`Assign task · ${task.title}`, `
+      <div class="form-grid">
+        <label>Role<select name="roleId">${roleOptions}</select></label>
+        <label>Iteration<select name="iterationId">${iterOptions}</select></label>
+      </div>
+      <div class="formula">${num.format(task.units)} ${esc(state.plan.unitName)} = ${num.format(taskHours(task))} h. Capacity warnings update after assignment.</div>
+    `, data => {
+      assignTask(task.id,String(data.get("roleId")),String(data.get("iterationId")));
+      return true;
+    }, "Assign");
+  }
+
+  function deleteTask(taskId) {
+    const task = state.tasks.find(t=>t.id===taskId);
+    if (!task) return;
+    if (!window.confirm(`Delete task "${task.title}" from this prototype workspace?`)) return;
+    state.tasks = state.tasks.filter(t=>t.id!==taskId);
+    save(); render(); announce("Task deleted.");
+  }
+
+  function exportWorkspace() {
+    const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${state.plan.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "capacity-plan"}.json`;
+    document.body.appendChild(anchor); anchor.click(); anchor.remove();
+    URL.revokeObjectURL(url);
+    announce("Workspace exported.");
+  }
+
+  async function importWorkspace(file) {
+    try {
+      const text = await file.text();
+      const candidate = JSON.parse(text);
+      const error = validate(candidate);
+      if (error) { announce(error); return; }
+      if (!window.confirm(`Replace the current workspace with "${candidate.plan.name}"?`)) return;
+      state = clone(candidate);
+      reconcile(true); save(); render(); announce("Workspace imported.");
+    } catch {
+      announce("Import failed. Choose a valid JSON workspace.");
+    } finally {
+      importInput.value = "";
+    }
+  }
+
+  document.addEventListener("click", event => {
+    const target = (event.target                  )?.closest                   ("button");
+    if (!target) return;
+    const action = target.dataset.action;
+    if (action === "allocate-role") allocateDialog(target.dataset.roleId);
+    if (action === "assign-task") assignmentDialog(target.dataset.taskId);
+    if (action === "unassign-task") unassignTask(target.dataset.taskId);
+    if (action === "delete-task") deleteTask(target.dataset.taskId);
+  });
+
+  $("#new-plan-btn").addEventListener("click",()=>planDialog(true));
+  $("#edit-plan-btn").addEventListener("click",()=>planDialog(false));
+  $("#add-role-btn").addEventListener("click",roleDialog);
+  $("#add-task-btn").addEventListener("click",taskDialog);
+  $("#sidebar-add-task").addEventListener("click",taskDialog);
+  $("#export-btn").addEventListener("click",exportWorkspace);
+  $("#import-btn").addEventListener("click",()=>importInput.click());
+  importInput.addEventListener("change",()=>{ if(importInput.files?.[0]) importWorkspace(importInput.files[0]); });
+  dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && dialog.open) dialog.close();
+  });
+
+  render();
+  save();
+})();</script>
+</body>
+</html>
