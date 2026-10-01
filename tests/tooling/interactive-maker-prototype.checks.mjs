@@ -30,7 +30,9 @@ test('prototype maker creates real compiler boilerplate, docs and a fully expand
     assert.ok(receipt.files.some(file => file.path === 'bin/app.ts' && file.ownership === 'framework'));
     const gate = await checkSteps(join(root, 'prepared/source'), false);
     assert.equal(gate.scope, 'generated-project');
-    assert.ok(gate.steps.some(step => step.id === 'maker-tests'));
+    // Generated source type-checks its shipped maker CLI; the shell's own maker qualification needs shell-only fixtures.
+    assert.ok(gate.steps.some(step => step.id === 'maker-types'));
+    assert.ok(!gate.steps.some(step => step.id === 'maker-tests'));
     assert.equal(document.design.visualDesigns.components.length, 1);
     assert.equal((await readData(join(root, 'prepared/prototype.manifest.json'))).artifact.sha256, null);
     assert.equal((await readData(join(root, 'prepared/prototype.manifest.json'))).status, 'incomplete');

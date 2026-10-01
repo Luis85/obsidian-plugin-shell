@@ -67,12 +67,13 @@ async function changedFiles(root: string, git: Git = runGit): Promise<Changes> {
   if (!listed.length) return { source: 'git', files: [...files].sort() };
   return { source: 'git', files: [...files].sort(), untraceable: listed, reason: untraceableReason(listed) };
 }
-async function makerSteps(root: string): Promise<CheckStep[]> {
+/** The shipped maker CLI is type-checked everywhere. Its qualification suite needs shell-only fixtures (the starter
+ * pack and the companion reference project) that generated projects deliberately omit, so it runs only in the shell. */
+async function makerSteps(root: string, project: boolean): Promise<CheckStep[]> {
   if (!await exists(join(root, 'bin/app.ts')) || !await exists(join(root, 'configs/types/tsconfig.maker.json'))) return [];
-  return [
-    { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] },
-    { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] },
-  ];
+  const types: CheckStep = { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] };
+  if (project) return [types];
+  return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] }];
 }
 function typecheckStep(root: string, project: boolean): CheckStep {
   if (!project) return { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
@@ -99,7 +100,7 @@ function fastTestStep(changes: Changes, fullTest: CheckStep, config: string[]): 
 }
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit): Promise<{ scope: string; steps: CheckStep[]; changes?: Changes }> {
   const scope = await checkScope(root), project = scope === 'generated-project';
-  const makers = await makerSteps(root);
+  const makers = await makerSteps(root, project);
   const config = vitestConfig(root, project);
   const typecheck = typecheckStep(root, project);
   const fullTest: CheckStep = { id: 'test', display: `vitest run ${config.join(' ')}`, entry: vitest, args: ['run', ...config] };

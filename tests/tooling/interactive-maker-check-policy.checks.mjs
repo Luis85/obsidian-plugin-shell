@@ -44,6 +44,13 @@ test('a generated project typechecks its own config and lints its configured roo
   assert.match(full.steps[0].display, /--project configs\/types\/tsconfig\.project\.json/);
   assert.ok(!full.steps.some(step => step.id === 'lint'));
   assert.ok(testStep(full).args.includes('--config'));
+  await mkdir(join(root, 'bin'), { recursive: true }); await writeFile(join(root, 'bin/app.ts'), 'export {};');
+  await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
+  for (const plan of [await checkSteps(root, false), await checkSteps(root, true, async () => null)]) {
+    assert.ok(plan.steps.some(step => step.id === 'maker-types'));
+    assert.ok(!plan.steps.some(step => step.id === 'maker-tests'), 'the shell maker qualification needs shell-only fixtures');
+  }
+  assert.ok((await checkSteps(root, false)).steps.find(step => step.id === 'eslint').args.includes('bin'));
 }));
 
 test('check outcomes report cancellation, missing tools and failures with their next step', () => withRoot(async root => {
