@@ -108,6 +108,21 @@ async function managedMcpEnabled(context: Context): Promise<boolean> {
   const probe = await createFilePlan(context.root, setupMcpFiles().map(file => ({ path: file.path, content: null })));
   return probe.changes.every(change => change.beforeHash !== null && owned[change.path] === change.beforeHash);
 }
+/** Setup writes the local Workbench MCP files on --mcp (with a bin/app launcher) and removes them on --no-mcp. */
+async function mcpEntries(request: Request, context: Context): Promise<Array<{ path: string; content: string | null }>> {
+  if (request.command !== 'setup') return [];
+  if (request.options.mcp === true) {
+    requireThat(await exists(join(context.root, 'bin/app')), 'MCP_SERVER_MISSING', 'This project has no bin/app launcher for the local Workbench MCP.');
+    return setupMcpFiles();
+  }
+  return request.options['no-mcp'] === true ? setupMcpFiles().map(file => ({ path: file.path, content: null })) : [];
+}
+/** Without either flag setup preserves an already managed configuration. */
+function agentMcpSummary(options: Options, priorMcp: boolean) {
+  const action = options.mcp === true ? 'enable' : options['no-mcp'] === true ? 'disable' : 'preserve';
+  const enabled = action === 'enable' || (action === 'preserve' && priorMcp);
+  return { enabled, action, clients: enabled ? ['claude-code', 'codex'] : [] };
+}
 function checkStartOptions(options: Options, input: string | undefined): void {
   requireThat(!(options.airship || options['no-airship']) || input || options.blank, 'AIRSHIP_DESIGN_REQUIRED', 'Use --input/--starter/--blank, or airship enable/disable on an existing design.');
   requireThat(!(input && options.blank), 'SETUP_START_CONFLICT', 'Choose --input or --blank, not both.');
@@ -128,22 +143,14 @@ export async function configurationPlan(request: Request, context: Context) {
   if (request.command === 'project import') requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
   await protectIdentity(context, selected);
   const priorMcp = request.command === 'setup' ? await managedMcpEnabled(context) : false;
-  if (request.command === 'setup' && options.mcp === true) {
-    requireThat(await exists(join(context.root, 'bin/app')), 'MCP_SERVER_MISSING', 'This project has no bin/app launcher for the local Workbench MCP.');
-    entries.push(...setupMcpFiles());
-  } else if (request.command === 'setup' && options['no-mcp'] === true) {
-    entries.push(...setupMcpFiles().map(file => ({ path: file.path, content: null })));
-  }
+  entries.push(...await mcpEntries(request, context));
   entries.push({ path: configFile, content: json(selected) });
   entries.push(...await ownershipEntries(context, selected, entries.filter(entry => entry.path !== configFile)));
   // A created handout becomes human-owned; keep it outside the intake ownership receipt.
   if (request.command === 'setup') entries.push(...(await prepareHandout(context.root, { virtualFiles: { [configFile]: json(selected) } })).entries);
   const plan = await createFilePlan(context.root, entries);
-  const mcpEnabled = options.mcp === true || (options['no-mcp'] !== true && priorMcp);
   return { plan, summary: { configuration: selected, imported: Boolean(input) && intake.origin === null, starter: intake.origin, blank: options.blank === true,
-    agentMcp: { enabled: mcpEnabled, action: options.mcp === true ? 'enable' : options['no-mcp'] === true ? 'disable' : 'preserve',
-      clients: mcpEnabled ? ['claude-code', 'codex'] : [] },
-    next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
+    agentMcp: agentMcpSummary(options, priorMcp), next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
 }
 export async function vaultPlan(context: Context) {
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup first.');
