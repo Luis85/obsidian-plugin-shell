@@ -11,15 +11,12 @@ function own(object: unknown, key: string): unknown {
   return property && 'value' in property ? property.value : undefined;
 }
 
-/** Allowlist projection, not a regex scrubber. Authored fields, messages, paths and raw causes never enter the report. */
-export function supportSnapshot(observation: Result) {
-  const data = own(observation, 'data');
-  const boolean = (key: string) => { const value = own(data, key);
-    requireThat(typeof value === 'boolean', 'SUPPORT_SHAPE', 'Unsupported observation shape.'); return value; };
-  const count = own(data, 'acceptanceObligations'), stale = own(data, 'designStale');
+function obligationCount(count: unknown): number | null {
   requireThat(count === null || (typeof count === 'number' && Number.isSafeInteger(count) && count >= 0 && count <= 100000), 'SUPPORT_SHAPE', 'Unsupported obligation count.');
-  requireThat(stale === null || typeof stale === 'boolean', 'SUPPORT_SHAPE', 'Unsupported freshness observation.');
-  const diagnostics = own(observation, 'diagnostics');
+  return count as number | null;
+}
+/** Only allowlisted codes survive; every other diagnostic collapses to OTHER. */
+function diagnosticCodes(diagnostics: unknown): Set<string> {
   requireThat(Array.isArray(diagnostics) && diagnostics.length <= 100, 'SUPPORT_SHAPE', 'Unsupported diagnostic collection.');
   const codes = new Set<string>();
   for (let index = 0; index < diagnostics.length; index++) {
@@ -27,6 +24,16 @@ export function supportSnapshot(observation: Result) {
     requireThat(entry && 'value' in entry, 'SUPPORT_SHAPE', 'Unsupported diagnostic entry.');
     const code = own(entry.value, 'code'); codes.add(typeof code === 'string' && safeCodes.has(code) ? code : 'OTHER');
   }
+  return codes;
+}
+/** Allowlist projection, not a regex scrubber. Authored fields, messages, paths and raw causes never enter the report. */
+export function supportSnapshot(observation: Result) {
+  const data = own(observation, 'data');
+  const boolean = (key: string) => { const value = own(data, key);
+    requireThat(typeof value === 'boolean', 'SUPPORT_SHAPE', 'Unsupported observation shape.'); return value; };
+  const count = obligationCount(own(data, 'acceptanceObligations')), stale = own(data, 'designStale');
+  requireThat(stale === null || typeof stale === 'boolean', 'SUPPORT_SHAPE', 'Unsupported freshness observation.');
+  const codes = diagnosticCodes(own(observation, 'diagnostics'));
   return { kind: 'shell-support-report', schemaVersion: 1,
     observations: { generated: boolean('generated'), imported: boolean('imported'), dependenciesPresent: boolean('dependencies'),
       designStale: stale, acceptanceObligations: count }, diagnosticCodes: [...codes].sort(),
@@ -36,19 +43,24 @@ export function supportSnapshot(observation: Result) {
     written: [], next: 'Review locally before sharing. Resolve uncertain writes before any retry.' };
 }
 
+const semver = /^\d{1,6}\.\d{1,6}\.\d{1,6}$/;
+/** Framework version and the selected Node baseline; both must be plain x.y.z values. */
+async function frameworkFacts(context: Context) {
+  const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
+  const version = own(await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')), 'version');
+  requireThat(typeof version === 'string' && semver.test(version), 'SUPPORT_SHAPE', 'Unsupported version.');
+  const selected = await exists(join(context.frameworkRoot, '.nvmrc')) ? (await readBounded(join(context.frameworkRoot, '.nvmrc'), 100)).toString('utf8').trim() : null;
+  requireThat(selected === null || semver.test(selected), 'SUPPORT_SHAPE', 'Unsupported toolchain.');
+  return { version, distribution: kit ? 'compiled-kit' : 'source', selectedNode: selected };
+}
 export async function supportReport(context: Context) {
   try {
     requireThat(!context.signal?.aborted,'CANCELLED','Report cancelled.');
     const report=supportSnapshot(await status(context,'doctor'));
     requireThat(!context.signal?.aborted,'CANCELLED','Report cancelled.');
-    const kit=await exists(join(context.frameworkRoot,'.framework/kit.json'));
-    const metadata=await readJson(join(context.frameworkRoot,kit?'.framework/kit.json':'package.json'));
-    const version=own(metadata,'version');
-    requireThat(typeof version==='string' && /^\d{1,6}\.\d{1,6}\.\d{1,6}$/.test(version),'SUPPORT_SHAPE','Unsupported version.');
-    const selected=await exists(join(context.frameworkRoot,'.nvmrc'))?(await readBounded(join(context.frameworkRoot,'.nvmrc'),100)).toString('utf8').trim():null;
-    requireThat(selected===null || /^\d{1,6}\.\d{1,6}\.\d{1,6}$/.test(selected),'SUPPORT_SHAPE','Unsupported toolchain.');
+    const framework=await frameworkFacts(context);
     requireThat(!context.signal?.aborted,'CANCELLED','Report cancelled.');
-    return result('support report',{...report,framework:{version,distribution:kit?'compiled-kit':'source',selectedNode:selected}});
+    return result('support report',{...report,framework});
   }
   catch { return unavailableSupport(context.signal?.aborted === true); }
 }
