@@ -51,7 +51,7 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   ownershipRecord.bytes = ownership.bytes.length;
   add('bin/app.js', await bundleReleaseCli(context.frameworkRoot));
   const pkg = object(await readJson(join(context.frameworkRoot, 'package.json')));
-  const rootScripts = { ...object(pkg.scripts), setup: 'node bin/app setup', app: 'node bin/app', make: 'node bin/app make', new: 'node bin/app new' };
+  const rootScripts: Record<string, unknown> = { ...object(pkg.scripts), setup: 'node bin/app setup', app: 'node bin/app', make: 'node bin/app make', new: 'node bin/app new' };
   delete rootScripts.shell;
   const rootPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: rootScripts };
   const bootstrap: Kit['bootstrap'] = [];

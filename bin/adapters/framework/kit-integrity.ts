@@ -31,11 +31,12 @@ export function kitManifest(value: unknown): Kit {
   const names = new Set<string>();
   const files = input.files.map(value => {
     const file = object(value); exactKeys(file, ['path', 'hash', 'bytes']);
-    const owned = typeof file.path === 'string' && (file.path === 'bin/app.js' || /^bin\/(?:template|plugins|licenses)\//.test(file.path));
-    requireThat(owned && portableFile(file.path), 'KIT_PATH', 'Unsafe kit path.');
-    requireThat(!names.has(file.path.toLowerCase()), 'KIT_DUPLICATE', 'Duplicate kit file.'); names.add(file.path.toLowerCase());
+    const path = file.path;
+    const owned = typeof path === 'string' && (path === 'bin/app.js' || /^bin\/(?:template|plugins|licenses)\//.test(path));
+    requireThat(owned && portableFile(path), 'KIT_PATH', 'Unsafe kit path.');
+    requireThat(!names.has(path.toLowerCase()), 'KIT_DUPLICATE', 'Duplicate kit file.'); names.add(path.toLowerCase());
     requireThat(typeof file.hash === 'string' && /^[a-f0-9]{64}$/.test(file.hash) && typeof file.bytes === 'number' && Number.isSafeInteger(file.bytes) && file.bytes >= 0 && file.bytes <= 8_000_000, 'KIT_HASH', 'Invalid file fingerprint.');
-    return { path: file.path, hash: file.hash, bytes: file.bytes };
+    return { path, hash: file.hash, bytes: file.bytes };
   });
   const bootstrap = input.bootstrap.map(value => {
     const file = object(value); exactKeys(file, ['path', 'hash']);
