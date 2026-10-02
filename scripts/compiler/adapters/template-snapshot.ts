@@ -1,7 +1,7 @@
 import { mapBounded } from '../../shared/bounded-map.mjs';
 import { lstat, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { readBounded, hash } from '../../framework/files.ts';
+import { readBounded, hash } from '../../../bin/adapters/framework/files.ts';
 import { maintainerOnly, relocatedPath } from '../../companion/compiler/framework-docs.ts';
 import { statIfPresent } from '../../shared/fs-presence.ts';
 import { prototypeSkillFiles } from '../../companion/prototype-skill.mjs';

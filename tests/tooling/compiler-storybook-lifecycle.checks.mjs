@@ -4,7 +4,7 @@ import { mkdtemp, readFile, writeFile, mkdir, rm, realpath, symlink, readdir } f
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { storybookOperation } from '../../scripts/framework/storybook.ts';
+import { storybookOperation } from '../../bin/adapters/framework/storybook.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planProject, applyProject } from '../../scripts/compiler/adapters/project-plan.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));

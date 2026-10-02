@@ -1,4 +1,4 @@
-import { guidedStarter } from '../../scripts/framework/starter-terminal.ts';
+import { guidedStarter } from '../../bin/presentation/terminal/starter-terminal.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, realpath, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';

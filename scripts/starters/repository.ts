@@ -1,7 +1,7 @@
 import { dirname, join, resolve } from 'node:path';
 import { lstat, readdir } from 'node:fs/promises';
 import { parseDesignData } from '../contracts/json-data.ts';
-import { exists, hash, readBounded, readJson } from '../framework/files.ts';
+import { exists, hash, readBounded, readJson } from '../../bin/adapters/framework/files.ts';
 import { requireThat } from '../framework/contracts.ts';
 import { portablePath, record, validateDefinition } from './validation.ts';
 import type { LoadedStarter, StarterDefinition } from './types.ts';

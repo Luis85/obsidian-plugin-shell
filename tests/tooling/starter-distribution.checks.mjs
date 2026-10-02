@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { stripTypeScriptTypes } from 'node:module';
-import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { included } from '../../scripts/framework/distribution.ts';
 import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
 import { zip } from '../../scripts/framework/zip.ts';
