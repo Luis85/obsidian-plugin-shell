@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "frameworkVersion": "0.4.0",
-  "source": "scripts/framework/catalog.ts + help-text.ts",
+  "source": "bin/adapters/framework/catalog.ts + help-text.ts",
   "groups": [
     {
       "id": "templates",
@@ -283,7 +283,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -362,7 +362,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -403,7 +403,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -444,7 +444,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -485,7 +485,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -526,7 +526,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -567,7 +567,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -635,7 +635,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -703,7 +703,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -746,7 +746,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -787,7 +787,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -828,7 +828,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -869,7 +869,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -910,7 +910,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -976,7 +976,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1038,7 +1038,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1096,7 +1096,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1171,7 +1171,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1234,7 +1234,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1298,7 +1298,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1335,7 +1335,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1376,7 +1376,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1417,7 +1417,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1480,7 +1480,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1522,7 +1522,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1573,7 +1573,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1624,7 +1624,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1670,7 +1670,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1711,7 +1711,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1777,7 +1777,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1848,7 +1848,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -1915,7 +1915,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2002,7 +2002,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2074,7 +2074,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2141,7 +2141,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2223,7 +2223,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2295,7 +2295,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2372,7 +2372,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2450,7 +2450,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2517,7 +2517,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2574,7 +2574,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2636,7 +2636,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2693,7 +2693,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2750,7 +2750,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2812,7 +2812,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2874,7 +2874,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2940,7 +2940,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -2971,12 +2971,12 @@
         {
           "name": "target",
           "kind": "value",
-          "description": "Target folder relative to --vault (compatibility mode)."
+          "description": "Output folder relative to the project root."
         },
         {
           "name": "output-kind",
           "kind": "value",
-          "description": "Compiler output; --target remains a folder.",
+          "description": "Compiler output kind.",
           "values": [
             "obsidian-plugin",
             "clickdummy"
@@ -3038,7 +3038,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3102,7 +3102,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3165,7 +3165,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3208,7 +3208,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3255,7 +3255,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3296,7 +3296,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3353,7 +3353,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3402,7 +3402,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3448,7 +3448,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3489,7 +3489,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3574,7 +3574,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3632,7 +3632,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3686,7 +3686,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3741,7 +3741,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3796,7 +3796,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3853,7 +3853,7 @@
         {
           "name": "output-kind",
           "kind": "value",
-          "description": "Compiler output; --target remains a folder.",
+          "description": "Compiler output kind.",
           "values": [
             "obsidian-plugin",
             "clickdummy"
@@ -3879,7 +3879,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -3939,7 +3939,7 @@
         {
           "name": "output-kind",
           "kind": "value",
-          "description": "Compiler output; --target remains a folder.",
+          "description": "Compiler output kind.",
           "values": [
             "obsidian-plugin",
             "clickdummy"
@@ -3975,7 +3975,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4016,7 +4016,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4057,7 +4057,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4103,7 +4103,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4187,7 +4187,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4230,7 +4230,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4271,7 +4271,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4323,7 +4323,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4362,7 +4362,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4404,7 +4404,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4445,7 +4445,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4486,7 +4486,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4527,7 +4527,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4568,7 +4568,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4634,7 +4634,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4671,7 +4671,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4755,7 +4755,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4917,7 +4917,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -4954,7 +4954,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5001,7 +5001,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5077,7 +5077,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5119,7 +5119,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5194,7 +5194,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5355,7 +5355,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5374,7 +5374,7 @@
     },
     {
       "id": "generate",
-      "summary": "Plan the existing project compiler; --vault/--target retain compatibility.",
+      "summary": "Plan generation for the configured project in place.",
       "effect": "plan",
       "maxArgs": 0,
       "group": "start",
@@ -5410,19 +5410,9 @@
           "description": "Input JSON file (use - for stdin where supported)."
         },
         {
-          "name": "vault",
-          "kind": "value",
-          "description": "Existing folder that contains the generation target (compatibility mode)."
-        },
-        {
-          "name": "target",
-          "kind": "value",
-          "description": "Target folder relative to --vault (compatibility mode)."
-        },
-        {
           "name": "output-kind",
           "kind": "value",
-          "description": "Compiler output; --target remains a folder.",
+          "description": "Compiler output kind.",
           "values": [
             "obsidian-plugin",
             "clickdummy"
@@ -5464,7 +5454,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5611,7 +5601,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5648,7 +5638,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5709,7 +5699,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5762,7 +5752,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5800,7 +5790,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5858,7 +5848,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5907,7 +5897,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -5957,7 +5947,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6007,7 +5997,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6063,7 +6053,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6113,7 +6103,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6178,7 +6168,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6234,7 +6224,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6285,7 +6275,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6345,7 +6335,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6409,7 +6399,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6468,7 +6458,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6525,7 +6515,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6572,7 +6562,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6622,7 +6612,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6672,7 +6662,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6722,7 +6712,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6762,7 +6752,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6824,7 +6814,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6887,7 +6877,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6954,7 +6944,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -6996,7 +6986,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -7058,7 +7048,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",
@@ -7117,7 +7107,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+          "default": "nearest folder with shell.config.json or bin/app"
         },
         {
           "name": "no-interaction",

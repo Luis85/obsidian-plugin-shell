@@ -74,15 +74,14 @@ test('export, import and restore-snapshot round-trip the workspace without overw
   assert.ok(restored.plan.changes.length > 0);
 }));
 
-test('adopting and generating bind the active variant and record its provenance', () => withWorkspace(async context => {
+test('adopting binds the active variant and in-place generation of it requires a verified kit', () => withWorkspace(async context => {
   assert.equal(await code(plan(context, 'adopt')), 'PROTOTYPE_ACTIVE_REQUIRED');
   await apply(context, 'status', ['alpha'], { ...main, status: 'approved' });
   await apply(context, 'activate', ['alpha'], main);
   const adopted = await plan(context, 'adopt');
   assert.ok(adopted.plan.changes.some(change => change.path === 'design/project.json'));
   assert.equal(await code(plan(context, 'generate')), 'PROTOTYPE_IMPORT_REQUIRED');
-  const generated = await plan(context, 'generate', [], { target: 'out' });
-  const receipt = generated.plan.changes.find(change => change.path === 'out/.companion/prototype-selection.json');
-  assert.ok(receipt); assert.equal(JSON.parse(receipt.content).prototypeId, 'alpha');
-  assert.deepEqual(generated.summary.prototypeSelection.variantId, 'main');
+  // generate has no --target any more; in-place generation of the adopted variant needs an extracted kit.
+  await applyFilePlan(adopted.plan);
+  assert.equal(await code(plan(context, 'generate')), 'KIT_REQUIRED');
 }));

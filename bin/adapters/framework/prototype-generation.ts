@@ -37,9 +37,9 @@ export async function managedGenerationPlan(request: Request, context: Context, 
   const selected = activeVariant(current.workspace), path = snapshotPath(selected.selection);
   const provenance = { ...selected.selection, variantRevision: selected.variant.revision,
     workspaceRevision: current.workspace.revision, snapshotPath: path, snapshotHash: hash(current.files.get(path)!) };
-  const target = stringOption(request.options, 'target');
-  if (target === undefined) await checkAdopted(context, selected.variant.document);
-  const planned = await compile({ ...request, options: { ...request.options, ...(target === undefined ? {} : { input: path }) } }, context);
+  // In-place generation compiles the adopted design; the active variant must be the adopted one.
+  await checkAdopted(context, selected.variant.document);
+  const planned = await compile(request, context);
   // Separate provenance receipt: the compiler continues to own its unchanged receipt contract.
   const receipt = relative(context.root, join(planned.summary.target, '.companion/prototype-selection.json')).replaceAll('\\', '/');
   const entries = planned.plan.changes.map(({ path, content, encoding }) => ({ path, content, ...(encoding ? { encoding } : {}) }));

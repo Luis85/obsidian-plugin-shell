@@ -25,11 +25,6 @@ test('relocated source generation rejects invalid output kind before filesystem 
   await assert.rejects(relocatedSourcePlan({ command: 'generate', args: [], options: { 'output-kind': 'desktop-app' } }, context), { code: 'INVALID_OUTPUT_KIND' });
 });
 
-test('relocated source generation keeps legacy vault authority behind explicit target', async t => {
-  const context = await fixture(t);
-  await assert.rejects(relocatedSourcePlan({ command: 'generate', args: [], options: { vault: 'elsewhere' } }, context), { code: 'TARGET_REQUIRED' });
-});
-
 test('relocated managed generation preserves setup/import prerequisite on empty projects', async t => {
   const context = await fixture(t);
   await assert.rejects(relocatedPlan({ command: 'generate', args: [], options: {} }, context), { code: 'CONFIG_REQUIRED' });

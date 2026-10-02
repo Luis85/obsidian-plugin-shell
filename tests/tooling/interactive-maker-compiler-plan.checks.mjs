@@ -111,7 +111,12 @@ test('project planning compiles, scopes and refuses invalid scope combinations a
   const folder = await vault(t);
   await writeFile(join(folder, 'quick.json'), quickText); await writeFile(join(folder, 'broken.json'), '{');
   const plan = await planProject({ input: join(folder, 'quick.json'), target: 'plugin', vault: folder, templateRoot: root });
-  assert.deepEqual(plan.conflicts, []); assert.equal(plan.summary.compiler.outputKind, 'obsidian-plugin'); assert.equal(plan.summary.compiler.diagnostics.length >= 0, true);
+  assert.deepEqual(plan.conflicts, []); assert.equal(plan.summary.compiler.outputKind, 'obsidian-plugin');
+  assert.ok(plan.plan.changes.some(change => change.path.startsWith('plugin/bin/')));
+  // An installed kit owns bin/: in-place generation must not write the template's runtime sources over it.
+  const kit = await planProject({ input: join(folder, 'quick.json'), target: 'kit', vault: folder, templateRoot: root, reservedRoot: 'bin' });
+  assert.ok(!kit.plan.changes.some(change => change.path.startsWith('kit/bin/')));
+  assert.ok(kit.plan.changes.some(change => change.path.startsWith('kit/src/')));
   await assert.rejects(planProject({ input: join(folder, 'quick.json'), target: 'plugin', vault: folder, templateRoot: root, scope: 'bogus' }), /GENERATION_SCOPE_INVALID/);
   await assert.rejects(planProject({ input: join(folder, 'quick.json'), target: 'plugin', vault: folder, templateRoot: root, scope: 'page:x', output: [] }), /GENERATION_SCOPE_OVERRIDE/);
   await assert.rejects(planProject({ input: join(folder, 'broken.json'), target: 'plugin', vault: folder, templateRoot: root }), /./);

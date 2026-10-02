@@ -58,7 +58,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok((await verifyKit(dir)).files.length > 100, 'restored plugin config keeps the extracted kit valid');
   output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
-  assert.deepEqual(files.filter(file => file.path.startsWith('.framework/compiled/') && file.path.endsWith('.js')).map(file => file.path), ['bin/app.js']);
+  assert.deepEqual(files.filter(file => file.path.startsWith('bin/') && !file.path.startsWith('bin/template/') && file.path.endsWith('.js')).map(file => file.path), ['bin/app.js']);
   const templateOwnership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json');
   const manifestRecord = JSON.parse(files.find(file => file.path === 'bin/kit.json').bytes)
     .files.find(file => file.path === templateOwnership.path);
@@ -149,7 +149,7 @@ test('kit manifest rejects traversal and duplicate case aliases', () => {
     ['bin/app', 'bin/app', 'package.json', 'README.md', 'LICENSE'],
     ['bin/app', 'package.json', 'README.md', 'LICENSE', 'bin/other'],
   ]) assert.throws(() => kitManifest({ ...base, bootstrap: paths.map(path => ({ path, hash: 'b'.repeat(64) })) }), /bootstrap/i, paths.join(','));
-  assert.throws(() => kitManifest({ ...base, schemaVersion: 1 }), /version/i);
+  assert.throws(() => kitManifest({ ...base, schemaVersion: 1 }), { code: 'KIT_VERSION' });
   assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: 'bin/template/../../outside' }] }));
   assert.throws(() => kitManifest({ ...base, files: [...base.files, { ...base.files[0], path: 'bin/template/license' }] }));
   assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: '.framework/template/LICENSE' }] }));

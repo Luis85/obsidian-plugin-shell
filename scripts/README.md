@@ -1,6 +1,6 @@
 # Tooling directory
 
-The developer CLI starts at `app.mjs` (run `node bin/app <command>`). Much of its core still lives
+The developer CLI starts at `bin/app` (run `node bin/app <command>`). Much of its core still lives
 here (`framework/`, `compiler/`, `companion/`); the staged plan to leave only real scripts in this
 folder is in [scripts consolidation](../docs/development/SCRIPTS-CONSOLIDATION.md).
 

@@ -107,7 +107,7 @@ test('relocated documentation parser packaging preserves exact pin and allowlist
     const files = await relocatedDocsParserFiles(root);
     const paths = files.map(file => file.path).sort();
     // The YAML runtime is bundled into app.js; only its license ships beside the bundle.
-    assert.deepEqual(paths, ['.framework/compiled/licenses/yaml.LICENSE']);
+    assert.deepEqual(paths, ['bin/licenses/yaml.LICENSE']);
     assert.equal(files[0].bytes.toString('utf8'), 'license');
 
     await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.0' }));

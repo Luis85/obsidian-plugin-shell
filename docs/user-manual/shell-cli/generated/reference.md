@@ -75,7 +75,7 @@ The tables list options with documented command semantics. Some common flags are
 - [project schema](#project-schema) — Discover the versioned project-v6 transport schema and semantic validation boundary.
 - [project validate](#project-validate) — Validate/migrate complete project JSON without generation or writes; no authored content in reports.
 - [project measure](#project-measure) — Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.
-- [generate](#generate) — Plan the existing project compiler; --vault/--target retain compatibility.
+- [generate](#generate) — Plan generation for the configured project in place.
 - [concept schema](#concept-schema) — Discover the data-only concept manifest contract.
 - [concept inspect](#concept-inspect) — Inspect a docs/concepts JSON/HTML input, or return the current project base hash.
 - [concept import](#concept-import) — Plan reviewed project, new-feature or base-bound improvement intake. Never executes HTML/source.
@@ -1640,8 +1640,8 @@ node bin/app prototypes generate [options]
 
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
-| --target | value | Target folder relative to --vault (compatibility mode). | See command semantics |
-| --output-kind | value | Compiler output; --target remains a folder. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
+| --target | value | Output folder relative to the project root. | See command semantics |
+| --output-kind | value | Compiler output kind. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
 | --scope | value | Generation selection: all, feature:&lt;id&gt;, page:&lt;surface-or-design-id&gt;, component:&lt;library-or-design-id&gt;. Shared registries remain complete; excluded artifacts must already exist unchanged in the generated definition. | Default: all |
 | --storybook | value | Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation. | Values: on, off; Default: project JSON, otherwise off |
 | --storybook-stories | value | Enable or disable CSF story emission. Independent of Storybook installation. | Values: on, off; Default: project JSON, otherwise off |
@@ -2100,7 +2100,7 @@ node bin/app compiler check [options]
 | --storybook | value | Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation. | Values: on, off; Default: project JSON, otherwise off |
 | --storybook-stories | value | Enable or disable CSF story emission. Independent of Storybook installation. | Values: on, off; Default: project JSON, otherwise off |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
-| --output-kind | value | Compiler output; --target remains a folder. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
+| --output-kind | value | Compiler output kind. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
 | --report-dir | value | Explicit new report directory beneath reports/compiler; omitted means no reports are written. | See command semantics |
 | --debug | flag | Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
@@ -2133,7 +2133,7 @@ node bin/app compiler inspect [options]
 | --storybook | value | Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation. | Values: on, off; Default: project JSON, otherwise off |
 | --storybook-stories | value | Enable or disable CSF story emission. Independent of Storybook installation. | Values: on, off; Default: project JSON, otherwise off |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
-| --output-kind | value | Compiler output; --target remains a folder. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
+| --output-kind | value | Compiler output kind. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
 | --stage | value | Compiler inspection stage. | Values: ir, artifacts; Default: ir |
 | --report-dir | value | Explicit new report directory beneath reports/compiler; omitted means no reports are written. | See command semantics |
 | --debug | flag | Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing. | See command semantics |
@@ -2867,7 +2867,7 @@ node bin/app new ../folio-tools --starter blank --storybook on --storybook-stori
 
 ## generate
 
-Plan the existing project compiler; --vault/--target retain compatibility.
+Plan generation for the configured project in place.
 
 ```sh
 node bin/app generate [options]
@@ -2882,9 +2882,7 @@ node bin/app generate [options]
 | --storybook | value | Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation. | Values: on, off; Default: project JSON, otherwise off |
 | --storybook-stories | value | Enable or disable CSF story emission. Independent of Storybook installation. | Values: on, off; Default: project JSON, otherwise off |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
-| --vault | value | Existing folder that contains the generation target (compatibility mode). | See command semantics |
-| --target | value | Target folder relative to --vault (compatibility mode). | See command semantics |
-| --output-kind | value | Compiler output; --target remains a folder. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
+| --output-kind | value | Compiler output kind. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
 | --scope | value | Generation selection: all, feature:&lt;id&gt;, page:&lt;surface-or-design-id&gt;, component:&lt;library-or-design-id&gt;. Shared registries remain complete; excluded artifacts must already exist unchanged in the generated definition. | Default: all |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |

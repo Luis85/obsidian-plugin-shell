@@ -183,7 +183,8 @@ test('relocated framework filesystem adapter preserves root discovery, bounded r
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-files-')));
   try {
     await mkdir(join(root, 'nested'));
-    await writeFile(join(root, 'app.mjs'), 'export {};\n');
+    await mkdir(join(root, 'bin'));
+    await writeFile(join(root, 'bin/app'), 'export {};\n');
     await writeFile(join(root, 'payload.txt'), 'bounded payload\n');
     assert.equal(await relocatedProjectRoot(join(root, 'nested')), root);
     assert.equal(await relocatedProjectRoot(root, true), root);

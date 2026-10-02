@@ -32,7 +32,7 @@ function run(args) {
   return result.stdout;
 }
 run([npm, 'ci', '--no-fund']);
-run(['app.mjs', 'airship', 'install', '--yes', '--json']);
+run(['bin/app', 'airship', 'install', '--yes', '--json']);
 const cli = join(project, '.airship-tooling/node_modules/@airshiplabs/cli');
 const packageInfo = JSON.parse(await readFile(join(cli, 'package.json'), 'utf8'));
 assert.equal(packageInfo.version, '0.3.0');

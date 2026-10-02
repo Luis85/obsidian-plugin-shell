@@ -7,7 +7,7 @@ import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 
 const roots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
 const relocated = ['TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'];
-const rootFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'app.mjs', 'shell.mjs'];
+const rootFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md'];
 /** A generated-project layout: product README/AGENTS at the root, framework documents under docs/framework/. */
 async function generatedLayout(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'template-snapshot-')));

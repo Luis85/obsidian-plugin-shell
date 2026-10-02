@@ -23,29 +23,39 @@ export async function listFiles(root: string, folder: string): Promise<string[]>
   await walk(folder); return result;
 }
 
-export function kitManifest(value: unknown): Kit {
+const sha256Hex = /^[a-f0-9]{64}$/;
+type ManifestHeader = { version: string; compilerVersion: string; sourceHash: string; files: unknown[]; bootstrap: unknown[] };
+function manifestHeader(value: unknown): ManifestHeader {
   const input = object(value); exactKeys(input, ['schemaVersion', 'version', 'compilerVersion', 'sourceHash', 'files', 'bootstrap']);
-  requireThat(input.schemaVersion === 2 && typeof input.version === 'string' && /^\d+\.\d+\.\d+$/.test(input.version) && typeof input.compilerVersion === 'string', 'KIT_VERSION', 'Unsupported kit manifest.');
-  requireThat(typeof input.sourceHash === 'string' && /^[a-f0-9]{64}$/.test(input.sourceHash), 'KIT_HASH', 'Invalid kit source hash.');
-  requireThat(Array.isArray(input.files) && input.files.length > 0 && input.files.length <= 5000 && Array.isArray(input.bootstrap) && input.bootstrap.length <= 10, 'KIT_LIMIT', 'Invalid kit inventory.');
-  const names = new Set<string>();
-  const files = input.files.map(value => {
-    const file = object(value); exactKeys(file, ['path', 'hash', 'bytes']);
-    const path = file.path;
-    const owned = typeof path === 'string' && (path === 'bin/app.js' || /^bin\/(?:template|plugins|licenses)\//.test(path));
-    requireThat(owned && portableFile(path), 'KIT_PATH', 'Unsafe kit path.');
-    requireThat(!names.has(path.toLowerCase()), 'KIT_DUPLICATE', 'Duplicate kit file.'); names.add(path.toLowerCase());
-    requireThat(typeof file.hash === 'string' && /^[a-f0-9]{64}$/.test(file.hash) && typeof file.bytes === 'number' && Number.isSafeInteger(file.bytes) && file.bytes >= 0 && file.bytes <= 8_000_000, 'KIT_HASH', 'Invalid file fingerprint.');
-    return { path, hash: file.hash, bytes: file.bytes };
-  });
-  const bootstrap = input.bootstrap.map(value => {
-    const file = object(value); exactKeys(file, ['path', 'hash']);
-    requireThat(typeof file.path === 'string' && bootstrapFiles.includes(file.path) && typeof file.hash === 'string' && /^[a-f0-9]{64}$/.test(file.hash), 'KIT_BOOTSTRAP', 'Invalid bootstrap fingerprint.');
-    return { path: file.path, hash: file.hash };
-  });
+  const { version, compilerVersion, sourceHash, files, bootstrap } = input;
+  requireThat(input.schemaVersion === 2 && typeof version === 'string' && /^\d+\.\d+\.\d+$/.test(version) && typeof compilerVersion === 'string', 'KIT_VERSION', 'Unsupported kit manifest.');
+  requireThat(typeof sourceHash === 'string' && sha256Hex.test(sourceHash), 'KIT_HASH', 'Invalid kit source hash.');
+  requireThat(Array.isArray(files) && files.length > 0 && files.length <= 5000 && Array.isArray(bootstrap) && bootstrap.length <= 10, 'KIT_LIMIT', 'Invalid kit inventory.');
+  return { version, compilerVersion, sourceHash, files, bootstrap };
+}
+const ownedKitPath = (path: unknown): path is string => typeof path === 'string' && (path === 'bin/app.js' || /^bin\/(?:template|plugins|licenses)\//.test(path));
+const validBytes = (bytes: unknown): bytes is number => typeof bytes === 'number' && Number.isSafeInteger(bytes) && bytes >= 0 && bytes <= 8_000_000;
+function kitFile(value: unknown, names: Set<string>): KitFile {
+  const file = object(value); exactKeys(file, ['path', 'hash', 'bytes']);
+  const { path, hash: digest, bytes } = file;
+  requireThat(ownedKitPath(path) && portableFile(path), 'KIT_PATH', 'Unsafe kit path.');
+  requireThat(!names.has(path.toLowerCase()), 'KIT_DUPLICATE', 'Duplicate kit file.'); names.add(path.toLowerCase());
+  requireThat(typeof digest === 'string' && sha256Hex.test(digest) && validBytes(bytes), 'KIT_HASH', 'Invalid file fingerprint.');
+  return { path, hash: digest, bytes };
+}
+function bootstrapFile(value: unknown): { path: string; hash: string } {
+  const file = object(value); exactKeys(file, ['path', 'hash']);
+  const { path, hash: digest } = file;
+  requireThat(typeof path === 'string' && bootstrapFiles.includes(path) && typeof digest === 'string' && sha256Hex.test(digest), 'KIT_BOOTSTRAP', 'Invalid bootstrap fingerprint.');
+  return { path, hash: digest };
+}
+export function kitManifest(value: unknown): Kit {
+  const header = manifestHeader(value), names = new Set<string>();
+  const files = header.files.map(file => kitFile(file, names));
+  const bootstrap = header.bootstrap.map(bootstrapFile);
   const paths = new Set(bootstrap.map(file => file.path));
   requireThat(paths.size === bootstrapFiles.length && bootstrap.length === bootstrapFiles.length && bootstrapFiles.every(path => paths.has(path)), 'KIT_BOOTSTRAP', 'Missing or duplicated bootstrap identity.');
-  return { schemaVersion: 2, version: input.version, compilerVersion: input.compilerVersion, sourceHash: input.sourceHash, files, bootstrap };
+  return { schemaVersion: 2, version: header.version, compilerVersion: header.compilerVersion, sourceHash: header.sourceHash, files, bootstrap };
 }
 
 export async function verifyKit(root: string): Promise<Kit> {

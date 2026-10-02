@@ -37,7 +37,8 @@ export async function generateSourcePlan(request: Request, context: Context) {
   const inputHash = hash(await readBounded(join(context.root, designFile), 4_000_000));
   requireThat(intake.schemaVersion === 1 && object(intake.files)[designFile] === inputHash, 'IMPORT_OWNERSHIP', 'The imported design changed outside the reviewed intake operation.');
   const bootstrap = [...kit.bootstrap, { path: designFile, hash: inputHash }];
-  const planned = await planProject({ ...compilation, input, vault: context.root, target: '.', templateRoot, bootstrap });
+  // The kit owns bin/ (its runtime and template); generation never writes the template's own bin sources over it.
+  const planned = await planProject({ ...compilation, input, vault: context.root, target: '.', templateRoot, bootstrap, reservedRoot: 'bin' });
   const generatedDesign = planned.plan.changes.find(change => change.path === designFile);
   if (!generatedDesign || generatedDesign.afterHash === inputHash) return planned;
   // Overrides replace the canonical input in this same plan. Both receipts must describe

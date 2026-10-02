@@ -29,7 +29,7 @@ class Terminal:
         for key in ["CI", "SHELL_ACCESSIBLE", "SHELL_UI"]:
             env.pop(key, None)
         self.process = subprocess.Popen(
-            [node, "--experimental-strip-types", str(repo / "app.mjs"),
+            [node, "--experimental-strip-types", str(repo / "bin" / "app"),
              command, "--root", str(root), "--ui", "tui", "--no-color"],
             stdin=self.slave, stdout=subprocess.PIPE, stderr=self.slave,
             cwd=repo, env=env,
@@ -146,7 +146,7 @@ def agent_parity(node, repo, target, human):
         {"op": "page.add", "title": "Overview", "as": "page"},
         {"op": "page.attach", "page": "@page", "components": [{"title": "Card"}, {"title": "Filters"}]},
     ]}
-    command = [node, "--experimental-strip-types", str(repo / "app.mjs"), "sketch", "--root", str(target),
+    command = [node, "--experimental-strip-types", str(repo / "bin" / "app"), "sketch", "--root", str(target),
                "--input", "-", "--json", "--no-interaction"]
     preview = subprocess.run(command, input=json.dumps(request), text=True, capture_output=True, timeout=30, cwd=repo)
     assert preview.returncode == 0, preview.stderr + preview.stdout
@@ -200,7 +200,7 @@ def new_project(node, repo, target, agent, evidence):
         request = {"schemaVersion": 2, "starter": "cli",
                    "interview": {"schemaVersion": 1, "guideId": "project-prototype", "guideVersion": 1,
                                         "answers": {"title": "PTY project", "approved": True}}}
-        command = [node, "--experimental-strip-types", str(repo / "app.mjs"), "new", "--root", str(agent),
+        command = [node, "--experimental-strip-types", str(repo / "bin" / "app"), "new", "--root", str(agent),
                    "--input", "-", "--json", "--no-interaction"]
         preview = subprocess.run(command, input=json.dumps(request), text=True, capture_output=True, timeout=30, cwd=repo)
         assert preview.returncode == 0, preview.stderr + preview.stdout

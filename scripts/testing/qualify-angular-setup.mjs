@@ -29,7 +29,7 @@ async function run(executable, args, cwd = root) {
     child.once('close', code => { clearTimeout(timer); if (code === 0) accept(stdout); else reject(new Error(`Command exit ${code}: ${args.join(' ')}\n${stdout}\n${stderr}`)); });
   });
 }
-const cli = async args => JSON.parse(await run(process.execPath, [join(root, 'tools/shell-cli/app.mjs'), ...args, '--json']));
+const cli = async args => JSON.parse(await run(process.execPath, [join(root, 'tools/shell-cli/bin/app'), ...args, '--json']));
 async function approve(args) {
   const planned = await cli(args); assert.equal(planned.status, 'planned');
   const applied = await cli([...args, '--apply', planned.data.planHash]);
@@ -39,7 +39,7 @@ async function browserChecks() {
   await writeFile(join(root, 'showcase.json'), JSON.stringify({ schemaVersion: 1, mode: 'showcase', port: 4197, openBrowser: false, showcaseDurationMs: 120000 }));
   const planned = await cli(['first-run', '--input', 'showcase.json']);
   assert.equal(planned.status, 'planned');
-  const child = spawn(process.execPath, [join(root, 'tools/shell-cli/app.mjs'), 'first-run', '--input', 'showcase.json', '--apply', planned.data.planHash, '--json'], {
+  const child = spawn(process.execPath, [join(root, 'tools/shell-cli/bin/app'), 'first-run', '--input', 'showcase.json', '--apply', planned.data.planHash, '--json'], {
     cwd: root, env: { ...process.env, CI: 'true' }, shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   });
   let stdout = '', stderr = '', ready = false;
@@ -98,7 +98,7 @@ try {
   const compiler = await installedCompiler(); assert.equal(compiler.version, '6.0.3');
   const files = await assembleKit({ root, frameworkRoot }, compiler);
   for (const file of files) { const path = join(root, 'tools/shell-cli', file.path); await mkdir(dirname(path), { recursive: true }); await writeFile(path, file.bytes); }
-  // The shell ships no starters; extract the separate starter pack beside shell.mjs, as a user does.
+  // The shell ships no starters; extract the separate starter pack beside bin/, as a user does.
   await assert.rejects(readFile(join(root, 'tools/shell-cli/configs/starters/webapp-angular.json')), { code: 'ENOENT' });
   for (const file of await assembleStarterPack({ root: frameworkRoot, frameworkRoot })) { const path = join(root, 'tools/shell-cli', file.path); await mkdir(dirname(path), { recursive: true }); await writeFile(path, file.bytes); }
   await assert.rejects(readFile(join(root, 'tools/shell-cli/node_modules/typescript/package.json')), { code: 'ENOENT' });

@@ -31,7 +31,7 @@ test('malformed and dangling recipes fail generation rather than generating brok
  }
 });
 test('generated kit preserves engine bytes, creates a read-only plan, and applies only approved test-vault notes',async()=>{
- const m=projectModel(seed);const files=new Map();assert.equal(renderFixtureCode(template,m,(p,c)=>files.set(p,c)),true);
+ const m=projectModel(seed);const files=new Map();assert.equal(await renderFixtureCode(template,m,(p,c)=>files.set(p,c)),true);
  assert.equal(files.get('scripts/test-data/engine.mjs'),await readFile('docs/concepts/companion/test-kit/engine.mjs','utf8'));
  assert.ok(files.has('tests/project/recipes/authoring-vault-list-requirements.test.mjs'));
  const scratch=await mkdtemp(join(tmpdir(),'generator-recipes-'));
