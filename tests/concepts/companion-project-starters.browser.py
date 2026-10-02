@@ -30,7 +30,7 @@ def review():act('starter-review',scope='#modal')
 def apply():page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
 def handoff_checks():
     modal=page.locator('#modal');text=modal.inner_text();commands=js('handoffCommands().map(([,c])=>c)')
-    check('Handoff lists the current journey with the project id',commands==['node shell.mjs new ../capture-tools --from capture-tools.companion.json','cd ../capture-tools','npm ci','npm run check','npm run dev:obsidian'] and all(c in text for c in commands) and 'companion:scaffold' not in text)
+    check('Handoff lists the current journey with the project id',commands==['node bin/app new ../capture-tools --from capture-tools.companion.json','cd ../capture-tools','npm ci','npm run check','npm run dev:obsidian'] and all(c in text for c in commands) and 'companion:scaffold' not in text)
     check('Every command has its own labelled copy button',all(modal.locator('.handoff-commands [data-action="copy"][data-value='+json.dumps(c)+']').get_attribute('aria-label')=='Copy: '+c for c in commands))
     check('Generated-project scripts and the download are disclosed','scripts of the generated project' in text and 'dist/main.js' in text and modal.locator('.dialog-footer [data-action="project-backup"]').inner_text().strip()=='Download project JSON')
     prompt=page.locator('#handoff-agent-prompt');ids=js('allRequirements(project().design).map(r=>r.id)');value=prompt.input_value()
@@ -93,9 +93,9 @@ with sync_playwright() as pw:
         with tempfile.TemporaryDirectory(prefix='companion-handoff-') as scratch:
             work=Path(scratch)/'framework-checkout';work.mkdir();(work/download.suggested_filename).write_text(exported)
             shown=page.locator('#modal .handoff-commands code').first.inner_text().split()
-            run=subprocess.run(['node',str(ROOT/'shell.mjs'),*shown[2:],'--json'],text=True,capture_output=True,cwd=work,timeout=120)
+            run=subprocess.run(['node',str(ROOT/'bin/app'),*shown[2:],'--json'],text=True,capture_output=True,cwd=work,timeout=120)
             result=json.loads(run.stdout) if run.returncode==0 else {}
-            check('Displayed new --from command plans the actual download without writing',shown[:3]==['node','shell.mjs','new'] and result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the downloaded bytes; preview only')
+            check('Displayed new --from command plans the actual download without writing',shown[:3]==['node','bin/app','new'] and result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the downloaded bytes; preview only')
         act('close',scope='#modal');act('nav','starters','#sidebar');configure('blank');review();act('close',scope='#modal')
         check('Cancelled replacement preserves the full current project and files',js('companionProjectToken()')==original)
         # Controlled states are safety negative proofs, not real native operations.

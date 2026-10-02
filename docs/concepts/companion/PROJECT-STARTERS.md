@@ -16,8 +16,8 @@ Use **Generate plugin shell** on the project overview to open the handoff. It of
 2. Terminal commands, each with its own copy button (and **Copy all commands**):
 
 ```sh
-node shell.mjs new ../my-plugin --from my-plugin.companion.json   # preview: plan + plan hash, writes nothing
-node shell.mjs new ../my-plugin --from my-plugin.companion.json --yes   # or --apply <planHash>
+node bin/app new ../my-plugin --from my-plugin.companion.json   # preview: plan + plan hash, writes nothing
+node bin/app new ../my-plugin --from my-plugin.companion.json --yes   # or --apply <planHash>
 cd ../my-plugin
 npm ci
 npm run check          # generated-project script
@@ -26,7 +26,7 @@ npm run dev:obsidian   # generated-project script; isolated sandbox vault only
 
 3. **Copy agent prompt**: a short prompt for Claude Code, Codex or another coding agent with the plugin ID/name, the `new --from` command, "read AGENTS.md", the requirement IDs in `design/traceability.json`, the `npm run test:tdd` loop and "finish only when `npm run check` passes".
 
-`new --from` validates the JSON with the same shared contract, keeps its identity (unless `--id/--name/--author` override it) and plans with the unchanged compiler; see [Companion handoff](../../development/COMPANION-HANDOFF.md). The lower-level `node shell.mjs generate --input … --vault … --target …` (alias `npm run companion:scaffold --`) remains available. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
+`new --from` validates the JSON with the same shared contract, keeps its identity (unless `--id/--name/--author` override it) and plans with the unchanged compiler; see [Companion handoff](../../development/COMPANION-HANDOFF.md). The lower-level `node bin/app generate --input … --vault … --target …` (alias `npm run companion:scaffold --`) remains available. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
 
 The custom folders configure **generated product code and tests**, such as `plugin/src/generated` and `plugin/tests/project`. They do not relocate the shell's internal foundation. No handoff command is executed in the browser.
 

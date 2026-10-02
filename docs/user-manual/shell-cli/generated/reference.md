@@ -1640,7 +1640,6 @@ node bin/app prototypes generate [options]
 
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
-| --target | value | Output folder relative to the project root. | See command semantics |
 | --output-kind | value | Compiler output kind. | Values: obsidian-plugin, clickdummy; Default: obsidian-plugin |
 | --scope | value | Generation selection: all, feature:&lt;id&gt;, page:&lt;surface-or-design-id&gt;, component:&lt;library-or-design-id&gt;. Shared registries remain complete; excluded artifacts must already exist unchanged in the generated definition. | Default: all |
 | --storybook | value | Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation. | Values: on, off; Default: project JSON, otherwise off |
@@ -1659,7 +1658,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node bin/app prototypes generate --target generated-preview --dry-run
+node bin/app prototypes generate --dry-run
 ```
 
 ## handout generate

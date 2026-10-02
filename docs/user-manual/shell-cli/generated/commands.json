@@ -2965,14 +2965,9 @@
       "group": "prototypes",
       "usage": "node bin/app prototypes generate [options]",
       "examples": [
-        "node bin/app prototypes generate --target generated-preview --dry-run"
+        "node bin/app prototypes generate --dry-run"
       ],
       "options": [
-        {
-          "name": "target",
-          "kind": "value",
-          "description": "Output folder relative to the project root."
-        },
         {
           "name": "output-kind",
           "kind": "value",

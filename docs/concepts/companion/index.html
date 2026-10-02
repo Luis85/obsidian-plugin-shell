@@ -16454,7 +16454,7 @@ function handoffFile(p = project()) { return p.id + '.companion.json'; }
 // IDs are validated lowercase slugs, so these commands need no shell quoting.
 function handoffCommands(p = project()) {
   return [
-    ['Create the project from the export', 'node shell.mjs new ../' + p.id + ' --from ' + handoffFile(p)],
+    ['Create the project from the export', 'node bin/app new ../' + p.id + ' --from ' + handoffFile(p)],
     ['Enter the new project', 'cd ../' + p.id],
     ['Install the pinned dependencies', 'npm ci'],
     ['Run every project check (generated project script)', 'npm run check'],
@@ -16472,7 +16472,7 @@ function handoffAgentPrompt(p = project()) {
     'Implement the Obsidian plugin "' + p.name + '" (plugin id: ' + p.id + ').',
     '',
     '1. In the plugin-shell framework checkout, with ' + handoffFile(p) + ' saved there, run:',
-    '   node shell.mjs new ../' + p.id + ' --from ' + handoffFile(p),
+    '   node bin/app new ../' + p.id + ' --from ' + handoffFile(p),
     '   Review the printed plan, then re-run it with --yes. Never invent a plan hash.',
     '2. cd ../' + p.id + ' && npm ci',
     '3. Read AGENTS.md before changing anything and follow it.',

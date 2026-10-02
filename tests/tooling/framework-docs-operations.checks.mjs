@@ -6,6 +6,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
+import { extractKit } from './framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { newDocument } from '../../bin/domain/document.ts';
 import { savePlan, applyPrepared } from '../../bin/adapters/storage.ts';
 import { openDocument } from '../../bin/domain/document.ts';
@@ -26,8 +28,9 @@ const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 test('documentation status adapter remains an explicit lazy-load contract', () => { assert.equal(typeof documentationStatus, 'function'); });
 async function directory(t) { const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-docs-'))); t.after(() => rm(dir, { recursive: true, force: true })); return dir; }
 async function write(path, value) { await mkdir(dirname(path), { recursive: true }); await writeFile(path, value); }
-async function fixture(t, project = projectFixture().project) {
-  const root = await directory(t), ctx = { root, frameworkRoot, inputText: JSON.stringify(project) };
+async function fixture(t, project = projectFixture().project, kit = false) {
+  const root = await directory(t), ctx = { root, frameworkRoot: kit ? root : frameworkRoot, inputText: JSON.stringify(project) };
+  if (kit) await extractKit(frameworkRoot, root);
   const response = await executeOperation(parseCliArguments(['setup', '--input', '-', '--yes']), ctx);
   assert.equal(response.status, 'applied', JSON.stringify(response)); delete ctx.inputText;
   return ctx;
@@ -225,8 +228,10 @@ test('merged command discovery retains documentation, handout and prototype hand
   assert.equal((await run(ctx, ['docs', 'schema'])).status, 'ok');
 });
 
-test('Markdown intake preserves the active prototype and requires explicit variant promotion before generation', async t => {
-  const ctx = await fixture(t), selected = ['exploration', '--version', 'v1', '--variant', 'main'];
+test('Markdown intake preserves the active prototype and requires explicit variant promotion before generation', { timeout: 180000 }, async t => {
+  if (await reviewedExamplesRemoved(frameworkRoot)) { t.skip('In-place generation requires the framework kit and its reviewed example sources.'); return; }
+  // In-place generation runs inside an extracted, verified kit.
+  const ctx = await fixture(t, undefined, true), selected = ['exploration', '--version', 'v1', '--variant', 'main'];
   async function apply(args) {
     const result = await run(ctx, [...args, '--yes']);
     assert.ok(['applied', 'unchanged'].includes(result.status), JSON.stringify(result));
@@ -243,16 +248,17 @@ test('Markdown intake preserves the active prototype and requires explicit varia
   const blocked = await run(ctx, ['generate', '--dry-run']);
   assert.equal(blocked.status, 'failed', JSON.stringify(blocked));
   assert.equal(blocked.diagnostics[0].code, 'PROTOTYPE_IMPORT_REQUIRED');
-  const pinned = await run(ctx, ['prototypes', 'generate', '--target', 'pinned-preview', '--dry-run']);
-  assert.equal(pinned.status, 'planned', JSON.stringify(pinned));
-  assert.equal(pinned.data.summary.prototypeSelection.variantId, 'main');
+  // The pinned variant is never compiled over the Markdown-edited canonical design either.
+  const pinned = await run(ctx, ['prototypes', 'generate', '--dry-run']);
+  assert.equal(pinned.status, 'failed', JSON.stringify(pinned));
+  assert.equal(pinned.diagnostics[0].code, 'PROTOTYPE_IMPORT_REQUIRED');
   assert.deepEqual(await snapshot(join(ctx.root, 'docs/concepts')), saved);
   await apply(['prototypes', 'fork', ...selected, '--as', 'markdown-edit']);
   const next = ['exploration', '--version', 'v1', '--variant', 'markdown-edit'];
   await apply(['prototypes', 'save', ...next]);
   await apply(['prototypes', 'status', ...next, '--status', 'approved']);
   await apply(['prototypes', 'activate', ...next]);
-  const generation = await run(ctx, ['generate', '--target', 'markdown-preview', '--dry-run']);
+  const generation = await run(ctx, ['generate', '--dry-run']);
   assert.equal(generation.status, 'planned', JSON.stringify(generation));
   assert.equal(generation.data.summary.prototypeSelection.variantId, 'markdown-edit');
   const project = await readJson(join(ctx.root, 'design/project.json'));

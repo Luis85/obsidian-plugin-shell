@@ -22,7 +22,7 @@ export const prototypeCommands: readonly Command[] = [
     ['import', 0, ['input'], 'Import a validated workspace bundle using reviewed, conflict-checked file writes.'],
     ['export', 0, ['out'], 'Export the complete workspace to inert JSON outside docs/concepts; never overwrite different files.'],
     ['adopt', 0, ['resolve'], 'Import the pinned active project through the existing configuration conflict workflow.'],
-    ['generate', 0, ['target','output-kind','scope','storybook','storybook-stories'], 'Generate strictly from the saved active variant; no implicit selection or process execution.'],
+    ['generate', 0, ['output-kind','scope','storybook','storybook-stories'], 'Generate strictly from the saved active variant; no implicit selection or process execution.'],
   ] satisfies Array<[string, number, string[], string]>).map(([name, maxArgs, options, summary]) => ({ id: 'prototypes ' + name, maxArgs: Number(maxArgs),
     options: values(...options), summary: String(summary), effect: 'plan' as const })),
 ];

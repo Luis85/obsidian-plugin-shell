@@ -200,7 +200,7 @@ const examples: Record<string, string[]> = {
   'prototypes import': ['node bin/app prototypes import --input prototype-workspace.json --dry-run'],
   'prototypes export': ['node bin/app prototypes export --out prototype-workspace.json --dry-run'],
   'prototypes adopt': ['node bin/app prototypes adopt --resolve import --dry-run'],
-  'prototypes generate': ['node bin/app prototypes generate --target generated-preview --dry-run'],
+  'prototypes generate': ['node bin/app prototypes generate --dry-run'],
   'docs import': ['node bin/app docs import docs/application --dry-run', 'node bin/app docs import docs/application --apply <reviewed-hash> --yes'],
   'docs export': ['node bin/app docs export --dry-run', 'node bin/app docs export --out docs/application --yes'],
   'docs validate': ['node bin/app docs validate docs/application --json'],

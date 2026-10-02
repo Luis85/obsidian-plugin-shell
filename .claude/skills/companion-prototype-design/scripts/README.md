@@ -66,7 +66,7 @@ typed deterministic browser adapters. The browser helper resolves the locked Pla
 from source/ and honors `SHELL_CHROMIUM`, without provisioning or changing versions.
 
 `save` calls the **same** Python package scanner as ZIP (`--check`, read-only), rechecks
-all byte hashes, then uses `scripts/shared/file-plan.mjs`. Preview and apply are separate;
+all byte hashes, then uses `scripts/shared/file-plan.ts`. Preview and apply are separate;
 only a new `docs/concepts/<slug>/` directory is allowed. A save is not Git commit/push,
 companion import, or a claim of verification. Python discovery uses `PYTHON`/`python3`,
 matching the repository's suite runner. The existing direct helpers remain supported.

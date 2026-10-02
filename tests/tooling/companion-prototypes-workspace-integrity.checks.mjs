@@ -33,7 +33,7 @@ test('default generation never reaches the compiler fallback after registry loss
   const context = await orphaned(t); let calls = 0;
   // Only the compiler port is injected; registry detection executes the real filesystem adapter.
   const compile = async () => { calls++; return {source:'unmanaged-fallback'}; };
-  await assert.rejects(managedGenerationPlan(parseCliArguments(['generate','--target','preview']), context, compile), {code:'PROTOTYPE_REGISTRY_MISSING'});
+  await assert.rejects(managedGenerationPlan(parseCliArguments(['generate']), context, compile), {code:'PROTOTYPE_REGISTRY_MISSING'});
   assert.equal(calls, 0);
 });
 test('a generated consumer can retain provenance without owning the source prototype library', async t => {
@@ -43,7 +43,7 @@ test('a generated consumer can retain provenance without owning the source proto
   await writeFile(join(context.root, '.companion/prototype-selection.json'), receipt);
   assert.deepEqual(await loadPrototypeWorkspace(context), {workspace:null, files:new Map()});
   let calls = 0;
-  await managedGenerationPlan(parseCliArguments(['generate','--target','preview']), context, async () => {calls++; return {};});
+  await managedGenerationPlan(parseCliArguments(['generate']), context, async () => {calls++; return {};});
   assert.equal(calls, 1);
   assert.equal(await readFile(join(context.root, '.companion/prototype-selection.json'), 'utf8'), receipt);
 });
@@ -54,12 +54,12 @@ test('ordinary unrelated concept documents retain standalone compatibility and a
   const before = await readdir(context.root, {recursive:true});
   assert.deepEqual(await loadPrototypeWorkspace(context), {workspace:null, files:new Map()});
   let calls = 0;
-  await managedGenerationPlan(parseCliArguments(['generate','--target','preview']), context, async () => {calls++; return {};});
+  await managedGenerationPlan(parseCliArguments(['generate']), context, async () => {calls++; return {};});
   assert.equal(calls, 1); assert.deepEqual(await readdir(context.root, {recursive:true}), before);
 });
 test('explicit standalone input still bypasses managed selection intentionally', async t => {
   const context = await orphaned(t); let calls = 0;
-  const result = await managedGenerationPlan(parseCliArguments(['generate','--input','source.json','--target','preview']), context,
+  const result = await managedGenerationPlan(parseCliArguments(['generate','--input','source.json']), context,
     async () => {calls++; return {standalone:true};});
   assert.equal(calls, 1); assert.deepEqual(result, {standalone:true});
 });
