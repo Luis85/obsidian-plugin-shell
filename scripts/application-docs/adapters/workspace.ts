@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 import { parseAuthoringDocument, migrateAuthoringDocument } from '../../companion/authoring-contract.ts';
-import { configuration } from '../../framework/configuration.ts';
+import { configuration } from '../../../bin/adapters/framework/configuration.ts';
 import { keyOf, docsObject as object, insist, validateEntity, jsonData, type DocsIndex, type Entity, type Resolutions } from '../domain/contracts.ts';
 import { readDocumentationSettings, validateSettings } from './settings.ts';
 import { readBytes, decode, discover, localPath, portable, type DocumentationSource as Source } from './filesystem.ts';

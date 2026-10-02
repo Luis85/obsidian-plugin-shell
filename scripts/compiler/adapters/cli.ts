@@ -1,7 +1,7 @@
-import { storybookFlags } from '../../framework/storybook-options.ts';
+import { storybookFlags } from '../../../bin/adapters/framework/storybook-options.ts';
 import { basename, join, resolve } from 'node:path';
-import { readBounded, exists } from '../../framework/files.ts';
-import { requireThat, result, stringOption, type Context, type Request, type Result } from '../../framework/contracts.ts';
+import { readBounded, exists } from '../../../bin/adapters/framework/files.ts';
+import { requireThat, result, stringOption, type Context, type Request, type Result } from '../../../bin/adapters/framework/contracts.ts';
 import { compileProject, loadTemplateSnapshot, diagnosticCatalog, compilerVersion } from '../index.ts';
 import { CompilerError, diagnostic } from '../../../bin/compiler/domain/diagnostics.ts';
 import type { OutputKind } from '../../../bin/compiler/domain/contracts.ts';

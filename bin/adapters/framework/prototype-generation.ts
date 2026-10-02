@@ -10,7 +10,7 @@ import { designFile } from './configuration.ts';
 import { hash, readBounded, exists } from './files.ts';
 import { stringOption, requireThat, type Request, type Context } from './contracts.ts';
 import { loadPrototypeWorkspace, bindPrototypePlan } from './prototype-workspace.ts';
-import type { generateSourcePlan } from '../../../scripts/framework/generation.ts';
+import type { generateSourcePlan } from './generation.ts';
 /** In-place generation requires the canonical design to be the adopted active variant. */
 async function checkAdopted(context: Context, variantDocument: Parameters<typeof workspaceKey>[0]): Promise<void> {
   requireThat(await exists(join(context.root, designFile)), 'PROTOTYPE_IMPORT_REQUIRED', 'Review prototypes adopt before in-place generation; no canonical design is imported.');

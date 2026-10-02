@@ -1,7 +1,7 @@
 import { preserveResolvedLock } from './resolved-lock.ts';
 import { join, resolve, relative, isAbsolute } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.ts';
-import { hash, readBounded } from '../../scripts/framework/files.ts';
+import { hash, readBounded } from './framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { object, list, text, keys } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';

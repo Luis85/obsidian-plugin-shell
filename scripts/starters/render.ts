@@ -1,4 +1,4 @@
-import { requireThat } from '../framework/contracts.ts';
+import { requireThat } from '../../bin/adapters/framework/contracts.ts';
 import { inputValue, portablePath, record } from './validation.ts';
 import type { StarterDefinition, InputValue, Json, StarterProcess } from './types.ts';
 export function resolveValues(definition: StarterDefinition, supplied: unknown): Record<string, InputValue> {

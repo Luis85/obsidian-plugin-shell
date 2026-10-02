@@ -3,7 +3,7 @@ import { lstat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from './framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { newDocument, openDocument, documentText } from '../domain/document.ts';
 import { object, keys, text, list } from '../domain/data.ts';

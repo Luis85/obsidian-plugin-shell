@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { exists } from './files.ts';
-import { inspectDesign } from '../../../scripts/framework/changes.ts';
+import { inspectDesign } from './changes.ts';
 import { runNode } from './process.ts';
 
 interface ClickdummyDependencies {

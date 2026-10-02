@@ -1,7 +1,7 @@
 import { validateDocumentationSettings } from './settings-documentation.ts';
 import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.ts';
-import { hash, readBounded } from '../../scripts/framework/files.ts';
+import { hash, readBounded } from './framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { defaultSettings, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { requireSketch } from '../domain/errors.ts';
