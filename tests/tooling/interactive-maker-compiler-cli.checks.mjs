@@ -70,8 +70,8 @@ test('inspection returns the IR or the artifact inventory, never both', async ()
 
 test('an installed kit supplies its packaged template to artifact inspection', async t => {
   const folder = await scratch(t, 'compiler-cli-kit-');
-  await templateTree(join(folder, '.framework/template'));
-  await writeFile(join(folder, '.framework/kit.json'), '{}\n');
+  await templateTree(join(folder, 'bin/template'));
+  await writeFile(join(folder, 'bin/kit.json'), '{}\n');
   const result = await compilerOperation(request('compiler inspect', { stage: 'artifacts', 'output-kind': 'clickdummy' }), { ...context, frameworkRoot: folder });
   // The packaged template carries no bundled offline builder, so lowering refuses click-dummy output from it.
   assert.equal(result.status, 'failed'); assert.equal(result.diagnostics[0].code, 'COMPILER_TEMPLATE_INVALID'); assert.match(result.diagnostics[0].message, /offline builder/);

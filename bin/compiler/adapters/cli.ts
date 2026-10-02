@@ -31,7 +31,7 @@ async function readSource(input: string, sourceName: string, context: Context): 
   catch (cause) { throw new CompilerError(diagnostic('COMPILER_JSON_INVALID', 'parse', 'Input is not valid UTF-8.', { file: sourceName, jsonPointer: '' }), { cause }); }
 }
 async function artifactTemplate(context: Context) {
-  const templateRoot = await exists(join(context.frameworkRoot, '.framework/kit.json')) ? join(context.frameworkRoot, '.framework/template') : context.frameworkRoot;
+  const templateRoot = await exists(join(context.frameworkRoot, 'bin/kit.json')) ? join(context.frameworkRoot, 'bin/template') : context.frameworkRoot;
   return loadTemplateSnapshot(templateRoot, context.signal);
 }
 type Compiled = Awaited<ReturnType<typeof compileProject>>;

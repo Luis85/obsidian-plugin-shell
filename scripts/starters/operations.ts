@@ -21,7 +21,7 @@ export async function readStarterOperation(request: Request, context: Context) {
     // A release kit keeps the schema as template data beside its bundled CLI; a checkout reads its own source.
     const schema = 'scripts/starters/starter.schema.json';
     let root = context.frameworkRoot;
-    for (const kit of ['.framework/compiled', '.framework/template']) if (await exists(join(context.frameworkRoot, kit, schema))) { root = join(context.frameworkRoot, kit); break; }
+    if (await exists(join(context.frameworkRoot, 'bin/template', schema))) root = join(context.frameworkRoot, 'bin/template');
     return result(request.command, JSON.parse((await readBounded(join(root, schema))).toString('utf8')));
   }
   const definitions = await loadDefinitions(context.root);
