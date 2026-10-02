@@ -23,14 +23,15 @@ function includesSame(values: readonly string[], expected?: string): boolean {
 }
 
 function matchesTemplate(template: ComponentTemplate, query: ComponentTemplateQuery, needle?: string): boolean {
-  return [
+  const checks = [
     matchesSearch(template, needle),
     matchesExact(template.templateType, query.templateType),
     matchesExact(template.atomicLevel, query.atomicLevel),
     same(template.category, query.category),
     includesSame(template.tags, query.tag),
     includesSame(template.recommendedFor, query.recommendedFor),
-  ].every(Boolean);
+  ];
+  return checks.every(value => value);
 }
 export function filterComponentTemplates(
   entries: readonly ComponentTemplateEntry[],
