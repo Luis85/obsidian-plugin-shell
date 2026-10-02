@@ -259,6 +259,13 @@
         ]
       },
       {
+        "name": "compiler-host",
+        "patterns": [
+          "bin/compiler/adapters/**",
+          "bin/compiler/index.ts"
+        ]
+      },
+      {
         "name": "companion-authoring-contract",
         "patterns": [
           "scripts/companion/authoring-contract.ts",
@@ -277,12 +284,6 @@
           "scripts/companion/detail-contract.mjs",
           "scripts/companion/composition-contract.mjs",
           "scripts/companion/prd-limits.mjs"
-        ]
-      },
-      {
-        "name": "fixture-compiler",
-        "patterns": [
-          "scripts/compiler/adapters/fixture-code.ts"
         ]
       },
       {
@@ -500,7 +501,6 @@
           "tooling",
           "styles",
           "companion-test-kit",
-          "fixture-compiler",
           "companion-authoring-contract",
           "prototype-skill",
           "maker-domain",
@@ -508,6 +508,7 @@
           "maker-host",
           "compiler-domain",
           "compiler-application",
+          "compiler-host",
           "project-path-contract",
           "cli-data-contract",
           "cli-result-contract",
@@ -548,7 +549,6 @@
           "harness",
           "tooling",
           "styles",
-          "fixture-compiler",
           "companion-test-kit",
           "companion-authoring-contract",
           "maker-domain",
@@ -556,6 +556,7 @@
           "maker-host",
           "compiler-domain",
           "compiler-application",
+          "compiler-host",
           "project-path-contract",
           "cli-data-contract",
           "cli-result-contract",
@@ -581,15 +582,6 @@
         "from": "companion-test-kit",
         "allow": [
           "companion-test-kit"
-        ]
-      },
-      {
-        "from": "fixture-compiler",
-        "allow": [
-          "tooling",
-          "companion-test-kit",
-          "companion-authoring-contract",
-          "cli-data-contract"
         ]
       },
       {
@@ -633,6 +625,7 @@
           "maker-host",
           "compiler-domain",
           "compiler-application",
+          "compiler-host",
           "maker-application",
           "maker-domain",
           "tooling",
@@ -660,6 +653,25 @@
         "allow": [
           "compiler-application",
           "compiler-domain"
+        ]
+      },
+      {
+        "from": "compiler-host",
+        "allow": [
+          "compiler-host",
+          "compiler-application",
+          "compiler-domain",
+          "maker-host",
+          "tooling",
+          "companion-authoring-contract",
+          "companion-test-kit",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-file-plan-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract",
+          "project-path-contract"
         ]
       },
       {

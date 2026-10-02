@@ -32,6 +32,6 @@ test('every pure entrypoint exists in the inventory; a missing one fails instead
 });
 test('the former scripts/compiler core paths are no longer treated as the inward-only layer',()=>{
   const legacy='scripts/compiler/domain/example.ts';
-  assert.equal(checkCompilerBoundaries(new Map([[domain,"import '../../../scripts/compiler/adapters/cli.ts';"]])).length,1);
+  assert.equal(checkCompilerBoundaries(new Map([[domain,"import '../adapters/cli.ts';"]])).length,1);
   assert.deepEqual(checkCompilerBoundaries(new Map([[legacy,"export {};"]])),[]);
 });

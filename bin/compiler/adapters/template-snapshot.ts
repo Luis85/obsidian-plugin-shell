@@ -1,12 +1,12 @@
-import { mapBounded } from '../../shared/bounded-map.mjs';
+import { mapBounded } from '../../../scripts/shared/bounded-map.ts';
 import { lstat, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { readBounded, hash } from '../../framework/files.ts';
-import { maintainerOnly, relocatedPath } from '../../companion/compiler/framework-docs.ts';
-import { statIfPresent } from '../../shared/fs-presence.ts';
-import { prototypeSkillFiles } from '../../companion/prototype-skill.mjs';
-import { CompilerError, diagnostic } from '../../../bin/compiler/domain/diagnostics.ts';
-import type { Artifact, TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
+import { readBounded, hash } from '../../adapters/framework/files.ts';
+import { maintainerOnly, relocatedPath } from '../../../scripts/companion/compiler/framework-docs.ts';
+import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
+import { prototypeSkillFiles } from '../../../scripts/companion/prototype-skill.mjs';
+import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
+import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
 
 const roots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
 const rootFiles = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','DESIGN-CONSTRAINTS.md','PROJECT-SETUP-HANDOUT.md','app.mjs','shell.mjs'];

@@ -5,7 +5,7 @@ on:
       - 'docs/concepts/native-file-integration-handoff/**'
       - 'scripts/framework/distribution.ts'
       - 'scripts/companion/compiler/framework-docs.ts'
-      - 'scripts/compiler/adapters/template-snapshot.ts'
+      - 'bin/compiler/adapters/template-snapshot.ts'
       - 'scripts/starters/**'
       - 'configs/starters/**'
       - 'tests/tooling/project-generator-native-handoff.checks.mjs'

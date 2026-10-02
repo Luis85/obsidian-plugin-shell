@@ -26,7 +26,7 @@ test('typed JSON data contract is an explicit narrow architecture boundary', () 
   assert.deepEqual(zone?.patterns, ['scripts/contracts/json-data.ts']);
   const own = config.boundaries.rules.find(item => item.from === 'cli-data-contract');
   assert.deepEqual(own?.allow, ['cli-data-contract']);
-  for (const source of ['test', 'tooling', 'maker-host', 'companion-authoring-contract', 'fixture-compiler']) {
+  for (const source of ['test', 'tooling', 'maker-host', 'companion-authoring-contract', 'compiler-host']) {
     assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-data-contract'), source);
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-data-contract'), false);

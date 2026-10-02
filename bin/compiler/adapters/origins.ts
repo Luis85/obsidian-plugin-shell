@@ -1,6 +1,6 @@
-import type { Artifact, SourceLocation } from '../../../bin/compiler/domain/contracts.ts';
-import type { Model } from '../../companion/compiler/model.ts';
-import { visualDefinitions, visualPagePath, visualComponentPath } from '../../companion/compiler/visual-model.ts';
+import type { Artifact, SourceLocation } from '../domain/contracts.ts';
+import type { Model } from '../../../scripts/companion/compiler/model.ts';
+import { visualDefinitions, visualPagePath, visualComponentPath } from '../../../scripts/companion/compiler/visual-model.ts';
 
 type OriginRange = {line:number;source:SourceLocation};
 /** Explicit file and generated-line origins. Unmapped files stay unmapped; no guessed source spans. */

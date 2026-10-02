@@ -1,11 +1,11 @@
 /** Companion is an input adapter, not a second schema or visual-model implementation. */
-import { authoringReader } from '../../companion/authoring-contract.ts';
-import { SitemapError } from '../../companion/sitemap/safety.ts';
-import { projectModel, type Model } from '../../companion/compiler/model.ts';
-import { visualDefinitions } from '../../companion/compiler/visual-model.ts';
-import { visualSources } from '../../companion/compiler/visual-ports.ts';
-import { CompilerError, diagnostic } from '../../../bin/compiler/domain/diagnostics.ts';
-import type { Phase } from '../../../bin/compiler/domain/contracts.ts';
+import { authoringReader } from '../../../scripts/companion/authoring-contract.ts';
+import { SitemapError } from '../../../scripts/companion/sitemap/safety.ts';
+import { projectModel, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { visualDefinitions } from '../../../scripts/companion/compiler/visual-model.ts';
+import { visualSources } from '../../../scripts/companion/compiler/visual-ports.ts';
+import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
+import type { Phase } from '../domain/contracts.ts';
 
 /** Only known legacy contract errors are adapted. Unexpected exceptions remain compiler defects. */
 export function contractCall<T>(phase: Phase, sourceName: string, work: () => T): T {

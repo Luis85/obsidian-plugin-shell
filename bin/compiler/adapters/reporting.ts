@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { createFilePlan, applyFilePlan } from '../../shared/file-plan.ts';
-import { portableArtifactPath } from '../../../bin/compiler/domain/artifacts.ts';
-import { CompilerError, diagnostic } from '../../../bin/compiler/domain/diagnostics.ts';
-import type { CompilerEvent, Phase, CompilerDiagnostic, Readiness } from '../../../bin/compiler/domain/contracts.ts';
+import { createFilePlan, applyFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { portableArtifactPath } from '../domain/artifacts.ts';
+import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
+import type { CompilerEvent, Phase, CompilerDiagnostic, Readiness } from '../domain/contracts.ts';
 
 export interface RunSummary {
   compilerVersion: string;
@@ -58,6 +58,8 @@ export async function writeReports(root: string, directory: string, recorder: Re
 }
 /** Terminal-safe rendering. Model text is data, including control sequences. */
 export function formatDiagnostics(values: readonly CompilerDiagnostic[]): string {
+  // Intentional terminal-safety boundary: neutralize C0/C1 control characters in model text.
+  // oxlint-disable-next-line no-control-regex
   const safe = (value: string) => value.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ');
   return values.map(value => `${value.severity.toUpperCase()} ${safe(value.code)} [${value.phase}]\n` +
     (value.source ? `${safe(value.source.file)} · ${safe(value.source.jsonPointer || '/')} (${value.source.document ?? 'input'})\n` : '') +

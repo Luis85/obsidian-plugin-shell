@@ -52,7 +52,6 @@ import * as legacyZip from '../../scripts/framework/zip.ts';
 import { pluginIdWordProblem as relocatedPluginIdWordProblem, derivedPluginId as relocatedDerivedPluginId, pluginIdProblem as relocatedPluginIdProblem, exportedIdProblem as relocatedExportedIdProblem, exportedIdWarning as relocatedExportedIdWarning } from '../../bin/adapters/framework/plugin-id.ts';
 import * as legacyPluginId from '../../scripts/framework/plugin-id.ts';
 import { storybookFlags as relocatedStorybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
-import * as legacyStorybookOptions from '../../scripts/framework/storybook-options.ts';
 import { terminalStyle as relocatedTerminalStyle, marker as relocatedMarker, bold as relocatedBold, rows as relocatedRows, duration as relocatedDuration, runnable as relocatedRunnable, nextLine as relocatedNextLine } from '../../bin/presentation/terminal/terminal-style.ts';
 import * as legacyTerminalStyle from '../../scripts/framework/terminal-style.ts';
 import { commandHelp as relocatedCommandHelp, helpIndex as relocatedHelpIndex } from '../../bin/adapters/framework/help-text.ts';
@@ -200,7 +199,6 @@ export {
   relocatedExportedIdWarning,
   legacyPluginId,
   relocatedStorybookFlags,
-  legacyStorybookOptions,
   relocatedTerminalStyle,
   relocatedMarker,
   relocatedBold,

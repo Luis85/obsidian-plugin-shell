@@ -9,7 +9,7 @@ import { visualNodes, visualRoot } from '../../scripts/companion/visual/visual-i
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { withStorybookOptions, projectToolingSchema } from '../../scripts/companion/tooling-contract.ts';
-import { storybookFlags } from '../../scripts/framework/storybook-options.ts';
+import { storybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);

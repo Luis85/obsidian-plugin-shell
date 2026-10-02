@@ -4,19 +4,19 @@ import { CompilerError, diagnostic } from '../../bin/compiler/domain/diagnostics
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
 import { createHash } from 'node:crypto';
 import { withStorybookOptions } from '../companion/tooling-contract.ts';
-import { lowerTarget } from './adapters/target-lowering.ts';
+import { lowerTarget } from '../../bin/compiler/adapters/target-lowering.ts';
 import { runCompiler } from '../../bin/compiler/application/pipeline.ts';
 import type { CompileRequest } from '../../bin/compiler/application/ports.ts';
 import type { Control, Artifact, TemplateSnapshot } from '../../bin/compiler/domain/contracts.ts';
-import { companionFrontend, contractCall } from './adapters/frontend.ts';
+import { companionFrontend, contractCall } from '../../bin/compiler/adapters/frontend.ts';
 import { renderProjectFiles } from './adapters/plugin-emitter.ts';
-import { clickdummyFiles } from './adapters/clickdummy-emitter.ts';
-import { dependencyReadiness } from './adapters/dependencies.ts';
-import { artifactOrigins } from './adapters/origins.ts';
+import { clickdummyFiles } from '../../bin/compiler/adapters/clickdummy-emitter.ts';
+import { dependencyReadiness } from '../../bin/compiler/adapters/dependencies.ts';
+import { artifactOrigins } from '../../bin/compiler/adapters/origins.ts';
 import { json, type Model } from '../companion/compiler/model.ts';
 import { requireFrameworkAdapter } from './adapters/project/framework-registry.ts';
 import type { FrameworkAdapter } from './adapters/project/framework-adapter.ts';
-export { loadTemplateSnapshot } from './adapters/template-snapshot.ts';
+export { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 export { compilerVersion, compilerPhases } from '../../bin/compiler/application/pipeline.ts';
 export { diagnosticCatalog, CompilerError } from '../../bin/compiler/domain/diagnostics.ts';
 export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind, StorybookOptions } from '../../bin/compiler/domain/contracts.ts';

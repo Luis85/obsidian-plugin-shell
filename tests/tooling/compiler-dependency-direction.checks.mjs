@@ -13,14 +13,17 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const owners = new Map([
   ['scripts/companion/compiler/plan.ts', 'scripts/compiler/adapters/project-plan.ts'],
   ['scripts/companion/compiler/cli.ts', 'scripts/compiler/adapters/generator-cli.ts'],
-  ['scripts/companion/compiler/fixture-code.ts', 'scripts/compiler/adapters/fixture-code.ts'],
+  ['scripts/companion/compiler/fixture-code.ts', 'bin/compiler/adapters/fixture-code.ts'],
   ['scripts/companion/compiler/project-files.ts', 'scripts/compiler/adapters/project-files.ts'],
   // The inward-only compiler core moved to bin/compiler; its former scripts/compiler paths are gone too.
   ...['artifacts', 'contracts', 'diagnostics', 'project-starter', 'references', 'selection', 'source-references']
     .map(name => [`scripts/compiler/domain/${name}.ts`, `bin/compiler/domain/${name}.ts`]),
   ...['pipeline', 'ports'].map(name => [`scripts/compiler/application/${name}.ts`, `bin/compiler/application/${name}.ts`]),
+  // The compiler host adapters moved to bin/compiler/adapters.
+  ...['cli', 'clickdummy-emitter', 'dependencies', 'fixture-code', 'fixture-emitter', 'frontend', 'origins', 'reporting', 'target-lowering', 'template-snapshot']
+    .map(name => [`scripts/compiler/adapters/${name}.ts`, `bin/compiler/adapters/${name}.ts`]),
 ]);
-const executableCompiler = /^(?:scripts\/compiler\/(?:index\.ts$|adapters\/)|bin\/compiler\/application\/)/;
+const executableCompiler = /^(?:scripts\/compiler\/(?:index\.ts$|adapters\/)|bin\/compiler\/(?:index\.ts$|adapters\/|application\/))/;
 const compilerDomain = /^bin\/compiler\/domain\//;
 const qualificationEntry = /^scripts\/companion\/qualify-[^/]+\.mjs$/;
 function resolved(from, specifier) {
@@ -82,7 +85,7 @@ test('companion code cannot import executable compiler modules, re-exports inclu
     assert.equal(findings.length, 1, specifier);
     assert.match(findings[0], /executable compiler module/);
   }
-  const lazy = directionFindings(new Map([[emitter, "export const load = () => import('../../compiler/adapters/cli.ts');"]]));
+  const lazy = directionFindings(new Map([[emitter, "export const load = () => import('../../../bin/compiler/adapters/cli.ts');"]]));
   assert.equal(lazy.length, 1);
   const contract = 'scripts/companion/project-store.mjs';
   assert.equal(directionFindings(new Map([[contract, "import '../compiler/adapters/project-plan.ts';"]])).length, 1);

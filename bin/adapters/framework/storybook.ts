@@ -2,7 +2,7 @@
 import { join } from 'node:path';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { storybookOptions } from '../../../scripts/companion/tooling-contract.ts';
-import { dependencyReadiness } from '../../../scripts/compiler/adapters/dependencies.ts';
+import { dependencyReadiness } from '../../compiler/adapters/dependencies.ts';
 import { exists, readBounded } from './files.ts';
 import { npmEntry, runNode } from './process.ts';
 import { result, requireThat, stringOption, type Request, type Context, type Result } from './contracts.ts';

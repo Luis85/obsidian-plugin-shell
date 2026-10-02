@@ -7,7 +7,7 @@ import { nativeCode } from '../../companion/compiler/native-code.ts';
 import { clickdummyCode } from '../../companion/compiler/clickdummy-code.ts';
 import { httpCode } from '../../companion/compiler/http-code.ts';
 import { relationshipCode } from '../../companion/compiler/relationship-code.ts';
-import { renderFixtureCode as fixtureCode } from './fixture-emitter.ts';
+import { renderFixtureCode as fixtureCode } from '../../../bin/compiler/adapters/fixture-emitter.ts';
 import { persistenceCode } from '../../companion/compiler/persistence-code.ts';
 import { literal, json, type Model } from '../../companion/compiler/model.ts';
 import { dataCode } from '../../companion/compiler/data-code.ts';

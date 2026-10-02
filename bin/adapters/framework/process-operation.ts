@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { dependencyReadiness } from '../../../scripts/compiler/adapters/dependencies.ts';
+import { dependencyReadiness } from '../../compiler/adapters/dependencies.ts';
 import { profiles } from './catalog.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { exists, readBounded } from './files.ts';

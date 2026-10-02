@@ -48,7 +48,7 @@ test('documentation links to the excluded directory or workflow become readable 
 });
 
 test('the real template loader excludes the archive and preserves the active native implementation', async () => {
-  const { loadTemplateSnapshot } = await import('../../scripts/compiler/adapters/template-snapshot.ts');
+  const { loadTemplateSnapshot } = await import('../../bin/compiler/adapters/template-snapshot.ts');
   const { fileURLToPath } = await import('node:url');
   const repository = fileURLToPath(new URL('../../', import.meta.url));
   const snapshot = await loadTemplateSnapshot(repository);

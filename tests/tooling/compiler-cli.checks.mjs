@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { executeOperation } from '../../scripts/framework/operations.ts';
-import { formatDiagnostics, createRecorder, writeReports } from '../../scripts/compiler/adapters/reporting.ts';
+import { formatDiagnostics, createRecorder, writeReports } from '../../bin/compiler/adapters/reporting.ts';
 import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
 import { operationSchemas } from '../../scripts/framework/schemas.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));

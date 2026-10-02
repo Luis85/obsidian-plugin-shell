@@ -8,7 +8,7 @@ import { customizeStarter } from '../companion/starter-contract.mjs';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { hash, readJson } from '../framework/files.ts';
 import { derivedPluginId, pluginIdProblem } from '../framework/plugin-id.ts';
-import { storybookFlags } from '../framework/storybook-options.ts';
+import { storybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
 import { requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
 import { loadDefinitions, companionCatalog } from './repository.ts';
 import { renderFiles, renderProcesses, resolveValues, interpolate } from './render.ts';

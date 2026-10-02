@@ -1,5 +1,5 @@
 /** Generator CLI adapter: the read-only plan by default, --apply only for a freshly rebuilt reviewed hash. */
-import { storybookFlags } from '../../framework/storybook-options.ts';
+import { storybookFlags } from '../../../bin/adapters/framework/storybook-options.ts';
 import { planProject, applyProject, reviewProject } from './project-plan.ts';
 export async function generatorCli(args: string[]) {
   if (args.length === 0 || (args.length === 1 && args[0] === '--help')) {

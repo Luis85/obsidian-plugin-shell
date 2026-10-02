@@ -1,8 +1,8 @@
-import type { Model } from '../../companion/compiler/model.ts';
-import { visualDefinitions, visualPackages } from '../../companion/compiler/visual-model.ts';
-import { visualNodes } from '../../companion/visual/visual-ir.mjs';
-import { CompilerError, diagnostic } from '../../../bin/compiler/domain/diagnostics.ts';
-import type { CompilerDiagnostic, OutputKind, TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
+import type { Model } from '../../../scripts/companion/compiler/model.ts';
+import { visualDefinitions, visualPackages } from '../../../scripts/companion/compiler/visual-model.ts';
+import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
+import type { CompilerDiagnostic, OutputKind, TemplateSnapshot } from '../domain/contracts.ts';
 import { contractCall } from './frontend.ts';
 
 /** Resolve target dependencies and implementation obligations before rendering any artifact. */

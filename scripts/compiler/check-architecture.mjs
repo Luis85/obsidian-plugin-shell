@@ -5,9 +5,9 @@ import { posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const pureEntrypoints = [
-  'scripts/compiler/adapters/plugin-emitter.ts', 'scripts/compiler/adapters/clickdummy-emitter.ts',
-  'scripts/compiler/adapters/target-lowering.ts', 'scripts/compiler/adapters/project/emitter.ts',
-  'scripts/compiler/adapters/frontend.ts', 'scripts/compiler/adapters/dependencies.ts', 'scripts/compiler/adapters/origins.ts',
+  'scripts/compiler/adapters/plugin-emitter.ts', 'bin/compiler/adapters/clickdummy-emitter.ts',
+  'bin/compiler/adapters/target-lowering.ts', 'scripts/compiler/adapters/project/emitter.ts',
+  'bin/compiler/adapters/frontend.ts', 'bin/compiler/adapters/dependencies.ts', 'bin/compiler/adapters/origins.ts',
 ];
 // Existing runtime modules expose pure validators alongside deferred runtime operations.
 // Only function-local timers in these two legacy modules are permitted; module-level effects stay forbidden.
@@ -17,7 +17,7 @@ function deferredTimer(path, node) {
   for (let parent = node.parent; parent; parent = parent.parent) if (ts.isFunctionLike(parent)) return true;
   return false;
 }
-// The inward-only compiler core lives in bin/compiler; adapters and emitters stay in scripts/compiler until they move.
+// The inward-only compiler core lives in bin/compiler/{domain,application}; host adapters live beside it in bin/compiler/adapters.
 const compilerDomain = 'bin/compiler/domain/', compilerApplication = 'bin/compiler/application/';
 const safePureImports = new Set(['node:crypto', 'node:path']);
 /** Uses a syntax tree: imports inside generated source string literals are not compiler dependencies. */
