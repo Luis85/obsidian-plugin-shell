@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { planLocalMcp } from '../../scripts/setup/mcp.mjs';
 import { setupOptions } from '../../scripts/setup/options.mjs';
 import { fixture, run, snapshot } from './setup-identity-fixture.mjs';

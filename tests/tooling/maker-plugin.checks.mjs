@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
 import { parseArguments } from '../../scripts/makers/arguments.mjs';
 import { planMaker } from '../../scripts/makers/plan.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 
 async function seedRegistry(root) {
   await mkdir(join(root, 'plugins'), { recursive: true });

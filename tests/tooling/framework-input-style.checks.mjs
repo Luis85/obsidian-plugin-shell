@@ -1,4 +1,4 @@
-import { parseJsonData, parseDesignData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData, parseDesignData } from '../../scripts/contracts/json-data.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PassThrough } from 'node:stream';

@@ -1,8 +1,8 @@
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { sha256 } from '../shared/hash.mjs';
-import { statIfPresent as present } from '../shared/fs-presence.mjs';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { sha256 } from '../shared/hash.ts';
+import { statIfPresent as present } from '../shared/fs-presence.ts';
+import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 const journalPath = '.template-state/setup.json';
 export const digest = value => sha256(value);
 function invalidAgentMcp(value) {

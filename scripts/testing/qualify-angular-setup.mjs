@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promi
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
-import { sha256 } from '../shared/hash.mjs';
+import { sha256 } from '../shared/hash.ts';
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { assembleStarterPack } from '../starters/operations.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');

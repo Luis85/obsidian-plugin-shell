@@ -10,7 +10,7 @@ import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts'
 import { setupCheckpointPlan, resumeSetupCheckpoint } from '../../bin/adapters/setup-checkpoint.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { defaultSettings, readSettings, settingsSchema } from '../../bin/domain/user-settings.ts';
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.mjs';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.ts';
 import { settingsForm } from '../../bin/presentation/settings.ts';
 async function scratch(work) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-settings-integration-'));
@@ -95,7 +95,7 @@ test('typed documentation follows the configured maker project path for export a
   const { spawnSync } = await import('node:child_process');
   const { projectSetupPlan } = await import('../../bin/adapters/project-setup.ts');
   const { documentationPlan } = await import('../../scripts/application-docs/adapters/plan.ts');
-  const { applyFilePlan } = await import('../../scripts/shared/file-plan.mjs');
+  const { applyFilePlan } = await import('../../scripts/shared/file-plan.ts');
   const { resolve } = await import('node:path');
   assert.equal(spawnSync('git', ['init', root]).status, 0); await mkdir(join(root, '.obsidian'));
   const setup = await projectSetupPlan({ root, frameworkRoot: resolve(import.meta.dirname, '../..') }, {

@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from './maker-fixture.mjs';
 import { parseArguments } from '../../scripts/makers/arguments.mjs';
 import { planMaker } from '../../scripts/makers/plan.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
 import { checkGenerated } from '../../scripts/quality/format-generated.mjs';
 import { createMakerContext } from '../../scripts/makers/engine.mjs';

@@ -1,7 +1,7 @@
 import { stdin, stderr } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { planExampleRemoval } from './plan.mjs';
-import { applyFilePlan } from '../shared/file-plan.mjs';
+import { applyFilePlan } from '../shared/file-plan.ts';
 
 const args = process.argv.slice(2);
 async function main() {

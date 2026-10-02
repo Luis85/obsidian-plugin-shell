@@ -1,7 +1,7 @@
 import { lstat, readdir, realpath, open } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
-import { sha256 } from '../../shared/hash.mjs';
+import { sha256 } from '../../shared/hash.ts';
 import { insist } from '../domain/contracts.ts';
 export const documentationDigest = (value: string | Uint8Array): string => sha256(value);
 const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;

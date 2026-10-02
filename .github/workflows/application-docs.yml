@@ -4,7 +4,7 @@ on:
     paths:
       - 'scripts/application-docs/**'
       - 'scripts/framework/**'
-      - 'scripts/shared/file-plan.mjs'
+      - 'scripts/shared/file-plan.ts'
       - 'tests/tooling/framework-docs-*'
       - 'tests/fixtures/application-docs/**'
       - 'docs/user-manual/shell-cli/**'

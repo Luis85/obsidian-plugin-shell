@@ -8,7 +8,7 @@ import { parseBrowserStarter, configureBrowserStarter, exportBrowserStarter, sta
 import { starterCoverage } from '../../scripts/starters/coverage.ts';
 import { parseDefinition, loadDefinitions } from '../../scripts/starters/repository.ts';
 import { validateDefinition } from '../../scripts/starters/validation.ts';
-import { parseJsonData, assertJsonData, assertDesignData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData, assertJsonData, assertDesignData } from '../../scripts/contracts/json-data.ts';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { exportGoldenProject } from '../../scripts/concepts/export-golden-project.mjs';
 import { authoringEvidence } from '../../scripts/companion/authoring-evidence.mjs';

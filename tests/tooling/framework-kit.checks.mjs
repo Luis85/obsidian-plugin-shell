@@ -10,7 +10,7 @@ import { extractArchive } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../bin/adapters/framework/zip.ts';
 import { hash } from '../../bin/adapters/framework/files.ts';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { kitManifest, verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { runNode, npmEntry } from '../../bin/adapters/framework/process.ts';
 import { runNodeProcess, runNodeScript as typedSharedRunNode } from '../../scripts/shared/process.ts';
-import { runNodeScript as legacySharedRunNode } from '../../scripts/shared/process.mjs';
+import { runNodeScript as legacySharedRunNode } from '../../scripts/shared/process.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { failure } from '../../bin/adapters/framework/contracts.ts';

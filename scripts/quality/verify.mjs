@@ -1,4 +1,4 @@
-import { runNodeScript as runNode } from '../shared/process.mjs';
+import { runNodeScript as runNode } from '../shared/process.ts';
 import { toolingGroups } from '../testing/suite-manifest.mjs';
 // tests/suites.json owns tooling classification; every group runs even after a
 // failure so one run still reports the complete tooling set, as before grouping.

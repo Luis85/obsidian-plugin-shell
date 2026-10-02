@@ -1,7 +1,7 @@
 /** One explicitly shipped agent skill, not a recursive copy of a user's .claude directory. */
 import { lstat, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { sha256 } from '../shared/hash.mjs';
+import { sha256 } from '../shared/hash.ts';
 export const prototypeSkillRoot = '.claude/skills/companion-prototype-design';
 export const prototypeCodexSkillPath = '.agents/skills/companion-prototype-design/SKILL.md';
 

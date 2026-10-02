@@ -1,6 +1,6 @@
 /** Hash actual executable inputs, including new files. Not a whole-repository attestation. */
-import { sha256 } from '../shared/hash.mjs';
-export { sha256 } from '../shared/hash.mjs';
+import { sha256 } from '../shared/hash.ts';
+export { sha256 } from '../shared/hash.ts';
 import { readdir, readFile, lstat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';

@@ -30,7 +30,7 @@ export async function audit(base = root) {
         else if (fence[0] === marker[1][0] && marker[1].length >= fence.length) { fence = ''; language = ''; }
         continue;
       }
-      if (fence && language === 'sh' && /^node (?:bin\/app|app\.mjs|shell\.mjs) /.test(line)) {
+      if (fence && language === 'sh' && /^node bin\/app /.test(line)) {
         const argv = words(line).slice(2);
         if (argv[0] === 'memory') { separateMemory++; continue; }
         try { parseCliArguments(argv); checked++; }

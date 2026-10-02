@@ -1,7 +1,7 @@
 import { access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setupMcpFiles } from '../agent/mcp-config.mjs';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 
 function previousHashes(previous) {
   const values = Array.isArray(previous?.files) ? previous.files : [];

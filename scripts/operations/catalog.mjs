@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { sha256 } from '../shared/hash.mjs';
-import { assertJsonData, parseJsonData } from '../contracts/json-data.mjs';
+import { sha256 } from '../shared/hash.ts';
+import { assertJsonData, parseJsonData } from '../contracts/json-data.ts';
 
 const slug = /^[a-z][a-z0-9]*(?:[-.][a-z0-9]+)*$/;
 function requireThat(condition, code = 'CATALOG_INVALID') { if (!condition) throw new Error(code); }

@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, cp, readdir } from 'node:fs/pr
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { spawnSync } from 'node:child_process';
 import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../../scripts/operations/catalog.mjs';
 import { builtinRecipes, parseArguments } from '../../scripts/makers/arguments.mjs';
@@ -86,7 +86,7 @@ test('[CAP-04] fresh Git-free copy discovers capabilities without installed pack
   await cp(join(root, 'scripts/makers/recipes.json'), join(folder, 'scripts/makers/recipes.json'));
   // The dependency-free canonical digest is part of the discovery surface.
   await mkdir(join(folder, 'scripts/shared'), { recursive: true });
-  for (const file of ['hash.mjs', 'hash.ts']) await cp(join(root, 'scripts/shared', file), join(folder, 'scripts/shared', file));
+  for (const file of ['hash.ts']) await cp(join(root, 'scripts/shared', file), join(folder, 'scripts/shared', file));
   const run = spawnSync(process.execPath, ['scripts/operations/cli.mjs', 'catalog'], { cwd: folder, encoding: 'utf8', timeout: 10000 });
   assert.equal(run.status, 0, run.stderr);
   assert.deepEqual(JSON.parse(run.stdout), capabilityCatalog());

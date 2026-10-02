@@ -10,7 +10,7 @@ import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
 import { customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { planMaker } from '../../scripts/makers/plan.mjs';
 import { parseArguments } from '../../scripts/makers/arguments.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
 const file = {
   id: 'folio',

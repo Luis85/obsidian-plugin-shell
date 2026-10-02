@@ -7,7 +7,7 @@ import { setupOptions } from '../../scripts/setup/options.mjs';
 import { inputFingerprint } from '../../scripts/setup/journal.mjs';
 import { executeSetup } from '../../scripts/setup/execute.mjs';
 import { planLocalMcp } from '../../scripts/setup/mcp.mjs';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { fixture, run, snapshot } from './setup-identity-fixture.mjs';
 const parsed = async (root, path) => JSON.parse(await readFile(join(root, path), 'utf8'));
 const flags = ['--yes', '--no-interaction', '--json'];

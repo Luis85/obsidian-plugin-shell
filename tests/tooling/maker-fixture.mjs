@@ -3,7 +3,7 @@ import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { planExampleRemoval } from '../../scripts/examples/plan.mjs';
 
 export const makerSourceRoot = fileURLToPath(new URL('../../', import.meta.url));

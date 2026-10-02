@@ -107,37 +107,12 @@ test('typed bounded concurrency helper is isolated from implementation layers', 
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-bounded-map-contract'), false);
 });
 
-test('legacy core entries remain compatibility-only shims over typed owners', async () => {
-  const wrappers = new Map([
-    ['scripts/contracts/json-data.mjs', './json-data.ts'],
-    ['scripts/shared/process.mjs', './process.ts'],
-    ['scripts/shared/confirmation.mjs', './confirmation.ts'],
-    ['scripts/shared/hash.mjs', './hash.ts'],
-    ['scripts/shared/fs-presence.mjs', './fs-presence.ts'],
-    ['scripts/shared/project-path.mjs', './project-path.ts'],
-    ['scripts/shared/bounded-map.mjs', './bounded-map.ts'],
-    ['scripts/shared/file-plan.mjs', './file-plan.ts'],
-  ]);
-  for (const [path, target] of wrappers) {
-    const source = await readFile(new URL(path, root), 'utf8');
-    const executable = source.split('\n').map(line => line.trim())
-      .filter(line => line && !line.startsWith('//'));
-    assert.deepEqual(executable, [`export * from '${target}';`], path);
+test('removed compatibility entries stay deleted; callers import the typed owners', async () => {
+  // Nothing has been released, so the former JavaScript and scripts/framework re-export entries are gone, not shimmed.
+  for (const path of ['scripts/contracts/json-data.mjs', 'scripts/shared/process.mjs', 'scripts/shared/confirmation.mjs', 'scripts/shared/hash.mjs',
+    'scripts/shared/fs-presence.mjs', 'scripts/shared/project-path.mjs', 'scripts/shared/bounded-map.mjs', 'scripts/shared/file-plan.mjs']) {
+    await assert.rejects(readFile(new URL(path, root), 'utf8'), { code: 'ENOENT' }, path);
+    await access(new URL(path.replace(/\.mjs$/, '.ts'), root));
   }
-});
-
-
-test('Stage D leaves scripts/framework as compatibility-only entries', async () => {
-  const directory = new URL('scripts/framework/', root);
-  const files = (await readdir(directory)).filter(name => name.endsWith('.ts')).sort();
-  assert.ok(files.length > 40, 'expected the retained compatibility surface');
-  for (const name of files) {
-    const source = await readFile(new URL(name, directory), 'utf8');
-    const executable = source.split('\n').map(line => line.trim())
-      .filter(line => line && !line.startsWith('//'));
-    assert.ok(source.length < 500, `${name} still contains a substantive implementation`);
-    assert.ok(executable.length >= 1, `${name} is an empty compatibility entry`);
-    assert.ok(executable.every(line => line.startsWith('export ')), `${name}: ${executable.join(' | ')}`);
-    assert.ok(source.includes('../../bin/') || source.includes('../shared/'), `${name} does not delegate to a relocated owner`);
-  }
+  assert.deepEqual((await readdir(new URL('scripts/framework/', root))).filter(name => name.endsWith('.ts')), []);
 });

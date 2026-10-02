@@ -124,7 +124,7 @@ test('in-place managed generation names adoption when canonical design is absent
 });
 test('managed-generation adapter rejects a lookalike provenance receipt before any writes',async t=>{
   const {managedGenerationPlan}=await import('../../bin/adapters/framework/prototype-generation.ts');
-  const {createFilePlan}=await import('../../scripts/shared/file-plan.mjs');
+  const {createFilePlan}=await import('../../scripts/shared/file-plan.ts');
   const ctx=await activated(t),target=join(ctx.root,'generated'),receipt=join(target,'.companion/prototype-selection.json');
   await mkdir(dirname(receipt),{recursive:true});
   const foreign=JSON.stringify({schemaVersion:1,projectId:'design-lab',foreign:true});await writeFile(receipt,foreign);

@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { loadDefinitions } from '../starters/repository.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 export async function exportGoldenProject(root, check = false) {
   const entries = await loadDefinitions(root), entry = entries.find(row => row.definition.id === 'companion-plugin');
   if (!entry || entry.definition.generator.kind !== 'companion') throw Error('GOLDEN_STARTER_REQUIRED: Install companion-plugin.json from the separate starter pack.');

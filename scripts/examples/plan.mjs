@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { readRegistry, validateRegistrySource } from '../makers/registry.mjs';
 
 const digest = value => createHash('sha256').update(value).digest('hex');

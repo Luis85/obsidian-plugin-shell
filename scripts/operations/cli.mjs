@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { capabilityCatalog } from './catalog.mjs';
 import { handleRequest } from './protocol.mjs';
-import { MAX_JSON_BYTES, parseJsonData } from '../contracts/json-data.mjs';
+import { MAX_JSON_BYTES, parseJsonData } from '../contracts/json-data.ts';
 
 async function input() {
   let size = 0; const chunks = [];

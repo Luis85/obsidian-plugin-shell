@@ -1,4 +1,4 @@
-import { assertJsonData } from '../contracts/json-data.mjs';
+import { assertJsonData } from '../contracts/json-data.ts';
 import { capabilityCatalog, catalogDigest } from './catalog.mjs';
 
 const errors = Object.freeze({

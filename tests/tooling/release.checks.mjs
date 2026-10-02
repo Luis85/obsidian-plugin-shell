@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { prepareVersion, parsePrepareArguments } from '../../scripts/release/prepare.mjs';
 import { parseRehearsalArguments } from '../../scripts/release/rehearse.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { collectAssets, retainCandidate, validateRetained, fixedSource, git, sha256, assetNames } from '../../scripts/release/candidate.mjs';
 
 async function fixture(t) {
