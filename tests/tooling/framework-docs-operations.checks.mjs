@@ -11,10 +11,10 @@ import { savePlan, applyPrepared } from '../../bin/adapters/storage.ts';
 import { openDocument } from '../../bin/domain/document.ts';
 import { addPage } from '../../bin/domain/pages.ts';
 import { attachComponents } from '../../bin/domain/components.ts';
-import { defaults } from '../../scripts/framework/configuration.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
+import { defaults } from '../../bin/adapters/framework/configuration.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { projectEntities } from '../../scripts/application-docs/adapters/model.ts';
 import { keyOf } from '../../scripts/application-docs/domain/contracts.ts';
@@ -171,8 +171,8 @@ test('machine schema discovery succeeds outside a configured project without pro
 });
 
 test('interactive setup reviews docs import before generation and offers independent docs export', async () => {
-  const { continueSetup } = await import('../../scripts/framework/setup-terminal.ts');
-  const { result } = await import('../../scripts/framework/contracts.ts');
+  const { continueSetup } = await import('../../bin/presentation/terminal/setup-terminal.ts');
+  const { result } = await import('../../bin/adapters/framework/contracts.ts');
   const answers=['no','yes','docs/application','yes','no','yes','yes'], calls=[];
   const execute=async request=>{calls.push(request);return request.options.apply ? result(request.command,{},'applied') : result(request.command,{planHash:'a'.repeat(64)},'planned');};
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},execute,async()=>answers.shift(),()=>{},result('setup',{},'applied'));
@@ -180,7 +180,7 @@ test('interactive setup reviews docs import before generation and offers indepen
   assert.deepEqual(calls[0].args,['docs/application']);assert.equal(calls[1].options.apply,'a'.repeat(64));assert.equal(answers.length,0);
 });
 test('declining reviewed docs changes cancels setup rather than applying or generating', async()=>{
-  const { continueSetup }=await import('../../scripts/framework/setup-terminal.ts');const { result }=await import('../../scripts/framework/contracts.ts');
+  const { continueSetup }=await import('../../bin/presentation/terminal/setup-terminal.ts');const { result }=await import('../../bin/adapters/framework/contracts.ts');
   const answers=['no','yes','','no'], calls=[];
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},async request=>{calls.push(request.command);return result(request.command,{planHash:'b'.repeat(64)},'planned');},async()=>answers.shift(),()=>{},result('setup',{},'applied'));
   assert.equal(outcome.status,'cancelled');assert.deepEqual(calls,['docs import']);

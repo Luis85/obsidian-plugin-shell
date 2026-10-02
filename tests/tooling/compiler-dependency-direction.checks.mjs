@@ -12,15 +12,19 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 // nothing may recreate or import the removed paths.
 const owners = new Map([
   ['scripts/companion/compiler/plan.ts', 'scripts/compiler/adapters/project-plan.ts'],
-  ['scripts/companion/compiler/cli.ts', 'scripts/compiler/adapters/generator-cli.ts'],
-  ['scripts/companion/compiler/fixture-code.ts', 'bin/compiler/adapters/fixture-code.ts'],
-  ['scripts/companion/compiler/project-files.ts', 'scripts/compiler/adapters/project-files.ts'],
+  ['scripts/companion/compiler/cli.ts', 'bin/adapters/framework-cli.ts'],
+  ['scripts/companion/compiler/fixture-code.ts', 'bin/compiler/adapters/fixture-emitter.ts'],
+  ['scripts/companion/compiler/project-files.ts', 'scripts/compiler/adapters/plugin-emitter.ts'],
   // The inward-only compiler core moved to bin/compiler; its former scripts/compiler paths are gone too.
   ...['artifacts', 'contracts', 'diagnostics', 'project-starter', 'references', 'selection', 'source-references']
     .map(name => [`scripts/compiler/domain/${name}.ts`, `bin/compiler/domain/${name}.ts`]),
   ...['pipeline', 'ports'].map(name => [`scripts/compiler/application/${name}.ts`, `bin/compiler/application/${name}.ts`]),
   // The compiler host adapters moved to bin/compiler/adapters.
-  ...['cli', 'clickdummy-emitter', 'dependencies', 'fixture-code', 'fixture-emitter', 'frontend', 'origins', 'reporting', 'target-lowering', 'template-snapshot']
+  // Unreleased compatibility entries were removed without a successor file; their callers use these owners.
+  ['scripts/compiler/adapters/fixture-code.ts', 'bin/compiler/adapters/fixture-emitter.ts'],
+  ['scripts/compiler/adapters/generator-cli.ts', 'bin/adapters/framework-cli.ts'],
+  ['scripts/compiler/adapters/project-files.ts', 'scripts/compiler/adapters/plugin-emitter.ts'],
+  ...['cli', 'clickdummy-emitter', 'dependencies', 'fixture-emitter', 'frontend', 'origins', 'reporting', 'target-lowering', 'template-snapshot']
     .map(name => [`scripts/compiler/adapters/${name}.ts`, `bin/compiler/adapters/${name}.ts`]),
   ...['angular-brick-runtime', 'angular-brick-templates', 'angular-bricks', 'angular-linker', 'build-source', 'configuration', 'emitter',
     'framework-adapter', 'framework-registry', 'plugin-extension', 'serve-source', 'sources']

@@ -6,7 +6,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { buildModel, renderReference, renderDiagnostics } from './render.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const destination = 'docs/user-manual/shell-cli/generated';
-const inputs = ['package.json', 'scripts/framework/catalog.ts', 'scripts/framework/help-text.ts',
+const inputs = ['package.json', 'bin/adapters/framework/catalog.ts', 'bin/adapters/framework/help-text.ts',
   'bin/compiler/domain/diagnostics.ts', 'scripts/documentation/render.mjs', 'scripts/documentation/manual.mjs'];
 const owned = ['reference.md', 'diagnostics.md', 'commands.json', 'manifest.json'];
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -33,8 +33,8 @@ async function safeDirectory(base, relative, create) {
 }
 export async function outputs(base = root) {
   const [{ commands, parameterKinds }, { commandHelp, groups }, { diagnosticCatalog }] = await Promise.all([
-    import(pathToFileURL(join(base, 'scripts/framework/catalog.ts')).href),
-    import(pathToFileURL(join(base, 'scripts/framework/help-text.ts')).href),
+    import(pathToFileURL(join(base, 'bin/adapters/framework/catalog.ts')).href),
+    import(pathToFileURL(join(base, 'bin/adapters/framework/help-text.ts')).href),
     import(pathToFileURL(join(base, 'bin/compiler/domain/diagnostics.ts')).href),
   ]);
   const pkg = JSON.parse(await readFile(join(base, 'package.json'), 'utf8'));

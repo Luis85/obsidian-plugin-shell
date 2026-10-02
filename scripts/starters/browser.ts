@@ -4,7 +4,7 @@ import { validateDefinition } from './validation.ts';
 import { resolveValues } from './render.ts';
 import { customizeStarter } from '../companion/starter-contract.mjs';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
-import { requireThat } from '../framework/contracts.ts';
+import { requireThat } from '../../bin/adapters/framework/contracts.ts';
 import type { StarterDefinition } from './types.ts';
 export const STARTER_MAX_BYTES = 4_000_000;
 export function parseBrowserStarter(text: string): StarterDefinition {

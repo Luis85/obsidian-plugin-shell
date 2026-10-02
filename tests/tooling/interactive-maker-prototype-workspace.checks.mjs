@@ -7,7 +7,7 @@ import {
   readPrototypeDocument as relocatedReadDocument,
   readPrototypeBundle as relocatedReadBundle,
 } from '../../bin/adapters/framework/prototype-workspace.ts';
-import * as legacy from '../../scripts/framework/prototype-workspace.ts';
+import * as legacy from '../../bin/adapters/framework/prototype-workspace.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

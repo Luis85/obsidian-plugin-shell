@@ -4,9 +4,9 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { handoutSections } from '../../scripts/framework/handout-questions.ts';
-import { digest, makeSnapshot, renderHandout, parseAnswers, readSnapshot, validateHandout, refreshHandout, HANDOUT_PATH } from '../../scripts/framework/handout-model.ts';
-import { loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout, portablePath } from '../../scripts/framework/handout-workspace.ts';
+import { handoutSections } from '../../bin/adapters/framework/handout-questions.ts';
+import { digest, makeSnapshot, renderHandout, parseAnswers, readSnapshot, validateHandout, refreshHandout, HANDOUT_PATH } from '../../bin/adapters/framework/handout-model.ts';
+import { loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout, portablePath } from '../../bin/adapters/framework/handout-workspace.ts';
 const base = makeSnapshot('docs/prds', [{ path: 'docs/prds/PRD-1.md', sha256: digest('# PRD') }]);
 const full = () => renderHandout(base).replace(/- \[ \] \*\*REQUIRED\*\*/g, '- [x] **REQUIRED**')
   .replace(/  - Answer:.*$/gm, '  - Answer: Reviewed concrete decision with details in docs/prds/PRD-1.md#scope.')
@@ -303,7 +303,7 @@ test('legacy handout entry delegates to the integrated reviewed-plan protocol', 
 
 test('canonical sha256 helper preserves framework and handout byte fingerprints', async () => {
   const { sha256 } = await import('../../scripts/shared/hash.mjs');
-  const { hash } = await import('../../scripts/framework/files.ts');
+  const { hash } = await import('../../bin/adapters/framework/files.ts');
   assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   for (const bytes of ['Unicode ⛄', Buffer.from([0, 255, 1, 0])]) {
     assert.equal(hash(bytes), sha256(bytes));

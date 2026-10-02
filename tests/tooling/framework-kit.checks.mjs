@@ -5,13 +5,13 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler, upgradePlan } from '../../scripts/framework/kit.ts';
+import { assembleKit, installedCompiler, upgradePlan } from '../../bin/adapters/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { zip } from '../../scripts/framework/zip.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { kitManifest, verifyKit } from '../../scripts/framework/kit-integrity.ts';
+import { kitManifest, verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {
   return spawnSync(process.execPath, [join(dir, 'bin/app'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });

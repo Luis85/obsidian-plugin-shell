@@ -9,10 +9,10 @@ import { airshipOptions, airshipConfig, toolingSchema } from '../../scripts/comp
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { planArtifacts, applyProject } from '../../scripts/compiler/adapters/workspace-plan.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
-import { airshipEnvironment } from '../../scripts/framework/airship.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { airshipEnvironment } from '../../bin/adapters/framework/airship.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const source = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
 const enabled = () => withAirshipOption(structuredClone(source), { airship: true });
@@ -168,8 +168,8 @@ test('generated preview entry points are analyzed and inert tooling stays inside
 });
 
 test('every optional Airship command has real parseable help examples for the source-driven manual',async()=>{
-  const {commands,parseCliArguments}=await import('../../scripts/framework/catalog.ts');
-  const {commandHelp}=await import('../../scripts/framework/help-text.ts');
+  const {commands,parseCliArguments}=await import('../../bin/adapters/framework/catalog.ts');
+  const {commandHelp}=await import('../../bin/adapters/framework/help-text.ts');
   const entries=commands.filter(entry=>entry.id.startsWith('airship '));assert.equal(entries.length,6);
   for(const entry of entries){const help=commandHelp(entry);assert.ok(help.examples.length,entry.id);
     for(const example of help.examples){const request=parseCliArguments(example.split(' ').slice(2));assert.equal(request.command,entry.id);}}

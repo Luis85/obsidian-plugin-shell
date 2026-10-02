@@ -47,9 +47,9 @@ test('source-only evidence inventories include the skill and enforce existing pe
 });
 test('actual archive assembler preserves exact skill bytes in its verified template inventory', { timeout: 60000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
-  const { assembleKit } = await import('../../scripts/framework/kit.ts');
+  const { assembleKit } = await import('../../bin/adapters/framework/kit.ts');
   let compiler;
-  try { const { installedCompiler } = await import('../../scripts/framework/kit.ts'); compiler = await installedCompiler(); }
+  try { const { installedCompiler } = await import('../../bin/adapters/framework/kit.ts'); compiler = await installedCompiler(); }
   catch (error) {
     // Explicitly test assembly only on a dependency-free host. This is NOT TS compilation evidence.
     if (error.code !== 'ERR_MODULE_NOT_FOUND') throw error;

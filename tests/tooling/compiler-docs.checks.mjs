@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { diagnosticCatalog } from '../../bin/compiler/domain/diagnostics.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 test('compiler documentation includes every stable diagnostic with the exact repair guidance',async()=>{

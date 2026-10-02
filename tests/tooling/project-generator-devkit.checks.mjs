@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
+import { projectFiles } from '../support/project-render.mjs';
 import { planProject, applyProject } from '../../scripts/compiler/adapters/project-plan.ts';
 import { renderTemplate } from '../../scripts/companion/compiler/devkit-files.ts';
 import { rebaseMarkdown, relocatedPath } from '../../scripts/companion/compiler/framework-docs.ts';

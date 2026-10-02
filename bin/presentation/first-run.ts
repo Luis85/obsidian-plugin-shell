@@ -2,7 +2,7 @@ import { firstRunPlan } from '../adapters/first-run-plan.ts';
 import { executeFirstRun } from '../adapters/first-run.ts';
 import { loadSettings } from '../adapters/user-settings.ts';
 import { choose, confirm, input, safe, type Prompts } from './prompts.ts';
-import type { Context } from '../../scripts/framework/contracts.ts';
+import type { Context } from '../adapters/framework/contracts.ts';
 /** Execution consent is separate from source generation and always defaults to Skip. */
 export async function firstRunWizard(ui: Prompts, context: Context): Promise<string | undefined> {
   const mode = await choose(ui, 'First run of the new application', [

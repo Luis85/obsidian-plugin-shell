@@ -5,10 +5,10 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
-import { loadPrototypeWorkspace } from '../../scripts/framework/prototype-workspace.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { loadPrototypeWorkspace } from '../../bin/adapters/framework/prototype-workspace.ts';
 import { api, document, main, alternate } from '../support/prototype-fixture.mjs';
 const frameworkRoot=fileURLToPath(new URL('../../',import.meta.url));
 async function fixture(t) {
@@ -123,7 +123,7 @@ test('in-place managed generation names adoption when canonical design is absent
   assert.equal(result.status,'failed');assert.match(result.diagnostics[0].message,/adopt/);
 });
 test('managed-generation adapter rejects a lookalike provenance receipt before any writes',async t=>{
-  const {managedGenerationPlan}=await import('../../scripts/framework/prototype-generation.ts');
+  const {managedGenerationPlan}=await import('../../bin/adapters/framework/prototype-generation.ts');
   const {createFilePlan}=await import('../../scripts/shared/file-plan.mjs');
   const ctx=await activated(t),target=join(ctx.root,'generated'),receipt=join(target,'.companion/prototype-selection.json');
   await mkdir(dirname(receipt),{recursive:true});

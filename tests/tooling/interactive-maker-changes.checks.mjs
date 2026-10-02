@@ -8,7 +8,7 @@ import {
   vaultPlan as relocatedVaultPlan,
   releaseVersionPlan as relocatedReleaseVersionPlan,
 } from '../../bin/adapters/framework/changes.ts';
-import * as legacy from '../../scripts/framework/changes.ts';
+import * as legacy from '../../bin/adapters/framework/changes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */

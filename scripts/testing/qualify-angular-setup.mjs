@@ -6,7 +6,7 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { sha256 } from '../shared/hash.mjs';
-import { assembleKit, installedCompiler } from '../framework/kit.ts';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { assembleStarterPack } from '../starters/operations.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const output = join(frameworkRoot, 'reports/angular-setup-acceptance');

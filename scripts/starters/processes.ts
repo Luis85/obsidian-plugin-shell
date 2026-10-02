@@ -1,9 +1,9 @@
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.ts';
-import { exists, hash, readBounded } from '../framework/files.ts';
-import { npmEntry, runNode } from '../framework/process.ts';
+import { exists, hash, readBounded } from '../../bin/adapters/framework/files.ts';
+import { npmEntry, runNode } from '../../bin/adapters/framework/process.ts';
 import { parseJsonData } from '../contracts/json-data.ts';
-import { result, OperationError, requireThat, stringOption, type Context, type Request, type Result } from '../framework/contracts.ts';
+import { result, OperationError, requireThat, stringOption, type Context, type Request, type Result } from '../../bin/adapters/framework/contracts.ts';
 import { array, record, fields, identifier, readProcesses, text } from './validation.ts';
 import { checkDirectoryChain } from './repository.ts';
 import { receiptFile } from './project.ts';

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { included, standaloneSource } from '../../scripts/framework/distribution.ts';
+import { included, standaloneSource } from '../../bin/adapters/framework/distribution.ts';
 import { maintainerOnly, rebaseMarkdown } from '../../scripts/companion/compiler/framework-docs.ts';
 
 const root = 'docs/concepts/native-file-integration-handoff/';

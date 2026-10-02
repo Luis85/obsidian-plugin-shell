@@ -3,7 +3,7 @@ import { mkdtemp, readFile, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { prototypesRead as relocatedRead, prototypesCompare as relocatedCompare, prototypesPlan as relocatedPlan } from '../../bin/adapters/framework/prototypes.ts';
-import * as legacy from '../../scripts/framework/prototypes.ts';
+import * as legacy from '../../bin/adapters/framework/prototypes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */

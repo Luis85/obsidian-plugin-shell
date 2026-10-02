@@ -3,7 +3,7 @@ import {
   HANDOUT_LIMIT, HANDOUT_PATH, HandoutError, digest, ensure, makeSnapshot, renderHandout,
   parseAnswers, readSnapshot, validateHandout, refreshHandout,
 } from '../../bin/adapters/framework/handout-model.ts';
-import * as legacy from '../../scripts/framework/handout-model.ts';
+import * as legacy from '../../bin/adapters/framework/handout-model.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const base = makeSnapshot('docs/prds', [{ path: 'docs/prds/PRD-1.md', sha256: digest('# PRD') }]);

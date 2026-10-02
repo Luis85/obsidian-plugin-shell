@@ -6,7 +6,7 @@ import { object, keys, list } from '../domain/data.ts';
 import { projectPath, type UserSettings } from '../domain/user-settings.ts';
 import { type PrdMarkdown } from '../domain/prd-markdown.ts';
 import { requireSketch } from '../domain/errors.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from './framework/files.ts';
 import { guardedText } from './user-settings.ts';
 import type { Entry } from './storage.ts';
 export interface PrdRecord extends PrdMarkdown { source: { path: string; sha256: string }; intake: 'unmapped' }

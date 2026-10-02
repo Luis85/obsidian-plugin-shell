@@ -10,8 +10,8 @@ import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/ind
 import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { withStorybookOptions, projectToolingSchema } from '../../scripts/companion/tooling-contract.ts';
 import { storybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);
 const source = await readFile(new URL('../fixtures/companion/detail-v3.json', import.meta.url), 'utf8');
 const fixture = () => migrateAuthoringDocument(JSON.parse(source)).document;

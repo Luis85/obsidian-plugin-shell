@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { included } from '../../scripts/framework/distribution.ts';
+import { included } from '../../bin/adapters/framework/distribution.ts';
 import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
 
 const root = 'docs/concepts/jev-prompt-editor/';

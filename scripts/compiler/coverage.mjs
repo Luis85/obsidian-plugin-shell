@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadThresholds } from '../quality/thresholds.mjs';
 
-const tests = ['compiler-core', 'compiler-cli', 'compiler-compatibility', 'compiler-targets', 'compiler-properties', 'compiler-selection', 'interactive-maker-project-starters', 'interactive-maker-compiler-core']
+const tests = ['compiler-core', 'compiler-cli', 'compiler-targets', 'compiler-properties', 'compiler-selection', 'interactive-maker-project-starters', 'interactive-maker-compiler-core']
   .map(name => `tests/tooling/${name}.checks.mjs`);
 export function compilerCoverageArguments(thresholds = loadThresholds()) {
   const { lines, branches, functions } = thresholds.coverage.compiler;

@@ -1,5 +1,5 @@
 import { createFilePlan } from '../../shared/file-plan.ts';
-import { configurationPlan } from '../../framework/changes.ts';
+import { configurationPlan } from '../../../bin/adapters/framework/changes.ts';
 import type { AuthoringDocument } from '../../companion/authoring-contract.ts';
 import { docsObject as object, insist } from '../domain/contracts.ts';
 import { decode } from './filesystem.ts';

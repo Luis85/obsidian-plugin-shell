@@ -86,7 +86,7 @@ test('shared discovery accepts the real launcher and TypeScript sources but reje
   const catalog = capabilityCatalog(), maker = catalog.operations.find(item => item.id === 'source.make');
   assert.equal(maker.cli.command, 'node bin/app make');
   assert.ok(maker.cli.sourceFiles.includes('bin/app'));
-  assert.ok(maker.cli.sourceFiles.includes('scripts/framework/cli.ts'));
+  assert.ok(maker.cli.sourceFiles.includes('bin/adapters/framework-cli.ts'));
   assert.equal(validateCatalog(catalog), true);
   for (const path of ['../bin/app', '/bin/app', 'bin/../app', 'app.mjs', 'shell.mjs', 'scripts/../bin/app', 'scripts//cli.ts', 'scripts/cli.js', 'node_modules/tool.mjs', 'scripts\\cli.ts']) {
     const invalid = structuredClone(catalog);

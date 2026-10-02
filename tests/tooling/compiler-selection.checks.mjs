@@ -10,8 +10,8 @@ import { planArtifacts, applyProject } from '../../scripts/compiler/adapters/wor
 import { planProject } from '../../scripts/compiler/adapters/project-plan.ts';
 import { projectModel, digest } from '../../scripts/companion/compiler/model.ts';
 import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
-import { descriptor } from '../../scripts/framework/catalog.ts';
+import { projectFiles } from '../support/project-render.mjs';
+import { descriptor } from '../../bin/adapters/framework/catalog.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const starter = migrateAuthoringDocument(JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'))).document;

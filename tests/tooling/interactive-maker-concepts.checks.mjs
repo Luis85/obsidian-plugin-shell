@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { inspectConcept as relocatedInspect, conceptImportPlan as relocatedImport } from '../../bin/adapters/framework/concepts.ts';
-import * as legacy from '../../scripts/framework/concepts.ts';
+import * as legacy from '../../bin/adapters/framework/concepts.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

@@ -17,7 +17,7 @@ export function words(line) {
   return result;
 }
 export async function audit(base = root) {
-  const { parseCliArguments } = await import(pathToFileURL(join(base, 'scripts/framework/catalog.ts')).href);
+  const { parseCliArguments } = await import(pathToFileURL(join(base, 'bin/adapters/framework/catalog.ts')).href);
   const folder = join(base, 'docs/user-manual/shell-cli');
   const files = (await readdir(folder)).filter(name => name.endsWith('.md')).sort();
   let checked = 0, separateMemory = 0, links = 0;

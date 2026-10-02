@@ -5,12 +5,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { runNode, npmEntry } from '../../scripts/framework/process.ts';
+import { runNode, npmEntry } from '../../bin/adapters/framework/process.ts';
 import { runNodeProcess, runNodeScript as typedSharedRunNode } from '../../scripts/shared/process.ts';
 import { runNodeScript as legacySharedRunNode } from '../../scripts/shared/process.mjs';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { failure } from '../../scripts/framework/contracts.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { failure } from '../../bin/adapters/framework/contracts.ts';
 import { fixtureManifest } from './test-data-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t, code = '') {
@@ -98,9 +98,6 @@ test('typed shared process runner remains the canonical compatibility implementa
 });
 
 test('framework process adapter uses the shared Node spawn lifecycle', async t => {
-  // Stage D relocated the policy adapter; the former path only re-exports it.
-  const shim = await readFile(join(root, 'scripts/framework/process.ts'), 'utf8');
-  assert.equal(shim.trim(), "export * from '../../bin/adapters/framework/process.ts';");
   const source = await readFile(join(root, 'bin/adapters/framework/process.ts'), 'utf8');
   assert.doesNotMatch(source, /node:child_process|StringDecoder/);
   assert.match(source, /runNodeProcess/);

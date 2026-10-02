@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { assertNoOrphanedPrototypes as relocated } from '../../bin/adapters/framework/prototype-integrity.ts';
-import * as legacy from '../../scripts/framework/prototype-integrity.ts';
+import * as legacy from '../../bin/adapters/framework/prototype-integrity.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

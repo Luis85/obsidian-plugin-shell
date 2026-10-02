@@ -110,7 +110,7 @@ test('merged tooling and scoped generation preserve the bound editor without mut
   const selected=generationSelection(result.model,result.artifacts,'page:'+d.design.editors.bindings[0].surface);
   assert.ok(selected.sharedPaths.includes(result.model.sourceRoot+'/bootstrap/journey-workspace.ts'));
   assert.ok(selected.selectedPaths.some(path=>path.includes('/screens/')));
-  const {parseCliArguments}=await import('../../scripts/framework/catalog.ts');
+  const {parseCliArguments}=await import('../../bin/adapters/framework/catalog.ts');
   const request=parseCliArguments(['generate','--scope','page:'+d.design.editors.bindings[0].surface,'--storybook','off','--storybook-stories','on']);
   assert.equal(request.options.scope,'page:'+d.design.editors.bindings[0].surface);
   assert.equal(request.options.storybook,'off');assert.equal(request.options['storybook-stories'],'on');

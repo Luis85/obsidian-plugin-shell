@@ -1,6 +1,6 @@
 import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { join } from 'node:path';
-import { exists, hash } from '../../scripts/framework/files.ts';
+import { exists, hash } from './framework/files.ts';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { pluginFrameworkAdapters } from '../../plugins/runtime.ts';
 import { generationReceipt } from '../../scripts/compiler/adapters/workspace-plan.ts';

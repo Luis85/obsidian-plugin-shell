@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { companionProjectSchema } from '../../scripts/companion/schema/project.mjs';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { schemaCorpus } from './companion-schema-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const corpus = schemaCorpus();

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import {
   portablePath, loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout,
 } from '../../bin/adapters/framework/handout-workspace.ts';
-import * as legacy from '../../scripts/framework/handout-workspace.ts';
+import * as legacy from '../../bin/adapters/framework/handout-workspace.ts';
 import { HANDOUT_PATH, readSnapshot } from '../../bin/adapters/framework/handout-model.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */

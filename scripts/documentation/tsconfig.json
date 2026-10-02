@@ -13,9 +13,9 @@
     "typeRoots": ["../../tooling/documentation/node_modules/@types"]
   },
   "files": [
-    "../framework/catalog.ts",
-    "../framework/help-text.ts",
-    "../framework/contracts.ts",
+    "../../bin/adapters/framework/catalog.ts",
+    "../../bin/adapters/framework/help-text.ts",
+    "../../bin/adapters/framework/contracts.ts",
     "../../bin/compiler/domain/contracts.ts",
     "../../bin/compiler/domain/diagnostics.ts"
   ]

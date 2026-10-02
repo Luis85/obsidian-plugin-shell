@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { runNode } from '../../scripts/framework/process.ts';
-import { OperationError, type Context } from '../../scripts/framework/contracts.ts';
+import { runNode } from './framework/process.ts';
+import { OperationError, type Context } from './framework/contracts.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { claimFirstRun } from './first-run-lock.ts';
 import { firstRunPlan, firstRunReport, validateFirstRunInputs, type FirstRunPlan, type FirstRunStep } from './first-run-plan.ts';

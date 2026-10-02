@@ -10,7 +10,6 @@
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
     "scripts/testing/node-reporter.mjs",
-    "scripts/framework/release-entry.ts",
     "configs/testing/vitest.obsidian.config.mjs",
     "scripts/testing/evidence-vitest-reporter.mjs",
     "scripts/styles/export-host-css.mjs",
@@ -160,8 +159,6 @@
     "docs/concepts/companion/editor/prototypes.css",
     "scripts/companion/native-contract.mjs",
     "scripts/companion/project-contract.mjs",
-    "app.mjs",
-    "shell.mjs",
     "scripts/companion/runtime/operation.ts",
     "docs/concepts/companion/src/storymap-model.js",
     "docs/concepts/companion/src/storymap-review.js",
@@ -199,8 +196,6 @@
     "docs/concepts/companion/src/project-starters.css",
     "scripts/companion/starter-files.mjs",
     "scripts/companion/qualify-starter.mjs",
-    "scripts/framework/operations.ts",
-    "scripts/framework/cli.ts",
     "scripts/concepts/mvp-bridge.js",
     "scripts/concepts/prototype-bridge.js",
     "bin/app.ts",
@@ -398,9 +393,7 @@
         "name": "tooling",
         "patterns": [
           "scripts/**",
-          "configs/**",
-          "app.mjs",
-          "shell.mjs"
+          "configs/**"
         ]
       },
       {

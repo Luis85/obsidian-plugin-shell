@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { setupSource as relocated } from '../../bin/adapters/framework/setup-source.ts';
-import * as legacy from '../../scripts/framework/setup-source.ts';
-import { starterCatalog } from '../../scripts/framework/starter-project.ts';
+import * as legacy from '../../bin/adapters/framework/setup-source.ts';
+import { starterCatalog } from '../../bin/adapters/framework/starter-project.ts';
 import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 

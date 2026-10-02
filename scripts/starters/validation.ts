@@ -1,4 +1,4 @@
-import { OperationError, requireThat } from '../framework/contracts.ts';
+import { OperationError, requireThat } from '../../bin/adapters/framework/contracts.ts';
 import { readProjectGenerator } from '../../bin/compiler/domain/project-starter.ts';
 import { assertDesignData } from '../contracts/json-data.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';

@@ -1,7 +1,7 @@
 import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
-import { descriptor, parameterKinds } from '../../scripts/framework/catalog.ts';
+import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { resolve } from 'node:path';

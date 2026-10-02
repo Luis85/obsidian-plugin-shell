@@ -11,7 +11,7 @@ import { chromium } from '@playwright/test';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { projectConfigs } from '../shared/project-configs.mjs';
-import { airshipEnvironment } from '../framework/airship.ts';
+import { airshipEnvironment } from '../../bin/adapters/framework/airship.ts';
 const root = process.cwd(), out = resolve(root, 'reports/airship-qualification');
 const project = join(out, 'project space'), npm = process.env.QUALIFIED_NPM;
 assert.ok(npm, 'QUALIFIED_NPM must select the qualified npm CLI.');

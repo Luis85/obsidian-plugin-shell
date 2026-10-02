@@ -10,7 +10,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
+import { projectFiles } from '../support/project-render.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // Resolved through the package manifest so the check also runs where node_modules sits in an ancestor directory.
 const vitest = join(dirname(createRequire(import.meta.url).resolve('vitest/package.json')), 'vitest.mjs');

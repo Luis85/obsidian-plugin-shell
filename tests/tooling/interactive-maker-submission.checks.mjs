@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { manifestRules, versionsRule, lintRule, submissionCheck } from '../../bin/adapters/framework/submission.ts';
-import * as legacySubmission from '../../scripts/framework/submission.ts';
+import * as legacySubmission from '../../bin/adapters/framework/submission.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const valid = {

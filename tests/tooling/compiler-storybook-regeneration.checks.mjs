@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 /** Source-only fixture, not a compiled distribution. Works with showcase and example-removed templates. */

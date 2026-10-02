@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { readFeatureBrainstorm, featureConcept, brainstormGuide, brainstormSchema } from '../../bin/domain/brainstorm.ts';
 import { captureRequest } from './interactive-maker-brainstorm-fixture.mjs';
 
