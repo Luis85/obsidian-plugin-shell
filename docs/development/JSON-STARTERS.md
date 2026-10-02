@@ -45,7 +45,7 @@ from that archive. The resulting starter files must sit next to the launcher as
 
 ```text
 workspace/
-  shell.mjs
+  bin/app
   .framework/
   configs/
     starters/
@@ -144,7 +144,7 @@ prototype interview supplies identity and design, and the compiler owns every fi
 Project starters run through `node bin/app new` (terminal) or `new guide --starter
 <id>` / `new --input` (agents), which prepare a reviewed prototype package; `new <dir>
 --starter <project-starter>` refuses with `STARTER_KIND`. The maker reads them from
-the starters folder beside `shell.mjs`. See [project starters](../../bin/PROJECT-STARTERS.md).
+the `configs/starters/` folder in the package root beside `bin/`. See [project starters](../../bin/PROJECT-STARTERS.md).
 Generic compiler/runtime/template code still belongs to the shell; starter-specific
 project designs and choices belong to the JSON. Native feature behavior retains
 the existing compiler's scaffold and acceptance boundaries.

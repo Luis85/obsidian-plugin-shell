@@ -35,7 +35,7 @@ node bin/app framework pack --out ./plugin-framework.zip --yes
 
 The packer compiles CLI TypeScript and creates an integrity inventory. It refuses unsafe/protected destinations and replacement of a different existing archive. Creating this ZIP does not upload it or authorize a release.
 
-Build the manual from the same source candidate before packaging. The inspected distribution includes the documentation tree in `.framework/template/docs/`; the separate manual workflow also produces a readable handbook and HTML artifact. Do not claim that a separately built website automatically becomes a top-level ZIP asset, or that an unbuilt generated reference is already in the kit. Check the actual archive inventory as part of release qualification.
+Build the manual from the same source candidate before packaging. The inspected distribution includes the documentation tree in `bin/template/docs/`; the separate manual workflow also produces a readable handbook and HTML artifact. Do not claim that a separately built website automatically becomes a top-level ZIP asset, or that an unbuilt generated reference is already in the kit. Check the actual archive inventory as part of release qualification.
 
 ## Prepare, inspect and rehearse a release
 
