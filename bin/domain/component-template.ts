@@ -97,8 +97,15 @@ function fields(row: Record<string, unknown>, allowed: readonly string[]): void 
   requireSketch(Object.keys(row).every(key => allowed.includes(key)), 'TEMPLATE_INVALID', 'Unknown component-template field.');
 }
 
+function containsControlCharacter(value: string): boolean {
+  return [...value].some(character => {
+    const code = character.charCodeAt(0);
+    return code < 32 || code === 127;
+  });
+}
+
 function text(value: unknown, label: string, max = 1000): string {
-  requireSketch(typeof value === 'string' && value.trim().length > 0 && value.length <= max && !/[\u0000-\u001f\u007f]/.test(value),
+  requireSketch(typeof value === 'string' && value.trim().length > 0 && value.length <= max && !containsControlCharacter(value),
     'TEMPLATE_INVALID', 'Invalid ' + label + '.');
   return value;
 }
