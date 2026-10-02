@@ -58,10 +58,10 @@ test('extracted compiled shell contains no starter data; a separate pack enables
   const files = await assembleKit({ root, frameworkRoot: root }, await compiler());
   assert.ok(!files.some(file => /(?:^|\/)configs\/starters\//.test(file.path) || file.path.includes('/companion/starters/')));
   assert.ok(!files.some(file => file.path.endsWith('/companion/companion-project.json') || file.path.includes('/companion/seeds/')));
-  for (const asset of ['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt']) assert.ok(files.some(file => file.path === '.framework/template/docs/concepts/companion/vendor/' + asset), asset);
+  for (const asset of ['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt']) assert.ok(files.some(file => file.path === 'bin/template/docs/concepts/companion/vendor/' + asset), asset);
   const archive = zip(files); await extractArchive(archive, shellRoot);
   const cli = args => {
-    const result = spawnSync(process.execPath, [join(shellRoot, 'shell.mjs'), ...args, '--json'], { cwd: shellRoot, encoding: 'utf8', timeout: 90000, maxBuffer: 16_000_000 });
+    const result = spawnSync(process.execPath, [join(shellRoot, 'bin/app'), ...args, '--json'], { cwd: shellRoot, encoding: 'utf8', timeout: 90000, maxBuffer: 16_000_000 });
     assert.equal(result.stdout.trim().split('\n').length, 1, result.stderr); return { code: result.status, result: JSON.parse(result.stdout) };
   };
   const bare = cli(['starters', 'list']); assert.equal(bare.code, 0, JSON.stringify(bare)); assert.deepEqual(bare.result.data.starters, []);

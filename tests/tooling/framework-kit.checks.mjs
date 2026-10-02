@@ -14,7 +14,7 @@ import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { kitManifest, verifyKit } from '../../scripts/framework/kit-integrity.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {
-  return spawnSync(process.execPath, [join(dir, 'app.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
+  return spawnSync(process.execPath, [join(dir, 'bin/app'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
 }
 test('compiled kit bootstraps, imports and generates without dependencies or Git', { timeout: 300000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
@@ -27,15 +27,15 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok(!extracted.some(path => /docs\/concepts\/companion\/(?:src|starters|seeds)\/|(?:^|\/)configs\/starters\//.test(path)));
   // Only the exact reviewed compiler runtime libraries and their notices ship; prototype runtimes stay maintainer-only.
   const vendor = ['d3-NOTICE.txt', 'packages.json', 'vue-flow-core-LICENSE.txt', 'vue-flow-core.iife.js', 'vue-flow.scoped.css', 'vueuse-NOTICE.txt'];
-  assert.deepEqual(extracted.filter(path => /docs\/concepts\/companion\/vendor\//.test(path)).sort(), vendor.map(name => '.framework/template/docs/concepts/companion/vendor/' + name));
+  assert.deepEqual(extracted.filter(path => /docs\/concepts\/companion\/vendor\//.test(path)).sort(), vendor.map(name => 'bin/template/docs/concepts/companion/vendor/' + name));
   assert.ok(!extracted.some(path => path.endsWith('docs/concepts/companion/index.html')));
   assert.ok(!(await readdir(dir)).includes('node_modules')); assert.ok(!(await readdir(dir)).includes('.git'));
   assert.ok((await verifyKit(dir)).files.length > 100);
-  const pluginConfigPath = join(dir, '.framework/compiled/plugins/example-extension/config.json');
+  const pluginConfigPath = join(dir, 'bin/plugins/example-extension/config.json');
   const pluginConfig = await readFile(pluginConfigPath, 'utf8');
   // Plugin code is bundled into app.js; its config.json stays editable data beside the bundle.
-  assert.ok(files.some(file => file.path === '.framework/compiled/app.js'));
-  assert.ok(!files.some(file => file.path === '.framework/compiled/plugins/runtime.js'));
+  assert.ok(files.some(file => file.path === 'bin/app.js'));
+  assert.ok(!files.some(file => file.path === 'bin/plugins/runtime.js'));
   await writeFile(pluginConfigPath, JSON.stringify({ ...JSON.parse(pluginConfig), enabled: true }, null, 2) + '\n');
   let output = cli(dir, ['example', 'send', '--message', 'Compiled extension', '--json']);
   assert.equal(output.status, 0, output.stderr + output.stdout);
@@ -58,16 +58,16 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok((await verifyKit(dir)).files.length > 100, 'restored plugin config keeps the extracted kit valid');
   output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
-  assert.deepEqual(files.filter(file => file.path.startsWith('.framework/compiled/') && file.path.endsWith('.js')).map(file => file.path), ['.framework/compiled/app.js']);
-  const templateOwnership = files.find(file => file.path === '.framework/template/scripts/examples/ownership.json');
-  const manifestRecord = JSON.parse(files.find(file => file.path === '.framework/kit.json').bytes)
+  assert.deepEqual(files.filter(file => file.path.startsWith('.framework/compiled/') && file.path.endsWith('.js')).map(file => file.path), ['bin/app.js']);
+  const templateOwnership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json');
+  const manifestRecord = JSON.parse(files.find(file => file.path === 'bin/kit.json').bytes)
     .files.find(file => file.path === templateOwnership.path);
   assert.equal(manifestRecord.hash, hash(templateOwnership.bytes), 'adapted template ownership must match kit integrity metadata');
-  assert.ok(!files.some(file => file.path === '.framework/compiled/scripts/examples/ownership.json'), 'no stale per-file runtime metadata');
-  assert.ok(!files.some(file => file.path.startsWith('.framework/compiled/node_modules/')), 'vendor runtime is bundled, not copied');
-  assert.ok((await readFile(join(dir, '.framework/compiled/app.js'), 'utf8')).length > 1000);
+  assert.ok(!files.some(file => file.path === 'bin/scripts/examples/ownership.json'), 'no stale per-file runtime metadata');
+  assert.ok(!files.some(file => file.path.startsWith('bin/node_modules/')), 'vendor runtime is bundled, not copied');
+  assert.ok((await readFile(join(dir, 'bin/app.js'), 'utf8')).length > 1000);
   for (const name of ['configs/types/tsconfig.sitemap.json', 'configs/types/tsconfig.authoring.json', 'configs/templates/atoms/button.json']) {
-    assert.deepEqual(await readFile(join(dir, '.framework/template', name)), await readFile(join(root, name)), name + ' must ship before generation');
+    assert.deepEqual(await readFile(join(dir, 'bin/template', name)), await readFile(join(root, name)), name + ' must ship before generation');
   }
   output = cli(dir, ['templates', 'list', '--atomic-level', 'atom', '--json']);
   assert.equal(output.status, 0, output.stderr + output.stdout);
@@ -109,7 +109,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.equal(JSON.parse(output.stdout).diagnostics[0].code, 'SETUP_INPUT_CHANGED');
   assert.ok(!(await readdir(join(dir, '.framework'))).includes('setup-progress.json'), 'stale approval cannot write stage intent');
   assert.ok(!(await readdir(dir)).includes('node_modules'), 'stale approval cannot launch dependency tooling');
-  const compiled = join(dir, '.framework/compiled/app.js'); await writeFile(compiled, (await readFile(compiled, 'utf8')) + '\n// drift\n');
+  const compiled = join(dir, 'bin/app.js'); await writeFile(compiled, (await readFile(compiled, 'utf8')) + '\n// drift\n');
   await assert.rejects(verifyKit(dir), /fingerprint mismatch/);
 });
 test('compiled kit preserves Storybook overrides and intake ownership across replay', { timeout: 300000 }, async t => {
@@ -140,16 +140,19 @@ test('compiled kit preserves Storybook overrides and intake ownership across rep
   output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stdout);
 });
 test('kit manifest rejects traversal and duplicate case aliases', () => {
-  const base = { schemaVersion: 1, version: '0.4.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64), files: [{ path: '.framework/template/LICENSE', hash: 'a'.repeat(64), bytes: 1 }], bootstrap: ['shell.mjs', 'package.json', 'README.md', 'LICENSE'].map(path => ({path, hash: 'b'.repeat(64)})) };
+  const bootstrap = ['bin/app', 'package.json', 'README.md', 'LICENSE'].map(path => ({ path, hash: 'b'.repeat(64) }));
+  const base = { schemaVersion: 2, version: '0.4.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64),
+    files: [{ path: 'bin/template/LICENSE', hash: 'a'.repeat(64), bytes: 1 }], bootstrap };
   assert.equal(kitManifest(base).version, '0.4.0');
-  // Current kits add app.mjs and bin/app; the pre-rename shell.mjs-only set stays valid for existing projects.
-  const bootstrap = paths => paths.map(path => ({ path, hash: 'b'.repeat(64) }));
-  assert.equal(kitManifest({ ...base, bootstrap: bootstrap(['app.mjs', 'bin/app', 'shell.mjs', 'package.json', 'README.md', 'LICENSE']) }).bootstrap.length, 6);
-  for (const paths of [['app.mjs', 'package.json', 'README.md', 'LICENSE'], ['app.mjs', 'bin/app', 'package.json', 'README.md', 'LICENSE'], ['app.mjs', 'app.mjs', 'shell.mjs', 'package.json', 'README.md', 'LICENSE'], ['app.mjs', 'bin/app', 'shell.mjs', 'package.json', 'README.md', 'LICENSE', 'bin/other']]) {
-    assert.throws(() => kitManifest({ ...base, bootstrap: bootstrap(paths) }), /bootstrap/i, paths.join(','));
-  }
-  assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: '.framework/template/../../outside' }] }));
-  assert.throws(() => kitManifest({ ...base, files: [...base.files, { ...base.files[0], path: '.framework/template/license' }] }));
+  for (const paths of [
+    ['package.json', 'README.md', 'LICENSE'],
+    ['bin/app', 'bin/app', 'package.json', 'README.md', 'LICENSE'],
+    ['bin/app', 'package.json', 'README.md', 'LICENSE', 'bin/other'],
+  ]) assert.throws(() => kitManifest({ ...base, bootstrap: paths.map(path => ({ path, hash: 'b'.repeat(64) })) }), /bootstrap/i, paths.join(','));
+  assert.throws(() => kitManifest({ ...base, schemaVersion: 1 }), /version/i);
+  assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: 'bin/template/../../outside' }] }));
+  assert.throws(() => kitManifest({ ...base, files: [...base.files, { ...base.files[0], path: 'bin/template/license' }] }));
+  assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: '.framework/template/LICENSE' }] }));
 });
 test('archive rejects traversal and duplicate entries', () => {
   assert.throws(() => zip([{ path: '../outside', bytes: Buffer.from('x') }]));
@@ -160,18 +163,21 @@ test('archive rejects traversal and duplicate entries', () => {
 test('kit verification reopens bytes on every call and rejects source links and size drift', async t => {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'kit-read-contract-')));
   t.after(() => rm(root, { recursive: true, force: true }));
+  await mkdir(join(root, 'bin/template'), { recursive: true });
   const files = [];
   for (let i=0; i<18; i++) {
-    const path = `.framework/${i<9?'template':'compiled'}/source-${i}.txt`, bytes = Buffer.from(`source-${i}`);
-    await mkdir(join(root, '.framework', i<9?'template':'compiled'), { recursive: true });
+    const path = `bin/template/source-${i}.txt`, bytes = Buffer.from(`source-${i}`);
     await writeFile(join(root, path), bytes); files.push({ path, bytes: bytes.length, hash: hash(bytes) });
   }
+  await writeFile(join(root, 'bin/app.js'), 'bundle');
+  files.push({ path: 'bin/app.js', bytes: 6, hash: hash('bundle') });
   const bootstrap = [];
-  for (const path of ['shell.mjs', 'package.json', 'README.md', 'LICENSE']) {
+  for (const path of ['bin/app', 'package.json', 'README.md', 'LICENSE']) {
+    await mkdir(dirname(join(root, path)), { recursive: true });
     await writeFile(join(root, path), path); bootstrap.push({ path, hash: hash(path) });
   }
-  const kit = { schemaVersion:1, version:'0.4.0', compilerVersion:'fixture', sourceHash:'a'.repeat(64), files, bootstrap };
-  await writeFile(join(root, '.framework/kit.json'), JSON.stringify(kit));
+  const kit = { schemaVersion:2, version:'0.4.0', compilerVersion:'fixture', sourceHash:'a'.repeat(64), files, bootstrap };
+  await writeFile(join(root, 'bin/kit.json'), JSON.stringify(kit));
   assert.deepEqual(await verifyKit(root), kit);
   const target = join(root, files[0].path);
   await writeFile(target, 'source-X'); await assert.rejects(verifyKit(root), /fingerprint mismatch/);
@@ -180,27 +186,23 @@ test('kit verification reopens bytes on every call and rejects source links and 
   await rm(target); await symlink(join(root, files[1].path), target, 'file');
   await assert.rejects(verifyKit(root), /links/);
 });
-
-test('upgrading a verified modular kit replaces only compiled runtime files and fails closed on edits or source removals', async t => {
+test('upgrading a verified bin-owned kit replaces runtime files and removes only verified kit inventory', async t => {
   const old = await realpath(await mkdtemp(join(tmpdir(), 'kit-old-')));
   const next = await realpath(await mkdtemp(join(tmpdir(), 'kit-new-')));
-  const unsafe = await realpath(await mkdtemp(join(tmpdir(), 'kit-unsafe-')));
-  t.after(async () => { await Promise.all([old, next, unsafe].map(path => rm(path, { recursive: true, force: true }))); });
-  const bootstrapOld = { 'shell.mjs': 'legacy', 'package.json': '{}', 'README.md': 'README', LICENSE: 'license' };
-  const bootstrapNext = { ...bootstrapOld, 'app.mjs': 'entry', 'bin/app': 'shim', 'shell.mjs': 'forward' };
-  const legacy = {
-    '.framework/template/LICENSE': 'template',
-    '.framework/compiled/package.json': '{"type":"module"}',
-    '.framework/compiled/scripts/framework/cli.js': 'old compiled JS',
-    '.framework/compiled/node_modules/yaml/LICENSE': 'old YAML license',
+  t.after(async () => { await Promise.all([old, next].map(path => rm(path, { recursive: true, force: true }))); });
+  const bootstrap = { 'bin/app': 'launcher', 'package.json': '{}', 'README.md': 'README', LICENSE: 'license' };
+  const currentFiles = {
+    'bin/template/LICENSE': 'template',
+    'bin/template/obsolete.md': 'obsolete template',
+    'bin/app.js': 'old bundled app',
+    'bin/licenses/yaml.LICENSE': 'yaml license',
   };
-  const bundled = {
-    '.framework/template/LICENSE': 'template',
-    '.framework/compiled/package.json': '{"type":"module"}',
-    '.framework/compiled/app.js': 'bundled app',
-    '.framework/compiled/licenses/yaml.LICENSE': 'old YAML license',
+  const nextFiles = {
+    'bin/template/LICENSE': 'template',
+    'bin/app.js': 'new bundled app',
+    'bin/licenses/yaml.LICENSE': 'yaml license',
   };
-  async function fixture(root, version, files, bootstrap) {
+  async function fixture(root, version, files) {
     const entries = [];
     for (const [path, content] of Object.entries(files)) {
       await mkdir(dirname(join(root, path)), { recursive: true });
@@ -213,23 +215,19 @@ test('upgrading a verified modular kit replaces only compiled runtime files and 
       await writeFile(join(root, path), content);
       initial.push({ path, hash: hash(content) });
     }
-    const manifest = { schemaVersion: 1, version, compilerVersion: 'fixture',
-      sourceHash: hash(version), files: entries, bootstrap: initial };
-    await writeFile(join(root, '.framework/kit.json'), JSON.stringify(manifest));
+    const manifest = { schemaVersion: 2, version, compilerVersion: 'fixture', sourceHash: hash(version), files: entries, bootstrap: initial };
+    await writeFile(join(root, 'bin/kit.json'), JSON.stringify(manifest));
     assert.deepEqual(await verifyKit(root), manifest);
     return manifest;
   }
-  await fixture(old, '0.4.0', legacy, bootstrapOld);
-  const final = await fixture(next, '0.4.1', bundled, bootstrapNext);
-  await fixture(unsafe, '0.4.0', { ...legacy, '.framework/template/obsolete.md': 'do not silently delete' }, bootstrapOld);
-  await assert.rejects(upgradePlan({ root: unsafe, frameworkRoot: unsafe }, next), { code: 'KIT_REMOVAL_REQUIRES_MIGRATION' });
+  await fixture(old, '0.4.0', currentFiles);
+  const final = await fixture(next, '0.4.1', nextFiles);
   const { plan } = await upgradePlan({ root: old, frameworkRoot: old }, next);
-  const obsolete = plan.changes.filter(change => change.status === 'delete').map(change => change.path).sort();
-  assert.deepEqual(obsolete, ['.framework/compiled/node_modules/yaml/LICENSE', '.framework/compiled/scripts/framework/cli.js']);
-  await writeFile(join(old, '.framework/compiled/scripts/framework/cli.js'), 'concurrent edit');
+  assert.deepEqual(plan.changes.filter(change => change.status === 'delete').map(change => change.path), ['bin/template/obsolete.md']);
+  await writeFile(join(old, 'bin/template/obsolete.md'), 'concurrent edit');
   await assert.rejects(applyFilePlan(plan), /PLAN_STALE/);
-  assert.equal(await readFile(join(old, '.framework/compiled/app.js'), 'utf8').catch(() => null), null);
-  await writeFile(join(old, '.framework/compiled/scripts/framework/cli.js'), legacy['.framework/compiled/scripts/framework/cli.js']);
+  assert.equal(await readFile(join(old, 'bin/app.js'), 'utf8'), 'old bundled app');
+  await writeFile(join(old, 'bin/template/obsolete.md'), currentFiles['bin/template/obsolete.md']);
   await applyFilePlan(plan);
   assert.deepEqual(await verifyKit(old), final);
 });

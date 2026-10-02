@@ -57,9 +57,9 @@ test('actual archive assembler preserves exact skill bytes in its verified templ
     compiler = { version: 'assembly-test-no-transpilation', compile: () => '// Assembly test only; not runnable compiled code.\n' };
   }
   const files = await assembleKit({ root, frameworkRoot: root }, compiler);
-  const inventory = JSON.parse(files.find(file => file.path === '.framework/kit.json').bytes);
+  const inventory = JSON.parse(files.find(file => file.path === 'bin/kit.json').bytes);
   for (const expected of await prototypeSkillFiles(root)) {
-    const key = '.framework/template/' + expected.path;
+    const key = 'bin/template/' + expected.path;
     const shipped = files.find(file => file.path === key);
     assert.ok(shipped?.bytes.equals(expected.bytes), key);
     assert.equal(inventory.files.find(file => file.path === key)?.bytes, expected.bytes.length);
