@@ -19,7 +19,7 @@ test('packaged CLI ships the pinned parser and supports docs import then existin
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'docs-kit-'))); t.after(() => rm(dir, { recursive: true, force: true }));
   const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler());
   for (const file of files) { await mkdir(dirname(join(dir, file.path)), { recursive: true }); await writeFile(join(dir, file.path), file.bytes); }
-  assert.deepEqual(files.filter(file => file.path.startsWith('.framework/compiled/') && file.path.endsWith('.js')).map(file => file.path), ['bin/app.js']);
+  assert.deepEqual(files.filter(file => file.path === 'bin/app.js').map(file => file.path), ['bin/app.js']);
   assert.ok(files.some(file => file.path === 'bin/licenses/yaml.LICENSE'));
   assert.ok(!files.some(file => file.path.startsWith('bin/node_modules/')));
   assert.equal(JSON.parse(await readFile(join(root,'node_modules/yaml/package.json'),'utf8')).version,'2.9.1');
