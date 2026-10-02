@@ -24,10 +24,10 @@ import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem 
 interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
 interface StarterCatalog { starters: StarterEntry[] }
 interface StarterSummary { directory: string; nextSteps?: string[] }
-/** A kit or configured consumer carries its verified template under .framework/template. */
+/** A kit or configured consumer carries its verified template under bin/template. */
 async function templateRoot(context: Context): Promise<string> {
-  if (!await exists(join(context.frameworkRoot, '.framework/kit.json'))) return context.frameworkRoot;
-  await verifyKit(context.frameworkRoot); return join(context.frameworkRoot, '.framework/template');
+  if (!await exists(join(context.frameworkRoot, 'bin/kit.json'))) return context.frameworkRoot;
+  await verifyKit(context.frameworkRoot); return join(context.frameworkRoot, 'bin/template');
 }
 export async function starterCatalog(context: Context): Promise<{ template: string; catalog: StarterCatalog }> {
   const template = await templateRoot(context);
@@ -51,7 +51,7 @@ export function invocationDirectory(path: string, environment: NodeJS.ProcessEnv
   return resolve(base, path);
 }
 const invocationPaths: Readonly<Record<string, readonly string[]>> = { new: ['values'], 'starters add': ['input'], 'starters edit': ['input'], 'starters pack': ['out'], 'starters run': ['project'] };
-/** Starter commands read the pack extracted beside shell.mjs unless --root names another starter workspace.
+/** Starter commands read configs/starters from the package root unless --root names another starter workspace.
  * Without --root their path options still resolve from the invoking shell, as they did when that was the root. */
 export function starterInvocation(request: Request, frameworkRoot: string): { request: Request; root: string } {
   const selected = request.options.root;

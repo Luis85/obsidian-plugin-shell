@@ -15,8 +15,8 @@ import { supportReport } from './support-report.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 
 async function versionInfo(context: Context) {
-  const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
-  const metadata = await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')) as { version?: string };
+  const kit = await exists(join(context.frameworkRoot, 'bin/kit.json'));
+  const metadata = await readJson(join(context.frameworkRoot, kit ? 'bin/kit.json' : 'package.json')) as { version?: string };
   return { frameworkVersion: metadata.version, nodeVersion: process.version, protocolVersion: 1, distribution: kit ? 'compiled-kit' : 'source' };
 }
 async function configurationInfo(context: Context) {

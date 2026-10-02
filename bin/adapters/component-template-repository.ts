@@ -65,7 +65,7 @@ async function scanFolder(folder: string, displayRoot: string, origin: Component
 async function baselineFolder(frameworkRoot: string): Promise<{ path: string; display: string } | null> {
   const source = resolve(frameworkRoot, TEMPLATE_FOLDER);
   if (await exists(source)) return { path: source, display: TEMPLATE_FOLDER };
-  const kit = resolve(frameworkRoot, '.framework/template', TEMPLATE_FOLDER);
+  const kit = resolve(frameworkRoot, 'bin/template', TEMPLATE_FOLDER);
   if (await exists(kit)) return { path: kit, display: TEMPLATE_FOLDER };
   return null;
 }

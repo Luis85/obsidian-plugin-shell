@@ -82,7 +82,7 @@ async function guidedRequest(request: Request, context: Context, io: FrameworkCl
 /** After an interactive setup in a kit project, each further stage is offered with its own approval. */
 async function continueInteractiveSetup(request: Request, outcome: Result, context: Context, io: FrameworkCliIO, signal: AbortSignal): Promise<Result> {
   if (!guidedSetupRun(request) || !['applied', 'unchanged'].includes(outcome.status)) return outcome;
-  if (!await exists(join(context.root, '.framework/kit.json')) || !await exists(join(context.root, 'design/project.json'))) return outcome;
+  if (!await exists(join(context.root, 'bin/kit.json')) || !await exists(join(context.root, 'design/project.json'))) return outcome;
   return continueSetup(context, executeOperation, query => ask(io.input, io.error as never, query, signal), value => renderCliResult(value, false, io), outcome);
 }
 function exitCode(outcome: Result): number {

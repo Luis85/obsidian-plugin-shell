@@ -9,7 +9,7 @@ import { documentText, type SketchDocument } from '../domain/document.ts';
 import { outputBoundary, packagePlan } from './package-plan.ts';
 /** Same dedicated compiler and template snapshot as shell generate; no second Vue/JSON generator. */
 export async function compile(document: SketchDocument, root: string, kind: 'clickdummy' | 'obsidian-plugin' | 'project', signal?: AbortSignal, projectSelection?: ProjectSelection) {
-  const templateRoot = await exists(join(root, '.framework/template/package.json')) ? join(root, '.framework/template') : root;
+  const templateRoot = await exists(join(root, 'bin/template/package.json')) ? join(root, 'bin/template') : root;
   const template = await loadTemplateSnapshot(templateRoot, signal);
   const source = documentText(document);
   const compilation = await compileProject({ source, sourceName: 'companion.project.json', outputKind: kind, template, projectSelection }, { signal },
