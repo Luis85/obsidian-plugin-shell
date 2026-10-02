@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.modal",
+  "name": "Modal",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "organism",
+  "category": "Feedback",
+  "description": "Focused modal workflow.",
+  "tags": [
+    "organism",
+    "feedback",
+    "overlay",
+    "modal"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "modal-workflow"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-modal"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "atom.number-input",
+  "name": "Number Input",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "atom",
+  "category": "Forms",
+  "description": "Single-line numeric input using the shared input primitive.",
+  "tags": [
+    "atom",
+    "forms",
+    "number",
+    "input"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "number-entry"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [
+    {
+      "name": "type",
+      "type": "string",
+      "required": false,
+      "default": "number",
+      "description": "Input mode."
+    },
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false,
+      "default": "0",
+      "description": "Input hint."
+    }
+  ],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-input"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

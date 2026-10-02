@@ -9,6 +9,15 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'templates list', summary: 'List and filter the canonical component-template library.', options: values('type', 'atomic-level', 'category', 'tag', 'for'), maxArgs: 0, effect: 'read' },
+  { id: 'templates search', summary: 'Search component templates by identity, purpose or capability.', options: values('type', 'atomic-level', 'category', 'tag', 'for'), maxArgs: 1, effect: 'read' },
+  { id: 'templates show', summary: 'Inspect one complete component-template JSON definition.', options: {}, maxArgs: 1, effect: 'read' },
+  { id: 'templates tree', summary: 'Inspect the resolved Atomic Design child composition of one template.', options: {}, maxArgs: 1, effect: 'read' },
+  { id: 'templates validate', summary: 'Validate one template or the complete installed component-template catalog.', options: {}, maxArgs: 1, effect: 'read' },
+  { id: 'templates schema', summary: 'Print the versioned component-template JSON Schema.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'templates coverage', summary: 'Inspect Atomic Design, category, documentation and composition coverage.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'templates docs', summary: 'Plan deterministic Markdown documentation generated from component-template JSON.', options: values('out'), maxArgs: 0, effect: 'plan' },
+  { id: 'templates instantiate', summary: 'Plan adding a component or page template to the canonical Companion project model.', options: values('project', 'name'), maxArgs: 1, effect: 'plan' },
   { id: 'starters coverage', summary: 'Inspect source-derived visual model coverage and explicit interaction gaps; never a native acceptance claim.', options: { 'require-model-coverage': 'flag' }, maxArgs: 1, effect: 'read' },
   { id: 'starters list', summary: 'Discover project-local JSON starters; no bundled fallback.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'starters show', summary: 'Inspect one complete editable starter definition and its processes.', options: {}, maxArgs: 1, effect: 'read' },

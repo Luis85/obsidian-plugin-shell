@@ -28,6 +28,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node bin/app make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
+  { id: 'templates', title: 'Component template library', commands: ['templates list', 'templates search', 'templates show', 'templates tree', 'templates validate', 'templates schema', 'templates coverage', 'templates docs', 'templates instantiate'] },
   { id: 'prototypes', title: 'Prototype versions and variants', commands: prototypeCommands.map(command => command.id) },
   { id: 'starters', title: 'External project starters', commands: ['starters list', 'starters show', 'starters validate', 'starters schema', 'starters add', 'starters edit', 'starters run', 'starters pack', 'starters coverage'] },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
@@ -57,6 +58,11 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  type: { description: 'Component-template type filter.', values: ['component', 'component-with-children', 'page', 'page-with-bricks'] },
+  'atomic-level': { description: 'Atomic Design level filter.', values: ['atom', 'molecule', 'organism', 'template', 'page'] },
+  category: { description: 'Exact component-template category filter.' },
+  tag: { description: 'Exact component-template tag filter.' },
+  for: { description: 'Application archetype recommendation filter, for example editor or obsidian-plugin.' },
   'require-model-coverage': { description: 'Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model.' },
   resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
   'obsidian-vault': { description: 'Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly.' },
@@ -158,6 +164,15 @@ const usage: Record<string, string> = {
   make: 'node bin/app make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'templates list': ['node bin/app templates list --atomic-level organism --json', 'node bin/app templates list --for editor --json'],
+  'templates search': ['node bin/app templates search table --json'],
+  'templates show': ['node bin/app templates show organism.data-table --json'],
+  'templates tree': ['node bin/app templates tree page.dashboard --json'],
+  'templates validate': ['node bin/app templates validate --json'],
+  'templates schema': ['node bin/app templates schema --json'],
+  'templates coverage': ['node bin/app templates coverage --json'],
+  'templates docs': ['node bin/app templates docs --dry-run --json', 'node bin/app templates docs --yes'],
+  'templates instantiate': ['node bin/app templates instantiate organism.data-table --project design/project.json --dry-run'],
   'starters coverage': ['node bin/app starters coverage feature-showcase --json', 'node bin/app starters coverage feature-showcase --require-model-coverage --json'],
   'starters list': ['node bin/app starters list --json'],
   'starters show': ['node bin/app starters show webapp --json'],
@@ -276,11 +291,16 @@ const optionOverrides: OptionOverride[] = [
   [option('release prepare', 'version'), describe('Release version x.y.z.')],
   [option('make', 'format'), doc => { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }],
   [option('docs export', 'out'), doc => { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }],
+  [option('templates docs', 'out'), doc => { doc.description = 'Generated component-library Markdown root. JSON remains authoritative.'; doc.default = 'docs/generated/component-library'; }],
+  [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON to update through a reviewed plan.'; doc.default = 'design/project.json'; }],
   [prototypeOption('version'), describe('Portable version slug, for example v1 or v2; distinct from the application release version.')],
   [option('prototypes version', 'from'), describe('Source version slug to copy into the new version.')],
   [prototypeOption('name'), describe('Prototype or variant display name; its folder slug stays unchanged.')],
   [option('prototypes prototype-details', 'description'), describe('Prototype description; changing it does not change folder slugs or saved designs.')],
   [option('new', 'from'), describe('Project JSON exported by the companion (instead of --starter).')],
+  [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown.'; doc.default = 'docs/generated/component-library'; }],
+  [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
+  [option('templates instantiate', 'name'), describe('Optional instance/component/page title override; the template name is the default.')],
 ];
 function optionDoc(entry: Command, name: string): OptionHelp {
   const doc = { ...(specific[name] ?? { description: '' }) };

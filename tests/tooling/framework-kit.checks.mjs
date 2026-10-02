@@ -66,9 +66,13 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok(!files.some(file => file.path === '.framework/compiled/scripts/examples/ownership.json'), 'no stale per-file runtime metadata');
   assert.ok(!files.some(file => file.path.startsWith('.framework/compiled/node_modules/')), 'vendor runtime is bundled, not copied');
   assert.ok((await readFile(join(dir, '.framework/compiled/app.js'), 'utf8')).length > 1000);
-  for (const name of ['configs/types/tsconfig.sitemap.json', 'configs/types/tsconfig.authoring.json']) {
+  for (const name of ['configs/types/tsconfig.sitemap.json', 'configs/types/tsconfig.authoring.json', 'configs/templates/atoms/button.json']) {
     assert.deepEqual(await readFile(join(dir, '.framework/template', name)), await readFile(join(root, name)), name + ' must ship before generation');
   }
+  output = cli(dir, ['templates', 'list', '--atomic-level', 'atom', '--json']);
+  assert.equal(output.status, 0, output.stderr + output.stdout);
+  const templateCatalog = JSON.parse(output.stdout);
+  assert.ok(templateCatalog.data.templates.some(item => item.id === 'atom.button'));
   const design = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
   design.project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
   design.settings = { codebaseFolder: 'app/source', testsFolder: 'spec' };
