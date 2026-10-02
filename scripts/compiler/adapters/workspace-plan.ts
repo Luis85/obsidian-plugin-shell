@@ -23,7 +23,7 @@ type Change = Awaited<ReturnType<typeof createFilePlan>>['changes'][number];
 /** Accumulated per-file planning outcome; entries and ownership stay index-aligned with the emitter output. */
 interface Planned { readonly preserved:string[];readonly conflicts:string[];readonly entries:PlannedEntry[];readonly ownership:Ownership[] }
 interface FileContext { readonly vault:string;readonly prefix:string;readonly retained:ReadonlySet<string>;readonly planned:Planned }
-const bootstrapPaths = ['app.mjs','bin/app','shell.mjs','package.json','README.md','LICENSE','design/project.json'];
+const bootstrapPaths = ['bin/app','package.json','README.md','LICENSE','design/project.json'];
 const sha256Hex = /^[a-f0-9]{64}$/;
 const selectionField = (options: WorkspaceOptions) => options.selection ? {selection:options.selection} : {};
 const encodingField = (file: Entry) => file.encoding ? {encoding:file.encoding} : {};
