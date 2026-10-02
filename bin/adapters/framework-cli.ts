@@ -35,7 +35,7 @@ function rawGeneratorInvocation(argv: string[]): boolean {
 }
 async function runRawGenerator(argv: string[], io: FrameworkCliIO): Promise<number> {
   try {
-    const { generatorCli } = await import('../../scripts/companion/compiler/cli.ts');
+    const { generatorCli } = await import('../../scripts/compiler/adapters/generator-cli.ts');
     await generatorCli(argv.slice(1));
     return Number(process.exitCode ?? 0);
   } catch (error) {

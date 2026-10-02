@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
 import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { planProject, applyProject } from '../../scripts/compiler/adapters/project-plan.ts';
 import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),allCatalog=await loadStarterCatalog(root);

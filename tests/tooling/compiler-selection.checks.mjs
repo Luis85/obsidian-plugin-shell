@@ -7,10 +7,10 @@ import { fileURLToPath } from 'node:url';
 import { parseSelection, selectionClosure } from '../../scripts/compiler/domain/selection.ts';
 import { generationSelection } from '../../scripts/compiler/adapters/selection.ts';
 import { planArtifacts, applyProject } from '../../scripts/compiler/adapters/workspace-plan.ts';
-import { planProject } from '../../scripts/companion/compiler/plan.ts';
+import { planProject } from '../../scripts/compiler/adapters/project-plan.ts';
 import { projectModel, digest } from '../../scripts/companion/compiler/model.ts';
 import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
+import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
 import { descriptor } from '../../scripts/framework/catalog.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

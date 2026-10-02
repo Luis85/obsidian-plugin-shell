@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
+import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
 import { clickdummyCode } from '../../scripts/companion/compiler/clickdummy-code.ts';
 import { matches } from '../../scripts/companion/runtime/contract.ts';
 const root = fileURLToPath(new URL('../../',import.meta.url));

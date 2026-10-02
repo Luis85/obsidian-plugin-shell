@@ -3,7 +3,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.ts';
-import { planProject } from '../companion/compiler/plan.ts';
+import { planProject } from '../compiler/adapters/project-plan.ts';
 import { customizeStarter } from '../companion/starter-contract.mjs';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { hash, readJson } from '../framework/files.ts';

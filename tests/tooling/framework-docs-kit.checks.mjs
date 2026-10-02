@@ -9,7 +9,7 @@ import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
 import { verifyKit } from '../../scripts/framework/kit-integrity.ts';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
+import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { rebaseMarkdown } from '../../scripts/companion/compiler/framework-docs.ts';
 import { documentationDigest as digest } from '../../scripts/application-docs/adapters/filesystem.ts';

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { sourceInputs, sha256 } from '../../scripts/testing/source-inputs.mjs';
 import assert from 'node:assert/strict';
-import { generatorCli } from '../../scripts/companion/compiler/cli.ts';
+import { generatorCli } from '../../scripts/compiler/adapters/generator-cli.ts';
 import { matches, NotImplementedError } from '../../scripts/companion/runtime/contract.ts';
 
 test('shared generator command rejects invalid arguments before touching a project', async () => {

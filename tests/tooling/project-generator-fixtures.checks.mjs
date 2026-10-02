@@ -4,7 +4,7 @@ import { readFile, readdir, mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { fixtureManifest, fixtureCode } from '../../scripts/companion/compiler/fixture-code.ts';
+import { fixtureManifest, fixtureCode } from '../../scripts/compiler/adapters/fixture-code.ts';
 import { validateSourceOverrides } from '../../scripts/companion/runtime/source-overrides.ts';
 import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engine.mjs';
 import { planFixtures, applyFixtures } from '../../docs/concepts/companion/test-kit/storage.mjs';

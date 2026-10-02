@@ -8,7 +8,7 @@ import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 import { parseDetailControl, copyDetailData } from '../../scripts/companion/runtime/detail-controls.ts';
 import { mapDetailPayload, detailValue } from '../../scripts/companion/runtime/detail-actions.ts';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
+import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
 import { visualSpecs } from '../../scripts/companion/compiler/visual-model.ts';
 import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
 import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';

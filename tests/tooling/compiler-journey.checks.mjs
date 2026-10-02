@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { stripTypeScriptTypes } from 'node:module';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { planProject, applyProject } from '../../scripts/compiler/adapters/project-plan.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const template=await loadTemplateSnapshot(root);
 const seed=JSON.parse(await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8'));

@@ -270,7 +270,7 @@
       {
         "name": "fixture-compiler",
         "patterns": [
-          "scripts/companion/compiler/fixture-code.ts"
+          "scripts/compiler/adapters/fixture-code.ts"
         ]
       },
       {

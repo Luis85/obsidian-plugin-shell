@@ -377,7 +377,7 @@ test('names and identifiers that could escape template syntax stop lowering', ()
   assert.ok(scripted.includes(`case "${lt}/script${gt}${lt}script${gt}x": if (typeof payload === "string")`));
 });
 
-const { projectFiles } = await import('../../scripts/companion/compiler/project-files.ts');
+const { projectFiles } = await import('../../scripts/compiler/adapters/project-files.ts');
 test('self-project generates visual files and no detail artifacts', async () => {
   const files = await projectFiles(process.cwd(), projectModel(self)); const paths = files.map(f => f.path);
   assert.ok(paths.some(p => /presentation\/components\/details\/vp-\d+\.vue$/.test(p)));

@@ -4,7 +4,7 @@
 
 `domain/` defines source locations, diagnostics, artifacts and independent semantic checks. `application/` orchestrates the parse/migrate/validate/resolve/lower/emit pipeline using explicit ports. These layers import only inward and never access filesystem, network, processes, clocks, random IDs, Vue or Obsidian.
 
-`adapters/` contains the Companion frontend, the plugin/click-dummy emitters, template loading, workspace planning and reporting. `index.ts` is the Node composition root. Existing `scripts/companion/compiler/plan.ts`, `project-files.ts` and the fixture entry retain compatibility while delegating to the new subsystem.
+`adapters/` contains the Companion frontend, the plugin/click-dummy emitters, template loading, workspace planning and reporting. `index.ts` is the Node composition root. Project planning, the generator CLI, legacy project-file rendering and the fixture entry are owned by `adapters/` (`project-plan.ts`, `generator-cli.ts`, `project-files.ts`, `fixture-code.ts`). The former `scripts/companion/compiler/{plan,cli,project-files,fixture-code}.ts` facades were removed; `tests/tooling/compiler-dependency-direction.checks.mjs` keeps companion code from depending on executable compiler modules and keeps every source off the removed paths.
 
 The normalized model still uses the existing validated Companion model and visual IR. Some legacy fields remain bounded generic rows; this extraction does not introduce a second project schema or claim that every legacy helper has been rewritten.
 

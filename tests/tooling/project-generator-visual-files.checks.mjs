@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
+import { projectFiles } from '../../scripts/compiler/adapters/project-files.ts';
 import { visualDefinitions, visualSpecs } from '../../scripts/companion/compiler/visual-model.ts';
 import { visualTestSource } from '../../scripts/companion/visual/visual-session.mjs';
 import { visualNodes, visualRoot } from '../../scripts/companion/visual/visual-ir.mjs';

@@ -26,7 +26,7 @@ source under `bin/`.
 - No `scripts/` module imports executable `bin/` modules now. Angular setup and legacy preset qualification exercise the public CLI boundary instead.
 - Legacy preset qualification still reads its declarative compatibility catalog/guide from `bin/guides`; relocating those assets belongs with the later compiler/domain move, not this dependency-direction cleanup.
 - `application-docs/adapters/settings.ts` no longer imports `bin/`; maker and docs settings share the neutral project-path policy.
-- Cycles: compiler ↔ companion, and framework ↔ compiler.
+- Cycles: compiler ↔ companion is broken at the facades (E1): companion code imports no executable compiler module except from the `qualify-*` scripts, its compiler-domain imports are `import type` only, and the four former facades are removed with no source importing them (`tests/tooling/compiler-dependency-direction.checks.mjs`). Compiler adapters still consume companion emitters (the intended direction). framework ↔ compiler remains (`scripts/compiler/adapters/{cli,template-snapshot,generator-cli}.ts` import `scripts/framework` compatibility entries).
 - Compatibility `.mjs` entries for JSON data, process, input, confirmation, hash, project-path, bounded mapping and file plans delegate to typed core modules. Remaining untyped engines are concentrated in `makers/*.mjs`, `operations/catalog.mjs` and real tooling scripts.
 
 | Folder | Role today | Direction |
@@ -175,7 +175,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D68 (gate repair, PR #63):** The D67 closure moved roughly 56 functions over the production limits (cyclomatic 10 / cognitive 15) into `bin/`, and its lint view had seven oxlint and eleven ESLint findings. Each relocated adapter is now split into named helpers or dispatch tables. Command routing, planners, read-only operations, process invocations, prototype actions and help overrides are ordered tables; behaviour, error codes and their ordering are unchanged. `check:maintainability`, `lint` and `eslint --max-warnings 0` pass with unchanged thresholds.
 - **D69 (test repair, PR #63):** Fifteen relocated maker test files imported `node:test` only, so the vitest maker-coverage run found no suite in them; they now use the dual-runner import. Sixteen tests matched error codes with a RegExp, which never sees `error.code`; they assert `{ code }` instead. The split parity files import only what the shared support module exports.
 - **D70 (#61 integration, PR #63):** The read-only Obsidian CLI adapter and its setup step moved to `bin/adapters/framework/obsidian-cli.ts` and `bin/presentation/terminal/obsidian-setup.ts`, keeping `scripts/framework` compatibility-only. The process launcher is injectable and the adapter is covered by the maker suite.
-- **Remaining E–F:** Planned; no claim of completion until their own tests and gates pass.
+- **E1:** The compiler ↔ companion cycle is broken at the facades. `scripts/companion/compiler/plan.ts` (a duplicated clone of `scripts/compiler/adapters/project-plan.ts`) is deleted; the generator CLI, legacy project-file rendering and fixture entry moved to `scripts/compiler/adapters/{generator-cli,project-files,fixture-code}.ts` and their companion paths are deleted rather than shimmed (owner decision: nothing is released, no compatibility entries). Framework generation, the starter planner, the lazy `generate` route, the tests and the `fixture-compiler` analyzer zone use the compiler owners directly. A dependency-direction regression enforces the new direction; thresholds are unchanged.
+- **Remaining E–F:** E2–E9 and Stage F (F0 onward) planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
