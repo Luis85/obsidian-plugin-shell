@@ -1,0 +1,94 @@
+name: Native source handoff
+on:
+  pull_request:
+    paths:
+      - 'docs/concepts/native-file-integration-handoff/**'
+      - 'scripts/framework/distribution.ts'
+      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'scripts/compiler/adapters/template-snapshot.ts'
+      - 'scripts/starters/**'
+      - 'configs/starters/**'
+      - 'tests/tooling/project-generator-native-handoff.checks.mjs'
+      - 'tests/suites.json'
+      - '.github/workflows/native-source-handoff.yml'
+permissions:
+  contents: read
+concurrency:
+  group: native-source-handoff-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-reconstruction:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    env:
+      PYTHON: python
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Record source and interpreter identities
+        run: |
+          mkdir -p reports/native-source-handoff
+          git rev-parse HEAD > reports/native-source-handoff/source-commit.txt
+          git --version > reports/native-source-handoff/environment.txt
+          python -c 'import sys; print(sys.version); assert sys.version_info >= (3, 12)' >> reports/native-source-handoff/environment.txt
+          node --version >> reports/native-source-handoff/environment.txt
+      - name: Exercise reconstruction and failure controls through the suite registry
+        run: |
+          set -o pipefail
+          node scripts/testing/suites.mjs native-handoff --json > reports/native-source-handoff/suite.json 2> reports/native-source-handoff/reconstruction-tests.log
+      - name: Plan and reconstruct the actual historical source from local Git objects
+        run: |
+          python -B docs/concepts/native-file-integration-handoff/restore.py --check --json > reports/native-source-handoff/source-check.json
+          python -B docs/concepts/native-file-integration-handoff/restore.py --plan --out "$RUNNER_TEMP/native-file-alternative" --json > reports/native-source-handoff/plan.json
+          python - <<'PY'
+          import json, pathlib
+          result = json.loads(pathlib.Path('reports/native-source-handoff/plan.json').read_text())
+          assert result['status'] == 'planned' and not pathlib.Path(result['output']).exists()
+          PY
+          python -B docs/concepts/native-file-integration-handoff/restore.py --out "$RUNNER_TEMP/native-file-alternative" --json > reports/native-source-handoff/restore.json
+          python - <<'PY'
+          import json, pathlib, subprocess, sys
+          evidence = pathlib.Path('reports/native-source-handoff')
+          plan = json.loads((evidence / 'plan.json').read_text())
+          result = json.loads((evidence / 'restore.json').read_text())
+          assert result['status'] == 'restored' and plan['reconstructedTree'] == result['reconstructedTree']
+          restored = pathlib.Path(result['output'])
+          assert not (restored / '.native-handoff-incomplete').exists()
+          receipt = (restored / '.native-handoff-receipt.json').read_bytes()
+          assert json.loads(receipt)['reconstructedTree'] == result['reconstructedTree']
+          (evidence / 'receipt.json').write_bytes(receipt)
+          run = subprocess.run([sys.executable, '-B', 'scripts/concepts/build-companion.py', '--check'], cwd=restored, capture_output=True, text=True)
+          (evidence / 'assembly.txt').write_text(run.stdout + run.stderr, encoding='utf-8')
+          assert run.returncode == 0, run.stdout + run.stderr
+          refused = subprocess.run([sys.executable, '-B', 'docs/concepts/native-file-integration-handoff/restore.py', '--out', str(restored), '--json'], capture_output=True, text=True)
+          assert refused.returncode == 1 and json.loads(refused.stdout)['error']['code'] == 'HANDOFF_OUTPUT_EXISTS'
+          assert (restored / '.native-handoff-receipt.json').read_bytes() == receipt
+          PY
+      - name: Exercise distribution boundaries and the real compiler template loader
+        run: |
+          node --test tests/tooling/project-generator-native-handoff.checks.mjs > reports/native-source-handoff/distribution-tests.txt
+          node scripts/testing/suites.mjs --check
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard docs/concepts/native-file-integration-handoff)"
+      - name: Retain exact-source recovery evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: native-source-handoff-${{ matrix.os }}
+          path: reports/native-source-handoff/
+          retention-days: 7
+          if-no-files-found: error

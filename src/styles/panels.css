@@ -1,65 +1,65 @@
 .shell-page-heading { margin-bottom: 26px; }
 .shell-page-heading h1 { font-size: clamp(1.5rem, 2.4cqi, 1.875rem); font-weight: 600; letter-spacing: -.9px; line-height: 1.2; }
-.shell-page-heading > p { color: var(--text-muted); margin-top: 12px !important; line-height: 1.6; font-size: 13px; }
+.shell-page-heading > p { color: var(--plugin-shell-text-muted); margin-top: 12px !important; line-height: 1.6; font-size: 13px; }
 .shell-document-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
 .shell-form { display: grid; gap: 22px; }
 .shell-field { display: grid; gap: 8px; }
 .shell-field > div { width: 100%; }
 .shell-field input { width: 100%; min-height: 36px; }
 .shell-field label { font-size: 12px; font-weight: 550; }
-.shell-field small, .shell-main small { color: var(--text-muted); font-size: 11px; line-height: 1.5; }
-.shell-field label span { color: var(--text-muted); }
-.shell-error { color: var(--text-error); background: color-mix(in srgb, var(--text-error) 6%, transparent); border: 1px solid color-mix(in srgb, var(--text-error) 20%, transparent); padding: 12px; border-radius: var(--radius-s); line-height: 1.6; font-size: 12px; }
-.shell-info { color: var(--text-muted); border-inline-start: 2px solid var(--interactive-accent); padding: 8px 12px; margin-bottom: 20px !important; font-size: 12px; line-height: 1.5; }
+.shell-field small, .shell-main small { color: var(--plugin-shell-text-muted); font-size: 11px; line-height: 1.5; }
+.shell-field label span { color: var(--plugin-shell-text-muted); }
+.shell-error { color: var(--plugin-shell-error); background: color-mix(in srgb, var(--plugin-shell-error) 6%, transparent); border: 1px solid color-mix(in srgb, var(--plugin-shell-error) 20%, transparent); padding: 12px; border-radius: var(--plugin-shell-radius-sm); line-height: 1.6; font-size: 12px; }
+.shell-info { color: var(--plugin-shell-text-muted); border-inline-start: 2px solid var(--plugin-shell-accent); padding: 8px 12px; margin-bottom: 20px !important; font-size: 12px; line-height: 1.5; }
 .shell-preview { min-height: 370px; }
 .shell-destination { display: grid; gap: 6px; padding-bottom: 16px; }
-.shell-destination code { white-space: normal; overflow-wrap: anywhere; font-size: 11px; color: var(--text-muted); }
-.shell-preview pre { margin: 0; padding: 18px; min-height: 250px; overflow: auto; border-radius: var(--radius-s); background: var(--background-primary-alt); border: 1px solid var(--background-modifier-border); line-height: 1.8; font-size: 11px; }
-.shell-preview pre code { font: inherit; font-family: var(--font-monospace); color: var(--text-normal); }
+.shell-destination code { white-space: normal; overflow-wrap: anywhere; font-size: 11px; color: var(--plugin-shell-text-muted); }
+.shell-preview pre { margin: 0; padding: 18px; min-height: 250px; overflow: auto; border-radius: var(--plugin-shell-radius-sm); background: var(--plugin-shell-surface-raised); border: 1px solid var(--plugin-shell-border); line-height: 1.8; font-size: 11px; }
+.shell-preview pre code { font: inherit; font-family: var(--plugin-shell-font-code); color: var(--plugin-shell-text); }
 .shell-empty { text-align: center; display: grid; justify-items: center; align-content: center; min-height: 280px; padding: 20px; }
-.shell-empty > span { font-size: 36px; color: var(--text-muted); margin-bottom: 22px; }
+.shell-empty > span { font-size: 36px; color: var(--plugin-shell-text-muted); margin-bottom: 22px; }
 .shell-empty h3 { font-size: 13px; }
-.shell-empty p { font-size: 12px; max-width: 240px; line-height: 1.6; color: var(--text-muted); margin-top: 8px !important; }
-.shell-created { margin-top: 20px; color: var(--text-success); }
+.shell-empty p { font-size: 12px; max-width: 240px; line-height: 1.6; color: var(--plugin-shell-text-muted); margin-top: 8px !important; }
+.shell-created { margin-top: 20px; color: var(--plugin-shell-success); }
 .shell-demo-actions { margin-bottom: 26px; }
 .shell-event-table { width: 100%; text-align: start; border-collapse: collapse; font-size: 12px; }
-.shell-event-table th { color: var(--text-muted); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; padding: 0 10px 12px; }
-.shell-event-table td { padding: 12px 10px; border-top: 1px solid var(--background-modifier-border); }
-.shell-event-table td:first-child { width: 90px; color: var(--text-muted); }
-.shell-empty-text { padding: 28px 0; color: var(--text-muted); font-size: 12px; }
+.shell-event-table th { color: var(--plugin-shell-text-muted); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; padding: 0 10px 12px; }
+.shell-event-table td { padding: 12px 10px; border-top: 1px solid var(--plugin-shell-border); }
+.shell-event-table td:first-child { width: 90px; color: var(--plugin-shell-text-muted); }
+.shell-empty-text { padding: 28px 0; color: var(--plugin-shell-text-muted); font-size: 12px; }
 .shell-diagnostics { margin-top: 20px; }
-.shell-diagnostic { display: flex; gap: 20px; padding: 8px 0; font-size: 11px; color: var(--text-muted); }
+.shell-diagnostic { display: flex; gap: 20px; padding: 8px 0; font-size: 11px; color: var(--plugin-shell-text-muted); }
 .shell-settings-card { width: 100%; }
-.shell-setting-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 8px 0 24px; border-bottom: 1px solid var(--background-modifier-border); }
+.shell-setting-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 8px 0 24px; border-bottom: 1px solid var(--plugin-shell-border); }
 .shell-setting-row > div:first-child { flex: 1; min-width: 0; }
 .shell-setting-row > :last-child:not([type="checkbox"]) { flex: 0 1 20rem; width: 100%; min-width: 0; }
-.shell-setting-row > :last-child input { width: 100%; min-height: max(var(--input-height), 2.5em); }
+.shell-setting-row > :last-child input { width: 100%; min-height: max(var(--plugin-shell-control-height), 2.5em); }
 .shell-setting-row input[type="checkbox"] { flex: 0 0 auto; }
 .shell-setting-row label { font-size: 13px; font-weight: 550; }
-.shell-setting-row p { margin-top: 7px !important; max-width: 64ch; line-height: 1.6; color: var(--text-muted); font-size: 12px; }
-.shell-setting-row select { background: var(--background-modifier-form-field); color: var(--text-normal); border: 1px solid var(--background-modifier-border); box-sizing: border-box; font: inherit; font-size: var(--font-ui-small); line-height: 1.4; height: auto; min-height: max(var(--input-height), 2.5em); padding: .55em 2.25em .55em .8em; overflow: visible; border-radius: var(--input-radius); }
+.shell-setting-row p { margin-top: 7px !important; max-width: 64ch; line-height: 1.6; color: var(--plugin-shell-text-muted); font-size: 12px; }
+.shell-setting-row select { background: var(--background-modifier-form-field); color: var(--plugin-shell-text); border: 1px solid var(--plugin-shell-border); box-sizing: border-box; font: inherit; font-size: var(--plugin-shell-text-size-sm); line-height: 1.4; height: auto; min-height: max(var(--plugin-shell-control-height), 2.5em); padding: .55em 2.25em .55em .8em; overflow: visible; border-radius: var(--plugin-shell-control-radius); }
 .shell-setting-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 3px; appearance: auto; }
 .shell-theme-note { padding: 26px 0;  }
-.shell-theme-note p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: 8px !important; }
+.shell-theme-note p { font-size: 12px; color: var(--plugin-shell-text-muted); line-height: 1.6; margin-top: 8px !important; }
 .shell-swatches { display: flex; gap: 6px; margin-top: 16px; }
-.shell-swatches span { width: 32px; height: 32px; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 50%; }
-.shell-swatches span:nth-child(2) { background: var(--background-secondary); }
-.shell-swatches span:nth-child(3) { background: var(--text-muted); }
-.shell-swatches span:nth-child(4) { background: var(--interactive-accent); }
+.shell-swatches span { width: 32px; height: 32px; background: var(--plugin-shell-surface); border: 1px solid var(--plugin-shell-border); border-radius: 50%; }
+.shell-swatches span:nth-child(2) { background: var(--plugin-shell-surface-muted); }
+.shell-swatches span:nth-child(3) { background: var(--plugin-shell-text-muted); }
+.shell-swatches span:nth-child(4) { background: var(--plugin-shell-accent); }
 .shell-setting-row :disabled { opacity: .6; cursor: not-allowed; }
-.shell-setting-row select:hover:not(:disabled) { border-color: var(--background-modifier-border-hover); }
+.shell-setting-row select:hover:not(:disabled) { border-color: var(--plugin-shell-border-hover); }
 .shell-event-table { table-layout: fixed; }
 .shell-event-table td { overflow-wrap: anywhere; }
 .shell-preview pre { max-width: 100%; white-space: pre; }
 .shell-page-heading > p { max-width: 78ch; }
-.shell-repository { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--background-modifier-border); }
+.shell-repository { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--plugin-shell-border); }
 .shell-repository > .shell-hint { margin-top: 12px; }
 .shell-note-list { list-style: none; padding: 0; margin: 20px 0; }
-.shell-note-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--background-modifier-border); }
+.shell-note-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--plugin-shell-border); }
 .shell-note-list li > div { min-width: 0; overflow-wrap: anywhere; }
 .shell-note-list small { display: block; margin-top: 6px; }
 .shell-note-editor { margin-top: 24px; max-width: 48rem; }
 .shell-note-editor code { overflow-wrap: anywhere; font-size: 12px; }
 .shell-note-editor fieldset { display: grid; gap: 20px; border: 0; padding: 0; margin: 0; min-width: 0; }
-.shell-note-editor select { color: var(--text-normal); background: var(--background-modifier-form-field); border: 1px solid var(--background-modifier-border); border-radius: var(--input-radius); min-height: 36px; padding: 8px 12px; font: inherit; }
-.shell-trash-confirm { padding: 16px; border: 1px solid var(--background-modifier-border); border-radius: var(--radius-s); }
+.shell-note-editor select { color: var(--plugin-shell-text); background: var(--background-modifier-form-field); border: 1px solid var(--plugin-shell-border); border-radius: var(--plugin-shell-control-radius); min-height: 36px; padding: 8px 12px; font: inherit; }
+.shell-trash-confirm { padding: 16px; border: 1px solid var(--plugin-shell-border); border-radius: var(--plugin-shell-radius-sm); }

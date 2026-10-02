@@ -1,0 +1,21 @@
+# Hash-verified inputs (starter catalog, example ownership manifest, templates,
+# fixtures) are compared byte-for-byte after checkout. Pin LF on every platform so
+# a Windows autocrlf checkout cannot turn a reviewed SHA-256 into a false mismatch.
+* text=auto eol=lf
+
+# Retained evidence keeps its committed bytes exactly as recorded.
+docs/testing/evidence/** -text
+
+# Binary assets never receive end-of-line normalization.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.tgz binary

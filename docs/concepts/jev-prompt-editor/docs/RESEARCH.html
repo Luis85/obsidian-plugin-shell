@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'"><title>Jev Studio — Research and product direction</title><style>*{box-sizing:border-box}body{margin:0;background:#f5f4f8;color:#252332;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:17px;line-height:1.75}main{max-width:980px;margin:48px auto;background:#fff;border:1px solid #dfdce8;border-radius:16px;padding:52px 64px}h1,h2,h3{line-height:1.2;letter-spacing:-.025em}h1{font-size:40px;margin:0 0 24px}h2{font-size:27px;margin-top:54px;border-top:1px solid #e5e2ed;padding-top:30px}h3{font-size:20px;margin-top:30px}p{margin:16px 0}a{color:#58419c;text-underline-offset:3px;overflow-wrap:anywhere}code{font-size:.88em;background:#f1eff6;padding:2px 4px;border-radius:4px;overflow-wrap:anywhere}pre{background:#201e2a;color:#eeebf7;border-radius:10px;padding:24px;overflow:auto}pre code{background:none;padding:0;color:inherit}table{border-collapse:collapse;width:100%;font-size:.88em;line-height:1.55}th,td{text-align:left;vertical-align:top;padding:14px 12px;border-bottom:1px solid #e1dce9}th{background:#f2eff8}li{margin:7px 0}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:12px;color:#786990;font-weight:700;margin-bottom:20px}@media(max-width:700px){body{font-size:16px}main{margin:0;border:0;border-radius:0;padding:30px 22px}h1{font-size:31px}h2{font-size:24px}table{display:block;overflow-x:auto}}@media print{body{background:white}main{border:0;margin:0;padding:0;max-width:none}h2{break-after:avoid}a{color:inherit}}</style></head><body><main><div class="eyebrow">Jev Studio / Research / 27 September 2026</div><h1>Jev Studio: research and product direction</h1>
+<p><strong>Research snapshot:</strong> 27 September 2026<br />
+<strong>Target:</strong> a vault-aware Jev prompt editor, aligned to the Obsidian Plugin Shell companion on PR #5.<br />
+<strong>Evidence boundary:</strong> desk research of primary documentation and the live PR; no interviews, independent model benchmark, paid API execution, or native Obsidian qualification was performed. Product recommendations below are design synthesis, not measured user-research findings.</p>
+<h2>1. The important terminology correction</h2>
+<p>TypeSafe calls the category <strong>System One</strong>, not “Level 1 AI.” Its documentation describes fast semantic judgments with typed outputs and probabilities, rather than generated answers. The name refers to the fast/intuitive versus slow/deliberate thinking metaphor, not a formal autonomy or automation maturity level. Jev does not produce prose, code, or reasoning explanations. Calibration is a property measured across predictions; it does not make each decision correct. [S1]</p>
+<p>For this product, that changes the central object. A generic prompt notebook encourages a person to write a long instruction and inspect a chat response. A useful Jev editor should instead help them define a <strong>decision contract</strong>: what evidence is available, which judgment is needed, what the possible answers mean, and what the application does with uncertainty.</p>
+<p>The product should therefore be a compact workbench, not a chatbot with an extra JSON switch. “Compose → Vault state → Test bench → Versions → JSON” follows the authoring and maintenance journey. The user can begin with a template, understand one question, and reveal more detail only as necessary.</p>
+<h2>2. Where Jev fits in a larger AI system</h2>
+<p>The launch material presents Jev as a decision-specialized model and describes reinforcement learning for calibrated decisions, or RLCD. It also reports substantial speed and cost advantages in its own comparisons. These are vendor-reported results with workload and benchmark assumptions, not independently reproduced evidence for this vault application. [S2]</p>
+<p>A useful architectural comparison is:</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Use it for</th>
+<th>Keep out of it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deterministic code</td>
+<td>Counts, path rules, permissions, known enums, dates, budgets, hashes</td>
+<td>Ambiguous semantic interpretation</td>
+</tr>
+<tr>
+<td>Jev-style typed judgment</td>
+<td>Classification, relevance, explicit actionability, ordinal assessments</td>
+<td>Free-form writing or final authorization</td>
+</tr>
+<tr>
+<td>Generative model</td>
+<td>Drafting, summarization, open-ended explanations</td>
+<td>Pretending generated explanations prove correctness</td>
+</tr>
+<tr>
+<td>Human review</td>
+<td>Ambiguous or consequential outcomes; rubric refinement</td>
+<td>Repetitive decisions whose risk has already been carefully bounded</td>
+</tr>
+</tbody>
+</table>
+<p>This table is a proposed division of responsibility, not an assertion that every model implements the same internal architecture. It also avoids the false choice between “an autonomous agent does everything” and “the model is useless.” The useful unit here is a small semantic decision inside a deterministic workflow.</p>
+<p>For example, code can gather a note and two references; Jev can assess its category; policy can decide whether to show a suggestion; the user can approve a later action. The model should never manufacture a vault path and thereby acquire permission to write it.</p>
+<h2>3. The current interface and model constraints</h2>
+<p>The documented endpoint is <code>POST https://api.typesafe.ai/v1/systemone</code>, with bearer authentication. The request carries <code>model</code>, <code>state</code>, and a <code>questions</code> map; the response returns matching answer IDs. Question IDs identify results but are not inference instructions. Therefore a question called <code>destination</code> must still explicitly explain which note is being classified. [S3]</p>
+<p>At this research snapshot, the documented version is <code>jev-1.13.0</code>; <code>jev-latest</code> and <code>jev-preview</code> resolve to that version. The listed context limits are 64k tokens overall and 32k for state plus the longest question. Input is text, including structured JSON, not images or audio. The listed price is $0.042 per million input tokens, with no output-token charge. Limits can change. The product defaults to the versioned ID for reproducibility rather than assuming an alias remains stable. [S4]</p>
+<p>The prototype reports exact <strong>characters</strong>, not a fictitious exact token count. Its file-size and note-count guards are local product limits, not evidence that a payload fits Jev’s tokenizer. Production needs a provider-compatible budget check or a clearly conservative policy before submission; a character estimate must not masquerade as acceptance by the API.</p>
+<h2>4. Author the three primitives differently</h2>
+<h3>Choice: enumerate a bounded answer space</h3>
+<p>Choice takes an option-to-description map and returns a selected option with the probability distribution. The documented maximum is 255 options. A meaningful fallback such as <code>other</code> or <code>not_stated</code> avoids pretending every input belongs to a cleanly defined category. [S5]</p>
+<p>The editor uses an explicit key column and a “when to choose it” column. It checks duplicate keys and missing descriptions. The prototype deliberately requires at least two options and text descriptions, a narrower authoring subset than the full API. It does not silently flatten structured criteria it cannot represent.</p>
+<h3>Score: describe an ordered rubric</h3>
+<p>Score uses an ordered list of two to ten levels. The result can fall between levels because it is probability-weighted; it is not a free-form measurement or a percentage. Levels should describe a single dimension and be meaningful on their own. [S6]</p>
+<p>The editor displays zero-based indices next to editable descriptions. “How complete is this note?” is too vague unless completeness is operationalized. A better rubric distinguishes absent evidence, partial evidence, and a concrete handover with an owner and deliverable. Reordering questions is an authoring convenience; it does not turn parallel questions into a sequential reasoning chain.</p>
+<h3>Noul: model a yes/no probability</h3>
+<p>Noul returns a value from zero to one representing the probability of yes. Optional descriptions can clarify yes and no. The editor requires both descriptions to encourage deliberate boundary-setting, while exporting the documented true/false criteria shape. [S7]</p>
+<p>The interface labels the number <strong>P(yes)</strong>. It never invents a Noul <code>confidence</code> property. An uncertain middle band is a useful place to request review, not a failed Boolean conversion.</p>
+<h2>5. Probability, confidence, and application policy</h2>
+<p>TypeSafe distinguishes the full answer distribution from a derived <code>confidence</code> statistic on Choice and Score. Noul has no such confidence field. A model’s preferred class, the probability of that class, and the confidence statistic must not be shown as interchangeable numbers. [S8]</p>
+<p>The prototype uses illustrative local defaults: minimum confidence 0.85 for Choice/Score; Noul no at or below 0.20 and yes at or above 0.80. These are <strong>design defaults, not validated operating thresholds</strong>. Fallback categories always route to review. All outcomes remain suggestions; none applies a vault mutation.</p>
+<p>Policy lives in the reusable recipe but is omitted from the API request. This makes it possible to change a review rule without falsely claiming the model was instructed by a local setting. A production extension should tune thresholds separately for each primitive and risk class and preserve the policy version with evaluation evidence. TypeSafe’s confidence-routing guidance also places escalation decisions in surrounding application logic. [S9]</p>
+<h2>6. Make vault state inspectable and intentionally small</h2>
+<p>TypeSafe recommends structured state with named fields and separates the evaluated content from the questions. All questions in one call see the same state and run independently. [S10]</p>
+<p>The proposed application state is intentionally small:</p>
+<pre><code class="language-text">state
+  active_note
+    path, title
+    content                  optional bounded Markdown body
+    frontmatter              explicit key allowlist
+    tasks / headings         optional parsed projections
+  references                 selected and bounded notes
+  editor_selection           explicitly enabled
+</code></pre>
+<p>The content compiler is deterministic. It does not execute arbitrary query expressions supplied in imported recipes. Choosing a note and selecting a reference are separate actions. The active note is visually distinguished; references are independently removable. One-hop wiki-link expansion is opt-in. Ambiguous links are skipped with a warning rather than resolved by a hidden guess.</p>
+<p>The inspector answers four practical questions: <strong>Which note is active? What else is included? What fields will leave? Has the snapshot changed?</strong> It remains adjacent to the question editor on large screens and moves into the dedicated state view on smaller displays.</p>
+<p>Binding settings are portable; a resolved snapshot is not. Sharing an inbox-routing recipe should not accidentally attach a renovation plan, a meeting transcript, or a customer’s name from the author’s vault.</p>
+<h2>7. Real Obsidian integration is more than reading a directory</h2>
+<p>Obsidian’s Vault API offers Markdown enumeration and cached reads for read-only display. The official documentation also distinguishes the narrow stale-cache interval for external changes and recommends guarded processing for read/modify/write operations. [S11]</p>
+<p>The future native adapter should combine saved-note context with the active editor and selected text, using Obsidian’s editor API rather than assuming the file on disk is the current buffer. [S12] The host owns file and metadata events; the feature should own a bounded, disposable subscription and invalidate a snapshot when a source changes.</p>
+<p>A browser HTML file outside Obsidian cannot directly inspect the application’s active leaf, unsaved buffers, MetadataCache, Dataview, or arbitrary plugin state. This prototype instead implements a genuine <strong>user-selected, read-only Markdown import</strong>. Folder imports use file input relative paths; a multiple-file fallback avoids requiring the newer directory-handle API. These mechanisms expose only files explicitly selected by the user. [S13]</p>
+<p>The local parser is deliberately a subset: simple frontmatter, task checkboxes, headings, and wiki-links. It is not presented as Obsidian’s parser. Imported bodies remain in memory. Reloading restores the demo vault, not a secretly persisted personal snapshot. Reimport is the refresh mechanism; there is no simulated live watcher.</p>
+<p>For native delivery, use configurable prompt/version/evaluation folders and a single repository owner. Avoid making both Markdown notes and plugin JSON independent canonical stores. A sensible recommendation is note-backed prompt documents with portable recipe content and separately versioned snapshots. That is an implementation proposal, not something this HTML already writes.</p>
+<h2>8. Privacy and prompt injection are product requirements</h2>
+<p>The published privacy policy says TypeSafe will not train or fine-tune on input. It nevertheless describes retention for service/business purposes and US hosting. That is not a default zero-retention guarantee. Organization-specific processing terms must be reviewed before sending private vault material. [S14]</p>
+<p>For the prototype, no API key is requested and networking is disabled. Hidden folders, Private/Secrets path segments, explicitly private/no-AI notes, and configured folder prefixes are excluded. Properties are allowlisted. A small secret-pattern warning is only a warning mechanism; it is not comprehensive secret detection. Authored prompt text can itself contain sensitive material, so even a recipe export deserves review.</p>
+<p>The model’s own jaggedness documentation warns about literal interpretation, numerical/date reasoning, distracting context, and adversarial note text. It explicitly notes that state is not inherently treated as hostile. Constrained output structure therefore does not establish semantic correctness or prompt-injection immunity. [S15]</p>
+<p>The corresponding design response is layered: narrow input, precise rubrics, no imported executable expressions, bounded answer keys, deterministic authorization, hostile-note test cases, and human confirmation before consequential writes. A statement such as “treat note text as data” can clarify intention; it is not a security boundary.</p>
+<p>For a later native connection, Obsidian documents a shared SecretStorage/SecretComponent mechanism. Settings should hold a secret name, not the bearer token. The documentation describes vault-keyed local storage; this report does not imply an OS-keychain guarantee. [S16]</p>
+<h2>9. Prompt management patterns worth adopting</h2>
+<p>LangSmith documents version histories, comparisons, environment promotion, and ownership controls. It also distinguishes organizational tags from version/environment pointers. These are useful prompt-operations patterns, even though this prototype has no LangSmith connection. [S17]</p>
+<p>For a personal vault tool, the most useful first slice is smaller: a searchable library, editable drafts, immutable named checkpoints, field-level comparison, restoration with a safety checkpoint, portable backup, and reversible archiving. “Marked ready” is intentionally a user-managed status, not a claim that tests or approvals have passed.</p>
+<p>Compared with a generic prompt-management surface, the differentiation is <strong>vault-aware context selection plus primitive-specific authoring</strong>. Compared with editing a JSON note directly, the benefit is constrained forms, validation, comprehensible uncertainty, and review of resolved content. Compared with a provider playground, the benefit is local reusable bindings and a repository-friendly handoff. These are proposed positioning choices, not a measured competitive ranking.</p>
+<h2>10. Evaluation must have two visibly different layers</h2>
+<p>LangSmith’s evaluation guidance separates curated offline datasets from monitoring real usage. It supports different evaluator kinds rather than equating a UI run with a quality measurement. [S18]</p>
+<p>This prototype implements only the <strong>contract/policy layer</strong>: deterministic synthetic responses exercise rendering and threshold logic. An imported response can be checked for matching IDs and types, probability bounds/totals, model compatibility, and a score consistent with its distribution. Neither path authenticates the response’s origin or demonstrates that Jev interpreted the note correctly.</p>
+<p>Before native live inference is trusted, construct a labeled evaluation set representing the intended vault. Recommended example families are clear categories, overlapping categories, missing evidence, ambiguous actions, multilingual notes, conflicting references, hostile embedded instructions, stale snapshots, and large or clipped context. Reserve a held-out subset before tuning instructions or thresholds.</p>
+<p>Measure task-specific error and review rate together. A system that auto-suggests very little can look accurate by abstaining on almost everything. Also track erroneous high-confidence suggestions, per-class performance, practical review effort, and the effect of context size. Report latency across the whole capture/compile/network/review pipeline rather than adopting a vendor’s model-only figure. These metrics are proposed acceptance measures; they were not measured in this delivery.</p>
+<h2>11. The JSON contract has three separate roles</h2>
+<p>The editable recipe contains identity, status, tags, model, state-binding configuration, typed question definitions, and review policy. The library adds immutable recipe revisions. Both use a product-owned versioned authoring schema.</p>
+<p>The resolved request uses the provider’s wire shape. No editor-only status, bindings, revision messages, policy settings, credentials, or approval flags are added to that envelope. Exporting it requires explicit acknowledgement of the included state.</p>
+<p>PR #5’s companion project JSON is a different design interchange. This prototype does not pretend that a Jev recipe is a companion project or that importing one adds a feature to the companion. No generator-compatible companion export was qualified here. The live PR was inspected at <code>b66200e2f43cd0682028f0151f9bdffc853cd2bf</code>; its instructions require framework-free core boundaries and host adapters. [R1, R2]</p>
+<p>The recipe schema deliberately supports only text instructions and text rubrics. The API is broader. Unsupported future formats are rejected rather than silently migrated, executed, or flattened. Library imports create independent copies; a file cannot authorize replacement of unrelated authoring work.</p>
+<h2>12. Recommended first native increment</h2>
+<p>Preserve the browser-tested core and move it behind the companion’s actual feature/service boundaries. Convert the presentation to the PR’s pinned Vue/Pinia/Nuxt UI pipeline; do not drop the prototype’s browser stylesheet or global runtime into a native bundle. [R2, R3]</p>
+<p>First ship read-only host context capture and note-backed prompt persistence, then qualify native lifecycle behavior. Only afterwards add an explicit provider connection with payload consent, secret lookup, cancellation, bounded retry, response validation, and redacted diagnostics. Keep automation out until labeled evaluation and conflict-safe review exist.</p>
+<p>The intended end-to-end experience is: select a decision template; bind an active note and a few references; refine an atomic rubric; inspect a frozen request; evaluate against labeled examples; save a named recipe revision; deliberately invoke a live provider; inspect uncertainty; and approve any subsequent application action independently. This sequence makes the system useful without implying that a structured model answer is an authorization to operate the vault.</p>
+<h2>Sources</h2>
+<p>All public pages below were consulted for this research snapshot. Links are primary documentation or first-party descriptions; vendor claims are not independent validation.</p>
+<ul>
+<li><strong>S1:</strong> <a href="https://docs.typesafe.ai/concepts/system-one">TypeSafe — System One</a></li>
+<li><strong>S2:</strong> <a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev">TypeSafe — Introducing System One models and Jev</a></li>
+<li><strong>S3:</strong> <a href="https://docs.typesafe.ai/api">TypeSafe — API reference</a></li>
+<li><strong>S4:</strong> <a href="https://docs.typesafe.ai/models">TypeSafe — Models</a></li>
+<li><strong>S5:</strong> <a href="https://docs.typesafe.ai/primitives/choice">TypeSafe — Choice</a></li>
+<li><strong>S6:</strong> <a href="https://docs.typesafe.ai/primitives/score">TypeSafe — Score</a></li>
+<li><strong>S7:</strong> <a href="https://docs.typesafe.ai/primitives/noul">TypeSafe — Noul</a></li>
+<li><strong>S8:</strong> <a href="https://docs.typesafe.ai/confidence">TypeSafe — Confidence</a></li>
+<li><strong>S9:</strong> <a href="https://docs.typesafe.ai/patterns/confidence-routing">TypeSafe — Confidence routing</a></li>
+<li><strong>S10:</strong> <a href="https://docs.typesafe.ai/concepts/state">TypeSafe — State</a></li>
+<li><strong>S11:</strong> <a href="https://docs.obsidian.md/Plugins/Vault">Obsidian — Vault</a></li>
+<li><strong>S12:</strong> <a href="https://docs.obsidian.md/Plugins/Editor/Editor">Obsidian — Editor</a></li>
+<li><strong>S13:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory">MDN — webkitdirectory</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/API/File_API">File API</a></li>
+<li><strong>S14:</strong> <a href="https://typesafe.ai/legal/privacy-policy">TypeSafe — Privacy policy</a></li>
+<li><strong>S15:</strong> <a href="https://docs.typesafe.ai/model-jaggedness/jev-1.13">TypeSafe — Jev 1.13 jaggedness</a></li>
+<li><strong>S16:</strong> <a href="https://docs.obsidian.md/plugins/guides/secret-storage">Obsidian — Store secrets</a></li>
+<li><strong>S17:</strong> <a href="https://docs.langchain.com/langsmith/manage-prompts">LangSmith — Manage prompts</a></li>
+<li><strong>S18:</strong> <a href="https://docs.langchain.com/langsmith/evaluation">LangSmith — Evaluation</a></li>
+<li><strong>R1:</strong> <a href="https://github.com/Luis85/obsidian-plugin-shell/pull/5">Repository — PR #5</a>, live head inspected via GitHub connector.</li>
+<li><strong>R2:</strong> <a href="https://github.com/Luis85/obsidian-plugin-shell/blob/b66200e2f43cd0682028f0151f9bdffc853cd2bf/AGENTS.md">Repository instructions at inspected SHA</a></li>
+<li><strong>R3:</strong> <a href="https://github.com/Luis85/obsidian-plugin-shell/blob/b66200e2f43cd0682028f0151f9bdffc853cd2bf/.claude/skills/companion-prototype-design/references/repository-contract.md">Prototype repository contract at inspected SHA</a></li>
+</ul>
+</main></body></html>

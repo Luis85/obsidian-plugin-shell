@@ -1,0 +1,514 @@
+{
+  "kind": "obsidian-companion-project",
+  "schemaVersion": 5,
+  "executable": false,
+  "project": {
+    "id": "custom-file-editor",
+    "name": "Custom File Editor",
+    "author": "",
+    "version": "0.1.0",
+    "description": "Own a distinct file extension and open it in a dedicated, editable Obsidian view."
+  },
+  "settings": {
+    "codebaseFolder": "src",
+    "testsFolder": "tests"
+  },
+  "design": {
+    "schema": 5,
+    "blueprint": "blank",
+    "goal": "Own a distinct file extension and open it in a dedicated, editable Obsidian view.",
+    "platform": "desktop",
+    "nodes": [
+      {
+        "id": "node-1",
+        "slug": "workspace",
+        "label": "Custom File Editor",
+        "kind": "view",
+        "layout": "sidebar-left",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": true,
+        "ribbon": false,
+        "entry": true,
+        "instance": "reuse",
+        "patterns": [
+          "open-view"
+        ],
+        "goal": "Own a distinct file extension and open it in a dedicated, editable Obsidian view.",
+        "entity": "",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      },
+      {
+        "id": "node-2",
+        "slug": "preferences",
+        "label": "Preferences",
+        "kind": "settings",
+        "layout": "form",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [
+          "settings"
+        ],
+        "goal": "Configure this plugin without changing unrelated host settings.",
+        "entity": "",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      }
+    ],
+    "links": [],
+    "nextId": 3,
+    "library": [],
+    "prds": [
+      {
+        "id": "starter-requirements",
+        "title": "Custom File Editor requirements",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "draft",
+        "problem": "Own a distinct file extension and open it in a dedicated, editable Obsidian view.",
+        "audience": "Obsidian plugin authors and users of their generated plugin.",
+        "goals": "Own a distinct file extension and open it in a dedicated, editable Obsidian view.",
+        "nonGoals": "Operating-system file associations, binary parsing, domain-specific JSON schema, conflict-free multi-process editing.",
+        "notes": "Starter code provides the integration. Verify each authored requirement in an isolated real Obsidian vault before changing its status.",
+        "nextReq": 5,
+        "baselines": [],
+        "requirements": [
+          {
+            "id": "starter-1",
+            "title": "Create a custom document",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Given a disposable vault, when Create Custom document file runs, exactly one new .shellnote file is created with valid initial JSON and an associated dedicated view; an existing file is never overwritten.",
+            "nodes": [
+              "node-1"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "starter-2",
+            "title": "Validated explicit save",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Given a custom document, editing keeps a per-view draft. Save accepts valid JSON without reformatting; invalid JSON never replaces the stored file. Opening an untouched or corrupt document does not rewrite it.",
+            "nodes": [
+              "node-1"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "starter-3",
+            "title": "Incoming changes and uncertain saves",
+            "priority": "must",
+            "status": "designed",
+            "kind": "quality",
+            "acceptance": "Given an external change during drafting, saving is blocked until the user copies their draft and loads the incoming version. After a failed write, reopening and verifying the file is required before retrying.",
+            "nodes": [
+              "node-1"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "starter-4",
+            "title": "Native lifecycle acceptance",
+            "priority": "must",
+            "status": "designed",
+            "kind": "quality",
+            "acceptance": "In a disposable Obsidian vault, verify create, explorer opening, file-menu opening, save, close, rename and disable/re-enable. Disabling removes registrations, closes owned modals and suppresses late callbacks without force-detaching leaves.",
+            "nodes": [
+              "node-1"
+            ],
+            "components": [],
+            "patterns": []
+          }
+        ]
+      }
+    ],
+    "librarySchema": 3,
+    "canvas": {
+      "schema": 1,
+      "layout": "vertical",
+      "positions": {},
+      "pan": {
+        "x": 32,
+        "y": 28
+      },
+      "zoom": 1,
+      "snap": true,
+      "collapsed": [],
+      "edges": "selected",
+      "custom": false,
+      "arrangedFor": "",
+      "fitted": false
+    },
+    "semantic": {
+      "schema": 1,
+      "nextId": 1,
+      "entities": [],
+      "relationships": [],
+      "sections": [],
+      "canvas": {
+        "positions": {},
+        "viewport": {
+          "x": 40,
+          "y": 40,
+          "zoom": 1
+        },
+        "snap": true
+      }
+    },
+    "dataSources": {
+      "schema": 1,
+      "nextId": 1,
+      "sources": [],
+      "flows": [],
+      "positions": {}
+    },
+    "designSystem": {
+      "schema": 1,
+      "name": "My Plugin tokens",
+      "description": "A starting point for a plugin that belongs in Obsidian. Customize these declarations before implementation.",
+      "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+      "fonts": [
+        {
+          "id": "interface",
+          "name": "Interface",
+          "source": "interface",
+          "families": "",
+          "fallback": "system-ui",
+          "usage": "Navigation, controls and labels.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "body",
+          "name": "Reading",
+          "source": "text",
+          "families": "",
+          "fallback": "sans-serif",
+          "usage": "Descriptions and long-form content.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "code",
+          "name": "Code",
+          "source": "mono",
+          "families": "",
+          "fallback": "monospace",
+          "usage": "Identifiers, paths and code samples.",
+          "license": "Host font preference. No font files are embedded."
+        }
+      ],
+      "typography": [
+        {
+          "id": "page-title",
+          "name": "Page title",
+          "font": "interface",
+          "size": 24,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.25,
+          "letterSpacing": 0,
+          "usage": "One primary heading per view."
+        },
+        {
+          "id": "section-title",
+          "name": "Section title",
+          "font": "interface",
+          "size": 18,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Group related controls or content."
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "font": "body",
+          "size": 16,
+          "unit": "px",
+          "weight": 400,
+          "lineHeight": 1.5,
+          "letterSpacing": 0,
+          "usage": "Main descriptive copy."
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "font": "interface",
+          "size": 14,
+          "unit": "px",
+          "weight": 500,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Form labels; do not rely on placeholders."
+        }
+      ],
+      "spacing": [
+        {
+          "id": "xs",
+          "name": "XS",
+          "value": 4,
+          "unit": "px",
+          "usage": "Related inline items"
+        },
+        {
+          "id": "sm",
+          "name": "SM",
+          "value": 8,
+          "unit": "px",
+          "usage": "Within a control group"
+        },
+        {
+          "id": "md",
+          "name": "MD",
+          "value": 16,
+          "unit": "px",
+          "usage": "Between related blocks"
+        },
+        {
+          "id": "lg",
+          "name": "LG",
+          "value": 24,
+          "unit": "px",
+          "usage": "Between sections"
+        },
+        {
+          "id": "xl",
+          "name": "XL",
+          "value": 32,
+          "unit": "px",
+          "usage": "Major content separation"
+        }
+      ],
+      "sizes": [
+        {
+          "id": "control",
+          "name": "Control height",
+          "value": 36,
+          "unit": "px",
+          "usage": "Proposed default, not an accessibility guarantee."
+        },
+        {
+          "id": "icon",
+          "name": "Icon",
+          "value": 18,
+          "unit": "px",
+          "usage": "Glyph size, not the clickable target."
+        },
+        {
+          "id": "inspector",
+          "name": "Inspector width",
+          "value": 320,
+          "unit": "px",
+          "usage": "Preferred width; adapt for narrower panes."
+        }
+      ],
+      "radii": [
+        {
+          "id": "control",
+          "name": "Control radius",
+          "value": 6,
+          "unit": "px",
+          "usage": "Inputs and compact actions."
+        },
+        {
+          "id": "surface",
+          "name": "Surface radius",
+          "value": 12,
+          "unit": "px",
+          "usage": "Standalone panels."
+        }
+      ],
+      "colors": [
+        {
+          "id": "background",
+          "name": "Background",
+          "light": "#FFFFFF",
+          "dark": "#1E1E24",
+          "host": "--background-primary",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "text",
+          "name": "Primary text",
+          "light": "#202027",
+          "dark": "#ECECF2",
+          "host": "--text-normal",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "muted",
+          "name": "Secondary text",
+          "light": "#595964",
+          "dark": "#B6B6C4",
+          "host": "--text-muted",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "light": "#6550B9",
+          "dark": "#B7A3FF",
+          "host": "--interactive-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent-text",
+          "name": "Text on accent",
+          "light": "#FFFFFF",
+          "dark": "#17131F",
+          "host": "--text-on-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        }
+      ],
+      "guidelines": [
+        {
+          "id": "interaction",
+          "name": "Interaction states",
+          "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+        },
+        {
+          "id": "components",
+          "name": "Component usage",
+          "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+        }
+      ],
+      "frontend": {
+        "schema": 1,
+        "target": "nuxt-ui",
+        "colorPolicy": "host",
+        "bindings": {}
+      }
+    },
+    "storymaps": {
+      "schema": 1,
+      "nextId": 1,
+      "maps": []
+    },
+    "visualDesigns": {
+      "schema": 3,
+      "nextId": 10,
+      "catalog": {
+        "id": "nuxt-ui",
+        "version": 1
+      },
+      "pages": [
+        {
+          "id": "vp-1",
+          "ownerId": "node-1",
+          "name": "Custom File Editor",
+          "root": [
+            {
+              "id": "vn-2",
+              "kind": "text",
+              "role": "h2",
+              "value": {
+                "kind": "literal",
+                "value": "Custom File Editor"
+              }
+            },
+            {
+              "id": "vn-3",
+              "kind": "text",
+              "role": "p",
+              "value": {
+                "kind": "literal",
+                "value": "Create a Custom document file from the command palette."
+              }
+            },
+            {
+              "id": "vn-4",
+              "kind": "text",
+              "role": "p",
+              "value": {
+                "kind": "literal",
+                "value": "Open the .shellnote file from the explorer or its Open in Custom document context action."
+              }
+            },
+            {
+              "id": "vn-5",
+              "kind": "text",
+              "role": "p",
+              "value": {
+                "kind": "literal",
+                "value": "Edit valid JSON and save. Invalid JSON is retained as a draft and never replaces the original file."
+              }
+            },
+            {
+              "id": "vn-6",
+              "kind": "text",
+              "role": "p",
+              "value": {
+                "kind": "literal",
+                "value": "Change the extension and domain validator in the generated file contract."
+              }
+            },
+            {
+              "id": "vn-7",
+              "kind": "text",
+              "role": "p",
+              "value": {
+                "kind": "literal",
+                "value": "This browser page explains the starter. Native file and menu actions run only in the generated Obsidian plugin."
+              }
+            }
+          ],
+          "scenarios": [
+            {
+              "id": "scenario-8",
+              "name": "Default",
+              "state": "default",
+              "width": "wide",
+              "values": {},
+              "bindings": []
+            },
+            {
+              "id": "scenario-9",
+              "name": "Narrow",
+              "state": "default",
+              "width": "narrow",
+              "values": {},
+              "bindings": []
+            }
+          ],
+          "notes": "Instructional preview only. Actual file registration, persistence and context menus run in the generated native Obsidian plugin."
+        }
+      ],
+      "components": [],
+      "layouts": [],
+      "revisions": []
+    },
+    "nativeIntegrations": {
+      "fileTypes": [
+        {
+          "id": "document",
+          "name": "Custom document",
+          "extension": "shellnote",
+          "icon": "file-code",
+          "format": "json",
+          "defaultContent": "{\n  \"schemaVersion\": 1,\n  \"title\": \"Untitled\",\n  \"content\": \"\"\n}\n"
+        }
+      ],
+      "contextMenus": []
+    }
+  },
+  "notes": [
+    "# Native integration starter\n\nOwn a distinct file extension and open it in a dedicated, editable Obsidian view.\n\nCreate a Custom document file from the command palette.\nOpen the .shellnote file from the explorer or its Open in Custom document context action.\nEdit valid JSON and save. Invalid JSON is retained as a draft and never replaces the original file.\nChange the extension and domain validator in the generated file contract.\n\nNative tests in an isolated vault and domain-specific acceptance remain required. Portable JSON grants no execution or write authority.\n"
+  ]
+}

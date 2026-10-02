@@ -6,11 +6,14 @@
   },
   "entryPointRole": "test",
   "entryPoints": [
+    "scripts/compiler/verify-preview-host.mjs",
     "tests/runtime/types.ts",
     "tests/tooling/*.checks.mjs",
     "tests/tooling/*.test.mjs",
+    "tests/hindsight/*.checks.mjs",
     "tests/verification/*.test.mjs",
     "tests/harness-styles/*.test.mjs",
-    "tests/browser-specimen/specimen.checks.mjs"
+    "tests/browser-specimen/specimen.checks.mjs",
+    "tests/concepts/*.browser.mjs"
   ]
 }

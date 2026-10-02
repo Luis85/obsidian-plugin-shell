@@ -1,0 +1,46 @@
+{
+  "kind": "agent-skill-verification",
+  "schemaVersion": 1,
+  "skill": "companion-prototype-design",
+  "version": "1.0.0",
+  "date": "2026-09-27",
+  "repository": "Luis85/obsidian-plugin-shell",
+  "inspectedCommit": "6178b1025336941ad6fb10eae4e26930622363f9",
+  "status": "tooling-tested-real-repository-integration-not-run",
+  "environment": {
+    "node": "22.16.0",
+    "npm": "10.9.2",
+    "python": "3.13.5"
+  },
+  "checks": [
+    {
+      "name": "node-helper-regressions",
+      "status": "passed",
+      "tests": 23,
+      "evidence": "evidence/helper-node.tap"
+    },
+    {
+      "name": "python-packaging-and-skill-contract",
+      "status": "passed",
+      "tests": 25,
+      "evidence": "evidence/helper-python.log"
+    },
+    {
+      "name": "helper-js-syntax",
+      "status": "passed",
+      "files": 8
+    },
+    {
+      "name": "real-repository-generation",
+      "status": "not-run"
+    },
+    {
+      "name": "real-browser-and-companion-import",
+      "status": "not-run"
+    },
+    {
+      "name": "live-agent-conversation",
+      "status": "not-run"
+    }
+  ]
+}

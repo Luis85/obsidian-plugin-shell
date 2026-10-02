@@ -60,7 +60,11 @@ edits security preferences, changes permissions or publishes anything.
 
 `--no-local` remains a browser-profile alias. `--skip-install` explicitly skips
 dependency installation and requires an already provisioned toolchain; verification
-still runs. `--help`, `--dry-run`, `--yes` and `--no-interaction` remain supported.
+still runs. `--defer-verify` skips only the verify stage for automation that runs
+`npm run verify` itself afterwards; the handoff reports static checks as deferred,
+the checkout is unverified until that run, and native profiles refuse it because
+native installation copies verified artifacts. `--help`, `--dry-run`, `--yes` and
+`--no-interaction` remain supported.
 
 `--answers answers.json` accepts only declared data fields, for example:
 

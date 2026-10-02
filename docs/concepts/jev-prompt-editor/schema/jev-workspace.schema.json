@@ -1,0 +1,79 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "jev-prompt-library"
+    },
+    "schemaVersion": {
+      "const": 2
+    },
+    "prompts": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "urn:jev-studio:prompt:1"
+          },
+          {
+            "$ref": "urn:jev-studio:prompt:2"
+          }
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 100
+    },
+    "revisions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "recipe": {
+              "anyOf": [
+                {
+                  "$ref": "urn:jev-studio:prompt:1"
+                },
+                {
+                  "$ref": "urn:jev-studio:prompt:2"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "createdAt",
+            "message",
+            "recipe"
+          ]
+        },
+        "minItems": 0,
+        "maxItems": 50
+      }
+    },
+    "logic": {
+      "$ref": "urn:jev-studio:logic:1"
+    }
+  },
+  "required": [
+    "kind",
+    "schemaVersion",
+    "prompts",
+    "revisions"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jev-studio:library:2",
+  "title": "Jev Studio linked workspace v2",
+  "$comment": "References the accompanying prompt schema by URN. Register both schemas locally. Runtime validation additionally checks prompt ID uniqueness and that revision keys and recipe IDs match existing prompts."
+}

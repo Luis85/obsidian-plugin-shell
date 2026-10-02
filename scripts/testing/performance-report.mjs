@@ -41,7 +41,7 @@ export async function candidateSizes(directory, attributionDirectory = resolve('
     const path = join(directory, file); const stat = await lstat(path);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.size === 0) throw new Error(`PERFORMANCE_ASSET_INVALID:${file}`);
     const bytes = await readFile(path);
-    const limitBytes = file === 'main.js' ? 1024 * 1024 : file === 'styles.css' ? 100 * 1024 : null;
+    const limitBytes = file === 'main.js' ? 1024 * 1024 : file === 'styles.css' ? 160 * 1024 : null;
     assets.push({ file, sha256: sha256(bytes), bytes: bytes.length,
       gzipBytes: gzipSync(bytes, { level: 9 }).length,
       brotliBytes: brotliCompressSync(bytes, { params: { [constants.BROTLI_PARAM_QUALITY]: 11 } }).length,

@@ -106,7 +106,10 @@ requirement to place every plugin feature into that demonstration screen.
 Test your actual actions against the same repository and codec. Assert persisted
 bytes and failure effects, not only a success notification. The template's feature
 registration tests demonstrate an independent third entity without modifying the
-shared infrastructure. Then run `npm run verify` and relevant served/native tests.
+shared infrastructure. For code that talks to Obsidian directly (commands, views,
+settings tabs, vault/metadata listeners), use the in-memory
+[Obsidian test kit](../testing/OBSIDIAN-TEST-KIT.md) instead of hand-written mocks.
+Then run `npm run verify` and relevant served/native tests.
 
 Keep source files under 400 code lines (tests/helpers 450, lifecycle main 100),
 excluding comments/blanks, and name files for their responsibility. The complete

@@ -1,0 +1,15 @@
+{
+  "name": "shell-cli-manual-tooling",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated source-manual renderer; never a plugin runtime dependency",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "generate": "node --experimental-strip-types ../../scripts/documentation/manual.mjs",
+    "check": "node --experimental-strip-types ../../scripts/documentation/manual.mjs --check",
+    "test": "node --test ../../scripts/documentation/manual.test.mjs",
+    "build": "node --experimental-strip-types ../../scripts/documentation/manual.mjs && typedoc --options ../../scripts/documentation/typedoc.json"
+  },
+  "devDependencies": { "@types/node": "26.6.2", "typedoc": "0.28.20", "typescript": "6.0.3" }
+}

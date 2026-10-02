@@ -57,7 +57,7 @@ async function setup() {
   const result = await executeSetup(root, options, planned, existing);
   const handoff = { status: result.status, identity: result.identity, toolchain: result.toolchain, profile: options.profile,
     inputFingerprint: result.fingerprint, lockHash: result.lockHash,
-    scope: { staticServiceArtifactChecks: 'verified', servedBrowser: 'not-run', nativeHost: 'not-run', release: 'not-run' },
+    scope: { staticServiceArtifactChecks: options['defer-verify'] ? 'deferred: run npm run verify' : 'verified', servedBrowser: 'not-run', nativeHost: 'not-run', release: 'not-run' },
     stages: result.stages, migration: result.migration, journal: '.template-state/setup.json',
     vault: options.profile === 'native' ? resolve('.dev-vault') : null,
     next: options.profile === 'native' ? `Open the contained vault and deliberately enable ${planned.identity.name}. Old migrated installation remains preserved and disabled.` : 'Run npm run dev:ui. Browser/native/device/release qualification remains separately scoped.' };

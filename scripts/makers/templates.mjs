@@ -1,4 +1,4 @@
-import { symbol, title } from './arguments.mjs';
+import { makerSymbol as symbol, title } from './arguments.mjs';
 export function templates({ owner, entity, folder, preset }) {
   const name = symbol(entity); const feature = `${name}Feature`; const sample = `Example ${title(entity)}`;
   const isTask = preset === 'task'; const isProject = preset === 'project'; const label = isProject ? 'name' : 'title';

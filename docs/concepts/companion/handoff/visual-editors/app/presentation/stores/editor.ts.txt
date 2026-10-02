@@ -1,0 +1,2 @@
+import type { EditorProject } from '../../domain/shared/project'
+export const useEditorStore=defineStore('visual-editor',()=>{const project=shallowRef<EditorProject|null>(null);const mode=ref<'page'|'component'>('page');const selectedPageId=ref<string>();const selectedComponentId=ref<string>();function setProject(next:EditorProject){project.value=next;selectedPageId.value=next.pages[0]?.id;selectedComponentId.value=next.components[0]?.id}return{project,mode,selectedPageId,selectedComponentId,setProject}})

@@ -45,7 +45,7 @@ input, missing prerequisite or infrastructure failure. An individual successful
 | Producer | Actual structured input | Evidence scope |
 | --- | --- | --- |
 | runtime | Vitest JSON plus public reporter diagnostics | Unit; explicitly named component test files have component mode. Synthetic host tests remain unit. |
-| browser | Playwright JSON, every result and retry | Served browser integration, never native-host evidence. |
+| browser | Producer-owned Playwright JSON file, every result and retry; separately retained stdout/stderr | Served browser integration, never native-host evidence. |
 | tooling | Node's versioned real test-event reporter | Tooling/generated controls; the dedicated evidence-control suites are Node baseline. |
 | coverage | Production Vitest output and actual coverage summary | Existing complete production inventory and unchanged production/business floors, separate from acceptance. |
 | artifact | Existing artifact checker's structured asset report | Exact output hashes, ownership, notices and size checks; no host execution. |
@@ -86,7 +86,7 @@ native execution. See [the native ownership protocol](FRAMEWORK-LIFECYCLE-NATIVE
 
 ## Packet and session integrity
 
-Schema 1 packets record the producer, run UUID, UTC interval, actual exit/signal,
+Schema 2 packets record the producer, run UUID, UTC interval, actual exit/signal,
 zero-retry command policy, complete suite inventory, normalized cases and counts,
 raw-output file hashes, before/after execution identities and relevant assets.
 The identity includes actual executable source/config/test files, exact lockfile,
@@ -95,6 +95,22 @@ policy hashes, operating system, architecture, locale/timezone and the selected
 Chromium executable's bytes/hash. Git metadata distinguishes clean and modified
 checkouts from literal Git-free archives; a revision never substitutes for the
 content digest. Native candidate source and current tooling source are separate.
+
+Current browser runs write the built-in JSON reporter to the fresh run directory's
+`framework.json` through `PLAYWRIGHT_JSON_OUTPUT_FILE`. Ambient JSON output overrides
+are removed, including mixed-case Windows variants. Configuration/Git diagnostics
+remain in `raw-stdout.txt` and `raw-stderr.txt`; only the separate, bounded UTF-8
+`raw-framework.txt` report supplies assertions. A missing, malformed, oversized or
+linked report is a failure, never a reason to parse a console substring. Nonzero
+exit codes, framework errors and failed/retried assertions still fail qualification.
+
+Version 1's strict stdout transport is available only when explicitly reading a
+version 1 packet. Version 2 requires the exact new raw inventory and cannot silently
+fall back to version 1. Changed policy/source identities still invalidate old
+packets for current-candidate qualification; preserving a historical parser is not
+promoting old evidence. The legacy acceptance plan/crosswalk versions are unchanged.
+See the [transport regression record](EVIDENCE-TRANSPORT-REGRESSION.md) and the
+[PR5 CI repair record](PR5-CI-REPAIR.md) for their separately executed scopes.
 
 Session directories use the complete input digest, including crosswalk/native
 policy bytes. A run is appended to `runs.jsonl` **before** starting the child.

@@ -10,7 +10,7 @@ import { fallowVersion } from './fallow-contract.mjs';
 import { duplicateArguments, measureCorpus, assertCorpus, checkCorpus } from './maintainability-corpus.mjs';
 
 const policy = { version: 2, cyclomatic: 10, cognitive: 15, duplication: 3, minTokens: 50, minLines: 5,
-  mode: 'mild', ignoreImports: true, production: 'every src JS/TS/Vue file, including generated consumers',
+  mode: 'mild', ignoreImports: true, production: 'every src and bin JS/TS/Vue file, including generated consumers',
   severities: { 'complexity-cyclomatic': 'error', 'complexity-cognitive': 'error', 'complexity-crap': 'warn' } };
 const stageConfig = { failOnParseError: true, duplicates: { ignoreDefaults: false },
   rules: { 'boundary-violation': 'off', 'policy-violation': 'off', ...policy.severities } };
@@ -102,7 +102,7 @@ export async function measureMaintainability(root = process.cwd(), options = {})
   const failures = failureList(views);
   const report = { schema: 'plugin-maintainability/v1', status: failures.length ? 'failed' : 'passed', policy,
     tool: toolVersion, inventory: before, views, failures,
-    scope: 'Production thresholds block. Tooling, fixtures and removal templates are separate measured diagnostic views; CSS/markup/data are inventoried without function/clone qualification.' };
+    scope: 'Production thresholds block. Tooling, fixtures and removal templates are separate measured diagnostic views; CSS/markup/data and Python concept tooling are inventoried without JS/TS/Vue function/clone qualification.' };
   await writeFile(join(output, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
   return { report, output };
 }

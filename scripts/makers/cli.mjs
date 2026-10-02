@@ -17,7 +17,7 @@ async function main() {
       if (!maker) return;
       const name = (await prompt.question('Name: ')).trim();
       const args = [maker, name];
-      if (!['feature', 'locale', 'maker'].includes(maker)) args.push('--feature', (await prompt.question('Existing feature owner: ')).trim());
+      if (!['feature', 'locale', 'maker', 'plugin'].includes(maker)) args.push('--feature', (await prompt.question('Existing feature owner: ')).trim());
       if (maker === 'listener') args.push('--event', (await prompt.question('Existing event name in this feature: ')).trim());
       if (maker === 'style') args.push('--view', (await prompt.question('Existing view name in this feature: ')).trim());
       request = parseArguments(args);

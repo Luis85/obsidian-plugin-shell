@@ -1,5 +1,7 @@
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { realpathSync } from 'node:fs';
+import { realpath } from 'node:fs/promises';
 import { runEvidence } from './evidence-runner.mjs';
 import { checkEvidence, checkSession } from './evidence-validation.mjs';
 import { acceptanceReport } from './evidence-acceptance.mjs';
@@ -18,6 +20,8 @@ export async function evidenceCli(args) {
     else throw new Error('EVIDENCE_ARGUMENT');
   }
   if (!target) throw new Error('EVIDENCE_ARGUMENT');
+  // Reported framework paths and source identities use the physical workspace.
+  root = await realpath(root);
   if (action === 'run') {
     const result = await runEvidence(root, target, { allowDownload, candidate });
     console.log(JSON.stringify({ path: result.path, status: result.packet.status, failure: result.packet.failure, counts: result.packet.result?.counts }, null, 2));
@@ -34,7 +38,15 @@ export async function evidenceCli(args) {
   }
   throw new Error('EVIDENCE_ARGUMENT');
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+function isEntrypoint() {
+  if (!process.argv[1]) return false;
+  // Node resolves module URLs through linked parents (including macOS /var).
+  // Compare actual files, not two spellings of the same owned launcher. This
+  // detects execution only; it does not relax source or output path checks.
+  try { return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url)); }
+  catch { return false; } // Imports from stdin/eval need not have an on-disk argv entry.
+}
+if (isEntrypoint()) {
   try { process.exitCode = await evidenceCli(process.argv.slice(2)); }
   catch (error) { console.error(JSON.stringify({ status: 'infrastructure-error', error: error.message })); process.exitCode = 2; }
 }

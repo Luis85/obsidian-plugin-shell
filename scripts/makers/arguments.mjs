@@ -1,6 +1,10 @@
+import recipes from './recipes.json' with { type: 'json' };
 const flags = new Set(['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--document']);
-const values = new Set(['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference']);
-export const builtinRecipes = ['feature', 'entity', 'view', 'component', 'store', 'usecase', 'command', 'modal', 'setting', 'event', 'listener', 'style', 'locale', 'maker'];
+const values = new Set(['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference', '--extension', '--format', '--extensions']);
+export const builtinRecipes = Object.freeze(recipes.map(recipe => recipe.id));
+export function recipeOptions(maker) {
+  return recipes.find(recipe => recipe.id === maker)?.options ?? ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature'];
+}
 export function parseArguments(args) {
   const options = {}; const positional = [];
   for (let index = 0; index < args.length; index++) {
@@ -22,7 +26,7 @@ export function slug(value, label) {
   if (typeof value !== 'string' || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) || value.length > 48 || /^(con|prn|aux|nul|com[1-9]|lpt[1-9]|constructor|prototype|default|class|function|var|let|const|export|import)$/i.test(value)) throw new Error(`Invalid ${label}: use a lowercase non-reserved hyphenated name`);
   return value;
 }
-export const symbol = value => value.replace(/-([a-z0-9])/g, (_, letter) => letter.toUpperCase());
+export const makerSymbol = value => value.replace(/-([a-z0-9])/g, (_, letter) => letter.toUpperCase());
 export const title = value => value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ');
 export const help = `Template maker v2 — explicit, local authoring recipes
 
@@ -33,8 +37,11 @@ npm run make -- view|component|store|usecase|command|modal|event <name> --featur
 npm run make -- setting <name> --feature bookmarks [--preference notifySuccess|hideObsidianViewHeader]
 npm run make -- listener <name> --feature bookmarks --event <existing-event-name>
 npm run make -- style <name> --feature bookmarks --view <existing-view-name>
+npm run make -- file-extension <name> --feature bookmarks --extension folio [--format json|text]
+npm run make -- context-menu <name> --feature bookmarks [--extensions md,txt]
 npm run make -- locale <language>                 (complete pending translation skeleton)
 npm run make -- maker <recipe-name>               (trusted explicit local custom recipe)
+npm run make -- plugin <plugin-name>              (Workbench extension skeleton, disabled by default)
 npm run make -- <custom-recipe> <name> --feature bookmarks
 
 Options: --folder <vault-relative-folder>, --dry-run, --yes, --no-interaction, --json.

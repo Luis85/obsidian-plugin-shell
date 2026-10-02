@@ -6,7 +6,7 @@ import { release } from 'node:os';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
 import { validateRetained } from '../release/candidate.mjs';
 
-const protocol = 'executable-evidence/1';
+const protocol = 'executable-evidence/2';
 const producerNames = ['runtime', 'browser', 'tooling', 'coverage', 'artifact', 'native'];
 export async function filesUnder(root, directory, pattern) {
   const files = [];

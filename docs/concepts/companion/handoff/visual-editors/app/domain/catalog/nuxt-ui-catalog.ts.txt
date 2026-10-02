@@ -1,0 +1,41 @@
+export type CatalogKind='primitive'|'recipe'
+export interface NuxtUiProp { name:string; type:string; required?:boolean; default?:unknown }
+export interface NuxtUiSlot { name:string; description?:string }
+export interface NuxtUiEmit { name:string; payload?:string }
+export interface NuxtUiCatalogEntry {
+ id:string; kind:CatalogKind; label:string; component?:string; category:string; description:string
+ props:NuxtUiProp[]; slots:NuxtUiSlot[]; emits:NuxtUiEmit[]; generator:{importSource:'@nuxt/ui'; strategy:'direct'|'expand-recipe'}
+}
+const p=(id:string,label:string,component:string,category:string,description:string,props:NuxtUiProp[]=[],slots:NuxtUiSlot[]=[],emits:NuxtUiEmit[]=[]):NuxtUiCatalogEntry=>({id,kind:'primitive',label,component,category,description,props,slots,emits,generator:{importSource:'@nuxt/ui',strategy:'direct'}})
+export const nuxtUiCatalog:NuxtUiCatalogEntry[]=[
+p('u-button','Button','UButton','Actions','Primary and secondary actions',[{name:'label',type:'string'},{name:'color',type:'string',default:'primary'},{name:'variant',type:'string',default:'solid'},{name:'icon',type:'string'},{name:'loading',type:'boolean',default:false},{name:'disabled',type:'boolean',default:false}],[{name:'leading'},{name:'default'},{name:'trailing'}],[{name:'click',payload:'MouseEvent'}]),
+p('u-input','Input','UInput','Forms','Single-line input',[{name:'modelValue',type:'string|number'},{name:'placeholder',type:'string'},{name:'icon',type:'string'},{name:'disabled',type:'boolean'}],[],[{name:'update:modelValue',payload:'string|number'}]),
+p('u-textarea','Textarea','UTextarea','Forms','Multi-line input',[{name:'modelValue',type:'string'},{name:'placeholder',type:'string'},{name:'rows',type:'number',default:3}],[],[{name:'update:modelValue',payload:'string'}]),
+p('u-select','Select','USelect','Forms','Option selection',[{name:'modelValue',type:'unknown'},{name:'items',type:'array'},{name:'placeholder',type:'string'}],[],[{name:'update:modelValue',payload:'unknown'}]),
+p('u-checkbox','Checkbox','UCheckbox','Forms','Boolean form control',[{name:'modelValue',type:'boolean'},{name:'label',type:'string'}],[],[{name:'update:modelValue',payload:'boolean'}]),
+p('u-switch','Switch','USwitch','Forms','Immediate boolean setting',[{name:'modelValue',type:'boolean'},{name:'label',type:'string'}],[],[{name:'update:modelValue',payload:'boolean'}]),
+p('u-form','Form','UForm','Forms','Validated form boundary',[{name:'state',type:'object'},{name:'schema',type:'unknown'}],[{name:'default'}],[{name:'submit',payload:'SubmitEvent'}]),
+p('u-form-field','Form Field','UFormField','Forms','Label, help and validation wrapper',[{name:'label',type:'string'},{name:'name',type:'string'},{name:'description',type:'string'},{name:'required',type:'boolean'}],[{name:'default'}]),
+p('u-table','Data Table','UTable','Data','Structured records',[{name:'data',type:'array'},{name:'columns',type:'array'},{name:'loading',type:'boolean'}],[{name:'empty'},{name:'loading'}],[{name:'select',payload:'unknown'}]),
+p('u-card','Card','UCard','Data','Grouped content container',[],[{name:'header'},{name:'default'},{name:'footer'}]),
+p('u-badge','Badge','UBadge','Data','Compact status',[{name:'label',type:'string'},{name:'color',type:'string'},{name:'variant',type:'string'}],[{name:'default'}]),
+p('u-avatar','Avatar','UAvatar','Data','User/entity identity',[{name:'src',type:'string'},{name:'alt',type:'string'},{name:'text',type:'string'}]),
+p('u-tabs','Tabs','UTabs','Navigation','Peer surface navigation',[{name:'items',type:'array'},{name:'modelValue',type:'string'}],[],[{name:'update:modelValue',payload:'string'}]),
+p('u-breadcrumb','Breadcrumb','UBreadcrumb','Navigation','Hierarchical location',[{name:'items',type:'array'}]),
+p('u-dropdown-menu','Dropdown Menu','UDropdownMenu','Navigation','Context actions',[{name:'items',type:'array'}],[{name:'default'}]),
+p('u-command-palette','Command Palette','UCommandPalette','Navigation','Keyboard-first command discovery',[{name:'groups',type:'array'},{name:'placeholder',type:'string'}]),
+p('u-modal','Modal','UModal','Overlays','Focused modal workflow',[{name:'open',type:'boolean'},{name:'title',type:'string'},{name:'description',type:'string'}],[{name:'body'},{name:'footer'}],[{name:'update:open',payload:'boolean'}]),
+p('u-drawer','Drawer','UDrawer','Overlays','Contextual side/bottom workflow',[{name:'open',type:'boolean'},{name:'title',type:'string'}],[{name:'body'},{name:'footer'}],[{name:'update:open',payload:'boolean'}]),
+p('u-alert','Alert','UAlert','Feedback','Persistent contextual feedback',[{name:'title',type:'string'},{name:'description',type:'string'},{name:'color',type:'string'}]),
+p('u-progress','Progress','UProgress','Feedback','Progress indicator',[{name:'modelValue',type:'number'},{name:'max',type:'number',default:100}]),
+p('u-skeleton','Skeleton','USkeleton','Feedback','Loading placeholder'),
+p('u-separator','Separator','USeparator','Layout','Visual separation',[{name:'orientation',type:"'horizontal'|'vertical'",default:'horizontal'}])
+]
+export const nuxtUiRecipes:NuxtUiCatalogEntry[]=[
+{id:'recipe-app-shell',kind:'recipe',label:'Application Shell',category:'Application patterns',description:'Sidebar, header and content region',props:[],slots:[{name:'navigation'},{name:'header'},{name:'default'}],emits:[],generator:{importSource:'@nuxt/ui',strategy:'expand-recipe'}},
+{id:'recipe-crud-list',kind:'recipe',label:'CRUD List Workspace',category:'Application patterns',description:'Heading, actions, filter bar, UTable and states',props:[],slots:[{name:'actions'},{name:'filters'},{name:'empty'}],emits:[],generator:{importSource:'@nuxt/ui',strategy:'expand-recipe'}},
+{id:'recipe-filter-bar',kind:'recipe',label:'Filter Bar',category:'Application patterns',description:'Search, selects, filter actions and reset',props:[],slots:[],emits:[],generator:{importSource:'@nuxt/ui',strategy:'expand-recipe'}},
+{id:'recipe-master-detail',kind:'recipe',label:'Master / Detail',category:'Application patterns',description:'Record collection with detail workspace',props:[],slots:[{name:'master'},{name:'detail'}],emits:[],generator:{importSource:'@nuxt/ui',strategy:'expand-recipe'}},
+{id:'recipe-settings',kind:'recipe',label:'Settings Form',category:'Application patterns',description:'Navigation plus grouped validated forms',props:[],slots:[],emits:[],generator:{importSource:'@nuxt/ui',strategy:'expand-recipe'}},
+{id:'recipe-empty-state',kind:'recipe',label:'Empty State',category:'Application patterns',description:'Message, supporting copy and primary action',props:[],slots:[{name:'actions'}],emits:[],generator:{importSource:'@nuxt/ui',strategy:'expand-recipe'}}
+]

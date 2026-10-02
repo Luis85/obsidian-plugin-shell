@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, lstat, open } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { vitestReport, playwrightReport, toolingReport, artifactReport, nativeReport, completeResult, object } from './evidence-adapters.mjs';
@@ -6,6 +7,44 @@ import { assertCoverageGates } from '../quality/coverage-inventory.mjs';
 import { filesUnder } from './evidence-identity.mjs';
 import { performanceProtocol, summarizePerformance, candidateSizes } from './performance-report.mjs';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
+
+// Version 2 separates a browser framework report from console diagnostics. Historical
+// version 1 parsing remains explicit; it is never a fallback for a missing new report.
+export const evidencePacketVersion = 2;
+export function producerRawKeys(producer, version = evidencePacketVersion) {
+  if (![1, evidencePacketVersion].includes(version)) throw new Error('EVIDENCE_SCHEMA');
+  return ['stdout', 'stderr', ...(['runtime', 'coverage'].includes(producer) ? ['framework', 'attempts'] : []),
+    ...(producer === 'browser' && version === 2 ? ['framework'] : []),
+    ...(['coverage', 'native'].includes(producer) ? [producer] : [])];
+}
+export function producerEnvironment(producer, output, candidate, parent = process.env) {
+  const env = { ...parent, TZ: 'UTC', LANG: 'C.UTF-8', NODE_OPTIONS: '', FORCE_COLOR: '0', SHELL_EVIDENCE_OUTPUT: output };
+  delete env.NODE_TEST_CONTEXT;
+  // Windows environment keys are case-insensitive; preserve unrelated configuration.
+  for (const key of Object.keys(env)) if (key.toUpperCase().startsWith('PLAYWRIGHT_JSON_OUTPUT')) delete env[key];
+  if (producer === 'browser') env.PLAYWRIGHT_JSON_OUTPUT_FILE = join(output, 'framework.json');
+  if (candidate) env.GITHUB_SHA = candidate.sourceCommit;
+  return env;
+}
+/** Read only the current run's fixed report; never reuse a prior file or parse a console substring. */
+export async function readFrameworkReport(output) {
+  const path = join(output, 'framework.json'), limit = 32_000_000;
+  const entry = await lstat(path);
+  if (!entry.isFile() || entry.isSymbolicLink() || entry.nlink !== 1) throw new Error('EVIDENCE_REPORT_FILE');
+  const handle = await open(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+  try {
+    const actual = await handle.stat();
+    if (!actual.isFile() || actual.nlink !== 1 || actual.dev !== entry.dev || actual.ino !== entry.ino) throw new Error('EVIDENCE_REPORT_FILE');
+    if (actual.size > limit) throw new Error('EVIDENCE_REPORT_LIMIT');
+    const chunks = []; let size = 0;
+    for await (const chunk of handle.createReadStream({ autoClose: false })) {
+      size += chunk.length;
+      if (size > limit) throw new Error('EVIDENCE_REPORT_LIMIT');
+      chunks.push(chunk);
+    }
+    return new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks, size));
+  } finally { await handle.close(); }
+}
 
 // Trusted code owns commands and modes. Reports cannot supply hooks or arguments.
 export function producerCommand(root, producer, files, output) {
@@ -34,10 +73,15 @@ async function nativePerformance(report, root) {
     || sizes.assets.some(asset => !report.assets.some(expected => expected.file === asset.file && expected.sha256 === asset.sha256))) throw new Error('EVIDENCE_PERFORMANCE');
   return { classification: value.classification, summary, budgetStatus };
 }
-export async function adaptProducer(producer, raw, root, files, exitCode) {
+export async function adaptProducer(producer, raw, root, files, exitCode, version = evidencePacketVersion) {
+  producerRawKeys(producer, version);
   let result;
   if (producer === 'runtime' || producer === 'coverage') result = vitestReport(JSON.parse(raw.framework), root, JSON.parse(raw.attempts));
-  else if (producer === 'browser') result = playwrightReport(JSON.parse(raw.stdout), root);
+  else if (producer === 'browser') {
+    const text = version === 1 ? raw.stdout : raw.framework;
+    if (typeof text !== 'string' || !text.length) throw new Error('EVIDENCE_REPORT_MISSING');
+    result = playwrightReport(JSON.parse(text), root);
+  }
   else if (producer === 'tooling') result = toolingReport(raw.stdout, root);
   else if (producer === 'artifact') result = artifactReport(JSON.parse(raw.stdout));
   else if (producer === 'native') {

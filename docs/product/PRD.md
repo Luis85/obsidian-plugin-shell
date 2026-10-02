@@ -179,3 +179,46 @@ runtime/tooling gaps in the readiness ledger, the Actions publication interface,
 real public-release qualification and expanded host/device/accessibility evidence.
 Native evidence is limited to named checks and cannot certify all hosts, themes
 or devices.
+
+## Proposed companion product
+
+The [shell-first delivery overview](../../SHELL-FIRST-OVERVIEW.md) and
+[delivery strategy](DELIVERY-STRATEGY.md) define repository execution order:
+qualify and ship the shared shell, TypeScript CLI and project generator first; build the native companion on that shipped framework second; publish the companion last.
+
+The [companion developer-workbench PRD](COMPANION-PLUGIN-PRD.md) specifies a
+same-repository Obsidian companion built on the shell: **one vault, one project**.
+A developer opens an initially empty folder as a vault, installs the companion,
+and defines/designs the project before needing Node/npm or a template. Preparation
+adds reviewed source files to that same vault while preserving its notes and host
+configuration. Generated-plugin testing uses the contained `.dev-vault`, not the
+companion's authoring profile. Other projects are other Obsidian vaults.
+
+The [single-vault contract](../concepts/companion/SINGLE-VAULT.md) identifies the
+implemented browser concept, native persistence/hydration backlog and acceptance
+boundary. The [earlier research](../research/2026-09-23-companion-plugin.md) is dated
+background; its external-source and multi-project proposals are superseded.
+This remains proposed native product scope, not an installable companion,
+marketplace listing, native file-write qualification or change to root-template
+verification results. The shared CLI stays canonical.
+
+### Companion semantic design and variants
+
+The companion's single-project Design workspace also declares runtime entities,
+Obsidian-compatible properties, cardinalities and source-owned note relationships.
+Visual ER sections organize the model without becoming persistence boundaries.
+Sitemap surfaces reference declared entity IDs; the reviewed generator consumes
+those declarations alongside views and reusable components. Named component
+variants share one contract, pin defaults/version at placement and retain local
+content until reviewed upgrades. See the [semantic-layer contract](../concepts/companion/SEMANTIC-LAYER.md).
+
+The browser concept implements these authoring interactions and input-driven
+source previews. Shared CLI lowering, native Markdown schema records,
+relationship resolution and safe data migrations remain separately qualified
+implementation packages; no existing root runtime behavior is replaced here.
+
+### Framework developer-kit entry refinement — 2026-09-24
+
+The primary developer starts with the assembled GitHub framework release archive, not an installed plugin: extract → console setup/configure → import project JSON → reviewed generation → develop/build/test → explicitly publish the generated plugin → maintain. The compiled TypeScript-authored CLI runs before dependency installation, both directly and through npm aliases, and shares operations/makers/contracts with the template and future companion. An independent project root and custom source/test paths are first-class.
+
+The [implementation plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and SH-023–SH-034 extend the existing requirements. SH-022 remains technically blocked; SH-034 requires new exact-candidate authorization. Existing read-only handoff semantics and all earlier quality/safety requirements remain unchanged. This amendment is not runtime implementation or a release claim.

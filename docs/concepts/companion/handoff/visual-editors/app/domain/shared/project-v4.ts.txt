@@ -1,0 +1,22 @@
+import type { PageDefinition } from '../page/page'
+import type { ComponentDefinition } from '../component/component'
+import type { LayoutDefinition } from '../layout/layout'
+
+export interface EditorProjectV4 {
+ schema:'companion.vue-ir'
+ version:4
+ target:{framework:'vue';version:3;language:'typescript';format:'sfc';ui:{catalog:'nuxt-ui';catalogVersion:1}}
+ project:{id:string;name:string}
+ pages:PageDefinition[]
+ layouts:LayoutDefinition[]
+ components:ComponentDefinition[]
+}
+
+export interface EditorSessionState {
+ activeEditor:'page'|'component'
+ selectedPageId?:string
+ selectedComponentId?:string
+ selectedNodeId?:string
+ viewport:'desktop'|'tablet'|'mobile'
+ zoom:number
+}

@@ -1,0 +1,49 @@
+import type { ComponentDefinition } from './component'
+import type { UiNode, ValueExpression, Action } from '../shared/ir'
+
+export type ChildSource =
+ | { kind:'nuxt-ui'; catalogEntryId:string; catalogVersion:1 }
+ | { kind:'project-component'; componentId:string }
+
+export interface ChildComponentNode {
+ id:string
+ kind:'component'
+ componentId:string
+ implementation?:ChildSource
+ props?:Record<string,ValueExpression>
+ slots?:Record<string,UiNode[]>
+ events?:Record<string,Action[]>
+}
+
+export function componentDependencies(component:ComponentDefinition):string[]{
+ const found=new Set<string>()
+ const walk=(nodes:UiNode[])=>nodes.forEach(n=>{
+  if(n.kind==='component'){ found.add(n.componentId); Object.values(n.slots??{}).forEach(walk) }
+  if(n.kind==='element'&&n.children)walk(n.children)
+  if(n.kind==='slot'&&n.fallback)walk(n.fallback)
+ })
+ walk(component.template); return [...found]
+}
+
+export function wouldCreateCycle(parentId:string,childId:string,all:ComponentDefinition[]):boolean{
+ if(parentId===childId)return true
+ const byId=new Map(all.map(x=>[x.id,x]))
+ const seen=new Set<string>()
+ const reaches=(id:string):boolean=>{
+  if(id===parentId)return true
+  if(seen.has(id))return false
+  seen.add(id)
+  const c=byId.get(id); if(!c)return false
+  return componentDependencies(c).some(reaches)
+ }
+ return reaches(childId)
+}
+
+export function validateComposition(component:ComponentDefinition,all:ComponentDefinition[]):string[]{
+ const issues:string[]=[]
+ for(const dep of componentDependencies(component)){
+  if(!all.some(x=>x.id===dep))issues.push(`Unknown child component: ${dep}`)
+  else if(wouldCreateCycle(component.id,dep,all))issues.push(`Component cycle: ${component.id} → ${dep}`)
+ }
+ return issues
+}

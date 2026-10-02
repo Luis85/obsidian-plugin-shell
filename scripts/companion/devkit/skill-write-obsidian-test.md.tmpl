@@ -1,0 +1,63 @@
+---
+name: write-obsidian-test
+description: Write a test that exercises the plugin against Obsidian, either the fast in-memory kit (@test/obsidian) or a real-Obsidian spec (tests/obsidian). Use when adding tests for commands, views, settings tabs, vault writes or plugin lifecycle.
+---
+
+# Write an Obsidian test
+
+Choose the layer:
+
+- **In-memory kit** (milliseconds, default): plugin logic, commands, settings,
+  vault writes, metadata. File: `{{testRoot}}/<behavior>.test.ts`.
+- **Real Obsidian** (seconds per case): anything the kit cannot prove (rendering,
+  host event order, real plugin manager). File: `tests/obsidian/<behavior>.obsidian.ts`.
+
+## In-memory kit template
+
+```ts
+// @vitest-environment happy-dom
+import { afterEach, expect, it, vi } from 'vitest';
+vi.mock('obsidian', () => import('@test/obsidian'));
+import { App } from 'obsidian';
+import { createTestApp } from '@test/obsidian';
+import Plugin from '<relative path>/src/main';
+import manifest from '<relative path>/manifest.json';
+
+afterEach(() => { document.body.replaceChildren(); });
+it('<observable behaviour>', async () => {
+  const app = new App();
+  const kit = createTestApp({ app, files: { 'Inbox.md': '# Inbox\n' } });
+  const plugin = new Plugin(app, manifest);
+  await kit.loadPlugin(plugin);
+  expect(await kit.runCommand('<command id>')).toBe(true);
+  await kit.flush();
+  expect(kit.read('Inbox.md')).toBe('# Inbox\n');   // exact bytes
+  await kit.unloadPlugin(plugin);
+  expect(kit.errors).toEqual([]);
+});
+```
+
+`{{testRoot}}/plugin-host.test.ts` is a working example. API and limits:
+`docs/testing/OBSIDIAN-TEST-KIT.md`. Run: `npx vitest run --config vitest.project.config.mjs <file>`.
+
+## Real-Obsidian template
+
+```ts
+import { describe, expect } from 'vitest';
+import { test } from './support/obsidian-fixture';
+
+describe('<feature> in real Obsidian', () => {
+  test('<observable behaviour>', async ({ obsidian }) => {
+    await obsidian.runCommand('<command id>');   // short id, prefixed with the plugin id
+    await expect.poll(() => obsidian.eval(({ app }) => app.vault.getAbstractFileByPath('New.md') !== null)).toBe(true);
+    expect(obsidian.errors()).toEqual([]);
+  });
+});
+```
+
+Seed notes in `tests/obsidian/vault/`. Run: `npm run test:obsidian -- <file filter>`;
+evidence is in `reports/obsidian/cases/`. Use `expect.poll`/`waitFor`, never sleeps.
+Guide: `docs/testing/OBSIDIAN-DEV-LOOP.md`.
+
+Assert observable behaviour (exact file bytes, commands, DOM, no errors), never
+implementation details, and never loosen an assertion to make a test pass.

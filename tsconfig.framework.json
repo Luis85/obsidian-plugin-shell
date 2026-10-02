@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext",
+    "strict": true, "noUncheckedIndexedAccess": true, "noEmit": true,
+    "allowImportingTsExtensions": true, "allowJs": true, "checkJs": false,
+    "skipLibCheck": true, "types": ["node"]
+  },
+  "include": ["scripts/framework/**/*.ts", "scripts/companion/compiler/**/*.ts", "scripts/companion/runtime/contract.ts"]
+}

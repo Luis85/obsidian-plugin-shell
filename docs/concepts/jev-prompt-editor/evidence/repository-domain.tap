@@ -1,0 +1,394 @@
+TAP version 13
+# Subtest: all four templates validate
+ok 1 - all four templates validate
+  ---
+  duration_ms: 3.165055
+  type: 'test'
+  ...
+# Subtest: blank recipe validates
+ok 2 - blank recipe validates
+  ---
+  duration_ms: 0.270375
+  type: 'test'
+  ...
+# Subtest: exact three-key request envelope
+ok 3 - exact three-key request envelope
+  ---
+  duration_ms: 3.242381
+  type: 'test'
+  ...
+# Subtest: choice criteria are a map
+ok 4 - choice criteria are a map
+  ---
+  duration_ms: 0.856248
+  type: 'test'
+  ...
+# Subtest: score criteria are an ordered array
+ok 5 - score criteria are an ordered array
+  ---
+  duration_ms: 0.767261
+  type: 'test'
+  ...
+# Subtest: noul criteria use true/false keys
+ok 6 - noul criteria use true/false keys
+  ---
+  duration_ms: 0.749167
+  type: 'test'
+  ...
+# Subtest: policies and metadata never leak into wire shape
+ok 7 - policies and metadata never leak into wire shape
+  ---
+  duration_ms: 0.719763
+  type: 'test'
+  ...
+# Subtest: duplicate question IDs rejected
+ok 8 - duplicate question IDs rejected
+  ---
+  duration_ms: 0.217886
+  type: 'test'
+  ...
+# Subtest: unsafe question ID rejected
+ok 9 - unsafe question ID rejected
+  ---
+  duration_ms: 0.369759
+  type: 'test'
+  ...
+# Subtest: empty instructions rejected
+ok 10 - empty instructions rejected
+  ---
+  duration_ms: 0.416497
+  type: 'test'
+  ...
+# Subtest: duplicate choice keys rejected
+ok 11 - duplicate choice keys rejected
+  ---
+  duration_ms: 0.275825
+  type: 'test'
+  ...
+# Subtest: choice minimum enforced
+ok 12 - choice minimum enforced
+  ---
+  duration_ms: 0.146263
+  type: 'test'
+  ...
+# Subtest: choice maximum enforced
+ok 13 - choice maximum enforced
+  ---
+  duration_ms: 1.217592
+  type: 'test'
+  ...
+# Subtest: unknown option fields rejected
+ok 14 - unknown option fields rejected
+  ---
+  duration_ms: 0.160349
+  type: 'test'
+  ...
+# Subtest: score cannot have one level
+ok 15 - score cannot have one level
+  ---
+  duration_ms: 0.171049
+  type: 'test'
+  ...
+# Subtest: score maximum ten
+ok 16 - score maximum ten
+  ---
+  duration_ms: 0.15548
+  type: 'test'
+  ...
+# Subtest: noul criteria required by editor subset
+ok 17 - noul criteria required by editor subset
+  ---
+  duration_ms: 0.137596
+  type: 'test'
+  ...
+# Subtest: invalid review band rejected
+ok 18 - invalid review band rejected
+  ---
+  duration_ms: 0.129702
+  type: 'test'
+  ...
+# Subtest: model alias accepted
+ok 19 - model alias accepted
+  ---
+  duration_ms: 0.124733
+  type: 'test'
+  ...
+# Subtest: unknown model rejected
+ok 20 - unknown model rejected
+  ---
+  duration_ms: 0.120565
+  type: 'test'
+  ...
+# Subtest: future format version rejected
+ok 21 - future format version rejected
+  ---
+  duration_ms: 0.122148
+  type: 'test'
+  ...
+# Subtest: unknown recipe fields rejected
+ok 22 - unknown recipe fields rejected
+  ---
+  duration_ms: 0.179365
+  type: 'test'
+  ...
+# Subtest: JSON prototype pollution keys rejected recursively
+ok 23 - JSON prototype pollution keys rejected recursively
+  ---
+  duration_ms: 0.295612
+  type: 'test'
+  ...
+# Subtest: over-nested JSON rejected
+ok 24 - over-nested JSON rejected
+  ---
+  duration_ms: 0.218447
+  type: 'test'
+  ...
+# Subtest: request cannot masquerade as authoring recipe
+ok 25 - request cannot masquerade as authoring recipe
+  ---
+  duration_ms: 1.547527
+  type: 'test'
+  ...
+# Subtest: recipe JSON round trips exactly
+ok 26 - recipe JSON round trips exactly
+  ---
+  duration_ms: 0.767252
+  type: 'test'
+  ...
+# Subtest: library duplicates rejected
+ok 27 - library duplicates rejected
+  ---
+  duration_ms: 0.623223
+  type: 'test'
+  ...
+# Subtest: missing bindings rejected
+ok 28 - missing bindings rejected
+  ---
+  duration_ms: 0.174605
+  type: 'test'
+  ...
+# Subtest: invalid body limit rejected
+ok 29 - invalid body limit rejected
+  ---
+  duration_ms: 0.19254
+  type: 'test'
+  ...
+# Subtest: parses simple metadata/tasks/links/headings
+ok 30 - parses simple metadata/tasks/links/headings
+  ---
+  duration_ms: 0.222555
+  type: 'test'
+  ...
+# Subtest: multiline metadata tags parsed
+ok 31 - multiline metadata tags parsed
+  ---
+  duration_ms: 0.208099
+  type: 'test'
+  ...
+# Subtest: private metadata excluded
+ok 32 - private metadata excluded
+  ---
+  duration_ms: 0.126315
+  type: 'test'
+  ...
+# Subtest: ai false excluded
+ok 33 - ai false excluded
+  ---
+  duration_ms: 0.113482
+  type: 'test'
+  ...
+# Subtest: private tags excluded
+ok 34 - private tags excluded
+  ---
+  duration_ms: 0.167091
+  type: 'test'
+  ...
+# Subtest: hidden paths excluded
+ok 35 - hidden paths excluded
+  ---
+  duration_ms: 0.09593
+  type: 'test'
+  ...
+# Subtest: private folder excluded case-insensitively
+ok 36 - private folder excluded case-insensitively
+  ---
+  duration_ms: 0.092553
+  type: 'test'
+  ...
+# Subtest: folder exclusion uses path boundaries
+ok 37 - folder exclusion uses path boundaries
+  ---
+  duration_ms: 0.105006
+  type: 'test'
+  ...
+# Subtest: traversal rejected
+ok 38 - traversal rejected
+  ---
+  duration_ms: 0.156843
+  type: 'test'
+  ...
+# Subtest: unselected references not included
+ok 39 - unselected references not included
+  ---
+  duration_ms: 0.377594
+  type: 'test'
+  ...
+# Subtest: one-hop links opt in
+ok 40 - one-hop links opt in
+  ---
+  duration_ms: 0.6645
+  type: 'test'
+  ...
+# Subtest: ambiguous wiki links do not guess
+ok 41 - ambiguous wiki links do not guess
+  ---
+  duration_ms: 0.137046
+  type: 'test'
+  ...
+# Subtest: private active note blocks request
+ok 42 - private active note blocks request
+  ---
+  duration_ms: 0.531893
+  type: 'test'
+  ...
+# Subtest: body clipping is explicit
+ok 43 - body clipping is explicit
+  ---
+  duration_ms: 0.520621
+  type: 'test'
+  ...
+# Subtest: property allowlist excludes arbitrary secret metadata
+ok 44 - property allowlist excludes arbitrary secret metadata
+  ---
+  duration_ms: 0.505403
+  type: 'test'
+  ...
+# Subtest: recipe export contains no resolved note bodies
+ok 45 - recipe export contains no resolved note bodies
+  ---
+  duration_ms: 0.112119
+  type: 'test'
+  ...
+# Subtest: clear fixture validates all three types
+ok 46 - clear fixture validates all three types
+  ---
+  duration_ms: 0.647097
+  type: 'test'
+  ...
+# Subtest: ambiguous fixture produces review for every question
+ok 47 - ambiguous fixture produces review for every question
+  ---
+  duration_ms: 0.370231
+  type: 'test'
+  ...
+# Subtest: clear fixture returns suggestions, never writes
+ok 48 - clear fixture returns suggestions, never writes
+  ---
+  duration_ms: 0.285814
+  type: 'test'
+  ...
+# Subtest: catch-all choice forces review
+ok 49 - catch-all choice forces review
+  ---
+  duration_ms: 0.180607
+  type: 'test'
+  ...
+# Subtest: noul has no fabricated confidence field
+ok 50 - noul has no fabricated confidence field
+  ---
+  duration_ms: 0.131705
+  type: 'test'
+  ...
+# Subtest: response noul confidence rejected
+ok 51 - response noul confidence rejected
+  ---
+  duration_ms: 0.213108
+  type: 'test'
+  ...
+# Subtest: probabilities must sum to one
+ok 52 - probabilities must sum to one
+  ---
+  duration_ms: 0.199963
+  type: 'test'
+  ...
+# Subtest: choice must be a highest-probability option
+ok 53 - choice must be a highest-probability option
+  ---
+  duration_ms: 0.279731
+  type: 'test'
+  ...
+# Subtest: response IDs must match exactly
+ok 54 - response IDs must match exactly
+  ---
+  duration_ms: 0.18775
+  type: 'test'
+  ...
+# Subtest: response pinned model enforced
+ok 55 - response pinned model enforced
+  ---
+  duration_ms: 0.587086
+  type: 'test'
+  ...
+# Subtest: score equals weighted mean
+ok 56 - score equals weighted mean
+  ---
+  duration_ms: 0.391049
+  type: 'test'
+  ...
+# Subtest: canonical transaction rolls back on failed persistence
+ok 57 - canonical transaction rolls back on failed persistence
+  ---
+  duration_ms: 1.014052
+  type: 'test'
+  ...
+# Subtest: revision is independent of future edits
+ok 58 - revision is independent of future edits
+  ---
+  duration_ms: 0.831311
+  type: 'test'
+  ...
+# Subtest: import creates new IDs and preserves originals
+ok 59 - import creates new IDs and preserves originals
+  ---
+  duration_ms: 0.945684
+  type: 'test'
+  ...
+# Subtest: library export and import retain version snapshots
+ok 60 - library export and import retain version snapshots
+  ---
+  duration_ms: 2.061777
+  type: 'test'
+  ...
+# Subtest: import count fails atomically above 100 prompts
+ok 61 - import count fails atomically above 100 prompts
+  ---
+  duration_ms: 6.223703
+  type: 'test'
+  ...
+# Subtest: malformed stored library is retained and memory fallback used
+ok 62 - malformed stored library is retained and memory fallback used
+  ---
+  duration_ms: 0.248554
+  type: 'test'
+  ...
+# Subtest: browser repository stores only the recipe library
+ok 63 - browser repository stores only the recipe library
+  ---
+  duration_ms: 0.208168
+  type: 'test'
+  ...
+# Subtest: no UI service triggers model or vault writes
+ok 64 - no UI service triggers model or vault writes
+  ---
+  duration_ms: 0.409334
+  type: 'test'
+  ...
+1..64
+# tests 64
+# suites 0
+# pass 64
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 132.602148

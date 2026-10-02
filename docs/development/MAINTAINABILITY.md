@@ -67,6 +67,26 @@ Styles, markup-only HTML, data and compressed vendor material are visibly
 classified as unsupported by this JS/TS/Vue function/clone measurement. They keep
 their independent parser, provenance, style and source-line checks.
 
+The companion adds Python assembly/browser tooling as immediate `.py` files in
+`scripts/concepts` and `tests/concepts`. These are retained with exact hashes,
+byte counts and `view: unsupported`, `measurement: not-measured`, plus an explicit
+Python scope reason. They do not enter any Fallow function/clone corpus or inflate
+the production denominator. Changing or omitting one still invalidates a retained
+report. This classification does not accept Python in `src`, unrelated folders,
+nested concept folders, bytecode or arbitrary extensions. Unknown inputs still fail.
+The separate companion CI parses every concept Python source without executing
+it or writing bytecode, then runs the existing assembly tests and current browser
+suites. Syntax success is not Python complexity, coverage or native qualification;
+normal template setup does not acquire an additional Python runtime prerequisite.
+
+The optional memory integration similarly inventories only these reviewed Python
+paths: `scripts/hindsight/embedded.py`, `tests/hindsight/test_embedded.py` and
+`tests/hindsight/test_providers.py`. Their exact bytes remain fingerprinted with
+an explicit optional-memory reason and `measurement: not-measured`. They do not
+change any measured production denominator or add Python to default setup.
+Unreviewed files in those directories still fail `METRIC_UNCLASSIFIED_INPUT`.
+The separate optional-memory workflow owns adapter tests and provider acceptance.
+
 Four measured views are retained: production, executable tooling/configuration,
 test/harness fixtures, and executable example-removal templates. Tooling and
 fixture/template complexity and duplication are diagnostic reports, without a
@@ -103,7 +123,7 @@ not physical repository lines or the code-line-limit denominator. Token statisti
 are retained separately; Fallow's duplicated-token count excludes one retained
 copy of each clone. Clone findings retain source path/ranges and minimum counts.
 Native threshold decisions and clone instance/file counts must agree with the
-reported totals; nonempty clone groups cannot claim zero duplicated lines/tokens.
+reported totals; nonempty clone groups cannot claim zero duplicated_lines/tokens.
 
 Initial source qualification exposed 33 executable function violations and four
 Vue template aggregates. Cohesive validation, request preparation, owned feedback,
@@ -120,7 +140,9 @@ changed source, omitted inventory, contradictory clone totals and unknown report
 schemas. A real CRAP-only function must remain a visible `warn` finding without
 failing, and tampered severities, health verdicts, a removed parse gate or an exit
 code contradicting the verdicts are rejected. They also prove the
-immutable vendor input is inventoried and altered bytes are rejected. Raw outputs
+immutable vendor input is inventoried and altered bytes are rejected. They exercise
+all actual concept Python sources, unchanged production metrics, stale/omitted
+Python records and rejection outside the narrow language scope. Raw outputs
 are kept; no report is synthesized as the only positive control.
 
 The report binds the source inventory, policy, Node version, installed package and

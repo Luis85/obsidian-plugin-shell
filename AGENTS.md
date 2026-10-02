@@ -30,7 +30,13 @@ not a newly reviewed selectable language. Do not advertise unexecuted qualificat
 
 ## Commands and environment
 
-Use the qualified Node 24.21.0/npm 11.19.1 with the exact package-lock. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
+Use the qualified Node 24.21.0/npm 11.19.1 with the exact package-lock.
+Use the repository-local **TypeScript 6.0.3** for all new source and prototype
+checks. Do not substitute a global TypeScript 5.x installation, link it into
+node_modules, or report a 5.x run as current validation. If locked tooling cannot
+be installed, report the TypeScript check as not run and use hosted qualification.
+Historical evidence records retain their actual compiler versions. Use the npm
+typecheck scripts; they select workspace compiler entrypoints, never PATH tools. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
 
 `npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. Use actual tool output, not assumed success.
 
@@ -91,7 +97,7 @@ Handwritten runtime/CSS/scripts: 400 code lines. Tests/helpers: 450; main.ts: 10
 
 Name executable tests, scripts and workflows by behavior or responsibility, not iteration number. Historical iteration guides/evidence records may retain iteration names. Update imports, workflows and inventories whenever executable files are renamed.
 
-Do not weaken thresholds, suppress whole directories, remove meaningful tests, accept screenshot baselines, use unsafe casts, or disable both linters for convenience. Negative fixtures must prove actual checker failure. Native/browser/inline/fixture evidence have different scopes.
+Do not weaken thresholds, suppress whole directories, remove meaningful tests, accept screenshot baselines, use unsafe casts, or disable both linters for convenience. Owner-decided exception: `docs/` is a design working directory. The repository analyzer and the Markdown/link check ignore it; Nuxt UI component names in it can still add plugin styles. The companion concept keeps its own assembly, analyzer-inventory and browser verification. Negative fixtures must prove actual checker failure. Native/browser/inline/fixture evidence have different scopes.
 
 Tests claiming application behavior run real services/actions, not default-stubbed stores. Check exact Markdown, write count, no-success-on-failure, owner cleanup, independent caught-error records and host-style containment. The legacy machine acceptance plan remains separate from the new iteration test IDs; no automatic promotion of all earlier cases.
 

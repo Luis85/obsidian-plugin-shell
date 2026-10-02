@@ -9,7 +9,7 @@ import { createFixtureServer } from '../../scripts/harness/serve-style-fixture.m
 const server = createFixtureServer();
 let port;
 before(async () => {
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
   port = server.address().port;
 });
 after(async () => {
@@ -18,7 +18,8 @@ after(async () => {
 });
 function get(path, method = 'GET') {
   return new Promise((resolve, reject) => {
-    const req = request({ hostname: '127.0.0.1', port, path, method, timeout: 3000 }, (res) => {
+    // One connection per request: no pooled keep-alive socket outlives a test into the shutdown hook.
+    const req = request({ hostname: '127.0.0.1', port, path, method, timeout: 3000, agent: false }, (res) => {
       let body = '';
       res.setEncoding('utf8');
       res.on('data', (chunk) => { body += chunk; });

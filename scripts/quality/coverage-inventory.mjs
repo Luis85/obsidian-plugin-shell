@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { globSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 export function assertCoverageInventory(summary, files) {
@@ -43,6 +43,28 @@ export function assertCoverageGates(summary, files) {
   for (const metric of metrics) if (reported[metric].total !== scopes.production[metric].total || reported[metric].covered !== scopes.production[metric].covered) throw new Error(`INCONSISTENT_COVERAGE_TOTAL: ${metric}`);
   return { ...inventory, scopes };
 }
+// The selected-core gate reuses the production run: both configs execute the
+// same tests, so each file's counts are identical and only the scope differs.
+export function assertSelectedCoreGate(summary, files, thresholds) {
+  if (!summary || typeof summary !== 'object' || Array.isArray(summary)) throw new Error('INVALID_COVERAGE_REPORT');
+  if (!thresholds || metrics.some(metric => typeof thresholds[metric] !== 'number')) throw new Error('INVALID_SELECTED_CORE_THRESHOLDS');
+  const inputs = [...new Set(files.map(file => resolve(file)))];
+  const recorded = new Map(Object.entries(summary).filter(([file]) => file !== 'total').map(([file, entry]) => [resolve(file), entry]));
+  const missing = inputs.filter(file => !recorded.has(file));
+  if (!inputs.length) throw new Error('EMPTY_COVERAGE_SCOPE: selectedCore');
+  if (missing.length) throw new Error(`INCOMPLETE_SELECTED_CORE_COVERAGE: ${missing.join(', ')}`);
+  const totals = aggregate(inputs.map(file => recorded.get(file)));
+  for (const metric of metrics) {
+    if (totals[metric].total === 0) throw new Error(`EMPTY_COVERAGE_SCOPE: selectedCore.${metric}`);
+    if (totals[metric].pct < thresholds[metric]) throw new Error(`COVERAGE_BELOW_THRESHOLD: selectedCore.${metric} ${totals[metric].pct} < ${thresholds[metric]}`);
+  }
+  return { status: 'passed', selectedCoreInputs: inputs.length, totals };
+}
+async function selectedCoreScope() {
+  const { default: config } = await import(pathToFileURL(resolve('vitest.config.mjs')).href);
+  const { include, thresholds } = config.test.coverage;
+  return { files: include.flatMap(pattern => globSync(pattern)), thresholds };
+}
 function sources(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
@@ -51,5 +73,10 @@ function sources(directory) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const report = JSON.parse(readFileSync('reports/production-coverage/coverage-summary.json', 'utf8'));
-  console.log(JSON.stringify(assertCoverageGates(report, sources('src')), null, 2));
+  const result = assertCoverageGates(report, sources('src'));
+  if (process.argv.includes('--selected-core')) {
+    const core = await selectedCoreScope();
+    result.selectedCore = assertSelectedCoreGate(report, core.files, core.thresholds);
+  }
+  console.log(JSON.stringify(result, null, 2));
 }

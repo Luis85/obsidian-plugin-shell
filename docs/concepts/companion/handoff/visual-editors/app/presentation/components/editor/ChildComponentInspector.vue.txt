@@ -1,0 +1,18 @@
+<script setup lang="ts">
+const selected=defineModel<string>({default:'search'})
+const tab=ref('props')
+</script>
+<template><div class="h-full flex flex-col">
+<div class="p-3 border-b border-default"><p class="text-xs text-muted">Child instance</p><div class="flex items-center mt-1"><UIcon name="i-lucide-component" class="mr-2 text-primary"/><strong>{{selected==='search'?'SearchField':selected==='filter'?'FilterButton':selected==='create'?'UButton':'CustomerToolbar'}}</strong><div class="flex-1"/><UButton v-if="selected!=='toolbar'&&selected!=='create'" size="xs" variant="ghost" trailing-icon="i-lucide-arrow-up-right">Open definition</UButton></div></div>
+<UTabs v-model="tab" :items="[{label:'Props',value:'props'},{label:'Slots',value:'slots'},{label:'Events',value:'events'}]" class="px-3 pt-2"/>
+<div class="flex-1 overflow-auto p-4">
+ <div v-if="tab==='props'" class="space-y-4">
+  <UFormField label="query"><div class="grid grid-cols-[95px_1fr] gap-2"><USelect :items="['Literal','Parent prop','State']" default-value="Parent prop"/><UInput model-value="searchQuery"/></div></UFormField>
+  <UFormField label="placeholder"><div class="grid grid-cols-[95px_1fr] gap-2"><USelect :items="['Literal','Parent prop']" default-value="Literal"/><UInput model-value="Search customers…"/></div></UFormField>
+  <UAlert color="primary" variant="subtle" title="Parent → child binding" description="Values are typed expressions in the IR. No Vue expressions are persisted."/>
+ </div>
+ <div v-else-if="tab==='slots'" class="space-y-3"><div class="border border-default rounded-lg p-3"><div class="flex"><code class="text-xs">#leading</code><div class="flex-1"/><UBadge variant="subtle">empty</UBadge></div><p class="text-xs text-muted mt-1">Optional child-owned content slot.</p></div><UButton block variant="outline" icon="i-lucide-plus">Map slot content</UButton></div>
+ <div v-else class="space-y-3"><div class="border border-default rounded-lg p-3"><div class="flex gap-2 items-center"><UBadge variant="subtle">@search</UBadge><UIcon name="i-lucide-arrow-right"/><span class="text-sm">Emit parent event</span></div><div class="mt-2 flex gap-2"><code class="text-xs">search</code><span class="text-xs text-muted">payload ← $event</span></div></div><div class="border border-default rounded-lg p-3"><div class="flex gap-2 items-center"><UBadge variant="subtle">@clear</UBadge><UIcon name="i-lucide-arrow-right"/><span class="text-sm">Set state</span></div><p class="text-xs text-muted mt-2">searchQuery ← ""</p></div><UButton block variant="outline" icon="i-lucide-plus">Map child event</UButton></div>
+</div>
+<div class="p-3 border-t border-default"><UAlert color="success" variant="subtle" title="Composition valid" description="No recursive component dependency detected."/></div>
+</div></template>

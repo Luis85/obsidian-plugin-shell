@@ -1,0 +1,43 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "cli",
+  "name": "CLI",
+  "version": "1.0.0",
+  "category": "Projects",
+  "level": "Foundation",
+  "summary": "A Node.js CLI with human and machine-readable output.",
+  "outcome": "A reviewed prototype package with command-line application source (No frontend), ready for explicit dependency resolution and implementation.",
+  "includes": [
+    "Shared core in src/core with stable page data",
+    "CLI entrypoint with --json output and exit code 2 on invalid input",
+    "Exact dependency pins with a root-only lock for explicit resolution"
+  ],
+  "implementation": [
+    "Agree the prototype brief in the interview before any files are written",
+    "Implement the agreed visual components and business actions",
+    "Resolve dependencies explicitly, then typecheck, test and build every target"
+  ],
+  "tags": [
+    "cli",
+    "node",
+    "json"
+  ],
+  "inputs": [],
+  "generator": {
+    "kind": "project",
+    "projectType": "cli",
+    "framework": "none",
+    "targets": [
+      "cli"
+    ]
+  },
+  "files": [],
+  "processes": [],
+  "firstRun": [],
+  "nextSteps": [
+    "Review execution-prompt.md and source/README.md in the prepared package.",
+    "In source/, run npm install, then npm run typecheck, npm test and npm run build.",
+    "Run npm run start:cli -- pages --json; the CLI transcript is the prototype."
+  ]
+}

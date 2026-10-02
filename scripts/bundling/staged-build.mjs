@@ -4,9 +4,12 @@ import { build as viteBuild } from 'vite';
 const names = ['main.js', 'styles.css', 'manifest.json'];
 async function exists(path) { try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; } }
 /** Build and validate the whole candidate before replacing the last good directory. */
-export async function stagedBuild({ root = process.cwd(), build = viteBuild } = {}) {
+/** `target`/`sourcemap`/`logLevel` exist for contained dev candidates; the default release build is unchanged. */
+export async function stagedBuild({ root = process.cwd(), build = viteBuild, target: directory = 'dist', sourcemap, logLevel } = {}) {
   root = resolve(root);
-  const target = join(root, 'dist'); const lock = join(root, '.shell-build-lock');
+  if (!/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(directory) || directory.split('/').some(part => /^\.{1,2}$/.test(part))) throw new Error('UNSAFE_BUILD_TARGET');
+  if (sourcemap !== undefined && sourcemap !== 'inline') throw new Error('UNSUPPORTED_BUILD_SOURCEMAP');
+  const target = join(root, directory); const lock = join(root, '.shell-build-lock');
   const previous = await exists(target);
   if (previous && (!previous.isDirectory() || previous.isSymbolicLink())) throw new Error('UNSAFE_BUILD_TARGET');
   await mkdir(lock); // Refuse overlapping processes; never remove another process's lock.
@@ -14,7 +17,8 @@ export async function stagedBuild({ root = process.cwd(), build = viteBuild } = 
   try {
     stage = await mkdtemp(join(root, '.shell-build-'));
     const output = join(stage, 'candidate');
-    await build({ root, configFile: join(root, 'vite.config.mjs'), build: { outDir: output, emptyOutDir: true } });
+    await build({ root, configFile: join(root, 'vite.config.mjs'), ...(logLevel ? { logLevel } : {}),
+      build: { outDir: output, emptyOutDir: true, ...(sourcemap ? { sourcemap } : {}) } });
     await copyFile(join(root, 'manifest.json'), join(output, 'manifest.json'));
     for (const name of names) {
       const stat = await lstat(join(output, name));

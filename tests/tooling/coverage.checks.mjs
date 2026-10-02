@@ -5,7 +5,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { assertCoverageInventory, assertCoverageGates } from '../../scripts/quality/coverage-inventory.mjs';
+import { assertCoverageInventory, assertCoverageGates, assertSelectedCoreGate } from '../../scripts/quality/coverage-inventory.mjs';
 test('[COV-02-01] silently omitted production input makes the coverage inventory fail', () => {
   const source = resolve('src/bootstrap/mount-ui.ts');
   assert.throws(() => assertCoverageInventory({ total: {}, [source]: {} }, [source, 'src/main.ts']), /INCOMPLETE_PRODUCTION_COVERAGE/);
@@ -57,4 +57,35 @@ test('[COV-03-01] production and domain/application/features thresholds are inde
   assert.throws(() => assertCoverageGates({ total: counts(), [view]: counts() }, [view]), /EMPTY_COVERAGE_SCOPE/);
   assert.throws(() => assertCoverageGates({ total: counts(), [domain]: counts(0, 0), [view]: counts() }, [domain, view]), /EMPTY_COVERAGE_SCOPE: domainApplicationFeatures/);
   assert.throws(() => assertCoverageGates({ ...report, total: counts(199, 200) }, [domain, view]), /INCONSISTENT_COVERAGE_TOTAL/);
+});
+test('[COV-04-01] the selected-core gate reads its own scope and thresholds from the shared production run', () => {
+  const domain = resolve('src/domain/example.ts'); const view = resolve('src/presentation/example.vue');
+  const floors = { lines: 95, statements: 90, functions: 90, branches: 90 };
+  const report = { total: counts(200, 200), [domain]: counts(), [view]: counts(10) };
+  const result = assertSelectedCoreGate(report, [domain], floors);
+  assert.equal(result.selectedCoreInputs, 1); assert.equal(result.totals.lines.pct, 100);
+  assert.throws(() => assertSelectedCoreGate({ ...report, [domain]: counts(94) }, [domain], floors), /selectedCore.lines/);
+  assert.throws(() => assertSelectedCoreGate({ ...report, [domain]: { ...counts(), branches: { total: 100, covered: 89, pct: 89 } } }, [domain], floors), /selectedCore.branches/);
+  assert.throws(() => assertSelectedCoreGate(report, [domain, resolve('src/domain/omitted.ts')], floors), /INCOMPLETE_SELECTED_CORE_COVERAGE/);
+  assert.throws(() => assertSelectedCoreGate(report, [], floors), /EMPTY_COVERAGE_SCOPE: selectedCore/);
+  assert.throws(() => assertSelectedCoreGate({ ...report, [domain]: counts(0, 0) }, [domain], floors), /EMPTY_COVERAGE_SCOPE: selectedCore.lines/);
+  assert.throws(() => assertSelectedCoreGate(report, [domain], { ...floors, branches: undefined }), /INVALID_SELECTED_CORE_THRESHOLDS/);
+  assert.throws(() => assertSelectedCoreGate(null, [domain], floors), /INVALID_COVERAGE_REPORT/);
+});
+test('[COV-04-02] the CLI applies the selected-core config only when requested and fails closed below its floor', () => {
+  const root = mkdtempSync(join(tmpdir(), 'shell-core-coverage-')); const script = resolve('scripts/quality/coverage-inventory.mjs');
+  try {
+    mkdirSync(join(root, 'src/domain'), { recursive: true }); mkdirSync(join(root, 'src/presentation'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
+    const domain = join(root, 'src/domain/value.ts'); const view = join(root, 'src/presentation/view.vue');
+    writeFileSync(domain, 'export const value = 1;'); writeFileSync(view, '<template>View</template>');
+    writeFileSync(join(root, 'vitest.config.mjs'), "export default { test: { coverage: { include: ['src/domain/**/*.ts'], thresholds: { lines: 99, statements: 90, functions: 90, branches: 90 } } } };");
+    const report = join(root, 'reports/production-coverage/coverage-summary.json');
+    const run = (...args) => spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', timeout: 10000 });
+    // Production (90%) and business (95%) floors pass at 97%; only the selected-core 99% line floor fails.
+    writeFileSync(report, JSON.stringify({ total: counts(194, 200), [domain]: counts(97), [view]: counts(97) }));
+    assert.equal(run().status, 0);
+    const failed = run('--selected-core'); assert.equal(failed.status, 1); assert.match(failed.stderr, /selectedCore.lines/);
+    writeFileSync(report, JSON.stringify({ total: counts(199, 200), [domain]: counts(), [view]: counts(99) }));
+    const passed = run('--selected-core'); assert.equal(passed.status, 0, passed.stderr); assert.equal(JSON.parse(passed.stdout).selectedCore.selectedCoreInputs, 1);
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

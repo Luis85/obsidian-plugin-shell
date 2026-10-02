@@ -49,7 +49,16 @@ The double hyphens are outside the valid ID grammar, keeping these marker catego
 disjoint from retained root IDs and each other. Readable `data-plugin-ui` markers
 remain; variable/keyframe namespaces and hash guards are unchanged. Negative
 controls reject foreign, suffix and sibling selectors, while actual renamed
-consumer artifacts remain subject to the unchanged 100 KiB stylesheet limit.
+consumer artifacts remain subject to the 160 KiB stylesheet limit.
+
+**Stylesheet budget change (owner-reviewed, 2026-09-27).** The CSS limit in `check-artifacts.mjs` and the performance
+report rose from 100 KiB to 160 KiB, a deviation from NFR-04's 100 KiB target. Nuxt UI `experimental.componentDetection`
+scans the whole repository for `U<Name>` tokens, so the companion's Nuxt UI catalog v1, its tests and `docs/`
+prototypes select component themes the plugin never renders. Measured on `6178b10`: 34 detected components,
+153,647 B (14 components used by `src` would build about 94 KB; all 118 components 264.51 kB). Scoping detection to
+`src` was tried and rejected: Nuxt UI writes its generated templates under its root, and many owned-source walkers
+assume `src/` holds only owned source. New component mentions anywhere in the repository, including `docs/`, can
+still grow the stylesheet.
 
 `npm run check:test-quality` parses every TypeScript file in `tests/runtime` and
 `tests/e2e` with the installed TypeScript AST. It rejects focused/skipped/todo/
@@ -70,7 +79,8 @@ The negative control runs actual ESLint with the repository config against a
 missing Playwright `await`; the corrected operation passes.
 
 `npm run check:repository` inventories current `.github/workflows` YAML, owned
-`src/styles/**/*.css`, documentation Markdown and root README/AGENTS/changelog.
+`src/styles/**/*.css` and root README/AGENTS/changelog (their links into `docs/` must resolve). Markdown under
+`docs/` is not walked: `docs/` is a design working directory outside the repository quality gates.
 Its YAML parser rejects malformed or duplicate mappings. The repository policy
 requires job/step structure, full action SHA pins, explicit read-only permissions,
 checkout without persisted credentials and environment-based handling of untrusted
@@ -78,6 +88,27 @@ inputs instead of direct shell interpolation. This is a focused repository polic
 not a substitute for the complete GitHub Actions schema or actionlint. Privileged
 publication workflows are not allowed by this iteration's checker; introducing
 them requires a separate authorized design and scoped policy change.
+
+Current workflows, all read-only:
+
+- `ci.yml` (pull requests, `main`, manual): dependency-free `baseline` on
+  Linux/Windows; `showcase` guided setup + `verify` (Windows on pull requests,
+  plus Linux served e2e on pushes); three parallel template-authoring journeys
+  (`renamed-feature`, `source-archive`, `example-removal`). On pull requests and
+  manual runs only: `framework-cli` on Linux/Windows/macOS, `real-obsidian`,
+  `generated-companion` and three grouped `starter` jobs.
+- `setup-compatibility.yml` (setup/toolchain input changes): Node 24.15.0 +
+  npm 12.0.2 and Node 24.21.0 + npm 11.19.1 on Linux/Windows with the real npm
+  install-policy fixture.
+- `companion-concept-verification.yml` (concept input changes): concept
+  assembly, test data, visual editors and browser suites. Kept separate because
+  the framework kit excludes it.
+- `candidate-qualification.yml` (`main` pushes touching execution inputs,
+  manual): fixed-source rehearsal, repeated runtime suites, both coverage scopes,
+  served browser, three native sessions, timing samples and the live audit.
+- `release-rehearsal.yml` (manual only): rehearsal of a reviewed default-branch
+  commit and version; it cannot publish or tag.
+- `maintenance-status.yml` (weekly, manual): version and action-pin discovery.
 
 Owned CSS is parsed with the already selected PostCSS and selector parser. Empty
 declarations and selectors without an owned class or plugin attribute fail. This

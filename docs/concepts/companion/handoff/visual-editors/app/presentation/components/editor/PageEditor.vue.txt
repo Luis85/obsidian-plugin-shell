@@ -1,0 +1,51 @@
+<script setup lang="ts">
+const leftMode=ref<'outline'|'insert'|'layouts'>('outline')
+const inspector=ref<'essentials'|'data'|'actions'>('essentials')
+const viewport=ref('Desktop'), editorMode=ref('Design'), scenario=ref('Default')
+const selected=ref('table'), advanced=ref(false), saveLayoutOpen=ref(false), commandOpen=ref(false)
+const pages=['Overview','Customers','Customer detail','Invoices','Settings']
+const outline=[
+ {id:'shell',label:'Application shell',icon:'i-lucide-panels-top-left',depth:0},
+ {id:'sidebar',label:'Primary sidebar',icon:'i-lucide-panel-left',depth:1},
+ {id:'header',label:'Command bar',icon:'i-lucide-panel-top',depth:1},
+ {id:'content',label:'Content',icon:'i-lucide-square-dashed',depth:1},
+ {id:'heading',label:'Page heading',icon:'i-lucide-heading-1',depth:2},
+ {id:'kpis',label:'KPI summary',icon:'i-lucide-chart-no-axes-column',depth:2},
+ {id:'table',label:'Customer table',icon:'i-lucide-table-2',depth:2}
+]
+const issues=[{severity:'warning',text:'Empty state needs a primary action',node:'table'},{severity:'info',text:'Mobile table scroll is enabled',node:'table'}]
+function runCommand(id:string){if(id==='save-layout')saveLayoutOpen.value=true;if(id==='apply-layout')leftMode.value='layouts';if(id==='bind')inspector.value='data';if(id==='interaction')inspector.value='actions'}
+</script>
+<template><div class="h-full grid grid-cols-[260px_minmax(0,1fr)_320px] bg-default">
+<aside class="border-r border-default min-h-0 flex flex-col">
+ <div class="p-3 border-b border-default"><div class="flex items-center gap-2"><UButton icon="i-lucide-chevron-left" variant="ghost" size="xs"/><div class="min-w-0"><p class="text-xs text-muted">Customer Management</p><strong class="block truncate">Customers</strong></div><div class="flex-1"/><UButton icon="i-lucide-ellipsis" variant="ghost" size="xs"/></div><USelect class="mt-3 w-full" :items="pages" default-value="Customers"/></div>
+ <div class="p-2 border-b border-default"><UButtonGroup class="w-full"><UButton class="flex-1 justify-center" icon="i-lucide-list-tree" size="sm" :variant="leftMode==='outline'?'soft':'ghost'" @click="leftMode='outline'">Outline</UButton><UButton class="flex-1 justify-center" icon="i-lucide-plus" size="sm" :variant="leftMode==='insert'?'soft':'ghost'" @click="leftMode='insert'">Insert</UButton><UButton class="flex-1 justify-center" icon="i-lucide-layout-template" size="sm" :variant="leftMode==='layouts'?'soft':'ghost'" @click="leftMode='layouts'">Layouts</UButton></UButtonGroup></div>
+ <div class="flex-1 min-h-0 overflow-auto">
+  <div v-if="leftMode==='outline'" class="p-2"><UInput icon="i-lucide-search" placeholder="Find in page…" size="sm" class="mb-2"/><button v-for="n in outline" :key="n.id" class="w-full flex items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-elevated" :class="selected===n.id?'bg-elevated ring-1 ring-primary/30':''" :style="{paddingLeft:(8+n.depth*18)+'px'}" @click="selected=n.id"><UIcon :name="n.icon" class="text-muted"/><span class="truncate">{{n.label}}</span><UIcon v-if="n.id==='table'" name="i-lucide-database" class="ml-auto text-primary"/></button></div>
+  <NuxtUiCatalogPanel v-else-if="leftMode==='insert'" @insert="leftMode='outline'" @create-component="()=>{}"/>
+  <LayoutLibrary v-else @save-current="saveLayoutOpen=true" @apply="()=>leftMode='outline'"/>
+ </div>
+ <div class="p-3 border-t border-default"><UButton block variant="ghost" icon="i-lucide-command" @click="commandOpen=true">Commands <UKbd class="ml-auto">⌘ K</UKbd></UButton></div>
+</aside>
+
+<section class="min-w-0 min-h-0 grid grid-rows-[48px_1fr_38px]">
+ <div class="border-b border-default flex items-center px-3 gap-2 bg-default"><UButtonGroup><UButton v-for="x in ['Design','Preview','Review']" :key="x" size="sm" :variant="editorMode===x?'solid':'ghost'" @click="editorMode=x">{{x}}</UButton></UButtonGroup><USeparator orientation="vertical" class="h-5 mx-1"/><USelect v-model="scenario" :items="['Default','Loading','Empty','Error','No permission']" size="sm" class="w-36"/><div class="flex-1"/><UButtonGroup><UButton v-for="x in ['Desktop','Tablet','Mobile']" :key="x" size="sm" :icon="x==='Desktop'?'i-lucide-monitor':x==='Tablet'?'i-lucide-tablet':'i-lucide-smartphone'" :variant="viewport===x?'soft':'ghost'" @click="viewport=x"/></UButtonGroup><UButton icon="i-lucide-play" variant="outline" size="sm">Present</UButton></div>
+ <div class="overflow-auto bg-elevated p-8 relative">
+  <div class="mx-auto transition-all bg-default shadow-xl border rounded-lg overflow-hidden" :class="[viewport==='Mobile'?'w-[390px]':viewport==='Tablet'?'w-[820px]':'max-w-[1180px]',selected==='table'?'border-primary':'border-default']"><ApplicationCanvas/></div>
+  <div v-if="selected==='table'&&editorMode==='Design'" class="absolute top-11 left-1/2 -translate-x-1/2"><SelectionToolbar label="Customer table" @insert="leftMode='insert'" @bind="inspector='data'" @action="inspector='actions'"/></div>
+ </div>
+ <div class="border-t border-default px-3 flex items-center gap-2 text-xs text-muted bg-default"><span>Page</span><span>›</span><span>Content</span><span>›</span><strong class="text-highlighted">Customer table</strong><div class="flex-1"/><span>Autosaved</span><span>•</span><span>Generator ready</span></div>
+</section>
+
+<aside class="border-l border-default min-h-0 flex flex-col">
+ <div class="p-3 border-b border-default"><div class="flex items-center gap-2"><UIcon name="i-lucide-table-2"/><div><p class="font-medium">Customer table</p><p class="text-xs text-muted">Data display · UTable</p></div><div class="flex-1"/><UButton icon="i-lucide-ellipsis" variant="ghost" size="xs"/></div></div>
+ <UTabs v-model="inspector" :items="[{label:'Essentials',value:'essentials'},{label:'Data',value:'data'},{label:'Actions',value:'actions'}]" class="px-3 pt-2"/>
+ <div class="flex-1 overflow-auto p-4">
+  <div v-if="inspector==='essentials'" class="space-y-4"><UFormField label="Name"><UInput model-value="Customer table"/></UFormField><div class="grid grid-cols-2 gap-2"><UFormField label="Width"><USelect :items="['Fill','Hug','Fixed']" default-value="Fill"/></UFormField><UFormField label="Density"><USelect :items="['Compact','Comfortable']" default-value="Compact"/></UFormField></div><div><p class="text-sm font-medium mb-2">Common options</p><UCheckbox label="Sticky header" default-value/><UCheckbox label="Row selection" default-value class="mt-2"/><UCheckbox label="Pagination" default-value class="mt-2"/></div><UButton block variant="ghost" trailing-icon="i-lucide-chevron-down" @click="advanced=!advanced">{{advanced?'Hide':'Show'}} advanced</UButton><div v-if="advanced" class="space-y-3 border-t border-default pt-4"><UFormField label="Min height"><UInput model-value="320"/></UFormField><UFormField label="Overflow"><USelect :items="['Auto','Hidden','Visible']" default-value="Auto"/></UFormField><UAlert color="neutral" variant="subtle" title="Responsive override" description="Hide low-priority columns below 640 px."/></div></div>
+  <div v-else-if="inspector==='data'" class="space-y-4"><UFormField label="Data source"><USelect :items="['customers','accounts','invoices']" default-value="customers"/></UFormField><UFormField label="Record key"><UInput model-value="id"/></UFormField><div><div class="flex mb-2"><p class="text-sm font-medium">Columns</p><div class="flex-1"/><UButton icon="i-lucide-plus" variant="ghost" size="xs">Add</UButton></div><div v-for="x in ['Customer → name','Owner → owner.name','Plan → plan','Status → status','MRR → monthlyRevenue']" :key="x" class="border border-default rounded-md px-2 py-2 text-xs mb-1 flex"><span>{{x}}</span><UIcon name="i-lucide-chevron-right" class="ml-auto text-muted"/></div></div><UAlert color="primary" variant="subtle" title="Typed binding" description="IR paths are declarative and validated before generation."/></div>
+  <div v-else class="space-y-4"><div class="border border-default rounded-lg p-3"><div class="flex gap-2 items-center"><UBadge variant="subtle">row:click</UBadge><UIcon name="i-lucide-arrow-right"/><span class="text-sm">Navigate</span></div><p class="text-xs text-muted mt-2">/customers/:id · id ← row.id</p></div><UButton block variant="outline" icon="i-lucide-plus">Add interaction</UButton><USeparator/><UCheckbox label="Enter opens selected row" default-value/><UCheckbox label="Arrow keys move selection" default-value/></div>
+ </div>
+ <div class="border-t border-default p-3"><div class="flex items-center"><span class="text-xs font-semibold">Review</span><div class="flex-1"/><UBadge color="warning" variant="subtle">{{issues.length}} findings</UBadge></div><button v-for="i in issues" :key="i.text" class="w-full text-left mt-2 p-2 rounded hover:bg-elevated" @click="selected=i.node"><div class="flex gap-2"><UIcon :name="i.severity==='warning'?'i-lucide-triangle-alert':'i-lucide-info'" :class="i.severity==='warning'?'text-warning':'text-info'"/><span class="text-xs">{{i.text}}</span></div></button></div>
+</aside>
+<SaveLayoutModal v-model="saveLayoutOpen" @save="()=>{}"/><EditorCommandPalette v-model="commandOpen" @run="runCommand"/>
+</div></template>

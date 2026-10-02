@@ -1,9 +1,9 @@
 [data-plugin-ui="plugin-shell"] { height: 100%; min-height: 0; width: 100%; container: plugin-shell-leaf / inline-size; }
 .ph--plugin-shell { padding: 0 !important; }
 .shell-vue-mount { display: contents; }
-.shell-app { display: flex; height: 100%; min-height: 0; overflow: hidden; background: var(--background-primary); font-size: var(--font-ui-small); }
+.shell-app { display: flex; height: 100%; min-height: 0; overflow: hidden; background: var(--plugin-shell-surface); font-size: var(--plugin-shell-text-size-sm); }
 .shell-workspace { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; position: relative; }
-.shell-header { min-height: 66px; padding: var(--plugin-shell-space-lg) var(--plugin-shell-gutter); display: flex; justify-content: space-between; align-items: center; gap: 18px; border-bottom: 1px solid var(--background-modifier-border); flex-wrap: wrap; }
+.shell-header { min-height: 66px; padding: var(--plugin-shell-space-lg) var(--plugin-shell-gutter); display: flex; justify-content: space-between; align-items: center; gap: 18px; border-bottom: 1px solid var(--plugin-shell-border); flex-wrap: wrap; }
 .shell-main { overflow: auto; overscroll-behavior: contain; padding: var(--plugin-shell-space-xl) var(--plugin-shell-gutter); flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--plugin-shell-space-xl); }
 .shell-page { width: 100%; min-width: 0; }
 .shell-page > * { min-width: 0; max-width: none; }
@@ -11,12 +11,12 @@
 .shell-main :where(p, h1, h2, h3, label, strong, small, td, button) { overflow-wrap: anywhere; }
 .shell-main > * { flex-shrink: 0; }
 .shell-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.shell-hint { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: 12px !important; }
+.shell-hint { font-size: 12px; color: var(--plugin-shell-text-muted); line-height: 1.6; margin-top: 12px !important; }
 .shell-main h2 { font-size: 15px; font-weight: 600; letter-spacing: -.2px; }
 .shell-main h3 { font-size: 14px; font-weight: 600; line-height: 1.4; }
 .shell-feedback { position: absolute; right: 20px; bottom: 20px; display: grid; gap: 8px; max-width: min(430px, calc(100% - 40px)); z-index: 10; }
-.shell-feedback-item { display: flex; align-items: center; gap: 14px; padding: 12px 12px 12px 18px; background: var(--background-secondary); border: 1px solid var(--background-modifier-border); border-inline-start: 3px solid var(--interactive-accent); box-shadow: var(--shadow-s); border-radius: var(--radius-m); font-size: 12px; line-height: 1.5; }
-.shell-feedback-item[data-kind="error"] { border-inline-start-color: var(--text-error); }
-.shell-feedback-item[data-kind="success"] { border-inline-start-color: var(--text-success); }
+.shell-feedback-item { display: flex; align-items: center; gap: 14px; padding: 12px 12px 12px 18px; background: var(--plugin-shell-surface-muted); border: 1px solid var(--plugin-shell-border); border-inline-start: 3px solid var(--plugin-shell-accent); box-shadow: var(--shadow-s); border-radius: var(--plugin-shell-radius-md); font-size: 12px; line-height: 1.5; }
+.shell-feedback-item[data-kind="error"] { border-inline-start-color: var(--plugin-shell-error); }
+.shell-feedback-item[data-kind="success"] { border-inline-start-color: var(--plugin-shell-success); }
 @media (prefers-reduced-motion: reduce) { [data-plugin-ui="plugin-shell"] * { transition: none !important; animation: none !important; } }
 .shell-view-actions { margin-inline-start: 0; flex: 0 0 auto; }

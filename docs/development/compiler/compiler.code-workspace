@@ -1,0 +1,12 @@
+{
+  "folders": [{ "path": "../../.." }],
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [{
+      "type": "node", "request": "launch", "name": "Debug compiler fixture",
+      "runtimeArgs": ["--experimental-strip-types"],
+      "program": "${workspaceFolder}/scripts/compiler/debug-fixture.mjs",
+      "cwd": "${workspaceFolder}", "skipFiles": ["<node_internals>/**"], "console": "integratedTerminal"
+    }]
+  }
+}

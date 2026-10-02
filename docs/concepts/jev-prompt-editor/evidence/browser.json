@@ -1,0 +1,206 @@
+{
+  "artifactSha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df",
+  "browser": "144.0.7559.96",
+  "renderMode": "exact HTML bytes via set_content; managed browser blocks file and localhost navigation",
+  "storageMode": "in-memory Storage test adapter; native browser persistence not qualified",
+  "results": [
+    {
+      "name": "Boots with precompiled templates under hash-only script CSP",
+      "status": "passed"
+    },
+    {
+      "name": "Three typed question cards",
+      "status": "passed"
+    },
+    {
+      "name": "Edits persist through the repository adapter",
+      "status": "passed"
+    },
+    {
+      "name": "Actual recipe download contains edited criteria",
+      "status": "passed"
+    },
+    {
+      "name": "Recipe download omits resolved note bodies",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid draft is not persisted",
+      "status": "passed"
+    },
+    {
+      "name": "Version comparison exposes changed fields",
+      "status": "passed"
+    },
+    {
+      "name": "Restore recovers recipe name",
+      "status": "passed"
+    },
+    {
+      "name": "Restore preserves checkpoint history",
+      "status": "passed"
+    },
+    {
+      "name": "Clear fixture shows three local suggestions",
+      "status": "passed"
+    },
+    {
+      "name": "Fixture is visibly labeled",
+      "status": "passed"
+    },
+    {
+      "name": "Ambiguous fixture routes all answers to review",
+      "status": "passed"
+    },
+    {
+      "name": "Policy edit invalidates previous results",
+      "status": "passed"
+    },
+    {
+      "name": "Malformed response is rejected visibly",
+      "status": "passed"
+    },
+    {
+      "name": "Markdown import review reports exclusions",
+      "status": "passed"
+    },
+    {
+      "name": "Markdown import replaces only the in-memory vault",
+      "status": "passed"
+    },
+    {
+      "name": "Imported HTML remains inert",
+      "status": "passed"
+    },
+    {
+      "name": "Resolved export requires explicit acknowledgement",
+      "status": "passed"
+    },
+    {
+      "name": "Resolved payload downloads documented envelope",
+      "status": "passed"
+    },
+    {
+      "name": "Actual imported note reaches state",
+      "status": "passed"
+    },
+    {
+      "name": "Unlisted frontmatter does not reach state",
+      "status": "passed"
+    },
+    {
+      "name": "Vault bodies never enter the persistence adapter",
+      "status": "passed"
+    },
+    {
+      "name": "File-based JSON import keeps its validation preview",
+      "status": "passed"
+    },
+    {
+      "name": "Round-trip import preserves originals",
+      "status": "passed"
+    },
+    {
+      "name": "Round-trip adds independent copy",
+      "status": "passed"
+    },
+    {
+      "name": "Adds an editable Score question",
+      "status": "passed"
+    },
+    {
+      "name": "Removes question without deleting the recipe",
+      "status": "passed"
+    },
+    {
+      "name": "Archive is non-destructive",
+      "status": "passed"
+    },
+    {
+      "name": "Archive restore returns to library",
+      "status": "passed"
+    },
+    {
+      "name": "Four-step tutorial can complete and dismiss",
+      "status": "passed"
+    },
+    {
+      "name": "Theme switches without changing recipe",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 1280px in Compose",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 1280px in Vault state",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 1280px in Test bench",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 1280px in Versions",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 1280px in JSON",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 820px in Compose",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 820px in Vault state",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 820px in Test bench",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 820px in Versions",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 820px in JSON",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 390px in Compose",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 390px in Vault state",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 390px in Test bench",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 390px in Versions",
+      "status": "passed"
+    },
+    {
+      "name": "No document overflow at 390px in JSON",
+      "status": "passed"
+    },
+    {
+      "name": "New prompt flow works at mobile width",
+      "status": "passed"
+    },
+    {
+      "name": "No page errors during interaction suite",
+      "status": "passed"
+    },
+    {
+      "name": "No network requests during interaction suite",
+      "status": "passed"
+    }
+  ],
+  "pageErrors": [],
+  "networkRequests": []
+}

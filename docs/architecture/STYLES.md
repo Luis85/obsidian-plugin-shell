@@ -158,7 +158,7 @@ may exceed 400 because it is generated composition output; it remains subject to
 artifact-size budgets, complete-source provenance and output validation. Do not
 exempt handwritten large files by naming them generated.
 
-The existing initial CSS artifact budget of 100 KiB remains a proposed target, not a substitute for source maintainability. Minification does not make an oversized source file comply with its line limit.
+The initial CSS artifact budget is 160 KiB since the owner-reviewed 2026-09-27 change (NFR-04 targets 100 KiB; see [QUALITY-ASSURANCE](../development/QUALITY-ASSURANCE.md)). It remains a proposed target, not a substitute for source maintainability. Minification does not make an oversized source file comply with its line limit.
 
 | Future command | Contract |
 | --- | --- |

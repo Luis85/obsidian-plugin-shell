@@ -64,6 +64,7 @@ export async function makerFixture(work, { temporaryRoot = tmpdir() } = {}) {
     await mkdir(join(root, 'src/bootstrap'), { recursive: true });
     await writeFile(join(root, 'src/bootstrap/features.ts'), registry);
     await writeFile(join(root, 'src/bootstrap/authoring.ts'), authoring);
+    await cp(join(makerSourceRoot, 'src/bootstrap/native-integrations.ts'), join(root, 'src/bootstrap/native-integrations.ts'));
     for (const [file, source] of Object.entries(eventRegistries)) await writeFile(join(root, 'src/bootstrap', file), source);
     await cp(join(makerSourceRoot, 'src/bootstrap/core-event-catalog.ts'), join(root, 'src/bootstrap/core-event-catalog.ts'));
     await writeFile(join(root, 'src/bootstrap/authoring-locales.ts'), 'export const authoringLocaleModules = [\n];\n');
@@ -133,6 +134,8 @@ export async function removeMakerExamples(root) {
 export async function copyMakerSuite(root) {
   for (const path of [
     'scripts/makers',
+    'scripts/companion/native-boilerplate.mjs',
+    'scripts/companion/native-contract.mjs',
     'scripts/events',
     'scripts/examples/plan.mjs',
     'scripts/shared',

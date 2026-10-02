@@ -28,7 +28,9 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     }
     // A local index/tree forms a real transport archive even when this test's
     // parent is already a Git-free archive. No commit, author or remote is needed.
-    for (const args of [['init', '--quiet'], ['-c', 'core.autocrlf=false', 'add', '--all']]) {
+    // Repository-local autocrlf=false keeps both add and archive byte-exact even
+    // when a Windows host enables autocrlf globally for LF-pinned checkouts.
+    for (const args of [['init', '--quiet'], ['config', 'core.autocrlf', 'false'], ['add', '--all']]) {
       const run = command('git', args, staging); assert.equal(run.status, 0, run.stderr);
     }
     const tree = command('git', ['write-tree'], staging); assert.equal(tree.status, 0, tree.stderr);
@@ -45,6 +47,22 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     const valid = check(); assert.equal(valid.status, 0, valid.stdout + valid.stderr);
     const diagnostic = async () => JSON.parse(await readFile(join(extracted, 'reports/analyzer/fallow.json'), 'utf8'));
     assert.deepEqual((await diagnostic()).workspace_diagnostics ?? [], []);
+    // The browser verifier is an exact test entry, not a whole-directory exemption.
+    const pluginPath = join(extracted, 'scripts/quality/fallow-node-tests.json');
+    const pluginBytes = await readFile(pluginPath, 'utf8');
+    const plugin = JSON.parse(pluginBytes), verifier = 'scripts/compiler/verify-preview-host.mjs';
+    assert.equal(plugin.entryPointRole, 'test');
+    assert.ok(plugin.entryPoints.includes(verifier));
+    plugin.entryPoints = plugin.entryPoints.filter(path => path !== verifier);
+    await writeFile(pluginPath, JSON.stringify(plugin));
+    assert.notEqual(check().status, 0);
+    assert.ok((await diagnostic()).unused_files.some(row => row.path === verifier));
+    await writeFile(pluginPath, pluginBytes);
+    const nearby = join(extracted, 'scripts/compiler/unreachable-preview-probe.mjs');
+    await writeFile(nearby, 'export const unexpectedPreviewProbe = 1;\n');
+    assert.notEqual(check().status, 0);
+    assert.ok((await diagnostic()).unused_files.some(row => row.path === 'scripts/compiler/unreachable-preview-probe.mjs'));
+    await rm(nearby);
     const maintained = join(extracted, 'src/unreachable-archive-probe.ts');
     await writeFile(maintained, 'export const unreachableArchiveProbe = 1;\n');
     assert.notEqual(check().status, 0);
@@ -69,6 +87,21 @@ test('[GATE-02-01] full analyzer fails for real unused files and exports', async
     const run = spawnSync(process.execPath, [resolve('node_modules/fallow/bin/fallow'), '--format', 'json', 'dead-code'], { cwd: root, encoding: 'utf8', timeout: 15000 });
     const report = JSON.parse(run.stdout); assert.equal(run.status, 1);
     assert.ok(report.summary.unused_files > 0); assert.ok(report.summary.unused_exports > 0);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+test('[GATE-02-03] the repository analyzer ignores the docs working directory but not other unused code', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shell-analysis-docs-'));
+  try {
+    const { ignorePatterns } = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+    await writeFile(join(root, '.fallowrc.json'), JSON.stringify({ entry: ['entry.ts'], ignorePatterns, rules: { 'policy-violation': 'off' } }));
+    await writeFile(join(root, 'package.json'), '{"name":"analyzer-docs-probe","type":"module"}');
+    await writeFile(join(root, 'entry.ts'), 'console.log(1);');
+    await mkdir(join(root, 'docs/concepts/draft'), { recursive: true });
+    await writeFile(join(root, 'docs/concepts/draft/prototype.ts'), 'import missing from "unlisted-package"; export const draft = missing;');
+    const analyze = () => { const run = spawnSync(process.execPath, [resolve('node_modules/fallow/bin/fallow'), '--format', 'json', 'dead-code'], { cwd: root, encoding: 'utf8', timeout: 15000 }); return { status: run.status, report: JSON.parse(run.stdout) }; };
+    const clean = analyze(); assert.equal(clean.status, 0, JSON.stringify(clean.report.summary)); assert.equal(clean.report.summary.total_issues, 0);
+    await writeFile(join(root, 'dead.ts'), 'export const unreachable = 1;');
+    const dead = analyze(); assert.equal(dead.status, 1); assert.ok(dead.report.summary.unused_files > 0);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 test('[GATE-02-02] ESLint 10 executes the real TypeScript, Obsidian and Vue rules/parsers', async () => {
@@ -97,4 +130,52 @@ test('[GATE-02-02] ESLint 10 executes the real TypeScript, Obsidian and Vue rule
     assert.ok(rules.includes('vue/require-v-for-key'), run.stdout);
     assert.ok(!reports.some(file => file.fatalErrorCount), 'Parsers must run, not fail before checking rules');
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+// These cases execute the real orchestration with explicit command doubles.
+// The archive case above separately executes the real analyzer and its controls.
+async function verificationTrace(t, mode, failAt = 0) {
+  const root = await mkdtemp(join(tmpdir(), 'verify-preflight-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const directory of ['quality', 'shared', 'testing']) await mkdir(join(root, 'scripts', directory), { recursive: true });
+  await cp(new URL('../../scripts/quality/verify.mjs', import.meta.url), join(root, 'scripts/quality/verify.mjs'));
+  await writeFile(join(root, 'scripts/shared/process.mjs'), `let analyzers = 0;
+export async function runNode(path, args = []) {
+  console.log(JSON.stringify({ executed: path, args }));
+  if (path === 'scripts/quality/check-analyzer.mjs' && ++analyzers === Number(process.env.FAIL_ANALYZER_AT))
+    throw new Error('fixture analyzer failed');
+}
+`);
+  await writeFile(join(root, 'scripts/testing/suite-manifest.mjs'), `export async function toolingGroups() {
+    return [{ name: 'fixture', files: ['tests/tooling/fixture.checks.mjs'] }];
+  }`);
+  const run = spawnSync(process.execPath, ['scripts/quality/verify.mjs'], { cwd: root, encoding: 'utf8', timeout: 10000,
+    env: { ...process.env, SHELL_EVIDENCE_TOOLING: mode, FAIL_ANALYZER_AT: String(failAt) } });
+  assert.equal(run.error, undefined);
+  const trace = run.stdout.split('\n').filter(line => line.startsWith('{"executed":')).map(line => JSON.parse(line));
+  return { ...run, trace };
+}
+for (const mode of ['0', '1']) {
+  test(`[VERIFY-PREFLIGHT] analyzer runs after build and again after tooling in evidence mode ${mode}`, async t => {
+    const run = await verificationTrace(t, mode), paths = run.trace.map(item => item.executed);
+    assert.equal(run.status, 0, run.stderr);
+    const first = paths.indexOf('scripts/quality/check-analyzer.mjs'), last = paths.lastIndexOf('scripts/quality/check-analyzer.mjs');
+    assert.equal(first, paths.indexOf('scripts/bundling/build.mjs') + 1);
+    const tooling = paths.indexOf(mode === '1' ? 'scripts/testing/evidence-cli.mjs' : '--test');
+    assert.ok(first < tooling && tooling < last);
+    assert.equal(paths.filter(path => path === 'scripts/quality/check-analyzer.mjs').length, 2);
+    assert.ok(last < paths.indexOf('scripts/quality/check-maintainability.mjs'));
+    assert.ok(paths.includes('node_modules/vitest/vitest.mjs'));
+  });
+}
+test('[VERIFY-PREFLIGHT] early and late analyzer failures both retain nonzero outcomes without starting later stages', async t => {
+  for (const failAt of [1, 2]) {
+    const run = await verificationTrace(t, '0', failAt), paths = run.trace.map(item => item.executed);
+    assert.equal(run.status, 1); assert.match(run.stderr, /fixture analyzer failed/);
+    assert.equal(paths.at(-1), 'scripts/quality/check-analyzer.mjs');
+    assert.equal(paths.filter(path => path === 'scripts/quality/check-analyzer.mjs').length, failAt);
+    assert.equal(paths.includes('--test'), failAt === 2);
+    assert.ok(!paths.includes('scripts/quality/check-maintainability.mjs'));
+    assert.doesNotMatch(run.stdout, /verification passed/);
+  }
 });

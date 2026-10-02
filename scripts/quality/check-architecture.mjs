@@ -1,3 +1,5 @@
+import { checkCompilerArchitecture } from '../compiler/check-architecture.mjs';
+await checkCompilerArchitecture(process.cwd());
 import { runDeadCode } from './fallow-contract.mjs';
 const { run, report } = runDeadCode('FALLOW', ['--boundary-violations'], { maxBuffer: 8 * 1024 * 1024, timeout: 30000 });
 if (!Number.isInteger(report.summary?.boundary_violations)) throw new Error('FALLOW_REPORT_SCHEMA');

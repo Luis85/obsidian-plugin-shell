@@ -3,6 +3,7 @@ const openCommand = JSON.parse(readFileSync(new URL('../src/locales/en.json', im
 console.log(`Obsidian plugin template — available commands
 npm run setup             Review identity/profile, install exact dependencies and verify
 npm run setup -- --help   Identity flags, explicit native migration, dry-run and resume
+npm run companion:generate -- --help  Read a companion JSON export; v1 prints data and writes nothing
 npm run make -- --list    Discover integrated source recipes and their prerequisites
 npm run examples:remove -- --dry-run  Review optional-example removal without deleting user features
 npm run entities:check    Validate actual registered entity/document definitions
@@ -12,6 +13,8 @@ npm run events:catalog    Print the source-derived event catalog (also supports 
 npm run dev:ui            Real plugin UI in the browser
 npm run build:local       Build/install to .dev-vault without touching notes or security settings
 npm run dev:local         Rebuild and install successful changes; manually reload Obsidian
+npm run dev:obsidian      Real Obsidian on a contained sandbox: watch, hot reload, logs (-- --json for agents)
+npm run test:obsidian     Vitest E2E in real Obsidian, fresh vault copy per case (first run: -- --allow-download)
 npm run verify            Current iteration's type/lint/architecture/unit/build/baseline checks
 npm run test:e2e          Served real-component browser tests (provision browsers first)
 npm run test:coverage     Enforce selected-core/feature coverage

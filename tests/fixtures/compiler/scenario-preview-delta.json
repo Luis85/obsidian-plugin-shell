@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "reviewedFrom": "ef49ab70e0fafed1968bd5de0922ad3de49ebf04",
+  "scope": "Authored scenario selection and read-only runtime context, layered on the unchanged prior preview and product goldens.",
+  "shared": [
+    {
+      "path": "harness/prototype/clickdummy-host.ts",
+      "before": "226ff252aa627f2dbed6caef67f6eadb04b1e57a9604f4209f85969e59327ada",
+      "after": "f857126acb89ac0ffcf5b390271f045b090c73d96420b7433dd563607c0ab755"
+    },
+    {
+      "path": "{sourceRoot}/presentation/context/clickdummy.ts",
+      "before": "c8c6a00d9ed89e5c675597a40cbec265877a5d1681f46c11a007555162cffec3",
+      "after": "da30f7a7eb83656b037748bf0779111e690809610b316d8ce82b0398b6943ebd"
+    },
+    {
+      "path": "{sourceRoot}/presentation/components/ClickdummyPreview.vue",
+      "before": "ea9d9a160e1746b403a74309ecf68f4081d2d73bddfb890c1e08c72b554a6631",
+      "after": "97f0d50c992e811d3b36ee303e7bfc7d184f00e4e65ad5fc8a6dc2960f227328"
+    },
+    {
+      "path": "{sourceRoot}/presentation/composables/use-visual.ts",
+      "before": "c407ad9e6653d753fc817b2118c552e27d3400c1daed9f4956a51eb8e9abe14b",
+      "after": "d49f53dd204b8c937f3c32c17d23b5866ebdb102ec670ef8c0ff305f3fecaa3f"
+    }
+  ],
+  "cases": [
+    {
+      "source": "docs/concepts/companion/starters/blank.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "81df685dac7113c5471f35013faafed726b8ec489bfc8658b5b4598bcbe9c646"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "e90c2f6cf5c886bba93bbcf720bb3bef76a32d336215037f25302cc7b705e243",
+          "after": "a427fb15b17d9835c9f2ff9b63457fb63ab8f02a703470699cf08cb01faf9a67"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/command-utility.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "bb5d9b3d58989824cf4fc089b67d348829858ebd0ee06b03750d84dcc60b2f7f"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "6eaa068789c9cd71b59c99e74a37d6138fd1553a30cd525b3f9304abe29cf659",
+          "after": "d974e83931387c04eae8037bc6e2f213dcfbdaf054191dd5af9ebb1f0f0b3350"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/context-menu.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "7719b730abac525a861bdd67da93b83fdb0c0e58d1600860456743ed05bfdf83"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "515922438c3620493e1dbd5af3af7fc09efcb523f2963413f73757bbed8d74b9",
+          "after": "7dda09163366af28ee9f2fe6e4de62f65e484935d593cfab4ab913ae806e9c8e"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/custom-file-view.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "7719b730abac525a861bdd67da93b83fdb0c0e58d1600860456743ed05bfdf83"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "9fd530ddc9bf738c88f891d8e152a536810d1b705bd782a76904aa2e26188d63",
+          "after": "ce02cfed4726fa96a2be16a0e2ba25740f13ff146531cbe3e942f023fbfd0cf4"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/daily-journal.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "510261dddde643e664a5f83e0845af2dd5d8e4be8bad64cfe5dd3eadde403a0f"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "fa08967012e72e1bf506cddcee8ae6d1617f31b393a5082c268c498252d75b9f",
+          "after": "a657a6b08b460622261bb8506271d85e7b6a059a36779868e27363f9f5e9d924"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/import-integration.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "510261dddde643e664a5f83e0845af2dd5d8e4be8bad64cfe5dd3eadde403a0f"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "ea4908bf9e7e49ac6f3f8616b9c9a2850a0e90757bd39af449a08e8bf24b11a1",
+          "after": "096d4546dfd986857d317a857f8b8819e3ec16e3f9eabe25ff184a8542aaf74d"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/knowledge-collection.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "510261dddde643e664a5f83e0845af2dd5d8e4be8bad64cfe5dd3eadde403a0f"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "19577001b5ee13e6baa0820bcad4d1a5266d9875a7c6324b3ce4227a8fa69606",
+          "after": "141adf26383a30b85f43fa56718046b810ec97a7e3781ee0aeb3960282a5a26a"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/note-inspector.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "b8f3ede97ee1da77d715107818233e5419cbd69f5cc8364a941384cc9d2c05ea"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "a11511ff6b484a8c930e6ea6de363177a6ac82306468f6794963d0f072d7f84f",
+          "after": "038b713a57797077f0b51f806da2c8da573cba427365d2913f2a07be124b9e1e"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/quick-capture.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "510261dddde643e664a5f83e0845af2dd5d8e4be8bad64cfe5dd3eadde403a0f"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "caa6fa38736577fff2b2606064b0cff7f8bf94c0060b4d9e1e96392617f421ad",
+          "after": "4312839732eff412c18b8b507b837fc4aa157426156bcaa1ad05ab72f31efa62"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/tasks-projects.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "510261dddde643e664a5f83e0845af2dd5d8e4be8bad64cfe5dd3eadde403a0f"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "193b3c6fe7cb6b05e4cc073a90199684c1a12d96508e6980eb25eeb3dca9f64e",
+          "after": "143befc1736e55549a171e01551d357d34d4d48c2f1996e0ddedcb28d437e78a"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/starters/vault-dashboard.companion.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "510261dddde643e664a5f83e0845af2dd5d8e4be8bad64cfe5dd3eadde403a0f"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "1921e4f1f042f73f5bc4b045d901c033540abb805af68753380cbf9d3e5d3b06",
+          "after": "f950514ee6a5f3a61519cbb3eec868b5aa42b54432dc366a4a8dc6b256dc496d"
+        }
+      ]
+    },
+    {
+      "source": "docs/concepts/companion/companion-project.json",
+      "files": [
+        {
+          "path": "harness/prototype/clickdummy-scenarios.ts",
+          "before": null,
+          "after": "06822ae4c7969d852aca1a978cf62c2cd3fb753a553272c43c9ba17b2648337c"
+        },
+        {
+          "path": "harness/prototype/clickdummy.ts",
+          "before": "3cc97c13280e451687d3ecfdea3e5e732caca67f5b3d007ce9ce23714e343fb6",
+          "after": "f7ab3af3361d03ebf69e222bfaed8f50a4d956c7e79bae8c425f2c64b0be0e08"
+        }
+      ]
+    }
+  ]
+}
