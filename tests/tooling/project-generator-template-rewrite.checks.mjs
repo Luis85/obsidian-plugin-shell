@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';

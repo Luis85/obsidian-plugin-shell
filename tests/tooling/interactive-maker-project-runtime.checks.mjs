@@ -14,7 +14,7 @@ import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { Window } from 'happy-dom';
 import { projectStarter } from '../../bin/adapters/projects.ts';
-import { compileProject, loadTemplateSnapshot, analyzeProject } from '../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot, analyzeProject } from '../../bin/compiler/index.ts';
 async function scratch(fn) { const root = await mkdtemp(join(await realpath(tmpdir()), 'project-runtime-')); try { await fn(root); } finally { await rm(root, { recursive: true, force: true }); } }
 function host(mount) {
   const surfaces = [], notices = [];

@@ -20,7 +20,7 @@ const failsWith = code => error => error?.diagnostic?.code === code;
 const request = (command, options = {}, args = []) => ({ command, args, options: { input: '-', ...options } });
 const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
 const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md',
-  'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md', 'app.mjs', 'shell.mjs'];
+  'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'];
 /** The smallest tree the template loader accepts: every root folder and root file, no generator templates. */
 async function templateTree(folder) {
   for (const name of templateRoots) await mkdir(join(folder, name), { recursive: true });

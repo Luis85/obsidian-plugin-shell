@@ -5,7 +5,7 @@ import { posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const pureEntrypoints = [
-  'scripts/compiler/adapters/plugin-emitter.ts', 'bin/compiler/adapters/clickdummy-emitter.ts',
+  'bin/compiler/adapters/plugin-emitter.ts', 'bin/compiler/adapters/clickdummy-emitter.ts',
   'bin/compiler/adapters/target-lowering.ts', 'bin/compiler/adapters/project/emitter.ts',
   'bin/compiler/adapters/frontend.ts', 'bin/compiler/adapters/dependencies.ts', 'bin/compiler/adapters/origins.ts',
 ];

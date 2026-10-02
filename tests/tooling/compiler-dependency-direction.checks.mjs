@@ -8,29 +8,31 @@ import { inspectModule } from '../../scripts/compiler/check-architecture.mjs';
 // Dependency direction between the compiler and the companion generator library:
 // executable compiler modules may consume companion emitters, never the reverse.
 const root = fileURLToPath(new URL('../../', import.meta.url));
-// The former companion facades moved to scripts/compiler/adapters and the compiler core to bin/compiler;
+// The former companion facades and the whole compiler moved to bin/compiler;
 // nothing may recreate or import the removed paths.
 const owners = new Map([
-  ['scripts/companion/compiler/plan.ts', 'scripts/compiler/adapters/project-plan.ts'],
+  ['scripts/companion/compiler/plan.ts', 'bin/compiler/adapters/project-plan.ts'],
   ['scripts/companion/compiler/cli.ts', 'bin/adapters/framework-cli.ts'],
   ['scripts/companion/compiler/fixture-code.ts', 'bin/compiler/adapters/fixture-emitter.ts'],
-  ['scripts/companion/compiler/project-files.ts', 'scripts/compiler/adapters/plugin-emitter.ts'],
+  ['scripts/companion/compiler/project-files.ts', 'bin/compiler/adapters/plugin-emitter.ts'],
   // The inward-only compiler core moved to bin/compiler; its former scripts/compiler paths are gone too.
   ...['artifacts', 'contracts', 'diagnostics', 'project-starter', 'references', 'selection', 'source-references']
     .map(name => [`scripts/compiler/domain/${name}.ts`, `bin/compiler/domain/${name}.ts`]),
   ...['pipeline', 'ports'].map(name => [`scripts/compiler/application/${name}.ts`, `bin/compiler/application/${name}.ts`]),
-  // The compiler host adapters moved to bin/compiler/adapters.
+  // The compiler composition root and host adapters moved to bin/compiler.
+  ['scripts/compiler/index.ts', 'bin/compiler/index.ts'],
   // Unreleased compatibility entries were removed without a successor file; their callers use these owners.
   ['scripts/compiler/adapters/fixture-code.ts', 'bin/compiler/adapters/fixture-emitter.ts'],
   ['scripts/compiler/adapters/generator-cli.ts', 'bin/adapters/framework-cli.ts'],
-  ['scripts/compiler/adapters/project-files.ts', 'scripts/compiler/adapters/plugin-emitter.ts'],
-  ...['cli', 'clickdummy-emitter', 'dependencies', 'fixture-emitter', 'frontend', 'origins', 'reporting', 'target-lowering', 'template-snapshot']
+  ['scripts/compiler/adapters/project-files.ts', 'bin/compiler/adapters/plugin-emitter.ts'],
+  ...['cli', 'clickdummy-emitter', 'dependencies', 'fixture-emitter', 'frontend', 'origins', 'plugin-emitter', 'project-plan', 'reporting', 'selection',
+    'target-lowering', 'template-snapshot', 'workspace-plan']
     .map(name => [`scripts/compiler/adapters/${name}.ts`, `bin/compiler/adapters/${name}.ts`]),
   ...['angular-brick-runtime', 'angular-brick-templates', 'angular-bricks', 'angular-linker', 'build-source', 'configuration', 'emitter',
     'framework-adapter', 'framework-registry', 'plugin-extension', 'serve-source', 'sources']
     .map(name => [`scripts/compiler/adapters/project/${name}.ts`, `bin/compiler/adapters/project/${name}.ts`]),
 ]);
-const executableCompiler = /^(?:scripts\/compiler\/(?:index\.ts$|adapters\/)|bin\/compiler\/(?:index\.ts$|adapters\/|application\/))/;
+const executableCompiler = /^bin\/compiler\/(?:index\.ts$|adapters\/|application\/)/;
 const compilerDomain = /^bin\/compiler\/domain\//;
 const qualificationEntry = /^scripts\/companion\/qualify-[^/]+\.mjs$/;
 function resolved(from, specifier) {
@@ -87,7 +89,7 @@ test('the former companion compiler facades are gone and their compiler owners e
 
 test('companion code cannot import executable compiler modules, re-exports included', () => {
   const emitter = 'scripts/companion/compiler/example-code.ts';
-  for (const specifier of ['../../compiler/index.ts', '../../compiler/adapters/selection.ts', '../../../bin/compiler/application/compile.ts']) {
+  for (const specifier of ['../../../bin/compiler/index.ts', '../../../bin/compiler/adapters/selection.ts', '../../../bin/compiler/application/compile.ts']) {
     const findings = directionFindings(new Map([[emitter, `import { x } from '${specifier}';\nexport const y = x;`]]));
     assert.equal(findings.length, 1, specifier);
     assert.match(findings[0], /executable compiler module/);
@@ -95,10 +97,12 @@ test('companion code cannot import executable compiler modules, re-exports inclu
   const lazy = directionFindings(new Map([[emitter, "export const load = () => import('../../../bin/compiler/adapters/cli.ts');"]]));
   assert.equal(lazy.length, 1);
   const contract = 'scripts/companion/project-store.mjs';
-  assert.equal(directionFindings(new Map([[contract, "import '../compiler/adapters/project-plan.ts';"]])).length, 1);
-  const reexport = "export * from '../../compiler/adapters/selection.ts';";
+  assert.equal(directionFindings(new Map([[contract, "import '../../bin/compiler/adapters/project-plan.ts';"]])).length, 1);
+  const reexport = "export * from '../../../bin/compiler/adapters/selection.ts';";
   assert.equal(directionFindings(new Map([[emitter, reexport]])).length, 1);
-  assert.deepEqual(directionFindings(new Map([['scripts/companion/qualify-example.mjs', "import '../compiler/adapters/project-plan.ts';"]])), []);
+  assert.deepEqual(directionFindings(new Map([['scripts/companion/qualify-example.mjs', "import '../../bin/compiler/adapters/project-plan.ts';"]])), []);
+  const moved = directionFindings(new Map([['scripts/compiler/qualify-example.mjs', "import { compileProject } from './index.ts';"]]));
+  assert.equal(moved.length, 1); assert.match(moved[0], /bin\/compiler\/index\.ts instead of removed facade/);
 });
 
 test('companion code reaches compiler domain contracts through import type only', () => {

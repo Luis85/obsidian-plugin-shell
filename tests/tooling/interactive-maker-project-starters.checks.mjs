@@ -7,7 +7,7 @@ import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { projectStarters, projectStarter, projectGuide, projectRequest, projectPlan } from '../../bin/adapters/projects.ts';
 import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../bin/compiler/domain/project-starter.ts';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';

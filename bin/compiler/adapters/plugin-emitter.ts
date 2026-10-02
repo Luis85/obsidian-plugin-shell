@@ -1,26 +1,52 @@
-import { storybookCode } from '../../companion/compiler/storybook-code.ts';
-import { previewCode, previewScripts } from '../../companion/compiler/preview-code.ts';
-import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
-import { artifactCollector } from '../../../bin/compiler/domain/artifacts.ts';
-import { journeyCode } from '../../companion/compiler/journey-code.ts';
-import { nativeCode } from '../../companion/compiler/native-code.ts';
-import { clickdummyCode } from '../../companion/compiler/clickdummy-code.ts';
-import { httpCode } from '../../companion/compiler/http-code.ts';
-import { relationshipCode } from '../../companion/compiler/relationship-code.ts';
-import { renderFixtureCode as fixtureCode } from '../../../bin/compiler/adapters/fixture-emitter.ts';
-import { persistenceCode } from '../../companion/compiler/persistence-code.ts';
-import { literal, json, type Model } from '../../companion/compiler/model.ts';
-import { dataCode } from '../../companion/compiler/data-code.ts';
-import { relativeImport, type Entry, type Add } from '../../companion/compiler/file-code.ts';
-import { uiCode } from '../../companion/compiler/ui-code.ts';
-import { navigationCode } from '../../companion/compiler/navigation-code.ts';
-import { hostCode } from '../../companion/compiler/host-code.ts';
-import { visualCode } from '../../companion/compiler/visual-files.ts';
-import { visualDefinitions, visualPackages, visualAdapterPath } from '../../companion/compiler/visual-model.ts';
-import { visualNodes } from '../../companion/visual/visual-ir.mjs';
-import { styleCode } from '../../companion/compiler/style-code.ts';
-import { devkitFiles, makerTests, renderTemplate } from '../../companion/compiler/devkit-files.ts';
-import { relocateFrameworkDocuments } from '../../companion/compiler/framework-docs.ts';
+import { storybookCode } from '../../../scripts/companion/compiler/storybook-code.ts';
+import { previewCode, previewScripts } from '../../../scripts/companion/compiler/preview-code.ts';
+import type { TemplateSnapshot } from '../domain/contracts.ts';
+import { artifactCollector } from '../domain/artifacts.ts';
+import { journeyCode } from '../../../scripts/companion/compiler/journey-code.ts';
+import { nativeCode } from '../../../scripts/companion/compiler/native-code.ts';
+import { clickdummyCode } from '../../../scripts/companion/compiler/clickdummy-code.ts';
+import { httpCode } from '../../../scripts/companion/compiler/http-code.ts';
+import { relationshipCode } from '../../../scripts/companion/compiler/relationship-code.ts';
+import { renderFixtureCode as fixtureCode } from './fixture-emitter.ts';
+import { persistenceCode } from '../../../scripts/companion/compiler/persistence-code.ts';
+import { literal, json, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { dataCode } from '../../../scripts/companion/compiler/data-code.ts';
+import { relativeImport, type Entry, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { uiCode } from '../../../scripts/companion/compiler/ui-code.ts';
+import { navigationCode } from '../../../scripts/companion/compiler/navigation-code.ts';
+import { hostCode } from '../../../scripts/companion/compiler/host-code.ts';
+import { visualCode } from '../../../scripts/companion/compiler/visual-files.ts';
+import { visualDefinitions, visualPackages, visualAdapterPath } from '../../../scripts/companion/compiler/visual-model.ts';
+import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { styleCode } from '../../../scripts/companion/compiler/style-code.ts';
+import { devkitFiles, makerTests, renderTemplate } from '../../../scripts/companion/compiler/devkit-files.ts';
+import { relocateFrameworkDocuments } from '../../../scripts/companion/compiler/framework-docs.ts';
+/** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
+function replacedProducer(previous: string | undefined, producer: string): string | undefined {
+  if (previous === 'framework') return 'framework';
+  if (producer === 'visual' && previous === 'ui') return 'ui';
+  return producer === 'journey' && (previous === 'ui' || previous === 'visual') ? previous : undefined;
+}
+type Scripts = Record<string, string>;
+/** The project test/verification scripts; full framework coverage/native/release gates stay and are NOT relabelled green. */
+function projectScripts(scripts: Scripts, m: Model): void {
+  const frameworkTests = scripts.test;
+  if (frameworkTests !== undefined) scripts['test:framework'] = frameworkTests;
+  scripts['test'] = 'vitest run --config configs/testing/vitest.project.config.mjs';
+  scripts['test:watch'] = 'vitest --config configs/testing/vitest.project.config.mjs';
+  scripts['test:tdd'] = `vitest --config configs/testing/vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
+  scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json';
+  scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
+  scripts['build:clickdummy'] = 'node bin/app clickdummy build';
+  scripts['doctor'] = 'node bin/app doctor';
+  Object.assign(scripts, previewScripts());
+  scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
+  scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
+}
+function fixtureScripts(scripts: Scripts): void {
+  scripts['testdata:check']='node scripts/test-data/verify.mjs'; scripts['verify:project'] += ' && npm run testdata:check';
+  for(const command of ['plan','apply','reset-plan','reset','serve']) scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
+}
 /** Emit the existing plugin project from explicit template data, without host I/O. */
 export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Model): Promise<Entry[]> {
   const entries = new Map(templateRoot.frameworkFiles.map(file => [file.path, { ...file } ]));
@@ -28,12 +54,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   const collector = artifactCollector([...entries.values()].map(file => ({ ...file, producer: 'framework' })));
   let producer = 'project';
   const add: Add = (path, content, ownership = 'extension') => {
-    const old = collector.get(path);
-    // Framework customization is explicit; visual lowering replaces only UI placeholders/registries.
-    const replacement = old?.producer === 'framework' ? 'framework'
-      : producer === 'visual' && old?.producer === 'ui' ? 'ui'
-      : producer === 'journey' && (old?.producer === 'ui' || old?.producer === 'visual') ? old.producer : undefined;
-    collector.add({path,content,ownership,producer},replacement);
+    collector.add({path,content,ownership,producer},replacedProducer(collector.get(path)?.producer,producer));
   };
   async function emit(name: string, work: () => void | Promise<unknown>): Promise<void> {
     producer = name; await work(); producer = 'project';
@@ -44,22 +65,10 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   const pkg = readJson('package.json'); const lock = readJson('package-lock.json');
   Object.assign(pkg,{name:m.project.id,version:m.project.version,description:m.project.description,author:m.project.author});
   Object.assign(lock,{name:pkg.name,version:pkg.version}); Object.assign(lock.packages[''],{name:pkg.name,version:pkg.version,...(pkg.bin ? {bin:pkg.bin} : {})});
-  pkg.scripts['test:framework'] = pkg.scripts.test;
-  pkg.scripts['test'] = 'vitest run --config configs/testing/vitest.project.config.mjs';
-  pkg.scripts['test:watch'] = 'vitest --config configs/testing/vitest.project.config.mjs';
-  pkg.scripts['test:tdd'] = `vitest --config configs/testing/vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
-  pkg.scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json';
-  pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
-  pkg.scripts['build:clickdummy'] = 'node bin/app clickdummy build';
-  pkg.scripts['doctor'] = 'node bin/app doctor';
-  Object.assign(pkg.scripts, previewScripts());
-  pkg.scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
-  pkg.scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
-  // Full framework coverage/native/release gates remain present and are NOT relabelled green.
+  projectScripts(pkg.scripts,m);
   let fixtures = false;
   await emit('fixtures', async () => { fixtures = await fixtureCode(templateRoot,m,add); });
-  if(fixtures) { pkg.scripts['testdata:check']='node scripts/test-data/verify.mjs'; pkg.scripts['verify:project'] += ' && npm run testdata:check'; }
-  if(fixtures) for(const command of ['plan','apply','reset-plan','reset','serve']) pkg.scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
+  if(fixtures) fixtureScripts(pkg.scripts);
   const pinned: Record<string,string> = {...pkg.devDependencies,...pkg.dependencies};
   const declared = Object.entries(visualPackages(m,pinned)).filter(([name]) => !Object.hasOwn(pinned,name));
   if (declared.length) pkg.dependencies = Object.fromEntries([...Object.entries<string>(pkg.dependencies ?? {}),...declared].sort(([a],[b]) => a < b ? -1 : 1));

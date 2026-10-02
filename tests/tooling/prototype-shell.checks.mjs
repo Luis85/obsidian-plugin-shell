@@ -64,7 +64,7 @@ test('reviewed starter generation ships a complete extension-owned skill and rej
   const adapterBytes = fs.readFileSync(adapterFile, 'utf8');
   fs.writeFileSync(adapterFile, adapterBytes + '\nUser adapter annotation.\n');
   const original = fs.readFileSync(skillFile, 'utf8'); fs.writeFileSync(skillFile, original + '\nUser customization.\n');
-  const { planProject, applyProject } = await import('../../scripts/compiler/adapters/project-plan.ts');
+  const { planProject, applyProject } = await import('../../bin/compiler/adapters/project-plan.ts');
   const options = { input: path.join(target, 'design/project.json'), vault: temp, target: path.basename(target), templateRoot: root };
   const regeneration = await planProject(options); assert.deepEqual(regeneration.conflicts, []);
   await applyProject(regeneration, regeneration.hash);

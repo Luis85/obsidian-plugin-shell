@@ -1,13 +1,13 @@
-import type { GenerationSelection } from '../../../bin/compiler/domain/selection.ts';
-import type { Model } from '../../companion/compiler/model.ts';
-import type { Entry } from '../../companion/compiler/file-code.ts';
+import type { GenerationSelection } from '../domain/selection.ts';
+import type { Model } from '../../../scripts/companion/compiler/model.ts';
+import type { Entry } from '../../../scripts/companion/compiler/file-code.ts';
 import { readFile } from 'node:fs/promises';
 import { resolve, relative, isAbsolute, sep } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../shared/file-plan.ts';
-import { digest, json, row, rows, text, requireValue } from '../../companion/compiler/model.ts';
-import { visualDefinitions } from '../../companion/compiler/visual-model.ts';
-import { visualVerification, visualAcceptanceTodo } from '../../companion/compiler/visual-files.ts';
-import { visualNodes, visualRoot } from '../../companion/visual/visual-ir.mjs';
+import { createFilePlan, applyFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { digest, json, row, rows, text, requireValue } from '../../../scripts/companion/compiler/model.ts';
+import { visualDefinitions } from '../../../scripts/companion/compiler/visual-model.ts';
+import { visualVerification, visualAcceptanceTodo } from '../../../scripts/companion/compiler/visual-files.ts';
+import { visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
 export interface WorkspaceOptions { target:string;templateRoot:string;bootstrap?:ReadonlyArray<{path:string;hash:string}>;selection?:GenerationSelection }
 interface InputSnapshot { content:Buffer;vault:string;target:string;migration?:{interactionIds?:Record<string,string>} | null }
 

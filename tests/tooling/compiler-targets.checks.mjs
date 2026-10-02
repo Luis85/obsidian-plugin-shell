@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import ts from 'typescript';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),template=await loadTemplateSnapshot(root);
 const source=await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8');
 test('browser output shares generated product code and packages an explicit offline build entry',async()=>{

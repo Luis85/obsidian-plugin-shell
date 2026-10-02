@@ -88,11 +88,11 @@ test('golden reports unresolved interactions rather than treating empty actions 
   assert.equal(report.nativeAcceptance, 'not-run'); assert.deepEqual(report.shippedEditors, ['journey-lens']);
 });
 test('every first-run npm script exists in the generated devkit contract', async () => {
-  const emitter = await readFile(new URL('scripts/compiler/adapters/plugin-emitter.ts',root),'utf8');
+  const emitter = await readFile(new URL('bin/compiler/adapters/plugin-emitter.ts',root),'utf8');
   for (const definition of [golden,showcase]) {
     assert.ok(definition.firstRun.includes('build-preview'));
     const step = definition.processes.find(p => p.id === 'build-preview').steps[0];
-    assert.deepEqual(step.args, ['run','build:clickdummy']); assert.ok(emitter.includes("pkg.scripts['build:clickdummy']"));
+    assert.deepEqual(step.args, ['run','build:clickdummy']); assert.ok(emitter.includes("scripts['build:clickdummy'] = "));
   }
 });
 async function qualificationFixture(t) {

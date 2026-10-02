@@ -15,7 +15,7 @@ test('domain and application reject framework, filesystem, dynamic imports and g
   assert.deepEqual(checkCompilerBoundaries(new Map([[app,"import '../domain/example.ts';"],[domain,'export {};']])),[]);
 });
 test('pure emitters cannot reach filesystem through a transitive helper',()=>{
-  const emitter='scripts/compiler/adapters/plugin-emitter.ts', helper='scripts/compiler/adapters/helper.ts';
+  const emitter='bin/compiler/adapters/plugin-emitter.ts', helper='bin/compiler/adapters/helper.ts';
   const findings=checkCompilerBoundaries(new Map([[emitter,"import './helper.ts';"],[helper,"import 'node:fs';"]]));
   assert.ok(findings.some(f=>f.includes('plugin-emitter.ts ->')&&f.includes('node:fs')));
 });

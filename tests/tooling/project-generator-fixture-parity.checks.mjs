@@ -10,7 +10,7 @@ import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engi
 import { createFixtureAdapter } from '../../docs/concepts/companion/test-kit/adapters.mjs';
 import { projectFiles } from '../support/project-render.mjs';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { planProject, applyProject } from '../../scripts/compiler/adapters/project-plan.ts';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { providerProject } from '../fixtures/generator-provider-project.mjs';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));

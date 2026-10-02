@@ -6,7 +6,7 @@ import { dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { visualNodes, visualRoot } from '../../scripts/companion/visual/visual-ir.mjs';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { withStorybookOptions, projectToolingSchema } from '../../scripts/companion/tooling-contract.ts';
 import { storybookFlags } from '../../bin/adapters/framework/storybook-options.ts';

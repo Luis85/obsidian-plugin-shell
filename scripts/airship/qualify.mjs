@@ -8,7 +8,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { build } from 'vite';
 import { chromium } from '@playwright/test';
-import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { projectConfigs } from '../shared/project-configs.mjs';
 import { airshipEnvironment } from '../../bin/adapters/framework/airship.ts';

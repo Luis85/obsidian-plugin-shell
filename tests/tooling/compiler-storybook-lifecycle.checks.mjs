@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { storybookOperation } from '../../bin/adapters/framework/storybook.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { planProject, applyProject } from '../../scripts/compiler/adapters/project-plan.ts';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const source = await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8');
 async function scratch(t) {

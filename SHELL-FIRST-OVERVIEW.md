@@ -56,7 +56,7 @@ This is the product direction, not a claim that every step is complete in every 
 
 ## Evidence and qualification boundaries
 
-The [compiler implementation](scripts/compiler/index.ts) emits readiness states with bundle, typecheck and tests initially `not-run`, and product acceptance `not-inferred`. Its project-starter path describes a navigable starting scaffold that still needs visual component and business-action implementation. Compilation success does not establish a complete product.
+The [compiler implementation](bin/compiler/index.ts) emits readiness states with bundle, typecheck and tests initially `not-run`, and product acceptance `not-inferred`. Its project-starter path describes a navigable starting scaffold that still needs visual component and business-action implementation. Compilation success does not establish a complete product.
 
 The [authoring guide](docs/concepts/companion/README.md) distinguishes the current browser concept, the retained v5 fixtures and the independently generated clickdummy. None is a substitute for full native Workbench acceptance. Preserve separate evidence for authored definitions, generated source, built previews, behavior tests, native operation and user acceptance.
 

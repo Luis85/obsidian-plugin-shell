@@ -4,7 +4,7 @@ import { Readable } from 'node:stream';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { hash } from '../../bin/adapters/framework/files.ts';
-import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyOperation, planOperation } from '../../bin/adapters/framework/planning.ts';

@@ -75,7 +75,7 @@ npm run prototype:tools -- npm --repo ../concept-source --script check:presentat
 
 Process operations are previewed unless `--execute` is present. They execute trusted
 project code and can write builds/reports/caches. Their cancellation/timeouts and npm
-selection use `bin/adapters/framework/process.ts`; they do not claim rollback of process effects.
+selection use `scripts/framework/process.ts`; they do not claim rollback of process effects.
 Ordinary shell `--root` is not accepted through the adapter: choose the one explicit
 `--repo`. Fixture mutation uses `data`'s own `approval` hash, not a generator plan hash.
 

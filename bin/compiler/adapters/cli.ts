@@ -2,7 +2,7 @@ import { storybookFlags } from '../../adapters/framework/storybook-options.ts';
 import { basename, join, resolve } from 'node:path';
 import { readBounded, exists } from '../../adapters/framework/files.ts';
 import { requireThat, result, stringOption, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
-import { compileProject, loadTemplateSnapshot, diagnosticCatalog, compilerVersion } from '../../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot, diagnosticCatalog, compilerVersion } from '../index.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { OutputKind } from '../domain/contracts.ts';
 import { createRecorder, writeReports } from './reporting.ts';

@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');

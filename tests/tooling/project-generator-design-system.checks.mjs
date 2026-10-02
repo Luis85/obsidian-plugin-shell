@@ -10,7 +10,7 @@ import { validateCompanionDocument } from '../../scripts/companion/project-contr
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { compositionDefaultUI, compositionStyle, validateCompositionDesignSystem } from '../../scripts/companion/composition-contract.mjs';
 import { styleCode } from '../../scripts/companion/compiler/style-code.ts';
-import { planProject, applyProject } from '../../scripts/compiler/adapters/project-plan.ts';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 const fixture = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
 const system = () => structuredClone(fixture.design.designSystem);
 const declaration = (colorPolicy='declared',bindings={}) => ({schema:1,target:'nuxt-ui',colorPolicy,bindings});

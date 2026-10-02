@@ -6,7 +6,7 @@ import { studioActions } from '../../../bin/presentation/studio.ts';
 import { Workspace } from '../../../bin/application/workspace.ts';
 import { newDocument, documentText } from '../../../bin/domain/document.ts';
 import { runOperations } from '../../../bin/application/operations.ts';
-import { compileProject, loadTemplateSnapshot } from '../../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../../bin/compiler/index.ts';
 import { packageFiles } from '../../../bin/compiler/adapters/project/configuration.ts';
 import { defineFrameworkAdapter } from '../../../bin/compiler/adapters/project/framework-adapter.ts';
 import { renderStarterProject } from '../../../bin/compiler/adapters/project/emitter.ts';

@@ -2,7 +2,7 @@ import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';
-import { planProject } from '../../../scripts/compiler/adapters/project-plan.ts';
+import { planProject } from '../../compiler/adapters/project-plan.ts';
 import { readConfiguration, readBounded, hash, exists } from './files.ts';
 import { designFile, object } from './configuration.ts';
 import { inspectDesign } from './changes.ts';
