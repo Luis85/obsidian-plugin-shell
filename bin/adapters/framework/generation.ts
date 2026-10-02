@@ -17,7 +17,7 @@ async function inPlaceKit(request: Request, context: Context, input: string) {
   requireThat(request.options.vault === undefined, 'TARGET_REQUIRED', '--vault requires an explicit legacy --target.');
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup and project import first.');
   requireThat(input === resolve(context.root, designFile), 'INPUT_REQUIRES_IMPORT', 'In-place generation compiles the imported ' + designFile + '; run project import to adopt a different file.');
-  requireThat(await exists(join(context.root, '.framework/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit; legacy --vault/--target remains available.');
+  requireThat(await exists(join(context.root, 'bin/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit; legacy --vault/--target remains available.');
   const kit = await verifyKit(context.root);
   const { model } = await inspectDesign(context, input);
   const identityMatches = Object.entries(config.project).every(([key, value]) => model.project[key] === value);
@@ -33,7 +33,7 @@ export async function generateSourcePlan(request: Request, context: Context) {
   const target = stringOption(request.options, 'target');
   if (target !== undefined) return planProject({ ...compilation, input, target, vault: resolve(context.root, stringOption(request.options, 'vault') ?? '.'), templateRoot: context.frameworkRoot });
   const kit = await inPlaceKit(request, context, input);
-  const templateRoot = join(context.root, '.framework/template');
+  const templateRoot = join(context.root, 'bin/template');
   const intakePath = '.framework/intake.json';
   const intakeBytes = await readBounded(join(context.root, intakePath));
   const intake = object(JSON.parse(intakeBytes.toString('utf8')));

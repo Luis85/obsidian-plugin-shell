@@ -198,7 +198,7 @@ node bin/app templates list [options]
 | --tag | value | Exact component-template tag filter. | See command semantics |
 | --for | value | Application archetype recommendation filter, for example editor or obsidian-plugin. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -231,7 +231,7 @@ node bin/app templates search [arguments] [options]
 | --tag | value | Exact component-template tag filter. | See command semantics |
 | --for | value | Application archetype recommendation filter, for example editor or obsidian-plugin. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -258,7 +258,7 @@ node bin/app templates show [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -285,7 +285,7 @@ node bin/app templates tree [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -312,7 +312,7 @@ node bin/app templates validate [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -339,7 +339,7 @@ node bin/app templates schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -366,7 +366,7 @@ node bin/app templates coverage
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -398,7 +398,7 @@ node bin/app templates docs [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -432,7 +432,7 @@ node bin/app templates instantiate [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -460,7 +460,7 @@ node bin/app starters coverage [arguments] [options]
 | --- | --- | --- | --- |
 | --require-model-coverage | flag | Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -488,7 +488,7 @@ node bin/app starters list
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -515,7 +515,7 @@ node bin/app starters show [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -542,7 +542,7 @@ node bin/app starters validate [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -569,7 +569,7 @@ node bin/app starters schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -601,7 +601,7 @@ node bin/app starters add [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -633,7 +633,7 @@ node bin/app starters edit [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -664,7 +664,7 @@ node bin/app starters pack [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -698,7 +698,7 @@ node bin/app starters run [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -731,7 +731,7 @@ node bin/app docs import [file-or-folder ...] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -764,7 +764,7 @@ node bin/app docs export [--out <documentation-root>] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -792,7 +792,7 @@ node bin/app docs validate [file-or-folder ...] [--json]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -819,7 +819,7 @@ node bin/app docs status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -846,7 +846,7 @@ node bin/app docs schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -877,7 +877,7 @@ node bin/app docs recover
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -906,7 +906,7 @@ node bin/app obsidian status --obsidian-vault <name-or-id> [--json]
 | --- | --- | --- | --- |
 | --obsidian-vault | value | Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -935,7 +935,7 @@ node bin/app obsidian files --obsidian-vault <name-or-id> [--obsidian-folder <fo
 | --obsidian-vault | value | Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly. | See command semantics |
 | --obsidian-folder | value | Optional vault-relative folder for Markdown listing. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -964,7 +964,7 @@ node bin/app obsidian read --obsidian-vault <name-or-id> --obsidian-path <note.m
 | --obsidian-vault | value | Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly. | See command semantics |
 | --obsidian-path | value | Vault-relative, non-hidden Markdown file path to read. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -992,7 +992,7 @@ node bin/app obsidian prepare --obsidian-vault <name-or-id> [--json]
 | --- | --- | --- | --- |
 | --obsidian-vault | value | Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1019,7 +1019,7 @@ node bin/app prototypes list
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1051,7 +1051,7 @@ node bin/app prototypes compare <prototype> --version <version> --variant <varia
 | --with-version | value | Version slug of the comparison reference snapshot. | See command semantics |
 | --with-variant | value | Variant slug of the comparison reference snapshot. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1084,7 +1084,7 @@ node bin/app prototypes prototype-details <prototype> [--name <name>] [--descrip
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1117,7 +1117,7 @@ node bin/app prototypes version-details <prototype> --version <version> --label 
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1154,7 +1154,7 @@ node bin/app prototypes restore-snapshot <prototype> --version <version> --varia
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1188,7 +1188,7 @@ node bin/app prototypes create [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1221,7 +1221,7 @@ node bin/app prototypes version [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1257,7 +1257,7 @@ node bin/app prototypes fork [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1291,7 +1291,7 @@ node bin/app prototypes save [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1326,7 +1326,7 @@ node bin/app prototypes details [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1360,7 +1360,7 @@ node bin/app prototypes status [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1393,7 +1393,7 @@ node bin/app prototypes activate [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1424,7 +1424,7 @@ node bin/app prototypes deactivate
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1456,7 +1456,7 @@ node bin/app prototypes seal [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1487,7 +1487,7 @@ node bin/app prototypes archive [arguments]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1518,7 +1518,7 @@ node bin/app prototypes restore [arguments]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1550,7 +1550,7 @@ node bin/app prototypes import [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1582,7 +1582,7 @@ node bin/app prototypes export [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1614,7 +1614,7 @@ node bin/app prototypes adopt [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1650,7 +1650,7 @@ node bin/app prototypes generate [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1682,7 +1682,7 @@ node bin/app handout generate [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1715,7 +1715,7 @@ node bin/app handout refresh [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1743,7 +1743,7 @@ node bin/app handout validate [options]
 | --- | --- | --- | --- |
 | --prds | value | Project-relative PRD folder override; fingerprinted and retained by handout refresh/validation. | Default: configs/user-settings.json paths.prds, otherwise docs/prds |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1771,7 +1771,7 @@ node bin/app handout inspect [options]
 | --- | --- | --- | --- |
 | --prds | value | Project-relative PRD folder override; fingerprinted and retained by handout refresh/validation. | Default: configs/user-settings.json paths.prds, otherwise docs/prds |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1798,7 +1798,7 @@ node bin/app support report
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1828,7 +1828,7 @@ node bin/app project measure [options]
 | --samples | value | Measured samples per operation, after one cold sample and three retained warmups (3..30). | Default: 10 |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1856,7 +1856,7 @@ node bin/app project schema [options]
 | --- | --- | --- | --- |
 | --version | value | Published project schema version. Legacy documents use project validate. | Values: 6; Default: 6 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1884,7 +1884,7 @@ node bin/app project validate [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1911,7 +1911,7 @@ node bin/app airship status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1945,7 +1945,7 @@ node bin/app airship enable [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1977,7 +1977,7 @@ node bin/app airship disable
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2008,7 +2008,7 @@ node bin/app airship install
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2039,7 +2039,7 @@ node bin/app airship start
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2070,7 +2070,7 @@ node bin/app airship doctor
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2104,7 +2104,7 @@ node bin/app compiler check [options]
 | --report-dir | value | Explicit new report directory beneath reports/compiler; omitted means no reports are written. | See command semantics |
 | --debug | flag | Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2138,7 +2138,7 @@ node bin/app compiler inspect [options]
 | --report-dir | value | Explicit new report directory beneath reports/compiler; omitted means no reports are written. | See command semantics |
 | --debug | flag | Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2165,7 +2165,7 @@ node bin/app compiler explain [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2192,7 +2192,7 @@ node bin/app version
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2220,7 +2220,7 @@ node bin/app styles inspect [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2254,7 +2254,7 @@ node bin/app styles export [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2283,7 +2283,7 @@ node bin/app help [command] [--all]
 | --- | --- | --- | --- |
 | --all | flag | List every command with its summary, grouped. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2311,7 +2311,7 @@ node bin/app capabilities
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2340,7 +2340,7 @@ node bin/app mcp
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2367,7 +2367,7 @@ node bin/app schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2394,7 +2394,7 @@ node bin/app status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2422,7 +2422,7 @@ node bin/app doctor
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2449,7 +2449,7 @@ node bin/app config get
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2476,7 +2476,7 @@ node bin/app config explain
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2503,7 +2503,7 @@ node bin/app config validate
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2535,7 +2535,7 @@ node bin/app config set [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2562,7 +2562,7 @@ node bin/app setup status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2596,7 +2596,7 @@ node bin/app setup resume [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2647,7 +2647,7 @@ node bin/app setup [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2676,7 +2676,7 @@ node bin/app concept schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2704,7 +2704,7 @@ node bin/app concept inspect [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2738,7 +2738,7 @@ node bin/app concept import [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2767,7 +2767,7 @@ node bin/app project inspect [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2800,7 +2800,7 @@ node bin/app project import [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2849,7 +2849,7 @@ node bin/app new <dir> (--starter <id> | --from <project.json>) [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2891,7 +2891,7 @@ node bin/app generate [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2937,7 +2937,7 @@ node bin/app make <recipe> <name> [options] | make list | make describe <recipe>
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2967,7 +2967,7 @@ node bin/app plan inspect <plan-file>
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2998,7 +2998,7 @@ node bin/app plan apply <plan-file> --yes
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3028,7 +3028,7 @@ node bin/app install
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3055,7 +3055,7 @@ node bin/app storybook status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3085,7 +3085,7 @@ node bin/app storybook install
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3115,7 +3115,7 @@ node bin/app storybook check
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3144,7 +3144,7 @@ node bin/app storybook dev
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 3600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3173,7 +3173,7 @@ node bin/app storybook build
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3203,7 +3203,7 @@ node bin/app clickdummy build [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3233,7 +3233,7 @@ node bin/app build
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3263,7 +3263,7 @@ node bin/app test [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3295,7 +3295,7 @@ node bin/app check [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 per step |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3325,7 +3325,7 @@ node bin/app check submission
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3356,7 +3356,7 @@ node bin/app verify [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3386,7 +3386,7 @@ node bin/app dev [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 3600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3419,7 +3419,7 @@ node bin/app vault prepare
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3450,7 +3450,7 @@ node bin/app plugin install
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3479,7 +3479,7 @@ node bin/app data plan [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3508,7 +3508,7 @@ node bin/app data apply [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3537,7 +3537,7 @@ node bin/app data reset-plan [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3566,7 +3566,7 @@ node bin/app data reset [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3593,7 +3593,7 @@ node bin/app framework status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3624,7 +3624,7 @@ node bin/app framework pack [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3656,7 +3656,7 @@ node bin/app framework upgrade [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3689,7 +3689,7 @@ node bin/app release prepare [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3717,7 +3717,7 @@ node bin/app release check [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3748,7 +3748,7 @@ node bin/app release rehearse [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3779,7 +3779,7 @@ node bin/app release operate [options]
 | --execute | flag | Request candidate writes (still requires --authorize). | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 

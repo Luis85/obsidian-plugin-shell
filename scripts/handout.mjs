@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { resultEnvelope } from './contracts/result-runtime.mjs';
-// Compatibility entry: the integrated CLI owns validation, reviewed plans and result envelopes.
+// Delegating entry: bin/app owns validation, reviewed plans and result envelopes.
 // --write remains the generate-only legacy spelling of --yes.
 const [command, ...args] = process.argv.slice(2);
 const writeCount = args.filter(value => value === '--write').length;
@@ -16,5 +16,5 @@ if (invalid) {
   process.exitCode = 1;
 } else {
   process.argv.splice(2, process.argv.length - 2, 'handout', command, ...args.map(arg => arg === '--write' ? '--yes' : arg));
-  await import('../app.mjs');
+  await import('../bin/app');
 }

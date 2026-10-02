@@ -169,7 +169,7 @@ The build of the framework distribution is an explicit maintainer action:
 node bin/app framework pack --out ./plugin-framework.zip --yes --json
 ```
 
-This uses the installed TypeScript compiler, compiles tooling into `.framework/compiled`, retains the matching template under `.framework/template`, and records file hashes, versions and source identity in `.framework/kit.json`. The ZIP has deterministic sorted entries and fixed timestamps. Packing does not upload, publish or install anything. A configured consumer cannot be repackaged as the framework by this command. Checksums detect corruption; they do not authenticate an untrusted distributor.
+This uses the installed TypeScript compiler and emits a self-contained CLI below `bin/`: `bin/app` is the only launcher, `bin/app.js` is the compiled runtime, supporting templates live under `bin/template/`, plugin configuration under `bin/plugins/`, licenses under `bin/licenses/`, and integrity metadata in `bin/kit.json`. The ZIP has deterministic sorted entries and fixed timestamps. Packing does not upload, publish or install anything. A configured consumer cannot be repackaged as the framework by this command. Checksums detect corruption; they do not authenticate an untrusted distributor.
 
 The user extracts that ZIP into a new directory and runs either:
 

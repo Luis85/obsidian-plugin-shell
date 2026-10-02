@@ -46,8 +46,8 @@ export function supportSnapshot(observation: Result) {
 const semver = /^\d{1,6}\.\d{1,6}\.\d{1,6}$/;
 /** Framework version and the selected Node baseline; both must be plain x.y.z values. */
 async function frameworkFacts(context: Context) {
-  const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
-  const version = own(await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')), 'version');
+  const kit = await exists(join(context.frameworkRoot, 'bin/kit.json'));
+  const version = own(await readJson(join(context.frameworkRoot, kit ? 'bin/kit.json' : 'package.json')), 'version');
   requireThat(typeof version === 'string' && semver.test(version), 'SUPPORT_SHAPE', 'Unsupported version.');
   const selected = await exists(join(context.frameworkRoot, '.nvmrc')) ? (await readBounded(join(context.frameworkRoot, '.nvmrc'), 100)).toString('utf8').trim() : null;
   requireThat(selected === null || semver.test(selected), 'SUPPORT_SHAPE', 'Unsupported toolchain.');

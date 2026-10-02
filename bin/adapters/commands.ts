@@ -46,7 +46,7 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app                       Open saved workspace or create a project (terminal only)
   node bin/app new                   Project starter → prototype guide → reviewed package
   node bin/app new --starter plugin-angular   Preselect an installed project starter
-  node bin/app new starters --json   Discover installed project starters (configs/starters beside shell.mjs)
+  node bin/app new starters --json   Discover installed project starters (configs/starters in the package root)
   node bin/app new guide --starter plugin-angular --json
   node bin/app new validate --input request.json --json
   node bin/app new --input request.json --out projects/demo --json

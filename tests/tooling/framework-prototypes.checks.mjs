@@ -84,7 +84,7 @@ test('tampered snapshots and future registries never fall back to the working so
   assert.equal((await run(ctx2,['list'])).status,'failed');assert.equal((await run(ctx2,['generate','--target','generated'])).status,'failed');
 });
 test('real shell entry routes plural prototypes separately from the prototype maker',async t=>{
-  const ctx=await created(t),output=spawnSync(process.execPath,[join(frameworkRoot,'app.mjs'),'prototypes','list','--root',ctx.root,'--json'],{encoding:'utf8',timeout:30000});
+  const ctx=await created(t),output=spawnSync(process.execPath,[join(frameworkRoot,'bin/app'),'prototypes','list','--root',ctx.root,'--json'],{encoding:'utf8',timeout:30000});
   assert.equal(output.status,0,output.stderr);assert.equal(JSON.parse(output.stdout).data.prototypes[0].id,'exploration');
 });
 test('workspace import does not overwrite a sealed or active saved document',async t=>{

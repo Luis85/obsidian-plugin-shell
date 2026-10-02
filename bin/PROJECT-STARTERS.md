@@ -2,8 +2,8 @@
 
 Creating a project always runs a **project starter**: a JSON definition in
 `configs/starters/<id>.json` whose `generator.kind` is `project`. The shell ZIP
-contains no starters. Extract the separate `workbench-starters-<version>.zip` beside
-`shell.mjs` (or add your own definition) first; the maker reads project starters
+contains no starters. Extract the separate `workbench-starters-<version>.zip` into the same package root
+(or add your own definition) first; the maker reads project starters
 from that folder, honoring its `configs/user-settings.json` `paths.startersFolder`.
 An empty folder lists no starters, and creation fails closed rather than falling back.
 

@@ -15,7 +15,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 /** The real entry point with piped (non-TTY) streams; NO_COLOR is controlled per call. */
 function cli(args, env = {}) {
   const base = Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NO_COLOR' && key !== 'FORCE_COLOR'));
-  return spawnSync(process.execPath, [join(root, 'app.mjs'), ...args], { cwd: root, encoding: 'utf8', timeout: 60000, maxBuffer: 10_000_000, env: { ...base, ...env } });
+  return spawnSync(process.execPath, [join(root, 'bin/app'), ...args], { cwd: root, encoding: 'utf8', timeout: 60000, maxBuffer: 10_000_000, env: { ...base, ...env } });
 }
 function machine(args) {
   const output = cli([...args, '--json']);

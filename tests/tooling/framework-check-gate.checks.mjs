@@ -14,7 +14,7 @@ async function scratch(t) {
   t.after(() => rm(dir, { recursive: true, force: true })); return dir;
 }
 function cli(args, env = process.env) {
-  const output = spawnSync(process.execPath, [join(root, 'app.mjs'), ...args, '--json'], { cwd: root, encoding: 'utf8', timeout: 60000, env });
+  const output = spawnSync(process.execPath, [join(root, 'bin/app'), ...args, '--json'], { cwd: root, encoding: 'utf8', timeout: 60000, env });
   assert.equal(output.stdout.trim().split('\n').length, 1, output.stderr);
   return { exit: output.status, result: JSON.parse(output.stdout) };
 }
@@ -54,7 +54,7 @@ test('check without installed tools fails every step honestly and points to inst
   assert.deepEqual(result.data.steps.map(step => [step.id, step.status, step.code]), [['typecheck', 'failed', 'TOOL_MISSING'], ['lint', 'failed', 'TOOL_MISSING'], ['eslint', 'failed', 'TOOL_MISSING'], ['test', 'failed', 'TOOL_MISSING']]);
   assert.deepEqual(result.data.summary.failed, 4);
   assert.equal(result.diagnostics[0].code, 'CHECK_FAILED'); assert.equal(result.diagnostics[0].next, 'node bin/app install --yes');
-  const human = spawnSync(process.execPath, [join(root, 'app.mjs'), 'check', '--root', dir], { encoding: 'utf8', timeout: 60000 });
+  const human = spawnSync(process.execPath, [join(root, 'bin/app'), 'check', '--root', dir], { encoding: 'utf8', timeout: 60000 });
   assert.equal(human.status, 1);
   assert.match(human.stdout, /^ {2}\[FAIL\] typecheck {2}vue-tsc --noEmit +\d+ms$/m);
   assert.match(human.stdout, /^ {2}Summary {2}0 passed, 4 failed, 0 skipped in /m);

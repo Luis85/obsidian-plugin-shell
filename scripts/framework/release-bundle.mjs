@@ -1,4 +1,4 @@
-/** Reproducible dependency-free release CLI; all templates remain source data under .framework/template. */
+/** Reproducible dependency-free release CLI; runtime and templates are packaged below bin/. */
 import { readFile } from 'node:fs/promises';
 import { relative, resolve, isAbsolute, sep, posix, basename } from 'node:path';
 import { requireThat } from './contracts.ts';
@@ -16,7 +16,7 @@ function rebaseModuleLocations(ts, content, file) {
     else ts.forEachChild(node, visit);
   };
   visit(source);
-  const target = '../template/' + file, folder = '../template/' + posix.dirname(file) + '/';
+  const target = './template/' + file, folder = './template/' + posix.dirname(file) + '/';
   for (const [start, end, kind] of edits.reverse()) {
     content = content.slice(0, start) + (kind === 'dirname'
       ? '__kitFileURLToPath(new URL(' + JSON.stringify(folder) + ', import.meta.url))'
@@ -33,7 +33,7 @@ export async function bundleReleaseCli(frameworkRoot) {
   const result = await build({
     absWorkingDir: root,
     entryPoints: [resolve(root, 'scripts/framework/release-entry.ts')],
-    outfile: resolve(root, '.framework/compiled/app.js'),
+    outfile: resolve(root, 'bin/app.js'),
     bundle: true, write: false, platform: 'node', format: 'esm', target: 'node22',
     packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent',
     // Bundled CommonJS dependencies (yaml's node build) require Node built-ins; ESM output needs a real require.
