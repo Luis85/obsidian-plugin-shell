@@ -45,8 +45,11 @@ from that archive. The resulting starter files must sit next to the launcher as
 
 ```text
 workspace/
-  bin/app
-  .framework/
+  bin/
+    app
+    app.js
+    kit.json
+    template/
   configs/
     starters/
       blank.json
