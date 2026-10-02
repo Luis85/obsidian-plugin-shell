@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +24,7 @@ test('baseline component-template catalog is valid, broad and compositional', as
 });
 
 test('templates docs creates a reviewed Markdown plan from JSON', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'component-template-docs-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'component-template-docs-')));
   const outcome = await executeOperation(
     { command: 'templates docs', args: [], options: {} },
     { root, frameworkRoot },
@@ -35,7 +35,7 @@ test('templates docs creates a reviewed Markdown plan from JSON', async () => {
 });
 
 test('templates instantiate uses the canonical project model and file-plan boundary', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'component-template-instantiate-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'component-template-instantiate-')));
   await writeFile(join(root, 'project.json'), documentText(newDocument('Template test')));
   const preview = await executeOperation(
     { command: 'templates instantiate', args: ['organism.data-table'], options: { project: 'project.json' } },
