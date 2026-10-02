@@ -8,7 +8,7 @@ replacement generator and does not change framework `setup` behavior.
 
 Use `project-setup` to prepare a new Angular **webapp** in an existing Git worktree
 that is also an Obsidian vault. Setup runs the installed `webapp-angular` project
-starter by ID, read from `configs/starters/` beside `shell.mjs` like every starter;
+starter by ID, read from `configs/starters/` in the CLI package root like every starter;
 extract the separate starters ZIP there first. Setup fails closed when that starter
 is missing or does not select Angular with a webapp target. The shipped starter pins
 Angular 22.0.0; `project.config.json` records the starter ID, version and SHA-256.

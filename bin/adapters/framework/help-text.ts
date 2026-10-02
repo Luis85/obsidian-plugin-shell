@@ -52,7 +52,7 @@ const common: Record<string, OptionHelp> = {
   yes: { description: 'Apply the freshly rebuilt plan (or run the process) without prompting.' },
   apply: { description: 'Apply only if the rebuilt plan still has this reviewed SHA-256 hash.' },
   'plan-out': { description: 'Save a replayable request plan (for plan inspect/apply).' },
-  root: { description: 'Project folder to operate on.', default: 'nearest folder with shell.config.json, app.mjs or shell.mjs' },
+  root: { description: 'Project folder to operate on.', default: 'nearest folder with shell.config.json or bin/app' },
   timeout: { description: 'Child-process timeout in milliseconds (1..3600000).', default: '600000' },
   'no-interaction': { description: 'Never prompt, even on a TTY.' },
   help: { description: 'Describe this command instead of running it.' },
