@@ -78,13 +78,19 @@ export async function readComponentTemplateOperation(request: Request, context: 
   });
 }
 
+function protectedPathPart(part: string): boolean {
+  const normalized = part.toLowerCase();
+  return part.startsWith('.') || normalized === 'node_modules';
+}
+
 function contained(root: string, input: string, label: string): string {
   const absolute = resolve(root, input);
   const local = relative(root, absolute);
-  requireThat(Boolean(local) && !isAbsolute(local) && !local.split(sep).includes('..')
-    && !local.split(sep).some(part => ['.git', '.framework', '.obsidian', 'node_modules'].includes(part.toLowerCase())),
+  const parts = local.split(sep);
+  requireThat(Boolean(local) && !isAbsolute(local) && !parts.includes('..')
+    && !parts.some(protectedPathPart),
   'TEMPLATE_PATH', label + ' must stay inside the project and outside protected directories.');
-  return local.split(sep).join('/');
+  return parts.join('/');
 }
 
 async function docsPlan(request: Request, context: Context) {
