@@ -5,18 +5,32 @@ function same(value: string, expected?: string): boolean {
   return expected === undefined || value.toLowerCase() === expected.toLowerCase();
 }
 
+function searchableTemplateText(template: ComponentTemplate): string {
+  return [template.id, template.name, template.category, template.description,
+    ...template.tags, ...template.capabilities].join(' ').toLowerCase();
+}
+
+function matchesSearch(template: ComponentTemplate, needle?: string): boolean {
+  return needle === undefined || searchableTemplateText(template).includes(needle);
+}
+
+function matchesExact(value: string, expected?: string): boolean {
+  return expected === undefined || value === expected;
+}
+
+function includesSame(values: readonly string[], expected?: string): boolean {
+  return expected === undefined || values.some(value => same(value, expected));
+}
+
 function matchesTemplate(template: ComponentTemplate, query: ComponentTemplateQuery, needle?: string): boolean {
-  if (needle) {
-    const searchable = [template.id, template.name, template.category, template.description,
-      ...template.tags, ...template.capabilities].join(' ').toLowerCase();
-    if (!searchable.includes(needle)) return false;
-  }
-  if (query.templateType && template.templateType !== query.templateType) return false;
-  if (query.atomicLevel && template.atomicLevel !== query.atomicLevel) return false;
-  if (!same(template.category, query.category)) return false;
-  if (query.tag && !template.tags.some(tag => same(tag, query.tag))) return false;
-  if (query.recommendedFor && !template.recommendedFor.some(item => same(item, query.recommendedFor))) return false;
-  return true;
+  return [
+    matchesSearch(template, needle),
+    matchesExact(template.templateType, query.templateType),
+    matchesExact(template.atomicLevel, query.atomicLevel),
+    same(template.category, query.category),
+    includesSame(template.tags, query.tag),
+    includesSame(template.recommendedFor, query.recommendedFor),
+  ].every(Boolean);
 }
 export function filterComponentTemplates(
   entries: readonly ComponentTemplateEntry[],
