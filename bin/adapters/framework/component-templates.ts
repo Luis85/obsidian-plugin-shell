@@ -80,7 +80,7 @@ export async function readComponentTemplateOperation(request: Request, context: 
 
 function protectedPathPart(part: string): boolean {
   const normalized = part.toLowerCase();
-  return part.startsWith('.') || normalized === 'node_modules';
+  return part.charCodeAt(0) === 46 || normalized === 'node_modules';
 }
 
 function contained(root: string, input: string, label: string): string {

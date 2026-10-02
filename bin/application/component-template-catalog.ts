@@ -22,16 +22,24 @@ function includesSame(values: readonly string[], expected?: string): boolean {
   return expected === undefined || values.some(value => same(value, expected));
 }
 
-function matchesTemplate(template: ComponentTemplate, query: ComponentTemplateQuery, needle?: string): boolean {
-  const checks = [
+function matchesTemplateShape(template: ComponentTemplate, query: ComponentTemplateQuery, needle?: string): boolean {
+  return [
     matchesSearch(template, needle),
     matchesExact(template.templateType, query.templateType),
     matchesExact(template.atomicLevel, query.atomicLevel),
+  ].every(value => value);
+}
+
+function matchesTemplateMetadata(template: ComponentTemplate, query: ComponentTemplateQuery): boolean {
+  return [
     same(template.category, query.category),
     includesSame(template.tags, query.tag),
     includesSame(template.recommendedFor, query.recommendedFor),
-  ];
-  return checks.every(value => value);
+  ].every(value => value);
+}
+
+function matchesTemplate(template: ComponentTemplate, query: ComponentTemplateQuery, needle?: string): boolean {
+  return matchesTemplateShape(template, query, needle) && matchesTemplateMetadata(template, query);
 }
 export function filterComponentTemplates(
   entries: readonly ComponentTemplateEntry[],
