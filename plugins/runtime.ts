@@ -165,7 +165,7 @@ function templateCatalog(options: RuntimeOptions, plugins: readonly WorkbenchPlu
       const entries = await loadComponentTemplates(options.root, options.frameworkRoot, contributed);
       return entries.find(entry => entry.template.id === id)?.template;
     },
-    async instantiate(workspace, id: string, name?: string) {
+    async instantiate(workspace: Parameters<ComponentTemplateCatalogApi['instantiate']>[0], id: string, name?: string) {
       const entries = await loadComponentTemplates(options.root, options.frameworkRoot, contributed);
       return workspace.instantiateTemplate(entries.map(entry => entry.template), id, name);
     },

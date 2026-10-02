@@ -26,7 +26,7 @@ function bindCatalogProps(
 ): void {
   const entry = visualCatalogEntry(entryId)!;
   for (const prop of template.props) {
-    if (entry.props.some(candidate => candidate.name === prop.name)) {
+    if (entry.props.some((candidate: { name: string }) => candidate.name === prop.name)) {
       node.props[prop.name] = { kind: 'prop', name: prop.name };
     }
   }

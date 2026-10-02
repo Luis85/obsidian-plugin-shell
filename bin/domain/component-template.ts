@@ -238,7 +238,7 @@ export function validateComponentTemplate(value: unknown): ComponentTemplate {
   requireSketch(id.startsWith(atomicLevel + '.'), 'TEMPLATE_INVALID',
     'Template ID prefix must match its Atomic Design level: ' + atomicLevel + '.*.');
   const states = strings(row.states, 'state', 8);
-  requireSketch(states.every(state => VISUAL_STATES.includes(state)), 'TEMPLATE_INVALID', 'Template states must use the visual IR state vocabulary.');
+  requireSketch(states.every(state => VISUAL_STATES.some(candidate => candidate === state)), 'TEMPLATE_INVALID', 'Template states must use the visual IR state vocabulary.');
   const children = readChildren(row.children);
   const slots = readSlots(row.slots);
   const templateType = row.templateType as ComponentTemplateType;
