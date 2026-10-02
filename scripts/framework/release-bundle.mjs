@@ -1,7 +1,7 @@
 /** Reproducible dependency-free release CLI; runtime and templates are packaged below bin/. */
 import { readFile } from 'node:fs/promises';
 import { relative, resolve, isAbsolute, sep, posix, basename } from 'node:path';
-import { requireThat } from './contracts.ts';
+import { requireThat } from '../../bin/adapters/framework/contracts.ts';
 
 /**
  * Rebase each real `import.meta.url` / `import.meta.dirname` expression in one module. The syntax tree leaves the
@@ -32,7 +32,7 @@ export async function bundleReleaseCli(frameworkRoot) {
   const ts = (await import('typescript')).default;
   const result = await build({
     absWorkingDir: root,
-    entryPoints: [resolve(root, 'scripts/framework/release-entry.ts')],
+    entryPoints: [resolve(root, 'bin/app.ts')],
     outfile: resolve(root, 'bin/app.js'),
     bundle: true, write: false, platform: 'node', format: 'esm', target: 'node22',
     packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent',

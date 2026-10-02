@@ -14,10 +14,9 @@ export async function generationPlan(request: Request, context: Context) {
 }
 /** In-place generation compiles the imported design with a verified kit whose configuration still matches it. */
 async function inPlaceKit(request: Request, context: Context, input: string) {
-  requireThat(request.options.vault === undefined, 'TARGET_REQUIRED', '--vault requires an explicit legacy --target.');
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup and project import first.');
   requireThat(input === resolve(context.root, designFile), 'INPUT_REQUIRES_IMPORT', 'In-place generation compiles the imported ' + designFile + '; run project import to adopt a different file.');
-  requireThat(await exists(join(context.root, 'bin/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit; legacy --vault/--target remains available.');
+  requireThat(await exists(join(context.root, 'bin/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit.');
   const kit = await verifyKit(context.root);
   const { model } = await inspectDesign(context, input);
   const identityMatches = Object.entries(config.project).every(([key, value]) => model.project[key] === value);
@@ -30,8 +29,6 @@ export async function generateSourcePlan(request: Request, context: Context) {
   const outputKind = stringOption(request.options, 'output-kind');
   requireThat(outputKind === undefined || ['obsidian-plugin','clickdummy'].includes(outputKind),'INVALID_OUTPUT_KIND','Use obsidian-plugin or clickdummy.');
   const compilation = {storybook:storybookFlags(request.options),outputKind:outputKind as 'obsidian-plugin'|'clickdummy'|undefined,signal:context.signal,scope:stringOption(request.options, 'scope')};
-  const target = stringOption(request.options, 'target');
-  if (target !== undefined) return planProject({ ...compilation, input, target, vault: resolve(context.root, stringOption(request.options, 'vault') ?? '.'), templateRoot: context.frameworkRoot });
   const kit = await inPlaceKit(request, context, input);
   const templateRoot = join(context.root, 'bin/template');
   const intakePath = '.framework/intake.json';

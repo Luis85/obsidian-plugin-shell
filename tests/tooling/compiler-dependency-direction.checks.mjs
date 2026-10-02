@@ -12,9 +12,9 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 // nothing may recreate or import the removed paths.
 const owners = new Map([
   ['scripts/companion/compiler/plan.ts', 'scripts/compiler/adapters/project-plan.ts'],
-  ['scripts/companion/compiler/cli.ts', 'scripts/compiler/adapters/generator-cli.ts'],
-  ['scripts/companion/compiler/fixture-code.ts', 'scripts/compiler/adapters/fixture-code.ts'],
-  ['scripts/companion/compiler/project-files.ts', 'scripts/compiler/adapters/project-files.ts'],
+  ['scripts/companion/compiler/cli.ts', 'bin/adapters/framework-cli.ts'],
+  ['scripts/companion/compiler/fixture-code.ts', 'scripts/compiler/adapters/fixture-emitter.ts'],
+  ['scripts/companion/compiler/project-files.ts', 'scripts/compiler/adapters/plugin-emitter.ts'],
   // The inward-only compiler core moved to bin/compiler; its former scripts/compiler paths are gone too.
   ...['artifacts', 'contracts', 'diagnostics', 'project-starter', 'references', 'selection', 'source-references']
     .map(name => [`scripts/compiler/domain/${name}.ts`, `bin/compiler/domain/${name}.ts`]),

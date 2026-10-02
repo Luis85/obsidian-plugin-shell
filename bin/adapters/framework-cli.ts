@@ -27,22 +27,6 @@ async function interactivePlanConfirm(io: FrameworkCliIO, message: string, signa
   return parseConfirmation(await ask(io.input, io.error as never, message + ' [y/N] ', signal)) === true;
 }
 
-/** The published workspace compiler keeps its raw JSON protocol and --help entry. */
-function rawGeneratorInvocation(argv: string[]): boolean {
-  if (argv[0] !== 'generate' || argv.includes('--json')) return false;
-  const workspace = argv.includes('--target') && argv.includes('--input') && !argv.includes('--scope');
-  return workspace || (argv.length === 2 && argv[1] === '--help');
-}
-async function runRawGenerator(argv: string[], io: FrameworkCliIO): Promise<number> {
-  try {
-    const { generatorCli } = await import('../../scripts/compiler/adapters/generator-cli.ts');
-    await generatorCli(argv.slice(1));
-    return Number(process.exitCode ?? 0);
-  } catch (error) {
-    io.error.write((error instanceof Error ? error.message : 'Generation failed.') + '\n');
-    return 1;
-  }
-}
 const discoveryCommands = ['help', 'capabilities', 'schema', 'version', 'compiler explain', 'project schema', 'docs schema'];
 /** Discovery commands describe the CLI itself and never need a project root. */
 function isDiscovery(request: Request): boolean {
@@ -106,7 +90,6 @@ async function runOperation(argv: string[], frameworkRoot: string, io: Framework
 
 /** Framework command composition root. Prompts/progress are isolated from the machine stdout result channel. */
 export async function main(argv: string[], frameworkRoot: string, io: FrameworkCliIO = processIO): Promise<number> {
-  if (rawGeneratorInvocation(argv)) return runRawGenerator(argv, io);
   const supportRequested = argv.some((value, index) => value === 'support' && argv[index + 1] === 'report');
   const machine = argv.includes('--json');
   const controller = new AbortController();
