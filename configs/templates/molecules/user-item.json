@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "molecule.user-item",
+  "name": "User Item",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "molecule",
+  "category": "Data display",
+  "description": "User identity row with status and trailing action.",
+  "tags": [
+    "molecule",
+    "data-display",
+    "user",
+    "list-item"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "identity-row"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "atom.avatar"
+    },
+    {
+      "template": "atom.badge"
+    },
+    {
+      "template": "atom.icon-button"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "composition",
+    "tag": "div",
+    "layout": "row"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

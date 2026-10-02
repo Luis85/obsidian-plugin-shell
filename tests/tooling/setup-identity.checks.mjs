@@ -6,6 +6,7 @@ import { planIdentity, validateIdentity } from '../../scripts/setup/identity.mjs
 import { setupOptions } from '../../scripts/setup/options.mjs';
 import { inputFingerprint } from '../../scripts/setup/journal.mjs';
 import { executeSetup } from '../../scripts/setup/execute.mjs';
+import { planLocalMcp } from '../../scripts/setup/mcp.mjs';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { fixture, run, snapshot } from './setup-identity-fixture.mjs';
 const parsed = async (root, path) => JSON.parse(await readFile(join(root, path), 'utf8'));
@@ -210,7 +211,9 @@ test('[SETUP-03] native identity migration installs one matching candidate and r
 
 test('[SETUP-05] intent is journaled before metadata application and externally changed journals are preserved', async t => {
   const f = await fixture(); t.after(() => rm(f.root, { recursive: true, force: true }));
-  const options = await setupOptions(['--id', 'recover-intent']); const planned = await planIdentity(f.root, options);
+  const options = await setupOptions(['--id', 'recover-intent']);
+  // setup.mjs always attaches the reviewed (here disabled) agent MCP plan before execution.
+  const planned = { ...await planIdentity(f.root, options), agentMcp: await planLocalMcp(f.root, false) };
   const edited = { ...f.manifest, description: 'edited after review' }; await writeFile(join(f.root, 'manifest.json'), JSON.stringify(edited));
   const activeNpm = process.env.npm_execpath; process.env.npm_execpath = f.launcher;
   try { await assert.rejects(executeSetup(f.root, options, planned, null), /STALE/); }

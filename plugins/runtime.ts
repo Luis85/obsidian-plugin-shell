@@ -1,8 +1,11 @@
 import { pluginRegistry } from './registry.ts';
 import { defineFrameworkAdapter, type FrameworkAdapter } from '../scripts/compiler/adapters/project/framework-adapter.ts';
 import type { StarterDefinition } from '../scripts/starters/types.ts';
+import { loadComponentTemplates } from '../bin/adapters/component-template-repository.ts';
+import { pluginComponentTemplates } from './template-contributions.ts';
 import { commands as frameworkCommands } from '../scripts/framework/catalog.ts';
 import type {
+  ComponentTemplateCatalogApi,
   PluginCliCommand,
   PluginCommandContext,
   PluginEventBus,
@@ -151,6 +154,24 @@ class EventBus implements PluginEventBus {
   }
 }
 
+function templateCatalog(options: RuntimeOptions, plugins: readonly WorkbenchPluginObject[]): ComponentTemplateCatalogApi {
+  const contributed = pluginComponentTemplates(plugins);
+  return Object.freeze({
+    async list() {
+      const entries = await loadComponentTemplates(options.root, options.frameworkRoot, contributed);
+      return entries.map(entry => structuredClone(entry.template));
+    },
+    async get(id: string) {
+      const entries = await loadComponentTemplates(options.root, options.frameworkRoot, contributed);
+      return entries.find(entry => entry.template.id === id)?.template;
+    },
+    async instantiate(workspace: Parameters<ComponentTemplateCatalogApi['instantiate']>[0], id: string, name?: string) {
+      const entries = await loadComponentTemplates(options.root, options.frameworkRoot, contributed);
+      return workspace.instantiateTemplate(entries.map(entry => entry.template), id, name);
+    },
+  });
+}
+
 export interface WorkbenchPluginRuntime {
   readonly eventBus: PluginEventBus;
   readonly cliCommands: readonly PluginCliCommand[];
@@ -167,11 +188,13 @@ export async function createPluginRuntime(options: RuntimeOptions): Promise<Work
     return event;
   }));
   const bus = new EventBus(events, code => options.onError?.(code));
+  const templates = templateCatalog(options, plugins);
   const commandContext: PluginCommandContext = Object.freeze({
     root: options.root, frameworkRoot: options.frameworkRoot, input: options.input,
     ...(options.signal ? { signal: options.signal } : {}),
     ...(options.progress ? { progress: options.progress } : {}),
     eventBus: bus,
+    templates,
   });
   const cleanups: Array<() => void> = [];
   try {

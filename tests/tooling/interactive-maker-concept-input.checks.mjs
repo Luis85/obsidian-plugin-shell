@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { decodeConceptInput as relocatedDecode, readConceptInput as relocatedRead } from '../../bin/adapters/framework/concept-input.ts';
 import * as legacy from '../../scripts/framework/concept-input.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+/** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
+const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const projectText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
@@ -29,7 +31,7 @@ test('relocated concept input treats ordinary HTML as reference-only and reads i
 
 test('relocated concept input enforces project-relative docs/concepts paths', async t => {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'concept-input-')));
-  t.after(() => rm(root, { recursive: true, force: true }));
+  after(t, () => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, 'docs/concepts'), { recursive: true });
   await writeFile(join(root, 'docs/concepts/example.json'), projectText);
   const context = { root, frameworkRoot };

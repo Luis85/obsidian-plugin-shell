@@ -14,60 +14,58 @@ import { inspectConcept } from './concepts.ts';
 import { supportReport } from './support-report.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 
+async function versionInfo(context: Context) {
+  const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
+  const metadata = await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')) as { version?: string };
+  return { frameworkVersion: metadata.version, nodeVersion: process.version, protocolVersion: 1, distribution: kit ? 'compiled-kit' : 'source' };
+}
+async function configurationInfo(context: Context) {
+  return { configuration: await readConfiguration(context.root), source: 'shell.config.json', identityAuthority: 'manifest.json after generation', overrides: 'none' };
+}
+async function projectInspection(request: Request, context: Context) {
+  const input = stringOption(request.options, 'input');
+  requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
+  const { model, source } = await inspectDesign(context, input);
+  return {
+    schemaVersion: source.document.schemaVersion,
+    project: model.project,
+    entities: model.entities.length,
+    sources: model.sources.length,
+    screens: model.screens.length,
+    components: model.components.length,
+    acceptanceObligations: model.requirements.length,
+    warnings: model.warnings,
+    sitemap: inspectSitemapSummary(source.document.design),
+  };
+}
+async function frameworkStatus(context: Context) {
+  const kit = await verifyKit(context.root);
+  return { version: kit.version, sourceHash: kit.sourceHash, compilerVersion: kit.compilerVersion, verifiedFiles: kit.files.length, authenticity: 'checksums-are-not-signatures' };
+}
+type Reader = (request: Request, context: Context) => Promise<Result> | Result;
+/** Read-only commands whose data is wrapped in a plain result envelope. */
+const dataReaders: Record<string, (request: Request, context: Context) => Promise<unknown> | unknown> = {
+  'prototypes list': (_request, context) => prototypesRead(context),
+  'prototypes compare': prototypesCompare,
+  'concept schema': () => conceptSchema(),
+  'concept inspect': inspectConcept,
+  version: (_request, context) => versionInfo(context),
+  'styles inspect': inspectStyles,
+  'project inspect': projectInspection,
+  'framework status': (_request, context) => frameworkStatus(context),
+};
+/** Read-only commands that build their own result (status, diagnostics). */
+const resultReaders: Record<string, Reader> = {
+  'handout validate': handoutRead, 'handout inspect': handoutRead,
+  'project measure': measureProject,
+  'support report': (_request, context) => supportReport(context),
+  'project schema': projectContractOperation, 'project validate': projectContractOperation,
+  'release check': (request, context) => releaseCheck(context, stringOption(request.options, 'input')),
+};
 export async function readOperation(request: Request, context: Context): Promise<Result> {
-  if (request.command === 'prototypes list') return result(request.command, await prototypesRead(context));
-  if (request.command === 'prototypes compare') return result(request.command, await prototypesCompare(request, context));
-  if (request.command === 'handout validate' || request.command === 'handout inspect') return handoutRead(request, context);
-  if (request.command === 'project measure') return measureProject(request, context);
-  if (request.command === 'support report') return supportReport(context);
-  if (['project schema', 'project validate'].includes(request.command)) return projectContractOperation(request, context);
-  if (request.command === 'concept schema') return result(request.command, conceptSchema());
-  if (request.command === 'concept inspect') return result(request.command, await inspectConcept(request, context));
-  if (request.command === 'version') {
-    const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
-    const metadata = await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')) as { version?: string };
-    return result(request.command, {
-      frameworkVersion: metadata.version,
-      nodeVersion: process.version,
-      protocolVersion: 1,
-      distribution: kit ? 'compiled-kit' : 'source',
-    });
-  }
-  if (request.command === 'styles inspect') return result(request.command, await inspectStyles(request, context));
-  if (request.command.startsWith('config ')) {
-    return result(request.command, {
-      configuration: await readConfiguration(context.root),
-      source: 'shell.config.json',
-      identityAuthority: 'manifest.json after generation',
-      overrides: 'none',
-    });
-  }
-  if (request.command === 'project inspect') {
-    const input = stringOption(request.options, 'input');
-    requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
-    const { model, source } = await inspectDesign(context, input);
-    return result(request.command, {
-      schemaVersion: source.document.schemaVersion,
-      project: model.project,
-      entities: model.entities.length,
-      sources: model.sources.length,
-      screens: model.screens.length,
-      components: model.components.length,
-      acceptanceObligations: model.requirements.length,
-      warnings: model.warnings,
-      sitemap: inspectSitemapSummary(source.document.design),
-    });
-  }
-  if (request.command === 'framework status') {
-    const kit = await verifyKit(context.root);
-    return result(request.command, {
-      version: kit.version,
-      sourceHash: kit.sourceHash,
-      compilerVersion: kit.compilerVersion,
-      verifiedFiles: kit.files.length,
-      authenticity: 'checksums-are-not-signatures',
-    });
-  }
-  if (request.command === 'release check') return releaseCheck(context, stringOption(request.options, 'input'));
-  return status(context, request.command);
+  const command = request.command;
+  if (Object.hasOwn(resultReaders, command)) return resultReaders[command]!(request, context);
+  if (Object.hasOwn(dataReaders, command)) return result(command, await dataReaders[command]!(request, context));
+  if (command.startsWith('config ')) return result(command, await configurationInfo(context));
+  return status(context, command);
 }

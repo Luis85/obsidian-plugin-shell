@@ -1,17 +1,19 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { mkdtemp, readFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { inspectStyles as relocatedInspect, styleExportPlan as relocatedPlan } from '../../bin/adapters/framework/styles.ts';
 import * as legacy from '../../scripts/framework/styles.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+/** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
+const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const projectText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
 
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'style-plan-')));
-  t.after(() => rm(root, { recursive: true, force: true }));
+  after(t, () => rm(root, { recursive: true, force: true }));
   return { root, frameworkRoot, inputText: projectText };
 }
 const request = (command, options = {}) => ({ command, args: [], options: { input: '-', ...options } });
@@ -38,6 +40,6 @@ test('relocated style adapter plans reviewed exports without writing', async t =
 
 test('relocated style adapter refuses protected and mismatched output targets', async t => {
   const context = await fixture(t);
-  await assert.rejects(relocatedPlan(request('styles export', { format: 'json', out: '.framework/design-system.json' }), context), /STYLE_OUTPUT_PATH/);
-  await assert.rejects(relocatedPlan(request('styles export', { format: 'json', out: 'exports/design-system.css' }), context), /STYLE_OUTPUT_FORMAT/);
+  await assert.rejects(relocatedPlan(request('styles export', { format: 'json', out: '.framework/design-system.json' }), context), { code: 'STYLE_OUTPUT_PATH' });
+  await assert.rejects(relocatedPlan(request('styles export', { format: 'json', out: 'exports/design-system.css' }), context), { code: 'STYLE_OUTPUT_FORMAT' });
 });

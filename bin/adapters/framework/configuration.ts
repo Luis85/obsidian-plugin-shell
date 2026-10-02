@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { OperationError, requireThat } from './contracts.ts';
 import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
 export interface Identity { id: string; name: string; author: string; version: string; description: string }
@@ -19,6 +20,7 @@ export function identity(value: unknown): Identity {
   const input = object(value); exactKeys(input, ['id', 'name', 'author', 'version', 'description']);
   const text = (key: string, limit: number) => {
     const item = input[key];
+    // oxlint-disable-next-line no-control-regex
     requireThat(typeof item === 'string' && item.length <= limit && item === item.trim() && !/[\u0000-\u001f]/.test(item), 'INVALID_IDENTITY', `Invalid project ${key}.`);
     return item;
   };
@@ -45,7 +47,7 @@ export function configuration(value: unknown): Configuration {
   return { schemaVersion: 1, project: identity(input.project), paths: { codebaseFolder: source, testsFolder: tests, testVaultFolder: vault, configDirectory: directory } };
 }
 export function defaults(project: Identity): Configuration {
-  return configuration({ schemaVersion: 1, project, paths: { codebaseFolder: 'src', testsFolder: 'tests', testVaultFolder: '.test-vault', configDirectory: '.obsidian' } });
+  return configuration({ schemaVersion: 1, project, paths: { codebaseFolder: 'src', testsFolder: 'tests', testVaultFolder: '.test-vault', configDirectory: defaultVaultConfigDirectory } });
 }
 export function resolveImport(config: Configuration | null, document: Record<string, unknown>, policy?: string) {
   requireThat(policy === undefined || ['project', 'import'].includes(policy), 'INVALID_POLICY', 'Resolution must be project or import.');

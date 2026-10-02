@@ -1008,9 +1008,10 @@
       ]
     },
     {
-      "purpose": "Generated project fixtures and ports",
+      "purpose": "Generated project fixtures, ports and the Vitest UI setup file",
       "include": [
-        "tests/project/fixtures/**"
+        "tests/project/fixtures/**",
+        "tests/project/ui-bootstrap.mjs"
       ],
       "exclude": [
         "tests/project/**/*.test.ts",

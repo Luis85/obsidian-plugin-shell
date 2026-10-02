@@ -32,6 +32,31 @@ async function inspectInstallDirectory(directory: string, counter = { value: 0 }
     } else if (file.isDirectory()) await inspectInstallDirectory(join(directory, file.name), counter);
   }
 }
+/** The isolated prefix must be a real directory dedicated to the pinned CLI. */
+async function prepareInstallPrefix(context: Context): Promise<void> {
+  const directory = join(context.root, prefix);
+  if (await exists(directory)) requireThat((await lstat(directory)).isDirectory() && !(await lstat(directory)).isSymbolicLink(), 'AIRSHIP_TOOL_LINK', 'Tooling directory must not be a symlink.');
+  else await mkdir(directory);
+  await inspectInstallDirectory(directory);
+  if (!await exists(join(directory, 'package.json'))) return;
+  const manifest = object(await readJson(join(directory, 'package.json'))), dependencies = object(manifest.dependencies);
+  requireThat(Object.keys(dependencies).length === 1 && dependencies['@airshiplabs/cli'] === AIRSHIP_VERSION &&
+    !manifest.devDependencies && !manifest.optionalDependencies, 'AIRSHIP_TOOL_MANIFEST', 'Keep this isolated prefix dedicated to the pinned Airship CLI.');
+}
+type Document = ReturnType<typeof parseAuthoringDocument>;
+type Options = ReturnType<typeof airshipOptions>;
+/** Launch only the installed pinned CLI against configuration identical to the validated project tooling. */
+async function checkLaunchable(context: Context, document: Document, installed: string | null): Promise<void> {
+  requireThat(installed === AIRSHIP_VERSION, 'AIRSHIP_NOT_INSTALLED', 'Run airship install --yes to install the pinned CLI locally.');
+  const actual = object(await readJson(join(context.root, 'airship.config.json'))), expected = airshipConfig(document.tooling);
+  requireThat(JSON.stringify(Object.entries(actual).sort()) === JSON.stringify(Object.entries(expected).sort()), 'AIRSHIP_CONFIG_CONFLICT', 'Airship configuration differs from validated project tooling. Reconcile it before launching.');
+  // Reading checks every ancestor for links, including @airshiplabs and the executable itself.
+  await readBounded(join(context.root, entry), 30_000_000);
+}
+function launchArgs(command: string, context: Context, options: Options): string[] {
+  if (command === 'airship doctor') return ['doctor', '--cwd', context.root, '--target', String(options.targetPort), '--agent', options.agent];
+  return ['--cwd', context.root, '--target', String(options.targetPort), '--port', String(options.port), '--host', '127.0.0.1', '--agent', options.agent, '--safe', '--no-commit'];
+}
 export async function airshipOperation(request: Request, context: Context, executor: AirshipExecutor = defaultExecutor) {
   const document = parseAuthoringDocument((await readBounded(join(context.root, 'design/project.json'), 4_000_000)).toString('utf8'));
   const options = airshipOptions(document.tooling), installed = await installedVersion(context.root);
@@ -44,25 +69,11 @@ export async function airshipOperation(request: Request, context: Context, execu
   const environment = airshipEnvironment();
   const timeout = Number(stringOption(request.options, 'timeout') ?? (request.command === 'airship start' ? 3600000 : 600000));
   if (request.command === 'airship install') {
-    const directory = join(context.root, prefix);
-    if (await exists(directory)) requireThat((await lstat(directory)).isDirectory() && !(await lstat(directory)).isSymbolicLink(), 'AIRSHIP_TOOL_LINK', 'Tooling directory must not be a symlink.');
-    else await mkdir(directory);
-    await inspectInstallDirectory(directory);
-    if (await exists(join(directory, 'package.json'))) {
-      const manifest = object(await readJson(join(directory, 'package.json'))), dependencies = object(manifest.dependencies);
-      requireThat(Object.keys(dependencies).length === 1 && dependencies['@airshiplabs/cli'] === AIRSHIP_VERSION &&
-        !manifest.devDependencies && !manifest.optionalDependencies, 'AIRSHIP_TOOL_MANIFEST', 'Keep this isolated prefix dedicated to the pinned Airship CLI.');
-    }
+    await prepareInstallPrefix(context);
     const execution = await executor.run(context, await executor.npm(), ['install', '--prefix', prefix, '--save-exact', '--ignore-scripts', '--no-audit', '--no-fund', '@airshiplabs/cli@' + AIRSHIP_VERSION], timeout, environment);
     requireThat(await installedVersion(context.root) === AIRSHIP_VERSION, 'AIRSHIP_VERSION', 'The pinned CLI was not installed.');
     return result(request.command, { ...state, installedVersion: AIRSHIP_VERSION, execution }, 'applied');
   }
-  requireThat(installed === AIRSHIP_VERSION, 'AIRSHIP_NOT_INSTALLED', 'Run airship install --yes to install the pinned CLI locally.');
-  const actual = object(await readJson(join(context.root, 'airship.config.json'))), expected = airshipConfig(document.tooling);
-  requireThat(JSON.stringify(Object.entries(actual).sort()) === JSON.stringify(Object.entries(expected).sort()), 'AIRSHIP_CONFIG_CONFLICT', 'Airship configuration differs from validated project tooling. Reconcile it before launching.');
-  // Reading checks every ancestor for links, including @airshiplabs and the executable itself.
-  await readBounded(join(context.root, entry), 30_000_000);
-  const args = request.command === 'airship doctor' ? ['doctor', '--cwd', context.root, '--target', String(options.targetPort), '--agent', options.agent]
-    : ['--cwd', context.root, '--target', String(options.targetPort), '--port', String(options.port), '--host', '127.0.0.1', '--agent', options.agent, '--safe', '--no-commit'];
-  return result(request.command, { ...state, execution: await executor.run(context, entry, args, timeout, environment) });
+  await checkLaunchable(context, document, installed);
+  return result(request.command, { ...state, execution: await executor.run(context, entry, launchArgs(request.command, context, options), timeout, environment) });
 }

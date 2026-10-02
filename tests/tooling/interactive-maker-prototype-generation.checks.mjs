@@ -1,15 +1,17 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { mkdtemp, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { managedGenerationPlan as relocated } from '../../bin/adapters/framework/prototype-generation.ts';
 import * as legacy from '../../scripts/framework/prototype-generation.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+/** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
+const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'prototype-generation-')));
-  t.after(() => rm(root, { recursive: true, force: true }));
+  after(t, () => rm(root, { recursive: true, force: true }));
   return { root, frameworkRoot };
 }
 
@@ -44,5 +46,5 @@ test('relocated managed generation respects cancellation while discovering works
   const context = await fixture(t);
   const controller = new AbortController();
   controller.abort();
-  await assert.rejects(relocated({ command: 'generate', args: [], options: {} }, { ...context, signal: controller.signal }, async () => ({ marker: 'unexpected' })), /CANCELLED/);
+  await assert.rejects(relocated({ command: 'generate', args: [], options: {} }, { ...context, signal: controller.signal }, async () => ({ marker: 'unexpected' })), { code: 'CANCELLED' });
 });

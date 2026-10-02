@@ -30,11 +30,10 @@ export function renderCliResult(value: Result, machine: boolean, io: CliOutput =
     : { text: starter, diagnosticsShown: false };
   io.output.write(human.text);
   if (human.diagnosticsShown) return;
-  for (const diagnostic of value.diagnostics) {
-    if (diagnostic.severity && diagnostic.phase && diagnostic.help) {
-      io.error.write(formatDiagnostics([diagnostic as CompilerDiagnostic]));
-      continue;
-    }
-    io.error.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + runnable(diagnostic.next) : ''}\n`);
-  }
+  for (const diagnostic of value.diagnostics) io.error.write(diagnosticText(diagnostic));
+}
+/** Compiler diagnostics keep their rich format; operation diagnostics print code, message and a runnable next step. */
+function diagnosticText(diagnostic: Result['diagnostics'][number]): string {
+  if (diagnostic.severity && diagnostic.phase && diagnostic.help) return formatDiagnostics([diagnostic as CompilerDiagnostic]);
+  return `${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + runnable(diagnostic.next) : ''}\n`;
 }

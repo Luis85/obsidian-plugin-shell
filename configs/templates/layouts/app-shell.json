@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "template.app-shell",
+  "name": "App Shell",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "template",
+  "category": "Layout",
+  "description": "Primary sidebar, command bar and main content shell.",
+  "tags": [
+    "template",
+    "layout",
+    "shell"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "application-layout"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.sidebar"
+    },
+    {
+      "template": "organism.app-header"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "recipe",
+    "recipeId": "recipe-app-shell"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

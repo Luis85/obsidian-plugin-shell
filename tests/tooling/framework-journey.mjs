@@ -64,6 +64,13 @@ await mkdir(starterKit);
 await extractArchive(bytes, starterKit);
 assert.equal((await (await import('node:fs/promises')).readdir(starterKit)).includes('node_modules'), false, 'extracted kit starts without installed packages');
 const starterApp = join(starterKit, 'bin/app');
+// The shell kit ships no starter data; the separately packed starter ZIP enables discovery and generation.
+const empty = await run('blank-starter-empty', starterKit, starterApp, ['new', '--list', '--json', '--no-interaction']).persist();
+assert.deepEqual(empty.data.starters, [], 'the shell kit itself carries no starter definitions');
+const starterPack = join(evidence, 'starters.zip');
+await rm(starterPack, { force: true });
+await run('starters-pack', repository, join(repository, 'app.mjs'), ['starters', 'pack', '--out', starterPack, '--yes', '--json', '--no-interaction']).persist();
+await extractArchive(await readFile(starterPack), starterKit);
 await run('blank-starter-discovery', starterKit, starterApp, ['new', '--list', '--json', '--no-interaction']).persist();
 const starter = await run('blank-starter-new', starterKit, starterApp,
   ['new', starterConsumer, '--starter', 'blank', '--id', 'blank-consumer', '--name', 'Blank Consumer',

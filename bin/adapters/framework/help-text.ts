@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
 /**
  * Explanatory help metadata for the command catalog: groups, the golden path, examples and
@@ -27,6 +28,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node bin/app make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
+  { id: 'templates', title: 'Component template library', commands: ['templates list', 'templates search', 'templates show', 'templates tree', 'templates validate', 'templates schema', 'templates coverage', 'templates docs', 'templates instantiate'] },
   { id: 'prototypes', title: 'Prototype versions and variants', commands: prototypeCommands.map(command => command.id) },
   { id: 'starters', title: 'External project starters', commands: ['starters list', 'starters show', 'starters validate', 'starters schema', 'starters add', 'starters edit', 'starters run', 'starters pack', 'starters coverage'] },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
@@ -36,6 +38,7 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'obsidian-cli', title: 'Optional Obsidian CLI', commands: ['obsidian status', 'obsidian files', 'obsidian read', 'obsidian prepare'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
   { id: 'airship', title: 'Optional Airship', commands: ['airship status', 'airship enable', 'airship disable', 'airship install', 'airship start', 'airship doctor'] },
+  { id: 'agent-mcp', title: 'Optional local agent MCP', commands: ['mcp'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'support report', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
@@ -55,6 +58,11 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  type: { description: 'Component-template type filter.', values: ['component', 'component-with-children', 'page', 'page-with-bricks'] },
+  'atomic-level': { description: 'Atomic Design level filter.', values: ['atom', 'molecule', 'organism', 'template', 'page'] },
+  category: { description: 'Exact component-template category filter.' },
+  tag: { description: 'Exact component-template tag filter.' },
+  for: { description: 'Application archetype recommendation filter, for example editor or obsidian-plugin.' },
   'require-model-coverage': { description: 'Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model.' },
   resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
   'obsidian-vault': { description: 'Exact Obsidian vault name or ID. Required on every adapter call; the active vault is never used implicitly.' },
@@ -84,6 +92,8 @@ const specific: Record<string, OptionHelp> = {
   'storybook-stories': { description: 'Enable or disable CSF story emission. Independent of Storybook installation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
   airship: { description: 'Opt into Airship tooling in a generated project; no automatic installation or launch.' },
   'no-airship': { description: 'Explicitly disable Airship in an imported or new project.' },
+  mcp: { description: 'Enable the project-local Workbench MCP for Claude Code and Codex (setup-owned config; client trust and tool approval stay external).' },
+  'no-mcp': { description: 'Remove unchanged setup-owned MCP configuration; edited files are preserved and refused. Without either flag setup preserves the current state.' },
   agent: { description: 'Airship agent backend.', values: ['claude', 'codex', 'opencode'], default: 'claude' },
   'target-port': { description: 'Local source preview TCP port (1024..65535).', default: '5173' },
   port: { description: 'Distinct local Airship proxy TCP port (1024..65535).', default: '5174' },
@@ -103,7 +113,7 @@ const specific: Record<string, OptionHelp> = {
   source: { description: 'Source folder.', default: 'src' },
   tests: { description: 'Tests folder.', default: 'tests' },
   'test-vault': { description: 'Isolated test-vault folder.', default: '.test-vault' },
-  'config-dir': { description: 'Host configuration directory name inside the test vault.', default: '.obsidian' },
+  'config-dir': { description: 'Host configuration directory name inside the test vault.', default: defaultVaultConfigDirectory },
   resolve: { description: 'Which side wins a configured/imported identity conflict.', values: ['project', 'import'] },
   blank: { description: 'Create an inert minimal design instead of importing one.' },
   starter: { description: 'Starter ID (see new --list). A project starter (generator project) runs without <dir> via new --starter <id> or new guide --starter <id>.' },
@@ -111,7 +121,7 @@ const specific: Record<string, OptionHelp> = {
   install: { description: 'After writing, run npm ci and project verification in the new folder.' },
   recover: { description: 'After inspecting an interrupted attempt, explicitly acknowledge uncertain previous effects. No automatic retry.' },
   'resume-hash': { description: 'Exact current input/progress digest returned by setup status or setup resume preview.' },
-  'inside-vault': { description: 'Allow a target inside a folder that contains .obsidian/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder.' },
+  'inside-vault': { description: `Allow a target inside a folder that contains ${defaultVaultConfigDirectory}/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder.` },
   vault: { description: 'Existing folder that contains the generation target (compatibility mode).' },
   target: { description: 'Target folder relative to --vault (compatibility mode).' },
   extension: { description: 'Custom file suffix without a dot (lowercase, 1–16 letters/digits). Core Obsidian extensions are refused.' },
@@ -154,6 +164,15 @@ const usage: Record<string, string> = {
   make: 'node bin/app make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'templates list': ['node bin/app templates list --atomic-level organism --json', 'node bin/app templates list --for editor --json'],
+  'templates search': ['node bin/app templates search table --json'],
+  'templates show': ['node bin/app templates show organism.data-table --json'],
+  'templates tree': ['node bin/app templates tree page.dashboard --json'],
+  'templates validate': ['node bin/app templates validate --json'],
+  'templates schema': ['node bin/app templates schema --json'],
+  'templates coverage': ['node bin/app templates coverage --json'],
+  'templates docs': ['node bin/app templates docs --dry-run --json', 'node bin/app templates docs --yes'],
+  'templates instantiate': ['node bin/app templates instantiate organism.data-table --project design/project.json --dry-run'],
   'starters coverage': ['node bin/app starters coverage feature-showcase --json', 'node bin/app starters coverage feature-showcase --require-model-coverage --json'],
   'starters list': ['node bin/app starters list --json'],
   'starters show': ['node bin/app starters show webapp --json'],
@@ -238,6 +257,7 @@ const examples: Record<string, string[]> = {
   make: ['node bin/app make list', 'node bin/app make file-extension board --feature documents --extension board', 'node bin/app make context-menu inspect --feature documents --extensions md,board', 'node bin/app make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node bin/app plan inspect generation.plan.json'], 'plan apply': ['node bin/app plan apply generation.plan.json --yes'],
   install: ['node bin/app install --yes'], build: ['node bin/app build'],
+  mcp: ['node bin/app mcp'],
   'clickdummy build': ['node bin/app clickdummy build', 'node bin/app clickdummy build --replace'],
   test: ['node bin/app test', 'node bin/app test --profile obsidian', 'node bin/app test --profile browser'],
   check: ['node bin/app check', 'node bin/app check --fast --json'],
@@ -259,29 +279,50 @@ function commonFor(entry: Command): string[] {
   if (entry.effect === 'release' || entry.id === 'project measure') return ['dry-run', ...shared];
   return shared;
 }
+type OptionOverride = [(id: string, name: string) => boolean, (doc: OptionHelp, id: string) => void];
+const option = (id: string, option: string) => (entryId: string, name: string) => entryId === id && name === option;
+const prototypeOption = (option: string) => (entryId: string, name: string) => entryId.startsWith('prototypes ') && name === option;
+const describe = (description: string) => (doc: OptionHelp) => { doc.description = description; };
+/** Command-specific option documentation, applied in order over the shared descriptions. */
+const optionOverrides: OptionOverride[] = [
+  [(id, name) => name === 'profile' && Boolean(profiles[id]), (doc, id) => { doc.values = profiles[id]; doc.default = profileDefaults[id]; }],
+  [option('setup resume', 'stage'), doc => { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }],
+  [option('project schema', 'version'), doc => { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }],
+  [option('release prepare', 'version'), describe('Release version x.y.z.')],
+  [option('make', 'format'), doc => { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }],
+  [option('docs export', 'out'), doc => { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }],
+  [option('templates docs', 'out'), doc => { doc.description = 'Generated component-library Markdown root. JSON remains authoritative.'; doc.default = 'docs/generated/component-library'; }],
+  [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON to update through a reviewed plan.'; doc.default = 'design/project.json'; }],
+  [prototypeOption('version'), describe('Portable version slug, for example v1 or v2; distinct from the application release version.')],
+  [option('prototypes version', 'from'), describe('Source version slug to copy into the new version.')],
+  [prototypeOption('name'), describe('Prototype or variant display name; its folder slug stays unchanged.')],
+  [option('prototypes prototype-details', 'description'), describe('Prototype description; changing it does not change folder slugs or saved designs.')],
+  [option('new', 'from'), describe('Project JSON exported by the companion (instead of --starter).')],
+  [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown.'; doc.default = 'docs/generated/component-library'; }],
+  [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
+  [option('templates instantiate', 'name'), describe('Optional instance/component/page title override; the template name is the default.')],
+];
+function optionDoc(entry: Command, name: string): OptionHelp {
+  const doc = { ...(specific[name] ?? { description: '' }) };
+  for (const [applies, apply] of optionOverrides) if (applies(entry.id, name)) apply(doc, entry.id);
+  return { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
+}
+function timeoutDefault(entry: Command): Partial<OptionHelp> {
+  if (['dev', 'storybook dev'].includes(entry.id)) return { default: '3600000' };
+  return entry.id === 'check' ? { default: '600000 per step' } : {};
+}
 /** A fresh copy on every call: callers can never mutate shared help or execution policy. */
 export function commandHelp(entry: Command): CommandHelp {
   const group = groups.find(item => item.commands.includes(entry.id))?.id ?? 'other';
   const optionHelp: Record<string, OptionHelp> = {};
-  for (const name of Object.keys(entry.options)) {
-    const doc = { ...(specific[name] ?? { description: '' }) };
-    if (name === 'profile' && profiles[entry.id]) { doc.values = profiles[entry.id]; doc.default = profileDefaults[entry.id]; }
-    if (entry.id === 'setup resume' && name === 'stage') { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }
-    if (entry.id === 'project schema' && name === 'version') { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }
-    if (entry.id === 'release prepare' && name === 'version') doc.description = 'Release version x.y.z.';
-    if (entry.id === 'make' && name === 'format') { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }
-    if (entry.id === 'docs export' && name === 'out') { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }
-    if (entry.id.startsWith('prototypes ') && name === 'version') doc.description = 'Portable version slug, for example v1 or v2; distinct from the application release version.';
-    if (entry.id === 'prototypes version' && name === 'from') doc.description = 'Source version slug to copy into the new version.';
-    if (entry.id.startsWith('prototypes ') && name === 'name') doc.description = 'Prototype or variant display name; its folder slug stays unchanged.';
-    if (entry.id === 'prototypes prototype-details' && name === 'description') doc.description = 'Prototype description; changing it does not change folder slugs or saved designs.';
-    if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
-    optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
-  }
-  for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && ['dev', 'storybook dev'].includes(entry.id) ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
+  for (const name of Object.keys(entry.options)) optionHelp[name] = optionDoc(entry, name);
+  for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' ? timeoutDefault(entry) : {}) };
   if (entry.id === 'starters run') optionHelp.apply!.description = 'Plan hash from the reviewed preview. Without it, --yes --trust-processes plans and runs in one step and cannot detect changes made since an earlier review.';
+  return { group, usage: usageLine(entry), examples: [...(examples[entry.id] ?? [])], optionHelp };
+}
+function usageLine(entry: Command): string {
   const argument = entry.maxArgs ? ' [arguments]' : '';
-  return { group, usage: usage[entry.id] ?? `node bin/app ${entry.id}${argument}${Object.keys(entry.options).length ? ' [options]' : ''}`, examples: [...(examples[entry.id] ?? [])], optionHelp };
+  return usage[entry.id] ?? `node bin/app ${entry.id}${argument}${Object.keys(entry.options).length ? ' [options]' : ''}`;
 }
 export function helpIndex() {
   return { goldenPath: goldenPath.map(item => ({ ...item })), groups: groups.map(item => ({ ...item, commands: [...item.commands] })), commandCount: commands.length };

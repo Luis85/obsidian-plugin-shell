@@ -1,7 +1,8 @@
-import type { Context, Request, Result } from './contracts.ts';
+import type { Context, Request, Result } from '../../adapters/framework/contracts.ts';
+import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
 type Execute = (request: Request, context: Context) => Promise<Result>;
 type Prompt = (message: string) => Promise<string>;
-const yes = (answer: string) => /^y(?:es)?$/i.test(answer.trim());
+const yes = (answer: string) => parseConfirmation(answer) === true;
 
 /** The note paths of each proposed `docs import` batch, without the command words and flags. */
 function importBatches(report: Result): string[][] {

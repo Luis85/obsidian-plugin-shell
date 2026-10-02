@@ -17,7 +17,7 @@ export async function handoutPlan(request: Request, context: Context) {
 export async function handoutRead(request: Request, context: Context) {
   requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
   const report = await inspectHandout(context.root, { prds: stringOption(request.options, 'prds') });
-  const { answers, ...summary } = report;
-  const data = request.command === 'handout inspect' ? report : summary;
+  // `handout status` omits the answer bodies that `handout inspect` returns.
+  const data = request.command === 'handout inspect' ? report : Object.fromEntries(Object.entries(report).filter(([key]) => key !== 'answers'));
   return { ...result(request.command, data, report.ready ? 'ok' : 'blocked'), diagnostics: report.diagnostics.map(({ code, message, id }) => ({ code, message: id ? `[${id}] ${message}` : message })) };
 }

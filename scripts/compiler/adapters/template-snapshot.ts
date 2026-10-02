@@ -2,7 +2,8 @@ import { mapBounded } from '../../shared/bounded-map.mjs';
 import { lstat, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { readBounded, hash } from '../../framework/files.ts';
-import { maintainerOnly } from '../../companion/compiler/framework-docs.ts';
+import { maintainerOnly, relocatedPath } from '../../companion/compiler/framework-docs.ts';
+import { statIfPresent } from '../../shared/fs-presence.ts';
 import { prototypeSkillFiles } from '../../companion/prototype-skill.mjs';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
@@ -26,7 +27,10 @@ export async function loadTemplateSnapshot(root: string, signal?: AbortSignal): 
     if (paths.length >= 5000) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID','emit','Template inventory exceeds its supported bound.'));
     paths.push(path);
   }
-  for (const path of [...roots,...rootFiles]) await copy(path);
+  for (const path of roots) await copy(path);
+  // A generated project keeps the framework's root documents under docs/framework/, which the docs root
+  // above already copies at that relocated path; only the shell checkout itself carries them at the root.
+  for (const path of rootFiles) if (!(relocatedPath(path) !== path && !await statIfPresent(join(root, path)))) await copy(path);
   const files: Artifact[] = await mapBounded(paths, 8, async (path): Promise<Artifact> => {
     checkpoint();
     const bytes = await readBounded(join(root,path),8_000_000);

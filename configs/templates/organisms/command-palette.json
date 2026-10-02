@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.command-palette",
+  "name": "Command Palette",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "organism",
+  "category": "Navigation",
+  "description": "Keyboard-first command and action discovery.",
+  "tags": [
+    "organism",
+    "navigation",
+    "command",
+    "palette",
+    "keyboard"
+  ],
+  "recommendedFor": [
+    "editor",
+    "obsidian-plugin",
+    "knowledge-tool"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "command-discovery",
+    "keyboard-navigation"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-command-palette"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

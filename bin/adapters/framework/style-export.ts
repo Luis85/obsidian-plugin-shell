@@ -11,7 +11,7 @@ export function exportDesignSystem(system: unknown, pluginId: string, format: st
   const rows = groups.flatMap(group => ((model[group] ?? []) as Record<string, unknown>[])
     .map(token => ({ group, token })).sort((a, b) => String(a.token.id) < String(b.token.id) ? -1 : String(a.token.id) > String(b.token.id) ? 1 : 0));
   const escape = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
-  const markdown = (value: unknown) => escape(value).replace(/[\\`*_{}\[\]()#+.!|~-]/g, '\\$&').replace(/\r?\n/g, '<br>');
+  const markdown = (value: unknown) => escape(value).replace(/[\\`*_{}[\]()#+.!|~-]/g, '\\$&').replace(/\r?\n/g, '<br>');
   const tokenValue = (token: Record<string, unknown>) => JSON.stringify(Object.fromEntries(Object.entries(token).filter(([key]) => !['id', 'name', 'usage'].includes(key)).sort(([a], [b]) => a < b ? -1 : 1)));
   let content: string, extension: string, mediaType: string;
   if (format === 'css') { content = compiled.css; extension = 'css'; mediaType = 'text/css'; }

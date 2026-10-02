@@ -37,54 +37,76 @@ const fields = (text: string) => text.split('\0').filter(Boolean);
 /** Tracked changes against HEAD plus untracked files, relative to the project root. A deleted file, a
  * configuration change or a non-code file inside a code root (fixtures, snapshots, JSON) cannot be
  * mapped to related tests, so it selects the full suite instead of silently skipping tests. */
+/** Pairs NUL-separated `--name-status` output into [status, path] entries, then adds untracked files. */
+function changeEntries(tracked: string, untracked: string): Array<[string, string]> {
+  const parts = fields(tracked), entries: Array<[string, string]> = [];
+  for (let index = 0; index + 1 < parts.length; index += 2) entries.push([parts[index]!, parts[index + 1]!]);
+  for (const path of fields(untracked)) entries.push(['?', path]);
+  return entries;
+}
+/** A deleted code/root file, a configuration file or a non-code file inside a code root cannot be traced. */
+function untraceableChange(status: string, path: string, inRoot: boolean): boolean {
+  if (status.startsWith('D')) return code.test(path) || inRoot;
+  return configuration.test(path) || (inRoot && !code.test(path));
+}
+function untraceableReason(listed: string[]): string {
+  const sample = listed.slice(0, 5).join(', ') + (listed.length > 5 ? ', …' : '');
+  return `deleted, configuration or non-code files changed (${sample}); running the full suite`;
+}
 async function changedFiles(root: string, git: Git = runGit): Promise<Changes> {
   const tracked = await git(root, ['diff', '--name-status', '--no-renames', '-z', '--relative', 'HEAD']);
   const untracked = tracked === null ? null : await git(root, ['ls-files', '--others', '--exclude-standard', '-z']);
   if (tracked === null || untracked === null) return { source: 'unavailable', files: [], reason: 'git or a HEAD commit is unavailable; running the full suite' };
-  const parts = fields(tracked), entries: Array<[string, string]> = [];
-  for (let index = 0; index + 1 < parts.length; index += 2) entries.push([parts[index]!, parts[index + 1]!]);
-  for (const path of fields(untracked)) entries.push(['?', path]);
   const roots = [...codeRoots(root), 'bin'], files = new Set<string>(), untraceable = new Set<string>();
-  for (const [status, path] of entries) {
+  for (const [status, path] of changeEntries(tracked, untracked)) {
     if (path.split('/').includes('node_modules')) continue;
-    const inRoot = roots.some(base => isWithinRoot(path, base));
-    if (status.startsWith('D') ? code.test(path) || inRoot : configuration.test(path) || (inRoot && !code.test(path))) untraceable.add(path);
+    if (untraceableChange(status, path, roots.some(base => isWithinRoot(path, base)))) untraceable.add(path);
     else if (code.test(path) && await exists(join(root, path))) files.add(path);
   }
   const listed = [...untraceable].sort();
   if (!listed.length) return { source: 'git', files: [...files].sort() };
-  return { source: 'git', files: [...files].sort(), untraceable: listed,
-    reason: `deleted, configuration or non-code files changed (${listed.slice(0, 5).join(', ')}${listed.length > 5 ? ', …' : ''}); running the full suite` };
+  return { source: 'git', files: [...files].sort(), untraceable: listed, reason: untraceableReason(listed) };
 }
-async function makerSteps(root: string): Promise<CheckStep[]> {
+/** The shipped maker CLI is type-checked everywhere. Its qualification suite needs shell-only fixtures (the starter
+ * pack and the companion reference project) that generated projects deliberately omit, so it runs only in the shell. */
+async function makerSteps(root: string, project: boolean): Promise<CheckStep[]> {
   if (!await exists(join(root, 'bin/app.ts')) || !await exists(join(root, 'configs/types/tsconfig.maker.json'))) return [];
-  return [
-    { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] },
-    { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] },
-  ];
+  const types: CheckStep = { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] };
+  if (project) return [types];
+  return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] }];
+}
+function typecheckStep(root: string, project: boolean): CheckStep {
+  if (!project) return { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
+  const tsconfig = projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path;
+  return { id: 'typecheck', display: `vue-tsc --noEmit --project ${tsconfig}`, entry: vueTsc, args: ['--noEmit', '--project', tsconfig] };
+}
+function vitestConfig(root: string, project: boolean): string[] {
+  return ['--config', project ? projectConfigPath(root, 'vitest') ?? projectConfigs.vitest.path : 'configs/testing/vitest.config.mjs'];
+}
+function fullSteps(root: string, project: boolean, makers: CheckStep[], typecheck: CheckStep, fullTest: CheckStep): CheckStep[] {
+  const lint: CheckStep[] = project ? [] : [{ id: 'lint', display: 'node scripts/quality/lint-source.mjs', entry: 'scripts/quality/lint-source.mjs', args: [] }];
+  // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
+  const targets = [...(project ? lintRoots(root) : ['src']), ...(makers.length ? ['bin'] : [])];
+  const eslintStep: CheckStep = { id: 'eslint', display: `eslint -c ${eslintConfig} ${targets.join(' ')} --max-warnings 0`, entry: eslint, args: ['-c', eslintConfig, ...targets, '--max-warnings', '0'] };
+  return [typecheck, ...lint, eslintStep, fullTest, ...makers];
+}
+/** Fast mode narrows the test step to `vitest related` only when every change is traceable and bounded. */
+function fastTestStep(changes: Changes, fullTest: CheckStep, config: string[]): CheckStep {
+  if (changes.untraceable || changes.source !== 'git') return fullTest;
+  const count = changes.files.length;
+  if (count > maxRelated) { changes.reason = `more than ${maxRelated} changed files; running the full suite`; return fullTest; }
+  if (!count) return { ...fullTest, display: 'vitest related (no changed source files)', skip: 'No changed source files since HEAD.' };
+  return { id: 'test', display: `vitest related --run (${count} changed file${count === 1 ? '' : 's'})`, entry: vitest, args: ['related', '--run', '--passWithNoTests', ...config, ...changes.files] };
 }
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit): Promise<{ scope: string; steps: CheckStep[]; changes?: Changes }> {
   const scope = await checkScope(root), project = scope === 'generated-project';
-  const makers = await makerSteps(root);
-  const config = ['--config', project ? projectConfigPath(root, 'vitest') ?? projectConfigs.vitest.path : 'configs/testing/vitest.config.mjs'];
-  const tsconfig = projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path;
-  const typecheck: CheckStep = project
-    ? { id: 'typecheck', display: `vue-tsc --noEmit --project ${tsconfig}`, entry: vueTsc, args: ['--noEmit', '--project', tsconfig] }
-    : { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
+  const makers = await makerSteps(root, project);
+  const config = vitestConfig(root, project);
+  const typecheck = typecheckStep(root, project);
   const fullTest: CheckStep = { id: 'test', display: `vitest run ${config.join(' ')}`, entry: vitest, args: ['run', ...config] };
-  if (!fast) {
-    const lint: CheckStep[] = project ? [] : [{ id: 'lint', display: 'node scripts/quality/lint-source.mjs', entry: 'scripts/quality/lint-source.mjs', args: [] }];
-    // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
-    const targets = [...(project ? lintRoots(root) : ['src']), ...(makers.length ? ['bin'] : [])];
-    return { scope, steps: [typecheck, ...lint, { id: 'eslint', display: `eslint -c ${eslintConfig} ${targets.join(' ')} --max-warnings 0`, entry: eslint, args: ['-c', eslintConfig, ...targets, '--max-warnings', '0'] }, fullTest, ...makers] };
-  }
+  if (!fast) return { scope, steps: fullSteps(root, project, makers, typecheck, fullTest) };
   const changes = await changedFiles(root, git);
-  let test = fullTest;
-  if (changes.untraceable) test = fullTest;
-  else if (changes.source === 'git' && changes.files.length > maxRelated) changes.reason = `more than ${maxRelated} changed files; running the full suite`;
-  else if (changes.source === 'git' && !changes.files.length) test = { ...fullTest, display: 'vitest related (no changed source files)', skip: 'No changed source files since HEAD.' };
-  else if (changes.source === 'git') test = { id: 'test', display: `vitest related --run (${changes.files.length} changed file${changes.files.length === 1 ? '' : 's'})`, entry: vitest, args: ['related', '--run', '--passWithNoTests', ...config, ...changes.files] };
-  return { scope, steps: [typecheck, test, ...makers], changes };
+  return { scope, steps: [typecheck, fastTestStep(changes, fullTest, config), ...makers], changes };
 }
 /** ANSI escape sequences are removed from captured output. */
 const ansi = new RegExp(String.fromCharCode(27) + '\\[[0-9;?]*[ -/]*[@-~]', 'g');
@@ -92,48 +114,63 @@ export function outputTail(text: string, lines = 60, chars = 6000): string {
   const tail = text.replace(ansi, '').replace(/\r\n?/g, '\n').trimEnd().split('\n').slice(-lines).join('\n');
   return tail.length > chars ? tail.slice(-chars) : tail;
 }
+function skippedReason(step: CheckStep, context: Context): string | undefined {
+  return context.signal?.aborted ? 'cancelled' : step.skip;
+}
+function failedOutcome(base: { id: string; command: string }, error: unknown, captured: string, durationMs: number): StepOutcome {
+  const failure = error instanceof OperationError ? error : new OperationError('PROCESS_FAILED', error instanceof Error ? error.message : 'Step failed.');
+  const exitCode = (failure.details as { execution?: { exitCode?: number | null } } | undefined)?.execution?.exitCode ?? null;
+  return { ...base, status: 'failed', durationMs, exitCode, code: failure.code, outputTail: outputTail(captured || failure.message) };
+}
+async function runCheckStep(step: CheckStep, context: Context, timeout: number, run: Runner): Promise<StepOutcome> {
+  const base = { id: step.id, command: step.display };
+  const reason = skippedReason(step, context);
+  if (reason) return { ...base, status: 'skipped', durationMs: 0, exitCode: null, reason };
+  context.progress?.(`check: ${step.id} (${step.display})\n`);
+  let captured = '';
+  const capture = (text: string) => { captured = (captured + text).slice(-65_536); };
+  const started = performance.now();
+  try {
+    const exit = await run({ ...context, progress: capture }, step.entry, step.args, timeout);
+    return { ...base, status: 'passed', durationMs: Math.round(performance.now() - started), exitCode: exit.exitCode };
+  } catch (error) {
+    return failedOutcome(base, error, captured, Math.round(performance.now() - started));
+  }
+}
 /** Runs every step (no fail-fast) unless cancelled; child output is captured, not streamed. */
 export async function runCheckSteps(steps: readonly CheckStep[], context: Context, timeout = 600_000, run: Runner = runNode): Promise<StepOutcome[]> {
   const outcomes: StepOutcome[] = [];
-  for (const step of steps) {
-    const base = { id: step.id, command: step.display };
-    if (context.signal?.aborted) { outcomes.push({ ...base, status: 'skipped', durationMs: 0, exitCode: null, reason: 'cancelled' }); continue; }
-    if (step.skip) { outcomes.push({ ...base, status: 'skipped', durationMs: 0, exitCode: null, reason: step.skip }); continue; }
-    context.progress?.(`check: ${step.id} (${step.display})\n`);
-    let captured = '';
-    const capture = (text: string) => { captured = (captured + text).slice(-65_536); };
-    const started = performance.now();
-    try {
-      const exit = await run({ ...context, progress: capture }, step.entry, step.args, timeout);
-      outcomes.push({ ...base, status: 'passed', durationMs: Math.round(performance.now() - started), exitCode: exit.exitCode });
-    } catch (error) {
-      const failure = error instanceof OperationError ? error : new OperationError('PROCESS_FAILED', error instanceof Error ? error.message : 'Step failed.');
-      const exitCode = (failure.details as { execution?: { exitCode?: number | null } } | undefined)?.execution?.exitCode ?? null;
-      outcomes.push({ ...base, status: 'failed', durationMs: Math.round(performance.now() - started), exitCode, code: failure.code, outputTail: outputTail(captured || failure.message) });
-    }
-  }
+  for (const step of steps) outcomes.push(await runCheckStep(step, context, timeout, run));
   return outcomes;
 }
 function nextStep(failed: StepOutcome[], fast: boolean): string {
   if (failed.length && failed.every(step => step.code === 'TOOL_MISSING')) return 'node bin/app install --yes';
   return `Fix the failures above, then rerun: node bin/app check${fast ? ' --fast' : ''}`;
 }
+function changeSummary(changes: Changes | undefined) {
+  if (!changes) return {};
+  return { changes: { source: changes.source, files: changes.files.length, sample: changes.files.slice(0, 20), ...(changes.reason ? { reason: changes.reason } : {}) } };
+}
+function plannedSteps(steps: readonly CheckStep[]) {
+  return steps.map(step => ({ id: step.id, command: step.display, status: step.skip ? 'skipped' : 'not-run', ...(step.skip ? { reason: step.skip } : {}) }));
+}
+function addOutcomeDiagnostic(outcome: Result, failed: StepOutcome[], total: number, cancelled: boolean, fast: boolean): void {
+  if (cancelled) outcome.diagnostics.push({ code: 'CANCELLED', message: 'Check cancelled; remaining steps were not run and completed steps are not a verdict.' });
+  else if (failed.length) outcome.diagnostics.push({ code: 'CHECK_FAILED', message: `${failed.length} of ${total} check steps failed: ${failed.map(step => step.id).join(', ')}.`, next: nextStep(failed, fast) });
+}
 export async function checkOperation(request: Request, context: Context, run: Runner = runNode, git: Git = runGit): Promise<Result> {
   const fast = request.options.fast === true;
   const timeout = Number(stringOption(request.options, 'timeout') ?? '600000');
   const { scope, steps, changes } = await checkSteps(context.root, fast, git);
-  const base = { gate: 'check', scope, mode: fast ? 'fast' : 'full', verify: 'not-run', ...(changes ? { changes: { source: changes.source, files: changes.files.length, sample: changes.files.slice(0, 20), ...(changes.reason ? { reason: changes.reason } : {}) } } : {}) };
-  if (request.options['dry-run']) {
-    return result(request.command, { ...base, execution: 'not-run', steps: steps.map(step => ({ id: step.id, command: step.display, status: step.skip ? 'skipped' : 'not-run', ...(step.skip ? { reason: step.skip } : {}) })) }, 'planned');
-  }
+  const base = { gate: 'check', scope, mode: fast ? 'fast' : 'full', verify: 'not-run', ...changeSummary(changes) };
+  if (request.options['dry-run']) return result(request.command, { ...base, execution: 'not-run', steps: plannedSteps(steps) }, 'planned');
   const started = performance.now();
   const outcomes = await runCheckSteps(steps, context, timeout, run);
   const failed = outcomes.filter(step => step.status === 'failed');
-  const summary = { passed: outcomes.filter(step => step.status === 'passed').length, failed: failed.length, skipped: outcomes.filter(step => step.status === 'skipped').length, durationMs: Math.round(performance.now() - started) };
+  const count = (status: StepOutcome['status']) => outcomes.filter(step => step.status === status).length;
+  const summary = { passed: count('passed'), failed: failed.length, skipped: count('skipped'), durationMs: Math.round(performance.now() - started) };
   const cancelled = Boolean(context.signal?.aborted) || failed.some(step => step.code === 'CANCELLED');
-  const status = cancelled ? 'cancelled' : failed.length ? 'failed' : 'ok';
-  const outcome = result(request.command, { ...base, steps: outcomes, summary }, status);
-  if (cancelled) outcome.diagnostics.push({ code: 'CANCELLED', message: 'Check cancelled; remaining steps were not run and completed steps are not a verdict.' });
-  else if (failed.length) outcome.diagnostics.push({ code: 'CHECK_FAILED', message: `${failed.length} of ${outcomes.length} check steps failed: ${failed.map(step => step.id).join(', ')}.`, next: nextStep(failed, fast) });
+  const outcome = result(request.command, { ...base, steps: outcomes, summary }, cancelled ? 'cancelled' : failed.length ? 'failed' : 'ok');
+  addOutcomeDiagnostic(outcome, failed, outcomes.length, cancelled, fast);
   return outcome;
 }
