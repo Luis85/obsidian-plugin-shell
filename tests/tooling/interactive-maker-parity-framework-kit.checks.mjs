@@ -88,32 +88,26 @@ test('relocated setup-progress preserves status, approval and persisted attempt 
 test('relocated kit integrity preserves manifest, inventory and tamper checks', async () => {
   assert.equal(legacyKitIntegrity.kitManifest, relocatedKitManifest);
   assert.equal(legacyKitIntegrity.verifyKit, relocatedVerifyKit);
-  assert.deepEqual(relocatedBootstrapFiles, ['app.mjs', 'bin/app', 'shell.mjs', 'package.json', 'README.md', 'LICENSE']);
+  assert.deepEqual(relocatedBootstrapFiles, ['bin/app', 'package.json', 'README.md', 'LICENSE']);
 
   const digest = value => relocatedHash(typeof value === 'string' ? value : Buffer.from(value));
   const modern = {
-    schemaVersion: 1, version: '1.0.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64),
-    files: [{ path: '.framework/template/a.txt', hash: 'b'.repeat(64), bytes: 1 }],
+    schemaVersion: 2, version: '1.0.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64),
+    files: [{ path: 'bin/template/a.txt', hash: 'b'.repeat(64), bytes: 1 }],
     bootstrap: relocatedBootstrapFiles.map(path => ({ path, hash: 'c'.repeat(64) })),
   };
   assert.equal(relocatedKitManifest(modern).version, '1.0.0');
-  assert.equal(relocatedKitManifest({
-    ...modern,
-    bootstrap: ['shell.mjs', 'package.json', 'README.md', 'LICENSE'].map(path => ({ path, hash: 'c'.repeat(64) })),
-  }).bootstrap.length, 4);
+  assert.throws(() => relocatedKitManifest({ ...modern, schemaVersion: 1 }), error => error.code === 'KIT_VERSION');
   assert.throws(() => relocatedKitManifest({ ...modern, sourceHash: 'bad' }), error => error.code === 'KIT_HASH');
+  assert.throws(() => relocatedKitManifest({ ...modern, files: [{ ...modern.files[0], path: '.framework/template/a.txt' }] }), error => error.code === 'KIT_PATH');
 
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-kit-integrity-relocated-')));
   try {
-    await mkdir(join(root, '.framework/template'), { recursive: true });
-    await mkdir(join(root, '.framework/compiled'), { recursive: true });
-    await mkdir(join(root, 'bin'), { recursive: true });
+    await mkdir(join(root, 'bin/template'), { recursive: true });
     const contents = {
-      '.framework/template/a.txt': 'template',
-      '.framework/compiled/b.js': 'compiled',
-      'app.mjs': 'app',
-      'bin/app': 'bin',
-      'shell.mjs': 'shell',
+      'bin/template/a.txt': 'template',
+      'bin/app.js': 'compiled',
+      'bin/app': 'launcher',
       'package.json': '{}',
       'README.md': 'readme',
       'LICENSE': 'license',
@@ -122,26 +116,25 @@ test('relocated kit integrity preserves manifest, inventory and tamper checks', 
       await mkdir(join(root, path.slice(0, Math.max(0, path.lastIndexOf('/')))), { recursive: true }).catch(() => {});
       await writeFile(join(root, path), content);
     }
-    assert.deepEqual(await relocatedListKitFiles(root, '.framework/template'), ['.framework/template/a.txt']);
+    assert.deepEqual(await relocatedListKitFiles(root, 'bin/template'), ['bin/template/a.txt']);
 
-    const files = ['.framework/template/a.txt', '.framework/compiled/b.js'].map(path => ({
+    const files = ['bin/template/a.txt', 'bin/app.js'].map(path => ({
       path, hash: digest(contents[path]), bytes: Buffer.byteLength(contents[path]),
     }));
     const bootstrap = relocatedBootstrapFiles.map(path => ({ path, hash: digest(contents[path]) }));
-    await writeFile(join(root, '.framework/kit.json'), JSON.stringify({
-      schemaVersion: 1, version: '1.0.0', compilerVersion: '6.0.3',
+    await writeFile(join(root, 'bin/kit.json'), JSON.stringify({
+      schemaVersion: 2, version: '1.0.0', compilerVersion: '6.0.3',
       sourceHash: 'd'.repeat(64), files, bootstrap,
     }));
     const verified = await relocatedVerifyKit(root);
     assert.equal(verified.files.length, 2);
 
-    await writeFile(join(root, '.framework/template/a.txt'), 'tampered');
+    await writeFile(join(root, 'bin/template/a.txt'), 'tampered');
     await assert.rejects(relocatedVerifyKit(root), error => error.code === 'KIT_MODIFIED');
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
-
 
 test('relocated distribution policy preserves filtering, adaptation and ownership refresh', () => {
   assert.equal(legacyDistribution.included, relocatedDistributedIncluded);
