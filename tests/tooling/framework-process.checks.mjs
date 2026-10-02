@@ -48,15 +48,15 @@ test('file-plan failures expose bounded recovery metadata without reading arbitr
   assert.equal(response.diagnostics[0].code, 'PLAN_STALE'); assert.deepEqual(response.data.recovery.preserved, ['two']); assert.equal(calls, 0); assert.equal(response.data.automaticRetry, false);
 });
 test('npm silent and direct CLI discovery return the same contract', async () => {
-  const direct = spawnSync(process.execPath, [join(root, 'app.mjs'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
+  const direct = spawnSync(process.execPath, [join(root, 'bin/app'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
   const indirect = spawnSync(process.execPath, [await npmEntry(), 'run', '--silent', 'shell', '--', 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
   assert.equal(direct.status, 0, direct.stderr); assert.equal(indirect.status, 0, indirect.stderr);
   assert.deepEqual(JSON.parse(indirect.stdout), JSON.parse(direct.stdout));
 });
-test('extensionless bin/app, npm app/exec and the legacy shell.mjs shim reach the same CLI', async () => {
-  const expected = JSON.parse(spawnSync(process.execPath, [join(root, 'app.mjs'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000}).stdout);
+test('extensionless bin/app and npm app/exec reach the same CLI', async () => {
+  const expected = JSON.parse(spawnSync(process.execPath, [join(root, 'bin/app'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000}).stdout);
   const npm = await npmEntry();
-  for (const argv of [[join(root, 'bin/app')], [join(root, 'shell.mjs')], [npm, 'run', '--silent', 'app', '--'], [npm, 'exec', '--no', '--', 'obs-shell']]) {
+  for (const argv of [[join(root, 'bin/app')], [npm, 'run', '--silent', 'app', '--'], [npm, 'exec', '--no', '--', 'obs-shell']]) {
     const output = spawnSync(process.execPath, [...argv, 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
     assert.equal(output.status, 0, argv.join(' ') + output.stderr);
     assert.deepEqual(JSON.parse(output.stdout), expected, argv.join(' '));

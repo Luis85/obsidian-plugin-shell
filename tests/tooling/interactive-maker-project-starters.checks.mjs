@@ -214,7 +214,7 @@ test('machine stdout stays one JSON response; directory creation refuses project
   io.input.isTTY = true; io.error.isTTY = true;
   assert.equal(await main(['new', '--input', '-', '--json', '--ui', 'tui', '--root', root, '--out', 'machine'], frameworkRoot, io), 0);
   assert.equal(output.length, 1); assert.equal(JSON.parse(output[0]).status, 'planned'); assert.equal(errors.length, 0);
-  const shell = args => spawnSync(process.execPath, ['--experimental-strip-types', 'shell.mjs', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
+  const shell = args => spawnSync(process.execPath, ['bin/app', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
   const child = shell(['new', '--list']);
   assert.equal(child.status, 0, child.stderr + child.stdout);
   const listed = JSON.parse(child.stdout).data.starters.find(item => item.id === 'cli');

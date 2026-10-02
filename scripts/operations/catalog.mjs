@@ -48,7 +48,7 @@ function operation(item) {
   if (item.cli) {
     requireThat(typeof item.cli.script === 'string' && typeof item.cli.command === 'string', 'CATALOG_CLI');
     requireThat(strings(item.cli.sourceFiles) && item.cli.sourceFiles.length > 0, 'CATALOG_CLI');
-    requireThat(item.cli.sourceFiles.every(path => path === 'app.mjs' || /^scripts\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.(?:mjs|ts)$/.test(path)), 'CATALOG_CLI');
+    requireThat(item.cli.sourceFiles.every(path => path === 'bin/app' || /^scripts\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.(?:mjs|ts)$/.test(path)), 'CATALOG_CLI');
   }
 }
 export function validateCatalog(catalog) {

@@ -166,7 +166,7 @@ test('an interaction can move to another existing source while retaining its sta
   assert.equal((await run(ctx,['docs','import',entry.path,'--yes'])).status,'applied');const project=await readJson(join(ctx.root,'design/project.json')), events=projectEntities(project).filter(e=>e.type==='interaction');assert.equal(events.length,1);assert.equal(events[0].id,fixtureData.interaction);assert.equal(events[0].fields.source_node_id,destination);
 });
 test('machine schema discovery succeeds outside a configured project without prompting', async t=>{
-  const root=await directory(t);await write(join(root,'shell.config.json'),'broken');const response=spawnSync(process.execPath,[join(frameworkRoot,'app.mjs'),'docs','schema','--json','--no-interaction'],{cwd:root,encoding:'utf8',timeout:30000});
+  const root=await directory(t);await write(join(root,'shell.config.json'),'broken');const response=spawnSync(process.execPath,[join(frameworkRoot,'bin/app'),'docs','schema','--json','--no-interaction'],{cwd:root,encoding:'utf8',timeout:30000});
   assert.equal(response.status,0,response.stderr);const result=JSON.parse(response.stdout);assert.equal(result.command,'docs schema');assert.ok(result.data.types.includes('journey'));assert.equal(response.stdout.trim().split('\n').length,1);
 });
 

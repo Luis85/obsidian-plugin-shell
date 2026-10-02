@@ -44,7 +44,7 @@ async function configured(t) {
   return ctx;
 }
 function cli(args, cwd = root) {
-  return spawnSync(process.execPath, [join(root, 'app.mjs'), ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 5_000_000 });
+  return spawnSync(process.execPath, [join(root, 'bin/app'), ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 5_000_000 });
 }
 test('command parser rejects unknown, duplicated and mismatched options', () => {
   for (const args of [['unknown'], ['status', '--input', 'x'], ['status', '--json', '--json'], ['setup', '--id'], ['status', 'extra']]) assert.throws(() => parseCliArguments(args));
