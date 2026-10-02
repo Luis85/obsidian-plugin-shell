@@ -55,8 +55,8 @@ function applyCatalogStructure(
     { name: template.name, a11y: template.accessibility.notes });
   bindCatalogProps(node, template, template.design.entryId);
   const entry = visualCatalogEntry(template.design.entryId)!;
-  const childSlot = entry.slots.includes('default') ? 'default' : entry.slots[0];
-  if (childSlot) node.slots[childSlot] = template.children.map(child => {
+  const childSlot = entry.slots.find((candidate: { name: string }) => candidate.name === 'default') ?? entry.slots[0];
+  if (childSlot) node.slots[childSlot.name] = template.children.map(child => {
     const target = catalog.get(child.template)!;
     return visualProject(visualAllocate(store, 'vn'), componentFromTemplate(document, target, catalog, created), { name: target.name });
   });

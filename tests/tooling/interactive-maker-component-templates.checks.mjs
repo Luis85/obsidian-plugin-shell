@@ -243,6 +243,10 @@ test('instantiation covers catalog, recipe, composition and both page shapes on 
   assert.equal(document.design.library.length, beforeButtonReuse);
   const catalogComposite = instantiateComponentTemplate(document, templates, 'molecule.form-field');
   assert.equal(catalogComposite.kind, 'component');
+  const catalogDefinition = document.design.visualDesigns.components.find(item => item.id === catalogComposite.id);
+  assert.ok(catalogDefinition?.template[0]?.kind === 'component');
+  assert.ok(Object.hasOwn(catalogDefinition.template[0].slots, 'default'));
+  assert.ok(!Object.hasOwn(catalogDefinition.template[0].slots, '[object Object]'));
   const composition = instantiateComponentTemplate(document, templates, 'organism.website-header');
   assert.equal(composition.kind, 'component');
   const recipe = instantiateComponentTemplate(document, templates, 'molecule.empty-state');
@@ -266,6 +270,7 @@ test('instantiation covers catalog, recipe, composition and both page shapes on 
   const dashboardSurface = document.design.nodes.find(item => item.id === pageWithSlots.id);
   assert.ok(Array.isArray(dashboardSurface?.components) && dashboardSurface.components.length === 4);
   assert.ok(dashboardSurface.components.every(reference => document.design.library.some(item => item.id === reference.id)));
+  assert.doesNotThrow(() => documentText(document));
   assert.throws(() => instantiateComponentTemplate(document, templates, 'page.unknown'), /not found/);
 });
 
