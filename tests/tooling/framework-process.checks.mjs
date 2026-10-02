@@ -49,7 +49,7 @@ test('file-plan failures expose bounded recovery metadata without reading arbitr
 });
 test('npm silent and direct CLI discovery return the same contract', async () => {
   const direct = spawnSync(process.execPath, [join(root, 'bin/app'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
-  const indirect = spawnSync(process.execPath, [await npmEntry(), 'run', '--silent', 'shell', '--', 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
+  const indirect = spawnSync(process.execPath, [await npmEntry(), 'run', '--silent', 'app', '--', 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
   assert.equal(direct.status, 0, direct.stderr); assert.equal(indirect.status, 0, indirect.stderr);
   assert.deepEqual(JSON.parse(indirect.stdout), JSON.parse(direct.stdout));
 });

@@ -70,7 +70,7 @@ test('check submission is read-only and reports per-rule outcomes with remediati
   await writeFile(join(dir, 'LICENSE'), 'MIT'); await writeFile(join(dir, 'README.md'), '# Quick Capture');
   await mkdir(join(dir, 'dist')); await writeFile(join(dir, 'dist/main.js'), 'module.exports = {};'); await writeFile(join(dir, 'dist/manifest.json'), JSON.stringify(valid));
   const before = (await readdir(dir, { recursive: true })).sort();
-  const output = spawnSync(process.execPath, [join(root, 'app.mjs'), 'check', 'submission', '--root', dir, '--json'], { encoding: 'utf8', timeout: 60000 });
+  const output = spawnSync(process.execPath, [join(root, 'bin/app'), 'check', 'submission', '--root', dir, '--json'], { encoding: 'utf8', timeout: 60000 });
   assert.equal(output.status, 1, output.stderr);
   const result = JSON.parse(output.stdout);
   assert.equal(result.status, 'blocked'); assert.equal(result.data.readOnly, true);
@@ -79,7 +79,7 @@ test('check submission is read-only and reports per-rule outcomes with remediati
   assert.equal(result.diagnostics[0].code, 'SUBMISSION_RULES_FAILED'); assert.equal(result.diagnostics[0].next, 'Install dependencies: node bin/app install --yes');
   assert.deepEqual((await readdir(dir, { recursive: true })).sort(), before, 'nothing was written');
   await writeFile(join(dir, 'dist/manifest.json'), JSON.stringify({ ...valid, version: '0.9.0' }));
-  const human = spawnSync(process.execPath, [join(root, 'app.mjs'), 'check', 'submission', '--root', dir], { encoding: 'utf8', timeout: 60000 });
+  const human = spawnSync(process.execPath, [join(root, 'bin/app'), 'check', 'submission', '--root', dir], { encoding: 'utf8', timeout: 60000 });
   assert.equal(human.status, 1);
   assert.match(human.stdout, /^ {2}\[FAIL\] build-artifacts +dist\/manifest\.json id\/version differ from manifest\.json\.$/m);
   assert.match(human.stdout, /^ +fix: Build the release assets: node bin\/app build$/m);
@@ -87,7 +87,7 @@ test('check submission is read-only and reports per-rule outcomes with remediati
   assert.match(human.stdout, /Local mirror only/);
 });
 test('check submission declares that it runs trusted project code (the ESLint configuration) and honours --dry-run', async t => {
-  const help = JSON.parse(spawnSync(process.execPath, [join(root, 'app.mjs'), 'help', 'check', 'submission', '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
+  const help = JSON.parse(spawnSync(process.execPath, [join(root, 'bin/app'), 'help', 'check', 'submission', '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
   const [entry] = help.data.commands;
   assert.equal(entry.id, 'check submission'); assert.equal(entry.effect, 'process'); assert.equal(entry.execution, 'trusted-project-code');
   assert.match(entry.summary, /runs the project ESLint configuration \(trusted project code\) and writes nothing/);
@@ -96,10 +96,10 @@ test('check submission declares that it runs trusted project code (the ESLint co
   // An ESLint entry that would leave a trace if it ran: a dry run must not load it.
   await mkdir(join(dir, 'node_modules/eslint/bin'), { recursive: true });
   await writeFile(join(dir, 'node_modules/eslint/bin/eslint.js'), `require('node:fs').writeFileSync(require('node:path').join(${JSON.stringify(dir)}, 'eslint-ran'), 'yes'); console.log('[]');`);
-  const planned = JSON.parse(spawnSync(process.execPath, [join(root, 'app.mjs'), 'check', 'submission', '--root', dir, '--dry-run', '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
+  const planned = JSON.parse(spawnSync(process.execPath, [join(root, 'bin/app'), 'check', 'submission', '--root', dir, '--dry-run', '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
   assert.equal(planned.status, 'planned'); assert.equal(planned.data.execution, 'not-run');
   assert.deepEqual(await readdir(dir), ['node_modules']);
-  const ran = JSON.parse(spawnSync(process.execPath, [join(root, 'app.mjs'), 'check', 'submission', '--root', dir, '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
+  const ran = JSON.parse(spawnSync(process.execPath, [join(root, 'bin/app'), 'check', 'submission', '--root', dir, '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
   assert.equal(ran.data.execution, 'trusted-project-code'); assert.equal(status(ran.data.rules, 'eslint-obsidianmd'), 'pass');
   assert.ok((await readdir(dir)).includes('eslint-ran'), 'the real run executes the project ESLint entry');
 });
