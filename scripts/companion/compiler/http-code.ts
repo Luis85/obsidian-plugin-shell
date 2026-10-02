@@ -1,4 +1,4 @@
-import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
+import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
 import { validateHttpSource, type JsonHttpSource } from '../runtime/json-http.ts';
 import { literal, text, symbol, type Model, type Source } from './model.ts';
 import { sampleCode } from './schema-code.ts';

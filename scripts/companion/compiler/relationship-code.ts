@@ -1,4 +1,4 @@
-import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
+import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
 import { literal, json, symbol, type Model } from './model.ts';
 import { relationshipDefinitions, relationshipScope } from './relationship-model.ts';
 import { sample } from './schema-code.ts';

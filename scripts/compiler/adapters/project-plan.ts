@@ -3,12 +3,12 @@ import { fileURLToPath } from 'node:url';
 import { resolve, basename } from 'node:path';
 import { readCompanionInput } from '../../companion/read-project.mjs';
 import { compileProject, loadTemplateSnapshot } from '../index.ts';
-import { CompilationFailure } from '../domain/diagnostics.ts';
+import { CompilationFailure } from '../../../bin/compiler/domain/diagnostics.ts';
 import { generationSelection } from './selection.ts';
-import { parseSelection } from '../domain/selection.ts';
+import { parseSelection } from '../../../bin/compiler/domain/selection.ts';
 import { planArtifacts } from './workspace-plan.ts';
 import type { Entry } from '../../companion/compiler/file-code.ts';
-import type { OutputKind, StorybookOptions } from '../domain/contracts.ts';
+import type { OutputKind, StorybookOptions } from '../../../bin/compiler/domain/contracts.ts';
 export { applyProject, reviewProject } from './workspace-plan.ts';
 export interface GenerateOptions {
   input:string;target:string;vault?:string;templateRoot?:string;

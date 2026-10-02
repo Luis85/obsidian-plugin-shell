@@ -1,4 +1,4 @@
-import type { GenerationSelection } from '../domain/selection.ts';
+import type { GenerationSelection } from '../../../bin/compiler/domain/selection.ts';
 import type { Model } from '../../companion/compiler/model.ts';
 import type { Entry } from '../../companion/compiler/file-code.ts';
 import { readFile } from 'node:fs/promises';

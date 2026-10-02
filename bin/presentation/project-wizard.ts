@@ -1,4 +1,4 @@
-import { frameworkLabels, type ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
+import { frameworkLabels, type ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { projectGuide, projectPlan, projectStarters } from '../adapters/projects.ts';
 import { guideInput } from '../adapters/prototype.ts';
 import { requireSketch } from '../domain/errors.ts';

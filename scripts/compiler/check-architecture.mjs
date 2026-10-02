@@ -17,6 +17,8 @@ function deferredTimer(path, node) {
   for (let parent = node.parent; parent; parent = parent.parent) if (ts.isFunctionLike(parent)) return true;
   return false;
 }
+// The inward-only compiler core lives in bin/compiler; adapters and emitters stay in scripts/compiler until they move.
+const compilerDomain = 'bin/compiler/domain/', compilerApplication = 'bin/compiler/application/';
 const safePureImports = new Set(['node:crypto', 'node:path']);
 /** Uses a syntax tree: imports inside generated source string literals are not compiler dependencies. */
 export function inspectModule(path, text) {
@@ -52,11 +54,11 @@ export function checkCompilerBoundaries(sources) {
     return modules.has(path) ? path : null;
   }
   for (const [path, module] of modules) {
-    const domain = path.startsWith('scripts/compiler/domain/'), application = path.startsWith('scripts/compiler/application/');
+    const domain = path.startsWith(compilerDomain), application = path.startsWith(compilerApplication);
     if (!domain && !application) continue;
     for (const dependency of module.dependencies) {
       const target = resolveImport(path, dependency.specifier);
-      const allowed = target && (target.startsWith('scripts/compiler/domain/') || (application && target.startsWith('scripts/compiler/application/')));
+      const allowed = target && (target.startsWith(compilerDomain) || (application && target.startsWith(compilerApplication)));
       if (!allowed) failures.push(`${path}: inward-only compiler layer cannot import ${dependency.specifier}`);
     }
     for (const name of module.globals) failures.push(`${path}: compiler core cannot use ${name}`);
@@ -87,11 +89,15 @@ export async function compilerSourceInventory(root) {
       else if (entry.isFile() && /\.(?:ts|mjs)$/.test(path)) sources.set(path, await readFile(resolve(root,path),'utf8'));
     }
   }
-  for (const folder of ['scripts/compiler','scripts/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
+  for (const folder of ['bin/compiler','scripts/compiler','scripts/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
   return sources;
 }
+/** A listed pure entrypoint outside the inventory would otherwise be skipped silently. */
+export function missingPureEntrypoints(sources) {
+  return pureEntrypoints.filter(entry => !sources.has(entry)).map(entry => `${entry}: pure entrypoint is missing from the compiler source inventory`);
+}
 export async function checkCompilerArchitecture(root) {
-  const sources = await compilerSourceInventory(root), failures = checkCompilerBoundaries(sources);
+  const sources = await compilerSourceInventory(root), failures = [...missingPureEntrypoints(sources), ...checkCompilerBoundaries(sources)];
   if (failures.length) throw new Error('COMPILER_ARCHITECTURE_FAILED\n' + failures.join('\n'));
   return { files: sources.size, pureEntrypoints: pureEntrypoints.length };
 }

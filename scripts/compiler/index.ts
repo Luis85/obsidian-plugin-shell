@@ -1,13 +1,13 @@
 import { renderStarterProject } from './adapters/project/emitter.ts';
-import { validateProjectSelection, type ProjectSelection } from './domain/project-starter.ts';
-import { CompilerError, diagnostic } from './domain/diagnostics.ts';
+import { validateProjectSelection, type ProjectSelection } from '../../bin/compiler/domain/project-starter.ts';
+import { CompilerError, diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
 import { createHash } from 'node:crypto';
 import { withStorybookOptions } from '../companion/tooling-contract.ts';
 import { lowerTarget } from './adapters/target-lowering.ts';
-import { runCompiler } from './application/pipeline.ts';
-import type { CompileRequest } from './application/ports.ts';
-import type { Control, Artifact, TemplateSnapshot } from './domain/contracts.ts';
+import { runCompiler } from '../../bin/compiler/application/pipeline.ts';
+import type { CompileRequest } from '../../bin/compiler/application/ports.ts';
+import type { Control, Artifact, TemplateSnapshot } from '../../bin/compiler/domain/contracts.ts';
 import { companionFrontend, contractCall } from './adapters/frontend.ts';
 import { renderProjectFiles } from './adapters/plugin-emitter.ts';
 import { clickdummyFiles } from './adapters/clickdummy-emitter.ts';
@@ -17,9 +17,9 @@ import { json, type Model } from '../companion/compiler/model.ts';
 import { requireFrameworkAdapter } from './adapters/project/framework-registry.ts';
 import type { FrameworkAdapter } from './adapters/project/framework-adapter.ts';
 export { loadTemplateSnapshot } from './adapters/template-snapshot.ts';
-export { compilerVersion, compilerPhases } from './application/pipeline.ts';
-export { diagnosticCatalog, CompilerError } from './domain/diagnostics.ts';
-export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind, StorybookOptions } from './domain/contracts.ts';
+export { compilerVersion, compilerPhases } from '../../bin/compiler/application/pipeline.ts';
+export { diagnosticCatalog, CompilerError } from '../../bin/compiler/domain/diagnostics.ts';
+export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind, StorybookOptions } from '../../bin/compiler/domain/contracts.ts';
 export interface CompilerExtensions { readonly frameworkAdapters?: readonly FrameworkAdapter[] }
 
 async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['outputKind'],sourceName:string,selection?:ProjectSelection,extensions:CompilerExtensions={}):Promise<Artifact[]> {

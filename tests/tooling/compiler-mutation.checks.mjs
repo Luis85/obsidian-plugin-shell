@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-const root=fileURLToPath(new URL('../../scripts/compiler/domain/',import.meta.url));
+const root=fileURLToPath(new URL('../../bin/compiler/domain/',import.meta.url));
 const files=['contracts.ts','diagnostics.ts','artifacts.ts','references.ts','source-references.ts'];
 const cases=[
   {name:'duplicate artifact guard',file:'artifacts.ts',before:'if (previous)',after:'if (false)',

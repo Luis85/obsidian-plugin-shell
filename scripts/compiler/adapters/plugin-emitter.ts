@@ -1,7 +1,7 @@
 import { storybookCode } from '../../companion/compiler/storybook-code.ts';
 import { previewCode, previewScripts } from '../../companion/compiler/preview-code.ts';
-import type { TemplateSnapshot } from '../domain/contracts.ts';
-import { artifactCollector } from '../domain/artifacts.ts';
+import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
+import { artifactCollector } from '../../../bin/compiler/domain/artifacts.ts';
 import { journeyCode } from '../../companion/compiler/journey-code.ts';
 import { nativeCode } from '../../companion/compiler/native-code.ts';
 import { clickdummyCode } from '../../companion/compiler/clickdummy-code.ts';

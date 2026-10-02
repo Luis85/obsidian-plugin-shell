@@ -1,4 +1,4 @@
-import type { Artifact, SourceLocation } from '../domain/contracts.ts';
+import type { Artifact, SourceLocation } from '../../../bin/compiler/domain/contracts.ts';
 import type { Model } from '../../companion/compiler/model.ts';
 import { visualDefinitions, visualPagePath, visualComponentPath } from '../../companion/compiler/visual-model.ts';
 

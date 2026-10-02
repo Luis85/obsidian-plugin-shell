@@ -6,6 +6,7 @@ on:
       - 'scripts/starters/**'
       - 'scripts/companion/**'
       - 'scripts/compiler/**'
+      - 'bin/compiler/**'
       - 'scripts/concepts/**'
       - 'scripts/bundling/**'
       - 'docs/licenses/**'

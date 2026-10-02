@@ -1,5 +1,5 @@
 import type { ComponentDefinition, PageDefinition, PropDefinition } from '../visual/visual-ir.mjs';
-import type { Artifact } from '../../compiler/domain/contracts.ts';
+import type { Artifact } from '../../../bin/compiler/domain/contracts.ts';
 import { visualDefinitions, visualComponentPath, visualPagePath } from './visual-model.ts';
 import { literal, type Model } from './model.ts';
 import { componentFile, relativeImport } from './file-code.ts';

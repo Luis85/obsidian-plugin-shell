@@ -9,7 +9,7 @@ import { STARTER_MAX_BYTES } from '../../scripts/starters/browser.ts';
 import { loadDefinitions, parseDefinition } from '../../scripts/starters/repository.ts';
 import { validateDefinition, readProcesses } from '../../scripts/starters/validation.ts';
 import { resolveValues, renderFiles, renderProcesses } from '../../scripts/starters/render.ts';
-import { angularPackages } from '../../scripts/compiler/domain/project-starter.ts';
+import { angularPackages } from '../../bin/compiler/domain/project-starter.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const reference = JSON.parse(await readFile(join(root, 'configs/starters/webapp.json'), 'utf8'));
 const loadFileDefinitions = rootPath => loadDefinitions(rootPath, []);

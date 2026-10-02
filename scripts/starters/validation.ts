@@ -1,5 +1,5 @@
 import { OperationError, requireThat } from '../framework/contracts.ts';
-import { readProjectGenerator } from '../compiler/domain/project-starter.ts';
+import { readProjectGenerator } from '../../bin/compiler/domain/project-starter.ts';
 import { assertDesignData } from '../contracts/json-data.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import type { InputValue, StarterDefinition, StarterInput, StarterProcess, StarterStep, StarterFile, Json } from './types.ts';

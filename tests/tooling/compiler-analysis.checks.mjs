@@ -9,7 +9,8 @@ test('compiler public exports are recognized without exempting private compiler 
   assert.ok(config.entry.includes('scripts/compiler/index.ts'));
   assert.ok(config.entry.includes('scripts/compiler/build-clickdummy.mjs'));
   await archiveCommandFixture(async ({ scratch, command }) => {
-    await mkdir(join(scratch, 'scripts/compiler/application'), { recursive: true });
+    await mkdir(join(scratch, 'scripts/compiler'), { recursive: true });
+    await mkdir(join(scratch, 'bin/compiler/application'), { recursive: true });
     await mkdir(join(scratch, 'scripts/quality'), { recursive: true });
     await writeFile(join(scratch, 'package.json'), '{"name":"compiler-analysis","private":true,"type":"module"}');
     await mkdir(join(scratch, 'configs/quality'), { recursive: true });
@@ -19,15 +20,15 @@ test('compiler public exports are recognized without exempting private compiler 
       await copyFile(`scripts/quality/${script}`, join(scratch, 'scripts/quality', script));
     await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
     await writeFile(join(scratch, 'scripts/compiler/index.ts'),
-      'export { compile } from "./application/internal";\nexport type { CompilerDiagnostic } from "./application/internal";\n');
+      'export { compile } from "../../bin/compiler/application/internal";\nexport type { CompilerDiagnostic } from "../../bin/compiler/application/internal";\n');
     const internal = 'export const compile = () => 1;\nexport interface CompilerDiagnostic { readonly message: string }\n';
-    await writeFile(join(scratch, 'scripts/compiler/application/internal.ts'), internal);
+    await writeFile(join(scratch, 'bin/compiler/application/internal.ts'), internal);
     const check = () => command(process.execPath, ['scripts/quality/check-analyzer.mjs'], scratch,
       { ...process.env, FALLOW_TELEMETRY_DISABLED: '1' });
     const clean = check();
     assert.equal(clean.status, 0, clean.stdout + clean.stderr);
-    await writeFile(join(scratch, 'scripts/compiler/application/internal.ts'), internal + 'export const unusedPrivate = 2;\n');
-    await writeFile(join(scratch, 'scripts/compiler/application/orphan.ts'), 'export const orphan = 1;\n');
+    await writeFile(join(scratch, 'bin/compiler/application/internal.ts'), internal + 'export const unusedPrivate = 2;\n');
+    await writeFile(join(scratch, 'bin/compiler/application/orphan.ts'), 'export const orphan = 1;\n');
     const bad = check();
     assert.equal(bad.status, 1, bad.stdout + bad.stderr);
     const report = JSON.parse(await readFile(join(scratch, 'reports/analyzer/fallow.json'), 'utf8'));

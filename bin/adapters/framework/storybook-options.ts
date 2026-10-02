@@ -1,4 +1,4 @@
-import type { StorybookOptions } from '../../../scripts/compiler/domain/contracts.ts';
+import type { StorybookOptions } from '../../compiler/domain/contracts.ts';
 import { requireThat, stringOption, type Values } from './contracts.ts';
 /** Explicit on/off values work identically in legacy CLI, saved requests and the TypeScript API. */
 export function storybookFlags(options: Values): StorybookOptions | undefined {

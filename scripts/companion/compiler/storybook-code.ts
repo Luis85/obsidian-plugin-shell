@@ -1,4 +1,4 @@
-import type { Artifact, TemplateSnapshot } from '../../compiler/domain/contracts.ts';
+import type { Artifact, TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
 import { storybookOptions, validateProjectTooling } from '../tooling-contract.ts';
 import { storybookStories } from './storybook-stories.ts';
 import { storybookHost } from './storybook-host.ts';

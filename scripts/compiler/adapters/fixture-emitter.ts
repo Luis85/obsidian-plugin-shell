@@ -1,4 +1,4 @@
-import type { TemplateSnapshot } from '../domain/contracts.ts';
+import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
 import { fixtureNoteTests } from '../../companion/compiler/fixture-notes-code.ts';
 import { sampleCode } from '../../companion/compiler/schema-code.ts';
 import { buildCompanionFixtureManifest } from '../../companion/test-data-manifest.mjs';

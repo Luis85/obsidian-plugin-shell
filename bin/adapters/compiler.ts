@@ -1,10 +1,10 @@
-import type { ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
+import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { join } from 'node:path';
 import { exists, hash } from '../../scripts/framework/files.ts';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { pluginFrameworkAdapters } from '../../plugins/runtime.ts';
 import { generationReceipt } from '../../scripts/compiler/adapters/workspace-plan.ts';
-import { CompilationFailure } from '../../scripts/compiler/domain/diagnostics.ts';
+import { CompilationFailure } from '../compiler/domain/diagnostics.ts';
 import { documentText, type SketchDocument } from '../domain/document.ts';
 import { outputBoundary, packagePlan } from './package-plan.ts';
 /** Same dedicated compiler and template snapshot as shell generate; no second Vue/JSON generator. */

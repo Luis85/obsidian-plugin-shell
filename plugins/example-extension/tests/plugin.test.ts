@@ -10,7 +10,7 @@ import { compileProject, loadTemplateSnapshot } from '../../../scripts/compiler/
 import { packageFiles } from '../../../scripts/compiler/adapters/project/configuration.ts';
 import { defineFrameworkAdapter } from '../../../scripts/compiler/adapters/project/framework-adapter.ts';
 import { renderStarterProject } from '../../../scripts/compiler/adapters/project/emitter.ts';
-import { projectSelection } from '../../../scripts/compiler/domain/project-starter.ts';
+import { projectSelection } from '../../../bin/compiler/domain/project-starter.ts';
 import { loadDefinitions } from '../../../scripts/starters/repository.ts';
 import { definePluginEvent, type WorkbenchPluginObject } from '../../api.ts';
 import { createPluginRuntime, pluginFrameworkAdapters, pluginStarterDefinitions } from '../../runtime.ts';

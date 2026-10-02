@@ -1,5 +1,5 @@
-import type { Artifact, CompilerDiagnostic } from '../domain/contracts.ts';
-import { diagnostic, CompilerError } from '../domain/diagnostics.ts';
+import type { Artifact, CompilerDiagnostic } from '../../../bin/compiler/domain/contracts.ts';
+import { diagnostic, CompilerError } from '../../../bin/compiler/domain/diagnostics.ts';
 
 type Manifest = { dependencies?: Record<string,string>; devDependencies?: Record<string,string>; packages?: Record<string,{version?:string;dependencies?:Record<string,string>;devDependencies?:Record<string,string>}> };
 /** Inspect exact direct pins and lock root entries; never installs or accesses a registry. */

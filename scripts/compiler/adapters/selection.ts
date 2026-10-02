@@ -1,4 +1,4 @@
-import { parseSelection, selectionClosure, SelectionError, type GenerationSelection, type Selection, type SelectionNode } from '../domain/selection.ts';
+import { parseSelection, selectionClosure, SelectionError, type GenerationSelection, type Selection, type SelectionNode } from '../../../bin/compiler/domain/selection.ts';
 import type { Model } from '../../companion/compiler/model.ts';
 import { row, rows } from '../../companion/compiler/model.ts';
 import { componentFile, type Entry } from '../../companion/compiler/file-code.ts';

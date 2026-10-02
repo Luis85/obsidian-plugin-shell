@@ -8,15 +8,20 @@ import { inspectModule } from '../../scripts/compiler/check-architecture.mjs';
 // Dependency direction between the compiler and the companion generator library:
 // executable compiler modules may consume companion emitters, never the reverse.
 const root = fileURLToPath(new URL('../../', import.meta.url));
-// The former companion facades moved to scripts/compiler/adapters; nothing may recreate or import them.
+// The former companion facades moved to scripts/compiler/adapters and the compiler core to bin/compiler;
+// nothing may recreate or import the removed paths.
 const owners = new Map([
   ['scripts/companion/compiler/plan.ts', 'scripts/compiler/adapters/project-plan.ts'],
   ['scripts/companion/compiler/cli.ts', 'scripts/compiler/adapters/generator-cli.ts'],
   ['scripts/companion/compiler/fixture-code.ts', 'scripts/compiler/adapters/fixture-code.ts'],
   ['scripts/companion/compiler/project-files.ts', 'scripts/compiler/adapters/project-files.ts'],
+  // The inward-only compiler core moved to bin/compiler; its former scripts/compiler paths are gone too.
+  ...['artifacts', 'contracts', 'diagnostics', 'project-starter', 'references', 'selection', 'source-references']
+    .map(name => [`scripts/compiler/domain/${name}.ts`, `bin/compiler/domain/${name}.ts`]),
+  ...['pipeline', 'ports'].map(name => [`scripts/compiler/application/${name}.ts`, `bin/compiler/application/${name}.ts`]),
 ]);
-const executableCompiler = /^scripts\/compiler\/(?:index\.ts$|application\/|adapters\/)/;
-const compilerDomain = /^scripts\/compiler\/domain\//;
+const executableCompiler = /^(?:scripts\/compiler\/(?:index\.ts$|adapters\/)|bin\/compiler\/application\/)/;
+const compilerDomain = /^bin\/compiler\/domain\//;
 const qualificationEntry = /^scripts\/companion\/qualify-[^/]+\.mjs$/;
 function resolved(from, specifier) {
   return specifier.startsWith('.') ? posix.normalize(posix.join(posix.dirname(from), specifier)) : null;
@@ -72,7 +77,7 @@ test('the former companion compiler facades are gone and their compiler owners e
 
 test('companion code cannot import executable compiler modules, re-exports included', () => {
   const emitter = 'scripts/companion/compiler/example-code.ts';
-  for (const specifier of ['../../compiler/index.ts', '../../compiler/adapters/selection.ts', '../../compiler/application/compile.ts']) {
+  for (const specifier of ['../../compiler/index.ts', '../../compiler/adapters/selection.ts', '../../../bin/compiler/application/compile.ts']) {
     const findings = directionFindings(new Map([[emitter, `import { x } from '${specifier}';\nexport const y = x;`]]));
     assert.equal(findings.length, 1, specifier);
     assert.match(findings[0], /executable compiler module/);
@@ -88,9 +93,9 @@ test('companion code cannot import executable compiler modules, re-exports inclu
 
 test('companion code reaches compiler domain contracts through import type only', () => {
   const emitter = 'scripts/companion/compiler/example-code.ts';
-  const typed = "import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';\nexport type T = TemplateSnapshot;";
+  const typed = "import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';\nexport type T = TemplateSnapshot;";
   assert.deepEqual(directionFindings(new Map([[emitter, typed]])), []);
-  const value = directionFindings(new Map([[emitter, "import { CompilationFailure } from '../../compiler/domain/diagnostics.ts';\nexport { CompilationFailure };"]]));
+  const value = directionFindings(new Map([[emitter, "import { CompilationFailure } from '../../../bin/compiler/domain/diagnostics.ts';\nexport { CompilationFailure };"]]));
   assert.equal(value.length, 1);
   assert.match(value[0], /only with import type/);
 });
@@ -102,6 +107,8 @@ test('no source may import or recreate a removed companion facade', () => {
     ['scripts/starters/example.ts', "import { projectFiles } from '../companion/compiler/project-files.ts';"],
     ['scripts/compiler/adapters/example.ts', "export { fixtureCode } from '../../companion/compiler/fixture-code.ts';"],
     ['plugins/example/index.ts', "import '../../scripts/companion/compiler/plan.ts';"],
+    ['bin/adapters/example.ts', "import { CompilerError } from '../../scripts/compiler/domain/diagnostics.ts';"],
+    ['scripts/compiler/adapters/example.ts', "import { runCompiler } from '../application/pipeline.ts';"],
     ['tests/tooling/example.checks.mjs', "import { planProject } from '../../scripts/companion/compiler/plan.ts';"],
   ]) {
     const findings = directionFindings(new Map([[path, statement]]));

@@ -1,4 +1,4 @@
-import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
+import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
 import type { ComponentDefinition, ExternalNode, Interaction } from '../visual/visual-ir.mjs';
 import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
 import { visualTestSource } from '../visual/visual-session.mjs';

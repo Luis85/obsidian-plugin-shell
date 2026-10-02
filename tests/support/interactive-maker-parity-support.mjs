@@ -23,7 +23,7 @@ import { suggestions as frameworkSuggestions, didYouMean as frameworkDidYouMean 
 import { prototypeCommands } from '../../bin/adapters/framework/prototype-catalog.ts';
 import { operationSchemas } from '../../bin/adapters/framework/schema.ts';
 import { failure as frameworkFailure, stringOption as frameworkStringOption, OperationError as FrameworkOperationError, requireThat as frameworkRequireThat } from '../../bin/adapters/framework/contracts.ts';
-import { CompilerError, CompilationFailure, diagnostic as compilerDiagnostic } from '../../scripts/compiler/domain/diagnostics.ts';
+import { CompilerError, CompilationFailure, diagnostic as compilerDiagnostic } from '../../bin/compiler/domain/diagnostics.ts';
 import { hash as relocatedHash, readBounded as relocatedReadBounded, projectRoot as relocatedProjectRoot, exists as relocatedExists } from '../../bin/adapters/framework/files.ts';
 import * as legacyFrameworkFiles from '../../scripts/framework/files.ts';
 import { configuration as relocatedConfiguration, defaults as relocatedDefaults, identity as relocatedIdentity, resolveImport as relocatedResolveImport } from '../../bin/adapters/framework/configuration.ts';

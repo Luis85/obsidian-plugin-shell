@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { createFilePlan, applyFilePlan } from '../../shared/file-plan.ts';
-import { portableArtifactPath } from '../domain/artifacts.ts';
-import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
-import type { CompilerEvent, Phase, CompilerDiagnostic, Readiness } from '../domain/contracts.ts';
+import { portableArtifactPath } from '../../../bin/compiler/domain/artifacts.ts';
+import { CompilerError, diagnostic } from '../../../bin/compiler/domain/diagnostics.ts';
+import type { CompilerEvent, Phase, CompilerDiagnostic, Readiness } from '../../../bin/compiler/domain/contracts.ts';
 
 export interface RunSummary {
   compilerVersion: string;

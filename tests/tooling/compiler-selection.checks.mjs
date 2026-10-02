@@ -4,7 +4,7 @@ import { readFile, writeFile, mkdtemp, rm, readdir, realpath } from 'node:fs/pro
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseSelection, selectionClosure } from '../../scripts/compiler/domain/selection.ts';
+import { parseSelection, selectionClosure } from '../../bin/compiler/domain/selection.ts';
 import { generationSelection } from '../../scripts/compiler/adapters/selection.ts';
 import { planArtifacts, applyProject } from '../../scripts/compiler/adapters/workspace-plan.ts';
 import { planProject } from '../../scripts/compiler/adapters/project-plan.ts';

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { formatDiagnostics, createRecorder, writeReports } from '../../scripts/compiler/adapters/reporting.ts';
-import { diagnostic } from '../../scripts/compiler/domain/diagnostics.ts';
+import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
 import { operationSchemas } from '../../scripts/framework/schemas.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const source=await readFile(join(root,'docs/concepts/companion/starters/blank.companion.json'),'utf8');

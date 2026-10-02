@@ -1,6 +1,6 @@
 import type { Model } from '../../../companion/compiler/model.ts';
-import type { TemplateSnapshot } from '../../domain/contracts.ts';
-import type { ProjectSelection } from '../../domain/project-starter.ts';
+import type { TemplateSnapshot } from '../../../../bin/compiler/domain/contracts.ts';
+import type { ProjectSelection } from '../../../../bin/compiler/domain/project-starter.ts';
 
 export type FrameworkEngine = 'none' | 'vanilla' | 'nuxtui' | 'angular';
 export interface FrameworkAdapterContext {

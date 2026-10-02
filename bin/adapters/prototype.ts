@@ -1,4 +1,4 @@
-import type { ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
+import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { spawnSync } from 'node:child_process';
 import { hash } from '../../scripts/framework/files.ts';
 import { artifactOrigins } from '../../scripts/compiler/adapters/origins.ts';

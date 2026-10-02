@@ -1,6 +1,6 @@
 import { stderr, stdout } from 'node:process';
 import { formatDiagnostics } from '../../../scripts/compiler/adapters/reporting.ts';
-import type { CompilerDiagnostic } from '../../../scripts/compiler/domain/contracts.ts';
+import type { CompilerDiagnostic } from '../../compiler/domain/contracts.ts';
 import type { Result } from '../../../scripts/contracts/result.ts';
 import { starterText } from './starter-terminal.ts';
 import { renderHuman } from './terminal-render.ts';

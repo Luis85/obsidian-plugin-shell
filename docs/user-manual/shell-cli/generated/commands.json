@@ -4,6 +4,21 @@
   "source": "scripts/framework/catalog.ts + help-text.ts",
   "groups": [
     {
+      "id": "templates",
+      "title": "Component template library",
+      "commands": [
+        "templates list",
+        "templates search",
+        "templates show",
+        "templates tree",
+        "templates validate",
+        "templates schema",
+        "templates coverage",
+        "templates docs",
+        "templates instantiate"
+      ]
+    },
+    {
       "id": "prototypes",
       "title": "Prototype versions and variants",
       "commands": [
@@ -209,6 +224,502 @@
     }
   ],
   "commands": [
+    {
+      "id": "templates list",
+      "summary": "List and filter the canonical component-template library.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "templates",
+      "usage": "node bin/app templates list [options]",
+      "examples": [
+        "node bin/app templates list --atomic-level organism --json",
+        "node bin/app templates list --for editor --json"
+      ],
+      "options": [
+        {
+          "name": "type",
+          "kind": "value",
+          "description": "Component-template type filter.",
+          "values": [
+            "component",
+            "component-with-children",
+            "page",
+            "page-with-bricks"
+          ]
+        },
+        {
+          "name": "atomic-level",
+          "kind": "value",
+          "description": "Atomic Design level filter.",
+          "values": [
+            "atom",
+            "molecule",
+            "organism",
+            "template",
+            "page"
+          ]
+        },
+        {
+          "name": "category",
+          "kind": "value",
+          "description": "Exact component-template category filter."
+        },
+        {
+          "name": "tag",
+          "kind": "value",
+          "description": "Exact component-template tag filter."
+        },
+        {
+          "name": "for",
+          "kind": "value",
+          "description": "Application archetype recommendation filter, for example editor or obsidian-plugin."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "templates search",
+      "summary": "Search component templates by identity, purpose or capability.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "templates",
+      "usage": "node bin/app templates search [arguments] [options]",
+      "examples": [
+        "node bin/app templates search table --json"
+      ],
+      "options": [
+        {
+          "name": "type",
+          "kind": "value",
+          "description": "Component-template type filter.",
+          "values": [
+            "component",
+            "component-with-children",
+            "page",
+            "page-with-bricks"
+          ]
+        },
+        {
+          "name": "atomic-level",
+          "kind": "value",
+          "description": "Atomic Design level filter.",
+          "values": [
+            "atom",
+            "molecule",
+            "organism",
+            "template",
+            "page"
+          ]
+        },
+        {
+          "name": "category",
+          "kind": "value",
+          "description": "Exact component-template category filter."
+        },
+        {
+          "name": "tag",
+          "kind": "value",
+          "description": "Exact component-template tag filter."
+        },
+        {
+          "name": "for",
+          "kind": "value",
+          "description": "Application archetype recommendation filter, for example editor or obsidian-plugin."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "templates show",
+      "summary": "Inspect one complete component-template JSON definition.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "templates",
+      "usage": "node bin/app templates show [arguments]",
+      "examples": [
+        "node bin/app templates show organism.data-table --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "templates tree",
+      "summary": "Inspect the resolved Atomic Design child composition of one template.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "templates",
+      "usage": "node bin/app templates tree [arguments]",
+      "examples": [
+        "node bin/app templates tree page.dashboard --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "templates validate",
+      "summary": "Validate one template or the complete installed component-template catalog.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "templates",
+      "usage": "node bin/app templates validate [arguments]",
+      "examples": [
+        "node bin/app templates validate --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "templates schema",
+      "summary": "Print the versioned component-template JSON Schema.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "templates",
+      "usage": "node bin/app templates schema",
+      "examples": [
+        "node bin/app templates schema --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "templates coverage",
+      "summary": "Inspect Atomic Design, category, documentation and composition coverage.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "templates",
+      "usage": "node bin/app templates coverage",
+      "examples": [
+        "node bin/app templates coverage --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "templates docs",
+      "summary": "Plan deterministic Markdown documentation generated from component-template JSON.",
+      "effect": "plan",
+      "maxArgs": 0,
+      "group": "templates",
+      "usage": "node bin/app templates docs [options]",
+      "examples": [
+        "node bin/app templates docs --dry-run --json",
+        "node bin/app templates docs --yes"
+      ],
+      "options": [
+        {
+          "name": "out",
+          "kind": "value",
+          "description": "Folder for generated component-library Markdown.",
+          "default": "docs/generated/component-library"
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "templates instantiate",
+      "summary": "Plan adding a component or page template to the canonical Companion project model.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "templates",
+      "usage": "node bin/app templates instantiate [arguments] [options]",
+      "examples": [
+        "node bin/app templates instantiate organism.data-table --project design/project.json --dry-run"
+      ],
+      "options": [
+        {
+          "name": "project",
+          "kind": "value",
+          "description": "Canonical Companion project JSON file to update.",
+          "default": "design/project.json"
+        },
+        {
+          "name": "name",
+          "kind": "value",
+          "description": "Optional instance/component/page title override; the template name is the default."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
     {
       "id": "starters coverage",
       "summary": "Inspect source-derived visual model coverage and explicit interaction gaps; never a native acceptance claim.",

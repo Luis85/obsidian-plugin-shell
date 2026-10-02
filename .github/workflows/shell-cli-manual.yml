@@ -8,7 +8,7 @@ on:
       - 'package.json'
       - '.nvmrc'
       - 'scripts/framework/**'
-      - 'scripts/compiler/domain/**'
+      - 'bin/compiler/domain/**'
       - 'scripts/documentation/**'
       - 'tests/tooling/framework-manual.checks.mjs'
       - 'tooling/documentation/**'

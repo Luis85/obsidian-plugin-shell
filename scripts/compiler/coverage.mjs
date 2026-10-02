@@ -4,12 +4,12 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadThresholds } from '../quality/thresholds.mjs';
 
-const tests = ['compiler-core', 'compiler-cli', 'compiler-compatibility', 'compiler-targets', 'compiler-properties', 'compiler-selection', 'interactive-maker-project-starters']
+const tests = ['compiler-core', 'compiler-cli', 'compiler-compatibility', 'compiler-targets', 'compiler-properties', 'compiler-selection', 'interactive-maker-project-starters', 'interactive-maker-compiler-core']
   .map(name => `tests/tooling/${name}.checks.mjs`);
 export function compilerCoverageArguments(thresholds = loadThresholds()) {
   const { lines, branches, functions } = thresholds.coverage.compiler;
   return ['--experimental-test-coverage', `--test-coverage-lines=${lines}`, `--test-coverage-branches=${branches}`, `--test-coverage-functions=${functions}`,
-    '--test-coverage-include=scripts/compiler/domain/**', '--test-coverage-include=scripts/compiler/application/**', '--test', '--test-concurrency=1', ...tests];
+    '--test-coverage-include=bin/compiler/domain/**', '--test-coverage-include=bin/compiler/application/**', '--test', '--test-concurrency=1', ...tests];
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const run = spawnSync(process.execPath, compilerCoverageArguments(), { stdio: 'inherit' });

@@ -11,6 +11,7 @@ on:
       - 'tests/tooling/*prototypes*.checks.mjs'
       - 'tests/support/prototype-fixture.mjs'
       - 'scripts/compiler/**'
+      - 'bin/compiler/**'
       - 'scripts/bundling/**'
       - 'tests/tooling/compiler-journey*.checks.mjs'
       - 'tests/tooling/companion-project.checks.mjs'

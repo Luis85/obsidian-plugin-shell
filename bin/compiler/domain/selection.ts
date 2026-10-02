@@ -9,6 +9,8 @@ export class SelectionError extends Error {
   constructor(code: string, message: string) { super(code + ': ' + message); this.code = code; this.name = 'SelectionError'; }
 }
 const sorted = (values: Iterable<string>): string[] => [...values].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+// Intentional identity boundary: reject ASCII control characters in selection keys.
+// oxlint-disable-next-line no-control-regex
 const identity = (value: unknown): value is string => typeof value === 'string' && value.length > 0 && value.length <= 180 && !/[\u0000-\u001f\u007f]/u.test(value);
 export function parseSelection(value?: string): Selection | null {
   if (value === undefined || value === 'all') return null;

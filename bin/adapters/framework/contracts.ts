@@ -1,4 +1,4 @@
-import { CompilerError, CompilationFailure } from '../../../scripts/compiler/domain/diagnostics.ts';
+import { CompilerError, CompilationFailure } from '../../compiler/domain/diagnostics.ts';
 import { result, type Result } from '../../../scripts/contracts/result.ts';
 import { OperationError, requireThat } from '../../../scripts/contracts/errors.ts';
 export { result } from '../../../scripts/contracts/result.ts';

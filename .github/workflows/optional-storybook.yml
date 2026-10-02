@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/companion/**'
       - 'scripts/compiler/**'
+      - 'bin/compiler/**'
       - 'scripts/framework/**'
       - 'scripts/bundling/**'
       - 'tests/tooling/compiler-storybook*.checks.mjs'
