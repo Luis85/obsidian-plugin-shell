@@ -46,7 +46,7 @@ export function buildModel(commands, helpFor, parameterKinds, groups, version, d
     }
   }
   for (const entry of entries) required(grouping.get(entry.id) === entry.group, `missing/mismatched group: ${entry.id}`);
-  return { schemaVersion: 1, frameworkVersion: String(version), source: 'scripts/framework/catalog.ts + help-text.ts',
+  return { schemaVersion: 1, frameworkVersion: String(version), source: 'bin/adapters/framework/catalog.ts + help-text.ts',
     groups: groups.map(group => ({ ...group, commands: [...group.commands] })), commands: entries,
     diagnostics: Object.entries(diagnostics).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([id, help]) => ({ id, help })) };
 }
