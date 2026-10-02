@@ -64,7 +64,7 @@ remain explicit manual acceptance scope, not inferred from stream-based tests.
 `npm run test:maker` retains the portable keyboard, frame, stream and parity tests.
 `npm run test:maker:pty` is the additional opt-in Linux/macOS acceptance suite. It
 needs Python 3's standard library only, not a new application dependency. It drives
-the actual `app.mjs` launcher through an OS pseudo-terminal, creates a page with bulk
+the actual `bin/app` launcher through an OS pseudo-terminal, creates a page with bulk
 components, refuses a save first, approves a second reviewed plan, and compares
 the written bytes against agent-mode creation. It also checks small-window paste
 protection, F1 help, Ctrl+C, external SIGTERM, empty stdout and exact termios
