@@ -1,6 +1,6 @@
-import { literal } from '../../../companion/compiler/model.ts';
-import { VISUAL_DOM_EVENTS, type UiNode, type ValueExpression, type Interaction, type Contract } from '../../../companion/visual/visual-ir.mjs';
-import { compositionStyle } from '../../../companion/composition-contract.mjs';
+import { literal } from '../../../../scripts/companion/compiler/model.ts';
+import { VISUAL_DOM_EVENTS, type UiNode, type ValueExpression, type Interaction, type Contract } from '../../../../scripts/companion/visual/visual-ir.mjs';
+import { compositionStyle } from '../../../../scripts/companion/composition-contract.mjs';
 export interface AngularDefinition { key: string; name: string; selector: string; nodes: UiNode[]; contract?: Contract; adapterRequired?: string; designSystem?: unknown }
 export interface AngularGap { definition: string; node: string; reason: string }
 const attr = (value: string) => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
@@ -49,9 +49,9 @@ export function angularDefinitionSource(definition: AngularDefinition, definitio
     const target = definitions.find(item => item.key === (ref.revisionId ?? ref.componentId));
     if (!target) return unsupported(node, 'Missing project component definition.');
     imports.set(target.key, target);
-    const defaults = Object.fromEntries((target.contract?.props ?? []).filter(prop => prop.default !== undefined).map(prop => [prop.name, { kind: 'literal', value: prop.default } as ValueExpression]));
+    const declared = Object.fromEntries((target.contract?.props ?? []).filter(prop => prop.default !== undefined).map(prop => [prop.name, { kind: 'literal', value: prop.default } as ValueExpression]));
     const variant = target.contract?.variants.find(item => item.id === node.variantId);
-    if (variant) Object.assign(defaults, Object.fromEntries(Object.entries(variant.values).map(([key, item]) => [key, { kind: 'literal', value: item }])));
+    const defaults = { ...declared, ...(variant ? Object.fromEntries(Object.entries(variant.values).map(([key, item]) => [key, { kind: 'literal', value: item } as ValueExpression])) : {}) };
     const props = '{' + Object.entries({ ...defaults, ...node.props }).map(([key, expression]) => literal(key) + ':' + value(expression)).join(',') + '}';
     const slots = Object.entries(node.slots).map(([name, nodes]) => `<div slot="${attr(name)}" class="wb-slot">${children(nodes)}</div>`).join('\n');
     return `<${target.selector} ${common(node)} [ui]="ui()" [scope]="key('${node.id}')" [values]="${attr(props)}" ${events(node.events, target.contract?.emits.map(item => item.name))}>${slots}</${target.selector}>`;

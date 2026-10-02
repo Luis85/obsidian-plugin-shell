@@ -1,4 +1,4 @@
-import { json } from '../../../companion/compiler/model.ts';
+import { json } from '../../../../scripts/companion/compiler/model.ts';
 
 const manifest = Object.freeze({
   id: 'starter-extension',
@@ -135,25 +135,25 @@ export function pluginExtensionFiles(): Record<string, string> {
   const readme = lines(
     "# Project plugins",
     "",
-    "Extensions live entirely under \`plugins/<plugin-name>/\`:",
+    "Extensions live entirely under `plugins/<plugin-name>/`:",
     "",
-    "\`\`\`text",
+    "```text",
     "plugins/example/",
     "  manifest.json",
     "  config.json",
     "  src/index.ts        # exports PluginObject",
     "  tests/*.test.ts",
-    "\`\`\`",
+    "```",
     "",
-    "Every plugin is TypeScript and exports a named \`PluginObject\` implementing \`src/core/plugin-api.ts\`. The manifest supplies stable identity/version metadata; \`config.json\` contains project-owned configuration, including optional \`enabled: false\`.",
+    "Every plugin is TypeScript and exports a named `PluginObject` implementing `src/core/plugin-api.ts`. The manifest supplies stable identity/version metadata; `config.json` contains project-owned configuration, including optional `enabled: false`.",
     "",
-    "Add the plugin's \`PluginObject\` to \`plugins/registry.ts\` to activate it. Registration is explicit and statically bundled so Obsidian, web apps, websites and terminal applications use the same deterministic extension set without runtime filesystem discovery.",
+    "Add the plugin's `PluginObject` to `plugins/registry.ts` to activate it. Registration is explicit and statically bundled so Obsidian, web apps, websites and terminal applications use the same deterministic extension set without runtime filesystem discovery.",
     "",
-    "\`activate(context)\` receives the current host, shared project data, the plugin's config and an optional browser/Obsidian root element. Return a cleanup function for every listener, DOM change or resource you own. Plugin code is trusted application code, not a sandbox.",
+    "`activate(context)` receives the current host, shared project data, the plugin's config and an optional browser/Obsidian root element. Return a cleanup function for every listener, DOM change or resource you own. Plugin code is trusted application code, not a sandbox.",
     "",
-    "Keep plugin-specific source and tests inside its directory; do not reach into another plugin's internals. Tests under \`plugins/*/tests/\` run as part of the generated project's normal \`npm test\` command.",
+    "Keep plugin-specific source and tests inside its directory; do not reach into another plugin's internals. Tests under `plugins/*/tests/` run as part of the generated project's normal `npm test` command.",
     "",
-    "The generated \`starter-extension\` is an executable example. Replace or remove it when establishing the product's real plugin set; if removed, delete its registry import/entry as well.",
+    "The generated `starter-extension` is an executable example. Replace or remove it when establishing the product's real plugin set; if removed, delete its registry import/entry as well.",
   );
   return {
     'src/core/plugin-api.ts': api,

@@ -1,4 +1,4 @@
-import { renderStarterProject } from './adapters/project/emitter.ts';
+import { renderStarterProject } from '../../bin/compiler/adapters/project/emitter.ts';
 import { validateProjectSelection, type ProjectSelection } from '../../bin/compiler/domain/project-starter.ts';
 import { CompilerError, diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
@@ -14,8 +14,8 @@ import { clickdummyFiles } from '../../bin/compiler/adapters/clickdummy-emitter.
 import { dependencyReadiness } from '../../bin/compiler/adapters/dependencies.ts';
 import { artifactOrigins } from '../../bin/compiler/adapters/origins.ts';
 import { json, type Model } from '../companion/compiler/model.ts';
-import { requireFrameworkAdapter } from './adapters/project/framework-registry.ts';
-import type { FrameworkAdapter } from './adapters/project/framework-adapter.ts';
+import { requireFrameworkAdapter } from '../../bin/compiler/adapters/project/framework-registry.ts';
+import type { FrameworkAdapter } from '../../bin/compiler/adapters/project/framework-adapter.ts';
 export { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 export { compilerVersion, compilerPhases } from '../../bin/compiler/application/pipeline.ts';
 export { diagnosticCatalog, CompilerError } from '../../bin/compiler/domain/diagnostics.ts';

@@ -22,6 +22,9 @@ const owners = new Map([
   // The compiler host adapters moved to bin/compiler/adapters.
   ...['cli', 'clickdummy-emitter', 'dependencies', 'fixture-code', 'fixture-emitter', 'frontend', 'origins', 'reporting', 'target-lowering', 'template-snapshot']
     .map(name => [`scripts/compiler/adapters/${name}.ts`, `bin/compiler/adapters/${name}.ts`]),
+  ...['angular-brick-runtime', 'angular-brick-templates', 'angular-bricks', 'angular-linker', 'build-source', 'configuration', 'emitter',
+    'framework-adapter', 'framework-registry', 'plugin-extension', 'serve-source', 'sources']
+    .map(name => [`scripts/compiler/adapters/project/${name}.ts`, `bin/compiler/adapters/project/${name}.ts`]),
 ]);
 const executableCompiler = /^(?:scripts\/compiler\/(?:index\.ts$|adapters\/)|bin\/compiler\/(?:index\.ts$|adapters\/|application\/))/;
 const compilerDomain = /^bin\/compiler\/domain\//;

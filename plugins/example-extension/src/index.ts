@@ -1,7 +1,7 @@
 import manifest from '../manifest.json' with { type: 'json' };
 import config from '../config.json' with { type: 'json' };
 import { definePluginEvent, type WorkbenchPluginObject } from '../../api.ts';
-import { defineFrameworkAdapter } from '../../../scripts/compiler/adapters/project/framework-adapter.ts';
+import { defineFrameworkAdapter } from '../../../bin/compiler/adapters/project/framework-adapter.ts';
 import type { StarterDefinition } from '../../../scripts/starters/types.ts';
 
 export const exampleNotice = definePluginEvent('example-extension.notice',

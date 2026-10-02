@@ -1,15 +1,17 @@
 import { angularBabelVersion } from './angular-linker.ts';
-import type { TemplateSnapshot } from '../../../../bin/compiler/domain/contracts.ts';
-import type { ProjectSelection } from '../../../../bin/compiler/domain/project-starter.ts';
-import { CompilerError, diagnostic } from '../../../../bin/compiler/domain/diagnostics.ts';
-import { json } from '../../../companion/compiler/model.ts';
+import type { TemplateSnapshot } from '../../domain/contracts.ts';
+import type { ProjectSelection } from '../../domain/project-starter.ts';
+import { CompilerError, diagnostic } from '../../domain/diagnostics.ts';
+import { json } from '../../../../scripts/companion/compiler/model.ts';
 import type { FrameworkAdapter } from './framework-adapter.ts';
-/** Minimal direct dependencies, all exact pins. A root-only lock honestly requires registry resolution. */
-export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string, adapter: FrameworkAdapter) {
-  const original = JSON.parse(template.text('package.json'));
-  const engine = adapter.engine;
-  const dependencies: Record<string, string> = {}, devDependencies: Record<string, string> = {};
-  function copy(names: string[], group: Record<string, string>) {
+type Pins = Record<string, string>;
+interface TemplatePackage { dependencies?: Pins; devDependencies?: Pins }
+const visualTarget = (selected: ProjectSelection) => selected.targets.some(target => target !== 'cli');
+const browserTarget = (selected: ProjectSelection) => selected.targets.some(target => target === 'webapp' || target === 'website');
+/** Copy exact template pins for the selected engine's direct dependencies. */
+function enginePins(original: TemplatePackage, selected: ProjectSelection, engine: FrameworkAdapter['engine']) {
+  const dependencies: Pins = {}, devDependencies: Pins = {};
+  function copy(names: string[], group: Pins) {
     for (const name of names) {
       const pin = original.dependencies?.[name] ?? original.devDependencies?.[name];
       if (typeof pin !== 'string' || !/^\d+\.\d+\.\d+$/.test(pin)) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Missing exact template pin for ' + name));
@@ -18,33 +20,48 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
   }
   copy(['typescript', '@types/node'], devDependencies);
   if (selected.targets.includes('plugin')) copy(['obsidian'], devDependencies);
-  const visual = selected.targets.some(target => target !== 'cli');
-  if (visual) copy(['vite'], devDependencies);
+  if (visualTarget(selected)) copy(['vite'], devDependencies);
   if (engine === 'nuxtui') {
     copy(['vue', 'pinia', '@nuxt/ui'], dependencies);
     copy(['@vitejs/plugin-vue', '@iconify-json/lucide', 'postcss', 'postcss-selector-parser', 'tailwindcss', 'vue-tsc'], devDependencies);
   }
-  if (engine === 'angular') for (const [name, pin] of Object.entries(selected.angularPins ?? {})) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
-  if (engine === 'angular') devDependencies['@babel/core'] = angularBabelVersion;
-  const merge = (source: Readonly<Record<string, string>> | undefined, target: Record<string, string>, other: Record<string, string>) => {
-    for (const [name, pin] of Object.entries(source ?? {})) {
-      if (other[name] !== undefined) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter changes dependency scope already owned by the selected engine: ' + name));
-      if (target[name] !== undefined && target[name] !== pin) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter dependency conflicts with the selected engine: ' + name));
-      target[name] = pin;
-    }
-  };
-  merge(adapter.dependencies, dependencies, devDependencies);
-  merge(adapter.devDependencies, devDependencies, dependencies);
-  const scripts: Record<string, string> = {
+  if (engine === 'angular') {
+    for (const [name, pin] of Object.entries(selected.angularPins ?? {})) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
+    devDependencies['@babel/core'] = angularBabelVersion;
+  }
+  return { dependencies, devDependencies };
+}
+/** Adapter pins may add to the engine's scope but never move or change a pin the engine owns. */
+function mergeAdapterPins(source: Readonly<Pins> | undefined, target: Pins, other: Pins): void {
+  for (const [name, pin] of Object.entries(source ?? {})) {
+    if (other[name] !== undefined) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter changes dependency scope already owned by the selected engine: ' + name));
+    if (target[name] !== undefined && target[name] !== pin) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter dependency conflicts with the selected engine: ' + name));
+    target[name] = pin;
+  }
+}
+const typecheckCommands: Record<FrameworkAdapter['engine'], string> = {
+  none: 'tsc --noEmit --project tsconfig.json', vanilla: 'tsc --noEmit --project tsconfig.json',
+  nuxtui: 'vue-tsc --noEmit --project tsconfig.json', angular: 'ngc --noEmit --project configs/types/tsconfig.angular.json',
+};
+function packageScripts(selected: ProjectSelection, engine: FrameworkAdapter['engine']): Pins {
+  const scripts: Pins = {
     build: 'node scripts/build.mjs',
-    typecheck: engine === 'nuxtui' ? 'vue-tsc --noEmit --project tsconfig.json' : engine === 'angular' ? 'ngc --noEmit --project configs/types/tsconfig.angular.json' : 'tsc --noEmit --project tsconfig.json',
+    typecheck: typecheckCommands[engine],
     test: 'node --experimental-strip-types --test tests/*.test.mjs plugins/*/tests/*.test.ts',
   };
-  if (selected.targets.some(target => target === 'webapp' || target === 'website')) scripts.start = 'npm run build && node scripts/serve.mjs';
-  if (visual) scripts['build:prototype'] = 'node scripts/build.mjs --prototype';
+  if (browserTarget(selected)) scripts.start = 'npm run build && node scripts/serve.mjs';
+  if (visualTarget(selected)) scripts['build:prototype'] = 'node scripts/build.mjs --prototype';
   if (selected.targets.includes('cli')) scripts['start:cli'] = 'node dist/cli/src/targets/cli/main.js';
+  return scripts;
+}
+/** Minimal direct dependencies, all exact pins. A root-only lock honestly requires registry resolution. */
+export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string, adapter: FrameworkAdapter) {
+  const original: TemplatePackage = JSON.parse(template.text('package.json'));
+  const { dependencies, devDependencies } = enginePins(original, selected, adapter.engine);
+  mergeAdapterPins(adapter.dependencies, dependencies, devDependencies);
+  mergeAdapterPins(adapter.devDependencies, devDependencies, dependencies);
   const pkg = { name: id, version: '0.1.0', private: true, type: 'module', engines: { node: '>=24.21.0 <25', npm: '>=11.19.1 <12' },
-    packageManager: 'npm@11.19.1', scripts, dependencies, devDependencies };
+    packageManager: 'npm@11.19.1', scripts: packageScripts(selected, adapter.engine), dependencies, devDependencies };
   return {
     'package.json': json(pkg),
     'package-lock.json': json({ name: id, version: '0.1.0', lockfileVersion: 3, requires: true,

@@ -1,15 +1,15 @@
 import { angularBrickFiles } from './angular-bricks.ts';
 import { serveSource } from './serve-source.ts';
 import { angularLinkerSource } from './angular-linker.ts';
-import { json, type Model } from '../../../companion/compiler/model.ts';
-import type { Artifact, TemplateSnapshot } from '../../../../bin/compiler/domain/contracts.ts';
-import { validateProjectSelection, type ProjectSelection } from '../../../../bin/compiler/domain/project-starter.ts';
+import { json, type Model } from '../../../../scripts/companion/compiler/model.ts';
+import type { Artifact, TemplateSnapshot } from '../../domain/contracts.ts';
+import { validateProjectSelection, type ProjectSelection } from '../../domain/project-starter.ts';
 import { coreSource, browserSource, pluginSource, cliSource, cliEntry, vanillaMount, vueMount, vueComponent, angularMount } from './sources.ts';
 import { buildSource, licenseSource } from './build-source.ts';
 import { packageFiles, typecheckFiles, starterReadme } from './configuration.ts';
 import { pluginExtensionFiles } from './plugin-extension.ts';
 import { requireFrameworkAdapter } from './framework-registry.ts';
-import type { FrameworkAdapter } from './framework-adapter.ts';
+import type { FrameworkAdapter, FrameworkAdapterContext } from './framework-adapter.ts';
 function styles(id: string): string {
   const root = `[data-plugin-ui="${id}"]`;
   return `${root} { display: block; padding: 1rem; color: var(--text-normal, #20242a); background: var(--background-primary, #fff); font: 1rem/1.5 var(--font-interface, system-ui); }
@@ -55,47 +55,63 @@ test('CLI has headless JSON parity and rejects unsupported commands', () => {
   assert.equal(run(['help']).exitCode, 0);
 });\n` : ''}`;
 }
-/** Pure target adapter downstream of the shared parser, migration, model and reference validation. */
-export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection, adapterOverride?: FrameworkAdapter): Artifact[] {
-  const selected = validateProjectSelection(input);
-  const adapter = adapterOverride ?? requireFrameworkAdapter(selected.framework), engine = adapter.engine;
+function requireMatchingAdapter(adapter: FrameworkAdapter, selected: ProjectSelection): void {
   if (adapter.id !== selected.framework) throw new Error('FRAMEWORK_ADAPTER_SELECTION_MISMATCH:' + selected.framework);
-  if (adapter.id !== adapter.engine && engine !== 'vanilla') throw new Error('FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:' + adapter.id);
-  const id = String(model.project.id), name = String(model.project.name);
-  const visual = selected.targets.some(target => target !== 'cli');
-  const files: Record<string, string> = {
+  if (adapter.id !== adapter.engine && adapter.engine !== 'vanilla') throw new Error('FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:' + adapter.id);
+}
+const agentGuide = '# Generated project source\n\nRead project.config.json and the agreed parent design-brief.md. Keep src/core independent of Obsidian, DOM, process and frameworks. Each host owns its entrypoint and lifecycle. Project extensions live under plugins/<name>, export PluginObject, own manifest.json/config.json/source/tests, and register explicitly in plugins/registry.ts. Keep the Companion v6 envelope intact. This is a starting scaffold; acceptance is not inferred from compilation. Do not install, activate, publish or modify external data without authorization. Use the exact .nvmrc/packageManager. Run typecheck, tests, build and target-specific runtime acceptance before claiming completion. Keep source under 400 and tests under 450 code lines, excluding blanks/comments.\n';
+const remainingAcceptance = ['Implement agreed domain actions and visual components.', 'Test enabled/disabled project-plugin activation and cleanup in each selected host.', 'Test actual keyboard/focus, empty, failure and cancel journeys.', 'Measure built artifact and source hashes.', 'Qualify a disposable Obsidian host for plugin targets; do not infer from the browser preview.'];
+function sharedFiles(model: Model, template: TemplateSnapshot, selected: ProjectSelection, adapter: FrameworkAdapter, id: string, name: string): Record<string, string> {
+  const project = model.project;
+  return {
     ...packageFiles(template, selected, id, adapter), ...typecheckFiles(selected, adapter),
     'project.config.json': json(selected), 'design/project.json': json(model.document),
     'src/core/project.ts': coreSource(model), ...pluginExtensionFiles(), 'scripts/build.mjs': buildSource,
-    'manifest.json': json({ id, name, version: String(model.project.version ?? '0.1.0'), minAppVersion: '1.13.0', description: String(model.project.description ?? 'Project prototype'), author: String(model.project.author ?? 'Your name'), isDesktopOnly: false }),
+    'manifest.json': json({ id, name, version: String(project.version ?? '0.1.0'), minAppVersion: '1.13.0', description: String(project.description ?? 'Project prototype'), author: String(project.author ?? 'Your name'), isDesktopOnly: false }),
     'README.md': starterReadme(selected), 'tests/scaffold.test.mjs': tests(selected.targets.includes('cli')),
-    'AGENTS.md': '# Generated project source\n\nRead project.config.json and the agreed parent design-brief.md. Keep src/core independent of Obsidian, DOM, process and frameworks. Each host owns its entrypoint and lifecycle. Project extensions live under plugins/<name>, export PluginObject, own manifest.json/config.json/source/tests, and register explicitly in plugins/registry.ts. Keep the Companion v6 envelope intact. This is a starting scaffold; acceptance is not inferred from compilation. Do not install, activate, publish or modify external data without authorization. Use the exact .nvmrc/packageManager. Run typecheck, tests, build and target-specific runtime acceptance before claiming completion. Keep source under 400 and tests under 450 code lines, excluding blanks/comments.\n',
+    'AGENTS.md': agentGuide,
     'prototype.acceptance.json': json({ stage: 'not-implemented', targets: selected.targets.map(target => ({ target, build: 'not-run', runtime: 'not-run', businessAcceptance: 'not-run' })),
-      remaining: ['Implement agreed domain actions and visual components.', 'Test enabled/disabled project-plugin activation and cleanup in each selected host.', 'Test actual keyboard/focus, empty, failure and cancel journeys.', 'Measure built artifact and source hashes.', 'Qualify a disposable Obsidian host for plugin targets; do not infer from the browser preview.'] }),
+      remaining: remainingAcceptance }),
   };
-  if (selected.targets.some(target => target === 'webapp' || target === 'website')) files['scripts/serve.mjs'] = serveSource;
-  if (visual) {
-    files['scripts/licenses.mjs'] = licenseSource;
-    files['src/targets/preview/main.ts'] = browserSource(selected, id, 'preview');
-    files['src/ui/styles.css'] = styles(id);
-    if (engine === 'vanilla') files['src/ui/mount.ts'] = vanillaMount;
-    if (engine === 'angular') { files['scripts/angular-linker.mjs'] = angularLinkerSource; files['src/ui/mount.ts'] = angularMount; Object.assign(files, angularBrickFiles(model)); }
-    if (engine === 'nuxtui') {
-      Object.assign(files, vueFiles(template)); files['src/ui/styles.css'] = '@import "./nuxt.css";\n' + styles(id);
-    }
-    const contributed = adapter.files?.({ model, template, selection: selected, projectId: id, projectName: name }) ?? {};
-    for (const [path, content] of Object.entries(contributed)) {
-      if (!/^src\/ui\/[a-zA-Z0-9_.\/-]+$/.test(path) || path.includes('..') || typeof content !== 'string') throw new Error('FRAMEWORK_ADAPTER_FILE_INVALID:' + adapter.id);
-      files[path] = content;
-    }
+}
+function engineFiles(files: Record<string, string>, model: Model, template: TemplateSnapshot, engine: FrameworkAdapter['engine'], id: string): void {
+  if (engine === 'vanilla') files['src/ui/mount.ts'] = vanillaMount;
+  if (engine === 'angular') { files['scripts/angular-linker.mjs'] = angularLinkerSource; files['src/ui/mount.ts'] = angularMount; Object.assign(files, angularBrickFiles(model)); }
+  if (engine === 'nuxtui') { Object.assign(files, vueFiles(template)); files['src/ui/styles.css'] = '@import "./nuxt.css";\n' + styles(id); }
+}
+function contributedFiles(files: Record<string, string>, adapter: FrameworkAdapter, context: FrameworkAdapterContext): void {
+  for (const [path, content] of Object.entries(adapter.files?.(context) ?? {})) {
+    if (!/^src\/ui\/[a-zA-Z0-9_./-]+$/.test(path) || path.includes('..') || typeof content !== 'string') throw new Error('FRAMEWORK_ADAPTER_FILE_INVALID:' + adapter.id);
+    files[path] = content;
   }
+}
+function visualFiles(files: Record<string, string>, adapter: FrameworkAdapter, context: FrameworkAdapterContext): void {
+  const { model, template, selection, projectId } = context;
+  files['scripts/licenses.mjs'] = licenseSource;
+  files['src/targets/preview/main.ts'] = browserSource(selection, projectId, 'preview');
+  files['src/ui/styles.css'] = styles(projectId);
+  engineFiles(files, model, template, adapter.engine, projectId);
+  contributedFiles(files, adapter, context);
+}
+function targetFiles(files: Record<string, string>, selected: ProjectSelection, id: string, name: string): void {
   for (const target of selected.targets) {
     if (target === 'plugin') files['src/targets/plugin/main.ts'] = pluginSource(id, name);
     else if (target === 'cli') { files['src/targets/cli/commands.ts'] = cliSource(); files['src/targets/cli/main.ts'] = '#!/usr/bin/env node\n' + cliEntry; }
     else files[`src/targets/${target}/main.ts`] = browserSource(selected, id, target);
   }
+}
+/** Pure target adapter downstream of the shared parser, migration, model and reference validation. */
+export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection, adapterOverride?: FrameworkAdapter): Artifact[] {
+  const selected = validateProjectSelection(input);
+  const adapter = adapterOverride ?? requireFrameworkAdapter(selected.framework);
+  requireMatchingAdapter(adapter, selected);
+  const id = String(model.project.id), name = String(model.project.name);
+  const files = sharedFiles(model, template, selected, adapter, id, name);
+  if (selected.targets.some(target => target === 'webapp' || target === 'website')) files['scripts/serve.mjs'] = serveSource;
+  if (selected.targets.some(target => target !== 'cli')) visualFiles(files, adapter, { model, template, selection: selected, projectId: id, projectName: name });
+  targetFiles(files, selected, id, name);
+  const origins = model.screens.map(page => ({ file: 'companion.project.json', entityId: page.id, jsonPointer: '/design/nodes', document: 'normalized' as const }));
   const artifacts: Artifact[] = Object.entries(files).map(([path, content]) => ({ path, content, ownership: 'managed', producer: 'project-starter',
-    ...(path === 'src/core/project.ts' ? { origins: model.screens.map(page => ({ file: 'companion.project.json', entityId: page.id,
-      jsonPointer: '/design/nodes', document: 'normalized' as const })) } : {}) }));
+    ...(path === 'src/core/project.ts' ? { origins } : {}) }));
   return [...artifacts, ...template.skillFiles];
 }

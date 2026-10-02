@@ -1,6 +1,6 @@
-import type { Model } from '../../../companion/compiler/model.ts';
-import type { TemplateSnapshot } from '../../../../bin/compiler/domain/contracts.ts';
-import type { ProjectSelection } from '../../../../bin/compiler/domain/project-starter.ts';
+import type { Model } from '../../../../scripts/companion/compiler/model.ts';
+import type { TemplateSnapshot } from '../../domain/contracts.ts';
+import type { ProjectSelection } from '../../domain/project-starter.ts';
 
 export type FrameworkEngine = 'none' | 'vanilla' | 'nuxtui' | 'angular';
 export interface FrameworkAdapterContext {
@@ -28,10 +28,14 @@ function pins(value: Readonly<Record<string, string>> | undefined, label: string
       throw new Error('FRAMEWORK_ADAPTER_' + label + '_INVALID');
   }
 }
+const engines: readonly string[] = ['none', 'vanilla', 'nuxtui', 'angular'];
+/** Identity, label, engine and optional file contributor are well formed. */
+function wellFormed(adapter: FrameworkAdapter | undefined): adapter is FrameworkAdapter {
+  if (!adapter || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(adapter.id) || adapter.id.length > 64) return false;
+  return Boolean(adapter.label) && engines.includes(adapter.engine) && (adapter.files === undefined || typeof adapter.files === 'function');
+}
 export function defineFrameworkAdapter<const T extends FrameworkAdapter>(adapter: T): T {
-  if (!adapter || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(adapter.id) || adapter.id.length > 64 || !adapter.label
-    || !['none', 'vanilla', 'nuxtui', 'angular'].includes(adapter.engine) || (adapter.files !== undefined && typeof adapter.files !== 'function'))
-    throw new Error('FRAMEWORK_ADAPTER_INVALID');
+  if (!wellFormed(adapter)) throw new Error('FRAMEWORK_ADAPTER_INVALID');
   pins(adapter.dependencies, 'DEPENDENCY');
   pins(adapter.devDependencies, 'DEV_DEPENDENCY');
   for (const name of Object.keys(adapter.dependencies ?? {})) {
