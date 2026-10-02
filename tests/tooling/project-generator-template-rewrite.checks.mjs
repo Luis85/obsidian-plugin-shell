@@ -1,0 +1,79 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
+import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { copiedTemplateMarker, rewriteTemplate } from '../../scripts/companion/compiler/file-code.ts';
+import { relationshipCode } from '../../scripts/companion/compiler/relationship-code.ts';
+import { httpCode } from '../../scripts/companion/compiler/http-code.ts';
+
+// Copied template text is rewritten by exact literals; a drifted literal must stop generation, never emit stale text.
+const root = fileURLToPath(new URL('../../', import.meta.url));
+const live = await loadTemplateSnapshot(root);
+const detail = JSON.parse(await readFile(new URL('../fixtures/companion/detail-v4.json', import.meta.url), 'utf8'));
+const model = projectModel(migrateCompanionDocument(boundaryProject(detail)).document);
+const relationshipTests = 'tests/tooling/project-generator-relationships.checks.mjs';
+const httpTests = 'tests/tooling/project-generator-http.checks.mjs';
+const nodeTest = "import { test } from 'node:test';";
+const drifts = [
+  [relationshipCode, relationshipTests, copiedTemplateMarker],
+  [relationshipCode, relationshipTests, nodeTest],
+  [relationshipCode, relationshipTests, '../../scripts/companion/runtime/relationships.ts'],
+  [relationshipCode, relationshipTests, '../../scripts/companion/runtime/relationship-session.ts'],
+  [relationshipCode, 'scripts/companion/runtime/relationship-session.ts', "'./relationships.ts'"],
+  [relationshipCode, 'scripts/companion/runtime/relationship-session.ts', "'./note-values.ts'"],
+  [httpCode, httpTests, copiedTemplateMarker],
+  [httpCode, httpTests, nodeTest],
+  [httpCode, httpTests, '../../scripts/companion/runtime/json-http.ts'],
+  [httpCode, 'scripts/companion/runtime/json-http.ts', "'./contract.ts'"],
+];
+const outputs = {
+  [relationshipTests]: '/relationships.test.mjs', [httpTests]: '/http.test.mjs',
+  'scripts/companion/runtime/relationship-session.ts': '/application/relationship-session.ts',
+  'scripts/companion/runtime/json-http.ts': '/infrastructure/json-http.ts',
+};
+function drifted(path, literal) {
+  return { ...live, text: requested => {
+    const source = live.text(requested);
+    return requested === path ? source.replaceAll(literal, '') : source;
+  } };
+}
+async function emit(emitter, template) {
+  const files = new Map();
+  await emitter(template, model, (path, content) => files.set(path, content));
+  return files;
+}
+
+test('template rewrites replace every occurrence and reject a missing literal by name', () => {
+  assert.equal(rewriteTemplate("a 'x' b 'x'", [["'x'", "'y'"]], 'example.ts'), "a 'y' b 'y'");
+  assert.throws(() => rewriteTemplate("a 'x'", [["'x'", "'y'"], ["'z'", "'w'"]], 'example.ts'),
+    { message: "GENERATOR_INVALID: Template example.ts no longer contains 'z'." });
+});
+
+test('the copied template suites start with the marker the generator removes', async () => {
+  for (const path of [relationshipTests, httpTests]) {
+    const source = await readFile(new URL(path, `file://${root}`), 'utf8');
+    assert.ok(source.startsWith(copiedTemplateMarker + nodeTest + '\n'), path);
+  }
+  const files = new Map([...await emit(relationshipCode, live), ...await emit(httpCode, live)]);
+  for (const name of ['relationships.test.mjs', 'http.test.mjs']) {
+    const content = files.get(`${model.testRoot}/${name}`);
+    assert.ok(content?.startsWith("import { test } from 'vitest';\n"), name);
+    assert.ok(!content.includes('Copied template text') && !content.includes('scripts/companion/runtime'), name);
+  }
+});
+
+for (const [emitter, path, literal] of drifts) {
+  test(`${emitter.name} fails loudly when ${path} no longer contains ${literal.trim()}`, async () => {
+    const added = [];
+    await assert.rejects(emitter(drifted(path, literal), model, file => added.push(file)), error => {
+      assert.ok(error.message.startsWith('GENERATOR_INVALID: Template '), error.message);
+      assert.ok(error.message.endsWith(`no longer contains ${literal}.`), error.message);
+      return true;
+    });
+    assert.ok(!added.some(file => file.endsWith(outputs[path])), `${outputs[path]} was emitted from drifted text`);
+  });
+}

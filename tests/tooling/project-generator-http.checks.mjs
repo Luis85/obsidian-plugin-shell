@@ -1,3 +1,4 @@
+// Copied template text: generated projects receive this suite with this line removed, a vitest import and rewritten runtime paths. Keep the plain node:test import.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createJsonHttpPort, validateHttpSource } from '../../scripts/companion/runtime/json-http.ts';
