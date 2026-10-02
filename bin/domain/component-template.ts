@@ -224,47 +224,61 @@ function readAccessibility(value: unknown): ComponentTemplate['accessibility'] {
   };
 }
 
-export function validateComponentTemplate(value: unknown): ComponentTemplate {
-  const row = record(value);
-  fields(row, ['$schema', 'schemaVersion', 'id', 'name', 'version', 'templateType', 'atomicLevel', 'category', 'description',
-    'tags', 'recommendedFor', 'useWhen', 'avoidWhen', 'capabilities', 'states', 'props', 'events', 'children', 'slots', 'design', 'accessibility']);
+interface TemplateIdentity {
+  id: string;
+  version: string;
+  templateType: ComponentTemplateType;
+  atomicLevel: AtomicLevel;
+  states: string[];
+}
+function readIdentity(row: Record<string, unknown>): TemplateIdentity {
   requireSketch(row.schemaVersion === 1, 'TEMPLATE_VERSION', 'Unsupported component-template schemaVersion; expected 1.');
   const version = text(row.version, 'version', 40);
   requireSketch(/^\d+\.\d+\.\d+$/.test(version), 'TEMPLATE_INVALID', 'Template version must be semantic x.y.z.');
   requireSketch(TEMPLATE_TYPES.includes(row.templateType as ComponentTemplateType), 'TEMPLATE_INVALID', 'Unknown template type.');
   requireSketch(ATOMIC_LEVELS.includes(row.atomicLevel as AtomicLevel), 'TEMPLATE_INVALID', 'Unknown atomic level.');
-  const atomicLevel = row.atomicLevel as AtomicLevel;
-  const id = identifier(row.id);
+  const atomicLevel = row.atomicLevel as AtomicLevel, templateType = row.templateType as ComponentTemplateType;
+  const id = identifier(row.id), states = strings(row.states, 'state', 8);
   requireSketch(id.startsWith(atomicLevel + '.'), 'TEMPLATE_INVALID',
     'Template ID prefix must match its Atomic Design level: ' + atomicLevel + '.*.');
-  const states = strings(row.states, 'state', 8);
-  requireSketch(states.every(state => VISUAL_STATES.some(candidate => candidate === state)), 'TEMPLATE_INVALID', 'Template states must use the visual IR state vocabulary.');
-  const children = readChildren(row.children);
-  const slots = readSlots(row.slots);
-  const templateType = row.templateType as ComponentTemplateType;
-  requireSketch(templateType.startsWith('page') === (atomicLevel === 'page'), 'TEMPLATE_INVALID',
-    'Only page templates use the page atomic level.');
-  requireSketch(atomicLevel !== 'atom' || templateType === 'component', 'TEMPLATE_INVALID',
+  requireSketch(states.every(state => VISUAL_STATES.some(candidate => candidate === state)), 'TEMPLATE_INVALID',
+    'Template states must use the visual IR state vocabulary.');
+  return { id, version, templateType, atomicLevel, states };
+}
+function validateTemplateShape(
+  atomicLevel: AtomicLevel,
+  templateType: ComponentTemplateType,
+  children: readonly TemplateChild[],
+  slots: readonly TemplateSlot[],
+  design: TemplateDesign,
+): void {
+  const pageType = templateType.startsWith('page');
+  requireSketch(pageType === (atomicLevel === 'page'), 'TEMPLATE_INVALID', 'Only page templates use the page atomic level.');
+  if (atomicLevel === 'atom') requireSketch(templateType === 'component', 'TEMPLATE_INVALID',
     'Atoms are leaf components and cannot declare child or brick composition.');
-  requireSketch(templateType !== 'page-with-bricks' || slots.length > 0, 'TEMPLATE_INVALID', 'A page-with-bricks template needs at least one named slot.');
-  requireSketch(templateType !== 'component-with-children' || children.length > 0 || slots.length > 0,
-    'TEMPLATE_INVALID', 'A component-with-children template needs children or slots.');
-  requireSketch(templateType !== 'component' || (children.length === 0 && slots.length === 0),
-    'TEMPLATE_INVALID', 'A component template cannot declare children or bricks; use component-with-children.');
-  requireSketch(templateType !== 'page' || slots.length === 0,
-    'TEMPLATE_INVALID', 'A page template cannot declare bricks; use page-with-bricks.');
-  const design = readDesign(row.design);
-  requireSketch(!templateType.startsWith('page') || design.kind === 'page' || design.kind === 'recipe',
-    'TEMPLATE_INVALID', 'Page templates use page or recipe designs.');
-  requireSketch(templateType.startsWith('page') || design.kind !== 'page', 'TEMPLATE_INVALID', 'Component templates cannot use a page design.');
+  if (templateType === 'page-with-bricks') requireSketch(slots.length > 0, 'TEMPLATE_INVALID',
+    'A page-with-bricks template needs at least one named slot.');
+  if (templateType === 'component-with-children') requireSketch(children.length > 0 || slots.length > 0, 'TEMPLATE_INVALID',
+    'A component-with-children template needs children or slots.');
+  if (templateType === 'component') requireSketch(children.length === 0 && slots.length === 0, 'TEMPLATE_INVALID',
+    'A component template cannot declare children or bricks; use component-with-children.');
+  if (templateType === 'page') requireSketch(slots.length === 0, 'TEMPLATE_INVALID',
+    'A page template cannot declare bricks; use page-with-bricks.');
+  if (pageType) requireSketch(design.kind === 'page' || design.kind === 'recipe', 'TEMPLATE_INVALID',
+    'Page templates use page or recipe designs.');
+  else requireSketch(design.kind !== 'page', 'TEMPLATE_INVALID', 'Component templates cannot use a page design.');
+}
+export function validateComponentTemplate(value: unknown): ComponentTemplate {
+  const row = record(value);
+  fields(row, ['$schema', 'schemaVersion', 'id', 'name', 'version', 'templateType', 'atomicLevel', 'category', 'description',
+    'tags', 'recommendedFor', 'useWhen', 'avoidWhen', 'capabilities', 'states', 'props', 'events', 'children', 'slots', 'design', 'accessibility']);
+  const identity = readIdentity(row), children = readChildren(row.children), slots = readSlots(row.slots), design = readDesign(row.design);
+  validateTemplateShape(identity.atomicLevel, identity.templateType, children, slots, design);
   return {
     schemaVersion: 1,
     ...(row.$schema === undefined ? {} : { $schema: text(row.$schema, '$schema', 500) }),
-    id,
+    ...identity,
     name: text(row.name, 'name', 120),
-    version,
-    templateType,
-    atomicLevel,
     category: text(row.category, 'category', 120),
     description: text(row.description, 'description', 2000),
     tags: strings(row.tags, 'tag'),
@@ -272,7 +286,6 @@ export function validateComponentTemplate(value: unknown): ComponentTemplate {
     useWhen: strings(row.useWhen, 'useWhen'),
     avoidWhen: strings(row.avoidWhen, 'avoidWhen'),
     capabilities: strings(row.capabilities, 'capability'),
-    states,
     props: readProps(row.props),
     events: readEvents(row.events),
     children,

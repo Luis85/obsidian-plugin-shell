@@ -5,27 +5,25 @@ function same(value: string, expected?: string): boolean {
   return expected === undefined || value.toLowerCase() === expected.toLowerCase();
 }
 
+function matchesTemplate(template: ComponentTemplate, query: ComponentTemplateQuery, needle?: string): boolean {
+  if (needle) {
+    const searchable = [template.id, template.name, template.category, template.description,
+      ...template.tags, ...template.capabilities].join(' ').toLowerCase();
+    if (!searchable.includes(needle)) return false;
+  }
+  if (query.templateType && template.templateType !== query.templateType) return false;
+  if (query.atomicLevel && template.atomicLevel !== query.atomicLevel) return false;
+  if (!same(template.category, query.category)) return false;
+  if (query.tag && !template.tags.some(tag => same(tag, query.tag))) return false;
+  if (query.recommendedFor && !template.recommendedFor.some(item => same(item, query.recommendedFor))) return false;
+  return true;
+}
 export function filterComponentTemplates(
   entries: readonly ComponentTemplateEntry[],
   query: ComponentTemplateQuery = {},
 ): ComponentTemplateEntry[] {
   const needle = query.query?.trim().toLowerCase();
-  return entries.filter(({ template }) => {
-    const searchable = [
-      template.id,
-      template.name,
-      template.category,
-      template.description,
-      ...template.tags,
-      ...template.capabilities,
-    ].join(' ').toLowerCase();
-    return (!needle || searchable.includes(needle))
-      && (!query.templateType || template.templateType === query.templateType)
-      && (!query.atomicLevel || template.atomicLevel === query.atomicLevel)
-      && same(template.category, query.category)
-      && (!query.tag || template.tags.some(tag => same(tag, query.tag)))
-      && (!query.recommendedFor || template.recommendedFor.some(item => same(item, query.recommendedFor)));
-  });
+  return entries.filter(entry => matchesTemplate(entry.template, query, needle));
 }
 
 export function componentTemplateSummary(entry: ComponentTemplateEntry) {

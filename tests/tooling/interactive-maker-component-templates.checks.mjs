@@ -262,7 +262,7 @@ test('instantiation covers catalog, recipe, composition and both page shapes on 
 
   assert.ok(document.design.library.some(item => item.templateId === 'organism.website-header'));
   assert.ok(document.design.visualDesigns.components.some(item => item.id === composition.id && item.template.length > 0));
-  assert.ok(document.design.visualDesigns.pages.some(item => item.id === pageWithSlots.id && item.root.length === 1));
+  assert.ok(document.design.visualDesigns.pages.some(item => item.ownerId === pageWithSlots.id && item.root.length === 1));
   const dashboardSurface = document.design.nodes.find(item => item.id === pageWithSlots.id);
   assert.ok(Array.isArray(dashboardSurface?.components) && dashboardSurface.components.length === 4);
   assert.ok(dashboardSurface.components.every(reference => document.design.library.some(item => item.id === reference.id)));
@@ -315,7 +315,7 @@ test('framework template commands share discovery and reviewed file-plan boundar
       args: ['page.dashboard'],
       options: { project: 'project.json', name: 'Overview' },
     }, context);
-    assert.equal(preview.status, 'planned');
+    assert.equal(preview.status, 'planned', JSON.stringify(preview.diagnostics));
     const applied = await executeOperation({
       command: 'templates instantiate',
       args: ['page.dashboard'],

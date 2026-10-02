@@ -32,6 +32,67 @@ function bindCatalogProps(
   }
 }
 
+function reusableComponent(
+  document: SketchDocument,
+  template: ComponentTemplate,
+  canonical: boolean,
+): string | undefined {
+  if (!canonical) return undefined;
+  const library = document.design.library.find(item => item.templateId === template.id && item.version === template.version
+    && (item.templateCanonical === true || (item.templateCanonical === undefined && item.name === template.name)));
+  return library && document.design.visualDesigns.components.find(item => item.libraryId === library.id)?.id;
+}
+function applyCatalogStructure(
+  document: SketchDocument,
+  template: ComponentTemplate,
+  catalog: Map<string, ComponentTemplate>,
+  created: Map<string, string>,
+  definitionId: string,
+): void {
+  const store = document.design.visualDesigns, definition = store.components.find(item => item.id === definitionId)!;
+  requireSketch(template.design.kind === 'catalog', 'TEMPLATE_KIND', 'Expected a catalog component template.');
+  const node = visualNuxt(visualAllocate(store, 'vn'), template.design.entryId, {},
+    { name: template.name, a11y: template.accessibility.notes });
+  bindCatalogProps(node, template, template.design.entryId);
+  const entry = visualCatalogEntry(template.design.entryId)!;
+  const childSlot = entry.slots.includes('default') ? 'default' : entry.slots[0];
+  if (childSlot) node.slots[childSlot] = template.children.map(child => {
+    const target = catalog.get(child.template)!;
+    return visualProject(visualAllocate(store, 'vn'), componentFromTemplate(document, target, catalog, created), { name: target.name });
+  });
+  definition.implementation = { catalog: 'nuxt-ui', entryId: template.design.entryId };
+  definition.template = [node];
+}
+function applyCompositionStructure(
+  document: SketchDocument,
+  template: ComponentTemplate,
+  catalog: Map<string, ComponentTemplate>,
+  created: Map<string, string>,
+  definitionId: string,
+): void {
+  requireSketch(template.design.kind === 'composition', 'TEMPLATE_KIND', 'Expected a composition component template.');
+  const store = document.design.visualDesigns, children: UiNode[] = template.children.map(child => {
+    const target = catalog.get(child.template)!;
+    return visualProject(visualAllocate(store, 'vn'), componentFromTemplate(document, target, catalog, created), { name: target.name });
+  });
+  if (!children.length) children.push(visualText(visualAllocate(store, 'vn'), template.description, 'p',
+    { name: template.name + ' placeholder' }));
+  store.components.find(item => item.id === definitionId)!.template = [visualElement(visualAllocate(store, 'vn'), template.design.tag, {
+    name: template.name, a11y: template.accessibility.notes, layout: visualLayoutRules(template.design.layout), children,
+  })];
+}
+function applyComponentStructure(
+  document: SketchDocument,
+  template: ComponentTemplate,
+  catalog: Map<string, ComponentTemplate>,
+  created: Map<string, string>,
+  definitionId: string,
+): void {
+  if (template.design.kind === 'catalog') { applyCatalogStructure(document, template, catalog, created, definitionId); return; }
+  const definition = document.design.visualDesigns.components.find(item => item.id === definitionId)!;
+  if (template.design.kind === 'recipe') { definition.template = visualExpand(document.design.visualDesigns, template.design.recipeId); return; }
+  applyCompositionStructure(document, template, catalog, created, definitionId);
+}
 function componentFromTemplate(
   document: SketchDocument,
   template: ComponentTemplate,
@@ -42,95 +103,24 @@ function componentFromTemplate(
   const existing = created.get(template.id);
   if (existing) return existing;
   requireSketch(!template.templateType.startsWith('page'), 'TEMPLATE_KIND', 'A page template cannot be used as a component child.');
-
-  const store = document.design.visualDesigns;
   const canonical = override === undefined || override === template.name;
-  if (canonical) {
-    const library = document.design.library.find(item => item.templateId === template.id && item.version === template.version
-      && (item.templateCanonical === true || (item.templateCanonical === undefined && item.name === template.name)));
-    const definition = library && store.components.find(item => item.libraryId === library.id);
-    if (definition) { created.set(template.id, definition.id); return definition.id; }
-  }
+  const reusable = reusableComponent(document, template, canonical);
+  if (reusable) { created.set(template.id, reusable); return reusable; }
 
   const id = addComponent(document, override ?? template.name);
   created.set(template.id, id);
-  const definition = store.components.find(item => item.id === id)!;
+  const definition = document.design.visualDesigns.components.find(item => item.id === id)!;
   const library = document.design.library.find(item => item.id === definition.libraryId)!;
-
   definition.description = template.description;
   definition.props = template.props.map(prop => ({ ...prop }));
-  definition.emits = template.events.map(event => ({
-    name: event.name,
-    payloadType: event.payloadType,
-    ...(event.description ? { description: event.description } : {}),
-  }));
-  library.category = template.category;
-  library.description = template.description;
-  library.version = template.version;
-  library.origin = 'template';
-  library.templateId = template.id;
-  library.templateCanonical = canonical;
-  library.atomicLevel = template.atomicLevel;
-  library.props = template.props.map(prop => prop.name).join(', ');
-  library.events = template.events.map(event => event.name).join(', ');
-
-  if (template.design.kind === 'catalog') {
-    const node = visualNuxt(
-      visualAllocate(store, 'vn'),
-      template.design.entryId,
-      {},
-      { name: template.name, a11y: template.accessibility.notes },
-    );
-    bindCatalogProps(node, template, template.design.entryId);
-    const entry = visualCatalogEntry(template.design.entryId)!;
-    const childSlot = entry.slots.includes('default') ? 'default' : entry.slots[0];
-    if (childSlot && template.children.length) {
-      node.slots[childSlot] = template.children.map(child => {
-        const target = catalog.get(child.template)!;
-        return visualProject(visualAllocate(store, 'vn'), componentFromTemplate(document, target, catalog, created), { name: target.name });
-      });
-    }
-    definition.implementation = { catalog: 'nuxt-ui', entryId: template.design.entryId };
-    definition.template = [node];
-    return id;
-  }
-
-  if (template.design.kind === 'recipe') {
-    definition.template = visualExpand(store, template.design.recipeId);
-    return id;
-  }
-
-  requireSketch(template.design.kind === 'composition', 'TEMPLATE_KIND',
-    'Component templates use catalog, recipe or composition designs.');
-  const children: UiNode[] = template.children.map(child => {
-    const target = catalog.get(child.template)!;
-    return visualProject(
-      visualAllocate(store, 'vn'),
-      componentFromTemplate(document, target, catalog, created),
-      { name: target.name },
-    );
-  });
-  if (!children.length) {
-    children.push(visualText(
-      visualAllocate(store, 'vn'),
-      template.description,
-      'p',
-      { name: template.name + ' placeholder' },
-    ));
-  }
-  definition.template = [visualElement(
-    visualAllocate(store, 'vn'),
-    template.design.tag,
-    {
-      name: template.name,
-      a11y: template.accessibility.notes,
-      layout: visualLayoutRules(template.design.layout),
-      children,
-    },
-  )];
+  definition.emits = template.events.map(event => ({ name: event.name, payloadType: event.payloadType,
+    ...(event.description ? { description: event.description } : {}) }));
+  Object.assign(library, { category: template.category, description: template.description, version: template.version,
+    origin: 'template', templateId: template.id, templateCanonical: canonical, atomicLevel: template.atomicLevel,
+    props: template.props.map(prop => prop.name).join(', '), events: template.events.map(event => event.name).join(', ') });
+  applyComponentStructure(document, template, catalog, created, id);
   return id;
 }
-
 function regionTag(role: string): 'header' | 'nav' | 'section' {
   if (role === 'header') return 'header';
   if (role === 'navigation') return 'nav';
