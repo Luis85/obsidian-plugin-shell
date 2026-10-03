@@ -130,7 +130,7 @@ function nativeEntities(m: Model): Map<string, Entity> {
   for(const entity of relationshipScope(m,true).entities) selected.set(entity.id,entity);
   return selected;
 }
-export async function persistenceCode(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
+export function persistenceCode(templateRoot: TemplateSnapshot, m: Model, add: Add): void {
   const selected = nativeEntities(m);
   if (!selected.size) return;
   const imports: string[] = []; const registrations: string[] = [];
@@ -140,9 +140,9 @@ export async function persistenceCode(templateRoot: TemplateSnapshot, m: Model, 
     registrations.push(name);
     persistenceTest(m, entity, props, file, add);
   }
-  const original = await templateRoot.text(['src/bootstrap/features.ts'].join('/'));
+  const original = templateRoot.text('src/bootstrap/features.ts');
   add('src/bootstrap/features.ts', imports.join('\n')+'\n'+registerFeatures(original, registrations));
   registryTest(m, selected, add);
   const sourceFile = `${m.sourceRoot}/application/note-operations.ts`;
-  add(sourceFile, await templateRoot.text(['templates/companion/runtime/note-operations.ts'].join('/')));
+  add(sourceFile, templateRoot.text('templates/companion/runtime/note-operations.ts'));
 }

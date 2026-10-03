@@ -18,6 +18,8 @@ The generated toolbar gains a project h1, visible focus indicators, minimum 36px
 
 ## Compatibility is checked, not discarded
 
+> **Retired (2026-10-03):** the compatibility test described below (`tests/tooling/compiler-compatibility.checks.mjs`) was removed with the unreleased compatibility layer in `b91e3185`, and its orphaned `tests/fixtures/compiler/*.json` snapshots were deleted afterwards. Both remain in git history; this section is a historical record of that transition, not a current gate.
+
 `post-mvp-base-code.json` and `template-inputs.json` are unchanged. All twelve original product snapshots were verified before editing. `preview-host-delta.json` records only four intentional generated-file changes per fixture: the new browser-host module, its entry, the preview toolbar component and its stylesheet.
 
 The compatibility test checks every new file hash first, reverses only that explicit delta, then requires the exact original aggregate digest. All other product bytes remain covered by the original snapshot. A negative control changes the new host output and proves rejection. This is a reviewed source-byte transition, not automatic acceptance of screenshot baselines or a directory exclusion.

@@ -3,6 +3,7 @@
  * so the product README/AGENTS.md/CI own the root without breaking the framework docs' local links. */
 import { posix } from 'node:path';
 import type { Entry } from './file-code.ts';
+import { requireValue } from './model.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
   ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'].map(name => [name, `docs/framework/${name}`]));
@@ -62,7 +63,11 @@ export function relocateFrameworkDocuments(entries: Map<string, Entry>): void {
     const to = relocatedPath(path);
     const content = !entry.encoding && path.endsWith('.md') ? rebaseMarkdown(entry.content, path, to) : entry.content;
     if (to === path && content === entry.content) continue;
-    if (to !== path) entries.delete(path);
+    if (to !== path) {
+      // Never let a relocated root document silently replace another file at its new home.
+      requireValue(!entries.has(to), 'Relocated framework file collides with an existing template file: ' + to);
+      entries.delete(path);
+    }
     entries.set(to, { ...entry, path: to, content });
   }
 }

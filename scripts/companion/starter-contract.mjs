@@ -1,5 +1,5 @@
 /** External starter projections are data. The retained browser fixture uses v5; current consumers also validate v6. */
-import { validateCompanionDocument, validateCompanionFolders } from './project-contract.mjs';
+import { validateCompanionDocument, validateCompanionFolders, COMPANION_MAX_BYTES } from './project-contract.mjs';
 import { validateAuthoringDocument, parseAuthoringDocument } from './authoring-contract.ts';
 import { validateTooling } from './tooling-contract.mjs';
 export const STARTER_CATALOG_VERSION = 1;
@@ -12,6 +12,8 @@ function starterDocument(value) {
   const legacy = structuredClone(value);
   const tooling = legacy?.tooling; if (legacy) delete legacy.tooling;
   validateCompanionDocument(legacy); validateTooling(tooling);
+  // The frozen envelope bounds itself without tooling; the whole projection keeps the same 4 MB transfer limit.
+  starterAssert(new TextEncoder().encode(JSON.stringify(value)).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB import/export limit.');
   return value;
 }
 export function validateStarterCatalog(value) {

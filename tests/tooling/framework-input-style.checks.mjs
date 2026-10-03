@@ -7,7 +7,6 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { readInput, ask } from '../../scripts/shared/input.ts';
-import { readInput as sharedReadInput, ask as sharedAsk } from '../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments, validateRequest, descriptor } from '../../bin/adapters/framework/catalog.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
@@ -136,9 +135,4 @@ test('shared confirmation policy keeps yes/no semantics explicit and case-insens
   for (const value of ['y', 'Y', 'yes', ' YES ']) assert.equal(parseConfirmation(value), true);
   for (const value of ['', ' ', 'n', 'N', 'no', ' NO ']) assert.equal(parseConfirmation(value), false);
   for (const value of ['maybe', '1', 'yep']) assert.equal(parseConfirmation(value), null);
-});
-
-test('framework input entry remains a compatibility re-export of shared typed transport', () => {
-  assert.equal(readInput, sharedReadInput);
-  assert.equal(ask, sharedAsk);
 });

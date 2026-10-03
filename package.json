@@ -72,7 +72,7 @@
     "check:source": "node scripts/quality/check-source.mjs",
     "check:presentation": "node scripts/quality/check-presentation.mjs",
     "check:artifacts": "node scripts/quality/check-artifacts.mjs",
-    "lint": "node scripts/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src bin plugins",
+    "lint": "node scripts/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src bin plugins templates/companion/runtime",
     "analyze": "fallow dead-code -c configs/quality/fallow.json",
     "verify": "node scripts/quality/verify.mjs",
     "help": "node scripts/help.mjs",

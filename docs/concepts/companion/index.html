@@ -15192,6 +15192,8 @@ function starterDocument(value) {
   const legacy = structuredClone(value);
   const tooling = legacy?.tooling; if (legacy) delete legacy.tooling;
   validateCompanionDocument(legacy); validateTooling(tooling);
+  // The frozen envelope bounds itself without tooling; the whole projection keeps the same 4 MB transfer limit.
+  starterAssert(new TextEncoder().encode(JSON.stringify(value)).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB import/export limit.');
   return value;
 }
 function validateStarterCatalog(value) {

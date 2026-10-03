@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "description": "Every file under the scanned test roots belongs to exactly one suite or one helper entry. Run `npm run test:suites -- --check` after adding a test; docs/testing/TEST-SUITES.md explains each suite.",
+  "documentation": "docs/testing/TEST-SUITES.md",
   "roots": [
     {
       "path": "tests/tooling"
@@ -367,7 +368,6 @@
       },
       "include": [
         "tests/tooling/framework-*.checks.mjs",
-        "tests/tooling/framework-*.test.mjs",
         "tests/tooling/capability-discovery.checks.mjs",
         "tests/tooling/starter-*.checks.mjs"
       ],
@@ -752,7 +752,6 @@
       "include": [
         "tests/tooling/native-*.checks.mjs",
         "tests/tooling/obsidian-*.checks.mjs",
-        "tests/tooling/dev-*.checks.mjs",
         "tests/tooling/performance-*.checks.mjs"
       ],
       "verify": "tooling",
