@@ -282,7 +282,7 @@ test('kit upgrade preserves an edited plugin config, follows unedited defaults a
   await writeFile(join(old, 'bin/plugins/added/config.json'), edited);
   assert.ok((await upgradePlan({ root: old, frameworkRoot: old }, newDefault)).conflicts.includes('bin/plugins/added/config.json'));
 });
-test('kit verification fails with an explicit code for missing configs, stray configs and the retired .framework layout', async t => {
+test('kit verification fails with an explicit code for missing configs, stray configs and a missing kit', async t => {
   const [root, legacy] = await kitRoots(t, 2);
   await kitFixture(root, '0.4.0', { 'bin/app.js': 'app' }, { demo: '{}' });
   await rm(join(root, 'bin/plugins/demo/config.json'));
@@ -293,10 +293,9 @@ test('kit verification fails with an explicit code for missing configs, stray co
   await assert.rejects(verifyKit(root), { code: 'KIT_INVENTORY' });
   await mkdir(join(legacy, '.framework'), { recursive: true });
   await writeFile(join(legacy, '.framework/kit.json'), JSON.stringify({ schemaVersion: 1 }));
-  await assert.rejects(verifyKit(legacy), { code: 'KIT_LAYOUT_MIGRATION_REQUIRED' });
-  await assert.rejects(upgradePlan({ root: legacy, frameworkRoot: legacy }, root), { code: 'KIT_LAYOUT_MIGRATION_REQUIRED' });
-  const status = await executeOperation({ command: 'framework status', args: [], options: {} }, { root: legacy, frameworkRoot: legacy });
-  assert.equal(status.diagnostics[0].code, 'KIT_LAYOUT_MIGRATION_REQUIRED', 'a clear diagnostic, not a raw ENOENT');
-  await rm(join(legacy, '.framework'), { recursive: true });
+  // The retired layout is not probed or migrated; it is simply not a kit, reported explicitly rather than as a raw ENOENT.
   await assert.rejects(verifyKit(legacy), { code: 'KIT_REQUIRED' });
+  await assert.rejects(upgradePlan({ root: legacy, frameworkRoot: legacy }, root), { code: 'KIT_REQUIRED' });
+  const status = await executeOperation({ command: 'framework status', args: [], options: {} }, { root: legacy, frameworkRoot: legacy });
+  assert.equal(status.diagnostics[0].code, 'KIT_REQUIRED', 'a clear diagnostic, not a raw ENOENT');
 });

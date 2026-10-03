@@ -60,12 +60,9 @@ export function kitManifest(value: unknown): Kit {
   return { schemaVersion: 2, version: header.version, compilerVersion: header.compilerVersion, sourceHash: header.sourceHash, files, bootstrap };
 }
 
-/** True for a bin-owned kit; the retired `.framework/kit.json` layout gets an explicit diagnostic, never a migration shim. */
+/** True for a bin-owned kit. Retired layouts are never probed: without bin/kit.json callers report KIT_REQUIRED. */
 export async function kitPresent(root: string): Promise<boolean> {
-  if (await exists(join(root, 'bin/kit.json'))) return true;
-  requireThat(!await exists(join(root, '.framework/kit.json')), 'KIT_LAYOUT_MIGRATION_REQUIRED',
-    'This project uses the retired .framework kit layout (schema 1). No automatic migration exists: extract a current kit and reapply project changes in review.');
-  return false;
+  return exists(join(root, 'bin/kit.json'));
 }
 
 const templatePluginConfig = /^bin\/template\/plugins\/([^/]+)\/config\.json$/;
