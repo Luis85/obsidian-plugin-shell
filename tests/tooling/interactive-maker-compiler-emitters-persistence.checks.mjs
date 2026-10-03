@@ -129,6 +129,8 @@ test('relationship scope follows writable mappings and read lists, and refuses u
   const cascade = await dataDocument(); cascade.design.semantic.relationships[1].onDelete = 'cascade';
   assert.throws(() => relationshipScope(model(cascade)), { message: 'GENERATOR_INVALID: Native relationship writes require supported cardinalities and restrict deletion. Cascade/unlink require a separately implemented transaction.' });
   const connected = await dataDocument(); connected.design.semantic.relationships.push({ id: 'er-relationship-21', name: 'Sub-project', source: 'er-entity-5', target: 'er-entity-5', key: 'parent_project', sourceCard: '0..*', targetCard: '0..1', onDelete: 'restrict' });
+  connected.design.dataSources.sources[1].operations.push({ id: 'ds-operation-19', slug: 'archive-tasks', name: 'Archive', direction: 'write', method: 'adapter', resource: 'Starter/Task', description: 'Unimplemented',
+    input: { mode: 'fields', entity: null, many: false, fields: [{ name: 'id', type: 'string', required: true }], schema: null }, output: { mode: 'none', entity: null, many: false, fields: [], schema: null } });
   const tested = recorder(); await relationshipCode(template, model(connected), tested.add);
   assert.deepEqual([...tested.files.keys()].filter(path => path.includes('/relationships/')), ['tests/project/relationships/starter-task.test.mjs']);
   const duplicate = model(await dataDocument()); duplicate.document.design.semantic.relationships.push({ ...duplicate.document.design.semantic.relationships[0] });

@@ -1,6 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { visualSpecs, visualDefinitions, visualNuxtImports, visualContractTypes, visualLibraryWithoutDefinition, visualPackages } from '../../scripts/companion/compiler/visual-model.ts';
+import { visualSpecs, visualDefinitions, visualNuxtImports, visualContractTypes, visualLibraryWithoutDefinition, visualPackages, visualComponentName } from '../../scripts/companion/compiler/visual-model.ts';
 import { visualSfc } from '../../scripts/companion/compiler/visual-code.ts';
 import { visualSources, visualPorts } from '../../scripts/companion/compiler/visual-ports.ts';
 import { richVisualDocument, detailDocument, starterDocument, model, recorder } from './compiler-emitters-fixture.mjs';
@@ -187,13 +187,17 @@ test('the visual model caches validation, applies variant defaults and reports p
   const twice = model(richVisualDocument()); const extra = structuredClone(visualDefinitions(twice).components[0]);
   visualDefinitions(twice).components.push({ ...extra, exportName: 'Second', dependencies: [{ package: 'chart.js', version: '4.5.0', purpose: 'Charts' }, { package: 'a-lib', version: '1.0.0', purpose: 'A' }] });
   assert.throws(() => visualPackages(twice, {}), visualError('chart.js is pinned to 4.4.0 in ProjectJsonReview and 4.5.0 in Second.'));
-  visualDefinitions(twice).components.at(-1).dependencies.shift();
-  assert.deepEqual(Object.keys(visualPackages(twice, {})), ['a-lib', 'chart.js']);
+  visualDefinitions(twice).components.at(-1).dependencies = [{ package: 'z-lib', version: '1.0.0', purpose: 'Z' }, { package: 'a-lib', version: '1.0.0', purpose: 'A' }];
+  assert.deepEqual(Object.keys(visualPackages(twice, {})), ['a-lib', 'chart.js', 'z-lib']);
+  assert.equal(visualComponentName(store.components[0]), 'ProjectJsonReview');
+  assert.equal(visualContractTypes({ props: [], emits: [], slots: [{ name: 'body', required: true }], variants: [] }),
+    'export interface ComponentProps {\n}\nexport interface ComponentEvents {\n}\nexport interface ComponentSlots {\n  "body": () => unknown;\n}\n');
 });
 
 test('projects without visual designs have an empty store and no specs', async () => {
-  const m = model(await starterDocument('blank'));
-  assert.deepEqual(visualSpecs(m), []); assert.deepEqual(visualSources(m), []);
+  const document = await starterDocument('blank'); delete document.design.visualDesigns;
+  const m = model(document);
+  assert.deepEqual(visualDefinitions(m).pages, []); assert.deepEqual(visualSpecs(m), []); assert.deepEqual(visualSources(m), []);
   const out = recorder(); visualPorts(m, out.add);
   assert.ok(out.text('src/generated/bootstrap/visual-context.ts').startsWith("\nimport type { Pinia } from 'pinia';\n"));
   assert.ok(out.text('src/generated/bootstrap/visual-context.ts').includes('return { ports: [], handle:'));
