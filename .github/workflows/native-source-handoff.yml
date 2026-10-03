@@ -7,6 +7,7 @@ on:
       - 'bin/compiler/emitters/framework-docs.ts'
       - 'bin/compiler/adapters/template-snapshot.ts'
       - 'scripts/starters/**'
+      - 'bin/adapters/starters/**'
       - 'configs/starters/**'
       - 'tests/tooling/project-generator-native-handoff.checks.mjs'
       - 'tests/suites.json'

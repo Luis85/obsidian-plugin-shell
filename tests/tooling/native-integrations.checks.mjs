@@ -6,7 +6,7 @@ import { validateNativeIntegrations, nativeReservedExtensions } from '../../scri
 import { reservedFileExtensions } from '../../src/domain/native-integrations.ts';
 import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
 import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
+import { loadStarterCatalog } from '../../bin/adapters/starters/catalog.ts';
 import { customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { planMaker } from '../../bin/adapters/makers/plan.ts';
 import { parseArguments } from '../../bin/adapters/makers/arguments.ts';

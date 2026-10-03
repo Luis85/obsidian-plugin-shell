@@ -6,7 +6,7 @@ import ts from 'typescript';
 import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { uiQualityCode, uiQualityScripts, uiQualitySurfaces } from '../../bin/compiler/emitters/ui-quality-code.ts';
 import { uiQualitySpec } from '../../bin/compiler/emitters/ui-quality-spec.ts';
-import { parseBrowserStarter } from '../../scripts/starters/browser.ts';
+import { parseBrowserStarter } from '../../bin/adapters/starters/browser.ts';
 import { projectFiles } from '../support/project-render.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

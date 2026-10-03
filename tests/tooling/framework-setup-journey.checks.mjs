@@ -9,7 +9,7 @@ import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { setupProgress } from '../../bin/adapters/framework/setup-progress.ts';
 import { guidedSetup, continueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
 import { result } from '../../bin/adapters/framework/contracts.ts';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
 import { zip } from '../../bin/adapters/framework/zip.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));

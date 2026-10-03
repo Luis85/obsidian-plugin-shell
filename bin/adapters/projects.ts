@@ -1,4 +1,4 @@
-import { loadDefinitions } from '../../scripts/starters/repository.ts';
+import { loadDefinitions } from './starters/repository.ts';
 import { projectSelection, type ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { frameworkAdapter, requireFrameworkAdapter } from '../compiler/adapters/project/framework-registry.ts';
 import { pluginFrameworkAdapters } from '../../plugins/runtime.ts';

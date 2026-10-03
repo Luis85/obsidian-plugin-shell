@@ -6,7 +6,7 @@ import { dirname, join, relative, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { parseBrowserStarter } from '../../scripts/starters/browser.ts';
+import { parseBrowserStarter } from '../../bin/adapters/starters/browser.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);
 const eslint = join(root, 'node_modules/eslint/bin/eslint.js');

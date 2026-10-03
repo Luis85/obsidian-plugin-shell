@@ -104,5 +104,15 @@
   "scripts/companion/compiler/schema-code.ts": "bin/compiler/emitters/schema-code.ts",
   "scripts/companion/compiler/visual-model.ts": "bin/compiler/emitters/visual-model.ts",
   "scripts/companion/compiler/file-code.ts": "bin/compiler/emitters/file-code.ts",
-  "scripts/companion/compiler/model.ts": "bin/compiler/emitters/model.ts"
+  "scripts/companion/compiler/model.ts": "bin/compiler/emitters/model.ts",
+  "scripts/starters/browser.ts": "bin/adapters/starters/browser.ts",
+  "scripts/starters/coverage.ts": "bin/adapters/starters/coverage.ts",
+  "scripts/starters/operations.ts": "bin/adapters/starters/operations.ts",
+  "scripts/starters/processes.ts": "bin/adapters/starters/processes.ts",
+  "scripts/starters/project.ts": "bin/adapters/starters/project.ts",
+  "scripts/starters/render.ts": "bin/adapters/starters/render.ts",
+  "scripts/starters/repository.ts": "bin/adapters/starters/repository.ts",
+  "scripts/starters/types.ts": "bin/adapters/starters/types.ts",
+  "scripts/starters/validation.ts": "bin/adapters/starters/validation.ts",
+  "scripts/companion/starter-files.mjs": "bin/adapters/starters/catalog.ts"
 }

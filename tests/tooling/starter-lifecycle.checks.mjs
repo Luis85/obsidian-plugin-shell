@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
-import { processPlan } from '../../scripts/starters/processes.ts';
+import { processPlan } from '../../bin/adapters/starters/processes.ts';
 import { commandHelp } from '../../bin/adapters/framework/help-text.ts';
 import { commands } from '../../bin/adapters/framework/catalog.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));

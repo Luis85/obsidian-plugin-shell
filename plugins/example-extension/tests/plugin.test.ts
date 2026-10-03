@@ -11,7 +11,7 @@ import { packageFiles } from '../../../bin/compiler/adapters/project/configurati
 import { defineFrameworkAdapter } from '../../../bin/compiler/adapters/project/framework-adapter.ts';
 import { renderStarterProject } from '../../../bin/compiler/adapters/project/emitter.ts';
 import { projectSelection } from '../../../bin/compiler/domain/project-starter.ts';
-import { loadDefinitions } from '../../../scripts/starters/repository.ts';
+import { loadDefinitions } from '../../../bin/adapters/starters/repository.ts';
 import { definePluginEvent, type WorkbenchPluginObject } from '../../api.ts';
 import { createPluginRuntime, pluginFrameworkAdapters, pluginStarterDefinitions } from '../../runtime.ts';
 import { PluginObject, exampleNotice, reactAdapter, reactStarter } from '../src/index.ts';

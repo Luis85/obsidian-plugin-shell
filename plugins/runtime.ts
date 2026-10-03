@@ -1,6 +1,6 @@
 import { pluginRegistry } from './registry.ts';
 import { defineFrameworkAdapter, type FrameworkAdapter } from '../bin/compiler/adapters/project/framework-adapter.ts';
-import type { StarterDefinition } from '../scripts/starters/types.ts';
+import type { StarterDefinition } from '../bin/adapters/starters/types.ts';
 import { loadComponentTemplates } from '../bin/adapters/component-template-repository.ts';
 import { pluginComponentTemplates } from './template-contributions.ts';
 import { commands as frameworkCommands } from '../bin/adapters/framework/catalog.ts';

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { loadStarterCatalog } from './starter-files.mjs';
+import { loadStarterCatalog } from '../../bin/adapters/starters/catalog.ts';
 import { customizeStarter } from './starter-contract.mjs';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),id=process.argv[2];

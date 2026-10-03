@@ -9,7 +9,7 @@ import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../bin/adapters/framework/zip.ts';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args, expected = 0) {
   const result = spawnSync(process.execPath, [join(dir, 'bin/app'), ...args, '--json'], {

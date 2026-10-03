@@ -121,7 +121,7 @@ test('no source may import or recreate a removed companion facade', () => {
   for (const [path, statement] of [
     ['bin/adapters/example.ts', "import { planProject } from '../../scripts/companion/compiler/plan.ts';"],
     ['bin/adapters/example.ts', "const cli = await import('../../scripts/companion/compiler/cli.ts');"],
-    ['scripts/starters/example.ts', "import { projectFiles } from '../companion/compiler/project-files.ts';"],
+    ['bin/adapters/starters/example.ts', "import { projectFiles } from '../../../scripts/companion/compiler/project-files.ts';"],
     ['scripts/compiler/adapters/example.ts', "export { fixtureCode } from '../../companion/compiler/fixture-code.ts';"],
     ['plugins/example/index.ts', "import '../../scripts/companion/compiler/plan.ts';"],
     ['bin/adapters/example.ts', "import { CompilerError } from '../../scripts/compiler/domain/diagnostics.ts';"],
