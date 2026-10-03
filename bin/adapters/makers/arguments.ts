@@ -1,4 +1,4 @@
-import recipes from '../../../scripts/makers/recipes.json' with { type: 'json' };
+import recipes from './recipes.json' with { type: 'json' };
 import { flagOptions, valueOptions, type FlagOption, type MakerArguments, type MakerOptions, type ValueOption } from './contracts.ts';
 
 const flags = new Set<string>(flagOptions);

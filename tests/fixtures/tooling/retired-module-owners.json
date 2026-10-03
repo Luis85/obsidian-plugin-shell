@@ -122,5 +122,7 @@
   "scripts/companion/qualify-project.mjs": "scripts/companion-tools/qualify-project.mjs",
   "scripts/companion/qualify-starter.mjs": "scripts/companion-tools/qualify-starter.mjs",
   "scripts/companion/qualify-styles.mjs": "scripts/companion-tools/qualify-styles.mjs",
-  "scripts/companion/authoring-evidence.mjs": "scripts/companion-tools/authoring-evidence.mjs"
+  "scripts/companion/authoring-evidence.mjs": "scripts/companion-tools/authoring-evidence.mjs",
+  "scripts/makers/recipes.json": "bin/adapters/makers/recipes.json",
+  "scripts/operations/operations.json": "bin/adapters/operations/operations.json"
 }
