@@ -1,9 +1,11 @@
 /** Diff-based self-review guard: `npm run check:self-review -- [--base <ref>] [--json] [--warn-only]`. */
-import { resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { collectChanges, resolveBase } from './self-review-diff.mjs';
 import { overLimitFiles, unclassifiedTests } from './self-review-files.mjs';
 import { lineViolations } from './self-review-rules.mjs';
+import { ALLOWLIST_PATH, parseAllowlist } from './check-docs-launchers.mjs';
 
 const usage = 'usage: check:self-review [--base <ref>] [--json] [--warn-only]';
 
@@ -26,7 +28,15 @@ const byLocation = (a, b) => a.file.localeCompare(b.file) || a.line - b.line || 
 /** Every violation for a set of parsed changes, sorted by file and line. */
 export async function reviewChanges(root, files) {
   const found = [...lineViolations(files), ...await unclassifiedTests(root, files), ...await overLimitFiles(root, files)];
-  return found.sort(byLocation);
+  const historical = await historicalLauncherFiles(root);
+  return found.filter(item => item.rule !== 'SR-RETIRED-LAUNCHER' || !historical.some(entry => entry.matcher.test(item.file))).sort(byLocation);
+}
+
+/** Files the reviewed docs-launchers allowlist keeps as historical records; one list serves both guards. */
+async function historicalLauncherFiles(root) {
+  let text;
+  try { text = await readFile(join(root, ALLOWLIST_PATH), 'utf8'); } catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+  return parseAllowlist(text).filter(entry => entry.rules.includes('retired-launcher'));
 }
 
 export function formatReport(report, warnOnly) {

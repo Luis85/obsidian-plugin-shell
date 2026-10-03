@@ -13,7 +13,7 @@ const SCANNED = /\.(?:md|json|ya?ml|[cm]?[jt]s|vue|sh)$/;
 const SKIPPED_DIRS = new Set(['node_modules', '.git', 'reports', '.dev-vault', 'dist', 'coverage', '.vite', '.fallow']);
 // Nested agent worktrees are separate checkouts of this repository, not its content.
 const SKIPPED_PATHS = new Set(['.claude/worktrees']);
-const ALLOWLIST_PATH = 'scripts/quality/docs-launchers-allowlist.json';
+export const ALLOWLIST_PATH = 'scripts/quality/docs-launchers-allowlist.json';
 
 export function findReferences(text) {
   const hits = [];

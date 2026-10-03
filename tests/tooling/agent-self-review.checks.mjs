@@ -122,6 +122,15 @@ test('[SELF-REVIEW-08] retired launcher references fail in added lines, with a c
   assert.deepEqual(found, ['SR-RETIRED-LAUNCHER docs/guide.md:2', 'SR-RETIRED-LAUNCHER docs/guide.md:3']);
 });
 
+test('[SELF-REVIEW-08b] the reviewed docs-launchers allowlist exempts its historical records, and only for retired launchers', async t => {
+  const allowlist = JSON.stringify({ entries: [{ glob: 'docs/history/**', rules: ['retired-launcher'], reason: 'dated record' }, { glob: 'docs/kit.md', rules: ['kit-layout-path'], reason: 'kit layout' }] });
+  const found = await review(t, {
+    'scripts/quality/docs-launchers-allowlist.json': allowlist,
+    'docs/history/stage-a.md': `Stage A\n${directive.launcher}\n`, 'docs/kit.md': `Kit\n${directive.launcher}\n`, 'docs/guide.md': `Guide\n${directive.launcher}\n`,
+  });
+  assert.deepEqual(found.filter(item => item.startsWith('SR-RETIRED-LAUNCHER')), ['SR-RETIRED-LAUNCHER docs/guide.md:2', 'SR-RETIRED-LAUNCHER docs/kit.md:2']);
+});
+
 test('[SELF-REVIEW-09] the CLI exits non-zero on findings, honours --warn-only and --json, and rejects bad usage', async t => {
   const root = await fixture(t); await put(root, { 'src/a.ts': `${directive.anyCast}\n` });
   const run = (...args) => spawnSync(process.execPath, [cli, ...args], { cwd: root, encoding: 'utf8' });
