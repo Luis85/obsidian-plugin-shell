@@ -42,6 +42,24 @@ test('the injected primitive revalidates untyped recipe requests before composin
   assert.equal(context.tests.size, 0);
 }));
 
+test('the injected primitive applies the built-in event slug, preference allowlist and per-kind requirements', () => makerFixture(async root => {
+  const recorded = createMakerContext(root), context = localRecipeContext(recorded);
+  const base = { owner: 'sample', name: 'example' };
+  for (const event of ['../../outside', 'sample/../x', 'Bad', 'constructor', 'x'.repeat(49)])
+    await assert.rejects(context.action({ ...base, kind: 'listener', event }), /Invalid existing event name/, event);
+  for (const preference of ["notifySuccess'; process.exit(1); '", '__proto__', 'readonly', ''])
+    await assert.rejects(context.action({ ...base, kind: 'setting', preference }), { message: 'Unknown --preference; select notifySuccess|hideObsidianViewHeader' }, preference);
+  await assert.rejects(context.action({ ...base, kind: 'setting' }), /MAKER_PREFERENCE_REQUIRED/);
+  await assert.rejects(context.action({ ...base, kind: 'listener' }), /Invalid existing event name/);
+  await assert.rejects(context.action({ ...base, kind: 'command', preference: 'notifySuccess' }), /MAKER_OPTION_UNSUPPORTED: preference/);
+  await assert.rejects(context.action({ ...base, kind: 'event', event: 'example' }), /MAKER_OPTION_UNSUPPORTED: event/);
+  // The built-in action rejects the same requests: one validator, not a second custom-only copy.
+  for (const request of [{ ...base, kind: 'listener', event: '../x' }, { ...base, kind: 'setting', preference: 'other' }, { ...base, kind: 'setting' }])
+    await assert.rejects(action(createMakerContext(root), request), /Invalid existing event name|Unknown --preference|MAKER_PREFERENCE_REQUIRED/);
+  assert.equal(context.tests.size, 0);
+  assert.deepEqual((await recorded.finish()).changes, [], 'rejected requests compose no outputs');
+}));
+
 async function snapshot(root, folder = '') {
   const entries = await readdir(join(root, folder), { withFileTypes: true });
   const nested = await Promise.all(entries.map(async entry => {
