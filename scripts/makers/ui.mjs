@@ -1,4 +1,4 @@
-import { localName, locales, generatedTest, registryPath } from './primitives.mjs';
+import { localName, locales, generatedTest, registryPath } from '../../bin/adapters/makers/primitives.ts';
 import { notePanelTests } from './ui-tests.mjs';
 import { notePanelComponentTests } from './ui-component-tests.mjs';
 

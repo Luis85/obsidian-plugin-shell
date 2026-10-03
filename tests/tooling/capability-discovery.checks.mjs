@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { spawnSync } from 'node:child_process';
 import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../../bin/adapters/operations/catalog.ts';
-import { builtinRecipes, parseArguments } from '../../scripts/makers/arguments.mjs';
-import { builtinHandlers } from '../../scripts/makers/dispatch.mjs';
+import { builtinRecipes, parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { builtinHandlers } from '../../bin/adapters/makers/dispatch.ts';
 import { handleRequest, validateMessage, protocolHandlers } from '../../bin/adapters/operations/protocol.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

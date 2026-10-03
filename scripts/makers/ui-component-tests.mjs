@@ -1,4 +1,4 @@
-import { generatedTest, localName } from './primitives.mjs';
+import { generatedTest, localName } from '../../bin/adapters/makers/primitives.ts';
 
 export async function notePanelComponentTests(context, { owner, name, repository }) {
   const { key, entity } = repository;

@@ -4,8 +4,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
-import { parseArguments } from '../../scripts/makers/arguments.mjs';
-import { planMaker } from '../../scripts/makers/plan.mjs';
+import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { planMaker } from '../../bin/adapters/makers/plan.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 
 async function seedRegistry(root) {

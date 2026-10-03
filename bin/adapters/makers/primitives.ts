@@ -1,9 +1,18 @@
-import { makerSymbol as symbol, title } from './arguments.mjs';
+import { makerSymbol as symbol, title } from './arguments.ts';
+import type { RecipeContext } from './contracts.ts';
 
 export const registryPath = 'src/bootstrap/authoring.ts';
-const testPath = (owner, name, kind) => `tests/runtime/generated/${owner}-${name}-${kind}.test.ts`;
-export const localName = (owner, name, kind) => symbol(`${owner}-${name}-${kind}`);
-export async function locales(context, owner, name, labels = {}) {
+interface ActionRequest { readonly owner: string; readonly name: string; readonly kind: string; readonly preference?: string; readonly event?: string }
+interface KindInput { readonly owner: string; readonly name: string; readonly prefix: string; readonly id: string; readonly local: string; readonly preference: string | undefined; readonly event: string }
+/** The generated command, its factory registration and its real-action test, filled in per primitive kind. */
+interface ActionSpec {
+  readonly imports: string[]; setup: string; execute: string | undefined; available: string; parameters: string;
+  factoryExpression: string | undefined; testImports: string; testPublisher: string; cleanup: string; assertion: string;
+}
+type Configure = (context: RecipeContext, spec: ActionSpec, input: KindInput) => void | Promise<void>;
+const testPath = (owner: string, name: string, kind: string): string => `tests/runtime/generated/${owner}-${name}-${kind}.test.ts`;
+export const localName = (owner: string, name: string, kind: string): string => symbol(`${owner}-${name}-${kind}`);
+export async function locales(context: RecipeContext, owner: string, name: string, labels: Readonly<Record<string, string>> = {}): Promise<string> {
   const local = localName(owner, name, 'messages');
   const namespace = symbol(`${owner}-${name}`);
   const scope = `${title(owner)}: ${title(name)}`;
@@ -42,27 +51,27 @@ export async function locales(context, owner, name, labels = {}) {
   ]);
   return `authoring.${namespace}`;
 }
-export async function registerFactory(context, owner, name, kind, expression) {
+export async function registerFactory(context: RecipeContext, owner: string, name: string, kind: string, expression?: string): Promise<string> {
   const local = localName(owner, name, kind);
   await context.editArray(registryPath, 'authoringFactories', expression ?? local, [
     { local, from: `../features/${owner}/${name}.${kind}` },
   ]);
   return local;
 }
-export async function generatedTest(context, owner, name, kind, source) {
+export async function generatedTest(context: RecipeContext, owner: string, name: string, kind: string, source: string): Promise<void> {
   const path = testPath(owner, name, kind);
   await context.add(path, source);
   context.tests.add(path);
 }
-function commandAction(_context, spec, { prefix, id }) {
+function commandAction(_context: RecipeContext, spec: ActionSpec, { prefix, id }: KindInput): void {
   spec.execute = `async () => { await services.modals.info({ owner: '${id}', titleKey: '${prefix}.title', messageKey: '${prefix}.description' }); }`;
 }
-function modalAction(_context, spec, { prefix, id }) {
+function modalAction(_context: RecipeContext, spec: ActionSpec, { prefix, id }: KindInput): void {
   spec.imports.push(`import { fields } from '../api';`);
   spec.execute = `async () => { await services.modals.prompt({ owner: '${id}', titleKey: '${prefix}.title', messageKey: '${prefix}.description', labelKey: '${prefix}.input', maxLength: 120, validate: value => fields.text({ trim: true, min: 1, max: 120 }).read(value) }); }`;
   spec.assertion = `const pending = command.execute();\n    await f.dialogs[0]?.callbacks.submit(''); expect(f.closed()).toBe(0);\n    await f.dialogs[0]?.callbacks.submit('Valid'); await pending;\n    expect(f.closed()).toBe(1);`;
 }
-async function usecaseAction(context, spec, { owner, name, prefix, id }) {
+async function usecaseAction(context: RecipeContext, spec: ActionSpec, { owner, name, prefix, id }: KindInput): Promise<void> {
   const functionName = localName(owner, name, 'normalize');
   spec.imports.push(`import { ${functionName} } from './${name}.usecase-action';`);
   await context.add(
@@ -72,7 +81,7 @@ async function usecaseAction(context, spec, { owner, name, prefix, id }) {
   spec.execute = `async () => { const result = await services.modals.prompt({ owner: '${id}', titleKey: '${prefix}.title', messageKey: '${prefix}.description', labelKey: '${prefix}.input', maxLength: 120, validate: ${functionName} });\n      if (result.status === 'confirmed') await services.modals.info({ owner: '${id}', titleKey: '${prefix}.preview', message: result.value }); }`;
   spec.assertion = `const pending = command.execute();\n    await f.dialogs[0]?.callbacks.submit('  Valid  ');\n    await Promise.resolve();\n    expect(f.dialogs[1]?.spec.message).toBe('Valid');\n    f.dialogs[1]?.callbacks.cancel(); await pending;`;
 }
-function settingAction(_context, spec, { preference }) {
+function settingAction(_context: RecipeContext, spec: ActionSpec, { preference }: KindInput): void {
   spec.available = 'available: () => !services.preferences.readonly,';
   spec.execute =
     preference === 'hideObsidianViewHeader'
@@ -80,7 +89,7 @@ function settingAction(_context, spec, { preference }) {
       : `() => services.preferences.update({ notifySuccess: !services.preferences.current.notifySuccess })`;
   spec.assertion = `const before = f.services.preferences.current.${preference};\n    expect(command.available?.()).toBe(true);\n    expect(f.saved).toHaveLength(0);\n    await command.execute();\n    expect(f.services.preferences.current.${preference}).toBe(!before);\n    expect(f.saved).toHaveLength(1);`;
 }
-async function eventAction(context, spec, { owner, name, local }) {
+async function eventAction(context: RecipeContext, spec: ActionSpec, { owner, name, local }: KindInput): Promise<void> {
   const eventName = `${owner}.${name}`;
   const descriptor = localName(owner, name, 'eventDefinition');
   spec.imports.push(`import { ${descriptor} } from './${name}.event-definition';`);
@@ -118,7 +127,7 @@ async function eventAction(context, spec, { owner, name, local }) {
   spec.testPublisher = `, f.services.events.publisher(${descriptor})`;
   spec.assertion = `const received: number[] = [];\n    const off = f.services.events.subscriber(${descriptor}).on(payload => { received.push(payload.sequence); });\n    await command.execute(); await command.execute();\n    expect(received).toEqual([1, 2]); off();`;
 }
-async function listenerAction(context, spec, { owner, name, prefix, id, local, event }) {
+async function listenerAction(context: RecipeContext, spec: ActionSpec, { owner, name, prefix, id, local, event }: KindInput): Promise<void> {
   const descriptor = localName(owner, event, 'eventDefinition');
   await context.read(`src/features/${owner}/${event}.event-definition.ts`);
   spec.imports.push(`import { ${descriptor} } from './${event}.event-definition';`);
@@ -139,9 +148,9 @@ async function listenerAction(context, spec, { owner, name, prefix, id, local, e
   spec.testImports = `import { ${descriptor} } from '../../../src/features/${owner}/${event}.event-definition';`;
   spec.assertion = `const publisher = f.services.events.publisher(${descriptor}); publisher.publish({ type: '${owner}.${event}', payload: { sequence: 1 } });\n    expect(f.notices()).toBe(1);\n    extension.dispose();\n    publisher.publish({ type: '${owner}.${event}', payload: { sequence: 2 } });\n    expect(f.notices()).toBe(1);`;
 }
-const actionKinds = { command: commandAction, modal: modalAction, usecase: usecaseAction, setting: settingAction, event: eventAction, listener: listenerAction };
+const actionKinds: Readonly<Record<string, Configure>> = { command: commandAction, modal: modalAction, usecase: usecaseAction, setting: settingAction, event: eventAction, listener: listenerAction };
 /** Hosted dialogs report failures; the generated action returns them instead of claiming success. */
-function reportFailures(kind, spec) {
+function reportFailures(kind: string, spec: ActionSpec & { execute: string }): void {
   if (['command', 'modal', 'listener'].includes(kind)) {
     spec.execute = spec.execute
       .replace('await services.modals.', 'const result = await services.modals.')
@@ -158,7 +167,7 @@ function reportFailures(kind, spec) {
     spec.assertion += `\n    const cancelled = command.execute(); f.dialogs.at(-1)?.callbacks.cancel(); await cancelled;\n    const failed = command.execute(); f.dialogs.at(-1)?.callbacks.failed(); expect(await failed).toMatchObject({ ok: false });\n    const failedPreview = command.execute(); await f.dialogs.at(-1)?.callbacks.submit('Valid');\n    await Promise.resolve(); f.dialogs.at(-1)?.callbacks.failed(); expect(await failedPreview).toMatchObject({ ok: false });`;
   }
 }
-async function eventContractTest(context, owner, name) {
+async function eventContractTest(context: RecipeContext, owner: string, name: string): Promise<void> {
   const descriptor = localName(owner, name, 'eventDefinition');
   await generatedTest(
     context,
@@ -168,7 +177,7 @@ async function eventContractTest(context, owner, name) {
     `import { expect, it } from 'vitest';\nimport type { EventPayload } from '../../../src/features/api';\nimport { ${descriptor} } from '../../../src/features/${owner}/${name}.event-definition';\n\nit('validates unknown event payloads and retains a literal typed contract', () => {\n  // @ts-expect-error This must remain a numeric payload; widening the contract breaks this negative check.\n  const invalid: EventPayload<typeof ${descriptor}> = { sequence: 'wrong' };\n  for (const value of [null, false, {}, invalid, { sequence: 0 }, { sequence: -1 }, { sequence: 1.5 }, { sequence: Infinity }, { sequence: 1, extra: true }]) expect(${descriptor}.valid(value)).toBe(false);\n  expect(${descriptor}.valid({ sequence: 1 })).toBe(true);\n});\n`,
   );
 }
-export async function action(context, { owner, name, kind, preference, event }) {
+export async function action(context: RecipeContext, { owner, name, kind, preference, event }: ActionRequest): Promise<void> {
   const local = localName(owner, name, kind);
   const prefix = await locales(context, owner, `${name}-${kind}`);
   const id = `${owner}-${name}-${kind}`;
@@ -176,17 +185,19 @@ export async function action(context, { owner, name, kind, preference, event }) 
     `import { defineCommand } from '../api';`,
     `import type { AuthoringServices } from '../api';`,
   ];
-  const spec = {
+  const spec: ActionSpec = {
     imports, setup: '', execute: undefined, available: '', parameters: '', factoryExpression: undefined, testImports: '', testPublisher: '',
     cleanup: `services.modals.closeOwner('${id}'); services.notices.dismissOwner('${id}');`,
     assertion: `const result = command.execute();\n    expect(f.dialogs).toHaveLength(1);\n    f.dialogs[0]?.callbacks.cancel(); await result;\n    expect(f.closed()).toBe(1);`,
   };
   const configure = Object.hasOwn(actionKinds, kind) ? actionKinds[kind] : undefined;
-  await configure?.(context, spec, { owner, name, prefix, id, local, preference, event });
-  if (!spec.execute) throw new Error(`Unsupported action primitive: ${kind}`);
-  reportFailures(kind, spec);
+  await configure?.(context, spec, { owner, name, prefix, id, local, preference, event: event ?? '' });
+  const { execute: configured } = spec;
+  if (!configured) throw new Error(`Unsupported action primitive: ${kind}`);
+  const ready = { ...spec, execute: configured };
+  reportFailures(kind, ready);
   if (kind === 'event') await eventContractTest(context, owner, name);
-  const { setup, execute, available, parameters, factoryExpression, testImports, testPublisher, cleanup, assertion } = spec;
+  const { setup, execute, available, parameters, factoryExpression, testImports, testPublisher, cleanup, assertion } = ready;
   await context.add(
     `src/features/${owner}/${name}.${kind}.ts`,
     `${imports.join('\n')}\n\nexport function ${local}(services: AuthoringServices${parameters}) {\n  ${setup}\n  const command = defineCommand({ id: '${id}', titleKey: '${prefix}.title', ${available}\n    execute: ${execute},\n  });\n  return { commands: [command] as const, dispose() { ${cleanup} } };\n}\n`,

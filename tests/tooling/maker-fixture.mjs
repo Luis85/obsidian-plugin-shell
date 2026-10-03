@@ -140,7 +140,7 @@ export async function copyMakerSuite(root) {
     'scripts/events',
     'scripts/examples/plan.mjs',
     'scripts/shared',
-    'scripts/quality/format-generated.mjs',
+    'bin/adapters/makers',
     'tests/tooling/makers.checks.mjs',
     'tests/tooling/maker-fixture.mjs',
   ]) {

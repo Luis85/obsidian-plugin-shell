@@ -1,13 +1,16 @@
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import { makerSymbol as symbol, title, builtinRecipes } from './arguments.mjs';
+import { makerSymbol as symbol, title, builtinRecipes } from '../../bin/adapters/makers/arguments.ts';
 import { localeSkeleton } from './pending-locale.mjs';
-import { defineLocalMaker } from './custom-contract.mjs';
+import { defineLocalMaker } from '../../bin/adapters/makers/custom-contract.ts';
+
+/** Generated consumer code reaches the built-in maker modules through the project's own bin sources, or an extracted kit's editable copy. */
+const frameworkMakers = (up) => `// Built-in maker modules: this project's bin sources, or an extracted kit's editable copy under bin/template.\nconst source = new URL('${up}bin/adapters/makers/', import.meta.url);\nconst makers = existsSync(new URL('primitives.ts', source)) ? source : new URL('${up}bin/template/bin/adapters/makers/', import.meta.url);`;
 
 export async function customMaker(context, name) {
   if (builtinRecipes.includes(name)) throw new Error('CUSTOM_RECIPE_BUILTIN_CONFLICT');
   const local = `${symbol(name)}Maker`;
-  await context.add(`scripts/makers/custom/${name}.mjs`, `import { action } from '../primitives.mjs';\nimport { defineLocalMaker } from '../custom-contract.mjs';\n\n/** Trusted local code. The runner owns writes, review, formatting and checks. */\nexport const ${local} = defineLocalMaker({\n  name: '${name}', version: 1, description: '${title(name)} localized info command',\n  async plan(context, request) {\n    await action(context, { owner: request.owner, name: request.name, kind: 'command' });\n  },\n});\n`);
+  await context.add(`scripts/makers/custom/${name}.mjs`, `import { existsSync } from 'node:fs';\n\n${frameworkMakers('../../../')}\nconst { action } = await import(new URL('primitives.ts', makers).href);\nconst { defineLocalMaker } = await import(new URL('custom-contract.ts', makers).href);\n\n/** Trusted local code. The runner owns writes, review, formatting and checks. */\nexport const ${local} = defineLocalMaker({\n  name: '${name}', version: 1, description: '${title(name)} localized info command',\n  async plan(context, request) {\n    await action(context, { owner: request.owner, name: request.name, kind: 'command' });\n  },\n});\n`);
   await context.editArray('scripts/makers/custom/registry.mjs', 'customMakers', local, [{ local, from: `./${name}.mjs` }]);
   const path = `tests/tooling/custom-${name}.checks.mjs`;
   await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { ${local} } from '../../scripts/makers/custom/${name}.mjs';\n\ntest('${name} custom recipe composes a registered localized command', async () => {\n  const paths = new Map(); const registrations = []; const tests = new Set();\n  await ${local}.plan({ tests, async add(path, content) { assert.equal(paths.has(path), false); paths.set(path, content); }, async editArray(...args) { registrations.push(args); } }, { owner: 'sample', name: 'example' });\n  assert.ok(paths.has('src/features/sample/example.command.ts'));\n  assert.ok(registrations.some(entry => entry[1] === 'authoringFactories'));\n  assert.ok(registrations.some(entry => entry[1] === 'authoringLocaleModules'));\n  assert.equal(tests.size, 1);\n});\n`);

@@ -1,7 +1,7 @@
-import { templates } from './templates.mjs';
-import { makerSymbol as symbol, title } from './arguments.mjs';
-import { readRegistry, extendRegistry, validateRegistrySource } from './registry.mjs';
-import { generatedTest } from './primitives.mjs';
+import { templates } from '../../bin/adapters/makers/templates.ts';
+import { makerSymbol as symbol, title } from '../../bin/adapters/makers/arguments.ts';
+import { readRegistry, extendRegistry, validateRegistrySource } from '../../bin/adapters/makers/registry.ts';
+import { generatedTest } from '../../bin/adapters/makers/primitives.ts';
 
 export async function registerEntity(context, { key, local, from }) {
   await context.edit('src/bootstrap/features.ts', async source => {

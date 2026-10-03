@@ -1,6 +1,6 @@
-import { localName, locales, registerFactory, generatedTest } from './primitives.mjs';
+import { localName, locales, registerFactory, generatedTest } from '../../bin/adapters/makers/primitives.ts';
 import { registerEntity } from './entities-recipe.mjs';
-import { title } from './arguments.mjs';
+import { title } from '../../bin/adapters/makers/arguments.ts';
 
 /** A new setting is explicit plugin-data storage, sharing the preference writer. */
 export async function settingRecipe(context, owner, name) {

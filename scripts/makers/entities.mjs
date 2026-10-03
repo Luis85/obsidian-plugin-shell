@@ -1,4 +1,4 @@
-import { loadCatalog } from './load-catalog.mjs';
+import { loadCatalog } from '../../bin/adapters/makers/load-catalog.ts';
 const args = process.argv.slice(2);
 const property = (entity, field) => entity.mappings.find(mapping => mapping.field === field.name)?.property ?? '—';
 const fallback = field => Object.hasOwn(field, 'default') ? JSON.stringify(field.default) : '—';

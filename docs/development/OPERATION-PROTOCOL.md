@@ -34,7 +34,7 @@ Custom makers remain executable local code, not metadata to import in a renderer
 
 - scripts/makers/recipes.json owns built-in names, options, descriptions, schema
   metadata, prerequisites and supported outputs. Argument validation and listing use
-  this data; scripts/makers/dispatch.mjs owns the actual implementation registrations.
+  this data; bin/adapters/makers/dispatch.ts owns the actual implementation registrations.
 - scripts/operations/operations.json describes the bounded operation catalog.
   bin/adapters/operations/protocol.ts registers the actual two discovery handlers.
 - bin/adapters/operations/catalog.ts validates supported schema keywords, duplicates,

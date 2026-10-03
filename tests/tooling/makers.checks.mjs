@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { parseArguments } from '../../scripts/makers/arguments.mjs';
-import { planMaker } from '../../scripts/makers/plan.mjs';
+import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { planMaker } from '../../bin/adapters/makers/plan.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
+import { loadCatalog } from '../../bin/adapters/makers/load-catalog.ts';
 import { loadEventCatalog } from '../../scripts/events/load-catalog.mjs';
 import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, removeMakerExamples, copyMakerSuite } from './maker-fixture.mjs';
 

@@ -1,4 +1,4 @@
-import { makerSymbol as symbol, title } from './arguments.mjs';
+import { makerSymbol as symbol, title } from '../../bin/adapters/makers/arguments.ts';
 
 function pluginLocal(name) {
   const base = symbol(name);

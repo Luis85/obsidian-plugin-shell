@@ -151,7 +151,9 @@ The explicit `customMakers` registry contains metadata (`name`, `version`,
 `description`) and an async `plan(context, request)` method. Request name/owner
 are validated. Context supplies read-only source access and declarative
 `add`/`editArray` planning methods plus targeted test paths. Builtin primitives are
-reusable. The runner owns review, formatting, hashes, locking, writes and checks.
+reusable: a generated recipe imports them from `bin/adapters/makers` in a source
+checkout, or from the editable `bin/template/bin/adapters/makers` copy in an
+extracted kit. The runner owns review, formatting, hashes, locking, writes and checks.
 
 Local recipe code is trusted developer code, not a sandbox. There is no remote
 loader, JSON command hook or automatic package installation. Recipes must return

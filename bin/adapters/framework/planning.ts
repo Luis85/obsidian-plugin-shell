@@ -6,7 +6,7 @@ import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '../../../scripts/shared/file-plan.ts';
-import { parseArguments as makerArguments, builtinRecipes } from '../../../scripts/makers/arguments.mjs';
+import { parseArguments as makerArguments, builtinRecipes } from '../makers/arguments.ts';
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
@@ -27,7 +27,7 @@ async function makerPlan(request: Request, context: Context): Promise<Planned> {
   const args = [recipe, name];
   const fields = descriptor('make').options;
   for (const [key, value] of Object.entries(request.options)) if (Object.hasOwn(fields, key) && !['list', 'trust-custom'].includes(key)) { args.push('--' + key); if (typeof value === 'string') args.push(value); }
-  const { planMaker } = await import('../../../scripts/makers/plan.mjs');
+  const { planMaker } = await import('../makers/plan.ts');
   const planned = await planMaker(context.root, makerArguments(args));
   return { plan: planned.plan, summary: { maker: planned.maker, checks: planned.checks.map(check => ({ ...check, status: 'not-run' })) }, conflicts: [] };
 }

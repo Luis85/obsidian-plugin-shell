@@ -94,7 +94,7 @@ test('native adapters, typed controls, slot content and mapped handlers are gene
 // Exact src/bootstrap/features.ts that examples:remove writes; fixed so the check holds in every consumer state.
 const removedRegistry="import { createNoteFeatures } from '../application/note-feature';\n\n\n\nimport type { PreferenceService } from '../application/preference-service';\n\n/** Add one explicit registration per feature. Ports are provided once by runtime bootstrap. */\nexport function createFeatures(services: Parameters<typeof createNoteFeatures>[0], preferences: PreferenceService) {\n  void preferences;\n  return createNoteFeatures(services, () => ({\n    \n    \n    \n  }));\n}\n";
 test('native repositories extend example-removed and maker-extended registries and refuse other layouts',async()=>{
- const {readRegistry,extendRegistry}=await import('../../scripts/makers/registry.mjs');
+ const {readRegistry,extendRegistry}=await import('../../bin/adapters/makers/registry.ts');
  const consumer=extendRegistry(await readRegistry(root,removedRegistry),{key:'bookmark',local:'bookmarkFeature',from:'../features/bookmarks/bookmark.definition'});
  const template=await realpath(await mkdtemp(join(tmpdir(),'generator-registry-')));
  const skipped=new Set(['.git','node_modules','dist','dist-harness','reports','.fallow','.qualification']);

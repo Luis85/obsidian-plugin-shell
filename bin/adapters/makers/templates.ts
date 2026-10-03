@@ -1,5 +1,12 @@
-import { makerSymbol as symbol, title } from './arguments.mjs';
-export function templates({ owner, entity, folder, preset }) {
+import { makerSymbol as symbol, title } from './arguments.ts';
+import type { Preset } from './contracts.ts';
+
+interface TemplateRequest { readonly owner: string; readonly entity: string; readonly folder: string; readonly preset: Preset }
+export interface EntityTemplates {
+  readonly name: string; readonly feature: string; readonly definition: string; readonly test: string;
+  readonly entries: readonly [{ readonly path: string; readonly content: string }, ...{ readonly path: string; readonly content: string }[]];
+}
+export function templates({ owner, entity, folder, preset }: TemplateRequest): EntityTemplates {
   const name = symbol(entity); const feature = `${name}Feature`; const sample = `Example ${title(entity)}`;
   const isTask = preset === 'task'; const isProject = preset === 'project'; const label = isProject ? 'name' : 'title';
   const schema = [`  ${label}: fields.text({ nonblank: true, min: 1, max: 120 }),`];
