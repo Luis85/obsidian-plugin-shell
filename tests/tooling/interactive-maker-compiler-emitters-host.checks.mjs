@@ -63,8 +63,11 @@ test('the workbench UI renders screens, components, flows and a journey-aware sm
   assert.deepEqual(screen.slice(2, 5), ["import C0 from '../library/record-card-a.vue';", "import C1 from '../library/list-component.vue';", 'const model = useScreen("node-2");']);
   assert.deepEqual(screen.slice(10, 12), ['    <C0 />', '    <C1 />']);
   const flows = lines(out, 'src/generated/bootstrap/flows.ts');
-  assert.equal(flows[10], '  return [{id:"ds-flow-3",card:"node-2",label:"Read declared records",trigger:"manual",direction:"read",requiresInput:false,get pending(){return GStarterRecords["list-records"].pending;},get error(){return GStarterRecords["list-records"].error;},run: () => GStarterRecords["list-records"].execute(undefined)},');
-  assert.equal(flows[11], `{id:"ds-flow-9",card:"node-2",label:"Archive",trigger:"manual",direction:"write",requiresInput:true,get pending(){return GStarterRecords["archive"].pending;},get error(){return GStarterRecords["archive"].error;},run: async () => ({ok:false,code:'input-mapping-required'})}];`);
+  // Only the source a flow runs is imported and bound; the flow-less task-notes and status-api sources stay unbound.
+  assert.deepEqual(flows.slice(0, 1), ["import { defineGStarterRecordsStore } from '../presentation/stores/starter-records.ts';"]);
+  assert.ok(!flows.some(line => line.includes('GTaskNotes') || line.includes('GStatusApi')));
+  assert.equal(flows[6], '  return [{id:"ds-flow-3",card:"node-2",label:"Read declared records",trigger:"manual",direction:"read",requiresInput:false,get pending(){return GStarterRecords["list-records"].pending;},get error(){return GStarterRecords["list-records"].error;},run: () => GStarterRecords["list-records"].execute(undefined)},');
+  assert.equal(flows[7], `{id:"ds-flow-9",card:"node-2",label:"Archive",trigger:"manual",direction:"write",requiresInput:true,get pending(){return GStarterRecords["archive"].pending;},get error(){return GStarterRecords["archive"].error;},run: async () => ({ok:false,code:'input-mapping-required'})}];`);
   assert.equal(lines(out, 'src/generated/bootstrap/panels.ts')[0], "import GWorkspace from '../presentation/components/screens/workspace-screen.vue';");
   const plainUi = run(uiCode, await plain());
   assert.equal(plainUi.text('src/generated/bootstrap/flows.ts'), "\nimport type { Pinia } from 'pinia';\nimport type { Sources } from '../application/sources.ts';\nimport type { Flow } from '../presentation/context/project.ts';\nexport const bindFlows: (sources: Sources, pinia: Pinia) => Flow[] = () => [];\n");
