@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 
 // Shared starter-domain fixtures. Only reviewed starter data (configs/starters) and in-test definitions are read;
 // no consumer-owned source (src/features, src/bootstrap, package.json, plugins/registry.ts) shapes an assertion.
-export const frameworkRoot = resolve(import.meta.dirname, '../..');
+const frameworkRoot = resolve(import.meta.dirname, '../..');
 export const shipped = async id => JSON.parse(await readFile(join(frameworkRoot, 'configs/starters', id + '.json'), 'utf8'));
 export const code = async pending => { try { await pending; return 'resolved'; } catch (error) { return error.code ?? error.message; } };
 export const request = (command, args = [], options = {}) => ({ command, args, options });

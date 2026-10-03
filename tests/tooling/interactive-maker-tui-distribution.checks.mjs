@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 let compilerVersion;

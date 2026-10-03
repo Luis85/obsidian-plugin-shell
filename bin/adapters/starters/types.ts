@@ -1,5 +1,5 @@
 /** Versioned, data-only recipes. Hosts implement these primitives, never starter IDs. */
-import type { ProjectGenerator } from '../../bin/compiler/domain/project-starter.ts';
+import type { ProjectGenerator } from '../../compiler/domain/project-starter.ts';
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type InputValue = string | boolean | number;
 export interface StarterInput {

@@ -11,7 +11,7 @@ import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
 import { conceptImportPlan } from './concepts.ts';
-import { editStarterPlan } from '../../../scripts/starters/operations.ts';
+import { editStarterPlan } from '../starters/operations.ts';
 import { componentTemplatePlan } from './component-templates.ts';
 import { starterProjectPlan } from './starter-project.ts';
 import { styleExportPlan } from './styles.ts';

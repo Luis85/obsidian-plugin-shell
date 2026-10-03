@@ -3,7 +3,7 @@ import { readFile, lstat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
-import { loadDefinitions } from '../starters/repository.ts';
+import { loadDefinitions } from '../../bin/adapters/starters/repository.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 export async function exportGoldenProject(root, check = false) {

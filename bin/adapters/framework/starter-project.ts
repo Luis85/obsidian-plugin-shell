@@ -7,10 +7,10 @@ import type { NativeProjectIntegrations } from '../../../scripts/companion/nativ
 import { mkdtemp, writeFile, rm, lstat, readdir, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { loadStarterCatalog } from '../../../scripts/companion/starter-files.mjs';
-import { listStarters } from '../../../scripts/starters/operations.ts';
-import { definitionProjectPlan } from '../../../scripts/starters/project.ts';
-import { completeDefinition } from '../../../scripts/starters/processes.ts';
+import { loadStarterCatalog } from '../starters/catalog.ts';
+import { listStarters } from '../starters/operations.ts';
+import { definitionProjectPlan } from '../starters/project.ts';
+import { completeDefinition } from '../starters/processes.ts';
 import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
 import { exists } from './files.ts';

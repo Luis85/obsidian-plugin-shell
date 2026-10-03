@@ -1,9 +1,9 @@
 import { join, resolve } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.ts';
-import { exists, hash, readBounded } from '../../bin/adapters/framework/files.ts';
-import { npmEntry, runNode } from '../../bin/adapters/framework/process.ts';
-import { parseJsonData } from '../contracts/json-data.ts';
-import { result, OperationError, requireThat, stringOption, type Context, type Request, type Result } from '../../bin/adapters/framework/contracts.ts';
+import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { exists, hash, readBounded } from '../framework/files.ts';
+import { npmEntry, runNode } from '../framework/process.ts';
+import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { result, OperationError, requireThat, stringOption, type Context, type Request, type Result } from '../framework/contracts.ts';
 import { array, record, fields, identifier, readProcesses, text } from './validation.ts';
 import { checkDirectoryChain } from './repository.ts';
 import { receiptFile } from './project.ts';
@@ -21,14 +21,15 @@ function orderedProcesses(processes: StarterProcess[], requested: string[]): Sta
   requested.forEach(visit);
   return ordered;
 }
+const packageFiles = ['package.json', 'package-lock.json', '.npmrc'];
+/** A step's node script and, outside the project root, its own package files. */
+function stepPaths(step: StarterStep): string[] {
+  const folder = step.cwd === '.' ? '' : step.cwd + '/';
+  return [...(step.script ? [folder + step.script] : []), ...(folder ? packageFiles.map(name => folder + name) : [])];
+}
 /** The receipt, package files and node scripts each reviewed process step depends on. */
 function boundPaths(ordered: StarterProcess[]): string[] {
-  const paths = new Set([receiptFile, 'package.json', 'package-lock.json', '.npmrc']);
-  for (const process of ordered) for (const step of process.steps) {
-    if (step.script) paths.add(step.cwd === '.' ? step.script : step.cwd + '/' + step.script);
-    if (step.cwd !== '.') for (const name of ['package.json', 'package-lock.json', '.npmrc']) paths.add(step.cwd + '/' + name);
-  }
-  return [...paths].sort();
+  return [...new Set([receiptFile, ...packageFiles, ...ordered.flatMap(process => process.steps.flatMap(stepPaths))])].sort();
 }
 export async function processPlan(directory: string, requested: string[]) {
   await checkDirectoryChain(directory);

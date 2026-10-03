@@ -1,7 +1,8 @@
-import { OperationError, requireThat } from '../../bin/adapters/framework/contracts.ts';
-import { readProjectGenerator } from '../../bin/compiler/domain/project-starter.ts';
-import { assertDesignData } from '../contracts/json-data.ts';
-import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
+import { OperationError, requireThat } from '../framework/contracts.ts';
+import { readProjectGenerator } from '../../compiler/domain/project-starter.ts';
+import { assertDesignData } from '../../../scripts/contracts/json-data.ts';
+import { validateAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import type { InputValue, StarterDefinition, StarterInput, StarterProcess, StarterStep, StarterFile, Json } from './types.ts';
 export function record(value: unknown): Record<string, unknown> {
   requireThat(value !== null && typeof value === 'object' && !Array.isArray(value), 'STARTER_INVALID', 'Expected an object.');
@@ -38,7 +39,7 @@ function unique(ids: string[]): void { requireThat(new Set(ids).size === ids.len
 export function portablePath(value: string, dot = false): boolean {
   if (dot && value === '.') return true;
   return value.length <= 240 && value.split('/').every(part => /^[a-zA-Z0-9_.-][a-zA-Z0-9_. -]*$/.test(part) &&
-    !['.', '..', '.git', '.obsidian', '.framework', '.companion', '.workbench', '.codex-authoring.lock'].includes(part.toLowerCase()) &&
+    !['.', '..', '.git', defaultVaultConfigDirectory, '.framework', '.companion', '.workbench', '.codex-authoring.lock'].includes(part.toLowerCase()) &&
     !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 }
 export function inputValue(value: unknown, input: StarterInput): InputValue {

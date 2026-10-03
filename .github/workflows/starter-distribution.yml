@@ -4,6 +4,7 @@ on:
     paths:
       - 'configs/starters/**'
       - 'scripts/starters/**'
+      - 'bin/adapters/starters/**'
       - 'scripts/companion/**'
       - 'templates/**'
       - 'scripts/compiler/**'

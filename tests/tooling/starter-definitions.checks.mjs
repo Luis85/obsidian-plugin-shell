@@ -5,10 +5,10 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, rm, symlink, readdir } f
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { STARTER_MAX_BYTES } from '../../scripts/starters/browser.ts';
-import { loadDefinitions, parseDefinition } from '../../scripts/starters/repository.ts';
-import { validateDefinition, readProcesses } from '../../scripts/starters/validation.ts';
-import { resolveValues, renderFiles, renderProcesses } from '../../scripts/starters/render.ts';
+import { STARTER_MAX_BYTES } from '../../bin/adapters/starters/browser.ts';
+import { loadDefinitions, parseDefinition } from '../../bin/adapters/starters/repository.ts';
+import { validateDefinition, readProcesses } from '../../bin/adapters/starters/validation.ts';
+import { resolveValues, renderFiles, renderProcesses } from '../../bin/adapters/starters/render.ts';
 import { angularPackages } from '../../bin/compiler/domain/project-starter.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const reference = JSON.parse(await readFile(join(root, 'configs/starters/webapp.json'), 'utf8'));

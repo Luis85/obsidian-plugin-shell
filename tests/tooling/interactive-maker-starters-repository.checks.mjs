@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { starterFolder, checkDirectoryChain, parseDefinition, loadDefinitions, companionCatalog } from '../../scripts/starters/repository.ts';
-import { validateDefinition } from '../../scripts/starters/validation.ts';
+import { starterFolder, checkDirectoryChain, parseDefinition, loadDefinitions, companionCatalog } from '../../bin/adapters/starters/repository.ts';
+import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
 import { code, fileStarter, shipped, workspace } from './starters-fixture.mjs';
 
 // The local starter repository (repository.ts): the configured folder, the directory chain, bounded loading and the Companion catalog adapter.
@@ -30,7 +30,7 @@ test('the directory chain refuses links, files and missing required directories'
   assert.equal(await code(checkDirectoryChain(join(root, 'missing'))), 'STARTER_DIRECTORY');
   await writeFile(join(root, 'file'), 'x');
   assert.equal(await code(checkDirectoryChain(join(root, 'file'), true)), 'STARTER_LINK');
-  await symlink(join(root, 'configs'), join(root, 'linked'));
+  await symlink(join(root, 'configs'), join(root, 'linked'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal(await code(checkDirectoryChain(join(root, 'linked/starters'))), 'STARTER_LINK');
   await settings(root, { paths: { startersFolder: 'linked/starters' } });
   assert.equal(await code(starterFolder(root)), 'STARTER_LINK');
@@ -55,12 +55,13 @@ test('loading refuses unsafe names, mismatched IDs, links and oversized folders'
   const folder = join(root, 'configs/starters'), load = () => code(loadDefinitions(root, []));
   await writeFile(join(folder, 'other.json'), JSON.stringify(named('different'))); assert.equal(await load(), 'STARTER_ID');
   await rm(join(folder, 'other.json'));
-  await writeFile(join(folder, 'one.JSON'), '{}'); assert.equal(await load(), 'STARTER_SOURCE');
-  await rm(join(folder, 'one.JSON'));
+  // Upper case would collide with one.json on case-insensitive file systems, so the refused name differs in its stem.
+  await writeFile(join(folder, 'Two.json'), '{}'); assert.equal(await load(), 'STARTER_SOURCE');
+  await rm(join(folder, 'Two.json'));
   await mkdir(join(folder, 'dir.json')); assert.equal(await load(), 'STARTER_SOURCE');
   await rm(join(folder, 'dir.json'), { recursive: true });
-  await symlink(join(folder, 'one.json'), join(folder, 'link.json')); assert.equal(await load(), 'STARTER_SOURCE');
-  await rm(join(folder, 'link.json'));
+  // Windows needs Developer Mode for file symlinks; the junction above already covers links there.
+  if (process.platform !== 'win32') { await symlink(join(folder, 'one.json'), join(folder, 'link.json')); assert.equal(await load(), 'STARTER_SOURCE'); await rm(join(folder, 'link.json')); }
   await writeFile(join(folder, 'bad.json'), Buffer.from([0x7b, 0xff, 0x7d])); assert.equal(await load(), 'ERR_ENCODING_INVALID_ENCODED_DATA');
   await rm(join(folder, 'bad.json'));
   for (let index = 0; index < 256; index += 1) await writeFile(join(folder, `note-${index}.txt`), '');

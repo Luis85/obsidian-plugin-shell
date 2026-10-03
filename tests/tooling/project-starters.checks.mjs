@@ -5,7 +5,7 @@ import { fileSymlink } from './file-symlink.mjs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
+import { loadStarterCatalog } from '../../bin/adapters/starters/catalog.ts';
 import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { projectModel, symbol } from '../../bin/compiler/emitters/model.ts';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';

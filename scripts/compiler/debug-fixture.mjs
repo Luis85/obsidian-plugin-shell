@@ -1,4 +1,4 @@
-import { loadDefinitions } from '../starters/repository.ts';
+import { loadDefinitions } from '../../bin/adapters/starters/repository.ts';
 /** Run with node --inspect-brk --experimental-strip-types scripts/compiler/debug-fixture.mjs. */
 import { fileURLToPath } from 'node:url';
 import { analyzeProject } from '../../bin/compiler/index.ts';

@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { listStarters, readStarterOperation, editStarterPlan, assembleStarterPack, packStarterOperation } from '../../scripts/starters/operations.ts';
-import { validateDefinition } from '../../scripts/starters/validation.ts';
+import { listStarters, readStarterOperation, editStarterPlan, assembleStarterPack, packStarterOperation } from '../../bin/adapters/starters/operations.ts';
+import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
 import { code, fileStarter, request, shipped, workspace } from './starters-fixture.mjs';
 
 // Starter operations (operations.ts): listing, schema/show/validate/coverage reads, add/edit plans and the standalone pack.

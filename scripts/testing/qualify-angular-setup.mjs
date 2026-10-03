@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { sha256 } from '../shared/hash.ts';
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
-import { assembleStarterPack } from '../starters/operations.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const output = join(frameworkRoot, 'reports/angular-setup-acceptance');
 const flags = process.argv.slice(2);
