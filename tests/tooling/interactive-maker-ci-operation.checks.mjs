@@ -12,6 +12,10 @@ import { terminalStyle } from '../../bin/presentation/terminal/terminal-style.ts
 const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const posix = process.platform !== 'win32';
+// Execution is refused for a job whose runner OS differs from this machine, so executing fixtures target the host's runner.
+const hostRunner = { linux: 'ubuntu-latest', darwin: 'macos-latest', win32: 'windows-latest' }[process.platform] ?? 'ubuntu-latest';
+const hostOs = { linux: 'Linux', darwin: 'macOS', win32: 'Windows' }[process.platform] ?? 'Linux';
+const onHost = text => text.replaceAll('ubuntu-latest', hostRunner);
 const pwshAvailable = spawnSync('pwsh', ['--version'], { encoding: 'utf8' }).status === 0;
 const created = [];
 after(() => Promise.all(created.map(dir => rm(dir, { recursive: true, force: true }))));
@@ -162,9 +166,9 @@ test('execute is refused for secrets, publication, deployment, wrong runner OS, 
   assert.deepEqual(listed.filter(item => !item.executable).map(item => item.id).sort(), ['deploy', 'publish', 'push', 'release', 'secret']);
 });
 test('execute runs run steps in order with env files, working directory and conditions, and stops at the first failure', { skip: !posix }, async () => {
-  const dir = await project({ 'fake.yml': fake });
+  const dir = await project({ 'fake.yml': onHost(fake) });
   const progress = [];
-  const outcome = await ciOperation(request({ ...select, execute: true }), { root: dir, frameworkRoot: root, progress: text => progress.push(text) });
+  const outcome = await ciOperation(request({ ...select, matrix: onHost(select.matrix), execute: true }), { root: dir, frameworkRoot: root, progress: text => progress.push(text) });
   assert.equal(outcome.status, 'failed'); assert.equal(outcome.data.mode, 'execute'); assert.equal(outcome.data.execution, 'executed');
   assert.deepEqual(outcome.data.steps.map(step => [step.index, step.status]), [[1, 'skipped'], [2, 'skipped'], [3, 'passed'], [4, 'passed'], [5, 'skipped'], [6, 'skipped'], [7, 'failed'], [8, 'not-run']]);
   assert.match(outcome.data.steps[1].reason, /Not reproducible locally/); assert.match(outcome.data.steps[4].reason, /is false on this machine/); assert.match(outcome.data.steps[5].reason, /cannot be settled locally/);
@@ -172,37 +176,37 @@ test('execute runs run steps in order with env files, working directory and cond
   assert.equal(failed.exitCode, 3); assert.equal(failed.code, 'PROCESS_FAILED'); assert.match(failed.outputTail, /^before-failure$/); assert.equal(typeof failed.durationMs, 'number');
   assert.equal(outcome.data.steps[7].reason, 'stopped after step 7 failed');
   assert.deepEqual(outcome.data.summary, { passed: 2, failed: 1, skipped: 4, notRun: 1, durationMs: outcome.data.summary.durationMs });
-  assert.equal(outcome.diagnostics[0].code, 'CI_JOB_FAILED'); assert.match(outcome.diagnostics[0].next, /--matrix os=ubuntu-latest,flavor=a --execute$/);
+  assert.equal(outcome.diagnostics[0].code, 'CI_JOB_FAILED'); assert.match(outcome.diagnostics[0].next, new RegExp(`--matrix os=${hostRunner},flavor=a --execute$`));
   assert.equal((await readFile(join(dir, 'pwd.txt'), 'utf8')).trim(), join(dir, 'sub'), 'step ran in the default working directory');
   assert.equal((await readFile(join(dir, 'wf.txt'), 'utf8')).trim(), 'wf'); await assert.rejects(access(join(dir, 'never.txt')));
   assert.deepEqual(progress.filter(line => !line.startsWith('ci: step')), [], 'child output is captured, not streamed');
 });
 test('a passing job reports ok with per-step durations; a timeout stops the step', { skip: !posix }, async () => {
-  const dir = await project({ 'ok.yml': 'name: Ok\non: push\njobs:\n  quick:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: echo one\n      - run: echo "$CI $RUNNER_OS" > ran.txt\n        shell: bash\n  slow:\n    runs-on: ubuntu-latest\n    steps:\n      - run: sleep 20\n      - run: echo after > after.txt\n' });
+  const dir = await project({ 'ok.yml': onHost('name: Ok\non: push\njobs:\n  quick:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: echo one\n      - run: echo "$CI $RUNNER_OS" > ran.txt\n        shell: bash\n  slow:\n    runs-on: ubuntu-latest\n    steps:\n      - run: sleep 20\n      - run: echo after > after.txt\n') });
   const ok = await run(dir, { job: 'ok/quick', execute: true });
   assert.equal(ok.status, 'ok'); assert.deepEqual(ok.data.summary, { passed: 2, failed: 0, skipped: 1, notRun: 0, durationMs: ok.data.summary.durationMs }); assert.deepEqual(ok.diagnostics, []);
-  assert.equal((await readFile(join(dir, 'ran.txt'), 'utf8')).trim(), 'true Linux');
+  assert.equal((await readFile(join(dir, 'ran.txt'), 'utf8')).trim(), `true ${hostOs}`);
   const timed = await run(dir, { job: 'ok/slow', execute: true, timeout: '400' });
   assert.equal(timed.status, 'failed'); assert.equal(timed.data.steps[0].code, 'TIMEOUT'); assert.equal(timed.data.steps[1].status, 'not-run');
   await assert.rejects(access(join(dir, 'after.txt')));
 });
 test('a working directory outside the project fails the step instead of running there', { skip: !posix }, async () => {
-  const dir = await project({ 'escape.yml': 'name: E\non: push\njobs:\n  j:\n    runs-on: ubuntu-latest\n    steps:\n      - run: touch escaped.txt\n        working-directory: ../\n' });
+  const dir = await project({ 'escape.yml': onHost('name: E\non: push\njobs:\n  j:\n    runs-on: ubuntu-latest\n    steps:\n      - run: touch escaped.txt\n        working-directory: ../\n') });
   const outcome = await run(dir, { job: 'escape/j', execute: true });
   assert.equal(outcome.status, 'failed'); assert.equal(outcome.data.steps[0].code, 'CI_WORKING_DIRECTORY');
 });
 test('the CLI exposes the command through the versioned JSON protocol and a readable terminal view', { skip: !posix }, async () => {
-  const dir = await project({ 'fake.yml': fake });
+  const dir = await project({ 'fake.yml': onHost(fake) });
   const listed = cli(['ci', '--list', '--json', '--root', dir]);
   assert.equal(listed.exit, 0); assert.equal(listed.stdout.trim().split('\n').length, 1, listed.stderr);
   const parsed = JSON.parse(listed.stdout);
   assert.deepEqual([parsed.protocolVersion, parsed.command, parsed.status, parsed.data.summary.jobs], [1, 'ci', 'ok', 1]);
-  const dry = cli(['ci', '--job', 'fake/build', '--matrix', 'os=ubuntu-latest,flavor=a', '--root', dir]);
+  const dry = cli(['ci', '--job', 'fake/build', '--matrix', `os=${hostRunner},flavor=a`, '--root', dir]);
   assert.equal(dry.exit, 0); assert.match(dry.stdout, /^ci: planned$/m); assert.match(dry.stdout, /^ {8}\$ pwd > "\$GITHUB_WORKSPACE\/pwd\.txt"$/m);
-  assert.match(dry.stdout, /unresolved: \$\{\{ steps\.export\.outputs\.token \}\}/); assert.match(dry.stdout, /^Next: node bin\/app ci --job fake\/build --matrix os=ubuntu-latest,flavor=a --execute$/m);
-  const failed = cli(['ci', '--job', 'fake/build', '--matrix', 'os=ubuntu-latest,flavor=a', '--execute', '--json', '--root', dir]);
+  assert.match(dry.stdout, /unresolved: \$\{\{ steps\.export\.outputs\.token \}\}/); assert.match(dry.stdout, new RegExp(`^Next: node bin/app ci --job fake/build --matrix os=${hostRunner},flavor=a --execute$`, 'm'));
+  const failed = cli(['ci', '--job', 'fake/build', '--matrix', `os=${hostRunner},flavor=a`, '--execute', '--json', '--root', dir]);
   assert.equal(failed.exit, 1); const result = JSON.parse(failed.stdout); assert.equal(result.status, 'failed'); assert.equal(result.data.steps[6].exitCode, 3);
-  const human = cli(['ci', '--job', 'fake/build', '--matrix', 'os=ubuntu-latest,flavor=a', '--execute', '--root', dir]);
+  const human = cli(['ci', '--job', 'fake/build', '--matrix', `os=${hostRunner},flavor=a`, '--execute', '--root', dir]);
   assert.equal(human.exit, 1); assert.match(human.stdout, /--- step 7 \(PROCESS_FAILED\) last output ---\n {2}before-failure/); assert.match(human.stdout, /Summary {2}2 passed, 1 failed, 4 skipped, 1 not run in /);
   const bad = cli(['ci', '--json', '--root', dir]);
   assert.equal(bad.exit, 1); assert.equal(JSON.parse(bad.stdout).diagnostics[0].code, 'CI_USAGE');
