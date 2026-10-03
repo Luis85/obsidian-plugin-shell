@@ -22,11 +22,12 @@ export function journeyCode(template: TemplateSnapshot, m: Model, add: Add): voi
     const to = relocated.get(file.path)!;
     let source = file.content.replace("import './ui.css';\n", '');
     if (file.path === prefix + 'main.ts') {
-      // The prototype bridge exports validators; a native mount is not that browser bridge.
+      // The prototype bridge exports validators and the shell's starter API; a native mount is not that browser bridge.
       source = source.replace(/^import .* from '.*\/(?:authoring-contract|sitemap\/(?:validate|safety))\.ts';\r?\n/gm, '')
+        .replace(/^export \{[^}\n]+\} from '.*\/bin\/[^']+';\r?\n/gm, '')
         .replace(/^export \{ validateAuthoringDocument,[^\n]+\r?\n/m, '')
         .replace('flow:FlowRuntime = root.ownerDocument.defaultView!.VueFlowCore', 'flow:FlowRuntime');
-      if (source.includes('authoring-contract.ts') || source.includes('defaultView!.VueFlowCore')) throw new Error('JOURNEY_MOUNT_CONTRACT');
+      if (source.includes('authoring-contract.ts') || source.includes('defaultView!.VueFlowCore') || /from '[^']*\/bin\//.test(source)) throw new Error('JOURNEY_MOUNT_CONTRACT');
     }
     source = source.replace(/((?:from\s*|import\s*)['"])(\.[^'"]+)(['"])/g, (_match, before, path, after) => {
       const resolved = posix.normalize(posix.join(posix.dirname(file.path), path));

@@ -58,6 +58,8 @@ test('the real maintained editor template is copied completely for a custom-root
   for (const path of relocated) assert.equal(out.files.get(path).ownership, 'extension');
   const mount = out.text('application/source/generated/bootstrap/journey-mount.ts');
   assert.ok(!mount.includes('authoring-contract.ts') && !mount.includes("import './ui.css'") && !mount.includes('defaultView!.VueFlowCore'));
+  // The extracted kit ships the compiled CLI, not bin/ sources, so the mount must not reach into them.
+  assert.ok(!mount.includes('/bin/') && !mount.includes('parseBrowserStarter'), 'the native mount drops the starter bridge');
   assert.ok(mount.includes("from '../../../../scripts/companion/tooling-contract.ts';"));
   assert.ok(out.files.has('checks/project/journey-generated.test.ts') && out.files.has('application/source/generated/presentation/components/screens/inbox-screen.vue'));
 });
@@ -68,7 +70,7 @@ test('journey emission is opt-in and refuses an incomplete or still-bridged edit
   const m = model(await journeyDocument());
   const missing = editorTemplate(bridge); missing.frameworkFiles = missing.frameworkFiles.filter(file => file.path !== prefix + 'workspace/contracts.ts');
   assert.throws(() => journeyCode(missing, m, recorder().add), { message: 'JOURNEY_TEMPLATE_MISSING: workspace/contracts.ts' });
-  for (const leaked of ["const contract = 'authoring-contract.ts';\n", 'const flow = root.ownerDocument.defaultView!.VueFlowCore;\n'])
+  for (const leaked of ["const contract = 'authoring-contract.ts';\n", 'const flow = root.ownerDocument.defaultView!.VueFlowCore;\n', "import { x } from '../../../../bin/adapters/starters/browser.ts';\n"])
     assert.throws(() => journeyCode(editorTemplate(leaked), m, recorder().add), { message: 'JOURNEY_MOUNT_CONTRACT' });
 });
 
