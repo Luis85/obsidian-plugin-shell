@@ -104,8 +104,8 @@
     },
     {
       "path": "references/repository-contract.md",
-      "bytes": 9638,
-      "sha256": "4780f0b582e1124e9f84765b2fa2a4a3ba0e6c8f7cb3d9fe2065d159da9a82ad"
+      "bytes": 9654,
+      "sha256": "7fa5785bb5626264f4c662106b135fb0f16566c5935d6c14e4910437a2817cf9"
     },
     {
       "path": "references/subagents.md",
@@ -154,8 +154,8 @@
     },
     {
       "path": "scripts/inspect-repository.mjs",
-      "bytes": 3403,
-      "sha256": "3f41eaf1986bcd6fb58ed4a35a7221df38ea614fcbd2f7028de446987eefa041"
+      "bytes": 3413,
+      "sha256": "446be2f40c78ad91877ca978a7d957f5214630003c7da38a70c720c80f215542"
     },
     {
       "path": "scripts/lib/build-output.mjs",
@@ -204,8 +204,8 @@
     },
     {
       "path": "scripts/validate-project.mjs",
-      "bytes": 4709,
-      "sha256": "c01cef34b1c56cb58b7f41e046d256a289d93470e7e3d16c6b14a01de5fee972"
+      "bytes": 4715,
+      "sha256": "1767a2739893de66c569d076335340e9b9eebb755fa3b179850a16e1e043fd41"
     },
     {
       "path": "scripts/verify-browser.mjs",
@@ -234,8 +234,8 @@
     },
     {
       "path": "tests/validator.checks.mjs",
-      "bytes": 4527,
-      "sha256": "1a349d432e332bcce1193eb8a71aece6ba52ed6171c3299053d645737b0f5be9"
+      "bytes": 4539,
+      "sha256": "beef0d96befeea8924a82a5daa614d3b8143d6e72ecfce35df3fd611009633c3"
     },
     {
       "path": "tests/worker-output.checks.mjs",

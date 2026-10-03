@@ -12,8 +12,8 @@ These commands read maintained JSON metadata relative to the installed tool, not
 relative to the current project. They do not read project package.json, load Vite,
 import custom recipes, execute npm scripts, inspect a vault, install dependencies,
 write files or activate plugins. The same modules run in a Git-free copy containing
-only scripts/operations, bin/adapters/operations, scripts/contracts, scripts/shared/hash.ts
-and scripts/makers/recipes.json.
+only scripts/operations/cli.mjs, bin/adapters/operations (with operations.json), scripts/contracts,
+scripts/shared/hash.ts and bin/adapters/makers/recipes.json.
 No companion code or npm installation is required for discovery.
 
 The catalog describes fourteen actual built-in maker registrations and seven
@@ -32,10 +32,10 @@ Custom makers remain executable local code, not metadata to import in a renderer
 
 ## Source of truth and drift checks
 
-- scripts/makers/recipes.json owns built-in names, options, descriptions, schema
+- bin/adapters/makers/recipes.json owns built-in names, options, descriptions, schema
   metadata, prerequisites and supported outputs. Argument validation and listing use
   this data; bin/adapters/makers/dispatch.ts owns the actual implementation registrations.
-- scripts/operations/operations.json describes the bounded operation catalog.
+- bin/adapters/operations/operations.json describes the bounded operation catalog.
   bin/adapters/operations/protocol.ts registers the actual two discovery handlers.
 - bin/adapters/operations/catalog.ts validates supported schema keywords, duplicates,
   aliases, implementation/transport claims and maker option parity. Tests additionally

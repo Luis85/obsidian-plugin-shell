@@ -9,6 +9,7 @@ import { included } from '../../bin/adapters/framework/distribution.ts';
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { listFiles } from '../../bin/adapters/framework/kit-integrity.ts';
 import { materialize } from './interactive-maker-adopt-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const templates = ['templates/adoption/claude-skill/SKILL.md', 'templates/adoption/agents-skill/SKILL.md'];
@@ -18,6 +19,7 @@ test('the adoption skill templates are part of the distributed kit inventory', a
   for (const path of templates) { assert.ok(listed.includes(path), path); assert.equal(included(path), true, path); }
 });
 test('an extracted compiled kit analyzes a project, plans, installs the skill and verifies itself from the project root', { timeout: 300000 }, async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
   const project = await realpath(await mkdtemp(join(tmpdir(), 'adopt-kit-')));
   t.after(() => rm(project, { recursive: true, force: true }));
   const files = await assembleKit({ root: project, frameworkRoot: root }, await installedCompiler());

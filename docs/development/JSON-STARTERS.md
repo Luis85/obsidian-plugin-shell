@@ -80,9 +80,11 @@ its JSON files to a configured alternative folder explicitly.
 
 ## Definition structure
 
-The editor schema is `scripts/starters/starter.schema.json`; the runtime validator
-also checks semantic rules such as path containment, dependency cycles, identity
-fields, current Companion version, and input type/default compatibility.
+The editor schema is `scripts/starters/starter.schema.json` (catalog data, kept beside
+the other JSON catalogs so starter files and in-place kit projects can reference it);
+the runtime validator in `bin/adapters/starters/validation.ts` also checks semantic
+rules such as path containment, dependency cycles, identity fields, current
+Companion version, and input type/default compatibility.
 `schemaVersion` versions this contract; `version` versions the individual starter.
 A content SHA-256 identifies the exact local bytes but is **not** a signature or
 proof that a starter is safe to execute.

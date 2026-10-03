@@ -4,11 +4,12 @@ on:
     paths: &concept-inputs
       - 'configs/starters/**'
       - 'scripts/starters/**'
+      - 'bin/adapters/starters/**'
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
+      - 'scripts/companion-tools/**'
       - 'templates/**'
-      - 'scripts/framework/release-bundle.mjs'
       - 'bin/adapters/framework/**'
       - 'bin/adapters/framework-cli.ts'
       - 'bin/presentation/terminal/**'
@@ -231,7 +232,7 @@ jobs:
           git rev-parse HEAD > reports/companion-mvp/source-commit.txt
       - name: Generate and independently build the exact v6 self-project and offline clickdummy
         run: |
-          node scripts/companion/qualify-project.mjs --authoring-fixture
+          node scripts/companion-tools/qualify-project.mjs --authoring-fixture
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py --clickdummy
       - name: Retain exact authoring artifacts and browser evidence
         if: always()
@@ -272,7 +273,7 @@ jobs:
           mkdir -p reports/journey-native
           node scripts/concepts/build-mvp.mjs 2>&1 | tee reports/journey-native/definition-build.log
           node scripts/concepts/export-golden-project.mjs 2>&1 | tee reports/journey-native/golden-source.log
-          node scripts/companion/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
+          node scripts/companion-tools/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
       - name: Exercise create, edit, reopen and independent leaves against the generated plugin
         env:
           SOURCE_COMMIT: ${{ github.sha }}

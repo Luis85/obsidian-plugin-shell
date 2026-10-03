@@ -1,13 +1,14 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { starterCoverage } from './coverage.ts';
 import { basename, dirname, join, resolve } from 'node:path';
 import { readdir } from 'node:fs/promises';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
-import { hash, readBounded, exists } from '../../bin/adapters/framework/files.ts';
-import { zip } from '../../bin/adapters/framework/zip.ts';
-import { result, requireThat, stringOption, type Context, type Request } from '../../bin/adapters/framework/contracts.ts';
+import { createFilePlan, applyFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { hash, readBounded, exists } from '../framework/files.ts';
+import { zip } from '../framework/zip.ts';
+import { result, requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
 import { STARTER_MAX_BYTES } from './browser.ts';
 import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts';
-import { pluginStarterDefinitions } from '../../plugins/runtime.ts';
+import { pluginStarterDefinitions } from '../../../plugins/runtime.ts';
 export async function listStarters(context: Context, command = 'starters list') {
   const definitions = await loadDefinitions(context.root), folder = await starterFolder(context.root);
   return result(command, { folder, integrity: 'local-content-sha256; not a signature', starters: definitions.map(({ definition: d, sha256, file }) => ({
@@ -83,7 +84,7 @@ export async function assembleStarterPack(context: Context) {
 export async function packStarterOperation(request: Request, context: Context) {
   const output = stringOption(request.options, 'out'); requireThat(output, 'OUTPUT_REQUIRED', 'Supply --out <starters.zip>.');
   const target = resolve(context.root, output);
-  requireThat(target.endsWith('.zip') && !target.split(/[\\/]/).some(part => ['.git', '.obsidian', '.framework', 'node_modules'].includes(part.toLowerCase())), 'STARTER_PATH', 'Choose a ZIP outside protected directories.');
+  requireThat(target.endsWith('.zip') && !target.split(/[\\/]/).some(part => ['.git', defaultVaultConfigDirectory, '.framework', 'node_modules'].includes(part.toLowerCase())), 'STARTER_PATH', 'Choose a ZIP outside protected directories.');
   const files = await assembleStarterPack(context), bytes = zip(files);
   const report = { archive: target, sha256: hash(bytes), bytes: bytes.length, starters: files.length, publication: 'not-authorized', definitionFormat: 'configs/starters/$starterName.json' };
   if (!request.options.yes || request.options['dry-run']) return result(request.command, { ...report, requires: '--yes' }, 'planned');

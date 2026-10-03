@@ -4,7 +4,6 @@ on:
     paths:
       - 'bin/documentation/**'
       - 'bin/adapters/settings-documentation.ts'
-      - 'scripts/framework/release-bundle.mjs'
       - 'bin/adapters/framework/**'
       - 'bin/adapters/framework-cli.ts'
       - 'bin/presentation/terminal/**'

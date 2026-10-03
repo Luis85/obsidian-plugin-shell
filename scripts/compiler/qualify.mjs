@@ -1,4 +1,4 @@
-import { loadDefinitions } from '../starters/repository.ts';
+import { loadDefinitions } from '../../bin/adapters/starters/repository.ts';
 /** Explicit qualified-toolchain integration: generated plugin and offline browser output. */
 import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';

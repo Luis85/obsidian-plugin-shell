@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
-import { packStarterOperation, readStarterOperation } from '../../../scripts/starters/operations.ts';
-import { starterProcessOperation } from '../../../scripts/starters/processes.ts';
+import { packStarterOperation, readStarterOperation } from '../starters/operations.ts';
+import { starterProcessOperation } from '../starters/processes.ts';
 import { adoptAnalyze } from './adopt-operation.ts';
 import { airshipOperation } from './airship.ts';
 import { buildClickdummy } from './clickdummy.ts';

@@ -75,7 +75,7 @@ test('real CLI returns exact v3 bytes; malformed detail data produces no output 
   const vault = await mkdtemp(join(tmpdir(), 'detail-contract-'));
   try {
     const input = join(vault, 'project.json'), text = JSON.stringify(seed, null, 2) + '\r\n'; await writeFile(input, text);
-    const run = () => spawnSync(process.execPath, ['scripts/companion/generate.mjs', '--input', input, '--vault', vault, '--target', 'new-plugin'], { encoding: 'utf8' });
+    const run = () => spawnSync(process.execPath, ['scripts/companion-tools/generate.mjs', '--input', input, '--vault', vault, '--target', 'new-plugin'], { encoding: 'utf8' });
     let result = run(); assert.equal(result.status, 0, result.stderr); assert.equal(result.stdout, text); assert.deepEqual(await readdir(vault), ['project.json']);
     const invalid = copy(seed); invalid.design.detailDesigns.documents[0].nodes[0].parentId = 'missing'; await writeFile(input, JSON.stringify(invalid)); result = run();
     assert.equal(result.status, 1); assert.equal(result.stdout, ''); assert.match(result.stderr, /DETAIL_INVALID/); assert.deepEqual(await readdir(vault), ['project.json']);

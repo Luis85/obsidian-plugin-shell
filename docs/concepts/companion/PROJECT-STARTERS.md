@@ -50,7 +50,7 @@ Focused starters provide original PRD acceptance TODOs and detailed compositions
 
 `starters/catalog.json` has catalog schema 1 and bounded metadata: stable ID, version, category, difficulty, description, outcome, includes, remaining implementation, tags, local filename and SHA-256. Each `<id>.companion.json` is a complete ordinary **project-v4** document. There is no starter-specific project schema or executable payload.
 
-The builder embeds these exact JSON files into the self-contained HTML, escaping `<` before insertion into a data-only script block. `scripts/companion/starter-contract.mjs` validates the same embedded catalog and customizes a deep copy. `starter-files.mjs` validates local file identity, integrity, regular-file status and inventory for tooling. The generator consumes the normal exported project document, not catalog metadata.
+The builder embeds these exact JSON files into the self-contained HTML, escaping `<` before insertion into a data-only script block. `scripts/companion/starter-contract.mjs` validates the same embedded catalog and customizes a deep copy. `bin/adapters/starters/catalog.ts` validates local file identity, integrity, regular-file status and inventory for tooling. The generator consumes the normal exported project document, not catalog metadata.
 
 A provenance note records starter ID/version/source hash. It is informational Markdown and grants no execution authority. The source hash identifies the built-in template bytes, not the later customized project. Renaming plugin identity does not rewrite domain labels, entity slugs, internal IDs or design tokens.
 
@@ -85,7 +85,7 @@ python3 scripts/concepts/run-browser-checks.py --real-storage
 
 Use Node 24.21.0 and npm 11.19.1 for qualification. Local Node22 strip-types checks are supplementary, not substitutes for pinned-toolchain evidence.
 
-The generator workflow has a per-starter matrix. `scripts/companion/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
+The generator workflow has a per-starter matrix. `scripts/companion-tools/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
 
 ## Companion self-project
 

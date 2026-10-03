@@ -82,8 +82,9 @@ test('[CAP-04] fresh Git-free copy discovers capabilities without installed pack
     await mkdir(join(folder, path), { recursive: true });
     await cp(join(root, path), join(folder, path), { recursive: true });
   }
-  await mkdir(join(folder, 'scripts/makers'), { recursive: true });
-  await cp(join(root, 'scripts/makers/recipes.json'), join(folder, 'scripts/makers/recipes.json'));
+  // The maker catalog is data beside the maker engine; discovery reads only this file from bin/adapters/makers.
+  await mkdir(join(folder, 'bin/adapters/makers'), { recursive: true });
+  await cp(join(root, 'bin/adapters/makers/recipes.json'), join(folder, 'bin/adapters/makers/recipes.json'));
   // The dependency-free canonical digest is part of the discovery surface.
   await mkdir(join(folder, 'scripts/shared'), { recursive: true });
   for (const file of ['hash.ts']) await cp(join(root, 'scripts/shared', file), join(folder, 'scripts/shared', file));

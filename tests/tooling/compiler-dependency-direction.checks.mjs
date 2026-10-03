@@ -34,12 +34,11 @@ const owners = new Map([
 ]);
 const executableCompiler = /^bin\/compiler\/(?:index\.ts$|adapters\/|application\/|emitters\/)/;
 const compilerDomain = /^bin\/compiler\/domain\//;
-const qualificationEntry = /^scripts\/companion\/qualify-[^/]+\.mjs$/;
 function resolved(from, specifier) {
   return specifier.startsWith('.') ? posix.normalize(posix.join(posix.dirname(from), specifier)) : null;
 }
+// The qualification entries moved to scripts/companion-tools (M4); no scripts/companion module is exempt any more.
 function companionFindings(path, dependency, target) {
-  if (qualificationEntry.test(path)) return [];
   const findings = [];
   if (executableCompiler.test(target))
     findings.push(`${path}: companion library cannot import executable compiler module ${target}`);
@@ -103,7 +102,8 @@ test('companion code cannot import executable compiler modules, re-exports inclu
   assert.equal(directionFindings(new Map([[contract, "import '../../bin/compiler/adapters/project-plan.ts';"]])).length, 1);
   const reexport = "export * from '../../../bin/compiler/adapters/selection.ts';";
   assert.equal(directionFindings(new Map([[companionModule, reexport]])).length, 1);
-  assert.deepEqual(directionFindings(new Map([['scripts/companion/qualify-example.mjs', "import '../../bin/compiler/adapters/project-plan.ts';"]])), []);
+  assert.equal(directionFindings(new Map([['scripts/companion/qualify-example.mjs', "import '../../bin/compiler/adapters/project-plan.ts';"]])).length, 1);
+  assert.deepEqual(directionFindings(new Map([['scripts/companion-tools/qualify-example.mjs', "import '../../bin/compiler/adapters/project-plan.ts';"]])), []);
   const moved = directionFindings(new Map([['scripts/compiler/qualify-example.mjs', "import { compileProject } from './index.ts';"]]));
   assert.equal(moved.length, 1); assert.match(moved[0], /bin\/compiler\/index\.ts instead of removed facade/);
 });
@@ -121,7 +121,7 @@ test('no source may import or recreate a removed companion facade', () => {
   for (const [path, statement] of [
     ['bin/adapters/example.ts', "import { planProject } from '../../scripts/companion/compiler/plan.ts';"],
     ['bin/adapters/example.ts', "const cli = await import('../../scripts/companion/compiler/cli.ts');"],
-    ['scripts/starters/example.ts', "import { projectFiles } from '../companion/compiler/project-files.ts';"],
+    ['bin/adapters/starters/example.ts', "import { projectFiles } from '../../../scripts/companion/compiler/project-files.ts';"],
     ['scripts/compiler/adapters/example.ts', "export { fixtureCode } from '../../companion/compiler/fixture-code.ts';"],
     ['plugins/example/index.ts', "import '../../scripts/companion/compiler/plan.ts';"],
     ['bin/adapters/example.ts', "import { CompilerError } from '../../scripts/compiler/domain/diagnostics.ts';"],

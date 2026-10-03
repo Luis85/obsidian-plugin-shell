@@ -105,8 +105,8 @@ export function capabilityCatalog(): CapabilityCatalog {
     id: 'obsidian-plugin-shell.authoring',
     compatibility: 'Discovery v1 only. CLI contracts remain independently versioned; metadata is not execution approval or qualification evidence.',
     customRecipes: 'Explicitly trusted execution only; custom registries are never imported for discovery.',
-    makers: readData('../../../scripts/makers/recipes.json'),
-    operations: readData('../../../scripts/operations/operations.json'),
+    makers: readData('../makers/recipes.json'),
+    operations: readData('./operations.json'),
   };
   assertCatalog(catalog);
   return catalog;

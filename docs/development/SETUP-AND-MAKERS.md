@@ -77,7 +77,6 @@ scripts/
     steps/
   makers/
     entities.mjs               # entity catalog check entry
-    recipes.json               # built-in recipe catalog data
     custom/                    # trusted local recipes and their registry
   shared/
     file-plan.mjs
@@ -93,7 +92,7 @@ scripts/
   release/
   maintenance/
 bin/
-  adapters/makers/             # maker engine, recipes and templates (strict TypeScript)
+  adapters/makers/             # maker engine, recipes and templates (strict TypeScript), recipes.json catalog data
 tests/tooling/
 ```
 

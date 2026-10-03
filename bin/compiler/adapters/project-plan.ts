@@ -1,7 +1,7 @@
 /** Compatibility facade. Compile in memory first; compare/apply use the original guarded writer. */
 import { fileURLToPath } from 'node:url';
 import { resolve, basename } from 'node:path';
-import { readCompanionInput } from '../../../scripts/companion/read-project.mjs';
+import { readCompanionInput } from '../../adapters/framework/read-project.ts';
 import { compileProject, loadTemplateSnapshot } from '../index.ts';
 import { CompilationFailure } from '../domain/diagnostics.ts';
 import { generationSelection } from './selection.ts';

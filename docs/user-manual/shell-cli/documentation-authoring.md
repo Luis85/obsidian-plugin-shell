@@ -6,8 +6,8 @@ The manual deliberately separates executable command facts, explanations close t
 
 | Content | Authoritative location | Result |
 | --- | --- | --- |
-| Commands, accepted option kinds, positional bounds, effects | `scripts/framework/catalog.ts` | Generated command reference and JSON |
-| Option meanings, profiles/defaults, usages, examples, groups | `scripts/framework/help-text.ts` | Terminal help and the same generated reference |
+| Commands, accepted option kinds, positional bounds, effects | `bin/adapters/framework/catalog.ts` | Generated command reference and JSON |
+| Option meanings, profiles/defaults, usages, examples, groups | `bin/adapters/framework/help-text.ts` | Terminal help and the same generated reference |
 | Stable compiler diagnostic recovery hints | `bin/compiler/domain/diagnostics.ts` | Generated diagnostic guide |
 | Public interfaces and their docblocks | Explicit TypeDoc entry points in `scripts/documentation/typedoc.json` | Source/API appendix |
 | Tutorials, workflows, safety explanations and troubleshooting | Markdown beside this page | Handbook documents |

@@ -61,8 +61,8 @@ test('the real template loader excludes the archive and preserves the active nat
   // Native starter definitions moved to the separate pack: never template input, yet still carried and valid there.
   for (const path of ['docs/concepts/companion/starters/custom-file-view.companion.json', 'docs/concepts/companion/starters/context-menu.companion.json',
     'configs/starters/custom-file-view.json', 'configs/starters/context-menu.json']) assert.ok(!paths.includes(path), path);
-  const { assembleStarterPack } = await import('../../scripts/starters/operations.ts');
-  const { companionCatalog, loadDefinitions } = await import('../../scripts/starters/repository.ts');
+  const { assembleStarterPack } = await import('../../bin/adapters/starters/operations.ts');
+  const { companionCatalog, loadDefinitions } = await import('../../bin/adapters/starters/repository.ts');
   const pack = await assembleStarterPack({ root: repository, frameworkRoot: repository });
   for (const id of ['custom-file-view', 'context-menu']) assert.ok(pack.some(file => file.path === `configs/starters/${id}.json`), id);
   const native = Object.fromEntries(companionCatalog(await loadDefinitions(repository)).starters.map(entry => [entry.id, entry.document.design.nativeIntegrations]));

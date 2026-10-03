@@ -16,7 +16,7 @@ const mismatch = { status: 'revision-mismatch', reason: 'browser-revision-mismat
 /** Fake side effects that record what the hook would have done. */
 function fakes(overrides = {}) {
   const calls = { install: [], exported: [], found: [], variables: [], provisioned: 0, pinned: [], pinResult: { ok: true, text: 'npm pinned to 11.19.1' } };
-  const deps = { read: readFrom(files), nodeVersion: '24.21.0', npmVersion: () => '11.19.1', home: '/h', exists: () => true, stale: () => false,
+  const deps = { platform: 'linux', read: readFrom(files), nodeVersion: '24.21.0', npmVersion: () => '11.19.1', home: '/h', exists: () => true, stale: () => false,
     findNode: (qualified, context) => { calls.found.push([qualified, context.home]); return null; },
     exportPath: (env, directory) => { calls.exported.push(directory); return Boolean(env.CLAUDE_ENV_FILE); },
     exportVariable: (env, name, value) => { calls.variables.push([name, value]); return Boolean(env.CLAUDE_ENV_FILE); },
@@ -29,9 +29,9 @@ function fakes(overrides = {}) {
 const status = (env, overrides) => { const { deps, calls } = fakes(overrides); return sessionStatus('/p', env, deps).then(text => ({ text, calls })); };
 
 test('[SESSION-START-01] qualified toolchains are read from .nvmrc, engines and packageManager; ranges are compared conservatively', () => {
-  assert.deepEqual(qualifiedToolchain('/p', readFrom(files)), { node: '24.21.0', nodeRange: '>=22.13.0', npm: '11.19.1', npmRange: '>=11.19.1 <13' });
-  assert.deepEqual(qualifiedToolchain('/p', readFrom({ '/p/.nvmrc': 'v20.1.0' })), { node: '20.1.0', nodeRange: null, npm: null, npmRange: null });
-  assert.deepEqual(qualifiedToolchain('/p', readFrom({ '/p/.nvmrc': 'lts/*', '/p/package.json': '{broken' })), { node: null, nodeRange: null, npm: null, npmRange: null });
+  assert.deepEqual(qualifiedToolchain('/p', readFrom(files), 'linux'), { node: '24.21.0', nodeRange: '>=22.13.0', npm: '11.19.1', npmRange: '>=11.19.1 <13' });
+  assert.deepEqual(qualifiedToolchain('/p', readFrom({ '/p/.nvmrc': 'v20.1.0' }), 'linux'), { node: '20.1.0', nodeRange: null, npm: null, npmRange: null });
+  assert.deepEqual(qualifiedToolchain('/p', readFrom({ '/p/.nvmrc': 'lts/*', '/p/package.json': '{broken' }), 'linux'), { node: null, nodeRange: null, npm: null, npmRange: null });
   assert.equal(satisfies('22.22.0', '>=22.13.0'), true);
   assert.equal(satisfies('22.12.9', '>=22.13.0'), false);
   assert.equal(satisfies('12.0.0', '>=11.19.1 <13'), true);
@@ -125,10 +125,10 @@ test('[SESSION-START-09] a qualified Node is found only when the candidate reall
   const env = { SHELL_NODE_BIN: '/custom/bin' };
   const versions = { '/custom/bin': '24.20.0', '/opt/node24/bin': '24.21.0' };
   const probe = directory => versions[directory] ?? null;
-  assert.equal(findQualifiedNode('24.21.0', { env, home: '/h', exists: () => true, probe }), '/opt/node24/bin');
-  assert.equal(findQualifiedNode('24.21.0', { env, home: '/h', exists: path => path !== '/opt/node24/bin', probe }), null, 'a missing directory is skipped');
-  assert.equal(findQualifiedNode('24.99.0', { env, home: '/h', exists: () => true, probe }), null);
-  assert.equal(findQualifiedNode(null, { env, home: '/h', exists: () => true, probe }), null);
+  assert.equal(findQualifiedNode('24.21.0', { env, home: '/h', platform: 'linux', exists: () => true, probe }), '/opt/node24/bin');
+  assert.equal(findQualifiedNode('24.21.0', { env, home: '/h', platform: 'linux', exists: path => path !== '/opt/node24/bin', probe }), null, 'a missing directory is skipped');
+  assert.equal(findQualifiedNode('24.99.0', { env, home: '/h', platform: 'linux', exists: () => true, probe }), null);
+  assert.equal(findQualifiedNode(null, { env, home: '/h', platform: 'linux', exists: () => true, probe }), null);
 });
 
 /** Run the hook as Claude Code does: a process fed the SessionStart event, with the cloud/install switches pinned off. */
@@ -272,4 +272,38 @@ test('[SESSION-START-19] npm is pinned only inside the Workbench cache, only whe
     await status(env, { ...overrides, pinNpm: pin({ ok: true, text: '' }) });
     assert.deepEqual(pinned, [], label);
   }
+});
+
+const WIN_FILES = { 'C:\\p\\.nvmrc': '24.21.0\r\n', 'C:\\p\\package.json': JSON.stringify({ engines: { node: '>=22.13.0', npm: '>=11.19.1 <13' }, packageManager: 'npm@11.19.1' }) };
+
+test('[SESSION-START-20] a simulated Windows host reads CRLF .nvmrc files, finds node.exe at the install root and writes bash-style PATH lines', () => {
+  assert.deepEqual(qualifiedToolchain('C:\\p', readFrom(WIN_FILES), 'win32'), { node: '24.21.0', nodeRange: '>=22.13.0', npm: '11.19.1', npmRange: '>=11.19.1 <13' });
+  const versions = { 'D:\\custom': '24.20.0', 'C:\\Users\\u\\nvm\\v24.21.0': '24.21.0', 'C:\\Program Files\\nodejs': '22.1.0' };
+  const seen = [];
+  const probe = directory => { seen.push(directory); return versions[directory] ?? null; };
+  const env = { SHELL_NODE_BIN: 'D:\\custom', NVM_HOME: 'C:\\Users\\u\\nvm', ProgramFiles: 'C:\\Program Files' };
+  const context = { env, home: 'C:\\Users\\u', platform: 'win32', exists: () => true, probe };
+  assert.equal(findQualifiedNode('24.21.0', context), 'C:\\Users\\u\\nvm\\v24.21.0', 'nvm-windows keeps node.exe in the version directory, not in bin');
+  assert.deepEqual(seen, ['D:\\custom', 'C:\\Users\\u\\nvm\\v24.21.0']);
+  seen.length = 0;
+  assert.equal(findQualifiedNode('24.21.0', { ...context, env: { ProgramFiles: 'C:\\Program Files' } }), null);
+  assert.deepEqual(seen, ['C:\\Program Files\\nodejs', 'C:\\Users\\u\\AppData\\Local\\Volta\\tools\\image\\node\\24.21.0'], 'no POSIX locations are probed on Windows');
+  const lines = [];
+  assert.equal(exportPath({ CLAUDE_ENV_FILE: 'x' }, 'C:\\Program Files\\nodejs', (file, line) => lines.push(line), 'win32'), true);
+  assert.equal(exportPath({ CLAUDE_ENV_FILE: 'x' }, 'C:\\Program Files\\nodejs', (file, line) => lines.push(line), 'linux'), true);
+  assert.deepEqual(lines, ['export PATH="/c/Program Files/nodejs:$PATH"\n', 'export PATH="C:\\\\Program Files\\\\nodejs:$PATH"\n']);
+  const qualified = qualifiedEnv('C:\\p', { Path: 'C:\\Windows', USERPROFILE: 'C:\\Users\\u' }, '22.22.0', () => 'C:\\n24', 'C:\\Users\\u', 'win32', readFrom(WIN_FILES));
+  assert.equal(qualified.Path, 'C:\\n24;C:\\Windows', 'the existing Path key is led, no second PATH key appears');
+  assert.equal('PATH' in qualified, false);
+});
+
+test('[SESSION-START-21] a simulated Windows status reports the toolchain from Windows paths and tells the bash export command', async () => {
+  const { deps, calls } = fakes({ platform: 'win32', read: readFrom(WIN_FILES), nodeVersion: '22.22.0', npmVersion: directory => directory ? '11.19.1' : '10.9.0',
+    findNode: () => 'C:\\Program Files\\nodejs', exists: path => path === 'C:\\p\\node_modules' });
+  const text = await sessionStatus('C:\\p', {}, deps);
+  assert.match(text, /Node 22\.22\.0: not the qualified 24\.21\.0/);
+  assert.match(text, /Qualified Node 24\.21\.0 found at C:\\Program Files\\nodejs; run: export PATH="\/c\/Program Files\/nodejs:\$PATH"\./);
+  assert.match(text, /npm \(with the qualified Node\) 11\.19\.1: qualified\./);
+  assert.doesNotMatch(text, /Dependencies:/, 'node_modules was found at the Windows path');
+  assert.deepEqual(calls.install, []);
 });

@@ -1,7 +1,7 @@
-import { readCompanionProject } from './read-project.mjs';
+import { readCompanionProject, companionReader } from '../../bin/adapters/framework/read-project.ts';
 
 const help = `Companion project handoff — v1 is READ ONLY
-Usage: node scripts/companion/generate.mjs --input <project.json> --target <vault-relative-path> [--vault <vault-root>]
+Usage: node scripts/companion-tools/generate.mjs --input <project.json> --target <vault-relative-path> [--vault <vault-root>]
        npm run --silent companion:generate -- --input <project.json> --target <vault-relative-path>
 
 --input   Full obsidian-companion-project JSON export; read locally, never executed.
@@ -29,7 +29,7 @@ function options(args) {
 try {
   const value = options(process.argv.slice(2));
   if (value === null) process.stdout.write(help);
-  else process.stdout.write((await readCompanionProject(value)).content);
+  else process.stdout.write((await readCompanionProject(value, companionReader)).content);
 } catch (error) {
   const message = error instanceof Error && (error.message.startsWith('COMPANION_') || error.message.startsWith('DETAIL_INVALID:')) ? error.message :
     'COMPANION_READ: Could not safely read the input or validate the vault target. No files were written.';

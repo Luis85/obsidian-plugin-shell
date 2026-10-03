@@ -1,12 +1,12 @@
 import { dirname, join, resolve } from 'node:path';
 import { lstat, readdir } from 'node:fs/promises';
-import { parseDesignData } from '../contracts/json-data.ts';
-import { exists, hash, readBounded, readJson } from '../../bin/adapters/framework/files.ts';
-import { requireThat } from '../../bin/adapters/framework/contracts.ts';
+import { parseDesignData } from '../../../scripts/contracts/json-data.ts';
+import { exists, hash, readBounded, readJson } from '../framework/files.ts';
+import { requireThat } from '../framework/contracts.ts';
 import { portablePath, record, validateDefinition } from './validation.ts';
 import type { LoadedStarter, StarterDefinition } from './types.ts';
 import { STARTER_MAX_BYTES } from './browser.ts';
-import { pluginStarterDefinitions } from '../../plugins/runtime.ts';
+import { pluginStarterDefinitions } from '../../../plugins/runtime.ts';
 const defaultStarterFolder = 'configs/starters';
 /** Only the invocation project's explicit preferences; never a fallback into the installed shell. */
 export async function starterFolder(root: string): Promise<string> {

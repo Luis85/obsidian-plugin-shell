@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../scripts/companion/prototype-skill.mjs';
+import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../bin/adapters/framework/prototype-skill.ts';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
