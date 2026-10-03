@@ -1,6 +1,6 @@
 /** Pure version parsing for the session hooks: the qualified toolchain a checkout declares and conservative range checks. */
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { pathFor } from '../shared/platform-path.mjs';
 
 export const version = text => /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? ''))?.slice(1, 4).map(Number) ?? null;
 /** True when both texts name the same major.minor.patch. */
@@ -17,8 +17,9 @@ export function satisfies(actual, range) {
 }
 export const readText = path => { try { return readFileSync(path, 'utf8'); } catch { return null; } };
 export const readJson = path => { try { return JSON.parse(readText(path)); } catch { return null; } };
-/** The qualified toolchain a checkout declares; missing declarations stay null. */
-export function qualifiedToolchain(root, read = readText) {
+/** The qualified toolchain a checkout declares; missing declarations stay null. `platform` selects how `root` is joined (the host's by default). */
+export function qualifiedToolchain(root, read = readText, platform = process.platform) {
+  const { join } = pathFor(platform);
   const pkg = (() => { try { return JSON.parse(read(join(root, 'package.json'))) ?? {}; } catch { return {}; } })();
   const nvmrc = String(read(join(root, '.nvmrc')) ?? '').trim().replace(/^v/, '');
   const manager = /^npm@(\d+\.\d+\.\d+)/.exec(pkg.packageManager ?? '');

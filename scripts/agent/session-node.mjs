@@ -3,7 +3,7 @@
  * extracted) -> extract into a scratch directory -> verify the binary reports the version -> atomic rename into
  * `<cache>/workbench/node-v<version>-<platform>-<arch>` -> pin npm with `npm install -g` against that private prefix only.
  * Every side effect goes through `io`, so tests run the whole flow without a network. */
-import { delimiter, dirname, join } from 'node:path';
+import { pathFor, withPathFirst } from '../shared/platform-path.mjs';
 import { switchDecision } from './session-switch.mjs';
 import { sameVersion } from './session-version.mjs';
 
@@ -26,11 +26,14 @@ export function nodeArchive(version, platform, arch, base = NODE_DIST) {
   return { name, file: `${name}.tar.gz`, url: `${base}/v${version}/${name}.tar.gz`, sumsUrl: `${base}/v${version}/SHASUMS256.txt` };
 }
 /** Workbench cache root: `${XDG_CACHE_HOME:-~/.cache}/workbench`. */
-export const cacheDirectory = (env, home) => join(env.XDG_CACHE_HOME || join(home, '.cache'), 'workbench');
+export function cacheDirectory(env, home, platform = process.platform) {
+  const { join } = pathFor(platform);
+  return join(env.XDG_CACHE_HOME || join(home, '.cache'), 'workbench');
+}
 /** The `bin` directory a provisioned Node lives in (whether or not it exists yet). */
 export function cachedNodeBin(version, { env, home, platform = process.platform, arch = process.arch }) {
   const archive = nodeArchive(version, platform, arch);
-  return archive ? join(cacheDirectory(env, home), archive.name, 'bin') : null;
+  return archive ? pathFor(platform).join(cacheDirectory(env, home, platform), archive.name, 'bin') : null;
 }
 /** The hex digest the official SHASUMS256.txt lists for a file, or null. */
 export function parseShasums(text, file) {
@@ -41,6 +44,8 @@ export function parseShasums(text, file) {
   return null;
 }
 const failure = text => ({ ok: false, text });
+/** The path flavour of the request's platform (the host's when the request names none). */
+const pathOf = request => pathFor(request.platform ?? process.platform);
 /** Time left for one step, keeping a reserve so the whole hook stays inside its own budget; 0 means out of time. */
 const allowance = (request, wanted) => Math.max(0, Math.min(wanted, request.remaining() - RESERVE_MS));
 async function fetchVerified(target, scratch, request, io) {
@@ -48,7 +53,7 @@ async function fetchVerified(target, scratch, request, io) {
   if (!expected) return failure(`SHASUMS256.txt lists no ${target.file}`);
   const wait = allowance(request, DOWNLOAD_MS);
   if (!wait) return failure('no time left to download Node');
-  const archive = join(scratch, target.file);
+  const archive = pathOf(request).join(scratch, target.file);
   await io.download(target.url, archive, wait);
   const actual = await io.sha256(archive);
   if (actual !== expected) return failure(`SHA-256 mismatch for ${target.file} (expected ${expected.slice(0, 12)}..., got ${String(actual).slice(0, 12)}...); refused, nothing was extracted`);
@@ -56,6 +61,7 @@ async function fetchVerified(target, scratch, request, io) {
 }
 /** Move the verified tree into the cache; a concurrent session's valid copy wins, a broken one is replaced. */
 function install(unpacked, prefix, request, io) {
+  const { dirname, join } = pathOf(request);
   if (io.exists(prefix)) {
     if (io.probe(join(prefix, 'bin')) === request.version) return;
     io.rm(prefix);
@@ -64,6 +70,7 @@ function install(unpacked, prefix, request, io) {
   io.rename(unpacked, prefix);
 }
 async function downloadNode(target, prefix, request, io) {
+  const { dirname, join } = pathOf(request);
   const scratch = join(dirname(prefix), `.tmp-${request.token}`);
   try {
     io.mkdir(scratch);
@@ -89,8 +96,8 @@ export function pinNpm(binDirectory, prefix, request, io) {
   if (sameVersion(bundled, wanted)) return { ok: true, text: `npm ${bundled} is bundled` };
   const wait = allowance(request, NPM_MS);
   if (!wait) return { ok: false, text: `npm ${bundled ?? '?'} kept: no time left to pin npm@${wanted}` };
-  const env = { ...request.env, PATH: `${binDirectory}${delimiter}${request.env.PATH ?? ''}`, npm_config_prefix: prefix, npm_execpath: undefined };
-  const run = io.run(join(binDirectory, 'npm'), ['install', '-g', `npm@${wanted}`, '--no-audit', '--no-fund'], { env, timeout: wait });
+  const env = { ...withPathFirst(request.env, binDirectory, request.platform), npm_config_prefix: prefix, npm_execpath: undefined };
+  const run = io.run(pathOf(request).join(binDirectory, 'npm'), ['install', '-g', `npm@${wanted}`, '--no-audit', '--no-fund'], { env, timeout: wait });
   const now = io.npmVersion(binDirectory);
   if (!run.error && run.status === 0 && sameVersion(now, wanted)) return { ok: true, text: `npm pinned to ${now}` };
   return { ok: false, text: `npm ${now ?? bundled ?? '?'} kept: npm install -g npm@${wanted} ${run.error ? `did not finish (${run.error.code ?? run.error.message})` : `failed (exit ${run.status})`}` };
@@ -100,7 +107,8 @@ export function pinNpm(binDirectory, prefix, request, io) {
 export async function provisionNode(request, io) {
   const target = nodeArchive(request.version, request.platform, request.arch, request.distBase);
   if (!target) return failure(`no official Node build for v${request.version} on ${request.platform}-${request.arch}`);
-  const prefix = join(cacheDirectory(request.env, request.home), target.name);
+  const { dirname, join } = pathOf(request);
+  const prefix = join(cacheDirectory(request.env, request.home, request.platform), target.name);
   const binDirectory = join(prefix, 'bin');
   let note = 'reused the cached copy';
   if (io.probe(binDirectory) !== request.version) {

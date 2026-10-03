@@ -5,7 +5,7 @@ import { mkdir, readFile, readdir, utimes } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { cacheDirectory, cachedNodeBin, nodeArchive, nodeProvisionDecision, parseShasums, pinNpm, provisionNode } from '../../scripts/agent/session-node.mjs';
-import { realNodeIo } from '../../scripts/agent/session-node-io.mjs';
+import { probeNode, realNodeIo } from '../../scripts/agent/session-node-io.mjs';
 import { VERSION, localNodeDist, noOfficialBuild } from './local-node-dist-fixture.mjs';
 
 const FILE = `node-v${VERSION}-linux-x64.tar.gz`;
@@ -42,8 +42,8 @@ test('[SESSION-NODE-01] official archive coordinates, cache location and checksu
   assert.equal(nodeArchive(VERSION, 'linux', 'arm').file, 'node-v24.21.0-linux-armv7l.tar.gz');
   for (const [version, platform, arch] of [[VERSION, 'win32', 'x64'], [VERSION, 'linux', 'riscv64'], ['24.21.0-evil/../x', 'linux', 'x64'], ['lts/*', 'linux', 'x64'], [null, 'linux', 'x64']])
     assert.equal(nodeArchive(version, platform, arch), null, `${version} ${platform} ${arch}`);
-  assert.equal(cacheDirectory({ XDG_CACHE_HOME: '/x' }, '/h'), '/x/workbench');
-  assert.equal(cacheDirectory({}, '/h'), '/h/.cache/workbench');
+  assert.equal(cacheDirectory({ XDG_CACHE_HOME: '/x' }, '/h', 'linux'), '/x/workbench');
+  assert.equal(cacheDirectory({}, '/h', 'linux'), '/h/.cache/workbench');
   assert.equal(cachedNodeBin(VERSION, { env: {}, home: '/h', platform: 'linux', arch: 'x64' }), '/h/.cache/workbench/node-v24.21.0-linux-x64/bin');
   assert.equal(cachedNodeBin(VERSION, { env: {}, home: '/h', platform: 'win32', arch: 'x64' }), null);
   assert.equal(parseShasums(`${GOOD}  ${FILE}\r\n${'c'.repeat(64)} *other.zip\n`, FILE), GOOD);
@@ -125,6 +125,24 @@ test('[SESSION-NODE-06] npm pinning keeps the bundled npm when it matches and re
   assert.match(pinNpm('/b', '/p', { ...BASE, env, remaining: () => 5000 }, fakeIo().io).text, /no time left to pin npm@11\.19\.1/);
   const kept = await provisionNode(BASE, fakeIo({ run: () => ({ status: 1 }) }).io);
   assert.deepEqual([kept.ok, kept.npmPinned], [true, false]);
+});
+
+test('[SESSION-NODE-09] a simulated Windows host probes node.exe, never provisions an archive and keeps one Path variable with Windows separators', async () => {
+  const probed = [];
+  const run = command => { probed.push(command); return { status: 0, stdout: 'v24.21.0\n' }; };
+  assert.equal(probeNode('C:\\Program Files\\nodejs', run, 'win32'), '24.21.0');
+  assert.equal(probeNode('/opt/node24/bin', run, 'linux'), '24.21.0');
+  assert.deepEqual(probed, ['C:\\Program Files\\nodejs\\node.exe', '/opt/node24/bin/node']);
+  assert.equal(cachedNodeBin(VERSION, { env: {}, home: 'C:\\Users\\u', platform: 'win32', arch: 'x64' }), null, 'Windows ships a zip with node.exe at its root, which is not provisioned');
+  assert.equal(cacheDirectory({}, 'C:\\Users\\u', 'win32'), 'C:\\Users\\u\\.cache\\workbench');
+  const windows = { ...BASE, platform: 'win32', npm: '11.19.1', env: { Path: 'C:\\Windows' }, home: 'C:\\Users\\u' };
+  const calls = [];
+  const pinned = fakeIo({ run: (command, args, options) => { calls.push([command, options.env]); pinned.io.npm = '11.19.1'; return { status: 0 }; } });
+  assert.equal(pinNpm('C:\\n\\bin', 'C:\\n', windows, pinned.io).ok, true);
+  assert.equal(calls[0][0], 'C:\\n\\bin\\npm');
+  assert.equal(calls[0][1].Path, 'C:\\n\\bin;C:\\Windows');
+  assert.equal('PATH' in calls[0][1], false);
+  assert.match((await provisionNode(windows, fakeIo().io)).text, /no official Node build for v24\.21\.0 on win32-x64/);
 });
 
 const hostRequest = dist => ({ ...BASE, platform: process.platform, arch: process.arch, env: dist.env, home: dist.root, distBase: dist.distUrl });
