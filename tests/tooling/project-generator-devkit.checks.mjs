@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
-import { renderTemplate } from '../../scripts/companion/compiler/devkit-files.ts';
-import { rebaseMarkdown, relocatedPath } from '../../scripts/companion/compiler/framework-docs.ts';
+import { renderTemplate } from '../../bin/compiler/emitters/devkit-files.ts';
+import { rebaseMarkdown, relocatedPath } from '../../bin/compiler/emitters/framework-docs.ts';
 import { inspectWorkflow, markdownLinks } from '../../scripts/quality/check-repository.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

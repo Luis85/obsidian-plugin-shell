@@ -1,7 +1,7 @@
-import { editorBindings } from '../sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../sitemap/model.ts';
-import { literal, symbol, type Model } from './model.ts';
-import { componentFile, relativeImport, when, type Add } from './file-code.ts';
+import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
+import { literal, symbol, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { componentFile, relativeImport, when, type Add } from '../../../scripts/companion/compiler/file-code.ts';
 export function uiCode(m: Model, add: Add): void {
   const journey = editorBindings(m.document.design as SitemapDesign).length > 0;
   const root = m.sourceRoot; const registry: string[] = []; const panels: string[] = [];

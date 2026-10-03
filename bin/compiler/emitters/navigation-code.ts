@@ -1,7 +1,7 @@
-import { literal, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
-import { editorBindings } from '../sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../sitemap/model.ts';
+import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
 export function navigationCode(m: Model, add: Add): void {
   const journey = editorBindings(m.document.design as SitemapDesign).length > 0;
   const root = m.sourceRoot; const test = `${m.testRoot}/navigation.test.ts`;

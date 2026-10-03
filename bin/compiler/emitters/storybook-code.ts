@@ -1,9 +1,9 @@
-import type { Artifact, TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
-import { storybookOptions, validateProjectTooling } from '../tooling-contract.ts';
+import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
+import { storybookOptions, validateProjectTooling } from '../../../scripts/companion/tooling-contract.ts';
 import { storybookStories } from './storybook-stories.ts';
 import { storybookHost } from './storybook-host.ts';
 import { storybookWorkspace, storybookVersion } from './storybook-workspace.ts';
-import { json, requireValue, type Model } from './model.ts';
+import { json, requireValue, type Model } from '../../../scripts/companion/compiler/model.ts';
 /** Pure optional artifact emission. No filesystem, registry, installation or implicit feature activation. */
 export function storybookCode(template: TemplateSnapshot, model: Model): Artifact[] {
   const tooling = model.document.tooling;

@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { validateNativeIntegrations, nativeReservedExtensions } from '../../scripts/companion/native-contract.mjs';
 import { reservedFileExtensions } from '../../src/domain/native-integrations.ts';
-import { nativeCode } from '../../scripts/companion/compiler/native-code.ts';
+import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
 import { customizeStarter } from '../../scripts/companion/starter-contract.mjs';

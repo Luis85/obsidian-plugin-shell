@@ -7,7 +7,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
-import { clickdummyCode } from '../../scripts/companion/compiler/clickdummy-code.ts';
+import { clickdummyCode } from '../../bin/compiler/emitters/clickdummy-code.ts';
 import { matches } from '../../templates/companion/runtime/contract.ts';
 const root = fileURLToPath(new URL('../../',import.meta.url));
 const document = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));

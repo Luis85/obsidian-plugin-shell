@@ -262,6 +262,12 @@
         ]
       },
       {
+        "name": "compiler-emitters",
+        "patterns": [
+          "bin/compiler/emitters/**"
+        ]
+      },
+      {
         "name": "companion-authoring-contract",
         "patterns": [
           "scripts/companion/authoring-contract.ts",
@@ -511,6 +517,7 @@
           "compiler-domain",
           "compiler-application",
           "compiler-host",
+          "compiler-emitters",
           "project-path-contract",
           "cli-data-contract",
           "cli-result-contract",
@@ -560,6 +567,7 @@
           "compiler-domain",
           "compiler-application",
           "compiler-host",
+          "compiler-emitters",
           "project-path-contract",
           "cli-data-contract",
           "cli-result-contract",
@@ -636,6 +644,7 @@
           "compiler-domain",
           "compiler-application",
           "compiler-host",
+          "compiler-emitters",
           "maker-application",
           "maker-domain",
           "tooling",
@@ -669,6 +678,7 @@
         "from": "compiler-host",
         "allow": [
           "compiler-host",
+          "compiler-emitters",
           "compiler-application",
           "compiler-domain",
           "maker-host",
@@ -682,6 +692,16 @@
           "cli-files-contract",
           "cli-bounded-map-contract",
           "project-path-contract"
+        ]
+      },
+      {
+        "from": "compiler-emitters",
+        "allow": [
+          "compiler-emitters",
+          "compiler-domain",
+          "companion-authoring-contract",
+          "project-templates",
+          "tooling"
         ]
       },
       {

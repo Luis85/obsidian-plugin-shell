@@ -1,11 +1,11 @@
-import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
+import type { TemplateSnapshot } from '../domain/contracts.ts';
 /** The generated project's developer and agent kit: product README/AGENTS.md, Claude Code settings
  * and skills, VS Code configuration, product CI, and a Vitest config wired to the Obsidian test kit.
  * Every file is 'extension' ownership: regeneration keeps a developer's edits and reports a conflict
  * instead of overwriting when the template itself changed. */
 import { posix } from 'node:path';
-import { literal, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
 
 const templates: ReadonlyArray<readonly [string, string]> = [
   ['README.md', 'README.md.tmpl'], ['AGENTS.md', 'AGENTS.md.tmpl'], ['CLAUDE.md', 'CLAUDE.md.tmpl'],

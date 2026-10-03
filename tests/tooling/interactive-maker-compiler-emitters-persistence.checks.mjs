@@ -5,7 +5,7 @@ import { relationshipCode } from '../../scripts/companion/compiler/relationship-
 import { relationshipDefinitions, relationshipScope } from '../../scripts/companion/compiler/relationship-model.ts';
 import { httpCode } from '../../scripts/companion/compiler/http-code.ts';
 import { fixtureNoteTests } from '../../scripts/companion/compiler/fixture-notes-code.ts';
-import { nativeCode } from '../../scripts/companion/compiler/native-code.ts';
+import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
 import { dataDocument, starterDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 
 // Native persistence, relationship integrity, HTTPS providers, fixture-note and native-integration emission.

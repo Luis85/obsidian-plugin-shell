@@ -1,8 +1,8 @@
-import { editorBindings } from '../sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../sitemap/model.ts';
-import { relationshipScope } from './relationship-model.ts';
-import { literal, type Model } from './model.ts';
-import { relativeImport, when, type Add } from './file-code.ts';
+import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
+import { relationshipScope } from '../../../scripts/companion/compiler/relationship-model.ts';
+import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { relativeImport, when, type Add } from '../../../scripts/companion/compiler/file-code.ts';
 export function hostCode(m: Model, add: Add): void {
   const journey = editorBindings(m.document.design as SitemapDesign).length > 0, integrity = relationshipScope(m,true).rules.length > 0;
   const root = m.sourceRoot; const init = `${root}/bootstrap/install.ts`;

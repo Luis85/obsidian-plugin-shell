@@ -6,8 +6,8 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { visualSpecs } from '../../scripts/companion/compiler/visual-model.ts';
-import { clickdummyCode } from '../../scripts/companion/compiler/clickdummy-code.ts';
-import { clickdummyScenariosCode } from '../../scripts/companion/compiler/clickdummy-scenarios-code.ts';
+import { clickdummyCode } from '../../bin/compiler/emitters/clickdummy-code.ts';
+import { clickdummyScenariosCode } from '../../bin/compiler/emitters/clickdummy-scenarios-code.ts';
 const document = JSON.parse(await readFile(new URL('../../docs/concepts/companion/starters/quick-capture.companion.json', import.meta.url), 'utf8'));
 const model = projectModel(document);
 function emit(m = model) { let source; clickdummyScenariosCode(m, (path, content) => { assert.equal(path, 'harness/prototype/clickdummy-scenarios.ts'); source = content; }); return source; }

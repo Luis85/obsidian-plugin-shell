@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { journeyCode } from '../../scripts/companion/compiler/journey-code.ts';
-import { journeyBootstrapCode } from '../../scripts/companion/compiler/journey-bootstrap-code.ts';
-import { journeyTestCode } from '../../scripts/companion/compiler/journey-test-code.ts';
+import { journeyCode } from '../../bin/compiler/emitters/journey-code.ts';
+import { journeyBootstrapCode } from '../../bin/compiler/emitters/journey-bootstrap-code.ts';
+import { journeyTestCode } from '../../bin/compiler/emitters/journey-test-code.ts';
 import { journeyDocument, starterDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 
 // Journey Lens emission (journey-{code,bootstrap-code,test-code}.ts): relocation, import rewriting, refusals and generated wiring.

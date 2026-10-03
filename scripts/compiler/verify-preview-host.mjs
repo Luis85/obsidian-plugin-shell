@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import ts from 'typescript';
 import { chromium } from '@playwright/test';
-import { clickdummyHostCode } from '../companion/compiler/clickdummy-host-code.ts';
+import { clickdummyHostCode } from '../../bin/compiler/emitters/clickdummy-host-code.ts';
 let source; clickdummyHostCode((_path, content) => { source = content; });
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
 const root = await mkdtemp(join(tmpdir(), 'preview-host-browser-')), file = join(root, 'index.html');

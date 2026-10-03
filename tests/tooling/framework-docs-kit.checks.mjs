@@ -11,7 +11,7 @@ import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { projectFiles } from '../support/project-render.mjs';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { rebaseMarkdown } from '../../scripts/companion/compiler/framework-docs.ts';
+import { rebaseMarkdown } from '../../bin/compiler/emitters/framework-docs.ts';
 import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 test('packaged CLI ships the pinned parser and supports docs import then existing generation without root dependencies', { timeout: 300000 }, async t => {

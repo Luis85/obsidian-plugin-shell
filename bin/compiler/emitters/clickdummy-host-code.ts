@@ -1,4 +1,4 @@
-import type { Add } from './file-code.ts';
+import type { Add } from '../../../scripts/companion/compiler/file-code.ts';
 
 /** Browser-only ownership shared by generated previews; no host, data or framework dependency. */
 export function clickdummyHostCode(add: Add): void {

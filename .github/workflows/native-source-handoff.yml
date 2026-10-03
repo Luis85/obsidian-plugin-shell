@@ -4,7 +4,7 @@ on:
     paths:
       - 'docs/concepts/native-file-integration-handoff/**'
       - 'bin/adapters/framework/distribution.ts'
-      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'bin/compiler/emitters/framework-docs.ts'
       - 'bin/compiler/adapters/template-snapshot.ts'
       - 'scripts/starters/**'
       - 'configs/starters/**'

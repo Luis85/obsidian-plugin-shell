@@ -1,6 +1,6 @@
-import { airshipConfig, airshipOptions } from '../tooling-contract.mjs';
-import { json, literal, type Model } from './model.ts';
-import type { Add } from './file-code.ts';
+import { airshipConfig, airshipOptions } from '../../../scripts/companion/tooling-contract.mjs';
+import { json, literal, type Model } from '../../../scripts/companion/compiler/model.ts';
+import type { Add } from '../../../scripts/companion/compiler/file-code.ts';
 /** Every generated project has a source-backed preview; optional agent tooling never enters src/. */
 export function previewScripts(): Record<string, string> {
   return { 'dev:preview': 'node bin/app dev --profile preview',

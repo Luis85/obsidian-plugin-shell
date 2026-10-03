@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { rebaseMarkdown } from '../../scripts/companion/compiler/framework-docs.ts';
+import { rebaseMarkdown } from '../../bin/compiler/emitters/framework-docs.ts';
 
 // Consumer docs retain useful prose without acquiring a separate concept's executable payload.
 test('[GENERATOR-DEVKIT-09] links to explicitly excluded concepts become named reference boundaries', () => {

@@ -33,7 +33,7 @@ Starter shortcut: `node bin/app new ../my-plugin --starter quick-capture --autho
 
 ## What the generated project contains
 
-Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `templates/companion/devkit/*.tmpl` by `scripts/companion/compiler/devkit-files.ts`:
+Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `templates/companion/devkit/*.tmpl` by `bin/compiler/emitters/devkit-files.ts`:
 
 | Path | Purpose |
 | --- | --- |

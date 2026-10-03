@@ -1,9 +1,9 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { storybookStories } from '../../scripts/companion/compiler/storybook-stories.ts';
-import { storybookHost } from '../../scripts/companion/compiler/storybook-host.ts';
-import { storybookWorkspace, storybookVersion } from '../../scripts/companion/compiler/storybook-workspace.ts';
-import { storybookCode } from '../../scripts/companion/compiler/storybook-code.ts';
+import { storybookStories } from '../../bin/compiler/emitters/storybook-stories.ts';
+import { storybookHost } from '../../bin/compiler/emitters/storybook-host.ts';
+import { storybookWorkspace, storybookVersion } from '../../bin/compiler/emitters/storybook-workspace.ts';
+import { storybookCode } from '../../bin/compiler/emitters/storybook-code.ts';
 import { detailDocument, richComponentDocument, model, template } from './compiler-emitters-fixture.mjs';
 
 // Optional Storybook emission (storybook-{stories,host,workspace,code}.ts): exact CSF files, inventory and opt-in gates.

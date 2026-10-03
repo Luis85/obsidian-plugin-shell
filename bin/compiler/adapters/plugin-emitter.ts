@@ -1,10 +1,10 @@
-import { storybookCode } from '../../../scripts/companion/compiler/storybook-code.ts';
-import { previewCode, previewScripts } from '../../../scripts/companion/compiler/preview-code.ts';
+import { storybookCode } from '../emitters/storybook-code.ts';
+import { previewCode, previewScripts } from '../emitters/preview-code.ts';
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
-import { journeyCode } from '../../../scripts/companion/compiler/journey-code.ts';
-import { nativeCode } from '../../../scripts/companion/compiler/native-code.ts';
-import { clickdummyCode } from '../../../scripts/companion/compiler/clickdummy-code.ts';
+import { journeyCode } from '../emitters/journey-code.ts';
+import { nativeCode } from '../emitters/native-code.ts';
+import { clickdummyCode } from '../emitters/clickdummy-code.ts';
 import { httpCode } from '../../../scripts/companion/compiler/http-code.ts';
 import { relationshipCode } from '../../../scripts/companion/compiler/relationship-code.ts';
 import { renderFixtureCode as fixtureCode } from './fixture-emitter.ts';
@@ -12,15 +12,15 @@ import { persistenceCode } from '../../../scripts/companion/compiler/persistence
 import { literal, json, type Model } from '../../../scripts/companion/compiler/model.ts';
 import { dataCode } from '../../../scripts/companion/compiler/data-code.ts';
 import { relativeImport, type Entry, type Add } from '../../../scripts/companion/compiler/file-code.ts';
-import { uiCode } from '../../../scripts/companion/compiler/ui-code.ts';
-import { navigationCode } from '../../../scripts/companion/compiler/navigation-code.ts';
-import { hostCode } from '../../../scripts/companion/compiler/host-code.ts';
+import { uiCode } from '../emitters/ui-code.ts';
+import { navigationCode } from '../emitters/navigation-code.ts';
+import { hostCode } from '../emitters/host-code.ts';
 import { visualCode } from '../../../scripts/companion/compiler/visual-files.ts';
 import { visualDefinitions, visualPackages, visualAdapterPath } from '../../../scripts/companion/compiler/visual-model.ts';
 import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
-import { styleCode } from '../../../scripts/companion/compiler/style-code.ts';
-import { devkitFiles, makerTests, renderTemplate } from '../../../scripts/companion/compiler/devkit-files.ts';
-import { relocateFrameworkDocuments } from '../../../scripts/companion/compiler/framework-docs.ts';
+import { styleCode } from '../emitters/style-code.ts';
+import { devkitFiles, makerTests, renderTemplate } from '../emitters/devkit-files.ts';
+import { relocateFrameworkDocuments } from '../emitters/framework-docs.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
 function replacedProducer(previous: string | undefined, producer: string): string | undefined {
   if (previous === 'framework') return 'framework';
