@@ -1,6 +1,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useWorkspaceEnvironment, type EditorMount } from './contracts.ts';
 import { importJourneyProject, projectFilePath, type JourneyProjectDocument } from '../../../../../scripts/companion/journey/project-store.ts';
+import { htmlElement } from '../dom.ts';
 
 /** Per-view document controls. Canonical project writes belong to the shared runtime owner. */
 export function useWorkspace() {
@@ -24,7 +25,7 @@ export function useWorkspace() {
     const doc = root.value?.ownerDocument, win = doc?.defaultView; if (stopped || !doc || !win) return;
     const url = URL.createObjectURL(new Blob([value], { type: 'application/json' })); downloads.add(url);
     try {
-      const link = doc.createElement('a'); link.href = url; link.download = name; link.click();
+      const link = htmlElement(doc, 'a'); link.setAttribute('href', url); link.setAttribute('download', name); link.click();
       win.setTimeout(() => revoke(url), 1000);
     } catch { revoke(url); throw Error('PROJECT_DOWNLOAD'); }
   }
