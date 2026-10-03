@@ -1,5 +1,5 @@
-import { lstat, readdir, realpath, open } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { lstat, readdir, realpath, open, type FileHandle } from 'node:fs/promises';
+import { constants, type Stats } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
 import { sha256 } from '../../shared/hash.ts';
 import { insist } from '../domain/contracts.ts';
@@ -24,19 +24,28 @@ export async function safePath(path: string): Promise<boolean> {
   }
   return true;
 }
+// Opening a FIFO before checking its type can block the CLI indefinitely.
+const READ_FLAGS = constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0);
+const bounded = (info: Stats, maximum: number): boolean => info.isFile() && info.size <= maximum;
+const sameFile = (left: Stats, right: Stats): boolean => left.ino === right.ino && left.dev === right.dev;
+function unchanged(before: Stats, after: Stats, length: number, maximum: number): boolean {
+  return length <= maximum && before.size === after.size && length === after.size && before.mtimeMs === after.mtimeMs && before.ctimeMs === after.ctimeMs;
+}
+async function readFully(file: FileHandle, size: number, maximum: number): Promise<Buffer> {
+  const buffer = Buffer.alloc(Math.min(maximum + 1, size + 1)); let length = 0;
+  while (length < buffer.length) { const result = await file.read(buffer, length, buffer.length - length, null); if (!result.bytesRead) break; length += result.bytesRead; }
+  return buffer.subarray(0, length);
+}
 export async function readBytes(path: string, maximum = 4_000_000): Promise<Buffer | null> {
   if (!await safePath(path)) return null;
   const observed = await lstat(path);
-  // Opening a FIFO before checking its type can block the CLI indefinitely.
-  insist(observed.isFile() && observed.size <= maximum, 'DOCS_LIMIT', 'Input must be a bounded regular file: ' + path);
-  const file = await open(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0));
+  insist(bounded(observed, maximum), 'DOCS_LIMIT', 'Input must be a bounded regular file: ' + path);
+  const file = await open(path, READ_FLAGS);
   try {
     const before = await file.stat();
-    insist(before.isFile() && before.size <= maximum && before.ino === observed.ino && before.dev === observed.dev, 'DOCS_LIMIT', 'Input must be a bounded regular file: ' + path);
-    const buffer = Buffer.alloc(Math.min(maximum + 1, before.size + 1)); let length = 0;
-    while (length < buffer.length) { const result = await file.read(buffer, length, buffer.length - length, null); if (!result.bytesRead) break; length += result.bytesRead; }
-    const bytes = buffer.subarray(0, length), after = await file.stat();
-    insist(bytes.length <= maximum && before.size === after.size && bytes.length === after.size && before.mtimeMs === after.mtimeMs && before.ctimeMs === after.ctimeMs, 'DOCS_INPUT_CHANGED', 'Input changed while reading: ' + path);
+    insist(bounded(before, maximum) && sameFile(before, observed), 'DOCS_LIMIT', 'Input must be a bounded regular file: ' + path);
+    const bytes = await readFully(file, before.size, maximum), after = await file.stat();
+    insist(unchanged(before, after, bytes.length, maximum), 'DOCS_INPUT_CHANGED', 'Input changed while reading: ' + path);
     return bytes;
   } finally { await file.close(); }
 }
@@ -54,32 +63,45 @@ function glob(pattern: string): RegExp {
   return new RegExp(result + '$', 'i');
 }
 const ignored = new Set(['.git', '.obsidian', '.framework', '.companion', 'node_modules', '.codex-authoring.lock']);
-export async function discover(roots: string[], options: { recursive: boolean; include: string[]; exclude: string[] }): Promise<DocumentationSource[]> {
-  const found = new Map<string, DocumentationSource>(), includes = options.include.map(glob), excludes = options.exclude.map(glob);
-  let total = 0, visited = 0;
-  async function visit(path: string, boundary: string, depth: number, explicit = false): Promise<void> {
-    insist(depth <= 40 && ++visited <= 20000, 'DOCS_LIMIT', 'Discovery exceeds the directory budget.');
-    if (!await safePath(path)) { insist(!explicit, 'DOCS_INPUT_MISSING', 'Selected input does not exist: ' + path); return; }
-    const info = await lstat(path), rel = localPath(boundary, path) ?? '';
-    if (rel) portable(rel);
-    if (rel && (excludes.some(pattern => pattern.test(rel)) || rel.split('/').some(part => ignored.has(part.toLowerCase())))) return;
-    if (info.isDirectory()) {
-      if (depth && !options.recursive) return;
-      const names = await readdir(path); names.sort();
-      for (const name of names) if (!ignored.has(name.toLowerCase())) await visit(join(path, name), boundary, depth + 1);
-      return;
-    }
-    const isMarkdown = /\.md$/i.test(path), asset = /\.(?:png|jpe?g|webp|gif|svg|pdf)$/i.test(path);
-    if (!isMarkdown && !asset || isMarkdown && !explicit && !includes.some(pattern => pattern.test(rel))) return;
-    const canonical = await realpath(path);
-    if (found.has(canonical)) return;
-    const bytes = await readBytes(path, asset ? 8_000_000 : 4_000_000); insist(bytes, 'DOCS_INPUT_CHANGED', 'Discovered input disappeared.');
-    total += bytes.length; insist(total <= 32_000_000 && found.size < 4000, 'DOCS_LIMIT', 'Documentation exceeds 32 MB or 4000 files.');
-    found.set(canonical, { path, relative: rel, boundary, bytes });
-  }
+interface DiscoveryOptions { recursive: boolean; include: string[]; exclude: string[] }
+interface Discovery { options: DiscoveryOptions; includes: RegExp[]; excludes: RegExp[]; found: Map<string, DocumentationSource>; total: number; visited: number }
+const isIgnored = (part: string): boolean => ignored.has(part.toLowerCase());
+function excluded(discovery: Discovery, rel: string): boolean {
+  return discovery.excludes.some(pattern => pattern.test(rel)) || rel.split('/').some(isIgnored);
+}
+async function visitDirectory(discovery: Discovery, path: string, boundary: string, depth: number): Promise<void> {
+  if (depth && !discovery.options.recursive) return;
+  const names = await readdir(path); names.sort();
+  for (const name of names) if (!isIgnored(name)) await visit(discovery, join(path, name), boundary, depth + 1);
+}
+function selected(discovery: Discovery, path: string, rel: string, explicit: boolean): { asset: boolean } | null {
+  const isMarkdown = /\.md$/i.test(path), asset = /\.(?:png|jpe?g|webp|gif|svg|pdf)$/i.test(path);
+  if (!isMarkdown && !asset) return null;
+  if (isMarkdown && !explicit && !discovery.includes.some(pattern => pattern.test(rel))) return null;
+  return { asset };
+}
+async function collect(discovery: Discovery, path: string, boundary: string, rel: string, asset: boolean): Promise<void> {
+  const canonical = await realpath(path);
+  if (discovery.found.has(canonical)) return;
+  const bytes = await readBytes(path, asset ? 8_000_000 : 4_000_000); insist(bytes, 'DOCS_INPUT_CHANGED', 'Discovered input disappeared.');
+  discovery.total += bytes.length; insist(discovery.total <= 32_000_000 && discovery.found.size < 4000, 'DOCS_LIMIT', 'Documentation exceeds 32 MB or 4000 files.');
+  discovery.found.set(canonical, { path, relative: rel, boundary, bytes });
+}
+async function visit(discovery: Discovery, path: string, boundary: string, depth: number, explicit = false): Promise<void> {
+  insist(depth <= 40 && ++discovery.visited <= 20000, 'DOCS_LIMIT', 'Discovery exceeds the directory budget.');
+  if (!await safePath(path)) { insist(!explicit, 'DOCS_INPUT_MISSING', 'Selected input does not exist: ' + path); return; }
+  const info = await lstat(path), rel = localPath(boundary, path) ?? '';
+  if (rel) portable(rel);
+  if (rel && excluded(discovery, rel)) return;
+  if (info.isDirectory()) return visitDirectory(discovery, path, boundary, depth);
+  const kind = selected(discovery, path, rel, explicit);
+  if (kind) await collect(discovery, path, boundary, rel, kind.asset);
+}
+export async function discover(roots: string[], options: DiscoveryOptions): Promise<DocumentationSource[]> {
+  const discovery: Discovery = { options, includes: options.include.map(glob), excludes: options.exclude.map(glob), found: new Map(), total: 0, visited: 0 };
   for (const root of [...new Set(roots.map(path => resolve(path)))].sort()) {
     if (!await safePath(root)) continue;
-    const info = await lstat(root); await visit(root, info.isDirectory() ? root : dirname(root), 0, true);
+    const info = await lstat(root); await visit(discovery, root, info.isDirectory() ? root : dirname(root), 0, true);
   }
-  return [...found.values()].sort((a, b) => a.path < b.path ? -1 : 1);
+  return [...discovery.found.values()].sort((a, b) => a.path < b.path ? -1 : 1);
 }

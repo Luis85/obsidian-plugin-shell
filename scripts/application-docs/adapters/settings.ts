@@ -16,26 +16,40 @@ function defaults(root = 'docs/application'): DocsSettings {
   return { root, indexFile: 'design/docs-index.json', paths: Object.fromEntries(DOC_TYPES.filter(type => type !== 'project').map(type => [folders[type], root + '/' + folders[type]])),
     recursive: true, include: ['**/*.md'], exclude: ['**/generated/**'], linkFormat: 'markdown' };
 }
+const SETTING_KEYS = ['root', 'indexFile', 'paths', 'recursive', 'include', 'exclude', 'linkFormat', 'preserveAuthoredContent', 'conflictPolicy', 'deleteMissing'];
+export const PROTECTED_ROOTS: readonly string[] = ['.git', '.obsidian', '.framework', '.companion', '.codex-authoring.lock', 'node_modules', 'scripts', 'bin', 'src', 'tests', 'dist', 'configs', 'design'];
+function keepsSafetyPolicy(raw: Record<string, unknown>): boolean {
+  return (raw.preserveAuthoredContent === undefined || raw.preserveAuthoredContent === true) && (raw.deleteMissing === undefined || raw.deleteMissing === false)
+    && (raw.conflictPolicy === undefined || raw.conflictPolicy === 'review');
+}
+function overlaps(folder: string, lower: string): boolean {
+  const blocked = folder.toLowerCase();
+  return lower === blocked || lower.startsWith(blocked + '/') || blocked.startsWith(lower + '/');
+}
+function safeLocation(blocked: readonly string[], path: string): void {
+  portable(path); const lower = path.toLowerCase();
+  insist(!path.split('/').some(part => part.startsWith('.')), 'DOCS_SETTINGS_PATH', 'Documentation paths must remain outside hidden directories: ' + path);
+  insist(!blocked.some(folder => overlaps(folder, lower)), 'DOCS_SETTINGS_PATH', 'Documentation overlaps a protected project path: ' + path);
+}
+function patterns(input: unknown): string[] {
+  const values = array(input);
+  insist(values.length <= 32 && values.every(item => typeof item === 'string' && item.length <= 240), 'DOCS_SETTINGS', 'Use bounded include/exclude glob patterns.');
+  return values as string[];
+}
 export function validateSettings(input: unknown, protectedPaths: string[]): DocsSettings {
   const raw = object(input), base = defaults(typeof raw.root === 'string' ? raw.root : undefined);
-  insist(Object.keys(raw).every(key => ['root', 'indexFile', 'paths', 'recursive', 'include', 'exclude', 'linkFormat', 'preserveAuthoredContent', 'conflictPolicy', 'deleteMissing'].includes(key)), 'DOCS_SETTINGS', 'Unknown documentation setting.');
-  insist((raw.preserveAuthoredContent === undefined || raw.preserveAuthoredContent === true) && (raw.deleteMissing === undefined || raw.deleteMissing === false) && (raw.conflictPolicy === undefined || raw.conflictPolicy === 'review'), 'DOCS_SETTINGS', 'Authored content preservation, no implicit deletion and conflict review cannot be disabled.');
+  insist(Object.keys(raw).every(key => SETTING_KEYS.includes(key)), 'DOCS_SETTINGS', 'Unknown documentation setting.');
+  insist(keepsSafetyPolicy(raw), 'DOCS_SETTINGS', 'Authored content preservation, no implicit deletion and conflict review cannot be disabled.');
   const value = { ...base, ...raw, paths: { ...base.paths, ...(raw.paths === undefined ? {} : object(raw.paths)) } };
   insist(typeof value.root === 'string' && typeof value.indexFile === 'string', 'DOCS_SETTINGS', 'Invalid documentation paths.');
   portable(value.root); portable(value.indexFile);
   insist(value.indexFile.startsWith('design/') && value.indexFile.endsWith('.json') && value.indexFile !== 'design/project.json', 'DOCS_SETTINGS', 'Keep the documentation index in design/, separate from project.json.');
-  const blocked = ['.git', '.obsidian', '.framework', '.companion', '.codex-authoring.lock', 'node_modules', 'scripts', 'bin', 'src', 'tests', 'dist', 'configs', 'design', ...protectedPaths];
-  const safe = (path: string) => {
-    portable(path); const lower = path.toLowerCase();
-    insist(!path.split('/').some(part => part.startsWith('.')), 'DOCS_SETTINGS_PATH', 'Documentation paths must remain outside hidden directories: ' + path);
-    insist(!blocked.some(folder => lower === folder.toLowerCase() || lower.startsWith(folder.toLowerCase() + '/') || folder.toLowerCase().startsWith(lower + '/')), 'DOCS_SETTINGS_PATH', 'Documentation overlaps a protected project path: ' + path);
-  };
-  safe(value.root);
+  const blocked = [...PROTECTED_ROOTS, ...protectedPaths];
+  safeLocation(blocked, value.root);
   for (const [key, path] of Object.entries(value.paths)) {
-    insist(Object.values(folders).includes(key) && typeof path === 'string', 'DOCS_SETTINGS', 'Unknown documentation path.'); safe(path);
+    insist(Object.values(folders).includes(key) && typeof path === 'string', 'DOCS_SETTINGS', 'Unknown documentation path.'); safeLocation(blocked, path);
   }
   insist(typeof value.recursive === 'boolean' && ['markdown', 'wikilink'].includes(String(value.linkFormat)), 'DOCS_SETTINGS', 'Invalid recursion or link preference.');
-  const patterns = (input: unknown) => { const values = array(input); insist(values.length <= 32 && values.every(item => typeof item === 'string' && item.length <= 240), 'DOCS_SETTINGS', 'Use bounded include/exclude glob patterns.'); return values as string[]; };
   return { root: value.root, indexFile: value.indexFile, paths: value.paths as Record<string, string>, recursive: value.recursive,
     include: patterns(value.include), exclude: patterns(value.exclude), linkFormat: value.linkFormat as DocsSettings['linkFormat'] };
 }

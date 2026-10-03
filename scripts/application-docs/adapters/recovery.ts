@@ -21,27 +21,37 @@ function alive(pid: number): boolean {
   try { process.kill(pid, 0); return true; }
   catch (error) { return !(error && typeof error === 'object' && 'code' in error && error.code === 'ESRCH'); }
 }
-async function inspectRecovery(root: string) {
-  const lock = join(root, lockName), bytes = await readBytes(join(lock, 'docs-journal.json'));
-  insist(bytes, 'DOCS_RECOVERY_MISSING', 'No documentation recovery journal exists. Do not discard an unrelated writer lock.');
+type Entry = { path: string; content: string | null; encoding?: 'base64' };
+const HASH = /^[a-f0-9]{64}$/;
+function journalOf(bytes: Buffer) {
   const journal = object(JSON.parse(decode(bytes)));
   insist(journal.schemaVersion === 1 && journal.kind === 'application-docs-recovery' && Number.isSafeInteger(journal.pid) && Number(journal.pid) > 0,
     'DOCS_RECOVERY_JOURNAL', 'Invalid recovery journal.');
+  return journal;
+}
+function journalChange(input: unknown) {
+  const change = object(input), path = portable(String(change.path));
+  insist(Number.isSafeInteger(change.index) && Number(change.index) >= 0 && Number(change.index) < 10000, 'DOCS_RECOVERY_JOURNAL', 'Invalid preimage index.');
+  for (const name of ['beforeHash', 'afterHash']) insist(change[name] === null || typeof change[name] === 'string' && HASH.test(String(change[name])), 'DOCS_RECOVERY_JOURNAL', 'Invalid preimage hash.');
+  return { change, path };
+}
+async function restoreEntry(lock: string, path: string, change: Record<string, unknown>): Promise<Entry> {
+  if (change.beforeHash === null) return { path, content: null };
+  const before = await readBytes(join(lock, `before-${Number(change.index)}`), 16_000_000);
+  insist(before && digest(before) === change.beforeHash, 'DOCS_RECOVERY_PREIMAGE', 'A recovery preimage is missing or altered: ' + path);
+  return { path, content: before.toString('base64'), encoding: 'base64' };
+}
+async function inspectRecovery(root: string) {
+  const lock = join(root, lockName), bytes = await readBytes(join(lock, 'docs-journal.json'));
+  insist(bytes, 'DOCS_RECOVERY_MISSING', 'No documentation recovery journal exists. Do not discard an unrelated writer lock.');
+  const journal = journalOf(bytes);
   insist(!alive(Number(journal.pid)), 'DOCS_RECOVERY_ACTIVE', 'The recorded writer is still running; recovery is refused.');
-  const entries: Array<{path: string; content: string | null; encoding?: 'base64'}> = [], observed: Array<{path: string; hash: string | null}> = [];
+  const entries: Entry[] = [], observed: Array<{path: string; hash: string | null}> = [];
   for (const input of array(journal.changes)) {
-    const change = object(input), path = portable(String(change.path));
-    insist(Number.isSafeInteger(change.index) && Number(change.index) >= 0 && Number(change.index) < 10000, 'DOCS_RECOVERY_JOURNAL', 'Invalid preimage index.');
-    for (const name of ['beforeHash', 'afterHash']) insist(change[name] === null || typeof change[name] === 'string' && /^[a-f0-9]{64}$/.test(String(change[name])), 'DOCS_RECOVERY_JOURNAL', 'Invalid preimage hash.');
+    const { change, path } = journalChange(input);
     const current = await readBytes(join(root, path), 16_000_000), hash = current ? digest(current) : null; observed.push({ path, hash });
     insist(hash === change.beforeHash || hash === change.afterHash, 'DOCS_RECOVERY_CONFLICT', 'Preserving an intervening edit: ' + path);
-    if (hash === change.beforeHash) continue;
-    if (change.beforeHash === null) entries.push({ path, content: null });
-    else {
-      const before = await readBytes(join(lock, `before-${Number(change.index)}`), 16_000_000);
-      insist(before && digest(before) === change.beforeHash, 'DOCS_RECOVERY_PREIMAGE', 'A recovery preimage is missing or altered: ' + path);
-      entries.push({ path, content: before.toString('base64'), encoding: 'base64' });
-    }
+    if (hash !== change.beforeHash) entries.push(await restoreEntry(lock, path, change));
   }
   const plan = await createFilePlan(root, entries);
   return { lock, entries, plan, hash: digest(stable({ journal: digest(bytes), observed })) };

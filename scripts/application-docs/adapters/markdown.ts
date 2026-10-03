@@ -7,80 +7,104 @@ export interface MarkdownDocument {
   regions: Regions; properties: ObjectData;
 }
 /** Core-schema YAML only. No alias expansion, explicit tags, directives or non-JSON objects. */
-function yaml(source: string, name: string) {
-  const doc = parseDocument(source, { uniqueKeys: true, strict: true, version: '1.2', stringKeys: true, keepSourceTokens: true });
-  insist(!doc.errors.length && !doc.warnings.length, 'DOCS_YAML', name + ': ' + (doc.errors[0]?.message ?? doc.warnings[0]?.message ?? 'Invalid YAML.'));
-  const stack: Array<{ value: unknown; depth: number }> = [{ value: doc.contents, depth: 0 }];
+function children(value: unknown): unknown[] {
+  if (!value || typeof value !== 'object') return [];
+  if ('items' in value && Array.isArray(value.items)) return value.items;
+  return 'key' in value && 'value' in value ? [value.key, value.value] : [];
+}
+function assertCoreTree(contents: unknown, name: string): void {
+  const stack: Array<{ value: unknown; depth: number }> = [{ value: contents, depth: 0 }];
   let count = 0;
   while (stack.length) {
     const { value, depth } = stack.pop()!;
     insist(depth <= 80 && ++count <= 360000, 'DOCS_LIMIT', name + ': YAML tree exceeds limits.');
     insist(!isAlias(value), 'DOCS_YAML_ALIAS', name + ': YAML aliases are not allowed.');
     if (isNode(value)) insist(!value.tag && !('anchor' in value && value.anchor), 'DOCS_YAML_TAG', name + ': Explicit tags and anchors are not allowed.');
-    if (value && typeof value === 'object') {
-      if ('items' in value && Array.isArray(value.items)) for (const item of value.items) stack.push({ value: item, depth: depth + 1 });
-      else if ('key' in value && 'value' in value) { stack.push({ value: value.key, depth: depth + 1 }, { value: value.value, depth: depth + 1 }); }
-    }
+    for (const child of children(value)) stack.push({ value: child, depth: depth + 1 });
   }
+}
+function yaml(source: string, name: string) {
+  const doc = parseDocument(source, { uniqueKeys: true, strict: true, version: '1.2', stringKeys: true, keepSourceTokens: true });
+  insist(!doc.errors.length && !doc.warnings.length, 'DOCS_YAML', name + ': ' + (doc.errors[0]?.message ?? doc.warnings[0]?.message ?? 'Invalid YAML.'));
+  assertCoreTree(doc.contents, name);
   insist(!/^%/m.test(source), 'DOCS_YAML_DIRECTIVE', name + ': YAML directives are not supported.');
   const value: unknown = doc.toJS({ maxAliasCount: 0 }); jsonData(value);
   return { doc, value: object(value) };
 }
+interface Fence { character: string; length: number; start: number; data: boolean }
+interface RegionScan { name: string; offset: number; fence: Fence | null; data: Span | null; generated: Span | null; generatedStart: number | null }
+const SHELL_DATA_INFO = /^(?:yaml|json) shell-data$/;
+function closesFence(fence: Fence, mark: RegExpExecArray | null): boolean {
+  return !!mark && mark[1]![0] === fence.character && mark[1]!.length >= fence.length && !mark[2]!.trim();
+}
+function scanFenced(scan: RegionScan, fence: Fence, mark: RegExpExecArray | null, line: string): void {
+  if (!closesFence(fence, mark)) return;
+  if (fence.data) { insist(!scan.data, 'DOCS_DATA_DUPLICATE', scan.name + ': Use one shell-data block.'); scan.data = { start: fence.start, end: scan.offset + line.length }; }
+  scan.fence = null;
+}
+function openFence(scan: RegionScan, mark: RegExpExecArray): void {
+  const info = mark[2]!.trim();
+  insist(!info.includes('shell-data') || SHELL_DATA_INFO.test(info), 'DOCS_DATA_FENCE', scan.name + ': Expected yaml shell-data or json shell-data.');
+  scan.fence = { character: mark[1]![0]!, length: mark[1]!.length, start: scan.offset, data: SHELL_DATA_INFO.test(info) };
+}
+function scanMarker(scan: RegionScan, clean: string, line: string): void {
+  if (clean === '<!-- shell:generated:start -->') {
+    insist(scan.generatedStart === null && !scan.generated, 'DOCS_MARKERS', scan.name + ': Duplicate generated region.'); scan.generatedStart = scan.offset;
+  } else if (clean === '<!-- shell:generated:end -->') {
+    insist(scan.generatedStart !== null, 'DOCS_MARKERS', scan.name + ': Unmatched generated-region end.');
+    scan.generated = { start: scan.generatedStart, end: scan.offset + line.length }; scan.generatedStart = null;
+  }
+}
+function scanLine(scan: RegionScan, line: string): void {
+  const clean = line.replace(/\r?\n$/, ''), mark = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(clean);
+  if (scan.fence) scanFenced(scan, scan.fence, mark, line);
+  else if (mark && !(mark[1]![0] === '`' && mark[2]!.includes('`'))) openFence(scan, mark);
+  else scanMarker(scan, clean, line);
+  scan.offset += line.length;
+}
 /** Line-state fenced-block parser: an example containing another fence is never interpreted. */
 function regions(source: string, offset: number, name: string): Regions {
-  let fence: { character: string; length: number; start: number; data: boolean } | null = null;
-  let data: Span | null = null, generated: Span | null = null, generatedStart: number | null = null;
-  const lines = source.slice(offset).match(/[^\n]*(?:\n|$)/g) ?? [];
-  for (const line of lines) {
-    const clean = line.replace(/\r?\n$/, ''), mark = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(clean);
-    if (fence) {
-      if (mark && mark[1]![0] === fence.character && mark[1]!.length >= fence.length && !mark[2]!.trim()) {
-        if (fence.data) { insist(!data, 'DOCS_DATA_DUPLICATE', name + ': Use one shell-data block.'); data = { start: fence.start, end: offset + line.length }; }
-        fence = null;
-      }
-    } else if (mark && !(mark[1]![0] === '`' && mark[2]!.includes('`'))) {
-      const info = mark[2]!.trim();
-      insist(!info.includes('shell-data') || /^(?:yaml|json) shell-data$/.test(info), 'DOCS_DATA_FENCE', name + ': Expected yaml shell-data or json shell-data.');
-      fence = { character: mark[1]![0]!, length: mark[1]!.length, start: offset, data: /^(?:yaml|json) shell-data$/.test(info) };
-    } else if (clean === '<!-- shell:generated:start -->') {
-      insist(generatedStart === null && !generated, 'DOCS_MARKERS', name + ': Duplicate generated region.'); generatedStart = offset;
-    } else if (clean === '<!-- shell:generated:end -->') {
-      insist(generatedStart !== null, 'DOCS_MARKERS', name + ': Unmatched generated-region end.');
-      generated = { start: generatedStart, end: offset + line.length }; generatedStart = null;
-    }
-    offset += line.length;
-  }
-  insist(!fence?.data && generatedStart === null, 'DOCS_MARKERS', name + ': Unclosed managed block.');
-  return { data, generated };
+  const scan: RegionScan = { name, offset, fence: null, data: null, generated: null, generatedStart: null };
+  for (const line of source.slice(offset).match(/[^\n]*(?:\n|$)/g) ?? []) scanLine(scan, line);
+  insist(!scan.fence?.data && scan.generatedStart === null, 'DOCS_MARKERS', name + ': Unclosed managed block.');
+  return { data: scan.data, generated: scan.generated };
 }
 function contents(source: string, span: Span): string {
   const lines = source.slice(span.start, span.end).split(/\r?\n/);
   if (lines.at(-1) === '') lines.pop();
   return lines.slice(1, -1).join('\n');
 }
-export function parseMarkdown(source: string, name = 'document.md'): MarkdownDocument | null {
-  insist(Buffer.byteLength(source, 'utf8') <= 4_000_000, 'DOCS_LIMIT', name + ': Document exceeds 4 MB.');
+function frontmatterSpan(source: string, name: string): { header: Span; body: number } | null {
   const start = source.charCodeAt(0) === 0xfeff ? 1 : 0;
   const first = /^---\r?\n/.exec(source.slice(start));
   if (!first) return null;
   const headerStart = start + first[0].length;
   const end = /^(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/m.exec(source.slice(headerStart));
   insist(end, 'DOCS_FRONTMATTER', name + ': Unclosed frontmatter.');
-  const header = { start: headerStart, end: headerStart + end.index }, body = header.end + end[0].length;
-  const properties = yaml(source.slice(header.start, header.end), name).value;
+  const header = { start: headerStart, end: headerStart + end.index };
+  return { header, body: header.end + end[0].length };
+}
+const reservedFields: ReadonlySet<string> = new Set(Object.values(fieldNames).flat());
+function checkRegions(source: string, found: Regions, name: string): void {
+  if (found.data && found.generated) insist(found.data.end <= found.generated.start || found.data.start >= found.generated.end, 'DOCS_MARKERS', name + ': Managed data and generated regions must not overlap.');
+  if (!found.data || !/^ {0,3}(?:`{3,}|~{3,})json shell-data/.test(source.slice(found.data.start))) return;
+  try { JSON.parse(contents(source, found.data)); } catch { insist(false, 'DOCS_JSON', name + ': Expected valid JSON in json shell-data.'); }
+}
+const identityOf = (properties: ObjectData) => ({ id: String(properties.id ?? ''), project: String(properties.project ?? ''), title: String(properties.title ?? '') });
+export function parseMarkdown(source: string, name = 'document.md'): MarkdownDocument | null {
+  insist(Buffer.byteLength(source, 'utf8') <= 4_000_000, 'DOCS_LIMIT', name + ': Document exceeds 4 MB.');
+  const span = frontmatterSpan(source, name);
+  if (!span) return null;
+  const { header, body } = span, properties = yaml(source.slice(header.start, header.end), name).value;
   if (properties.doc_schema === undefined && !DOC_TYPES.includes(properties.type as DocType)) return null;
   insist(properties.doc_schema === 1, 'DOCS_VERSION', name + ': Expected doc_schema: 1; adopt legacy documents explicitly.');
   insist(DOC_TYPES.includes(properties.type as DocType), 'DOCS_TYPE', name + ': Unknown document type.');
   const type = properties.type as DocType, fields: ObjectData = {};
   for (const field of fieldNames[type]) if (Object.hasOwn(properties, field)) fields[field] = properties[field];
   const found = regions(source, body, name);
-  const reservedFields = new Set(Object.values(fieldNames).flat());
   insist(Object.keys(properties).every(key => !reservedFields.has(key) || fieldNames[type].includes(key)), 'DOCS_FIELD', name + ': Managed field belongs to another document type.');
-  if (found.data && found.generated) insist(found.data.end <= found.generated.start || found.data.start >= found.generated.end, 'DOCS_MARKERS', name + ': Managed data and generated regions must not overlap.');
-  if (found.data && /^ {0,3}(?:`{3,}|~{3,})json shell-data/.test(source.slice(found.data.start))) {
-    try { JSON.parse(contents(source, found.data)); } catch { insist(false, 'DOCS_JSON', name + ': Expected valid JSON in json shell-data.'); }
-  }
-  const entity: Entity = { type, id: String(properties.id ?? ''), project: String(properties.project ?? ''), title: String(properties.title ?? ''), fields,
+  checkRegions(source, found, name);
+  const entity: Entity = { type, ...identityOf(properties), fields,
     data: found.data ? yaml(contents(source, found.data), name + ':shell-data').value : {} };
   for (const field of ['id', 'project', 'title']) insist(typeof properties[field] === 'string', 'DOCS_FIELD', name + ': ' + field + ' must be text.');
   validateEntity(entity);
@@ -91,31 +115,38 @@ function replace(source: string, changes: Array<Span & { value: string }>): stri
   for (const change of changes.sort((a, b) => b.start - a.start)) source = source.slice(0, change.start) + change.value + source.slice(change.end);
   return source;
 }
+type Edit = Span & { value: string };
+type Pair = { key: unknown; value: unknown };
+function obsoleteEdit(source: string, pair: Pair): Edit {
+  insist(isNode(pair.key) && pair.key.range && isNode(pair.value) && pair.value.range,
+    'DOCS_FRONTMATTER', 'Cannot locate an obsolete managed property.');
+  const start = source.lastIndexOf('\n', pair.key.range[0] - 1) + 1;
+  const end = source.indexOf('\n', pair.value.range[1]);
+  return { start, end: end < 0 ? source.length : end + 1, value: '' };
+}
+function keepsAuthoredValue(document: MarkdownDocument, entity: Entity, key: string, value: unknown): boolean {
+  if (key === 'title' && entity.type === 'route' && document.properties.title !== document.entity.title) return true;
+  return equal(document.properties[key], value);
+}
+function managedEdit(document: MarkdownDocument, entity: Entity, pair: Pair, value: unknown): Edit | null {
+  if (keepsAuthoredValue(document, entity, String(pair.key), value)) return null;
+  insist(isNode(pair.value) && pair.value.range, 'DOCS_FRONTMATTER', 'Cannot locate a managed property.');
+  return { start: pair.value.range[0], end: pair.value.range[1], value: JSON.stringify(value) };
+}
 /** Rewrite only managed top-level scalar spans; custom properties/comments retain exact bytes. */
 function headerText(document: MarkdownDocument, entity: Entity, newline: string): string {
-  let source = document.source.slice(document.header.start, document.header.end);
-  const { doc } = yaml(source, document.name), fields = frontmatter(entity);
+  const original = document.source.slice(document.header.start, document.header.end);
+  const { doc } = yaml(original, document.name), fields = frontmatter(entity);
   insist(isMap(doc.contents), 'DOCS_FRONTMATTER', 'Frontmatter must be a mapping.');
-  const edits: Array<Span & { value: string }> = [], seen = new Set<string>();
+  const edits: Edit[] = [], seen = new Set<string>();
   for (const pair of doc.contents.items) {
     const key = String(pair.key);
-    if (!Object.hasOwn(fields, key)) {
-      if (fieldNames[entity.type].includes(key)) {
-        insist(isNode(pair.key) && pair.key.range && isNode(pair.value) && pair.value.range,
-          'DOCS_FRONTMATTER', 'Cannot locate an obsolete managed property.');
-        const start = source.lastIndexOf('\n', pair.key.range[0] - 1) + 1;
-        const end = source.indexOf('\n', pair.value.range[1]);
-        edits.push({ start, end: end < 0 ? source.length : end + 1, value: '' });
-      }
-      continue;
-    }
-    seen.add(key);
-    if (key === 'title' && entity.type === 'route' && document.properties.title !== document.entity.title) continue;
-    if (equal(document.properties[key], fields[key])) continue;
-    insist(isNode(pair.value) && pair.value.range, 'DOCS_FRONTMATTER', 'Cannot locate a managed property.');
-    edits.push({ start: pair.value.range[0], end: pair.value.range[1], value: JSON.stringify(fields[key]) });
+    const edit = Object.hasOwn(fields, key) ? managedEdit(document, entity, pair, fields[key])
+      : fieldNames[entity.type].includes(key) ? obsoleteEdit(original, pair) : null;
+    if (Object.hasOwn(fields, key)) seen.add(key);
+    if (edit) edits.push(edit);
   }
-  source = replace(source, edits);
+  let source = replace(original, edits);
   for (const [key, value] of Object.entries(fields)) if (!seen.has(key)) source += `${key}: ${JSON.stringify(value)}${newline}`;
   return source;
 }

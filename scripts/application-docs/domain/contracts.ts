@@ -66,30 +66,32 @@ export function validateEntity(entity: Entity): void {
   }
   if (entity.type === 'interaction') for (const name of ['owner_type', 'owner_id', 'source_node_id', 'event']) text(entity.fields[name], name);
 }
-
 /** Accepted concise hand-authoring forms normalize before semantic reconciliation. */
+const payloadKeys: Partial<Record<DocType, readonly string[]>> = {
+  project: ['identity', 'settings', 'notes', 'design', 'order', 'tooling'],
+  page: ['surface', 'visual'], component: ['library', 'visual'],
+  interaction: ['actions', 'notes', 'acceptance', 'emptyLabel'], journey: ['steps'], route: [],
+};
+// Identity lives in frontmatter; structured payloads must not repeat it.
+const identityRules: Partial<Record<DocType, ReadonlyArray<readonly [string, readonly string[], string]>>> = {
+  page: [['visual', ['id', 'ownerId'], 'Visual identity belongs in frontmatter.'], ['surface', ['id', 'label', 'kind'], 'Surface identity belongs in frontmatter.']],
+  component: [['library', ['id', 'name'], 'Library identity belongs in frontmatter.'], ['visual', ['id', 'libraryId', 'exportName'], 'Component identity belongs in frontmatter.']],
+};
+function liftProjectIdentity(data: ObjectData): void {
+  const identity = data.identity === undefined ? {} : docsObject(data.identity);
+  for (const key of ['author', 'version', 'description']) if (Object.hasOwn(data, key)) { identity[key] = data[key]; delete data[key]; }
+  if (Object.keys(identity).length) data.identity = identity;
+}
+function rejectIdentity(value: unknown, keys: readonly string[], message: string): void {
+  if (value) insist(!keys.some(key => Object.hasOwn(docsObject(value), key)), 'DOCS_PAYLOAD', message);
+}
 export function normalizePayload(entity: Entity): Entity {
   const value = structuredClone(entity), data = value.data;
   if (value.type === 'component' && !Object.hasOwn(data, 'visual') && !Object.hasOwn(data, 'library')) value.data = { visual: data };
-  if (value.type === 'project') {
-    const identity = data.identity === undefined ? {} : docsObject(data.identity);
-    for (const key of ['author', 'version', 'description']) if (Object.hasOwn(data, key)) { identity[key] = data[key]; delete data[key]; }
-    if (Object.keys(identity).length) data.identity = identity;
-  }
-  const allowed: Partial<Record<DocType, string[]>> = {
-    project: ['identity', 'settings', 'notes', 'design', 'order', 'tooling'],
-    page: ['surface', 'visual'], component: ['library', 'visual'],
-    interaction: ['actions', 'notes', 'acceptance', 'emptyLabel'], journey: ['steps'], route: [],
-  };
+  if (value.type === 'project') liftProjectIdentity(data);
   if (value.type === 'route') value.title = text(value.fields.path, 'path');
-  const keys = allowed[value.type];
+  const keys = payloadKeys[value.type];
   insist(!keys || Object.keys(value.data).every(key => keys.includes(key)), 'DOCS_PAYLOAD', 'Unknown structured field on ' + value.type + '.');
-  if (value.type === 'page' && value.data.visual) {
-    const visual = docsObject(value.data.visual);
-    insist(!['id', 'ownerId'].some(key => Object.hasOwn(visual, key)), 'DOCS_PAYLOAD', 'Visual identity belongs in frontmatter.');
-  }
-  if (value.type === 'page' && value.data.surface) insist(!['id', 'label', 'kind'].some(key => Object.hasOwn(docsObject(value.data.surface), key)), 'DOCS_PAYLOAD', 'Surface identity belongs in frontmatter.');
-  if (value.type === 'component' && value.data.library) insist(!['id', 'name'].some(key => Object.hasOwn(docsObject(value.data.library), key)), 'DOCS_PAYLOAD', 'Library identity belongs in frontmatter.');
-  if (value.type === 'component' && value.data.visual) insist(!['id', 'libraryId', 'exportName'].some(key => Object.hasOwn(docsObject(value.data.visual), key)), 'DOCS_PAYLOAD', 'Component identity belongs in frontmatter.');
+  for (const [field, identity, message] of identityRules[value.type] ?? []) rejectIdentity(value.data[field], identity, message);
   return value;
 }
