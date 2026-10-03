@@ -403,15 +403,15 @@ jobs:
           node "$QUALIFIED_NPM" run test:visual
       - name: Generate, independently install, build and test the companion project
         run: |
-          node scripts/companion/qualify-project.mjs
-          node scripts/companion/qualify-project.mjs --boundary-fixture
-          node scripts/companion/qualify-project.mjs --provider-fixture
+          node scripts/companion-tools/qualify-project.mjs
+          node scripts/companion-tools/qualify-project.mjs --boundary-fixture
+          node scripts/companion-tools/qualify-project.mjs --provider-fixture
       - *playwright-version
       - *playwright-cache
       - name: Exercise generated stylesheet against real Nuxt UI components
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
-          node scripts/companion/qualify-styles.mjs
+          node scripts/companion-tools/qualify-styles.mjs
       - name: Retain exact source and generated project without dependencies or machine state
         if: always()
         run: |
@@ -460,7 +460,7 @@ jobs:
           failed=""
           for id in $STARTER_IDS; do
             echo "::group::Starter $id"
-            node scripts/companion/qualify-starter.mjs "$id" || failed="$failed $id"
+            node scripts/companion-tools/qualify-starter.mjs "$id" || failed="$failed $id"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi

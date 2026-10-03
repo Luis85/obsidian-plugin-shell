@@ -17,8 +17,8 @@ AGENTS.md
 package.json, package-lock.json, .nvmrc
 README.md, TEMPLATE-GUIDE.md
 scripts/companion/project-contract.mjs
-scripts/companion/read-project.mjs
-scripts/companion/generate.mjs
+bin/adapters/framework/read-project.ts
+scripts/companion-tools/generate.mjs
 scripts/companion/visual/visual-validate.mjs
 scripts/companion/visual/visual-ir.mjs (locate the actual IR/types file)
 scripts/companion/visual/visual-catalog.mjs (locate the actual catalog file)
@@ -98,7 +98,7 @@ label native work still pending. Never count acceptance TODOs as passing tests.
 
 ## Read-only handoff versus generation
 
-`node scripts/companion/generate.mjs --input <json> --vault <existing-dir> --target <relative>`
+`node scripts/companion-tools/generate.mjs --input <json> --vault <existing-dir> --target <relative>`
 validates and echoes the **original bytes**. `npm run companion:generate` is the same
 read-only path. It is not a generator.
 

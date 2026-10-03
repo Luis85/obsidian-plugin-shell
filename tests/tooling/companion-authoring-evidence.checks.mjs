@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { authoringEvidence } from '../../scripts/companion/authoring-evidence.mjs';
+import { authoringEvidence } from '../../scripts/companion-tools/authoring-evidence.mjs';
 import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 async function fixture(t) {

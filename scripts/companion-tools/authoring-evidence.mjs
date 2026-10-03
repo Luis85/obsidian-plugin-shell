@@ -2,7 +2,7 @@ import { readFile, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { loadDefinitions } from '../../bin/adapters/starters/repository.ts';
-import { parseAuthoringDocument } from './authoring-contract.ts';
+import { parseAuthoringDocument } from '../companion/authoring-contract.ts';
 
 /** Bind qualification to the actual modern build's HTML and complete export, never an abbreviated schema example. */
 export async function authoringEvidence(root) {

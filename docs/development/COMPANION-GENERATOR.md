@@ -55,7 +55,7 @@ The framework's own `README.md`, `AGENTS.md`, `TEMPLATE-GUIDE.md` and `SHELL-FIR
 
 Generated plugins also register the shell's `debug-toggle` and `debug-report` commands (the dev loop enables debug logging after each load), use `<id>-view-*` view types that the shell's view-header binding accepts, and name Vue component files with multiple words so `npm run check` is lint-clean for every starter.
 
-The original `npm run companion:generate` and `scripts/companion/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
+The original `npm run companion:generate` and `scripts/companion-tools/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
 
 ## Generated implementation contracts
 

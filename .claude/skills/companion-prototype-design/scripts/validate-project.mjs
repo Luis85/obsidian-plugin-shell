@@ -10,7 +10,7 @@ export function validateProject(directory, input, timeout = 120000) {
   const repo = noLinks(directory);
   const source = noLinks(input);
   const bytes = readBytes(source, 4_000_000);
-  const reader = path.join(repo, 'scripts/companion/generate.mjs');
+  const reader = path.join(repo, 'scripts/companion-tools/generate.mjs');
   const app = path.join(repo, 'bin/app');
   readBytes(reader); readBytes(app);
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'prototype-contract-'));

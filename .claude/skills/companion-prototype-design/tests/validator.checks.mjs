@@ -8,12 +8,12 @@ import { validateProject } from '../scripts/validate-project.mjs';
 function fakeCheckout(t, readerBody, plannerBody) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'fake-prototype-cli-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(root, 'scripts/companion'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'scripts/companion-tools'), { recursive: true });
   fs.mkdirSync(path.join(root, 'bin'));
   const prelude = `import fs from 'node:fs'; import path from 'node:path';
 const a=process.argv.slice(2); const get=k=>a[a.indexOf(k)+1];
 if(a.includes('--apply')||a.includes('--yes')) throw new Error('Unexpected write authorization');\n`;
-  fs.writeFileSync(path.join(root, 'scripts/companion/generate.mjs'), prelude + (readerBody ??
+  fs.writeFileSync(path.join(root, 'scripts/companion-tools/generate.mjs'), prelude + (readerBody ??
     `process.stdout.write(fs.readFileSync(get('--input')));`));
   fs.writeFileSync(path.join(root, 'bin/app'), prelude + `if(a[0]!=='new'||!a.includes('--from')||!a.includes('--json')) throw new Error('Missing new --from --json request');\n` + (plannerBody ??
     `process.stdout.write(JSON.stringify({status:'planned',data:{planHash:'test-plan-not-real',conflicts:[]}}));`));

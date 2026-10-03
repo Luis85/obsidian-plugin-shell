@@ -85,7 +85,7 @@ python3 scripts/concepts/run-browser-checks.py --real-storage
 
 Use Node 24.21.0 and npm 11.19.1 for qualification. Local Node22 strip-types checks are supplementary, not substitutes for pinned-toolchain evidence.
 
-The generator workflow has a per-starter matrix. `scripts/companion/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
+The generator workflow has a per-starter matrix. `scripts/companion-tools/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
 
 ## Companion self-project
 

@@ -180,7 +180,7 @@ with sync_playwright() as pw:
         act('close', scope='#modal')
         with tempfile.TemporaryDirectory(prefix='storymap-cli-') as tmp:
             vault=Path(tmp)/'vault'; vault.mkdir(); keep=vault/'keep.md';keep.write_text('foreign record')
-            run=subprocess.run(['node',str(ROOT/'scripts/companion/generate.mjs'),'--input',str(OUT/'project.companion.json'),'--vault',str(vault),'--target','plugins/companion'],capture_output=True,timeout=15)
+            run=subprocess.run(['node',str(ROOT/'scripts/companion-tools/generate.mjs'),'--input',str(OUT/'project.companion.json'),'--vault',str(vault),'--target','plugins/companion'],capture_output=True,timeout=15)
             check('Read-only CLI returns the browser’s exact Storymaps export bytes',run.returncode==0 and run.stdout==(OUT/'project.companion.json').read_bytes() and not run.stderr,'Actual CLI subprocess')
             check('Storymap handoff writes no target or foreign file', list(vault.iterdir())==[keep] and keep.read_text()=='foreign record','Actual isolated filesystem')
         # Confirmation is rendered only after parsing; locator auto-wait preserves the strict CSP.

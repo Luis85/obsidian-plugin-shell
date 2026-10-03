@@ -99,7 +99,7 @@ Import stores an accepted design snapshot and provenance after review. It does n
 
 ## 6. JSON contract and deterministic project generation
 
-Preserve the existing `obsidian-companion-project` v1 envelope and exact-byte read-only CLI. The current `scripts/companion/generate.mjs` command remains a compatibility handoff; it must not silently become a writer. Its vault-relative target semantics remain documented separately. New project-root operations do not require any Obsidian vault.
+Preserve the existing `obsidian-companion-project` v1 envelope and exact-byte read-only CLI. The current `scripts/companion-tools/generate.mjs` command remains a compatibility handoff; it must not silently become a writer. Its vault-relative target semantics remain documented separately. New project-root operations do not require any Obsidian vault.
 
 Promote detailed nested authoring validation out of browser-only code into shared TypeScript. Import validity, draft validity and generation readiness are distinct. Validate references/IDs, bounds, schema versions, relationships, source operations, component/action bindings and future-version behavior. Normalize a deterministic semantic intermediate representation; viewport/selection changes must not change generation fingerprints.
 

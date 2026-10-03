@@ -6,6 +6,7 @@ on:
       - 'scripts/starters/**'
       - 'bin/adapters/starters/**'
       - 'scripts/companion/**'
+      - 'scripts/companion-tools/**'
       - 'templates/**'
       - 'scripts/compiler/**'
       - 'bin/compiler/**'

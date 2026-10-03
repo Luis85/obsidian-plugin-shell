@@ -116,5 +116,11 @@
   "scripts/starters/validation.ts": "bin/adapters/starters/validation.ts",
   "scripts/companion/starter-files.mjs": "bin/adapters/starters/catalog.ts",
   "scripts/framework/release-bundle.mjs": "bin/adapters/framework/release-bundle.ts",
-  "scripts/companion/prototype-skill.mjs": "bin/adapters/framework/prototype-skill.ts"
+  "scripts/companion/prototype-skill.mjs": "bin/adapters/framework/prototype-skill.ts",
+  "scripts/companion/read-project.mjs": "bin/adapters/framework/read-project.ts",
+  "scripts/companion/generate.mjs": "scripts/companion-tools/generate.mjs",
+  "scripts/companion/qualify-project.mjs": "scripts/companion-tools/qualify-project.mjs",
+  "scripts/companion/qualify-starter.mjs": "scripts/companion-tools/qualify-starter.mjs",
+  "scripts/companion/qualify-styles.mjs": "scripts/companion-tools/qualify-styles.mjs",
+  "scripts/companion/authoring-evidence.mjs": "scripts/companion-tools/authoring-evidence.mjs"
 }
