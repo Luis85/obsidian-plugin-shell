@@ -112,7 +112,7 @@ The output is a development shell. Components without detail designs remain impl
 ## Visual page and component generation (companion v5)
 
 The compiler reads validated `design.visualDesigns`; v3/v4 inputs are migrated first (`migrateCompanionDocument`), so
-the detail-schema sections below are historical. `scripts/companion/compiler/visual-*.ts` lower each page to
+the detail-schema sections below are historical. `bin/compiler/emitters/visual-*.ts` lower each page to
 `presentation/components/details/<pageId>.vue` and each component to its library SFC with `defineProps`/`defineEmits`/
 `defineSlots` from the typed contract. Elements become their tags, text becomes escaped interpolation or a typed
 binding, slots become `<slot>`, project components are imported by export name and Nuxt UI entries become explicitly

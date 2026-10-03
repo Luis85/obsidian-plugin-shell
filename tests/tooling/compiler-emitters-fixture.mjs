@@ -3,7 +3,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
@@ -62,7 +62,7 @@ export async function dataDocument(properties = []) {
   design.dataSources.sources[0].operations.push({ id: 'ds-operation-9', slug: 'archive', name: 'Archive', direction: 'write', method: 'adapter', resource: 'Starter/Task',
     description: 'Unimplemented write', input: { mode: 'fields', entity: null, many: false, fields: [{ name: 'id', type: 'string', required: true }, { name: 'tags', type: 'array', required: false }], schema: null }, output: none });
   const entity = projectModel(document).entities.find(item => item.id === task.id);
-  const { noteWireSchemas } = await import('../../scripts/companion/compiler/note-contracts.ts');
+  const { noteWireSchemas } = await import('../../bin/compiler/emitters/note-contracts.ts');
   design.dataSources.sources.push({ id: 'ds-source-10', slug: 'task-notes', name: 'Task notes', kind: 'vault', status: 'active', description: 'Native task notes', locator: 'vault://active', auth: 'none', credentialRef: '',
     operations: ['list', 'create', 'update', 'delete'].map((kind, index) => {
       const wire = noteWireSchemas(entity, kind), shape = schema => schema ? schemaShape(schema) : none;

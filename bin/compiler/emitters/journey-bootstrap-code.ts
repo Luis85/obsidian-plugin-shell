@@ -1,5 +1,5 @@
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { literal, type Model } from './model.ts';
+import { relativeImport, type Add } from './file-code.ts';
 /** Native and browser composition roots have disjoint storage adapters and one shared editor implementation. */
 export function journeyBootstrapCode(m: Model, add: Add): void {
   const root=m.sourceRoot, base=`${root}/bootstrap`;

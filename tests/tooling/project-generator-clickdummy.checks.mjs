@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
 import { clickdummyCode } from '../../bin/compiler/emitters/clickdummy-code.ts';
 import { matches } from '../../templates/companion/runtime/contract.ts';

@@ -1,5 +1,5 @@
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { literal, type Model } from './model.ts';
+import { relativeImport, type Add } from './file-code.ts';
 
 /** Real-host acceptance is explicit and runs only in the existing copied-vault fixture. */
 export function journeyTestCode(m: Model, surface: string, add: Add): void {

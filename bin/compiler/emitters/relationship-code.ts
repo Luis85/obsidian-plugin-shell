@@ -1,8 +1,8 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
-import { literal, json, symbol, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relationshipDefinitions, relationshipScope } from '../../../scripts/companion/compiler/relationship-model.ts';
-import { sample } from '../../../scripts/companion/compiler/schema-code.ts';
-import { copiedTemplateTest, relativeImport, rewriteTemplate, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { literal, json, symbol, type Model } from './model.ts';
+import { relationshipDefinitions, relationshipScope } from './relationship-model.ts';
+import { sample } from './schema-code.ts';
+import { copiedTemplateTest, relativeImport, rewriteTemplate, type Add } from './file-code.ts';
 export async function relationshipCode(template: TemplateSnapshot,m:Model,add:Add):Promise<void>{
   const all=relationshipDefinitions(m);if(!all.length)return;
   const scope=relationshipScope(m); const auditScope=relationshipScope(m,true);

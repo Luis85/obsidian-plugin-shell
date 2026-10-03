@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { dataCode } from '../../bin/compiler/emitters/data-code.ts';
-import { typeCode, sample, sampleCode } from '../../scripts/companion/compiler/schema-code.ts';
-import { noteWireSchemas, validateNoteWire } from '../../scripts/companion/compiler/note-contracts.ts';
+import { typeCode, sample, sampleCode } from '../../bin/compiler/emitters/schema-code.ts';
+import { noteWireSchemas, validateNoteWire } from '../../bin/compiler/emitters/note-contracts.ts';
 import { dataDocument, starterDocument, model, recorder } from './compiler-emitters-fixture.mjs';
 
 // Source/entity emission (data-code.ts) and the schema/wire helpers it shares (schema-code.ts, note-contracts.ts).

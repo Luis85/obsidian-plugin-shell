@@ -3,7 +3,7 @@ import { storybookOptions, validateProjectTooling } from '../../../scripts/compa
 import { storybookStories } from './storybook-stories.ts';
 import { storybookHost } from './storybook-host.ts';
 import { storybookWorkspace, storybookVersion } from './storybook-workspace.ts';
-import { json, requireValue, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { json, requireValue, type Model } from './model.ts';
 /** Pure optional artifact emission. No filesystem, registry, installation or implicit feature activation. */
 export function storybookCode(template: TemplateSnapshot, model: Model): Artifact[] {
   const tooling = model.document.tooling;

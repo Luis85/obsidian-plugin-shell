@@ -1,6 +1,6 @@
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
-import { json, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { json, type Model } from '../emitters/model.ts';
 
 /** The target packages the shared v6 browser composition; it never substitutes another renderer. */
 export function clickdummyFiles(model: Model, template: TemplateSnapshot, files: Artifact[]): Artifact[] {

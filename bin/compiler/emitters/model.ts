@@ -1,8 +1,8 @@
-import { PRD_LIMITS } from '../prd-limits.mjs';
+import { PRD_LIMITS } from '../../../scripts/companion/prd-limits.mjs';
 import { matches, type Schema } from '../../../templates/companion/runtime/contract.ts';
 import { createHash } from 'node:crypto';
-import { companionRelativeFolder } from '../project-contract.mjs';
-import { validateAuthoringDocument as validateCompanionDocument } from '../authoring-contract.ts';
+import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
+import { validateAuthoringDocument as validateCompanionDocument } from '../../../scripts/companion/authoring-contract.ts';
 export type Row = Record<string, unknown>;
 export interface Entity { id: string; slug: string; name: string; folder: string; schema: Schema }
 export interface Operation { id: string; slug: string; name: string; direction: string; input: Schema | null; output: Schema | null; contract: Row }
@@ -11,7 +11,7 @@ export interface Screen { id: string; slug: string; label: string; kind: string;
 export interface Requirement { id: string; key: string; title: string; acceptance: string; prd: string; nodes: string[]; components: string[] }
 export interface Model { document: Row; project: Row; sourceRoot: string; testRoot: string; entities: Entity[]; sources: Source[]; screens: Screen[]; links: Row[]; components: Row[]; requirements: Requirement[]; flows: Row[]; warnings: string[] }
 export const digest = (text: string | Uint8Array) => createHash('sha256').update(text).digest('hex');
-export { serializeJson as json } from '../../contracts/serialization.ts';
+export { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 export const literal = (value: unknown) => JSON.stringify(value).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('\u2028', '\\u2028').replaceAll('\u2029', '\\u2029');
 export const symbol = (slug: string) => 'G' + slug.split('-').map(word => word[0]!.toUpperCase() + word.slice(1)).join('');
 export function requireValue(value: unknown, message: string): asserts value { if (!value) throw new Error('GENERATOR_INVALID: ' + message); }

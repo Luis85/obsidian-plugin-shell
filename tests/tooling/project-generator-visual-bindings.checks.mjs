@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { stripVTControlCharacters } from 'node:util';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { projectFiles } from '../support/project-render.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));

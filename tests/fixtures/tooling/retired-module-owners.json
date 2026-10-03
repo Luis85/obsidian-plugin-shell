@@ -97,5 +97,12 @@
   "scripts/companion/compiler/visual-code.ts": "bin/compiler/emitters/visual-code.ts",
   "scripts/companion/compiler/visual-ports.ts": "bin/compiler/emitters/visual-ports.ts",
   "scripts/companion/compiler/visual-tests.ts": "bin/compiler/emitters/visual-tests.ts",
-  "scripts/companion/compiler/visual-runtime-tests.ts": "bin/compiler/emitters/visual-runtime-tests.ts"
+  "scripts/companion/compiler/visual-runtime-tests.ts": "bin/compiler/emitters/visual-runtime-tests.ts",
+  "scripts/companion/compiler/persistence-code.ts": "bin/compiler/emitters/persistence-code.ts",
+  "scripts/companion/compiler/note-contracts.ts": "bin/compiler/emitters/note-contracts.ts",
+  "scripts/companion/compiler/relationship-model.ts": "bin/compiler/emitters/relationship-model.ts",
+  "scripts/companion/compiler/schema-code.ts": "bin/compiler/emitters/schema-code.ts",
+  "scripts/companion/compiler/visual-model.ts": "bin/compiler/emitters/visual-model.ts",
+  "scripts/companion/compiler/file-code.ts": "bin/compiler/emitters/file-code.ts",
+  "scripts/companion/compiler/model.ts": "bin/compiler/emitters/model.ts"
 }

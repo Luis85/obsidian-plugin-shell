@@ -2,7 +2,7 @@
  * under docs/framework/ (kept as inert reference) and every copied Markdown link to them is rebased,
  * so the product README/AGENTS.md/CI own the root without breaking the framework docs' local links. */
 import { posix } from 'node:path';
-import type { Entry } from '../../../scripts/companion/compiler/file-code.ts';
+import type { Entry } from './file-code.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
   ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'].map(name => [name, `docs/framework/${name}`]));

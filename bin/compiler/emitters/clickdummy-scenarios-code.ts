@@ -1,8 +1,8 @@
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { visualSpecs } from '../../../scripts/companion/compiler/visual-model.ts';
+import { literal, type Model } from './model.ts';
+import { visualSpecs } from './visual-model.ts';
 import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
 import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
-import type { Add } from '../../../scripts/companion/compiler/file-code.ts';
+import type { Add } from './file-code.ts';
 
 /** Only scenario identity/presentation metadata is duplicated; values stay in the existing visual specs. */
 export function clickdummyScenariosCode(model: Model, add: Add): void {

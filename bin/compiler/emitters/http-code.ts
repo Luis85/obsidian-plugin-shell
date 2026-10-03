@@ -1,8 +1,8 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { validateHttpSource, type JsonHttpSource } from '../../../templates/companion/runtime/json-http.ts';
-import { literal, text, symbol, type Model, type Source } from '../../../scripts/companion/compiler/model.ts';
-import { sampleCode } from '../../../scripts/companion/compiler/schema-code.ts';
-import { copiedTemplateTest, relativeImport, rewriteTemplate, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { literal, text, symbol, type Model, type Source } from './model.ts';
+import { sampleCode } from './schema-code.ts';
+import { copiedTemplateTest, relativeImport, rewriteTemplate, type Add } from './file-code.ts';
 function httpDefinition(source:Source):JsonHttpSource {
   const definition={id:source.id,locator:text(source.contract.locator,240),auth:text(source.contract.auth,40),credentialRef:text(source.contract.credentialRef,60),operations:source.operations.map(op=>({slug:op.slug,method:text(op.contract.method,10),resource:text(op.contract.resource,500),input:op.input,output:op.output}))};
   validateHttpSource(definition);return definition;

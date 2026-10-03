@@ -1,5 +1,5 @@
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { literal, type Model } from './model.ts';
+import { relativeImport, type Add } from './file-code.ts';
 import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
 import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
 export function navigationCode(m: Model, add: Add): void {

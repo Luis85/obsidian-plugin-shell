@@ -1,11 +1,11 @@
 import type { GenerationSelection } from '../domain/selection.ts';
-import type { Model } from '../../../scripts/companion/compiler/model.ts';
-import type { Entry } from '../../../scripts/companion/compiler/file-code.ts';
+import type { Model } from '../emitters/model.ts';
+import type { Entry } from '../emitters/file-code.ts';
 import { readFile } from 'node:fs/promises';
 import { resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { digest, json, row, rows, text, requireValue } from '../../../scripts/companion/compiler/model.ts';
-import { visualDefinitions } from '../../../scripts/companion/compiler/visual-model.ts';
+import { digest, json, row, rows, text, requireValue } from '../emitters/model.ts';
+import { visualDefinitions } from '../emitters/visual-model.ts';
 import { visualVerification, visualAcceptanceTodo } from '../emitters/visual-files.ts';
 import { visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
 export interface WorkspaceOptions { target:string;templateRoot:string;bootstrap?:ReadonlyArray<{path:string;hash:string}>;selection?:GenerationSelection }

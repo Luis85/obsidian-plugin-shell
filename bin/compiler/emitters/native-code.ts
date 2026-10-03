@@ -1,7 +1,7 @@
 import { validateNativeIntegrations } from '../../../scripts/companion/native-contract.mjs';
 import { nativeDeclarationSource, nativeDeclarationTest } from '../../../scripts/companion/native-boilerplate.mjs';
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { literal, type Model } from './model.ts';
+import { relativeImport, type Add } from './file-code.ts';
 
 /** Lower portable native declarations into the same adapters used by maker-authored features. */
 export function nativeCode(model: Model, add: Add): void {

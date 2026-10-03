@@ -4,7 +4,7 @@ import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { renderTemplate } from '../../bin/compiler/emitters/devkit-files.ts';

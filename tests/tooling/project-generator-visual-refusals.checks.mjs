@@ -2,9 +2,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { visualSpecs, visualContractTypes, visualDefinitions } from '../../scripts/companion/compiler/visual-model.ts';
+import { visualSpecs, visualContractTypes, visualDefinitions } from '../../bin/compiler/emitters/visual-model.ts';
 import { visualSfc } from '../../bin/compiler/emitters/visual-code.ts';
 import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
 import { detailValue } from '../../templates/companion/runtime/detail-actions.ts';

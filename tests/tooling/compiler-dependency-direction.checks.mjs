@@ -81,6 +81,8 @@ test('repository sources keep the compiler -> companion dependency direction', a
 });
 
 test('the former companion compiler facades are gone and their compiler owners exist', async () => {
+  // E4: the code emitters moved to bin/compiler/emitters; the whole former folder is gone.
+  await assert.rejects(readdir(resolve(root, 'scripts/companion/compiler')), { code: 'ENOENT' });
   for (const [path, owner] of owners) {
     await assert.rejects(readFile(resolve(root, path), 'utf8'), { code: 'ENOENT' }, path);
     assert.ok((await readFile(resolve(root, owner), 'utf8')).includes('export '), owner);

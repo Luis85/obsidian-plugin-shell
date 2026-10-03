@@ -1,5 +1,5 @@
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport } from '../../../scripts/companion/compiler/file-code.ts';
+import { literal, type Model } from './model.ts';
+import { relativeImport } from './file-code.ts';
 /** A separate Vue app and Pinia per mounted story: no singleton state, Obsidian imports or live data adapters. */
 export function storybookHost(model: Model): string {
   const path = 'storybook/generated/with-project.ts';

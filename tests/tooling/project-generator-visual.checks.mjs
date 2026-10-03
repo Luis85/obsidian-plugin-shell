@@ -218,9 +218,9 @@ test('external adapters mount after render and never mount an element removed be
   assert.equal(created, 1); assert.deepEqual(log, [['mount', true, 'v'], ['destroy']]);
 });
 
-const { projectModel } = await import('../../scripts/companion/compiler/model.ts');
+const { projectModel } = await import('../../bin/compiler/emitters/model.ts');
 const { migrateCompanionDocument } = await import('../../scripts/companion/project-contract.mjs');
-const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
+const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../bin/compiler/emitters/visual-model.ts');
 const self = migrateCompanionDocument(JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'))).document;
 test('model exposes validated definitions and explicit Nuxt UI imports', () => {
   const m = projectModel(self), store = visualDefinitions(m);

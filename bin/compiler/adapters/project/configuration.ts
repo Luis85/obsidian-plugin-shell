@@ -2,7 +2,7 @@ import { angularBabelVersion } from './angular-linker.ts';
 import type { TemplateSnapshot } from '../../domain/contracts.ts';
 import type { ProjectSelection } from '../../domain/project-starter.ts';
 import { CompilerError, diagnostic } from '../../domain/diagnostics.ts';
-import { json } from '../../../../scripts/companion/compiler/model.ts';
+import { json } from '../../emitters/model.ts';
 import type { FrameworkAdapter } from './framework-adapter.ts';
 type Pins = Record<string, string>;
 interface TemplatePackage { dependencies?: Pins; devDependencies?: Pins }

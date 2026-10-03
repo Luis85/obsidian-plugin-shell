@@ -1,12 +1,12 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { fixtureNoteTests } from '../emitters/fixture-notes-code.ts';
-import { sampleCode } from '../../../scripts/companion/compiler/schema-code.ts';
+import { sampleCode } from '../emitters/schema-code.ts';
 import { buildCompanionFixtureManifest } from '../../../scripts/companion/test-data-manifest.mjs';
 import { createFixtureEngine } from '../../../docs/concepts/companion/test-kit/engine.mjs';
 import { createFixtureAdapter } from '../../../docs/concepts/companion/test-kit/adapters.mjs';
-import { noteEntity } from '../../../scripts/companion/compiler/persistence-code.ts';
-import { json, literal, row, symbol, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { noteEntity } from '../emitters/persistence-code.ts';
+import { json, literal, row, symbol, type Model } from '../emitters/model.ts';
+import { relativeImport, type Add } from '../emitters/file-code.ts';
 const kitFiles = ['engine.mjs', 'adapters.mjs', 'storage.mjs', 'server.mjs', 'client.mjs', 'cli.mjs', 'faker-provider.mjs'];
 export function fixtureManifest(m: Model) {
   const manifest = buildCompanionFixtureManifest(row(m.document.design));

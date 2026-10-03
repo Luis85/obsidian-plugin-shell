@@ -7,7 +7,7 @@ import { compileDesignSystem } from '../../scripts/companion/design-system-css.m
 import { DESIGN_SYSTEM_ROLES } from '../../scripts/companion/design-system-roles.mjs';
 import { resolveDesignSystemFrontend, validateDesignSystem } from '../../scripts/companion/design-system-contract.mjs';
 import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { compositionDefaultUI, compositionStyle, validateCompositionDesignSystem } from '../../scripts/companion/composition-contract.mjs';
 import { styleCode } from '../../bin/compiler/emitters/style-code.ts';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';

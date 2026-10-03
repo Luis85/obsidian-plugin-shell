@@ -1,7 +1,7 @@
-import { noteEntity } from '../../../scripts/companion/compiler/persistence-code.ts';
-import { relationshipScope } from '../../../scripts/companion/compiler/relationship-model.ts';
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { noteEntity } from './persistence-code.ts';
+import { relationshipScope } from './relationship-model.ts';
+import { literal, type Model } from './model.ts';
+import { relativeImport, type Add } from './file-code.ts';
 /** Test the emitted Markdown against actual canonical repositories and the actual YAML codec. */
 export function fixtureNoteTests(m: Model, add: Add): void {
   const initial = new Map(m.sources.flatMap(source => source.operations.flatMap(op => { const e=noteEntity(m,source.id,op.id);return e?[[e.id,e] as const]:[]; })));

@@ -10,7 +10,7 @@ import { verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { projectFiles } from '../support/project-render.mjs';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { rebaseMarkdown } from '../../bin/compiler/emitters/framework-docs.ts';
 import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));

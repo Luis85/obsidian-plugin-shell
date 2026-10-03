@@ -4,10 +4,10 @@ import { visualSession, visualTransition, visualVisible, type Session } from '..
 import { visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { mapDetailPayload } from '../../../templates/companion/runtime/detail-actions.ts';
 import { parseDetailControl, copyDetailData, type DetailData } from '../../../templates/companion/runtime/detail-controls.ts';
-import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
-import { sample, sampleCode } from '../../../scripts/companion/compiler/schema-code.ts';
-import { visualDefinitionPath } from '../../../scripts/companion/compiler/visual-model.ts';
+import { literal, type Model } from './model.ts';
+import { relativeImport, type Add } from './file-code.ts';
+import { sample, sampleCode } from './schema-code.ts';
+import { visualDefinitionPath } from './visual-model.ts';
 
 const vtStates: VisualState[] = ['default', 'loading', 'empty', 'error', 'disabled'];
 /** Nuxt UI entries whose root (or $attrs target) is always in the DOM, so their node marker is observable in tests. */

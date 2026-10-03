@@ -1,8 +1,8 @@
 /** Companion is an input adapter, not a second schema or visual-model implementation. */
 import { authoringReader } from '../../../scripts/companion/authoring-contract.ts';
 import { SitemapError } from '../../../scripts/companion/sitemap/safety.ts';
-import { projectModel, type Model } from '../../../scripts/companion/compiler/model.ts';
-import { visualDefinitions } from '../../../scripts/companion/compiler/visual-model.ts';
+import { projectModel, type Model } from '../emitters/model.ts';
+import { visualDefinitions } from '../emitters/visual-model.ts';
 import { visualSources } from '../emitters/visual-ports.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Phase } from '../domain/contracts.ts';

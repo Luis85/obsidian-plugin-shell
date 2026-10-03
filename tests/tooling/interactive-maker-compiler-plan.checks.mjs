@@ -10,7 +10,7 @@ import { generationSelection } from '../../bin/compiler/adapters/selection.ts';
 import { renderProjectFiles } from '../../bin/compiler/adapters/plugin-emitter.ts';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 import { compileProject, analyzeProject } from '../../bin/compiler/index.ts';
-import { projectModel, digest } from '../../scripts/companion/compiler/model.ts';
+import { projectModel, digest } from '../../bin/compiler/emitters/model.ts';
 import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 
 // Drives workspace planning, project planning, scoped selection and the plugin emitter (bin/compiler) under the maker floors.
