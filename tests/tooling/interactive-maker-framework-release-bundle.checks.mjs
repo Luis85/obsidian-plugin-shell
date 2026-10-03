@@ -1,6 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,7 +54,8 @@ console.log(here, dir, plain_default, meta_default, config_default, config_defau
 `;
 
 async function framework(files, run) {
-  const base = await mkdtemp(join(tmpdir(), 'release-bundle-'));
+  // Canonical temp root: macOS tmpdir() lives under the /var symlink, which input-path checks correctly refuse.
+  const base = await mkdtemp(join(await realpath(tmpdir()), 'release-bundle-'));
   try {
     const root = join(base, 'framework');
     for (const [path, text] of Object.entries(files)) {
