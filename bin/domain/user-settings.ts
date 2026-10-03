@@ -21,6 +21,13 @@ export const defaultSettings: UserSettings = {
 };
 /** The folder that holds one Claude Design folder per prototype. */
 export function designRoot(paths: UserSettings['paths']): string { return paths.design ?? defaultDesignRoot; }
+/** Every configured location with the optional design root resolved, so checks see the folder the tools actually use. */
+export function effectivePaths(paths: UserSettings['paths']): Required<UserSettings['paths']> { return { ...paths, design: designRoot(paths) }; }
+/** The one overlap rule for settings, design and migration checks: equal or nested, ignoring case. */
+export function pathsOverlap(a: string, b: string): boolean {
+  const left = a.toLowerCase(), right = b.toLowerCase();
+  return left === right || left.startsWith(right + '/') || right.startsWith(left + '/');
+}
 /** Portable, vault-relative paths only. Host configuration and Git are never output locations. */
 export function projectPath(value: unknown): string {
   const path = text(value, 'relative path', 240);
@@ -29,11 +36,10 @@ export function projectPath(value: unknown): string {
   requireSketch(!hasProtectedProjectRoot(path), 'SETTINGS_PATH', 'Host, framework, dependency and Git directories are protected.');
   return path;
 }
-const overlap = (a: string, b: string) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
 function validateLocations(paths: UserSettings['paths'], hostDirectory: string): void {
-  const locations = [...Object.values(paths), settingsPath, setupStatePath, 'configs/project-setup-draft.json', 'project.config.json', hostDirectory].map(path => path.toLowerCase());
+  const locations = [...Object.values(effectivePaths(paths)), settingsPath, setupStatePath, 'configs/project-setup-draft.json', 'project.config.json', hostDirectory];
   for (let i = 0; i < locations.length; i++) for (const other of locations.slice(i + 1))
-    requireSketch(!overlap(locations[i]!, other), 'SETTINGS_OVERLAP', 'Input, output and configuration paths must not overlap.');
+    requireSketch(!pathsOverlap(locations[i]!, other), 'SETTINGS_OVERLAP', `Input, output and configuration paths must not overlap; paths.design defaults to ${defaultDesignRoot}.`);
 }
 function readPaths(input: unknown, baseline: UserSettings['paths'], hostDirectory: string): UserSettings['paths'] {
   const raw = object(input); keys(raw, [...Object.keys(defaultSettings.paths), 'design']);

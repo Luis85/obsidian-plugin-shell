@@ -6,6 +6,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { designFolderPlan, designFolderStatus } from '../../bin/adapters/design-folder.ts';
 import { currentSourceHash } from '../../bin/adapters/design-source.ts';
 import { offerDesignFolder } from '../../bin/presentation/design-folder.ts';
+import { readSettings } from '../../bin/domain/user-settings.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { prototypesPlan } from '../../bin/adapters/framework/prototypes.ts';
 import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
@@ -139,7 +140,7 @@ test('names, missing folders, manifests and changed sources fail closed', async 
 test('the design root is configurable, overlap-checked and moved by the reviewed settings migration', async () => scratch(async root => {
   await saveProject(root);
   await put(root, 'configs/user-settings.json', JSON.stringify({ schemaVersion: 1, paths: { prds: 'docs/design' } }));
-  await assert.rejects(() => plan(root), { code: 'DESIGN_ROOT_OVERLAP' });
+  await assert.rejects(() => plan(root), { code: 'SETTINGS_OVERLAP' });
   await put(root, 'configs/user-settings.json', JSON.stringify({ schemaVersion: 1, paths: { design: 'docs/prds/designs' } }));
   await assert.rejects(() => plan(root), { code: 'SETTINGS_OVERLAP' });
   await rm(join(root, 'configs'), { recursive: true });
@@ -233,6 +234,43 @@ test('implementation-map rows whose screen title holds an escaped pipe are count
   await apply(root);
   assert.match(await read(root, `${folder}/handoff/implementation-map.md`), /\| Inbox \\\| Archive \| `node-\d+` \| todo \|/);
   assert.deepEqual((await designFolderStatus(root, frameworkRoot)).folders[0].implementation, { todo: 3 });
+}));
+test('settings validation applies the default design root, so an overlapping path fails before any design command', () => {
+  for (const paths of [{ prds: 'docs/design/prds' }, { app: 'docs/design/app' }, { brief: 'docs/design/brief.md' }])
+    assert.throws(() => readSettings({ schemaVersion: 1, paths }), { code: 'SETTINGS_OVERLAP' }, JSON.stringify(paths));
+  assert.equal(readSettings({ schemaVersion: 1, paths: { prds: 'docs/design/prds', design: 'handoff/design' } }).paths.prds, 'docs/design/prds');
+});
+test('first configuring paths.design moves only prepared design folders and never shared files in the default root', async () => scratch(async root => {
+  await saveProject(root);
+  await apply(root);
+  const shared = { 'docs/design/obsidian-tokens.json': '{"groups":[]}\n', 'docs/design/OBSIDIAN-TOKENS.md': '# Tokens\n', 'docs/design/sketches/early.html': '<!doctype html>\n' };
+  for (const [path, content] of Object.entries(shared)) await put(root, path, content);
+  const migration = await settingsMigrationPlan(root, { schemaVersion: 1, paths: { design: 'handoff/design' } });
+  const touched = migration.plan.changes.filter(change => change.status !== 'unchanged').map(change => change.path);
+  assert.ok(touched.every(path => path.startsWith(`${folder}/`) || path.startsWith('handoff/design/issue-desk/') || path.startsWith('configs/')), touched.join('\n'));
+  await applyPrepared(migration, migration.planHash);
+  for (const [path, content] of Object.entries(shared)) assert.equal(await read(root, path), content, path);
+  await assert.rejects(() => read(root, `${folder}/design.manifest.json`));
+  assert.equal((await designFolderStatus(root, frameworkRoot)).folders[0].folder, 'handoff/design/issue-desk');
+}));
+test('moving the project model and package folders rewrites design manifests through the reviewed migration', async () => scratch(async root => {
+  await saveProject(root);
+  await put(root, 'prototypes/project/design-brief.md', '# Brief\n\n## Problem\n\nSlow triage.\n');
+  await apply(root, { package: 'prototypes/project' });
+  const path = `${folder}/design.manifest.json`, before = JSON.parse(await read(root, path));
+  const migration = await settingsMigrationPlan(root, { schemaVersion: 1, paths: { project: 'model/project.json', prototypes: 'packages/project' } });
+  assert.equal(migration.plan.changes.find(change => change.path === path).status, 'update');
+  await put(root, path, JSON.stringify(before, null, 2) + ' \n');
+  await assert.rejects(() => applyPrepared(migration, migration.planHash), { code: 'MAKER_STALE' });
+  await put(root, path, JSON.stringify(before, null, 2) + '\n');
+  await applyPrepared(migration, migration.planHash);
+  const after = JSON.parse(await read(root, path));
+  assert.deepEqual([after.source.path, after.brief.path, after.managed], ['model/project.json', 'packages/project/design-brief.md', before.managed]);
+  assert.deepEqual((await designFolderStatus(root, frameworkRoot)).folders.map(item => [item.state, item.brief.missing]), [['current', false]]);
+  const sync = await designFolderPlan({ root, frameworkRoot, name: 'issue-desk', mode: 'sync' });
+  assert.deepEqual(sync.plan.changes.filter(change => change.status !== 'unchanged').map(change => change.path), [`${folder}/README.md`, path]);
+  await applyPrepared(sync, sync.planHash);
+  assert.match(await read(root, `${folder}/README.md`), /Source of this folder: `model\/project\.json`/);
 }));
 function scriptedAnswers(answers) {
   let cursor = 0; const transcript = [];

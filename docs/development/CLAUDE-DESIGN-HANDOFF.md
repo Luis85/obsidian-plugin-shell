@@ -100,9 +100,14 @@ itself is described: an Obsidian plugin with a Vue 3 and Nuxt UI frontend.
 
 The design root defaults to `docs/design`. Set `paths.design` in `configs/user-settings.json` to change
 it. The key is optional so that existing settings and saved setup state keep their exact path set.
-The root must not overlap another configured path (`DESIGN_ROOT_OVERLAP` or `SETTINGS_OVERLAP`). Moving
-an existing root is a reviewed file migration (`node bin/app settings migrate`) like the other folders;
-afterwards the folders report `stale` until synced, because their instructions name the folder path.
+The root, configured or default, must not overlap another configured path; settings validation fails
+with `SETTINGS_OVERLAP`. Moving an existing root is a reviewed file migration
+(`node bin/app settings migrate`) like the other folders. It moves only the prepared design folders
+(those with a `design.manifest.json`); shared files in the root, such as the token inventory in
+`docs/design`, stay where they are. Afterwards the folders report `stale` until synced, because their
+instructions name the folder path. A migration that moves the project model or a prepared package also
+rewrites the `source.path` and `brief.path` recorded in each design manifest, hash-guarded in the same
+reviewed plan; sync afterwards to refresh the source path named in the folder's `README.md`.
 
 ## Boundaries
 

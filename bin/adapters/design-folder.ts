@@ -20,12 +20,10 @@ export interface DesignFolderOptions {
   /** A prepared brief file outside the root; its text is kept as notes/prototype-brief.md so sync can reread it. */
   briefFile?: string; title?: string; signal?: AbortSignal;
 }
-const overlaps = (a: string, b: string) => { a = a.toLowerCase(); b = b.toLowerCase(); return a === b || a.startsWith(b + '/') || b.startsWith(a + '/'); };
+/** Settings validation already rejects a design root, configured or default, that overlaps another configured path. */
 async function configuredRoot(root: string) {
-  const { settings } = await loadSettings(root), base = designRoot(settings.paths);
-  const others = Object.entries(settings.paths).filter(([key]) => key !== 'design').map(([, path]) => path);
-  requireSketch(!others.some(path => overlaps(path, base)), 'DESIGN_ROOT_OVERLAP', `The design root ${base} overlaps another configured path. Set paths.design in configs/user-settings.json.`);
-  return { base, project: settings.paths.project };
+  const { settings } = await loadSettings(root);
+  return { base: designRoot(settings.paths), project: settings.paths.project };
 }
 async function readManifest(root: string, folder: string): Promise<{ manifest: DesignManifest | null; beforeHash: string | null }> {
   const read = await guardedText(root, `${folder}/${designManifestFile}`);
@@ -139,4 +137,11 @@ async function folderNames(directory: string): Promise<string[]> {
     if (entry.isDirectory() && isDesignSlug(entry.name)) names.push(entry.name);
   }
   return names.sort();
+}
+/** Prepared design folders (those holding a manifest) under a design root; shared files beside them are not design folders. */
+export async function preparedDesignFolders(root: string, base: string): Promise<string[]> {
+  const names = await exists(join(root, base)) ? await folderNames(join(root, base)) : [];
+  const prepared: string[] = [];
+  for (const name of names) if (await exists(join(root, base, name, designManifestFile))) prepared.push(`${base}/${name}`);
+  return prepared;
 }
