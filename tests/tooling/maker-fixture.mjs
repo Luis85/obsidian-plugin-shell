@@ -142,7 +142,6 @@ export async function copyMakerSuite(root) {
     'scripts/events',
     'scripts/examples/plan.mjs',
     'scripts/shared',
-    'bin/adapters/makers',
     'tests/tooling/makers.checks.mjs',
     'tests/tooling/maker-fixture.mjs',
   ]) {
@@ -150,4 +149,6 @@ export async function copyMakerSuite(root) {
     await mkdir(dirname(target), { recursive: true });
     await cp(resolve(makerSourceRoot, path), target, { recursive: true });
   }
+  // A source checkout carries the whole CLI: generated locale checks run the project's own bin/app.
+  await symlink(resolve(makerSourceRoot, 'bin'), join(root, 'bin'), process.platform === 'win32' ? 'junction' : 'dir');
 }

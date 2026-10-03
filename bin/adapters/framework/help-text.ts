@@ -135,6 +135,7 @@ const specific: Record<string, OptionHelp> = {
   preference: { description: 'Preference key for setting makers.' },
   document: { description: 'Note-backed entity (requires the markdown backend).' },
   'trust-custom': { description: 'Allow a reviewed custom maker to execute local code.' },
+  check: { description: 'Read-only: compare the pending locale draft (make locale <name> --check) with the current base keys; plans and writes nothing.' },
   profile: { description: 'Execution profile.' },
   from: { description: 'Extracted replacement kit folder.' },
   'notes-file': { description: 'Release-notes Markdown file.' },

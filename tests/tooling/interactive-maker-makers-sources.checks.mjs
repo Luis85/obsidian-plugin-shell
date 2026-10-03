@@ -119,4 +119,9 @@ test('style and custom recipes refuse foreign views and malformed local registri
   const custom = createMakerContext(root);
   await runCustom(custom, { ...request, maker: 'notes' });
   assert.deepEqual((await custom.finish()).changes.map(change => [change.path, change.status]), [['notes/x.md', 'create'], ['scripts/makers/custom/registry.mjs', 'unchanged']]);
+  // The runner injects only declared outputs plus the bound primitive: no root, edit or finish reaches recipe code.
+  await writeFile(join(root, 'scripts/makers/custom/registry.mjs'), "export const customMakers = [{ name: 'keys', version: 1, description: 'Context keys', async plan(context) { await context.add('keys.txt', Object.keys(context).sort().join(',') + (Object.isFrozen(context) ? ' frozen' : '') + '\\n'); } }];\n");
+  const keys = createMakerContext(root);
+  await runCustom(keys, { ...request, maker: 'keys' });
+  assert.equal((await keys.finish()).changes.find(change => change.path === 'keys.txt')?.content, 'action,add,editArray,read,tests frozen\n');
 });

@@ -2929,6 +2929,7 @@ node bin/app make <recipe> <name> [options] | make list | make describe <recipe>
 | --document | flag | Note-backed entity (requires the markdown backend). | See command semantics |
 | --list | flag | List the available entries instead of creating one. | See command semantics |
 | --trust-custom | flag | Allow a reviewed custom maker to execute local code. | See command semantics |
+| --check | flag | Read-only: compare the pending locale draft (make locale &lt;name&gt; --check) with the current base keys; plans and writes nothing. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |

@@ -5568,6 +5568,11 @@
           "description": "Allow a reviewed custom maker to execute local code."
         },
         {
+          "name": "check",
+          "kind": "flag",
+          "description": "Read-only: compare the pending locale draft (make locale <name> --check) with the current base keys; plans and writes nothing."
+        },
+        {
           "name": "dry-run",
           "kind": "flag",
           "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
