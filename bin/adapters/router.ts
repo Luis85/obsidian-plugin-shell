@@ -10,11 +10,11 @@ const directoryNewFlags = new Set([
   '--yes', '--dry-run', '--plan-out', '--timeout', '--values', '--answers', '--run', '--trust-processes',
 ]);
 const makerCommands = new Set([
-  'studio', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm',
+  'studio', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design',
   '--ui', '--no-color',
 ]);
 const makerHelpCommands = new Set([
-  'sketch', 'prototype', 'studio', 'settings', 'project-setup', 'first-run', 'brainstorm',
+  'sketch', 'prototype', 'studio', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design',
 ]);
 
 function normalizeHelp(argv: readonly string[]): string[] {

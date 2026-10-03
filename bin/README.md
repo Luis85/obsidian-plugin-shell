@@ -35,6 +35,22 @@ agreement and file-write approval remain separate. See the
 [project starter and agent guide](PROJECT-STARTERS.md) for the shipped starters,
 noninteractive requests, generated artifacts and build-qualification boundaries.
 
+## Prepare a Claude Design folder
+
+After the prototype maker or `new` writes a prototype, the app asks whether to create a design folder
+at `docs/design/<prototype>` (configurable as `paths.design`). It is a self-contained folder for Claude
+Design: brief, screens, components, design tokens and agent instructions, plus `prototypes/`,
+`assets/`, `notes/` and an implementation map that sync never touches. Agents use the same reviewed
+plan/apply protocol:
+
+```sh
+node bin/app design status --json
+node bin/app design prepare --name issue-desk --json   # then repeat with --apply <planHash>
+node bin/app design sync --name issue-desk --json      # after the project model changed
+```
+
+See [Claude Design folders](../docs/development/CLAUDE-DESIGN-HANDOFF.md).
+
 ## Make a page
 
 ```sh

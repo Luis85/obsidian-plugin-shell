@@ -1,0 +1,47 @@
+# {{title}}: Claude Design folder
+
+This folder prepares the **{{title}}** prototype of **{{projectName}}** for Claude Design and hands the
+result back to Claude Code. It holds only what a design agent needs: the brief, the screens and
+components of the project model, the platform's design tokens and agent instructions. Import it on
+its own; it does not need the rest of the repository.
+
+## Design with Claude Design
+
+1. Pull the latest project so this folder matches the current project model.
+2. In Claude Design, start a project and import this folder (`{{folder}}`): attach it as a local
+   folder, or link the repository and select this folder.
+3. Ask Claude Design to read `AGENTS.md` and build an interactive prototype for one screen or flow
+   from `context/screens.md`.
+4. Save the prototypes into `prototypes/` (exported HTML) and images into `assets/`, update
+   `handoff/implementation-map.md`, then commit.
+
+## Implement with Claude Code
+
+Ask Claude Code to implement the `ready` rows of `handoff/implementation-map.md` following
+`handoff/HANDOFF.md`. The prototypes are references, not source code: the implementation uses the
+project's own components, tokens and gates.
+
+## Keep it in sync
+
+```sh
+{{statusCommand}}
+{{syncCommand}}
+```
+
+`status` reports whether the project model changed since this folder was prepared and how many
+prototypes it holds. `sync` regenerates the generated files from the current model. It never touches
+`prototypes/`, `assets/`, `notes/` or `handoff/implementation-map.md`, and it refuses to overwrite a
+generated file that was edited by hand.
+
+## Layout
+
+| Path | Contents |
+| --- | --- |
+| `AGENTS.md`, `CLAUDE.md` | Instructions for the design agent and for Claude Code. |
+| `context/` | Generated brief, screens, components, design tokens and the project model snapshot. |
+| `handoff/HANDOFF.md` | Generated checklist for implementing a prototype in the frontend. |
+| `handoff/implementation-map.md` | Screen-by-screen status, shared by designers and Claude Code. |
+| `prototypes/`, `assets/`, `notes/` | Design work. Never regenerated. |
+| `design.manifest.json` | Which files are generated, their hashes and the project source they came from. |
+
+Source of this folder: `{{sourcePath}}`.

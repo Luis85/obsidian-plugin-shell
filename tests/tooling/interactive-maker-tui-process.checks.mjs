@@ -73,6 +73,8 @@ test('standalone prototype completion remains visible after leaving the alternat
       ['Components for the first page', '\r'], ['Review your prototype brief', '\r'],
       ['Do you agree to this complete brief', '\x1b[B\r'], ['Package output folder', '\r'],
       ['Review before writing', '\r'], ['Apply this reviewed plan?', '\x1b[B\r'],
+      // No is the default for the optional Claude Design folder offered after the package is written.
+      ['Create a Claude Design folder', '\r'],
     ];
     let position = 0;
     const f = streams((screen, input) => {

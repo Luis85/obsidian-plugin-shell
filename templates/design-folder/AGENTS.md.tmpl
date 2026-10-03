@@ -1,0 +1,63 @@
+# {{title}}: design agent instructions
+
+This folder is a self-contained design workspace for the **{{title}}** prototype of
+**{{projectName}}**. It is meant to be imported on its own into Claude Design, or opened by any
+design agent. You do not need the rest of the repository; everything the design depends on is here.
+
+Your job is to turn the agreed structure in `context/` into interactive prototypes that the
+project's coding agent can implement without guessing.
+
+## Read first
+
+1. `context/brief.md`: the problem, audience, outcome and agreed scope.
+2. `context/screens.md`: every screen with its stable ID, route, components and interactions.
+3. `context/components.md`: the shared component inventory and where each component is used.
+4. `context/design-tokens.md`: the platform, its visual tokens and the constraints of the frontend.
+5. `context/project.json`: the canonical design model. It is the machine source of the files above.
+   Read it; never edit it.
+
+## Platform
+
+{{platform}}
+
+{{frontend}}
+
+## What you may change
+
+| Path | Owner | Rule |
+| --- | --- | --- |
+| `prototypes/` | You | Interactive prototypes, one self-contained HTML file per screen or flow. |
+| `assets/` | You | Exported images, screenshots and illustrations the prototypes or notes refer to. |
+| `notes/decisions.md` | You | Design decisions, open questions and rejected alternatives. |
+| `handoff/implementation-map.md` | You and Claude Code | One row per screen: prototype files, status and acceptance notes. |
+| Everything else | Generated | Do not edit. `{{syncCommand}}` regenerates it from the project model and refuses to overwrite hand edits. |
+
+## How to design here
+
+- Start from the screens in `context/screens.md`. Keep their IDs and titles. Propose a new screen,
+  component or interaction in `notes/decisions.md` and add a `proposed` row to the implementation
+  map; do not silently add structure the project model does not have.
+- Use the token names in `context/design-tokens.md` for colour, spacing, radius and typography, as
+  CSS custom properties with a neutral fallback, for example `var(--text-normal, #222)`. Do not
+  introduce a second palette or hard-coded brand colours.
+- Every screen works in the light and the dark theme, at narrow width, and from the keyboard with a
+  visible focus indicator. Text has sufficient contrast in both themes.
+- Name prototype files `<screen-id>--<variant>.html`, for example `node-1--compact.html`. Keep each
+  file self-contained: inline CSS and JavaScript, sample data only, no remote fonts, scripts, images
+  or network requests.
+- Put `data-design-id="<id>"` on the element that represents a screen, component or interaction from
+  `context/screens.md`, so the implementation can be mapped back without guessing.
+- Show empty, loading, error and populated states for every screen that lists or edits data.
+- Describe behaviour with sample content. Do not invent backend behaviour, storage or permissions.
+
+## Hand off to Claude Code
+
+When a prototype is ready to build:
+
+1. Set its row in `handoff/implementation-map.md` to `ready`, list its prototype files and write the
+   acceptance notes a reviewer can check.
+2. Save the files into this folder and commit them, or hand the folder back to the developer.
+3. The developer asks Claude Code: *"Implement the ready rows of
+   `{{folder}}/handoff/implementation-map.md`, following `{{folder}}/handoff/HANDOFF.md`."*
+
+Claude Code follows `handoff/HANDOFF.md` and the repository's own `AGENTS.md`.

@@ -4,16 +4,19 @@ import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { hash } from './framework/files.ts';
 import { object, list } from '../domain/data.ts';
 import { documentText, openDocument } from '../domain/document.ts';
-import { readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
+import { designRoot, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { prepared } from './storage.ts';
 import { guardedText, jsonText, loadSettings } from './user-settings.ts';
 import { migrationFiles, type MigrationFile } from './migration-files.ts';
-const folderPaths = new Set(['prds', 'app', 'prototypes']);
+const folderPaths = new Set(['prds', 'app', 'prototypes', 'design']);
 interface Move { key: string; from: string; to: string; folder: boolean }
+/** The optional design root compares by its effective value, so configuring it for the first time moves the default folder. */
 function movesFor(before: UserSettings, after: UserSettings): Move[] {
-  return Object.entries(before.paths).flatMap(([key, from]) => {
-    const to = after.paths[key as keyof UserSettings['paths']];
+  const effective = (settings: UserSettings) => ({ ...settings.paths, design: designRoot(settings.paths) });
+  const target = effective(after);
+  return Object.entries(effective(before)).flatMap(([key, from]) => {
+    const to = target[key as keyof UserSettings['paths']]!;
     return from === to ? [] : [{ key, from, to, folder: folderPaths.has(key) }];
   });
 }

@@ -3,13 +3,15 @@ import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scrip
 import { firstRunDefaults, firstRunPreferenceSchema, readFirstRunPreferences, type FirstRunPreferences } from './first-run.ts';
 import { object, keys, text } from './data.ts';
 import { requireSketch } from './errors.ts';
+import { defaultDesignRoot } from './design-folder.ts';
 export const settingsPath = 'configs/user-settings.json';
 export const setupStatePath = 'configs/project-setup.json';
 export interface UserSettings {
   schemaVersion: 1;
   /** The documentation feature owns semantic validation of this shared namespace. */
   documentation?: Record<string, unknown>;
-  paths: { prds: string; project: string; prototypes: string; app: string; brief: string; firstRunReport: string };
+  /** design is optional so existing settings and saved setup state keep their exact path set; designRoot resolves it. */
+  paths: { prds: string; project: string; prototypes: string; app: string; brief: string; firstRunReport: string; design?: string };
   preferences: { author: string; ui: 'auto' | 'tui' | 'plain'; vaultConfigDirectory: string; scanRecursive: boolean; firstRun: FirstRunPreferences };
 }
 export const defaultSettings: UserSettings = {
@@ -17,6 +19,8 @@ export const defaultSettings: UserSettings = {
   paths: { prds: 'docs/prds', project: 'design/project.json', prototypes: 'prototypes/project', app: 'apps/product', brief: 'docs/project-brief.md', firstRunReport: 'reports/first-run.json' },
   preferences: { author: 'Your name', ui: 'auto', vaultConfigDirectory: defaultVaultConfigDirectory, scanRecursive: true, firstRun: firstRunDefaults },
 };
+/** The folder that holds one Claude Design folder per prototype. */
+export function designRoot(paths: UserSettings['paths']): string { return paths.design ?? defaultDesignRoot; }
 /** Portable, vault-relative paths only. Host configuration and Git are never output locations. */
 export function projectPath(value: unknown): string {
   const path = text(value, 'relative path', 240);
@@ -32,7 +36,7 @@ function validateLocations(paths: UserSettings['paths'], hostDirectory: string):
     requireSketch(!overlap(locations[i]!, other), 'SETTINGS_OVERLAP', 'Input, output and configuration paths must not overlap.');
 }
 function readPaths(input: unknown, baseline: UserSettings['paths'], hostDirectory: string): UserSettings['paths'] {
-  const raw = object(input); keys(raw, Object.keys(defaultSettings.paths));
+  const raw = object(input); keys(raw, [...Object.keys(defaultSettings.paths), 'design']);
   const merged = { ...baseline, ...raw };
   const paths = Object.fromEntries(Object.entries(merged).map(([key, value]) => [key, projectPath(value)])) as UserSettings['paths'];
   for (const [key, extension] of [['project', '.json'], ['brief', '.md'], ['firstRunReport', '.json']] as const)
@@ -85,7 +89,7 @@ export const settingsSchema = {
       exclude: { type: 'array', maxItems: 32, items: { type: 'string', maxLength: 240 } },
       preserveAuthoredContent: { const: true }, conflictPolicy: { const: 'review' }, deleteMissing: { const: false },
     } }, paths: { type: 'object', additionalProperties: false,
-      properties: Object.fromEntries(Object.keys(defaultSettings.paths).map(name => [name, { type: 'string', minLength: 1, maxLength: 240 }])) },
+      properties: Object.fromEntries([...Object.keys(defaultSettings.paths), 'design'].map(name => [name, { type: 'string', minLength: 1, maxLength: 240 }])) },
     preferences: { type: 'object', additionalProperties: false, properties: {
       vaultConfigDirectory: { type: 'string', minLength: 1, maxLength: 100 },
       author: { type: 'string', minLength: 1, maxLength: 80 }, ui: { enum: ['auto', 'tui', 'plain'] }, scanRecursive: { type: 'boolean' }, firstRun: firstRunPreferenceSchema,

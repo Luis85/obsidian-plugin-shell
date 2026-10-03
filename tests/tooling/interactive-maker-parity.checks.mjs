@@ -20,7 +20,8 @@ test('complete interactive and agent sessions produce byte-identical sketch and 
     assert.equal(await readFile(join(human, 'design/project.json'), 'utf8'), await readFile(join(agent, 'design/project.json'), 'utf8'));
     const guide = await loadGuide();
     const answers = guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => field.kind === 'confirm' ? 'y' : '');
-    const wizard = scripted([...answers, 'prepared', 'y']);
+    // The trailing 'n' declines the optional Claude Design folder; the prepared package stays byte-identical.
+    const wizard = scripted([...answers, 'prepared', 'y', 'n']);
     await prototypeWizard(wizard, { root: human, frameworkRoot, project: 'design/project.json' }); wizard.done();
     const answerText = await readFile(join(human, 'prepared/prototype-answers.json'), 'utf8');
     const proto = parseArguments(['prototype', '--input', '-', '--out', 'prepared', '--json']);
