@@ -3,7 +3,7 @@
   "description": "Data behind `node bin/app check --plan` and the suite selection of `check --fast`. It joins changed paths to gates. tests/suites.json supplies per-suite test-file includes and workflow names, .github/workflows/*.yml supplies `paths:` filters, and this file adds what those cannot say: which source files a suite protects, the change-type rules, the gate commands and the docs-only globs. Durations come from docs/testing/TEST-SUITES.md (Measured column). Glob syntax is the suites manifest syntax (*, **, ?, {a,b}).",
   "docsGlobs": ["docs/**", "**/*.md", "LICENSE", "THIRD-PARTY-NOTICES*"],
   "suiteSources": {
-    "maker": ["bin/adapters/makers/**", "scripts/makers/**", "bin/adapters/framework/check*.ts", "bin/adapters/framework/gate-*.ts", "configs/quality/gate-rules.json"],
+    "maker": ["bin/adapters/makers/**", "scripts/makers/**", "bin/adapters/framework/check*.ts", "bin/adapters/framework/gate-*.ts", "bin/adapters/framework/adopt-*.ts", "bin/domain/adoption/**", "bin/application/adoption/**", "bin/presentation/terminal/adopt-view.ts", "configs/quality/gate-rules.json"],
     "makers": ["bin/adapters/makers/**", "scripts/makers/**", "scripts/events/**", "scripts/examples/**"],
     "cli": ["bin/app", "bin/app.ts", "bin/adapters/framework/**", "bin/adapters/framework-cli.ts", "bin/presentation/terminal/**", "scripts/framework/**", "scripts/operations/**", "scripts/contracts/**", "configs/quality/gate-rules.json"],
     "generator": ["templates/**", "configs/templates/**", "bin/compiler/**", "scripts/compiler/**", "scripts/starters/**", "configs/starters/**", "scripts/shared/file-plan*"],

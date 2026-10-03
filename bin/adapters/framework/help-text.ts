@@ -34,6 +34,7 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'ui', title: 'Generated UI progress and evidence', commands: ['ui status', 'ui gallery'] },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
+  { id: 'adopt', title: 'Adopt an existing project', commands: ['adopt analyze', 'adopt plan', 'adopt skill'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'ci', 'make', 'styles inspect', 'styles export'] },
   { id: 'documentation', title: 'Application documentation', commands: ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover'] },
   { id: 'obsidian-cli', title: 'Optional Obsidian CLI', commands: ['obsidian status', 'obsidian files', 'obsidian read', 'obsidian prepare'] },
@@ -125,6 +126,7 @@ const specific: Record<string, OptionHelp> = {
   'inside-vault': { description: `Allow a target inside a folder that contains ${defaultVaultConfigDirectory}/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder.` },
   'no-git': { description: 'Do not run git init and the initial commit in a new project folder (skipped automatically inside an existing git work tree or without git).' },
   target: { description: 'Output folder relative to the project root.' },
+  report: { description: 'Adoption report JSON (workbench-adoption-report/v1) to render instead of analyzing the target again.' },
   extension: { description: 'Custom file suffix without a dot (lowercase, 1–16 letters/digits). Core Obsidian extensions are refused.' },
   extensions: { description: 'Comma-separated lowercase, dotless file-menu filters, for example md,txt.' },
   feature: { description: 'Existing feature that receives the generated piece.' },
@@ -154,6 +156,9 @@ const specific: Record<string, OptionHelp> = {
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when configs/testing/vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
+  'adopt analyze': 'node bin/app adopt analyze [--target <dir>] [--out <report.json>] [--replace] [--json]',
+  'adopt plan': 'node bin/app adopt plan [--target <dir>] [--report <report.json>] [--out <plan.md>] [--replace] [--yes | --apply <sha256>] [--json]',
+  'adopt skill': 'node bin/app adopt skill [--target <dir>] [--yes | --apply <sha256>] [--json]',
   'prototypes compare': 'node bin/app prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]',
   'prototypes prototype-details': 'node bin/app prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]',
   'prototypes version-details': 'node bin/app prototypes version-details <prototype> --version <version> --label <label> [options]',
@@ -171,6 +176,9 @@ const usage: Record<string, string> = {
   make: 'node bin/app make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'adopt analyze': ['node bin/app adopt analyze --target ../legacy-app', 'node bin/app adopt analyze --target ../legacy-app --json --out ../legacy-report.json'],
+  'adopt plan': ['node bin/app adopt plan --target ../legacy-app', 'node bin/app adopt plan --target ../legacy-app --apply <sha256>', 'node bin/app adopt plan --report ../legacy-report.json --target ../legacy-app --dry-run'],
+  'adopt skill': ['node bin/app adopt skill --target ../legacy-app --dry-run', 'node bin/app adopt skill --target ../legacy-app --yes'],
   'templates list': ['node bin/app templates list --atomic-level organism --json', 'node bin/app templates list --for editor --json'],
   'templates search': ['node bin/app templates search table --json'],
   'templates show': ['node bin/app templates show organism.data-table --json'],
@@ -312,6 +320,10 @@ const optionOverrides: OptionOverride[] = [
   [option('ui gallery', 'target'), doc => { doc.description = 'What to capture: the served harness (this framework) or the built clickdummy.html (generated project).'; doc.values = ['harness', 'clickdummy']; doc.default = 'harness'; }],
   [option('ui gallery', 'out'), doc => { doc.description = 'Gallery folder relative to the project root; previous captures there are replaced.'; doc.default = 'reports/ui-gallery'; }],
   [option('ui gallery', 'input'), doc => { doc.description = 'Built clickdummy file relative to the project root (--target clickdummy only).'; doc.default = 'clickdummy.html'; }],
+  [(id, name) => id.startsWith('adopt ') && name === 'target', describe('Folder to analyze or adopt into. Defaults to --root, then the current directory; no shell.config.json is needed.')],
+  [option('adopt analyze', 'out'), describe('Write the report JSON here: outside the project, or inside it only as docs/workbench/*.json. A different existing file is refused without --replace.')],
+  [option('adopt plan', 'out'), doc => { doc.description = 'Markdown file for the plan, relative to the target; only an earlier adoption plan can be replaced.'; doc.default = 'docs/workbench/ADOPTION-PLAN.md'; }],
+  [(id, name) => id.startsWith('adopt ') && name === 'replace', describe('Replace an earlier report or adoption plan; never replaces an unrelated file.')],
   [option('new', 'from'), describe('Project JSON exported by the companion (instead of --starter).')],
   [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown.'; doc.default = 'docs/generated/component-library'; }],
   [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
