@@ -15,12 +15,13 @@ const readFrom = table => path => table[path] ?? null;
 const mismatch = { status: 'revision-mismatch', reason: 'browser-revision-mismatch', expectedRevision: '1243', availableRevisions: ['1194'], candidateExecutable: '/pw/chromium-1194/chrome-linux/chrome', hint: 'long' };
 /** Fake side effects that record what the hook would have done. */
 function fakes(overrides = {}) {
-  const calls = { install: [], exported: [], found: [], variables: [], provisioned: 0 };
+  const calls = { install: [], exported: [], found: [], variables: [], provisioned: 0, pinned: [], pinResult: { ok: true, text: 'npm pinned to 11.19.1' } };
   const deps = { read: readFrom(files), nodeVersion: '24.21.0', npmVersion: () => '11.19.1', home: '/h', exists: () => true, stale: () => false,
     findNode: (qualified, context) => { calls.found.push([qualified, context.home]); return null; },
     exportPath: (env, directory) => { calls.exported.push(directory); return Boolean(env.CLAUDE_ENV_FILE); },
     exportVariable: (env, name, value) => { calls.variables.push([name, value]); return Boolean(env.CLAUDE_ENV_FILE); },
     provisionNode: async () => { calls.provisioned += 1; return { ok: false, text: 'unused' }; },
+    nodeBin: '/usr/bin', cacheBin: () => '/h/.cache/workbench/node-v24.21.0-linux-x64/bin', pinNpm: (qualified, env, directory) => { calls.pinned.push(directory); return calls.pinResult; },
     install: (root, env, directory) => { calls.install.push([root, directory]); return { ok: true, text: 'restored with npm ci --ignore-scripts (3s).' }; },
     resolveBrowser: () => ({ status: 'pinned', expectedRevision: '1243' }), ...overrides };
   return { deps, calls };
@@ -252,4 +253,23 @@ test('[SESSION-START-18] hooks run project commands with the qualified Node firs
   assert.equal(qualifiedEnv(root, env, '22.22.0', () => null), env, 'nothing qualified to use');
   assert.equal(qualifiedEnv(tmpdir(), env, '22.22.0', find), env, 'no .nvmrc declared');
   assert.equal(qualifiedEnv(root, env, '22.22.0', find).PATH, `/opt/node24/bin${delimiter}/usr/bin`);
+});
+
+test('[SESSION-START-19] npm is pinned only inside the Workbench cache, only when provisioning is allowed and only when it differs', async () => {
+  const cacheBin = '/h/.cache/workbench/node-v24.21.0-linux-x64/bin';
+  const inCache = { nodeBin: cacheBin, npmVersion: () => '11.9.0' };
+  const pinned = [];
+  const pin = result => (qualified, env, directory) => { pinned.push(directory); return result; };
+  const unpinned = await status(cloud, { ...inCache, pinNpm: pin({ ok: true, text: 'npm pinned to 11.19.1' }) });
+  assert.deepEqual(pinned, [cacheBin]);
+  assert.doesNotMatch(unpinned.text, /\nnpm: /, 'a successful pin adds no noise');
+  const failed = await status(cloud, { ...inCache, pinNpm: pin({ ok: false, text: 'npm 11.9.0 kept: npm install -g npm@11.19.1 failed (exit 1)' }) });
+  assert.match(failed.text, /\nnpm: npm 11\.9\.0 kept: npm install -g npm@11\.19\.1 failed \(exit 1\)\.\n/);
+  assert.match(failed.text, /\nnpm 11\.9\.0: not the qualified|\nnpm 11\.9\.0: UNQUALIFIED/, 'the npm line still tells the truth');
+  pinned.length = 0;
+  for (const [label, env, overrides] of [['system npm', cloud, { npmVersion: () => '11.9.0' }], ['local session', {}, inCache], ['opt-out', { ...cloud, SHELL_SESSION_START_NODE: '0' }, inCache],
+    ['already pinned', cloud, { nodeBin: cacheBin, npmVersion: () => '11.19.1' }]]) {
+    await status(env, { ...overrides, pinNpm: pin({ ok: true, text: '' }) });
+    assert.deepEqual(pinned, [], label);
+  }
 });

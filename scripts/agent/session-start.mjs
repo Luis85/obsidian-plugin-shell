@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { packageRootFor, readHookInput } from './hook-io.mjs';
 import { browserLine, loadResolver } from './session-browser.mjs';
 import { dependencyLine, installDependencies, stale } from './session-install.mjs';
-import { nodeProvisionDecision, provisionNode } from './session-node.mjs';
+import { cachedNodeBin, nodeProvisionDecision, pinNpm, provisionNode } from './session-node.mjs';
 import { bundledNpm, realNodeIo } from './session-node-io.mjs';
 import { exportPath, exportVariable, findQualifiedNode, pathNpm, toolLine } from './session-toolchain.mjs';
 import { qualifiedToolchain, readText, sameVersion } from './session-version.mjs';
@@ -37,6 +37,13 @@ async function resolveNode(qualified, env, deps) {
   if (!outcome.ok) return { directory: null, line: `${hint} Provisioning failed, nothing is qualified: ${outcome.text}.` };
   return { directory: outcome.binDirectory, line: `Qualified Node ${qualified.node} provisioned at ${outcome.binDirectory} (${outcome.text}); ${pathPhrase(deps, env, outcome.binDirectory)}.` };
 }
+/** npm inside the Workbench cache is ours to pin (a download with an unpinned npm, or an earlier failed pin); any other npm is never touched. */
+function pinPrivateNpm(qualified, env, deps, directory) {
+  const ours = directory && qualified.npm && resolve(directory) === resolve(deps.cacheBin(qualified.node, env));
+  if (!ours || !nodeProvisionDecision(env).provision || sameVersion(deps.npmVersion(directory), qualified.npm)) return null;
+  const outcome = deps.pinNpm(qualified, env, directory);
+  return outcome.ok ? null : `npm: ${outcome.text}.`;
+}
 /** Build the status text. `deps` carries every side effect so tests can fake the file system, processes and environment. */
 export async function sessionStatus(root, env, deps) {
   const qualified = qualifiedToolchain(root, deps.read);
@@ -48,6 +55,8 @@ export async function sessionStatus(root, env, deps) {
     directory = resolved.directory;
     lines.push(resolved.line);
   }
+  const pinNote = pinPrivateNpm(qualified, env, deps, directory ?? (qualified.node && sameVersion(deps.nodeVersion, qualified.node) ? deps.nodeBin : null));
+  if (pinNote) lines.push(pinNote);
   lines.push(toolLine(directory ? 'npm (with the qualified Node)' : 'npm', deps.npmVersion(directory), qualified.npm, qualified.npmRange));
   const budget = (deps.remaining ?? (() => BUDGET_MS))() - 10_000;
   for (const line of [dependencyLine(root, env, directory, deps, budget), browserLine(deps.resolveBrowser, root, env, deps.exportVariable)]) if (line) lines.push(line);
@@ -56,8 +65,9 @@ export async function sessionStatus(root, env, deps) {
 async function realDeps(root, deadline = Date.now() + BUDGET_MS) {
   const home = homedir();
   const remaining = () => deadline - Date.now();
-  const provision = (qualified, env) => provisionNode({ version: qualified.node, npm: qualified.npm, env, home, platform: process.platform, arch: process.arch, remaining, token: `${process.pid}-${Date.now()}` }, realNodeIo({ env }));
-  return { read: readText, nodeVersion: process.versions.node, npmVersion: directory => directory ? bundledNpm(directory) : bundledNpm(dirname(process.execPath)) ?? pathNpm(), home, exists: existsSync, stale,
+  const provision = (qualified, env) => provisionNode({ version: qualified.node, npm: qualified.npm, env, home, platform: process.platform, arch: process.arch, distBase: env.SHELL_NODE_DIST || undefined, remaining, token: `${process.pid}-${Date.now()}` }, realNodeIo({ env }));
+  const pin = (qualified, env, directory) => pinNpm(directory, dirname(directory), { npm: qualified.npm, env, remaining }, realNodeIo({ env }));
+  return { read: readText, nodeVersion: process.versions.node, nodeBin: dirname(process.execPath), cacheBin: (version, env) => cachedNodeBin(version, { env, home }) ?? '', pinNpm: pin, npmVersion: directory => directory ? bundledNpm(directory) : bundledNpm(dirname(process.execPath)) ?? pathNpm(), home, exists: existsSync, stale,
     findNode: findQualifiedNode, exportPath, exportVariable, install: installDependencies, provisionNode: provision, remaining,
     resolveBrowser: await loadResolver(resolve(dirname(fileURLToPath(import.meta.url)), '../..')) };
 }

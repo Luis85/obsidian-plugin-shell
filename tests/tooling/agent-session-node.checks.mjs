@@ -1,15 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { cacheDirectory, cachedNodeBin, nodeArchive, nodeProvisionDecision, parseShasums, pinNpm, provisionNode } from '../../scripts/agent/session-node.mjs';
 import { realNodeIo } from '../../scripts/agent/session-node-io.mjs';
+import { VERSION, localNodeDist, noOfficialBuild } from './local-node-dist-fixture.mjs';
 
-const VERSION = '24.21.0';
 const FILE = `node-v${VERSION}-linux-x64.tar.gz`;
 const GOOD = 'a'.repeat(64);
 const BASE = { version: VERSION, npm: '11.19.1', env: { PATH: '/usr/bin', XDG_CACHE_HOME: '/cache' }, home: '/h', platform: 'linux', arch: 'x64', remaining: () => 500_000, token: 't1' };
@@ -128,65 +126,31 @@ test('[SESSION-NODE-06] npm pinning keeps the bundled npm when it matches and re
   assert.deepEqual([kept.ok, kept.npmPinned], [true, false]);
 });
 
-/** The "nodejs.org" runs in its own process: the code under test blocks its event loop with spawnSync (curl), which would starve an in-process server. */
-const SERVER = `import { createServer } from 'node:http'; import { readFileSync } from 'node:fs';
-const [root, sums, file] = process.argv.slice(1);
-createServer((request, response) => {
-  if (request.url.endsWith('SHASUMS256.txt')) return response.end(sums);
-  if (request.url.endsWith(file)) return response.end(readFileSync(root + '/' + file));
-  response.statusCode = 404; response.end('missing');
-}).listen(0, '127.0.0.1', function () { console.log(this.address().port); });`;
-async function serveDirectory(t, root, sums) {
-  const archive = nodeArchive(VERSION, process.platform, process.arch);
-  const child = spawn(process.execPath, ['--input-type=module', '-e', SERVER, root, sums, archive.file], { stdio: ['ignore', 'pipe', 'inherit'] });
-  t.after(() => child.kill());
-  return new Promise((resolve, reject) => { child.once('error', reject); child.stdout.once('data', chunk => resolve(Number(String(chunk).trim()))); });
-}
-const posixOnly = process.platform === 'win32' || !['x64', 'arm64', 'arm'].includes(process.arch) ? 'POSIX hosts with an official Node architecture only' : false;
-/** A local "nodejs.org": SHASUMS256.txt and one tarball holding a fake node and npm that report the requested version. */
-async function localDist(t, { corrupt = false } = {}) {
-  const root = await mkdtemp(join(tmpdir(), 'session node ü-'));
-  t.after(() => rm(root, { recursive: true, force: true }));
-  const archive = nodeArchive(VERSION, process.platform, process.arch);
-  const tree = join(root, 'stage', archive.name);
-  await mkdir(join(tree, 'bin'), { recursive: true }); await mkdir(join(tree, 'lib/node_modules/npm'), { recursive: true });
-  await writeFile(join(tree, 'bin/node'), `#!/bin/sh\necho v${VERSION}\n`); await chmod(join(tree, 'bin/node'), 0o755);
-  await writeFile(join(tree, 'lib/node_modules/npm/package.json'), '{"version":"10.0.0"}');
-  await writeFile(join(tree, 'bin/npm'), `#!/bin/sh\n[ "$npm_config_prefix" = "$(dirname "$(dirname "$0")")" ] || exit 9\nprintf '{"version":"%s"}' "\${3#npm@}" > "$npm_config_prefix/lib/node_modules/npm/package.json"\n`);
-  await chmod(join(tree, 'bin/npm'), 0o755);
-  assert.equal(spawnSync('tar', ['-czf', join(root, archive.file), '-C', join(root, 'stage'), archive.name]).status, 0);
-  const bytes = await readFile(join(root, archive.file));
-  const sums = `${createHash('sha256').update(corrupt ? 'something else' : bytes).digest('hex')}  ${archive.file}\n`;
-  const port = await serveDirectory(t, root, sums);
-  const env = { ...process.env, XDG_CACHE_HOME: join(root, 'cache'), NO_PROXY: '127.0.0.1', no_proxy: '127.0.0.1' };
-  delete env.npm_execpath;
-  return { root, env, request: { ...BASE, platform: process.platform, arch: process.arch, env, home: root, distBase: `http://127.0.0.1:${port}` } };
-}
+const hostRequest = dist => ({ ...BASE, platform: process.platform, arch: process.arch, env: dist.env, home: dist.root, distBase: dist.distUrl });
 
-test('[SESSION-NODE-07] the real io downloads through curl, verifies, extracts and pins npm in the cache (local server, no internet)', { skip: posixOnly }, async t => {
-  const dist = await localDist(t);
-  const result = await provisionNode(dist.request, realNodeIo({ env: dist.env }));
+test('[SESSION-NODE-07] the real io downloads through curl, verifies, extracts and pins npm in the cache (local server, no internet)', { skip: noOfficialBuild }, async t => {
+  const dist = await localNodeDist(t);
+  const result = await provisionNode(hostRequest(dist), realNodeIo({ env: dist.env }));
   assert.equal(result.ok, true, result.text);
   assert.equal(result.npmPinned, true, result.text);
-  const prefix = join(dist.root, 'cache/workbench', nodeArchive(VERSION, process.platform, process.arch).name);
+  const prefix = join(dist.cache, dist.archive.name);
   assert.equal(result.binDirectory, join(prefix, 'bin'));
   assert.equal(JSON.parse(await readFile(join(prefix, 'lib/node_modules/npm/package.json'), 'utf8')).version, '11.19.1');
-  assert.deepEqual((await readdir(join(dist.root, 'cache/workbench'))).sort(), [nodeArchive(VERSION, process.platform, process.arch).name], 'no scratch left behind');
-  const again = await provisionNode(dist.request, realNodeIo({ env: dist.env }));
+  assert.deepEqual(await readdir(dist.cache), [dist.archive.name], 'no scratch left behind');
+  const again = await provisionNode(hostRequest(dist), realNodeIo({ env: dist.env }));
   assert.match(again.text, /reused the cached copy/);
 });
 
-test('[SESSION-NODE-08] without curl the fetch fallback works; a corrupted download is refused and leaves no Node in the cache', { skip: posixOnly }, async t => {
-  const good = await localDist(t);
+test('[SESSION-NODE-08] without curl the fetch fallback works; a corrupted download is refused and leaves no Node in the cache', { skip: noOfficialBuild }, async t => {
+  const good = await localNodeDist(t);
   const noCurl = (command, args, options) => command === 'curl' ? { status: null, error: Object.assign(new Error('spawn curl ENOENT'), { code: 'ENOENT' }) } : spawnSync(command, args, options);
-  const viaFetch = await provisionNode(good.request, realNodeIo({ env: good.env, spawn: noCurl }));
+  const viaFetch = await provisionNode(hostRequest(good), realNodeIo({ env: good.env, spawn: noCurl }));
   assert.equal(viaFetch.ok, true, viaFetch.text);
-  const bad = await localDist(t, { corrupt: true });
-  const refused = await provisionNode(bad.request, realNodeIo({ env: bad.env }));
+  const bad = await localNodeDist(t, { corrupt: true });
+  const refused = await provisionNode(hostRequest(bad), realNodeIo({ env: bad.env }));
   assert.equal(refused.ok, false);
   assert.match(refused.text, /SHA-256 mismatch .*refused, nothing was extracted/);
-  const cache = join(bad.root, 'cache/workbench');
-  assert.deepEqual(existsSync(cache) ? await readdir(cache) : [], [], 'neither the archive nor a half-extracted tree remains');
-  const unreachable = await provisionNode({ ...bad.request, distBase: 'http://127.0.0.1:9' }, realNodeIo({ env: bad.env, spawn: noCurl }));
+  assert.deepEqual(existsSync(bad.cache) ? await readdir(bad.cache) : [], [], 'neither the archive nor a half-extracted tree remains');
+  const unreachable = await provisionNode({ ...hostRequest(bad), distBase: 'http://127.0.0.1:9' }, realNodeIo({ env: bad.env, spawn: noCurl }));
   assert.match(unreachable.text, /curl not found; fetch failed/);
 });
