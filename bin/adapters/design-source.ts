@@ -48,21 +48,31 @@ export async function resolveDesignSource(request: SourceRequest): Promise<Resol
     `The managed prototype ${request.name} no longer exists. Restore it, or sync with --project <project.json>.`);
   return managed ?? projectSource(request.root, request.configuredProject);
 }
-/** The current hash of a folder's source, or null when it can no longer be resolved. Read-only. */
+/** Only an absent source maps to null; cancellation, corrupt data and other I/O failures are reported, never relabelled. */
+const absent = (error: unknown) => error instanceof Error && 'code' in error && ['DESIGN_SOURCE_MISSING', 'ENOENT', 'ENOTDIR'].includes(String(error.code));
+/** A folder's current source, or null when it no longer exists. Read-only. */
+export async function currentSource(request: SourceRequest): Promise<ResolvedDesignSource | null> {
+  try { return await resolveDesignSource(request); } catch (error) {
+    if (absent(error)) return null;
+    throw error;
+  }
+}
 export async function currentSourceHash(request: SourceRequest): Promise<{ path: string; sha256: string } | null> {
-  try {
-    const resolved = await resolveDesignSource(request);
-    return { path: resolved.source.path, sha256: resolved.source.sha256 };
-  } catch { return null; }
+  const resolved = await currentSource(request);
+  return resolved && { path: resolved.source.path, sha256: resolved.source.sha256 };
 }
 export async function readBrief(root: string, path: string | null): Promise<string | null> {
   if (path === null) return null;
   const read = await guardedText(root, path);
   return read.content;
 }
+/** A prepared brief outside the root: bounded, link-refusing and strict UTF-8, like every other input. */
+export async function readBriefFile(path: string): Promise<string> {
+  return new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(path, 4_000_000));
+}
 export async function designTarget(root: string): Promise<DesignTarget> {
   const selection = await savedProjectSelection(root);
-  return selection ? { targets: [...selection.targets], framework: selection.framework } : shellTarget;
+  return selection ? { targets: [...selection.targets], framework: selection.framework, source: 'project.config.json' } : shellTarget;
 }
 /** The reviewed Obsidian token names ship with the shell and with generated projects at the same path. */
 export async function designTokens(root: string, frameworkRoot: string): Promise<string | null> {

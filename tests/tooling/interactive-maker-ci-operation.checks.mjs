@@ -15,7 +15,8 @@ const posix = process.platform !== 'win32';
 // Execution is refused for a job whose runner OS differs from this machine, so executing fixtures target the host's runner.
 const hostRunner = { linux: 'ubuntu-latest', darwin: 'macos-latest', win32: 'windows-latest' }[process.platform] ?? 'ubuntu-latest';
 const hostOs = { linux: 'Linux', darwin: 'macOS', win32: 'Windows' }[process.platform] ?? 'Linux';
-const onHost = text => text.replaceAll('ubuntu-latest', hostRunner);
+// The Linux runner becomes the host's; on Windows the two runners swap so the matrix keeps two distinct operating systems.
+const onHost = text => text.replace(/ubuntu-latest|windows-latest/g, os => os === 'ubuntu-latest' ? hostRunner : hostRunner === 'windows-latest' ? 'ubuntu-latest' : os);
 const pwshAvailable = spawnSync('pwsh', ['--version'], { encoding: 'utf8' }).status === 0;
 const created = [];
 after(() => Promise.all(created.map(dir => rm(dir, { recursive: true, force: true }))));

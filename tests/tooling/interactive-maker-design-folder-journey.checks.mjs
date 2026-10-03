@@ -108,7 +108,8 @@ test('a terminal target gets command-journey guidance and no host tokens', async
   const document = runOperations(newDocument('Ops tool'), [{ op: 'page.add', title: 'Status' }]).document;
   document.design.nodes[0].acceptance = { states: ['default', 'empty'], minWidth: 320, notes: 'Keep  output short.' };
   const { managed } = renderDesignFolder({ name: 'ops-tool', title: 'Ops tool', folder: 'docs/design/ops-tool', sourcePath: 'design/project.json', document,
-    brief: '# Brief\n\n## Problem\n\nSlow checks.\n', target: { targets: ['cli'], framework: 'none' }, tokens: '{"groups":[{"id":"colors","names":["--text-normal"]}]}', templates: await designTemplates() });
+    brief: '# Brief\n\n## Problem\n\nSlow checks.\n', target: { targets: ['cli'], framework: 'none', source: 'project.config.json' }, tokens: '{"groups":[{"id":"colors","names":["--text-normal"]}]}', templates: await designTemplates(),
+    facts: { sources: [], fingerprint: 'f'.repeat(64), codebase: 'src', tests: 'tests', packageJson: null, layout: [], components: [], libraryUsage: [], tokens: null, origins: new Map(), trace: null, limits: null, docs: [], placement: [] } });
   const files = new Map(managed.map(entry => [entry.path, entry.content]));
   assert.ok(!files.has('context/obsidian-tokens.json'));
   assert.match(files.get('context/design-tokens.md'), /no host token set/);
@@ -117,4 +118,8 @@ test('a terminal target gets command-journey guidance and no host tokens', async
   assert.match(files.get('context/brief.md'), /Target: Terminal application\./);
   assert.match(files.get('context/brief.md'), /^### Problem$/m);
   assert.match(files.get('context/screens.md'), /- Acceptance: states default, empty; themes light, dark; minimum width 320px; Keep output short\./);
+  const guide = files.get('ENGINEERING_HANDOFF_GUIDE.md');
+  assert.match(guide, /Target: Terminal application, frontend `none` \(source: project\.config\.json\)/);
+  assert.match(guide, /5\. Show the success, empty and failure output of every command, and its `--json` form\./);
+  assert.match(guide, /6\. Mark repeated regions as named components, so each becomes one small, reusable implementation file\./);
 });

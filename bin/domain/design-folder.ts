@@ -1,6 +1,6 @@
 /** A per-prototype Claude Design workspace: generated context plus design-owned areas that sync never touches. */
 import { object, keys, text, list } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch, slug } from './errors.ts';
 import { resolveSurfaceAcceptance, validateSurfaceAcceptance } from '../../scripts/companion/sitemap/acceptance.ts';
 export const designManifestFile = 'design.manifest.json';
 export const defaultDesignRoot = 'docs/design';
@@ -17,13 +17,23 @@ export interface DesignManifest {
   kind: 'workbench-design-folder'; schemaVersion: 1; name: string; title: string; folder: string;
   project: { id: string; name: string }; source: DesignSource; brief: DesignBrief | null;
   targets: string[]; framework: string; managed: DesignFile[]; designerOwned: string[];
+  /** Fingerprint of the project files ENGINEERING_HANDOFF_GUIDE.md was generated from; null in folders prepared before the guide existed. */
+  facts: string | null;
 }
+/** Folders are named after prototypes, so names, version and variant IDs share the prototype slug rule and its 48-character limit. */
+const designNameLimit = 48;
 const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9]|constructor|prototype)$/;
+export const isDesignSlug = (value: unknown): value is string =>
+  typeof value === 'string' && value.length <= designNameLimit && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && !reserved.test(value);
 /** The folder name is a portable slug, never a path. */
 export function designFolderName(value: unknown): string {
-  requireSketch(typeof value === 'string' && /^[a-z][a-z0-9-]{0,39}$/.test(value) && !value.endsWith('-') && !value.includes('--') && !reserved.test(value),
-    'DESIGN_NAME', 'Use a lowercase prototype slug (letters, digits and single hyphens, starting with a letter, at most 40 characters).');
+  requireSketch(isDesignSlug(value), 'DESIGN_NAME',
+    `Use a lowercase prototype slug (letters, digits and single hyphens, starting with a letter, at most ${designNameLimit} characters).`);
   return value;
+}
+/** A folder name derived from a title; the prefix for a digit-leading title is applied before the length limit. */
+export function designFolderSlug(title: string): string {
+  return designFolderName(slug(title, 'prototype').slice(0, designNameLimit).replace(/-+$/, ''));
 }
 /** True when a folder-relative path belongs to the design work rather than to generation. */
 function isDesignerOwned(path: string): boolean {
@@ -34,15 +44,16 @@ const digest = (value: unknown, name: string): string => {
   requireSketch(/^[a-f0-9]{64}$/.test(sha), 'DESIGN_MANIFEST', `${name} must be a SHA-256 digest.`);
   return sha;
 };
-function relativePath(value: unknown, name: string): string {
-  const path = text(value, name, 240);
+function relativePath(value: unknown, name: string, max = 240): string {
+  const path = text(value, name, max);
   requireSketch(path === value && !path.startsWith('/') && !path.split('/').some(part => !part || part === '.' || part === '..') && !path.includes('\\'),
     'DESIGN_MANIFEST', `${name} must be a relative path without dot segments.`);
   return path;
 }
 function readSelection(value: unknown): DesignSelection {
   const raw = object(value); keys(raw, ['prototypeId', 'versionId', 'variantId']);
-  return { prototypeId: designFolderName(raw.prototypeId), versionId: text(raw.versionId, 'versionId', 40), variantId: text(raw.variantId, 'variantId', 40) };
+  const id = (item: unknown, name: string) => { requireSketch(isDesignSlug(item), 'DESIGN_MANIFEST', `${name} must be a prototype slug.`); return item; };
+  return { prototypeId: id(raw.prototypeId, 'prototypeId'), versionId: id(raw.versionId, 'versionId'), variantId: id(raw.variantId, 'variantId') };
 }
 function readSource(value: unknown): DesignSource {
   const raw = object(value); keys(raw, ['kind', 'path', 'sha256', 'selection']);
@@ -56,10 +67,10 @@ function readBrief(value: unknown): DesignBrief {
   requireSketch(raw.scope === 'root' || raw.scope === 'folder', 'DESIGN_MANIFEST', 'brief.scope must be root or folder.');
   return { scope: raw.scope, path: relativePath(raw.path, 'brief.path') };
 }
-/** Validates a saved manifest; an edited or foreign manifest is refused, never repaired silently. */
+/** Validates a saved manifest and every manifest before it is written; an edited or foreign manifest is refused, never repaired silently. */
 export function readDesignManifest(value: unknown): DesignManifest {
   const raw = object(value);
-  keys(raw, ['kind', 'schemaVersion', 'name', 'title', 'folder', 'project', 'source', 'brief', 'targets', 'framework', 'managed', 'designerOwned']);
+  keys(raw, ['kind', 'schemaVersion', 'name', 'title', 'folder', 'project', 'source', 'brief', 'targets', 'framework', 'managed', 'designerOwned', 'facts']);
   requireSketch(raw.kind === 'workbench-design-folder' && raw.schemaVersion === 1, 'DESIGN_MANIFEST', 'Unsupported design folder manifest. It has not been changed.');
   const project = object(raw.project); keys(project, ['id', 'name']);
   const managed = list(raw.managed, 'managed', 200).map(item => {
@@ -69,11 +80,11 @@ export function readDesignManifest(value: unknown): DesignManifest {
     return { path, sha256: digest(file.sha256, 'managed.sha256') };
   });
   requireSketch(new Set(managed.map(file => file.path)).size === managed.length, 'DESIGN_MANIFEST', 'Duplicate generated file entries.');
-  return { kind: 'workbench-design-folder', schemaVersion: 1, name: designFolderName(raw.name), title: text(raw.title, 'title', 120), folder: relativePath(raw.folder, 'folder'),
+  return { kind: 'workbench-design-folder', schemaVersion: 1, name: designFolderName(raw.name), title: text(raw.title, 'title', 120), folder: relativePath(raw.folder, 'folder', 241 + designNameLimit),
     project: { id: text(project.id, 'project.id', 80), name: text(project.name, 'project.name', 120) }, source: readSource(raw.source),
     brief: raw.brief === null ? null : readBrief(raw.brief),
     targets: list(raw.targets, 'targets', 8).map(item => text(item, 'target', 20)), framework: text(raw.framework, 'framework', 40),
-    managed, designerOwned: [...designerOwned] };
+    managed, designerOwned: [...designerOwned], facts: raw.facts === undefined || raw.facts === null ? null : digest(raw.facts, 'facts') };
 }
 /** One line of a surface's UX acceptance block with its documented defaults applied, or null when it declares none. */
 export function acceptanceSummary(block: unknown): string | null {

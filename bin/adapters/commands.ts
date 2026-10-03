@@ -22,7 +22,7 @@ import { boilerplatePlan } from './compiler.ts';
 import { pluginCliCommands, type WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
 import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
-import { option, type Arguments } from '../domain/command-options.ts';
+import { makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
 const makerHelp = `Shell maker — make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
@@ -89,8 +89,8 @@ Workbench plugins registered in plugins/registry.ts may add top-level CLI comman
 `;
 function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
-  const booleans = ['json', 'no-interaction', 'help', 'no-color', ...(extension?.options?.booleans ?? [])];
-  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter', 'name', 'package', ...(extension?.options?.values ?? [])];
+  const booleans = [...makerBooleanOptions, ...(extension?.options?.booleans ?? [])];
+  const values = [...makerValueOptions, ...(extension?.options?.values ?? [])];
   while (tokens.length) {
     const flag = tokens.shift()!;
     requireSketch(flag.startsWith('--'), 'MAKER_ARGUMENT', `Unexpected argument ${flag}.`);
@@ -107,10 +107,9 @@ function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<stri
 export function parseArguments(argv: string[], extensions: readonly PluginCliCommand[] = pluginCliCommands()): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  const builtins = ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design'];
-  requireSketch(extensions.every(item => !builtins.includes(item.id)), 'PLUGIN_COMMAND_CONFLICT', 'A plugin CLI command conflicts with a built-in maker command.');
+  requireSketch(extensions.every(item => !makerCommandIds.includes(item.id)), 'PLUGIN_COMMAND_CONFLICT', 'A plugin CLI command conflicts with a built-in maker command.');
   const extension = first ? extensions.find(item => item.id === first) : undefined;
-  requireSketch(first === undefined || builtins.includes(first) || extension, 'MAKER_COMMAND', 'Use a built-in maker command or a registered plugin command.');
+  requireSketch(first === undefined || makerCommandIds.includes(first) || extension, 'MAKER_COMMAND', 'Use a built-in maker command or a registered plugin command.');
   const command = first ?? 'studio';
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
   const flags = parseFlags(tokens, extension);

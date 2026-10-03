@@ -42,7 +42,7 @@ every other maker command. There is no `--yes`.
 
 | Option | Meaning |
 | --- | --- |
-| `--name <slug>` | Folder name: a lowercase slug (letters, digits, single hyphens, at most 40 characters). |
+| `--name <slug>` | Folder name: a lowercase prototype slug (letters, digits, single hyphens, at most 48 characters, like a managed prototype ID). |
 | `--project <path>` | Use this project JSON as the source instead of a managed prototype or the folder's saved source. |
 | `--package <folder>` | A prepared prototype package; its `design-brief.md` becomes the folder's brief. |
 | `--root <folder>` | Project root, as for the other maker commands. |
@@ -73,12 +73,36 @@ The guided prototype maker passes its prepared package (`<out>/companion.project
 | `context/obsidian-tokens.json` | Generated | Plugin targets only: the reviewed token inventory from `docs/design/obsidian-tokens.json`. |
 | `context/project.json` | Generated | The exact project model snapshot. |
 | `handoff/HANDOFF.md` | Generated | Checklist for Claude Code to implement a ready prototype. |
+| `ENGINEERING_HANDOFF_GUIDE.md` | Generated | How to shape the design for the target codebase, stated only from facts read from the project's files (below). |
 | `handoff/implementation-map.md` | Design work | One row per screen: status, prototype files, acceptance notes. |
 | `prototypes/`, `assets/`, `notes/` | Design work | Prototypes, exported images, decisions. |
-| `design.manifest.json` | Generated | Source path and hash, target, folder and the hash of every generated file. |
+| `design.manifest.json` | Generated | Source path and hash, target, folder, the hash of every generated file and the engineering facts fingerprint. |
 
 The platform section follows the saved project starter (`project.config.json`). Without one, the shell
 itself is described: an Obsidian plugin with a Vue 3 and Nuxt UI frontend.
+
+## Engineering handoff guide
+
+`ENGINEERING_HANDOFF_GUIDE.md` tells the design agent how to prepare a design so it integrates with the
+target architecture and its documentation. It contains nothing that the tool did not read from the
+project root that holds the design folder; a missing source is stated as missing, never guessed.
+
+| Section | Read from |
+| --- | --- |
+| Target architecture | `project.config.json` (or the shell default), the project model's source and test folders, the design-relevant packages and exact versions in `package.json`, file counts per folder under the source root, and the conventional folders that exist (`presentation/components`, `composables`, `stores`, `features`, `ui`, `core`, `targets`, `generated`, ...). |
+| Where each screen is implemented | `design/visual-traceability.json` page definitions and `design/compiler-origins.json`, joined with the model's screen IDs. |
+| Interactions and their code hooks | `design/visual-traceability.json` interactions (verification, implementation and test files), otherwise the model's interactions. |
+| Components to build with | `*.vue` and `*.component.ts` files under the source root, and the Nuxt UI components they import or render, counted per file. |
+| Styling contract | The custom properties and their scope in `<src>/styles/tokens.css`, and whether `check:style-literals` exists. |
+| Size and quality budgets | `configs/quality/thresholds.json` code-line limits and the gate scripts declared in `package.json`. |
+| Documentation | `AGENTS.md`, `README.md` and the architecture, presentation, style and token documents that exist, under `docs/` or `docs/framework/`, with their headings. |
+| Sources | Every file read, with its SHA-256 prefix, and a fingerprint of all of them. |
+
+The fingerprint is recorded in the manifest. `status` re-reads the sources and reports `facts: changed`
+(and the folder as `stale`) when any of them changed, even when the design source did not; `sync` then
+rewrites only the guide and the manifest. Reading is bounded (2,000 scanned files, 300 component files
+read, 4 MB per file and 1 MB per component), stays inside the project root, skips `node_modules`, `dist` and `.git`, and never
+follows links. Paths from traceability files that are absolute or contain `..` are dropped.
 
 ## Sync rules
 
@@ -88,17 +112,26 @@ itself is described: an Obsidian plugin with a Vue 3 and Nuxt UI frontend.
 - Design-work files are created once, when absent, and never changed or deleted afterwards.
 - A generated file that a newer version no longer produces is reported as `retired` and left in place.
 - Applying re-checks the source hash; a project changed after review fails with `MAKER_STALE`.
-- `status` reports `current`, `stale` (the source changed, or the folder moved since it was rendered),
-  `source-missing` or `unmanaged` (a folder without a manifest), plus edited generated files, the
-  prototype files and the implementation-map status counts. It never writes.
+- A recorded brief that is gone keeps its reference: `prepare` and `sync` fail with
+  `DESIGN_BRIEF_MISSING` until it is restored or the folder is prepared again with `--package`.
+- `status` reports `current`, `stale` (the source or an engineering fact changed, or the folder moved since it was rendered),
+  `source-missing` or `unmanaged` (a folder without a manifest), plus the brief reference and whether it
+  is missing, edited generated files, the prototype files and the implementation-map status counts. Only
+  an absent source counts as `source-missing`; cancellation, corrupt project JSON and other read errors
+  are reported as errors. It never writes.
 
 ## Configuration
 
 The design root defaults to `docs/design`. Set `paths.design` in `configs/user-settings.json` to change
 it. The key is optional so that existing settings and saved setup state keep their exact path set.
-The root must not overlap another configured path (`DESIGN_ROOT_OVERLAP` or `SETTINGS_OVERLAP`). Moving
-an existing root is a reviewed file migration (`node bin/app settings migrate`) like the other folders;
-afterwards the folders report `stale` until synced, because their instructions name the folder path.
+The root, configured or default, must not overlap another configured path; settings validation fails
+with `SETTINGS_OVERLAP`. Moving an existing root is a reviewed file migration
+(`node bin/app settings migrate`) like the other folders. It moves only the prepared design folders
+(those with a `design.manifest.json`); shared files in the root, such as the token inventory in
+`docs/design`, stay where they are. Afterwards the folders report `stale` until synced, because their
+instructions name the folder path. A migration that moves the project model or a prepared package also
+rewrites the `source.path` and `brief.path` recorded in each design manifest, hash-guarded in the same
+reviewed plan; sync afterwards to refresh the source path named in the folder's `README.md`.
 
 ## Boundaries
 
@@ -108,4 +141,4 @@ afterwards the folders report `stale` until synced, because their instructions n
   project's components, tokens and gates, and screenshots stay review evidence, not baselines.
 - A prototype that adds structure (a screen, component or interaction) changes the project model first;
   the folder follows on the next sync.
-- Tests: `tests/tooling/interactive-maker-design-folder*.checks.mjs` in the `maker` suite.
+- Tests: `tests/tooling/interactive-maker-design-folder*.checks.mjs` in the `maker` suite, including the engineering guide in `interactive-maker-design-folder-engineering.checks.mjs`.
