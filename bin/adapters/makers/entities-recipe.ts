@@ -1,16 +1,20 @@
-import { templates } from '../../bin/adapters/makers/templates.ts';
-import { makerSymbol as symbol, title } from '../../bin/adapters/makers/arguments.ts';
-import { readRegistry, extendRegistry, validateRegistrySource } from '../../bin/adapters/makers/registry.ts';
-import { generatedTest } from '../../bin/adapters/makers/primitives.ts';
+import { templates } from './templates.ts';
+import { makerSymbol as symbol, title } from './arguments.ts';
+import { readRegistry, extendRegistry, validateRegistrySource } from './registry.ts';
+import { generatedTest } from './primitives.ts';
+import type { EntityInput, MakerContext } from './contracts.ts';
+import type { EntityTemplates } from './templates.ts';
 
-export async function registerEntity(context, { key, local, from }) {
+interface FeatureBinding { readonly key: string; readonly local: string; readonly from: string }
+
+export async function registerEntity(context: MakerContext, { key, local, from }: FeatureBinding): Promise<void> {
   await context.edit('src/bootstrap/features.ts', async source => {
     const registry = await readRegistry(context.root, source);
     const next = extendRegistry(registry, { key, local, from });
     await validateRegistrySource(next); return next;
   });
 }
-export async function entityRecipe(context, { owner, entity, folder, preset, backend }) {
+export async function entityRecipe(context: MakerContext, { owner, entity, folder, preset, backend }: EntityInput): Promise<EntityTemplates> {
   const generated = templates({ owner, entity, folder, preset });
   if (backend === 'markdown') {
     for (const entry of generated.entries) await context.add(entry.path, entry.content);

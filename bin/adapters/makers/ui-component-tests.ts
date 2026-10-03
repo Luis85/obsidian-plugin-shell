@@ -1,6 +1,8 @@
-import { generatedTest, localName } from '../../bin/adapters/makers/primitives.ts';
+import { generatedTest, localName } from './primitives.ts';
+import type { RecipeContext } from './contracts.ts';
+import type { PanelRepository } from './ui.ts';
 
-export async function notePanelComponentTests(context, { owner, name, repository }) {
+export async function notePanelComponentTests(context: RecipeContext, { owner, name, repository }: { owner: string; name: string; repository: PanelRepository }): Promise<void> {
   const { key, entity } = repository;
   await generatedTest(context, owner, name, 'pending-view', `// @vitest-environment happy-dom
 import { mount, flushPromises } from '@vue/test-utils';

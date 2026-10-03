@@ -13,6 +13,8 @@ export function hasSyntaxErrors(ast: TS.SourceFile): boolean {
 }
 export const variableDeclarations = (ts: Typescript, ast: TS.SourceFile): TS.VariableDeclaration[] =>
   ast.statements.filter(ts.isVariableStatement).flatMap(statement => [...statement.declarationList.declarations]);
+export const variableNamed = (ts: Typescript, ast: TS.SourceFile, name: string): TS.VariableDeclaration | undefined =>
+  variableDeclarations(ts, ast).find(item => ts.isIdentifier(item.name) && item.name.text === name);
 export interface NamedImport { readonly local: string; readonly imported: string; readonly from: string }
 /** Named (`{ a as b }`) bindings of every string-specifier import declaration, in source order. */
 export function namedImports(ts: Typescript, ast: TS.SourceFile): NamedImport[] {

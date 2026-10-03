@@ -1,11 +1,11 @@
-import { nativeRecipe } from '../../../scripts/makers/native.mjs';
+import { nativeRecipe } from './native.ts';
 import { slug, makerSymbol as symbol } from './arguments.ts';
-import { entityRecipe } from '../../../scripts/makers/entities-recipe.mjs';
+import { entityRecipe } from './entities-recipe.ts';
 import { action } from './primitives.ts';
-import { component } from '../../../scripts/makers/ui.mjs';
-import { customMaker, runCustom, styleRecipe, localeRecipe } from '../../../scripts/makers/extra-recipes.mjs';
-import { settingRecipe } from '../../../scripts/makers/setting.mjs';
-import { pluginRecipe } from '../../../scripts/makers/plugin-recipe.mjs';
+import { component } from './ui.ts';
+import { customMaker, runCustom, styleRecipe, localeRecipe } from './extra-recipes.ts';
+import { settingRecipe } from './setting.ts';
+import { pluginRecipe } from './plugin-recipe.ts';
 import type { EntityInput, MakerContext, MakerInput, OwnedInput } from './contracts.ts';
 
 type Handler = (context: MakerContext, input: MakerInput) => Promise<void>;

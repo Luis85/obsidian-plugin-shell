@@ -75,11 +75,10 @@ scripts/
   setup/
     bootstrap/                 # Node built-ins/checked-in helpers only
     steps/
-  make/
-    registry.mjs
-    makers/                    # includes entity.mjs
-    templates/                 # local versioned source templates
-    custom/
+  makers/
+    entities.mjs               # entity catalog check entry
+    recipes.json               # built-in recipe catalog data
+    custom/                    # trusted local recipes and their registry
   shared/
     file-plan.mjs
     process-runner.mjs
@@ -93,6 +92,8 @@ scripts/
   quality/                     # includes entity/catalog checks
   release/
   maintenance/
+bin/
+  adapters/makers/             # maker engine, recipes and templates (strict TypeScript)
 tests/tooling/
 ```
 

@@ -1,66 +1,61 @@
-import { makerSymbol as symbol, title } from '../../bin/adapters/makers/arguments.ts';
+import type TS from 'typescript';
+import { makerSymbol as symbol, title } from './arguments.ts';
+import { hasSyntaxErrors, loadTypescript, namedImports, parseTypescript, variableDeclarations, type NamedImport, type Typescript } from './syntax.ts';
+import type { MakerContext } from './contracts.ts';
 
-function pluginLocal(name) {
+function pluginLocal(name: string): string {
   const base = symbol(name);
   return base.charAt(0).toUpperCase() + base.slice(1) + 'Plugin';
 }
-function importBindings(ts, imports) {
-  return imports.flatMap(node => {
-    const bindings = node.importClause?.namedBindings;
-    if (!bindings || !ts.isNamedImports(bindings)) return [];
-    const from = ts.isStringLiteral(node.moduleSpecifier) ? node.moduleSpecifier.text : '';
-    return bindings.elements.map(item => ({ local: item.name.text, imported: item.propertyName?.text ?? item.name.text, from }));
-  });
+function frozenArray(ts: Typescript, init: TS.Expression): TS.ArrayLiteralExpression | undefined {
+  if (!ts.isCallExpression(init) || !ts.isPropertyAccessExpression(init.expression)) return undefined;
+  const target = init.expression; const [argument, ...rest] = init.arguments;
+  const freezes = ts.isIdentifier(target.expression) && target.expression.text === 'Object' && target.name.text === 'freeze';
+  return freezes && !rest.length && argument && ts.isArrayLiteralExpression(argument) ? argument : undefined;
 }
-function frozenArray(ts, init) {
-  const call = ts.isCallExpression(init) && ts.isPropertyAccessExpression(init.expression) ? init : undefined;
-  const target = call?.expression;
-  const freezes = target && ts.isIdentifier(target.expression) && target.expression.text === 'Object' && target.name.text === 'freeze';
-  return freezes && call.arguments.length === 1 && ts.isArrayLiteralExpression(call.arguments[0]) ? call.arguments[0] : undefined;
-}
-function registryArray(ts, parsed) {
-  let array;
-  const declarations = parsed.statements.filter(ts.isVariableStatement).flatMap(statement => statement.declarationList.declarations);
-  for (const declaration of declarations) {
+function registryArray(ts: Typescript, parsed: TS.SourceFile): TS.ArrayLiteralExpression {
+  let array: TS.ArrayLiteralExpression | undefined;
+  for (const declaration of variableDeclarations(ts, parsed)) {
     if (!ts.isIdentifier(declaration.name) || declaration.name.text !== 'pluginRegistry' || !declaration.initializer) continue;
     const init = declaration.initializer;
     array = frozenArray(ts, init) ?? (ts.isArrayLiteralExpression(init) ? init : array);
   }
-  if (!array || array.elements.some(item => !ts.isIdentifier(item))) throw new Error('PLUGIN_REGISTRY_UNSUPPORTED_SHAPE');
+  if (!array || !array.elements.every(item => ts.isIdentifier(item))) throw new Error('PLUGIN_REGISTRY_UNSUPPORTED_SHAPE');
   return array;
 }
+interface Ownership { readonly matching: number; readonly localImports: readonly NamedImport[]; readonly registered: boolean; readonly local: string; readonly from: string; readonly name: string }
 /** True when the exact generated import and registration already exist; any partial ownership conflicts. */
-function alreadyRegistered({ matching, localImports, array, local, from, name }) {
-  const registered = array.elements.some(item => item.text === local);
-  if (!matching.length && !registered) {
+function alreadyRegistered({ matching, localImports, registered, local, from, name }: Ownership): boolean {
+  if (!matching && !registered) {
     if (localImports.some(item => item.local === local)) throw new Error('PLUGIN_REGISTRY_CONFLICT:' + local);
     return false;
   }
-  const imported = matching.length === 1 && localImports.some(item => item.from === from && item.imported === 'PluginObject' && item.local === local);
+  const imported = matching === 1 && localImports.some(item => item.from === from && item.imported === 'PluginObject' && item.local === local);
   if (imported && registered) return true;
   throw new Error('PLUGIN_REGISTRY_CONFLICT:' + name);
 }
-async function extendRegistry(source, name) {
-  const ts = await import('typescript');
-  const parsed = ts.createSourceFile('plugins/registry.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
-  if (parsed.parseDiagnostics.length) throw new Error('PLUGIN_REGISTRY_PARSE_ERROR');
+async function extendRegistry(source: string, name: string): Promise<string> {
+  const ts = await loadTypescript();
+  const parsed = parseTypescript(ts, 'plugins/registry.ts', source);
+  if (hasSyntaxErrors(parsed)) throw new Error('PLUGIN_REGISTRY_PARSE_ERROR');
   const local = pluginLocal(name), from = './' + name + '/src/index.ts';
   const imports = parsed.statements.filter(ts.isImportDeclaration);
-  const matching = imports.filter(node => ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === from);
-  const array = registryArray(ts, parsed);
-  if (alreadyRegistered({ matching, localImports: importBindings(ts, imports), array, local, from, name })) return source;
-  const insertion = array.elements.length ? (array.elements.hasTrailingComma ? ' ' : ', ') + local : local;
+  const matching = imports.filter(node => ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === from).length;
+  const array = registryArray(ts, parsed); const { elements } = array;
+  const registered = elements.some(item => ts.isIdentifier(item) && item.text === local);
+  if (alreadyRegistered({ matching, localImports: namedImports(ts, parsed), registered, local, from, name })) return source;
+  const insertion = elements.length ? (elements.hasTrailingComma ? ' ' : ', ') + local : local;
   const updated = source.slice(0, array.end - 1) + insertion + source.slice(array.end - 1);
   const lastImport = imports.at(-1);
   if (!lastImport) throw new Error('PLUGIN_REGISTRY_IMPORTS_MISSING');
   return updated.slice(0, lastImport.end) + "\nimport { PluginObject as " + local + " } from '" + from + "';" + updated.slice(lastImport.end);
 }
 
-export async function pluginRecipe(context, name) {
+export async function pluginRecipe(context: MakerContext, name: string): Promise<void> {
   for (const path of ['plugins/api.ts', 'plugins/runtime.ts', 'plugins/registry.ts']) {
     try { await context.read(path); }
     catch (error) {
-      if (error?.code === 'ENOENT') throw new Error('PLUGIN_SDK_REQUIRED: make plugin runs only from a Workbench source checkout with plugins/api.ts, plugins/runtime.ts and plugins/registry.ts.');
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') throw new Error('PLUGIN_SDK_REQUIRED: make plugin runs only from a Workbench source checkout with plugins/api.ts, plugins/runtime.ts and plugins/registry.ts.');
       throw error;
     }
   }

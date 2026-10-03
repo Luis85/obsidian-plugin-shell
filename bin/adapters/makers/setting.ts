@@ -1,9 +1,10 @@
-import { localName, locales, registerFactory, generatedTest } from '../../bin/adapters/makers/primitives.ts';
-import { registerEntity } from './entities-recipe.mjs';
-import { title } from '../../bin/adapters/makers/arguments.ts';
+import { localName, locales, registerFactory, generatedTest } from './primitives.ts';
+import { registerEntity } from './entities-recipe.ts';
+import { title } from './arguments.ts';
+import type { MakerContext } from './contracts.ts';
 
 /** A new setting is explicit plugin-data storage, sharing the preference writer. */
-export async function settingRecipe(context, owner, name) {
+export async function settingRecipe(context: MakerContext, owner: string, name: string): Promise<void> {
   const local = localName(owner, name, 'setting'); const definition = `${local}Feature`;
   const prefix = await locales(context, owner, `${name}-setting`, { title: `${title(owner)}: Toggle ${title(name)}`,
     settingTitle: `${title(owner)}: ${title(name)}`, description: 'Boolean feature preference; disabled by default.' });
