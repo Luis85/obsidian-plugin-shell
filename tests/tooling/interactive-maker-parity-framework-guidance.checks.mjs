@@ -1,9 +1,6 @@
-import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, readdir, tmpdir, join, resolve, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, legacyFrameworkFiles, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, legacyFrameworkConfiguration, relocatedNpmEntry, relocatedRunNode, legacyFrameworkProcess, relocatedTerminateProcessTree, legacyProcessTree, relocatedHandoutPlan, relocatedHandoutRead, legacyHandoutAdapter, applySharedFilePlan, relocatedProjectContractOperation, legacyProjectContract, relocatedMeasureProject, legacyProjectMeasure, relocatedSampleSummary, relocatedMeasureOperation, legacyMeasurement, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, legacySupportReport, relocatedStatus, relocatedReleaseCheck, legacyInspection, relocatedPortableFile, legacyArchivePath, relocatedZip, legacyZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, legacyPluginId, relocatedStorybookFlags, legacyStorybookOptions, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, legacyTerminalStyle, relocatedCommandHelp, relocatedHelpIndex, legacyHelpText, relocatedHelpText, legacyTerminalHelp, relocatedSetupDocumentation, legacyDocsSetup, relocatedDocsParserFiles, legacyDocsVendor, relocatedExportedProject, legacyProjectFrom, relocatedStorybookOperation, legacyStorybook, relocatedAirshipPlan, legacyAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, legacyAirship, relocatedBuildClickdummy, legacyClickdummy, relocatedDocsRead, relocatedDocsPlan, legacyDocs, relocatedFixtureOperation, legacyFixtures, relocatedGuidedSetup, relocatedContinueSetup, legacySetupTerminal, relocatedGuidedStarter, relocatedStarterText, legacyStarterTerminal, relocatedRenderHuman, legacyTerminalRender, relocatedSetupSnapshot, legacySetupState, relocatedSetupProgress, legacySetupProgress, relocatedKitManifest, relocatedListKitFiles, relocatedVerifyKit, relocatedBootstrapFiles, legacyKitIntegrity, relocatedDistributedIncluded, relocatedStandaloneSource, relocatedUpdateOwnership, legacyDistribution, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
+import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedDocsParserFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
 
 test('relocated CLI help metadata and tiered rendering preserve command guidance', () => {
-  assert.equal(legacyHelpText.commandHelp, relocatedCommandHelp);
-  assert.equal(legacyHelpText.helpIndex, relocatedHelpIndex);
-  assert.equal(legacyTerminalHelp.helpText, relocatedHelpText);
 
   const statusDescriptor = frameworkDescriptor('status');
   const statusHelp = relocatedCommandHelp(statusDescriptor);
@@ -14,7 +11,8 @@ test('relocated CLI help metadata and tiered rendering preserve command guidance
   assert.equal(relocatedCommandHelp(statusDescriptor).examples.includes('mutated'), false);
 
   const devHelp = relocatedCommandHelp(frameworkDescriptor('dev'));
-  assert.deepEqual(devHelp.optionHelp.profile.values, ['obsidian', 'ui']);
+  assert.deepEqual(devHelp.optionHelp.profile.values, ['watch', 'ui', 'preview', 'obsidian']);
+  assert.equal(devHelp.optionHelp.profile.default, 'watch');
   assert.equal(devHelp.optionHelp.timeout.default, '3600000');
 
   const resumeHelp = relocatedCommandHelp(frameworkDescriptor('setup resume'));
@@ -49,7 +47,6 @@ test('relocated CLI help metadata and tiered rendering preserve command guidance
 
 
 test('relocated documentation setup preserves decline, cancel and hash-bound apply flow', async () => {
-  assert.equal(legacyDocsSetup.setupDocumentation, relocatedSetupDocumentation);
   const context = { root: frameworkRoot, frameworkRoot };
   const current = operationResult('setup', { ready: true }, 'ok');
 
@@ -92,7 +89,6 @@ test('relocated documentation setup preserves decline, cancel and hash-bound app
 
 
 test('relocated documentation parser packaging preserves exact pin and allowlist semantics', async () => {
-  assert.equal(legacyDocsVendor.docsParserFiles, relocatedDocsParserFiles);
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-docs-vendor-')));
   try {
     await writeFile(join(root, 'package.json'), JSON.stringify({ dependencies: { yaml: '2.9.1' } }));
@@ -105,13 +101,9 @@ test('relocated documentation parser packaging preserves exact pin and allowlist
 
     const files = await relocatedDocsParserFiles(root);
     const paths = files.map(file => file.path).sort();
-    assert.deepEqual(paths, [
-      '.framework/compiled/node_modules/yaml/LICENSE',
-      '.framework/compiled/node_modules/yaml/dist/index.js',
-      '.framework/compiled/node_modules/yaml/dist/schema.json',
-      '.framework/compiled/node_modules/yaml/package.json',
-    ]);
-    assert.equal(files.find(file => file.path.endsWith('/LICENSE')).bytes.toString('utf8'), 'license');
+    // The YAML runtime is bundled into app.js; only its license ships beside the bundle.
+    assert.deepEqual(paths, ['bin/licenses/yaml.LICENSE']);
+    assert.equal(files[0].bytes.toString('utf8'), 'license');
 
     await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.0' }));
     await assert.rejects(relocatedDocsParserFiles(root), error => error.code === 'DOCS_PARSER_VERSION');
@@ -122,7 +114,6 @@ test('relocated documentation parser packaging preserves exact pin and allowlist
 
 
 test('relocated exported-project intake preserves bounded data and identity semantics', async () => {
-  assert.equal(legacyProjectFrom.exportedProject, relocatedExportedProject);
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-project-from-')));
   try {
     const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
@@ -164,7 +155,6 @@ test('relocated exported-project intake preserves bounded data and identity sema
 
 
 test('relocated Storybook lifecycle preserves planning, install and execution boundaries', async () => {
-  assert.equal(legacyStorybook.storybookOperation, relocatedStorybookOperation);
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-storybook-')));
   try {
     const context = { root, frameworkRoot };

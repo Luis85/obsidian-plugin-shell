@@ -59,9 +59,9 @@ scripts/
     vite-shared.mjs
   quality/
     check-styles.mjs
-  make/
-    makers/style.mjs
-    templates/
+bin/
+  adapters/makers/
+    extra-recipes.ts           # style recipe
 ```
 
 Create only modules with an actual use. A large product can split its feature/native entries further without changing the pipeline.

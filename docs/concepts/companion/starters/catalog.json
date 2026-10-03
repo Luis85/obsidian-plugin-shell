@@ -28,6 +28,35 @@
       "sha256": "509163e5e584bc1df415fd2aca91aea608886291a9a6ca8dc113ef8402aa1f3a"
     },
     {
+      "id": "agent-ready",
+      "name": "Agent Ready",
+      "category": "Foundations",
+      "level": "Foundation",
+      "summary": "Start blank with reviewed, inert Airship and Hindsight defaults for agent-assisted development.",
+      "outcome": "Use when you want the minimal shell prepared for explicit agent tooling without automatic installs or data processing.",
+      "tags": [
+        "blank",
+        "agent",
+        "airship",
+        "hindsight",
+        "codex",
+        "claude"
+      ],
+      "includes": [
+        "The same domain-free minimal shell as Start Blank",
+        "Airship enabled as project data with safe local defaults",
+        "Hindsight defaults for Claude Code and Codex with session retention off"
+      ],
+      "implementation": [
+        "Choose and review a Hindsight inference provider before setup",
+        "Explicitly approve optional tool installation, data processing and MCP connections",
+        "Native acceptance and release qualification"
+      ],
+      "version": "1.0.0",
+      "file": "agent-ready.companion.json",
+      "sha256": "5d9c6c39752d2d168e41c706e98281442c19440f4aeabb44f3b1898f4515e4e1"
+    },
+    {
       "id": "command-utility",
       "name": "Command Utility",
       "category": "Foundations",

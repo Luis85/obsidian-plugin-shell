@@ -8,9 +8,10 @@ import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { build } from 'vite';
 import { chromium } from '@playwright/test';
-import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
-import { airshipEnvironment } from '../framework/airship.ts';
+import { projectConfigs } from '../shared/project-configs.mjs';
+import { airshipEnvironment } from '../../bin/adapters/framework/airship.ts';
 const root = process.cwd(), out = resolve(root, 'reports/airship-qualification');
 const project = join(out, 'project space'), npm = process.env.QUALIFIED_NPM;
 assert.ok(npm, 'QUALIFIED_NPM must select the qualified npm CLI.');
@@ -31,7 +32,7 @@ function run(args) {
   return result.stdout;
 }
 run([npm, 'ci', '--no-fund']);
-run(['app.mjs', 'airship', 'install', '--yes', '--json']);
+run(['bin/app', 'airship', 'install', '--yes', '--json']);
 const cli = join(project, '.airship-tooling/node_modules/@airshiplabs/cli');
 const packageInfo = JSON.parse(await readFile(join(cli, 'package.json'), 'utf8'));
 assert.equal(packageInfo.version, '0.3.0');
@@ -60,7 +61,7 @@ const evidence = { source: spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, 
   compilerFingerprint: compiled.fingerprint, cliVersion: packageInfo.version, node: process.version,
   checks: [], providerEditing: 'not-run', nativeObsidian: 'not-run', storybookRuntime: 'not-run' };
 try {
-  start(['node_modules/vite/bin/vite.js', '--config', 'vite.preview.config.mjs']);
+  start(['node_modules/vite/bin/vite.js', '--config', projectConfigs.preview.path]);
   await ready('http://127.0.0.1:5741/');
   browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });

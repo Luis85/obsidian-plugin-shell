@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { mkdtemp, readFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -9,23 +8,21 @@ import {
   vaultPlan as relocatedVaultPlan,
   releaseVersionPlan as relocatedReleaseVersionPlan,
 } from '../../bin/adapters/framework/changes.ts';
-import * as legacy from '../../scripts/framework/changes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+/** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
+const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const projectText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
 
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-changes-')));
-  t.after(() => rm(root, { recursive: true, force: true }));
+  after(t, () => rm(root, { recursive: true, force: true }));
   return { root, frameworkRoot };
 }
 
 test('relocated change planner preserves compatibility identity and stdin inspection', async t => {
-  assert.equal(legacy.inspectDesign, relocatedInspect);
-  assert.equal(legacy.configurationPlan, relocatedConfigurationPlan);
-  assert.equal(legacy.vaultPlan, relocatedVaultPlan);
-  assert.equal(legacy.releaseVersionPlan, relocatedReleaseVersionPlan);
   const context = { ...await fixture(t), inputText: projectText };
   const inspected = await relocatedInspect(context, '-');
   assert.ok(inspected.model.project.id);
@@ -45,6 +42,6 @@ test('relocated configuration planner creates and applies a blank setup plan', a
 
 test('relocated change planner keeps configuration and release prerequisites explicit', async t => {
   const context = await fixture(t);
-  await assert.rejects(relocatedVaultPlan(context), /CONFIG_REQUIRED/);
-  await assert.rejects(relocatedReleaseVersionPlan({ command: 'release prepare', args: [], options: {} }, context), /RELEASE_INPUT_REQUIRED/);
+  await assert.rejects(relocatedVaultPlan(context), { code: 'CONFIG_REQUIRED' });
+  await assert.rejects(relocatedReleaseVersionPlan({ command: 'release prepare', args: [], options: {} }, context), { code: 'RELEASE_INPUT_REQUIRED' });
 });

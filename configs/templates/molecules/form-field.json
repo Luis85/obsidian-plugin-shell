@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "molecule.form-field",
+  "name": "Form Field",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "molecule",
+  "category": "Forms",
+  "description": "Labelled field wrapper with help and validation context.",
+  "tags": [
+    "molecule",
+    "forms",
+    "form",
+    "label"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "label",
+    "validation"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "atom.text-input"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-form-field"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

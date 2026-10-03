@@ -6,8 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { derivedId, derivedName, enclosingVault, invocationDirectory, pluginIdProblem } from '../../scripts/framework/starter-project.ts';
-import { pluginIdWordProblem } from '../../scripts/framework/plugin-id.ts';
+import { derivedId, derivedName, enclosingVault, invocationDirectory, pluginIdProblem } from '../../bin/adapters/framework/starter-project.ts';
+import { pluginIdWordProblem } from '../../bin/adapters/framework/plugin-id.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 async function scratch(t) {
@@ -18,7 +18,7 @@ async function scratch(t) {
 }
 /** The real terminal entry point, never a TTY: it must not prompt or hang. */
 function cli(args, cwd) {
-  return spawnSync(process.execPath, [join(root, 'app.mjs'), 'new', ...args], { cwd, encoding: 'utf8', timeout: 120000, maxBuffer: 50_000_000, stdio: ['pipe', 'pipe', 'pipe'] });
+  return spawnSync(process.execPath, [join(root, 'bin/app'), 'new', ...args], { cwd, encoding: 'utf8', timeout: 120000, maxBuffer: 50_000_000, stdio: ['pipe', 'pipe', 'pipe'] });
 }
 function machine(args, cwd) {
   const output = cli([...args, '--json'], cwd);

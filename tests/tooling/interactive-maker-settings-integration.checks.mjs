@@ -3,14 +3,14 @@ import { mkdir, mkdtemp, realpath, readFile, writeFile, rm } from 'node:fs/promi
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { readDocumentationSettings as readDocsSettings } from '../../scripts/application-docs/adapters/settings.ts';
+import { readDocumentationSettings as readDocsSettings } from '../../bin/documentation/adapters/settings.ts';
 import { loadSettings, settingsPlan } from '../../bin/adapters/user-settings.ts';
 import { documentationSettings } from '../../bin/adapters/settings-documentation.ts';
 import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
 import { setupCheckpointPlan, resumeSetupCheckpoint } from '../../bin/adapters/setup-checkpoint.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { defaultSettings, readSettings, settingsSchema } from '../../bin/domain/user-settings.ts';
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.mjs';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.ts';
 import { settingsForm } from '../../bin/presentation/settings.ts';
 async function scratch(work) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-settings-integration-'));
@@ -94,8 +94,8 @@ test('advanced human preferences expose every first-run field, host directory, r
 test('typed documentation follows the configured maker project path for export and import', async () => scratch(async root => {
   const { spawnSync } = await import('node:child_process');
   const { projectSetupPlan } = await import('../../bin/adapters/project-setup.ts');
-  const { documentationPlan } = await import('../../scripts/application-docs/adapters/plan.ts');
-  const { applyFilePlan } = await import('../../scripts/shared/file-plan.mjs');
+  const { documentationPlan } = await import('../../bin/documentation/adapters/plan.ts');
+  const { applyFilePlan } = await import('../../scripts/shared/file-plan.ts');
   const { resolve } = await import('node:path');
   assert.equal(spawnSync('git', ['init', root]).status, 0); await mkdir(join(root, '.obsidian'));
   const setup = await projectSetupPlan({ root, frameworkRoot: resolve(import.meta.dirname, '../..') }, {

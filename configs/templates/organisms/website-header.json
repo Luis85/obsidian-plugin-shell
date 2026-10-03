@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.website-header",
+  "name": "Website Header",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "organism",
+  "category": "Navigation",
+  "description": "Responsive website header with identity, navigation and actions.",
+  "tags": [
+    "organism",
+    "navigation",
+    "header",
+    "website"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "branding",
+    "navigation",
+    "actions"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "atom.icon"
+    },
+    {
+      "template": "molecule.breadcrumb"
+    },
+    {
+      "template": "molecule.action-group"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "composition",
+    "tag": "header",
+    "layout": "row"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

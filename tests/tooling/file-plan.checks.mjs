@@ -1,12 +1,12 @@
 import { test } from 'node:test';
-import { mapBounded } from '../../scripts/shared/bounded-map.mjs';
+import { mapBounded } from '../../scripts/shared/bounded-map.ts';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, readFile, mkdir, readdir, rm, symlink, access, realpath, rename, cp } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 async function fixture(work) {
   const root = await mkdtemp(join(tmpdir(), 'template-file-plan-'));
   try { await work(root); } finally { await rm(root, { recursive: true, force: true }); }
@@ -91,6 +91,7 @@ test('[PLAN-03-08] apply rejects an ancestor replaced by a junction after review
 async function setupDryRun(alias, canonical) {
   const source = fileURLToPath(new URL('../../', import.meta.url)); await mkdir(join(canonical, 'scripts'));
   for (const path of ['setup.mjs', 'setup', 'shared']) await cp(join(source, 'scripts', path), join(canonical, 'scripts', path), { recursive: true });
+  await cp(join(source, 'scripts/agent/mcp-config.mjs'), join(canonical, 'scripts/agent/mcp-config.mjs'));
   for (const name of ['manifest.json', 'package.json', 'package-lock.json', 'versions.json']) await cp(join(source, name), join(canonical, name));
   const result = spawnSync(process.execPath, [join(alias, 'scripts/setup.mjs'), '--dry-run', '--json'], { cwd: alias, encoding: 'utf8', timeout: 15000 });
   assert.equal(result.status, 0, result.stdout + result.stderr); assert.equal(JSON.parse(result.stdout).dryRun, true);

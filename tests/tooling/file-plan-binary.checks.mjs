@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 async function fixture(run) { const root=await mkdtemp(join(tmpdir(),'binary-plan-'));try{await run(root);}finally{await rm(root,{recursive:true,force:true});} }
 test('explicit binary content hashes and writes decoded bytes, including rollback',()=>fixture(async root=>{
   const bytes=Buffer.from([0,255,1,128,13,10]); const entry={path:'fixture.gz',content:bytes.toString('base64'),encoding:'base64'};

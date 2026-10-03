@@ -6,6 +6,7 @@ import ts from 'typescript';
 import { composeMvp } from '../../scripts/concepts/mvp-compose.mjs';
 import { validateAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { COMPANION_VERSION, validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { validateTooling } from '../../scripts/companion/tooling-contract.mjs';
 const root = new URL('../../', import.meta.url);
 const base = await readFile(new URL('docs/concepts/companion/index.html', root), 'utf8');
 const graphStyle = await readFile(new URL('docs/concepts/companion/vendor/vue-flow.scoped.css', root), 'utf8');
@@ -23,9 +24,10 @@ test('modern export does not reinterpret immutable legacy starter bytes as v6', 
   // Current runtime starts empty: starter definitions are external JSON, never embedded seed data.
   assert.match(html, /<script type="application\/json" id="project-starters-data">\{"schemaVersion":1,"starters":\[\]\}<\/script>/);
   assert.doesNotMatch(html, /id="companion-visual-seed"/);
-  const context = vm.createContext({ validateCompanionDocument, validateAuthoringDocument: value => validateAuthoringDocument(structuredClone(value)), COMPANION_VERSION: 6, STARTER_CATALOG_VERSION: 1 });
+  const context = vm.createContext({ validateCompanionDocument, validateTooling, structuredClone,
+    validateAuthoringDocument: value => validateAuthoringDocument(structuredClone(value)), COMPANION_VERSION: 6, STARTER_CATALOG_VERSION: 1 });
   const fields = /const STARTER_FIELDS = ([^;]+);/.exec(composed)[0];
-  const validate = vm.runInContext(fields + '\n' + ['starterAssert','starterText','validateStarterCatalog'].map(n => declaration(composed,n)).join('\n') + '\nvalidateStarterCatalog;', context);
+  const validate = vm.runInContext(fields + '\n' + ['starterAssert','starterText','starterDocument','validateStarterCatalog'].map(n => declaration(composed,n)).join('\n') + '\nvalidateStarterCatalog;', context);
   assert.equal(validate(catalog), catalog);
   // The retained v5 bytes are validated as v5 and never relabeled to the current version.
   assert.ok(catalog.starters.every(s => s.document.schemaVersion === COMPANION_VERSION));

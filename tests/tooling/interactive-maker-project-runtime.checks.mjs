@@ -1,4 +1,4 @@
-import { angularLinkerSource } from '../../scripts/compiler/adapters/project/angular-linker.ts';
+import { angularLinkerSource } from '../../bin/compiler/adapters/project/angular-linker.ts';
 import assert from 'node:assert/strict';
 import { mkdtemp, realpath, rm, mkdir, writeFile, readFile, symlink } from 'node:fs/promises';
 import { resolve, join, dirname } from 'node:path';
@@ -7,14 +7,14 @@ import { spawnSync } from 'node:child_process';
 import { stripTypeScriptTypes } from 'node:module';
 import vm from 'node:vm';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { coreSource, pluginSource, cliSource, cliEntry, browserSource } from '../../scripts/compiler/adapters/project/sources.ts';
-import { buildSource, licenseSource } from '../../scripts/compiler/adapters/project/build-source.ts';
-import { pluginExtensionFiles } from '../../scripts/compiler/adapters/project/plugin-extension.ts';
+import { coreSource, pluginSource, cliSource, cliEntry, browserSource } from '../../bin/compiler/adapters/project/sources.ts';
+import { buildSource, licenseSource } from '../../bin/compiler/adapters/project/build-source.ts';
+import { pluginExtensionFiles } from '../../bin/compiler/adapters/project/plugin-extension.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { Window } from 'happy-dom';
 import { projectStarter } from '../../bin/adapters/projects.ts';
-import { compileProject, loadTemplateSnapshot, analyzeProject } from '../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot, analyzeProject } from '../../bin/compiler/index.ts';
 async function scratch(fn) { const root = await mkdtemp(join(await realpath(tmpdir()), 'project-runtime-')); try { await fn(root); } finally { await rm(root, { recursive: true, force: true }); } }
 function host(mount) {
   const surfaces = [], notices = [];

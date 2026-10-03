@@ -1,6 +1,7 @@
 import { docsParserFiles } from './docs-vendor.ts';
+import { bundleReleaseCli } from './release-bundle.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
-import { prototypeSkillFiles } from '../../../scripts/companion/prototype-skill.mjs';
+import { prototypeSkillFiles } from './prototype-skill.ts';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { readBounded, hash, readJson, exists } from './files.ts';
@@ -9,8 +10,8 @@ import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
 import { included, standaloneSource, updateOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
-const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins'];
-const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.sitemap.json', 'tsconfig.authoring.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md', 'app.mjs', 'shell.mjs', 'vitest.obsidian.config.mjs'];
+const templateRoots = ['src', 'scripts', 'templates', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
+const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'];
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = await import('typescript');
@@ -35,38 +36,38 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     const original = await readBounded(join(context.frameworkRoot, path), 8_000_000); originals.set(path, original); sourceInventory.push({ path, hash: hash(original) });
     // Skill templates are literal authoring inputs; preserve their byte-exact inventory.
     const bytes = skill.get(path) ?? standaloneSource(path, original);
-    add('.framework/template/' + path, bytes);
-    if (path.startsWith('scripts/') || path.startsWith('bin/') || path.startsWith('plugins/') || path.startsWith('docs/concepts/companion/test-kit/')) {
-      if (path.endsWith('.ts') && !path.endsWith('.d.ts')) add('.framework/compiled/' + path.slice(0, -3) + '.js', Buffer.from(compiler.compile(bytes.toString('utf8'), path)));
-      // A JavaScript shim that imports TypeScript source is compiled too, so its specifiers point at the emitted .js.
-      else if (/\.m?js$/.test(path) && /\.ts['"]/.test(bytes.toString('utf8'))) add('.framework/compiled/' + path, Buffer.from(compiler.compile(bytes.toString('utf8'), path)));
-      else if (!path.endsWith('.ts')) add('.framework/compiled/' + path, bytes);
-    }
+    add('bin/template/' + path, bytes);
+    // Templates stay editable source data; runtime code is shipped only in the bundled CLI.
+    // The bundle reads each Workbench plugin's config.json beside app.js, so enabling a plugin stays a data edit.
+    if (/^plugins\/[^/]+\/config\.json$/.test(path)) add('bin/' + path, original);
   }
-  const ownership = files.find(file => file.path === '.framework/template/scripts/examples/ownership.json')!;
-  const shipped = new Map(files.filter(file => file.path.startsWith('.framework/template/')).map(file => [file.path.slice('.framework/template/'.length), file.bytes]));
+  const ownership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json')!;
+  const shipped = new Map(files.filter(file => file.path.startsWith('bin/template/')).map(file => [file.path.slice('bin/template/'.length), file.bytes]));
   ownership.bytes = updateOwnership(originals, shipped, ownership.bytes);
-  for (const path of [ownership.path, '.framework/compiled/scripts/examples/ownership.json']) {
-    const file = files.find(entry => entry.path === path)!; file.bytes = ownership.bytes;
-    const record = records.find(entry => entry.path === path)!; record.hash = hash(file.bytes); record.bytes = file.bytes.length;
-  }
-  add('.framework/compiled/package.json', Buffer.from('{"type":"module"}\n'));
+  // The runtime is now a single bundle. Only the editable template copy of
+  // ownership.json ships; no per-module compiled ownership file exists.
+  const ownershipRecord = records.find(entry => entry.path === ownership.path)!;
+  ownershipRecord.hash = hash(ownership.bytes);
+  ownershipRecord.bytes = ownership.bytes.length;
+  add('bin/app.js', await bundleReleaseCli(context.frameworkRoot));
   const pkg = object(await readJson(join(context.frameworkRoot, 'package.json')));
-  const rootPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: { ...object(pkg.scripts), setup: 'node app.mjs setup', shell: 'node app.mjs', app: 'node app.mjs', make: 'node app.mjs make' } };
+  const rootScripts: Record<string, unknown> = { ...object(pkg.scripts), setup: 'node bin/app setup', app: 'node bin/app', make: 'node bin/app make', new: 'node bin/app new' };
+  delete rootScripts.shell;
+  const rootPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: rootScripts };
   const bootstrap: Kit['bootstrap'] = [];
   for (const path of bootstrapFiles) {
     const bytes = path === 'package.json' ? Buffer.from(json(rootPackage)) : standaloneSource(path, await readBounded(join(context.frameworkRoot, path), 8_000_000));
     files.push({ path, bytes }); bootstrap.push({ path, hash: hash(bytes) });
   }
   // Make the template's aliases identical to the initial project-local CLI entry.
-  const templatePackage = files.find(file => file.path === '.framework/template/package.json')!;
+  const templatePackage = files.find(file => file.path === 'bin/template/package.json')!;
   templatePackage.bytes = Buffer.from(json(rootPackage));
   const packageRecord = records.find(file => file.path === templatePackage.path)!;
   packageRecord.hash = hash(templatePackage.bytes); packageRecord.bytes = templatePackage.bytes.length;
   for (const file of await docsParserFiles(context.frameworkRoot)) add(file.path, file.bytes);
-  const kit: Kit = { schemaVersion: 1, version: String(pkg.version), compilerVersion: compiler.version,
+  const kit: Kit = { schemaVersion: 2, version: String(pkg.version), compilerVersion: compiler.version,
     sourceHash: hash(json(sourceInventory)), files: records.sort((a, b) => a.path < b.path ? -1 : 1), bootstrap };
-  files.push({ path: '.framework/kit.json', bytes: Buffer.from(json(kit)) });
+  files.push({ path: 'bin/kit.json', bytes: Buffer.from(json(kit)) });
   return files;
 }
 export async function packKit(context: Context, output: string) {
@@ -87,17 +88,16 @@ export async function upgradePlan(context: Context, from: string) {
   const { compareVersions } = await import('../../../scripts/release/prepare.mjs');
   requireThat(compareVersions(next.version, current.version) >= 0, 'KIT_DOWNGRADE', 'Downgrades require separate migration review.');
   requireThat(next.version !== current.version || (next.sourceHash === current.sourceHash && JSON.stringify(next.files) === JSON.stringify(current.files)), 'KIT_VERSION_REUSED', 'A different kit must have a new version.');
-  const entries: Array<{path: string; content: string; encoding?: 'base64'}> = [];
+  const entries: Array<{path: string; content: string | null; encoding?: 'base64'}> = [];
   const nextPaths = new Set(next.files.map(file => file.path));
-  for (const file of next.files) entries.push({ path: file.path, content: (await readBounded(join(nextRoot, file.path), 8_000_000)).toString('base64'), encoding: 'base64' });
-  requireThat(current.files.every(file => nextPaths.has(file.path)), 'KIT_REMOVAL_REQUIRES_MIGRATION', 'This kit removes files; an explicit removal migration is required.');
-  // Legacy kits own only shell.mjs; upgrading adds app.mjs and bin/app and turns shell.mjs into a forwarding shim.
+  for (const item of next.files) entries.push({ path: item.path, content: (await readBounded(join(nextRoot, item.path), 8_000_000)).toString('base64'), encoding: 'base64' });
+  for (const item of current.files.filter(file => !nextPaths.has(file.path))) entries.push({ path: item.path, content: null });
   for (const launcher of current.bootstrap.filter(file => launcherFiles.includes(file.path))) {
     requireThat(hash(await readBounded(join(context.root, launcher.path))) === launcher.hash, 'LAUNCHER_EDITED', 'Preserve the edited launcher and review its migration.');
   }
   for (const launcher of next.bootstrap.filter(file => launcherFiles.includes(file.path))) {
     entries.push({ path: launcher.path, content: (await readBounded(join(nextRoot, launcher.path))).toString('utf8') });
   }
-  entries.push({ path: '.framework/kit.json', content: json(next) });
+  entries.push({ path: 'bin/kit.json', content: json(next) });
   return { plan: await createFilePlan(context.root, entries), conflicts: [] as string[], summary: { from: current.version, to: next.version, sourceRegeneration: 'separate-reviewed-operation', dependencies: 'unchanged' } };
 }

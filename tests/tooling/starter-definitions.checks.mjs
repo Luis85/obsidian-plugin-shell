@@ -5,11 +5,11 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, rm, symlink, readdir } f
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { STARTER_MAX_BYTES } from '../../scripts/starters/browser.ts';
-import { loadDefinitions, parseDefinition } from '../../scripts/starters/repository.ts';
-import { validateDefinition, readProcesses } from '../../scripts/starters/validation.ts';
-import { resolveValues, renderFiles, renderProcesses } from '../../scripts/starters/render.ts';
-import { angularPackages } from '../../scripts/compiler/domain/project-starter.ts';
+import { STARTER_MAX_BYTES } from '../../bin/adapters/starters/browser.ts';
+import { loadDefinitions, parseDefinition } from '../../bin/adapters/starters/repository.ts';
+import { validateDefinition, readProcesses } from '../../bin/adapters/starters/validation.ts';
+import { resolveValues, renderFiles, renderProcesses } from '../../bin/adapters/starters/render.ts';
+import { angularPackages } from '../../bin/compiler/domain/project-starter.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const reference = JSON.parse(await readFile(join(root, 'configs/starters/webapp.json'), 'utf8'));
 const loadFileDefinitions = rootPath => loadDefinitions(rootPath, []);
@@ -21,8 +21,8 @@ async function seed(dir, definition = reference, name = definition.id) {
   await mkdir(join(dir, 'configs/starters'), { recursive: true });
   await writeFile(join(dir, 'configs/starters', name + '.json'), JSON.stringify(definition));
 }
-test('all twenty-five standalone definitions validate and carry their metadata, source and process contracts', async () => {
-  const entries = await loadFileDefinitions(root); assert.equal(entries.length, 25);
+test('all twenty-six standalone definitions validate and carry their metadata, source and process contracts', async () => {
+  const entries = await loadFileDefinitions(root); assert.equal(entries.length, 26);
   assert.deepEqual(entries.map(entry => entry.definition.id), entries.map(entry => entry.definition.id).sort());
   assert.equal(entries.filter(entry => entry.definition.generator.kind === 'project').length, 11, 'eight former presets, two hybrid frameworks and the Angular setup');
   for (const { definition, file, sha256 } of entries) {

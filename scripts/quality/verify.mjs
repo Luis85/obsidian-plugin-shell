@@ -1,4 +1,4 @@
-import { runNodeScript as runNode } from '../shared/process.mjs';
+import { runNodeScript as runNode } from '../shared/process.ts';
 import { toolingGroups } from '../testing/suite-manifest.mjs';
 // tests/suites.json owns tooling classification; every group runs even after a
 // failure so one run still reports the complete tooling set, as before grouping.
@@ -30,11 +30,11 @@ const commands = [
   ['scripts/quality/check-workbench-plugins.mjs'],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['scripts/quality/lint-source.mjs'],
-  ['node_modules/eslint/bin/eslint.js', 'src', 'bin', 'plugins', '--max-warnings', '0'],
-  ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'tsconfig.maker.json'],
-  ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.maker.config.mjs'],
+  ['node_modules/eslint/bin/eslint.js', '-c', 'configs/lint/eslint.config.mjs', 'src', 'bin', 'plugins', '--max-warnings', '0'],
+  ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'configs/types/tsconfig.maker.json'],
+  ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'configs/testing/vitest.maker.config.mjs'],
   ['scripts/quality/maker-coverage.mjs'],
-  ['node_modules/eslint/bin/eslint.js', 'tests/runtime', 'tests/support', 'tests/e2e', 'tests/obsidian', 'harness/app', '--max-warnings', '0'],
+  ['node_modules/eslint/bin/eslint.js', '-c', 'configs/lint/eslint.config.mjs', 'tests/runtime', 'tests/support', 'tests/e2e', 'tests/obsidian', 'harness/app', '--max-warnings', '0'],
   ['scripts/quality/check-test-quality.mjs'],
   ['scripts/quality/check-repository.mjs'],
   ['scripts/quality/check-source.mjs'],
@@ -45,13 +45,13 @@ const commands = [
   ['scripts/makers/entities.mjs', '--check'],
   ['scripts/events/catalog.mjs', '--check'],
   // One run gates both scopes: production coverage and, from the same per-file
-  // counts, the selected-core thresholds and include list in vitest.config.mjs.
-  ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.production.config.mjs'],
+  // counts, the selected-core thresholds and include list in configs/testing/vitest.config.mjs.
+  ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'configs/testing/vitest.production.config.mjs'],
   ['scripts/quality/coverage-inventory.mjs', '--selected-core'],
   ['scripts/styles/check-tokens.mjs'],
   ['scripts/quality/check-artifacts.mjs'],
   ['scripts/testing/verify-baseline.mjs', '--repeat', '3'],
-  ['node_modules/vite/bin/vite.js', 'build', '--config', 'vite.harness.config.mjs'],
+  ['node_modules/vite/bin/vite.js', 'build', '--config', 'configs/bundling/vite.harness.config.mjs'],
 ];
 try { for (const command of commands) {
   if (command === toolingStep) { await runToolingSuites(); continue; }

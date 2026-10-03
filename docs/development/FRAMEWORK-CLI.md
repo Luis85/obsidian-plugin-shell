@@ -26,7 +26,7 @@ node bin/app new <dir> --starter <id> --apply <planHash>
   folder. Pass `--inside-vault` only for a disposable test vault you own.
 - Plugin IDs use lowercase letters, digits and single hyphens, start with a letter and
   must not contain `obsidian` or `plugin` (the same rule `check submission` applies,
-  from `scripts/framework/plugin-id.ts`). An explicit `--id my-plugin` is refused with
+  from `bin/adapters/framework/plugin-id.ts`). An explicit `--id my-plugin` is refused with
   a suggestion. The default ID is the folder name without the words `obsidian` and
   `plugin`; a remainder shorter than three characters is combined with the starter's
   ID (`../my-plugin` with `quick-capture` gives `my-quick-capture`, with `blank` it
@@ -116,9 +116,9 @@ native qualification stay in `verify` and CI.
 | Scope | Detected by | Steps |
 |---|---|---|
 | Shell repository | default | `vue-tsc --noEmit`, `scripts/quality/lint-source.mjs`, `eslint src --max-warnings 0`, `vitest run` |
-| Generated project | `.companion/generation.json` and `tsconfig.project.json` | `vue-tsc --noEmit --project tsconfig.project.json`, `eslint src <product roots> --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
+| Generated project | `.companion/generation.json` and `configs/types/tsconfig.project.json` | `vue-tsc --noEmit --project configs/types/tsconfig.project.json`, `eslint src <product roots> --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
 
-A generated project's product roots are the folders named in `tsconfig.project.json`
+A generated project's product roots are the folders named in `configs/types/tsconfig.project.json`
 that are not test roots (`tests/suites.json`), for example `<codebaseFolder>/generated`
 for a custom codebase folder. ESLint, the dev watchers and the agent hooks all derive
 them from `scripts/shared/project-roots.mjs`. After a passing run in a generated
@@ -169,7 +169,7 @@ The build of the framework distribution is an explicit maintainer action:
 node bin/app framework pack --out ./plugin-framework.zip --yes --json
 ```
 
-This uses the installed TypeScript compiler, compiles tooling into `.framework/compiled`, retains the matching template under `.framework/template`, and records file hashes, versions and source identity in `.framework/kit.json`. The ZIP has deterministic sorted entries and fixed timestamps. Packing does not upload, publish or install anything. A configured consumer cannot be repackaged as the framework by this command. Checksums detect corruption; they do not authenticate an untrusted distributor.
+This uses the installed TypeScript compiler and emits a self-contained CLI below `bin/`: `bin/app` is the only launcher, `bin/app.js` is the compiled runtime, supporting templates live under `bin/template/`, plugin configuration under `bin/plugins/`, licenses under `bin/licenses/`, and integrity metadata in `bin/kit.json`. The ZIP has deterministic sorted entries and fixed timestamps. Packing does not upload, publish or install anything. A configured consumer cannot be repackaged as the framework by this command. Checksums detect corruption; they do not authenticate an untrusted distributor.
 
 The user extracts that ZIP into a new directory and runs either:
 
@@ -263,7 +263,7 @@ Fixture commands reuse the real exported fixture engine, validators and ownershi
 
 ## Shared API and remaining gates
 
-`scripts/framework/operations.ts` exports `executeOperation(request, context)`. Terminal and headless companion-facing tests submit the same validated requests and get the same plans/results. Contracts and schemas contain no terminal state; Node adapters own file/process access. The native companion has not been converted and direct mobile/runtime RPC is not implemented.
+`bin/adapters/framework/operations.ts` exports `executeOperation(request, context)`. Terminal and headless companion-facing tests submit the same validated requests and get the same plans/results. Contracts and schemas contain no terminal state; Node adapters own file/process access. The native companion has not been converted and direct mobile/runtime RPC is not implemented.
 
 Existing MJS makers, file plans, fixture and release services are reused unchanged or selectively reconciled; their full TypeScript migration, unified legacy/current metadata, arbitrary source migrations and broader native/runtime adapters remain follow-on scope. Do not describe the 57-task backlog as complete because the central workflow runs.
 

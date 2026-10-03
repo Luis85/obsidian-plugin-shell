@@ -1,8 +1,8 @@
 import { assertNoFirstRun } from './first-run-lock.ts';
 import { join } from 'node:path';
 import { createFilePlan, applyFilePlan, type FilePlan } from '../../scripts/shared/file-plan.ts';
-import { configurationPlan } from '../../scripts/framework/changes.ts';
-import { hash, readBounded, exists } from '../../scripts/framework/files.ts';
+import { configurationPlan } from './framework/changes.ts';
+import { hash, readBounded, exists } from './framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { openDocument, documentText, type SketchDocument } from '../domain/document.ts';
 import { requireSketch } from '../domain/errors.ts';

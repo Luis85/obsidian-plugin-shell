@@ -7,12 +7,12 @@ import { fileURLToPath } from 'node:url';
 import { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { airshipOptions, airshipConfig, toolingSchema } from '../../scripts/companion/tooling-contract.mjs';
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
-import { planArtifacts, applyProject } from '../../scripts/compiler/adapters/workspace-plan.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
-import { airshipEnvironment } from '../../scripts/framework/airship.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { planArtifacts, applyProject } from '../../bin/compiler/adapters/workspace-plan.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { airshipEnvironment } from '../../bin/adapters/framework/airship.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const source = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
 const enabled = () => withAirshipOption(structuredClone(source), { airship: true });
@@ -61,14 +61,16 @@ test('all starters emit source previews without optional dependencies; Airship i
     assert.ok(file, JSON.stringify(starter));
     const document = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters', file), 'utf8'));
     for (const outputKind of ['obsidian-plugin', 'clickdummy']) {
-      const plain = await compileProject({ source: JSON.stringify(document), template, outputKind });
+      // Explicitly opted out, so a starter whose defaults enable Airship (agent-ready) is compared like the rest.
+      const plain = await compileProject({ source: JSON.stringify(withAirshipOption(document, { 'no-airship': true })), template, outputKind });
       const opted = await compileProject({ source: JSON.stringify(withAirshipOption(document, { airship: true })), template, outputKind });
       assert.equal(plain.status, 'ok', JSON.stringify(plain.diagnostics));
       assert.equal(opted.status, 'ok', JSON.stringify(opted.diagnostics));
       const get = (result, path) => result.artifacts.find(file => file.path === path)?.content;
-      assert.ok(get(plain, 'vite.preview.config.mjs'));
+      assert.ok(get(plain, 'configs/bundling/vite.preview.config.mjs'));
       assert.equal(get(plain, 'airship.config.json'), undefined);
       assert.equal(JSON.parse(get(opted, 'airship.config.json')).safe, true);
+      if (airshipOptions(document.tooling).enabled) assert.equal(get(await compileProject({ source: JSON.stringify(document), template, outputKind }), 'airship.config.json'), get(opted, 'airship.config.json'));
       assert.equal(get(plain, 'package-lock.json'), get(opted, 'package-lock.json'));
       assert.equal(get(plain, 'package.json'), get(opted, 'package.json'));
       assert.equal(JSON.parse(get(opted, 'package.json')).dependencies['@airshiplabs/cli'], undefined);
@@ -86,7 +88,7 @@ test('custom source paths survive preview generation and unrelated optional scri
   const enhanced = { ...template, frameworkFiles: template.frameworkFiles.map(file => file === original ? { ...file, content: JSON.stringify(pkg) } : file) };
   const compiled = await compileProject({ source: JSON.stringify(document), template: enhanced });
   assert.equal(compiled.status, 'ok', JSON.stringify(compiled.diagnostics));
-  assert.match(compiled.artifacts.find(file => file.path === 'vite.preview.config.mjs').content, /product source\/generated/);
+  assert.match(compiled.artifacts.find(file => file.path === 'configs/bundling/vite.preview.config.mjs').content, /product source\/generated/);
   assert.equal(JSON.parse(compiled.artifacts.find(file => file.path === 'package.json').content).scripts.storybook, pkg.scripts.storybook);
 });
 test('enable and disable use reviewed plans without installation; stale/foreign config stays untouched', async t => {
@@ -153,7 +155,7 @@ test('new/setup opt-in flags and Airship commands are discoverable; unknown laun
 });
 
 test('generated preview entry points are analyzed and inert tooling stays inside the authoring boundary', async () => {
-  const config = JSON.parse(await readFile(join(root, '.fallowrc.json'), 'utf8'));
+  const config = JSON.parse(await readFile(join(root, 'configs/quality/fallow.json'), 'utf8'));
   const tools = config.framework.find(item => item.name === 'airship-source-preview-tools');
   assert.equal(tools.entryPointRole, 'support', 'preview/build tools are not plugin production roots');
   for (const entry of ['scripts/airship/preview-config.mjs', 'scripts/airship/qualify.mjs']) {
@@ -166,8 +168,8 @@ test('generated preview entry points are analyzed and inert tooling stays inside
 });
 
 test('every optional Airship command has real parseable help examples for the source-driven manual',async()=>{
-  const {commands,parseCliArguments}=await import('../../scripts/framework/catalog.ts');
-  const {commandHelp}=await import('../../scripts/framework/help-text.ts');
+  const {commands,parseCliArguments}=await import('../../bin/adapters/framework/catalog.ts');
+  const {commandHelp}=await import('../../bin/adapters/framework/help-text.ts');
   const entries=commands.filter(entry=>entry.id.startsWith('airship '));assert.equal(entries.length,6);
   for(const entry of entries){const help=commandHelp(entry);assert.ok(help.examples.length,entry.id);
     for(const example of help.examples){const request=parseCliArguments(example.split(' ').slice(2));assert.equal(request.command,entry.id);}}

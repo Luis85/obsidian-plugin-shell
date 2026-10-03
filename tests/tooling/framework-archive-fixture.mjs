@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { crc32 } from 'node:zlib';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
 /** Independent central-directory reader used only by qualification, not by the ZIP writer. */
 export async function extractArchive(bytes, root) {
   const end = bytes.length - 22;
@@ -32,4 +34,11 @@ export async function extractArchive(bytes, root) {
     cursor += 46 + nameLength + bytes.readUInt16LE(cursor + 30) + bytes.readUInt16LE(cursor + 32);
   }
   assert.equal(cursor, indexEnd); return files;
+}
+
+let kitArchive;
+/** Extract the actual framework kit, assembled once per test process; in-place generation requires a verified kit. */
+export async function extractKit(frameworkRoot, root) {
+  kitArchive ??= zip(await assembleKit({ root: frameworkRoot, frameworkRoot }, await installedCompiler()));
+  return extractArchive(kitArchive, root);
 }

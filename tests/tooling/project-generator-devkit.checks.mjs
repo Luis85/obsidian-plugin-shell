@@ -4,11 +4,11 @@ import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
-import { renderTemplate } from '../../scripts/companion/compiler/devkit-files.ts';
-import { rebaseMarkdown, relocatedPath } from '../../scripts/companion/compiler/framework-docs.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { projectFiles } from '../support/project-render.mjs';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { renderTemplate } from '../../bin/compiler/emitters/devkit-files.ts';
+import { rebaseMarkdown, relocatedPath } from '../../bin/compiler/emitters/framework-docs.ts';
 import { inspectWorkflow, markdownLinks } from '../../scripts/quality/check-repository.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -68,7 +68,7 @@ test('[GENERATOR-DEVKIT-03] Claude Code, VS Code and agent files are valid, wire
   const launch = JSON.parse(text('.vscode/launch.json')).configurations;
   assert.deepEqual(launch.map(item => [item.name, item.type, item.request]), [['Attach to Obsidian (dev:obsidian)', 'chrome', 'attach'], ['Debug current Vitest file', 'node', 'launch']]);
   assert.equal(launch[0].port, 9222);
-  for (const path of ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', '.vscode/launch.json', '.github/workflows/ci.yml', '.editorconfig', 'vitest.project.config.mjs', 'tests/project/plugin-host.test.ts'])
+  for (const path of ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', '.vscode/launch.json', '.github/workflows/ci.yml', '.editorconfig', 'configs/testing/vitest.project.config.mjs', 'tests/project/plugin-host.test.ts'])
     assert.equal(files.get(path).ownership, 'extension', path);
   assert.equal(files.get('PROJECT-IMPLEMENTATION.md').ownership, 'managed');
   assert.match(text('PROJECT-IMPLEMENTATION.md'), /\[README\.md\]\(README\.md\)/);
@@ -103,15 +103,15 @@ test('[GENERATOR-DEVKIT-08] pre-approved agent commands are exact safe forms; do
   assert.match(text('CLAUDE.md'), /Obsidian downloads \(`--allow-download`,\n {2}`OBSIDIAN_ALLOW_DOWNLOAD`\) are denied/);
 });
 test('[GENERATOR-DEVKIT-04] product tests use the Obsidian test kit and the project keeps the real-Obsidian loop', () => {
-  const config = text('vitest.project.config.mjs');
-  assert.match(config, /'@test\/obsidian': fileURLToPath\(new URL\('\.\/tests\/support\/obsidian\/index\.ts'/);
+  const config = text('configs/testing/vitest.project.config.mjs');
+  assert.match(config, /'@test\/obsidian': fileURLToPath\(new URL\('\.\.\/\.\.\/tests\/support\/obsidian\/index\.ts'/);
   assert.match(config, /OBSIDIAN_BOUNDARY_REQUIRES_EXPLICIT_TEST_DOUBLE/); assert.doesNotMatch(config, /reporters/);
   assert.match(config, /include: \["tests\/project\/\*\*\/\*\.test\.\{ts,mjs\}", "tests\/runtime\/generated\/\*\*\/\*\.test\.ts"\]/);
-  assert.ok(JSON.parse(text('tsconfig.project.json')).include.includes('tests/runtime/generated/**/*.ts'));
+  assert.ok(JSON.parse(text('configs/types/tsconfig.project.json')).include.includes('../../tests/runtime/generated/**/*.ts'));
   const example = text('tests/project/plugin-host.test.ts');
   assert.match(example, /vi\.mock\('obsidian', \(\) => import\('@test\/obsidian'\)\)/); assert.match(example, /from "\.\.\/\.\.\/src\/main\.ts"/);
   assert.match(example, /join\(import\.meta\.dirname, "\.\.\/obsidian\/vault"\)/);
-  assert.ok(files.has('vitest.obsidian.config.mjs')); assert.ok(files.has('tests/obsidian/plugin-load.obsidian.ts'));
+  assert.ok(files.has('configs/testing/vitest.obsidian.config.mjs')); assert.ok(files.has('tests/obsidian/plugin-load.obsidian.ts'));
   const scripts = JSON.parse(text('package.json')).scripts;
   for (const name of ['check', 'check:fast', 'test', 'test:watch', 'test:tdd', 'test:obsidian', 'dev:obsidian', 'dev:ui', 'typecheck:project', 'verify:project', 'doctor']) assert.ok(scripts[name], name);
   assert.match(text('src/generated/bootstrap/install.ts'), /createDebugCommands/);
@@ -122,7 +122,7 @@ test('[GENERATOR-DEVKIT-07] custom test folders keep the example test, Vitest co
   const output = new Map((await projectFiles(root, projectModel(custom))).map(entry => [entry.path, entry]));
   assert.ok(output.has('verification/specs/project/plugin-host.test.ts'));
   assert.match(output.get('verification/specs/project/plugin-host.test.ts').content, /from "\.\.\/\.\.\/\.\.\/src\/main\.ts"/);
-  assert.match(output.get('vitest.project.config.mjs').content, /"verification\/specs\/project\/\*\*\/\*\.test\.\{ts,mjs\}"/);
+  assert.match(output.get('configs/testing/vitest.project.config.mjs').content, /"verification\/specs\/project\/\*\*\/\*\.test\.\{ts,mjs\}"/);
   const suites = JSON.parse(output.get('tests/suites.json').content);
   assert.ok(suites.roots.some(entry => entry.path === 'verification/specs/project'));
   assert.deepEqual(suites.suites.find(suite => suite.name === 'project').include, ['verification/specs/project/**/*.test.ts', 'verification/specs/project/**/*.test.mjs']);

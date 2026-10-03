@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import {
   HANDOUT_LIMIT, HANDOUT_PATH, HandoutError, digest, ensure, makeSnapshot, renderHandout,
   parseAnswers, readSnapshot, validateHandout, refreshHandout,
 } from '../../bin/adapters/framework/handout-model.ts';
-import * as legacy from '../../scripts/framework/handout-model.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const base = makeSnapshot('docs/prds', [{ path: 'docs/prds/PRD-1.md', sha256: digest('# PRD') }]);
 const full = () => renderHandout(base).replace(/- \[ \] \*\*REQUIRED\*\*/g, '- [x] **REQUIRED**')
@@ -14,7 +13,6 @@ const full = () => renderHandout(base).replace(/- \[ \] \*\*REQUIRED\*\*/g, '- [
   .replace(/(`ready\.(?:product|design|engineering)`[^\n]*\n  - Answer:)[^\n]*/g, '$1 approved; reviewer=Test reviewer; date=2026-09-29; limitations=Reviewed synthetic fixture.');
 
 test('relocated handout model preserves compatibility identity and constants', () => {
-  for (const key of ['makeSnapshot','renderHandout','parseAnswers','readSnapshot','validateHandout','refreshHandout']) assert.equal(legacy[key], ({makeSnapshot,renderHandout,parseAnswers,readSnapshot,validateHandout,refreshHandout})[key]);
   assert.equal(HANDOUT_PATH, 'PROJECT-SETUP-HANDOUT.md');
   assert.equal(HANDOUT_LIMIT, 2_000_000);
   assert.match(digest('bytes'), /^[a-f0-9]{64}$/);

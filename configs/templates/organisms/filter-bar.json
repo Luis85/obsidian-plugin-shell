@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.filter-bar",
+  "name": "Filter Bar",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "organism",
+  "category": "Forms",
+  "description": "Search, filter and reset controls for a result set.",
+  "tags": [
+    "organism",
+    "forms",
+    "filter",
+    "search"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "search",
+    "filtering"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "molecule.search-field"
+    },
+    {
+      "template": "atom.select"
+    },
+    {
+      "template": "atom.button"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "recipe",
+    "recipeId": "recipe-filter-bar"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

@@ -1,16 +1,14 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { resolve } from 'node:path';
 import { setupSource as relocated } from '../../bin/adapters/framework/setup-source.ts';
-import * as legacy from '../../scripts/framework/setup-source.ts';
-import { starterCatalog } from '../../scripts/framework/starter-project.ts';
+import { starterCatalog } from '../../bin/adapters/framework/starter-project.ts';
 import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const context = { root: frameworkRoot, frameworkRoot };
 
 test('relocated setup source preserves compatibility and ordinary input passthrough', async () => {
-  assert.equal(legacy.setupSource, relocated);
   const request = { command: 'setup', args: [], options: { input: 'project.json' } };
   const result = await relocated(request, context, null);
   assert.equal(result.input, 'project.json');
@@ -19,8 +17,8 @@ test('relocated setup source preserves compatibility and ordinary input passthro
 });
 
 test('relocated setup source refuses conflicting starts and native options without starters', async () => {
-  await assert.rejects(relocated({ command: 'setup', args: [], options: { input: 'a.json', blank: true } }, context, null), /SETUP_START_CONFLICT/);
-  await assert.rejects(relocated({ command: 'setup', args: [], options: { extension: 'menu' } }, context, null), /NATIVE_OPTIONS_REQUIRE_STARTER/);
+  await assert.rejects(relocated({ command: 'setup', args: [], options: { input: 'a.json', blank: true } }, context, null), { code: 'SETUP_START_CONFLICT' });
+  await assert.rejects(relocated({ command: 'setup', args: [], options: { extension: 'menu' } }, context, null), { code: 'NATIVE_OPTIONS_REQUIRE_STARTER' });
 });
 
 test('relocated setup source converts a verified starter into stdin authoring input', async () => {

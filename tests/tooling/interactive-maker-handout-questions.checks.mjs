@@ -1,10 +1,8 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { handoutSections as relocated } from '../../bin/adapters/framework/handout-questions.ts';
-import * as legacy from '../../scripts/framework/handout-questions.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 test('relocated handout question catalog preserves compatibility identity and stable structure', () => {
-  assert.equal(legacy.handoutSections, relocated);
   assert.equal(relocated.length, 20);
   const questions = relocated.flatMap(section => section.questions);
   assert.equal(questions.length, 69);

@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '../..');
 const plugins = join(root, 'plugins');
 const registry = await readFile(join(plugins, 'registry.ts'), 'utf8');
-const reserved = new Set(['api.ts', 'registry.ts', 'runtime.ts', 'README.md']);
+const reserved = new Set(['api.ts', 'registry.ts', 'runtime.ts', 'template-contributions.ts', 'README.md']);
 const idPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const versionPattern = /^\d+\.\d+\.\d+$/;
 

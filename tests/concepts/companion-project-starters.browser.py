@@ -30,7 +30,7 @@ def review():act('starter-review',scope='#modal')
 def apply():page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
 def handoff_checks():
     modal=page.locator('#modal');text=modal.inner_text();commands=js('handoffCommands().map(([,c])=>c)')
-    check('Handoff lists the current journey with the project id',commands==['node shell.mjs new ../capture-tools --from capture-tools.companion.json','cd ../capture-tools','npm ci','npm run check','npm run dev:obsidian'] and all(c in text for c in commands) and 'companion:scaffold' not in text)
+    check('Handoff lists the current journey with the project id',commands==['node bin/app new ../capture-tools --from capture-tools.companion.json','cd ../capture-tools','npm ci','npm run check','npm run dev:obsidian'] and all(c in text for c in commands) and 'companion:scaffold' not in text)
     check('Every command has its own labelled copy button',all(modal.locator('.handoff-commands [data-action="copy"][data-value='+json.dumps(c)+']').get_attribute('aria-label')=='Copy: '+c for c in commands))
     check('Generated-project scripts and the download are disclosed','scripts of the generated project' in text and 'dist/main.js' in text and modal.locator('.dialog-footer [data-action="project-backup"]').inner_text().strip()=='Download project JSON')
     prompt=page.locator('#handoff-agent-prompt');ids=js('allRequirements(project().design).map(r=>r.id)');value=prompt.input_value()
@@ -54,6 +54,7 @@ with sync_playwright() as pw:
         check('Welcome exposes a starter entry without creating a project',page.locator('#content [data-action="nav"][data-value="starters"]').count()==1 and js('project()===null'))
         act('nav','starters','#sidebar')
         check('Gallery shows eleven built-in project starters',page.locator('.starter-card').count()==11)
+        check('Starters with development tooling are not offered by the retained v5 concept',js('starterCatalog.starters.length===12 && starterOffered().length===11 && !starterOffered().some(s=>s.document.tooling!==undefined)') and page.locator('[data-action="starter-open"][data-value="agent-ready"]').count()==0)
         check('Browsing does not initialize the project',js('project()===null'))
         check('Gallery calls out the runnable shell and remaining work','not a finished plugin' in page.locator('#content').inner_text())
         page.screenshot(path=str(OUT/'01-gallery-dark.png'))
@@ -87,14 +88,14 @@ with sync_playwright() as pw:
         with page.expect_download() as event:act('project-backup',scope='#modal')
         download=event.value;download.save_as(str(OUT/'configured-project.json'));exported=(OUT/'configured-project.json').read_text()
         check('Actual handoff download is the complete configured project',json.loads(exported)==json.loads(js('companionJson()')) and download.suggested_filename=='capture-tools.companion.json')
-        probe=subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',"import {projectModel} from './scripts/companion/compiler/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=20)
+        probe=subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',"import {projectModel} from './bin/compiler/emitters/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=20)
         check('Actual browser download is consumed by the real compiler',probe.returncode==0 and json.loads(probe.stdout)=={'id':'capture-tools','source':'plugin/src/generated','tests':'plugin/tests/project'},'Actual Node compiler subprocess on downloaded bytes')
         with tempfile.TemporaryDirectory(prefix='companion-handoff-') as scratch:
             work=Path(scratch)/'framework-checkout';work.mkdir();(work/download.suggested_filename).write_text(exported)
             shown=page.locator('#modal .handoff-commands code').first.inner_text().split()
-            run=subprocess.run(['node',str(ROOT/'shell.mjs'),*shown[2:],'--json'],text=True,capture_output=True,cwd=work,timeout=120)
+            run=subprocess.run(['node',str(ROOT/'bin/app'),*shown[2:],'--json'],text=True,capture_output=True,cwd=work,timeout=120)
             result=json.loads(run.stdout) if run.returncode==0 else {}
-            check('Displayed new --from command plans the actual download without writing',shown[:3]==['node','shell.mjs','new'] and result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the downloaded bytes; preview only')
+            check('Displayed new --from command plans the actual download without writing',shown[:3]==['node','bin/app','new'] and result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the downloaded bytes; preview only')
         act('close',scope='#modal');act('nav','starters','#sidebar');configure('blank');review();act('close',scope='#modal')
         check('Cancelled replacement preserves the full current project and files',js('companionProjectToken()')==original)
         # Controlled states are safety negative proofs, not real native operations.
@@ -110,7 +111,7 @@ with sync_playwright() as pw:
         check('Start Blank has no example domain, recipes, PRDs or page and component designs',js('project().design.semantic.entities.length===0 && project().design.dataSources.sources.length===0 && project().design.prds.length===0 && project().design.library.length===0 && veStore(project().design).pages.length===0 && veStore(project().design).components.length===0'))
         check('Confirmed replacement retains unrelated host files',js('state.vaultFiles["unrelated.md"]==="changed after review"'))
         # Every built-in goes through real configuration/review/confirm, not just JSON parsing.
-        for identifier in js('starterCatalog.starters.map(s=>s.id)'):
+        for identifier in js('starterOffered().map(s=>s.id)'):
             act('nav','starters','#sidebar');before=js('JSON.stringify(starterCatalog)');configure(identifier)
             if identifier=='custom-file-view':page.locator('#f-starter-extension').fill('board')
             if identifier=='context-menu':page.locator('#f-starter-extensions').fill('md,txt')

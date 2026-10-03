@@ -5,14 +5,14 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { zip } from '../../scripts/framework/zip.ts';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args, expected = 0) {
-  const result = spawnSync(process.execPath, [join(dir, 'app.mjs'), ...args, '--json'], {
+  const result = spawnSync(process.execPath, [join(dir, 'bin/app'), ...args, '--json'], {
     cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 8_000_000,
   });
   assert.equal(result.error, undefined); assert.equal(result.status, expected, result.stderr + result.stdout);
@@ -27,7 +27,7 @@ test('extracted kit discovers v6 schema, sets up a starter, resumes generation a
   await extractArchive(zip(files), dir);
   const args = ['setup', '--starter', 'quick-capture', '--id', 'folio', '--name', 'Folio', '--author', 'Example'];
   const bare = await readdir(dir);
-  // The shell ZIP bundles no starters; the separate pack is extracted beside shell.mjs as the kit README instructs.
+  // The shell ZIP bundles no starters; the separate pack is extracted into the same package root as the kit README instructs.
   assert.equal(cli(dir, args, 1).diagnostics[0].code, 'STARTER_UNKNOWN'); assert.deepEqual(await readdir(dir), bare);
   await extractArchive(zip(await assembleStarterPack({ root, frameworkRoot: root })), dir);
   const initial = await readdir(dir);

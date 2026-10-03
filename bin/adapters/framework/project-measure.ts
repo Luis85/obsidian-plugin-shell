@@ -6,6 +6,15 @@ import { readBounded, hash } from './files.ts';
 import { measureOperation } from './measurement.ts';
 import { result, requireThat, stringOption, type Request, type Context } from './contracts.ts';
 
+async function measuredInput(context: Context, input: string): Promise<string> {
+  requireThat(input !== '-' || context.inputText !== undefined, 'STDIN_REQUIRED', 'Supply JSON on stdin.');
+  if (input === '-') return context.inputText!;
+  return new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(resolve(context.root, input), 4_000_000));
+}
+function designCounts(design: ReturnType<typeof migrateAuthoringDocument>['document']['design']) {
+  return { surfaces: design.nodes.length, transitions: design.links.length,
+    routes: design.sitemap?.routes.length ?? 0, journeys: design.sitemap?.journeys.length ?? 0 };
+}
 /** Explicit local measurement, never code execution from the imported document. */
 export async function measureProject(request: Request, context: Context) {
   const input = stringOption(request.options, 'input');
@@ -15,8 +24,7 @@ export async function measureProject(request: Request, context: Context) {
   requireThat(/^(?:[3-9]|[12]\d|30)$/.test(samples) && Number.isInteger(count) && count >= 3 && count <= 30, 'MEASUREMENT_COUNT', 'Choose 3 to 30 measured samples.');
   const operations = ['import-validate-migrate', 'export-json', 'hierarchy-projection', 'arrange-proposal'];
   if (request.options['dry-run']) return result(request.command, { execution: 'not-run', operations, samples: count, written: [], network: false }, 'planned');
-  requireThat(input !== '-' || context.inputText !== undefined, 'STDIN_REQUIRED', 'Supply JSON on stdin.');
-  const text = input === '-' ? context.inputText! : new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(resolve(context.root, input), 4_000_000));
+  const text = await measuredInput(context, input);
   const document = migrateAuthoringDocument(parseAuthoringDocument(text)).document;
   const heapBeforeBytes = process.memoryUsage().heapUsed;
   const actions = [
@@ -29,8 +37,7 @@ export async function measureProject(request: Request, context: Context) {
   for(const [index,operation] of actions.entries())measured.push({operation:operations[index]!,...await measureOperation(operation,count,context.signal)});
   return result(request.command, { kind: 'companion-authoring-measurements', schemaVersion: 1,
     inputSha256: hash(text), inputBytes: Buffer.byteLength(text), projectSchema: document.schemaVersion,
-    counts: { surfaces: document.design.nodes.length, transitions: document.design.links.length,
-      routes: document.design.sitemap?.routes.length ?? 0, journeys: document.design.sitemap?.journeys.length ?? 0 },
+    counts: designCounts(document.design),
     runtime: { node: process.versions.node, platform: process.platform, architecture: process.arch, clock: 'performance.now' },
     measured, memory: { heapBeforeBytes, heapAfterBytes: process.memoryUsage().heapUsed, isolated: false, forcedCollection: false },
     budgets: 'not-established', qualification: 'not-inferred',

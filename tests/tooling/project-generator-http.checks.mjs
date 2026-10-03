@@ -1,6 +1,7 @@
+// Copied template text: generated projects receive this suite with this line removed, a vitest import and rewritten runtime paths. Keep the plain node:test import.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createJsonHttpPort, validateHttpSource } from '../../scripts/companion/runtime/json-http.ts';
+import { createJsonHttpPort, validateHttpSource } from '../../templates/companion/runtime/json-http.ts';
 const source={id:'test-api',locator:'https://example.invalid/v1',auth:'none',credentialRef:'',operations:[{slug:'list',method:'GET',resource:'/items/{id}',input:{type:'object',properties:{id:{type:'string'},query:{type:'string'}},required:['id','query'],additionalProperties:false},output:{type:'array',items:{type:'string'}}}]};
 const input={id:'hello world',query:'a&b'};
 test('HTTP adapter serializes declared path/query and validates real response bytes',async()=>{

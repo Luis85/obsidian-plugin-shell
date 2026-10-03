@@ -87,7 +87,7 @@ node bin/app starters edit companion-plugin --input ./reviewed-companion-plugin.
 ## Generate through the shell
 
 Extract the shell and starter archives separately into the same workspace, so
-`configs/starters/` is beside `shell.mjs`. An extracted shell alone lists zero
+`configs/starters/` is in the same package root as `bin/app`. An extracted shell alone lists zero
 starters. A configured `paths.startersFolder` in `configs/user-settings.json` can
 select another contained folder. There is no fallback to an embedded library.
 

@@ -46,7 +46,7 @@ below; they are orientation, not budgets.
 | `baseline` | Dependency-free verification baseline and HTTP style specimen, repeated three times (8) | `npm run test:baseline` | `verify-baseline.mjs` | none | own step | 20 s |
 | `browser-specimen` | Host-style specimen assertions in a real browser | `node scripts/testing/suites.mjs browser-specimen` | node script + Playwright | Chromium | opt-in | 11 s |
 | `e2e` | Served harness in Chromium: showcase, modals, persistence, accessibility, design system (11) | `npm run test:e2e` | Playwright | Chromium, `npm run harness:build` | opt-in | 78 s |
-| `project` | Generated product tests under `tests/project` (only in companion-generated projects) | `npm test` in the generated project | Vitest `vitest.project.config.mjs` | generated project | opt-in | n/a here |
+| `project` | Generated product tests under `tests/project` (only in companion-generated projects) | `npm test` in the generated project | Vitest `configs/testing/vitest.project.config.mjs` | generated project | opt-in | n/a here |
 | `project:ui-effects` | Generated composition/UI-effect checks (generated projects only) | `npm run test:ui-effects` in the generated project | `node --test` | generated project | opt-in | n/a here |
 | `obsidian` | Vitest-driven E2E against a real sandboxed Obsidian (`tests/obsidian`, added by the native dev loop) | `npm run test:obsidian` | npm script | provisioned native runner | opt-in | ~30 s, 4 cases (Obsidian 1.13.7 under Xvfb) |
 

@@ -35,6 +35,12 @@ Authenticate that home separately using the official client first. The path is n
 
 For Claude, use the official authenticated Agent SDK route; no token spoofing or OAuth-to-API proxy is introduced. Both account-backed routes need access to their remote provider and can consume account allowance. Use local inference when that distinction is unsuitable.
 
+### Agent-ready starter defaults
+
+The `agent-ready` starter declares inert Hindsight defaults in `design/project.json`: Claude Code and Codex as the proposed agents, Git-message ingestion, and session retention off. This is configuration input only. Creating the project does **not** install Hindsight, choose an inference provider, process repository data, start a daemon, or connect MCP clients.
+
+When those defaults are present, `node bin/app memory setup --provider ...` uses them in its read-only preview. Command-line `--agents`, `--git`, and `--sessions` choices override the project defaults. Any installation still requires a second invocation with `--apply --accept-data-processing`.
+
 ## First-time setup
 
 Use the repo's qualified Node/npm toolchain (`.nvmrc` and `packageManager`). Optional package installation needs Python 3.11+ with venv/pip, Git, npm and selected agent prerequisites. The source launcher supports Node 22.13+ native type stripping. Full installation on Intel macOS is deliberately refused; a separately reviewed slim/external-service setup is not silently substituted. Standard development remains available without Hindsight.

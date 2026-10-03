@@ -5,26 +5,27 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
-import { verifyKit } from '../../scripts/framework/kit-integrity.ts';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
+import { verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { rebaseMarkdown } from '../../scripts/companion/compiler/framework-docs.ts';
-import { documentationDigest as digest } from '../../scripts/application-docs/adapters/filesystem.ts';
+import { projectFiles } from '../support/project-render.mjs';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { rebaseMarkdown } from '../../bin/compiler/emitters/framework-docs.ts';
+import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 test('packaged CLI ships the pinned parser and supports docs import then existing generation without root dependencies', { timeout: 300000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Kit packaging requires the reviewed framework sources, not an example-removed consumer.'); return; }
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'docs-kit-'))); t.after(() => rm(dir, { recursive: true, force: true }));
   const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler());
   for (const file of files) { await mkdir(dirname(join(dir, file.path)), { recursive: true }); await writeFile(join(dir, file.path), file.bytes); }
-  assert.ok(files.some(file => file.path === '.framework/compiled/node_modules/yaml/dist/index.js'));
-  assert.ok(files.some(file => file.path === '.framework/compiled/node_modules/yaml/LICENSE'));
-  assert.equal(JSON.parse(await readFile(join(dir,'.framework/compiled/node_modules/yaml/package.json'),'utf8')).version,'2.9.1');
-  for (const name of ['DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md']) assert.equal(await readFile(join(dir, '.framework/template', name), 'utf8'), await readFile(join(root, name), 'utf8'));
+  assert.deepEqual(files.filter(file => file.path === 'bin/app.js').map(file => file.path), ['bin/app.js']);
+  assert.ok(files.some(file => file.path === 'bin/licenses/yaml.LICENSE'));
+  assert.ok(!files.some(file => file.path.startsWith('bin/node_modules/')));
+  assert.equal(JSON.parse(await readFile(join(root,'node_modules/yaml/package.json'),'utf8')).version,'2.9.1');
+  for (const name of ['DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md']) assert.equal(await readFile(join(dir, 'bin/template', name), 'utf8'), await readFile(join(root, name), 'utf8'));
   await verifyKit(dir); assert.equal((await readdir(dir)).includes('node_modules'),false);
-  const run = args => { const result=spawnSync(process.execPath,[join(dir,'app.mjs'),...args,'--json','--no-interaction'],{cwd:dir,encoding:'utf8',timeout:120000,maxBuffer:8000000});assert.equal(result.status,0,result.stdout+result.stderr);return JSON.parse(result.stdout); };
+  const run = args => { const result=spawnSync(process.execPath,[join(dir,'bin/app'),...args,'--json','--no-interaction'],{cwd:dir,encoding:'utf8',timeout:120000,maxBuffer:8000000});assert.equal(result.status,0,result.stdout+result.stderr);return JSON.parse(result.stdout); };
   assert.ok(run(['docs','schema']).data.types.includes('interaction'));
   await writeFile(join(dir,'input.json'),JSON.stringify(projectFixture().project));
   const catalog = run(['capabilities']).data.commands.map(command => command.id);
@@ -61,8 +62,8 @@ test('generated consumers retain framework design constraints and rebase product
 });
 
 test('generated handout references and project-setup links remain inside the distributed documentation', async () => {
-  const analyzer = JSON.parse(await readFile(join(root, '.fallowrc.json'), 'utf8'));
-  assert.ok(analyzer.entry.includes('scripts/handout.mjs'), 'Analyze the documented standalone executable as an explicit entry, not an ignored file.');
+  const analyzer = JSON.parse(await readFile(join(root, 'configs/quality/fallow.json'), 'utf8'));
+  assert.ok(!analyzer.entry.includes('scripts/handout.mjs'), 'The removed handout entry is not part of the analyzer inventory.');
   const entries = await projectFiles(root, projectModel(projectFixture().project));
   const files = new Map(entries.map(entry => [entry.path, entry]));
   const name = 'PROJECT-SETUP-HANDOUT.md', path = 'docs/framework/' + name;

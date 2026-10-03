@@ -1,8 +1,9 @@
 import type { Readable } from 'node:stream';
 import type { Workspace } from '../bin/application/workspace.ts';
 import type { Prompts } from '../bin/presentation/prompts.ts';
-import type { FrameworkAdapter } from '../scripts/compiler/adapters/project/framework-adapter.ts';
-import type { StarterDefinition } from '../scripts/starters/types.ts';
+import type { FrameworkAdapter } from '../bin/compiler/adapters/project/framework-adapter.ts';
+import type { StarterDefinition } from '../bin/adapters/starters/types.ts';
+import type { ComponentTemplate } from '../bin/domain/component-template.ts';
 
 export interface PluginManifest {
   readonly id: string;
@@ -30,6 +31,11 @@ export interface PluginEventBus {
   once<N extends string, P>(definition: PluginEventDefinition<N, P>, listener: (payload: P) => void | Promise<void>): () => void;
   dispatch<N extends string, P>(definition: PluginEventDefinition<N, P>, payload: P): void;
 }
+export interface ComponentTemplateCatalogApi {
+  list(): Promise<readonly ComponentTemplate[]>;
+  get(id: string): Promise<ComponentTemplate | undefined>;
+  instantiate(workspace: Workspace, id: string, name?: string): Promise<{ kind: 'page' | 'component'; id: string; templateId: string }>;
+}
 export interface PluginCommandContext {
   readonly root: string;
   readonly frameworkRoot: string;
@@ -37,6 +43,7 @@ export interface PluginCommandContext {
   readonly signal?: AbortSignal;
   readonly progress?: (message: string) => void;
   readonly eventBus: PluginEventBus;
+  readonly templates: ComponentTemplateCatalogApi;
 }
 export interface PluginCliRequest {
   readonly action: string;
@@ -70,5 +77,6 @@ export interface WorkbenchPluginObject {
   readonly tui?: readonly PluginTuiAction[];
   readonly frameworks?: readonly FrameworkAdapter[];
   readonly starters?: readonly StarterDefinition[];
+  readonly componentTemplates?: readonly ComponentTemplate[];
   activate?(context: WorkbenchPluginContext): void | (() => void) | Promise<void | (() => void)>;
 }

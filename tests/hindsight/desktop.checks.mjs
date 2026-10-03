@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { providerSettings, providerPlan } from '../../scripts/hindsight/provider.ts';
@@ -46,6 +46,26 @@ test('setup preview exposes full keyless provider and desktop flow without write
   assert.equal(r.status, 0, r.stderr); const plan = JSON.parse(r.stdout);
   assert.equal(plan.provider.provider, 'none'); assert.deepEqual(plan.desktopConnections, ['claude-code', 'codex']);
   assert.deepEqual(readdirSync(f.home), []);
+});
+test('agent-ready project defaults are preview-only and cannot bypass processing consent', t => {
+  const f = fixture(t); mkdirSync(join(f.root, 'design'));
+  writeFileSync(join(f.root, 'design/project.json'), JSON.stringify({ tooling: { hindsight: {
+    enabled: true, agents: ['claude-code', 'codex'], git: 'message', sessions: false,
+  } } }));
+  let r = f.invoke(['setup', '--provider', 'none']); assert.equal(r.status, 0, r.stderr);
+  const plan = JSON.parse(r.stdout); assert.deepEqual(plan.agents, ['claude-code', 'codex']);
+  assert.equal(plan.privacy.gitIngest, 'message'); assert.equal(plan.privacy.retainSessions, false);
+  assert.equal(plan.projectDefaults.source, 'design/project.json'); assert.deepEqual(readdirSync(f.home), []);
+  r = f.invoke(['setup', '--provider', 'none', '--apply']); assert.equal(r.status, 1);
+  assert.match(r.stderr, /CONSENT_REQUIRED/); assert.deepEqual(readdirSync(f.home), []);
+});
+test('invalid project Hindsight defaults fail closed without user-scope writes', t => {
+  const f = fixture(t); mkdirSync(join(f.root, 'design'));
+  writeFileSync(join(f.root, 'design/project.json'), JSON.stringify({ tooling: { hindsight: {
+    enabled: true, agents: ['all'], git: 'message', sessions: false,
+  } } }));
+  const r = f.invoke(['setup', '--provider', 'none']); assert.equal(r.status, 1);
+  assert.match(r.stderr, /PROJECT_MEMORY_CONFIG_INVALID/); assert.deepEqual(readdirSync(f.home), []);
 });
 test('new flags fail closed; no query processing or live discovery under dry-run', t => {
   const f = fixture(t);
@@ -124,7 +144,7 @@ test('MCP discovery refuses a wrong package version or unapproved repository bef
   fails(() => discoverTools({ ...f.repo, root: join(f.root, 'other'), mainRoot: undefined }, f.p, 'codex'), 'NOT_ENABLED');
 });
 test('shell memory and help memory work without framework dependencies, Git or Python', t => {
-  const f = fixture(t); const shell = new URL('../../app.mjs', import.meta.url);
+  const f = fixture(t); const shell = new URL('../../bin/app', import.meta.url);
   const result = spawnSync(process.execPath, [fileURLToPath(shell), 'help', 'memory', '--json'], { cwd: f.home, env: f.env, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr); assert.match(JSON.parse(result.stdout).help, /--provider/);
   assert.deepEqual(readdirSync(f.home), []);
@@ -142,13 +162,21 @@ test('launcher plan is pure and staged snapshots are reusable without checkout p
   assert.deepEqual(readdirSync(f.home), []); stageLauncher(f.p, plan);
   assert.equal(readFileSync(join(plan.directory, 'cli.ts'), 'utf8'), '// reviewed fixture\n');
   assert.equal(readFileSync(join(plan.directory, '../shared/hash.ts'), 'utf8'), '// reviewed fixture\n');
-  stageLauncher(f.p, plan); assert.deepEqual(readdirSync(dirname(plan.directory)).sort(), ['hindsight', 'shared']);
+  stageLauncher(f.p, plan); assert.deepEqual(readdirSync(dirname(plan.directory)).sort(), ['companion', 'hindsight', 'shared']);
   const entry = mcpEntry(f.repo, 'claude-code', f.p); assert.ok(entry.args[1].startsWith(join(f.state, 'launchers')));
 });
 test('changed launcher source invalidates its plan before creating a snapshot', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source);
   writeFileSync(join(source, 'cli.ts'), '// changed\n'); fails(() => stageLauncher(f.p, plan), 'PLAN_CHANGED');
   assert.equal(existsSync(plan.directory), false); assert.deepEqual(readdirSync(f.home), []);
+});
+test('the staged launcher is self-contained: every relative import resolves to a staged file', t => {
+  const f = fixture(t); const plan = launcherPlan(f.p); const staged = new Set(plan.files.map(file => file.name));
+  for (const file of plan.files.filter(file => /\.(?:ts|mjs)$/.test(file.name))) {
+    const text = readFileSync(join(plan.source, file.name), 'utf8');
+    for (const [, specifier] of text.matchAll(/(?:from|import)\s*\(?\s*'(\.{1,2}\/[^']+)'/g))
+      assert.ok(staged.has(posix.normalize(posix.join(posix.dirname(file.name), specifier))), `${file.name} imports ${specifier}, which the launcher snapshot does not stage`);
+  }
 });
 test('modified existing snapshot is preserved and rejected instead of silently overwritten', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source); stageLauncher(f.p, plan);

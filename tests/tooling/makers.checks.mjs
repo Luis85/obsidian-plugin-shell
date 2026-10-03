@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { parseArguments } from '../../scripts/makers/arguments.mjs';
-import { planMaker } from '../../scripts/makers/plan.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
+import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { planMaker } from '../../bin/adapters/makers/plan.ts';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
+import { loadCatalog } from '../../bin/adapters/makers/load-catalog.ts';
 import { loadEventCatalog } from '../../scripts/events/load-catalog.mjs';
 import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, removeMakerExamples, copyMakerSuite } from './maker-fixture.mjs';
 
@@ -89,7 +89,7 @@ test('[MAKE-03-05] generated independent feature and second entity execute their
   // Remove the original schemas and registry entries: generated tests/catalog
   // must use the reusable foundation, not reach through the worked examples.
   await removeMakerExamples(root);
-  const run = spawnSync(process.execPath, [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
+  const run = spawnSync(process.execPath, [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run', '--config', 'configs/testing/vitest.config.mjs'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
   assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
   assert.match(run.stdout, /10 passed/);
   const report = await loadCatalog(root);
@@ -110,7 +110,7 @@ test('[MAKE-EVENT-01] isolated event and listener compile and run on the real bu
   }, include: ['src/**/*.ts', 'tests/runtime/**/*.ts'] }));
   for (const args of [
     [join(sourceRoot, 'node_modules/typescript/bin/tsc'), '--noEmit'],
-    [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run'],
+    [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run', '--config', 'configs/testing/vitest.config.mjs'],
   ]) {
     const run = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
     assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);

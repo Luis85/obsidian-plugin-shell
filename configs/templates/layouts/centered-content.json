@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "template.centered-content",
+  "name": "Centered Content",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "template",
+  "category": "Layout",
+  "description": "Focused content layout for setup, onboarding and narrow workflows.",
+  "tags": [
+    "template",
+    "layout",
+    "centered",
+    "focused"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "focused-layout"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.detail-panel"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "composition",
+    "tag": "main",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

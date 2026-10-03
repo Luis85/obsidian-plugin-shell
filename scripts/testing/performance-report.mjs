@@ -2,6 +2,9 @@ import { readFile, lstat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { gzipSync, brotliCompressSync, constants } from 'node:zlib';
 import { sha256 } from './source-inputs.mjs';
+import { loadThresholds } from '../quality/thresholds.mjs';
+
+const budgets = loadThresholds().performance;
 
 export const performanceProtocol = Object.freeze({
   schemaVersion: 1, warmups: 3, samples: 30, clock: 'renderer performance.now()',
@@ -10,7 +13,7 @@ export const performanceProtocol = Object.freeze({
   readiness: 'Immediately before workspace.getLeaf(tab).setViewState; finish after Documents click, 100 exact fixture labels, aria-busy=false and two animation frames; includes mount, query, render and paint opportunity.',
   fixture: '100 stable-ID plugin-data item records, labels Reference item 001 through 100; schema 1; collection revision 100; each record revision 1.',
   policy: 'Three retained warmups then 30 sequential samples per metric; no retries, outlier removal or early readiness marker. Correctness failures abort and retain partial results.',
-  budgets: { 'warm-initialization': 200, 'items-readiness': 500 },
+  budgets: { 'warm-initialization': budgets.warmInitializationMs, 'items-readiness': budgets.itemsReadinessMs },
 });
 
 export function summarizePerformance(samples) {
@@ -41,7 +44,7 @@ export async function candidateSizes(directory, attributionDirectory = resolve('
     const path = join(directory, file); const stat = await lstat(path);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.size === 0) throw new Error(`PERFORMANCE_ASSET_INVALID:${file}`);
     const bytes = await readFile(path);
-    const limitBytes = file === 'main.js' ? 1024 * 1024 : file === 'styles.css' ? 160 * 1024 : null;
+    const limitBytes = file === 'main.js' ? budgets.mainJsBytes : file === 'styles.css' ? budgets.stylesCssBytes : null;
     assets.push({ file, sha256: sha256(bytes), bytes: bytes.length,
       gzipBytes: gzipSync(bytes, { level: 9 }).length,
       brotliBytes: brotliCompressSync(bytes, { params: { [constants.BROTLI_PARAM_QUALITY]: 11 } }).length,

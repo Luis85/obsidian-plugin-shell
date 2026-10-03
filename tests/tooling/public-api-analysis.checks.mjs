@@ -6,11 +6,12 @@ import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
 const implementation = 'export interface PublicContract { readonly title: string }\nexport const retained = () => 1;\n';
 async function analyzerProject(scratch, configure = config => config) {
-  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+  const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   const source = join(scratch, 'src'); const scripts = join(scratch, 'scripts/quality');
   await mkdir(join(source, 'features'), { recursive: true }); await mkdir(join(source, 'application')); await mkdir(scripts, { recursive: true });
   await writeFile(join(scratch, 'package.json'), JSON.stringify({ name: 'framework-api-analysis', private: true, type: 'module' }));
-  await writeFile(join(scratch, '.fallowrc.json'), JSON.stringify(configure({ ...config,
+  await mkdir(join(scratch, 'configs/quality'), { recursive: true });
+  await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify(configure({ ...config,
     entry: [...config.entry.filter(path => ['src/main.ts', 'src/features/api.ts'].includes(path)), 'scripts/quality/check-analyzer.mjs', 'scripts/quality/fallow-contract.mjs'], plugins: [],
   })));
   for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs']) await copyFile(`scripts/quality/${script}`, join(scripts, script));

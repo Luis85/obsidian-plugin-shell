@@ -1,4 +1,4 @@
-import { open, lstat, realpath } from 'node:fs/promises';
+import { open, lstat, realpath, type FileHandle } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { sha256 } from '../../../scripts/shared/hash.ts';
@@ -9,22 +9,30 @@ import { configuration, configFile, type Configuration } from './configuration.t
 import { requireThat, OperationError } from './contracts.ts';
 export const hash = (bytes: string | Uint8Array): string => sha256(bytes);
 export { exists };
-/** Refuse links in every supplied ancestor, not only the opened final file. */
-export async function readBounded(path: string, maxBytes = 1_048_576): Promise<Buffer> {
-  path = resolve(path);
+async function refuseLinkedAncestors(path: string): Promise<void> {
   for (let parent = path; ; parent = dirname(parent)) {
     const stat = await lstat(parent);
     requireThat(!stat.isSymbolicLink(), 'INPUT_LINK', 'Refusing a symlink in an input path.');
     if (parent === dirname(parent)) break;
   }
+}
+async function readInto(handle: FileHandle, buffer: Buffer): Promise<number> {
+  let size = 0;
+  while (size < buffer.length) { const next = await handle.read(buffer, size, buffer.length - size, null); if (!next.bytesRead) break; size += next.bytesRead; }
+  return size;
+}
+/** Refuse links in every supplied ancestor, not only the opened final file. */
+export async function readBounded(path: string, maxBytes = 1_048_576): Promise<Buffer> {
+  path = resolve(path);
+  await refuseLinkedAncestors(path);
   const before = await lstat(path);
   requireThat(before.isFile() && before.size <= maxBytes, 'INPUT_LIMIT', 'Expected a bounded regular input file.');
   const handle = await open(path, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
   try {
     const stat = await handle.stat();
     requireThat(stat.isFile() && stat.dev === before.dev && stat.ino === before.ino, 'INPUT_CHANGED', 'Input changed while opening.');
-    const buffer = Buffer.alloc(Math.min(maxBytes, stat.size) + 1); let size = 0;
-    while (size < buffer.length) { const next = await handle.read(buffer, size, buffer.length - size, null); if (!next.bytesRead) break; size += next.bytesRead; }
+    const buffer = Buffer.alloc(Math.min(maxBytes, stat.size) + 1);
+    const size = await readInto(handle, buffer);
     requireThat(size <= maxBytes, 'INPUT_LIMIT', 'Input exceeds its limit.');
     const after = await handle.stat();
     requireThat(size === stat.size && after.size === stat.size && after.mtimeMs === stat.mtimeMs, 'INPUT_CHANGED', 'Input changed while reading.');
@@ -43,7 +51,7 @@ export async function projectRoot(start: string, explicit = false): Promise<stri
   let root = resolve(start);
   if (explicit) { root = await realpath(root); await createFilePlan(root, []); return root; }
   while (true) {
-    if (await exists(join(root, configFile)) || await exists(join(root, 'app.mjs')) || await exists(join(root, 'shell.mjs'))) {
+    if (await exists(join(root, configFile)) || await exists(join(root, 'bin/app'))) {
       root = await realpath(root); await createFilePlan(root, []); return root;
     }
     const parent = dirname(root);

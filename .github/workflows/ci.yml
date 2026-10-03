@@ -47,8 +47,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     # Guided setup runs the complete verify gates once before the served showcase.
     # The integrated Windows suites exceed 30 minutes before coverage finishes.
-    # Match setup-compatibility's job budget; keep every test and threshold intact.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 30 }}
+    # Match setup-compatibility's job budget (75 minutes on Windows), which runs
+    # the same setup and complete verify; keep every test and threshold intact.
+    # This is a job budget, not a test deadline or product performance threshold.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -186,7 +188,7 @@ jobs:
   source-archive:
     name: Template authoring / source archive
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - *checkout
       - *setup-node
@@ -313,14 +315,14 @@ jobs:
           node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.sitemap.json
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.sitemap.json
           node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
@@ -401,15 +403,15 @@ jobs:
           node "$QUALIFIED_NPM" run test:visual
       - name: Generate, independently install, build and test the companion project
         run: |
-          node scripts/companion/qualify-project.mjs
-          node scripts/companion/qualify-project.mjs --boundary-fixture
-          node scripts/companion/qualify-project.mjs --provider-fixture
+          node scripts/companion-tools/qualify-project.mjs
+          node scripts/companion-tools/qualify-project.mjs --boundary-fixture
+          node scripts/companion-tools/qualify-project.mjs --provider-fixture
       - *playwright-version
       - *playwright-cache
       - name: Exercise generated stylesheet against real Nuxt UI components
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
-          node scripts/companion/qualify-styles.mjs
+          node scripts/companion-tools/qualify-styles.mjs
       - name: Retain exact source and generated project without dependencies or machine state
         if: always()
         run: |
@@ -458,7 +460,7 @@ jobs:
           failed=""
           for id in $STARTER_IDS; do
             echo "::group::Starter $id"
-            node scripts/companion/qualify-starter.mjs "$id" || failed="$failed $id"
+            node scripts/companion-tools/qualify-starter.mjs "$id" || failed="$failed $id"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi

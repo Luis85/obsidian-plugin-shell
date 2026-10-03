@@ -5,10 +5,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { projectModel, schema, literal } from '../../scripts/companion/compiler/model.ts';
-import { sample, typeCode } from '../../scripts/companion/compiler/schema-code.ts';
-import { matches } from '../../scripts/companion/runtime/contract.ts';
-import { planProject, applyProject, reviewProject } from '../../scripts/compiler/adapters/project-plan.ts';
+import { projectModel, schema, literal } from '../../bin/compiler/emitters/model.ts';
+import { sample, typeCode } from '../../bin/compiler/emitters/schema-code.ts';
+import { matches } from '../../templates/companion/runtime/contract.ts';
+import { planProject, applyProject, reviewProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const fixture = JSON.parse(await readFile(join(root,'docs/concepts/companion/companion-project.json'),'utf8'));
@@ -18,7 +18,7 @@ async function sandbox(work) {
   await writeFile(input,JSON.stringify(fixture));
   try { return await work({vault,input,target:'plugin'}); } finally { await rm(vault,{recursive:true,force:true}); }
 }
-function cli(options,extra = [], entry = join(root,'app.mjs')) {
+function cli(options,extra = [], entry = join(root,'bin/app')) {
   return spawnSync(process.execPath,[entry,'generate','--input',options.input,'--vault',options.vault,'--target',options.target,...extra],{encoding:'utf8',timeout:45000,maxBuffer:10_000_000});
 }
 test('self-project preserves all declared artifacts and exposes honest readiness',()=>{
@@ -94,7 +94,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.equal(JSON.parse(await readFile(join(target,'package-lock.json'),'utf8')).packages[''].name,pkg.name);
   const replay=await planProject(options); assert.deepEqual(replay.conflicts,[]); assert.ok(replay.plan.changes.every(c=>c.status==='unchanged'));
   assert.deepEqual((await applyProject(replay,replay.hash)).written,[]);
-  const ownCli=spawnSync(process.execPath,[join(target,'app.mjs'),'generate','--help'],{encoding:'utf8',timeout:10000}); assert.equal(ownCli.status,0,ownCli.stderr); assert.match(ownCli.stdout,/Usage:/);
+  const ownCli=spawnSync(process.execPath,[join(target,'bin/app'),'generate','--help'],{encoding:'utf8',timeout:10000}); assert.equal(ownCli.status,0,ownCli.stderr); assert.match(ownCli.stdout,/^Usage$/m);
 }));
 test('regeneration preserves consumer business logic and refuses conflicting rewrites',()=>sandbox(async options=>{
   const first=await planProject(options); await applyProject(first,first.hash);
@@ -120,10 +120,10 @@ test('existing unowned, manually changed managed, and removed owned files never 
   await rm(join(options.vault,options.target,'.companion/generation.json'));
   assert.ok((await planProject(options)).conflicts.some(c=>c.includes('unowned')));
 }));
-test('CLI rebuilds the reviewed hash and refuses stale design input or target bytes',()=>sandbox(async options=>{
-  const plan=cli(options); assert.equal(plan.status,0,plan.stderr); const hash=JSON.parse(plan.stdout).planHash;
+test('a rebuilt plan refuses a reviewed hash for stale design input or target bytes',()=>sandbox(async options=>{
+  const { hash }=await planProject(options);
   const next=clone(); next.notes.push('A changed declaration'); await writeFile(options.input,JSON.stringify(next));
-  const stale=cli(options,['--apply',hash]); assert.equal(stale.status,1); assert.match(stale.stderr,/stale/);
+  await assert.rejects(applyProject(await planProject(options),hash),/stale/);
   assert.deepEqual(await readdir(options.vault),['project.json']);
   const fresh=await planProject(options); await mkdir(join(options.vault,options.target)); await writeFile(join(options.vault,options.target,'manifest.json'),'consumer');
   await assert.rejects(applyProject(fresh,fresh.hash),/STALE/); assert.equal(await readFile(join(options.vault,options.target,'manifest.json'),'utf8'),'consumer');
@@ -141,8 +141,8 @@ test('unsafe vault targets and target symlinks are rejected without writes',()=>
   await mkdir(join(options.vault,'real')); await symlink(join(options.vault,'real'),join(options.vault,'link'),process.platform==='win32'?'junction':'dir');
   await assert.rejects(planProject({...options,target:'link'}),/link/i); assert.deepEqual(await readdir(join(options.vault,'real')),[]);
 }));
-test('public CLI has no implicit apply and rejects repeated/unknown flags',()=>sandbox(async options=>{
-  for (const extra of [['--target','again'],['--force','yes'],['--apply']]) { const result=cli(options,extra); assert.equal(result.status,1); }
+test('the public CLI has no external --vault/--target generation and writes nothing',()=>sandbox(async options=>{
+  for (const extra of [[],['--target','again'],['--force','yes'],['--apply']]) { const result=cli(options,extra); assert.equal(result.status,1); }
   assert.deepEqual(await readdir(options.vault),['project.json']);
 }));
 // Hooks generated from legacy detail designs were named after edge IDs; a legacy input's plan names their new IDs.

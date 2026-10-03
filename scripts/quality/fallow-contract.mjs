@@ -27,9 +27,11 @@ export function assertParsedCompletely(report, exit, fail) {
   if (gateStatus(report, 'parse-error', fail) !== 'pass') fail('PARSE_ERROR');
   assertExitVerdict(report, exit, fail);
 }
+// Repository gates read the relocated analyzer config; fixtures mirror it at the same project-relative path.
+const fallowConfig = 'configs/quality/fallow.json';
 export function runDeadCode(prefix, args = [], limits = {}) {
   const fail = code => { throw new Error(`${prefix}_${code}`); };
-  const run = spawnSync(process.execPath, ['node_modules/fallow/bin/fallow', '--format', 'json', 'dead-code', ...args],
+  const run = spawnSync(process.execPath, ['node_modules/fallow/bin/fallow', '--format', 'json', 'dead-code', '--config', fallowConfig, ...args],
     { encoding: 'utf8', maxBuffer: limits.maxBuffer ?? 12 * 1024 * 1024, timeout: limits.timeout ?? 60000 });
   if (limits.output) {
     mkdirSync(limits.output, { recursive: true });

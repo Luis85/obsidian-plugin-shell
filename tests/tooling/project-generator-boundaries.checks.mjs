@@ -5,13 +5,13 @@ import { join, relative, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
-import { parseDetailControl, copyDetailData } from '../../scripts/companion/runtime/detail-controls.ts';
-import { mapDetailPayload, detailValue } from '../../scripts/companion/runtime/detail-actions.ts';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
-import { visualSpecs } from '../../scripts/companion/compiler/visual-model.ts';
-import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
-import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
+import { parseDetailControl, copyDetailData } from '../../templates/companion/runtime/detail-controls.ts';
+import { mapDetailPayload, detailValue } from '../../templates/companion/runtime/detail-actions.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { projectFiles } from '../support/project-render.mjs';
+import { visualSpecs } from '../../bin/compiler/emitters/visual-model.ts';
+import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
+import { noteEntity } from '../../bin/compiler/emitters/persistence-code.ts';
 import { validateDetailDesigns } from '../../scripts/companion/detail-contract.mjs';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { visualSession, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
@@ -94,7 +94,7 @@ test('native adapters, typed controls, slot content and mapped handlers are gene
 // Exact src/bootstrap/features.ts that examples:remove writes; fixed so the check holds in every consumer state.
 const removedRegistry="import { createNoteFeatures } from '../application/note-feature';\n\n\n\nimport type { PreferenceService } from '../application/preference-service';\n\n/** Add one explicit registration per feature. Ports are provided once by runtime bootstrap. */\nexport function createFeatures(services: Parameters<typeof createNoteFeatures>[0], preferences: PreferenceService) {\n  void preferences;\n  return createNoteFeatures(services, () => ({\n    \n    \n    \n  }));\n}\n";
 test('native repositories extend example-removed and maker-extended registries and refuse other layouts',async()=>{
- const {readRegistry,extendRegistry}=await import('../../scripts/makers/registry.mjs');
+ const {readRegistry,extendRegistry}=await import('../../bin/adapters/makers/registry.ts');
  const consumer=extendRegistry(await readRegistry(root,removedRegistry),{key:'bookmark',local:'bookmarkFeature',from:'../features/bookmarks/bookmark.definition'});
  const template=await realpath(await mkdtemp(join(tmpdir(),'generator-registry-')));
  const skipped=new Set(['.git','node_modules','dist','dist-harness','reports','.fallow','.qualification']);

@@ -5,18 +5,21 @@ import { exists } from './files.ts';
 import { requireThat, OperationError, type Context } from './contracts.ts';
 import { projectInstallEnvironment } from '../../../scripts/shared/npm-install.mjs';
 import { NodeProcessFailure, runNodeProcess } from '../../../scripts/shared/process.ts';
+/** npm entries found on PATH; a Windows npm.cmd shim maps to the npm-cli.js beside it. */
+async function pathNpmEntries(): Promise<string[]> {
+  const found: string[] = [];
+  for (const folder of (process.env.PATH ?? '').split(delimiter).filter(Boolean)) {
+    const candidate = join(folder, process.platform === 'win32' ? 'npm.cmd' : 'npm');
+    if (!await exists(candidate)) continue;
+    const path = await realpath(candidate);
+    found.push(path.endsWith('.cmd') ? join(dirname(path), 'node_modules/npm/bin/npm-cli.js') : path);
+  }
+  return found;
+}
 export async function npmEntry(): Promise<string> {
   const explicit = process.env.QUALIFIED_NPM ?? process.env.npm_execpath;
   if (explicit) { const path = resolve(explicit); requireThat(await exists(path), 'NPM_MISSING', 'Selected npm entry does not exist.'); return path; }
-  const candidates = [join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), join(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js')];
-  for (const folder of (process.env.PATH ?? '').split(delimiter)) {
-    if (!folder) continue;
-    const candidate = join(folder, process.platform === 'win32' ? 'npm.cmd' : 'npm');
-    if (await exists(candidate)) {
-      const path = await realpath(candidate);
-      candidates.push(path.endsWith('.cmd') ? join(dirname(path), 'node_modules/npm/bin/npm-cli.js') : path);
-    }
-  }
+  const candidates = [join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), join(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js'), ...await pathNpmEntries()];
   for (const path of candidates) if (await exists(path)) return realpath(path);
   throw new OperationError('NPM_MISSING', 'No npm installation found.', 'Install the qualified Node/npm toolchain or explicitly set QUALIFIED_NPM to npm-cli.js.');
 }
@@ -44,26 +47,27 @@ export async function runNode(context: Context, entry: string, args: readonly st
     });
     return { exitCode: execution.exitCode ?? 0, signal: execution.signal, truncated: execution.truncated, stdout: execution.stdout };
   } catch (error) {
-    if (!(error instanceof NodeProcessFailure)) throw error;
-    if (error.kind === 'start') throw new OperationError('PROCESS_START_FAILED', error.message);
-    const diagnostic = error.kind === 'cancelled' ? 'CANCELLED'
-      : error.kind === 'timeout' ? 'TIMEOUT'
-      : error.kind === 'progress' ? 'PROGRESS_FAILED'
-      : 'PROCESS_FAILED';
-    const message = error.kind === 'exit'
-      ? `Process exited with ${error.exitCode ?? error.signal}; inspect stderr. Completed effects are preserved.`
-      : 'Process stopped. Completed external effects are not rolled back.';
-    const failure = new OperationError(diagnostic, message);
-    failure.details = {
-      execution: {
-        exitCode: error.exitCode,
-        signal: error.signal,
-        truncated: error.truncated,
-        stdout: error.stdout,
-        effects: 'preserved-or-uncertain; not rolled back',
-      },
-      automaticRetry: false,
-    };
-    throw failure;
+    throw processFailure(error);
   }
+}
+const failureCodes: Partial<Record<NodeProcessFailure['kind'], string>> = { cancelled: 'CANCELLED', timeout: 'TIMEOUT', progress: 'PROGRESS_FAILED' };
+/** Maps the shared process primitive's failure into the public, bounded operation error. */
+function processFailure(error: unknown): unknown {
+  if (!(error instanceof NodeProcessFailure)) return error;
+  if (error.kind === 'start') return new OperationError('PROCESS_START_FAILED', error.message);
+  const message = error.kind === 'exit'
+    ? `Process exited with ${error.exitCode ?? error.signal}; inspect stderr. Completed effects are preserved.`
+    : 'Process stopped. Completed external effects are not rolled back.';
+  const failure = new OperationError(failureCodes[error.kind] ?? 'PROCESS_FAILED', message);
+  failure.details = {
+    execution: {
+      exitCode: error.exitCode,
+      signal: error.signal,
+      truncated: error.truncated,
+      stdout: error.stdout,
+      effects: 'preserved-or-uncertain; not rolled back',
+    },
+    automaticRetry: false,
+  };
+  return failure;
 }

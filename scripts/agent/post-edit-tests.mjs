@@ -8,10 +8,11 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { boundedOutput, inputProblem, projectRootFor, readHookInput } from './hook-io.mjs';
 import { codeRoots } from '../shared/project-roots.mjs';
+import { projectConfigPath, projectConfigs } from '../shared/project-configs.mjs';
 
 const code = /\.(?:[cm]?[jt]s|vue)$/;
 const TIMEOUT_MS = 120_000;
-/** src/ and tests/ plus the product roots named in tsconfig.project.json (custom generated folders). */
+/** src/ and tests/ plus the product roots named in the project tsconfig (custom generated folders). */
 export function watchedRoots(root) {
   return codeRoots(root);
 }
@@ -27,12 +28,12 @@ export function editedTarget(input) {
   if (!watchedRoots(root).some(base => local === base || local.startsWith(`${base}/`))) return null;
   return { root, file: local };
 }
-export function relatedArguments(file) {
-  return ['node_modules/vitest/vitest.mjs', 'related', file, '--run', '--config', 'vitest.project.config.mjs', '--passWithNoTests', '--reporter=agent'];
+export function relatedArguments(file, config = projectConfigs.vitest.path) {
+  return ['node_modules/vitest/vitest.mjs', 'related', file, '--run', '--config', config, '--passWithNoTests', '--reporter=agent'];
 }
 /** Map a finished Vitest run to the hook's exit code and message. */
 export function postEditOutcome(target, run) {
-  if (run.error || run.signal) return { code: 1, message: `Related tests for ${target.file} did not finish (${run.error?.code ?? run.error?.message ?? run.signal}). Run: npx vitest related ${target.file} --run --config vitest.project.config.mjs` };
+  if (run.error || run.signal) return { code: 1, message: `Related tests for ${target.file} did not finish (${run.error?.code ?? run.error?.message ?? run.signal}). Run: npx vitest related ${target.file} --run --config ${projectConfigPath(target.root, 'vitest') ?? projectConfigs.vitest.path}` };
   if (run.status === 0) return { code: 0, message: '' };
   return { code: 2, message: `Tests related to ${target.file} fail after this edit (vitest related, exit ${run.status}). Fix the code or the test before continuing:\n${boundedOutput(`${run.stdout ?? ''}\n${run.stderr ?? ''}`)}` };
 }
@@ -47,7 +48,7 @@ async function runHook(input) {
   const target = editedTarget(input);
   if (!target) return { code: 0, message: '' };
   if (!existsSync(join(target.root, 'node_modules/vitest/vitest.mjs'))) return { code: 1, message: 'Vitest is not installed in this project; run npm ci.' };
-  const run = spawnSync(process.execPath, relatedArguments(target.file), { cwd: target.root, encoding: 'utf8', timeout: TIMEOUT_MS,
+  const run = spawnSync(process.execPath, relatedArguments(target.file, projectConfigPath(target.root, 'vitest') ?? undefined), { cwd: target.root, encoding: 'utf8', timeout: TIMEOUT_MS,
     maxBuffer: 16 * 1024 * 1024, env: { ...process.env, FORCE_COLOR: '0' } });
   return postEditOutcome(target, run);
 }

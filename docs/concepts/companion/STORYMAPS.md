@@ -85,7 +85,7 @@ The portable definition uses ordered arrays rather than persisted coordinates:
 
 `releaseId: null` means Unplanned. Array order is authoritative within each parent/cell. The shared `scripts/companion/storymap-contract.mjs` validator is used by the browser and read-only Node handoff. Vue Flow is a disposable projection of this model, not a second persisted source of truth.
 
-The **read-only inspection entrypoint** `companion:generate` validates the export/target and returns exact input bytes. The separate **`companion:scaffold` / `node shell.mjs generate`** generator provides reviewed plan/apply scaffolding; see [COMPANION-GENERATOR.md](../../development/COMPANION-GENERATOR.md). It retains the complete authoring document but does not implement a native Storymaps engine or prove business acceptance. Storymap data stays excluded from the older illustrative blueprint compiler fingerprint/output. Editing a lane is not authorization to generate code. Full-project JSON is the lossless interchange route.
+The **read-only inspection entrypoint** `companion:generate` validates the export/target and returns exact input bytes. The separate **`companion:scaffold` / `node bin/app generate`** generator provides reviewed plan/apply scaffolding; see [COMPANION-GENERATOR.md](../../development/COMPANION-GENERATOR.md). It retains the complete authoring document but does not implement a native Storymaps engine or prove business acceptance. Storymap data stays excluded from the older illustrative blueprint compiler fingerprint/output. Editing a lane is not authorization to generate code. Full-project JSON is the lossless interchange route.
 
 ## Bounds and implementation ownership
 

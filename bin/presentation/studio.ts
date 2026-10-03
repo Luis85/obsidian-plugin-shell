@@ -17,6 +17,7 @@ import { review } from './review.ts';
 import { workspaceContext } from './context.ts';
 import { choose, input, titleInput, confirm, reportError, type Prompts } from './prompts.ts';
 import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
+import { browseComponentTemplates } from './template-browser.ts';
 export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime }
 async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
   const snapshot = await readSnapshot(options.root, options.project);
@@ -71,6 +72,7 @@ export function studioActions(ui: Prompts, options: StudioOptions, workspace: Wo
     page: { label: 'Continue an existing page', run: () => selectPage(ui, workspace) },
     bricks: { label: 'Edit sitemap, layout, entities, data sources and journeys', run: () => editBricks(ui, workspace) },
     library: { label: 'Create or rename components', run: () => library(ui, workspace) },
+    templates: { label: 'Browse component and page templates', run: () => browseComponentTemplates(ui, workspace, options) },
     brainstorm: { label: 'Brainstorm a new project or feature', run: async () => {
       if (workspace.dirty) {
         if (!await confirm(ui, 'Save current project before starting a feature brainstorm?')) return;

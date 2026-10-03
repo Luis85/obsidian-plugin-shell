@@ -17,7 +17,7 @@ async function scratch(t) {
 }
 /** The real terminal entry point, never a TTY: relative paths resolve against the caller's cwd. */
 function cli(args, cwd) {
-  return spawnSync(process.execPath, [join(root, 'app.mjs'), 'new', ...args], { cwd, encoding: 'utf8', timeout: 120000, maxBuffer: 50_000_000, stdio: ['pipe', 'pipe', 'pipe'] });
+  return spawnSync(process.execPath, [join(root, 'bin/app'), 'new', ...args], { cwd, encoding: 'utf8', timeout: 120000, maxBuffer: 50_000_000, stdio: ['pipe', 'pipe', 'pipe'] });
 }
 function machine(args, cwd) {
   const output = cli([...args, '--json'], cwd);

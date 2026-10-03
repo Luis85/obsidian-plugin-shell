@@ -4,7 +4,7 @@ import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { clickdummyHostCode } from '../../scripts/companion/compiler/clickdummy-host-code.ts';
+import { clickdummyHostCode } from '../../bin/compiler/emitters/clickdummy-host-code.ts';
 
 async function load(t) {
   const root = await mkdtemp(join(tmpdir(), 'preview-lifecycle-'));

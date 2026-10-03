@@ -13,7 +13,8 @@ async function fixture(action) {
   const root = await mkdtemp(join(tmpdir(), 'maintainability-fixture-'));
   try {
     for (const directory of ['src', 'scripts', 'tests', 'harness']) await mkdir(join(root, directory));
-    for (const file of ['package.json', 'package-lock.json', '.fallowrc.json']) await writeFile(join(root, file), await readFile(resolve(file)));
+    await mkdir(join(root, 'configs/quality'), { recursive: true });
+    for (const file of ['package.json', 'package-lock.json', 'configs/quality/fallow.json']) await writeFile(join(root, file), await readFile(resolve(file)));
     await symlink(resolve('node_modules'), join(root, 'node_modules'), 'junction');
     await writeFile(join(root, 'src/main.ts'), composition);
     await action(root);

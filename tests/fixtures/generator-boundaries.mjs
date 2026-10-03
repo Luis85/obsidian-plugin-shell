@@ -1,6 +1,6 @@
 // Synthetic qualification design. Never substituted for the actual companion export.
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { noteWireSchemas } from '../../scripts/companion/compiler/note-contracts.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { noteWireSchemas } from '../../bin/compiler/emitters/note-contracts.ts';
 export function boundaryProject(original) {
   const project = structuredClone(original), design = project.design;
   project.schemaVersion=4;design.schema=4;

@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { docsPlan } from './docs.ts';
 import { prototypesPlan } from './prototypes.ts';
 import { airshipPlan } from './airship-plan.ts';
@@ -5,12 +6,13 @@ import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '../../../scripts/shared/file-plan.ts';
-import { parseArguments as makerArguments, builtinRecipes } from '../../../scripts/makers/arguments.mjs';
+import { parseArguments as makerArguments, builtinRecipes } from '../makers/arguments.ts';
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
 import { conceptImportPlan } from './concepts.ts';
-import { editStarterPlan } from '../../../scripts/starters/operations.ts';
+import { editStarterPlan } from '../starters/operations.ts';
+import { componentTemplatePlan } from './component-templates.ts';
 import { starterProjectPlan } from './starter-project.ts';
 import { styleExportPlan } from './styles.ts';
 import { upgradePlan } from './kit.ts';
@@ -25,7 +27,7 @@ async function makerPlan(request: Request, context: Context): Promise<Planned> {
   const args = [recipe, name];
   const fields = descriptor('make').options;
   for (const [key, value] of Object.entries(request.options)) if (Object.hasOwn(fields, key) && !['list', 'trust-custom'].includes(key)) { args.push('--' + key); if (typeof value === 'string') args.push(value); }
-  const { planMaker } = await import('../../../scripts/makers/plan.mjs');
+  const { planMaker } = await import('../makers/plan.ts');
   const planned = await planMaker(context.root, makerArguments(args));
   return { plan: planned.plan, summary: { maker: planned.maker, checks: planned.checks.map(check => ({ ...check, status: 'not-run' })) }, conflicts: [] };
 }
@@ -53,31 +55,37 @@ async function pluginPlan(context: Context): Promise<Planned> {
   }
   return { plan: await createFilePlan(context.root, entries), conflicts: [], summary: { plugin: manifest.id, activation: 'manual', dataJson: 'preserved', target: prefix } };
 }
+type Planner = (request: Request, context: Context) => Promise<Planned>;
+async function frameworkUpgradePlan(request: Request, context: Context): Promise<Planned> {
+  const from = stringOption(request.options, 'from'); requireThat(from, 'INPUT_REQUIRED', 'Supply --from <extracted-kit>.');
+  return upgradePlan(context, from);
+}
+/** Each command's reviewed planner; prototype subcommands share one planner. */
+const planners: Record<string, Planner> = {
+  'docs import': docsPlan, 'docs export': docsPlan,
+  'handout generate': handoutPlan, 'handout refresh': handoutPlan,
+  'airship enable': airshipPlan, 'airship disable': airshipPlan,
+  setup: configurationPlan, 'config set': configurationPlan, 'project import': configurationPlan,
+  generate: generationPlan,
+  'concept import': conceptImportPlan,
+  'starters add': editStarterPlan, 'starters edit': editStarterPlan,
+  'templates docs': componentTemplatePlan, 'templates instantiate': componentTemplatePlan,
+  new: starterProjectPlan,
+  'styles export': styleExportPlan,
+  make: makerPlan,
+  'vault prepare': (_request, context) => vaultPlan(context),
+  'plugin install': (_request, context) => pluginPlan(context),
+  'release prepare': releaseVersionPlan,
+  'framework upgrade': frameworkUpgradePlan,
+};
+function plannerFor(command: string): Planner {
+  if (Object.hasOwn(planners, command)) return planners[command]!;
+  if (command.startsWith('prototypes ')) return prototypesPlan;
+  throw new Error('Operation has no file plan.');
+}
 export async function planOperation(request: Request, context: Context) {
   requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  let planned: Planned;
-  switch (request.command) {
-    case 'docs import': case 'docs export': planned = await docsPlan(request, context); break;
-    case 'handout generate': case 'handout refresh': planned = await handoutPlan(request, context); break;
-    case 'airship enable': case 'airship disable': planned = await airshipPlan(request, context); break;
-    case 'setup': case 'config set': case 'project import': planned = await configurationPlan(request, context); break;
-    case 'generate': planned = await generationPlan(request, context); break;
-    case 'concept import': planned = await conceptImportPlan(request, context); break;
-    case 'starters add': case 'starters edit': planned = await editStarterPlan(request, context); break;
-    case 'new': planned = await starterProjectPlan(request, context); break;
-    case 'styles export': planned = await styleExportPlan(request, context); break;
-    case 'make': planned = await makerPlan(request, context); break;
-    case 'vault prepare': planned = await vaultPlan(context); break;
-    case 'plugin install': planned = await pluginPlan(context); break;
-    case 'release prepare': planned = await releaseVersionPlan(request, context); break;
-    case 'framework upgrade': {
-      const from = stringOption(request.options, 'from'); requireThat(from, 'INPUT_REQUIRED', 'Supply --from <extracted-kit>.');
-      planned = await upgradePlan(context, from); break;
-    }
-    default:
-      if (request.command.startsWith('prototypes ')) { planned = await prototypesPlan(request, context); break; }
-      throw new Error('Operation has no file plan.');
-  }
+  const planned: Planned = await plannerFor(request.command)(request, context);
   const requestData = canonicalRequest(request);
   const configurationHash = await exists(join(context.root, configFile)) ? hash(await readBounded(join(context.root, configFile))) : null;
   const changes = planned.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash }));
@@ -93,7 +101,7 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
   const fresh = await planOperation(planned.request, context);
   requireThat(fresh.planHash === expected && fresh.conflicts.length === 0, 'PLAN_STALE', 'Inputs changed after review; inspect a new plan.');
   const journal = fresh.request.command.startsWith('docs ')
-    ? (await import('../../../scripts/application-docs/adapters/recovery.ts')).journalHook(fresh.plan) : null;
+    ? (await import('../../documentation/adapters/recovery.ts')).journalHook(fresh.plan) : null;
   return applyFilePlan(fresh.plan, { async beforeWrite() {
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
     await journal?.();
@@ -104,7 +112,7 @@ export async function saveOperationPlan(context: Context, planned: Awaited<Retur
   requireThat(planned.request.options['trust-custom'] !== true, 'CUSTOM_PLAN_NOT_PORTABLE', 'Custom maker trust cannot be serialized as approval.');
   const path = resolve(context.root, output);
   const local = relative(context.root, path);
-  requireThat(local && !isAbsolute(local) && !local.split(sep).some(part => ['..', '.framework', '.companion', '.test-vault', '.obsidian'].includes(part.toLowerCase())), 'PLAN_OUTPUT_PROTECTED', 'Store plans inside the project, outside framework and ownership directories.');
+  requireThat(local && !isAbsolute(local) && !local.split(sep).some(part => ['..', '.framework', '.companion', '.test-vault', defaultVaultConfigDirectory].includes(part.toLowerCase())), 'PLAN_OUTPUT_PROTECTED', 'Store plans inside the project, outside framework and ownership directories.');
   requireThat(!planned.plan.changes.some(change => change.path.toLowerCase() === local.split(sep).join('/').toLowerCase()), 'PLAN_OUTPUT_COLLISION', 'A saved plan cannot occupy one of its output paths.');
   const config = await readConfiguration(context.root);
   requireThat(!config || !local.split(sep).some(part => part.toLowerCase() === config.paths.testVaultFolder.toLowerCase()), 'PLAN_OUTPUT_PROTECTED', 'Saved plans must remain outside the configured test vault.');

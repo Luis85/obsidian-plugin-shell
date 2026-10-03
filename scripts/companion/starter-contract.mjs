@@ -1,10 +1,19 @@
 /** External starter projections are data. The retained browser fixture uses v5; current consumers also validate v6. */
-import { validateCompanionDocument, validateCompanionFolders, parseCompanionDocument } from './project-contract.mjs';
+import { validateCompanionDocument, validateCompanionFolders } from './project-contract.mjs';
 import { validateAuthoringDocument, parseAuthoringDocument } from './authoring-contract.ts';
+import { validateTooling } from './tooling-contract.mjs';
 export const STARTER_CATALOG_VERSION = 1;
 const STARTER_FIELDS = ['id', 'name', 'category', 'level', 'summary', 'outcome', 'includes', 'implementation', 'tags', 'version', 'file', 'sha256', 'document'];
 function starterAssert(ok, message) { if (!ok) throw Error('STARTER_INVALID: ' + message); }
 function starterText(value, limit = 400) { return typeof value === 'string' && value.trim().length > 0 && value.length <= limit && !/[\u0000-\u001f]/.test(value); }
+/** v6 documents use the authoring contract; a v5 projection carries optional development tooling outside its frozen envelope. */
+function starterDocument(value) {
+  if (value?.schemaVersion === 6) { validateAuthoringDocument(value); return value; }
+  const legacy = structuredClone(value);
+  const tooling = legacy?.tooling; if (legacy) delete legacy.tooling;
+  validateCompanionDocument(legacy); validateTooling(tooling);
+  return value;
+}
 export function validateStarterCatalog(value) {
   starterAssert(value && value.schemaVersion === STARTER_CATALOG_VERSION && Array.isArray(value.starters), 'Unsupported catalog.');
   starterAssert(Object.keys(value).every(k => ['schemaVersion', 'starters'].includes(k)), 'Unknown catalog field.');
@@ -18,8 +27,7 @@ export function validateStarterCatalog(value) {
     starterAssert(['Foundation', 'Everyday', 'Advanced'].includes(entry.level), 'Unknown difficulty.');
     starterAssert(entry.file === entry.id + '.companion.json' && /^[a-f0-9]{64}$/.test(entry.sha256), 'Invalid local source identity.');
     for (const key of ['includes', 'implementation', 'tags']) starterAssert(Array.isArray(entry[key]) && entry[key].length > 0 && entry[key].length <= 32 && entry[key].every(v => starterText(v)), 'Invalid ' + key + '.');
-    if (entry.document?.schemaVersion === 6) validateAuthoringDocument(entry.document);
-    else validateCompanionDocument(entry.document);
+    starterDocument(entry.document);
     starterAssert([5, 6].includes(entry.document.schemaVersion), 'Starters require project v5 or v6.');
   }
   // Empty installations and a single custom starter are valid; no bundled blank fallback.
@@ -45,5 +53,5 @@ export function customizeStarter(catalog, id, fields) {
   }
   // Provenance is informational Markdown, not a schema extension or execution authority.
   document.notes.push('# Project starter\n\nDefinition: ' + entry.id + ' @ ' + entry.version + '\nSource SHA-256: ' + entry.sha256 + '\n\nThis project is an independent editable copy. Catalog updates never overwrite it. No execution approvals, credentials, machine paths, test results or plugin installation are imported.\n');
-  return document.schemaVersion === 6 ? parseAuthoringDocument(JSON.stringify(document)) : parseCompanionDocument(JSON.stringify(document));
+  return document.schemaVersion === 6 ? parseAuthoringDocument(JSON.stringify(document)) : starterDocument(JSON.parse(JSON.stringify(document)));
 }

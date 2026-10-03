@@ -4,7 +4,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { digest, requireThat } from './policy.ts';
 import { noSymlink, readText, type Paths } from './io.ts';
-const FILES = ['cli.ts', 'desktop.ts', 'embedded.py', 'install.ts', 'io.ts', 'launcher.ts', 'mcp.ts', 'policy.ts', 'provider.ts', 'sources.ts', '../shared/hash.ts'];
+const FILES = ['cli.ts', 'desktop.ts', 'embedded.py', 'install.ts', 'io.ts', 'launcher.ts', 'mcp.ts', 'policy.ts', 'provider.ts', 'sources.ts',
+  '../companion/tooling-contract.mjs', '../shared/hash.ts'];
 const PACKAGE = '{"type":"module","private":true}\n';
 export interface LauncherPlan { source: string; directory: string; digest: string; files: { name: string; sha256: string }[] }
 export function launcherPlan(p: Paths, source = dirname(fileURLToPath(import.meta.url))): LauncherPlan {

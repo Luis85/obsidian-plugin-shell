@@ -36,7 +36,7 @@ Use actual host capabilities; a Claude directory name never requires launching C
 
 ## Project-starter package routing
 
-For `node shell.mjs new` packages, read `project.config.json` and
+For `node bin/app new` packages, read `project.config.json` and
 `references/project-starters.md` **before** following the legacy Vue-only flow below.
 Its target/framework contract governs source, build and artifact requirements.
 Do not convert a vanilla, Angular or CLI selection to Vue; no HTML is required for
@@ -46,7 +46,7 @@ This section overrides legacy stack-specific instructions, not safety or accepta
 ## Prepared maker handoff
 
 The TypeScript maker under `bin/` can prepare this workflow with
-`node shell.mjs prototype` or the equivalent versioned JSON request. Discover
+`node bin/app prototype` or the equivalent versioned JSON request. Discover
 its data-driven interview using `prototype guide --json`; `sketch schema --json`
 describes page/component/interaction authoring. The guide is
 `bin/guides/prototype.json`, not a separate agent-host skill.

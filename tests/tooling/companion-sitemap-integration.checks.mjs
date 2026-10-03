@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { executeOperation } from '../../scripts/framework/operations.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { inspectSitemapSummary } from '../../scripts/companion/sitemap/summary.ts';
 import { applySitemapCommand } from '../../scripts/companion/sitemap/commands.ts';
 
@@ -42,7 +42,9 @@ test('all checked-in starters pass the shared sitemap core without synthesizing 
   const folder = resolve(root, 'docs/concepts/companion/starters');
   const catalog = JSON.parse(await readFile(resolve(folder, 'catalog.json'), 'utf8'));
   for (const entry of catalog.starters) {
-    const document = validateCompanionDocument(JSON.parse(await readFile(resolve(folder, entry.file), 'utf8')));
+    // Starter files may carry optional tooling defaults; the starter contract validates those separately.
+    const { tooling: _tooling, ...stored } = JSON.parse(await readFile(resolve(folder, entry.file), 'utf8'));
+    const document = validateCompanionDocument(stored);
     const original = JSON.stringify(document);
     const summary = inspectSitemapSummary(document.design);
     assert.equal(summary.surfaces, document.design.nodes.length, entry.id);

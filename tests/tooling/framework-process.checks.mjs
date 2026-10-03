@@ -5,12 +5,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { runNode, npmEntry } from '../../scripts/framework/process.ts';
+import { runNode, npmEntry } from '../../bin/adapters/framework/process.ts';
 import { runNodeProcess, runNodeScript as typedSharedRunNode } from '../../scripts/shared/process.ts';
-import { runNodeScript as legacySharedRunNode } from '../../scripts/shared/process.mjs';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { failure } from '../../scripts/framework/contracts.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { failure } from '../../bin/adapters/framework/contracts.ts';
 import { fixtureManifest } from './test-data-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t, code = '') {
@@ -48,15 +47,15 @@ test('file-plan failures expose bounded recovery metadata without reading arbitr
   assert.equal(response.diagnostics[0].code, 'PLAN_STALE'); assert.deepEqual(response.data.recovery.preserved, ['two']); assert.equal(calls, 0); assert.equal(response.data.automaticRetry, false);
 });
 test('npm silent and direct CLI discovery return the same contract', async () => {
-  const direct = spawnSync(process.execPath, [join(root, 'app.mjs'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
-  const indirect = spawnSync(process.execPath, [await npmEntry(), 'run', '--silent', 'shell', '--', 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
+  const direct = spawnSync(process.execPath, [join(root, 'bin/app'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
+  const indirect = spawnSync(process.execPath, [await npmEntry(), 'run', '--silent', 'app', '--', 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
   assert.equal(direct.status, 0, direct.stderr); assert.equal(indirect.status, 0, indirect.stderr);
   assert.deepEqual(JSON.parse(indirect.stdout), JSON.parse(direct.stdout));
 });
-test('extensionless bin/app, npm app/exec and the legacy shell.mjs shim reach the same CLI', async () => {
-  const expected = JSON.parse(spawnSync(process.execPath, [join(root, 'app.mjs'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000}).stdout);
+test('extensionless bin/app and npm app/exec reach the same CLI', async () => {
+  const expected = JSON.parse(spawnSync(process.execPath, [join(root, 'bin/app'), 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000}).stdout);
   const npm = await npmEntry();
-  for (const argv of [[join(root, 'bin/app')], [join(root, 'shell.mjs')], [npm, 'run', '--silent', 'app', '--'], [npm, 'exec', '--no', '--', 'obs-shell']]) {
+  for (const argv of [[join(root, 'bin/app')], [npm, 'run', '--silent', 'app', '--'], [npm, 'exec', '--no', '--', 'obs-shell']]) {
     const output = spawnSync(process.execPath, [...argv, 'capabilities', '--json'], {cwd: root, encoding: 'utf8', timeout: 30000});
     assert.equal(output.status, 0, argv.join(' ') + output.stderr);
     assert.deepEqual(JSON.parse(output.stdout), expected, argv.join(' '));
@@ -85,12 +84,11 @@ test('dry-run dominates public execution flags and never launches a release adap
   assert.ok(!(await readdir(ctx.root)).includes('release-adapter-started'));
 });
 
-test('typed shared process runner remains the canonical compatibility implementation', async t => {
-  assert.equal(legacySharedRunNode, typedSharedRunNode);
+test('typed shared process runner preserves successful and failed child exits', async t => {
   const ctx = await fixture(t, `process.exitCode = Number(process.argv[2] ?? 0);`);
   const entry = join(ctx.root, 'child.mjs');
   await typedSharedRunNode(entry, ['0'], { cwd: ctx.root, stdio: 'ignore' });
-  await assert.rejects(legacySharedRunNode(entry, ['7'], { cwd: ctx.root, stdio: 'ignore' }), error => {
+  await assert.rejects(typedSharedRunNode(entry, ['7'], { cwd: ctx.root, stdio: 'ignore' }), error => {
     assert.equal(error.exitCode, 7);
     assert.equal(error.signal, null);
     return true;
@@ -98,7 +96,8 @@ test('typed shared process runner remains the canonical compatibility implementa
 });
 
 test('framework process adapter uses the shared Node spawn lifecycle', async t => {
-  const source = await readFile(join(root, 'scripts/framework/process.ts'), 'utf8');
+  await assert.rejects(readFile(join(root, 'scripts/framework/process.ts')), { code: 'ENOENT' });
+  const source = await readFile(join(root, 'bin/adapters/framework/process.ts'), 'utf8');
   assert.doesNotMatch(source, /node:child_process|StringDecoder/);
   assert.match(source, /runNodeProcess/);
 

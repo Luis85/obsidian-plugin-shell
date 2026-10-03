@@ -42,7 +42,7 @@ async function main(argv) {
 async function runVitest(args) {
   await rm(resolve('reports/obsidian'), { recursive: true, force: true });
   await mkdir(resolve('reports/obsidian/cases'), { recursive: true });
-  const child = spawn(process.execPath, [resolve('node_modules/vitest/vitest.mjs'), 'run', '--config', 'vitest.obsidian.config.mjs', ...args], { stdio: 'inherit' });
+  const child = spawn(process.execPath, [resolve('node_modules/vitest/vitest.mjs'), 'run', '--config', 'configs/testing/vitest.obsidian.config.mjs', ...args], { stdio: 'inherit' });
   const forward = signal => { child.kill(signal); };
   process.on('SIGINT', forward); process.on('SIGTERM', forward);
   return new Promise((ok, fail) => {

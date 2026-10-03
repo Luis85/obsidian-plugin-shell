@@ -33,7 +33,7 @@ Starter shortcut: `node bin/app new ../my-plugin --starter quick-capture --autho
 
 ## What the generated project contains
 
-Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `scripts/companion/devkit/*.tmpl` by `scripts/companion/compiler/devkit-files.ts`:
+Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `templates/companion/devkit/*.tmpl` by `bin/compiler/emitters/devkit-files.ts`:
 
 | Path | Purpose |
 | --- | --- |
@@ -42,17 +42,20 @@ Besides the framework copy and the generated product code, every project gets a 
 | `.claude/settings.json` | Permission allowlist for safe commands, deny rules for publishing/force-push/release; a PostToolUse hook runs `vitest related` for each edited source or test file and a Stop hook runs `npm run check -- --fast` (`scripts/agent/*.mjs`) |
 | `.claude/skills/*/SKILL.md` | `implement-requirement`, `debug-in-obsidian`, `add-feature`, `write-obsidian-test` |
 | `.github/copilot-instructions.md`, `.cursor/rules/project.mdc` | One-line pointers to `AGENTS.md` |
-| `.vscode/` | Recommended extensions, Vitest pointed at `vitest.project.config.mjs`, "Attach to Obsidian (dev:obsidian)" on port 9222, "Debug current Vitest file", tasks for `dev:obsidian`, `check`, `test:watch` |
+| `.vscode/` | Recommended extensions, Vitest pointed at `configs/testing/vitest.project.config.mjs`, "Attach to Obsidian (dev:obsidian)" on port 9222, "Debug current Vitest file", tasks for `dev:obsidian`, `check`, `test:watch` |
 | `.editorconfig` | Two-space, LF, UTF-8 |
 | `.github/workflows/ci.yml`, `obsidian.yml` | Product CI: `check` + `verify:project` on every push/PR; real-Obsidian tests on `main` and on demand, with cached host download and uploaded evidence |
-| `vitest.project.config.mjs` | Product tests with the shared build config, the `@test/obsidian` in-memory host and the throwing `obsidian` boundary; default reporters (agents get Vitest's `agent` reporter) |
+| `configs/testing/vitest.project.config.mjs` | Product tests with the shared build config, the `@test/obsidian` in-memory host and the throwing `obsidian` boundary; default reporters (agents get Vitest's `agent` reporter) |
+| `configs/types/tsconfig.project.json`, `configs/bundling/vite.preview.config.mjs` | Project typecheck scope (`typecheck:project`) and the source preview (`dev:preview`); `configs/types/tsconfig.clickdummy.json` joins them for click-dummy output |
 | `<tests>/project/plugin-host.test.ts` | Example kit test: loads `src/main.ts`, opens the workbench, toggles debug logging, unloads, and proves fixture notes are untouched |
+
+Tool configuration lives under `configs/<concern>/`, like the framework's own. Only files a tool requires at the project root stay there: `package.json`, the lockfile, `manifest.json`, `versions.json`, a `tsconfig.json` stub for editors and `airship.config.json` (the upstream Airship CLI reads it from the project root). A project generated before this layout keeps its root copies of `vitest.project.config.mjs`, `tsconfig.project.json` and `vite.preview.config.mjs`: regeneration writes the new files but never removes a retired one, and the CLI, suite runner and agent hooks fall back to the root copy until the new one exists. Delete the root copies after regenerating.
 
 The framework's own `README.md`, `AGENTS.md`, `TEMPLATE-GUIDE.md` and `SHELL-FIRST-OVERVIEW.md` move to `docs/framework/`, and its maintainer workflows to `docs/framework/workflows/` (inert reference; copied framework docs link to them). Every copied Markdown link to a moved file is rebased. The maintainer-only Windows runner script and the maintainer CI trigger test are not copied. All kit files are `extension` ownership: regeneration updates them while unedited, keeps your edits, and reports a conflict when both you and the template changed a file. `PROJECT-IMPLEMENTATION.md` stays `managed`.
 
 Generated plugins also register the shell's `debug-toggle` and `debug-report` commands (the dev loop enables debug logging after each load), use `<id>-view-*` view types that the shell's view-header binding accepts, and name Vue component files with multiple words so `npm run check` is lint-clean for every starter.
 
-The original `npm run companion:generate` and `scripts/companion/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
+The original `npm run companion:generate` and `scripts/companion-tools/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
 
 ## Generated implementation contracts
 
@@ -109,7 +112,7 @@ The output is a development shell. Components without detail designs remain impl
 ## Visual page and component generation (companion v5)
 
 The compiler reads validated `design.visualDesigns`; v3/v4 inputs are migrated first (`migrateCompanionDocument`), so
-the detail-schema sections below are historical. `scripts/companion/compiler/visual-*.ts` lower each page to
+the detail-schema sections below are historical. `bin/compiler/emitters/visual-*.ts` lower each page to
 `presentation/components/details/<pageId>.vue` and each component to its library SFC with `defineProps`/`defineEmits`/
 `defineSlots` from the typed contract. Elements become their tags, text becomes escaped interpolation or a typed
 binding, slots become `<slot>`, project components are imported by export name and Nuxt UI entries become explicitly

@@ -17,7 +17,7 @@ export function words(line) {
   return result;
 }
 export async function audit(base = root) {
-  const { parseCliArguments } = await import(pathToFileURL(join(base, 'scripts/framework/catalog.ts')).href);
+  const { parseCliArguments } = await import(pathToFileURL(join(base, 'bin/adapters/framework/catalog.ts')).href);
   const folder = join(base, 'docs/user-manual/shell-cli');
   const files = (await readdir(folder)).filter(name => name.endsWith('.md')).sort();
   let checked = 0, separateMemory = 0, links = 0;
@@ -30,7 +30,7 @@ export async function audit(base = root) {
         else if (fence[0] === marker[1][0] && marker[1].length >= fence.length) { fence = ''; language = ''; }
         continue;
       }
-      if (fence && language === 'sh' && /^node (?:bin\/app|app\.mjs|shell\.mjs) /.test(line)) {
+      if (fence && language === 'sh' && /^node bin\/app /.test(line)) {
         const argv = words(line).slice(2);
         if (argv[0] === 'memory') { separateMemory++; continue; }
         try { parseCliArguments(argv); checked++; }

@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { maintainabilityInventory } from '../../scripts/quality/maintainability-inventory.mjs';
-import { sha256 } from '../../scripts/shared/hash.mjs';
+import { sha256 } from '../../scripts/shared/hash.ts';
 
 async function fixture(run) {
   const root = await mkdtemp(join(tmpdir(), 'python-inventory-'));

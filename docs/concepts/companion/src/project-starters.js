@@ -1,10 +1,13 @@
 // A curated offline catalog; all mutations use the existing import transaction.
 const starterCatalog = validateStarterCatalog(JSON.parse(document.getElementById('project-starters-data').textContent));
 const starterUi = { query: '', category: 'all', draft: null, error: '' };
-function starterEntry(id) { return starterCatalog.starters.find(s => s.id === id); }
+// This retained v5 concept cannot hold development tooling, so it offers only starters without it; the MVP composition replaces this seam.
+function starterAvailable(entry) { return entry.document.tooling === undefined; }
+function starterOffered() { return starterCatalog.starters.filter(starterAvailable); }
+function starterEntry(id) { return starterOffered().find(s => s.id === id); }
 function starterMatches() {
   const query = starterUi.query.trim().toLowerCase();
-  return starterCatalog.starters.filter(s => (starterUi.category === 'all' || s.category === starterUi.category) && [s.name, s.summary, s.outcome, ...s.tags].join(' ').toLowerCase().includes(query));
+  return starterOffered().filter(s => (starterUi.category === 'all' || s.category === starterUi.category) && [s.name, s.summary, s.outcome, ...s.tags].join(' ').toLowerCase().includes(query));
 }
 function openStarter(id) {
   try {

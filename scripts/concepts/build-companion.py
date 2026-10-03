@@ -84,7 +84,7 @@ def build(output: Path, check: bool = False):
  source_inputs=modules+['style-guide-model.js','test-data-model.js','data-source-model.js','semantic-model.js','component-variants.js','vault-project.js','brick-catalog.js','catalog.js','canvas-catalog.js','flow-catalog.js']+styles
  tools=['engine.mjs','adapters.mjs','storage.mjs','server.mjs','cli.mjs','faker-provider.mjs','client.mjs']
  inputs={'src/'+name for name in source_inputs}|{'vendor/'+name for name in vendor_inputs}|{'test-kit/'+name for name in tools}
- config=json.loads((ROOT.parents[2]/'.fallowrc.json').read_text(encoding='utf-8'))
+ config=json.loads((ROOT.parents[2]/'configs/quality/fallow.json').read_text(encoding='utf-8'))
  prefix='docs/concepts/companion/'
  owned_roots=('src/','vendor/','test-kit/')
  registered=[entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix) and entry[len(prefix):].startswith(owned_roots)]
@@ -133,6 +133,9 @@ def build(output: Path, check: bool = False):
  shared=(ds_shared+'\n'+composition_contract.read_text(encoding='utf-8')+'\n'+re.sub(r'^import .*composition-contract.mjs.*\n', '', detail_contract.read_text(encoding='utf-8'), flags=re.M)+visual_shared+'\n'+storymap_contract.read_text(encoding='utf-8')+'\n'+prd_limits.read_text(encoding='utf-8').replace('export const ','const ')+'\n'+contract.read_text(encoding='utf-8').replace("import { PRD_LIMITS } from './prd-limits.mjs';\n",'').replace("import { validateNativeIntegrations } from './native-contract.mjs';\n",'').replace("import { validateDesignSystem } from './design-system-contract.mjs';\n",'').replace("import { validateDetailDesigns } from './detail-contract.mjs';\n",'').replace("import { validateStorymaps } from './storymap-contract.mjs';\n",'').replace("import { validateVisualDesigns } from './visual/visual-validate.mjs';\n",'').replace("import { migrateDetailDesigns } from './visual/visual-migrate.mjs';\n",'')).replace('export const ', 'const ').replace('export function ', 'function ')
  starter_contract=ROOT.parents[2]/'scripts/companion/starter-contract.mjs'
  if 'scripts/companion/starter-contract.mjs' not in config['entry']:raise ValueError('Starter contract missing from inventory')
+ # The starter contract validates tooling; scope the tooling contract so only validateTooling joins the shared script.
+ tooling_contract=ROOT.parents[2]/'scripts/companion/tooling-contract.mjs'
+ shared+='\nconst validateTooling=(()=>{\n'+tooling_contract.read_text(encoding='utf-8').replace('export const ','const ').replace('export function ','function ')+'\nreturn validateTooling;\n})();'
  shared+='\n'+re.sub(r'^import .*\n','',starter_contract.read_text(encoding='utf-8'),flags=re.M).replace('export const ','const ').replace('export function ','function ')
  change('<script>','<script>\n'+shared+'\n'+(ROOT/'src/brick-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/canvas-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/flow-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/vault-project.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/style-guide-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/test-data-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/data-source-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/semantic-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/component-variants.js').read_text(encoding='utf-8')+'\nlet dialogReturnFocus=null;\n')
  change('</style>',''.join((ROOT/'src'/name).read_text(encoding='utf-8') for name in styles)+'\n</style>')

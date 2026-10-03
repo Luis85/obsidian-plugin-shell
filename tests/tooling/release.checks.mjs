@@ -7,15 +7,15 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { prepareVersion, parsePrepareArguments } from '../../scripts/release/prepare.mjs';
 import { parseRehearsalArguments } from '../../scripts/release/rehearse.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { collectAssets, retainCandidate, validateRetained, fixedSource, git, sha256, assetNames } from '../../scripts/release/candidate.mjs';
 
 async function fixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'release-rehearsal-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const manifest = { id: 'different-plugin', name: 'Different Plugin', version: '0.3.0', minAppVersion: '1.13.7', isDesktopOnly: true };
-  const files = { 'manifest.json': manifest, 'package.json': { name: 'different-plugin', version: '0.3.0' },
-    'package-lock.json': { version: '0.3.0', lockfileVersion: 3, packages: { '': { version: '0.3.0' } } },
+  const files = { 'manifest.json': manifest, 'package.json': { name: 'different-plugin', version: '0.3.0', dependencies: { alpha: '1.2.3' }, overrides: { beta: '2.3.4' } },
+    'package-lock.json': { version: '0.3.0', lockfileVersion: 3, packages: { '': { version: '0.3.0', dependencies: { alpha: '1.2.3' } }, 'node_modules/alpha': { version: '1.2.3' } } },
     'versions.json': { '0.1.0': '1.13.7', '0.3.0': '1.13.7' } };
   for (const [name, content] of Object.entries(files)) await writeFile(join(root, name), JSON.stringify(content, null, 2) + '\n');
   await writeFile(join(root, 'CHANGELOG.md'), '# Changelog\n\n## 0.3.0\n\nExisting notes.\n');
@@ -33,11 +33,20 @@ test('prepare reviews all five files without writes then preserves history on ap
   const before = await readFile(join(root, 'package.json'), 'utf8');
   const result = await prepareVersion(root, '0.4.0', 'Add a reviewed capability.');
   assert.equal(result.hostFloorChanged, false); assert.equal(result.plan.changes.length, 5);
+  assert.equal(result.dependencyPins.policy, 'exact-npm-pins-v1'); assert.equal(result.dependencyPins.checked.dependencyDeclarations, 1);
   assert.equal(await readFile(join(root, 'package.json'), 'utf8'), before);
   await applyFilePlan(result.plan);
   assert.equal(JSON.parse(await readFile(join(root, 'package-lock.json'))).packages[''].version, '0.4.0');
   assert.deepEqual(JSON.parse(await readFile(join(root, 'versions.json'))), { '0.1.0': '1.13.7', '0.3.0': '1.13.7', '0.4.0': '1.13.7' });
   assert.match(await readFile(join(root, 'CHANGELOG.md'), 'utf8'), /## 0\.4\.0[\s\S]*## 0\.3\.0/);
+});
+test('release preparation and candidate collection cannot bypass exact dependency pins', async t => {
+  const { root } = await fixture(t);
+  const packagePath = join(root, 'package.json'), original = await readFile(packagePath, 'utf8');
+  const pkg = JSON.parse(original); pkg.dependencies.alpha = '^1.2.3'; await writeFile(packagePath, JSON.stringify(pkg, null, 2) + '\n');
+  await assert.rejects(prepareVersion(root, '0.4.0', 'Notes'), /DEPENDENCY_PIN_INVALID.*alpha/);
+  await assert.rejects(collectAssets(root, join(root, 'dist'), '0.3.0'), /DEPENDENCY_PIN_INVALID.*alpha/);
+  assert.equal(JSON.parse(await readFile(packagePath)).dependencies.alpha, '^1.2.3');
 });
 test('prepare rejects invalid, reused and lower versions, missing notes and conflicting metadata', async t => {
   const { root } = await fixture(t);
@@ -61,6 +70,7 @@ test('retained package has exactly three assets, notes and hash-bound provenance
   const options = await retained(t); const record = await retainCandidate(options);
   assert.equal(record.nativeAcceptance.status, 'not-run'); assert.equal(record.publication, 'not-authorized');
   assert.equal(record.tools.node, options.qualification.node); assert.equal(record.packagingNode, process.version);
+  assert.equal(record.dependencyPins.lockfile.hash, record.lockHash); assert.equal(record.dependencyPins.manifests[0].path, 'package.json');
   assert.equal((await readdir(options.output)).length, 5);
   assert.equal((await validateRetained(options.output, options.commit, options.version)).identity, 'different-plugin');
   await assert.rejects(retainCandidate(options), /CANDIDATE_ALREADY_EXISTS/);

@@ -4,13 +4,13 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 4687,
-      "sha256": "1c7d8645b04b8155a42e93869d07039b8f06937de494bb2c18a00611ae158097"
+      "bytes": 4685,
+      "sha256": "c26f65f8d7df2f3c65eca8d84c475a087f8b3c6e2b8d2fb652fa7e84623484eb"
     },
     {
       "path": "SKILL.md",
-      "bytes": 16302,
-      "sha256": "c34d0ab494b93e2ae46b15f31a65c1812657cd818e67fb440175e181f9f7e53a"
+      "bytes": 16298,
+      "sha256": "c7566395a2cdae4207c2270d1718fe63571b77e3fe5b82faf7bdeeb23e4d19ad"
     },
     {
       "path": "VERIFICATION.md",
@@ -99,13 +99,13 @@
     },
     {
       "path": "references/project-starters.md",
-      "bytes": 3749,
-      "sha256": "d4c5a7de5adafc7b2970b38ed9030f8954c6e54667f79e52ae56bacf2d9518ef"
+      "bytes": 3745,
+      "sha256": "2adddda5462fcb0aa575d5e0178a6e1db74a35e48b81d26177055246c5fc13ea"
     },
     {
       "path": "references/repository-contract.md",
-      "bytes": 9593,
-      "sha256": "cf62a4f43e71e3b97795c190b57194c81f625c639ba069d6d52af4b047b58a68"
+      "bytes": 9654,
+      "sha256": "7fa5785bb5626264f4c662106b135fb0f16566c5935d6c14e4910437a2817cf9"
     },
     {
       "path": "references/subagents.md",
@@ -114,8 +114,8 @@
     },
     {
       "path": "references/tooling-integration.md",
-      "bytes": 9759,
-      "sha256": "6d28c18ca6e6796e29f8d4a15294495177b79b67a2309ff72d88713b5e275f79"
+      "bytes": 9831,
+      "sha256": "eadc1297674127459f75de4274f6ec9bbdbd09d50b61618a8a33e5569951cc7c"
     },
     {
       "path": "references/tooling-verification.md",
@@ -129,8 +129,8 @@
     },
     {
       "path": "scripts/README.md",
-      "bytes": 6255,
-      "sha256": "7a5fd8c814b91ee52a473ba1d1d1c3984ca8f6f7fe89043ed5fce73ce36c0814"
+      "bytes": 6254,
+      "sha256": "0e78349c12fb137939b14b9b36e57bff89b2474260f99a5f1cb074a9ca7afbb1"
     },
     {
       "path": "scripts/build-prototype.mjs",
@@ -154,8 +154,8 @@
     },
     {
       "path": "scripts/inspect-repository.mjs",
-      "bytes": 3405,
-      "sha256": "f5a51667d4857b94ae5b43c63c9c64539b50044a7982907064b2c2fda85c4a54"
+      "bytes": 3413,
+      "sha256": "446be2f40c78ad91877ca978a7d957f5214630003c7da38a70c720c80f215542"
     },
     {
       "path": "scripts/lib/build-output.mjs",
@@ -169,8 +169,8 @@
     },
     {
       "path": "scripts/lib/framework.mjs",
-      "bytes": 6630,
-      "sha256": "e235d3cb84568106f6cd27289f50de99b5078c2dc520ae6ec5225a04d9be9d38"
+      "bytes": 6627,
+      "sha256": "736faaace38626c15b0d02b8256c5aa671b16e0bd27d669e4a7840d8d59bd1a3"
     },
     {
       "path": "scripts/lib/io.mjs",
@@ -194,18 +194,18 @@
     },
     {
       "path": "scripts/prototype.mjs",
-      "bytes": 6580,
-      "sha256": "021399931925e1a96cea2c52a70c90ff8db70cb91d363dd60fc708cfe1d9918e"
+      "bytes": 6578,
+      "sha256": "fa4cb6519c90c9493562defb4543e0997cea55b73301e59d47321124896473a5"
     },
     {
       "path": "scripts/save-concept.mjs",
-      "bytes": 4028,
-      "sha256": "1ecd8bb2e02a3ba7177d5a3f5793cdf7d93253b5a1d2446875bb32d5598df2cc"
+      "bytes": 3925,
+      "sha256": "61f5fdc3af1121f459f1f20eef0809a2e7b0227a33ff95d3c4cfd35a027bfed6"
     },
     {
       "path": "scripts/validate-project.mjs",
-      "bytes": 4134,
-      "sha256": "036cf2a168820a1042464d98bcd67bcfd876e0a13bc7c31e39fb5d98e1fad658"
+      "bytes": 4715,
+      "sha256": "1767a2739893de66c569d076335340e9b9eebb755fa3b179850a16e1e043fd41"
     },
     {
       "path": "scripts/verify-browser.mjs",
@@ -234,8 +234,8 @@
     },
     {
       "path": "tests/validator.checks.mjs",
-      "bytes": 4299,
-      "sha256": "da833c86367e65d2d395fc79c2a2a6beada08cdccbef21d91ce4642240383a5c"
+      "bytes": 4539,
+      "sha256": "beef0d96befeea8924a82a5daa614d3b8143d6e72ecfce35df3fd611009633c3"
     },
     {
       "path": "tests/worker-output.checks.mjs",

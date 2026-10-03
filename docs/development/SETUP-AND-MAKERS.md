@@ -75,11 +75,9 @@ scripts/
   setup/
     bootstrap/                 # Node built-ins/checked-in helpers only
     steps/
-  make/
-    registry.mjs
-    makers/                    # includes entity.mjs
-    templates/                 # local versioned source templates
-    custom/
+  makers/
+    entities.mjs               # entity catalog check entry
+    custom/                    # trusted local recipes and their registry
   shared/
     file-plan.mjs
     process-runner.mjs
@@ -93,6 +91,8 @@ scripts/
   quality/                     # includes entity/catalog checks
   release/
   maintenance/
+bin/
+  adapters/makers/             # maker engine, recipes and templates (strict TypeScript), recipes.json catalog data
 tests/tooling/
 ```
 
@@ -160,7 +160,7 @@ Missing owners/events/entities fail with an actionable prerequisite. Composite m
 
 **MAKE-07:** Stage complete plans, recheck hashes, restore only owned unchanged writes. Preserve concurrent edits, report incomplete rollback/staged files, lock shared registrations. Multi-file operations are not filesystem-wide atomic transactions.
 
-**MAKE-08:** Small typed/JSDoc custom-maker contract: metadata/options, read-only context, declarative file/edit plan. Explicit local custom registry; runner owns prompts/I/O/format/report/checks. No remote templates, arbitrary JSON hooks, or dependency installation during a maker run. Trusted local maker code is not sandboxed.
+**MAKE-08:** Small typed/JSDoc custom-maker contract: metadata/options, read-only context, declarative file/edit plan. The runner injects the context and the shared primitives, so generated recipes and their checks import no framework internals and probe no layout. Explicit local custom registry; runner owns prompts/I/O/format/report/checks. No remote templates, arbitrary JSON hooks, or dependency installation during a maker run. Trusted local maker code is not sandboxed.
 
 **MAKE-09:** --no-interaction/--yes/--dry-run/--json and specific help. Report maker/template version, paths/preconditions/written/skipped/conflicts and checks actually run. Missing input fails; npm run --silent keeps machine output clean.
 

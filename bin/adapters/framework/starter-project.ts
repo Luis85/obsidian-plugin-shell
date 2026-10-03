@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { storybookFlags } from './storybook-options.ts';
 /** One-command project creation from a reviewed local JSON starter. It composes the
  * existing catalog loader, identity-only customization and project compiler/plan
@@ -6,13 +7,14 @@ import type { NativeProjectIntegrations } from '../../../scripts/companion/nativ
 import { mkdtemp, writeFile, rm, lstat, readdir, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { loadStarterCatalog } from '../../../scripts/companion/starter-files.mjs';
-import { listStarters } from '../../../scripts/starters/operations.ts';
-import { definitionProjectPlan } from '../../../scripts/starters/project.ts';
-import { completeDefinition } from '../../../scripts/starters/processes.ts';
+import { loadStarterCatalog } from '../starters/catalog.ts';
+import { listStarters } from '../starters/operations.ts';
+import { definitionProjectPlan } from '../starters/project.ts';
+import { completeDefinition } from '../starters/processes.ts';
 import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
-import { planProject } from '../../../scripts/compiler/adapters/project-plan.ts';
+import { planProject } from '../../compiler/adapters/project-plan.ts';
 import { exists } from './files.ts';
+import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
@@ -22,10 +24,10 @@ import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem 
 interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
 interface StarterCatalog { starters: StarterEntry[] }
 interface StarterSummary { directory: string; nextSteps?: string[] }
-/** A kit or configured consumer carries its verified template under .framework/template. */
+/** A kit or configured consumer carries its verified template under bin/template. */
 async function templateRoot(context: Context): Promise<string> {
-  if (!await exists(join(context.frameworkRoot, '.framework/kit.json'))) return context.frameworkRoot;
-  await verifyKit(context.frameworkRoot); return join(context.frameworkRoot, '.framework/template');
+  if (!await exists(join(context.frameworkRoot, 'bin/kit.json'))) return context.frameworkRoot;
+  await verifyKit(context.frameworkRoot); return join(context.frameworkRoot, 'bin/template');
 }
 export async function starterCatalog(context: Context): Promise<{ template: string; catalog: StarterCatalog }> {
   const template = await templateRoot(context);
@@ -49,7 +51,7 @@ export function invocationDirectory(path: string, environment: NodeJS.ProcessEnv
   return resolve(base, path);
 }
 const invocationPaths: Readonly<Record<string, readonly string[]>> = { new: ['values'], 'starters add': ['input'], 'starters edit': ['input'], 'starters pack': ['out'], 'starters run': ['project'] };
-/** Starter commands read the pack extracted beside shell.mjs unless --root names another starter workspace.
+/** Starter commands read configs/starters from the package root unless --root names another starter workspace.
  * Without --root their path options still resolve from the invoking shell, as they did when that was the root. */
 export function starterInvocation(request: Request, frameworkRoot: string): { request: Request; root: string } {
   const selected = request.options.root;
@@ -68,8 +70,9 @@ interface Placement { directory: string; vault: string; target: string }
 /** The nearest existing folder (the start or an ancestor) that holds a `.obsidian` directory. */
 export async function enclosingVault(start: string): Promise<string | null> {
   for (let current = resolve(start); ; current = dirname(current)) {
-    const marker = join(current, '.obsidian');
-    if (await exists(marker) && (await lstat(marker)).isDirectory()) return current;
+    // Only an existing directory can hold the marker; probing below a file would fail with ENOTDIR.
+    const marker = join(current, defaultVaultConfigDirectory);
+    if ((await statIfPresent(current))?.isDirectory() && (await statIfPresent(marker))?.isDirectory()) return current;
     if (dirname(current) === current) return null;
   }
 }
@@ -123,15 +126,8 @@ async function fromExport(request: Request, context: Context) {
 function nextSteps(directory: string): string[] {
   return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch'];
 }
-/** Adds guidance, and only after a written project runs the explicitly requested install/verify. */
-export async function completeStarterProject(outcome: Result, request: Request, context: Context): Promise<Result> {
-  if (!['planned', 'applied', 'blocked'].includes(outcome.status)) return outcome;
-  const data = outcome.data as { summary: StarterSummary & { recipe?: unknown } };
-  if (data.summary.recipe) return completeDefinition(outcome, request, context);
-  const directory = data.summary.directory, steps = nextSteps(directory);
-  const guide = { readme: join(directory, 'README.md'), implementation: join(directory, 'PROJECT-IMPLEMENTATION.md') };
-  if (outcome.status !== 'applied') return { ...outcome, data: { ...data, written: false, next: 'Nothing has been written. To create the project, confirm when asked or re-run with --yes (or --apply <planHash>).' } };
-  if (!request.options.install) return { ...outcome, data: { ...data, written: true, nextSteps: steps, guide } };
+/** Runs npm ci then project verification; a failure keeps the written project and names the step to rerun. */
+async function installAndVerify(request: Request, context: Context, directory: string): Promise<Record<string, unknown>> {
   const project: Context = { ...context, root: directory }, npm = await npmEntry();
   const timeout = Number(stringOption(request.options, 'timeout') ?? '600000');
   const executions: Record<string, unknown> = {};
@@ -144,5 +140,17 @@ export async function completeStarterProject(outcome: Result, request: Request, 
       failed.details = { written: true, directory, completed: executions, failure: error.details ?? null, automaticRetry: false }; throw failed;
     }
   }
+  return executions;
+}
+/** Adds guidance, and only after a written project runs the explicitly requested install/verify. */
+export async function completeStarterProject(outcome: Result, request: Request, context: Context): Promise<Result> {
+  if (!['planned', 'applied', 'blocked'].includes(outcome.status)) return outcome;
+  const data = outcome.data as { summary: StarterSummary & { recipe?: unknown } };
+  if (data.summary.recipe) return completeDefinition(outcome, request, context);
+  const directory = data.summary.directory, steps = nextSteps(directory);
+  const guide = { readme: join(directory, 'README.md'), implementation: join(directory, 'PROJECT-IMPLEMENTATION.md') };
+  if (outcome.status !== 'applied') return { ...outcome, data: { ...data, written: false, next: 'Nothing has been written. To create the project, confirm when asked or re-run with --yes (or --apply <planHash>).' } };
+  if (!request.options.install) return { ...outcome, data: { ...data, written: true, nextSteps: steps, guide } };
+  const executions = await installAndVerify(request, context, directory);
   return { ...outcome, data: { ...data, written: true, install: executions, nextSteps: steps.filter(step => step !== 'npm ci'), guide } };
 }

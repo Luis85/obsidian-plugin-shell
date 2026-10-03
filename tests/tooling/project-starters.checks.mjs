@@ -5,25 +5,32 @@ import { fileSymlink } from './file-symlink.mjs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
+import { loadStarterCatalog } from '../../bin/adapters/starters/catalog.ts';
 import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
-import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { projectModel, symbol } from '../../bin/compiler/emitters/model.ts';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),allCatalog=await loadStarterCatalog(root);
 // These retained migration assertions stay scoped to the original eleven v5 fixtures.
 const catalog={schemaVersion:1,starters:allCatalog.starters.filter(entry=>entry.document.schemaVersion===5)};
 // Page counts equal the page documents each starter held before the visual-design migration.
-const pageCounts={blank:0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4,'custom-file-view':3,'context-menu':3};
+const pageCounts={blank:0,'agent-ready':0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4,'custom-file-view':3,'context-menu':3};
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
 async function temporary(work){const folder=await mkdtemp(join(tmpdir(),'project-starters-'));try{return await work(folder);}finally{await rm(folder,{recursive:true,force:true});}}
-test('eleven original data-only starters include a genuinely domain-free minimal shell',()=>{
- assert.equal(catalog.starters.length,11);assert.equal(validateStarterCatalog(catalog),catalog);
+test('twelve data-only starters retain a genuinely domain-free blank shell',()=>{
+ assert.equal(catalog.starters.length,12);assert.equal(validateStarterCatalog(catalog),catalog);
  const blank=catalog.starters.find(s=>s.id==='blank').document.design;
  assert.equal(blank.nodes.length,2);assert.equal(blank.nodes[0].kind,'view');assert.equal(blank.nodes[1].kind,'settings');
  assert.equal(blank.semantic.entities.length,0);assert.equal(blank.dataSources.sources.length,0);assert.equal(blank.prds.length,0);assert.equal(blank.library.length,0);
  assert.equal('detailDesigns' in blank,false);assert.deepEqual([blank.visualDesigns.pages.length,blank.visualDesigns.components.length,blank.visualDesigns.layouts.length,blank.visualDesigns.revisions.length],[0,0,0,0]);
+});
+test('agent-ready is an explicit inert tooling preset over the same blank product surface',()=>{
+ const entry=catalog.starters.find(s=>s.id==='agent-ready'),d=entry.document;
+ assert.equal(d.design.blueprint,'blank');assert.equal(d.design.semantic.entities.length,0);assert.equal(d.design.prds.length,0);
+ assert.deepEqual(d.tooling.airship,{enabled:true,agent:'claude',targetPort:5173,port:5174});
+ assert.deepEqual(d.tooling.hindsight,{enabled:true,agents:['claude-code','codex'],git:'message',sessions:false});
+ assert.match(d.notes.at(-1),/does not install Hindsight/);
 });
 for(const entry of catalog.starters){
  test(entry.id+': built-in visual designs are current v'+COMPANION_VERSION+' pages over its own surfaces',()=>{
@@ -51,7 +58,7 @@ for(const entry of catalog.starters){
   assert.equal(pkg.name,'my-new-plugin');assert.ok(pkg.scripts['verify:project']);assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
   assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),document);
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8'));assert.ok(trace.requirements.every(r=>r.verification==='todo'));
-  if(entry.id!=='blank')assert.ok(trace.requirements.length>=4);
+  if(!['blank','agent-ready'].includes(entry.id))assert.ok(trace.requirements.length>=4);
   if(entry.document.design.dataSources.sources.length){
    assert.match(await readFile(join(target,'src/generated/presentation/stores/starter-records.ts'),'utf8'),/defineStore/);
    const source=document.design.dataSources.sources[0],module=await import(pathToFileURL(join(target,'src/generated/infrastructure/sources/starter-records.ts')).href);
@@ -78,7 +85,7 @@ for(const [label,fields,pattern] of [
  ['absolute source',{codebaseFolder:'/tmp/src'},/relative/],['traversal source',{codebaseFolder:'../src'},/relative/],['host folder',{testsFolder:'.obsidian'},/reserved|protected/i],['overlapping paths',{codebaseFolder:'app',testsFolder:'APP/tests'},/overlap/i],['tooling collision',{codebaseFolder:'scripts'},/tooling/i],['unknown choice',{runScript:'evil'},/Unknown configuration/],
 ])test('refuses '+label+' without altering the catalog',()=>{const before=JSON.stringify(catalog);assert.throws(()=>customizeStarter(catalog,fields===null?'missing':'quick-capture',{...choices,...fields}),pattern);assert.equal(JSON.stringify(catalog),before);});
 for(const [label,mutate] of [
- ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id='blank'],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
+ ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id=c.starters[0].id],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
 test('catalog rejects a valid legacy v4 built-in: starters ship current visual designs',()=>{
  const c=structuredClone(catalog),d=c.starters[0].document;d.schemaVersion=4;d.design.schema=4;delete d.design.visualDesigns;d.design.detailDesigns={schema:2,nextId:1,documents:[],revisions:[]};
@@ -96,7 +103,7 @@ for(const [label,change] of [
 test('an edited valid definition has a new hash without needing a catalog rewrite',()=>temporary(async folder=>{
  const f=join(folder,'configs/starters');await mkdir(f,{recursive:true});await cp(join(root,'configs/starters'),f,{recursive:true});
  const before=await loadStarterCatalog(folder),p=join(f,'blank.json');await writeFile(p,(await readFile(p,'utf8'))+' ');
- const after=await loadStarterCatalog(folder);assert.notEqual(after.starters[0].sha256,before.starters[0].sha256);
+ const after=await loadStarterCatalog(folder),blank=c=>c.starters.find(s=>s.id==='blank');assert.notEqual(blank(after).sha256,blank(before).sha256);
 }));
 test('an installation may omit blank and have no bundled fallback',()=>{
  const c=structuredClone(catalog);c.starters=c.starters.filter(s=>s.id!=='blank');assert.equal(validateStarterCatalog(c),c);

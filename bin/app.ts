@@ -13,6 +13,7 @@ import { stdin, stdout, stderr } from 'node:process';
 import type { Readable, Writable } from 'node:stream';
 import { ask } from '../scripts/shared/input.ts';
 import { failure } from './adapters/framework/contracts.ts';
+export { resultEnvelope } from '../scripts/contracts/result-runtime.mjs';
 import { result as operationResult, type ResultStatus } from '../scripts/contracts/result.ts';
 import { SketchError } from './domain/errors.ts';
 import { parseArguments, execute, option, type Arguments, type CommandContext } from './adapters/commands.ts';
@@ -80,6 +81,11 @@ function errorResult(command: string, error: unknown) {
 }
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
+  if (argv[0] === 'mcp') {
+    if (argv.length !== 1) { io.error.write('MCP_USAGE: use node bin/app mcp with no additional arguments.\n'); return 1; }
+    const { runMcpServer } = await import('./adapters/mcp-server.ts');
+    return runMcpServer(frameworkRoot, { input: io.input, output: io.output });
+  }
   const routed = routeArguments(argv, { pluginCommands: new Set(pluginCliCommands().map(entry => entry.id)),
     frameworkRoots: new Set(frameworkCommands.map(entry => entry.id.split(' ')[0]!)) });
   if (routed.surface === 'framework') {

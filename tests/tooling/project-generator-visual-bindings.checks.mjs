@@ -8,9 +8,9 @@ import { spawnSync } from 'node:child_process';
 import { stripVTControlCharacters } from 'node:util';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
+import { projectFiles } from '../support/project-render.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // Resolved through the package manifest so the check also runs where node_modules sits in an ancestor directory.
 const vitest = join(dirname(createRequire(import.meta.url).resolve('vitest/package.json')), 'vitest.mjs');
@@ -38,7 +38,7 @@ test('generated binding tests assert every bound prop, table rows and cells, and
 });
 test('generated binding tests pass in a generated workspace and fail once bound data no longer reaches the table', async () => {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'visual-bindings-')));
-  const run = () => spawnSync(process.execPath, [vitest, 'run', '--config', 'vitest.project.config.mjs', bindings], { cwd: dir, encoding: 'utf8', timeout: 300000, maxBuffer: 16 * 1024 * 1024, env: Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NODE_TEST_CONTEXT')) });
+  const run = () => spawnSync(process.execPath, [vitest, 'run', '--config', 'configs/testing/vitest.project.config.mjs', bindings], { cwd: dir, encoding: 'utf8', timeout: 300000, maxBuffer: 16 * 1024 * 1024, env: Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NODE_TEST_CONTEXT')) });
   try {
     for (const file of await projectFiles(root, projectModel(bindingFixture()))) {
       await mkdir(dirname(join(dir, file.path)), { recursive: true });

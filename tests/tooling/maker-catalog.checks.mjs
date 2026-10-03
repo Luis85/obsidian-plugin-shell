@@ -4,12 +4,12 @@ import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from './maker-fixture.mjs';
-import { parseArguments } from '../../scripts/makers/arguments.mjs';
-import { planMaker } from '../../scripts/makers/plan.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
-import { checkGenerated } from '../../scripts/quality/format-generated.mjs';
-import { createMakerContext } from '../../scripts/makers/engine.mjs';
+import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { planMaker } from '../../bin/adapters/makers/plan.ts';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
+import { loadCatalog } from '../../bin/adapters/makers/load-catalog.ts';
+import { checkGenerated } from '../../bin/adapters/makers/format-generated.ts';
+import { createMakerContext } from '../../bin/adapters/makers/engine.ts';
 import { pathToFileURL } from 'node:url';
 import { measureMaintainability } from '../../scripts/quality/check-maintainability.mjs';
 
@@ -40,6 +40,7 @@ test('[MAKER-CATALOG] every integrated recipe generates executable source, real 
   await mkdir(join(root, 'src/locales'), { recursive: true });
   await cp(join(makerSourceRoot, 'src/locales/en.json'), join(root, 'src/locales/en.json'));
   await cp(join(makerSourceRoot, 'tsconfig.json'), join(root, 'tsconfig.json'));
+  await cp(join(makerSourceRoot, 'configs/types/tsconfig.base.json'), join(root, 'configs/types/tsconfig.base.json'));
   await apply(root, ['feature', 'bookmarks', '--entity', 'bookmark']);
   const requests = [
     ['entity', 'reference', '--feature', 'bookmarks', '--preset', 'project'],
@@ -70,7 +71,7 @@ test('[MAKER-CATALOG] every integrated recipe generates executable source, real 
     return run;
   };
   check([join(makerSourceRoot, 'node_modules/vue-tsc/bin/vue-tsc.js'), '--noEmit']);
-  const runtime = check([join(makerSourceRoot, 'node_modules/vitest/vitest.mjs'), 'run']);
+  const runtime = check([join(makerSourceRoot, 'node_modules/vitest/vitest.mjs'), 'run', '--config', 'configs/testing/vitest.config.mjs']);
   assert.match(runtime.stdout, /24 passed/);
   check(['--test', 'tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']);
   const catalog = await loadCatalog(root);

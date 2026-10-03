@@ -3,7 +3,7 @@ import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { planExampleRemoval } from '../../scripts/examples/plan.mjs';
 
 export const makerSourceRoot = fileURLToPath(new URL('../../', import.meta.url));
@@ -54,8 +54,10 @@ export const exampleEventCatalog: readonly EventCatalogEntry[] = [];
 `,
 };
 
-export async function makerFixture(work, { temporaryRoot = tmpdir() } = {}) {
-  const requested = await mkdtemp(join(temporaryRoot, 'template-maker-'));
+// Default to the canonical temporary directory: on macOS tmpdir() lives under the /var symlink,
+// which the file-plan root check correctly refuses. Callers may still pass an alias explicitly.
+export async function makerFixture(work, { temporaryRoot } = {}) {
+  const requested = await mkdtemp(join(temporaryRoot ?? await realpath(tmpdir()), 'template-maker-'));
   const root = await realpath(requested);
   try {
     // Keep root/link validation on the original spelling, then use one canonical
@@ -121,8 +123,9 @@ export const ${name}Feature = defineNoteFeature({ defaultFolder: 'Fixture', docu
     join(root, 'node_modules'),
     process.platform === 'win32' ? 'junction' : 'dir',
   );
+  await mkdir(join(root, 'configs/testing'), { recursive: true });
   await writeFile(
-    join(root, 'vitest.config.mjs'),
+    join(root, 'configs/testing/vitest.config.mjs'),
     "import vue from '@vitejs/plugin-vue';\nexport default { plugins: [vue()], test: { include: ['tests/runtime/generated/**/*.test.ts'], environment: 'node', fileParallelism: false } };\n",
   );
 }
@@ -134,12 +137,10 @@ export async function removeMakerExamples(root) {
 export async function copyMakerSuite(root) {
   for (const path of [
     'scripts/makers',
-    'scripts/companion/native-boilerplate.mjs',
     'scripts/companion/native-contract.mjs',
     'scripts/events',
     'scripts/examples/plan.mjs',
     'scripts/shared',
-    'scripts/quality/format-generated.mjs',
     'tests/tooling/makers.checks.mjs',
     'tests/tooling/maker-fixture.mjs',
   ]) {
@@ -147,4 +148,6 @@ export async function copyMakerSuite(root) {
     await mkdir(dirname(target), { recursive: true });
     await cp(resolve(makerSourceRoot, path), target, { recursive: true });
   }
+  // A source checkout carries the whole CLI: generated locale checks run the project's own bin/app.
+  await symlink(resolve(makerSourceRoot, 'bin'), join(root, 'bin'), process.platform === 'win32' ? 'junction' : 'dir');
 }

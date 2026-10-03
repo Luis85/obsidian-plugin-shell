@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { diagnosticCatalog } from '../../scripts/compiler/domain/diagnostics.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { diagnosticCatalog } from '../../bin/compiler/domain/diagnostics.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 test('compiler documentation includes every stable diagnostic with the exact repair guidance',async()=>{
   const text=await readFile(join(root,'docs/development/compiler/DIAGNOSTICS.md'),'utf8');
@@ -16,7 +16,10 @@ test('documented read commands are accepted by the real CLI catalog',()=>{
 
 test('compiler coverage includes selection and project starter contracts without lowering any gate',async()=>{
   const pkg=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
-  const command=pkg.scripts['test:compiler:coverage'];
+  assert.equal(pkg.scripts['test:compiler:coverage'],'node scripts/compiler/coverage.mjs');
+  const { compilerCoverageArguments } = await import('../../scripts/compiler/coverage.mjs');
+  const command=compilerCoverageArguments();
   for(const token of ['--test-coverage-lines=95','--test-coverage-branches=90','--test-coverage-functions=90',
-    'tests/tooling/compiler-selection.checks.mjs', 'tests/tooling/interactive-maker-project-starters.checks.mjs']) assert.ok(command.split(' ').includes(token),token);
+    'tests/tooling/compiler-selection.checks.mjs', 'tests/tooling/interactive-maker-project-starters.checks.mjs', 'tests/tooling/interactive-maker-compiler-core.checks.mjs',
+    '--test-coverage-include=bin/compiler/domain/**', '--test-coverage-include=bin/compiler/application/**']) assert.ok(command.includes(token),token);
 });

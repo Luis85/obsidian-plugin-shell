@@ -1,7 +1,7 @@
 # Project-starter preparation packages
 
 Creating a project always runs an installed **project starter**: a JSON definition
-under `configs/starters/<id>.json` beside `shell.mjs` whose `generator.kind` is
+under `configs/starters/<id>.json` beside `bin/app` whose `generator.kind` is
 `project`. It fixes the project type, frontend framework, targets and, for Angular,
 exact dependency pins. The flow is starter → data-driven prototype interview →
 agreement → complete plan review → separate default-No apply. Frameworks and targets
@@ -23,7 +23,7 @@ Read `source/AGENTS.md`, `source/README.md` and `source/prototype.acceptance.jso
 Use `source/scripts/build.mjs` through the declared npm scripts. Do not invoke the
 legacy Vue-only init/build/package helpers on a project-starter package: their
 artifact/manifest assumptions are different. They remain correct for legacy
-`node shell.mjs prototype` packages. Never change the selected stack to fit a helper.
+`node bin/app prototype` packages. Never change the selected stack to fit a helper.
 
 Use the pinned Node/npm. The generated root-only package-lock is explicitly
 unresolved: review and run `npm install` only when authorized, inspect the resolved

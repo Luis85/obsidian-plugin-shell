@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
-import { standaloneSource, updateOwnership } from '../../scripts/framework/distribution.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { standaloneSource, updateOwnership } from '../../bin/adapters/framework/distribution.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const projectFixture = 'docs/concepts/companion/companion-project.json';
@@ -63,7 +63,7 @@ test('source-only archive includes and fingerprints the actual imported project 
   const catalogBytes = await readFile(join(root, catalogPath));
   assert.equal(inventory.files.find(item => item.path === catalogPath)?.sha256, hash(catalogBytes));
   const catalog = JSON.parse(catalogBytes.toString('utf8'));
-  assert.equal(catalog.starters.length, 11, 'retain all eleven reviewed starters');
+  assert.equal(catalog.starters.length, 12, 'retain all twelve reviewed starters');
   for (const starter of catalog.starters) {
     const path = `docs/concepts/companion/starters/${starter.file}`;
     const actualHash = hash(await readFile(join(root, path)));
@@ -114,7 +114,7 @@ test('reviewed style removal preserves tokens across checkout line endings', asy
   await copy('src/bootstrap/features.ts');
   for (const file of ownership.files) {
     if (file.sha256 !== null) assert.equal(hash(await copy(file.path)), file.sha256, file.path);
-    if (file.template) await copy('scripts/examples/templates/' + file.template);
+    if (file.template) await copy('templates/examples/' + file.template);
   }
   const report = await planExampleRemoval(folder);
   const shell = report.plan.changes.find(change => change.path === 'src/styles/shell.css');

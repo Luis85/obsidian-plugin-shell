@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { readFeatureBrainstorm, featureConcept, brainstormSchema } from '../../bin/domain/brainstorm.ts';
 import { brainstormFeaturePlan, brainstormVerifyPlan } from '../../bin/adapters/brainstorm.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';

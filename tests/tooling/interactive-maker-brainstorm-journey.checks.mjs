@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readdir } from 'node:fs/promises';
 import { PassThrough, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 // Maker-only surface: these requests must not be routed to the framework CLI.
 import { makerMain as main } from '../../bin/app.ts';
 import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';

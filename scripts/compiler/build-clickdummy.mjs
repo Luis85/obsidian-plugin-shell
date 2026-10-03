@@ -1,5 +1,5 @@
 /** Explicit build adapter. It reuses the devKit's pinned offline builder, never installs dependencies. */
-import { readBounded } from '../framework/files.ts';
+import { readBounded } from '../../bin/adapters/framework/files.ts';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 const args=process.argv.slice(2);

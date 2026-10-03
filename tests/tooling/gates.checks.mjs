@@ -92,7 +92,7 @@ test('[GATE-02-01] full analyzer fails for real unused files and exports', async
 test('[GATE-02-03] the repository analyzer ignores the docs working directory but not other unused code', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shell-analysis-docs-'));
   try {
-    const { ignorePatterns } = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+    const { ignorePatterns } = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
     await writeFile(join(root, '.fallowrc.json'), JSON.stringify({ entry: ['entry.ts'], ignorePatterns, rules: { 'policy-violation': 'off' } }));
     await writeFile(join(root, 'package.json'), '{"name":"analyzer-docs-probe","type":"module"}');
     await writeFile(join(root, 'entry.ts'), 'console.log(1);');
@@ -121,7 +121,7 @@ test('[GATE-02-02] ESLint 10 executes the real TypeScript, Obsidian and Vue rule
     // loading alone took 50–51s in both. Isolation reduced parsing 24.9s -> 2.1s.
     // The finite 180s startup allowance is not a lint/performance threshold or retry.
     const started = performance.now();
-    const run = spawnSync(process.execPath, ['node_modules/eslint/bin/eslint.js', ts, vue, '--format', 'json'], { encoding: 'utf8', timeout: 180000, windowsHide: true });
+    const run = spawnSync(process.execPath, ['node_modules/eslint/bin/eslint.js', '-c', 'configs/lint/eslint.config.mjs', ts, vue, '--format', 'json'], { encoding: 'utf8', timeout: 180000, windowsHide: true });
     assert.equal(run.error, undefined, `ESLint probe process failed after ${Math.round(performance.now() - started)}ms: ${run.error?.code ?? run.signal ?? 'unknown'}; ${run.stderr}`);
     assert.equal(run.status, 1, run.stderr);
     const reports = JSON.parse(run.stdout); const rules = reports.flatMap(file => file.messages.map(message => message.ruleId));
@@ -139,7 +139,7 @@ async function verificationTrace(t, mode, failAt = 0) {
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const directory of ['quality', 'shared', 'testing']) await mkdir(join(root, 'scripts', directory), { recursive: true });
   await cp(new URL('../../scripts/quality/verify.mjs', import.meta.url), join(root, 'scripts/quality/verify.mjs'));
-  await writeFile(join(root, 'scripts/shared/process.mjs'), `let analyzers = 0;
+  await writeFile(join(root, 'scripts/shared/process.ts'), `let analyzers = 0;
 export async function runNodeScript(path, args = []) {
   console.log(JSON.stringify({ executed: path, args }));
   if (path === 'scripts/quality/check-analyzer.mjs' && ++analyzers === Number(process.env.FAIL_ANALYZER_AT))

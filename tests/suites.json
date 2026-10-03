@@ -348,15 +348,10 @@
     {
       "name": "runtime",
       "purpose": "Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit.",
-      "runner": {
-        "type": "vitest",
-        "config": "vitest.config.mjs"
-      },
-      "include": [
-        "tests/runtime/**/*.test.ts"
-      ],
+      "runner": {"type": "vitest", "config": "configs/testing/vitest.config.mjs"},
+      "include": ["tests/runtime/**/*.test.ts"],
       "verify": "own-step",
-      "verifyStep": "production coverage run (vitest.production.config.mjs) executes every runtime test",
+      "verifyStep": "production coverage run (configs/testing/vitest.production.config.mjs) executes every runtime test",
       "npmScript": "test:runtime",
       "workflows": [
         "ci",
@@ -366,7 +361,7 @@
     },
     {
       "name": "cli",
-      "purpose": "Central app.mjs CLI (node bin/app): command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery.",
+      "purpose": "Central bin/app CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery.",
       "runner": {
         "type": "node-test"
       },
@@ -831,28 +826,10 @@
     },
     {
       "name": "quality",
-      "purpose": "Repository gates: analyzer, lint, coverage inventory, maintainability, presentation, repository and test-quality policies, evidence producers and this suite manifest.",
-      "runner": {
-        "type": "node-test"
-      },
-      "include": [
-        "tests/tooling/gates.checks.mjs",
-        "tests/tooling/coverage.checks.mjs",
-        "tests/tooling/maintainability.checks.mjs",
-        "tests/tooling/lint-*.checks.mjs",
-        "tests/tooling/repository.checks.mjs",
-        "tests/tooling/test-quality.checks.mjs",
-        "tests/tooling/presentation.checks.mjs",
-        "tests/tooling/evidence-*.checks.mjs",
-        "tests/tooling/archive-*.checks.mjs",
-        "tests/tooling/public-api-*.checks.mjs",
-        "tests/tooling/dependency-*.checks.mjs",
-        "tests/tooling/suite-*.checks.mjs",
-        "tests/tooling/agent-*.checks.mjs"
-      ],
-      "prerequisites": [
-        "build"
-      ],
+      "purpose": "Repository gates: analyzer, lint, coverage inventory, maintainability, tighten-only thresholds, presentation, repository and test-quality policies, evidence producers and this suite manifest.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs"],
+      "prerequisites": ["build"],
       "verify": "tooling",
       "npmScript": "test:quality",
       "workflows": [
@@ -930,14 +907,8 @@
     {
       "name": "project",
       "purpose": "Generated product tests (tests/project) that exist only in a project created by the companion compiler.",
-      "runner": {
-        "type": "vitest",
-        "config": "vitest.project.config.mjs"
-      },
-      "include": [
-        "tests/project/**/*.test.ts",
-        "tests/project/**/*.test.mjs"
-      ],
+      "runner": {"type": "vitest", "config": "configs/testing/vitest.project.config.mjs"},
+      "include": ["tests/project/**/*.test.ts", "tests/project/**/*.test.mjs"],
       "optional": true,
       "verify": "opt-in",
       "workflows": [
@@ -1037,9 +1008,10 @@
       ]
     },
     {
-      "purpose": "Generated project fixtures and ports",
+      "purpose": "Generated project fixtures, ports and the Vitest UI setup file",
       "include": [
-        "tests/project/fixtures/**"
+        "tests/project/fixtures/**",
+        "tests/project/ui-bootstrap.mjs"
       ],
       "exclude": [
         "tests/project/**/*.test.ts",

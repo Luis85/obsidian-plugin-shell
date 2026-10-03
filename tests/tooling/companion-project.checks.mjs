@@ -9,10 +9,10 @@ import { spawnSync } from 'node:child_process';
 import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, migrateCompanionDocument, COMPANION_VERSION,
   companionDesignKey, companionDropLegacy, companionLegacyDetails, companionUpgradeDesign } from '../../scripts/companion/project-contract.mjs';
 import { migrateDetailDesigns } from '../../scripts/companion/visual/visual-migrate.mjs';
-import { readCompanionProject } from '../../scripts/companion/read-project.mjs';
+import { readCompanionProject, companionReader } from '../../bin/adapters/framework/read-project.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const cli = join(root, 'scripts/companion/generate.mjs');
+const cli = join(root, 'scripts/companion-tools/generate.mjs');
 const seed = await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8');
 const document = JSON.parse(seed);
 // Build an own JSON property, not an object-literal prototype or a newline-dependent splice.
@@ -104,7 +104,7 @@ test('[COMPANION-READ] exported service returns data and canonical targets witho
   // Keep the supplied spelling, including a Windows 8.3 temp path, as the input.
   for (const vault of [f.vault, alias]) {
     for (const target of ['.', 'plugins/new companion']) {
-      const result = await readCompanionProject({ input: f.input, vault, target });
+      const result = await readCompanionProject({ input: f.input, vault, target }, companionReader);
       assert.equal(result.content.toString(), seed);
       assert.deepEqual(result.document, migrated.document);
       assert.deepEqual(result.migration, migrated.report);
@@ -117,7 +117,7 @@ test('[COMPANION-READ] exported service returns data and canonical targets witho
 test('[COMPANION-READ] a v4 export is migrated on read and reports what the migration dropped', async t => {
   const f = await fixture(t), legacy = await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8');
   await writeFile(f.input, legacy);
-  const expected = migrateCompanionDocument(JSON.parse(legacy)), result = await readCompanionProject({ input: f.input, vault: f.vault, target: '.' });
+  const expected = migrateCompanionDocument(JSON.parse(legacy)), result = await readCompanionProject({ input: f.input, vault: f.vault, target: '.' }, companionReader);
   assert.equal(result.content.toString(), legacy);
   assert.deepEqual(result.document, expected.document); assert.deepEqual(result.migration, expected.report);
   assert.equal(result.document.schemaVersion, COMPANION_VERSION); assert.ok(result.migration.droppedPositions > 0);

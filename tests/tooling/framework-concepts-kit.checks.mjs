@@ -6,14 +6,14 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
-import { zip } from '../../scripts/framework/zip.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const hash = value => createHash('sha256').update(value).digest('hex');
 function cli(dir, args) {
-  const result = spawnSync(process.execPath,[join(dir,'app.mjs'),...args,'--json'],{cwd:dir,encoding:'utf8',timeout:120000,maxBuffer:8_000_000});
+  const result = spawnSync(process.execPath,[join(dir,'bin/app'),...args,'--json'],{cwd:dir,encoding:'utf8',timeout:120000,maxBuffer:8_000_000});
   assert.equal(result.status,0,result.stdout+result.stderr);
   return JSON.parse(result.stdout);
 }

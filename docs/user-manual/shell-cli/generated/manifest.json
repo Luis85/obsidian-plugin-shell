@@ -1,37 +1,37 @@
 {
   "schemaVersion": 1,
   "frameworkVersion": "0.4.0",
-  "commandCount": 103,
+  "commandCount": 117,
   "sources": [
     {
       "path": "package.json",
-      "sha256": "94c9453b0a76004a486635a710957ed19c53e5b6e04bf684b34fa3102c19d163"
+      "sha256": "ea74103f91bbcaee4c91ea946c12bffb1a9745fff6a58b3cb623605d79140842"
     },
     {
-      "path": "scripts/framework/catalog.ts",
-      "sha256": "5fb0753c54ee41db6e9b8f8d50f034970d16e169123e28e0274e56843dcc4ee4"
+      "path": "bin/adapters/framework/catalog.ts",
+      "sha256": "580dcd8313498e823c305bcf829a36291f7fb648543675ff5a9073b3fd3b206b"
     },
     {
-      "path": "scripts/framework/help-text.ts",
-      "sha256": "f3f70401ad0d576866c100062df5337f53115c1ed360d48d928659cef09c475c"
+      "path": "bin/adapters/framework/help-text.ts",
+      "sha256": "13009c1a11579803e74a2ea40c1bc1ac4d0ae73df05be82edf105da57ef9e031"
     },
     {
-      "path": "scripts/compiler/domain/diagnostics.ts",
+      "path": "bin/compiler/domain/diagnostics.ts",
       "sha256": "8cf40898f461b38aa39a7d5399a1e4108e65279611c6067831236270e9e364b6"
     },
     {
       "path": "scripts/documentation/render.mjs",
-      "sha256": "76b850f57bc28f3e6629525dad1bb4725dfaab92864a80c1da9fbe97a5a63894"
+      "sha256": "cb43bf33da7cd5423f8a538e3e135bf4127dec346e473c5ad64b7c33ad04bff8"
     },
     {
       "path": "scripts/documentation/manual.mjs",
-      "sha256": "41fc1c0522fda7dcf6cf7dd70e1f776e838ef836e8e052d585269d77cf615c75"
+      "sha256": "8b3487f625f2ba7507c2a9f45fd0d09fa34ea59000322c0c30e7409022ec18e2"
     }
   ],
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "4fab8e35729b58591f31cb079cc9f746ca81729ac632f5a15a2092ee9336af87"
+      "sha256": "89d35ae6762dff08e23e3916a87e8a826ede3acdb828158fa961f2eae1600997"
     },
     {
       "path": "diagnostics.md",
@@ -39,7 +39,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "d21ef2f4d6e997ca069046492ed2d7d7075c1ac3edcfe38e43a34754eb4ec19b"
+      "sha256": "d22344553679b18c48dac47444542ee66d94d88c5421119af977a929a08dce24"
     }
   ]
 }

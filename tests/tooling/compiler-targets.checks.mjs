@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import ts from 'typescript';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),template=await loadTemplateSnapshot(root);
 const source=await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8');
 test('browser output shares generated product code and packages an explicit offline build entry',async()=>{
@@ -28,9 +28,9 @@ test('browser output shares generated product code and packages an explicit offl
     const generated = JSON.parse(result.artifacts.find(file => file.path === 'package.json').content);
     assert.equal(generated.devDependencies.typescript, ts.version);
     assert.match(generated.devDependencies.typescript, /^6\.\d+\.\d+$/);
-    assert.equal(generated.scripts['typecheck:project'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.project.json');
+    assert.equal(generated.scripts['typecheck:project'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json');
   }
-  assert.equal(pkg.scripts['typecheck:clickdummy'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.clickdummy.json');
+  assert.equal(pkg.scripts['typecheck:clickdummy'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.clickdummy.json');
 });
 test('compiled browser sources refuse an explicitly writable operation at runtime', async t => {
   const document = JSON.parse(source);
@@ -77,8 +77,8 @@ test('v6 authoring routes survive compiler analysis, emission and both output ta
     assert.deepEqual(result.model.document, document);
     assert.deepEqual(JSON.parse(result.artifacts.find(file => file.path === 'design/project.json').content), document);
     assert.match(result.artifacts.find(file => file.path === 'harness/prototype/clickdummy.ts').content, /capture\/:recordId/);
-    assert.ok(result.artifacts.some(file => file.path === 'tsconfig.sitemap.json'));
-    assert.ok(result.artifacts.some(file => file.path === 'tsconfig.authoring.json'));
+    assert.ok(result.artifacts.some(file => file.path === 'configs/types/tsconfig.sitemap.json'));
+    assert.ok(result.artifacts.some(file => file.path === 'configs/types/tsconfig.authoring.json'));
   }
   assert.equal(JSON.stringify(document), text);
 });
