@@ -107,19 +107,21 @@ test('a job with an external action is marked not reproducible and the action is
   assert.match(plan.data.notes.join('\n'), /external action step\(s\) are skipped: docker\/build-push-action/);
 });
 test('dry run prints exact ordered commands with literal env, working directory, conditions and verbatim unresolved expressions', async () => {
-  const dir = await project({ 'fake.yml': fake });
+  const dir = await project({ 'fake.yml': onHost(fake) });
   const before = await readdir(dir);
-  const { data, status } = await run(dir, select);
+  const { data, status } = await run(dir, { ...select, matrix: onHost(select.matrix) });
+  const windowsHost = process.platform === 'win32';
   assert.equal(status, 'planned'); assert.equal(data.mode, 'dry-run'); assert.equal(data.execution, 'not-run');
-  assert.equal(data.name, 'Build / ubuntu-latest / a'); assert.equal(data.runsOn, 'ubuntu-latest'); assert.deepEqual(data.matrix, { mode: 'selected', available: 4, combination: { os: 'ubuntu-latest', flavor: 'a' } });
-  assert.deepEqual(data.steps.map(step => [step.index, step.disposition]), [[1, 'setup'], [2, 'external'], [3, 'run'], [4, 'run'], [5, 'skip-condition'], [6, 'condition-unknown'], [7, 'run'], [8, 'run']]);
+  assert.equal(data.name, `Build / ${hostRunner} / a`); assert.equal(data.runsOn, hostRunner); assert.deepEqual(data.matrix, { mode: 'selected', available: 4, combination: { os: hostRunner, flavor: 'a' } });
+  assert.deepEqual(data.steps.map(step => [step.index, step.disposition]), [[1, 'setup'], [2, 'external'], [3, 'run'], [4, 'run'], [5, windowsHost ? 'run' : 'skip-condition'], [6, 'condition-unknown'], [7, 'run'], [8, 'run']]);
   const use = data.steps[3];
   assert.match(use.command, /^test "\$FROM_ENV" = exported\ntest "\$STEP_LEVEL" = abc123\n/);
   assert.deepEqual(use.env, { WORKFLOW_LEVEL: 'wf', JOB_LEVEL: 'a', STEP_LEVEL: '${{ steps.export.outputs.token }}' });
   assert.deepEqual(use.unresolved, ['steps.export.outputs.token']); assert.equal(use.workingDirectory, 'sub'); assert.equal(use.shell, 'bash');
-  assert.deepEqual(data.steps[4].condition, { expression: "runner.os == 'Windows'", result: 'false' }); assert.equal(data.steps[5].condition.result, 'unknown');
+  assert.deepEqual(data.steps[4].condition, { expression: "runner.os == 'Windows'", result: windowsHost ? 'true' : 'false' }); assert.equal(data.steps[5].condition.result, 'unknown');
   assert.equal(data.steps[5].status, 'skipped'); assert.match(data.steps[5].reason, /cannot be settled locally/);
-  assert.equal(data.executable, true); assert.match(data.next, /^node bin\/app ci --job fake\/build --matrix os=ubuntu-latest,flavor=a --execute$/);
+  // The job targets this machine's runner OS, so it is executable wherever a POSIX shell exists.
+  if (posix) { assert.equal(data.executable, true); assert.match(data.next, new RegExp(`^node bin/app ci --job fake/build --matrix os=${hostRunner},flavor=a --execute$`)); }
   assert.deepEqual(await readdir(dir), before, 'a dry run writes nothing'); await assert.rejects(access(join(dir, 'pwd.txt')));
 });
 test('matrix selection: explicit, defaulted to this machine, no match, ambiguous and expression-computed', async () => {
@@ -143,15 +145,17 @@ test('usage errors and unknown workflows or jobs fail with suggestions', async (
   assert.deepEqual((await run(await project({}), { list: true })).data.workflows, []);
 });
 test('execute is refused for secrets, publication, deployment, wrong runner OS, unresolved inputs and missing shells; nothing runs', async () => {
-  const danger = (id, body, head = '') => `  ${id}:\n    runs-on: ubuntu-latest\n${head}    steps:\n      - run: touch ran-${id}.txt\n${body}`;
+  // A runner OS that differs from this machine (and is still in the fake matrix), so the refusal holds on every host.
+  const foreign = process.platform === 'win32' ? 'ubuntu-latest' : 'windows-latest';
+  const danger = (id, body, head = '', runner = 'ubuntu-latest') => `  ${id}:\n    runs-on: ${runner}\n${head}    steps:\n      - run: touch ran-${id}.txt\n${body}`;
   const dir = await project({ 'danger.yml': 'name: Danger\non: push\njobs:\n' + [
     danger('secret', '      - run: echo "${{ secrets.TOKEN }}"\n'), danger('publish', '      - run: npm publish\n'), danger('push', '      - run: git push origin HEAD\n'),
     danger('release', '      - run: echo hi\n'), danger('deploy', '      - run: echo hi\n', '    environment: production\n'),
-    danger('inputs', '      - run: echo ${{ inputs.version }}\n'), danger('windows', '      - run: echo hi\n').replace('ubuntu-latest', 'windows-latest'),
+    danger('inputs', '      - run: echo ${{ inputs.version }}\n'), danger('windows', '      - run: echo hi\n', '', foreign),
     ...(pwshAvailable ? [] : [danger('shell', '      - run: Write-Host hi\n        shell: pwsh\n')]) ].join(''), 'fake.yml': fake });
   const ids = ['secret', 'publish', 'push', 'release', 'deploy', 'inputs', 'windows', ...(pwshAvailable ? [] : ['shell'])];
   const patterns = { secret: /refused: step 2 references secrets/, publish: /refused: step 2 runs npm publish/, push: /runs git push/, release: /named as a release/, deploy: /deployment environment/,
-    inputs: /unresolved expressions.*inputs\.version/, windows: /targets windows-latest but this machine is/, shell: /needs pwsh/ };
+    inputs: /unresolved expressions.*inputs\.version/, windows: new RegExp(`targets ${foreign} but this machine is`), shell: /needs pwsh/ };
   for (const id of ids) {
     const plan = await run(dir, { job: `danger/${id}` });
     assert.equal(plan.status, 'planned', `${id} dry run is still available`); assert.equal(plan.data.executable, false);
@@ -160,8 +164,8 @@ test('execute is refused for secrets, publication, deployment, wrong runner OS, 
     assert.equal(refused.diagnostics[0].code, 'CI_EXECUTE_REFUSED'); assert.ok(refused.data.steps.every(step => step.status !== 'passed'));
     await assert.rejects(access(join(dir, `ran-${id}.txt`)), `${id} ran nothing`);
   }
-  const windows = await run(dir, { ...select, matrix: 'os=windows-latest,flavor=a', execute: true });
-  assert.equal(windows.status, 'blocked'); assert.match(windows.data.blockers[0], /targets windows-latest/);
+  const windows = await run(dir, { ...select, matrix: `os=${foreign},flavor=a`, execute: true });
+  assert.equal(windows.status, 'blocked'); assert.match(windows.data.blockers[0], new RegExp(`targets ${foreign}`));
   const listed = (await run(dir, { list: true })).data.workflows.find(item => item.stem === 'danger').jobs;
   assert.deepEqual(listed.filter(item => !item.executable).map(item => item.id).sort(), ['deploy', 'publish', 'push', 'release', 'secret']);
 });
@@ -231,19 +235,20 @@ test('the command is catalogued with its options and routed through the shared o
   assert.match(help.data.commands[0].usage, /--job <workflow-file-stem>\/<job-id>/); assert.match(help.data.commands[0].optionHelp.job.description, /ci --list/);
 });
 test('terminal views show listings, dry-run commands, refusals and execution results from the same result', { skip: !posix }, async () => {
-  const dir = await project({ 'fake.yml': fake, 'danger.yml': 'name: D\non: push\njobs:\n  secret:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ secrets.T }}\n', 'ext.yml': 'name: E\non:\n  schedule:\n    - cron: "1 2 * * 3"\n  push:\n    paths-ignore: [docs/**]\njobs:\n  j:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: x/y@v1\n' });
+  const dir = await project({ 'fake.yml': onHost(fake), 'danger.yml': onHost('name: D\non: push\njobs:\n  secret:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ secrets.T }}\n'), 'ext.yml': onHost('name: E\non:\n  schedule:\n    - cron: "1 2 * * 3"\n  push:\n    paths-ignore: [docs/**]\njobs:\n  j:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: x/y@v1\n') });
+  const hostSelect = { ...select, matrix: onHost(select.matrix) };
   const style = terminalStyle({});
   const listing = renderHuman(await run(dir, { list: true }), style).text;
   assert.match(listing, /^ {2}Jobs {7}3 \(1 reproducible, 2 executable\)$/m); assert.match(listing, /fake\/build +\$\{\{ matrix\.os \}\}; matrix os,flavor x4; 6 run steps; not fully reproducible \(1 reason\(s\)\); executable/);
   assert.match(listing, /danger\/secret .*execute refused/); assert.match(listing, /schedule 1 2 \* \* 3; push: 1 ignored paths/); assert.match(listing, /^Next: node bin\/app ci --job danger\/secret$/m);
-  const dry = renderHuman(await run(dir, select), style);
-  assert.equal(dry.diagnosticsShown, true); assert.match(dry.text, /^ {2}Matrix {3}os=ubuntu-latest,flavor=a \(selected\)$/m); assert.match(dry.text, /^ {8}in sub with bash; env WORKFLOW_LEVEL=wf JOB_LEVEL=a$/m);
+  const dry = renderHuman(await run(dir, hostSelect), style);
+  assert.equal(dry.diagnosticsShown, true); assert.match(dry.text, new RegExp(`^ {2}Matrix {3}os=${hostRunner},flavor=a \\(selected\\)$`, 'm')); assert.match(dry.text, /^ {8}in sub with bash; env WORKFLOW_LEVEL=wf JOB_LEVEL=a$/m);
   assert.match(dry.text, /\[condition-unknown\] Unknown event\n {8}condition "github\.event_name == 'push'" cannot be settled locally/);
   const refused = renderHuman(await run(dir, { job: 'danger/secret', execute: true }), style).text;
   assert.match(refused, /^ci: blocked$/m); assert.match(refused, /\[warn\] --execute would be refused: refused: step 1 references secrets/); assert.match(refused, /^Next: node bin\/app ci --job danger\/secret$/m);
-  const executed = renderHuman(await run(dir, { ...select, execute: true }), style).text;
+  const executed = renderHuman(await run(dir, { ...hostSelect, execute: true }), style).text;
   assert.match(executed, /^--- step 7 \(PROCESS_FAILED\) last output ---$/m); assert.match(executed, /\[ok\] +3\. \[run\] Export values +\d+ms$/m); assert.match(executed, /\[FAIL\] +7\. \[run\] Fails +\d+ms {2}exit 3$/m);
-  assert.match(executed, /^Next: node bin\/app ci --job fake\/build --matrix os=ubuntu-latest,flavor=a --execute$/m);
-  const quoted = renderHuman(await run(dir, { job: 'fake/build', matrix: 'os=ubuntu-latest,flavor=b', execute: true, 'dry-run': true }), style);
+  assert.match(executed, new RegExp(`^Next: node bin/app ci --job fake/build --matrix os=${hostRunner},flavor=a --execute$`, 'm'));
+  const quoted = renderHuman(await run(dir, { job: 'fake/build', matrix: `os=${hostRunner},flavor=b`, execute: true, 'dry-run': true }), style);
   assert.match(quoted.text, /^ci: planned$/m, '--dry-run wins over --execute');
 });
