@@ -67,8 +67,9 @@ before the agent starts, and persist per environment where the platform snapshot
 sh scripts/agent/cloud-setup.sh
 ```
 
-If the script runs before the repository is cloned, or from another directory, set `CLAUDE_PROJECT_DIR`
-to the checkout. The script delegates to `node scripts/agent/session-start.mjs --provision-only` when Node
+The script needs the checkout: it finds it through `CLAUDE_PROJECT_DIR`, the git top level or the current
+directory and otherwise does nothing (exit 0). Which directories a platform snapshot keeps between sessions is the
+platform's behaviour; whatever the setup script could not prepare, the SessionStart hook prepares again. The script delegates to `node scripts/agent/session-start.mjs --provision-only` when Node
 18 or newer exists; otherwise it downloads and verifies the qualified Node itself with `curl` (or `wget`),
 `tar` and `sha256sum`/`shasum`. It always exits 0 (a failing setup script would stop the session) and prints
 what it could not do. The SessionStart hook then finds the cached Node instantly. `SHELL_SESSION_START_NODE=0`
