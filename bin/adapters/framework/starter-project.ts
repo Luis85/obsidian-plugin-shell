@@ -20,6 +20,7 @@ import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
 import { exportedProject } from './project-from.ts';
+import { restoreExecutableBits } from './executable-bits.ts';
 import { initializeRepository, type GitReport } from './git-init.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
 interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
@@ -145,6 +146,7 @@ async function installAndVerify(request: Request, context: Context, directory: s
 }
 /** The initial git commit of a newly written project, unless --no-git; the project itself is already written either way. */
 async function versionControl(request: Request, context: Context, directory: string): Promise<GitReport> {
+  await restoreExecutableBits(directory);
   if (request.options['no-git'] === true) return { status: 'skipped', reason: '--no-git was passed' };
   const report = await initializeRepository(directory, stringOption(request.options, 'starter') ?? 'an exported project');
   context.progress?.(`git: ${report.status}${report.reason ? ` (${report.reason})` : ''}\n`);

@@ -184,3 +184,14 @@ test('[GENERATOR-DEVKIT-06] regeneration keeps an edited README and AGENTS.md; a
     await assert.rejects(applyProject(changed, changed.hash), /conflicts/); assert.equal(await readFile(readme, 'utf8'), custom);
   } finally { await rm(vault, { recursive: true, force: true }); }
 });
+test('[GENERATOR-DEVKIT-10] a generated project carries the cloud-session kit and leaves the maintainer handoff tooling behind', () => {
+  for (const path of ['scripts/agent/cloud-setup.sh', 'scripts/agent/session-start.mjs', 'scripts/agent/session-node.mjs', 'scripts/agent/session-node-io.mjs', 'scripts/agent/session-toolchain.mjs',
+    'scripts/agent/session-version.mjs', 'scripts/agent/session-switch.mjs', 'scripts/agent/session-install.mjs', 'scripts/agent/session-browser.mjs', 'scripts/agent/process-group.mjs'])
+    assert.ok(files.has(path), `${path} is imported by a hook or is the setup script`);
+  for (const path of ['scripts/testing/qualify-project-handoff.mjs', 'scripts/testing/handoff-run.mjs', 'scripts/testing/handoff-steps.mjs', 'tests/tooling/agent-project-handoff.checks.mjs'])
+    assert.ok(!files.has(path), `${path} generates projects from framework starters, so it stays in the framework`);
+  assert.match(text('AGENTS.md'), /## Working in a cloud session[\s\S]*docs\/framework\/development\/CLOUD-AND-LOCAL-SESSIONS\.md/);
+  assert.ok(files.has('docs/framework/development/CLOUD-AND-LOCAL-SESSIONS.md'));
+  assert.equal(JSON.parse(text('.claude/settings.json')).hooks.SessionStart[0].hooks[0].timeout, 600, 'the hook may download Node and run npm ci');
+  assert.ok(text('.gitignore').split('\n').includes('/clickdummy.html'), 'the e2e web server rebuilds the click-dummy; it must not dirty the tree');
+});

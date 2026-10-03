@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { statSync } from 'node:fs';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -75,4 +76,15 @@ test('initializeRepository reports each skip and failure honestly without throwi
   const ok = await initializeRepository('/p', 'quick-capture', runner([['rev-parse', { code: 128, stdout: '' }], ['config', { code: 0, stdout: 'x\n' }]], configured));
   assert.deepEqual(ok, { status: 'initialized', committer: 'configured', message: 'chore: generate project from quick-capture' });
   assert.ok(configured.at(-1).startsWith('commit '), 'no -c identity override when one is configured');
+});
+test('new keeps the framework entry points executable in the first commit, so a clone can run them', { skip: process.platform === 'win32' ? 'file modes need a POSIX file system' : false }, async t => {
+  const cwd = await scratch(t);
+  create(cwd, ['modes', '--starter', 'blank']);
+  const project = join(cwd, 'modes'), env = bareGit(join(cwd, 'home'));
+  const modes = Object.fromEntries(git(project, ['ls-files', '-s', 'bin/app', 'scripts/agent/cloud-setup.sh', 'package.json'], env).stdout.trim().split('\n').map(line => [line.split('\t')[1], line.slice(0, 6)]));
+  assert.deepEqual(modes, { 'bin/app': '100755', 'scripts/agent/cloud-setup.sh': '100755', 'package.json': '100644' });
+  assert.equal(git(project, ['status', '--porcelain'], env).stdout, '');
+  const plain = create(cwd, ['plain-modes', '--starter', 'blank', '--no-git']);
+  assert.equal(plain.data.git.status, 'skipped');
+  assert.ok(statSync(join(cwd, 'plain-modes', 'bin/app')).mode & 0o111, '--no-git projects keep the bits too');
 });
