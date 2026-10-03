@@ -42,6 +42,12 @@ test('package ownership protects edits, removed files, unsafe paths and foreign 
   assert.throws(() => outputBoundary(frameworkRoot, frameworkRoot, 'docs/concepts/nested'));
   outputBoundary(frameworkRoot, frameworkRoot, 'prototypes/new'); outputBoundary(root, frameworkRoot, 'source');
 }));
+test('every template snapshot root and .framework is a reserved output folder, in any letter case', () => {
+  // configs/ and plugins/ are snapshot roots too; Docs/ names docs/ on a case-insensitive file system.
+  for (const out of ['configs/nested', 'plugins/new', 'Docs/concepts', 'SRC', '.Framework/x', '.github/out'])
+    assert.throws(() => outputBoundary(frameworkRoot, frameworkRoot, out), error => error.code === 'MAKER_OUTPUT', out);
+  for (const out of ['generated/configs', 'prototypes/plugins', 'documents']) outputBoundary(frameworkRoot, frameworkRoot, out);
+});
 test('symlink inputs and malformed receipts are refused', async () => scratch(async root => {
   const path = join(root, 'real.json'); await writeFile(path, JSON.stringify(newDocument('P')));
   await symlink(path, join(root, 'linked.json')); await assert.rejects(() => readSnapshot(root, 'linked.json'), /PLAN_SYMLINK: linked.json/);

@@ -4,11 +4,13 @@ import { mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } f
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import { compilerOperation } from '../../bin/compiler/adapters/cli.ts';
 import { createRecorder, formatDiagnostics, writeReports } from '../../bin/compiler/adapters/reporting.ts';
 import { dependencyReadiness } from '../../bin/compiler/adapters/dependencies.ts';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
+import { templateRootFiles as templateFiles, templateRoots } from '../../bin/compiler/domain/template-inputs.ts';
 
 // Drives the compiler host CLI adapters (bin/compiler/adapters/{cli,reporting,dependencies,template-snapshot}.ts).
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -18,13 +20,31 @@ const context = { root, frameworkRoot: root, inputText: source };
 // Compiler adapters throw CompilerError, whose stable code lives on its diagnostic.
 const failsWith = code => error => error?.diagnostic?.code === code;
 const request = (command, options = {}, args = []) => ({ command, args, options: { input: '-', ...options } });
-const templateRoots = ['src', 'scripts', 'templates', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
-const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md',
-  'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'];
 /** The smallest tree the template loader accepts: every root folder and root file, no generator templates. */
 async function templateTree(folder) {
   for (const name of templateRoots) await mkdir(join(folder, name), { recursive: true });
   for (const name of templateFiles) await writeFile(join(folder, name), name.endsWith('.json') ? '{}\n' : name + '\n');
+}
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+/** A verifiable kit around that tree: every bin-owned file and bootstrap file is fingerprinted in bin/kit.json. */
+async function kitTree(folder) {
+  await templateTree(join(folder, 'bin/template'));
+  await writeFile(join(folder, 'bin/app.js'), '// inert kit fixture\n');
+  const files = [];
+  async function walk(path) {
+    for (const entry of await readdir(join(folder, path), { withFileTypes: true })) {
+      const child = path + '/' + entry.name;
+      if (entry.isDirectory()) await walk(child);
+      else { const bytes = await readFile(join(folder, child)); files.push({ path: child, hash: sha(bytes), bytes: bytes.length }); }
+    }
+  }
+  await walk('bin');
+  const bootstrap = [];
+  for (const path of ['bin/app', 'package.json', 'README.md', 'LICENSE']) {
+    await writeFile(join(folder, path), path + '\n'); bootstrap.push({ path, hash: sha(Buffer.from(path + '\n')) });
+  }
+  await writeFile(join(folder, 'bin/kit.json'), JSON.stringify({ schemaVersion: 2, version: '1.0.0', compilerVersion: 'fixture',
+    sourceHash: sha('fixture'), files, bootstrap }));
 }
 const scratch = async (t, prefix) => {
   const folder = await realpath(await mkdtemp(join(tmpdir(), prefix)));
@@ -68,13 +88,18 @@ test('inspection returns the IR or the artifact inventory, never both', async ()
   assert.equal(failed.status, 'failed'); assert.equal(failed.data.ir, undefined); assert.equal(failed.data.project, undefined);
 });
 
-test('an installed kit supplies its packaged template to artifact inspection', async t => {
+test('an installed kit is verified before it supplies its packaged template to artifact inspection', async t => {
   const folder = await scratch(t, 'compiler-cli-kit-');
-  await templateTree(join(folder, 'bin/template'));
-  await writeFile(join(folder, 'bin/kit.json'), '{}\n');
-  const result = await compilerOperation(request('compiler inspect', { stage: 'artifacts', 'output-kind': 'clickdummy' }), { ...context, frameworkRoot: folder });
+  await kitTree(folder);
+  const inspect = () => compilerOperation(request('compiler inspect', { stage: 'artifacts', 'output-kind': 'clickdummy' }), { ...context, frameworkRoot: folder });
+  const result = await inspect();
   // The packaged template carries no bundled offline builder, so lowering refuses click-dummy output from it.
   assert.equal(result.status, 'failed'); assert.equal(result.diagnostics[0].code, 'COMPILER_TEMPLATE_INVALID'); assert.match(result.diagnostics[0].message, /offline builder/);
+  // A modified kit is refused before any template is read: the rule starters and maker compilation apply too.
+  await writeFile(join(folder, 'bin/template/src/edited.ts'), 'export {};\n');
+  await assert.rejects(inspect(), { code: 'KIT_INVENTORY' });
+  await writeFile(join(folder, 'bin/kit.json'), '{}\n');
+  await assert.rejects(inspect(), { code: 'KIT_VERSION' });
 });
 
 test('debug reports are retained only beside an explicit contained report directory', async t => {

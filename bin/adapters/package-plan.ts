@@ -6,6 +6,7 @@ import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { object, list, text, keys } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { prepared, type Entry, type Prepared } from './storage.ts';
+import { reservedOutputFolder } from '../compiler/domain/template-inputs.ts';
 function receipt(value: unknown): Map<string, string> {
   const input = object(value); keys(input, ['schemaVersion', 'files']);
   requireSketch(input.schemaVersion === 1, 'MAKER_RECEIPT', 'Unsupported maker receipt.');
@@ -23,7 +24,7 @@ export function outputBoundary(root: string, frameworkRoot: string, out: string)
   const target = relative(resolve(frameworkRoot), resolve(root, out));
   if (target.startsWith('..') || isAbsolute(target)) return;
   const first = target.split(/[\\/]/)[0];
-  requireSketch(first && !['src', 'bin', 'scripts', 'templates', 'tests', 'harness', 'docs', '.github', '.framework'].includes(first), 'MAKER_OUTPUT', 'Inside a framework checkout, use prototypes/<name> or generated/<name>, not a template input directory.');
+  requireSketch(first && !reservedOutputFolder(first), 'MAKER_OUTPUT', 'Inside a framework checkout, use prototypes/<name> or generated/<name>, not a template input directory.');
 }
 /** Compiler emission stays separate from package persistence. Edited/foreign files are never silently adopted. */
 export async function packagePlan(root: string, out: string, entries: Entry[], data: Record<string, unknown>): Promise<Prepared> {

@@ -1,6 +1,7 @@
 import { storybookFlags } from '../../adapters/framework/storybook-options.ts';
-import { basename, join, resolve } from 'node:path';
-import { readBounded, exists } from '../../adapters/framework/files.ts';
+import { basename, resolve } from 'node:path';
+import { readBounded } from '../../adapters/framework/files.ts';
+import { resolveTemplateRoot } from '../../adapters/template-root.ts';
 import { requireThat, result, stringOption, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
 import { compileProject, loadTemplateSnapshot, diagnosticCatalog, compilerVersion } from '../index.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
@@ -31,8 +32,7 @@ async function readSource(input: string, sourceName: string, context: Context): 
   catch (cause) { throw new CompilerError(diagnostic('COMPILER_JSON_INVALID', 'parse', 'Input is not valid UTF-8.', { file: sourceName, jsonPointer: '' }), { cause }); }
 }
 async function artifactTemplate(context: Context) {
-  const templateRoot = await exists(join(context.frameworkRoot, 'bin/kit.json')) ? join(context.frameworkRoot, 'bin/template') : context.frameworkRoot;
-  return loadTemplateSnapshot(templateRoot, context.signal);
+  return loadTemplateSnapshot(await resolveTemplateRoot(context.frameworkRoot), context.signal);
 }
 type Compiled = Awaited<ReturnType<typeof compileProject>>;
 function inspection(request: Request, stage: string, compiled: Compiled) {
