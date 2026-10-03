@@ -5,7 +5,7 @@
 **What this repo is.** Workbench is a reusable Obsidian plugin shell with three
 parts: the plugin runtime in `src/` (Vue, Pinia, Nuxt UI), the `node bin/app` CLI
 that sets up, checks and extends projects (`new`, `setup`, `make`, `generate`,
-`check`, `ci`, `ui`, `memory`, `adopt`), and the authoring path from the browser companion
+`check`, `ci`, `ui`, `memory`, `adopt`, `design`), and the authoring path from the browser companion
 concept through the dedicated compiler to independent generated projects (project
 starters, `node bin/app new`). Generated projects carry their own short
 `AGENTS.md` and the same `check` gate. `node bin/app` is the only CLI entry; there
@@ -26,6 +26,7 @@ qualification and release authorization are separate. Milestone background is in
 | `harness/` | Browser harness for the served UI; never shipped in the plugin. |
 | `docs/` | Product, development and testing docs; `docs/concepts/companion` is the authoring concept. |
 | `docs/development/ADOPT-EXISTING-PROJECT.md` | Adding Workbench to an existing project: `node bin/app adopt analyze`, `adopt plan` and `adopt skill`, with the `adopt-existing-project` skill. |
+| `docs/design/<prototype>/` | Per-prototype Claude Design folders (`node bin/app design status\|prepare\|sync`); see [Claude Design folders](docs/development/CLAUDE-DESIGN-HANDOFF.md). Generated files there are owned by sync, including `ENGINEERING_HANDOFF_GUIDE.md`, which is built only from facts read from the project's files; `prototypes/`, `assets/`, `notes/` and `handoff/implementation-map.md` are design work. |
 
 **Setup.** Use the qualified Node 24.21.0/npm 11.19.1 (`.nvmrc`) and `npm ci` with
 the exact lock; do not run `npm install`. In Claude Code, `scripts/agent/session-start.mjs`

@@ -51,8 +51,10 @@ export async function maintainabilityInventory(root) {
     const terminalPython = path === 'tests/tooling/interactive-maker-pty.py';
     const shell = shellScripts.has(path);
     const python = conceptPython.test(path) || memoryPython.has(path) || terminalPython;
-    // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings) are rendered text, not code.
-    const templateData = (path.startsWith('templates/examples/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^templates\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path);
+    // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings) and the Claude Design folder's
+    // Markdown templates are rendered text, not code.
+    const templateData = (path.startsWith('templates/examples/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^templates\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path)
+      || /^templates\/design-folder\/[\w-]+\.md\.tmpl$/.test(path);
     if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData && !python && !shell) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
     let templateRegion = null;
     if (/\.vue(?:\.txt)?$/.test(path)) {

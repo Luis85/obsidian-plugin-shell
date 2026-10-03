@@ -66,7 +66,8 @@ test('workspace guides and agent commands share the persistence and compiler pat
 test('prototype-only guide loads the saved baseline and writes a complete preparation package', async () => scratch(async root => {
   const ui = scripted(['P', 'new', 'Home', 'back', 'save', 'y', 'exit']);
   await studio(ui, { root, frameworkRoot, project: 'design/project.json' });
-  const guide = await loadGuide(), wizard = scripted([...guideAnswers(guide), 'prepared', 'y']);
+  // The trailing 'n' declines the optional Claude Design folder offered after the package is written.
+  const guide = await loadGuide(), wizard = scripted([...guideAnswers(guide), 'prepared', 'y', 'n']);
   await prototypeWizard(wizard, { root, frameworkRoot, project: 'design/project.json' }); wizard.done();
   const answers = JSON.parse(await readFile(join(root, 'prepared/prototype-answers.json'), 'utf8'));
   assert.deepEqual(answers.answers.pages, ['Home']);

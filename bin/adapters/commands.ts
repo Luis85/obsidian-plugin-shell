@@ -1,5 +1,6 @@
 import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
+import { designCommand } from './design-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -21,7 +22,7 @@ import { boilerplatePlan } from './compiler.ts';
 import { pluginCliCommands, type WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
 import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
-import { option, type Arguments } from '../domain/command-options.ts';
+import { makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
 const makerHelp = `Shell maker — make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
@@ -70,10 +71,13 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app prototype guide --json
   node bin/app prototype validate --input answers.json --json
   node bin/app prototype --input answers.json --out prototypes/my-prototype --json
+  node bin/app design status --json  Claude Design folders under docs/design (configurable paths.design)
+  node bin/app design prepare --name my-prototype --json   Prepare docs/design/my-prototype for Claude Design
+  node bin/app design sync --name my-prototype --json      Regenerate its context; design work is never touched
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
---starter <project-starter-id> (new, new guide),
+--starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -85,8 +89,8 @@ Workbench plugins registered in plugins/registry.ts may add top-level CLI comman
 `;
 function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
-  const booleans = ['json', 'no-interaction', 'help', 'no-color', ...(extension?.options?.booleans ?? [])];
-  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter', ...(extension?.options?.values ?? [])];
+  const booleans = [...makerBooleanOptions, ...(extension?.options?.booleans ?? [])];
+  const values = [...makerValueOptions, ...(extension?.options?.values ?? [])];
   while (tokens.length) {
     const flag = tokens.shift()!;
     requireSketch(flag.startsWith('--'), 'MAKER_ARGUMENT', `Unexpected argument ${flag}.`);
@@ -103,10 +107,9 @@ function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<stri
 export function parseArguments(argv: string[], extensions: readonly PluginCliCommand[] = pluginCliCommands()): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  const builtins = ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm'];
-  requireSketch(extensions.every(item => !builtins.includes(item.id)), 'PLUGIN_COMMAND_CONFLICT', 'A plugin CLI command conflicts with a built-in maker command.');
+  requireSketch(extensions.every(item => !makerCommandIds.includes(item.id)), 'PLUGIN_COMMAND_CONFLICT', 'A plugin CLI command conflicts with a built-in maker command.');
   const extension = first ? extensions.find(item => item.id === first) : undefined;
-  requireSketch(first === undefined || builtins.includes(first) || extension, 'MAKER_COMMAND', 'Use a built-in maker command or a registered plugin command.');
+  requireSketch(first === undefined || makerCommandIds.includes(first) || extension, 'MAKER_COMMAND', 'Use a built-in maker command or a registered plugin command.');
   const command = first ?? 'studio';
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
   const flags = parseFlags(tokens, extension);
@@ -169,7 +172,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -186,6 +189,7 @@ function directCommand(args: Arguments, context: CommandContext): Record<string,
   if (args.flags.help || args.command === 'studio') return helpResult(args, context.plugins?.cliCommands ?? pluginCliCommands());
   if (args.command === 'new') return newProjectCommand(args, context);
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
+  if (args.command === 'design') return designCommand(args, context);
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
   return undefined;
 }

@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 
 // Generated-project template sources live in templates/: the companion runtime copied into generated projects,
-// the developer-kit text templates, the example-removal templates and the adoption skill the kit installs into existing projects. The shared companion contracts stay in scripts/companion.
+// the developer-kit text templates, the example-removal templates, the adoption skill the kit installs into existing projects
+// and the Claude Design folder templates `design prepare` renders. The shared companion contracts stay in scripts/companion.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const removed = ['scripts/companion/runtime', 'scripts/companion/devkit', 'scripts/examples/templates'];
 async function files(folder) {
@@ -17,10 +18,10 @@ async function files(folder) {
   return nested.flat();
 }
 
-test('templates/ holds only the runtime, developer-kit, example-removal and adoption-skill templates', async () => {
+test('templates/ holds only the runtime, developer-kit, example-removal, adoption-skill and design-folder templates', async () => {
   const all = await files('templates');
   const kinds = [[/^templates\/companion\/runtime\/[\w-]+\.ts$/, 'runtime'], [/^templates\/companion\/devkit\/[\w.-]+\.tmpl$/, 'devkit'], [/^templates\/examples\/[\w.-]+\.txt$/, 'examples'],
-    [/^templates\/adoption\/(?:claude|agents)-skill\/SKILL\.md$/, 'adoption skill']];
+    [/^templates\/adoption\/(?:claude|agents)-skill\/SKILL\.md$/, 'adoption skill'], [/^templates\/design-folder\/[\w-]+\.md\.tmpl$/, 'design folder']];
   const unexpected = all.filter(path => !kinds.some(([pattern]) => pattern.test(path)));
   assert.deepEqual(unexpected, []);
   for (const [pattern, name] of kinds) assert.ok(all.some(path => pattern.test(path)), `${name} templates are present`);
