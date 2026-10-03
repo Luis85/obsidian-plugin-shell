@@ -1,3 +1,4 @@
+import { adoptCommands } from './adopt-catalog.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
 import { assertJsonData } from '../../../scripts/contracts/json-data.ts';
@@ -40,6 +41,7 @@ export const commands: readonly Command[] = [
   { id: 'obsidian read', summary: 'Read one non-hidden Markdown file from the explicitly selected vault.', options: values('obsidian-vault', 'obsidian-path'), maxArgs: 0, effect: 'read' },
   { id: 'obsidian prepare', summary: 'Scan configured documentation paths through the official CLI and propose existing reviewed docs-import commands.', options: values('obsidian-vault'), maxArgs: 0, effect: 'read' },
   ...prototypeCommands,
+  ...adoptCommands,
   { id: 'handout generate', summary: 'Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout refresh', summary: 'Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout validate', summary: 'Validate required handout decisions and source freshness without writes or execution authorization.', options: values('prds'), maxArgs: 0, effect: 'read' },

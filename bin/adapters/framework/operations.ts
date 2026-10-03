@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { packStarterOperation, readStarterOperation } from '../../../scripts/starters/operations.ts';
 import { starterProcessOperation } from '../../../scripts/starters/processes.ts';
+import { adoptAnalyze } from './adopt-operation.ts';
 import { airshipOperation } from './airship.ts';
 import { buildClickdummy } from './clickdummy.ts';
 import { checkOperation } from './check.ts';
@@ -109,6 +110,7 @@ const routes: Route[] = [
   [(request, effect) => request.command.startsWith('docs ') && effect !== 'plan', docsRead],
   [(_request, effect) => effect === 'fixtures', (request, context) => fixtureOperation(request, context)],
   [isMakerDiscovery, makerDiscovery],
+  [named('adopt analyze'), adoptAnalyze],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],
   [prefixed('storybook '), (request, context) => storybookOperation(request, context)],

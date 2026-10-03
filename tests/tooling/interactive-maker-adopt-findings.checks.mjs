@@ -1,0 +1,96 @@
+import assert from 'node:assert/strict';
+import { analyzeInventory } from '../../bin/application/adoption/analyze.ts';
+import { AdoptionError } from '../../bin/domain/adoption/contracts.ts';
+import { sortFindings, finding } from '../../bin/domain/adoption/findings.ts';
+import { parseReport } from '../../bin/domain/adoption/report-codec.ts';
+import { recommend, stackOf } from '../../bin/domain/adoption/strategy.ts';
+import { inventoryOf, noTargets, targets } from './interactive-maker-adopt-fixture.mjs';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+
+const repo = { present: true, dirty: false, remoteHost: null, dirtyNote: null };
+const pkg = (dependencies = {}, extra = {}) => ({ name: 'sample', dependencies, ...extra });
+const analyze = (files, options = {}, target = targets) => analyzeInventory(inventoryOf(files, { git: repo, ...options }), target, '2026-01-02T03:04:05.000Z');
+const find = (report, id) => report.findings.find(item => item.id === id);
+const angularApp = major => ({ 'package.json': pkg({ '@angular/core': `^${major}.0.0` }), 'angular.json': { projects: { app: { projectType: 'application', architect: { build: { builder: '@angular/build:application' } } } } }, 'package-lock.json': '{}' });
+
+test('the Angular gap decides between aligned, behind, ahead and blocking, using the target read from the starter', () => {
+  assert.equal(find(analyze(angularApp(22)), 'ANGULAR_VERSION_ALIGNED').severity, 'info');
+  assert.equal(find(analyze(angularApp(21)), 'ANGULAR_ONE_MAJOR_BEHIND').severity, 'warn');
+  assert.equal(find(analyze(angularApp(23)), 'ANGULAR_AHEAD_OF_TARGET').severity, 'warn');
+  const blocked = find(analyze(angularApp(20)), 'ANGULAR_TARGET_GAP');
+  assert.equal(blocked.severity, 'block'); assert.match(blocked.message, /2 majors behind.*22\.0\.0/);
+  const moved = find(analyze(angularApp(20), {}, { ...targets, angular: { version: '20.1.0', major: 20, source: 'other.json' } }), 'ANGULAR_VERSION_ALIGNED');
+  assert.match(moved.message, /other\.json/);
+  assert.equal(find(analyze(angularApp(20), {}, noTargets), 'ANGULAR_TARGET_UNKNOWN').severity, 'info');
+  assert.equal(find(analyze({ 'package.json': pkg({ '@angular/core': 'latest' }) }), 'ANGULAR_VERSION_UNKNOWN').severity, 'warn');
+  assert.ok(find(analyze({ 'package.json': pkg() }), 'NO_ANGULAR_DETECTED'));
+  assert.ok(find(analyze(angularApp(22)), 'ANGULAR_SOURCE_NOT_READ'));
+  assert.ok(find(analyze({ ...angularApp(22), 'angular.json': { projects: { a: { architect: { build: { builder: '@angular-devkit/build-angular:browser' } } } } } }), 'ANGULAR_WEBPACK_BUILDER'));
+  assert.ok(find(analyze({ ...angularApp(22), '.nvmrc': '24.21.0', 'src/m.ts': '@NgModule({}) class M {}' }), 'ANGULAR_NGMODULE_BASED') === undefined);
+});
+test('toolchain findings compare Node, TypeScript, lockfiles and strictness with the repository pins', () => {
+  const report = analyze({ 'package.json': pkg({ typescript: '~4.9.4' }, { engines: { node: '^18 || ^20' } }), '.nvmrc': 'v18.19.0', '.node-version': '20', '.tool-versions': 'nodejs 24.21.0', 'tsconfig.json': '{ "compilerOptions": { "strict": false } }', 'package-lock.json': '{}', 'yarn.lock': 'x' });
+  assert.deepEqual(report.findings.filter(item => item.id === 'NODE_MAJOR_DIFFERS').flatMap(item => item.evidence), ['.node-version', '.nvmrc']);
+  assert.ok(find(report, 'NODE_ENGINES_EXCLUDE_TARGET')); assert.ok(find(report, 'TYPESCRIPT_MAJOR_DIFFERS')); assert.ok(find(report, 'TYPESCRIPT_NOT_STRICT')); assert.ok(find(report, 'MULTIPLE_LOCKFILES'));
+  const clean = analyze({ 'package.json': pkg({ typescript: '6.0.3' }, { engines: { node: '>=22.13.0' } }), '.nvmrc': '24.21.0', 'package-lock.json': '{}' });
+  for (const id of ['NODE_MAJOR_DIFFERS', 'NODE_ENGINES_EXCLUDE_TARGET', 'TYPESCRIPT_MAJOR_DIFFERS', 'NODE_UNPINNED', 'NO_LOCKFILE']) assert.equal(find(clean, id), undefined, id);
+  assert.ok(find(analyze({ 'package.json': pkg() }), 'NODE_UNPINNED')); assert.ok(find(analyze({ 'package.json': pkg() }), 'NO_LOCKFILE')); assert.equal(find(analyze({ 'src/a.ts': 'x' }), 'NO_LOCKFILE'), undefined);
+  const noTarget = analyze({ 'package.json': pkg({ typescript: '4' }, { engines: { node: '14' } }), '.nvmrc': '16' }, {}, noTargets);
+  assert.equal(find(noTarget, 'NODE_MAJOR_DIFFERS'), undefined); assert.equal(find(noTarget, 'TYPESCRIPT_MAJOR_DIFFERS'), undefined);
+  assert.ok(find(analyze({ 'package.json': pkg(), 'a.eslintrc.json': '{}', '.eslintrc.json': '{}', 'eslint.config.js': 'x' }), 'TOOL_CONFIG_CONFLICT'));
+  assert.ok(find(analyze({ 'package.json': pkg() }), 'NO_TEST_RUNNER'));
+});
+test('repository findings cover git state, scan limits, malformed files, agent files, Workbench presence and path collisions', () => {
+  const dirty = analyze({ 'package.json': pkg() }, { git: { present: true, dirty: true, remoteHost: 'github.com', dirtyNote: null } });
+  assert.ok(find(dirty, 'GIT_DIRTY')); assert.match(find(dirty, 'GIT_REMOTE').message, /github\.com/);
+  assert.ok(find(analyze({ 'package.json': pkg() }, { git: { present: true, dirty: null, remoteHost: null, dirtyNote: 'because' } }), 'GIT_STATE_UNKNOWN').message.includes('because'));
+  assert.ok(find(analyze({ 'package.json': pkg() }, { git: { present: true, dirty: null, remoteHost: null, dirtyNote: null } }), 'GIT_STATE_UNKNOWN'));
+  assert.ok(find(analyze({ 'package.json': pkg() }, { git: { present: false, dirty: null, remoteHost: null, dirtyNote: null } }), 'GIT_ABSENT'));
+  const limited = analyze({ 'package.json': '{ bad' }, { scan: { truncated: true, skipped: { directories: [], symlinks: 2, oversize: 1, binary: 3, unreadable: 4 } } });
+  for (const id of ['SCAN_TRUNCATED', 'SYMLINKS_SKIPPED', 'OVERSIZE_FILES_SKIPPED', 'BINARY_FILES_SKIPPED', 'UNREADABLE_FILES_SKIPPED', 'MALFORMED_CONFIG']) assert.ok(find(limited, id), id);
+  const agents = analyze({ 'AGENTS.md': 'x', '.claude/settings.json': { hooks: { Stop: [] } }, 'package.json': pkg() });
+  assert.deepEqual(find(agents, 'AGENT_INSTRUCTIONS_PRESENT').evidence, ['AGENTS.md']); assert.match(find(agents, 'CLAUDE_SETTINGS_PRESENT').message, /with hooks, without permissions/);
+  assert.match(find(analyze({ '.claude/settings.json': { permissions: { allow: [] } } }), 'CLAUDE_SETTINGS_PRESENT').message, /without hooks, with permissions/);
+  const collisions = analyze({ 'package.json': pkg(), design: 'a file', 'docs/workbench/NOTES.md': 'x', '.claude/skills/adopt-existing-project/SKILL.md': 'x', 'apps/workbench-app/package.json': '{}' });
+  assert.equal(find(collisions, 'PATH_COLLISION_FILE').severity, 'block'); assert.deepEqual(collisions.findings.filter(item => item.id === 'PATH_COLLISION').flatMap(item => item.evidence), ['.claude/skills/adopt-existing-project', 'apps/workbench-app', 'docs/workbench']);
+  const kit = analyze({ 'package.json': pkg(), 'tools/shell-cli/bin/kit.json': '{}' });
+  assert.equal(find(kit, 'WORKBENCH_PRESENT'), undefined); assert.equal(find(kit, 'WORKBENCH_KIT_PRESENT').severity, 'info'); assert.equal(find(kit, 'PATH_COLLISION'), undefined);
+  const prior = analyze({ 'package.json': pkg(), 'tools/shell-cli/bin/kit.json': '{}', 'design/project.json': '{}', 'shell.config.json': '{}' });
+  assert.deepEqual(find(prior, 'WORKBENCH_PRESENT').evidence, ['design/project.json', 'shell.config.json']); assert.ok(find(prior, 'WORKBENCH_KIT_PRESENT'));
+  assert.ok(find(analyze({ 'package.json': pkg(), 'design/project.json': '{}' }), 'WORKBENCH_PRESENT')); assert.equal(find(analyze({ 'package.json': pkg() }), 'WORKBENCH_KIT_PRESENT'), undefined);
+  assert.ok(find(analyze({ '.obsidian/app.json': '{}' }), 'NOT_AN_OBSIDIAN_VAULT') === undefined); assert.ok(find(analyze({ 'package.json': pkg() }), 'NO_CI_DETECTED'));
+  assert.ok(find(analyze({ 'package.json': pkg(), nx: null, 'nx.json': '{}', 'manifest.json': { id: 'p', minAppVersion: '1.0.0' } }), 'OBSIDIAN_PLUGIN_DETECTED'));
+  assert.ok(find(analyze({ 'package.json': pkg({ nx: '1' }), 'nx.json': '{}' }), 'NX_WORKSPACE'));
+});
+test('findings are ordered by severity then id and de-duplicate evidence', () => {
+  const sorted = sortFindings([finding('B', 'info', 'm'), finding('A', 'warn', 'm', ['z', 'a', 'a']), finding('C', 'block', 'm'), finding('A', 'info', 'm')]);
+  assert.deepEqual(sorted.map(item => `${item.severity}:${item.id}`), ['block:C', 'warn:A', 'info:A', 'info:B']); assert.deepEqual(sorted[1].evidence, ['a', 'z']);
+});
+test('strategy choice follows stack and version feasibility and names the Vue starter when relevant', () => {
+  const plan = files => recommend(analyze(files));
+  assert.equal(plan(angularApp(22)).primary, 'A'); assert.equal(plan(angularApp(21)).primary, 'A'); assert.equal(plan(angularApp(18)).primary, 'B');
+  assert.equal(plan({ 'package.json': pkg({ '@angular/core': 'latest' }) }).primary, 'B');
+  assert.equal(plan({ 'package.json': pkg({ react: '18' }) }).stack, 'other-web'); assert.equal(plan({ 'package.json': pkg({ nuxt: '3' }) }).stack, 'vue');
+  assert.match(plan({ 'package.json': pkg({ vue: '3' }) }).options[1].reasons.join(' '), /webapp-nuxtui/);
+  const plugin = plan({ 'manifest.json': { id: 'p', minAppVersion: '1.0.0' }, 'package.json': pkg({ obsidian: '1' }) });
+  assert.equal(plugin.primary, 'C'); assert.equal(plugin.options[2].fit, 'recommended');
+  assert.equal(plan({ 'README.md': 'x' }).stack, 'none'); assert.equal(plan({ 'README.md': 'x' }).primary, 'B');
+  const legacyStyle = { 'src/m.ts': '@NgModule({}) class M {}', 'src/c.ts': "@Component({ standalone: false, template: '' }) class C {}" };
+  const modules = plan({ ...angularApp(22), ...legacyStyle }); assert.match(modules.options[0].reasons.join(' '), /bridging/);
+  assert.deepEqual(plan(angularApp(22)).options.map(item => item.fit), ['recommended', 'possible', 'not-advised']); assert.equal(plan(angularApp(10)).options[0].fit, 'not-advised');
+  assert.equal(stackOf(analyze({ 'package.json': pkg({ '@angular/core': '17' }) })), 'angular');
+});
+test('report parsing round-trips a real report and rejects tampered or unsupported data', () => {
+  const report = analyze({ ...angularApp(21), 'src/app/app.routes.ts': "export const routes = [{ path: 'orders' }];", 'AGENTS.md': 'x', '.claude/settings.json': { hooks: {} } });
+  const copy = parseReport(JSON.parse(JSON.stringify(report)));
+  assert.deepEqual(copy, report); assert.notEqual(copy, report);
+  const clone = () => JSON.parse(JSON.stringify(report));
+  const expectInvalid = (mutate, code = 'ADOPT_REPORT_INVALID') => { const data = clone(); mutate(data); assert.throws(() => parseReport(data), error => error instanceof AdoptionError && error.code === code); };
+  expectInvalid(data => { data.schema = 'workbench-adoption-report/v2'; }, 'ADOPT_REPORT_SCHEMA');
+  expectInvalid(data => { delete data.target; }); expectInvalid(data => { data.findings[0].severity = 'fatal'; }); expectInvalid(data => { data.findings[0].message = 'a\u0007b'; });
+  expectInvalid(data => { data.scan.files = -1; }); expectInvalid(data => { data.scan.files = 1.5; }); expectInvalid(data => { data.target.git.dirty = 'yes'; }); expectInvalid(data => { data.angular.projects = 'x'; });
+  expectInvalid(data => { data.findings = new Array(401).fill(data.findings[0]); }); expectInvalid(data => { data.runtime.scripts = [1]; }); expectInvalid(data => { data.target.name = 'x'.repeat(201); });
+  assert.throws(() => parseReport([]), AdoptionError); assert.throws(() => parseReport(null), AdoptionError);
+  const without = clone(); without.angular = null; assert.equal(parseReport(without).angular, null);
+  const inherited = Object.create({ schema: 'workbench-adoption-report/v1' }); assert.throws(() => parseReport(inherited), error => error.code === 'ADOPT_REPORT_SCHEMA');
+});

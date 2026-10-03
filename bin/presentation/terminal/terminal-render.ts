@@ -4,6 +4,7 @@
  */
 import type { Diagnostic, Result } from '../../adapters/framework/contracts.ts';
 import { helpText, type HelpData } from './terminal-help.ts';
+import { adoptAnalyzeView, adoptPlanView } from './adopt-view.ts';
 import { checkPlanView } from './check-plan-view.ts';
 import { ciJobView, ciListView } from './ci-view.ts';
 import { uiStatusView } from './ui-status-view.ts';
@@ -156,6 +157,8 @@ const views: Array<[View, boolean]> = [
   [(style, value, data) => value.command === 'ci' && data.gate === 'ci' ? ciJobView(style, value) : undefined, true],
   [(style, value, data) => value.command === 'ci' && Array.isArray(data.workflows) ? ciListView(style, value) : undefined, true],
   [(style, value) => value.command === 'ui status' ? uiStatusView(style, value.data as UiStatusReport) : undefined, false],
+  [(style, value) => value.command === 'adopt analyze' ? adoptAnalyzeView(style, value) : undefined, false],
+  [(style, value, data) => value.command === 'adopt plan' && typeof data.planHash === 'string' ? adoptPlanView(style, value) : undefined, false],
   [(style, value, data) => typeof data.planHash === 'string' && Array.isArray(data.changes) ? planView(style, value) : undefined, false],
 ];
 const isHelp = (value: Result, data: Data) => Array.isArray(data.commands) && (value.command === 'help' || value.command === 'capabilities' || Boolean(data.scope));
