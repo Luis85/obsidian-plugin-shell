@@ -14,6 +14,9 @@ export function sample(s: Schema | null): unknown {
   if (Array.isArray(s.type)) return sample({...s,type:s.type[0]!});
   if (s.type === 'object') return Object.fromEntries(Object.entries(s.properties ?? {}).filter(([key]) => s.required?.includes(key)).map(([key,value]) => [key,sample(value)]));
   if (s.type === 'array') return [sample(s.items!)];
+  return sampleScalar(s);
+}
+function sampleScalar(s: Schema): unknown {
   if (s.type === 'boolean') return false;
   if (s.type === 'number' || s.type === 'integer') return 1;
   if (s.type === 'null') return null;

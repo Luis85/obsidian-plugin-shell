@@ -2,21 +2,19 @@ import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { makerSymbol as symbol, title, builtinRecipes } from './arguments.ts';
 import { localeSkeleton } from './pending-locale.ts';
-import { defineLocalMaker } from './custom-contract.ts';
+import { defineLocalMaker, localRecipeContext } from './custom-contract.ts';
 import type { MakerContext, MakerInput } from './contracts.ts';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
-/** Generated consumer code reaches the built-in maker modules through the project's own bin sources, or an extracted kit's editable copy. */
-const frameworkMakers = (up: string): string => `// Built-in maker modules: this project's bin sources, or an extracted kit's editable copy under bin/template.\nconst source = new URL('${up}bin/adapters/makers/', import.meta.url);\nconst makers = existsSync(new URL('primitives.ts', source)) ? source : new URL('${up}bin/template/bin/adapters/makers/', import.meta.url);`;
-
 export async function customMaker(context: MakerContext, name: string): Promise<void> {
   if (builtinRecipes.includes(name)) throw new Error('CUSTOM_RECIPE_BUILTIN_CONFLICT');
   const local = `${symbol(name)}Maker`;
-  await context.add(`scripts/makers/custom/${name}.mjs`, `import { existsSync } from 'node:fs';\n\n${frameworkMakers('../../../')}\nconst { action } = await import(new URL('primitives.ts', makers).href);\nconst { defineLocalMaker } = await import(new URL('custom-contract.ts', makers).href);\n\n/** Trusted local code. The runner owns writes, review, formatting and checks. */\nexport const ${local} = defineLocalMaker({\n  name: '${name}', version: 1, description: '${title(name)} localized info command',\n  async plan(context, request) {\n    await action(context, { owner: request.owner, name: request.name, kind: 'command' });\n  },\n});\n`);
+  // Import-free: the runner validates this object and injects its context, so the file works in any project layout.
+  await context.add(`scripts/makers/custom/${name}.mjs`, `/** Trusted local code. The runner validates it, injects its context and owns writes, review, formatting and checks. */\nexport const ${local} = {\n  name: '${name}', version: 1, description: '${title(name)} localized info command',\n  async plan(context, request) {\n    await context.action({ owner: request.owner, name: request.name, kind: 'command' });\n  },\n};\n`);
   await context.editArray('scripts/makers/custom/registry.mjs', 'customMakers', local, [{ local, from: `./${name}.mjs` }]);
   const path = `tests/tooling/custom-${name}.checks.mjs`;
-  await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { ${local} } from '../../scripts/makers/custom/${name}.mjs';\n\ntest('${name} custom recipe composes a registered localized command', async () => {\n  const paths = new Map(); const registrations = []; const tests = new Set();\n  await ${local}.plan({ tests, async add(path, content) { assert.equal(paths.has(path), false); paths.set(path, content); }, async editArray(...args) { registrations.push(args); } }, { owner: 'sample', name: 'example' });\n  assert.ok(paths.has('src/features/sample/example.command.ts'));\n  assert.ok(registrations.some(entry => entry[1] === 'authoringFactories'));\n  assert.ok(registrations.some(entry => entry[1] === 'authoringLocaleModules'));\n  assert.equal(tests.size, 1);\n});\n`);
+  await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { ${local} } from '../../scripts/makers/custom/${name}.mjs';\n\n// Contract level: the runner injects the real primitive; the framework's recipe tests prove the composed output.\ntest('${name} custom recipe requests one localized command through the injected context', async () => {\n  const actions = []; const direct = []; const tests = new Set();\n  const record = kind => async path => { direct.push([kind, path]); };\n  const context = Object.freeze({ tests, read: record('read'), add: record('add'), editArray: record('editArray'), async action(request) { actions.push(request); } });\n  await ${local}.plan(context, Object.freeze({ owner: 'sample', name: 'example' }));\n  assert.deepEqual([${local}.name, ${local}.version], ['${name}', 1]);\n  assert.deepEqual(actions, [{ owner: 'sample', name: 'example', kind: 'command' }]);\n  assert.deepEqual(direct, []); assert.equal(tests.size, 0);\n});\n`);
   context.tests.add(path);
 }
 export async function runCustom(context: MakerContext, request: MakerInput): Promise<void> {
@@ -27,8 +25,7 @@ export async function runCustom(context: MakerContext, request: MakerInput): Pro
   const matches = recipes.filter(recipe => isRecord(recipe) && recipe.name === request.maker);
   const [recipe] = matches;
   if (matches.length !== 1 || !isRecord(recipe) || typeof recipe.plan !== 'function' || recipe.version !== 1) throw new Error('Unknown maker. Use --list for the implemented catalog.');
-  const safeContext = Object.freeze({ add: context.add, read: context.read, editArray: context.editArray, tests: context.tests });
-  await defineLocalMaker(recipe).plan(safeContext, Object.freeze({ name: request.name, owner: request.owner }));
+  await defineLocalMaker(recipe).plan(localRecipeContext(context), Object.freeze({ name: request.name, owner: request.owner }));
 }
 export async function styleRecipe(context: MakerContext, owner: string, name: string, view: string): Promise<void> {
   const component = `src/presentation/components/generated/${owner}-${view}.vue`;
@@ -45,7 +42,8 @@ export async function localeRecipe(context: MakerContext, name: string): Promise
   await context.add(`src/locales/pending/${name}.json`, JSON.stringify(base, null, 2) + '\n');
   await context.add(`src/locales/pending/${name}.status.json`, JSON.stringify({ locale: name, status: 'pending-translation-review', fallback: 'en', selectable: false, keys: countKeys(base) }, null, 2) + '\n');
   const path = `tests/tooling/locale-${name}.checks.mjs`;
-  await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { readFile } from 'node:fs/promises';\nimport { existsSync } from 'node:fs';\n\n${frameworkMakers('../../')}\nconst { localeSkeleton } = await import(new URL('pending-locale.ts', makers).href);\n\nconst keys = value => Object.entries(value).flatMap(([key, child]) => typeof child === 'object' && child !== null ? keys(child).map(nested => key + '.' + nested) : [key]).sort();\ntest('${name} pending translation preserves every checked base key and is not selectable', async () => {\n  const load = async path => JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8'));\n  const base = await localeSkeleton(path => readFile(new URL('../../' + path, import.meta.url), 'utf8'));\n  const draft = await load('../../src/locales/pending/${name}.json');\n  const status = await load('../../src/locales/pending/${name}.status.json');\n  assert.deepEqual(keys(draft), keys(base)); assert.equal(status.selectable, false);\n});\n`);
+  // The consumer test asks the project's own CLI (source launcher or extracted kit bundle) for a read-only key comparison.
+  await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { spawnSync } from 'node:child_process';\nimport { fileURLToPath } from 'node:url';\n\nconst root = fileURLToPath(new URL('../../', import.meta.url));\ntest('${name} pending translation preserves every checked base key and is not selectable', () => {\n  const run = spawnSync(process.execPath, ['bin/app', 'make', 'locale', '${name}', '--check', '--json'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });\n  assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);\n  const { status, data } = JSON.parse(run.stdout);\n  assert.equal(status, 'ok'); assert.deepEqual([data.missing, data.extra, data.selectable], [[], [], false]);\n});\n`);
   context.tests.add(path);
 }
 function countKeys(value: object): number { return Object.values(value).reduce((count: number, child: unknown) => count + (child && typeof child === 'object' ? countKeys(child) : 1), 0); }

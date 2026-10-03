@@ -21,6 +21,8 @@ node-qualified
 .obsidian-sandbox*/
 # Personal Claude Code overrides; the shared .claude/settings.json is committed.
 .claude/settings.local.json
+# Claude Code agent worktrees are separate checkouts of this repository.
+.claude/worktrees/
 
 .shell-build-lock/
 .shell-build-*/

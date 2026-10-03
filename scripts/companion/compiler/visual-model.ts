@@ -23,12 +23,15 @@ export function visualDefinitions(m: Model): VisualDesigns {
   return validated;
 }
 
+/** The contract a project instance renders against: its pinned revision, otherwise the live component. */
+function vmContract(store: VisualDesigns, ref: { componentId: string; revisionId?: string }): Contract | undefined {
+  return ref.revisionId ? store.revisions.find(r => r.id === ref.revisionId)?.contract : store.components.find(c => c.id === ref.componentId);
+}
 /** A project instance's variant supplies prop defaults; explicit instance props (including false, 0 and '') win. */
 function vmVariantDefaults(store: VisualDesigns, roots: UiNode[]): void {
   for (const node of visualNodes(roots)) {
     if (node.kind !== 'component' || node.ref.kind !== 'project' || node.variantId === undefined) continue;
-    const ref = node.ref, contract = ref.revisionId ? store.revisions.find(r => r.id === ref.revisionId)?.contract : store.components.find(c => c.id === ref.componentId);
-    const variant = contract?.variants.find(v => v.id === node.variantId);
+    const variant = vmContract(store, node.ref)?.variants.find(v => v.id === node.variantId);
     for (const [name, value] of Object.entries(variant?.values ?? {})) if (!Object.hasOwn(node.props, name)) node.props[name] = { kind: 'literal', value };
   }
 }

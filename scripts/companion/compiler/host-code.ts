@@ -2,9 +2,9 @@ import { editorBindings } from '../sitemap/editor-bindings.ts';
 import type { SitemapDesign } from '../sitemap/model.ts';
 import { relationshipScope } from './relationship-model.ts';
 import { literal, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { relativeImport, when, type Add } from './file-code.ts';
 export function hostCode(m: Model, add: Add): void {
-  const journey = editorBindings(m.document.design as SitemapDesign).length > 0;
+  const journey = editorBindings(m.document.design as SitemapDesign).length > 0, integrity = relationshipScope(m,true).rules.length > 0;
   const root = m.sourceRoot; const init = `${root}/bootstrap/install.ts`;
   const ref = (path: string) => literal(relativeImport(init,path));
   add(init,`import { Modal, PluginSettingTab, type Plugin } from 'obsidian';
@@ -20,22 +20,22 @@ import { CommandService } from ${ref('src/application/command-service.ts')};
 import { createDebugCommands } from ${ref('src/features/debugging/commands.ts')};
 import { screens } from '../domain/screens.ts';
 import { createSources } from './sources.ts';
-${relationshipScope(m,true).rules.length ? "import { disposeRelationshipIntegrity } from './relationships.ts';" : ''}
+${when(integrity, "import { disposeRelationshipIntegrity } from './relationships.ts';")}
 import { configureSourceProviders } from './source-providers.ts';
-import { mountProject } from './mount.ts';${journey ? "\nimport { createJourneyNative } from './journey-native.ts';" : ''}
+import { mountProject } from './mount.ts';${when(journey, "\nimport { createJourneyNative } from './journey-native.ts';")}
 export async function initializeProject(plugin: Plugin) {
-  const shell = await createServices(nativeAdapters(plugin));${journey ? "\n  const journey = createJourneyNative(plugin.app.vault, () => shell.diagnostics.report('journey.storage', 'project.file'));" : ''}
+  const shell = await createServices(nativeAdapters(plugin));${when(journey, "\n  const journey = createJourneyNative(plugin.app.vault, () => shell.diagnostics.report('journey.storage', 'project.file'));")}
   let sources: ReturnType<typeof createSources>;
   let providers: ReturnType<typeof configureSourceProviders> | undefined;
   const views = new Set<ShowcaseView>(); const modals = new Set<Modal>(); const settings = new Set<() => void>();
   let disposed = false; let stopEvents = () => {}; let stopCommands = () => {}; let stopNative = () => {};
   const dispose = () => {
     if (disposed) return; disposed = true;
-    stopNative();${journey ? '\n    journey.dispose();' : ''}
+    stopNative();${when(journey, '\n    journey.dispose();')}
     for (const modal of modals) { try { modal.close(); } catch { shell.diagnostics.report('generated.cleanup','modal.close'); } }
     for (const release of settings) { try { release(); } catch { shell.diagnostics.report('generated.cleanup','settings.close'); } }
     for (const view of views) { try { view.disposeView(); } catch { shell.diagnostics.report('generated.cleanup','view.close'); } }
-    ${relationshipScope(m,true).rules.length ? 'disposeRelationshipIntegrity(shell);' : ''}
+    ${when(integrity, 'disposeRelationshipIntegrity(shell);')}
     try { stopCommands(); } catch { shell.diagnostics.report('generated.cleanup','command.dispose'); }
     try { providers?.dispose(); } catch { shell.diagnostics.report('generated.cleanup','sources.dispose'); }
     try { stopEvents(); } finally { shell.dispose(); }
@@ -45,7 +45,7 @@ export async function initializeProject(plugin: Plugin) {
     const screen = screens.find(s => s.id === id && s.kind === 'modal'); if (!screen) throw new Error('MODAL_NOT_DECLARED');
     const modal = new Modal(plugin.app); let release = () => {};
     modal.setTitle(screen.label);
-    modal.onOpen = () => { release = mountProject(modal.contentEl,shell,sources,openModal,id,true${journey ? ',journey' : ''}); };
+    modal.onOpen = () => { release = mountProject(modal.contentEl,shell,sources,openModal,id,true${when(journey, ',journey')}); };
     modal.onClose = () => { release(); modals.delete(modal); };
     modals.add(modal);
     try { modal.open(); } catch (error) { modal.close(); throw error; }
@@ -67,7 +67,7 @@ export async function initializeProject(plugin: Plugin) {
     for (const definition of definitions) {
       const View = nativeViewClass({type:definition.type,title:()=>definition.label});
       plugin.registerView(definition.type,leaf => new View(leaf,
-        element => mountProject(element,shell,sources,openModal,definition.id${journey ? ',false,journey' : ''}),
+        element => mountProject(element,shell,sources,openModal,definition.id${when(journey, ',false,journey')}),
         {preferences:shell.preferences,diagnostics:shell.diagnostics,text:key=>shell.i18n.global.t(key),toggleHeader:()=>{void shell.preferences.toggleViewHeader();}},
         (view,visible) => { if (visible) views.add(view); else views.delete(view); }));
     }
@@ -82,7 +82,7 @@ export async function initializeProject(plugin: Plugin) {
       // eslint-disable-next-line obsidianmd/settings-tab/prefer-setting-definitions -- this tab mounts the generated Vue settings screen in display(); its controls have no declarative definitions to index.
       class ProjectSettings extends PluginSettingTab {
         private release = () => {};
-        display() { this.hide(); this.containerEl.empty(); this.release = mountProject(this.containerEl,shell,sources,openModal,screen.id,true${journey ? ',journey' : ''}); settings.add(this.release); }
+        display() { this.hide(); this.containerEl.empty(); this.release = mountProject(this.containerEl,shell,sources,openModal,screen.id,true${when(journey, ',journey')}); settings.add(this.release); }
         override hide() { this.release(); settings.delete(this.release); this.release = () => {}; }
       }
       plugin.addSettingTab(new ProjectSettings(plugin.app,plugin));
@@ -116,15 +116,15 @@ import { panels } from './panels.ts';
 import { bindFlows } from './flows.ts';
 import { provideVisualContext } from '../presentation/composables/use-visual.ts';
 import { createVisualContext } from './visual-context.ts';
-import '../presentation/detail-layout.css';${journey ? "\nimport { provideJourney, type JourneyRuntime } from './journey-workspace.ts';" : ''}
-export function mountProject(root: HTMLElement,shell: Services,sources: Sources,openModal: (id: string) => void,initial?: string,isolated = false${journey ? ',journey?: JourneyRuntime' : ''}) {
+import '../presentation/detail-layout.css';${when(journey, "\nimport { provideJourney, type JourneyRuntime } from './journey-workspace.ts';")}
+export function mountProject(root: HTMLElement,shell: Services,sources: Sources,openModal: (id: string) => void,initial?: string,isolated = false${when(journey, ',journey?: JourneyRuntime')}) {
   const pinia = createPinia(); const app = createApp(Workbench); let mounted = false; let closed = false; let theme = () => {};
   const close = () => { if (closed) return; closed = true; try { if (mounted) app.unmount(); } finally { disposePinia(pinia); theme(); } };
   try {
     root.classList.add(shell.identity.rootClass,shell.identity.scopeClass); root.dataset.pluginUi = shell.identity.id;
     theme = bindHostTheme(root); app.use(pinia); app.use(ui); provideVisualContext(app, createVisualContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
     app.config.errorHandler = () => shell.diagnostics.report('generated.render','view.render');
-    ${journey ? 'if (journey) provideJourney(app,pinia,journey);\n    ' : ''}mounted = true; app.mount(root); return close;
+    ${when(journey, 'if (journey) provideJourney(app,pinia,journey);\n    ')}mounted = true; app.mount(root); return close;
   } catch (error) { close(); throw error; }
 }
 `);

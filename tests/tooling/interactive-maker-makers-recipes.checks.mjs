@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { cp, mkdir, readFile, rename } from 'node:fs/promises';
+import { cp, mkdir, readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from './maker-fixture.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
@@ -17,6 +17,8 @@ async function apply(root, values) {
   assert.ok((await plan(root, values)).plan.changes.every(change => change.status === 'unchanged'), values.join(' '));
   return planned;
 }
+// A nested runner, not a worker of an outer node:test process.
+const isolated = () => { const env = { ...process.env }; delete env.NODE_TEST_CONTEXT; return env; };
 const paths = planned => planned.plan.changes.filter(change => change.status === 'create').map(change => change.path);
 async function authorFixture(root) {
   await installMakerFoundation(root); await copyMakerSuite(root);
@@ -59,30 +61,28 @@ test('every built-in recipe composes its declared sources, registrations and tar
   await assert.rejects(plan(root, ['style', 'card', '--feature', 'bookmarks', '--view', 'summary-missing']), { code: 'ENOENT' });
 }));
 
-test('a generated local recipe and pending locale run in a source checkout and an extracted kit layout', () => makerFixture(async root => {
+// The extracted-kit layout (no project-level bin/adapters, bundled bin/app.js) is proven by maker-kit-layout.checks.mjs.
+test('a generated local recipe and pending locale use only injected context and the project CLI in a source checkout', () => makerFixture(async root => {
   await authorFixture(root);
   const maker = await apply(root, ['maker', 'nudge']);
   assert.deepEqual(paths(maker).sort(), ['scripts/makers/custom/nudge.mjs', 'tests/tooling/custom-nudge.checks.mjs']);
   const recipe = await readFile(join(root, 'scripts/makers/custom/nudge.mjs'), 'utf8');
-  assert.match(recipe, /new URL\('\.\.\/\.\.\/\.\.\/bin\/adapters\/makers\/', import\.meta\.url\)/);
-  assert.match(recipe, /bin\/template\/bin\/adapters\/makers\//);
-  assert.ok(paths(await apply(root, ['nudge', 'review', '--feature', 'bookmarks'])).includes('src/features/bookmarks/review.command.ts'));
-  await assert.rejects(plan(root, ['maker', 'feature']), { message: 'CUSTOM_RECIPE_BUILTIN_CONFLICT' });
-  await assert.rejects(plan(root, ['unknown', 'x', '--feature', 'bookmarks']), { message: 'Unknown maker. Use --list for the implemented catalog.' });
+  // The runner injects the real primitive: the composed command and both registrations exist.
+  const custom = await apply(root, ['nudge', 'review', '--feature', 'bookmarks']);
+  assert.deepEqual(paths(custom).sort(), ['src/features/bookmarks/review-command.messages.ts', 'src/features/bookmarks/review.command.ts', 'tests/runtime/generated/bookmarks-review-command.test.ts']);
+  assert.match(await readFile(join(root, 'src/bootstrap/authoring.ts'), 'utf8'), /bookmarksReviewCommand/);
   const locale = await apply(root, ['locale', 'fr']);
   assert.deepEqual(paths(locale).sort(), ['src/locales/pending/fr.json', 'src/locales/pending/fr.status.json', 'tests/tooling/locale-fr.checks.mjs']);
+  const localeTest = await readFile(join(root, 'tests/tooling/locale-fr.checks.mjs'), 'utf8');
+  for (const source of [recipe, localeTest]) for (const probe of [/existsSync/, /bin\/adapters/, /bin\/template/, /import\(/]) assert.doesNotMatch(source, probe);
+  assert.doesNotMatch(recipe, /\bimport\b/);
+  assert.match(recipe, /await context\.action\(\{ owner: request\.owner, name: request\.name, kind: 'command' \}\)/);
+  assert.match(localeTest, /\['bin\/app', 'make', 'locale', 'fr', '--check', '--json'\]/);
+  await assert.rejects(plan(root, ['maker', 'feature']), { message: 'CUSTOM_RECIPE_BUILTIN_CONFLICT' });
+  await assert.rejects(plan(root, ['unknown', 'x', '--feature', 'bookmarks']), { message: 'Unknown maker. Use --list for the implemented catalog.' });
   const status = JSON.parse(await readFile(join(root, 'src/locales/pending/fr.status.json'), 'utf8'));
   assert.deepEqual([status.status, status.selectable, status.fallback], ['pending-translation-review', false, 'en']);
-  // An extracted kit ships the editable maker sources under bin/template and no project-level bin/adapters.
-  await mkdir(join(root, 'bin/template/bin/adapters'), { recursive: true });
-  await rename(join(root, 'bin/adapters/makers'), join(root, 'bin/template/bin/adapters/makers'));
-  await mkdir(join(root, 'bin/template/scripts'), { recursive: true });
-  await cp(join(root, 'scripts/makers'), join(root, 'bin/template/scripts/makers'), { recursive: true });
-  await cp(join(root, 'scripts/shared'), join(root, 'bin/template/scripts/shared'), { recursive: true });
-  const kitRecipe = await import(`${pathToFileURL(join(root, 'scripts/makers/custom/nudge.mjs')).href}?layout=kit`);
-  assert.equal(kitRecipe.nudgeMaker.name, 'nudge');
-  const outputs = new Map(); const registrations = [];
-  await kitRecipe.nudgeMaker.plan({ tests: new Set(), async add(path, content) { outputs.set(path, content); }, async editArray(...entry) { registrations.push(entry[1]); } }, { owner: 'bookmarks', name: 'later' });
-  assert.ok(outputs.has('src/features/bookmarks/later.command.ts'));
-  assert.deepEqual([...new Set(registrations)].sort(), ['authoringFactories', 'authoringLocaleModules']);
+  const checks = spawnSync(process.execPath, ['--test', '--test-reporter=tap', 'tests/tooling/custom-nudge.checks.mjs', 'tests/tooling/locale-fr.checks.mjs'], { cwd: root, encoding: 'utf8', timeout: 120000, env: isolated() });
+  assert.equal(checks.status, 0, checks.stdout + checks.stderr);
+  assert.match(checks.stdout, /# pass 2\b/);
 }));

@@ -1,6 +1,6 @@
 import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
 import { relationshipScope } from './relationship-model.ts';
-import { literal, requireValue, symbol, type Model, type Entity } from './model.ts';
+import { literal, requireValue, symbol, type Model, type Entity, type Operation } from './model.ts';
 import type { Schema } from '../../../templates/companion/runtime/contract.ts';
 import { relativeImport, type Add } from './file-code.ts';
 import { sampleCode, typeCode } from './schema-code.ts';
@@ -11,17 +11,23 @@ function field(s: Schema, index: number): string {
   return `function isF${index}(value: unknown): value is ${typeCode(s)} { return matches(value,${literal(s)}); }
 const f${index} = {required:true as const,kind:${literal(kind)} as const,read(value:unknown) { return isF${index}(value) ? success(${s.type === 'array' ? 'Object.freeze([...value])' : 'value'}) : failure('validation','error.entity'); }};`;
 }
+function supportedNoteDeclaration(kind: string, declared: { kind?: string; entity?: string; operation?: string }): boolean {
+  const keys = Object.keys(declared);
+  return keys.length === 3 && keys.every(key=>['kind','entity','operation'].includes(key)) && ['vault','collection'].includes(kind) && declared.kind === 'note' && ['list','create','update','delete'].includes(String(declared.operation));
+}
+/** A declared note mapping must name an exact entity folder and wire contract; a read-only entity list maps implicitly. */
 export function noteEntity(m: Model, sourceId: string, operationId: string): Entity | undefined {
   const source = m.sources.find(s => s.id === sourceId)!; const op = source.operations.find(o => o.id === operationId)!;
   const declared = op.contract.implementation as { kind?: string; entity?: string; operation?: string } | undefined;
-  if (declared) {
-    requireValue(Object.keys(declared).length === 3 && Object.keys(declared).every(key=>['kind','entity','operation'].includes(key)) && ['vault','collection'].includes(source.kind) && declared.kind === 'note' && ['list','create','update','delete'].includes(String(declared.operation)), 'Unsupported persistence adapter.');
-    const entity = m.entities.find(e => e.id === declared.entity); requireValue(entity && entity.folder !== '' && entity.folder === op.contract.resource, 'Native repository needs an exact declared entity folder.');
-    validateNoteWire(entity,op,String(declared.operation));
-    return entity;
-  }
+  if (!declared) return listedNoteEntity(m, source.kind, op);
+  requireValue(supportedNoteDeclaration(source.kind, declared), 'Unsupported persistence adapter.');
+  const entity = m.entities.find(e => e.id === declared.entity); requireValue(entity && entity.folder !== '' && entity.folder === op.contract.resource, 'Native repository needs an exact declared entity folder.');
+  validateNoteWire(entity,op,String(declared.operation));
+  return entity;
+}
+function listedNoteEntity(m: Model, kind: string, op: Operation): Entity | undefined {
   const output = op.contract.output as { mode?: string; entity?: string; many?: boolean };
-  if (['vault','collection'].includes(source.kind) && op.direction === 'read' && op.input === null && output.mode === 'entity' && output.many) return m.entities.find(e => e.id === output.entity && e.folder === op.contract.resource && e.folder !== '');
+  if (['vault','collection'].includes(kind) && op.direction === 'read' && op.input === null && output.mode === 'entity' && output.many) return m.entities.find(e => e.id === output.entity && e.folder === op.contract.resource && e.folder !== '');
   return undefined;
 }
 // The maker's registry layout: one callback object of `    key: register(feature, ...),` lines.
@@ -40,22 +46,20 @@ function registerFeatures(original: string, names: string[]): string {
   const header = parameter === '()' ? register : parameter!;
   return original.replace(whole!, () => `createNoteFeatures(services, ${header} => ({\n${body}\n${names.map(name => `    ${name}: ${register}(${name}),`).join('\n')}\n  }));`);
 }
-export async function persistenceCode(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
-  const selected = new Map<string, Entity>();
-  for (const source of m.sources) for (const op of source.operations) { const entity = noteEntity(m, source.id, op.id); if (entity) selected.set(entity.id, entity); }
-  for(const entity of relationshipScope(m,true).entities) selected.set(entity.id,entity);
-  if (!selected.size) return;
-  const imports: string[] = []; const registrations: string[] = [];
-  for (const entity of selected.values()) {
-    requireValue(!['task','project','items'].includes(entity.slug), 'Remove/rename the corresponding framework example before registering its canonical entity key.');
-    const props = Object.entries(entity.schema.properties ?? {}).filter(([key]) => !['id','type'].includes(key));
-    requireValue(props.length && props.every(([key]) => /^[a-z][a-zA-Z0-9_]*$/.test(key) && !['schema_version','created_at','constructor','prototype'].includes(key)), 'Native property mapping requires portable frontmatter keys.');
-    const title = props.find(([key, s]) => key === 'title' && s.type === 'string');
-    requireValue(title && entity.schema.required?.includes('title') && entity.slug.length <= 50, 'Declare a title field for a native note repository.');
-    const name = symbol(entity.slug); const file = `${m.sourceRoot}/application/documents/${entity.slug}.ts`;
-    const fields = props.map(([key],index) => `${literal(key)}: ${entity.schema.required?.includes(key) ? 'f'+index : `fields.optional(f${index})`}`).join(',\n');
-    const validators = props.map(([,schema],index) => field(schema,index)).join('\n');
-    add(file, `import { defineEntity${fields.includes('fields.optional(') ? ', fields' : ''} } from ${literal(relativeImport(file, 'src/domain/entity.ts'))};
+/** Portable frontmatter properties of a native repository; a required string title is mandatory. */
+function nativeProperties(entity: Entity): [string, Schema][] {
+  requireValue(!['task','project','items'].includes(entity.slug), 'Remove/rename the corresponding framework example before registering its canonical entity key.');
+  const props = Object.entries(entity.schema.properties ?? {}).filter(([key]) => !['id','type'].includes(key));
+  requireValue(props.length && props.every(([key]) => /^[a-z][a-zA-Z0-9_]*$/.test(key) && !['schema_version','created_at','constructor','prototype'].includes(key)), 'Native property mapping requires portable frontmatter keys.');
+  const title = props.find(([key, s]) => key === 'title' && s.type === 'string');
+  requireValue(title && entity.schema.required?.includes('title') && entity.slug.length <= 50, 'Declare a title field for a native note repository.');
+  return props;
+}
+function documentFile(m: Model, entity: Entity, props: [string, Schema][], add: Add): string {
+  const file = `${m.sourceRoot}/application/documents/${entity.slug}.ts`;
+  const fields = props.map(([key],index) => `${literal(key)}: ${entity.schema.required?.includes(key) ? 'f'+index : `fields.optional(f${index})`}`).join(',\n');
+  const validators = props.map(([,schema],index) => field(schema,index)).join('\n');
+  add(file, `import { defineEntity${fields.includes('fields.optional(') ? ', fields' : ''} } from ${literal(relativeImport(file, 'src/domain/entity.ts'))};
 import { matches } from '../../domain/contract.ts';
 import { success, failure } from ${literal(relativeImport(file, 'src/domain/outcome.ts'))};
 import { defineDocument, heading } from ${literal(relativeImport(file, 'src/application/document-definition.ts'))};
@@ -65,11 +69,12 @@ export const entity = defineEntity(${literal(entity.slug)},1,{${fields}});
 export const document = defineDocument(entity,{mappings:${literal(props.map(([key]) => ({field:key,property:key})))},title: values => String(values.title ?? ''),body: values => '# ' + heading(String(values.title ?? '')) + '\\n'});
 export const feature = defineNoteFeature({document,defaultFolder:${literal(entity.folder)}});
 `);
-    imports.push(`import { feature as ${name} } from ${literal(relativeImport('src/bootstrap/features.ts', file))};`);
-    registrations.push(name);
-    const test = `${m.testRoot}/persistence/${entity.slug}.test.ts`;
-    const input: Schema = {...entity.schema, properties:Object.fromEntries(props), required:props.map(([key])=>key), additionalProperties:false};
-    add(test, `import { it, expect } from 'vitest';
+  return file;
+}
+function persistenceTest(m: Model, entity: Entity, props: [string, Schema][], file: string, add: Add): void {
+  const test = `${m.testRoot}/persistence/${entity.slug}.test.ts`;
+  const input: Schema = {...entity.schema, properties:Object.fromEntries(props), required:props.map(([key])=>key), additionalProperties:false};
+  add(test, `import { it, expect } from 'vitest';
 import { NoteRepository } from ${literal(relativeImport(test,'src/application/note-repository.ts'))};
 import { markdownCodec } from ${literal(relativeImport(test,'src/infrastructure/markdown.ts'))};
 import { success, failure } from ${literal(relativeImport(test,'src/domain/outcome.ts'))};
@@ -98,9 +103,8 @@ it('persists every ${entity.slug} field, rejects stale edits and preserves unrel
   repository.dispose(); expect((await repository.create(values,'after-dispose')).ok).toBe(false);
 });
 `);
-  }
-  const original = await templateRoot.text(['src/bootstrap/features.ts'].join('/'));
-  add('src/bootstrap/features.ts', imports.join('\n')+'\n'+registerFeatures(original, registrations));
+}
+function registryTest(m: Model, selected: Map<string, Entity>, add: Add): void {
   const registryTest = `${m.testRoot}/persistence/registry.test.ts`;
   add(registryTest, `import { it, expect } from 'vitest';
 import { createFeatures } from ${literal(relativeImport(registryTest,'src/bootstrap/features.ts'))};
@@ -118,6 +122,27 @@ it('composes every generated repository with the actual retained framework regis
   finally { registry.dispose(); preferences.dispose(); data.dispose(); }
 });
 `);
+}
+/** Entities with a native mapping or read list, plus every entity in the relationship audit scope. */
+function nativeEntities(m: Model): Map<string, Entity> {
+  const selected = new Map<string, Entity>();
+  for (const source of m.sources) for (const op of source.operations) { const entity = noteEntity(m, source.id, op.id); if (entity) selected.set(entity.id, entity); }
+  for(const entity of relationshipScope(m,true).entities) selected.set(entity.id,entity);
+  return selected;
+}
+export async function persistenceCode(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
+  const selected = nativeEntities(m);
+  if (!selected.size) return;
+  const imports: string[] = []; const registrations: string[] = [];
+  for (const entity of selected.values()) {
+    const props = nativeProperties(entity), name = symbol(entity.slug), file = documentFile(m, entity, props, add);
+    imports.push(`import { feature as ${name} } from ${literal(relativeImport('src/bootstrap/features.ts', file))};`);
+    registrations.push(name);
+    persistenceTest(m, entity, props, file, add);
+  }
+  const original = await templateRoot.text(['src/bootstrap/features.ts'].join('/'));
+  add('src/bootstrap/features.ts', imports.join('\n')+'\n'+registerFeatures(original, registrations));
+  registryTest(m, selected, add);
   const sourceFile = `${m.sourceRoot}/application/note-operations.ts`;
   add(sourceFile, await templateRoot.text(['templates/companion/runtime/note-operations.ts'].join('/')));
 }

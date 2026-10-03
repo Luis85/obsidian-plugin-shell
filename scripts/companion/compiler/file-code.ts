@@ -4,6 +4,8 @@ export interface Entry { path: string; content: string; encoding?: 'base64'; own
 export type Add = (path: string, content: string, ownership?: Entry['ownership']) => void;
 /** Vue component files need multi-word names (vue/multi-word-component-names): a single-word name gets its role as suffix. */
 export function componentFile(name: string, role: 'screen' | 'component'): string { return name.includes('-') ? name : `${name}-${role}`; }
+/** Optional template text: the fragment when the condition holds, otherwise nothing. */
+export const when = (condition: boolean, text: string): string => (condition ? text : '');
 export function relativeImport(from: string, to: string): string { const path = posix.relative(posix.dirname(from),to); return path.startsWith('.') ? path : './'+path; }
 /** Copied template text is rewritten by exact literals; a literal that drifted away fails generation instead of emitting stale text. */
 export function rewriteTemplate(source: string, pairs: ReadonlyArray<readonly [string, string]>, file: string): string {

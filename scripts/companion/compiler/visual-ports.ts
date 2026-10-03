@@ -1,4 +1,4 @@
-import type { Mapping, VisualAction, EmitDefinition, Interaction } from '../visual/visual-ir.mjs';
+import type { Mapping, VisualAction, EmitDefinition, Interaction, UiNode } from '../visual/visual-ir.mjs';
 import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
 import { visualSession, visualVisible } from '../visual/visual-session.mjs';
 import { visualExpressions, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
@@ -12,12 +12,18 @@ export interface VisualSourceUse { source: Source; operation: Operation }
 interface Scope { m: Model; uses: Map<string, VisualSourceUse>; emits: EmitDefinition[] | null }
 const vpUnsafe = new Set(['__proto__', 'prototype', 'constructor']);
 
+const vpKey = /^(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*)$/;
+/** The declared schema one path segment selects: an array index or an own object property. */
+function vpChild(schema: Schema, key: string): Schema | null {
+  if (schema.type === 'array' && /^\d+$/.test(key)) return schema.items ?? null;
+  return schema.type === 'object' ? schema.properties?.[key] ?? null : null;
+}
 /** A dotted own-data path must resolve inside the declared output schema; unknown or inherited keys never resolve. */
 function vpField(schema: Schema | null, field: string): boolean {
   if (field === '') return schema !== null;
   for (const key of field.split('.')) {
-    if (!/^(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*)$/.test(key) || vpUnsafe.has(key) || !schema) return false;
-    schema = schema.type === 'array' && /^\d+$/.test(key) ? schema.items ?? null : schema.type === 'object' ? schema.properties?.[key] ?? null : null;
+    if (!vpKey.test(key) || vpUnsafe.has(key) || !schema) return false;
+    schema = vpChild(schema, key);
   }
   return schema !== null;
 }
@@ -35,26 +41,30 @@ function vpMapping(scope: Scope, mapping: Mapping, where: string): void {
   if (mapping.kind === 'source') vpRead(scope, mapping, where);
   if (mapping.kind === 'object') for (const field of Object.values(mapping.fields)) vpMapping(scope, field, where);
 }
+/** An object mapping must supply every required input field and only declared fields of a closed input. */
+function vpObjectInput(input: Schema | null, fields: Record<string, Mapping>, name: string, where: string): void {
+  visualAssert(input?.type === 'object' && (input.required ?? []).every(key => Object.hasOwn(fields, key)), `${where}: mapped input omits required fields of ${name}.`);
+  visualAssert(input.additionalProperties !== false || Object.keys(fields).every(key => Object.hasOwn(input.properties ?? {}, key)), `${where}: mapped input has fields ${name} does not declare.`);
+}
+function vpSourceAction(scope: Scope, action: VisualAction & { kind: 'source' }, where: string): void {
+  const { operation } = vpOperation(scope, action.sourceId, action.operationId, where), input = operation.input, mapping = action.input;
+  const name = `${action.sourceId}/${action.operationId}`;
+  vpMapping(scope, mapping, where);
+  visualAssert((input === null) === (mapping.kind === 'none'), `${where}: ${name} ${input === null ? 'takes no input, so map none' : 'requires an input mapping'}.`);
+  if (mapping.kind === 'value') visualAssert(matches(mapping.value, input), `${where}: literal input violates the input of ${name}.`);
+  if (mapping.kind === 'object') vpObjectInput(input, mapping.fields, name, where);
+}
+function vpEmitAction(scope: Scope, action: VisualAction & { kind: 'emit' }, where: string): void {
+  vpMapping(scope, action.payload, where);
+  const emit = scope.emits?.find(e => e.name === action.event);
+  if (!emit) return;
+  visualAssert((emit.payloadType === 'void') === (action.payload.kind === 'none'), `${where}: emit ${action.event} payload presence does not match its ${emit.payloadType} contract.`);
+  if (action.payload.kind === 'value' && emit.payloadType !== 'unknown') visualAssert(typeof action.payload.value === emit.payloadType, `${where}: emit ${action.event} literal is not a ${emit.payloadType}.`);
+}
 /** Explicit mappings must agree with the operation input and the declared emit payload before any UI can route them. */
 function vpAction(scope: Scope, action: VisualAction, where: string): void {
-  if (action.kind === 'source') {
-    const { operation } = vpOperation(scope, action.sourceId, action.operationId, where), input = operation.input, mapping = action.input;
-    const name = `${action.sourceId}/${action.operationId}`;
-    vpMapping(scope, mapping, where);
-    visualAssert((input === null) === (mapping.kind === 'none'), `${where}: ${name} ${input === null ? 'takes no input, so map none' : 'requires an input mapping'}.`);
-    if (mapping.kind === 'value') visualAssert(matches(mapping.value, input), `${where}: literal input violates the input of ${name}.`);
-    if (mapping.kind === 'object') {
-      const fields = mapping.fields;
-      visualAssert(input?.type === 'object' && (input.required ?? []).every(key => Object.hasOwn(fields, key)), `${where}: mapped input omits required fields of ${name}.`);
-      visualAssert(input.additionalProperties !== false || Object.keys(fields).every(key => Object.hasOwn(input.properties ?? {}, key)), `${where}: mapped input has fields ${name} does not declare.`);
-    }
-  } else if (action.kind === 'emit') {
-    vpMapping(scope, action.payload, where);
-    const emit = scope.emits?.find(e => e.name === action.event);
-    if (!emit) return;
-    visualAssert((emit.payloadType === 'void') === (action.payload.kind === 'none'), `${where}: emit ${action.event} payload presence does not match its ${emit.payloadType} contract.`);
-    if (action.payload.kind === 'value' && emit.payloadType !== 'unknown') visualAssert(typeof action.payload.value === emit.payloadType, `${where}: emit ${action.event} literal is not a ${emit.payloadType}.`);
-  }
+  if (action.kind === 'source') vpSourceAction(scope, action, where);
+  else if (action.kind === 'emit') vpEmitAction(scope, action, where);
 }
 /** An interaction whose source is hidden or disabled in every enabled state could never run. */
 function vpReachable(spec: VisualSpec, nodeId: string): boolean {
@@ -62,22 +72,28 @@ function vpReachable(spec: VisualSpec, nodeId: string): boolean {
 }
 const vpWhere = (spec: VisualSpec) => (spec.kind === 'page' ? `Page ${JSON.stringify(spec.name)}` : `Component ${JSON.stringify(spec.exportName)}`);
 
+/** Scenario fixtures must match the declared output of the operation they stand in for. */
+function vpScenarios(scope: Scope, spec: VisualSpec, owner: string): void {
+  for (const scenario of spec.scenarios) for (const binding of scenario.bindings) {
+    const { operation } = vpOperation(scope, binding.sourceId, binding.operationId, `${owner} scenario ${JSON.stringify(scenario.name)}`);
+    visualAssert(matches(binding.value, operation.output), `${owner} scenario ${JSON.stringify(scenario.name)}: fixture for ${binding.sourceId}/${binding.operationId} does not match its output.`);
+  }
+}
+/** Source reads, reachability and actions of one node. */
+function vpNode(scope: Scope, spec: VisualSpec, node: UiNode, owner: string): void {
+  const where = `${owner} / ${node.name || node.id}`;
+  for (const expr of visualExpressions(node)) if (expr.kind === 'source') vpRead(scope, expr, where);
+  const events: Interaction[] = 'events' in node ? node.events : [];
+  if (events.length) visualAssert(vpReachable(spec, node.id), `${where}: interaction source has no enabled visible state.`);
+  for (const interaction of events) for (const action of interaction.actions) vpAction(scope, action, `${where} → ${interaction.label}`);
+}
 /** Validates every source reference and mapping against the model schemas and returns the referenced operations. */
 export function visualSources(m: Model, specs: VisualSpec[] = visualSpecs(m)): VisualSourceUse[] {
   const uses = new Map<string, VisualSourceUse>();
   for (const spec of specs) {
     const scope: Scope = { m, uses, emits: spec.kind === 'component' ? spec.emits : null }, owner = vpWhere(spec);
-    for (const scenario of spec.scenarios) for (const binding of scenario.bindings) {
-      const { operation } = vpOperation(scope, binding.sourceId, binding.operationId, `${owner} scenario ${JSON.stringify(scenario.name)}`);
-      visualAssert(matches(binding.value, operation.output), `${owner} scenario ${JSON.stringify(scenario.name)}: fixture for ${binding.sourceId}/${binding.operationId} does not match its output.`);
-    }
-    for (const node of visualNodes(visualRoot(spec))) {
-      const where = `${owner} / ${node.name || node.id}`;
-      for (const expr of visualExpressions(node)) if (expr.kind === 'source') vpRead(scope, expr, where);
-      const events: Interaction[] = 'events' in node ? node.events : [];
-      if (events.length) visualAssert(vpReachable(spec, node.id), `${where}: interaction source has no enabled visible state.`);
-      for (const interaction of events) for (const action of interaction.actions) vpAction(scope, action, `${where} → ${interaction.label}`);
-    }
+    vpScenarios(scope, spec, owner);
+    for (const node of visualNodes(visualRoot(spec))) vpNode(scope, spec, node, owner);
   }
   return [...uses.values()];
 }
