@@ -1,4 +1,4 @@
-import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedDocsParserFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
+import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedBundledNoticeFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
 
 test('relocated CLI help metadata and tiered rendering preserve command guidance', () => {
 
@@ -88,25 +88,24 @@ test('relocated documentation setup preserves decline, cancel and hash-bound app
 });
 
 
-test('relocated documentation parser packaging preserves exact pin and allowlist semantics', async () => {
+test('relocated bundled-notice packaging preserves exact pin and license-only semantics', async () => {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-docs-vendor-')));
   try {
     await writeFile(join(root, 'package.json'), JSON.stringify({ dependencies: { yaml: '2.9.1' } }));
     await mkdir(join(root, 'node_modules/yaml/dist'), { recursive: true });
-    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.1' }));
+    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ name: 'yaml', version: '2.9.1', license: 'ISC' }));
     await writeFile(join(root, 'node_modules/yaml/LICENSE'), 'license');
     await writeFile(join(root, 'node_modules/yaml/dist/index.js'), 'export const yaml = true;\n');
-    await writeFile(join(root, 'node_modules/yaml/dist/schema.json'), '{}');
     await writeFile(join(root, 'node_modules/yaml/dist/readme.md'), 'not packaged');
 
-    const files = await relocatedDocsParserFiles(root);
-    const paths = files.map(file => file.path).sort();
-    // The YAML runtime is bundled into app.js; only its license ships beside the bundle.
-    assert.deepEqual(paths, ['bin/licenses/yaml.LICENSE']);
+    const packages = [{ name: 'yaml', directory: 'node_modules/yaml' }];
+    const files = await relocatedBundledNoticeFiles(root, packages);
+    // The YAML runtime is bundled into app.js; only its license and version notice ship beside the bundle.
+    assert.deepEqual(files.map(file => file.path), ['bin/licenses/yaml.LICENSE', 'bin/licenses/NOTICES.json']);
     assert.equal(files[0].bytes.toString('utf8'), 'license');
 
-    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.0' }));
-    await assert.rejects(relocatedDocsParserFiles(root), error => error.code === 'DOCS_PARSER_VERSION');
+    await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ name: 'yaml', version: '2.9.0' }));
+    await assert.rejects(relocatedBundledNoticeFiles(root, packages), error => error.code === 'KIT_NOTICE_VERSION');
   } finally {
     await rm(root, { recursive: true, force: true });
   }
