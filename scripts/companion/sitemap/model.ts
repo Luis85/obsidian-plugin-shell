@@ -1,4 +1,5 @@
 /** Shared sitemap projections over canonical design.nodes/design.links. No host or UI imports. */
+import type { SurfaceAcceptance } from './acceptance.ts';
 export type SurfaceKind = 'view' | 'page' | 'group' | 'modal' | 'settings' | 'action';
 
 export interface Surface {
@@ -9,6 +10,8 @@ export interface Surface {
   slug?: string;
   nav?: boolean;
   entry?: boolean;
+  /** Optional UX obligations; absent for surfaces that declare none. */
+  acceptance?: SurfaceAcceptance;
   [key: string]: unknown;
 }
 

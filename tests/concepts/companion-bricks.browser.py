@@ -1,11 +1,12 @@
 """Content Brick concept: real embedded Vue Flow, exact HTML injection.
 No native host/CLI claim. Storage and explicitly labeled negative cases are fixtures.
 """
+import os
 from pathlib import Path
 import argparse, hashlib, json
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[2]
-a=argparse.ArgumentParser();a.add_argument('--html',default=str(ROOT/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(ROOT/'reports/concepts/companion-bricks'));a.add_argument('--browser',default='/usr/bin/chromium');args=a.parse_args()
+a=argparse.ArgumentParser();a.add_argument('--html',default=str(ROOT/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(ROOT/'reports/concepts/companion-bricks'));a.add_argument('--browser',default=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'));args=a.parse_args()
 HTML=Path(args.html);OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];requests=[];current=None
 

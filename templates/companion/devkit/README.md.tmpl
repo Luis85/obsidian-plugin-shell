@@ -41,7 +41,6 @@ folder are ever opened.
 | `npm run -s dev:obsidian -- --json` | One build/launch/reload iteration with a JSON summary (errors, logs, screenshot) |
 | `npm run dev:ui` | Browser harness for the Vue UI, without Obsidian |
 | `npm run build:clickdummy` | Build `clickdummy.html` from the generated Vue pages with synthetic read data |
-| `npm run prototype:tools -- discover --repo .` | Discover the shell-first design/prototype skill helpers and current command contracts |
 | `npm run make -- --list` | Code generators (features, entities, commands, events); preview with `--dry-run` |
 
 | Gates | What it proves |
@@ -50,7 +49,8 @@ folder are ever opened.
 | `npm run check:fast` | Typecheck plus only the tests related to files changed since the last commit |
 | `npm test` | All product tests once |
 | `npm run test:obsidian` | The built plugin loads, registers and unloads in real Obsidian |
-| `npm run verify:project` | Build, typecheck, product and UI-effect tests (what CI runs) |
+| `npm run verify:project` | Build, typecheck, product and UI-effect tests (the full local gate) |
+| `npm run verify:artifacts` | What the full gate adds to `check`: release build, UI-effect tests, test data (CI runs `check`, then this) |
 | `npm run build` | Release bundle in `dist/` (`main.js`, `styles.css`, `manifest.json`) |
 | `npm run check:submission` | Local mirror of the Obsidian community-review rules (manifest, lint, bundle) |
 | `npm run doctor` | Toolchain and configuration diagnostics |
@@ -123,8 +123,11 @@ See [logging and debugging](docs/development/LOGGING-AND-DEBUGGING.md).
 `AGENTS.md` lists the commands that define "done", the architecture rules and the
 safety rules. Claude Code additionally gets a PostToolUse hook that runs the tests
 related to each edited file, a Stop hook that runs `npm run check -- --fast`, a
-permission allowlist for the safe commands, and skills (`implement-requirement`,
-`debug-in-obsidian`, `add-feature`, `write-obsidian-test`) in `.claude/skills/`.
+SessionStart hook that prints the project state, a permission allowlist for the safe
+commands, and skills (`implement-requirement`, `debug-in-obsidian`, `add-feature`,
+`write-obsidian-test`, `self-review`) in `.claude/skills/` (mirrored for Codex in
+`.agents/skills/`). Start with [BRIEF.md](BRIEF.md), the product brief the owner fills in;
+pull requests use `.github/pull_request_template.md`.
 
 ## What is and is not done
 
@@ -143,5 +146,3 @@ permission allowlist for the safe commands, and skills (`implement-requirement`,
 - [Build a feature](docs/development/BUILD-A-FEATURE.md) and [makers](docs/development/SETUP-AND-MAKERS.md)
 - [Framework guide](docs/development/FRAMEWORK-GUIDE.md) and [framework CLI](docs/development/FRAMEWORK-CLI.md)
 - [Framework README](docs/framework/README.md) and [maintainer rules](docs/framework/AGENTS.md) (reference)
-
-For Codex use `$companion-prototype-design`; its `.agents/skills/companion-prototype-design/SKILL.md` entrypoint reads the canonical Claude skill. Both hosts reuse the same workflow and prototype helpers.

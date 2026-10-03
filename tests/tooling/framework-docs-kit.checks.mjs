@@ -10,6 +10,9 @@ import { verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { projectFiles } from '../support/project-render.mjs';
+import { withBanner, rewriteDocReferences } from '../../scripts/companion/compiler/framework-scope.ts';
+/** What relocation adds to a kept framework document: the reference banner and relocated mentions of other kept docs. */
+const referenceDocument = text => withBanner(rewriteDocReferences(text));
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { rebaseMarkdown } from '../../scripts/companion/compiler/framework-docs.ts';
 import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
@@ -55,9 +58,11 @@ test('generated consumers retain framework design constraints and rebase product
   const source = await readFile(join(root, 'DESIGN-CONSTRAINTS.md'), 'utf8');
   assert.ok(!files.has('DESIGN-CONSTRAINTS.md'), 'Framework policy must not become a consumer-owned root policy.');
   assert.equal(files.get(path)?.ownership, 'framework');
-  assert.equal(files.get(path)?.content, rebaseMarkdown(source, 'DESIGN-CONSTRAINTS.md', path));
-  assert.match(files.get('docs/product/README.md')?.content ?? '', /\(\.\.\/framework\/DESIGN-CONSTRAINTS\.md\)/);
-  assert.match(files.get(path).content, /\[Product vision\]\(\.\.\/product\/PRODUCT-VISION\.md\)/);
+  assert.equal(files.get(path)?.content, referenceDocument(rebaseMarkdown(source, 'DESIGN-CONSTRAINTS.md', path)));
+  // The framework's own product documents are not generated, so a link to one becomes a plain note instead of dangling.
+  assert.ok(![...files.keys()].some(file => file.startsWith('docs/product/')));
+  assert.match(files.get(path).content, /Product vision \(maintainer-only asset, not included\)/);
+  assert.doesNotMatch(files.get(path).content, /\]\(\.\.\/product\//);
   assert.match(files.get(path).content, /\[Repository instructions\]\(AGENTS\.md\)/);
 });
 
@@ -69,6 +74,8 @@ test('generated handout references and project-setup links remain inside the dis
   const name = 'PROJECT-SETUP-HANDOUT.md', path = 'docs/framework/' + name;
   assert.ok(!files.has(name), 'Do not replace the consumer-owned root handout with a prefilled framework copy.');
   assert.equal(files.get(path)?.ownership, 'framework');
-  assert.equal(files.get(path)?.content, rebaseMarkdown(await readFile(join(root, name), 'utf8'), name, path));
-  assert.match(files.get('docs/project-setup/HANDOUT.md')?.content ?? '', /\(\.\.\/framework\/PROJECT-SETUP-HANDOUT\.md\)/);
+  assert.equal(files.get(path)?.content, referenceDocument(rebaseMarkdown(await readFile(join(root, name), 'utf8'), name, path)));
+  // Kept framework reference documents all live under docs/framework/ and link to the relocated root handout.
+  assert.ok(!files.has('docs/project-setup/HANDOUT.md'));
+  assert.match(files.get('docs/framework/project-setup/HANDOUT.md')?.content ?? '', /\(\.\.\/PROJECT-SETUP-HANDOUT\.md\)/);
 });

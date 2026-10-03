@@ -36,7 +36,7 @@ def clean():
     js('modalOriginal=null;closeModal()')
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE','/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM','/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width':1540,'height':1000}, accept_downloads=True)
     page.set_default_timeout(8000)
     page.on('pageerror', lambda e: errors.append(str(e)))

@@ -1,11 +1,12 @@
 """Concept04 workflow refinement. Exact HTML injection; no Vue Flow/native claims.
 Uses a controlled Storage stand-in. Tests navigate the real browser concept UI.
 """
+import os
 from pathlib import Path
 import argparse,hashlib,json,time
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[2]
-a=argparse.ArgumentParser();a.add_argument('--html',default=str(ROOT/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(ROOT/'reports/concepts/companion-workflow'));a.add_argument('--browser',default='/usr/bin/chromium');args=a.parse_args()
+a=argparse.ArgumentParser();a.add_argument('--html',default=str(ROOT/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(ROOT/'reports/concepts/companion-workflow'));a.add_argument('--browser',default=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'));args=a.parse_args()
 HTML=Path(args.html);OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];requests=[];started=time.monotonic()
 def check(name,ok,scope='browser interaction'):

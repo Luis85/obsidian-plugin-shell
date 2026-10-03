@@ -45,7 +45,7 @@ export function starterCoverage(input: unknown) {
   return { starter: definition.id, scope: 'declarative-model-inventory',
     modeled: { categories, complete: Object.values(categories).every(category => category.missing.length === 0),
       pages: visual.pages.length, components: visual.components.length, revisions: visual.revisions.length, layouts: visual.layouts.length,
-      surfaces: d.nodes.length, routes: d.sitemap?.routes.length ?? 0, journeys: d.sitemap?.journeys.length ?? 0 },
+      surfaces: d.nodes.length, surfacesWithUxAcceptance: d.nodes.filter(n => n.acceptance !== undefined).length, routes: d.sitemap?.routes.length ?? 0, journeys: d.sitemap?.journeys.length ?? 0 },
     unboundInteractions: unbound, limitations, shippedEditors: [...SHIPPED_EDITORS], declaredEditorBindings: editorBindings(d),
     behaviorAcceptance: 'not-run', nativeAcceptance: 'not-run',
     note: 'Presence in JSON is not a passing interaction test. Full native Companion parity requires native adapters and candidate-bound behavioral evidence; this read-only report does not invent either.' };

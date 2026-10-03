@@ -99,7 +99,7 @@ report = {
     'python': sys.version, 'playwright': python_playwright(),
     'node': subprocess.run([NODE, '--version'], text=True, capture_output=True).stdout.strip() if NODE else None,
     'only': args.only,
-    'chromium_executable': os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),
+    'chromium_executable': os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'),
     'real_storage_requested': args.real_storage,
     'passed': sum(r.get('passed', 0) for r in results), 'suites': results,
     'scope': 'Companion UI, full-project read-only CLI, reviewed project generation and the exported test-data CLI in isolated temporary directories. Assertion totals include model, geometry and controlled-state fixtures; not native host, generated-project dependency/build qualification or release qualification.',

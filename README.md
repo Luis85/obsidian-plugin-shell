@@ -43,7 +43,8 @@ npm run new -- ../my-plugin --starter blank --yes --install --trust-processes   
 npm run new -- ../my-plugin --from my-plugin.companion.json   # any project JSON exported by the companion
 ```
 
-In a terminal, `npm run new` without arguments asks for the folder, starter and
+`npm run new` is `node bin/app new`; `node bin/app` is the only CLI entry (there is
+no root launcher script). In a terminal, `npm run new` without arguments asks for the folder, starter and
 identity, then shows the plan before writing. The result is scaffolding with TODO
 acceptance obligations, not a finished or natively qualified plugin. Details:
 [Framework CLI](docs/development/FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter).

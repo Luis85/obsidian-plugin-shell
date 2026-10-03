@@ -157,7 +157,7 @@ jobs:
           from playwright.sync_api import sync_playwright
           with sync_playwright() as pw:
               with open(os.environ['GITHUB_ENV'], 'a') as output:
-                  output.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
+                  output.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
           PYTHON
       # The aggregated runner stops at the first failing suite; run the page and component editors on their own first.
       - name: Exercise the page and component editors on the exact artifact
@@ -207,7 +207,7 @@ jobs:
           from playwright.sync_api import sync_playwright
           with sync_playwright() as pw:
               with open(os.environ['GITHUB_ENV'], 'a') as env:
-                  env.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
+                  env.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
           PY
       - name: Typecheck shared contracts and actual Vue authoring components
         shell: bash

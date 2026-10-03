@@ -43,7 +43,7 @@ From the repository root:
 python3 scripts/concepts/build-companion.py --check
 python3 tests/concepts/companion-assembly.test.py
 for file in docs/concepts/companion/src/*.js; do node --check "$file"; done
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python3 scripts/concepts/run-browser-checks.py --real-storage
 # After normal repository dependency provisioning with its qualified toolchain:
 node --test tests/tooling/companion-boundaries.checks.mjs
 node scripts/quality/check-architecture.mjs

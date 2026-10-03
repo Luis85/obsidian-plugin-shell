@@ -98,6 +98,14 @@ function visualInventory(model: Model) {
 function planSummary(options: WorkspaceOptions, input: InputSnapshot, model: Model, output: Entry[], { visual, interactions }: ReturnType<typeof visualInventory>) {
   return {...selectionField(options),project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + interactions.filter(visualAcceptanceTodo).length,definitions:visual.pages.length+visual.components.length,pages:visual.pages.length,componentDefinitions:visual.components.length,publishedRevisions:visual.revisions.length,visualInteractions:interactions.length,businessTodos:interactions.filter(i=>visualVerification(i)==='business-todo').length,warnings:model.warnings};
 }
+/** The receipt's inputHash names the accepted design bytes the project carries (design/project.json), the file
+ * `doctor` re-hashes. The generator rewrites that file in normalized form, so hashing the raw source input
+ * (a starter or an export) made a fresh project look changed since generation. Without a written design file
+ * (for example a click-dummy target) the source input remains the recorded input. */
+function acceptedDesign(entries: readonly PlannedEntry[], prefix: string, input: InputSnapshot): string {
+  const design = entries.find(entry => entry.path === prefix + 'design/project.json' && !entry.encoding);
+  return design?.content ?? input.content.toString('utf8');
+}
 /** Plans are rebuilt from local data and trusted templates, not deserialized executable plans. */
 export async function planArtifacts(options: WorkspaceOptions, input: InputSnapshot, model: Model, output: Entry[]) {
   requireOutsideTemplate(options, input);
@@ -112,7 +120,7 @@ export async function planArtifacts(options: WorkspaceOptions, input: InputSnaps
   const context: FileContext = { vault: input.vault, prefix, retained: new Set(options.selection?.retainedPaths ?? []), planned };
   await planFiles(context, output, candidates.changes, previous);
   const { ownership, entries } = planned;
-  const receipt = {...generationReceipt(text(model.project.id), input.content.toString('utf8'), ownership),...selectionField(options)};
+  const receipt = {...generationReceipt(text(model.project.id), acceptedDesign(entries, prefix, input), ownership),...selectionField(options)};
   entries.push({path:receiptPath,content:json(receipt)});
   const plan = await createFilePlan(input.vault,entries);
   requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');

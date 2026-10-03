@@ -56,6 +56,8 @@ implementation points, not a sandbox for arbitrary code.
 
 See [scenario execution and limits](../testing/GENERATED-PREVIEW-SCENARIOS.md).
 
+To look at every surface, state and scenario in light and dark at wide and narrow widths, run `npm run ui:gallery`; it writes screenshots and an index for human review (not acceptance) as described in [UI review gallery](UI-REVIEW-GALLERY.md).
+
 ## Ownership and implementation
 
 | Source | Responsibility |

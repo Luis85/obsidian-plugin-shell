@@ -7,7 +7,7 @@ export function storybookWorkspace(template: TemplateSnapshot, paths: string[]):
   const pinned = { ...pkg.dependencies, ...pkg.devDependencies };
   const shared = ['vue', 'vite', '@vitejs/plugin-vue', '@types/node', 'typescript', 'vue-tsc'];
   for (const name of shared) requireValue(typeof pinned[name] === 'string', 'Storybook workspace requires the framework pin for ' + name);
-  const dependencies = { storybook: storybookVersion, '@storybook/vue3-vite': storybookVersion, '@storybook/addon-docs': storybookVersion, '@storybook/builder-vite': storybookVersion,
+  const dependencies = { storybook: storybookVersion, '@storybook/vue3-vite': storybookVersion, '@storybook/addon-docs': storybookVersion, '@storybook/addon-a11y': storybookVersion, '@storybook/builder-vite': storybookVersion,
     ...Object.fromEntries(shared.map(name => [name, pinned[name]])) };
   const add = (path: string, content: string, ownership: Artifact['ownership'] = 'managed'): Artifact => ({ path: 'storybook/' + path, content, ownership, producer: 'storybook' });
   return [
@@ -32,17 +32,30 @@ const generated: string[] = JSON.parse(readFileSync(new URL('./generated.json', 
 const config: StorybookConfig = {
   framework: { name: packageRoot('@storybook/vue3-vite'), options: { docgen: false } },
   stories: [...(project.tooling?.storybook?.generateStories === true ? generated : []), '../custom/**/*.stories.@(js|ts)'],
-  addons: [packageRoot('@storybook/addon-docs')],
+  addons: [packageRoot('@storybook/addon-docs'), packageRoot('@storybook/addon-a11y')],
   core: { disableTelemetry: true, enableCrashReports: false, builder: {
     name: '@storybook/builder-vite', options: { viteConfigPath: fileURLToPath(new URL('../vite.config.mjs', import.meta.url)) },
   } },
 };
 export default config;
 `, 'extension'),
-    add('.storybook/preview.ts', `import type { Preview } from '@storybook/vue3-vite';
+    add('.storybook/preview.ts', `import type { Decorator, Preview } from '@storybook/vue3-vite';
+const themes = ['light', 'dark'] as const;
+type Theme = (typeof themes)[number];
+const isTheme = (value: unknown): value is Theme => themes.some(theme => theme === value);
+// Obsidian marks the document body with theme-light or theme-dark. Portals and docs pages live outside the story host, so the toolbar global drives the body too.
+const withObsidianTheme: Decorator = (story, context) => {
+  const theme: Theme = isTheme(context.globals.theme) ? context.globals.theme : 'light';
+  for (const name of themes) document.body.classList.toggle('theme-' + name, name === theme);
+  document.body.style.colorScheme = theme;
+  return story();
+};
 const preview: Preview = {
-  parameters: { controls: { expanded: true } },
-  globalTypes: { theme: { description: 'Simulated host theme', toolbar: { icon: 'circlehollow', items: ['light', 'dark'], dynamicTitle: true } } },
+  decorators: [withObsidianTheme],
+  // The a11y panel reports violations while developing. Qualification audits every story in both themes and blocks on serious or critical axe results.
+  parameters: { controls: { expanded: true }, a11y: { test: 'todo' } },
+  globalTypes: { theme: { description: 'Simulated Obsidian theme', toolbar: { title: 'Theme', icon: 'circlehollow', dynamicTitle: true,
+    items: [{ value: 'light', title: 'Light' }, { value: 'dark', title: 'Dark' }] } } },
   initialGlobals: { theme: 'light' },
 };
 export default preview;
@@ -67,6 +80,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Overview: Story = {};
 `, 'extension'),
-    add('DEPENDENCIES.md', `# Optional Storybook dependencies\n\nStorybook ${storybookVersion}, Vue/Vite and TypeScript versions are exact direct pins. Installation is not part of generation or normal setup. Run \`node bin/app storybook install --yes\` from the project root. The first explicit install resolves the optional lockfile; subsequent installs use npm ci. Commit and review storybook/package-lock.json. No fake lockfile or green verification claim is emitted.\n\nUse \`node bin/app storybook check\`, \`node bin/app storybook dev\` or \`node bin/app storybook build\` after the normal project dependencies are installed. The launcher disables Storybook telemetry before startup. No browser auto-open, cloud publication or native host operation is requested.\n\nNormal root dependencies, install and verify remain independent. Disabling the feature does not delete custom files or uninstall existing packages.\n`),
+    add('DEPENDENCIES.md', `# Optional Storybook dependencies\n\nStorybook ${storybookVersion}, its Docs and Accessibility (a11y) addons, Vue/Vite and TypeScript versions are exact direct pins. The a11y addon version always equals the Storybook version; update them together. Installation is not part of generation or normal setup. Run \`node bin/app storybook install --yes\` from the project root. The first explicit install resolves the optional lockfile; subsequent installs use npm ci. Commit and review storybook/package-lock.json. No fake lockfile or green verification claim is emitted.\n\nUse \`node bin/app storybook check\`, \`node bin/app storybook dev\` or \`node bin/app storybook build\` after the normal project dependencies are installed. The launcher disables Storybook telemetry before startup. No browser auto-open, cloud publication or native host operation is requested.\n\nNormal root dependencies, install and verify remain independent. Disabling the feature does not delete custom files or uninstall existing packages.\n`),
   ];
 }

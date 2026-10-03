@@ -13,6 +13,10 @@ package scripts, side effects and execution plan hash. Approving file generation
 never approves package execution. The first-run choice is offered only after
 boilerplate was created; it can also be started later from the studio or CLI.
 
+The commands below use the extracted-kit path: the CLI kit lives under
+`<project>/tools/shell-cli/` and the commands run from the project root. From a
+source checkout of this repository, the same commands are `node bin/app <command>`.
+
 ```sh
 # From the project root, with the CLI kit kept intact:
 node tools/shell-cli/bin/app project-setup --root .

@@ -3,18 +3,19 @@
  * so the product README/AGENTS.md/CI own the root without breaking the framework docs' local links. */
 import { posix } from 'node:path';
 import type { Entry } from './file-code.ts';
+import { frameworkOnlyPath, referenceDocPath, rewriteDocReferences, withBanner } from './framework-scope.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
   ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'].map(name => [name, `docs/framework/${name}`]));
 const maintainerWorkflows = '.github/workflows/';
 /** Where a copied framework file lives in a generated project. Maintainer workflows never run there. */
 export function relocatedPath(path: string): string {
-  return frameworkDocuments.get(path) ?? (path.startsWith(maintainerWorkflows) ? 'docs/framework/workflows/' + path.slice(maintainerWorkflows.length) : path);
+  return frameworkDocuments.get(path) ?? referenceDocPath(path) ?? (path.startsWith(maintainerWorkflows) ? 'docs/framework/workflows/' + path.slice(maintainerWorkflows.length) : path);
 }
 /** The maintainer runner script, the policy test for maintainer CI triggers and the standalone
  * standalone design prototypes (their own apps and retained evidence) are not copied. */
 export function maintainerOnly(path: string): boolean {
-  return path === 'docs/concepts/companion/companion-project.json' || path.startsWith('docs/concepts/companion/seeds/')
+  return frameworkOnlyPath(path) || path === 'docs/concepts/companion/companion-project.json' || path.startsWith('docs/concepts/companion/seeds/')
     || path.startsWith('configs/starters/') || path.startsWith('docs/concepts/companion/starters/') || path === '.github/workflows/starter-distribution.yml'
     || path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
     || path.startsWith('docs/concepts/sitemap-editor/')
@@ -55,12 +56,17 @@ export function rebaseMarkdown(text: string, from: string, to: string): string {
     });
   }).join('\n');
 }
+/** Every Markdown file under docs/framework/ is reference material: it names the real instructions and mentions
+ * other kept framework docs by their relocated path. */
+function referenceBanner(text: string, to: string): string {
+  return to.startsWith('docs/framework/') ? withBanner(rewriteDocReferences(text)) : text;
+}
 /** Move the root framework documents and maintainer workflows; rebase links in copied Markdown. */
 export function relocateFrameworkDocuments(entries: Map<string, Entry>): void {
   for (const [path, entry] of [...entries]) {
     if (entry.ownership !== 'framework') continue;
     const to = relocatedPath(path);
-    const content = !entry.encoding && path.endsWith('.md') ? rebaseMarkdown(entry.content, path, to) : entry.content;
+    const content = !entry.encoding && path.endsWith('.md') ? referenceBanner(rebaseMarkdown(entry.content, path, to), to) : entry.content;
     if (to === path && content === entry.content) continue;
     if (to !== path) entries.delete(path);
     entries.set(to, { ...entry, path: to, content });

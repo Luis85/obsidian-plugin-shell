@@ -8,6 +8,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { build } from 'vite';
 import { chromium } from '@playwright/test';
+import { chromiumLaunchOptions } from '../testing/browser-executable.mjs';
 import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { projectConfigs } from '../shared/project-configs.mjs';
@@ -63,7 +64,7 @@ const evidence = { source: spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, 
 try {
   start(['node_modules/vite/bin/vite.js', '--config', projectConfigs.preview.path]);
   await ready('http://127.0.0.1:5741/');
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('http://127.0.0.1:5741/', { waitUntil: 'networkidle' });

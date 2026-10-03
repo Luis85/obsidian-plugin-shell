@@ -2,11 +2,12 @@
 Pre-provisioned Python Playwright/Chromium required; installs nothing.
 Persistence uses an explicit Storage substitute. Model fixtures are scope-labeled.
 """
+import os
 from pathlib import Path
 import argparse, hashlib, json, time
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[2]
-a=argparse.ArgumentParser();a.add_argument('--html',default=str(ROOT/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(ROOT/'reports/concepts/companion-sitemap'));a.add_argument('--browser',default='/usr/bin/chromium');args=a.parse_args()
+a=argparse.ArgumentParser();a.add_argument('--html',default=str(ROOT/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(ROOT/'reports/concepts/companion-sitemap'));a.add_argument('--browser',default=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'));args=a.parse_args()
 HTML=Path(args.html);OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];requests=[];metrics={};start=time.monotonic();current=None
 

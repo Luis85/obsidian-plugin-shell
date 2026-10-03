@@ -55,6 +55,31 @@ const vtPropValue = (type: string, changed = false): unknown => (type === 'boole
 export const visualFixtureProps = (spec: VisualSpec | ComponentDefinition): Record<string, unknown> => ('template' in spec ? Object.fromEntries(spec.props.map(p => [p.name, vtPropValue(p.type)])) : {});
 const vtExpectValue = (value: unknown) => (value === undefined ? 'undefined' : literal(value));
 
+const vtGroupTitle = (ids: string[], event: string): string => '[' + ids.join(', ') + '] dispatches the designed ' + event + ' interaction';
+const vtStateTitle = (state: VisualState): string => 'renders declared ' + state + ' visibility including hidden ancestors';
+const vtDescribe = (spec: VisualSpec): string => spec.id + ' ' + (spec.kind === 'page' ? spec.name : spec.exportName);
+/** The natively dispatched (node, event) groups of a definition, in generation order. */
+function vtDispatchGroups(spec: VisualSpec, rendered: Rendered[]): { node: UiNode; event: string; group: Interaction[]; state: VisualState }[] {
+  const groups: { node: UiNode; event: string; group: Interaction[]; state: VisualState }[] = [];
+  for (const { node, marked } of rendered) {
+    const entry = vtEntry(node), events = node.kind === 'element' || (node.kind === 'component' && entry) ? node.events : [];
+    if (!marked || (node.kind === 'component' && !vtNative[entry ?? ''])) continue;
+    const state = (['default', 'empty', 'error'] as const).find(s => visualVisible(spec, vtSession(s), node.id)); if (!state) continue;
+    for (const event of [...new Set(events.map(i => i.event))].filter(e => vtDom.has(e) && (node.kind === 'element' || vtNative[entry ?? '']?.includes(e))))
+      groups.push({ node, event, group: events.filter(i => i.event === event), state });
+  }
+  return groups;
+}
+/** Deterministic ids ("describe > title") of the generated state-visibility tests of a definition. */
+export const visualStateTestIds = (spec: VisualSpec): string[] => vtStates.map(state => vtDescribe(spec) + ' > ' + vtStateTitle(state));
+/** Deterministic ids of the generated dispatch tests of a definition, keyed by the interaction ids each one covers. */
+export function visualDispatchTestIds(spec: VisualSpec): Map<string, string> {
+  const ids = new Map<string, string>();
+  for (const { event, group } of vtDispatchGroups(spec, visualRendered(spec.kind === 'page' ? spec.root : spec.template)))
+    for (const interaction of group) ids.set(interaction.id, vtDescribe(spec) + ' > ' + vtGroupTitle(group.map(i => i.id), event));
+  return ids;
+}
+
 /** Assertions for one designed (node, event): dispatch, hooks, navigation, mapped source/emit payloads and executable local effects. */
 function vtGroup(m: Model, spec: VisualSpec, rendered: Rendered[], node: UiNode, event: string, group: Interaction[], state: VisualState, ports: string[]): string {
   const props = visualFixtureProps(spec), ids = group.map(i => i.id), local = group.every(i => i.actions.length && i.actions.every(a => ['set-state', 'toggle', 'set-value', 'focus'].includes(a.kind)));
@@ -94,7 +119,7 @@ function vtGroup(m: Model, spec: VisualSpec, rendered: Rendered[], node: UiNode,
       if (a.kind === 'focus' && session.focused === target.id) lines.push(`expect(marked(wrapper.element, ${literal(target.id)}).contains(document.activeElement)).toBe(true);`);
     }
   }
-  return `it(${literal('[' + ids.join(', ') + '] dispatches the designed ' + event + ' interaction')}, async () => {
+  return `it(${literal(vtGroupTitle(ids, event))}, async () => {
   const f = fixture(); const wrapper = mount(Subject, { attachTo: document.body, props: { ...${literal(props)}, designState: ${literal(state)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try {
     ${fills.map(line => line + '\n    ').join('')}${fills.length ? 'f.reset();\n    ' : ''}await wrapper.get(${literal(`[data-design-node="${node.id}"]`)}).trigger(${literal(event)}); await flushPromises();
@@ -109,7 +134,7 @@ function vtDefinition(m: Model, spec: VisualSpec, subject: string): string[] {
   const roots = spec.kind === 'page' ? spec.root : spec.template, rendered = visualRendered(roots), props = visualFixtureProps(spec), ports = vtPorts(m);
   const states = vtStates.map(state => {
     const disabled = ['loading', 'disabled'].includes(state) ? rendered.filter(r => r.marked && VISUAL_RUNTIME_INTERACTIVE.includes(vtEntry(r.node) ?? '') && r.node.kind === 'component' && !Object.hasOwn(r.node.props, 'disabled') && visualVisible(spec, vtSession(state), r.node.id)).map(r => r.node.id) : [];
-    return `it(${literal('renders declared ' + state + ' visibility including hidden ancestors')}, () => {
+    return `it(${literal(vtStateTitle(state))}, () => {
   const f = fixture(); const wrapper = mount(Subject, { props: { ...${literal(props)}, designState: ${literal(state)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try { expectVisible(wrapper.element, ${literal(vtVisibility(spec, rendered, vtSession(state)))});${disabled.length ? `\n    for (const id of ${literal(disabled)}) expect(disabledWithin(marked(wrapper.element, id)), id).toBe(true);` : ''}
   } finally { wrapper.unmount(); }
@@ -119,16 +144,8 @@ function vtDefinition(m: Model, spec: VisualSpec, subject: string): string[] {
   const f = fixture(); const wrapper = mount(Subject, { props: { ...${literal(props)}, designScenario: ${literal(scenario.id)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try { expect(wrapper.attributes('data-design-state')).toBe(${literal(scenario.state)}); expectVisible(wrapper.element, ${literal(vtVisibility(spec, rendered, visualSession(scenario)))}); } finally { wrapper.unmount(); }
 });`) : [];
-  const groups: string[] = [];
-  for (const { node, marked } of rendered) {
-    const entry = vtEntry(node), events = node.kind === 'element' || (node.kind === 'component' && entry) ? node.events : [];
-    if (!marked || (node.kind === 'component' && !vtNative[entry ?? ''])) continue;
-    const state = (['default', 'empty', 'error'] as const).find(s => visualVisible(spec, vtSession(s), node.id)); if (!state) continue;
-    for (const event of [...new Set(events.map(i => i.event))].filter(e => vtDom.has(e) && (node.kind === 'element' || vtNative[entry ?? '']?.includes(e))))
-      groups.push(vtGroup(m, spec, rendered, node, event, events.filter(i => i.event === event), state, ports.map(p => p.key)));
-  }
-  const name = spec.kind === 'page' ? spec.name : spec.exportName;
-  return [...states, ...scenarios, ...groups].map(test => `describe(${literal(spec.id + ' ' + name)}, () => {\nconst Subject = ${subject};\n${test}\n});`);
+  const groups = vtDispatchGroups(spec, rendered).map(({ node, event, group, state }) => vtGroup(m, spec, rendered, node, event, group, state, ports.map(p => p.key)));
+  return [...states, ...scenarios, ...groups].map(test => `describe(${literal(vtDescribe(spec))}, () => {\nconst Subject = ${subject};\n${test}\n});`);
 }
 
 /** Bounded generated UI suites retain every case; source size does not grow with the catalog. */

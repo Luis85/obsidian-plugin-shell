@@ -102,6 +102,50 @@ Browser checks must observe caught Vue/application errors in addition to console
 
 Use the declared scenario/theme/locale/seed and owned readiness signals. Record source/build/style identity, actual commands, and missing environments. Never accept baselines or suppress errors just to complete a task.
 
+### Reproduce a CI job locally
+
+The workflows keep their explicit commands; `node bin/app ci` reads them so a failing job can be reproduced
+without copying commands by hand. It parses `.github/workflows/*.yml` with the pinned `yaml` library (strict
+YAML 1.2, no new dependency) and never contacts GitHub.
+
+```text
+node bin/app ci --list [--json]                       # workflows -> jobs: triggers, path filters, runner/matrix, reproducible?
+node bin/app ci --job ci/baseline --matrix os=ubuntu-latest        # dry run: the exact ordered shell commands
+node bin/app ci --job ci/baseline --matrix os=ubuntu-latest --execute --json   # run the run: steps, stop at the first failure
+```
+
+- **Reference** a job as `<workflow-file-stem>/<job-id>` (`ci/baseline` is job `baseline` in `ci.yml`).
+- **Dry run** (default) prints each step in order with its shell, `working-directory`, the job/workflow/step `env`
+  and the `run:` text. `${{ matrix.* }}` and `${{ runner.os }}` are resolved (the runner is this machine); any other
+  `${{ }}` expression stays verbatim and is flagged as unresolved. `if:` conditions are settled three-valued:
+  a condition that is false here (`runner.os == 'Windows'` on Linux) is skipped, one that cannot be decided locally
+  (`github.event_name`, `inputs.*`, `steps.*` outputs in a condition) is shown as unknown and not run.
+- **Matrix:** without `--matrix` the first combination that targets this machine is used and the note says how many
+  exist. `--matrix key=value,...` selects one combination by exact values (`group=1`); no match or more than one
+  match is an error that lists the available combinations. A matrix computed by an expression (`fromJSON(...)`)
+  needs the values from `--matrix`.
+- **Reproducible** means every step is a `run:` step or a known setup action (`actions/checkout`,
+  `actions/setup-node`, `actions/cache`, `actions/upload-artifact`: nothing to run locally). Any other `uses:` step is
+  marked `external`, skipped and noted, and the job is listed as not reproducible.
+- **`--execute`** runs the `run:` steps sequentially through bash (default `bash -e`, explicit `shell: bash` adds
+  `pipefail`; `pwsh` only when installed), in the project root with the job's literal env, `CI=true`, a scratch
+  `RUNNER_TEMP` and emulated `GITHUB_ENV`, `GITHUB_OUTPUT`, `GITHUB_PATH` and `GITHUB_STEP_SUMMARY` files, so
+  later steps see exported variables and step outputs. It stops at the first failure and reports every step in the
+  same versioned result shape as `check --json`: `status`, `durationMs`, `exitCode`, `code` and an `outputTail`
+  of failing output; steps after a failure are `not-run`. `--timeout` applies per step (default 600000 ms).
+- **Refused, with the reason printed** (`status: blocked`, `CI_EXECUTE_REFUSED`; nothing runs): `secrets.` or
+  `github.token` references, publication or tagging commands (`npm publish`, `git push`, `git tag <name>`,
+  `gh release|api`, `docker push`, guarded `release operate`/`--authorize`), jobs named release/publish/deploy or
+  using an `environment`, container or service jobs, a runner OS other than this machine, unresolved expressions
+  other than step outputs and `runner.temp`, and a missing shell. The dry run is always available and reports
+  `executable` and `blockers`.
+
+A dry run also notes steps that run `npm ci` or `npm install` in the project folder, because `--execute` would
+replace this checkout's `node_modules`; the many jobs that start with such a step are best reproduced in a scratch
+copy. A local run is a reproduction aid, not proof of CI: hosted-runner images, the `needs:` job results, uploaded
+artifacts, `github.*` event data, caches and external actions are not reproduced, and many jobs install, download or
+write under `reports/`. Jobs that need a Windows or macOS runner can only be inspected here.
+
 ## 7. Native work and release
 
 The implemented `dev:local` path uses `.dev-vault` and staged matching JS/CSS/manifest
@@ -127,3 +171,35 @@ The [maintenance/release guide](MAINTENANCE-AND-RELEASE.md) retains reviewed dep
 | Host unavailable | Report not run; fixture screenshots cannot substitute. |
 
 A handoff describes actual behavior, exact checks and limitations. Extensive generated code or a polished specimen is not a completed template.
+
+## Cloud and agent sessions
+
+Cloud containers (Claude Code on the web) usually ship a different Node/npm than the qualified
+toolchain (`.nvmrc`, `package.json` engines and `packageManager`: Node 24.21.0, npm 11.19.1) and may start
+without `node_modules`. The repository's `.claude/settings.json` therefore registers a `SessionStart` hook,
+`scripts/agent/session-start.mjs` (the same file serves generated projects), and the existing `Stop` hook
+(`scripts/agent/stop-check.mjs`, which runs the fast check, `node bin/app check --fast`).
+
+The SessionStart hook prints at most ten lines of context and never fails the session (it always exits 0 and
+reports problems as text). It is read-only and fast when everything is fine:
+
+- **Toolchain report:** actual Node/npm versus the qualified ones, distinguishing "qualified", "satisfies engines
+  but is not the qualified version" and "outside engines". If another qualified Node exists in a well-known place
+  (`/opt/node<major>/bin`, nvm, n, Volta, or `SHELL_NODE_BIN`), it is put first on `PATH` for the session through
+  `CLAUDE_ENV_FILE`; otherwise the report names the install command. Version drift is reported, never hidden.
+- **Dependencies:** a missing `node_modules` is restored with `npm ci --ignore-scripts`, using the qualified Node
+  when one was found. This only happens in cloud sessions (`CLAUDE_CODE_REMOTE=true`) or when
+  `SHELL_SESSION_START_INSTALL=1`; `SHELL_SESSION_START_INSTALL=0` disables it everywhere. Local sessions are never
+  changed unasked. Lifecycle scripts stay off and nothing is downloaded beyond the locked packages.
+- **Browser:** reported through the single resolver, `scripts/testing/browser-executable.mjs`. It never downloads.
+
+Browser executable selection has one canonical override, `SHELL_CHROMIUM` (an absolute path to a Chromium
+executable; Playwright config, browser scripts, the evidence browser producer and the Python concept checks all
+read it). Without it the Chromium revision pinned by the installed Playwright
+(`node_modules/playwright-core/browsers.json`) must exist in the Playwright cache (`PLAYWRIGHT_BROWSERS_PATH`).
+An installed but different revision, such as the cloud image's `/opt/pw-browsers/chromium-1194`, is a
+`revision-mismatch`: browser suites are reported `not-run` with the reason `browser-revision-mismatch` and the exact
+opt-in, for example `SHELL_CHROMIUM=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. A mismatched Chromium is
+never used silently and never reported as a pass. `node scripts/testing/browser-executable.mjs [--json]` prints the
+resolution (exit 0 only when a browser is usable). The earlier names `CHROMIUM_EXECUTABLE`, `CHROMIUM_PATH`,
+`PLAYWRIGHT_EXECUTABLE_PATH` and the `--browser` option of the browser specimen check are removed.

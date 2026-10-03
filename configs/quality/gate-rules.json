@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "description": "Data behind `node bin/app check --plan` and the suite selection of `check --fast`. It joins changed paths to gates. tests/suites.json supplies per-suite test-file includes and workflow names, .github/workflows/*.yml supplies `paths:` filters, and this file adds what those cannot say: which source files a suite protects, the change-type rules, the gate commands and the docs-only globs. Durations come from docs/testing/TEST-SUITES.md (Measured column). Glob syntax is the suites manifest syntax (*, **, ?, {a,b}).",
+  "docsGlobs": ["docs/**", "**/*.md", "LICENSE", "THIRD-PARTY-NOTICES*"],
+  "suiteSources": {
+    "maker": ["bin/adapters/makers/**", "scripts/makers/**", "bin/adapters/framework/check*.ts", "bin/adapters/framework/gate-*.ts", "configs/quality/gate-rules.json"],
+    "makers": ["bin/adapters/makers/**", "scripts/makers/**", "scripts/events/**", "scripts/examples/**"],
+    "cli": ["bin/app", "bin/app.ts", "bin/adapters/framework/**", "bin/adapters/framework-cli.ts", "bin/presentation/terminal/**", "scripts/framework/**", "scripts/operations/**", "scripts/contracts/**", "configs/quality/gate-rules.json"],
+    "generator": ["templates/**", "configs/templates/**", "bin/compiler/**", "scripts/compiler/**", "scripts/starters/**", "configs/starters/**", "scripts/shared/file-plan*"],
+    "compiler": ["bin/compiler/**", "scripts/compiler/**"],
+    "companion": ["scripts/companion/**", "scripts/concepts/**", "templates/**"],
+    "visual": ["scripts/companion/visual/**"],
+    "airship": ["scripts/airship/**", "bin/adapters/framework/airship*.ts"],
+    "prototypes": ["scripts/companion/prototypes/**", "scripts/companion/prototype-skill.mjs", "bin/adapters/prototype*.ts", "bin/adapters/framework/prototype*.ts"],
+    "native": ["scripts/testing/native-*", "scripts/testing/obsidian-*", "scripts/dev/**"],
+    "setup": ["scripts/setup.mjs", "scripts/setup/**", "scripts/shared/npm-install.mjs", "scripts/bundling/**"],
+    "release": ["scripts/release/**", "scripts/security/**", "scripts/maintenance/**"],
+    "quality": ["scripts/quality/**", "configs/quality/**", "configs/lint/**", "scripts/testing/suite-manifest.mjs", "scripts/testing/evidence-*"],
+    "test-data": ["scripts/companion/test-data-manifest.mjs"]
+  },
+  "gates": {
+    "check": { "label": "Agent gate (typecheck, eslint, lint-source, related tests, matching node suites)", "command": ["node", "bin/app", "check", "--fast"], "kind": "check", "prerequisites": [] },
+    "coverage-production": { "label": "Production coverage gate", "command": ["npm", "run", "test:coverage:production"], "kind": "script", "prerequisites": [] },
+    "check-presentation": { "label": "Presentation concern boundary", "command": ["npm", "run", "check:presentation"], "kind": "script", "prerequisites": [] },
+    "events-check": { "label": "Event contracts, references and catalog drift", "command": ["npm", "run", "events:check"], "kind": "script", "prerequisites": [] },
+    "check-repository": { "label": "Repository policy checks (README, AGENTS, workflows)", "command": ["npm", "run", "check:repository"], "kind": "script", "prerequisites": [] },
+    "docs-launchers": { "label": "Documentation launcher commands", "command": ["npm", "run", "check:docs-launchers"], "kind": "script", "requiresScript": "check:docs-launchers", "prerequisites": [] },
+    "verify": { "label": "Pre-PR full gate", "command": ["npm", "run", "verify"], "kind": "verify", "prerequisites": [], "workflows": ["ci"] }
+  },
+  "rules": [
+    { "id": "runtime-source", "label": "Plugin runtime source", "paths": ["src/**"], "gates": ["check", "coverage-production"] },
+    { "id": "presentation", "label": "Presentation layer", "paths": ["src/presentation/**"], "gates": ["check-presentation"] },
+    { "id": "events", "label": "Event contracts", "paths": ["src/application/event*", "src/application/event-definitions/**", "src/bootstrap/*event*", "src/features/**/events.ts", "src/infrastructure/events/**"], "gates": ["events-check"] },
+    { "id": "test-sources", "label": "Test and helper files", "paths": ["tests/**"], "gates": ["check"] },
+    { "id": "shell-tooling", "label": "Shell CLI and tooling sources", "paths": ["bin/**", "scripts/**", "plugins/**"], "gates": ["check"] },
+    {
+      "id": "generator-inputs", "label": "Generator, compiler and companion inputs",
+      "paths": ["templates/**", "configs/templates/**", "bin/compiler/**", "scripts/companion/**", "scripts/compiler/**"],
+      "gates": ["check"], "suites": ["generator", "compiler"],
+      "notes": ["Generated output may change: golden snapshots, the template snapshot and kit integrity (bin/kit.json) can drift. A generator/compiler suite failure that names a golden or integrity lock needs a reviewed regeneration; do not edit those files by hand."]
+    },
+    { "id": "workflows", "label": "CI workflows", "paths": [".github/workflows/**"], "notes": ["CI workflow changed: it cannot run locally. Review trigger paths and pinned actions; `node bin/app ci --list` shows the jobs once available, and tests/tooling/repository.checks.mjs validates workflow shape."], "suites": ["quality"] },
+    { "id": "dependency-manifests", "label": "Dependency manifests", "paths": ["package.json", "package-lock.json"], "gates": ["check"], "notes": ["Dependency manifest changed: `check --fast` falls back to the full check; installs, lockfile and security checks run only in `npm run verify` and CI."] },
+    { "id": "threshold-change", "label": "Quality thresholds", "paths": ["configs/quality/**", "scripts/quality/thresholds.mjs", "tests/tooling/quality-thresholds.checks.mjs"], "suites": ["quality"], "flags": [{ "code": "THRESHOLD_CHANGE", "message": "threshold change: requires owner review" }] }
+  ],
+  "docsOnly": { "gates": ["check-repository", "docs-launchers"], "note": "Documentation-only diff: only the documentation checks apply before the final verify." },
+  "final": ["verify"]
+}

@@ -6,6 +6,7 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { sha256 } from '../shared/hash.ts';
+import { chromiumLaunchOptions } from './browser-executable.mjs';
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { assembleStarterPack } from '../starters/operations.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
@@ -58,7 +59,7 @@ async function browserChecks() {
     child.once('close', code => { if (!ready) { clearTimeout(timer); reject(new Error(`Showcase exited before readiness (code ${code}).\n${stdout}\n${stderr}`)); } });
   });
   const { chromium, expect } = await import('@playwright/test');
-  const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}) });
+  const browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() });
   // Windows cannot signal a child to stop gracefully (kill terminates it without an exit code), so a passing run
   // lets the showcase end on its own after its bounded window; the child is killed only when a check failed.
   let checked = false;

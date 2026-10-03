@@ -66,8 +66,8 @@ Current screenshot paths under `reports/concepts/editors/`:
 ```sh
 python3 -B scripts/concepts/build-companion.py --check
 python3 -B tests/concepts/companion-assembly.test.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B tests/concepts/companion-editors.browser.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python3 -B tests/concepts/companion-editors.browser.py
+SHELL_CHROMIUM=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
 The permanent read-only companion workflow runs the registered current suites, including these new tests and actual multi-page Storage, on one exact artifact. Root-template authoring, compatibility, showcase and fixture workflows remain required separate evidence on the final PR head. Older green results cannot qualify this iteration.

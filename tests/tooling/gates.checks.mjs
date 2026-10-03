@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, mkdir, cp, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, readdir, mkdir, cp, rm, symlink } from 'node:fs/promises';
 import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -138,9 +138,12 @@ async function verificationTrace(t, mode, failAt = 0) {
   const root = await mkdtemp(join(tmpdir(), 'verify-preflight-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const directory of ['quality', 'shared', 'testing']) await mkdir(join(root, 'scripts', directory), { recursive: true });
-  await cp(new URL('../../scripts/quality/verify.mjs', import.meta.url), join(root, 'scripts/quality/verify.mjs'));
+  await mkdir(join(root, 'scripts/contracts'), { recursive: true });
+  await cp(new URL('../../scripts/contracts/result-runtime.mjs', import.meta.url), join(root, 'scripts/contracts/result-runtime.mjs'));
+  for (const file of (await readdir(new URL('../../scripts/quality/', import.meta.url))).filter(name => /^verify(?:-[a-z]+)?\.mjs$/.test(name)))
+    await cp(new URL(`../../scripts/quality/${file}`, import.meta.url), join(root, 'scripts/quality', file));
   await writeFile(join(root, 'scripts/shared/process.ts'), `let analyzers = 0;
-export async function runNodeScript(path, args = []) {
+export async function runNodeProcess(path, args = []) {
   console.log(JSON.stringify({ executed: path, args }));
   if (path === 'scripts/quality/check-analyzer.mjs' && ++analyzers === Number(process.env.FAIL_ANALYZER_AT))
     throw new Error('fixture analyzer failed');

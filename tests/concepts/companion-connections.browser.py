@@ -2,6 +2,7 @@
 Requires pre-provisioned Python Playwright and Chromium. Exact HTML injection and
 explicit Storage substitute; no native host, filesystem deployment or CLI execution.
 """
+import os
 from pathlib import Path
 import argparse, hashlib, json, time
 from playwright.sync_api import sync_playwright
@@ -9,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 a = argparse.ArgumentParser()
 a.add_argument('--html', default=str(ROOT/'docs/concepts/companion/index.html'))
 a.add_argument('--out', default=str(ROOT/'reports/concepts/companion-connections'))
-a.add_argument('--browser', default='/usr/bin/chromium')
+a.add_argument('--browser', default=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'))
 args = a.parse_args(); HTML = Path(args.html); OUT = Path(args.out); OUT.mkdir(parents=True, exist_ok=True)
 checks, errors, requests = [], [], []; page = None
 

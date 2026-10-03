@@ -44,7 +44,7 @@ The target for `new` must be a new or empty independent directory. Review the re
 
 For the existing template itself, `npm run setup` uses reviewed setup and the exact dependencies. The optional `--profile native` installs assets only into the contained development vault. Open it separately and deliberately enable the plugin. Do not use a personal vault; setup does not authorize activation or change Restricted Mode. The [setup guide](docs/development/SETUP-IDENTITY.md) retains identity, protected-data and resume behavior.
 
-The product name is Workbench, but the executable is `app.mjs` (run it as `node bin/app`; `shell.mjs` remains a compatibility shim) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
+The product name is Workbench, but the executable is `bin/app` (run it as `node bin/app`; no root launcher or compatibility shim remains) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
 
 ## Intended connected workflow
 

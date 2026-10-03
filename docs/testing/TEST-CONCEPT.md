@@ -102,7 +102,7 @@ Default path after explicit browser provisioning:
 node scripts/testing/check-browser-specimen.mjs --mode served --repeat 2
 ```
 
-It imports the local `@playwright/test` browser API; it never invokes an unpinned download. The normal future dependency installation will provide that package. In a pre-provisioned diagnostic environment, `--driver /absolute/path/to/playwright/index.mjs` and `--browser /absolute/path/to/chromium` select trusted local overrides. Version/override information is recorded. These options load local code/binaries and are not a sandbox for untrusted paths.
+It imports the local `@playwright/test` browser API; it never invokes an unpinned download. The normal future dependency installation will provide that package. In a pre-provisioned diagnostic environment, `--driver /absolute/path/to/playwright/index.mjs` and the `SHELL_CHROMIUM=/absolute/path/to/chromium` environment variable (the only browser override) select trusted local overrides. Version/override information is recorded. These options load local code/binaries and are not a sandbox for untrusted paths.
 
 The runner owns a loopback server on an ephemeral port, creates a fresh context per scenario, fixes locale/timezone/date, blocks other network origins, and records console/page/request faults. It waits for the fixture's readiness attribute and meaningful DOM states rather than arbitrary delay. Its fixed-date setting does not freeze all timers or guarantee scheduling determinism; this specimen does not have a timer-expiry service to verify.
 

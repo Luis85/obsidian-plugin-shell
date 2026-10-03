@@ -37,6 +37,16 @@ export function projectRootFor(start) {
     current = parent;
   }
 }
+/** Nearest ancestor (including `start`) with a package.json: the repository checkout or generated project a hook runs in. */
+export function packageRootFor(start) {
+  let current = resolve(start);
+  for (;;) {
+    if (existsSync(join(current, 'package.json'))) return current;
+    const parent = dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
 export function packageScripts(root) {
   try { return JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts ?? {}; } catch { return {}; }
 }

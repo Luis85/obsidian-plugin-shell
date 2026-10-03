@@ -1,6 +1,6 @@
 import { storybookCode } from '../../../scripts/companion/compiler/storybook-code.ts';
 import { previewCode, previewScripts } from '../../../scripts/companion/compiler/preview-code.ts';
-import type { TemplateSnapshot } from '../domain/contracts.ts';
+import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
 import { journeyCode } from '../../../scripts/companion/compiler/journey-code.ts';
 import { nativeCode } from '../../../scripts/companion/compiler/native-code.ts';
@@ -13,7 +13,9 @@ import { literal, json, type Model } from '../../../scripts/companion/compiler/m
 import { dataCode } from '../../../scripts/companion/compiler/data-code.ts';
 import { relativeImport, type Entry, type Add } from '../../../scripts/companion/compiler/file-code.ts';
 import { uiCode } from '../../../scripts/companion/compiler/ui-code.ts';
+import { authoredJourneyCode } from '../../../scripts/companion/compiler/authored-journey-code.ts';
 import { navigationCode } from '../../../scripts/companion/compiler/navigation-code.ts';
+import { uiQualityCode, uiQualityScripts } from '../../../scripts/companion/compiler/ui-quality-code.ts';
 import { hostCode } from '../../../scripts/companion/compiler/host-code.ts';
 import { visualCode } from '../../../scripts/companion/compiler/visual-files.ts';
 import { visualDefinitions, visualPackages, visualAdapterPath } from '../../../scripts/companion/compiler/visual-model.ts';
@@ -21,6 +23,7 @@ import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { styleCode } from '../../../scripts/companion/compiler/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../../../scripts/companion/compiler/devkit-files.ts';
 import { relocateFrameworkDocuments } from '../../../scripts/companion/compiler/framework-docs.ts';
+import { maintainerScript, rewriteDocReferences } from '../../../scripts/companion/compiler/framework-scope.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
 function replacedProducer(previous: string | undefined, producer: string): string | undefined {
   if (previous === 'framework') return 'framework';
@@ -38,13 +41,19 @@ function projectScripts(scripts: Scripts, m: Model): void {
   scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json';
   scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
   scripts['build:clickdummy'] = 'node bin/app clickdummy build';
+  scripts['ui:gallery'] = 'node scripts/ui/review-gallery.mjs --target clickdummy';
   scripts['doctor'] = 'node bin/app doctor';
   Object.assign(scripts, previewScripts());
+  uiQualityScripts(scripts);
   scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
   scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
+  // What the full gate adds to `check` (which already runs typecheck, lint and the product tests): CI runs
+  // `check` then this, so no gate runs twice.
+  scripts['verify:artifacts'] = 'npm run build && npm run test:ui-effects';
+  for (const name of Object.keys(scripts)) if (maintainerScript(name)) delete scripts[name];
 }
 function fixtureScripts(scripts: Scripts): void {
-  scripts['testdata:check']='node scripts/test-data/verify.mjs'; scripts['verify:project'] += ' && npm run testdata:check';
+  scripts['testdata:check']='node scripts/test-data/verify.mjs'; for (const name of ['verify:project', 'verify:artifacts']) scripts[name] += ' && npm run testdata:check';
   for(const command of ['plan','apply','reset-plan','reset','serve']) scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
 }
 /** Emit the existing plugin project from explicit template data, without host I/O. */
@@ -93,7 +102,9 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   await emit('http', () => httpCode(templateRoot,m,add));
   await emit('journey', () => journeyCode(templateRoot,m,add));
   await emit('clickdummy', () => clickdummyCode(m,add));
+  await emit('journey-specs', () => authoredJourneyCode(m,add));
   await emit('preview', () => previewCode(m,add));
+  await emit('ui-quality', () => uiQualityCode(m,add));
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;
   add(opTest,`import { it, expect } from 'vitest';\nimport { effectScope } from 'vue';\nimport { operation } from ${literal(relativeImport(opTest,`${m.sourceRoot}/presentation/composables/operation.ts`))};
 it('latest read wins and disposal prevents late projection updates', async () => {
@@ -111,7 +122,13 @@ it('does not issue a duplicate pending write', async () => { const scope = effec
   const values = {name:String(m.project.name),sourceRoot:m.sourceRoot,testRoot:m.testRoot,dependencies:dependencySection(m)};
   add('PROJECT-IMPLEMENTATION.md',renderTemplate(await templateRoot.text(['templates/companion/devkit/PROJECT-IMPLEMENTATION.md.tmpl'].join('/')),values),'managed');
   for (const file of storybookCode(templateRoot, m)) collector.add(file);
-  return collector.values();
+  return collector.values().map(productDocReferences);
+}
+/** Product-authored text names kept framework docs by the repository path; a project carries them under docs/framework/. */
+function productDocReferences(file: Artifact): Artifact {
+  if (file.ownership === 'framework' || file.encoding || !/\.(?:md|mdc|ts|mjs)$/.test(file.path)) return file;
+  const content = rewriteDocReferences(file.content);
+  return content === file.content ? file : { ...file, content };
 }
 /** Declared third-party packages with purpose and the real path of every extension-owned adapter; installing the
  * packages and reviewing their licenses stays with the author. */

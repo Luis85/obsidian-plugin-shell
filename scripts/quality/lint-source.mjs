@@ -1,11 +1,12 @@
 import { existsSync } from 'node:fs';
 import { readdir, lstat } from 'node:fs/promises';
-import { resolve, join, relative } from 'node:path';
+import { resolve, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runNodeScript as runNode } from '../shared/process.ts';
 
-/** Explicit file arguments prevent an ignored archive ancestor from hiding its src tree. */
-export async function lintOwnedSource(root = process.cwd(), tool = resolve(root, 'node_modules/oxlint/bin/oxlint')) {
+/** Explicit file arguments prevent an ignored archive ancestor from hiding its src tree. `only` (repository-relative
+ * paths) narrows the run to those owned inputs, as `check --fast` does for changed files; the default is every input. */
+export async function lintOwnedSource(root = process.cwd(), tool = resolve(root, 'node_modules/oxlint/bin/oxlint'), only = null) {
   const files = [];
   async function visit(path) {
     const stat = await lstat(path);
@@ -19,15 +20,24 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   if ((await readdir(root)).includes('plugins')) await visit(resolve(root, 'plugins'));
   files.sort();
   if (!files.length) throw new Error('LINT_SOURCE_EMPTY');
+  if (only) {
+    const wanted = new Set(only), owned = files.filter(file => wanted.has(file.split(sep).join('/')));
+    files.splice(0, files.length, ...owned);
+    if (!files.length) return { status: 'passed', files: 0, scope: 'none of the requested files is an owned src/bin/plugins input' };
+  }
   // The project's own rules win; a bare source tree (archive probe) uses this framework's reviewed rules.
   const config = [join(root, 'configs/lint/oxlintrc.json'), fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url))].find(path => existsSync(path));
   if (!config) throw new Error('LINT_SOURCE_CONFIG_MISSING');
   for (let offset = 0; offset < files.length; offset += 100) {
     await runNode(tool, ['-c', config, ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
   }
-  return { status: 'passed', files: files.length, scope: 'every owned src/bin/plugins JS/TS/Vue input, explicit paths' };
+  return { status: 'passed', files: files.length, scope: only ? 'the requested owned src/bin/plugins inputs, explicit paths' : 'every owned src/bin/plugins JS/TS/Vue input, explicit paths' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await lintOwnedSource())); }
+  try {
+    const only = process.argv.slice(2);
+    if (only.some(file => file.startsWith('-'))) throw new Error('NO_OPTIONS_SUPPORTED');
+    console.log(JSON.stringify(await lintOwnedSource(process.cwd(), undefined, only.length ? only : null)));
+  }
   catch (error) { console.error(error.message); process.exitCode = 1; }
 }

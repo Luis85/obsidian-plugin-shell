@@ -8,7 +8,8 @@ import { componentFile, relativeImport, rewriteTemplate, type Add } from './file
 import { visualDefinitions, visualSpecs, visualDefinitionPath, visualAdapterPath, visualContractTypes } from './visual-model.ts';
 import { visualSfc } from './visual-code.ts';
 import { visualPorts, visualSources } from './visual-ports.ts';
-import { visualTests } from './visual-tests.ts';
+import { visualTests, visualDispatchTestIds } from './visual-tests.ts';
+import { interactionTestIds, surfaceAcceptanceTests, surfaceTrace, type TraceEvidence } from './acceptance-trace.ts';
 import { visualRuntimeTests } from './visual-runtime-tests.ts';
 
 /** How a generated interaction is verified: routed navigation, a declarative source/emit action, an executable UI effect or a business TODO. */
@@ -93,6 +94,7 @@ export async function visualCode(templateRoot: TemplateSnapshot, m: Model, add: 
   const root = m.sourceRoot, store = visualDefinitions(m), specs = visualSpecs(m);
   visualSources(m, specs);
   await vfRuntime(templateRoot, m, add);
+  const uxIds = surfaceAcceptanceTests(m, add);
   const handlers: string[] = [], cases: string[] = [], trace: Record<string, unknown>[] = [], adapters: { component: ComponentDefinition; node: ExternalNode; path: string }[] = [];
   for (const component of store.components) add(`${root}/domain/components/contracts/${vfFileId(component.libraryId, 'Library id')}.ts`, visualContractTypes(component), 'managed');
   for (const spec of specs) {
@@ -102,6 +104,7 @@ export async function visualCode(templateRoot: TemplateSnapshot, m: Model, add: 
     if (spec.kind === 'page') vfScreen(m, spec, add);
     else for (const node of visualNodes(spec.template)) if (node.kind === 'external') adapters.push({ component: spec, node, path: vfAdapter(m, spec, node, add) });
     add(`${m.testRoot}/ui-effects/${id}.checks.mjs`, visualTestSource(spec), 'managed');
+    const dispatch = visualDispatchTestIds(spec);
     for (const node of visualNodes(visualRoot(spec))) for (const interaction of 'events' in node ? node.events : []) {
       const interactionId = vfFileId(interaction.id, 'Interaction id'), verification = visualVerification(interaction);
       const implementation = `${root}/application/interactions/${interactionId}.ts`, test = `${m.testRoot}/acceptance/${interactionId}.test.ts`;
@@ -111,8 +114,10 @@ export async function visualCode(templateRoot: TemplateSnapshot, m: Model, add: 
         add(implementation, `import type { VisualRequest } from '../../domain/visual-runtime.ts';\nimport type { Sources } from '../sources.ts';\nimport { NotImplementedError } from '../../domain/contract.ts';\nexport const intent = ${literal({ definitionId: spec.id, nodeId: node.id, ...interaction })};\n/** Start with a failing acceptance test. This hook does not infer business rules from prose. */\nexport const execute: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new NotImplementedError(${literal(spec.id)}, ${literal(interactionId)}); };\n`);
       }
       const accepted = visualAcceptanceTodo(interaction);
-      if (accepted) add(test, `import { it } from 'vitest';\n// UI dispatch/navigation tests are separate from this unimplemented business acceptance.\nit.todo(${literal('[' + interactionId + '] ' + interaction.label + ' — ' + (interaction.acceptance || interaction.notes || 'implementation required'))});\n`);
-      trace.push({ definitionId: spec.id, nodeId: node.id, ...interaction, component: path, implementation: verification === 'business-todo' ? implementation : null, test: accepted ? test : null, verification });
+      const title = '[' + interactionId + '] ' + interaction.label + ' — ' + (interaction.acceptance || interaction.notes || 'implementation required');
+      if (accepted) add(test, `import { it } from 'vitest';\n// UI dispatch/navigation tests are separate from this unimplemented business acceptance.\nit.todo(${literal(title)});\n`);
+      const evidence: TraceEvidence[] = [], testIds = interactionTestIds(m, spec, interaction, accepted ? `${test}#${title}` : null, dispatch);
+      trace.push({ definitionId: spec.id, nodeId: node.id, ...interaction, component: path, implementation: verification === 'business-todo' ? implementation : null, test: accepted ? test : null, verification, testIds, evidence });
     }
   }
   // Without hooks the dispatcher declares no parameters it would never read.
@@ -120,7 +125,7 @@ export async function visualCode(templateRoot: TemplateSnapshot, m: Model, add: 
     : "export const handleVisualInteraction: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new Error('VISUAL_INTERACTION_UNKNOWN'); };\n";
   add(`${root}/application/visual-interactions.ts`, `${handlers.map(line => line + '\n').join('')}import type { VisualRequest } from '../domain/visual-runtime.ts';\nimport type { Sources } from './sources.ts';\n${dispatch}`);
   const definitions = specs.map(spec => ({ id: spec.id, kind: spec.kind, ...(spec.kind === 'page' ? { ownerId: spec.ownerId } : { libraryId: spec.libraryId }), component: visualDefinitionPath(m, spec) }));
-  add('design/visual-traceability.json', json({ definitions, interactions: trace, adapters: adapters.map(a => ({ componentId: a.component.id, nodeId: a.node.id, package: a.node.package, adapter: a.node.adapter, path: a.path })), businessAcceptance: 'not-implemented' }), 'managed');
+  add('design/visual-traceability.json', json({ definitions, surfaces: surfaceTrace(m, specs, uxIds), interactions: trace, adapters: adapters.map(a => ({ componentId: a.component.id, nodeId: a.node.id, package: a.node.package, adapter: a.node.adapter, path: a.path })), businessAcceptance: 'not-implemented' }), 'managed');
   add(`${root}/presentation/detail-layout.css`, vfLayout);
   visualPorts(m, add); visualTests(m, specs, add); visualRuntimeTests(m, specs, adapters, add);
 }

@@ -4,6 +4,8 @@ import { starterProcessOperation } from '../../../scripts/starters/processes.ts'
 import { airshipOperation } from './airship.ts';
 import { buildClickdummy } from './clickdummy.ts';
 import { checkOperation } from './check.ts';
+import { checkPlanOperation } from './check-plan.ts';
+import { ciOperation } from './ci.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
@@ -23,6 +25,7 @@ import { fileOperation } from './file-operation.ts';
 import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';
 import { readComponentTemplateOperation } from './component-templates.ts';
+import { isUiCommand, uiOperation } from './ui-operation.ts';
 
 function helpOperation(request: Request): Result {
   const command = request.command;
@@ -98,6 +101,7 @@ const routes: Route[] = [
   [named('schema'), request => result(request.command, operationSchemas())],
   [request => Boolean(request.options.help) || ['help', 'capabilities'].includes(request.command), helpOperation],
   [(request, effect) => request.command.startsWith('templates ') && effect === 'read', readComponentTemplateOperation],
+  [isUiCommand, uiOperation],
   [named('starters pack'), packStarterOperation],
   [named('starters run'), starterProcessOperation],
   [(request, effect) => request.command.startsWith('starters ') && effect === 'read', readStarterOperation],
@@ -110,7 +114,8 @@ const routes: Route[] = [
   [prefixed('storybook '), (request, context) => storybookOperation(request, context)],
   [prefixed('compiler '), compilerOperation],
   [named('clickdummy build'), (request, context) => buildClickdummy(request, context)],
-  [named('check'), (request, context) => checkOperation(request, context)],
+  [named('check'), (request, context) => request.options.plan === true ? checkPlanOperation(request, context) : checkOperation(request, context)],
+  [named('ci'), (request, context) => ciOperation(request, context)],
   [named('check submission'), (request, context) => submissionCheck(context, request.options['dry-run'] === true)],
   [(request, effect) => request.command.startsWith('airship ') && effect !== 'plan', (request, context) => airshipOperation(request, context)],
   [(request, effect) => request.command === 'plan inspect' || effect === 'plan', fileOperation],
