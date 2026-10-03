@@ -124,5 +124,7 @@
   "scripts/companion/qualify-styles.mjs": "scripts/companion-tools/qualify-styles.mjs",
   "scripts/companion/authoring-evidence.mjs": "scripts/companion-tools/authoring-evidence.mjs",
   "scripts/makers/recipes.json": "bin/adapters/makers/recipes.json",
-  "scripts/operations/operations.json": "bin/adapters/operations/operations.json"
+  "scripts/operations/operations.json": "bin/adapters/operations/operations.json",
+  "scripts/companion/native-boilerplate.mjs": "bin/compiler/emitters/native-boilerplate.ts",
+  "scripts/companion/native-boilerplate.d.mts": "bin/compiler/emitters/native-boilerplate.ts"
 }
