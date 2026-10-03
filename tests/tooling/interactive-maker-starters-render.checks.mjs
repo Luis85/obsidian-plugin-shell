@@ -55,3 +55,12 @@ test('process arguments are interpolated into copies that leave the definition u
   assert.deepEqual(definition.processes[1].dependsOn, ['hello']);
   assert.deepEqual(definition.processes[0].steps[0].args, ['{{id}}']);
 });
+
+test('inputs and definition text refuse C0 controls and DEL but keep other characters', () => {
+  for (const control of ['\u0000', '\u0007', '\n', '\u001f', '\u007f']) {
+    refusal(() => resolveValues(definition, { id: 'demo', name: 'a' + control }), 'STARTER_INPUT', 'Invalid input name.');
+    refusal(() => validateDefinition(fileStarter({ summary: 'a' + control })), 'STARTER_INVALID', 'Invalid summary.');
+  }
+  assert.deepEqual(resolveValues(definition, { id: 'demo', name: 'Caf\u00e9 \u0080 \u{1F600} ~' }).name, 'Caf\u00e9 \u0080 \u{1F600} ~');
+  assert.equal(validateDefinition(fileStarter({ summary: 'Tab-free \u00a0 text' })).summary, 'Tab-free \u00a0 text');
+});

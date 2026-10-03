@@ -10,8 +10,16 @@ export function record(value: unknown): Record<string, unknown> {
 export function fields(value: Record<string, unknown>, allowed: string[]): void {
   requireThat(Object.keys(value).every(key => allowed.includes(key)), 'STARTER_INVALID', 'Unknown definition field.');
 }
+/** C0 controls and DEL (U+0000–U+001F, U+007F); text and string inputs refuse them. */
+function hasControl(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code < 32 || code === 127) return true;
+  }
+  return false;
+}
 export function text(value: unknown, label: string, max = 400): string {
-  requireThat(typeof value === 'string' && value.trim().length > 0 && value.length <= max && !/[\u0000-\u001f\u007f]/.test(value), 'STARTER_INVALID', `Invalid ${label}.`);
+  requireThat(typeof value === 'string' && value.trim().length > 0 && value.length <= max && !hasControl(value), 'STARTER_INVALID', `Invalid ${label}.`);
   return value;
 }
 export function identifier(value: unknown): string {
@@ -34,7 +42,7 @@ export function portablePath(value: string, dot = false): boolean {
     !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 }
 export function inputValue(value: unknown, input: StarterInput): InputValue {
-  const valid = input.type === 'string' ? typeof value === 'string' && value.length <= 4000 && !/[\u0000-\u001f\u007f]/.test(value)
+  const valid = input.type === 'string' ? typeof value === 'string' && value.length <= 4000 && !hasControl(value)
     : input.type === 'boolean' ? typeof value === 'boolean' : typeof value === 'number' && Number.isSafeInteger(value);
   requireThat(valid && (!input.required || value !== ''), 'STARTER_INPUT', `Invalid input ${input.id}.`);
   const typed = value as InputValue;
