@@ -61,12 +61,12 @@ test('every built-in recipe composes its declared sources, registrations and tar
 
 test('a generated local recipe and pending locale run in a source checkout and an extracted kit layout', () => makerFixture(async root => {
   await authorFixture(root);
-  const maker = await apply(root, ['maker', 'reminder']);
-  assert.deepEqual(paths(maker).sort(), ['scripts/makers/custom/reminder.mjs', 'tests/tooling/custom-reminder.checks.mjs']);
-  const recipe = await readFile(join(root, 'scripts/makers/custom/reminder.mjs'), 'utf8');
+  const maker = await apply(root, ['maker', 'nudge']);
+  assert.deepEqual(paths(maker).sort(), ['scripts/makers/custom/nudge.mjs', 'tests/tooling/custom-nudge.checks.mjs']);
+  const recipe = await readFile(join(root, 'scripts/makers/custom/nudge.mjs'), 'utf8');
   assert.match(recipe, /new URL\('\.\.\/\.\.\/\.\.\/bin\/adapters\/makers\/', import\.meta\.url\)/);
   assert.match(recipe, /bin\/template\/bin\/adapters\/makers\//);
-  assert.ok(paths(await apply(root, ['reminder', 'review', '--feature', 'bookmarks'])).includes('src/features/bookmarks/review.command.ts'));
+  assert.ok(paths(await apply(root, ['nudge', 'review', '--feature', 'bookmarks'])).includes('src/features/bookmarks/review.command.ts'));
   await assert.rejects(plan(root, ['maker', 'feature']), { message: 'CUSTOM_RECIPE_BUILTIN_CONFLICT' });
   await assert.rejects(plan(root, ['unknown', 'x', '--feature', 'bookmarks']), { message: 'Unknown maker. Use --list for the implemented catalog.' });
   const locale = await apply(root, ['locale', 'fr']);
@@ -79,10 +79,10 @@ test('a generated local recipe and pending locale run in a source checkout and a
   await mkdir(join(root, 'bin/template/scripts'), { recursive: true });
   await cp(join(root, 'scripts/makers'), join(root, 'bin/template/scripts/makers'), { recursive: true });
   await cp(join(root, 'scripts/shared'), join(root, 'bin/template/scripts/shared'), { recursive: true });
-  const kitRecipe = await import(`${pathToFileURL(join(root, 'scripts/makers/custom/reminder.mjs')).href}?layout=kit`);
-  assert.equal(kitRecipe.reminderMaker.name, 'reminder');
+  const kitRecipe = await import(`${pathToFileURL(join(root, 'scripts/makers/custom/nudge.mjs')).href}?layout=kit`);
+  assert.equal(kitRecipe.nudgeMaker.name, 'nudge');
   const outputs = new Map(); const registrations = [];
-  await kitRecipe.reminderMaker.plan({ tests: new Set(), async add(path, content) { outputs.set(path, content); }, async editArray(...entry) { registrations.push(entry[1]); } }, { owner: 'bookmarks', name: 'later' });
+  await kitRecipe.nudgeMaker.plan({ tests: new Set(), async add(path, content) { outputs.set(path, content); }, async editArray(...entry) { registrations.push(entry[1]); } }, { owner: 'bookmarks', name: 'later' });
   assert.ok(outputs.has('src/features/bookmarks/later.command.ts'));
   assert.deepEqual([...new Set(registrations)].sort(), ['authoringFactories', 'authoringLocaleModules']);
 }));
