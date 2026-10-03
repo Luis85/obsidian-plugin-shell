@@ -4,13 +4,14 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathFor } from '../shared/platform-path.mjs';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { readJson } from './session-version.mjs';
 
 /** The version a node binary in `directory` reports, or null when it does not run. */
 export function probeNode(directory, run = spawnSync, platform = process.platform) {
-  const result = run(join(directory, platform === 'win32' ? 'node.exe' : 'node'), ['--version'], { encoding: 'utf8', timeout: 5000 });
+  const result = run(pathFor(platform).join(directory, platform === 'win32' ? 'node.exe' : 'node'), ['--version'], { encoding: 'utf8', timeout: 5000 });
   return result.status === 0 ? String(result.stdout).trim().replace(/^v/, '') : null;
 }
 /** npm bundled beside a node binary (Unix `bin/../lib/node_modules/npm`, Windows `node_modules/npm`). */

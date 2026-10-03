@@ -14,6 +14,7 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pathFor, shellPath } from '../shared/platform-path.mjs';
 import { packageRootFor, readHookInput } from './hook-io.mjs';
 import { browserLine, loadResolver } from './session-browser.mjs';
 import { dependencyLine, installDependencies, stale } from './session-install.mjs';
@@ -25,10 +26,11 @@ import { qualifiedToolchain, readText, sameVersion } from './session-version.mjs
 const MAX_LINES = 10;
 /** Everything the hook does must end inside Claude Code's 600 s SessionStart timeout. */
 const BUDGET_MS = 570_000;
-const pathPhrase = (deps, env, directory) => deps.exportPath(env, directory) ? 'put first on PATH for this session' : `run: export PATH="${directory}:$PATH"`;
+const platformOf = deps => deps.platform ?? process.platform;
+const pathPhrase = (deps, env, directory) => deps.exportPath(env, directory) ? 'put first on PATH for this session' : `run: export PATH="${shellPath(directory, platformOf(deps))}:$PATH"`;
 /** The qualified Node's bin directory (found or provisioned) and the status line explaining how. */
 async function resolveNode(qualified, env, deps) {
-  const found = deps.findNode(qualified.node, { env, home: deps.home });
+  const found = deps.findNode(qualified.node, { env, home: deps.home, platform: platformOf(deps) });
   if (found) return { directory: found, line: `Qualified Node ${qualified.node} found at ${found}; ${pathPhrase(deps, env, found)}.` };
   const hint = `No qualified Node ${qualified.node} found in known locations; install it (nvm install ${qualified.node}).`;
   const decision = nodeProvisionDecision(env);
@@ -39,14 +41,16 @@ async function resolveNode(qualified, env, deps) {
 }
 /** npm inside the Workbench cache is ours to pin (a download with an unpinned npm, or an earlier failed pin); any other npm is never touched. */
 function pinPrivateNpm(qualified, env, deps, directory) {
-  const ours = directory && qualified.npm && resolve(directory) === resolve(deps.cacheBin(qualified.node, env));
+  const cache = directory && qualified.npm ? deps.cacheBin(qualified.node, env) : '';
+  const { resolve: resolvePath } = pathFor(platformOf(deps));
+  const ours = Boolean(cache) && resolvePath(directory) === resolvePath(cache);
   if (!ours || !nodeProvisionDecision(env).provision || sameVersion(deps.npmVersion(directory), qualified.npm)) return null;
   const outcome = deps.pinNpm(qualified, env, directory);
   return outcome.ok ? null : `npm: ${outcome.text}.`;
 }
 /** Build the status text. `deps` carries every side effect so tests can fake the file system, processes and environment. */
 export async function sessionStatus(root, env, deps) {
-  const qualified = qualifiedToolchain(root, deps.read);
+  const qualified = qualifiedToolchain(root, deps.read, platformOf(deps));
   const lines = [`Session toolchain (${root}):`];
   let directory = null;
   lines.push(toolLine('Node', deps.nodeVersion, qualified.node, qualified.nodeRange));
@@ -66,8 +70,8 @@ async function realDeps(root, deadline = Date.now() + BUDGET_MS) {
   const home = homedir();
   const remaining = () => deadline - Date.now();
   const provision = (qualified, env) => provisionNode({ version: qualified.node, npm: qualified.npm, env, home, platform: process.platform, arch: process.arch, distBase: env.SHELL_NODE_DIST || undefined, remaining, token: `${process.pid}-${Date.now()}` }, realNodeIo({ env }));
-  const pin = (qualified, env, directory) => pinNpm(directory, dirname(directory), { npm: qualified.npm, env, remaining }, realNodeIo({ env }));
-  return { read: readText, nodeVersion: process.versions.node, nodeBin: dirname(process.execPath), cacheBin: (version, env) => cachedNodeBin(version, { env, home }) ?? '', pinNpm: pin, npmVersion: directory => directory ? bundledNpm(directory) : bundledNpm(dirname(process.execPath)) ?? pathNpm(), home, exists: existsSync, stale,
+  const pin = (qualified, env, directory) => pinNpm(directory, dirname(directory), { npm: qualified.npm, env, remaining, platform: process.platform }, realNodeIo({ env }));
+  return { platform: process.platform, read: readText, nodeVersion: process.versions.node, nodeBin: dirname(process.execPath), cacheBin: (version, env) => cachedNodeBin(version, { env, home }) ?? '', pinNpm: pin, npmVersion: directory => directory ? bundledNpm(directory) : bundledNpm(dirname(process.execPath)) ?? pathNpm(), home, exists: existsSync, stale,
     findNode: findQualifiedNode, exportPath, exportVariable, install: installDependencies, provisionNode: provision, remaining,
     resolveBrowser: await loadResolver(resolve(dirname(fileURLToPath(import.meta.url)), '../..')) };
 }

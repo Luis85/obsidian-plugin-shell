@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { delimiter, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { auditTracked, parseIndex } from '../../scripts/testing/handoff-audit.mjs';
 import { DEFAULT_STARTER, applyEnvFile, baseNodeBin, parseOptions, recordStep, simulatedPath, summarize } from '../../scripts/testing/handoff-options.mjs';
-import { failure, networkAvailable, sessionEnvironment, tail } from '../../scripts/testing/handoff-run.mjs';
+import { failure, networkAvailable, sessionEnvironment, spawnTarget, tail } from '../../scripts/testing/handoff-run.mjs';
 import { exportPath, exportVariable } from '../../scripts/agent/session-toolchain.mjs';
 
 const script = resolve(import.meta.dirname, '../../scripts/testing/qualify-project-handoff.mjs');
@@ -25,19 +25,37 @@ test('[PROJECT-HANDOFF-01] options default to the quick-capture project and reje
 test('[PROJECT-HANDOFF-02] the simulated PATH holds only the base Node plus tools without a node of their own', () => {
   const holds = new Set(['/opt/node22/bin/node', '/usr/local/bin/node', '/opt/node22/bin']);
   const exists = path => holds.has(path);
-  assert.equal(baseNodeBin(null, exists), null);
-  assert.equal(baseNodeBin('/opt/node22', exists), '/opt/node22/bin');
-  assert.equal(baseNodeBin('/opt/node22/bin', exists), '/opt/node22/bin', 'a bin directory is accepted as is');
-  const path = ['/usr/local/bin', '/usr/bin', '', '/bin'].join(delimiter);
-  assert.equal(simulatedPath('/opt/node22/bin', path, exists), ['/opt/node22/bin', '/usr/bin', '/bin'].join(delimiter));
-  assert.equal(simulatedPath(null, path, exists), path, 'without a base Node the current PATH is kept');
+  assert.equal(baseNodeBin(null, exists, 'linux'), null);
+  assert.equal(baseNodeBin('/opt/node22', exists, 'linux'), '/opt/node22/bin');
+  assert.equal(baseNodeBin('/opt/node22/bin', exists, 'linux'), '/opt/node22/bin', 'a bin directory is accepted as is');
+  const path = ['/usr/local/bin', '/usr/bin', '', '/bin'].join(':');
+  assert.equal(simulatedPath('/opt/node22/bin', path, exists, 'linux'), ['/opt/node22/bin', '/usr/bin', '/bin'].join(':'));
+  assert.equal(simulatedPath(null, path, exists, 'linux'), path, 'without a base Node the current PATH is kept');
+});
+
+test('[PROJECT-HANDOFF-09] a simulated Windows host uses node.exe at the install root, semicolon PATH entries, the Path key and npm.cmd', () => {
+  const holds = new Set(['C:\\node22\\node.exe', 'C:\\prefix\\bin\\node.exe', 'C:\\Program Files\\nodejs\\node.exe', 'C:\\Users\\u\\AppData\\Local\\ms-playwright']);
+  const exists = path => holds.has(path);
+  assert.equal(baseNodeBin('C:\\node22', exists, 'win32'), 'C:\\node22', 'Windows Node has no bin directory: the root holds node.exe');
+  assert.equal(baseNodeBin('C:\\prefix', exists, 'win32'), 'C:\\prefix\\bin');
+  const path = ['C:\\Windows\\System32', 'C:\\Program Files\\nodejs', '', 'C:\\Program Files\\Git\\cmd'].join(';');
+  const expectedPath = 'C:\\node22;C:\\Windows\\System32;C:\\Program Files\\Git\\cmd';
+  assert.equal(simulatedPath('C:\\node22', path, exists, 'win32'), expectedPath);
+  const base = { HOME: 'C:\\Users\\u', Path: path, SystemRoot: 'C:\\Windows', npm_execpath: 'x' };
+  const env = sessionEnvironment(base, { clone: 'C:\\c', envFile: 'C:\\e', cacheDir: 'C:\\cache', baseBin: 'C:\\node22', exists, platform: 'win32' });
+  assert.equal(env.Path, expectedPath);
+  assert.equal('PATH' in env, false, 'no second spelling of the Path variable');
+  assert.equal(env.PLAYWRIGHT_BROWSERS_PATH, 'C:\\Users\\u\\AppData\\Local\\ms-playwright', 'the Windows default browser cache is %LOCALAPPDATA%\\ms-playwright');
+  assert.deepEqual(spawnTarget('npm', ['run', 'check'], 'win32'), { command: 'npm.cmd', args: ['run', 'check'], shell: true });
+  assert.deepEqual(spawnTarget('npm', ['run', 'check'], 'linux'), { command: 'npm', args: ['run', 'check'], shell: false });
+  assert.deepEqual(spawnTarget('node', ['-v'], 'win32'), { command: 'node', args: ['-v'], shell: false });
 });
 
 test('[PROJECT-HANDOFF-03] the env-file replay reads exactly what the session hook writes, including escapes and PATH expansion', async () => {
   const lines = [];
   const append = (file, line) => lines.push(line);
   const env = { CLAUDE_ENV_FILE: '/e' };
-  exportPath(env, '/cache/a b/node-v24/bin', append);
+  exportPath(env, '/cache/a b/node-v24/bin', append, 'linux');
   exportVariable(env, 'SHELL_CHROMIUM', '/pw/chrome $HOME "x" `y` \\z', append);
   const applied = applyEnvFile(lines.join(''), { PATH: '/usr/bin', HOME: '/h' });
   assert.equal(applied.PATH, `/cache/a b/node-v24/bin:/usr/bin`);
@@ -111,11 +129,11 @@ test('[PROJECT-HANDOFF-06] local dependencies are found in package.json and the 
 
 test('[PROJECT-HANDOFF-07] the simulated session starts from a clean environment and the process helpers report failures honestly', async () => {
   const base = { HOME: '/h', PATH: '/usr/local/bin:/usr/bin', npm_execpath: '/x/npm-cli.js', npm_config_https_proxy: 'http://p', INIT_CWD: '/x', CLAUDE_CODE_SESSION_ID: 's', SHELL_CHROMIUM: '/old', SHELL_SESSION_START_INSTALL: '0', KEEP: 'yes' };
-  const env = sessionEnvironment(base, { clone: '/c', envFile: '/e', cacheDir: '/cache', baseBin: null, exists: () => false });
+  const env = sessionEnvironment(base, { clone: '/c', envFile: '/e', cacheDir: '/cache', baseBin: null, exists: () => false, platform: 'linux' });
   assert.deepEqual(env, { HOME: '/h', PATH: '/usr/local/bin:/usr/bin', npm_config_https_proxy: 'http://p', KEEP: 'yes', CLAUDE_CODE_REMOTE: 'true', CLAUDE_ENV_FILE: '/e', CLAUDE_PROJECT_DIR: '/c', XDG_CACHE_HOME: '/cache' });
-  const withBrowsers = sessionEnvironment({ ...base, XDG_CACHE_HOME: '/real/cache' }, { clone: '/c', envFile: '/e', cacheDir: '/cache', baseBin: null, exists: path => path === '/real/cache/ms-playwright' });
+  const withBrowsers = sessionEnvironment({ ...base, XDG_CACHE_HOME: '/real/cache' }, { clone: '/c', envFile: '/e', cacheDir: '/cache', baseBin: null, exists: path => path === '/real/cache/ms-playwright', platform: 'linux' });
   assert.equal(withBrowsers.PLAYWRIGHT_BROWSERS_PATH, '/real/cache/ms-playwright', 'a fresh Workbench cache must not hide the existing browsers');
-  assert.equal(sessionEnvironment({ ...base, PLAYWRIGHT_BROWSERS_PATH: '/pw' }, { clone: '/c', envFile: '/e', cacheDir: '/cache', baseBin: null, exists: () => true }).PLAYWRIGHT_BROWSERS_PATH, '/pw');
+  assert.equal(sessionEnvironment({ ...base, PLAYWRIGHT_BROWSERS_PATH: '/pw' }, { clone: '/c', envFile: '/e', cacheDir: '/cache', baseBin: null, exists: () => true, platform: 'linux' }).PLAYWRIGHT_BROWSERS_PATH, '/pw');
   assert.equal(failure({ status: 0, stdout: '', stderr: '' }, 'x'), null);
   assert.match(failure({ status: 2, stdout: 'out', stderr: 'bad' }, 'npm run check'), /^npm run check exited 2: out\s+bad$/);
   assert.match(failure({ status: null, error: Object.assign(new Error('t'), { code: 'ETIMEDOUT' }), stdout: '', stderr: '' }, 'step'), /did not finish \(ETIMEDOUT\)/);
