@@ -1,6 +1,6 @@
 /** Pure parts of the project handoff qualification: options, the simulated cloud environment, the env-file replay and the summary. */
 import { existsSync } from 'node:fs';
-import { delimiter, join } from 'node:path';
+import { pathFor } from '../shared/platform-path.mjs';
 
 export const DEFAULT_STARTER = 'quick-capture';
 export const USAGE = `Usage: node scripts/testing/qualify-project-handoff.mjs [--starter <id>] [--base-node <dir>] [--target project|framework]
@@ -28,14 +28,17 @@ export function parseOptions(argv) {
   if (!options.error && !/^[a-z0-9][a-z0-9-]*$/.test(options.starter)) options.error = `--starter must be a starter id, not ${options.starter}`;
   return options;
 }
-/** The bin directory for `--base-node`: the prefix's bin when it has one, else the directory itself. */
-export function baseNodeBin(baseNode, exists = existsSync) {
+/** The directory holding node for `--base-node`: the prefix's `bin` when it has one (Unix), else the directory itself (a bin
+ * directory, or a Windows install whose node.exe sits at the root). Paths follow `platform` (the host's by default). */
+export function baseNodeBin(baseNode, exists = existsSync, platform = process.platform) {
   if (!baseNode) return null;
-  return exists(join(baseNode, 'bin', 'node')) ? join(baseNode, 'bin') : baseNode;
+  const { join } = pathFor(platform);
+  return ['node', 'node.exe'].some(name => exists(join(baseNode, 'bin', name))) ? join(baseNode, 'bin') : baseNode;
 }
 /** PATH for the simulated session: the base Node first, then the current entries that hold no node of their own (git, curl, tar stay available). */
-export function simulatedPath(baseBin, currentPath, exists = existsSync) {
+export function simulatedPath(baseBin, currentPath, exists = existsSync, platform = process.platform) {
   if (!baseBin) return currentPath;
+  const { delimiter, join } = pathFor(platform);
   const keep = String(currentPath ?? '').split(delimiter).filter(entry => entry && !exists(join(entry, 'node')) && !exists(join(entry, 'node.exe')));
   return [baseBin, ...keep].join(delimiter);
 }
