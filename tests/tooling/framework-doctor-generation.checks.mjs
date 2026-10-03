@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -13,7 +13,8 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const staleCodes = diagnostics => diagnostics.filter(item => item.code === 'DESIGN_GENERATION_STALE');
 
 test('doctor is clean right after generation from a differently formatted input, and still detects a real design change', async () => {
-  const vault = await mkdtemp(join(tmpdir(), 'doctor-generation-'));
+  // Canonical path: macOS tmpdir() sits under the /var symlink, which the CLI refuses in input paths.
+  const vault = await realpath(await mkdtemp(join(tmpdir(), 'doctor-generation-')));
   try {
     const starter = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
     // Four-space indentation and no trailing newline: the generator writes its own normalized design/project.json.

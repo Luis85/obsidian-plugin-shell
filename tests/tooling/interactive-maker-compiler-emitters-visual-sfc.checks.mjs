@@ -191,7 +191,7 @@ test('the visual model caches validation, applies variant defaults and reports p
   assert.deepEqual(Object.keys(visualPackages(twice, {})), ['a-lib', 'chart.js', 'z-lib']);
   assert.equal(visualComponentName(store.components[0]), 'ProjectJsonReview');
   assert.equal(visualContractTypes({ props: [], emits: [], slots: [{ name: 'body', required: true }], variants: [] }),
-    'export interface ComponentProps {\n}\nexport interface ComponentEvents {\n}\nexport interface ComponentSlots {\n  "body": () => unknown;\n}\n');
+    'export interface ComponentSlots {\n  "body": () => unknown;\n}\n', 'empty contract interfaces are not emitted');
 });
 
 test('projects without visual designs have an empty store and no specs', async () => {
