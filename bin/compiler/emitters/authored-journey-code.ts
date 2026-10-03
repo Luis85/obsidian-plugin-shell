@@ -28,15 +28,20 @@ const todo = (reason: string, surface?: Screen, edge?: Edge): StepPlan =>
 function planOpen(surface: Screen): StepPlan {
   return surface.kind === 'modal' ? todo('a dialog cannot be opened by address; reach it from a screen', surface) : { kind: 'open', surface };
 }
+/** Why a declared transition between neighbouring steps cannot be driven by a generated spec, or null when it can. */
+function followBlocker(context: Context, from: Screen | undefined, to: Screen, edge: Edge): string | null {
+  if (!from || edge.from !== from.id || edge.to !== to.id) return 'the transition does not connect the neighbouring steps';
+  if (!['navigate', 'open'].includes(edge.kind)) return `transition kind ${oneLine(edge.kind)} requires business interaction behavior`;
+  if (context.editors.has(from.id)) return 'the source screen hosts an editor instead of generated transition controls';
+  if (!isPage(from)) return 'controls inside a dialog are not driven by generated specs';
+  return oneLine(edge.label) === '' ? 'the transition control has no accessible label' : null;
+}
 function planFollow(context: Context, journey: SitemapJourney, index: number, to: Screen): StepPlan {
   const step = journey.steps[index]!, from = context.screens.get(journey.steps[index - 1]!.surface);
   const edge = step.via === null ? undefined : context.edges.find(candidate => candidate.id === step.via);
   if (!edge) return todo('no declared transition leads into this step', to);
-  if (!from || edge.from !== from.id || edge.to !== to.id) return todo('the transition does not connect the neighbouring steps', to, edge);
-  if (!['navigate', 'open'].includes(edge.kind)) return todo(`transition kind ${oneLine(edge.kind)} requires business interaction behavior`, to, edge);
-  if (context.editors.has(from.id)) return todo('the source screen hosts an editor instead of generated transition controls', to, edge);
-  if (!isPage(from)) return todo('controls inside a dialog are not driven by generated specs', to, edge);
-  if (oneLine(edge.label) === '') return todo('the transition control has no accessible label', to, edge);
+  const blocker = followBlocker(context, from, to, edge);
+  if (blocker !== null || !from) return todo(blocker ?? 'the transition does not connect the neighbouring steps', to, edge);
   const nth = context.edges.filter(other => other.from === edge.from && other.label === edge.label).indexOf(edge);
   return { kind: to.kind === 'modal' ? 'dialog' : 'follow', edge, from, to, nth };
 }
