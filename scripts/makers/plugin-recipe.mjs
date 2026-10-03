@@ -4,47 +4,56 @@ function pluginLocal(name) {
   const base = symbol(name);
   return base.charAt(0).toUpperCase() + base.slice(1) + 'Plugin';
 }
+function importBindings(ts, imports) {
+  return imports.flatMap(node => {
+    const bindings = node.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) return [];
+    const from = ts.isStringLiteral(node.moduleSpecifier) ? node.moduleSpecifier.text : '';
+    return bindings.elements.map(item => ({ local: item.name.text, imported: item.propertyName?.text ?? item.name.text, from }));
+  });
+}
+function frozenArray(ts, init) {
+  const call = ts.isCallExpression(init) && ts.isPropertyAccessExpression(init.expression) ? init : undefined;
+  const target = call?.expression;
+  const freezes = target && ts.isIdentifier(target.expression) && target.expression.text === 'Object' && target.name.text === 'freeze';
+  return freezes && call.arguments.length === 1 && ts.isArrayLiteralExpression(call.arguments[0]) ? call.arguments[0] : undefined;
+}
+function registryArray(ts, parsed) {
+  let array;
+  const declarations = parsed.statements.filter(ts.isVariableStatement).flatMap(statement => statement.declarationList.declarations);
+  for (const declaration of declarations) {
+    if (!ts.isIdentifier(declaration.name) || declaration.name.text !== 'pluginRegistry' || !declaration.initializer) continue;
+    const init = declaration.initializer;
+    array = frozenArray(ts, init) ?? (ts.isArrayLiteralExpression(init) ? init : array);
+  }
+  if (!array || array.elements.some(item => !ts.isIdentifier(item))) throw new Error('PLUGIN_REGISTRY_UNSUPPORTED_SHAPE');
+  return array;
+}
+/** True when the exact generated import and registration already exist; any partial ownership conflicts. */
+function alreadyRegistered({ matching, localImports, array, local, from, name }) {
+  const registered = array.elements.some(item => item.text === local);
+  if (!matching.length && !registered) {
+    if (localImports.some(item => item.local === local)) throw new Error('PLUGIN_REGISTRY_CONFLICT:' + local);
+    return false;
+  }
+  const imported = matching.length === 1 && localImports.some(item => item.from === from && item.imported === 'PluginObject' && item.local === local);
+  if (imported && registered) return true;
+  throw new Error('PLUGIN_REGISTRY_CONFLICT:' + name);
+}
 async function extendRegistry(source, name) {
   const ts = await import('typescript');
-  const path = 'plugins/registry.ts';
-  const parsed = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const parsed = ts.createSourceFile('plugins/registry.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   if (parsed.parseDiagnostics.length) throw new Error('PLUGIN_REGISTRY_PARSE_ERROR');
   const local = pluginLocal(name), from = './' + name + '/src/index.ts';
   const imports = parsed.statements.filter(ts.isImportDeclaration);
   const matching = imports.filter(node => ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === from);
-  const localImports = imports.flatMap(node => {
-    const bindings = node.importClause?.namedBindings;
-    return bindings && ts.isNamedImports(bindings)
-      ? bindings.elements.map(item => ({ local: item.name.text, imported: item.propertyName?.text ?? item.name.text, from: ts.isStringLiteral(node.moduleSpecifier) ? node.moduleSpecifier.text : '' }))
-      : [];
-  });
-  let array;
-  for (const statement of parsed.statements) {
-    if (!ts.isVariableStatement(statement)) continue;
-    for (const declaration of statement.declarationList.declarations) {
-      if (!ts.isIdentifier(declaration.name) || declaration.name.text !== 'pluginRegistry' || !declaration.initializer) continue;
-      const init = declaration.initializer;
-      if (ts.isCallExpression(init) && ts.isPropertyAccessExpression(init.expression)
-        && ts.isIdentifier(init.expression.expression) && init.expression.expression.text === 'Object'
-        && init.expression.name.text === 'freeze' && init.arguments.length === 1 && ts.isArrayLiteralExpression(init.arguments[0])) array = init.arguments[0];
-      else if (ts.isArrayLiteralExpression(init)) array = init;
-    }
-  }
-  if (!array || array.elements.some(item => !ts.isIdentifier(item))) throw new Error('PLUGIN_REGISTRY_UNSUPPORTED_SHAPE');
-  const registered = array.elements.some(item => item.text === local);
-  if (matching.length || registered) {
-    const imported = matching.length === 1 && localImports.some(item => item.from === from && item.imported === 'PluginObject' && item.local === local);
-    if (matching.length === 1 && imported && registered) return source;
-    throw new Error('PLUGIN_REGISTRY_CONFLICT:' + name);
-  }
-  if (localImports.some(item => item.local === local)) throw new Error('PLUGIN_REGISTRY_CONFLICT:' + local);
-  const last = array.elements.at(-1);
-  const insertion = last ? (array.elements.hasTrailingComma ? ' ' : ', ') + local : local;
-  let updated = source.slice(0, array.end - 1) + insertion + source.slice(array.end - 1);
+  const array = registryArray(ts, parsed);
+  if (alreadyRegistered({ matching, localImports: importBindings(ts, imports), array, local, from, name })) return source;
+  const insertion = array.elements.length ? (array.elements.hasTrailingComma ? ' ' : ', ') + local : local;
+  const updated = source.slice(0, array.end - 1) + insertion + source.slice(array.end - 1);
   const lastImport = imports.at(-1);
   if (!lastImport) throw new Error('PLUGIN_REGISTRY_IMPORTS_MISSING');
-  updated = updated.slice(0, lastImport.end) + "\nimport { PluginObject as " + local + " } from '" + from + "';" + updated.slice(lastImport.end);
-  return updated;
+  return updated.slice(0, lastImport.end) + "\nimport { PluginObject as " + local + " } from '" + from + "';" + updated.slice(lastImport.end);
 }
 
 export async function pluginRecipe(context, name) {

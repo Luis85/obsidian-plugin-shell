@@ -5,19 +5,21 @@ export const builtinRecipes = Object.freeze(recipes.map(recipe => recipe.id));
 export function recipeOptions(maker) {
   return recipes.find(recipe => recipe.id === maker)?.options ?? ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature'];
 }
+function readOption(args, index, options) {
+  const arg = args[index];
+  if (!flags.has(arg) && !values.has(arg)) throw new Error(`Unknown maker option: ${arg}`);
+  if (Object.hasOwn(options, arg)) throw new Error(`Repeated maker option: ${arg}`);
+  if (flags.has(arg)) { options[arg] = true; return index; }
+  const value = args[index + 1];
+  if (!value || value.startsWith('--')) throw new Error(`Missing value for ${arg}`);
+  options[arg] = value;
+  return index + 1;
+}
 export function parseArguments(args) {
   const options = {}; const positional = [];
   for (let index = 0; index < args.length; index++) {
-    const arg = args[index];
-    if (!arg.startsWith('--')) { positional.push(arg); continue; }
-    if (!flags.has(arg) && !values.has(arg)) throw new Error(`Unknown maker option: ${arg}`);
-    if (Object.hasOwn(options, arg)) throw new Error(`Repeated maker option: ${arg}`);
-    if (flags.has(arg)) options[arg] = true;
-    else {
-      const value = args[++index];
-      if (!value || value.startsWith('--')) throw new Error(`Missing value for ${arg}`);
-      options[arg] = value;
-    }
+    if (args[index].startsWith('--')) index = readOption(args, index, options);
+    else positional.push(args[index]);
   }
   if (positional.length > 2) throw new Error('Expected a maker and one name');
   return { maker: positional[0], name: positional[1], options };
