@@ -30,7 +30,9 @@ qualification and release authorization are separate. Milestone background is in
 the exact lock; do not run `npm install`. In Claude Code, `scripts/agent/session-start.mjs`
 runs automatically at session start (cloud and local). Browser runs use the
 provisioned Playwright Chromium; `SHELL_CHROMIUM=/absolute/chromium` overrides it.
-`npm run setup` is the guided local setup described below.
+`npm run setup` is the guided local setup described below. Cloud sessions provision the
+qualified Node themselves and an environment setup script exists: see
+[local and cloud sessions](docs/development/CLOUD-AND-LOCAL-SESSIONS.md).
 
 **Gates.** Run the cheapest gate that proves your change, and `check` before you stop.
 

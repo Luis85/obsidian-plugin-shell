@@ -142,6 +142,14 @@ records; the dev loop enables them automatically.
 - Code generators preview first: run `npm run make -- <maker> <name> --dry-run`,
   review, then apply with `--yes`.
 
+## Working in a cloud session
+
+In Claude Code on the web, `scripts/agent/session-start.mjs` provisions the exact `.nvmrc` Node
+(checksum-verified, cached under `~/.cache/workbench`) and restores `node_modules` with `npm ci --ignore-scripts`;
+read its status first. An older Chromium is adopted as a non-pinned `SHELL_CHROMIUM`: say so when you report
+browser evidence. Opt out with `SHELL_SESSION_START_NODE=0`. Setup script and troubleshooting:
+`docs/development/CLOUD-AND-LOCAL-SESSIONS.md`.
+
 ## When stuck
 
 - `npm run doctor` for toolchain problems; `node bin/app help` for commands.
