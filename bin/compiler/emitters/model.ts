@@ -2,7 +2,7 @@ import { PRD_LIMITS } from '../../../scripts/companion/prd-limits.mjs';
 import { matches, type Schema } from '../../../templates/companion/runtime/contract.ts';
 import { createHash } from 'node:crypto';
 import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
-import { validateAuthoringDocument as validateCompanionDocument } from '../../../scripts/companion/authoring-contract.ts';
+import { RELATIONSHIP_CARDINALITIES, validateAuthoringDocument as validateCompanionDocument } from '../../../scripts/companion/authoring-contract.ts';
 export type Row = Record<string, unknown>;
 export interface Entity { id: string; slug: string; name: string; folder: string; schema: Schema }
 export interface Operation { id: string; slug: string; name: string; direction: string; input: Schema | null; output: Schema | null; contract: Row }
@@ -62,7 +62,7 @@ function entityProperty(p: Row): Schema {
 /** Relationship keys become string references (arrays for to-many); a required target makes the key required. */
 function relationshipProperty(r: Row, properties: Record<string, Schema>, required: string[]): void {
   const key = fieldName(r.key); requireValue(!Object.hasOwn(properties, key), 'Relationship/property collision.');
-  requireValue(['0..1','1','1..1','0..*','1..+'].includes(String(r.targetCard)), 'Unsupported relationship cardinality.');
+  requireValue(RELATIONSHIP_CARDINALITIES.includes(String(r.targetCard)), 'Unsupported relationship cardinality.');
   properties[key] = String(r.targetCard).endsWith('*') ? { type:'array', items:{type:'string'} } : {type:'string'};
   if (String(r.targetCard).startsWith('1')) required.push(key);
 }

@@ -1,5 +1,6 @@
 import { row, rows, text, requireValue, type Model, type Operation, type Source } from './model.ts';
 import type { RelationshipRule } from '../../../templates/companion/runtime/relationships.ts';
+import { RELATIONSHIP_CARDINALITIES } from '../../../scripts/companion/authoring-contract.ts';
 export function relationshipDefinitions(m:Model):RelationshipRule[]{
   const rules=rows(row(row(m.document.design).semantic ?? {}).relationships ?? [],120).map(value=>{
     const source=m.entities.find(e=>e.id===value.source),target=m.entities.find(e=>e.id===value.target);
@@ -35,6 +36,6 @@ export function relationshipScope(m:Model, includeRead = false){
   const selected=new Set(m.sources.flatMap(s=>s.operations.flatMap(op=>operationEntities(m,s,op,includeRead))));
   for(let changed=true;changed;){changed=false;for(const rule of definitions)if(connectRule(selected,rule))changed=true;}
   const rules=definitions.filter(r=>selected.has(r.source)||selected.has(r.target));
-  for(const rule of rules)requireValue(rule.onDelete==='restrict'&&[rule.sourceCard,rule.targetCard].every(c=>['0..1','1','1..1','0..*','1..*'].includes(c)), 'Native relationship writes require supported cardinalities and restrict deletion. Cascade/unlink require a separately implemented transaction.');
+  for(const rule of rules)requireValue(rule.onDelete==='restrict'&&[rule.sourceCard,rule.targetCard].every(c=>RELATIONSHIP_CARDINALITIES.includes(c)), 'Native relationship writes require supported cardinalities and restrict deletion. Cascade/unlink require a separately implemented transaction.');
   return {rules,entities:rules.length?m.entities.filter(e=>selected.has(e.slug)):[]};
 }

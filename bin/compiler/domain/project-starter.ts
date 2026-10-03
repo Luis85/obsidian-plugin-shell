@@ -16,13 +16,6 @@ export interface ProjectSelection {
 const targetOrder: readonly ProjectTarget[] = ['plugin', 'webapp', 'website', 'cli'];
 const frameworkId = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 export const angularPackages = ['@angular/core', '@angular/common', '@angular/compiler', '@angular/platform-browser', '@angular/compiler-cli', 'rxjs', 'tslib'] as const;
-/** Human labels for guide context; data about the adapters the compiler implements, not a starter catalog. */
-export const frameworkLabels: Readonly<Record<string, string>> = {
-  nuxtui: 'Vue 3 + Nuxt UI — Vue single-file components, Pinia and Nuxt UI; not the Nuxt application framework.',
-  vanilla: 'Vanilla, no frontend framework — TypeScript and DOM APIs; native Obsidian integration for plugin targets.',
-  angular: 'Angular — standalone Angular components, AOT compilation and zoneless, per-view lifecycle.',
-  none: 'No frontend, command-line application — Node.js commands, structured output and explicit exit codes.',
-};
 function check(value: unknown, message: string): asserts value {
   if (!value) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', message));
 }

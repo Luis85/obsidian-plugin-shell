@@ -67,7 +67,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   Object.assign(lock,{name:pkg.name,version:pkg.version}); Object.assign(lock.packages[''],{name:pkg.name,version:pkg.version,...(pkg.bin ? {bin:pkg.bin} : {})});
   projectScripts(pkg.scripts,m);
   let fixtures = false;
-  await emit('fixtures', async () => { fixtures = await fixtureCode(templateRoot,m,add); });
+  await emit('fixtures', () => { fixtures = fixtureCode(templateRoot,m,add); });
   if(fixtures) fixtureScripts(pkg.scripts);
   const pinned: Record<string,string> = {...pkg.devDependencies,...pkg.dependencies};
   const declared = Object.entries(visualPackages(m,pinned)).filter(([name]) => !Object.hasOwn(pinned,name));
@@ -78,9 +78,9 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,visualDesigns:((m.document.design as Record<string,unknown>).visualDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');
-  add(`${m.sourceRoot}/domain/contract.ts`,await templateRoot.text(['templates/companion/runtime/contract.ts'].join('/')));
-  add(`${m.sourceRoot}/presentation/composables/operation.ts`,await templateRoot.text(['templates/companion/runtime/operation.ts'].join('/')));
-  add(`${m.sourceRoot}/application/source-overrides.ts`,await templateRoot.text(['templates/companion/runtime/source-overrides.ts'].join('/')),'managed');
+  add(`${m.sourceRoot}/domain/contract.ts`,templateRoot.text('templates/companion/runtime/contract.ts'));
+  add(`${m.sourceRoot}/presentation/composables/operation.ts`,templateRoot.text('templates/companion/runtime/operation.ts'));
+  add(`${m.sourceRoot}/application/source-overrides.ts`,templateRoot.text('templates/companion/runtime/source-overrides.ts'),'managed');
   await emit('data', () => dataCode(m,add));
   await emit('navigation', () => navigationCode(m,add));
   await emit('ui', () => uiCode(m,add));
@@ -109,7 +109,7 @@ it('does not issue a duplicate pending write', async () => { const scope = effec
 `);
   await emit('devkit', () => devkitFiles(templateRoot,m,add));
   const values = {name:String(m.project.name),sourceRoot:m.sourceRoot,testRoot:m.testRoot,dependencies:dependencySection(m)};
-  add('PROJECT-IMPLEMENTATION.md',renderTemplate(await templateRoot.text(['templates/companion/devkit/PROJECT-IMPLEMENTATION.md.tmpl'].join('/')),values),'managed');
+  add('PROJECT-IMPLEMENTATION.md',renderTemplate(templateRoot.text('templates/companion/devkit/PROJECT-IMPLEMENTATION.md.tmpl'),values),'managed');
   for (const file of storybookCode(templateRoot, m)) collector.add(file);
   return collector.values();
 }

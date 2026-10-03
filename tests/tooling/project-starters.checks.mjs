@@ -105,6 +105,17 @@ test('an edited valid definition has a new hash without needing a catalog rewrit
  const before=await loadStarterCatalog(folder),p=join(f,'blank.json');await writeFile(p,(await readFile(p,'utf8'))+' ');
  const after=await loadStarterCatalog(folder),blank=c=>c.starters.find(s=>s.id==='blank');assert.notEqual(blank(after).sha256,blank(before).sha256);
 }));
+test('a v5 projection with tooling keeps the 4 MB transfer limit for the whole document',()=>{
+ const c=structuredClone(catalog),d=c.starters.find(s=>s.id==='agent-ready').document;
+ assert.ok(d.tooling,'agent-ready carries development tooling');
+ const tooling=d.tooling;delete d.tooling;
+ const size=()=>new TextEncoder().encode(JSON.stringify(d)).length,fill=4_000_000-Buffer.byteLength(JSON.stringify(tooling));
+ while(size()+100_010<fill)d.notes.push('x'.repeat(100_000));
+ d.notes.push('x'.repeat(fill-size()-3));
+ assert.ok(size()<=4_000_000);assert.equal(validateStarterCatalog(c),c,'the frozen envelope alone is within the limit');
+ d.tooling=tooling;
+ assert.ok(size()>4_000_000);assert.throws(()=>validateStarterCatalog(c),/STARTER_INVALID: Project exceeds the 4 MB/);
+});
 test('an installation may omit blank and have no bundled fallback',()=>{
  const c=structuredClone(catalog);c.starters=c.starters.filter(s=>s.id!=='blank');assert.equal(validateStarterCatalog(c),c);
 });
