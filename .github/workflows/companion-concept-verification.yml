@@ -216,7 +216,7 @@ jobs:
         run: |
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py
           "$PYTHON" -B tests/concepts/companion-prototypes.browser.py
-          node shell.mjs project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
+          node bin/app project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
           git rev-parse HEAD > reports/companion-mvp/source-commit.txt
       - name: Generate and independently build the exact v6 self-project and offline clickdummy
         run: |

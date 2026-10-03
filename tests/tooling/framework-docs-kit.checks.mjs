@@ -24,7 +24,7 @@ test('packaged CLI ships the pinned parser and supports docs import then existin
   assert.equal(JSON.parse(await readFile(join(dir,'.framework/compiled/node_modules/yaml/package.json'),'utf8')).version,'2.9.1');
   for (const name of ['DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md']) assert.equal(await readFile(join(dir, '.framework/template', name), 'utf8'), await readFile(join(root, name), 'utf8'));
   await verifyKit(dir); assert.equal((await readdir(dir)).includes('node_modules'),false);
-  const run = args => { const result=spawnSync(process.execPath,[join(dir,'shell.mjs'),...args,'--json','--no-interaction'],{cwd:dir,encoding:'utf8',timeout:120000,maxBuffer:8000000});assert.equal(result.status,0,result.stdout+result.stderr);return JSON.parse(result.stdout); };
+  const run = args => { const result=spawnSync(process.execPath,[join(dir,'app.mjs'),...args,'--json','--no-interaction'],{cwd:dir,encoding:'utf8',timeout:120000,maxBuffer:8000000});assert.equal(result.status,0,result.stdout+result.stderr);return JSON.parse(result.stdout); };
   assert.ok(run(['docs','schema']).data.types.includes('interaction'));
   await writeFile(join(dir,'input.json'),JSON.stringify(projectFixture().project));
   const catalog = run(['capabilities']).data.commands.map(command => command.id);

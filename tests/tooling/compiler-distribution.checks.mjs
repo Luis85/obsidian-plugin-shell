@@ -16,7 +16,7 @@ test('packed compiled CLI and source CLI return equivalent analysis and errors w
     for(const file of files){const path=join(destination,file.path);await mkdir(dirname(path),{recursive:true});await writeFile(path,file.bytes);}
     const valid=await readFile(join(root,'docs/concepts/companion/starters/blank.companion.json'),'utf8');
     for(const source of [valid,'{']){
-      const invoke=directory=>spawnSync(process.execPath,[join(directory,'shell.mjs'),'compiler','check','--input','-','--json'],{cwd:directory,input:source,encoding:'utf8',timeout:30000});
+      const invoke=directory=>spawnSync(process.execPath,[join(directory,'app.mjs'),'compiler','check','--input','-','--json'],{cwd:directory,input:source,encoding:'utf8',timeout:30000});
       const a=invoke(root),b=invoke(destination);assert.equal(b.status,a.status,b.stderr);assert.deepEqual(JSON.parse(b.stdout),JSON.parse(a.stdout));
     }
     assert.ok(files.some(file=>file.path==='.framework/compiled/scripts/compiler/index.js'));

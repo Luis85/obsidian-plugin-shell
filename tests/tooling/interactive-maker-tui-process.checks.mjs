@@ -4,7 +4,7 @@ import { realpath, mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { parseArguments } from '../../bin/adapters/commands.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');

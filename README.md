@@ -18,7 +18,7 @@ inputs, then enter setup. `configs/starters/companion-plugin.json` is the canoni
 Companion development model; `configs/starters/feature-showcase.json` exercises the
 catalogued visual controls and actions with explicit mock scenarios.
 
-Run `node shell.mjs starters coverage feature-showcase --json` to inspect model
+Run `node bin/app starters coverage feature-showcase --json` to inspect model
 coverage. This is not native acceptance: the golden Companion still has unbound
 business interactions and missing native authoring adapters. See the
 [Companion starter guide](docs/development/COMPANION-STARTERS.md) for the exact
@@ -51,7 +51,7 @@ The new project has its own README and short `AGENTS.md`, Claude Code hooks, ski
 and permissions, VS Code debugging, product CI and an in-memory Obsidian example test
 ([what it contains](docs/development/COMPANION-GENERATOR.md#what-the-generated-project-contains)).
 
-`node shell.mjs help` shows the golden path (new, install, dev, test, check, make).
+`node bin/app help` shows the golden path (new, install, dev, test, check, make).
 `npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`
 covers changed files only), and `npm run check:submission` mirrors documented
 Obsidian review rules locally. Neither replaces `npm run verify`. See
@@ -303,7 +303,7 @@ release promotion require separate evidence and authorization.
 ## Generate a plugin from a companion design
 
 Export Project JSON from the companion HTML concept. From this framework checkout, run
-`node shell.mjs generate --input /path/to/project.json --vault /path/to/vault --target projects/my-plugin`
+`node bin/app generate --input /path/to/project.json --vault /path/to/vault --target projects/my-plugin`
 to inspect the file plan, then repeat with `--apply <planHash>`. The npm equivalent is
 `npm run companion:scaffold -- ...`. In the generated project run `npm ci`,
 `npm run verify:project`, then `npm run test:tdd`. Generation performs no installation, activation or publishing.

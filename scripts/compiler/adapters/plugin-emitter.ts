@@ -50,8 +50,8 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   pkg.scripts['test:tdd'] = `vitest --config vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
   pkg.scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.project.json';
   pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
-  pkg.scripts['build:clickdummy'] = 'node shell.mjs clickdummy build';
-  pkg.scripts['doctor'] = 'node shell.mjs doctor';
+  pkg.scripts['build:clickdummy'] = 'node bin/app clickdummy build';
+  pkg.scripts['doctor'] = 'node bin/app doctor';
   Object.assign(pkg.scripts, previewScripts());
   pkg.scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
   pkg.scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';

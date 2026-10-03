@@ -12,7 +12,7 @@ import { settingsPlan } from '../../bin/adapters/user-settings.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { claimFirstRun, assertNoFirstRun } from '../../bin/adapters/first-run-lock.ts';
 import { projectStarter } from '../../bin/adapters/projects.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const json = value => JSON.stringify(value, null, 2) + '\n';
 async function scratch(fn) {

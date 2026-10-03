@@ -76,12 +76,12 @@ and uses the current project's identity/folders as export defaults. Other input
 values come from that recipe's defaults.
 
 ```sh
-node shell.mjs starters validate companion-plugin --json
-node shell.mjs starters show companion-plugin --json
-node shell.mjs starters coverage companion-plugin --json
+node bin/app starters validate companion-plugin --json
+node bin/app starters show companion-plugin --json
+node bin/app starters coverage companion-plugin --json
 
 # Preview the proposed definition edit; add --yes only after reviewing it.
-node shell.mjs starters edit companion-plugin --input ./reviewed-companion-plugin.json
+node bin/app starters edit companion-plugin --input ./reviewed-companion-plugin.json
 ```
 
 ## Generate through the shell
@@ -92,12 +92,12 @@ starters. A configured `paths.startersFolder` in `configs/user-settings.json` ca
 select another contained folder. There is no fallback to an embedded library.
 
 ```sh
-node shell.mjs starters list
-node shell.mjs new ../companion-development --starter companion-plugin
-node shell.mjs new ../companion-development --starter companion-plugin --yes
+node bin/app starters list
+node bin/app new ../companion-development --starter companion-plugin
+node bin/app new ../companion-development --starter companion-plugin --yes
 
-node shell.mjs new ../visual-feature-demo --starter feature-showcase
-node shell.mjs new ../visual-feature-demo --starter feature-showcase --yes
+node bin/app new ../visual-feature-demo --starter feature-showcase
+node bin/app new ../visual-feature-demo --starter feature-showcase --yes
 ```
 
 Only the confirmed file plan creates the project. Run subsequent processes by
@@ -152,7 +152,7 @@ disposed reads. Legacy JSON textarea input retains its earlier paste-as-text
 behavior. JSON definitions never carry executable event callbacks.
 
 ```sh
-node shell.mjs starters coverage feature-showcase --require-model-coverage --json
+node bin/app starters coverage feature-showcase --require-model-coverage --json
 ```
 
 This command reports **model inventory**, not executed or native acceptance. Its

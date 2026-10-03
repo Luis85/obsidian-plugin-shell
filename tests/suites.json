@@ -366,7 +366,7 @@
     },
     {
       "name": "cli",
-      "purpose": "Central shell.mjs CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery.",
+      "purpose": "Central app.mjs CLI (node bin/app): command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery.",
       "runner": {
         "type": "node-test"
       },

@@ -1,7 +1,7 @@
 import { starterCoverage } from './coverage.ts';
 import { basename, dirname, join, resolve } from 'node:path';
 import { readdir } from 'node:fs/promises';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 import { hash, readBounded, exists } from '../framework/files.ts';
 import { zip } from '../framework/zip.ts';
 import { result, requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';

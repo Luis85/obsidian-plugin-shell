@@ -25,8 +25,8 @@ Record the command with secrets removed, working directory, framework/Node/npm v
 ## Compiler diagnostics
 
 ```sh
-node shell.mjs compiler explain COMPILER_REFERENCE_MISSING
-node shell.mjs compiler check --input design/project.json --json
+node bin/app compiler explain COMPILER_REFERENCE_MISSING
+node bin/app compiler check --input design/project.json --json
 ```
 
 Use the generated **Compiler diagnostics** page for the current stable codes and recovery hints. Syntax errors, missing references, duplicate IDs, path collisions, template defects and unresolved dependencies have different causes. Do not “repair” a template defect by arbitrarily editing user design data.

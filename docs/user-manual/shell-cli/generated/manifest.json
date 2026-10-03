@@ -5,15 +5,15 @@
   "sources": [
     {
       "path": "package.json",
-      "sha256": "eeb9c582748c5f69c4911c3ee1e15134411b54840f0660161dc2b3fc22641b35"
+      "sha256": "94c9453b0a76004a486635a710957ed19c53e5b6e04bf684b34fa3102c19d163"
     },
     {
       "path": "scripts/framework/catalog.ts",
-      "sha256": "d76d48b2945fbb34826cc87c4f423983b1cfde10f16cc4bc33a11039bebbc499"
+      "sha256": "5fb0753c54ee41db6e9b8f8d50f034970d16e169123e28e0274e56843dcc4ee4"
     },
     {
       "path": "scripts/framework/help-text.ts",
-      "sha256": "1f0c0863b0c5690dc4359c9838583739d8f62363015b06d2a4b4aa2f608d42e4"
+      "sha256": "f3f70401ad0d576866c100062df5337f53115c1ed360d48d928659cef09c475c"
     },
     {
       "path": "scripts/compiler/domain/diagnostics.ts",
@@ -21,7 +21,7 @@
     },
     {
       "path": "scripts/documentation/render.mjs",
-      "sha256": "050b407d1f3e15c7cfeed37abab9d2a25c1774f9faf184c91cf3c0ee030a1ea7"
+      "sha256": "76b850f57bc28f3e6629525dad1bb4725dfaab92864a80c1da9fbe97a5a63894"
     },
     {
       "path": "scripts/documentation/manual.mjs",
@@ -31,15 +31,15 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "e6098724b4b2ab7966f52ed32bfd2b5a3370d5d64548b8d9e75666572738e9a0"
+      "sha256": "4fab8e35729b58591f31cb079cc9f746ca81729ac632f5a15a2092ee9336af87"
     },
     {
       "path": "diagnostics.md",
-      "sha256": "416eedb8de52eb02faf336112a9cd18371de5aa266076ffd14ce75ab3f12bd2b"
+      "sha256": "6be5f78b74ad5d3f02260870d34bdf3acfeec3f9464dd1e78d505ac8d7929c03"
     },
     {
       "path": "commands.json",
-      "sha256": "dc72fd8536038beacb7d03c0c163dec6e73954859658d2d59f5432b16680c08d"
+      "sha256": "d21ef2f4d6e997ca069046492ed2d7d7075c1ac3edcfe38e43a34754eb4ec19b"
     }
   ]
 }

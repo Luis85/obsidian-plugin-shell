@@ -1,5 +1,5 @@
 /** Pure project-memory policy. Importing this module has no I/O or side effects. */
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.ts';
 export const PYTHON_VERSION = '0.10.1';
 export const AGENT_VERSION = '0.7.0';
 export const PROFILE = 'obsidian-shell';
@@ -28,7 +28,7 @@ export function object(value: unknown): JsonObject {
   }
   return result;
 }
-export function digest(text: string): string { return createHash('sha256').update(text).digest('hex'); }
+export function digest(text: string): string { return sha256(text); }
 export function identity(root: string, commonDir: string, remote: string): Identity {
   const match = /^(?:https:\/\/(?:[^/@]+@)?github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/i.exec(remote);
   const github = match ? `${match[1]}/${match[2]}`.toLowerCase() : undefined;

@@ -1,6 +1,6 @@
 import { validateDocumentationSettings } from './settings-documentation.ts';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { hash } from '../../scripts/framework/files.ts';
 import { object, list } from '../domain/data.ts';
 import { documentText, openDocument } from '../domain/document.ts';

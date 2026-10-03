@@ -1,7 +1,7 @@
 import { readdir, lstat } from 'node:fs/promises';
 import { resolve, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runNode } from '../shared/process.mjs';
+import { runNodeScript as runNode } from '../shared/process.mjs';
 
 /** Explicit file arguments prevent an ignored archive ancestor from hiding its src tree. */
 export async function lintOwnedSource(root = process.cwd(), tool = resolve(root, 'node_modules/oxlint/bin/oxlint')) {

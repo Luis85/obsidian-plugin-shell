@@ -12,7 +12,7 @@ import { zip } from '../../scripts/framework/zip.ts';
 import { assembleStarterPack } from '../../scripts/starters/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args, expected = 0) {
-  const result = spawnSync(process.execPath, [join(dir, 'shell.mjs'), ...args, '--json'], {
+  const result = spawnSync(process.execPath, [join(dir, 'app.mjs'), ...args, '--json'], {
     cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 8_000_000,
   });
   assert.equal(result.error, undefined); assert.equal(result.status, expected, result.stderr + result.stdout);

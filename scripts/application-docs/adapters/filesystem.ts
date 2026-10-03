@@ -1,9 +1,9 @@
 import { lstat, readdir, realpath, open } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
-import { createHash } from 'node:crypto';
+import { sha256 } from '../../shared/hash.mjs';
 import { insist } from '../domain/contracts.ts';
-export const documentationDigest = (value: string | Uint8Array): string => createHash('sha256').update(value).digest('hex');
+export const documentationDigest = (value: string | Uint8Array): string => sha256(value);
 const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 export function portable(path: string): string {
   insist(typeof path === 'string' && path.length <= 1024 && !isAbsolute(path) && !path.includes('\\'), 'DOCS_PATH', 'Use a portable project-relative path.');

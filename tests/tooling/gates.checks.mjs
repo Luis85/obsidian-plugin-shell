@@ -140,7 +140,7 @@ async function verificationTrace(t, mode, failAt = 0) {
   for (const directory of ['quality', 'shared', 'testing']) await mkdir(join(root, 'scripts', directory), { recursive: true });
   await cp(new URL('../../scripts/quality/verify.mjs', import.meta.url), join(root, 'scripts/quality/verify.mjs'));
   await writeFile(join(root, 'scripts/shared/process.mjs'), `let analyzers = 0;
-export async function runNode(path, args = []) {
+export async function runNodeScript(path, args = []) {
   console.log(JSON.stringify({ executed: path, args }));
   if (path === 'scripts/quality/check-analyzer.mjs' && ++analyzers === Number(process.env.FAIL_ANALYZER_AT))
     throw new Error('fixture analyzer failed');

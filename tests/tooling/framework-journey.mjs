@@ -21,13 +21,13 @@ function run(name, cwd, entry, args, { allowBlocked = false } = {}) {
   } };
 }
 const archive = join(evidence, 'plugin-framework.zip');
-await run('pack', repository, join(repository, 'shell.mjs'), ['framework', 'pack', '--out', archive, '--yes', '--json']).persist();
+await run('pack', repository, join(repository, 'app.mjs'), ['framework', 'pack', '--out', archive, '--yes', '--json']).persist();
 const bytes = await readFile(archive), archiveHash = createHash('sha256').update(bytes).digest('hex');
 const full = JSON.parse(await readFile(join(repository, 'docs/concepts/companion/companion-project.json'), 'utf8'));
 for (const [id, paths] of [['field-notes', {codebaseFolder: 'app/source', testsFolder: 'spec'}], ['task-board', {codebaseFolder: 'src', testsFolder: 'tests'}]]) {
   const target = await realpath(await mkdtemp(join(process.env.RUNNER_TEMP ?? tmpdir(), id + '-kit-'))); targets.push(target);
   await extractArchive(bytes, target);
-  const invoke = async (stage, args, options) => run(id + '-' + stage, target, join(target, 'shell.mjs'), [...args, '--json', '--no-interaction'], options).persist();
+  const invoke = async (stage, args, options) => run(id + '-' + stage, target, join(target, 'app.mjs'), [...args, '--json', '--no-interaction'], options).persist();
   await invoke('bootstrap', ['capabilities']);
   const design = structuredClone(full); design.project = { id, name: id === 'field-notes' ? 'Field Notes' : 'Task Board', author: 'Qualification fixture', version: '0.1.0', description: 'Independent archive consumer' }; design.settings = paths;
   if (id === 'task-board') {

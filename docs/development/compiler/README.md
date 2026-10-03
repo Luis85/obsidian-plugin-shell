@@ -5,12 +5,12 @@ The compiler turns Companion JSON into artifact data. It does not install depend
 ## Commands
 
 ```sh
-node shell.mjs compiler check --input docs/concepts/companion/starters/blank.companion.json
-node shell.mjs compiler check --input project.json --json
-node shell.mjs compiler inspect --input project.json --stage ir --json
-node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json
-node shell.mjs compiler explain COMPILER_REFERENCE_MISSING
-node shell.mjs compiler check --input project.json --report-dir reports/compiler --debug
+node bin/app compiler check --input docs/concepts/companion/starters/blank.companion.json
+node bin/app compiler check --input project.json --json
+node bin/app compiler inspect --input project.json --stage ir --json
+node bin/app compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json
+node bin/app compiler explain COMPILER_REFERENCE_MISSING
+node bin/app compiler check --input project.json --report-dir reports/compiler --debug
 ```
 
 `check` validates without loading templates. `inspect --stage ir` explicitly returns the normalized model (which includes authored content); `--stage artifacts` loads a template snapshot and returns paths, ownership and producers, not file contents. Neither command changes project files. Reports are the only opt-in writes and are confined to new directories under `reports/compiler`.
@@ -18,11 +18,11 @@ node shell.mjs compiler check --input project.json --report-dir reports/compiler
 Existing `new` and `generate` call the same compiler. The legacy `generate --input ... --vault ... --target ...` JSON protocol, reviewed hash and explicit `--apply` remain. `--target` still means a folder. Use **`--output-kind clickdummy`** to select browser output:
 
 ```sh
-node shell.mjs generate --input project.json --vault /absolute/existing/workspace --target prototype --output-kind clickdummy
+node bin/app generate --input project.json --vault /absolute/existing/workspace --target prototype --output-kind clickdummy
 # Review that output; repeat the same command with --apply <reviewed-plan-hash>.
 ```
 
-`new` retains its existing plugin output. For an already configured generated project, `node shell.mjs generate --output-kind clickdummy` uses the accepted design and existing ownership rules.
+`new` retains its existing plugin output. For an already configured generated project, `node bin/app generate --output-kind clickdummy` uses the accepted design and existing ownership rules.
 
 ## Readiness, dependencies and verification
 

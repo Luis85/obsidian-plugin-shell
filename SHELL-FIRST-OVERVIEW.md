@@ -34,17 +34,17 @@ Keep three choices separate: where Workbench authoring runs, what runtime the us
 Use the repository-selected Node/npm toolchain and exact lockfile. From a prepared checkout, inspect supported starters and a new-project plan before writing:
 
 ```sh
-node shell.mjs help
-node shell.mjs new --list
-node shell.mjs new ../my-plugin --starter quick-capture
-node shell.mjs new ../my-plugin --from ./project.companion.json
+node bin/app help
+node bin/app new --list
+node bin/app new ../my-plugin --starter quick-capture
+node bin/app new ../my-plugin --from ./project.companion.json
 ```
 
 The target for `new` must be a new or empty independent directory. Review the returned plan before applying it. Installation runs trusted project lifecycle code and is a separate explicit step. Follow the CLI guide for exact flags, existing-project import, conflicts, regeneration and recovery. The broader intended setup journey must not be confused with this existing checkout entry.
 
 For the existing template itself, `npm run setup` uses reviewed setup and the exact dependencies. The optional `--profile native` installs assets only into the contained development vault. Open it separately and deliberately enable the plugin. Do not use a personal vault; setup does not authorize activation or change Restricted Mode. The [setup guide](docs/development/SETUP-IDENTITY.md) retains identity, protected-data and resume behavior.
 
-The product name is Workbench, but the executable remains `shell.mjs` and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
+The product name is Workbench, but the executable is `app.mjs` (run it as `node bin/app`; `shell.mjs` remains a compatibility shim) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
 
 ## Intended connected workflow
 

@@ -22,24 +22,24 @@ These commands are included in this contribution. Use a checkout or compiled kit
 
 ```sh
 # Discover the actual installed command set first.
-node shell.mjs capabilities --json
+node bin/app capabilities --json
 
 # Create-only preview. Existing handouts are preserved.
-node shell.mjs handout generate --dry-run --json
+node bin/app handout generate --dry-run --json
 
 # Retain a reviewed file plan, inspect it, then explicitly apply it.
-node shell.mjs handout generate --plan-out handout.plan.json --json
-node shell.mjs plan inspect handout.plan.json --json
-node shell.mjs plan apply handout.plan.json --yes --json
+node bin/app handout generate --plan-out handout.plan.json --json
+node bin/app plan inspect handout.plan.json --json
+node bin/app plan apply handout.plan.json --yes --json
 
 # Read-only readiness and structured answer export.
-node shell.mjs handout validate --json
-node shell.mjs handout inspect --json
+node bin/app handout validate --json
+node bin/app handout inspect --json
 
 # After PRDs or settings change: preserve answers/notes, reset review marks.
-node shell.mjs handout refresh --plan-out handout-refresh.plan.json --json
-node shell.mjs plan inspect handout-refresh.plan.json --json
-node shell.mjs plan apply handout-refresh.plan.json --yes --json
+node bin/app handout refresh --plan-out handout-refresh.plan.json --json
+node bin/app plan inspect handout-refresh.plan.json --json
+node bin/app plan apply handout-refresh.plan.json --yes --json
 ```
 
 `handout generate` and `handout refresh` use the existing framework file-plan/hash/apply machinery. They never execute project processes. A stale plan must be reviewed again; `--yes` does not carry execution approval. `handout validate` and `handout inspect` are read-only; incomplete, malformed or stale documents return `blocked` and a nonzero CLI exit code. `inspect` includes the parsed answers; `validate` omits those potentially sensitive meeting answers and returns counts and diagnostics. Neither response grants execution permission: `executionAuthorized` remains `false`.

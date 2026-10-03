@@ -160,7 +160,7 @@ The tables list options with documented command semantics. Some common flags are
 Inspect source-derived visual model coverage and explicit interaction gaps; never a native acceptance claim.
 
 ```sh
-node shell.mjs starters coverage [arguments] [options]
+node bin/app starters coverage [arguments] [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -171,7 +171,7 @@ node shell.mjs starters coverage [arguments] [options]
 | --- | --- | --- | --- |
 | --require-model-coverage | flag | Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -180,8 +180,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs starters coverage feature-showcase --json
-node shell.mjs starters coverage feature-showcase --require-model-coverage --json
+node bin/app starters coverage feature-showcase --json
+node bin/app starters coverage feature-showcase --require-model-coverage --json
 ```
 
 ## starters list
@@ -189,7 +189,7 @@ node shell.mjs starters coverage feature-showcase --require-model-coverage --jso
 Discover project-local JSON starters; no bundled fallback.
 
 ```sh
-node shell.mjs starters list
+node bin/app starters list
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -199,7 +199,7 @@ node shell.mjs starters list
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -208,7 +208,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs starters list --json
+node bin/app starters list --json
 ```
 
 ## starters show
@@ -216,7 +216,7 @@ node shell.mjs starters list --json
 Inspect one complete editable starter definition and its processes.
 
 ```sh
-node shell.mjs starters show [arguments]
+node bin/app starters show [arguments]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -226,7 +226,7 @@ node shell.mjs starters show [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -235,7 +235,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs starters show webapp --json
+node bin/app starters show webapp --json
 ```
 
 ## starters validate
@@ -243,7 +243,7 @@ node shell.mjs starters show webapp --json
 Validate one or all installed definitions without writes or execution.
 
 ```sh
-node shell.mjs starters validate [arguments]
+node bin/app starters validate [arguments]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -253,7 +253,7 @@ node shell.mjs starters validate [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -262,7 +262,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs starters validate --json
+node bin/app starters validate --json
 ```
 
 ## starters schema
@@ -270,7 +270,7 @@ node shell.mjs starters validate --json
 Print the versioned starter-definition JSON Schema.
 
 ```sh
-node shell.mjs starters schema
+node bin/app starters schema
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -280,7 +280,7 @@ node shell.mjs starters schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -289,7 +289,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs starters schema --json
+node bin/app starters schema --json
 ```
 
 ## starters add
@@ -297,7 +297,7 @@ node shell.mjs starters schema --json
 Plan adding one JSON definition; never executes processes.
 
 ```sh
-node shell.mjs starters add [options]
+node bin/app starters add [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -312,7 +312,7 @@ node shell.mjs starters add [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -321,7 +321,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs starters add --input my-starter.json --dry-run
+node bin/app starters add --input my-starter.json --dry-run
 ```
 
 ## starters edit
@@ -329,7 +329,7 @@ node shell.mjs starters add --input my-starter.json --dry-run
 Plan replacing one definition from validated JSON.
 
 ```sh
-node shell.mjs starters edit [arguments] [options]
+node bin/app starters edit [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -344,7 +344,7 @@ node shell.mjs starters edit [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -353,7 +353,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs starters edit webapp --input edited-webapp.json --plan-out starter-edit.plan.json
+node bin/app starters edit webapp --input edited-webapp.json --plan-out starter-edit.plan.json
 ```
 
 ## starters pack
@@ -361,7 +361,7 @@ node shell.mjs starters edit webapp --input edited-webapp.json --plan-out starte
 Create the standalone starter-definition ZIP, separate from the shell.
 
 ```sh
-node shell.mjs starters pack [options]
+node bin/app starters pack [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -375,7 +375,7 @@ node shell.mjs starters pack [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -384,7 +384,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs starters pack --out ./workbench-starters.zip --yes
+node bin/app starters pack --out ./workbench-starters.zip --yes
 ```
 
 ## starters run
@@ -392,7 +392,7 @@ node shell.mjs starters pack --out ./workbench-starters.zip --yes
 Review/explicitly execute processes from a generated project receipt.
 
 ```sh
-node shell.mjs starters run [options]
+node bin/app starters run [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -409,7 +409,7 @@ node shell.mjs starters run [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -418,8 +418,8 @@ Parser-accepted common flags without documented semantics here: `--plan-out`. Do
 ### Examples
 
 ```sh
-node shell.mjs starters run --project ../my-app --process verify,build --dry-run
-node shell.mjs starters run --project ../my-app --process build --yes --trust-processes --apply <planHash>
+node bin/app starters run --project ../my-app --process verify,build --dry-run
+node bin/app starters run --project ../my-app --process build --yes --trust-processes --apply <planHash>
 ```
 
 ## docs import
@@ -427,7 +427,7 @@ node shell.mjs starters run --project ../my-app --process build --yes --trust-pr
 Review typed Markdown files/folders into actual project elements without deleting absent data.
 
 ```sh
-node shell.mjs docs import [file-or-folder ...] [options]
+node bin/app docs import [file-or-folder ...] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -442,7 +442,7 @@ node shell.mjs docs import [file-or-folder ...] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -451,8 +451,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs docs import docs/application --dry-run
-node shell.mjs docs import docs/application --apply <reviewed-hash> --yes
+node bin/app docs import docs/application --dry-run
+node bin/app docs import docs/application --apply <reviewed-hash> --yes
 ```
 
 ## docs export
@@ -460,7 +460,7 @@ node shell.mjs docs import docs/application --apply <reviewed-hash> --yes
 Generate complete, lossless application Markdown documentation with conflict protection.
 
 ```sh
-node shell.mjs docs export [--out <documentation-root>] [options]
+node bin/app docs export [--out <documentation-root>] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -475,7 +475,7 @@ node shell.mjs docs export [--out <documentation-root>] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -484,8 +484,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs docs export --dry-run
-node shell.mjs docs export --out docs/application --yes
+node bin/app docs export --dry-run
+node bin/app docs export --out docs/application --yes
 ```
 
 ## docs validate
@@ -493,7 +493,7 @@ node shell.mjs docs export --out docs/application --yes
 Validate typed documentation and native model references without writing.
 
 ```sh
-node shell.mjs docs validate [file-or-folder ...] [--json]
+node bin/app docs validate [file-or-folder ...] [--json]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -503,7 +503,7 @@ node shell.mjs docs validate [file-or-folder ...] [--json]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -512,7 +512,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs docs validate docs/application --json
+node bin/app docs validate docs/application --json
 ```
 
 ## docs status
@@ -520,7 +520,7 @@ node shell.mjs docs validate docs/application --json
 Inspect documentation drift, missing bindings and export coverage without writing.
 
 ```sh
-node shell.mjs docs status
+node bin/app docs status
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -530,7 +530,7 @@ node shell.mjs docs status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -539,7 +539,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs docs status --json
+node bin/app docs status --json
 ```
 
 ## docs schema
@@ -547,7 +547,7 @@ node shell.mjs docs status --json
 Discover typed Markdown fields and ownership rules without reading a project.
 
 ```sh
-node shell.mjs docs schema
+node bin/app docs schema
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -557,7 +557,7 @@ node shell.mjs docs schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -566,7 +566,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs docs schema --json
+node bin/app docs schema --json
 ```
 
 ## docs recover
@@ -574,7 +574,7 @@ node shell.mjs docs schema --json
 Review or explicitly roll back an interrupted documentation operation; never overwrite intervening edits.
 
 ```sh
-node shell.mjs docs recover
+node bin/app docs recover
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -588,7 +588,7 @@ node shell.mjs docs recover
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -597,8 +597,8 @@ Parser-accepted common flags without documented semantics here: `--plan-out`. Do
 ### Examples
 
 ```sh
-node shell.mjs docs recover --dry-run
-node shell.mjs docs recover --apply <recovery-hash> --yes
+node bin/app docs recover --dry-run
+node bin/app docs recover --apply <recovery-hash> --yes
 ```
 
 ## prototypes list
@@ -606,7 +606,7 @@ node shell.mjs docs recover --apply <recovery-hash> --yes
 Read prototypes, versions, variants and the single pinned generator selection.
 
 ```sh
-node shell.mjs prototypes list
+node bin/app prototypes list
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -616,7 +616,7 @@ node shell.mjs prototypes list
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -625,7 +625,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs prototypes list --json
+node bin/app prototypes list --json
 ```
 
 ## prototypes compare
@@ -633,7 +633,7 @@ node shell.mjs prototypes list --json
 Read complete snapshot differences without changing saved content or activation.
 
 ```sh
-node shell.mjs prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]
+node bin/app prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -648,7 +648,7 @@ node shell.mjs prototypes compare <prototype> --version <version> --variant <var
 | --with-version | value | Version slug of the comparison reference snapshot. | See command semantics |
 | --with-variant | value | Variant slug of the comparison reference snapshot. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -657,7 +657,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json
+node bin/app prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json
 ```
 
 ## prototypes prototype-details
@@ -665,7 +665,7 @@ node shell.mjs prototypes compare exploration --version v1 --variant main --with
 Edit prototype display details without changing folder slugs or saved designs.
 
 ```sh
-node shell.mjs prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]
+node bin/app prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -681,7 +681,7 @@ node shell.mjs prototypes prototype-details <prototype> [--name <name>] [--descr
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -690,7 +690,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes prototype-details exploration --name "Product exploration" --description "Compare navigation variants" --dry-run
+node bin/app prototypes prototype-details exploration --name "Product exploration" --description "Compare navigation variants" --dry-run
 ```
 
 ## prototypes version-details
@@ -698,7 +698,7 @@ node shell.mjs prototypes prototype-details exploration --name "Product explorat
 Edit the label of an unsealed version without changing saved designs.
 
 ```sh
-node shell.mjs prototypes version-details <prototype> --version <version> --label <label> [options]
+node bin/app prototypes version-details <prototype> --version <version> --label <label> [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -714,7 +714,7 @@ node shell.mjs prototypes version-details <prototype> --version <version> --labe
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -723,7 +723,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes version-details exploration --version v1 --label "Iteration 1" --dry-run
+node bin/app prototypes version-details exploration --version v1 --label "Iteration 1" --dry-run
 ```
 
 ## prototypes restore-snapshot
@@ -731,7 +731,7 @@ node shell.mjs prototypes version-details exploration --version v1 --label "Iter
 Restore a saved reference into an editable draft, retaining its previous content in a sealed recovery version.
 
 ```sh
-node shell.mjs prototypes restore-snapshot <prototype> --version <version> --variant <variant> --from-prototype <prototype> --from-version <version> --from-variant <variant> --recovery-version <version> [options]
+node bin/app prototypes restore-snapshot <prototype> --version <version> --variant <variant> --from-prototype <prototype> --from-version <version> --from-variant <variant> --recovery-version <version> [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -751,7 +751,7 @@ node shell.mjs prototypes restore-snapshot <prototype> --version <version> --var
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -760,7 +760,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes restore-snapshot exploration --version v1 --variant sitemap-b --from-prototype exploration --from-version v1 --from-variant main --recovery-version v2 --dry-run
+node bin/app prototypes restore-snapshot exploration --version v1 --variant sitemap-b --from-prototype exploration --from-version v1 --from-variant main --recovery-version v2 --dry-run
 ```
 
 ## prototypes create
@@ -768,7 +768,7 @@ node shell.mjs prototypes restore-snapshot exploration --version v1 --variant si
 Capture a complete project as docs/concepts/<slug>/, version v1, draft variant main.
 
 ```sh
-node shell.mjs prototypes create [arguments] [options]
+node bin/app prototypes create [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -785,7 +785,7 @@ node shell.mjs prototypes create [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -794,7 +794,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes create exploration --input design/project.json --dry-run
+node bin/app prototypes create exploration --input design/project.json --dry-run
 ```
 
 ## prototypes version
@@ -802,7 +802,7 @@ node shell.mjs prototypes create exploration --input design/project.json --dry-r
 Copy a saved version into a new editable version; all copied variants start as drafts.
 
 ```sh
-node shell.mjs prototypes version [arguments] [options]
+node bin/app prototypes version [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -818,7 +818,7 @@ node shell.mjs prototypes version [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -827,7 +827,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes version exploration --version v2 --from v1 --dry-run
+node bin/app prototypes version exploration --version v2 --from v1 --dry-run
 ```
 
 ## prototypes fork
@@ -835,7 +835,7 @@ node shell.mjs prototypes version exploration --version v2 --from v1 --dry-run
 Fork the selected saved variant; edits never change the original.
 
 ```sh
-node shell.mjs prototypes fork [arguments] [options]
+node bin/app prototypes fork [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -854,7 +854,7 @@ node shell.mjs prototypes fork [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -863,7 +863,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run
+node bin/app prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run
 ```
 
 ## prototypes save
@@ -871,7 +871,7 @@ node shell.mjs prototypes fork exploration --version v1 --variant main --as site
 Save complete project JSON to a draft in an unsealed version.
 
 ```sh
-node shell.mjs prototypes save [arguments] [options]
+node bin/app prototypes save [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -888,7 +888,7 @@ node shell.mjs prototypes save [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -897,7 +897,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes save exploration --version v1 --variant sitemap-b --input design/project.json --dry-run
+node bin/app prototypes save exploration --version v1 --variant sitemap-b --input design/project.json --dry-run
 ```
 
 ## prototypes details
@@ -905,7 +905,7 @@ node shell.mjs prototypes save exploration --version v1 --variant sitemap-b --in
 Maintain a draft variant name and hypothesis without changing its path.
 
 ```sh
-node shell.mjs prototypes details [arguments] [options]
+node bin/app prototypes details [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -923,7 +923,7 @@ node shell.mjs prototypes details [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -932,7 +932,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes details exploration --version v1 --variant sitemap-b --name "Sitemap B" --hypothesis "Alternative navigation" --dry-run
+node bin/app prototypes details exploration --version v1 --variant sitemap-b --name "Sitemap B" --hypothesis "Alternative navigation" --dry-run
 ```
 
 ## prototypes status
@@ -940,7 +940,7 @@ node shell.mjs prototypes details exploration --version v1 --variant sitemap-b -
 Set draft, review, approved or archived status; activation is a separate operation.
 
 ```sh
-node shell.mjs prototypes status [arguments] [options]
+node bin/app prototypes status [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -957,7 +957,7 @@ node shell.mjs prototypes status [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -966,7 +966,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes status exploration --version v1 --variant sitemap-b --status approved --dry-run
+node bin/app prototypes status exploration --version v1 --variant sitemap-b --status approved --dry-run
 ```
 
 ## prototypes activate
@@ -974,7 +974,7 @@ node shell.mjs prototypes status exploration --version v1 --variant sitemap-b --
 Pin an approved variant for generation and demote any previous active variant.
 
 ```sh
-node shell.mjs prototypes activate [arguments] [options]
+node bin/app prototypes activate [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -990,7 +990,7 @@ node shell.mjs prototypes activate [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -999,7 +999,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes activate exploration --version v1 --variant sitemap-b --dry-run
+node bin/app prototypes activate exploration --version v1 --variant sitemap-b --dry-run
 ```
 
 ## prototypes deactivate
@@ -1007,7 +1007,7 @@ node shell.mjs prototypes activate exploration --version v1 --variant sitemap-b 
 Clear the generator selection without deleting snapshots.
 
 ```sh
-node shell.mjs prototypes deactivate
+node bin/app prototypes deactivate
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1021,7 +1021,7 @@ node shell.mjs prototypes deactivate
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1030,7 +1030,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes deactivate --dry-run
+node bin/app prototypes deactivate --dry-run
 ```
 
 ## prototypes seal
@@ -1038,7 +1038,7 @@ node shell.mjs prototypes deactivate --dry-run
 Seal snapshot content in a version; create a new version for further edits.
 
 ```sh
-node shell.mjs prototypes seal [arguments] [options]
+node bin/app prototypes seal [arguments] [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1053,7 +1053,7 @@ node shell.mjs prototypes seal [arguments] [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1062,7 +1062,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes seal exploration --version v1 --dry-run
+node bin/app prototypes seal exploration --version v1 --dry-run
 ```
 
 ## prototypes archive
@@ -1070,7 +1070,7 @@ node shell.mjs prototypes seal exploration --version v1 --dry-run
 Archive an inactive prototype without deleting any of its files.
 
 ```sh
-node shell.mjs prototypes archive [arguments]
+node bin/app prototypes archive [arguments]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1084,7 +1084,7 @@ node shell.mjs prototypes archive [arguments]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1093,7 +1093,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes archive exploration --dry-run
+node bin/app prototypes archive exploration --dry-run
 ```
 
 ## prototypes restore
@@ -1101,7 +1101,7 @@ node shell.mjs prototypes archive exploration --dry-run
 Restore an archived prototype without activating it.
 
 ```sh
-node shell.mjs prototypes restore [arguments]
+node bin/app prototypes restore [arguments]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1115,7 +1115,7 @@ node shell.mjs prototypes restore [arguments]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1124,7 +1124,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes restore exploration --dry-run
+node bin/app prototypes restore exploration --dry-run
 ```
 
 ## prototypes import
@@ -1132,7 +1132,7 @@ node shell.mjs prototypes restore exploration --dry-run
 Import a validated workspace bundle using reviewed, conflict-checked file writes.
 
 ```sh
-node shell.mjs prototypes import [options]
+node bin/app prototypes import [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1147,7 +1147,7 @@ node shell.mjs prototypes import [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1156,7 +1156,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes import --input prototype-workspace.json --dry-run
+node bin/app prototypes import --input prototype-workspace.json --dry-run
 ```
 
 ## prototypes export
@@ -1164,7 +1164,7 @@ node shell.mjs prototypes import --input prototype-workspace.json --dry-run
 Export the complete workspace to inert JSON outside docs/concepts; never overwrite different files.
 
 ```sh
-node shell.mjs prototypes export [options]
+node bin/app prototypes export [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1179,7 +1179,7 @@ node shell.mjs prototypes export [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1188,7 +1188,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes export --out prototype-workspace.json --dry-run
+node bin/app prototypes export --out prototype-workspace.json --dry-run
 ```
 
 ## prototypes adopt
@@ -1196,7 +1196,7 @@ node shell.mjs prototypes export --out prototype-workspace.json --dry-run
 Import the pinned active project through the existing configuration conflict workflow.
 
 ```sh
-node shell.mjs prototypes adopt [options]
+node bin/app prototypes adopt [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1211,7 +1211,7 @@ node shell.mjs prototypes adopt [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1220,7 +1220,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes adopt --resolve import --dry-run
+node bin/app prototypes adopt --resolve import --dry-run
 ```
 
 ## prototypes generate
@@ -1228,7 +1228,7 @@ node shell.mjs prototypes adopt --resolve import --dry-run
 Generate strictly from the saved active variant; no implicit selection or process execution.
 
 ```sh
-node shell.mjs prototypes generate [options]
+node bin/app prototypes generate [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1247,7 +1247,7 @@ node shell.mjs prototypes generate [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1256,7 +1256,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs prototypes generate --target generated-preview --dry-run
+node bin/app prototypes generate --target generated-preview --dry-run
 ```
 
 ## handout generate
@@ -1264,7 +1264,7 @@ node shell.mjs prototypes generate --target generated-preview --dry-run
 Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.
 
 ```sh
-node shell.mjs handout generate [options]
+node bin/app handout generate [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1279,7 +1279,7 @@ node shell.mjs handout generate [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1288,8 +1288,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs handout generate --dry-run --json
-node shell.mjs handout generate --plan-out handout.plan.json --json
+node bin/app handout generate --dry-run --json
+node bin/app handout generate --plan-out handout.plan.json --json
 ```
 
 ## handout refresh
@@ -1297,7 +1297,7 @@ node shell.mjs handout generate --plan-out handout.plan.json --json
 Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.
 
 ```sh
-node shell.mjs handout refresh [options]
+node bin/app handout refresh [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1312,7 +1312,7 @@ node shell.mjs handout refresh [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1321,7 +1321,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs handout refresh --plan-out handout-refresh.plan.json --json
+node bin/app handout refresh --plan-out handout-refresh.plan.json --json
 ```
 
 ## handout validate
@@ -1329,7 +1329,7 @@ node shell.mjs handout refresh --plan-out handout-refresh.plan.json --json
 Validate required handout decisions and source freshness without writes or execution authorization.
 
 ```sh
-node shell.mjs handout validate [options]
+node bin/app handout validate [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1340,7 +1340,7 @@ node shell.mjs handout validate [options]
 | --- | --- | --- | --- |
 | --prds | value | Project-relative PRD folder override; fingerprinted and retained by handout refresh/validation. | Default: configs/user-settings.json paths.prds, otherwise docs/prds |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1349,7 +1349,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs handout validate --json
+node bin/app handout validate --json
 ```
 
 ## handout inspect
@@ -1357,7 +1357,7 @@ node shell.mjs handout validate --json
 Read structured handout answers, diagnostics and non-authorizing readiness.
 
 ```sh
-node shell.mjs handout inspect [options]
+node bin/app handout inspect [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1368,7 +1368,7 @@ node shell.mjs handout inspect [options]
 | --- | --- | --- | --- |
 | --prds | value | Project-relative PRD folder override; fingerprinted and retained by handout refresh/validation. | Default: configs/user-settings.json paths.prds, otherwise docs/prds |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1377,7 +1377,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs handout inspect --json
+node bin/app handout inspect --json
 ```
 
 ## support report
@@ -1385,7 +1385,7 @@ node shell.mjs handout inspect --json
 Collect an opt-in, allowlisted local support report without identities, paths, content or network calls.
 
 ```sh
-node shell.mjs support report
+node bin/app support report
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1395,7 +1395,7 @@ node shell.mjs support report
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1404,7 +1404,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs support report --json
+node bin/app support report --json
 ```
 
 ## project measure
@@ -1412,7 +1412,7 @@ node shell.mjs support report --json
 Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.
 
 ```sh
-node shell.mjs project measure [options]
+node bin/app project measure [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1425,7 +1425,7 @@ node shell.mjs project measure [options]
 | --samples | value | Measured samples per operation, after one cold sample and three retained warmups (3..30). | Default: 10 |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1434,7 +1434,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs project measure --input project.json --samples 10 --json
+node bin/app project measure --input project.json --samples 10 --json
 ```
 
 ## project schema
@@ -1442,7 +1442,7 @@ node shell.mjs project measure --input project.json --samples 10 --json
 Discover the versioned project-v6 transport schema and semantic validation boundary.
 
 ```sh
-node shell.mjs project schema [options]
+node bin/app project schema [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1453,7 +1453,7 @@ node shell.mjs project schema [options]
 | --- | --- | --- | --- |
 | --version | value | Published project schema version. Legacy documents use project validate. | Values: 6; Default: 6 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1462,7 +1462,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs project schema --version 6 --json
+node bin/app project schema --version 6 --json
 ```
 
 ## project validate
@@ -1470,7 +1470,7 @@ node shell.mjs project schema --version 6 --json
 Validate/migrate complete project JSON without generation or writes; no authored content in reports.
 
 ```sh
-node shell.mjs project validate [options]
+node bin/app project validate [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1481,7 +1481,7 @@ node shell.mjs project validate [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1490,7 +1490,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs project validate --input project.json --json
+node bin/app project validate --input project.json --json
 ```
 
 ## airship status
@@ -1498,7 +1498,7 @@ node shell.mjs project validate --input project.json --json
 Read optional Airship configuration and local install state.
 
 ```sh
-node shell.mjs airship status
+node bin/app airship status
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1508,7 +1508,7 @@ node shell.mjs airship status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1517,7 +1517,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs airship status --json
+node bin/app airship status --json
 ```
 
 ## airship enable
@@ -1525,7 +1525,7 @@ node shell.mjs airship status --json
 Review enabling local safe Airship tooling; never installs or launches.
 
 ```sh
-node shell.mjs airship enable [options]
+node bin/app airship enable [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1542,7 +1542,7 @@ node shell.mjs airship enable [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1551,8 +1551,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs airship enable --agent codex --dry-run
-node shell.mjs airship enable --yes
+node bin/app airship enable --agent codex --dry-run
+node bin/app airship enable --yes
 ```
 
 ## airship disable
@@ -1560,7 +1560,7 @@ node shell.mjs airship enable --yes
 Review disabling future Airship launches; preserve installed tooling and edits.
 
 ```sh
-node shell.mjs airship disable
+node bin/app airship disable
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1574,7 +1574,7 @@ node shell.mjs airship disable
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1583,8 +1583,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs airship disable --dry-run
-node shell.mjs airship disable --yes
+node bin/app airship disable --dry-run
+node bin/app airship disable --yes
 ```
 
 ## airship install
@@ -1592,7 +1592,7 @@ node shell.mjs airship disable --yes
 Explicitly install the pinned CLI in an isolated project-local prefix (--yes).
 
 ```sh
-node shell.mjs airship install
+node bin/app airship install
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -1605,7 +1605,7 @@ node shell.mjs airship install
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1614,8 +1614,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs airship install --dry-run
-node shell.mjs airship install --yes
+node bin/app airship install --dry-run
+node bin/app airship install --yes
 ```
 
 ## airship start
@@ -1623,7 +1623,7 @@ node shell.mjs airship install --yes
 Explicitly start the local safe editor against the source preview (--yes).
 
 ```sh
-node shell.mjs airship start
+node bin/app airship start
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -1636,7 +1636,7 @@ node shell.mjs airship start
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1645,8 +1645,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs airship start --dry-run
-node shell.mjs airship start --yes
+node bin/app airship start --dry-run
+node bin/app airship start --yes
 ```
 
 ## airship doctor
@@ -1654,7 +1654,7 @@ node shell.mjs airship start --yes
 Run third-party Airship diagnostics only with --yes.
 
 ```sh
-node shell.mjs airship doctor
+node bin/app airship doctor
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -1667,7 +1667,7 @@ node shell.mjs airship doctor
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1676,8 +1676,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs airship doctor --dry-run
-node shell.mjs airship doctor --yes
+node bin/app airship doctor --dry-run
+node bin/app airship doctor --yes
 ```
 
 ## compiler check
@@ -1685,7 +1685,7 @@ node shell.mjs airship doctor --yes
 Analyze project JSON without generation or writes; --report-dir explicitly retains diagnostics.
 
 ```sh
-node shell.mjs compiler check [options]
+node bin/app compiler check [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1701,7 +1701,7 @@ node shell.mjs compiler check [options]
 | --report-dir | value | Explicit new report directory beneath reports/compiler; omitted means no reports are written. | See command semantics |
 | --debug | flag | Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1710,7 +1710,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs compiler check --input project.json --json
+node bin/app compiler check --input project.json --json
 ```
 
 ## compiler inspect
@@ -1718,7 +1718,7 @@ node shell.mjs compiler check --input project.json --json
 Inspect normalized IR or an in-memory artifact inventory; never applies a workspace plan.
 
 ```sh
-node shell.mjs compiler inspect [options]
+node bin/app compiler inspect [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1735,7 +1735,7 @@ node shell.mjs compiler inspect [options]
 | --report-dir | value | Explicit new report directory beneath reports/compiler; omitted means no reports are written. | See command semantics |
 | --debug | flag | Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1744,7 +1744,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json
+node bin/app compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json
 ```
 
 ## compiler explain
@@ -1752,7 +1752,7 @@ node shell.mjs compiler inspect --input project.json --stage artifacts --output-
 Explain a stable compiler diagnostic code.
 
 ```sh
-node shell.mjs compiler explain [arguments]
+node bin/app compiler explain [arguments]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1762,7 +1762,7 @@ node shell.mjs compiler explain [arguments]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1771,7 +1771,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs compiler explain COMPILER_REFERENCE_MISSING
+node bin/app compiler explain COMPILER_REFERENCE_MISSING
 ```
 
 ## version
@@ -1779,7 +1779,7 @@ node shell.mjs compiler explain COMPILER_REFERENCE_MISSING
 Report the pinned framework and current Node versions.
 
 ```sh
-node shell.mjs version
+node bin/app version
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1789,7 +1789,7 @@ node shell.mjs version
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1798,7 +1798,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs --version --json
+node bin/app --version --json
 ```
 
 ## styles inspect
@@ -1806,7 +1806,7 @@ node shell.mjs --version --json
 Validate saved design tokens and inspect scoped Nuxt UI bindings.
 
 ```sh
-node shell.mjs styles inspect [options]
+node bin/app styles inspect [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1817,7 +1817,7 @@ node shell.mjs styles inspect [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1826,7 +1826,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs styles inspect --input design/project.json
+node bin/app styles inspect --input design/project.json
 ```
 
 ## styles export
@@ -1834,7 +1834,7 @@ node shell.mjs styles inspect --input design/project.json
 Plan deterministic CSS, JSON, Markdown or HTML exports.
 
 ```sh
-node shell.mjs styles export [options]
+node bin/app styles export [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -1851,7 +1851,7 @@ node shell.mjs styles export [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1860,8 +1860,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs styles export --input design/project.json --format css --dry-run
-node shell.mjs styles export --input design/project.json --format html --yes
+node bin/app styles export --input design/project.json --format css --dry-run
+node bin/app styles export --input design/project.json --format html --yes
 ```
 
 ## help
@@ -1869,7 +1869,7 @@ node shell.mjs styles export --input design/project.json --format html --yes
 Discover commands without reading project code; --all lists every command.
 
 ```sh
-node shell.mjs help [command] [--all]
+node bin/app help [command] [--all]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1880,7 +1880,7 @@ node shell.mjs help [command] [--all]
 | --- | --- | --- | --- |
 | --all | flag | List every command with its summary, grouped. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1889,8 +1889,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs help check
-node shell.mjs help --all
+node bin/app help check
+node bin/app help --all
 ```
 
 ## capabilities
@@ -1898,7 +1898,7 @@ node shell.mjs help --all
 Versioned command and maker contracts; no custom-code discovery.
 
 ```sh
-node shell.mjs capabilities
+node bin/app capabilities
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1908,7 +1908,7 @@ node shell.mjs capabilities
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1917,7 +1917,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs capabilities --json
+node bin/app capabilities --json
 ```
 
 ## schema
@@ -1925,7 +1925,7 @@ node shell.mjs capabilities --json
 Machine-readable operation request/result contracts.
 
 ```sh
-node shell.mjs schema
+node bin/app schema
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1935,7 +1935,7 @@ node shell.mjs schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1944,7 +1944,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs schema --json
+node bin/app schema --json
 ```
 
 ## status
@@ -1952,7 +1952,7 @@ node shell.mjs schema --json
 Project identity, configuration and readiness observations.
 
 ```sh
-node shell.mjs status
+node bin/app status
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1962,7 +1962,7 @@ node shell.mjs status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1971,8 +1971,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs status
-node shell.mjs status --json
+node bin/app status
+node bin/app status --json
 ```
 
 ## doctor
@@ -1980,7 +1980,7 @@ node shell.mjs status --json
 Read-only toolchain/configuration diagnostics.
 
 ```sh
-node shell.mjs doctor
+node bin/app doctor
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -1990,7 +1990,7 @@ node shell.mjs doctor
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -1999,7 +1999,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs doctor
+node bin/app doctor
 ```
 
 ## config get
@@ -2007,7 +2007,7 @@ node shell.mjs doctor
 Read the effective configuration.
 
 ```sh
-node shell.mjs config get
+node bin/app config get
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2017,7 +2017,7 @@ node shell.mjs config get
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2026,7 +2026,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs config get --json
+node bin/app config get --json
 ```
 
 ## config explain
@@ -2034,7 +2034,7 @@ node shell.mjs config get --json
 Explain persisted configuration and identity authority.
 
 ```sh
-node shell.mjs config explain
+node bin/app config explain
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2044,7 +2044,7 @@ node shell.mjs config explain
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2053,7 +2053,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs config explain
+node bin/app config explain
 ```
 
 ## config validate
@@ -2061,7 +2061,7 @@ node shell.mjs config explain
 Validate configuration without changes.
 
 ```sh
-node shell.mjs config validate
+node bin/app config validate
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2071,7 +2071,7 @@ node shell.mjs config validate
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2080,7 +2080,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs config validate
+node bin/app config validate
 ```
 
 ## config set
@@ -2088,7 +2088,7 @@ node shell.mjs config validate
 Plan a validated configuration update from JSON.
 
 ```sh
-node shell.mjs config set [options]
+node bin/app config set [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2103,7 +2103,7 @@ node shell.mjs config set [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2112,7 +2112,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs config set --input config.json --dry-run
+node bin/app config set --input config.json --dry-run
 ```
 
 ## setup status
@@ -2120,7 +2120,7 @@ node shell.mjs config set --input config.json --dry-run
 Inspect resumable setup progress against actual current input bytes; no processes or writes.
 
 ```sh
-node shell.mjs setup status
+node bin/app setup status
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2130,7 +2130,7 @@ node shell.mjs setup status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2139,7 +2139,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs setup status --json
+node bin/app setup status --json
 ```
 
 ## setup resume
@@ -2147,7 +2147,7 @@ node shell.mjs setup status --json
 Explicitly run one setup stage with fresh input checks and retained interruption/failure history.
 
 ```sh
-node shell.mjs setup resume [options]
+node bin/app setup resume [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2164,7 +2164,7 @@ node shell.mjs setup resume [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2173,8 +2173,8 @@ Parser-accepted common flags without documented semantics here: `--plan-out`. Do
 ### Examples
 
 ```sh
-node shell.mjs setup resume --stage verify --dry-run --json
-node shell.mjs setup resume --stage verify --resume-hash <digest> --yes
+node bin/app setup resume --stage verify --dry-run --json
+node bin/app setup resume --stage verify --resume-hash <digest> --yes
 ```
 
 ## setup
@@ -2182,7 +2182,7 @@ node shell.mjs setup resume --stage verify --resume-hash <digest> --yes
 Configure this folder from a verified starter, blank project or JSON; no implicit install.
 
 ```sh
-node shell.mjs setup [options]
+node bin/app setup [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2213,7 +2213,7 @@ node shell.mjs setup [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2222,9 +2222,9 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs setup --starter quick-capture --id capture --name Capture --author Me --dry-run
-node shell.mjs setup --id folio-tools --name "Folio Tools" --author "Me" --blank --yes
-node shell.mjs setup --input ./my-project.json --dry-run --json
+node bin/app setup --starter quick-capture --id capture --name Capture --author Me --dry-run
+node bin/app setup --id folio-tools --name "Folio Tools" --author "Me" --blank --yes
+node bin/app setup --input ./my-project.json --dry-run --json
 ```
 
 ## concept schema
@@ -2232,7 +2232,7 @@ node shell.mjs setup --input ./my-project.json --dry-run --json
 Discover the data-only concept manifest contract.
 
 ```sh
-node shell.mjs concept schema
+node bin/app concept schema
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2242,7 +2242,7 @@ node shell.mjs concept schema
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2251,7 +2251,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs concept schema --json
+node bin/app concept schema --json
 ```
 
 ## concept inspect
@@ -2259,7 +2259,7 @@ node shell.mjs concept schema --json
 Inspect a docs/concepts JSON/HTML input, or return the current project base hash.
 
 ```sh
-node shell.mjs concept inspect [options]
+node bin/app concept inspect [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2270,7 +2270,7 @@ node shell.mjs concept inspect [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2279,8 +2279,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs concept inspect --json
-node shell.mjs concept inspect --input docs/concepts/capture/concept.json
+node bin/app concept inspect --json
+node bin/app concept inspect --input docs/concepts/capture/concept.json
 ```
 
 ## concept import
@@ -2288,7 +2288,7 @@ node shell.mjs concept inspect --input docs/concepts/capture/concept.json
 Plan reviewed project, new-feature or base-bound improvement intake. Never executes HTML/source.
 
 ```sh
-node shell.mjs concept import [options]
+node bin/app concept import [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2304,7 +2304,7 @@ node shell.mjs concept import [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2313,8 +2313,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json
-node shell.mjs plan apply concept.plan.json --yes
+node bin/app concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json
+node bin/app plan apply concept.plan.json --yes
 ```
 
 ## project inspect
@@ -2322,7 +2322,7 @@ node shell.mjs plan apply concept.plan.json --yes
 Validate a companion export and report compiler obligations.
 
 ```sh
-node shell.mjs project inspect [options]
+node bin/app project inspect [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2333,7 +2333,7 @@ node shell.mjs project inspect [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2342,7 +2342,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs project inspect --input project.json
+node bin/app project inspect --input project.json
 ```
 
 ## project import
@@ -2350,7 +2350,7 @@ node shell.mjs project inspect --input project.json
 Review configuration conflicts and accept a design snapshot.
 
 ```sh
-node shell.mjs project import [options]
+node bin/app project import [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2366,7 +2366,7 @@ node shell.mjs project import [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2375,7 +2375,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs project import --input project.json --resolve project --dry-run
+node bin/app project import --input project.json --resolve project --dry-run
 ```
 
 ## new
@@ -2383,7 +2383,7 @@ node shell.mjs project import --input project.json --resolve project --dry-run
 Create a new project in <dir> from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without <dir>: new --starter <id>.
 
 ```sh
-node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]
+node bin/app new <dir> (--starter <id> | --from <project.json>) [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2415,7 +2415,7 @@ node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2424,11 +2424,11 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs new --list
-node shell.mjs new ../folio-tools --starter custom-file-view --extension folio
-node shell.mjs new ../quick-capture --starter quick-capture --yes
-node shell.mjs new ../folio-tools --from folio-tools.companion.json
-node shell.mjs new ../folio-tools --starter blank --storybook on --storybook-stories on
+node bin/app new --list
+node bin/app new ../folio-tools --starter custom-file-view --extension folio
+node bin/app new ../quick-capture --starter quick-capture --yes
+node bin/app new ../folio-tools --from folio-tools.companion.json
+node bin/app new ../folio-tools --starter blank --storybook on --storybook-stories on
 ```
 
 ## generate
@@ -2436,7 +2436,7 @@ node shell.mjs new ../folio-tools --starter blank --storybook on --storybook-sto
 Plan the existing project compiler; --vault/--target retain compatibility.
 
 ```sh
-node shell.mjs generate [options]
+node bin/app generate [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2457,7 +2457,7 @@ node shell.mjs generate [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2466,8 +2466,8 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs generate --scope feature:workspace --plan-out generation.plan.json
-node shell.mjs generate --yes
+node bin/app generate --scope feature:workspace --plan-out generation.plan.json
+node bin/app generate --yes
 ```
 
 ## make
@@ -2475,7 +2475,7 @@ node shell.mjs generate --yes
 Use the shared maker registry and file planner.
 
 ```sh
-node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>
+node bin/app make <recipe> <name> [options] | make list | make describe <recipe>
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2503,7 +2503,7 @@ node shell.mjs make <recipe> <name> [options] | make list | make describe <recip
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2512,10 +2512,10 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs make list
-node shell.mjs make file-extension board --feature documents --extension board
-node shell.mjs make context-menu inspect --feature documents --extensions md,board
-node shell.mjs make feature bookmarks --entity bookmark --dry-run
+node bin/app make list
+node bin/app make file-extension board --feature documents --extension board
+node bin/app make context-menu inspect --feature documents --extensions md,board
+node bin/app make feature bookmarks --entity bookmark --dry-run
 ```
 
 ## plan inspect
@@ -2523,7 +2523,7 @@ node shell.mjs make feature bookmarks --entity bookmark --dry-run
 Rebuild and compare a saved request plan; never execute it.
 
 ```sh
-node shell.mjs plan inspect <plan-file>
+node bin/app plan inspect <plan-file>
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2533,7 +2533,7 @@ node shell.mjs plan inspect <plan-file>
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2542,7 +2542,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs plan inspect generation.plan.json
+node bin/app plan inspect generation.plan.json
 ```
 
 ## plan apply
@@ -2550,7 +2550,7 @@ node shell.mjs plan inspect generation.plan.json
 Rebuild a saved request and apply only its matching reviewed plan.
 
 ```sh
-node shell.mjs plan apply <plan-file> --yes
+node bin/app plan apply <plan-file> --yes
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2564,7 +2564,7 @@ node shell.mjs plan apply <plan-file> --yes
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2573,7 +2573,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs plan apply generation.plan.json --yes
+node bin/app plan apply generation.plan.json --yes
 ```
 
 ## install
@@ -2581,7 +2581,7 @@ node shell.mjs plan apply generation.plan.json --yes
 Explicit exact-lock npm ci; reviewed lifecycle hooks may run.
 
 ```sh
-node shell.mjs install
+node bin/app install
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2594,7 +2594,7 @@ node shell.mjs install
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2603,7 +2603,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs install --yes
+node bin/app install --yes
 ```
 
 ## storybook status
@@ -2611,7 +2611,7 @@ node shell.mjs install --yes
 Inspect the independent story-generation and optional Storybook switches; never installs.
 
 ```sh
-node shell.mjs storybook status
+node bin/app storybook status
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -2621,7 +2621,7 @@ node shell.mjs storybook status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2630,7 +2630,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs storybook status --json
+node bin/app storybook status --json
 ```
 
 ## storybook install
@@ -2638,7 +2638,7 @@ node shell.mjs storybook status --json
 Explicitly install the enabled optional Storybook workspace; first resolution then exact-lock npm ci.
 
 ```sh
-node shell.mjs storybook install
+node bin/app storybook install
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2651,7 +2651,7 @@ node shell.mjs storybook install
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2660,8 +2660,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs storybook install --dry-run
-node shell.mjs storybook install --yes
+node bin/app storybook install --dry-run
+node bin/app storybook install --yes
 ```
 
 ## storybook check
@@ -2669,7 +2669,7 @@ node shell.mjs storybook install --yes
 Type-check the installed optional Storybook workspace; not a default project gate.
 
 ```sh
-node shell.mjs storybook check
+node bin/app storybook check
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2681,7 +2681,7 @@ node shell.mjs storybook check
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2690,7 +2690,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs storybook check
+node bin/app storybook check
 ```
 
 ## storybook dev
@@ -2698,7 +2698,7 @@ node shell.mjs storybook check
 Run the enabled optional Storybook locally; no auto-open, telemetry or cloud publication.
 
 ```sh
-node shell.mjs storybook dev
+node bin/app storybook dev
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2710,7 +2710,7 @@ node shell.mjs storybook dev
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 3600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2719,7 +2719,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs storybook dev
+node bin/app storybook dev
 ```
 
 ## storybook build
@@ -2727,7 +2727,7 @@ node shell.mjs storybook dev
 Build the enabled optional Storybook to local static files; never publishes.
 
 ```sh
-node shell.mjs storybook build
+node bin/app storybook build
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2739,7 +2739,7 @@ node shell.mjs storybook build
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2748,7 +2748,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs storybook build
+node bin/app storybook build
 ```
 
 ## clickdummy build
@@ -2756,7 +2756,7 @@ node shell.mjs storybook build
 Build the generated Vue project as offline HTML with synthetic read data. No native/business writes.
 
 ```sh
-node shell.mjs clickdummy build [options]
+node bin/app clickdummy build [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2769,7 +2769,7 @@ node shell.mjs clickdummy build [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2778,8 +2778,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs clickdummy build
-node shell.mjs clickdummy build --replace
+node bin/app clickdummy build
+node bin/app clickdummy build --replace
 ```
 
 ## build
@@ -2787,7 +2787,7 @@ node shell.mjs clickdummy build --replace
 Run the existing production bundler.
 
 ```sh
-node shell.mjs build
+node bin/app build
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2799,7 +2799,7 @@ node shell.mjs build
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2808,7 +2808,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs build
+node bin/app build
 ```
 
 ## test
@@ -2816,7 +2816,7 @@ node shell.mjs build
 Run unit/project, browser, native qualification or real-Obsidian tests.
 
 ```sh
-node shell.mjs test [options]
+node bin/app test [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2829,7 +2829,7 @@ node shell.mjs test [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2838,9 +2838,9 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs test
-node shell.mjs test --profile obsidian
-node shell.mjs test --profile browser
+node bin/app test
+node bin/app test --profile obsidian
+node bin/app test --profile browser
 ```
 
 ## check
@@ -2848,7 +2848,7 @@ node shell.mjs test --profile browser
 Fast daily/agent gate: typecheck, lint and tests; runs every step and summarizes failures. Not verify.
 
 ```sh
-node shell.mjs check [options]
+node bin/app check [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2861,7 +2861,7 @@ node shell.mjs check [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 per step |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2870,8 +2870,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs check
-node shell.mjs check --fast --json
+node bin/app check
+node bin/app check --fast --json
 ```
 
 ## check submission
@@ -2879,7 +2879,7 @@ node shell.mjs check --fast --json
 Local mirror of documented Obsidian community review rules; runs the project ESLint configuration (trusted project code) and writes nothing.
 
 ```sh
-node shell.mjs check submission
+node bin/app check submission
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2891,7 +2891,7 @@ node shell.mjs check submission
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2900,8 +2900,8 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs check submission
-node shell.mjs check submission --json
+node bin/app check submission
+node bin/app check submission --json
 ```
 
 ## verify
@@ -2909,7 +2909,7 @@ node shell.mjs check submission --json
 Run existing full verification; project scope is explicitly separate.
 
 ```sh
-node shell.mjs verify [options]
+node bin/app verify [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2922,7 +2922,7 @@ node shell.mjs verify [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2931,7 +2931,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs verify --profile project
+node bin/app verify --profile project
 ```
 
 ## dev
@@ -2939,7 +2939,7 @@ node shell.mjs verify --profile project
 Run development watch, UI harness or the real-Obsidian sandbox; cancel with Ctrl-C.
 
 ```sh
-node shell.mjs dev [options]
+node bin/app dev [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -2952,7 +2952,7 @@ node shell.mjs dev [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 3600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2961,9 +2961,9 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs dev --profile obsidian
-node shell.mjs dev
-node shell.mjs dev --profile ui
+node bin/app dev --profile obsidian
+node bin/app dev
+node bin/app dev --profile ui
 ```
 
 ## vault prepare
@@ -2971,7 +2971,7 @@ node shell.mjs dev --profile ui
 Plan a marker in the configured isolated test vault.
 
 ```sh
-node shell.mjs vault prepare
+node bin/app vault prepare
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -2985,7 +2985,7 @@ node shell.mjs vault prepare
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -2994,7 +2994,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs vault prepare --yes
+node bin/app vault prepare --yes
 ```
 
 ## plugin install
@@ -3002,7 +3002,7 @@ node shell.mjs vault prepare --yes
 Install exact built assets into the approved test vault; never enable.
 
 ```sh
-node shell.mjs plugin install
+node bin/app plugin install
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -3016,7 +3016,7 @@ node shell.mjs plugin install
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3025,7 +3025,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs plugin install --dry-run
+node bin/app plugin install --dry-run
 ```
 
 ## data plan
@@ -3033,7 +3033,7 @@ node shell.mjs plugin install --dry-run
 Shared owned test-data plan; never touches production sources.
 
 ```sh
-node shell.mjs data plan [options]
+node bin/app data plan [options]
 ```
 
 **Effect:** fixtures. Owned test-data operation. Mutation/reset uses its own reviewed approval; not a general project write.
@@ -3045,7 +3045,7 @@ node shell.mjs data plan [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3054,7 +3054,7 @@ Parser-accepted common flags without documented semantics here: `--dry-run`, `--
 ### Examples
 
 ```sh
-node shell.mjs data plan --input test-data-manifest.json
+node bin/app data plan --input test-data-manifest.json
 ```
 
 ## data apply
@@ -3062,7 +3062,7 @@ node shell.mjs data plan --input test-data-manifest.json
 Shared owned test-data apply; never touches production sources.
 
 ```sh
-node shell.mjs data apply [options]
+node bin/app data apply [options]
 ```
 
 **Effect:** fixtures. Owned test-data operation. Mutation/reset uses its own reviewed approval; not a general project write.
@@ -3074,7 +3074,7 @@ node shell.mjs data apply [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3083,7 +3083,7 @@ Parser-accepted common flags without documented semantics here: `--dry-run`, `--
 ### Examples
 
 ```sh
-node shell.mjs data apply --input test-data-manifest.json --apply <approval-hash>
+node bin/app data apply --input test-data-manifest.json --apply <approval-hash>
 ```
 
 ## data reset-plan
@@ -3091,7 +3091,7 @@ node shell.mjs data apply --input test-data-manifest.json --apply <approval-hash
 Shared owned test-data reset-plan; never touches production sources.
 
 ```sh
-node shell.mjs data reset-plan [options]
+node bin/app data reset-plan [options]
 ```
 
 **Effect:** fixtures. Owned test-data operation. Mutation/reset uses its own reviewed approval; not a general project write.
@@ -3103,7 +3103,7 @@ node shell.mjs data reset-plan [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3112,7 +3112,7 @@ Parser-accepted common flags without documented semantics here: `--dry-run`, `--
 ### Examples
 
 ```sh
-node shell.mjs data reset-plan --input test-data-manifest.json
+node bin/app data reset-plan --input test-data-manifest.json
 ```
 
 ## data reset
@@ -3120,7 +3120,7 @@ node shell.mjs data reset-plan --input test-data-manifest.json
 Shared owned test-data reset; never touches production sources.
 
 ```sh
-node shell.mjs data reset [options]
+node bin/app data reset [options]
 ```
 
 **Effect:** fixtures. Owned test-data operation. Mutation/reset uses its own reviewed approval; not a general project write.
@@ -3132,7 +3132,7 @@ node shell.mjs data reset [options]
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3141,7 +3141,7 @@ Parser-accepted common flags without documented semantics here: `--dry-run`, `--
 ### Examples
 
 ```sh
-node shell.mjs data reset --input test-data-manifest.json --apply <approval-hash>
+node bin/app data reset --input test-data-manifest.json --apply <approval-hash>
 ```
 
 ## framework status
@@ -3149,7 +3149,7 @@ node shell.mjs data reset --input test-data-manifest.json --apply <approval-hash
 Inspect the pinned kit and its integrity.
 
 ```sh
-node shell.mjs framework status
+node bin/app framework status
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -3159,7 +3159,7 @@ node shell.mjs framework status
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3168,7 +3168,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs framework status
+node bin/app framework status
 ```
 
 ## framework pack
@@ -3176,7 +3176,7 @@ node shell.mjs framework status
 Build a deterministic compiled developer-kit ZIP locally.
 
 ```sh
-node shell.mjs framework pack [options]
+node bin/app framework pack [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -3190,7 +3190,7 @@ node shell.mjs framework pack [options]
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3199,7 +3199,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs framework pack --out ./plugin-framework.zip --yes
+node bin/app framework pack --out ./plugin-framework.zip --yes
 ```
 
 ## framework upgrade
@@ -3207,7 +3207,7 @@ node shell.mjs framework pack --out ./plugin-framework.zip --yes
 Plan an explicit kit replacement; preserves consumer edits.
 
 ```sh
-node shell.mjs framework upgrade [options]
+node bin/app framework upgrade [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -3222,7 +3222,7 @@ node shell.mjs framework upgrade [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3231,7 +3231,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs framework upgrade --from ../extracted-kit --dry-run
+node bin/app framework upgrade --from ../extracted-kit --dry-run
 ```
 
 ## release prepare
@@ -3239,7 +3239,7 @@ node shell.mjs framework upgrade --from ../extracted-kit --dry-run
 Plan source version and release-note changes.
 
 ```sh
-node shell.mjs release prepare [options]
+node bin/app release prepare [options]
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -3255,7 +3255,7 @@ node shell.mjs release prepare [options]
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
 | --plan-out | value | Save a replayable request plan (for plan inspect/apply). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3264,7 +3264,7 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 ### Examples
 
 ```sh
-node shell.mjs release prepare --version 1.0.0 --notes-file notes.md --dry-run
+node bin/app release prepare --version 1.0.0 --notes-file notes.md --dry-run
 ```
 
 ## release check
@@ -3272,7 +3272,7 @@ node shell.mjs release prepare --version 1.0.0 --notes-file notes.md --dry-run
 Inspect packaging and optionally validate a retained release plan.
 
 ```sh
-node shell.mjs release check [options]
+node bin/app release check [options]
 ```
 
 **Effect:** read. Inspection/discovery. Some commands write reports only when explicitly requested; inspect command-specific help.
@@ -3283,7 +3283,7 @@ node shell.mjs release check [options]
 | --- | --- | --- | --- |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3292,7 +3292,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--dr
 ### Examples
 
 ```sh
-node shell.mjs release check
+node bin/app release check
 ```
 
 ## release rehearse
@@ -3300,7 +3300,7 @@ node shell.mjs release check
 Run existing fixed-candidate rehearsal; no public promotion.
 
 ```sh
-node shell.mjs release rehearse [options]
+node bin/app release rehearse [options]
 ```
 
 **Effect:** process. Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.
@@ -3314,7 +3314,7 @@ node shell.mjs release rehearse [options]
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3323,7 +3323,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs release rehearse --commit <sha> --version 1.0.0
+node bin/app release rehearse --commit <sha> --version 1.0.0
 ```
 
 ## release operate
@@ -3331,7 +3331,7 @@ node shell.mjs release rehearse --commit <sha> --version 1.0.0
 Use the existing guarded release executor and separate authorization.
 
 ```sh
-node shell.mjs release operate [options]
+node bin/app release operate [options]
 ```
 
 **Effect:** release. Release workflow. Publication requires separate candidate authorization; --yes does not grant it.
@@ -3345,7 +3345,7 @@ node shell.mjs release operate [options]
 | --execute | flag | Request candidate writes (still requires --authorize). | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
-| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or shell.mjs |
+| --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json, app.mjs or shell.mjs |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
 | --help | flag | Describe this command instead of running it. | See command semantics |
 
@@ -3354,5 +3354,5 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 ### Examples
 
 ```sh
-node shell.mjs release operate --input release-operation.json --dry-run
+node bin/app release operate --input release-operation.json --dry-run
 ```

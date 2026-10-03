@@ -21,13 +21,13 @@ test('prototype maker creates real compiler boilerplate, docs and a fully expand
     const prompt = plan.data.prompt; assert.match(prompt, /Issue desk/); assert.ok(!/\{\{[a-zA-Z]/.test(prompt));
     assert.match(prompt, /not.*completed prototype/i);
     const paths = plan.plan.changes.map(item => item.path);
-    for (const path of ['source/harness/prototype/main.ts', 'source/package-lock.json', 'source/bin/shell.ts', 'design-brief.md', 'prototype-answers.json', 'integration-map.json', 'README.md']) assert.ok(paths.includes('prepared/' + path), path);
+    for (const path of ['source/harness/prototype/main.ts', 'source/package-lock.json', 'source/bin/app.ts', 'design-brief.md', 'prototype-answers.json', 'integration-map.json', 'README.md']) assert.ok(paths.includes('prepared/' + path), path);
     await applyPrepared(plan, plan.planHash);
     const document = openDocument(await readData(join(root, 'prepared/companion.project.json')));
     assert.equal(document.design.nodes.length, 2);
     const receipt = await readData(join(root, 'prepared/source/.companion/generation.json'));
     assert.equal(receipt.projectId, document.project.id);
-    assert.ok(receipt.files.some(file => file.path === 'bin/shell.ts' && file.ownership === 'framework'));
+    assert.ok(receipt.files.some(file => file.path === 'bin/app.ts' && file.ownership === 'framework'));
     const gate = await checkSteps(join(root, 'prepared/source'), false);
     assert.equal(gate.scope, 'generated-project');
     assert.ok(gate.steps.some(step => step.id === 'maker-tests'));

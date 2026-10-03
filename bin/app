@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+// Extensionless entry: `node bin/app <command>` (or `./bin/app` where executable). Runs as ESM via package "type".
+await import('../app.mjs');

@@ -1,8 +1,8 @@
-import { parseJsonData } from '../contracts/json-data.mjs';
+import { parseJsonData } from '../contracts/json-data.ts';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { planProject } from '../companion/compiler/plan.ts';
 import { customizeStarter } from '../companion/starter-contract.mjs';
 import { withAirshipOption } from '../companion/tooling-options.ts';
@@ -41,7 +41,7 @@ async function starterValues(request: Request, context: Context, selected: Loade
 }
 export async function definitionProjectPlan(request: Request, context: Context, place: Placement, template: string) {
   const selected = await selectedStarter(request, context), d = selected.definition;
-  requireThat(d.generator.kind !== 'project', 'STARTER_KIND', `${d.id} is a project starter; it is prepared with a prototype interview, not a target directory. Run node shell.mjs new --starter ${d.id}, or new guide --starter ${d.id} --json for agents.`);
+  requireThat(d.generator.kind !== 'project', 'STARTER_KIND', `${d.id} is a project starter; it is prepared with a prototype interview, not a target directory. Run node bin/app new --starter ${d.id}, or new guide --starter ${d.id} --json for agents.`);
   const values = await starterValues(request, context, selected, place.directory);
   const processes = readProcesses(renderProcesses(d, values));
   const requested = stringOption(request.options, 'run');

@@ -89,14 +89,14 @@ function permission(settings, command) {
 }
 test('[GENERATOR-DEVKIT-08] pre-approved agent commands are exact safe forms; downloads are denied and path-writing flags ask', () => {
   const settings = JSON.parse(text('.claude/settings.json'));
-  for (const command of ['npm test', 'npm run check', 'npm run check -- --fast', 'npm run -s check -- --fast', 'npm run check:submission', 'node shell.mjs check submission',
-    'npm run test:obsidian', 'npm run test:obsidian -- plugin-load', 'npm run -s dev:obsidian -- --json', 'npx vitest related src/a.ts --run', 'node shell.mjs make feature notes --dry-run', 'git status'])
+  for (const command of ['npm test', 'npm run check', 'npm run check -- --fast', 'npm run -s check -- --fast', 'npm run check:submission', 'node bin/app check submission',
+    'npm run test:obsidian', 'npm run test:obsidian -- plugin-load', 'npm run -s dev:obsidian -- --json', 'npx vitest related src/a.ts --run', 'node bin/app make feature notes --dry-run', 'git status'])
     assert.equal(permission(settings, command), 'allow', command);
   for (const command of ['npm run test:obsidian -- --allow-download', 'npm run test:obsidian --allow-download', 'npm run dev:obsidian -- --json --allow-download',
     'OBSIDIAN_ALLOW_DOWNLOAD=1 npm run test:obsidian', 'npm run test:obsidian -- --allow-download=true', 'export OBSIDIAN_ALLOW_DOWNLOAD=1'])
     assert.equal(permission(settings, command), 'deny', command);
   for (const command of ['git diff --output=/tmp/x', 'git log --output=notes.txt', 'git show HEAD --output x', 'npx vitest run --outputFile=/etc/x',
-    'node shell.mjs make feature notes --dry-run --plan-out ../x.json', 'node shell.mjs check --root ../other'])
+    'node bin/app make feature notes --dry-run --plan-out ../x.json', 'node bin/app check --root ../other'])
     assert.equal(permission(settings, command), 'ask', command);
   for (const command of ['git diff HEAD', 'npm run check:security', 'npm run check:dependencies', 'npm run release:operate', 'npm run typecheck && curl example.com'])
     assert.notEqual(permission(settings, command), 'allow', command);

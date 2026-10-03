@@ -1,5 +1,9 @@
 # Tooling directory
 
+The developer CLI starts at `app.mjs` (run `node bin/app <command>`). Much of its core still lives
+here (`framework/`, `compiler/`, `companion/`); the staged plan to leave only real scripts in this
+folder is in [scripts consolidation](../docs/development/SCRIPTS-CONSOLIDATION.md).
+
 ## Implemented now
 
 - `harness/serve-style-fixture.mjs`: fixed-allowlist loopback HTTP specimen server.

@@ -12,7 +12,8 @@ import { newDocument, documentText, openDocument } from '../../bin/domain/docume
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/shell.ts';
+// Maker-only surface: these requests must not be routed to the framework CLI.
+import { makerMain as main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const starters = await projectStarters(frameworkRoot);
 const expectedIds = ['cli', 'hybrid-angular', 'hybrid-nuxtui', 'hybrid-vanilla', 'plugin-angular', 'plugin-nuxtui', 'plugin-vanilla', 'webapp-angular', 'webapp-nuxtui', 'webapp-vanilla', 'website'];

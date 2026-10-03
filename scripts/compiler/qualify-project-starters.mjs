@@ -35,12 +35,12 @@ async function qualify() {
   try {
     if (run('npm version', root, [process.env.QUALIFIED_NPM, '--version']).trim() !== '11.19.1') throw new Error('Wrong npm version.');
     scratch = await mkdtemp(join(tmpdir(), 'qualify-project-'));
-    const discovery = JSON.parse(run('discover', root, ['shell.mjs', 'new', 'guide', '--starter', starter, '--json']));
+    const discovery = JSON.parse(run('discover', root, ['app.mjs', 'new', 'guide', '--starter', starter, '--json']));
     const input = discovery.data.input; report.selection = discovery.data.selection;
     if (report.selection.starter.id !== starter || input.starter !== starter) throw new Error('Discovery did not select the requested starter.');
     Object.assign(input.interview.answers, { title: 'Qualified starter fixture', pages: ['Overview', 'Details'], components: [], approved: true });
     await writeFile(join(scratch, 'request.json'), JSON.stringify(input));
-    const planArgs = ['shell.mjs', 'new', '--root', scratch, '--input', 'request.json', '--out', 'prepared', '--json'];
+    const planArgs = ['app.mjs', 'new', '--root', scratch, '--input', 'request.json', '--out', 'prepared', '--json'];
     const plan = JSON.parse(run('plan', root, planArgs)); report.fingerprint = plan.data.compilerFingerprint;
     const applied = JSON.parse(run('apply', root, [...planArgs, '--apply', plan.data.planHash]));
     if (applied.status !== 'applied') throw new Error('Expected an applied source fixture.');

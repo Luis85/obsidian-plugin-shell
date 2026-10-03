@@ -4,7 +4,8 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { Readable, Writable, PassThrough } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { main } from '../../bin/shell.ts';
+// Maker-only surface: these requests must not be routed to the framework CLI.
+import { makerMain as main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(run) { const root = await mkdtemp(join(await realpath(tmpdir()), 'starters-ui-')); try { await run(root); } finally { await rm(root, { recursive: true, force: true }); } }
 test('agent discovery, validation and failures use one JSON response without opening the terminal', async () => scratch(async root => {

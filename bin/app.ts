@@ -11,14 +11,17 @@ import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stdin, stdout, stderr } from 'node:process';
 import type { Readable, Writable } from 'node:stream';
-import { ask } from '../scripts/framework/input.ts';
-import { failure } from '../scripts/framework/contracts.ts';
+import { ask } from '../scripts/shared/input.ts';
+import { failure } from './adapters/framework/contracts.ts';
+import { result as operationResult, type ResultStatus } from '../scripts/contracts/result.ts';
 import { SketchError } from './domain/errors.ts';
 import { parseArguments, execute, option, type Arguments, type CommandContext } from './adapters/commands.ts';
 import { studio, prototypeWizard } from './presentation/studio.ts';
 import { TerminalSession } from './presentation/tui/session.ts';
 import { useTerminal, useColor } from './presentation/tui/mode.ts';
 import { safe, Back, type Prompts } from './presentation/prompts.ts';
+import { routeArguments } from './adapters/router.ts';
+import { commands as frameworkCommands } from './adapters/framework/catalog.ts';
 import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } from '../plugins/runtime.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
@@ -72,11 +75,25 @@ async function createInteractive(args: Arguments, context: CommandContext, ui: P
 function errorResult(command: string, error: unknown) {
   const issue = error instanceof Back ? new SketchError('CANCELLED', 'Guide cancelled.') : error;
   if (!(issue instanceof SketchError)) return failure(command, issue);
-  return { protocolVersion: 1, command, status: issue.code === 'CANCELLED' ? 'cancelled' : 'failed',
-    data: null, diagnostics: [{ code: issue.code, message: issue.message }] };
+  return { ...operationResult(command, null, issue.code === 'CANCELLED' ? 'cancelled' : 'failed'),
+    diagnostics: [{ code: issue.code, message: issue.message }] };
 }
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
+  const routed = routeArguments(argv, { pluginCommands: new Set(pluginCliCommands().map(entry => entry.id)),
+    frameworkRoots: new Set(frameworkCommands.map(entry => entry.id.split(' ')[0]!)) });
+  if (routed.surface === 'framework') {
+    const { main: frameworkMain } = await import('./adapters/framework-cli.ts');
+    return frameworkMain(routed.args, frameworkRoot);
+  }
+  if (routed.surface === 'memory') {
+    const { main: memoryMain } = await import('../scripts/hindsight/cli.ts');
+    return memoryMain(routed.args);
+  }
+  return makerMain(routed.args, frameworkRoot, io);
+}
+/** The maker surface itself, without routing; its help and failures stay on the supplied streams. */
+export async function makerMain(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
   const controller = new AbortController(), stop = () => controller.abort();
   let plugins: WorkbenchPluginRuntime | undefined;
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
@@ -90,7 +107,7 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
     const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await execute(args, context);
-    const result = { protocolVersion: 1, command, status: data.status ?? 'ok', data, diagnostics: [] };
+    const result = operationResult(command, data, (data.status ?? 'ok') as ResultStatus);
     if (machine) io.output.write(JSON.stringify(result) + '\n');
     else if (data.help) io.output.write(safe(String(data.help)));
     else io.output.write(safe(JSON.stringify(result, null, 2)) + '\n');

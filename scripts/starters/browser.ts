@@ -1,5 +1,5 @@
 /** Browser/CLI-shared starter semantics. No filesystem, process, URL-fetch or storage authority. */
-import { parseDesignData } from '../contracts/json-data.mjs';
+import { parseDesignData } from '../contracts/json-data.ts';
 import { validateDefinition } from './validation.ts';
 import { resolveValues } from './render.ts';
 import { customizeStarter } from '../companion/starter-contract.mjs';

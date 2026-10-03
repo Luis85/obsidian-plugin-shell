@@ -41,10 +41,10 @@ Keep the downloaded/extracted CLI kit intact, for example under
 `<project>/tools/shell-cli/`. From the **project root**, run:
 
 ```sh
-node tools/shell-cli/shell.mjs project-setup --root .
+node tools/shell-cli/bin/app project-setup --root .
 ```
 
-From a source checkout instead, run `node shell.mjs project-setup --root <vault>`.
+From a source checkout instead, run `node bin/app project-setup --root <vault>`.
 Use the qualified Node 24.21.0/npm 11.19.1 toolchain. Source checks require the locked
 repository TypeScript 6.0.3; release kits carry compiled CLI modules and do not
 require an implicit npm install to discover commands or prepare a plan.
@@ -73,8 +73,8 @@ After selecting boilerplate, choose the separately reviewed first run in the wiz
 or start it later from the project root:
 
 ```sh
-node tools/shell-cli/shell.mjs first-run
-node tools/shell-cli/shell.mjs first-run status --json
+node tools/shell-cli/bin/app first-run
+node tools/shell-cli/bin/app first-run status --json
 ```
 
 The runner stops on the first failure and preserves generated source and completed
@@ -146,10 +146,10 @@ Host/plugin `data.json`, project target selection, prototype answers and transie
 terminal state retain their own existing contracts; they are not duplicated here.
 
 ```sh
-node tools/shell-cli/shell.mjs settings
-node tools/shell-cli/shell.mjs settings show --json
-node tools/shell-cli/shell.mjs settings schema --json
-node tools/shell-cli/shell.mjs settings --input settings-change.json --json
+node tools/shell-cli/bin/app settings
+node tools/shell-cli/bin/app settings show --json
+node tools/shell-cli/bin/app settings schema --json
+node tools/shell-cli/bin/app settings --input settings-change.json --json
 ```
 
 A settings mutation is a preview until repeated with its reviewed `--apply` hash.
@@ -158,7 +158,7 @@ rewrite. The interactive settings form selects a migration plan when application
 paths change; agents explicitly call:
 
 ```sh
-node tools/shell-cli/shell.mjs settings migrate --input paths.json --json
+node tools/shell-cli/bin/app settings migrate --input paths.json --json
 # Review file moves, then repeat with --apply <current-planHash>.
 ```
 
@@ -215,12 +215,12 @@ progress/prompts use stderr. Inspect `data.status` and diagnostics, not just exi
 uses 130. No `--yes` approval bypass is added.
 
 ```sh
-node tools/shell-cli/shell.mjs project-setup schema --json
-node tools/shell-cli/shell.mjs project-setup guide --json
-node tools/shell-cli/shell.mjs project-setup scan --json
-node tools/shell-cli/shell.mjs sketch schema --json
-node tools/shell-cli/shell.mjs project-setup validate --input setup.json --json
-node tools/shell-cli/shell.mjs project-setup --input setup.json --json
+node tools/shell-cli/bin/app project-setup schema --json
+node tools/shell-cli/bin/app project-setup guide --json
+node tools/shell-cli/bin/app project-setup scan --json
+node tools/shell-cli/bin/app sketch schema --json
+node tools/shell-cli/bin/app project-setup validate --input setup.json --json
+node tools/shell-cli/bin/app project-setup --input setup.json --json
 ```
 
 Start from [the request example](examples/angular-setup.json). Set
@@ -252,13 +252,13 @@ continue authoring instead of rerunning initialization.
 ## Further brick authoring
 
 ```sh
-node tools/shell-cli/shell.mjs sketch
-node tools/shell-cli/shell.mjs sketch show --json
-node tools/shell-cli/shell.mjs sketch --input changes.json --json
-node tools/shell-cli/shell.mjs sketch generate --json
-node tools/shell-cli/shell.mjs prototype guide --json
-node tools/shell-cli/shell.mjs prototype
-node tools/shell-cli/shell.mjs project-setup status --json
+node tools/shell-cli/bin/app sketch
+node tools/shell-cli/bin/app sketch show --json
+node tools/shell-cli/bin/app sketch --input changes.json --json
+node tools/shell-cli/bin/app sketch generate --json
+node tools/shell-cli/bin/app prototype guide --json
+node tools/shell-cli/bin/app prototype
+node tools/shell-cli/bin/app project-setup status --json
 ```
 
 These commands use saved project/output paths, and generation/prototype preparation

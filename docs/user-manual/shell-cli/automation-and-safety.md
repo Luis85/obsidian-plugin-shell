@@ -7,8 +7,8 @@ The CLI distinguishes inspection, reviewed file plans, trusted processes, owned 
 Use command-specific help:
 
 ```sh
-node shell.mjs help generate --json
-node shell.mjs help release operate --json
+node bin/app help generate --json
+node bin/app help release operate --json
 ```
 
 For ordinary file plans, `--dry-run` previews the change, `--yes` approves the newly reconstructed request, and `--apply` can bind application to a specific returned SHA-256 plan hash. `--plan-out` intentionally saves a plan file, including when combined with a preview. Thus “dry run” does not mean “no filesystem effects whatsoever” when you also explicitly request retained output.
@@ -18,9 +18,9 @@ For ordinary file plans, `--dry-run` previews the change, `--yes` approves the n
 ## The repeatable reviewed-plan pattern
 
 ```sh
-node shell.mjs generate --plan-out generation.plan.json --json --no-interaction
-node shell.mjs plan inspect generation.plan.json --json --no-interaction
-node shell.mjs plan apply generation.plan.json --yes --json --no-interaction
+node bin/app generate --plan-out generation.plan.json --json --no-interaction
+node bin/app plan inspect generation.plan.json --json --no-interaction
+node bin/app plan apply generation.plan.json --yes --json --no-interaction
 ```
 
 Keep the plan tied to the exact request and current workspace. On application the CLI reconstructs and compares it. Editing the plan, source inputs, configuration or target files can make it stale. When a mismatch occurs, preserve the work, inspect the difference and create a new reviewed plan. Never “fix” the check by accepting any hash, deleting ownership information or automatically retrying the write.
@@ -55,7 +55,7 @@ Actual `data` varies by operation. Discover the installed contract with `capabil
 
 The normalized terminal adapter exits with 0 for ordinary successful/planned/unchanged results, 1 for failed/blocked results, and 130 for cancellation. Exit 0 on a preview therefore does not mean changes were applied. Parse the status and operation-specific data as well as the exit code. Keep stdout for the JSON result and stderr for diagnostics/progress; do not merge the streams and then attempt to parse the mixture.
 
-**Transport exceptions:** `shell.mjs memory` dispatches to the optional memory CLI with its own receipts and flags. Legacy generation calls using `--target` without `--json`, and the special legacy `generate --help` path, preserve the older compiler interface. Prefer `help generate --json` and the normalized reviewed-generation path for new automation. Do not assume every launcher path has the result envelope shown above.
+**Transport exceptions:** `node bin/app memory` dispatches to the optional memory CLI with its own receipts and flags. Legacy generation calls using `--target` without `--json`, and the special legacy `generate --help` path, preserve the older compiler interface. Prefer `help generate --json` and the normalized reviewed-generation path for new automation. Do not assume every launcher path has the result envelope shown above.
 
 ## Argument and input rules
 

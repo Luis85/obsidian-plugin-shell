@@ -5,7 +5,7 @@ These commands use the same CLI catalog and typed operation dispatcher as other 
 ## Share a minimal support report
 
 ```sh
-node shell.mjs support report --json
+node bin/app support report --json
 ```
 
 The versioned report includes framework distribution/version, selected Node version, actual Node/platform/architecture, dependency presence, design freshness, outstanding acceptance count and a finite set of diagnostic codes. Native and release readiness are explicitly not inferred.
@@ -17,8 +17,8 @@ Ordinary `doctor`, `compiler inspect --stage ir`, recovery exports, generated pr
 ## Measure actual model operations
 
 ```sh
-node shell.mjs project measure --input project.json --samples 10 --dry-run --json
-node shell.mjs project measure --input project.json --samples 10 --json
+node bin/app project measure --input project.json --samples 10 --dry-run --json
+node bin/app project measure --input project.json --samples 10 --json
 ```
 
 Input may be `-` for bounded UTF-8 JSON on stdin. Three to thirty measured samples are supported. Each of four operations records one cold sample, three warmups and every measured sample: import/validation/migration, JSON export, hierarchy projection and an arrangement proposal. Samples use `performance.now`; median/p95 are nearest-rank observations and no slow result is discarded. The collector yields between samples so cancellation can stop the sequence. A failed warmup, invalid clock, missing/nonfinite sample or cancelled run cannot become passing evidence.

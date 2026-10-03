@@ -21,7 +21,7 @@ export async function firstRunWizard(ui: Prompts, context: Context): Promise<str
   const summary = [plan.app, ...plan.review, ...plan.steps.map(step => 'npm ' + step.args.join(' ')), 'Execution plan hash: ' + plan.planHash].join('\n');
   if (ui.rich) await ui.rich.review('Review first-run execution', [{ title: 'Commands and effects', body: summary }, { title: 'Package and scripts', body: JSON.stringify(plan.package, null, 2) }]);
   else ui.write(summary + '\nPackage and scripts:\n' + JSON.stringify(plan.package, null, 2) + '\n');
-  if (plan.blockers.length) { ui.write(plan.blockers.join('\n') + '\nNo dependency or application process was started. Run shell.mjs first-run after switching toolchains.\n'); return; }
+  if (plan.blockers.length) { ui.write(plan.blockers.join('\n') + '\nNo dependency or application process was started. Run node bin/app first-run after switching toolchains.\n'); return; }
   if (!await confirm(ui, 'Execute this reviewed first run?')) return;
   ui.write('Execution starts now. Ctrl+C stops the current process or closes a ready showcase.\n');
   const result = await executeFirstRun(plan, plan.planHash, { ...context, progress: message => ui.write(safe(message)) });

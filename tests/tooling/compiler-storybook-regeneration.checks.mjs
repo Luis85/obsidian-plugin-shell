@@ -23,8 +23,9 @@ async function sourceFixture(directory) {
     await writeFile(join(directory, file.path), file.bytes, { flag: 'wx' });
   }
   const bootstrap = [];
-  for (const path of ['shell.mjs', 'package.json', 'README.md', 'LICENSE']) {
+  for (const path of ['app.mjs', 'bin/app', 'shell.mjs', 'package.json', 'README.md', 'LICENSE']) {
     const bytes = Buffer.from(snapshot.text(path));
+    await mkdir(dirname(join(directory, path)), { recursive: true });
     await writeFile(join(directory, path), bytes, { flag: 'wx' });
     bootstrap.push({ path, hash: digest(bytes) });
   }

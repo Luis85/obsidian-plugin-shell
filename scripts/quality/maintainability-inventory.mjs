@@ -5,6 +5,8 @@ import { decodeVendor, vendorArchive } from '../styles/vendor-policy.mjs';
 
 const executable = /\.(?:[cm]?[jt]sx?|vue)$/;
 const nonExecutable = /\.(?:json|css|html|md)$/;
+// Exact extensionless launchers. Node loads them as ES modules through the package "type"; measure them as .mjs.
+const extensionless = new Map([['bin/app', 'mjs']]);
 // The concept uses Python to assemble and test its offline artifact. Keep these
 // exact bytes in the inventory, but never present them as JS/TS/Vue measurements.
 // This is a language classification, not a directory or production exemption.
@@ -36,7 +38,7 @@ export async function maintainabilityInventory(root) {
     const golden = /^tests\/fixtures\/.+\.(?:vue|ts)\.txt$/.test(path);
     if (template) view = 'templates';
     else if (golden) view = 'fixtures';
-    else if (executable.test(path)) {
+    else if (executable.test(path) || extensionless.has(path)) {
       if (path.startsWith('src/') || path.startsWith('bin/')) view = 'production';
       else if (path.startsWith('tests/') || path.startsWith('harness/')) view = 'fixtures';
       else view = 'tooling';
@@ -60,7 +62,7 @@ export async function maintainabilityInventory(root) {
         : memoryPython.has(path)
         ? 'Python optional memory tooling; stdlib adapter tests and live-provider acceptance are separate from JS/TS/Vue metrics.'
         : 'Python concept tooling; syntax, assembly and browser evidence are separate from JS/TS/Vue metrics.' } : {}),
-      templateRegion, extension: template || golden ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1) });
+      templateRegion, extension: extensionless.get(path) ?? (template || golden ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1)) });
   }
   for (const path of ['src', 'scripts', 'tests', 'harness']) await visit(path);
   if ((await readdir(root)).includes('bin')) await visit('bin');

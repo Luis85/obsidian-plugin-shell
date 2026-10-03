@@ -31,7 +31,7 @@ The generator produces four owned files below `docs/user-manual/shell-cli/genera
 
 The writer refuses unknown files in its output directory and symlinked destinations. Keep all authored material outside `generated/`. Replacements are per file, with the manifest written last; this is not a claim of a transactional, whole-directory update. An interrupted write requires a fresh inspection/regeneration.
 
-The audit parses simple, single-line authored `node shell.mjs` examples using the real framework argument parser and checks local Markdown file links. It does not execute commands or validate all semantic preconditions. Separately dispatched memory examples are counted but not parsed with the wrong protocol. Complex shell programs and actual end-to-end behavior still need their own tests.
+The audit parses simple, single-line authored `node bin/app` examples using the real framework argument parser and checks local Markdown file links. It does not execute commands or validate all semantic preconditions. Separately dispatched memory examples are counted but not parsed with the wrong protocol. Complex shell programs and actual end-to-end behavior still need their own tests.
 
 ## Add content in a docblock
 

@@ -3,7 +3,7 @@ import type { Model } from '../../companion/compiler/model.ts';
 import type { Entry } from '../../companion/compiler/file-code.ts';
 import { readFile } from 'node:fs/promises';
 import { resolve, relative, isAbsolute, sep } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../shared/file-plan.ts';
 import { digest, json, row, rows, text, requireValue } from '../../companion/compiler/model.ts';
 import { visualDefinitions } from '../../companion/compiler/visual-model.ts';
 import { visualVerification, visualAcceptanceTodo } from '../../companion/compiler/visual-files.ts';
@@ -24,7 +24,7 @@ export async function planArtifacts(options: WorkspaceOptions, input: InputSnaps
   const prefix = options.target === '.' ? '' : options.target+'/';
   const receiptPath = prefix+'.companion/generation.json';
   const inspected = await createFilePlan(input.vault,[{path:receiptPath,content:null}]); const receiptBefore = inspected.changes[0]!.beforeHash;
-  for (const file of options.bootstrap ?? []) requireValue(['shell.mjs','package.json','README.md','LICENSE','design/project.json'].includes(file.path) && /^[a-f0-9]{64}$/.test(file.hash), 'Invalid bootstrap ownership.');
+  for (const file of options.bootstrap ?? []) requireValue(['app.mjs','bin/app','shell.mjs','package.json','README.md','LICENSE','design/project.json'].includes(file.path) && /^[a-f0-9]{64}$/.test(file.hash), 'Invalid bootstrap ownership.');
   let previous = new Map<string,{hash:string;ownership:string}>((options.bootstrap ?? []).map(file => [file.path,{hash:file.hash,ownership:'framework'}]));
   if (receiptBefore) {
     const raw = await readFile(resolve(input.vault,receiptPath),'utf8'); requireValue(digest(raw) === receiptBefore,'Receipt changed while reading.');

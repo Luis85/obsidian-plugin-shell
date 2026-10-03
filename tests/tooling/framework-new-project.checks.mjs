@@ -18,7 +18,7 @@ async function scratch(t) {
 }
 /** The real terminal entry point, never a TTY: it must not prompt or hang. */
 function cli(args, cwd) {
-  return spawnSync(process.execPath, [join(root, 'shell.mjs'), 'new', ...args], { cwd, encoding: 'utf8', timeout: 120000, maxBuffer: 50_000_000, stdio: ['pipe', 'pipe', 'pipe'] });
+  return spawnSync(process.execPath, [join(root, 'app.mjs'), 'new', ...args], { cwd, encoding: 'utf8', timeout: 120000, maxBuffer: 50_000_000, stdio: ['pipe', 'pipe', 'pipe'] });
 }
 function machine(args, cwd) {
   const output = cli([...args, '--json'], cwd);

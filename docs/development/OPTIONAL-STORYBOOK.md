@@ -29,28 +29,28 @@ Neither setting installs packages, starts a server or grants execution authority
 The terminal, shared operation API, compiler inspection, `new`, and legacy generator support independent `--storybook-stories on|off` and `--storybook on|off` overrides:
 
 ```sh
-node shell.mjs new ../folio-tools --from project.json --storybook-stories on --storybook on --yes
-node shell.mjs compiler inspect --input project.json --stage artifacts --storybook-stories on --json
+node bin/app new ../folio-tools --from project.json --storybook-stories on --storybook on --yes
+node bin/app compiler inspect --input project.json --stage artifacts --storybook-stories on --json
 # In an extracted/generated kit with imported project JSON:
-node shell.mjs generate --storybook-stories on --storybook on --plan-out storybook.plan.json
-node shell.mjs plan apply storybook.plan.json --yes
+node bin/app generate --storybook-stories on --storybook on --plan-out storybook.plan.json
+node bin/app plan apply storybook.plan.json --yes
 ```
 
 External `--input`/`--from` files are never overwritten. Overrides are written to the generated `design/project.json`; a reviewed in-place generation also updates the intake receipt, so the next generation and import can still verify ownership. A saved plan remains bound to its request and exact output; toggling either flag invalidates an old approval.
 
-The TypeScript API accepts `compileProject({ source, template, storybook: { enabled, generateStories } })`. It remains pure after the template snapshot is loaded. `node shell.mjs schema --json` exposes the optional field schema as `projectTooling`, alongside the existing request/result schemas.
+The TypeScript API accepts `compileProject({ source, template, storybook: { enabled, generateStories } })`. It remains pure after the template snapshot is loaded. `node bin/app schema --json` exposes the optional field schema as `projectTooling`, alongside the existing request/result schemas.
 
 ## Install and operate Storybook separately
 
 After opting in and generating, install the normal root dependencies separately. Then:
 
 ```sh
-node shell.mjs storybook status --json
-node shell.mjs storybook install --dry-run
-node shell.mjs storybook install --yes
-node shell.mjs storybook check
-node shell.mjs storybook build
-node shell.mjs storybook dev
+node bin/app storybook status --json
+node bin/app storybook install --dry-run
+node bin/app storybook install --yes
+node bin/app storybook check
+node bin/app storybook build
+node bin/app storybook dev
 ```
 
 The first explicitly approved optional install runs npm install in `storybook/` to resolve its own lockfile. Review and commit that lockfile. Subsequent installs run npm ci; a manifest/lock mismatch is refused instead of silently updating it. Dependency lifecycle scripts are trusted project execution, not part of JSON import or generation.

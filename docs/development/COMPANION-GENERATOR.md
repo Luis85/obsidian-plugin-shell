@@ -4,13 +4,13 @@ Related: issue #19, PR #5's full project JSON contract. This is shell tooling, n
 
 ## User journey
 
-1. Download/extract the framework. Use its qualified Node/npm versions. `node shell.mjs setup` forwards to the existing guided setup; `node shell.mjs make` forwards to the existing maker. Both also retain their npm entrypoints.
+1. Download/extract the framework. Use its qualified Node/npm versions. `node bin/app setup` forwards to the existing guided setup; `node bin/app make` forwards to the existing maker. Both also retain their npm entrypoints.
 2. Finish and save the design in the companion HTML prototype, then export **Project JSON**. The bundled `docs/concepts/companion/companion-project.json` is the companion's own design and is the qualification fixture.
 3. **Recommended:** create the project in one reviewable command. It validates the export with the shared contract, keeps its identity unless `--id/--name/--author` override it, previews the plan and hash, and writes only with `--yes` or `--apply <planHash>` into an absent or empty folder outside the checkout:
 
 ```sh
-node shell.mjs new ../my-plugin --from my-plugin.companion.json
-node shell.mjs new ../my-plugin --from my-plugin.companion.json --yes
+node bin/app new ../my-plugin --from my-plugin.companion.json
+node bin/app new ../my-plugin --from my-plugin.companion.json --yes
 ```
 
 The companion's **Generate plugin shell** handoff copies exactly these commands, followed by `cd`, `npm ci`, `npm run check` and `npm run dev:obsidian`, plus a short coding-agent prompt. See [Companion handoff](COMPANION-HANDOFF.md) and [Framework CLI](FRAMEWORK-CLI.md#from-an-exported-companion-project). The lower-level form below remains for an explicit vault/target placement.
@@ -18,7 +18,7 @@ The companion's **Generate plugin shell** handoff copies exactly these commands,
    Plan into a separate, empty project location. The vault must exist; the target directory may be absent. The framework checkout must not contain the target.
 
 ```sh
-node shell.mjs generate \
+node bin/app generate \
   --input /path/to/project.companion.json \
   --vault /path/to/development-vault \
   --target projects/my-plugin
@@ -29,7 +29,7 @@ The default is read-only: stdout is a JSON file-change inventory with `planHash`
 4. Review the paths, changes, source JSON and warnings. Apply by repeating the command with `--apply <planHash>`. The CLI reconstructs the plan; it never executes a serialized plan file. Changed input, template content, target bytes or ownership receipt invalidate the reviewed hash. A conflicting plan exits 2; invalid input/apply exits 1.
 5. Open the generated project and follow its own `README.md`: `npm ci`, `npm run check` (typecheck, ESLint with zero warnings, product tests), `npm run dev:obsidian` (contained real-Obsidian sandbox with hot reload and logs; the first run needs `--allow-download`), `npm run test:watch`, and `npm run test:obsidian`. `npm run verify:project` is what the generated CI runs. Build/install/test/release remain distinct operations, never hidden generation side effects.
 
-Starter shortcut: `node shell.mjs new ../my-plugin --starter quick-capture --author "Me" --yes` runs the same compiler on a reviewed starter ([Framework CLI](FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter)).
+Starter shortcut: `node bin/app new ../my-plugin --starter quick-capture --author "Me" --yes` runs the same compiler on a reviewed starter ([Framework CLI](FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter)).
 
 ## What the generated project contains
 

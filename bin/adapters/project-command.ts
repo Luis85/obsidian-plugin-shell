@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
-import { readInput } from '../../scripts/framework/input.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { readInput } from '../../scripts/shared/input.ts';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import type { Arguments, CommandContext } from './commands.ts';
 import { option } from '../domain/command-options.ts';
 import { requireSketch, SketchError } from '../domain/errors.ts';

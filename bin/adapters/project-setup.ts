@@ -2,9 +2,9 @@ import { validateDocumentationSettings } from './settings-documentation.ts';
 import { lstat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { hash } from '../../scripts/framework/files.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { newDocument, openDocument, documentText } from '../domain/document.ts';
 import { object, keys, text, list } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
@@ -131,7 +131,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
     ignoredMarkdown: intake.ignored, phase: state.phase, prototypePrepared: state.prototypePrepared, boilerplatePrepared: state.boilerplatePrepared,
     installed: false, built: false, runtimeAccepted: false, businessImplemented: false,
     start: data.boilerplate ? { cwd: settings.paths.app, commands: [['npm', 'install'], ['npm', 'run', 'typecheck'], ['npm', 'test'], ['npm', 'start']] } : null,
-    next: 'Use shell.mjs sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
+    next: 'Use node bin/app sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
   return { ...result, validate: async () => {
     await setupPrerequisites(root, settings.preferences.vaultConfigDirectory);
     requireSketch(intakeIdentity(await intakePrds(root, settings, data.prds)) === intakeHash, 'SETUP_STALE_PRDS', 'PRD inventory changed after preview; review setup again.');

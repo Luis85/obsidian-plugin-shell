@@ -7,10 +7,10 @@ argument-hint: "[maker] [name] [options]"
 # Add a feature with the makers
 
 1. List the makers and their options: `npm run make -- --list` (or
-   `node shell.mjs make --list --json`).
+   `node bin/app make --list --json`).
 2. Preview the plan without writing anything, for example:
-   `node shell.mjs make feature bookmarks --entity bookmark --dry-run`
-   `node shell.mjs make command open-bookmarks --feature bookmarks --dry-run`
+   `node bin/app make feature bookmarks --entity bookmark --dry-run`
+   `node bin/app make command open-bookmarks --feature bookmarks --dry-run`
    Review the listed files and the plan hash. Existing files are never overwritten.
 3. Apply exactly that plan: re-run the same command with `--yes` instead of
    `--dry-run` (ask the user first if the plan touches files outside

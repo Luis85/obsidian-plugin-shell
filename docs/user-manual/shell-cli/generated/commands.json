@@ -198,10 +198,10 @@
       "effect": "read",
       "maxArgs": 1,
       "group": "starters",
-      "usage": "node shell.mjs starters coverage [arguments] [options]",
+      "usage": "node bin/app starters coverage [arguments] [options]",
       "examples": [
-        "node shell.mjs starters coverage feature-showcase --json",
-        "node shell.mjs starters coverage feature-showcase --require-model-coverage --json"
+        "node bin/app starters coverage feature-showcase --json",
+        "node bin/app starters coverage feature-showcase --require-model-coverage --json"
       ],
       "options": [
         {
@@ -218,7 +218,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -245,9 +245,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "starters",
-      "usage": "node shell.mjs starters list",
+      "usage": "node bin/app starters list",
       "examples": [
-        "node shell.mjs starters list --json"
+        "node bin/app starters list --json"
       ],
       "options": [
         {
@@ -259,7 +259,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -286,9 +286,9 @@
       "effect": "read",
       "maxArgs": 1,
       "group": "starters",
-      "usage": "node shell.mjs starters show [arguments]",
+      "usage": "node bin/app starters show [arguments]",
       "examples": [
-        "node shell.mjs starters show webapp --json"
+        "node bin/app starters show webapp --json"
       ],
       "options": [
         {
@@ -300,7 +300,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -327,9 +327,9 @@
       "effect": "read",
       "maxArgs": 1,
       "group": "starters",
-      "usage": "node shell.mjs starters validate [arguments]",
+      "usage": "node bin/app starters validate [arguments]",
       "examples": [
-        "node shell.mjs starters validate --json"
+        "node bin/app starters validate --json"
       ],
       "options": [
         {
@@ -341,7 +341,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -368,9 +368,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "starters",
-      "usage": "node shell.mjs starters schema",
+      "usage": "node bin/app starters schema",
       "examples": [
-        "node shell.mjs starters schema --json"
+        "node bin/app starters schema --json"
       ],
       "options": [
         {
@@ -382,7 +382,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -409,9 +409,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "starters",
-      "usage": "node shell.mjs starters add [options]",
+      "usage": "node bin/app starters add [options]",
       "examples": [
-        "node shell.mjs starters add --input my-starter.json --dry-run"
+        "node bin/app starters add --input my-starter.json --dry-run"
       ],
       "options": [
         {
@@ -448,7 +448,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -471,9 +471,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "starters",
-      "usage": "node shell.mjs starters edit [arguments] [options]",
+      "usage": "node bin/app starters edit [arguments] [options]",
       "examples": [
-        "node shell.mjs starters edit webapp --input edited-webapp.json --plan-out starter-edit.plan.json"
+        "node bin/app starters edit webapp --input edited-webapp.json --plan-out starter-edit.plan.json"
       ],
       "options": [
         {
@@ -510,7 +510,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -533,9 +533,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "starters",
-      "usage": "node shell.mjs starters pack [options]",
+      "usage": "node bin/app starters pack [options]",
       "examples": [
-        "node shell.mjs starters pack --out ./workbench-starters.zip --yes"
+        "node bin/app starters pack --out ./workbench-starters.zip --yes"
       ],
       "options": [
         {
@@ -568,7 +568,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -592,10 +592,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "starters",
-      "usage": "node shell.mjs starters run [options]",
+      "usage": "node bin/app starters run [options]",
       "examples": [
-        "node shell.mjs starters run --project ../my-app --process verify,build --dry-run",
-        "node shell.mjs starters run --project ../my-app --process build --yes --trust-processes --apply <planHash>"
+        "node bin/app starters run --project ../my-app --process verify,build --dry-run",
+        "node bin/app starters run --project ../my-app --process build --yes --trust-processes --apply <planHash>"
       ],
       "options": [
         {
@@ -643,7 +643,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -666,10 +666,10 @@
       "effect": "plan",
       "maxArgs": 32,
       "group": "documentation",
-      "usage": "node shell.mjs docs import [file-or-folder ...] [options]",
+      "usage": "node bin/app docs import [file-or-folder ...] [options]",
       "examples": [
-        "node shell.mjs docs import docs/application --dry-run",
-        "node shell.mjs docs import docs/application --apply <reviewed-hash> --yes"
+        "node bin/app docs import docs/application --dry-run",
+        "node bin/app docs import docs/application --apply <reviewed-hash> --yes"
       ],
       "options": [
         {
@@ -706,7 +706,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -729,10 +729,10 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "documentation",
-      "usage": "node shell.mjs docs export [--out <documentation-root>] [options]",
+      "usage": "node bin/app docs export [--out <documentation-root>] [options]",
       "examples": [
-        "node shell.mjs docs export --dry-run",
-        "node shell.mjs docs export --out docs/application --yes"
+        "node bin/app docs export --dry-run",
+        "node bin/app docs export --out docs/application --yes"
       ],
       "options": [
         {
@@ -770,7 +770,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -793,9 +793,9 @@
       "effect": "read",
       "maxArgs": 32,
       "group": "documentation",
-      "usage": "node shell.mjs docs validate [file-or-folder ...] [--json]",
+      "usage": "node bin/app docs validate [file-or-folder ...] [--json]",
       "examples": [
-        "node shell.mjs docs validate docs/application --json"
+        "node bin/app docs validate docs/application --json"
       ],
       "options": [
         {
@@ -807,7 +807,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -834,9 +834,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "documentation",
-      "usage": "node shell.mjs docs status",
+      "usage": "node bin/app docs status",
       "examples": [
-        "node shell.mjs docs status --json"
+        "node bin/app docs status --json"
       ],
       "options": [
         {
@@ -848,7 +848,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -875,9 +875,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "documentation",
-      "usage": "node shell.mjs docs schema",
+      "usage": "node bin/app docs schema",
       "examples": [
-        "node shell.mjs docs schema --json"
+        "node bin/app docs schema --json"
       ],
       "options": [
         {
@@ -889,7 +889,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -916,10 +916,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "documentation",
-      "usage": "node shell.mjs docs recover",
+      "usage": "node bin/app docs recover",
       "examples": [
-        "node shell.mjs docs recover --dry-run",
-        "node shell.mjs docs recover --apply <recovery-hash> --yes"
+        "node bin/app docs recover --dry-run",
+        "node bin/app docs recover --apply <recovery-hash> --yes"
       ],
       "options": [
         {
@@ -952,7 +952,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -975,9 +975,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes list",
+      "usage": "node bin/app prototypes list",
       "examples": [
-        "node shell.mjs prototypes list --json"
+        "node bin/app prototypes list --json"
       ],
       "options": [
         {
@@ -989,7 +989,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1016,9 +1016,9 @@
       "effect": "read",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]",
+      "usage": "node bin/app prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]",
       "examples": [
-        "node shell.mjs prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json"
+        "node bin/app prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json"
       ],
       "options": [
         {
@@ -1055,7 +1055,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1082,9 +1082,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]",
+      "usage": "node bin/app prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]",
       "examples": [
-        "node shell.mjs prototypes prototype-details exploration --name \"Product exploration\" --description \"Compare navigation variants\" --dry-run"
+        "node bin/app prototypes prototype-details exploration --name \"Product exploration\" --description \"Compare navigation variants\" --dry-run"
       ],
       "options": [
         {
@@ -1126,7 +1126,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1149,9 +1149,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes version-details <prototype> --version <version> --label <label> [options]",
+      "usage": "node bin/app prototypes version-details <prototype> --version <version> --label <label> [options]",
       "examples": [
-        "node shell.mjs prototypes version-details exploration --version v1 --label \"Iteration 1\" --dry-run"
+        "node bin/app prototypes version-details exploration --version v1 --label \"Iteration 1\" --dry-run"
       ],
       "options": [
         {
@@ -1193,7 +1193,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1216,9 +1216,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes restore-snapshot <prototype> --version <version> --variant <variant> --from-prototype <prototype> --from-version <version> --from-variant <variant> --recovery-version <version> [options]",
+      "usage": "node bin/app prototypes restore-snapshot <prototype> --version <version> --variant <variant> --from-prototype <prototype> --from-version <version> --from-variant <variant> --recovery-version <version> [options]",
       "examples": [
-        "node shell.mjs prototypes restore-snapshot exploration --version v1 --variant sitemap-b --from-prototype exploration --from-version v1 --from-variant main --recovery-version v2 --dry-run"
+        "node bin/app prototypes restore-snapshot exploration --version v1 --variant sitemap-b --from-prototype exploration --from-version v1 --from-variant main --recovery-version v2 --dry-run"
       ],
       "options": [
         {
@@ -1280,7 +1280,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1303,9 +1303,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes create [arguments] [options]",
+      "usage": "node bin/app prototypes create [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes create exploration --input design/project.json --dry-run"
+        "node bin/app prototypes create exploration --input design/project.json --dry-run"
       ],
       "options": [
         {
@@ -1352,7 +1352,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1375,9 +1375,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes version [arguments] [options]",
+      "usage": "node bin/app prototypes version [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes version exploration --version v2 --from v1 --dry-run"
+        "node bin/app prototypes version exploration --version v2 --from v1 --dry-run"
       ],
       "options": [
         {
@@ -1419,7 +1419,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1442,9 +1442,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes fork [arguments] [options]",
+      "usage": "node bin/app prototypes fork [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run"
+        "node bin/app prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run"
       ],
       "options": [
         {
@@ -1501,7 +1501,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1524,9 +1524,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes save [arguments] [options]",
+      "usage": "node bin/app prototypes save [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes save exploration --version v1 --variant sitemap-b --input design/project.json --dry-run"
+        "node bin/app prototypes save exploration --version v1 --variant sitemap-b --input design/project.json --dry-run"
       ],
       "options": [
         {
@@ -1573,7 +1573,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1596,9 +1596,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes details [arguments] [options]",
+      "usage": "node bin/app prototypes details [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes details exploration --version v1 --variant sitemap-b --name \"Sitemap B\" --hypothesis \"Alternative navigation\" --dry-run"
+        "node bin/app prototypes details exploration --version v1 --variant sitemap-b --name \"Sitemap B\" --hypothesis \"Alternative navigation\" --dry-run"
       ],
       "options": [
         {
@@ -1650,7 +1650,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1673,9 +1673,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes status [arguments] [options]",
+      "usage": "node bin/app prototypes status [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes status exploration --version v1 --variant sitemap-b --status approved --dry-run"
+        "node bin/app prototypes status exploration --version v1 --variant sitemap-b --status approved --dry-run"
       ],
       "options": [
         {
@@ -1728,7 +1728,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1751,9 +1751,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes activate [arguments] [options]",
+      "usage": "node bin/app prototypes activate [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes activate exploration --version v1 --variant sitemap-b --dry-run"
+        "node bin/app prototypes activate exploration --version v1 --variant sitemap-b --dry-run"
       ],
       "options": [
         {
@@ -1795,7 +1795,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1818,9 +1818,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes deactivate",
+      "usage": "node bin/app prototypes deactivate",
       "examples": [
-        "node shell.mjs prototypes deactivate --dry-run"
+        "node bin/app prototypes deactivate --dry-run"
       ],
       "options": [
         {
@@ -1852,7 +1852,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1875,9 +1875,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes seal [arguments] [options]",
+      "usage": "node bin/app prototypes seal [arguments] [options]",
       "examples": [
-        "node shell.mjs prototypes seal exploration --version v1 --dry-run"
+        "node bin/app prototypes seal exploration --version v1 --dry-run"
       ],
       "options": [
         {
@@ -1914,7 +1914,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1937,9 +1937,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes archive [arguments]",
+      "usage": "node bin/app prototypes archive [arguments]",
       "examples": [
-        "node shell.mjs prototypes archive exploration --dry-run"
+        "node bin/app prototypes archive exploration --dry-run"
       ],
       "options": [
         {
@@ -1971,7 +1971,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -1994,9 +1994,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes restore [arguments]",
+      "usage": "node bin/app prototypes restore [arguments]",
       "examples": [
-        "node shell.mjs prototypes restore exploration --dry-run"
+        "node bin/app prototypes restore exploration --dry-run"
       ],
       "options": [
         {
@@ -2028,7 +2028,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2051,9 +2051,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes import [options]",
+      "usage": "node bin/app prototypes import [options]",
       "examples": [
-        "node shell.mjs prototypes import --input prototype-workspace.json --dry-run"
+        "node bin/app prototypes import --input prototype-workspace.json --dry-run"
       ],
       "options": [
         {
@@ -2090,7 +2090,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2113,9 +2113,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes export [options]",
+      "usage": "node bin/app prototypes export [options]",
       "examples": [
-        "node shell.mjs prototypes export --out prototype-workspace.json --dry-run"
+        "node bin/app prototypes export --out prototype-workspace.json --dry-run"
       ],
       "options": [
         {
@@ -2152,7 +2152,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2175,9 +2175,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes adopt [options]",
+      "usage": "node bin/app prototypes adopt [options]",
       "examples": [
-        "node shell.mjs prototypes adopt --resolve import --dry-run"
+        "node bin/app prototypes adopt --resolve import --dry-run"
       ],
       "options": [
         {
@@ -2218,7 +2218,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2241,9 +2241,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "prototypes",
-      "usage": "node shell.mjs prototypes generate [options]",
+      "usage": "node bin/app prototypes generate [options]",
       "examples": [
-        "node shell.mjs prototypes generate --target generated-preview --dry-run"
+        "node bin/app prototypes generate --target generated-preview --dry-run"
       ],
       "options": [
         {
@@ -2316,7 +2316,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2339,10 +2339,10 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "handout",
-      "usage": "node shell.mjs handout generate [options]",
+      "usage": "node bin/app handout generate [options]",
       "examples": [
-        "node shell.mjs handout generate --dry-run --json",
-        "node shell.mjs handout generate --plan-out handout.plan.json --json"
+        "node bin/app handout generate --dry-run --json",
+        "node bin/app handout generate --plan-out handout.plan.json --json"
       ],
       "options": [
         {
@@ -2380,7 +2380,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2403,9 +2403,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "handout",
-      "usage": "node shell.mjs handout refresh [options]",
+      "usage": "node bin/app handout refresh [options]",
       "examples": [
-        "node shell.mjs handout refresh --plan-out handout-refresh.plan.json --json"
+        "node bin/app handout refresh --plan-out handout-refresh.plan.json --json"
       ],
       "options": [
         {
@@ -2443,7 +2443,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2466,9 +2466,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "handout",
-      "usage": "node shell.mjs handout validate [options]",
+      "usage": "node bin/app handout validate [options]",
       "examples": [
-        "node shell.mjs handout validate --json"
+        "node bin/app handout validate --json"
       ],
       "options": [
         {
@@ -2486,7 +2486,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2513,9 +2513,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "handout",
-      "usage": "node shell.mjs handout inspect [options]",
+      "usage": "node bin/app handout inspect [options]",
       "examples": [
-        "node shell.mjs handout inspect --json"
+        "node bin/app handout inspect --json"
       ],
       "options": [
         {
@@ -2533,7 +2533,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2560,9 +2560,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs support report",
+      "usage": "node bin/app support report",
       "examples": [
-        "node shell.mjs support report --json"
+        "node bin/app support report --json"
       ],
       "options": [
         {
@@ -2574,7 +2574,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2601,9 +2601,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs project measure [options]",
+      "usage": "node bin/app project measure [options]",
       "examples": [
-        "node shell.mjs project measure --input project.json --samples 10 --json"
+        "node bin/app project measure --input project.json --samples 10 --json"
       ],
       "options": [
         {
@@ -2631,7 +2631,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2657,9 +2657,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs project schema [options]",
+      "usage": "node bin/app project schema [options]",
       "examples": [
-        "node shell.mjs project schema --version 6 --json"
+        "node bin/app project schema --version 6 --json"
       ],
       "options": [
         {
@@ -2680,7 +2680,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2707,9 +2707,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs project validate [options]",
+      "usage": "node bin/app project validate [options]",
       "examples": [
-        "node shell.mjs project validate --input project.json --json"
+        "node bin/app project validate --input project.json --json"
       ],
       "options": [
         {
@@ -2726,7 +2726,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2753,9 +2753,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "airship",
-      "usage": "node shell.mjs airship status",
+      "usage": "node bin/app airship status",
       "examples": [
-        "node shell.mjs airship status --json"
+        "node bin/app airship status --json"
       ],
       "options": [
         {
@@ -2767,7 +2767,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2794,10 +2794,10 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "airship",
-      "usage": "node shell.mjs airship enable [options]",
+      "usage": "node bin/app airship enable [options]",
       "examples": [
-        "node shell.mjs airship enable --agent codex --dry-run",
-        "node shell.mjs airship enable --yes"
+        "node bin/app airship enable --agent codex --dry-run",
+        "node bin/app airship enable --yes"
       ],
       "options": [
         {
@@ -2852,7 +2852,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2875,10 +2875,10 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "airship",
-      "usage": "node shell.mjs airship disable",
+      "usage": "node bin/app airship disable",
       "examples": [
-        "node shell.mjs airship disable --dry-run",
-        "node shell.mjs airship disable --yes"
+        "node bin/app airship disable --dry-run",
+        "node bin/app airship disable --yes"
       ],
       "options": [
         {
@@ -2910,7 +2910,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2933,10 +2933,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "airship",
-      "usage": "node shell.mjs airship install",
+      "usage": "node bin/app airship install",
       "examples": [
-        "node shell.mjs airship install --dry-run",
-        "node shell.mjs airship install --yes"
+        "node bin/app airship install --dry-run",
+        "node bin/app airship install --yes"
       ],
       "options": [
         {
@@ -2964,7 +2964,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -2988,10 +2988,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "airship",
-      "usage": "node shell.mjs airship start",
+      "usage": "node bin/app airship start",
       "examples": [
-        "node shell.mjs airship start --dry-run",
-        "node shell.mjs airship start --yes"
+        "node bin/app airship start --dry-run",
+        "node bin/app airship start --yes"
       ],
       "options": [
         {
@@ -3019,7 +3019,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3043,10 +3043,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "airship",
-      "usage": "node shell.mjs airship doctor",
+      "usage": "node bin/app airship doctor",
       "examples": [
-        "node shell.mjs airship doctor --dry-run",
-        "node shell.mjs airship doctor --yes"
+        "node bin/app airship doctor --dry-run",
+        "node bin/app airship doctor --yes"
       ],
       "options": [
         {
@@ -3074,7 +3074,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3098,9 +3098,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "compiler",
-      "usage": "node shell.mjs compiler check [options]",
+      "usage": "node bin/app compiler check [options]",
       "examples": [
-        "node shell.mjs compiler check --input project.json --json"
+        "node bin/app compiler check --input project.json --json"
       ],
       "options": [
         {
@@ -3157,7 +3157,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3184,9 +3184,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "compiler",
-      "usage": "node shell.mjs compiler inspect [options]",
+      "usage": "node bin/app compiler inspect [options]",
       "examples": [
-        "node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json"
+        "node bin/app compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json"
       ],
       "options": [
         {
@@ -3253,7 +3253,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3280,9 +3280,9 @@
       "effect": "read",
       "maxArgs": 1,
       "group": "compiler",
-      "usage": "node shell.mjs compiler explain [arguments]",
+      "usage": "node bin/app compiler explain [arguments]",
       "examples": [
-        "node shell.mjs compiler explain COMPILER_REFERENCE_MISSING"
+        "node bin/app compiler explain COMPILER_REFERENCE_MISSING"
       ],
       "options": [
         {
@@ -3294,7 +3294,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3321,9 +3321,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs version",
+      "usage": "node bin/app version",
       "examples": [
-        "node shell.mjs --version --json"
+        "node bin/app --version --json"
       ],
       "options": [
         {
@@ -3335,7 +3335,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3362,9 +3362,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs styles inspect [options]",
+      "usage": "node bin/app styles inspect [options]",
       "examples": [
-        "node shell.mjs styles inspect --input design/project.json"
+        "node bin/app styles inspect --input design/project.json"
       ],
       "options": [
         {
@@ -3381,7 +3381,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3408,10 +3408,10 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs styles export [options]",
+      "usage": "node bin/app styles export [options]",
       "examples": [
-        "node shell.mjs styles export --input design/project.json --format css --dry-run",
-        "node shell.mjs styles export --input design/project.json --format html --yes"
+        "node bin/app styles export --input design/project.json --format css --dry-run",
+        "node bin/app styles export --input design/project.json --format html --yes"
       ],
       "options": [
         {
@@ -3465,7 +3465,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3488,10 +3488,10 @@
       "effect": "read",
       "maxArgs": 2,
       "group": "discovery",
-      "usage": "node shell.mjs help [command] [--all]",
+      "usage": "node bin/app help [command] [--all]",
       "examples": [
-        "node shell.mjs help check",
-        "node shell.mjs help --all"
+        "node bin/app help check",
+        "node bin/app help --all"
       ],
       "options": [
         {
@@ -3508,7 +3508,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3535,9 +3535,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "discovery",
-      "usage": "node shell.mjs capabilities",
+      "usage": "node bin/app capabilities",
       "examples": [
-        "node shell.mjs capabilities --json"
+        "node bin/app capabilities --json"
       ],
       "options": [
         {
@@ -3549,7 +3549,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3576,9 +3576,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "discovery",
-      "usage": "node shell.mjs schema",
+      "usage": "node bin/app schema",
       "examples": [
-        "node shell.mjs schema --json"
+        "node bin/app schema --json"
       ],
       "options": [
         {
@@ -3590,7 +3590,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3617,10 +3617,10 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs status",
+      "usage": "node bin/app status",
       "examples": [
-        "node shell.mjs status",
-        "node shell.mjs status --json"
+        "node bin/app status",
+        "node bin/app status --json"
       ],
       "options": [
         {
@@ -3632,7 +3632,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3659,9 +3659,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs doctor",
+      "usage": "node bin/app doctor",
       "examples": [
-        "node shell.mjs doctor"
+        "node bin/app doctor"
       ],
       "options": [
         {
@@ -3673,7 +3673,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3700,9 +3700,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs config get",
+      "usage": "node bin/app config get",
       "examples": [
-        "node shell.mjs config get --json"
+        "node bin/app config get --json"
       ],
       "options": [
         {
@@ -3714,7 +3714,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3741,9 +3741,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs config explain",
+      "usage": "node bin/app config explain",
       "examples": [
-        "node shell.mjs config explain"
+        "node bin/app config explain"
       ],
       "options": [
         {
@@ -3755,7 +3755,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3782,9 +3782,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs config validate",
+      "usage": "node bin/app config validate",
       "examples": [
-        "node shell.mjs config validate"
+        "node bin/app config validate"
       ],
       "options": [
         {
@@ -3796,7 +3796,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3823,9 +3823,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "inspect",
-      "usage": "node shell.mjs config set [options]",
+      "usage": "node bin/app config set [options]",
       "examples": [
-        "node shell.mjs config set --input config.json --dry-run"
+        "node bin/app config set --input config.json --dry-run"
       ],
       "options": [
         {
@@ -3862,7 +3862,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3885,9 +3885,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs setup status",
+      "usage": "node bin/app setup status",
       "examples": [
-        "node shell.mjs setup status --json"
+        "node bin/app setup status --json"
       ],
       "options": [
         {
@@ -3899,7 +3899,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -3926,10 +3926,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs setup resume [options]",
+      "usage": "node bin/app setup resume [options]",
       "examples": [
-        "node shell.mjs setup resume --stage verify --dry-run --json",
-        "node shell.mjs setup resume --stage verify --resume-hash <digest> --yes"
+        "node bin/app setup resume --stage verify --dry-run --json",
+        "node bin/app setup resume --stage verify --resume-hash <digest> --yes"
       ],
       "options": [
         {
@@ -3983,7 +3983,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4006,11 +4006,11 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs setup [options]",
+      "usage": "node bin/app setup [options]",
       "examples": [
-        "node shell.mjs setup --starter quick-capture --id capture --name Capture --author Me --dry-run",
-        "node shell.mjs setup --id folio-tools --name \"Folio Tools\" --author \"Me\" --blank --yes",
-        "node shell.mjs setup --input ./my-project.json --dry-run --json"
+        "node bin/app setup --starter quick-capture --id capture --name Capture --author Me --dry-run",
+        "node bin/app setup --id folio-tools --name \"Folio Tools\" --author \"Me\" --blank --yes",
+        "node bin/app setup --input ./my-project.json --dry-run --json"
       ],
       "options": [
         {
@@ -4135,7 +4135,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4158,9 +4158,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs concept schema",
+      "usage": "node bin/app concept schema",
       "examples": [
-        "node shell.mjs concept schema --json"
+        "node bin/app concept schema --json"
       ],
       "options": [
         {
@@ -4172,7 +4172,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4199,10 +4199,10 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs concept inspect [options]",
+      "usage": "node bin/app concept inspect [options]",
       "examples": [
-        "node shell.mjs concept inspect --json",
-        "node shell.mjs concept inspect --input docs/concepts/capture/concept.json"
+        "node bin/app concept inspect --json",
+        "node bin/app concept inspect --input docs/concepts/capture/concept.json"
       ],
       "options": [
         {
@@ -4219,7 +4219,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4246,10 +4246,10 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs concept import [options]",
+      "usage": "node bin/app concept import [options]",
       "examples": [
-        "node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json",
-        "node shell.mjs plan apply concept.plan.json --yes"
+        "node bin/app concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json",
+        "node bin/app plan apply concept.plan.json --yes"
       ],
       "options": [
         {
@@ -4295,7 +4295,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4318,9 +4318,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs project inspect [options]",
+      "usage": "node bin/app project inspect [options]",
       "examples": [
-        "node shell.mjs project inspect --input project.json"
+        "node bin/app project inspect --input project.json"
       ],
       "options": [
         {
@@ -4337,7 +4337,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4364,9 +4364,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs project import [options]",
+      "usage": "node bin/app project import [options]",
       "examples": [
-        "node shell.mjs project import --input project.json --resolve project --dry-run"
+        "node bin/app project import --input project.json --resolve project --dry-run"
       ],
       "options": [
         {
@@ -4412,7 +4412,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4435,13 +4435,13 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "start",
-      "usage": "node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]",
+      "usage": "node bin/app new <dir> (--starter <id> | --from <project.json>) [options]",
       "examples": [
-        "node shell.mjs new --list",
-        "node shell.mjs new ../folio-tools --starter custom-file-view --extension folio",
-        "node shell.mjs new ../quick-capture --starter quick-capture --yes",
-        "node shell.mjs new ../folio-tools --from folio-tools.companion.json",
-        "node shell.mjs new ../folio-tools --starter blank --storybook on --storybook-stories on"
+        "node bin/app new --list",
+        "node bin/app new ../folio-tools --starter custom-file-view --extension folio",
+        "node bin/app new ../quick-capture --starter quick-capture --yes",
+        "node bin/app new ../folio-tools --from folio-tools.companion.json",
+        "node bin/app new ../folio-tools --starter blank --storybook on --storybook-stories on"
       ],
       "options": [
         {
@@ -4573,7 +4573,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4596,10 +4596,10 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "start",
-      "usage": "node shell.mjs generate [options]",
+      "usage": "node bin/app generate [options]",
       "examples": [
-        "node shell.mjs generate --scope feature:workspace --plan-out generation.plan.json",
-        "node shell.mjs generate --yes"
+        "node bin/app generate --scope feature:workspace --plan-out generation.plan.json",
+        "node bin/app generate --yes"
       ],
       "options": [
         {
@@ -4682,7 +4682,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4705,12 +4705,12 @@
       "effect": "plan",
       "maxArgs": 2,
       "group": "develop",
-      "usage": "node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>",
+      "usage": "node bin/app make <recipe> <name> [options] | make list | make describe <recipe>",
       "examples": [
-        "node shell.mjs make list",
-        "node shell.mjs make file-extension board --feature documents --extension board",
-        "node shell.mjs make context-menu inspect --feature documents --extensions md,board",
-        "node shell.mjs make feature bookmarks --entity bookmark --dry-run"
+        "node bin/app make list",
+        "node bin/app make file-extension board --feature documents --extension board",
+        "node bin/app make context-menu inspect --feature documents --extensions md,board",
+        "node bin/app make feature bookmarks --entity bookmark --dry-run"
       ],
       "options": [
         {
@@ -4829,7 +4829,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4852,9 +4852,9 @@
       "effect": "read",
       "maxArgs": 1,
       "group": "plans",
-      "usage": "node shell.mjs plan inspect <plan-file>",
+      "usage": "node bin/app plan inspect <plan-file>",
       "examples": [
-        "node shell.mjs plan inspect generation.plan.json"
+        "node bin/app plan inspect generation.plan.json"
       ],
       "options": [
         {
@@ -4866,7 +4866,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4893,9 +4893,9 @@
       "effect": "plan",
       "maxArgs": 1,
       "group": "plans",
-      "usage": "node shell.mjs plan apply <plan-file> --yes",
+      "usage": "node bin/app plan apply <plan-file> --yes",
       "examples": [
-        "node shell.mjs plan apply generation.plan.json --yes"
+        "node bin/app plan apply generation.plan.json --yes"
       ],
       "options": [
         {
@@ -4927,7 +4927,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -4950,9 +4950,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs install",
+      "usage": "node bin/app install",
       "examples": [
-        "node shell.mjs install --yes"
+        "node bin/app install --yes"
       ],
       "options": [
         {
@@ -4980,7 +4980,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5004,9 +5004,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "storybook",
-      "usage": "node shell.mjs storybook status",
+      "usage": "node bin/app storybook status",
       "examples": [
-        "node shell.mjs storybook status --json"
+        "node bin/app storybook status --json"
       ],
       "options": [
         {
@@ -5018,7 +5018,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5045,10 +5045,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "storybook",
-      "usage": "node shell.mjs storybook install",
+      "usage": "node bin/app storybook install",
       "examples": [
-        "node shell.mjs storybook install --dry-run",
-        "node shell.mjs storybook install --yes"
+        "node bin/app storybook install --dry-run",
+        "node bin/app storybook install --yes"
       ],
       "options": [
         {
@@ -5076,7 +5076,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5100,9 +5100,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "storybook",
-      "usage": "node shell.mjs storybook check",
+      "usage": "node bin/app storybook check",
       "examples": [
-        "node shell.mjs storybook check"
+        "node bin/app storybook check"
       ],
       "options": [
         {
@@ -5125,7 +5125,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5150,9 +5150,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "storybook",
-      "usage": "node shell.mjs storybook dev",
+      "usage": "node bin/app storybook dev",
       "examples": [
-        "node shell.mjs storybook dev"
+        "node bin/app storybook dev"
       ],
       "options": [
         {
@@ -5175,7 +5175,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5200,9 +5200,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "storybook",
-      "usage": "node shell.mjs storybook build",
+      "usage": "node bin/app storybook build",
       "examples": [
-        "node shell.mjs storybook build"
+        "node bin/app storybook build"
       ],
       "options": [
         {
@@ -5225,7 +5225,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5250,10 +5250,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs clickdummy build [options]",
+      "usage": "node bin/app clickdummy build [options]",
       "examples": [
-        "node shell.mjs clickdummy build",
-        "node shell.mjs clickdummy build --replace"
+        "node bin/app clickdummy build",
+        "node bin/app clickdummy build --replace"
       ],
       "options": [
         {
@@ -5281,7 +5281,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5306,9 +5306,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs build",
+      "usage": "node bin/app build",
       "examples": [
-        "node shell.mjs build"
+        "node bin/app build"
       ],
       "options": [
         {
@@ -5331,7 +5331,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5356,11 +5356,11 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs test [options]",
+      "usage": "node bin/app test [options]",
       "examples": [
-        "node shell.mjs test",
-        "node shell.mjs test --profile obsidian",
-        "node shell.mjs test --profile browser"
+        "node bin/app test",
+        "node bin/app test --profile obsidian",
+        "node bin/app test --profile browser"
       ],
       "options": [
         {
@@ -5396,7 +5396,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5421,10 +5421,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs check [options]",
+      "usage": "node bin/app check [options]",
       "examples": [
-        "node shell.mjs check",
-        "node shell.mjs check --fast --json"
+        "node bin/app check",
+        "node bin/app check --fast --json"
       ],
       "options": [
         {
@@ -5452,7 +5452,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5477,10 +5477,10 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs check submission",
+      "usage": "node bin/app check submission",
       "examples": [
-        "node shell.mjs check submission",
-        "node shell.mjs check submission --json"
+        "node bin/app check submission",
+        "node bin/app check submission --json"
       ],
       "options": [
         {
@@ -5503,7 +5503,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5528,9 +5528,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs verify [options]",
+      "usage": "node bin/app verify [options]",
       "examples": [
-        "node shell.mjs verify --profile project"
+        "node bin/app verify --profile project"
       ],
       "options": [
         {
@@ -5563,7 +5563,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5588,11 +5588,11 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
-      "usage": "node shell.mjs dev [options]",
+      "usage": "node bin/app dev [options]",
       "examples": [
-        "node shell.mjs dev --profile obsidian",
-        "node shell.mjs dev",
-        "node shell.mjs dev --profile ui"
+        "node bin/app dev --profile obsidian",
+        "node bin/app dev",
+        "node bin/app dev --profile ui"
       ],
       "options": [
         {
@@ -5627,7 +5627,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5652,9 +5652,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "vault",
-      "usage": "node shell.mjs vault prepare",
+      "usage": "node bin/app vault prepare",
       "examples": [
-        "node shell.mjs vault prepare --yes"
+        "node bin/app vault prepare --yes"
       ],
       "options": [
         {
@@ -5686,7 +5686,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5709,9 +5709,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "vault",
-      "usage": "node shell.mjs plugin install",
+      "usage": "node bin/app plugin install",
       "examples": [
-        "node shell.mjs plugin install --dry-run"
+        "node bin/app plugin install --dry-run"
       ],
       "options": [
         {
@@ -5743,7 +5743,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5766,9 +5766,9 @@
       "effect": "fixtures",
       "maxArgs": 0,
       "group": "vault",
-      "usage": "node shell.mjs data plan [options]",
+      "usage": "node bin/app data plan [options]",
       "examples": [
-        "node shell.mjs data plan --input test-data-manifest.json"
+        "node bin/app data plan --input test-data-manifest.json"
       ],
       "options": [
         {
@@ -5790,7 +5790,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5816,9 +5816,9 @@
       "effect": "fixtures",
       "maxArgs": 0,
       "group": "vault",
-      "usage": "node shell.mjs data apply [options]",
+      "usage": "node bin/app data apply [options]",
       "examples": [
-        "node shell.mjs data apply --input test-data-manifest.json --apply <approval-hash>"
+        "node bin/app data apply --input test-data-manifest.json --apply <approval-hash>"
       ],
       "options": [
         {
@@ -5840,7 +5840,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5866,9 +5866,9 @@
       "effect": "fixtures",
       "maxArgs": 0,
       "group": "vault",
-      "usage": "node shell.mjs data reset-plan [options]",
+      "usage": "node bin/app data reset-plan [options]",
       "examples": [
-        "node shell.mjs data reset-plan --input test-data-manifest.json"
+        "node bin/app data reset-plan --input test-data-manifest.json"
       ],
       "options": [
         {
@@ -5890,7 +5890,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5916,9 +5916,9 @@
       "effect": "fixtures",
       "maxArgs": 0,
       "group": "vault",
-      "usage": "node shell.mjs data reset [options]",
+      "usage": "node bin/app data reset [options]",
       "examples": [
-        "node shell.mjs data reset --input test-data-manifest.json --apply <approval-hash>"
+        "node bin/app data reset --input test-data-manifest.json --apply <approval-hash>"
       ],
       "options": [
         {
@@ -5940,7 +5940,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -5966,9 +5966,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs framework status",
+      "usage": "node bin/app framework status",
       "examples": [
-        "node shell.mjs framework status"
+        "node bin/app framework status"
       ],
       "options": [
         {
@@ -5980,7 +5980,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -6007,9 +6007,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs framework pack [options]",
+      "usage": "node bin/app framework pack [options]",
       "examples": [
-        "node shell.mjs framework pack --out ./plugin-framework.zip --yes"
+        "node bin/app framework pack --out ./plugin-framework.zip --yes"
       ],
       "options": [
         {
@@ -6042,7 +6042,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -6066,9 +6066,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs framework upgrade [options]",
+      "usage": "node bin/app framework upgrade [options]",
       "examples": [
-        "node shell.mjs framework upgrade --from ../extracted-kit --dry-run"
+        "node bin/app framework upgrade --from ../extracted-kit --dry-run"
       ],
       "options": [
         {
@@ -6105,7 +6105,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -6128,9 +6128,9 @@
       "effect": "plan",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs release prepare [options]",
+      "usage": "node bin/app release prepare [options]",
       "examples": [
-        "node shell.mjs release prepare --version 1.0.0 --notes-file notes.md --dry-run"
+        "node bin/app release prepare --version 1.0.0 --notes-file notes.md --dry-run"
       ],
       "options": [
         {
@@ -6172,7 +6172,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -6195,9 +6195,9 @@
       "effect": "read",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs release check [options]",
+      "usage": "node bin/app release check [options]",
       "examples": [
-        "node shell.mjs release check"
+        "node bin/app release check"
       ],
       "options": [
         {
@@ -6214,7 +6214,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -6241,9 +6241,9 @@
       "effect": "process",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs release rehearse [options]",
+      "usage": "node bin/app release rehearse [options]",
       "examples": [
-        "node shell.mjs release rehearse --commit <sha> --version 1.0.0"
+        "node bin/app release rehearse --commit <sha> --version 1.0.0"
       ],
       "options": [
         {
@@ -6276,7 +6276,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",
@@ -6301,9 +6301,9 @@
       "effect": "release",
       "maxArgs": 0,
       "group": "maintain",
-      "usage": "node shell.mjs release operate [options]",
+      "usage": "node bin/app release operate [options]",
       "examples": [
-        "node shell.mjs release operate --input release-operation.json --dry-run"
+        "node bin/app release operate --input release-operation.json --dry-run"
       ],
       "options": [
         {
@@ -6335,7 +6335,7 @@
           "name": "root",
           "kind": "value",
           "description": "Project folder to operate on.",
-          "default": "nearest folder with shell.config.json or shell.mjs"
+          "default": "nearest folder with shell.config.json, app.mjs or shell.mjs"
         },
         {
           "name": "no-interaction",

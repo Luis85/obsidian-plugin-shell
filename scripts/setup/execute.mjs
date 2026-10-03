@@ -2,7 +2,7 @@ import { mkdir, rm, readFile, access, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { applyFilePlan, createFilePlan } from '../shared/file-plan.mjs';
-import { runNode } from '../shared/process.mjs';
+import { runNodeScript as runNode } from '../shared/process.mjs';
 import { projectInstallEnvironment } from '../shared/npm-install.mjs';
 import { savedOptions } from './options.mjs';
 import { writeJournal, inputFingerprint, stageIsCurrent, artifactHashes, digest } from './journal.mjs';

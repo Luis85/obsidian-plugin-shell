@@ -1,8 +1,15 @@
-import { projectPath } from '../../../bin/domain/user-settings.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../shared/project-path.ts';
 import { join } from 'node:path';
 import { DOC_TYPES, docsObject as object, array, insist, type DocType } from '../domain/contracts.ts';
 import { portable, readBytes, decode } from './filesystem.ts';
 export const SETTINGS_FILE = 'configs/user-settings.json';
+function projectPath(value: unknown): string {
+  insist(typeof value === 'string' && value.trim().length > 0 && value.length <= 240, 'DOCS_SETTINGS_PATH', 'Project path needs bounded text.');
+  const path = value.trim();
+  insist(path === value && hasPortableProjectSegments(path), 'DOCS_SETTINGS_PATH', 'Use a portable project-relative path without whitespace or dot segments.');
+  insist(!hasProtectedProjectRoot(path), 'DOCS_SETTINGS_PATH', 'Project path cannot target host, framework, dependency or Git directories.');
+  return path;
+}
 export const folders: Record<DocType, string> = { project: '', page: 'pages', component: 'components', interaction: 'interactions', journey: 'journeys', route: 'routes', transition: 'transitions', layout: 'layouts', 'component-revision': 'component-revisions', 'library-component': 'library-components', feature: 'features', prd: 'prds' };
 export interface DocsSettings { root: string; indexFile: string; paths: Record<string, string>; recursive: boolean; include: string[]; exclude: string[]; linkFormat: 'markdown' | 'wikilink' }
 function defaults(root = 'docs/application'): DocsSettings {

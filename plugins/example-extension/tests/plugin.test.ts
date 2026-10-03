@@ -139,7 +139,7 @@ void test('one invocation shares the event bus across activation, CLI and TUI co
   const helpArgs = parseArguments(['--help'], runtime.cliCommands);
   const help = await execute(helpArgs, { root: '/workspace', frameworkRoot: '/framework', input, plugins: runtime });
   assert.ok(Array.isArray(help.commands) && help.commands.includes('example'));
-  assert.match(String(help.help), /node shell\.mjs example/);
+  assert.match(String(help.help), /node bin\/app example/);
   assert.deepEqual(help.pluginCommands, [{ id: 'example', summary: 'Dispatch the example plugin event.', options: { values: ['message'] } }]);
 
   const args = parseArguments(['example', 'send', '--message', 'Hello'], runtime.cliCommands);

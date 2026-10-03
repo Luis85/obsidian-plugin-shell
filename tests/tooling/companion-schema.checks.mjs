@@ -14,7 +14,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const corpus = schemaCorpus();
 const sha = text => createHash('sha256').update(text).digest('hex');
 function cli(args, cwd = root, input) {
-  const output = spawnSync(process.execPath, ['--experimental-strip-types', join(root, 'shell.mjs'), ...args, '--json'], {
+  const output = spawnSync(process.execPath, ['--experimental-strip-types', join(root, 'app.mjs'), ...args, '--json'], {
     cwd, input, encoding: 'utf8', timeout: 30000, maxBuffer: 10_000_000,
   });
   assert.equal(output.error, undefined);

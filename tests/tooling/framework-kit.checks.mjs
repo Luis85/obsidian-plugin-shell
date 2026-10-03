@@ -13,7 +13,7 @@ import { hash } from '../../scripts/framework/files.ts';
 import { kitManifest, verifyKit } from '../../scripts/framework/kit-integrity.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {
-  return spawnSync(process.execPath, [join(dir, 'shell.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
+  return spawnSync(process.execPath, [join(dir, 'app.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
 }
 test('compiled kit bootstraps, imports and generates without dependencies or Git', { timeout: 300000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
@@ -129,6 +129,12 @@ test('compiled kit preserves Storybook overrides and intake ownership across rep
 test('kit manifest rejects traversal and duplicate case aliases', () => {
   const base = { schemaVersion: 1, version: '0.4.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64), files: [{ path: '.framework/template/LICENSE', hash: 'a'.repeat(64), bytes: 1 }], bootstrap: ['shell.mjs', 'package.json', 'README.md', 'LICENSE'].map(path => ({path, hash: 'b'.repeat(64)})) };
   assert.equal(kitManifest(base).version, '0.4.0');
+  // Current kits add app.mjs and bin/app; the pre-rename shell.mjs-only set stays valid for existing projects.
+  const bootstrap = paths => paths.map(path => ({ path, hash: 'b'.repeat(64) }));
+  assert.equal(kitManifest({ ...base, bootstrap: bootstrap(['app.mjs', 'bin/app', 'shell.mjs', 'package.json', 'README.md', 'LICENSE']) }).bootstrap.length, 6);
+  for (const paths of [['app.mjs', 'package.json', 'README.md', 'LICENSE'], ['app.mjs', 'bin/app', 'package.json', 'README.md', 'LICENSE'], ['app.mjs', 'app.mjs', 'shell.mjs', 'package.json', 'README.md', 'LICENSE'], ['app.mjs', 'bin/app', 'shell.mjs', 'package.json', 'README.md', 'LICENSE', 'bin/other']]) {
+    assert.throws(() => kitManifest({ ...base, bootstrap: bootstrap(paths) }), /bootstrap/i, paths.join(','));
+  }
   assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: '.framework/template/../../outside' }] }));
   assert.throws(() => kitManifest({ ...base, files: [...base.files, { ...base.files[0], path: '.framework/template/license' }] }));
 });

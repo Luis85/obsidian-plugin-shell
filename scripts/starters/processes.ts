@@ -1,8 +1,8 @@
 import { join, resolve } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { exists, hash, readBounded } from '../framework/files.ts';
 import { npmEntry, runNode } from '../framework/process.ts';
-import { parseJsonData } from '../contracts/json-data.mjs';
+import { parseJsonData } from '../contracts/json-data.ts';
 import { result, OperationError, requireThat, stringOption, type Context, type Request, type Result } from '../framework/contracts.ts';
 import { array, record, fields, identifier, readProcesses, text } from './validation.ts';
 import { checkDirectoryChain } from './repository.ts';
@@ -51,7 +51,7 @@ async function runProcesses(context: Context, directory: string, requested: stri
     error.details = { written: true, directory, completed, failure: cause instanceof OperationError ? cause.details ?? null : null, automaticRetry: false, effects: 'preserved-or-uncertain; not rolled back' }; throw error;
   }
 }
-export async function processOperation(request: Request, context: Context): Promise<Result> {
+export async function starterProcessOperation(request: Request, context: Context): Promise<Result> {
   const directory = resolve(context.root, stringOption(request.options, 'project') ?? '.');
   const process = stringOption(request.options, 'process'); requireThat(process, 'STARTER_PROCESS', 'Supply --process <id[,id]>; inspect the definition with starters show.');
   const plan = await processPlan(directory, process.split(','));

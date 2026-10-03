@@ -11,7 +11,7 @@ import { PROVIDERS, providerPlan, providerSettings, type ProviderSettings } from
 import { applyConnection, connection, connectionStatus, desktopClient } from './desktop.ts';
 import { discoverTools, launchMcp, nativeServer } from './mcp.ts';
 
-const HELP = `Optional project memory — node shell.mjs memory <command>
+const HELP = `Optional project memory — node bin/app memory <command>
 The equivalent npm entry is npm run memory -- <command>. All receipts are JSON.
 
 Getting started (preview first, then repeat with --apply --accept-data-processing):

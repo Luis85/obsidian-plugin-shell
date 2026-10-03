@@ -6,10 +6,25 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
+import { result as frameworkResult, OperationError as frameworkOperationError, requireThat as frameworkRequireThat } from '../../scripts/framework/contracts.ts';
+import { result as canonicalResult } from '../../scripts/contracts/result.ts';
+import { resultEnvelope as bootstrapResultEnvelope } from '../../scripts/contracts/result-runtime.mjs';
+import { OperationError as canonicalOperationError, requireThat as canonicalRequireThat } from '../../scripts/contracts/errors.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
 import { readBounded } from '../../scripts/framework/files.ts';
+import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan as createTypedFilePlan, applyFilePlan as applyTypedFilePlan } from '../../scripts/shared/file-plan.ts';
+import { sha256 } from '../../scripts/shared/hash.mjs';
+import { mapBounded as typedMapBounded } from '../../scripts/shared/bounded-map.ts';
+import { mapBounded as legacyMapBounded } from '../../scripts/shared/bounded-map.mjs';
+import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
+import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
+import { exists as legacyExists, statIfPresent as legacyStatIfPresent } from '../../scripts/shared/fs-presence.mjs';
+import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
+import * as typedJsonData from '../../scripts/contracts/json-data.ts';
+import * as legacyJsonData from '../../scripts/contracts/json-data.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
 // The last v4 self-project, retained as a migration input.
@@ -29,7 +44,7 @@ async function configured(t) {
   return ctx;
 }
 function cli(args, cwd = root) {
-  return spawnSync(process.execPath, [join(root, 'shell.mjs'), ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 5_000_000 });
+  return spawnSync(process.execPath, [join(root, 'app.mjs'), ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 5_000_000 });
 }
 test('command parser rejects unknown, duplicated and mismatched options', () => {
   for (const args of [['unknown'], ['status', '--input', 'x'], ['status', '--json', '--json'], ['setup', '--id'], ['status', 'extra']]) assert.throws(() => parseCliArguments(args));
@@ -168,4 +183,105 @@ test('in-place generation refuses an unimported --input before any kit or plan w
   assert.equal(refused.status, 'failed'); assert.ok(refused.diagnostics.some(item => item.code === 'INPUT_REQUIRES_IMPORT'), JSON.stringify(refused));
   const kitless = await run(ctx, ['generate']);
   assert.equal(kitless.status, 'failed'); assert.ok(kitless.diagnostics.some(item => item.code === 'KIT_REQUIRED'), JSON.stringify(kitless));
+});
+
+test('file plans and capability discovery use the canonical shared digest', async t => {
+  const ctx = await fixture(t), content = 'exact plan bytes — café\n';
+  const plan = await createFilePlan(ctx.root, [{ path: 'planned.txt', content }]);
+  assert.equal(plan.changes[0].beforeHash, null);
+  assert.equal(plan.changes[0].afterHash, sha256(content));
+  const catalog = capabilityCatalog();
+  assert.equal(catalogDigest(catalog), sha256(JSON.stringify(catalog)));
+});
+
+test('typed JSON data contract remains the canonical compatibility implementation', () => {
+  assert.equal(legacyJsonData.assertJsonData, typedJsonData.assertJsonData);
+  assert.equal(legacyJsonData.parseJsonData, typedJsonData.parseJsonData);
+  const value = Object.assign(Object.create(null), { safe: ['café', 7, true, null] });
+  assert.equal(typedJsonData.assertJsonData(value), true);
+  // JSON.parse always yields plain objects; the null-prototype input is accepted, not reproduced.
+  assert.deepEqual(legacyJsonData.parseJsonData(JSON.stringify(value)), { ...value });
+  let invoked = 0;
+  const poisoned = {};
+  Object.defineProperty(poisoned, 'value', { enumerable: true, get() { invoked++; return 1; } });
+  assert.throws(() => typedJsonData.assertJsonData(poisoned), /JSON_DATA_INVALID/);
+  assert.equal(invoked, 0);
+});
+
+test('typed file-plan facade preserves the reviewed runtime plan/apply boundary', async t => {
+  assert.equal(createFilePlan, createTypedFilePlan);
+  const ctx = await fixture(t);
+  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-facade.txt', content: 'typed facade\n' }]);
+  assert.equal(plan.version, 1);
+  assert.equal(plan.changes[0].status, 'create');
+  assert.equal(plan.changes[0].beforeHash, null);
+  const applied = await applyTypedFilePlan(plan);
+  assert.deepEqual(applied.written, ['typed-facade.txt']);
+  assert.equal(await readFile(join(ctx.root, 'typed-facade.txt'), 'utf8'), 'typed facade\n');
+});
+
+test('typed file-plan facade refuses stale preimages and preserves the intervening edit', async t => {
+  const ctx = await fixture(t);
+  const path = join(ctx.root, 'typed-stale.txt');
+  await writeFile(path, 'before\n');
+  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-stale.txt', content: 'planned\n' }]);
+  await writeFile(path, 'external edit\n');
+  await assert.rejects(applyTypedFilePlan(plan), /PLAN_STALE/);
+  assert.equal(await readFile(path, 'utf8'), 'external edit\n');
+  assert.ok(!(await readdir(ctx.root)).includes('.codex-authoring.lock'));
+});
+
+test('framework result helper reuses the canonical typed envelope', () => {
+  assert.deepEqual(bootstrapResultEnvelope('status', { ready: true }), canonicalResult('status', { ready: true }));
+  assert.equal(frameworkResult, canonicalResult);
+  assert.deepEqual(canonicalResult('status', { ready: true }), {
+    protocolVersion: 1, command: 'status', status: 'ok', data: { ready: true }, diagnostics: [],
+  });
+  assert.equal(canonicalResult('setup', null, 'blocked').status, 'blocked');
+});
+
+test('framework operation errors reuse the canonical contract primitives', () => {
+  assert.equal(frameworkOperationError, canonicalOperationError);
+  assert.equal(frameworkRequireThat, canonicalRequireThat);
+  assert.throws(() => canonicalRequireThat(false, 'CONTRACT_TEST', 'contract refusal'), error => {
+    assert.ok(error instanceof canonicalOperationError);
+    assert.equal(error.code, 'CONTRACT_TEST');
+    assert.equal(error.message, 'contract refusal');
+    return true;
+  });
+});
+
+test('typed filesystem helpers preserve compatibility and exact-byte hashing', async t => {
+  assert.equal(sha256, typedSha256);
+  assert.equal(legacyExists, typedExists);
+  assert.equal(legacyStatIfPresent, typedStatIfPresent);
+  assert.equal(typedSha256('Grüße'), sha256('Grüße'));
+
+  const ctx = await fixture(t);
+  const missing = join(ctx.root, 'missing.txt');
+  assert.equal(await typedStatIfPresent(missing), null);
+  assert.equal(await typedExists(missing), false);
+  const present = join(ctx.root, 'present.txt');
+  await writeFile(present, 'present');
+  assert.equal((await typedStatIfPresent(present))?.isFile(), true);
+  assert.equal(await legacyExists(present), true);
+});
+
+test('typed bounded-map preserves compatibility, order and stop-on-failure scheduling', async () => {
+  assert.equal(legacyMapBounded, typedMapBounded);
+  const completed = [];
+  const values = await typedMapBounded([3, 1, 2], 2, async (value, index) => {
+    completed.push(index);
+    return value * 2;
+  });
+  assert.deepEqual(values, [6, 2, 4]);
+  assert.deepEqual(completed.slice().sort((a, b) => a - b), [0, 1, 2]);
+  await assert.rejects(typedMapBounded([1], 0, async value => value), /INVALID_CONCURRENCY/);
+  let started = 0;
+  await assert.rejects(typedMapBounded([1, 2, 3, 4], 1, async value => {
+    started++;
+    if (value === 2) throw new Error('stop');
+    return value;
+  }), /stop/);
+  assert.equal(started, 2);
 });

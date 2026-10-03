@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { runNode } from '../../scripts/framework/process.ts';
 import { OperationError, type Context } from '../../scripts/framework/contracts.ts';
 import { requireSketch } from '../domain/errors.ts';
@@ -90,7 +90,7 @@ export async function executeFirstRun(value: FirstRunPlan, approval?: string, co
       requireSketch(report.preview.ready && report.preview.httpStatus === 200 && report.preview.stopped, 'FIRST_RUN_PREVIEW', 'The owned showcase did not complete its startup and shutdown checks.');
     });
     report.status = 'passed'; report.finishedAt = new Date().toISOString(); await save();
-    return { status: 'ok', executed: true, report, reportPath: plan.reportPath, next: 'Edit with shell.mjs sketch. Review and commit the resolved lockfile. Manual browser acceptance remains separate.' };
+    return { status: 'ok', executed: true, report, reportPath: plan.reportPath, next: 'Edit with node bin/app sketch. Review and commit the resolved lockfile. Manual browser acceptance remains separate.' };
   } catch (error) {
     report.status = cancelled(error) ? 'cancelled' : 'failed'; report.finishedAt = new Date().toISOString();
     const reportSaved = await saveFailureReport(started, save);

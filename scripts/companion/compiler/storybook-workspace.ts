@@ -13,8 +13,8 @@ export function storybookWorkspace(template: TemplateSnapshot, paths: string[]):
   return [
     add('package.json', json({ name: 'generated-storybook-workspace', private: true, type: 'module',
       description: 'Opt-in development workspace; not part of the Obsidian plugin bundle.',
-      scripts: { storybook: 'node ../shell.mjs storybook dev --root ..', 'build-storybook': 'node ../shell.mjs storybook build --root ..',
-        typecheck: 'node ../shell.mjs storybook check --root ..' }, devDependencies: dependencies })),
+      scripts: { storybook: 'node ../bin/app storybook dev --root ..', 'build-storybook': 'node ../bin/app storybook build --root ..',
+        typecheck: 'node ../bin/app storybook check --root ..' }, devDependencies: dependencies })),
     add('.gitignore', 'node_modules/\nstorybook-static/\n*.log\n'),
     add('tsconfig.json', json({ extends: '../tsconfig.json', compilerOptions: { allowImportingTsExtensions: true },
       files: paths.map(path => path.slice('storybook/'.length)), include: ['custom/**/*.ts', '.storybook/**/*.ts'] })),
@@ -67,6 +67,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Overview: Story = {};
 `, 'extension'),
-    add('DEPENDENCIES.md', `# Optional Storybook dependencies\n\nStorybook ${storybookVersion}, Vue/Vite and TypeScript versions are exact direct pins. Installation is not part of generation or normal setup. Run \`node shell.mjs storybook install --yes\` from the project root. The first explicit install resolves the optional lockfile; subsequent installs use npm ci. Commit and review storybook/package-lock.json. No fake lockfile or green verification claim is emitted.\n\nUse \`node shell.mjs storybook check\`, \`node shell.mjs storybook dev\` or \`node shell.mjs storybook build\` after the normal project dependencies are installed. The launcher disables Storybook telemetry before startup. No browser auto-open, cloud publication or native host operation is requested.\n\nNormal root dependencies, install and verify remain independent. Disabling the feature does not delete custom files or uninstall existing packages.\n`),
+    add('DEPENDENCIES.md', `# Optional Storybook dependencies\n\nStorybook ${storybookVersion}, Vue/Vite and TypeScript versions are exact direct pins. Installation is not part of generation or normal setup. Run \`node bin/app storybook install --yes\` from the project root. The first explicit install resolves the optional lockfile; subsequent installs use npm ci. Commit and review storybook/package-lock.json. No fake lockfile or green verification claim is emitted.\n\nUse \`node bin/app storybook check\`, \`node bin/app storybook dev\` or \`node bin/app storybook build\` after the normal project dependencies are installed. The launcher disables Storybook telemetry before startup. No browser auto-open, cloud publication or native host operation is requested.\n\nNormal root dependencies, install and verify remain independent. Disabling the feature does not delete custom files or uninstall existing packages.\n`),
   ];
 }

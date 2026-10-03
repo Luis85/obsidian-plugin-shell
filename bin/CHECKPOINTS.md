@@ -5,7 +5,7 @@ brief, PRD intake, prototype interview and brick editing. The default is No:
 continue without creating a checkpoint. Selecting Yes opens the normal file-plan
 review. Only approved saves write `configs/project-setup-draft.json`.
 
-Restart `node shell.mjs project-setup` to resume, start over while preserving the
+Restart `node bin/app project-setup` to resume, start over while preserving the
 saved draft, or exit without changes. Resume retains completed answers and prior
 brick operations. The prototype interview is reviewed again. Boilerplate generation
 and optional first-run execution still require their own current approvals.
@@ -17,11 +17,11 @@ Saving removes prototype `approved: true`. No autosave writes are introduced.
 ## Agent commands
 
 ```sh
-node shell.mjs project-setup schema --json
-node shell.mjs project-setup checkpoint --input partial-setup.json --json
+node bin/app project-setup schema --json
+node bin/app project-setup checkpoint --input partial-setup.json --json
 # Review the checkpoint file change; repeat with its current --apply hash.
-node shell.mjs project-setup checkpoint-status --json
-node shell.mjs project-setup resume --json
+node bin/app project-setup checkpoint-status --json
+node bin/app project-setup resume --json
 ```
 
 `checkpointSchema` in schema discovery describes a partial setup request. Only
@@ -42,7 +42,7 @@ The checkpoint remains after successful setup as a non-executing recovery record
 Remove it explicitly through a reviewed deletion:
 
 ```sh
-node shell.mjs project-setup discard-checkpoint --json
+node bin/app project-setup discard-checkpoint --json
 # Review the deletion, then repeat with --apply <current-planHash>.
 ```
 

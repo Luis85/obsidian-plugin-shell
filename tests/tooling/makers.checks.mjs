@@ -10,6 +10,8 @@ import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
 import { loadEventCatalog } from '../../scripts/events/load-catalog.mjs';
 import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, removeMakerExamples, copyMakerSuite } from './maker-fixture.mjs';
 
+// A consumer copy (MAKE-03-08) carries only the maker suite; it plans through the source repository's CLI.
+const cliRoot = process.env.MAKER_CLI_ROOT ?? sourceRoot;
 const feature = () => parseArguments(['feature', 'bookmarks', '--entity', 'bookmark']);
 test('[MAKE-03-01] deterministic dry-run performs no writes and prints an exact source plan', () => fixture(async root => {
   const before = await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8');
@@ -17,9 +19,10 @@ test('[MAKE-03-01] deterministic dry-run performs no writes and prints an exact 
   assert.deepEqual(a, b); assert.ok(a.plan.changes.length >= 15);
   assert.deepEqual(await readdir(join(root, 'src')), ['bootstrap']);
   assert.equal(await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8'), before);
-  const run = spawnSync(process.execPath, [resolve(sourceRoot, 'scripts/makers/cli.mjs'), 'feature', 'bookmarks', '--entity', 'bookmark', '--dry-run', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
+  const run = spawnSync(process.execPath, [resolve(cliRoot, 'bin/app'), 'make', 'feature', 'bookmarks', '--entity', 'bookmark', '--root', root, '--dry-run', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
   assert.equal(run.status, 0, run.stderr); const report = JSON.parse(run.stdout);
-  assert.equal(report.status, 'planned'); assert.ok(report.plan.changes.every(change => !Object.hasOwn(change, 'content')));
+  assert.equal(report.status, 'planned'); assert.equal(report.command, 'make');
+  assert.ok(report.data.changes.every(change => !Object.hasOwn(change, 'content')));
   assert.deepEqual(await readdir(root), ['src']);
 }));
 test('[MAKE-03-02] applied registration occurs once; identical repeats no-op and edited source conflicts', () => fixture(async root => {
@@ -141,6 +144,7 @@ test('[MAKE-03-08] maker checks remain isolated after a consumer extends and rem
   const env = { ...process.env, FORCE_COLOR: '0' };
   // This is a new runner, not a worker of the outer node:test process.
   delete env.NODE_TEST_CONTEXT;
+  env.MAKER_CLI_ROOT = cliRoot;
   const run = spawnSync(process.execPath, ['--test', '--test-reporter=spec', `--test-name-pattern=${selected}`, 'tests/tooling/makers.checks.mjs'], { cwd: root, env, encoding: 'utf8', timeout: 180000, maxBuffer: 2 * 1024 * 1024 });
   assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
   for (const id of ['01', '02', '03', '04', '05', '06', '07']) assert.ok(run.stdout.includes(`[MAKE-03-${id}]`), run.stdout);

@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { validateProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
 import { readData } from './storage.ts';
 /** The same contained-path inspection used for models, including symlink rejection. The sidecar records the

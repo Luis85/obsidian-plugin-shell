@@ -1,4 +1,4 @@
-import { createFilePlan } from '../../shared/file-plan.mjs';
+import { createFilePlan } from '../../shared/file-plan.ts';
 import { configurationPlan } from '../../framework/changes.ts';
 import type { AuthoringDocument } from '../../companion/authoring-contract.ts';
 import { docsObject as object, insist } from '../domain/contracts.ts';
