@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,7 @@ import { componentTemplateCoverage, componentTemplateTree } from '../../bin/appl
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { documentText, newDocument, openDocument } from '../../bin/domain/document.ts';
 import { pluginComponentTemplates } from '../../plugins/template-contributions.ts';
+import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
 
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -32,6 +33,47 @@ test('templates docs creates a reviewed Markdown plan from JSON', async () => {
   assert.equal(outcome.status, 'planned');
   assert.ok(outcome.data.changes.some(change => change.path.endsWith('component-library/README.md')));
   assert.ok(outcome.data.changes.length >= 40);
+});
+
+test('templates docs owns only its receipted output and turns edits to other files into conflicts', async () => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'component-template-docs-owned-')));
+  const docs = options => executeOperation({ command: 'templates docs', args: [], options }, { root, frameworkRoot });
+  const first = await docs({ out: 'docs/library' });
+  assert.deepEqual(first.data.conflicts, []);
+  assert.ok(first.data.changes.some(change => change.path === 'docs/library/component-library.receipt.json'));
+  assert.equal((await docs({ out: 'docs/library', apply: first.data.planHash })).status, 'applied');
+  const receipt = JSON.parse(await readFile(join(root, 'docs/library/component-library.receipt.json'), 'utf8'));
+  assert.equal(receipt.files['docs/library/README.md'].length, 64);
+  assert.equal((await docs({ out: 'docs/library', yes: true })).status, 'unchanged');
+  // A generated file edited after generation is preserved as a conflict, never silently regenerated.
+  await writeFile(join(root, 'docs/library/README.md'), '# Hand-edited index\n');
+  const edited = await docs({ out: 'docs/library' });
+  assert.deepEqual(edited.data.conflicts, ['docs/library/README.md']);
+  const refused = await docs({ out: 'docs/library', apply: edited.data.planHash });
+  assert.equal(refused.diagnostics[0].code, 'PLAN_CONFLICT');
+  assert.equal(await readFile(join(root, 'docs/library/README.md'), 'utf8'), '# Hand-edited index\n');
+  // A non-generated file at a generated path (no receipt) is a conflict too.
+  await mkdir(join(root, 'docs/notes'), { recursive: true });
+  await writeFile(join(root, 'docs/notes/README.md'), '# Team notes\n');
+  assert.deepEqual((await docs({ out: 'docs/notes' })).data.conflicts, ['docs/notes/README.md']);
+  await writeFile(join(root, 'docs/notes/component-library.receipt.json'), '{"schemaVersion":1,"files":{"bin/README.md":"' + 'a'.repeat(64) + '"}}');
+  assert.equal((await docs({ out: 'docs/notes' })).diagnostics[0].code, 'TEMPLATE_DOCS_RECEIPT');
+  await writeFile(join(root, 'docs/notes/component-library.receipt.json'), 'not json');
+  assert.equal((await docs({ out: 'docs/notes' })).diagnostics[0].code, 'TEMPLATE_DOCS_RECEIPT');
+});
+
+test('templates docs rejects framework, source and configured project roots as output', async () => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'component-template-docs-roots-')));
+  const code = async out => (await executeOperation({ command: 'templates docs', args: [], options: { out } }, { root, frameworkRoot })).diagnostics[0]?.code;
+  for (const out of ['bin', 'BIN/docs', 'src/docs', 'scripts', 'configs/templates', 'templates', 'plugins/x', 'tests', 'harness', 'design', 'dist'])
+    assert.equal(await code(out), 'TEMPLATE_DOCS_PROTECTED', out);
+  for (const out of ['.framework/docs', '../outside', 'node_modules/x']) assert.equal(await code(out), 'TEMPLATE_PATH', out);
+  await writeFile(join(root, 'shell.config.json'), JSON.stringify(defaults(identity({ id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' }))));
+  const configured = JSON.parse(await readFile(join(root, 'shell.config.json'), 'utf8'));
+  configured.paths = { ...configured.paths, codebaseFolder: 'app/source', testsFolder: 'spec' };
+  await writeFile(join(root, 'shell.config.json'), JSON.stringify(configured));
+  for (const out of ['app/docs', 'spec']) assert.equal(await code(out), 'TEMPLATE_DOCS_PROTECTED', out);
+  assert.equal(await code('docs/library'), undefined);
 });
 
 test('templates instantiate uses the canonical project model and file-plan boundary', async () => {

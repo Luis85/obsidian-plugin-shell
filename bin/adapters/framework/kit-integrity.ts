@@ -4,6 +4,7 @@ import { readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { exactKeys, object } from './configuration.ts';
 import { exists, hash, readBounded, readJson } from './files.ts';
+import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
 import { requireThat } from './contracts.ts';
 
 export interface KitFile { path: string; hash: string; bytes: number }
@@ -33,7 +34,8 @@ function manifestHeader(value: unknown): ManifestHeader {
   requireThat(Array.isArray(files) && files.length > 0 && files.length <= 5000 && Array.isArray(bootstrap) && bootstrap.length <= 10, 'KIT_LIMIT', 'Invalid kit inventory.');
   return { version, compilerVersion, sourceHash, files, bootstrap };
 }
-const ownedKitPath = (path: unknown): path is string => typeof path === 'string' && (path === 'bin/app.js' || /^bin\/(?:template|plugins|licenses)\//.test(path));
+// bin/plugins/<id>/config.json is user-editable data (see pluginConfigFiles), so it is never a fingerprinted kit file.
+const ownedKitPath = (path: unknown): path is string => typeof path === 'string' && (path === 'bin/app.js' || /^bin\/(?:template|licenses)\//.test(path));
 const validBytes = (bytes: unknown): bytes is number => typeof bytes === 'number' && Number.isSafeInteger(bytes) && bytes >= 0 && bytes <= 8_000_000;
 function kitFile(value: unknown, names: Set<string>): KitFile {
   const file = object(value); exactKeys(file, ['path', 'hash', 'bytes']);
@@ -58,15 +60,46 @@ export function kitManifest(value: unknown): Kit {
   return { schemaVersion: 2, version: header.version, compilerVersion: header.compilerVersion, sourceHash: header.sourceHash, files, bootstrap };
 }
 
+/** True for a bin-owned kit. Retired layouts are never probed: without bin/kit.json callers report KIT_REQUIRED. */
+export async function kitPresent(root: string): Promise<boolean> {
+  return exists(join(root, 'bin/kit.json'));
+}
+
+const templatePluginConfig = /^bin\/template\/plugins\/([^/]+)\/config\.json$/;
+/**
+ * The bundled CLI reads each Workbench plugin's runtime config beside app.js. That copy is editable data (enable/disable),
+ * so it is schema-checked instead of fingerprinted; its shipped default is the fingerprinted template copy.
+ */
+export function pluginConfigFiles(kit: Kit): Array<{ path: string; defaults: KitFile }> {
+  return kit.files.flatMap(file => {
+    const match = templatePluginConfig.exec(file.path);
+    return match ? [{ path: `bin/plugins/${match[1]}/config.json`, defaults: file }] : [];
+  });
+}
+const pluginConfigShape = (value: unknown): boolean => typeof value === 'object' && value !== null && !Array.isArray(value)
+  && (!('enabled' in value) || typeof value.enabled === 'boolean');
+/** Reads one runtime plugin config, failing closed on a missing, oversized, unsafe or wrongly shaped document. */
+export async function readPluginConfig(root: string, path: string): Promise<Buffer> {
+  requireThat(await exists(join(root, path)), 'KIT_PLUGIN_CONFIG', `Missing Workbench plugin config: ${path}.`);
+  const bytes = await readBounded(join(root, path), 65_536);
+  let value: unknown = null;
+  try { value = parseJsonData(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); } catch { value = null; }
+  requireThat(pluginConfigShape(value), 'KIT_PLUGIN_CONFIG', `Invalid Workbench plugin config (expected a JSON object with optional boolean enabled): ${path}.`);
+  return bytes;
+}
+
 export async function verifyKit(root: string): Promise<Kit> {
+  requireThat(await kitPresent(root), 'KIT_REQUIRED', 'No extracted framework kit (bin/kit.json) was found.');
   const kit = kitManifest(await readJson(join(root, 'bin/kit.json')));
-  const actual = (await listFiles(root, 'bin')).filter(path => path !== 'bin/app' && path !== 'bin/kit.json').sort();
+  const configs = pluginConfigFiles(kit), configPaths = new Set(configs.map(file => file.path));
+  const actual = (await listFiles(root, 'bin')).filter(path => path !== 'bin/app' && path !== 'bin/kit.json' && !configPaths.has(path)).sort();
   requireThat(JSON.stringify(actual) === JSON.stringify(kit.files.map(file => file.path).sort()), 'KIT_INVENTORY', 'Missing or unlisted kit files.');
   requireThat(kit.files.reduce((total, file) => total + file.bytes, 0) <= 100_000_000, 'KIT_MODIFIED', 'Kit inventory exceeds its byte bound.');
   await mapBounded(kit.files, 8, async file => {
     const content = await readBounded(join(root, file.path), 8_000_000);
     requireThat(content.length === file.bytes && hash(content) === file.hash, 'KIT_MODIFIED', `Kit fingerprint mismatch: ${file.path}.`);
   });
+  await mapBounded(configs, 8, file => readPluginConfig(root, file.path));
   if (!await exists(join(root, '.companion/generation.json'))) for (const file of kit.bootstrap) {
     requireThat(hash(await readBounded(join(root, file.path), 8_000_000)) === file.hash, 'BOOTSTRAP_MODIFIED', `Bootstrap changed before generation: ${file.path}.`);
   }

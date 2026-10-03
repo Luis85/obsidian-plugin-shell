@@ -1,6 +1,6 @@
 import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
-import { join } from 'node:path';
-import { exists, hash } from './framework/files.ts';
+import { hash } from './framework/files.ts';
+import { resolveTemplateRoot } from './template-root.ts';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
 import { pluginFrameworkAdapters } from '../../plugins/runtime.ts';
 import { generationReceipt } from '../compiler/adapters/workspace-plan.ts';
@@ -9,8 +9,7 @@ import { documentText, type SketchDocument } from '../domain/document.ts';
 import { outputBoundary, packagePlan } from './package-plan.ts';
 /** Same dedicated compiler and template snapshot as shell generate; no second Vue/JSON generator. */
 export async function compile(document: SketchDocument, root: string, kind: 'clickdummy' | 'obsidian-plugin' | 'project', signal?: AbortSignal, projectSelection?: ProjectSelection) {
-  const templateRoot = await exists(join(root, 'bin/template/package.json')) ? join(root, 'bin/template') : root;
-  const template = await loadTemplateSnapshot(templateRoot, signal);
+  const template = await loadTemplateSnapshot(await resolveTemplateRoot(root), signal);
   const source = documentText(document);
   const compilation = await compileProject({ source, sourceName: 'companion.project.json', outputKind: kind, template, projectSelection }, { signal },
     { frameworkAdapters: pluginFrameworkAdapters() });

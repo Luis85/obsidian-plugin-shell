@@ -35,10 +35,22 @@ test('typed JSON data contract is an explicit narrow architecture boundary', () 
 test('companion code emitters own a zone that may read the project templates; compiler-host may not', () => {
   const rule = name => config.boundaries.rules.find(item => item.from === name)?.allow;
   assert.deepEqual(config.boundaries.zones.find(item => item.name === 'compiler-emitters')?.patterns, ['bin/compiler/emitters/**']);
-  assert.deepEqual(rule('compiler-emitters'), ['compiler-emitters', 'compiler-domain', 'companion-authoring-contract', 'project-templates', 'tooling']);
+  assert.deepEqual(rule('compiler-emitters'), ['compiler-emitters', 'compiler-domain', 'companion-authoring-contract', 'project-templates', 'cli-serialization-contract']);
   for (const source of ['compiler-host', 'maker-host', 'test', 'tooling']) assert.ok(rule(source)?.includes('compiler-emitters'), source);
   assert.equal(rule('compiler-host')?.includes('project-templates'), false);
   for (const core of ['compiler-domain', 'compiler-application', 'maker-domain', 'maker-application']) assert.equal(rule(core)?.includes('compiler-emitters'), false, core);
+});
+
+test('the compiler reaches tooling only through named narrow contracts, never the whole tooling zone', () => {
+  const rule = name => config.boundaries.rules.find(item => item.from === name)?.allow;
+  for (const source of ['compiler-host', 'compiler-emitters']) assert.equal(rule(source)?.includes('tooling'), false, source);
+  assert.deepEqual(config.boundaries.zones.find(item => item.name === 'cli-serialization-contract')?.patterns, ['scripts/contracts/serialization.ts']);
+  assert.deepEqual(rule('cli-serialization-contract'), ['cli-serialization-contract']);
+  // A zone listed after tooling would never match: scripts/** claims the file first.
+  const order = config.boundaries.zones.map(item => item.name);
+  assert.ok(order.indexOf('cli-serialization-contract') < order.indexOf('tooling'));
+  for (const source of ['compiler-emitters', 'maker-host', 'test', 'tooling']) assert.ok(rule(source)?.includes('cli-serialization-contract'), source);
+  assert.ok(rule('maker-host')?.includes('companion-test-kit'), 'maker fixtures read the companion test kit');
 });
 
 test('canonical CLI result envelope is isolated from implementation layers', () => {

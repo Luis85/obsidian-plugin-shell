@@ -24,6 +24,9 @@ export default ts.config(
   },
   { files: ['bin/**/*.ts', 'plugins/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
+  // Companion runtime templates are copied verbatim into generated plugins; lint them as the plugin code they become.
+  { files: ['templates/companion/runtime/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.generator.json'], tsconfigRootDir: root } },
+    plugins: { obsidianmd: obsidian }, rules: pluginRules },
   // Extensionless launcher: lint it as an ES module (the package "type" decides how Node loads it).
   { files: ['bin/app'], languageOptions: { sourceType: 'module' } },
   { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts', 'bin/compiler/domain/**/*.ts', 'bin/compiler/application/**/*.ts', 'bin/documentation/domain/**/*.ts', 'bin/documentation/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },

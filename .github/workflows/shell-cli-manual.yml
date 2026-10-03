@@ -13,8 +13,7 @@ on:
       - 'tooling/documentation/**'
       - 'docs/user-manual/shell-cli/**'
       - '.github/workflows/shell-cli-manual.yml'
-  push:
-    branches: ['docs/shell-cli-source-driven-manual']
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:

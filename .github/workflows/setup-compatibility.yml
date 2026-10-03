@@ -31,10 +31,11 @@ jobs:
     name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
     runs-on: ${{ matrix.os }}
     # Fresh setup runs every verify gate once. The integrated Windows tooling
-    # suites alone approach 30 minutes and full Linux runs now take about 25 (more
-    # on Node 24.15); retain time for coverage and npm controls.
+    # suites alone approach 30 minutes and Ubuntu setup plus complete verify was
+    # measured at about 39 minutes; 60 minutes retains time for coverage and npm
+    # controls without shortening any gate.
     # This is a job budget, not a test deadline or product performance threshold.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 45 }}
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 60 }}
     strategy:
       fail-fast: false
       matrix:

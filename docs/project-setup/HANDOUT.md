@@ -48,7 +48,7 @@ Refresh updates only the generated source-snapshot comment and the actual review
 
 ## Project-root selection
 
-Use the same canonical CLI entry to operate on an explicit project directory. Source checkouts use the repository’s locked toolchain; extracted developer kits run the bundled CLI.
+Use the same canonical CLI entry to operate on an explicit project directory. Source checkouts use the repository’s locked toolchain; extracted framework kits run the bundled CLI.
 
 ```sh
 node bin/app handout generate --root /path/to/project --dry-run --json
@@ -87,4 +87,4 @@ npm run typecheck:framework
 npm run test:framework-cli
 ```
 
-The implementation bundle records executed local evidence separately in `HANDOUT-VERIFICATION.md`. The focused source tests and isolated typecheck do not substitute for the full framework suite, compiled developer-kit packaging, CI on the exact applied commit, or native acceptance. Both test files use the existing framework-*.checks.mjs naming convention and are selected by the CLI suite in tests/suites.json. The five framework-integration tests still require execution in a complete checkout; discovery is not a passing test result.
+The implementation bundle records executed local evidence separately in `HANDOUT-VERIFICATION.md`. The focused source tests and isolated typecheck do not substitute for the full framework suite, compiled framework kit packaging, CI on the exact applied commit, or native acceptance. Both test files use the existing framework-*.checks.mjs naming convention and are selected by the CLI suite in tests/suites.json. The five framework-integration tests still require execution in a complete checkout; discovery is not a passing test result.

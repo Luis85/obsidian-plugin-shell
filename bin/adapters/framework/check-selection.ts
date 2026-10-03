@@ -100,7 +100,7 @@ function limitedStep(full: CheckStep, wide: boolean, files: string[], where: str
 }
 function lintStep(ctx: FastContext, wide: boolean): CheckStep[] {
   if (!ctx.fullLint) return [];
-  const full = ctx.fullLint, roots = ['src', 'bin', 'plugins'];
+  const full = ctx.fullLint, roots = ['src', 'bin', 'plugins', 'templates/companion/runtime'];
   const files = ctx.changes.files.filter(path => roots.some(root => isWithinRoot(path, root)));
   return [limitedStep(full, wide, files, roots.join(', '), list => ({ ...full, display: `${full.display} ${preview(list)}`, args: list }))];
 }

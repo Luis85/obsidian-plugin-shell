@@ -608,7 +608,7 @@
     },
     {
       "id": "templates docs",
-      "summary": "Plan deterministic Markdown documentation generated from component-template JSON.",
+      "summary": "Plan deterministic Markdown documentation generated from component-template JSON; replaces only its receipted, unedited output.",
       "effect": "plan",
       "maxArgs": 0,
       "group": "templates",
@@ -621,7 +621,7 @@
         {
           "name": "out",
           "kind": "value",
-          "description": "Folder for generated component-library Markdown.",
+          "description": "Folder for generated component-library Markdown, outside framework/source roots (bin, src, scripts, configs, templates, plugins, tests, configured code/test/vault folders).",
           "default": "docs/generated/component-library"
         },
         {
@@ -7258,7 +7258,7 @@
     },
     {
       "id": "framework upgrade",
-      "summary": "Plan an explicit kit replacement; preserves consumer edits.",
+      "summary": "Plan an explicit kit replacement; deletes only verified retired kit files and keeps edited plugin configs or reports a conflict.",
       "effect": "plan",
       "maxArgs": 0,
       "group": "maintain",

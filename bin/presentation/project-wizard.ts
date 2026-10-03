@@ -1,4 +1,6 @@
-import { frameworkLabels, type ProjectSelection } from '../compiler/domain/project-starter.ts';
+import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
+import { frameworkAdapter } from '../compiler/adapters/project/framework-registry.ts';
+import { pluginFrameworkAdapters } from '../../plugins/runtime.ts';
 import { projectGuide, projectPlan, projectStarters } from '../adapters/projects.ts';
 import { guideInput } from '../adapters/prototype.ts';
 import { requireSketch } from '../domain/errors.ts';
@@ -21,7 +23,7 @@ function showContext(ui: Prompts, stage: number): void {
     details: ['Starter → prototype → review', 'Nothing is written until the complete plan is approved.', 'Escape: previous step. Ctrl+C: cancel.'] });
 }
 function describe(selection: ProjectSelection): string {
-  return `${selection.targets.join(' + ')}; ${selection.framework === 'none' ? 'no frontend framework' : (frameworkLabels[selection.framework] ?? selection.framework).split(' — ')[0]}`;
+  return `${selection.targets.join(' + ')}; ${selection.framework === 'none' ? 'no frontend framework' : (frameworkAdapter(selection.framework, pluginFrameworkAdapters())?.label ?? selection.framework).split(' — ')[0]}`;
 }
 async function chooseStarter(ui: Prompts, starters: Starter[], state: WizardState): Promise<void> {
   const chosen = await choose(ui, 'Which project starter do you want to run?', starters.map(item => ({ id: item.id, label: `${item.name} — ${item.summary} (${describe(item.selection)})` })), state.starterId);

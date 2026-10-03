@@ -12,6 +12,7 @@ import { zip } from '../../bin/adapters/framework/zip.ts';
 import { hash } from '../../bin/adapters/framework/files.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { kitManifest, verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {
   return spawnSync(process.execPath, [join(dir, 'bin/app'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
@@ -37,7 +38,11 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok(files.some(file => file.path === 'bin/app.js'));
   assert.ok(!files.some(file => file.path === 'bin/plugins/runtime.js'));
   await writeFile(pluginConfigPath, JSON.stringify({ ...JSON.parse(pluginConfig), enabled: true }, null, 2) + '\n');
-  let output = cli(dir, ['example', 'send', '--message', 'Compiled extension', '--json']);
+  // Enabling a plugin is a data edit: the runtime config is schema-checked, not fingerprinted.
+  assert.ok((await verifyKit(dir)).files.every(file => !file.path.startsWith('bin/plugins/')));
+  let output = cli(dir, ['framework', 'status', '--json']);
+  assert.equal(output.status, 0, output.stderr + output.stdout); assert.equal(JSON.parse(output.stdout).status, 'ok');
+  output = cli(dir, ['example', 'send', '--message', 'Compiled extension', '--json']);
   assert.equal(output.status, 0, output.stderr + output.stdout);
   let pluginResult = JSON.parse(output.stdout);
   assert.equal(pluginResult.command, 'example');
@@ -54,6 +59,10 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   pluginResult = JSON.parse(output.stdout);
   assert.equal(pluginResult.data.selection.framework, 'react');
   assert.deepEqual(pluginResult.data.selection.targets, ['webapp']);
+  await writeFile(pluginConfigPath, '[]');
+  await assert.rejects(verifyKit(dir), { code: 'KIT_PLUGIN_CONFIG' });
+  await writeFile(pluginConfigPath, '{"enabled":"yes"}');
+  await assert.rejects(verifyKit(dir), { code: 'KIT_PLUGIN_CONFIG' });
   await writeFile(pluginConfigPath, pluginConfig);
   assert.ok((await verifyKit(dir)).files.length > 100, 'restored plugin config keeps the extracted kit valid');
   output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
@@ -153,6 +162,8 @@ test('kit manifest rejects traversal and duplicate case aliases', () => {
   assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: 'bin/template/../../outside' }] }));
   assert.throws(() => kitManifest({ ...base, files: [...base.files, { ...base.files[0], path: 'bin/template/license' }] }));
   assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: '.framework/template/LICENSE' }] }));
+  // Runtime plugin configs are editable data, so the fingerprinted inventory can never claim them.
+  assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: 'bin/plugins/demo/config.json' }] }), { code: 'KIT_PATH' });
 });
 test('archive rejects traversal and duplicate entries', () => {
   assert.throws(() => zip([{ path: '../outside', bytes: Buffer.from('x') }]));
@@ -186,11 +197,40 @@ test('kit verification reopens bytes on every call and rejects source links and 
   await rm(target); await symlink(join(root, files[1].path), target, 'file');
   await assert.rejects(verifyKit(root), /links/);
 });
+const kitBootstrap = { 'bin/app': 'launcher', 'package.json': '{}', 'README.md': 'README', LICENSE: 'license' };
+/** A minimal verified bin-owned kit; `configs` are runtime plugin configs whose shipped default is the template copy. */
+async function kitFixture(root, version, files, configs = {}) {
+  const entries = [];
+  for (const [path, content] of Object.entries(files)) {
+    await mkdir(dirname(join(root, path)), { recursive: true });
+    await writeFile(join(root, path), content);
+    entries.push({ path, hash: hash(content), bytes: Buffer.byteLength(content) });
+  }
+  for (const [id, content] of Object.entries(configs)) {
+    for (const path of [`bin/template/plugins/${id}/config.json`, `bin/plugins/${id}/config.json`]) {
+      await mkdir(dirname(join(root, path)), { recursive: true });
+      await writeFile(join(root, path), content);
+    }
+    entries.push({ path: `bin/template/plugins/${id}/config.json`, hash: hash(content), bytes: Buffer.byteLength(content) });
+  }
+  const initial = [];
+  for (const [path, content] of Object.entries(kitBootstrap)) {
+    await mkdir(dirname(join(root, path)), { recursive: true });
+    await writeFile(join(root, path), content);
+    initial.push({ path, hash: hash(content) });
+  }
+  const manifest = { schemaVersion: 2, version, compilerVersion: 'fixture', sourceHash: hash(version), files: entries, bootstrap: initial };
+  await writeFile(join(root, 'bin/kit.json'), JSON.stringify(manifest));
+  assert.deepEqual(await verifyKit(root), manifest);
+  return manifest;
+}
+async function kitRoots(t, count) {
+  const roots = await Promise.all(Array.from({ length: count }, async () => realpath(await mkdtemp(join(tmpdir(), 'kit-upgrade-')))));
+  t.after(async () => { await Promise.all(roots.map(path => rm(path, { recursive: true, force: true }))); });
+  return roots;
+}
 test('upgrading a verified bin-owned kit replaces runtime files and removes only verified kit inventory', async t => {
-  const old = await realpath(await mkdtemp(join(tmpdir(), 'kit-old-')));
-  const next = await realpath(await mkdtemp(join(tmpdir(), 'kit-new-')));
-  t.after(async () => { await Promise.all([old, next].map(path => rm(path, { recursive: true, force: true }))); });
-  const bootstrap = { 'bin/app': 'launcher', 'package.json': '{}', 'README.md': 'README', LICENSE: 'license' };
+  const [old, next] = await kitRoots(t, 2);
   const currentFiles = {
     'bin/template/LICENSE': 'template',
     'bin/template/obsolete.md': 'obsolete template',
@@ -202,26 +242,8 @@ test('upgrading a verified bin-owned kit replaces runtime files and removes only
     'bin/app.js': 'new bundled app',
     'bin/licenses/yaml.LICENSE': 'yaml license',
   };
-  async function fixture(root, version, files) {
-    const entries = [];
-    for (const [path, content] of Object.entries(files)) {
-      await mkdir(dirname(join(root, path)), { recursive: true });
-      await writeFile(join(root, path), content);
-      entries.push({ path, hash: hash(content), bytes: Buffer.byteLength(content) });
-    }
-    const initial = [];
-    for (const [path, content] of Object.entries(bootstrap)) {
-      await mkdir(dirname(join(root, path)), { recursive: true });
-      await writeFile(join(root, path), content);
-      initial.push({ path, hash: hash(content) });
-    }
-    const manifest = { schemaVersion: 2, version, compilerVersion: 'fixture', sourceHash: hash(version), files: entries, bootstrap: initial };
-    await writeFile(join(root, 'bin/kit.json'), JSON.stringify(manifest));
-    assert.deepEqual(await verifyKit(root), manifest);
-    return manifest;
-  }
-  await fixture(old, '0.4.0', currentFiles);
-  const final = await fixture(next, '0.4.1', nextFiles);
+  await kitFixture(old, '0.4.0', currentFiles);
+  const final = await kitFixture(next, '0.4.1', nextFiles);
   const { plan } = await upgradePlan({ root: old, frameworkRoot: old }, next);
   assert.deepEqual(plan.changes.filter(change => change.status === 'delete').map(change => change.path), ['bin/template/obsolete.md']);
   await writeFile(join(old, 'bin/template/obsolete.md'), 'concurrent edit');
@@ -230,4 +252,50 @@ test('upgrading a verified bin-owned kit replaces runtime files and removes only
   await writeFile(join(old, 'bin/template/obsolete.md'), currentFiles['bin/template/obsolete.md']);
   await applyFilePlan(plan);
   assert.deepEqual(await verifyKit(old), final);
+});
+test('kit upgrade preserves an edited plugin config, follows unedited defaults and reports a changed-on-both-sides conflict', async t => {
+  const [old, sameDefault, newDefault] = await kitRoots(t, 3);
+  const files = { 'bin/app.js': 'app', 'bin/template/LICENSE': 'template' };
+  const shipped = '{"enabled":false}\n', edited = '{"enabled":true}\n', revised = '{"enabled":false,"defaultMessage":"v2"}\n';
+  await kitFixture(old, '0.4.0', files, { demo: shipped, retired: shipped });
+  await kitFixture(sameDefault, '0.4.1', { ...files, 'bin/app.js': 'app 2' }, { demo: shipped, added: shipped });
+  await kitFixture(newDefault, '0.4.2', { ...files, 'bin/app.js': 'app 3' }, { demo: revised });
+  // Unedited: the config follows the new kit (retired configs are removed, new ones created).
+  let upgrade = await upgradePlan({ root: old, frameworkRoot: old }, newDefault);
+  assert.deepEqual(upgrade.conflicts, []);
+  const status = path => upgrade.plan.changes.find(change => change.path === path)?.status;
+  assert.equal(status('bin/plugins/demo/config.json'), 'update'); assert.equal(status('bin/plugins/retired/config.json'), 'delete');
+  // Enabling a plugin is user data: kept when the shipped default is unchanged.
+  await writeFile(join(old, 'bin/plugins/demo/config.json'), edited);
+  await verifyKit(old);
+  upgrade = await upgradePlan({ root: old, frameworkRoot: old }, sameDefault);
+  assert.deepEqual(upgrade.conflicts, []); assert.deepEqual(upgrade.summary.preservedPluginConfigs, ['bin/plugins/demo/config.json']);
+  assert.equal(status('bin/plugins/demo/config.json'), undefined); assert.equal(status('bin/plugins/added/config.json'), 'create');
+  await applyFilePlan(upgrade.plan);
+  assert.equal(await readFile(join(old, 'bin/plugins/demo/config.json'), 'utf8'), edited);
+  await verifyKit(old);
+  // Edited locally and changed upstream: a conflict, never an overwrite.
+  upgrade = await upgradePlan({ root: old, frameworkRoot: old }, newDefault);
+  assert.deepEqual(upgrade.conflicts, ['bin/plugins/demo/config.json']);
+  assert.equal(status('bin/plugins/demo/config.json'), undefined);
+  // An edited config whose plugin the new kit retires is a conflict, not a deletion.
+  await writeFile(join(old, 'bin/plugins/added/config.json'), edited);
+  assert.ok((await upgradePlan({ root: old, frameworkRoot: old }, newDefault)).conflicts.includes('bin/plugins/added/config.json'));
+});
+test('kit verification fails with an explicit code for missing configs, stray configs and a missing kit', async t => {
+  const [root, legacy] = await kitRoots(t, 2);
+  await kitFixture(root, '0.4.0', { 'bin/app.js': 'app' }, { demo: '{}' });
+  await rm(join(root, 'bin/plugins/demo/config.json'));
+  await assert.rejects(verifyKit(root), { code: 'KIT_PLUGIN_CONFIG' });
+  await writeFile(join(root, 'bin/plugins/demo/config.json'), '{}');
+  await mkdir(join(root, 'bin/plugins/stray'), { recursive: true });
+  await writeFile(join(root, 'bin/plugins/stray/config.json'), '{}');
+  await assert.rejects(verifyKit(root), { code: 'KIT_INVENTORY' });
+  await mkdir(join(legacy, '.framework'), { recursive: true });
+  await writeFile(join(legacy, '.framework/kit.json'), JSON.stringify({ schemaVersion: 1 }));
+  // The retired layout is not probed or migrated; it is simply not a kit, reported explicitly rather than as a raw ENOENT.
+  await assert.rejects(verifyKit(legacy), { code: 'KIT_REQUIRED' });
+  await assert.rejects(upgradePlan({ root: legacy, frameworkRoot: legacy }, root), { code: 'KIT_REQUIRED' });
+  const status = await executeOperation({ command: 'framework status', args: [], options: {} }, { root: legacy, frameworkRoot: legacy });
+  assert.equal(status.diagnostics[0].code, 'KIT_REQUIRED', 'a clear diagnostic, not a raw ENOENT');
 });

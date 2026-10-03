@@ -1,4 +1,4 @@
-# Setup inside an extracted developer kit
+# Setup inside an extracted framework kit
 
 Use the qualified Node/npm versions declared by the repository and exact kit. This guide describes a locally packed/extracted kit; it is not a claim that a public release already exists.
 
