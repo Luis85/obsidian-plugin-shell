@@ -47,3 +47,15 @@ export async function localeSkeleton(read: Read): Promise<Record<string, unknown
   const dictionary = typeof base === 'object' && base !== null ? base : {};
   return Object.keys(authoring).length ? { ...dictionary, authoring } : { ...dictionary };
 }
+export interface PendingLocaleCheck { readonly locale: string; readonly missing: readonly string[]; readonly extra: readonly string[]; readonly selectable: unknown }
+const keyPaths = (value: unknown): string[] => typeof value === 'object' && value !== null
+  ? Object.entries(value).flatMap(([key, child]: [string, unknown]) => typeof child === 'object' && child !== null ? keyPaths(child).map(nested => `${key}.${nested}`) : [key])
+  : [];
+/** Read-only comparison of a pending draft with the current base keys; translated values stay free to change. */
+export async function checkPendingLocale(read: Read, locale: string): Promise<PendingLocaleCheck> {
+  const base = new Set(keyPaths(await localeSkeleton(read)));
+  const draft = new Set(keyPaths(JSON.parse(await read(`src/locales/pending/${locale}.json`))));
+  const status: unknown = JSON.parse(await read(`src/locales/pending/${locale}.status.json`));
+  const selectable = typeof status === 'object' && status !== null && 'selectable' in status ? status.selectable : null;
+  return { locale, missing: [...base].filter(key => !draft.has(key)).sort(), extra: [...draft].filter(key => !base.has(key)).sort(), selectable };
+}

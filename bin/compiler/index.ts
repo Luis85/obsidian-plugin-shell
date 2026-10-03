@@ -13,7 +13,7 @@ import { renderProjectFiles } from './adapters/plugin-emitter.ts';
 import { clickdummyFiles } from './adapters/clickdummy-emitter.ts';
 import { dependencyReadiness } from './adapters/dependencies.ts';
 import { artifactOrigins } from './adapters/origins.ts';
-import { json, type Model } from '../../scripts/companion/compiler/model.ts';
+import { json, type Model } from './emitters/model.ts';
 import { requireFrameworkAdapter } from './adapters/project/framework-registry.ts';
 import type { FrameworkAdapter } from './adapters/project/framework-adapter.ts';
 export { loadTemplateSnapshot } from './adapters/template-snapshot.ts';

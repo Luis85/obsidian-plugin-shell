@@ -1,4 +1,4 @@
-import type { Model } from '../../../../scripts/companion/compiler/model.ts';
+import type { Model } from '../../emitters/model.ts';
 import type { TemplateSnapshot } from '../../domain/contracts.ts';
 import type { ProjectSelection } from '../../domain/project-starter.ts';
 

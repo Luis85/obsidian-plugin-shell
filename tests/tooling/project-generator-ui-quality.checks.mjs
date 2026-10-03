@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { uiQualityCode, uiQualityScripts, uiQualitySurfaces } from '../../scripts/companion/compiler/ui-quality-code.ts';
-import { uiQualitySpec } from '../../scripts/companion/compiler/ui-quality-spec.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { uiQualityCode, uiQualityScripts, uiQualitySurfaces } from '../../bin/compiler/emitters/ui-quality-code.ts';
+import { uiQualitySpec } from '../../bin/compiler/emitters/ui-quality-spec.ts';
 import { parseBrowserStarter } from '../../scripts/starters/browser.ts';
 import { projectFiles } from '../support/project-render.mjs';
 

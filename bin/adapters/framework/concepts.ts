@@ -4,7 +4,7 @@ import { serializeJson } from '../../../scripts/contracts/serialization.ts';
 import { applyConcept } from '../../../scripts/companion/concepts/apply.ts';
 import { conceptRequire } from '../../../scripts/companion/concepts/contract.ts';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
-import { projectModel } from '../../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../compiler/emitters/model.ts';
 import { record } from '../../../scripts/companion/sitemap/safety.ts';
 import { configurationPlan } from './changes.ts';
 import { designFile } from './configuration.ts';

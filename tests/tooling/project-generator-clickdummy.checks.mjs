@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
-import { clickdummyCode } from '../../scripts/companion/compiler/clickdummy-code.ts';
+import { clickdummyCode } from '../../bin/compiler/emitters/clickdummy-code.ts';
 import { matches } from '../../templates/companion/runtime/contract.ts';
 const root = fileURLToPath(new URL('../../',import.meta.url));
 const document = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
@@ -32,7 +32,7 @@ test('generated source reads return detached schema-valid fixtures and writes fa
   // Include one writable operation to prove the browser never imports or calls a native writer.
   const m = structuredClone(model), source=m.sources[0], operation=source.operations[0];
   source.operations.push({...structuredClone(operation), id:'write-fixture',slug:'write-fixture',direction:'write'});
-  const {dataCode}=await import('../../scripts/companion/compiler/data-code.ts');
+  const {dataCode}=await import('../../bin/compiler/emitters/data-code.ts');
   const files=emitted(m); dataCode(m,(path,content)=>files.set(path,{content}));
   files.set(`${m.sourceRoot}/domain/contract.ts`,{content:await readFile(join(root,'templates/companion/runtime/contract.ts'),'utf8')});
   for (const [path,file] of files) if(path.endsWith('.ts') && /(?:application\/|domain\/contract|clickdummy-sources)/.test(path)) {

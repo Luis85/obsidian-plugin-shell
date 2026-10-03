@@ -36,6 +36,9 @@ export async function bundleReleaseCli(frameworkRoot) {
     outfile: resolve(root, 'bin/app.js'),
     bundle: true, write: false, platform: 'node', format: 'esm', target: 'node22',
     packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent',
+    // Whitespace only: identifiers, syntax and inline legal notices are unchanged. It keeps the single bundled file
+    // well inside the 8 MB per-file limit that every kit reader enforces (Prettier alone is about 5.6 MB unminified).
+    minifyWhitespace: true,
     // Bundled CommonJS dependencies (yaml's node build) require Node built-ins; ESM output needs a real require.
     banner: { js: "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);" },
     // These are maintainer-only/optional tools. Regular extracted-kit commands never load them.

@@ -1,7 +1,7 @@
 import { angularBrickFiles } from './angular-bricks.ts';
 import { serveSource } from './serve-source.ts';
 import { angularLinkerSource } from './angular-linker.ts';
-import { json, type Model } from '../../../../scripts/companion/compiler/model.ts';
+import { json, type Model } from '../../emitters/model.ts';
 import type { Artifact, TemplateSnapshot } from '../../domain/contracts.ts';
 import { validateProjectSelection, type ProjectSelection } from '../../domain/project-starter.ts';
 import { coreSource, browserSource, pluginSource, cliSource, cliEntry, vanillaMount, vueMount, vueComponent, angularMount } from './sources.ts';

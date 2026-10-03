@@ -15,6 +15,10 @@ Run from the project or CLI package root and invoke `node bin/app`; it is the si
 
 The extracted kit contains compiled CLI modules and can start before project dependency installation. The source launcher uses Node's TypeScript support, requesting type stripping where necessary. Starting the CLI is different from installing dependencies required to build or test a generated application.
 
+## 2. Add Workbench to a project that already exists
+
+Use `adopt` instead of `new` or `setup` when a project exists, for example a legacy Angular webapp: `node bin/app adopt analyze --target <project>` reads it without changing anything, and `adopt plan` previews and then writes one Markdown integration plan. Nothing else in the project is touched. See [Adopt an existing project](../../development/ADOPT-EXISTING-PROJECT.md).
+
 ## 2A. Start from a framework checkout
 
 Discover the installed starter catalog instead of copying a list that can become stale:

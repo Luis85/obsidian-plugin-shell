@@ -1,4 +1,4 @@
-import { json } from '../../../../scripts/companion/compiler/model.ts';
+import { json } from '../../emitters/model.ts';
 
 const manifest = Object.freeze({
   id: 'starter-extension',

@@ -33,3 +33,11 @@ test('no source, test, plugin or configuration file imports a removed maker path
   }
   assert.deepEqual(offenders, []);
 });
+
+test('generated consumer code receives maker primitives by injection; nothing names the kit editable maker copy', async () => {
+  const kitMakerCopy = ['bin', 'template', 'bin', 'adapters', 'makers'].join('/');
+  const sources = (await Promise.all(['bin', 'scripts', 'templates', 'tests'].map(files))).flat().filter(path => /\.(?:[cm]?[jt]s|json|vue)$/.test(path));
+  const offenders = [];
+  for (const path of sources) if ((await readFile(join(root, path), 'utf8')).includes(kitMakerCopy)) offenders.push(path);
+  assert.deepEqual(offenders, []);
+});

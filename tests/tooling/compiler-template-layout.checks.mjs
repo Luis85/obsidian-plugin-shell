@@ -11,7 +11,8 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const removed = ['scripts/companion/runtime', 'scripts/companion/devkit', 'scripts/examples/templates'];
 async function files(folder) {
   const entries = await readdir(join(root, folder), { withFileTypes: true }).catch(error => error.code === 'ENOENT' ? [] : Promise.reject(error));
-  const nested = await Promise.all(entries.filter(entry => entry.name !== 'node_modules')
+  // Agent worktrees under .claude/worktrees are separate checkouts of this repository, not its sources.
+  const nested = await Promise.all(entries.filter(entry => entry.name !== 'node_modules' && `${folder}/${entry.name}` !== '.claude/worktrees')
     .map(entry => entry.isDirectory() ? files(`${folder}/${entry.name}`) : [`${folder}/${entry.name}`]));
   return nested.flat();
 }

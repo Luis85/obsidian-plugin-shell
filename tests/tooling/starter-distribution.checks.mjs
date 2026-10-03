@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { stripTypeScriptTypes } from 'node:module';
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
 import { included } from '../../bin/adapters/framework/distribution.ts';
-import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
+import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
 import { zip } from '../../bin/adapters/framework/zip.ts';
 import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';

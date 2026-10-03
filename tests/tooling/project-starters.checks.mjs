@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
 import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
-import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
+import { projectModel, symbol } from '../../bin/compiler/emitters/model.ts';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';

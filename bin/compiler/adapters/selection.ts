@@ -1,10 +1,10 @@
 import { parseSelection, selectionClosure, SelectionError, type GenerationSelection, type Selection, type SelectionNode } from '../domain/selection.ts';
-import type { Model } from '../../../scripts/companion/compiler/model.ts';
-import { row, rows } from '../../../scripts/companion/compiler/model.ts';
-import { componentFile, type Entry } from '../../../scripts/companion/compiler/file-code.ts';
-import { visualDefinitions, visualPagePath, visualComponentPath, visualAdapterPath } from '../../../scripts/companion/compiler/visual-model.ts';
+import type { Model } from '../emitters/model.ts';
+import { row, rows } from '../emitters/model.ts';
+import { componentFile, type Entry } from '../emitters/file-code.ts';
+import { visualDefinitions, visualPagePath, visualComponentPath, visualAdapterPath } from '../emitters/visual-model.ts';
 import { visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
-import { noteEntity } from '../../../scripts/companion/compiler/persistence-code.ts';
+import { noteEntity } from '../emitters/persistence-code.ts';
 
 type VisualStore = ReturnType<typeof visualDefinitions>;
 type VisualDefinition = VisualStore['pages'][number] | VisualStore['components'][number];

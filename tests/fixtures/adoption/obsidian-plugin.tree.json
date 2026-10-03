@@ -1,0 +1,18 @@
+{
+  "description": "A hand-written Obsidian plugin: manifest.json with minAppVersion, the obsidian package, esbuild and a vault-style .obsidian folder is absent. Exercises option C.",
+  "files": {
+    "manifest.json": { "id": "daily-digest", "name": "Daily Digest", "version": "0.4.1", "minAppVersion": "1.5.0", "description": "Summarises daily notes.", "author": "Ada", "isDesktopOnly": false },
+    "package.json": {
+      "name": "daily-digest",
+      "version": "0.4.1",
+      "scripts": { "dev": "node esbuild.config.mjs", "build": "tsc -noEmit && node esbuild.config.mjs production", "lint": "eslint src" },
+      "devDependencies": { "@types/node": "^20.0.0", "builtin-modules": "3.3.0", "esbuild": "0.21.5", "eslint": "^9.0.0", "obsidian": "latest", "tslib": "2.4.0", "typescript": "5.4.5" }
+    },
+    "package-lock.json": { "name": "daily-digest", "lockfileVersion": 3, "packages": {} },
+    "tsconfig.json": { "compilerOptions": { "strict": true, "target": "ES6", "module": "ESNext" }, "include": ["src/**/*.ts"] },
+    "esbuild.config.mjs": ["export default {};"],
+    "src/main.ts": ["import { Plugin } from 'obsidian';", "export default class DailyDigest extends Plugin { async onload() { this.addCommand({ id: 'digest', name: 'Digest', callback: () => {} }); } }"],
+    "styles.css": [".daily-digest { padding: 4px; }"],
+    "versions.json": { "0.4.1": "1.5.0" }
+  }
+}

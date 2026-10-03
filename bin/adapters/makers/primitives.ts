@@ -2,7 +2,7 @@ import { makerSymbol as symbol, title } from './arguments.ts';
 import type { RecipeContext } from './contracts.ts';
 
 export const registryPath = 'src/bootstrap/authoring.ts';
-interface ActionRequest { readonly owner: string; readonly name: string; readonly kind: string; readonly preference?: string; readonly event?: string }
+export interface ActionRequest { readonly owner: string; readonly name: string; readonly kind: string; readonly preference?: string; readonly event?: string }
 interface KindInput { readonly owner: string; readonly name: string; readonly prefix: string; readonly id: string; readonly local: string; readonly preference: string | undefined; readonly event: string }
 /** The generated command, its factory registration and its real-action test, filled in per primitive kind. */
 interface ActionSpec {

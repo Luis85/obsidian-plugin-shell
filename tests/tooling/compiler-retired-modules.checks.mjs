@@ -53,11 +53,15 @@ test('guard preserves generated-source strings and accepts canonical source impo
   ].join('\n')]])), []);
 });
 
+const kitMakerCopy = ['bin', 'template', 'bin', 'adapters', 'makers'].join('/');
 function retiredLayoutLiterals(source, file) {
   const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
   const found = [];
   function visit(node) {
     if (ts.isStringLiteralLike(node) && /^\.framework\/(?:kit\.json$|(?:compiled|template)(?:\/|$))/.test(node.text)) found.push(node.text);
+    // Generated consumer code receives maker primitives by injection; no source may probe the kit's editable copy.
+    const text = ts.isStringLiteralLike(node) || ts.isTemplateHead(node) || ts.isTemplateMiddle(node) || ts.isTemplateTail(node) ? node.text : '';
+    if (text.includes(kitMakerCopy)) found.push(kitMakerCopy);
     ts.forEachChild(node, visit);
   }
   visit(parsed);
@@ -70,4 +74,6 @@ test('runtime discovery never probes retired distribution layouts', async () => 
   }
   assert.deepEqual(retiredLayoutLiterals("const root = join(base, '.framework/template');", 'example.ts'), ['.framework/template']);
   assert.deepEqual(retiredLayoutLiterals("// Retired .framework/template layout.\nconst root = join(base, 'bin/template');", 'example.ts'), []);
+  const probe = 'const source = `const makers = new URL(\'${up}' + kitMakerCopy + '/\', import.meta.url);`;';
+  assert.deepEqual(retiredLayoutLiterals(probe, 'example.ts'), [kitMakerCopy]);
 });

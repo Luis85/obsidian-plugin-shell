@@ -218,9 +218,9 @@ test('external adapters mount after render and never mount an element removed be
   assert.equal(created, 1); assert.deepEqual(log, [['mount', true, 'v'], ['destroy']]);
 });
 
-const { projectModel } = await import('../../scripts/companion/compiler/model.ts');
+const { projectModel } = await import('../../bin/compiler/emitters/model.ts');
 const { migrateCompanionDocument } = await import('../../scripts/companion/project-contract.mjs');
-const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualContractNames, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
+const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualContractNames, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../bin/compiler/emitters/visual-model.ts');
 const self = migrateCompanionDocument(JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'))).document;
 test('model exposes validated definitions and explicit Nuxt UI imports', () => {
   const m = projectModel(self), store = visualDefinitions(m);
@@ -279,7 +279,7 @@ test('declared component packages merge as exact pins and framework conflicts na
   assert.throws(() => visualPackages(withDeps([{ package: 'vue', version: '3.0.0', purpose: 'Old' }]), framework), { message: 'VISUAL_INVALID: vue is pinned to 3.5.43 by the framework and 3.0.0 by ' + name + '.' });
 });
 
-const { visualSfc } = await import('../../scripts/companion/compiler/visual-code.ts');
+const { visualSfc } = await import('../../bin/compiler/emitters/visual-code.ts');
 const { writeFile } = await import('node:fs/promises');
 const { readFileSync } = await import('node:fs');
 const { visualNodes } = await import('../../scripts/companion/visual/visual-ir.mjs');
