@@ -44,10 +44,10 @@ test('release bundle rebases real module locations and plugin configs only insid
   assert.equal(bundle.toString('utf8'), expected);
 }));
 
-test('release bundle rebases the same way when the framework root is reached through a symlink', () => framework(sources, async root => {
+test('release bundle rebases the same locations when the framework root is reached through a symlink', () => framework(sources, async root => {
   // macOS temp directories live under the /var -> /private/var symlink; esbuild reports the real paths.
   const linked = join(root, '..', 'linked-framework');
-  await symlink(root, linked, 'junction');
+  await symlink(root, linked, process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal((await bundleReleaseCli(linked)).toString('utf8'), expected);
 }));
 
