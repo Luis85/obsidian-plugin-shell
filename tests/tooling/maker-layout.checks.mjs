@@ -24,7 +24,7 @@ test('scripts/makers holds only catalog data and the consumer custom registry; e
 
 test('no source, test, plugin or configuration file imports a removed maker path', async () => {
   const removed = [...moved.map(name => `makers/${name}.mjs`), 'quality/format-generated.mjs', 'makers/cli.mjs'];
-  const sources = (await Promise.all(['bin', 'scripts', 'tests', 'plugins', 'configs', '.github'].map(files))).flat()
+  const sources = (await Promise.all(['bin', 'scripts', 'templates', 'tests', 'plugins', 'configs', '.github'].map(files))).flat()
     .filter(path => /\.(?:[cm]?[jt]s|json|ya?ml)$/.test(path) && path !== 'tests/tooling/maker-layout.checks.mjs');
   const offenders = [];
   for (const path of sources) {

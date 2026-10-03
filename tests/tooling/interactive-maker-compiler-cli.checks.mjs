@@ -18,7 +18,7 @@ const context = { root, frameworkRoot: root, inputText: source };
 // Compiler adapters throw CompilerError, whose stable code lives on its diagnostic.
 const failsWith = code => error => error?.diagnostic?.code === code;
 const request = (command, options = {}, args = []) => ({ command, args, options: { input: '-', ...options } });
-const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
+const templateRoots = ['src', 'scripts', 'templates', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins', 'configs'];
 const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md',
   'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'];
 /** The smallest tree the template loader accepts: every root folder and root file, no generator templates. */

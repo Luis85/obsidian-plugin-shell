@@ -111,7 +111,7 @@ export async function planExampleRemoval(root, { beforeFinalize } = {}) {
     const currentHash = probe.changes[0].beforeHash;
     let content = null;
     if (item.template) {
-      const path = 'scripts/examples/templates/' + item.template;
+      const path = 'templates/examples/' + item.template;
       const templateProbe = await createFilePlan(root, [{ path, content: null }]);
       content = await readFile(resolve(root, path), 'utf8');
       if (digest(content) !== templateProbe.changes[0].beforeHash) throw new Error('EXAMPLES_STALE_TEMPLATE: ' + path);

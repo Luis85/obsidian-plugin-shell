@@ -18,7 +18,7 @@ function defaults(root = 'docs/application'): DocsSettings {
     recursive: true, include: ['**/*.md'], exclude: ['**/generated/**'], linkFormat: 'markdown' };
 }
 const SETTING_KEYS = ['root', 'indexFile', 'paths', 'recursive', 'include', 'exclude', 'linkFormat', 'preserveAuthoredContent', 'conflictPolicy', 'deleteMissing'];
-export const PROTECTED_ROOTS: readonly string[] = ['.git', defaultVaultConfigDirectory, '.framework', '.companion', '.codex-authoring.lock', 'node_modules', 'scripts', 'bin', 'src', 'tests', 'dist', 'configs', 'design'];
+export const PROTECTED_ROOTS: readonly string[] = ['.git', defaultVaultConfigDirectory, '.framework', '.companion', '.codex-authoring.lock', 'node_modules', 'scripts', 'templates', 'bin', 'src', 'tests', 'dist', 'configs', 'design'];
 function keepsSafetyPolicy(raw: Record<string, unknown>): boolean {
   return (raw.preserveAuthoredContent === undefined || raw.preserveAuthoredContent === true) && (raw.deleteMissing === undefined || raw.deleteMissing === false)
     && (raw.conflictPolicy === undefined || raw.conflictPolicy === 'review');

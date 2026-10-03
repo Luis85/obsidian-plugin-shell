@@ -23,7 +23,7 @@ export function outputBoundary(root: string, frameworkRoot: string, out: string)
   const target = relative(resolve(frameworkRoot), resolve(root, out));
   if (target.startsWith('..') || isAbsolute(target)) return;
   const first = target.split(/[\\/]/)[0];
-  requireSketch(first && !['src', 'bin', 'scripts', 'tests', 'harness', 'docs', '.github', '.framework'].includes(first), 'MAKER_OUTPUT', 'Inside a framework checkout, use prototypes/<name> or generated/<name>, not a template input directory.');
+  requireSketch(first && !['src', 'bin', 'scripts', 'templates', 'tests', 'harness', 'docs', '.github', '.framework'].includes(first), 'MAKER_OUTPUT', 'Inside a framework checkout, use prototypes/<name> or generated/<name>, not a template input directory.');
 }
 /** Compiler emission stays separate from package persistence. Edited/foreign files are never silently adopted. */
 export async function packagePlan(root: string, out: string, entries: Entry[], data: Record<string, unknown>): Promise<Prepared> {

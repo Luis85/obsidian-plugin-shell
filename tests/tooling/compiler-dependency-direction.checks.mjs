@@ -70,7 +70,7 @@ async function sourceInventory() {
       else if (entry.isFile() && /\.(?:ts|mts|mjs)$/.test(path)) sources.set(path, await readFile(resolve(root, path), 'utf8'));
     }
   }
-  for (const folder of ['bin', 'scripts', 'plugins', 'tests']) await walk(folder);
+  for (const folder of ['bin', 'scripts', 'templates', 'plugins', 'tests']) await walk(folder);
   return sources;
 }
 

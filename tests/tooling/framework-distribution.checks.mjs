@@ -114,7 +114,7 @@ test('reviewed style removal preserves tokens across checkout line endings', asy
   await copy('src/bootstrap/features.ts');
   for (const file of ownership.files) {
     if (file.sha256 !== null) assert.equal(hash(await copy(file.path)), file.sha256, file.path);
-    if (file.template) await copy('scripts/examples/templates/' + file.template);
+    if (file.template) await copy('templates/examples/' + file.template);
   }
   const report = await planExampleRemoval(folder);
   const shell = report.plan.changes.find(change => change.path === 'src/styles/shell.css');
