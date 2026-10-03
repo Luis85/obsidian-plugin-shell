@@ -22,7 +22,7 @@ import { mapBounded as legacyMapBounded } from '../../scripts/shared/bounded-map
 import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
 import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
 import { exists as legacyExists, statIfPresent as legacyStatIfPresent } from '../../scripts/shared/fs-presence.ts';
-import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
+import { capabilityCatalog, catalogDigest } from '../../bin/adapters/operations/catalog.ts';
 import * as typedJsonData from '../../scripts/contracts/json-data.ts';
 import * as legacyJsonData from '../../scripts/contracts/json-data.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));

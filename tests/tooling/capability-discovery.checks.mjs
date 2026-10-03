@@ -6,10 +6,10 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { spawnSync } from 'node:child_process';
-import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../../scripts/operations/catalog.mjs';
+import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../../bin/adapters/operations/catalog.ts';
 import { builtinRecipes, parseArguments } from '../../scripts/makers/arguments.mjs';
 import { builtinHandlers } from '../../scripts/makers/dispatch.mjs';
-import { handleRequest, validateMessage, protocolHandlers } from '../../scripts/operations/protocol.mjs';
+import { handleRequest, validateMessage, protocolHandlers } from '../../bin/adapters/operations/protocol.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = resolve(root, 'scripts/operations/cli.mjs');
@@ -78,7 +78,7 @@ test('[CAP-03] data-only CLI discovery never imports custom recipes or executes 
 }));
 
 test('[CAP-04] fresh Git-free copy discovers capabilities without installed packages or concept assets', () => fixture(async folder => {
-  for (const path of ['scripts/operations', 'scripts/contracts']) {
+  for (const path of ['scripts/operations', 'scripts/contracts', 'bin/adapters/operations']) {
     await mkdir(join(folder, path), { recursive: true });
     await cp(join(root, path), join(folder, path), { recursive: true });
   }

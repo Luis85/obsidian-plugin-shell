@@ -16,7 +16,7 @@ import { starterListing, completeStarterProject } from './starter-project.ts';
 import { storybookOperation } from './storybook.ts';
 import { submissionCheck } from './submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
-import { capabilityCatalog } from '../../../scripts/operations/catalog.mjs';
+import { capabilityCatalog } from '../operations/catalog.ts';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
 import { fileOperation } from './file-operation.ts';

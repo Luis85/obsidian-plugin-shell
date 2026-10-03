@@ -82,7 +82,7 @@ test('disposing an already destroyed output still observes its scheduled error w
 });
 
 test('shared discovery accepts the real launcher and TypeScript sources but rejects unsafe source paths', async () => {
-  const { capabilityCatalog, validateCatalog } = await import('../../scripts/operations/catalog.mjs');
+  const { capabilityCatalog, validateCatalog } = await import('../../bin/adapters/operations/catalog.ts');
   const catalog = capabilityCatalog(), maker = catalog.operations.find(item => item.id === 'source.make');
   assert.equal(maker.cli.command, 'node bin/app make');
   assert.ok(maker.cli.sourceFiles.includes('bin/app'));
