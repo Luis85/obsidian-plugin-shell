@@ -1,5 +1,5 @@
 import { readdir } from 'node:fs/promises';
-import { isAbsolute, join, normalize } from 'node:path';
+import { join, posix, win32 } from 'node:path';
 import { collectUiStatus, isUiProject, type UiStatusPort } from '../../application/ui-status.ts';
 import type { ReportRead } from '../../domain/ui-status-evidence.ts';
 import type { SpecFile } from '../../domain/ui-status-source.ts';
@@ -8,10 +8,14 @@ import { readBounded } from './files.ts';
 import { OperationError, result, type Context, type Request, type Result } from './contracts.ts';
 
 const SPEC_ROOT = 'tests/e2e', SPEC_PATTERN = /\.spec\.(?:ts|mts|js|mjs)$/, SPEC_LIMIT = 500, JSON_LIMIT = 16_000_000;
-/** Project-relative POSIX paths only: no absolute, parent or NUL segments, whatever the traceability file claims. */
+/**
+ * Project-relative POSIX paths only: no absolute, drive, parent or NUL segments, whatever the traceability file claims.
+ * The checks are POSIX on every host; the platform normalize would turn `../x` into `..\x` on Windows and let it escape.
+ */
 function containedPath(path: string): boolean {
-  const clean = normalize(path);
-  return !isAbsolute(path) && !path.includes('\0') && !path.includes('\\') && clean !== '..' && !clean.startsWith('../') && clean !== '.';
+  const clean = posix.normalize(path);
+  return !posix.isAbsolute(path) && !win32.isAbsolute(path) && !/^[A-Za-z]:/.test(path) && !path.includes('\0') && !path.includes('\\')
+    && clean !== '..' && !clean.startsWith('../') && clean !== '.';
 }
 const missing = (error: unknown): boolean => error instanceof Error && (error as NodeJS.ErrnoException).code === 'ENOENT';
 async function jsonReport(root: string, path: string): Promise<ReportRead> {

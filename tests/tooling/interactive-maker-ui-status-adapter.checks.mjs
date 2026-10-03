@@ -66,6 +66,17 @@ test('a link-escaping implementation path is treated as missing, not read', asyn
   assert.equal(item.state, 'todo'); assert.deepEqual(item.reasons.slice(0, 1), ['stub-missing']);
   assert.equal(item.stub.exists, false);
 });
+test('absolute, drive and backslash implementation paths are treated as missing on every host', async t => {
+  const root = await project(t);
+  const escapes = ['/outside.ts', 'C:/outside.ts', 'C:outside.ts', '..\\outside.ts', 'src/../../outside.ts'];
+  await write(root, 'design/visual-traceability.json', { definitions: [{ id: 'vp-1', kind: 'page' }],
+    interactions: escapes.map((path, index) => hook(`vi-e${index}`, { implementation: path })) });
+  // Real targets exist, so only the containment check can keep them unread; POSIX hosts can also hold the drive-shaped names.
+  await writeFile(join(root, '..', 'outside.ts'), STUB);
+  if (process.platform !== 'win32') { await write(root, 'C:/outside.ts', STUB); await write(root, 'C:outside.ts', STUB); }
+  const report = await status(root);
+  assert.deepEqual(escapes.map((_, index) => find(report, `vi-e${index}`).stub.exists), escapes.map(() => false));
+});
 test('a symlinked linked file is not followed', async t => {
   const root = await project(t);
   await symlink(join(root, 'tests/project/acceptance/vi-2.test.ts'), join(root, 'tests/project/acceptance/vi-link.test.ts'));
