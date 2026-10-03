@@ -8,7 +8,7 @@ const bounds: Readonly<Record<string, readonly [number,number]>> = {'0..1':[0,1]
 function targetRecord(value: string, records: readonly RelationshipRecord[]): RelationshipRecord | undefined {
   if (!value || value.length>500 || /[\r\n]/.test(value)) return;
   if (!value.startsWith('[[')) return records.find(record=>record.id===value);
-  const match=/^\[\[([^\[\]|#^]+)(?:\|[^\[\]\r\n]+)?\]\]$/.exec(value); if(!match)return;
+  const match=/^\[\[([^[\]|#^]+)(?:\|[^[\]\r\n]+)?\]\]$/.exec(value); if(!match)return;
   const path=match[1]!.replace(/\.md$/,'');
   if(path.startsWith('/') || path.includes('\\') || path.split('/').some(p=>p==='.' || p==='..' || p===''))return;
   const matches=records.filter(record=>record.path.replace(/\.md$/,'')===path);

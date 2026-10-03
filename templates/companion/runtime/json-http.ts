@@ -25,7 +25,7 @@ export function validateHttpSource(source:JsonHttpSource):void {
       const field=op.input?.type==='object'?op.input.properties?.[key]:undefined;
       if(!field || !['string','number','integer','boolean'].includes(String(field.type)) || !op.input?.required?.includes(key))throw new Error('HTTP_PATH_INPUT_REQUIRED');return 'parameter';
     });
-    if(/[{}]/.test(route) || route.split('/').some(part=>{try{const decoded=decodeURIComponent(part);return decoded==='.'||decoded==='..'||/[\/\\]/.test(decoded);}catch{return true;}}))throw new Error('HTTP_RESOURCE_INVALID');
+    if(/[{}]/.test(route) || route.split('/').some(part=>{try{const decoded=decodeURIComponent(part);return decoded==='.'||decoded==='..'||/[/\\]/.test(decoded);}catch{return true;}}))throw new Error('HTTP_RESOURCE_INVALID');
     if(['GET','HEAD'].includes(op.method) && op.input && (op.input.type!=='object'||op.input.additionalProperties!==false||Object.values(op.input.properties ?? {}).some(field=>!['string','number','integer','boolean'].includes(String(field.type)))))throw new Error('HTTP_QUERY_OBJECT_REQUIRED');
     if(op.method==='HEAD' && op.output!==null)throw new Error('HTTP_HEAD_OUTPUT_UNSUPPORTED');
   }
@@ -36,7 +36,7 @@ function requestUrl(base:URL,op:JsonHttpOperation,input:unknown):URL {
   const route=op.resource.replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g,(_,key:string)=>{
     const value=values[key];
     if(!['string','number','boolean'].includes(typeof value))throw new Error('HTTP_PATH_INPUT_INVALID');
-    const part=String(value);if(!part || part==='.' || part==='..' || /[\/\\]/.test(part))throw new Error('HTTP_PATH_INPUT_INVALID');
+    const part=String(value);if(!part || part==='.' || part==='..' || /[/\\]/.test(part))throw new Error('HTTP_PATH_INPUT_INVALID');
     used.add(key);return encodeURIComponent(part);
   });
   const prefix=base.pathname.replace(/\/$/,'');const url=new URL(base.origin+prefix+route);

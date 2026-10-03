@@ -35,7 +35,6 @@
     "../../tests/support/**/*.ts",
     "../../tests/e2e/**/*.ts",
     "../../tests/obsidian/**/*.ts",
-    "../testing/playwright.config.ts",
-    "../testing/vitest.config.ts"
+    "../testing/playwright.config.ts"
   ]
 }
