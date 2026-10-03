@@ -1,45 +1,45 @@
 {
   "schemaVersion": 1,
   "frameworkVersion": "0.4.0",
-  "commandCount": 103,
+  "commandCount": 123,
   "sources": [
     {
       "path": "package.json",
-      "sha256": "74c8ce78c2f2d9532369046f1e381e18576a36a788d1dc90e378d887e551ea58"
+      "sha256": "6784919ba4d8d8926a518940d59989f8275d8cc07117ef7918f74573f3c5a82c"
     },
     {
-      "path": "scripts/framework/catalog.ts",
-      "sha256": "7ee7c0103f8aadd3d8d491305718658c5d45c987dfd203b11367f22757745110"
+      "path": "bin/adapters/framework/catalog.ts",
+      "sha256": "ac75eaa17398e1b69df6ca708a296b56fa29b2f49ea69868528ab6a07c247475"
     },
     {
-      "path": "scripts/framework/help-text.ts",
-      "sha256": "6e9a79a8663ac5534007bf5497db114f567fe0139c96e15786d2b59952aadc85"
+      "path": "bin/adapters/framework/help-text.ts",
+      "sha256": "fe8ffbb4d3febd642840aaff63c032988f54cb331ca4603377400c07985ea162"
     },
     {
-      "path": "scripts/compiler/domain/diagnostics.ts",
+      "path": "bin/compiler/domain/diagnostics.ts",
       "sha256": "8cf40898f461b38aa39a7d5399a1e4108e65279611c6067831236270e9e364b6"
     },
     {
       "path": "scripts/documentation/render.mjs",
-      "sha256": "050b407d1f3e15c7cfeed37abab9d2a25c1774f9faf184c91cf3c0ee030a1ea7"
+      "sha256": "cb43bf33da7cd5423f8a538e3e135bf4127dec346e473c5ad64b7c33ad04bff8"
     },
     {
       "path": "scripts/documentation/manual.mjs",
-      "sha256": "41fc1c0522fda7dcf6cf7dd70e1f776e838ef836e8e052d585269d77cf615c75"
+      "sha256": "8b3487f625f2ba7507c2a9f45fd0d09fa34ea59000322c0c30e7409022ec18e2"
     }
   ],
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "c3c9df50b063771b40bbe61406d650c3774955df581847fed9331eb6a71e3325"
+      "sha256": "281c7d30a39e87e410452384b9cc56be84c1d1211efd3392e315a40bfd674ab4"
     },
     {
       "path": "diagnostics.md",
-      "sha256": "416eedb8de52eb02faf336112a9cd18371de5aa266076ffd14ce75ab3f12bd2b"
+      "sha256": "6be5f78b74ad5d3f02260870d34bdf3acfeec3f9464dd1e78d505ac8d7929c03"
     },
     {
       "path": "commands.json",
-      "sha256": "eb6f43881416996beae5f770fd97b1b748e8477ebb7aa23f604abd487e98887e"
+      "sha256": "fef987c2f4b79922ca03a8dd24c437fb74a52f3c0d332f03a0f84fabf6ec49fb"
     }
   ]
 }

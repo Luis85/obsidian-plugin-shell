@@ -14420,6 +14420,21 @@ Edge: ${id2}`,
 			data: []
 		})
 	])];
+	var vcatBar = (s, label, value) => vcatBox(s, "div", "row", label + " bar", [
+		vcatTxt(s, label, "span", label + " label"),
+		vcatUi(s, "u-progress", label + " value", {
+			modelValue: value,
+			max: 100
+		}, { a11y: label + ": " + value + " percent" }),
+		vcatTxt(s, value + "%", "span", label + " value label")
+	]);
+	var vcatBarChart = (s) => [vcatBox(s, "section", "stack", "Bar chart", [
+		vcatTxt(s, "Category comparison", "h2", "Chart title"),
+		vcatTxt(s, "Example values. Bind the chart to application data in the component editor.", "p", "Chart description"),
+		vcatBar(s, "Alpha", 72),
+		vcatBar(s, "Beta", 46),
+		vcatBar(s, "Gamma", 88)
+	])];
 	function vcatForm(s) {
 		const form = vcatUi(s, "u-form", "Record form");
 		form.slots.default = [vcatField(s, "Title", "u-input", { placeholder: "Title" }), vcatField(s, "Description", "u-textarea", { rows: 4 })];
@@ -14445,7 +14460,8 @@ Edge: ${id2}`,
 		vcatRecipe("recipe-filter-bar", "Filter Bar", "Search, filter and reset", vcatFilter),
 		vcatRecipe("recipe-master-detail", "Master / Detail", "Record collection with a detail pane", vcatMasterDetail),
 		vcatRecipe("recipe-settings", "Settings Form", "Section navigation plus grouped validated form", vcatSettings),
-		vcatRecipe("recipe-empty-state", "Empty State", "Message, supporting copy and primary action", vcatEmpty)
+		vcatRecipe("recipe-empty-state", "Empty State", "Message, supporting copy and primary action", vcatEmpty),
+		vcatRecipe("recipe-bar-chart", "Bar Chart", "Accessible categorical comparison with visible values", vcatBarChart)
 	]);
 	var vcatLayout = (id, name, category, description, build) => Object.freeze({
 		id,
@@ -15203,6 +15219,19 @@ Edge: ${id2}`,
 		targetPort: 5173,
 		port: 5174
 	});
+	var HINDSIGHT_AGENTS = Object.freeze([
+		"claude-code",
+		"codex",
+		"cursor-cli",
+		"copilot-cli",
+		"opencode"
+	]);
+	Object.freeze({
+		enabled: false,
+		agents: Object.freeze([]),
+		git: "message",
+		sessions: false
+	});
 	function requireTooling(condition, message) {
 		if (!condition) throw new Error("COMPANION_TOOLING_INVALID: " + message);
 	}
@@ -15214,10 +15243,32 @@ Edge: ${id2}`,
 	}
 	function validateTooling(value) {
 		if (value === void 0) return;
-		fields$1(value, ["airship", "storybook"]);
+		fields$1(value, [
+			"airship",
+			"storybook",
+			"hindsight"
+		]);
 		if (Object.hasOwn(value, "storybook")) {
 			fields$1(value.storybook, ["enabled", "generateStories"]);
 			requireTooling(Object.values(value.storybook).every((item) => typeof item === "boolean"), "tooling.storybook accepts only boolean enabled and generateStories switches. Both default to false.");
+		}
+		if (Object.hasOwn(value, "hindsight")) {
+			const memory = value.hindsight;
+			fields$1(memory, [
+				"enabled",
+				"agents",
+				"git",
+				"sessions"
+			]);
+			requireTooling(typeof memory.enabled === "boolean", "Hindsight enabled must be a boolean.");
+			requireTooling(Array.isArray(memory.agents) && memory.agents.length <= HINDSIGHT_AGENTS.length && new Set(memory.agents).size === memory.agents.length && memory.agents.every((agent) => HINDSIGHT_AGENTS.includes(agent)), "Hindsight agents must be a unique supported-agent list.");
+			requireTooling(!memory.enabled || memory.agents.length > 0, "Enabled Hindsight defaults require at least one explicit agent.");
+			requireTooling(memory.git === void 0 || [
+				"none",
+				"message",
+				"full"
+			].includes(memory.git), "Unsupported Hindsight Git ingestion mode.");
+			requireTooling(memory.sessions === void 0 || typeof memory.sessions === "boolean", "Hindsight session retention must be a boolean.");
 		}
 		if (!Object.hasOwn(value, "airship")) return;
 		const item = value.airship;
@@ -15384,6 +15435,60 @@ Edge: ${id2}`,
 		featureIds.forEach(visit);
 	}
 	//#endregion
+	//#region scripts/companion/sitemap/acceptance.ts
+	/** Optional per-surface UX acceptance block: structural validation and default resolution. No host or UI imports. */
+	var SURFACE_ACCEPTANCE_STATES = [
+		"default",
+		"loading",
+		"empty",
+		"error",
+		"disabled"
+	];
+	var SURFACE_ACCEPTANCE_THEMES = ["light", "dark"];
+	var SURFACE_ACCEPTANCE_MIN_WIDTH = {
+		default: 360,
+		minimum: 120,
+		maximum: 4e3
+	};
+	var SURFACE_ACCEPTANCE_LIMITS = {
+		keyboardSteps: 40,
+		step: 120,
+		notes: 2e3
+	};
+	var KEYS = [
+		"states",
+		"keyboardPath",
+		"focusReturn",
+		"minWidth",
+		"themes",
+		"notes"
+	];
+	function fail$1(message) {
+		throw new SitemapError("SITEMAP_ACCEPTANCE", message);
+	}
+	/** Members must be plain data of the declared type; unknown members, duplicates and out-of-range values name the offender. */
+	function choices(value, allowed, name, minimum) {
+		requireSitemap(Array.isArray(value) && value.length >= minimum && value.length <= allowed.length, "SITEMAP_ACCEPTANCE", `Acceptance ${name} must list ${minimum === 0 ? "" : "at least one of "}${allowed.join(", ")}.`);
+		for (const item of value) requireSitemap(typeof item === "string" && allowed.includes(item), "SITEMAP_ACCEPTANCE", `Acceptance ${name} contains an unsupported value; use ${allowed.join(", ")}.`);
+		requireSitemap(new Set(value).size === value.length, "SITEMAP_ACCEPTANCE", `Acceptance ${name} lists a value twice.`);
+	}
+	function validateSurfaceAcceptance(value) {
+		requireSitemap(record$2(value), "SITEMAP_ACCEPTANCE", "Surface acceptance must be an object.");
+		const unknown = Object.keys(value).find((key) => !KEYS.includes(key));
+		if (unknown !== void 0) fail$1(`Unknown acceptance member ${JSON.stringify(unknown)}; allowed: ${KEYS.join(", ")}.`);
+		if (value.states !== void 0) choices(value.states, SURFACE_ACCEPTANCE_STATES, "states", 0);
+		if (value.themes !== void 0) choices(value.themes, SURFACE_ACCEPTANCE_THEMES, "themes", 1);
+		if (value.keyboardPath !== void 0) {
+			const path = value.keyboardPath;
+			requireSitemap(Array.isArray(path) && path.length <= SURFACE_ACCEPTANCE_LIMITS.keyboardSteps, "SITEMAP_ACCEPTANCE", `Acceptance keyboardPath must be a list of at most ${SURFACE_ACCEPTANCE_LIMITS.keyboardSteps} control ids or labels.`);
+			for (const step of path) requireSitemap(typeof step === "string" && step.trim() !== "" && step.length <= SURFACE_ACCEPTANCE_LIMITS.step && !/[\u0000-\u001f\u007f]/u.test(step), "SITEMAP_ACCEPTANCE", "Each keyboardPath step must be a non-empty single-line control id or label.");
+		}
+		requireSitemap(value.focusReturn === void 0 || typeof value.focusReturn === "boolean", "SITEMAP_ACCEPTANCE", "Acceptance focusReturn must be true or false.");
+		const width = value.minWidth;
+		requireSitemap(width === void 0 || typeof width === "number" && Number.isInteger(width) && width >= SURFACE_ACCEPTANCE_MIN_WIDTH.minimum && width <= SURFACE_ACCEPTANCE_MIN_WIDTH.maximum, "SITEMAP_ACCEPTANCE", `Acceptance minWidth must be a whole number of pixels from ${SURFACE_ACCEPTANCE_MIN_WIDTH.minimum} to ${SURFACE_ACCEPTANCE_MIN_WIDTH.maximum}.`);
+		requireSitemap(value.notes === void 0 || typeof value.notes === "string" && value.notes.length <= SURFACE_ACCEPTANCE_LIMITS.notes, "SITEMAP_ACCEPTANCE", `Acceptance notes must be text of at most ${SURFACE_ACCEPTANCE_LIMITS.notes} characters.`);
+	}
+	//#endregion
 	//#region scripts/companion/sitemap/validate.ts
 	function assertDesign(value) {
 		requireSitemap(record$2(value), "SITEMAP_SHAPE", "Expected the canonical design object.");
@@ -15406,6 +15511,7 @@ Edge: ${id2}`,
 			if (node.parent !== null) id(node.parent);
 			if (node.slug !== void 0) sitemapText(node.slug, 120, false);
 			for (const key of ["nav", "entry"]) requireSitemap(node[key] === void 0 || typeof node[key] === "boolean", "SITEMAP_SHAPE", "Surface flags must be booleans.");
+			if (node.acceptance !== void 0) validateSurfaceAcceptance(node.acceptance);
 			surfaceIds.push(node.id);
 			parents.set(node.id, node.parent);
 			kinds.set(node.id, String(node.kind));
@@ -15777,7 +15883,7 @@ Edge: ${id2}`,
 		return checkData(value, designLimits);
 	}
 	//#endregion
-	//#region scripts/compiler/domain/diagnostics.ts
+	//#region bin/compiler/domain/diagnostics.ts
 	/** Codes are public API. Catalog changes require documentation and protocol tests. */
 	var diagnosticCatalog = Object.freeze({
 		COMPILER_JSON_INVALID: "Supply a complete UTF-8 project JSON document; check its syntax.",
@@ -15814,7 +15920,8 @@ Edge: ${id2}`,
 		}
 	};
 	//#endregion
-	//#region scripts/framework/contracts.ts
+	//#region scripts/contracts/errors.ts
+	/** Host-independent operation error primitives shared by CLI adapters and core utilities. */
 	var OperationError = class extends Error {
 		code;
 		next;
@@ -15830,7 +15937,7 @@ Edge: ${id2}`,
 		if (!value) throw new OperationError(code, message);
 	}
 	//#endregion
-	//#region scripts/compiler/domain/project-starter.ts
+	//#region bin/compiler/domain/project-starter.ts
 	var targetOrder = [
 		"plugin",
 		"webapp",
@@ -15903,7 +16010,7 @@ Edge: ${id2}`,
 		};
 	}
 	//#endregion
-	//#region scripts/starters/validation.ts
+	//#region bin/adapters/starters/validation.ts
 	function record(value) {
 		requireThat(value !== null && typeof value === "object" && !Array.isArray(value), "STARTER_INVALID", "Expected an object.");
 		return value;
@@ -15911,8 +16018,16 @@ Edge: ${id2}`,
 	function fields(value, allowed) {
 		requireThat(Object.keys(value).every((key) => allowed.includes(key)), "STARTER_INVALID", "Unknown definition field.");
 	}
+	/** C0 controls and DEL (U+0000–U+001F, U+007F); text and string inputs refuse them. */
+	function hasControl(value) {
+		for (let index = 0; index < value.length; index += 1) {
+			const code = value.charCodeAt(index);
+			if (code < 32 || code === 127) return true;
+		}
+		return false;
+	}
 	function text(value, label, max = 400) {
-		requireThat(typeof value === "string" && value.trim().length > 0 && value.length <= max && !/[\u0000-\u001f\u007f]/.test(value), "STARTER_INVALID", `Invalid ${label}.`);
+		requireThat(typeof value === "string" && value.trim().length > 0 && value.length <= max && !hasControl(value), "STARTER_INVALID", `Invalid ${label}.`);
 		return value;
 	}
 	function identifier(value) {
@@ -15944,7 +16059,7 @@ Edge: ${id2}`,
 		].includes(part.toLowerCase()) && !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 	}
 	function inputValue(value, input) {
-		requireThat((input.type === "string" ? typeof value === "string" && value.length <= 4e3 && !/[\u0000-\u001f\u007f]/.test(value) : input.type === "boolean" ? typeof value === "boolean" : typeof value === "number" && Number.isSafeInteger(value)) && (!input.required || value !== ""), "STARTER_INPUT", `Invalid input ${input.id}.`);
+		requireThat((input.type === "string" ? typeof value === "string" && value.length <= 4e3 && !hasControl(value) : input.type === "boolean" ? typeof value === "boolean" : typeof value === "number" && Number.isSafeInteger(value)) && (!input.required || value !== ""), "STARTER_INPUT", `Invalid input ${input.id}.`);
 		const typed = value;
 		requireThat(!input.choices || input.choices.includes(typed), "STARTER_INPUT", `Choose an allowed value for ${input.id}.`);
 		return typed;
@@ -16193,7 +16308,7 @@ Edge: ${id2}`,
 		};
 	}
 	//#endregion
-	//#region scripts/starters/render.ts
+	//#region bin/adapters/starters/render.ts
 	function resolveValues(definition, supplied) {
 		const source = record(supplied), values = {};
 		requireThat(Object.keys(source).every((key) => definition.inputs.some((input) => input.id === key)), "STARTER_INPUT", "Unknown input name.");
@@ -16205,7 +16320,7 @@ Edge: ${id2}`,
 		return values;
 	}
 	//#endregion
-	//#region scripts/starters/customize.ts
+	//#region bin/adapters/starters/customize.ts
 	/** Turns a loaded Companion starter into an independent, editable project v6 document. No catalog projection or execution trust. */
 	var FIELDS = [
 		"id",
@@ -17086,6 +17201,18 @@ const vcatMasterDetail = s => [vcatBox(s, 'div', 'grid', 'Master / detail', [vca
 function vcatSettings(s) { const form = vcatUi(s, 'u-form', 'Settings form'); form.slots.default = [vcatField(s, 'Name', 'u-input', { placeholder: 'Workspace name' }), vcatField(s, 'Notifications', 'u-switch', { label: 'Email notifications' })]; return [vcatBox(s, 'div', 'row', 'Settings', [vcatBox(s, 'nav', 'stack', 'Settings sections', [vcatUi(s, 'u-button', 'General section', { label: 'General', variant: 'ghost' }), vcatUi(s, 'u-button', 'Notifications section', { label: 'Notifications', variant: 'ghost' })]), form])]; }
 const vcatEmpty = s => [vcatBox(s, 'section', 'stack', 'Empty state', [vcatTxt(s, 'Nothing here yet', 'h2', 'Empty title'), vcatTxt(s, 'Create the first item to get started.', 'p', 'Empty copy'), vcatUi(s, 'u-button', 'Empty action', { label: 'Create' })])];
 const vcatDashboard = s => [vcatBox(s, 'section', 'stack', 'Dashboard', [vcatTxt(s, 'Overview', 'h1', 'Title'), vcatBox(s, 'div', 'grid', 'KPI summary', [vcatCard(s, 'Active', '0'), vcatCard(s, 'Revenue', '0'), vcatCard(s, 'Attention', '0')], { columns: 3 }), vcatUi(s, 'u-table', 'Activity', { columns: [{ accessorKey: 'event', header: 'Event' }], data: [] })])];
+const vcatBar = (s, label, value) => vcatBox(s, 'div', 'row', label + ' bar', [
+  vcatTxt(s, label, 'span', label + ' label'),
+  vcatUi(s, 'u-progress', label + ' value', { modelValue: value, max: 100 }, { a11y: label + ': ' + value + ' percent' }),
+  vcatTxt(s, value + '%', 'span', label + ' value label'),
+]);
+const vcatBarChart = s => [vcatBox(s, 'section', 'stack', 'Bar chart', [
+  vcatTxt(s, 'Category comparison', 'h2', 'Chart title'),
+  vcatTxt(s, 'Example values. Bind the chart to application data in the component editor.', 'p', 'Chart description'),
+  vcatBar(s, 'Alpha', 72),
+  vcatBar(s, 'Beta', 46),
+  vcatBar(s, 'Gamma', 88),
+])];
 function vcatForm(s) { const form = vcatUi(s, 'u-form', 'Record form'); form.slots.default = [vcatField(s, 'Title', 'u-input', { placeholder: 'Title' }), vcatField(s, 'Description', 'u-textarea', { rows: 4 })]; return [vcatBox(s, 'section', 'stack', 'Form workflow', [vcatTxt(s, 'New record', 'h1', 'Title'), form, vcatBox(s, 'footer', 'row', 'Form actions', [vcatUi(s, 'u-button', 'Cancel', { label: 'Cancel', variant: 'ghost' }), vcatUi(s, 'u-button', 'Save', { label: 'Save' })], { justify: 'end' })])]; }
 const vcatRecipe = (id, label, description, build) => Object.freeze({ id, label, category: 'Application patterns', description, build });
 const visualRecipes = Object.freeze([
@@ -17095,6 +17222,7 @@ const visualRecipes = Object.freeze([
   vcatRecipe('recipe-master-detail', 'Master / Detail', 'Record collection with a detail pane', vcatMasterDetail),
   vcatRecipe('recipe-settings', 'Settings Form', 'Section navigation plus grouped validated form', vcatSettings),
   vcatRecipe('recipe-empty-state', 'Empty State', 'Message, supporting copy and primary action', vcatEmpty),
+  vcatRecipe('recipe-bar-chart', 'Bar Chart', 'Accessible categorical comparison with visible values', vcatBarChart),
 ]);
 const vcatLayout = (id, name, category, description, build) => Object.freeze({ id, name, category, scope: 'page', description, build });
 const visualBuiltinLayouts = Object.freeze([
@@ -19001,7 +19129,7 @@ function starterConfigureDialog() {
 function starterGenerationDialog() {
   const p=project(),source=p&&starterProjectSources.get(p);
   if(!p)return dialogBody('Generate a project','<p>Create or import a project first.</p>',button('Close','close','','ghost'));
-  const command=source?'node shell.mjs new ../'+p.id+' --starter '+source.definition.id:'node shell.mjs new ../'+p.id+' --from '+p.id+'.companion.json';
+  const command=source?'node bin/app new ../'+p.id+' --starter '+source.definition.id:'node bin/app new ../'+p.id+' --from '+p.id+'.companion.json';
   return dialogBody('Export and generate',`<p>This browser does not run processes. Review the source before invoking the shell.</p>${source?`<h3>Preserve the entire starter</h3><p>Export the edited starter to <code>configs/starters/${esc(source.definition.id)}.json</code>. It retains the current design, configured input defaults, supplementary files, process definitions and first-run choices. It does not retain execution trust.</p>`:'<p>No reviewed starter recipe is attached in this session. Load its JSON in Project starters and choose Use recipe for current project, or export project JSON without inferred files or processes.</p>'}<div class="command"><code>${esc(command)}</code></div><p>Review the printed file plan, then re-run with <code>--yes</code> to write it. Select subsequent processes separately with <code>starters run</code> and <code>--trust-processes</code>. Generation alone never grants execution authority.</p><p>Generated code and tests retain their implementation gaps. A model coverage report does not prove native behavior.</p>`,button('Close','close','','ghost')+(source?button('Export starter JSON','starter-export','','primary','download'):'')+button('Export project JSON','project-export','','ghost','download'));
 }
 function starterRecipeDialog() {
