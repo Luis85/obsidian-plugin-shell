@@ -1,11 +1,11 @@
-import type { Mapping, VisualAction, EmitDefinition, Interaction, UiNode } from '../visual/visual-ir.mjs';
-import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
-import { visualSession, visualVisible } from '../visual/visual-session.mjs';
+import type { Mapping, VisualAction, EmitDefinition, Interaction, UiNode } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualAssert, visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualSession, visualVisible } from '../../../scripts/companion/visual/visual-session.mjs';
 import { visualExpressions, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { matches, type Schema } from '../../../templates/companion/runtime/contract.ts';
-import { literal, symbol, type Model, type Operation, type Source } from './model.ts';
-import type { Add } from './file-code.ts';
-import { visualSpecs } from './visual-model.ts';
+import { literal, symbol, type Model, type Operation, type Source } from '../../../scripts/companion/compiler/model.ts';
+import type { Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { visualSpecs } from '../../../scripts/companion/compiler/visual-model.ts';
 
 /** A source operation referenced by a visual definition: a read binding, a mapped field or a source action. */
 export interface VisualSourceUse { source: Source; operation: Operation }

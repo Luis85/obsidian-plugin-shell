@@ -1,10 +1,10 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { persistenceCode, noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
-import { relationshipCode } from '../../scripts/companion/compiler/relationship-code.ts';
+import { relationshipCode } from '../../bin/compiler/emitters/relationship-code.ts';
 import { relationshipDefinitions, relationshipScope } from '../../scripts/companion/compiler/relationship-model.ts';
-import { httpCode } from '../../scripts/companion/compiler/http-code.ts';
-import { fixtureNoteTests } from '../../scripts/companion/compiler/fixture-notes-code.ts';
+import { httpCode } from '../../bin/compiler/emitters/http-code.ts';
+import { fixtureNoteTests } from '../../bin/compiler/emitters/fixture-notes-code.ts';
 import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
 import { dataDocument, starterDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 

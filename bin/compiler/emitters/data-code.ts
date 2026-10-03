@@ -1,9 +1,9 @@
-import { relationshipScope } from './relationship-model.ts';
-import { noteEntity } from './persistence-code.ts';
+import { relationshipScope } from '../../../scripts/companion/compiler/relationship-model.ts';
+import { noteEntity } from '../../../scripts/companion/compiler/persistence-code.ts';
 import type { Schema } from '../../../templates/companion/runtime/contract.ts';
-import { literal, json, symbol, type Entity, type Model, type Source } from './model.ts';
-import { typeCode, sampleCode } from './schema-code.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { literal, json, symbol, type Entity, type Model, type Source } from '../../../scripts/companion/compiler/model.ts';
+import { typeCode, sampleCode } from '../../../scripts/companion/compiler/schema-code.ts';
+import { relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
 function contract(name: string, schema: Schema | null): string {
   return `export type ${name} = ${typeCode(schema)};\nexport const ${name}Schema: Schema | null = ${literal(schema)};\nexport function is${name}(value: unknown): value is ${name} { return matches(value,${name}Schema); }\n`;
 }

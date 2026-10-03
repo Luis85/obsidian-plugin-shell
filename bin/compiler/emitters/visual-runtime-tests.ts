@@ -1,11 +1,11 @@
-import type { ComponentDefinition, ComponentNode, ExternalNode, UiNode, ValueExpression } from '../visual/visual-ir.mjs';
-import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
-import { visualRead, visualSession, visualVisible } from '../visual/visual-session.mjs';
+import type { ComponentDefinition, ComponentNode, ExternalNode, UiNode, ValueExpression } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualCatalogEntry } from '../../../scripts/companion/visual/visual-catalog.mjs';
+import { visualRead, visualSession, visualVisible } from '../../../scripts/companion/visual/visual-session.mjs';
 import { visualTextValue, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
-import { literal, symbol, type Model } from './model.ts';
-import { componentFile, relativeImport, type Add } from './file-code.ts';
-import { sample, sampleCode } from './schema-code.ts';
-import { visualDefinitionPath, visualComponentPath } from './visual-model.ts';
+import { literal, symbol, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { componentFile, relativeImport, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { sample, sampleCode } from '../../../scripts/companion/compiler/schema-code.ts';
+import { visualDefinitionPath, visualComponentPath } from '../../../scripts/companion/compiler/visual-model.ts';
 import { visualFixtureProps, visualRendered } from './visual-tests.ts';
 
 /** Generic runtime behavior of the copied use-visual composable, independent of any authored definition. */

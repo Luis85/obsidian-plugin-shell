@@ -88,5 +88,14 @@
   "scripts/companion/compiler/ui-code.ts": "bin/compiler/emitters/ui-code.ts",
   "scripts/companion/compiler/host-code.ts": "bin/compiler/emitters/host-code.ts",
   "scripts/companion/compiler/devkit-files.ts": "bin/compiler/emitters/devkit-files.ts",
-  "scripts/companion/compiler/framework-docs.ts": "bin/compiler/emitters/framework-docs.ts"
+  "scripts/companion/compiler/framework-docs.ts": "bin/compiler/emitters/framework-docs.ts",
+  "scripts/companion/compiler/data-code.ts": "bin/compiler/emitters/data-code.ts",
+  "scripts/companion/compiler/fixture-notes-code.ts": "bin/compiler/emitters/fixture-notes-code.ts",
+  "scripts/companion/compiler/http-code.ts": "bin/compiler/emitters/http-code.ts",
+  "scripts/companion/compiler/relationship-code.ts": "bin/compiler/emitters/relationship-code.ts",
+  "scripts/companion/compiler/visual-files.ts": "bin/compiler/emitters/visual-files.ts",
+  "scripts/companion/compiler/visual-code.ts": "bin/compiler/emitters/visual-code.ts",
+  "scripts/companion/compiler/visual-ports.ts": "bin/compiler/emitters/visual-ports.ts",
+  "scripts/companion/compiler/visual-tests.ts": "bin/compiler/emitters/visual-tests.ts",
+  "scripts/companion/compiler/visual-runtime-tests.ts": "bin/compiler/emitters/visual-runtime-tests.ts"
 }

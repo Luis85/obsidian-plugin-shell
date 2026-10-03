@@ -1,11 +1,11 @@
-import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
-import type { ComponentDefinition, ExternalNode, Interaction, UiNode, VisualDesigns } from '../visual/visual-ir.mjs';
-import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
-import { visualTestSource } from '../visual/visual-session.mjs';
+import type { TemplateSnapshot } from '../domain/contracts.ts';
+import type { ComponentDefinition, ExternalNode, Interaction, UiNode, VisualDesigns } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualAssert, visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualTestSource } from '../../../scripts/companion/visual/visual-session.mjs';
 import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
-import { literal, json, requireValue, type Model } from './model.ts';
-import { componentFile, relativeImport, rewriteTemplate, type Add } from './file-code.ts';
-import { visualDefinitions, visualSpecs, visualDefinitionPath, visualAdapterPath, visualContractTypes } from './visual-model.ts';
+import { literal, json, requireValue, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { componentFile, relativeImport, rewriteTemplate, type Add } from '../../../scripts/companion/compiler/file-code.ts';
+import { visualDefinitions, visualSpecs, visualDefinitionPath, visualAdapterPath, visualContractTypes } from '../../../scripts/companion/compiler/visual-model.ts';
 import { visualSfc } from './visual-code.ts';
 import { visualPorts, visualSources } from './visual-ports.ts';
 import { visualTests } from './visual-tests.ts';

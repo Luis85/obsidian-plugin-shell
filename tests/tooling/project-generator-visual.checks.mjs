@@ -276,7 +276,7 @@ test('declared component packages merge as exact pins and framework conflicts na
   assert.throws(() => visualPackages(withDeps([{ package: 'vue', version: '3.0.0', purpose: 'Old' }]), framework), { message: 'VISUAL_INVALID: vue is pinned to 3.5.43 by the framework and 3.0.0 by ' + name + '.' });
 });
 
-const { visualSfc } = await import('../../scripts/companion/compiler/visual-code.ts');
+const { visualSfc } = await import('../../bin/compiler/emitters/visual-code.ts');
 const { writeFile } = await import('node:fs/promises');
 const { readFileSync } = await import('node:fs');
 const { visualNodes } = await import('../../scripts/companion/visual/visual-ir.mjs');

@@ -6,7 +6,7 @@ import { resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { digest, json, row, rows, text, requireValue } from '../../../scripts/companion/compiler/model.ts';
 import { visualDefinitions } from '../../../scripts/companion/compiler/visual-model.ts';
-import { visualVerification, visualAcceptanceTodo } from '../../../scripts/companion/compiler/visual-files.ts';
+import { visualVerification, visualAcceptanceTodo } from '../emitters/visual-files.ts';
 import { visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
 export interface WorkspaceOptions { target:string;templateRoot:string;bootstrap?:ReadonlyArray<{path:string;hash:string}>;selection?:GenerationSelection }
 interface InputSnapshot { content:Buffer;vault:string;target:string;migration?:{interactionIds?:Record<string,string>} | null }

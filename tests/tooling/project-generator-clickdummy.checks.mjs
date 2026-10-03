@@ -32,7 +32,7 @@ test('generated source reads return detached schema-valid fixtures and writes fa
   // Include one writable operation to prove the browser never imports or calls a native writer.
   const m = structuredClone(model), source=m.sources[0], operation=source.operations[0];
   source.operations.push({...structuredClone(operation), id:'write-fixture',slug:'write-fixture',direction:'write'});
-  const {dataCode}=await import('../../scripts/companion/compiler/data-code.ts');
+  const {dataCode}=await import('../../bin/compiler/emitters/data-code.ts');
   const files=emitted(m); dataCode(m,(path,content)=>files.set(path,{content}));
   files.set(`${m.sourceRoot}/domain/contract.ts`,{content:await readFile(join(root,'templates/companion/runtime/contract.ts'),'utf8')});
   for (const [path,file] of files) if(path.endsWith('.ts') && /(?:application\/|domain\/contract|clickdummy-sources)/.test(path)) {

@@ -3,7 +3,7 @@ import { authoringReader } from '../../../scripts/companion/authoring-contract.t
 import { SitemapError } from '../../../scripts/companion/sitemap/safety.ts';
 import { projectModel, type Model } from '../../../scripts/companion/compiler/model.ts';
 import { visualDefinitions } from '../../../scripts/companion/compiler/visual-model.ts';
-import { visualSources } from '../../../scripts/companion/compiler/visual-ports.ts';
+import { visualSources } from '../emitters/visual-ports.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Phase } from '../domain/contracts.ts';
 

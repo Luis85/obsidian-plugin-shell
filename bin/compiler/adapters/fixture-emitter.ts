@@ -1,5 +1,5 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
-import { fixtureNoteTests } from '../../../scripts/companion/compiler/fixture-notes-code.ts';
+import { fixtureNoteTests } from '../emitters/fixture-notes-code.ts';
 import { sampleCode } from '../../../scripts/companion/compiler/schema-code.ts';
 import { buildCompanionFixtureManifest } from '../../../scripts/companion/test-data-manifest.mjs';
 import { createFixtureEngine } from '../../../docs/concepts/companion/test-kit/engine.mjs';

@@ -1,10 +1,10 @@
-import type { UiNode, ElementNode, TextNode, SlotNode, ExternalNode, ComponentNode, VisualDesigns, ComponentDefinition, EmitDefinition, PageDefinition, PropDefinition, SlotDefinition } from '../visual/visual-ir.mjs';
-import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '../visual/visual-ir.mjs';
-import { visualCatalogEntry, visualReservedExport } from '../visual/visual-catalog.mjs';
+import type { UiNode, ElementNode, TextNode, SlotNode, ExternalNode, ComponentNode, VisualDesigns, ComponentDefinition, EmitDefinition, PageDefinition, PropDefinition, SlotDefinition } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualCatalogEntry, visualReservedExport } from '../../../scripts/companion/visual/visual-catalog.mjs';
 import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
-import { literal, type Model } from './model.ts';
-import { relativeImport } from './file-code.ts';
-import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath } from './visual-model.ts';
+import { literal, type Model } from '../../../scripts/companion/compiler/model.ts';
+import { relativeImport } from '../../../scripts/companion/compiler/file-code.ts';
+import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath } from '../../../scripts/companion/compiler/visual-model.ts';
 
 /** Authored names reach template syntax only after matching these patterns; all authored text goes through model.text(). */
 const vcId = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/, vcExport = /^[A-Z][A-Za-z0-9]*$/, vcSlot = /^[a-z][A-Za-z0-9-]*$/;

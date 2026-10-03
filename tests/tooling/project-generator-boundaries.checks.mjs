@@ -10,7 +10,7 @@ import { mapDetailPayload, detailValue } from '../../templates/companion/runtime
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
 import { visualSpecs } from '../../scripts/companion/compiler/visual-model.ts';
-import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
+import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
 import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
 import { validateDetailDesigns } from '../../scripts/companion/detail-contract.mjs';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
