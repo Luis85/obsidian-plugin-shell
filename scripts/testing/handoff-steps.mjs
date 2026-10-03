@@ -35,7 +35,9 @@ const readTracked = root => path => {
 export function audit(context) {
   const entries = parseIndex(gitIn(context.clone, ['ls-files', '-s'], context.baseEnv).stdout);
   const forbidden = context.options.target === 'framework' ? [context.workDir] : [context.frameworkRoot, context.workDir];
-  const findings = auditTracked(entries, { read: readTracked(context.clone), forbidden });
+  // A generated project copies framework files under the same paths; their existing text is not a generation leak.
+  const original = context.options.target === 'framework' ? undefined : readTracked(context.frameworkRoot);
+  const findings = auditTracked(entries, { read: readTracked(context.clone), forbidden, original });
   if (findings.length === 0) return { detail: `${entries.length} tracked files, no findings` };
   return { status: 'failed', detail: findings.slice(0, 12).map(item => `${item.check}${item.path ? ` ${item.path}` : ''}: ${item.detail}`).join('\n') + (findings.length > 12 ? `\n...and ${findings.length - 12} more` : '') };
 }

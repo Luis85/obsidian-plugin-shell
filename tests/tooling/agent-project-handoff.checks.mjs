@@ -73,6 +73,14 @@ const audit = (table, modes = {}, forbidden = ['/maintainer/checkout']) => {
 };
 const checks = findings => findings.map(item => item.check);
 
+test('[PROJECT-HANDOFF-05b] a checkout path already present in the copied framework file is fixture data, not a generation leak', () => {
+  const table = files({ 'tests/tooling/fixture.checks.mjs': "const root = '/maintainer/checkout';\n", 'src/leak.ts': "const root = '/maintainer/checkout';\n" });
+  const entries = Object.keys(table).map(path => ({ path, mode: path === 'bin/app' || path.endsWith('cloud-setup.sh') ? '100755' : '100644' }));
+  const original = path => (path === 'tests/tooling/fixture.checks.mjs' ? Buffer.from(table[path]) : null);
+  const found = auditTracked(entries, { read: path => (table[path] === undefined ? null : Buffer.from(table[path])), forbidden: ['/maintainer/checkout'], original });
+  assert.deepEqual(found.map(item => [item.check, item.path]), [['absolute-path', 'src/leak.ts']]);
+});
+
 test('[PROJECT-HANDOFF-05] a clean project has no findings and every portability defect is detected (negative fixtures)', () => {
   assert.deepEqual(audit(files()), []);
   const tableWithout = name => { const copy = files(); delete copy[name]; return copy; };

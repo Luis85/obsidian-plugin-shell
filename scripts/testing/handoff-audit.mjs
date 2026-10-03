@@ -50,9 +50,11 @@ function dependencyFindings(packageText, lockText) {
   return found;
 }
 /** @param {{mode:string, path:string}[]} entries tracked files
- * @param {{read:(path:string)=>Buffer|null, forbidden:string[]}} context file reader and strings that must not appear (maintainer checkout, scratch directories)
+ * @param {{read:(path:string)=>Buffer|null, forbidden:string[], original?:(path:string)=>Buffer|null}} context file reader, strings that must not appear
+ *   (maintainer checkout, scratch directories) and, optionally, the framework file a tracked file was copied from: a string the
+ *   original already contains (fixture data that happens to equal the checkout path) was not introduced by generation.
  * @returns {{check:string, detail:string, path?:string}[]} */
-export function auditTracked(entries, { read, forbidden }) {
+export function auditTracked(entries, { read, forbidden, original = () => null }) {
   const paths = new Set(entries.map(entry => entry.path));
   const found = structureFindings(entries);
   const settings = read('.claude/settings.json');
@@ -65,7 +67,8 @@ export function auditTracked(entries, { read, forbidden }) {
     const bytes = read(entry.path);
     if (!bytes || bytes.length > MAX_TEXT_BYTES || bytes.subarray(0, 8000).includes(0)) continue;
     const text = bytes.toString('utf8');
-    for (const needle of forbidden) if (needle && text.includes(needle)) found.push(finding('absolute-path', `contains the maintainer/scratch path ${needle}`, entry.path));
+    const source = original(entry.path)?.toString('utf8') ?? '';
+    for (const needle of forbidden) if (needle && text.includes(needle) && !source.includes(needle)) found.push(finding('absolute-path', `contains the maintainer/scratch path ${needle}`, entry.path));
     if (LINE_ENDING_SENSITIVE.test(entry.path) && text.includes('\r')) found.push(finding('line-endings', 'carries CRLF line endings, which break shell scripts and shebangs', entry.path));
   }
   return found;
