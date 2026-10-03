@@ -10,9 +10,11 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
-SEED = ROOT / 'docs/concepts/companion/companion-project.json'
 OUT = ROOT / 'reports/concepts/project-transfer'
 OUT.mkdir(parents=True, exist_ok=True)
+# The self-project is the external golden starter's schema 6 document; there is no bundled example project.
+SEED = OUT / 'companion-project.json'
+SEED.write_text(json.dumps(json.loads((ROOT / 'configs/starters/companion-plugin.json').read_text())['generator']['document'], indent=2) + '\n')
 checks, errors, requests = [], [], []
 fatal = None
 STORAGE = """<script>window.__saved={};Object.defineProperty(window,'localStorage',{value:{getItem:k=>__saved[k]??null,setItem:(k,v)=>{__saved[k]=v},removeItem:k=>delete __saved[k]}});</script>"""
@@ -46,12 +48,12 @@ with sync_playwright() as pw:
     page.on('request', lambda r: requests.append(r.url))
     try:
         page.set_content(STORAGE + HTML.read_text())
-        check('Welcome offers the full companion project without creating one',
-              page.locator('[data-action="project-example"]').count() == 1 and js('project()===null'))
+        check('Welcome offers Project Starters and no bundled example project',
+              page.locator('#content [data-action="nav"][data-value="starters"]').count() == 1 and page.locator('[data-action="project-example"]').count() == 0 and js('project()===null'))
         check('Welcome offers full project import before initialization', page.locator('[data-action="project-import"]').count() == 1)
-        act('project-example')
-        check('Bundled project opens a reviewed import, not an automatic replacement', js('project()===null && !!projectTransferUi.candidate'))
-        check('Large bundled payload stays complete without mounting its text into the form', js('projectTransferUi.text.length>100000') and page.locator('#project-import-text').input_value() == '')
+        act('project-import', '#content'); page.locator('#project-import-file').set_input_files(str(SEED)); page.locator('#project-import-summary').wait_for()
+        check('The selected self-project opens a reviewed import, not an automatic replacement', js('project()===null && !!projectTransferUi.candidate'))
+        check('Large selected payload stays complete without mounting its text into the form', js('projectTransferUi.text.length>100000') and page.locator('#project-import-text').input_value() == '')
         check('Example contains 28 surfaces and 31 mapped requirements', js('projectTransferUi.candidate.design.nodes.length===28 && allRequirements(projectTransferUi.candidate.design).length===31'))
         check('Example includes ten project-owned components', js('projectTransferUi.candidate.design.library.filter(c=>c.origin==="project").length===10'))
         check('Example includes entities, source operations, recipes and design tokens', js('projectTransferUi.candidate.design.semantic.entities.length===11 && projectTransferUi.candidate.design.dataSources.sources[0].operations.length===3 && projectTransferUi.candidate.design.designSystem.colors.length===5'))
@@ -59,15 +61,16 @@ with sync_playwright() as pw:
         act('project-import-apply')
         check('Confirmation is required before importing', js('project()===null') and 'confirm' in page.locator('#project-transfer-error').inner_text())
         act('close', '#modal')
+        check('Cancelling a selected file asks before discarding the review', page.locator('#discard-dialog').is_visible())
+        page.locator('#discard-confirm').click()
         check('Cancel preserves the empty workspace', js('project()===null'))
-        act('project-example')
+        act('project-import', '#content'); page.locator('#project-import-file').set_input_files(str(SEED)); page.locator('#project-import-summary').wait_for()
         shot('01-companion-import-review.png')
         page.locator('#project-import-confirm').check(); act('project-import-apply')
         check('Confirmed example loads exactly one project', js('project().id==="plugin-companion" && !Object.hasOwn(state,"projects")'))
         check('Example loading does not prepare or trust a plugin', js('project().phase==="planning" && !project().trusted && !project().enabled && !state.wizard'))
         check('Source and test folder defaults are src and tests', js('JSON.stringify(companionFolders())===JSON.stringify(COMPANION_DEFAULT_FOLDERS)'))
         check('Imported state meets existing persistence validators', js('validState(state)'))
-        check('Bundled JSON artifact matches the executable seed definition', json.loads(js('companionJson(companionExampleProject())')) == json.loads(SEED.read_text()))
         original = js('companionJson()')
         check('First import/export round trip preserves every portable field', json.loads(original) == json.loads(SEED.read_text()))
         shot('02-companion-project-overview.png')
@@ -83,7 +86,7 @@ with sync_playwright() as pw:
             vault = Path(tmp) / 'vault'; vault.mkdir(); (vault / 'keep.md').write_text('preserve')
             run = subprocess.run(['node', str(ROOT / 'scripts/companion-tools/generate.mjs'), '--input', str(OUT / 'project.companion.json'),
                                   '--vault', str(vault), '--target', 'plugins/companion'], capture_output=True, timeout=15)
-            check('Shell v1 consumes the actual browser export and prints exact bytes', run.returncode == 0 and run.stdout == original.encode() and not run.stderr, 'Actual CLI subprocess on exported browser bytes')
+            check('Read-only shell returns the exact schema 6 export bytes', run.returncode == 0 and run.stdout == (OUT / 'project.companion.json').read_bytes() and not run.stderr, 'Actual CLI subprocess on exported browser bytes')
             check('Shell handoff creates no files or target directory', list(vault.iterdir()) == [vault / 'keep.md'] and (vault / 'keep.md').read_text() == 'preserve', 'Actual isolated filesystem before/after')
         act('close', '#modal'); act('settings'); act('project-folders', '#modal')
         check('Folder settings start with the current defaults', page.locator('#f-project-codebase-folder').input_value() == 'src')
@@ -152,7 +155,8 @@ with sync_playwright() as pw:
         js('localStorage.setItem=window.normalSet;storageWarning="";modalOriginal=null'); act('close', '#modal')
         js('tdUi.busy=true'); act('project-import', '#content')
         check('Active test operations block replacement', js('!document.getElementById("modal").open'))
-        js('tdUi.busy=false'); act('settings'); act('project-example', '#modal'); page.locator('#project-import-confirm').check(); act('project-import-apply')
+        js('tdUi.busy=false'); act('settings'); act('project-import', '#modal'); page.locator('#project-import-file').set_input_files(str(SEED)); page.locator('#project-import-summary').wait_for()
+        page.locator('#project-import-confirm').check(); act('project-import-apply')
         page.locator('[data-action="nav"][data-value="prepare"]').first.click(); act('project-handoff')
         check('Handoff explicitly says v1 returns JSON and writes nothing', 'Version 1 returns the supplied JSON only' in page.locator('#modal').inner_text())
         check('Handoff shows CLI input, vault and target arguments', all(flag in page.locator('#modal').inner_text() for flag in ['--input', '--target', '--vault']))
@@ -165,7 +169,7 @@ with sync_playwright() as pw:
         for width, theme in [(960, 'light'), (390, 'dark')]:
             page.set_viewport_size({'width': width, 'height': 900}); js('(theme)=>{state.settings.theme=theme;setView("overview")}', theme)
             check('Overview fits ' + str(width) + 'px', js('document.documentElement.scrollWidth<=innerWidth'))
-            js('openCompanionImport(true)')
+            js('openCompanionImport()')
             check('Import controls fit ' + str(width) + 'px', js('document.getElementById("modal").getBoundingClientRect().right<=innerWidth'))
             shot('06-import-' + str(width) + '.png'); act('close', '#modal')
         check('No page or console errors in exercised routes', not errors)

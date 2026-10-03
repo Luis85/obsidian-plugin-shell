@@ -4,7 +4,8 @@ import { devkitFiles, renderTemplate, makerTests } from '../../bin/compiler/emit
 import { componentFile, relativeImport, rewriteTemplate, copiedTemplateTest, copiedTemplateMarker } from '../../bin/compiler/emitters/file-code.ts';
 import { relocatedPath, maintainerOnly, rebaseMarkdown, relocateFrameworkDocuments } from '../../bin/compiler/emitters/framework-docs.ts';
 import { projectModel, schema, symbol, literal, text, rows } from '../../bin/compiler/emitters/model.ts';
-import { starterDocument, dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 // Developer kit (devkit-files.ts), file helpers (file-code.ts), framework document relocation (framework-docs.ts) and model validation (model.ts).
 const invalid = message => ({ message: 'GENERATOR_INVALID: ' + message });
@@ -57,14 +58,16 @@ test('file helpers name components, relativize imports and rewrite copied templa
 test('framework documents and maintainer workflows move under docs/framework with rebased links', () => {
   assert.deepEqual(['README.md', 'AGENTS.md', '.github/workflows/ci.yml', 'docs/a.md', 'README.txt'].map(relocatedPath),
     ['docs/framework/README.md', 'docs/framework/AGENTS.md', 'docs/framework/workflows/ci.yml', 'docs/a.md', 'README.txt']);
-  for (const path of ['docs/concepts/companion/companion-project.json', 'docs/concepts/companion/seeds/a.json', 'configs/starters/blank.json', 'docs/concepts/companion/starters/x.json',
+  for (const path of ['configs/starters/blank.json',
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
-    'docs/concepts/native-file-integration-handoff', '.github/workflows/native-source-handoff.yml', 'docs/concepts/native-file-integration-handoff/a.md',
-    'tests/tooling/project-generator-native-handoff.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs'])
+    'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs'])
     assert.equal(maintainerOnly(path), true, path);
+  // The retired schema 5 concept data and the removed native source handoff are no longer special-cased.
+  for (const path of ['docs/concepts/companion/companion-project.json', 'docs/concepts/companion/starters/x.json', 'docs/concepts/native-file-integration-handoff/a.md'])
+    assert.equal(maintainerOnly(path), false, path);
   assert.equal(maintainerOnly('docs/concepts/companion/editor/main.ts'), false);
   const markdown = ['See [agents](AGENTS.md#rules), [guide](docs/guide.md?x=1), <[angled](<docs/a b.md>)>.', '```md', '[inside](AGENTS.md)', '````',
-    '[web](https://example.invalid) [anchor](#top) [root](/abs.md) [bad](%E0%A4%A.md) ![seed](docs/concepts/companion/seeds/a.png) [empty](?q)', '~~~', '[tilde](README.md)', '~~~', '[ci](.github/workflows/ci.yml)'].join('\n');
+    '[web](https://example.invalid) [anchor](#top) [root](/abs.md) [bad](%E0%A4%A.md) ![seed](docs/concepts/sitemap-editor/a.png) [empty](?q)', '~~~', '[tilde](README.md)', '~~~', '[ci](.github/workflows/ci.yml)'].join('\n');
   assert.equal(rebaseMarkdown(markdown, 'README.md', 'docs/framework/README.md'), ['See [agents](AGENTS.md#rules), [guide](../guide.md?x=1), <[angled](<../a%20b.md>)>.', '```md', '[inside](AGENTS.md)', '````',
     '[web](https://example.invalid) [anchor](#top) [root](/abs.md) [bad](%E0%A4%A.md) seed (maintainer-only asset, not included) [empty](?q)', '~~~', '[tilde](README.md)', '~~~', '[ci](workflows/ci.yml)'].join('\n'));
   assert.equal(rebaseMarkdown('[readme](../README.md) [same](other.md)', 'docs/x.md', 'docs/x.md'), '[readme](framework/README.md) [same](other.md)');

@@ -5,7 +5,9 @@ import { loadDefinitions } from '../../adapters/starters/repository.ts';
 import { record, inputValue } from '../../adapters/starters/validation.ts';
 /** Terminal-only presentation and prompts for `new`. The operation result stays the authority. */
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
-import { starterCatalog, derivedId, derivedName, invocationDirectory } from '../../adapters/framework/starter-project.ts';
+import { companionStarterSet, derivedId, derivedName, invocationDirectory } from '../../adapters/framework/starter-project.ts';
+import { validateNativeIntegrations, type NativeProjectIntegrations } from '../../../scripts/companion/native-contract.mjs';
+import type { AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
 type Prompt = (query: string) => Promise<string>;
 type Write = (text: string) => void;
@@ -65,12 +67,15 @@ async function askInputs(d: Definition, target: string, values: Record<string, u
 /** Companion starters may opt into Airship and fill a single native file type or context-menu filter. */
 async function companionOptions(options: Options, context: Context, prompt: Prompt): Promise<void> {
   if (options.airship === undefined && options['no-airship'] === undefined && parseConfirmation(await prompt('Enable optional Airship tooling? No install or launch [y/N]: ')) === true) options.airship = true;
-  const { catalog } = await starterCatalog(context);
-  const native = catalog.starters.find(entry => entry.id === options.starter)?.document.design?.nativeIntegrations;
+  const { starters } = await companionStarterSet(context);
+  const native = nativeIntegrations(starters.find(entry => entry.definition.id === options.starter)?.document);
   if (native) await nativeOptions(native, options, prompt);
 }
-type Native = NonNullable<NonNullable<Awaited<ReturnType<typeof starterCatalog>>['catalog']['starters'][number]['document']['design']>['nativeIntegrations']>;
-async function nativeOptions(native: Native, options: Options, prompt: Prompt): Promise<void> {
+/** The starter's declared native integrations, read through their own contract. */
+function nativeIntegrations(document?: AuthoringDocument): NativeProjectIntegrations | undefined {
+  return document?.design.nativeIntegrations === undefined ? undefined : validateNativeIntegrations(document.design.nativeIntegrations);
+}
+async function nativeOptions(native: NativeProjectIntegrations, options: Options, prompt: Prompt): Promise<void> {
   if (native.fileTypes.length === 1 && options.extension === undefined) options.extension = (await prompt(`Custom extension [${native.fileTypes[0]!.extension}]: `)).trim() || native.fileTypes[0]!.extension;
   if (native.contextMenus.length === 1 && options.extensions === undefined) options.extensions = (await prompt(`File extension filters [${native.contextMenus[0]!.extensions.join(',')}]: `)).trim() || native.contextMenus[0]!.extensions.join(',');
 }

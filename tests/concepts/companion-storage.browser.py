@@ -36,6 +36,16 @@ def check(name, value):
     assert value, name
 
 
+GOLDEN = json.dumps(json.loads((ROOT / 'configs/starters/companion-plugin.json').read_text())['generator']['document'])
+
+
+def review_golden(p):
+    """Review the self-project, the external golden starter's schema 6 document, through the real import dialog."""
+    p.locator('#modal [data-action="project-import"]').click()
+    p.locator('#project-import-text').fill(GOLDEN)
+    p.locator('#modal [data-action="project-import-review"]').click()
+
+
 server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
 threading.Thread(target=server.serve_forever, daemon=True).start()
 url = f'http://127.0.0.1:{server.server_port}/'
@@ -90,7 +100,7 @@ try:
         p.reload()
         check('Reload adopts the latest retained snapshot and clears the conflict', p.evaluate('design().goal==="Newer second-window edit"&&!storageWarning'))
         p.locator('[data-action="settings"]').first.click()
-        p.locator('#modal [data-action="project-example"]').click()
+        review_golden(p)
         p.locator('#project-import-confirm').check()
         p.locator('#modal [data-action="project-import-apply"]').click()
         portable = p.evaluate('companionJson()')
@@ -119,7 +129,7 @@ try:
               p.evaluate('companionFolders().codebaseFolder==="plugin/src" && companionFolders().testsFolder==="plugin/tests"'))
         q = context.new_page(); q.on('pageerror', lambda e: errors.append(str(e))); q.goto(url); p.reload()
         p.locator('[data-action="settings"]').first.click()
-        p.locator('#modal [data-action="project-example"]').click()
+        review_golden(p)
         q.evaluate('design().goal="Newer imported project edit";designChanged()')
         p.wait_for_function('() => storageWarning.includes("another window")')
         p.locator('#project-import-confirm').check()

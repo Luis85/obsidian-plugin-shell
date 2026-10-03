@@ -9,9 +9,11 @@ import { projectModel, schema, literal } from '../../bin/compiler/emitters/model
 import { sample, typeCode } from '../../bin/compiler/emitters/schema-code.ts';
 import { matches } from '../../templates/companion/runtime/contract.ts';
 import { planProject, applyProject, reviewProject } from '../../bin/compiler/adapters/project-plan.ts';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
+import { retiredProjectText } from '../support/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const fixture = JSON.parse(await readFile(join(root,'docs/concepts/companion/companion-project.json'),'utf8'));
+// The current self-project, including its managed Markdown Collection (full CRUD ports).
+const fixture = selfProject();
 const clone = () => structuredClone(fixture);
 async function sandbox(work) {
   const vault = await mkdtemp(join(tmpdir(),'companion-generator-')); const input = join(vault,'project.json');
@@ -25,7 +27,7 @@ test('self-project preserves all declared artifacts and exposes honest readiness
   const m = projectModel(fixture);
   assert.deepEqual([m.screens.length,m.components.length,m.entities.length,m.sources.length,m.requirements.length],[28,54,11,2,31]);
   assert.equal(m.sources[0].operations.length,3); assert.equal(m.flows.length,3);
-  // The self-project keeps its vault reads and adds one Markdown Collection with the full CRUD port set.
+  // The self-project declares its vault reads and one Markdown Collection with the full CRUD port set.
   assert.deepEqual(m.sources.map(source=>[source.kind,source.operations.map(operation=>operation.slug)]),
     [['vault',['list-requirements','list-sitemap','list-components']],['collection',['list','create','update','delete']]]);
   assert.equal(m.document,fixture); assert.ok(m.warnings.some(w=>w.includes('require implementation')));
@@ -33,10 +35,11 @@ test('self-project preserves all declared artifacts and exposes honest readiness
 for (const [label,change,expected] of [
   ['unsupported version',d=>d.schemaVersion=99,/version/i],
   ['duplicate screen slug',d=>d.design.nodes[1].slug=d.design.nodes[0].slug,/Duplicate/],
-  ['dangling parent',d=>d.design.nodes[1].parent='missing',/Dangling/],
-  ['cyclic parent',d=>d.design.nodes[0].parent=d.design.nodes[0].id,/Cyclic/],
+  // Structural references are refused by the v6 sitemap contract before the compiler model is built.
+  ['dangling parent',d=>d.design.nodes[1].parent='missing',/parent surface is missing/],
+  ['cyclic parent',d=>d.design.nodes[0].parent=d.design.nodes[0].id,/cycle|top-level or grouped/],
   ['missing component',d=>d.design.nodes[0].components.push({id:'missing'}),/component/],
-  ['dangling edge',d=>d.design.links[0].to='missing',/Dangling/],
+  ['dangling edge',d=>d.design.links[0].to='missing',/transition endpoint is missing/],
   ['unsafe slug',d=>d.design.nodes[0].slug='../escape',/slug/],
   ['symbol collision',d=>{d.design.nodes[0].slug='screen-1';d.design.nodes[1].slug='screen1';},/Duplicate/],
   ['unspecified shape',d=>d.design.dataSources.sources[0].operations[0].input.mode='unspecified',/unspecified/],
@@ -86,7 +89,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.deepEqual(await readFile(join(target,'harness/styles/vendor/obsidian.css.gz')),await readFile(join(root,'harness/styles/vendor/obsidian.css.gz')));
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,31);
   assert.ok(trace.requirements.every(r=>r.verification==='todo'));
-  assert.deepEqual(trace.visualDesigns,migrateCompanionDocument(fixture).document.design.visualDesigns);
+  assert.deepEqual(trace.visualDesigns,fixture.design.visualDesigns);
   assert.ok(trace.warnings.some(w=>w.includes('visual designs compile')));
   const visual=JSON.parse(await readFile(join(target,'design/visual-traceability.json'),'utf8')); assert.equal(visual.definitions.length,81); assert.equal(visual.businessAcceptance,'not-implemented');
   for (const r of trace.requirements) assert.match(await readFile(join(target,r.test),'utf8'),/it.todo/);
@@ -130,7 +133,7 @@ test('a rebuilt plan refuses a reviewed hash for stale design input or target by
 }));
 test('custom folders and additive declarations retain configuration and traceability',()=>sandbox(async options=>{
   const next=clone(); next.settings={codebaseFolder:'product/code',testsFolder:'verification/specs'};
-  const base=next.design.nodes[0]; next.design.nodes.push({...structuredClone(base),id:'new-screen',slug:'new-screen',parent:base.id,components:[],bricks:[],nav:true,label:'New screen'});
+  const base=next.design.nodes[0]; next.design.nodes.push({...structuredClone(base),kind:'page',id:'new-screen',slug:'new-screen',parent:base.id,components:[],bricks:[],nav:true,label:'New screen'});
   await writeFile(options.input,JSON.stringify(next)); const plan=await planProject(options);
   assert.ok(plan.plan.changes.some(c=>c.path==='plugin/product/code/generated/presentation/components/screens/new-screen.vue'));
   assert.ok(plan.plan.changes.some(c=>c.path==='plugin/verification/specs/project/workbench.test.ts'));
@@ -145,12 +148,9 @@ test('the public CLI has no external --vault/--target generation and writes noth
   for (const extra of [[],['--target','again'],['--force','yes'],['--apply']]) { const result=cli(options,extra); assert.equal(result.status,1); }
   assert.deepEqual(await readdir(options.vault),['project.json']);
 }));
-// Hooks generated from legacy detail designs were named after edge IDs; a legacy input's plan names their new IDs.
-test('a legacy input reports its edge-to-interaction ID mapping in the reviewed plan',()=>sandbox(async options=>{
-  const legacy = await readFile(join(root,'tests/fixtures/companion/detail-v3.json'),'utf8'), mapping = migrateCompanionDocument(JSON.parse(legacy)).report.interactionIds;
-  await writeFile(options.input,legacy); const review = reviewProject(await planProject(options));
-  assert.ok(Object.keys(mapping).length > 0); assert.deepEqual(review.legacyInteractionIds, mapping);
-  const hooks = review.changes.map(c => /^plugin\/src\/generated\/application\/interactions\/(vi-\d+)\.ts$/.exec(c.path)?.[1]).filter(Boolean);
-  assert.ok(hooks.length > 0 && hooks.every(id => Object.values(mapping).includes(id)), 'every generated hook is named by a mapped interaction ID');
+test('a retired v3 input is refused before planning, with no writes and no legacy mapping',()=>sandbox(async options=>{
+  await writeFile(options.input,retiredProjectText(3));
+  await assert.rejects(planProject(options),error=>/only schema 6 is supported/.test(JSON.stringify(error.diagnostics ?? error.message)));
+  assert.deepEqual(await readdir(options.vault),['project.json']);
   await writeFile(options.input,JSON.stringify(fixture)); assert.equal(Object.hasOwn(reviewProject(await planProject(options)),'legacyInteractionIds'),false);
 }));

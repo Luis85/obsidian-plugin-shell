@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractArchive } from './framework-archive-fixture.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
 const repository = process.cwd(), npm = process.env.QUALIFIED_NPM;
 assert.ok(npm, 'Explicit qualified npm is required; no global installation.');
 const evidence = join(repository, 'reports/framework-cli'); await mkdir(evidence, { recursive: true });
@@ -23,7 +24,7 @@ function run(name, cwd, entry, args, { allowBlocked = false } = {}) {
 const archive = join(evidence, 'plugin-framework.zip');
 await run('pack', repository, join(repository, 'bin/app'), ['framework', 'pack', '--out', archive, '--yes', '--json']).persist();
 const bytes = await readFile(archive), archiveHash = createHash('sha256').update(bytes).digest('hex');
-const full = JSON.parse(await readFile(join(repository, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+const full = selfProject();
 for (const [id, paths] of [['field-notes', {codebaseFolder: 'app/source', testsFolder: 'spec'}], ['task-board', {codebaseFolder: 'src', testsFolder: 'tests'}]]) {
   const target = await realpath(await mkdtemp(join(process.env.RUNNER_TEMP ?? tmpdir(), id + '-kit-'))); targets.push(target);
   await extractArchive(bytes, target);
@@ -38,6 +39,7 @@ for (const [id, paths] of [['field-notes', {codebaseFolder: 'app/source', testsF
     design.design.prds = []; design.design.storymaps = {schema: 1, nextId: 1, maps: []};
     delete design.design.visualDesigns;
     design.design.dataSources = {schema: 1, nextId: 1, sources: [], flows: []};
+    design.design.sitemap = {schema: 1, routes: [], journeys: []}; design.design.features = {schema: 1, items: []}; design.design.editors = {schema: 1, bindings: []};
     design.design.semantic = { entities: [{id: 'tasks', slug: 'task', name: 'Task', folder: 'Tasks', properties: [{key:'title', type:'text', required:true}, {key:'done', type:'checkbox', required:true}]}], relationships: [] };
   }
   await writeFile(join(target, 'input.json'), JSON.stringify(design));

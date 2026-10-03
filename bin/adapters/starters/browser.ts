@@ -2,7 +2,7 @@
 import { parseDesignData } from '../../../scripts/contracts/json-data.ts';
 import { validateDefinition } from './validation.ts';
 import { resolveValues } from './render.ts';
-import { customizeStarter } from '../../../scripts/companion/starter-contract.mjs';
+import { customizeStarter } from './customize.ts';
 import { validateAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { requireThat } from '../framework/contracts.ts';
 import type { StarterDefinition } from './types.ts';
@@ -25,7 +25,8 @@ export function configureBrowserStarter(definition: StarterDefinition, sha256: s
   for (const key of ['id', 'name', 'author', 'description', 'version', 'codebaseFolder', 'testsFolder', 'extension', 'extensions']) {
     if (values[key] !== undefined) fields[key] = String(values[key]);
   }
-  return customizeStarter({ schemaVersion: 1, starters: [starterProjection(d, sha256)] }, d.id, fields);
+  starterProjection(d, sha256);
+  return customizeStarter({ definition: d, sha256 }, fields);
 }
 
 /** Export edited design with the reviewed recipe's files/processes intact; never serialize session approvals. */

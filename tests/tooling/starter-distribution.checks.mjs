@@ -28,8 +28,8 @@ async function compiler() {
     } };
   }
 }
-test('distribution boundaries exclude canonical and legacy definitions from shell and generated framework copies', () => {
-  for (const path of ['configs/starters/webapp.json', 'docs/concepts/companion/companion-project.json', 'docs/concepts/companion/seeds/visual-self-project.json', 'docs/concepts/companion/starters/catalog.json', 'docs/concepts/companion/starters/blank.companion.json']) {
+test('distribution boundaries exclude canonical definitions from shell and generated framework copies', () => {
+  for (const path of ['configs/starters/webapp.json', 'configs/starters/companion-plugin.json', 'configs/starters/feature-showcase.json']) {
     assert.equal(included(path), false); assert.equal(maintainerOnly(path), true);
   }
   assert.equal(included('scripts/starters/starter.schema.json'), true);

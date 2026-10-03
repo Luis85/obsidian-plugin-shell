@@ -73,7 +73,7 @@ function veHealthChecks(d = design()) {
   const about = prefixes => (prefixes.some(p => failure.startsWith(p)) ? failure : '');
   const pinned = store.catalog.id === VISUAL_CATALOG.id && store.catalog.version === VISUAL_CATALOG.version;
   checks.push(['Full validation', !failure, failure || 'Every page, component, layout and revision passes the generator gate.']);
-  checks.push(['Project schema', d.schema === COMPANION_VERSION && store.schema === VISUAL_SCHEMA && companionLegacyDetails(d) === undefined, 'Companion v' + d.schema + ' · visual designs schema ' + store.schema]);
+  checks.push(['Project schema', d.schema === COMPANION_VERSION && store.schema === VISUAL_SCHEMA, 'Companion v' + d.schema + ' · visual designs schema ' + store.schema]);
   checks.push(['Nuxt UI catalog', pinned, pinned ? 'Catalog nuxt-ui v1 pinned · @nuxt/ui ' + VISUAL_NUXT_UI_VERSION : 'Unsupported catalog ' + JSON.stringify(store.catalog)]);
   const dangling = store.pages.filter(p => !context.surfaces.has(p.ownerId)).length;
   const pageIssue = about(['Page ']);

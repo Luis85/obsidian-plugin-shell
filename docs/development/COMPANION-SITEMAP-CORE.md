@@ -7,12 +7,12 @@
 `scripts/companion/sitemap/` contains framework-free TypeScript over the existing `design.nodes`, `design.links` and `design.canvas`. It does not create a competing page database, browser storage writer or native persistence service. `project inspect` uses the same core for an additive `data.sitemap` summary after the existing project/compiler intake:
 
 ```sh
-node bin/app project inspect --input docs/concepts/companion/companion-project.json --json
+node bin/app project inspect --input my-plugin.companion.json --json
 ```
 
 The summary reports surface/native-view/page counts, hierarchy and navigation counts, explicitly declared routes/journeys/features and journey findings. `acceptance` is `structure-only-not-product-acceptance`. Inspection writes nothing and exports no private authoring preimages.
 
-The complete transport/exporter remains **v5**. The new `sitemap` and `features` subsystem interfaces are staged internal contracts for WP-03, not fields that the current full-project importer accepts. Do not insert them into a v5 export or bump its version manually. The full envelope, migrations, browser/native import, schema discovery, starters and golden self-project must be upgraded together. A host must continue to apply the full project validator; the structural core cannot authorize saving an otherwise invalid project.
+The complete transport is **project schema 6**, which carries the `sitemap`, `features` and `editors` subsystems; earlier versions are rejected and never migrated. A host must continue to apply the full project validator; the structural core cannot authorize saving an otherwise invalid project.
 
 ## Source provenance and differences
 

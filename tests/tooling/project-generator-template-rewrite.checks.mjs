@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
 import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { copiedTemplateMarker, rewriteTemplate } from '../../bin/compiler/emitters/file-code.ts';
 import { relationshipCode } from '../../bin/compiler/emitters/relationship-code.ts';
@@ -13,8 +13,8 @@ import { httpCode } from '../../bin/compiler/emitters/http-code.ts';
 // Copied template text is rewritten by exact literals; a drifted literal must stop generation, never emit stale text.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const live = await loadTemplateSnapshot(root);
-const detail = JSON.parse(await readFile(new URL('../fixtures/companion/detail-v4.json', import.meta.url), 'utf8'));
-const model = projectModel(migrateCompanionDocument(boundaryProject(detail)).document);
+// The boundary fixture extends the current (project v6) self-project starter.
+const model = projectModel(boundaryProject(selfProject()));
 const relationshipTests = 'tests/tooling/project-generator-relationships.checks.mjs';
 const httpTests = 'tests/tooling/project-generator-http.checks.mjs';
 const nodeTest = "import { test } from 'node:test';";

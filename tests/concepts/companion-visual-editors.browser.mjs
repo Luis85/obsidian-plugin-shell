@@ -7,7 +7,7 @@ import { chromium } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { failedUpgradeRecovery, surfaceRemovalAndOrphans, revisionSurfaceAndBlueprint } from './companion-visual-recovery-phases.mjs';
+import { savedSelfProject, previousWorkspaceAdoption, surfaceRemovalAndOrphans, revisionSurfaceAndBlueprint } from './companion-visual-recovery-phases.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const HTML = ROOT + 'docs/concepts/companion/index.html', OUT = ROOT + 'reports/concepts/visual-editors', FIXTURES = ROOT + 'tests/fixtures/companion/';
@@ -17,7 +17,7 @@ const html = readFileSync(HTML, 'utf8');
 // In-memory storage adapter, optionally pre-seeded, installed before the concept script reads it.
 const storage = (saved = {}) => `<script>window.__saved=${JSON.stringify(saved).replace(/</g, '\\u003c')};Object.defineProperty(window,'localStorage',{value:{getItem:k=>__saved[k]??null,setItem:(k,v)=>{__saved[k]=v},removeItem:k=>delete __saved[k]}});</script>`;
 const checks = [], errors = [], requests = [], hostile = {};
-let fatal = null, page, browser, app = null, review = null, composed = null, legacyDesign = null;
+let fatal = null, page, browser, app = null, review = null, composed = null;
 
 function check(name, value, detail = '', scope = SCOPE) {
   checks.push({ name, result: value ? 'passed' : 'failed', scope });
@@ -64,12 +64,14 @@ const errorText = () => page.locator('#ve-error').innerText();
 const toast = () => page.locator('#toasts').innerText();
 const harness = { FIXTURES, check, js, act, navigate, load, toast, snapshot, opened, closed, escape, modalText, page: () => page };
 
-async function legacyImportAndPages() {
-  await importFile(FIXTURES + 'detail-v3.json');
-  const report = await page.locator('#project-import-migration').innerText(), mapped = await page.locator('#project-import-interactions li').count();
+// A current (schema 6) project with page and component designs imports unchanged; earlier formats are never migrated.
+async function currentImportAndPages() {
+  await importFile(FIXTURES + 'visual-project.json');
+  const upgrade = await page.locator('#project-import-migration').count();
   await applyImport();
-  const migrated = await js(() => ({ schema: design().visualDesigns?.schema, legacy: 'detailDesigns' in design(), pages: veStore().pages.map(p => p.ownerId), components: veStore().components.map(c => c.libraryId), valid: validSavedDesign(design()) }));
-  check('legacy v3 import migrates with report', report.includes('canvas positions dropped') && mapped > 0 && migrated.schema === 3 && !migrated.legacy && migrated.valid && migrated.pages.join() === 'node-48,node-27' && migrated.components.includes('project-json-review'), { report, mapped, migrated });
+  const fixture = JSON.parse(readFileSync(FIXTURES + 'visual-project.json', 'utf8')).design.visualDesigns;
+  const imported = await js(() => ({ schema: design().schema, visual: JSON.stringify(veStore()), legacy: 'detailDesigns' in design(), pages: veStore().pages.map(p => p.ownerId), components: veStore().components.map(c => c.libraryId), valid: validSavedDesign(design()) }));
+  check('schema 6 project import keeps its page and component designs unchanged', upgrade === 0 && imported.schema === 6 && imported.visual === JSON.stringify(fixture) && !imported.legacy && imported.valid && imported.pages.join() === 'node-48,node-27' && imported.components.includes('project-json-review'), { upgrade, imported: { ...imported, visual: imported.visual.length } });
   await navigate('pages');
   const cards = await page.locator('.ve-page-card').count(), before = await snapshot();
   await act('ve-open-page', 'node-5');
@@ -387,27 +389,6 @@ async function backNavigation() {
   check('back from sitemap restores the selected surface and inspector tab', fromSitemap === 'page-editor' && await js(() => state.view === 'sitemap' && designUi.selected === 'node-5' && canvasUi.inspector === 'links'));
 }
 
-// Saved browser state from before this change (Review Focus 1): the v4 self-project with detail designs and legacy
-// history snapshots, written into the storage adapter before the concept starts.
-const legacyPages = () => legacyDesign.detailDesigns.documents.filter(d => d.kind === 'page').length;
-async function legacySavedState() {
-  const fixture = JSON.parse(readFileSync(FIXTURES + 'detail-v4.json', 'utf8')), key = await js(() => STORAGE_KEY);
-  const saved = await js(v4 => {
-    const s = JSON.parse(localStorage.getItem(STORAGE_KEY)), old = { ...s.project.design, ...v4.design };
-    delete old.visualDesigns; old.history = [designSnapshot(old), designSnapshot(old)]; old.future = [designSnapshot(old)];
-    s.project.design = old; s.view = 'pages'; return JSON.stringify(s);
-  }, fixture);
-  legacyDesign = JSON.parse(saved).project.design;
-  await load({ [key]: saved });
-  const notice = await toast(), restored = await js(() => ({ legacy: 'detailDesigns' in design(), schema: design().visualDesigns?.schema, history: design().history.length, future: design().future.length, stored: localStorage.getItem(STORAGE_KEY).includes('detailDesigns'), pages: veStore().pages.length, valid: validSavedDesign(design()) }));
-  await act('ve-open-page', 'node-50');
-  const disabled = await page.locator('.ve-toolbar [data-action="ve-undo"]').isDisabled() && await page.locator('.ve-toolbar [data-action="ve-redo"]').isDisabled();
-  await page.locator('#ve-outline [role="treeitem"][tabindex="0"]').focus(); await page.keyboard.press('Control+z');
-  const attempt = { toast: await toast(), legacy: await js(() => 'detailDesigns' in design() || design().history.some(h => h.detailDesigns)) };
-  check('legacy saved state migrates and clears history', legacyDesign.detailDesigns.documents.length > 50 && notice.includes('upgraded to the new page and component editors. Earlier undo history was cleared.') && !restored.legacy && restored.schema === 3 && restored.history === 0 && restored.future === 0
-    && !restored.stored && restored.pages === legacyPages() && restored.pages > 20 && restored.valid && disabled && attempt.toast.includes('Nothing to undo') && !attempt.legacy, { notice, restored, disabled, attempt }, 'Seeded pre-upgrade browser storage, real startup restore and editor controls');
-}
-
 async function scenariosAndNarrow() {
   const nodes = await js(() => ({ error: visualNodes(veCurrentPage().root).find(n => n.name === 'Import error')?.id, loading: visualNodes(veCurrentPage().root).find(n => n.name === 'Reading project')?.id, scenarios: veCurrentPage().scenarios.map(s => [s.id, s.name, s.state, s.width]) }));
   const [wide] = nodes.scenarios.filter(s => s[2] === 'default'), [narrow] = nodes.scenarios.filter(s => s[2] === 'error'), shown = id => page.locator(`.ve-frame [data-ve-node="${id}"]`).count();
@@ -430,16 +411,9 @@ async function scenariosAndNarrow() {
   await page.setViewportSize({ width: 1600, height: 1000 });
 }
 
-async function legacyOutlineAdoption() {
-  const key = await js(() => LEGACY_STORAGE_KEY);
-  await load({ [key]: JSON.stringify({ schema: 1, projects: [{ name: 'Legacy outline', id: 'legacy-outline', author: 'Concept test', description: 'Saved before the visual editors', version: '0.1.0', design: legacyDesign }] }) });
-  await act('vault-legacy'); await opened(); await act('vault-legacy-adopt', undefined, '#modal'); await closed();
-  const adopted = await js(() => ({ legacy: 'detailDesigns' in design(), schema: design().visualDesigns?.schema, pages: veStore().pages.length, history: design().history.length, valid: validSavedDesign(design()), original: localStorage.getItem(LEGACY_STORAGE_KEY).includes('detailDesigns') }));
-  check('legacy outline adoption upgrades the copied design and keeps the original', !adopted.legacy && adopted.schema === 3 && adopted.pages === legacyPages() && adopted.history === 0 && adopted.valid && adopted.original, adopted, 'Seeded previous-workspace storage, real recovery dialog');
-}
-
 async function selfProjectHealthAndHostileImports() {
-  await palette('project-example'); await page.locator('#project-import-confirm').waitFor();
+  const golden = JSON.parse(readFileSync(ROOT + 'configs/starters/companion-plugin.json', 'utf8')).generator.document;
+  await importFile({ name: 'companion-plugin.companion.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(golden, null, 2) + '\n') });
   const name = await page.locator('#project-import-summary h3').innerText();
   await applyImport();
   const self = await js(() => ({ schema: design().schema, legacy: 'detailDesigns' in design(), pages: veStore().pages.length, components: veStore().components.length }));
@@ -447,13 +421,13 @@ async function selfProjectHealthAndHostileImports() {
   const rows = await page.locator('#modal .ve-health-check').evaluateAll(els => els.map(e => [e.querySelector('strong').textContent, e.classList.contains('is-pass')]));
   const status = await page.locator('#modal [role="status"]').first().innerText(), slideover = await js(() => document.getElementById('modal').classList.contains('ve-slideover'));
   await escape();
-  check('health slideover lists all passing checks for the self-project', self.schema === 5 && !self.legacy && self.pages > 20 && self.components > 0 && slideover && rows.length === 8 && rows.every(([, pass]) => pass) && status.startsWith('8 of 8 checks pass'), { name, self, rows, status });
+  check('health slideover lists all passing checks for the self-project', self.schema === 6 && !self.legacy && self.pages > 20 && self.components > 0 && slideover && rows.length === 8 && rows.every(([, pass]) => pass) && status.startsWith('8 of 8 checks pass'), { name, self, rows, status });
   const before = { json: await js(() => companionJson()), stored: await js(() => localStorage.getItem(STORAGE_KEY)) }, doc = () => JSON.parse(before.json);
-  const catalog = doc(), unknown = doc(), legacy = doc(), added = unknown.design.visualDesigns;
-  catalog.design.visualDesigns.catalog.version = 2; legacy.design.detailDesigns = { schema: 2, nextId: 1, documents: [], revisions: [] };
+  const catalog = doc(), unknown = doc(), legacy = doc(), retired = doc(), added = unknown.design.visualDesigns;
+  catalog.design.visualDesigns.catalog.version = 2; legacy.design.detailDesigns = { schema: 2, nextId: 1, documents: [], revisions: [] }; retired.schemaVersion = retired.design.schema = 5;
   added.pages[0].root.push({ id: 'vn-' + added.nextId++, kind: 'component', ref: { kind: 'nuxt-ui', entryId: 'u-bogus' }, props: {}, slots: {}, events: [] });
   const proto = before.json.replace(/"visualDesigns":\s*\{/, '"visualDesigns":{"__proto__":{"polluted":true},'), outcomes = [];
-  const variants = [['catalog version 2', JSON.stringify(catalog), /catalog/i], ['unknown catalog entry', JSON.stringify(unknown), /u-bogus/], ['v5 with detailDesigns', JSON.stringify(legacy), /detail/i], ['prototype key', proto, /Unsafe object key/]];
+  const variants = [['catalog version 2', JSON.stringify(catalog), /catalog/i], ['unknown catalog entry', JSON.stringify(unknown), /u-bogus/], ['retired detail store', JSON.stringify(legacy), /design envelope/i], ['retired schema 5', JSON.stringify(retired), /only schema 6 is supported/], ['prototype key', proto, /Unsafe key/]];
   for (const [label, text, pattern] of variants) {
     await importFile({ name: 'hostile.json', mimeType: 'application/json', buffer: Buffer.from(text) });
     const message = await page.locator('#project-transfer-error').innerText(), confirmable = await page.locator('#project-import-confirm').count();
@@ -462,12 +436,12 @@ async function selfProjectHealthAndHostileImports() {
     await closed();
     outcomes.push({ label, message: message.slice(0, 200), ok: pattern.test(message) && !confirmable && before.json === await js(() => companionJson()) && before.stored === await js(() => localStorage.getItem(STORAGE_KEY)) });
   }
-  check('hostile v5 import rejected, project unchanged', proto.includes('__proto__') && outcomes.every(o => o.ok) && await js(() => ({}).polluted === undefined), outcomes);
+  check('hostile and retired imports rejected, project unchanged', proto.includes('__proto__') && outcomes.every(o => o.ok) && await js(() => ({}).polluted === undefined), outcomes);
 }
 
-const phases = [legacyImportAndPages, insertAndLayouts, inspectorBindingsAndInteractions, keyboardOnly, moveTo, layoutsAcrossPages, guardedWrites, hostilePageNames, retiredEntryActions,
-  customizeAndContract, dependencies, childComposition, componentRefusals, publish, backNavigation, legacySavedState, scenariosAndNarrow, legacyOutlineAdoption,
-  () => failedUpgradeRecovery(harness), selfProjectHealthAndHostileImports, () => surfaceRemovalAndOrphans(harness), () => revisionSurfaceAndBlueprint(harness)];
+const phases = [currentImportAndPages, insertAndLayouts, inspectorBindingsAndInteractions, keyboardOnly, moveTo, layoutsAcrossPages, guardedWrites, hostilePageNames, retiredEntryActions,
+  customizeAndContract, dependencies, childComposition, componentRefusals, publish, backNavigation, () => savedSelfProject(harness), scenariosAndNarrow, () => previousWorkspaceAdoption(harness),
+  selfProjectHealthAndHostileImports, () => surfaceRemovalAndOrphans(harness), () => revisionSurfaceAndBlueprint(harness)];
 browser = await chromium.launch({ headless: true, ...(process.env.SHELL_CHROMIUM ? { executablePath: process.env.SHELL_CHROMIUM } : {}) });
 try {
   await load();

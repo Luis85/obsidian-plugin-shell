@@ -84,7 +84,7 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
         "id": "custom-file-view-plugin",
@@ -98,7 +98,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Create, open, edit and save .folio documents without replacing Markdown or another core format.",
         "platform": "desktop",

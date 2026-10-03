@@ -2,13 +2,12 @@
 import { constants, type Stats } from 'node:fs';
 import { lstat, open, realpath, type FileHandle } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { COMPANION_MAX_BYTES, companionRelativeFolder, parseCompanionDocument, migrateCompanionDocument } from '../../../scripts/companion/project-contract.mjs';
+import { COMPANION_MAX_BYTES, companionRelativeFolder, parseAuthoringDocument, type AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 
 export interface CompanionRequest { input: unknown; target: string; vault?: string }
-export interface Migrated { document: { settings: Record<string, string> }; report: unknown }
-export interface CompanionReader<M extends Migrated> { parse: (text: string) => unknown; migrate: (value: unknown) => M }
-/** The shared companion contract: parse, then migrate legacy versions to the current one. */
-export const companionReader = { parse: parseCompanionDocument, migrate: migrateCompanionDocument };
+export interface ProjectSettings { settings: Record<string, string> }
+/** Parses one current (schema 6) project text; earlier formats are rejected, never migrated. */
+export type CompanionParse<D extends ProjectSettings> = (text: string) => D;
 
 const missing = (error: unknown): boolean => error instanceof Error && 'code' in error && error.code === 'ENOENT';
 async function checkDirectoryChain(root: string, path: string): Promise<void> {
@@ -56,18 +55,22 @@ async function vaultRoot(vault: string, message: string): Promise<string> {
   return root;
 }
 
-/** Read and return a project definition. This v1 seam never generates files. */
-export async function readCompanionProject<M extends Migrated>({ input, target, vault = process.cwd() }: CompanionRequest, reader: CompanionReader<M>) {
+export interface CompanionRead<D extends ProjectSettings> { content: Buffer; document: D; vault: string; target: string }
+/** Read and return a current (schema 6) project definition. This v1 seam never generates files. */
+export async function readCompanionProject(request: CompanionRequest): Promise<CompanionRead<AuthoringDocument>>;
+export async function readCompanionProject<D extends ProjectSettings>(request: CompanionRequest, parse: CompanionParse<D>): Promise<CompanionRead<D>>;
+export async function readCompanionProject({ input, target, vault = process.cwd() }: CompanionRequest,
+  parse: CompanionParse<ProjectSettings> = parseAuthoringDocument): Promise<CompanionRead<ProjectSettings>> {
   requireInput(input);
   if (!companionRelativeFolder(target, true)) throw new Error('COMPANION_TARGET: Use a portable vault-relative --target path, or dot for the vault root.');
   const root = await vaultRoot(vault, 'The vault root must be an existing directory.');
   await checkDirectoryChain(root, target);
   const { content, text } = await readBoundedText(resolve(input));
-  const { document, report } = reader.migrate(reader.parse(text));
+  const document = parse(text);
   for (const folder of Object.values(document.settings)) {
     await checkDirectoryChain(root, target === '.' ? folder : target + '/' + folder);
   }
-  return { content, document, migration: report, vault: root, target: resolve(root, target) };
+  return { content, document, vault: root, target: resolve(root, target) };
 }
 
 /** Raw input for the dedicated compiler. Same containment and bounded byte checks; no semantic parsing. */

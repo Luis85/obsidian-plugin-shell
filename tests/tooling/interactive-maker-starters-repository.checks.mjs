@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { starterFolder, checkDirectoryChain, parseDefinition, loadDefinitions, companionCatalog } from '../../bin/adapters/starters/repository.ts';
+import { starterFolder, checkDirectoryChain, parseDefinition, loadDefinitions, companionStarters } from '../../bin/adapters/starters/repository.ts';
 import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
 import { code, fileStarter, shipped, workspace } from './starters-fixture.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 
-// The local starter repository (repository.ts): the configured folder, the directory chain, bounded loading and the Companion catalog adapter.
+// The local starter repository (repository.ts): the configured folder, the directory chain, bounded loading and the Companion starter set.
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const settings = (root, value) => writeFile(join(root, 'configs/user-settings.json'), JSON.stringify(value));
 const named = (id, overrides = {}) => fileStarter({ id, name: 'Starter ' + id, ...overrides });
@@ -79,11 +80,13 @@ test('loading bounds the total folder and contributed size at 16 MB', () => work
   assert.equal(await code(loadDefinitions(root, [])), 'STARTER_LIMIT');
 }, []));
 
-test('the Companion catalog keeps only Companion definitions with their source hash', async () => {
+test('the Companion starter set keeps only Companion definitions, with their source hash and validated schema 6 document', async () => {
   const blank = validateDefinition(await shipped('blank')), bytes = Buffer.from('x');
-  const entries = [{ definition: validateDefinition(fileStarter()), file: 'f', sha256: 'f'.repeat(64), bytes }, { definition: blank, file: 'b', sha256: 'b'.repeat(64), bytes }];
-  assert.deepEqual(companionCatalog(entries), { schemaVersion: 1, starters: [{ id: 'blank', name: blank.name, category: blank.category, level: blank.level,
-    summary: blank.summary, outcome: blank.outcome, includes: blank.includes, implementation: blank.implementation, tags: blank.tags, version: blank.version,
-    file: 'blank.companion.json', sha256: 'b'.repeat(64), document: blank.generator.document }] });
+  const file = { definition: validateDefinition(fileStarter()), file: 'f', sha256: 'f'.repeat(64), bytes }, companion = { definition: blank, file: 'b', sha256: 'b'.repeat(64), bytes };
+  assert.deepEqual(companionStarters([file, companion]), [{ ...companion, document: blank.generator.document }]);
+  assert.equal(companionStarters([companion])[0].document.schemaVersion, 6);
   assert.deepEqual(parseDefinition(Buffer.from(JSON.stringify(blank))), blank);
+  // A retired project format is refused when the definition is read, never migrated into the set.
+  const retired = structuredClone(blank); retired.generator.document = retiredProject(5);
+  assert.throws(() => validateDefinition(retired), { code: 'STARTER_VERSION' });
 });

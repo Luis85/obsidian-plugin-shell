@@ -1,6 +1,6 @@
 import { setupDocumentation } from './docs-setup.ts';
 import { setupObsidian } from './obsidian-setup.ts';
-import { starterCatalog, derivedId, derivedName } from '../../adapters/framework/starter-project.ts';
+import { companionStarterSet, derivedId, derivedName } from '../../adapters/framework/starter-project.ts';
 import { readConfiguration } from '../../adapters/framework/files.ts';
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
 import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
@@ -12,7 +12,7 @@ type Execute = (request: Request, context: Context) => Promise<Result>;
 interface SetupTerminalDependencies {
   setupDocumentation: typeof setupDocumentation;
   setupObsidian: typeof setupObsidian;
-  starterCatalog: typeof starterCatalog;
+  companionStarterSet: typeof companionStarterSet;
   derivedId: typeof derivedId;
   derivedName: typeof derivedName;
   readConfiguration: typeof readConfiguration;
@@ -21,7 +21,7 @@ interface SetupTerminalDependencies {
 const defaults: SetupTerminalDependencies = {
   setupDocumentation,
   setupObsidian,
-  starterCatalog,
+  companionStarterSet,
   derivedId,
   derivedName,
   readConfiguration,
@@ -30,16 +30,16 @@ const defaults: SetupTerminalDependencies = {
 type Options = Request['options'];
 /** Lists the reviewed starters and records the chosen starter or a JSON import path. */
 async function chooseSource(options: Options, context: Context, prompt: Prompt, write: Write, dependencies: SetupTerminalDependencies): Promise<void> {
-  const { catalog } = await dependencies.starterCatalog(context);
+  const { starters } = await dependencies.companionStarterSet(context);
   write('Start with a reviewed starter, or import existing project JSON.\n');
-  for (const item of catalog.starters) write(`  ${item.id} — ${item.name} (${item.level})\n`);
+  for (const { definition: item } of starters) write(`  ${item.id} — ${item.name} (${item.level})\n`);
   const source = (await prompt('Starter ID, or json [blank]: ')).trim() || 'blank';
   if (source === 'json') {
     options.input = (await prompt('Project JSON path: ')).trim();
     requireThat(options.input, 'INPUT_REQUIRED', 'A JSON import needs a file path. No files were changed.');
     return;
   }
-  requireThat(catalog.starters.some(item => item.id === source), 'STARTER_UNKNOWN', 'Choose a listed starter ID. No files were changed.');
+  requireThat(starters.some(item => item.definition.id === source), 'STARTER_UNKNOWN', 'Choose a listed starter ID. No files were changed.');
   options.starter = source;
 }
 /** Asks only for identity fields the caller did not supply, defaulting from the folder and starter. */

@@ -1,4 +1,3 @@
-function jmValidTooling(value){try{CompanionJourney.validateProjectTooling(value);return true;}catch{return false;}}
 // Trusted composition bridge. The browser concept's existing project and persistence remain authoritative.
 let jmEditor=null,jmOwner=null;
 // UI state only, keyed by the actual project object. Replacing/importing a project cannot leak a prior lens or filter.
@@ -25,16 +24,8 @@ function jmMount(){
   importProject:()=>openCompanionImport(),exportProject:()=>companionExport(),
  });
 }
-function jmValidFields(value){try{CompanionJourney.validateSitemapModel(value);return true;}catch{return false;}}
-function jmSeed(p){
- const d=p.design,bySlug=new Map(d.nodes.map(n=>[n.slug,n]));
- const paths={overview:'/',starters:'/starters',requirements:'/requirements',storymaps:'/storymaps','storymap-detail':'/storymaps/editor',sitemap:'/sitemap',pages:'/pages','page-editor':'/pages/editor','component-editor':'/components/editor',entities:'/entities',sources:'/sources','test-data':'/test-data','design-system':'/design-system',components:'/components',blueprints:'/blueprints',patterns:'/patterns',prepare:'/prepare',generate:'/generate',develop:'/develop',quality:'/quality',capabilities:'/capabilities',release:'/release',runs:'/runs'};
- d.sitemap={schema:1,routes:Object.entries(paths).map(([slug,path])=>({id:'route-'+slug,surface:bySlug.get(slug).id,path})),journeys:[]};
- for(const [id,name,slugs] of [['design','Design a plugin',['overview','requirements','sitemap','page-editor']],['starter','Start from a template',['overview','starters','import-project']],['delivery','Prepare and verify',['prepare','develop','quality','release']]]){
-  d.sitemap.journeys.push({id:'journey-'+id,name,steps:slugs.map((slug,i)=>{const surface=bySlug.get(slug).id,prior=i?bySlug.get(slugs[i-1]).id:null;return {id:'step-'+(i+1),surface,via:i?d.links.find(e=>e.from===prior&&e.to===surface)?.id??null:null};})});
- }
- const groups=[['design','Product design',['overview','starters','requirements','storymaps','storymap-detail','sitemap','pages','page-editor','component-editor','components','blueprints','patterns','design-system']],['data','Data and contracts',['entities','sources','test-data']],['delivery','Development and delivery',['prepare','generate','develop','quality','capabilities','release','runs']]];
- d.features={schema:1,items:groups.map(([id,name,slugs])=>{const surfaces=slugs.map(s=>bySlug.get(s).id);return {id:'feature-'+id,name,surfaces,entryPoints:[surfaces[0]],components:[],requirements:d.prds.flatMap(prd=>prd.requirements).filter(r=>r.nodes.some(n=>surfaces.includes(n))).map(r=>r.id),dependsOn:[]};})};
- d.editors={schema:1,bindings:[{surface:bySlug.get('sitemap').id,editor:'journey-lens'}]};
- d.schema=6;return p;
+// The authoring build opens on the empty starter workspace instead of the concept's design-first welcome.
+function jmWelcomeView() {
+  return heading('Welcome to Workbench', 'Choose a starter or begin with a blank project. Nothing is created before review.') +
+    `<section class="starter-intro" data-onboarding="empty"><div><span class="eyebrow">FOCUS ON YOUR IDEA</span><h2>Your workspace is empty.</h2><p>Load an editable JSON starter from the separate starter pack, or create a blank project. Then review your identity, folders and setup steps.</p><div class="row wrap">${button('Choose a starter','nav','starters','primary','grid')}${button('Blank project','starter-blank','','','plus')}</div></div><div class="starter-boundary"><strong>No hidden example project</strong><p>The Companion golden template and feature showcase are external JSON definitions. Existing saved projects reopen without being replaced.</p>${button('Import existing project','project-import','','ghost','file')}</div></section>${vaultLegacyBanner()}`;
 }

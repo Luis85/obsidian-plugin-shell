@@ -4,8 +4,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 4685,
-      "sha256": "c26f65f8d7df2f3c65eca8d84c475a087f8b3c6e2b8d2fb652fa7e84623484eb"
+      "bytes": 4723,
+      "sha256": "05c05971016e14424c7f4b36266e02ebbd98a651480bccac519e46e07f344856"
     },
     {
       "path": "SKILL.md",
@@ -104,8 +104,8 @@
     },
     {
       "path": "references/repository-contract.md",
-      "bytes": 9654,
-      "sha256": "7fa5785bb5626264f4c662106b135fb0f16566c5935d6c14e4910437a2817cf9"
+      "bytes": 9665,
+      "sha256": "17e0a283b7f97d55dc80eb5d4d3f9199e2ccfc67061ae2f10b53ea7ffbc42311"
     },
     {
       "path": "references/subagents.md",
@@ -154,8 +154,8 @@
     },
     {
       "path": "scripts/inspect-repository.mjs",
-      "bytes": 3413,
-      "sha256": "446be2f40c78ad91877ca978a7d957f5214630003c7da38a70c720c80f215542"
+      "bytes": 3415,
+      "sha256": "74f4c360ec29c5a24f9c207201bba0aedfffdd471420d0c00e9ec1381977b713"
     },
     {
       "path": "scripts/lib/build-output.mjs",
@@ -214,8 +214,8 @@
     },
     {
       "path": "tests/helpers.checks.mjs",
-      "bytes": 7999,
-      "sha256": "019751847fff14b14c5faad27048b4040e48b39b6945fd4af645176beb7dde30"
+      "bytes": 8000,
+      "sha256": "3458c415eecef46c943bcae414f29e50c45d42d86f78215e548405978cb4c38a"
     },
     {
       "path": "tests/integration.checks.mjs",
@@ -230,7 +230,7 @@
     {
       "path": "tests/test_skill_contract.py",
       "bytes": 8506,
-      "sha256": "f8e1bc22eccdd673dc3e56067015845718779b0c85c8e17c1a309554901dbe67"
+      "sha256": "190c14060fc34441c60c659f0c36d9e1d0d646a1122013d54ea5c4526621f5ff"
     },
     {
       "path": "tests/validator.checks.mjs",

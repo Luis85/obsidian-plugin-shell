@@ -9,9 +9,10 @@ import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snaps
 import { validateSourceOverrides } from '../../templates/companion/runtime/source-overrides.ts';
 import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engine.mjs';
 import { planFixtures, applyFixtures } from '../../docs/concepts/companion/test-kit/storage.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
 const root=process.cwd();
 const template=await loadTemplateSnapshot(root);
-const seed=JSON.parse(await readFile('docs/concepts/companion/companion-project.json','utf8'));
+const seed=selfProject();
 
 test('actual companion export resolves every enabled recipe with readable native metadata and no credentials',()=>{
  const manifest=fixtureManifest(projectModel(seed));const engine=createFixtureEngine();const before=JSON.stringify(seed);

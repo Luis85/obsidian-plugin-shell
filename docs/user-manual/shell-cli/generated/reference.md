@@ -78,7 +78,7 @@ The tables list options with documented command semantics. Some common flags are
 - [project inspect](#project-inspect) — Validate a companion export and report compiler obligations.
 - [project import](#project-import) — Review configuration conflicts and accept a design snapshot.
 - [project schema](#project-schema) — Discover the versioned project-v6 transport schema and semantic validation boundary.
-- [project validate](#project-validate) — Validate/migrate complete project JSON without generation or writes; no authored content in reports.
+- [project validate](#project-validate) — Validate complete project v6 JSON without generation or writes; no authored content in reports.
 - [project measure](#project-measure) — Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.
 - [generate](#generate) — Plan generation for the configured project in place.
 - [concept schema](#concept-schema) — Discover the data-only concept manifest contract.
@@ -2029,7 +2029,7 @@ node bin/app project schema [options]
 
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
-| --version | value | Published project schema version. Legacy documents use project validate. | Values: 6; Default: 6 |
+| --version | value | Published project schema version; only the current schema 6 exists. | Values: 6; Default: 6 |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
 | --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |
@@ -2045,7 +2045,7 @@ node bin/app project schema --version 6 --json
 
 ## project validate
 
-Validate/migrate complete project JSON without generation or writes; no authored content in reports.
+Validate complete project v6 JSON without generation or writes; no authored content in reports.
 
 ```sh
 node bin/app project validate [options]

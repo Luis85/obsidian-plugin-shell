@@ -9,8 +9,9 @@ import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { formatDiagnostics, createRecorder, writeReports } from '../../bin/compiler/adapters/reporting.ts';
 import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
 import { operationSchemas } from '../../bin/adapters/framework/schema.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const source=await readFile(join(root,'docs/concepts/companion/starters/blank.companion.json'),'utf8');
+const source=starterDocumentText('blank');
 const context={root,frameworkRoot:root,inputText:source};
 const request=(command,options={})=>({command,args:[],options:{input:'-',...options}});
 

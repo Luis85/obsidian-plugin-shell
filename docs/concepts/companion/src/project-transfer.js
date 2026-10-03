@@ -1,24 +1,18 @@
 // Portable authoring documents are deliberately separate from recovery snapshots.
-const projectTransferUi = { text: '', filename: '', candidate: null, report: null, snapshot: '', error: '', serial: 0, loading: false };
+const projectTransferUi = { text: '', filename: '', candidate: null, snapshot: '', error: '', serial: 0, loading: false };
 let projectFoldersDraft = null;
 function companionFolders(p = project()) { return { ...(p?.folders || COMPANION_DEFAULT_FOLDERS) }; }
 function validCompanionProjectFolders(value) {
   if (value === undefined) return true;
   try { validateCompanionFolders(value); return true; } catch { return false; }
 }
-// A design whose one-time upgrade failed still holds its only copy of the legacy detail designs: it is exported unchanged,
-// at its legacy version, so nothing is dropped and importing the file retries the upgrade.
-function companionDesignExport(d) {
-  const legacy = companionLegacyDetails(d);
-  if (legacy === undefined) return { schema: COMPANION_VERSION, ...designSnapshot(d) };
-  return { schema: [3, 4].includes(d.schema) ? d.schema : 4, ...designSnapshot(d), detailDesigns: designCopy(legacy) };
-}
+// The saved design, the optional development tooling and every sitemap, feature and editor record travel unchanged.
 function companionProjectDocument(p = project()) {
   if (!p) throw Error('Define a project before exporting.');
   const identity = Object.fromEntries(['id', 'name', 'author', 'version', 'description'].map(key => [key, p[key] || '']));
-  const design = companionDesignExport(ensureProductModel(p.design));
-  return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: design.schema, executable: false,
-    project: identity, settings: companionFolders(p), design, notes: designCopy(p.notes || []) });
+  const design = { schema: COMPANION_VERSION, ...designSnapshot(ensureProductModel(p.design)) };
+  return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: COMPANION_VERSION, executable: false,
+    project: identity, settings: companionFolders(p), design, notes: designCopy(p.notes || []), ...(p.tooling === undefined ? {} : { tooling: designCopy(p.tooling) }) });
 }
 function companionJson(p = project()) {
   const text = JSON.stringify(companionProjectDocument(p), null, 2) + '\n';
@@ -29,8 +23,7 @@ function companionExport() {
   if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation before exporting.');
   try {
     const text = companionJson();
-    const legacy = companionLegacyDetails(project().design) !== undefined ? ' Legacy version: it keeps the detail designs that could not be upgraded; importing it retries the upgrade.' : '';
-    showModal('copy', { title: 'Full project JSON — saved authoring data and folder settings. Keep private. No trust, source files, approvals or verification receipts.' + legacy,
+    showModal('copy', { title: 'Full project JSON — saved authoring data and folder settings. Keep private. No trust, source files, approvals or verification receipts.',
       text, filename: project().id + '.companion.json' });
   } catch (error) { notify(error.message); }
 }
@@ -44,27 +37,26 @@ function companionCanReplace(snapshot) {
     throw Error('Project.md is not an unchanged owned record. Nothing was replaced.');
   }
 }
-// Older transfer versions are migrated before review; the report names what the new editors cannot hold.
+// Only the current project schema is read; an earlier version is refused with the contract's reason, never migrated.
 function companionReview(text) {
-  const { document, report } = migrateCompanionDocument(parseCompanionDocument(text));
-  const d = document.design;
+  const document = parseCompanionDocument(text), d = document.design;
   if (!structuralDesign(d)) throw Error('The design contains unsupported or malformed fields. Nothing was imported.');
   if (d.nextId < importCounter(d)) throw Error('The design counter could reuse an existing ID. Nothing was imported.');
   const p = newPlanningProject(document.project);
   Object.assign(p.design, designCopy(d));
   p.folders = designCopy(document.settings);
   p.notes = designCopy(document.notes);
+  if (document.tooling !== undefined) p.tooling = designCopy(document.tooling);
   if (!validSavedDesign(p.design)) throw Error('The imported design cannot be retained safely.');
-  return { project: p, report };
+  return { project: p };
 }
 function companionCandidate(text) { return companionReview(text).project; }
-function openCompanionImport(example = false) {
+function openCompanionImport() {
   if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation first.');
-  Object.assign(projectTransferUi, { text: example ? companionJson(companionExampleProject()) : '',
-    filename: example ? 'Bundled companion project' : '', candidate: null, snapshot: companionProjectToken(),
+  starterWorkspaceUi.startSetup = false;
+  Object.assign(projectTransferUi, { text: '', filename: '', candidate: null, snapshot: companionProjectToken(),
     error: '', loading: false, starter: null, serial: projectTransferUi.serial + 1 });
   showModal('project-import');
-  if (example) reviewCompanionImport();
 }
 function companionTransferError(error) {
   projectTransferUi.error = error instanceof Error ? error.message : 'The project could not be read.';
@@ -77,18 +69,17 @@ function reviewCompanionImport() {
     const snapshot = companionProjectToken();
     companionCanReplace(snapshot);
     projectTransferUi.snapshot = snapshot;
-    const review = companionReview(projectTransferUi.text);
-    projectTransferUi.candidate = review.project; projectTransferUi.report = review.report;
+    projectTransferUi.candidate = companionCandidate(projectTransferUi.text);
     projectTransferUi.error = '';
     redrawModal();
     document.getElementById('project-import-summary')?.focus();
-  } catch (error) { projectTransferUi.candidate = null; projectTransferUi.report = null; companionTransferError(error); }
+  } catch (error) { projectTransferUi.candidate = null; companionTransferError(error); }
 }
 function applyCompanionImport() {
   const u = projectTransferUi;
   try {
     if (!u.candidate || u.loading || !document.getElementById('project-import-confirm')?.checked) throw Error('Review the project and confirm the replacement first.');
-    companionCanReplace(u.snapshot);
+    companionCanReplace(u.snapshot);verifyStarterReview();
     const p = companionCandidate(u.text); // Never trust a cached or edited review.
     const before = state;
     state = { ...state, project: p, vaultFiles: { ...state.vaultFiles, 'Project.md': p.projectNote },
@@ -97,8 +88,8 @@ function applyCompanionImport() {
     tdDropSession(); veReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
     designUi.error = ''; productUi.prd = null; productUi.component = null;
     dsUi.selected = null; dsUi.catalogSelected = null; erUi.selected = null; erUi.edge = null;
-    u.serial++; u.candidate = null; u.report = null; modalOriginal = null; closeModal(); setView('overview');
-    notify('Project imported into this vault’s workspace. No source was generated, acquired or activated.');
+    u.serial++; u.candidate = null; modalOriginal = null; closeModal(); setView('overview');
+    notify('Project imported into this vault’s workspace. No source was generated, acquired or activated.');starterSetupAfterCreate();
   } catch (error) { companionTransferError(error); }
 }
 async function readCompanionImportFile(file) {
@@ -118,22 +109,15 @@ async function readCompanionImportFile(file) {
 }
 function companionSettingsCard() {
   const p = project(), folders = companionFolders();
-  return `<section class="card mt16"><h3>Project files &amp; JSON handoff</h3><p>${p ? 'Saved folder settings travel with the full project export.' : 'Load the companion example, import a full project, or start a blank project.'}</p>
+  return `<section class="card mt16"><h3>Project files &amp; JSON handoff</h3><p>${p ? 'Saved folder settings travel with the full project export.' : 'Choose a Companion starter, import a full project, or start a blank project.'}</p>
     ${p ? `<dl class="receipt"><dt>Codebase folder</dt><dd><code>${esc(folders.codebaseFolder)}/</code></dd><dt>Tests folder</dt><dd><code>${esc(folders.testsFolder)}/</code></dd></dl>` : ''}
-    <div class="row wrap">${p ? button('Configure project folders', 'project-folders', '', 'small', 'folder') + button('Export project JSON', 'project-export', '', 'small', 'download') : ''}${button('Import project JSON', 'project-import', '', 'small', 'file')}${button('Load companion project', 'project-example', '', 'small', 'box')}${button('Project Starters', 'palette-nav', 'starters', 'small', 'grid')}${p ? button('Generate plugin shell','starter-generate','','small','terminal') : ''}</div>
+    <div class="row wrap">${p ? button('Configure project folders', 'project-folders', '', 'small', 'folder') + button('Export project JSON', 'project-export', '', 'small', 'download') : ''}${button('Import project JSON', 'project-import', '', 'small', 'file')}${button('Project Starters', 'palette-nav', 'starters', 'small', 'grid')}${p ? button('Generate plugin shell','starter-generate','','small','terminal') : ''}</div>
     <p class="small muted">Import replaces the one project only after review. Recovery snapshots below are a different format. The read-only inspector prints JSON; the separate reviewed generator creates the shell.</p></section>`;
-}
-// Generated interaction hooks were named after legacy edge IDs; the new IDs let a developer port hooks written for an
-// earlier generation (application/interactions/<edge>.ts → <vi-N>.ts).
-function companionInteractionIds(report) {
-  const ids = Object.entries(report?.interactionIds || {});
-  if (!ids.length) return '';
-  return `<dt>Interaction IDs</dt><dd><details id="project-import-interactions"><summary>${ids.length} legacy interaction${ids.length === 1 ? '' : 's'} renamed. Hooks generated earlier move from application/interactions/&lt;edge&gt;.ts to &lt;new ID&gt;.ts.</summary><ul>${ids.map(([edge, id]) => `<li><code>${esc(edge)}</code> → <code>${esc(id)}</code></li>`).join('')}</ul></details></dd>`;
 }
 function companionImportDialog() {
   const u = projectTransferUi, p = u.candidate, current = project();
   const retainedFile = !!u.filename && u.text.length > 100000;
-  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd>${u.report ? `<dt>Upgrade</dt><dd id="project-import-migration">Upgraded to project version ${COMPANION_VERSION} for the page and component editors: ${esc(veMigrationSummary(u.report))}</dd>` : ''}${companionInteractionIds(u.report)}</dl>
+  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd></dl>
     <label class="checkbox"><input type="checkbox" id="project-import-confirm"><span>${current ? 'Replace ' + esc(current.name) + ' with this project.' : 'Load this project into the current workspace.'} Clear simulated runs, approvals and prepared state. Keep host files.</span></label></section>` : '';
   return dialogBody(projectTransferUi.starter ? 'Review starter project' : 'Import a full project', starterReviewBanner() + `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
     <div class="field"><label for="project-import-file">Project JSON file (up to 4 MB)</label><input type="file" id="project-import-file" accept=".json,application/json" ${u.loading ? 'disabled' : ''}></div>
@@ -171,7 +155,7 @@ function saveCompanionFolders() {
 }
 function handleCompanionTransfer(action) {
   const actions = { 'project-export': companionExport, 'project-import': openCompanionImport,
-    'project-example': () => openCompanionImport(true), 'project-import-review': reviewCompanionImport,
+    'project-import-review': reviewCompanionImport,
     'project-import-apply': applyCompanionImport, 'project-folders': openCompanionFolders, 'project-folders-save': saveCompanionFolders,
     'project-handoff': () => showModal('project-handoff'),
     'project-backup': () => downloadText({ text: companionJson(), filename: project().id + '.companion.json' }) };

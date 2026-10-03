@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
-import { migrateAuthoringDocument } from '../companion/authoring-contract.ts';
+import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), npm = process.env.QUALIFIED_NPM;
 if (!npm) throw Error('QUALIFIED_NPM_REQUIRED: no implicit global installation.');
 const output = join(root, 'reports/storybook-qualification'); await mkdir(output, { recursive: true });
@@ -19,11 +19,14 @@ async function command(label, args, cwd) {
   report.steps.push({ label, exit: run.status }); if (run.status !== 0) throw Error(label + ' failed: ' + (run.error?.message ?? run.status));
 }
 try {
-  const document = migrateAuthoringDocument(JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v3.json'), 'utf8'))).document;
+  // The current self-project starter (project v6) supplies every reusable component the stories cover.
+  const starter = JSON.parse(await readFile(join(root, 'configs/starters/companion-plugin.json'), 'utf8'));
+  const document = validateAuthoringDocument(starter.generator.document);
   document.tooling = { storybook: { enabled: true, generateStories: true } };
   const visual = document.design.visualDesigns;
-  visual.components[0].scenarios.push({ id: 'vs-100', name: 'Narrow empty preview', state: 'empty', width: 'narrow', values: {}, bindings: [] });
-  visual.nextId = Math.max(visual.nextId, 101);
+  visual.components[0].scenarios.push({ id: 'vs-' + visual.nextId, name: 'Narrow empty preview', state: 'empty', width: 'narrow', values: {}, bindings: [] });
+  visual.nextId += 1;
+  validateAuthoringDocument(document);
   const input = join(vault, 'project.json'); await writeFile(input, JSON.stringify(document));
   const plan = await planProject({ input, vault, target: 'project', templateRoot: root }); await applyProject(plan, plan.hash);
   const target = join(vault, 'project'), shell = join(target, 'bin/app');

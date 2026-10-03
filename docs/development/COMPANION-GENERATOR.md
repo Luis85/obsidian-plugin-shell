@@ -5,7 +5,7 @@ Related: issue #19, PR #5's full project JSON contract. This is shell tooling, n
 ## User journey
 
 1. Download/extract the framework. Use its qualified Node/npm versions. `node bin/app setup` forwards to the existing guided setup; `node bin/app make` forwards to the existing maker. Both also retain their npm entrypoints.
-2. Finish and save the design in the companion HTML prototype, then export **Project JSON**. The bundled `docs/concepts/companion/companion-project.json` is the companion's own design and is the qualification fixture.
+2. Finish and save the design in the companion HTML prototype, then export **Project JSON**. The golden starter `configs/starters/companion-plugin.json` embeds the companion's own schema 6 design and is the qualification fixture.
 3. **Recommended:** create the project in one reviewable command. It validates the export with the shared contract, keeps its identity unless `--id/--name/--author` override it, previews the plan and hash, and writes only with `--yes` or `--apply <planHash>` into an absent or empty folder outside the checkout:
 
 ```sh
@@ -134,10 +134,10 @@ The output is a development shell. Components without detail designs remain impl
 - Vitest test API: https://vitest.dev/api/test — TODOs identify unimplemented acceptance, not passing assertions.
 - Node TypeScript execution: https://nodejs.org/api/typescript.html — type stripping executes erasable TypeScript; it does not replace the compiler type-check.
 
-## Visual page and component generation (companion v5)
+## Visual page and component generation (project schema 6)
 
-The compiler reads validated `design.visualDesigns`; v3/v4 inputs are migrated first (`migrateCompanionDocument`), so
-the detail-schema sections below are historical. `bin/compiler/emitters/visual-*.ts` lower each page to
+The compiler reads validated `design.visualDesigns` of a project schema 6 document; schema 1–5 inputs (including the
+v3/v4 detail designs) are rejected and never migrated, so the detail-schema sections below are historical. `bin/compiler/emitters/visual-*.ts` lower each page to
 `presentation/components/details/<pageId>.vue` and each component to its library SFC with `defineProps`/`defineEmits`/
 `defineSlots` from the typed contract. Elements become their tags, text becomes escaped interpolation or a typed
 binding, slots become `<slot>`, project components are imported by export name and Nuxt UI entries become explicitly

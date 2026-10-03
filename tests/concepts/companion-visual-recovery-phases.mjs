@@ -1,38 +1,52 @@
 // Recovery phases of the visual-editors browser suite (companion-visual-editors.browser.mjs owns the harness and the
-// report): a project whose one-time upgrade failed keeps its legacy detail designs through the export it is told to
-// use, and designs that name a missing sitemap surface are protected against removal and stay repairable. `h` is the
-// suite harness; page.evaluate is used only for canonical readback and labelled controlled fixtures.
+// report): saved and previous-workspace state restores only as schema 6, and designs that name a missing sitemap surface
+// are protected against removal and stay repairable. `h` is the suite harness; page.evaluate is used only for canonical
+// readback and labelled controlled fixtures.
 import { readFileSync } from 'node:fs';
 
-// Valid legacy data the one-way upgrade cannot hold: a 120-element page whose list options each add two elements.
-function unmigratable(store) {
-  const s = structuredClone(store), doc = s.documents.find(d => d.kind === 'page'), root = doc.nodes.find(n => n.parentId === null);
-  const base = { kind: 'text', label: 'Filler', text: 'x', parentId: root.id, layout: 'stack', position: { x: 0, y: 0 }, size: { width: 80, height: 80 }, component: null, props: {}, binding: null, a11y: '', visibleIn: ['default', 'loading', 'empty', 'error', 'disabled'], sourceBrickId: null };
-  doc.nodes.push({ ...base, id: 'detail-node-' + s.nextId++, kind: 'list', label: 'Options', options: ['a', 'b'] });
-  while (doc.nodes.length < 120) doc.nodes.push({ ...base, id: 'detail-node-' + s.nextId++ });
-  return s;
+let savedDesign = null;
+
+// Saved browser state: a schema 6 self-project with undo history restores unchanged; a saved design of a retired
+// schema is not loaded and its storage is preserved until an explicit reset.
+export async function savedSelfProject(h) {
+  const golden = JSON.parse(readFileSync(new URL('../../configs/starters/companion-plugin.json', import.meta.url), 'utf8')).generator.document, key = await h.js(() => STORAGE_KEY);
+  const saved = await h.js(document => {
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY)), current = { ...s.project.design, ...document.design };
+    current.history = [designSnapshot(current), designSnapshot(current)]; current.future = [designSnapshot(current)];
+    s.project.design = current; s.view = 'pages'; return JSON.stringify(s);
+  }, golden);
+  savedDesign = JSON.parse(saved).project.design;
+  const retired = JSON.parse(saved); retired.project.design.schema = 5;
+  await h.load({ [key]: JSON.stringify(retired) });
+  const refused = await h.js(stored => ({ project: project(), warning: storageWarning, kept: localStorage.getItem(STORAGE_KEY) === stored }), JSON.stringify(retired));
+  h.check('a saved retired-schema design is not loaded and its storage is preserved', refused.project === null && refused.warning.includes('original storage preserved') && refused.kept, refused, 'Seeded retired-schema browser storage, real startup restore');
+  await h.load({ [key]: saved });
+  const restored = await h.js(() => ({ schema: design().schema, history: design().history.length, future: design().future.length, pages: veStore().pages.length, valid: validSavedDesign(design()), stored: localStorage.getItem(STORAGE_KEY) }));
+  await h.act('ve-open-page', 'node-50');
+  const undo = await h.page().locator('.ve-toolbar [data-action="ve-undo"]').isEnabled();
+  h.check('a saved schema 6 self-project restores unchanged with its history', restored.schema === 6 && restored.history === 2 && restored.future === 1 && restored.pages === savedDesign.visualDesigns.pages.length && restored.pages > 20 && restored.valid
+    && JSON.parse(restored.stored).project.design.visualDesigns.pages.length === restored.pages && undo, { ...restored, stored: restored.stored.length, undo }, 'Seeded browser storage, real startup restore and editor controls');
 }
 
-export async function failedUpgradeRecovery(h) {
-  const v4 = JSON.parse(readFileSync(h.FIXTURES + 'detail-v4.json', 'utf8')), store = unmigratable(v4.design.detailDesigns), key = await h.js(() => STORAGE_KEY);
-  const saved = await h.js(({ design, detailDesigns }) => {
-    const s = JSON.parse(localStorage.getItem(STORAGE_KEY)), old = { ...s.project.design, ...design, detailDesigns };
-    delete old.visualDesigns; old.history = []; old.future = []; s.project.design = old; s.view = 'pages'; return JSON.stringify(s);
-  }, { design: v4.design, detailDesigns: store });
-  await h.load({ [key]: saved });
-  const notice = await h.toast(), kept = await h.js(() => ({ legacy: JSON.stringify(design().detailDesigns), visual: 'visualDesigns' in design(), stored: localStorage.getItem(STORAGE_KEY).includes('"detailDesigns"'), view: state.view }));
-  const card = h.page().locator('section[aria-label="Legacy detail designs"]'), shown = await card.isVisible();
-  await card.locator('[data-action="project-export"]').click(); await h.opened();
-  const title = await h.modalText(), exported = JSON.parse(await h.js(() => modalData.text)); await h.escape();
-  const refusal = await h.js(() => { try { importDesign('{}'); return ''; } catch (error) { return error.message; } });
-  h.check('failed upgrade keeps the legacy store; the Pages view offers the export that keeps it at its legacy version', notice.includes('could not be upgraded') && notice.includes('Use Export project JSON on the Pages view')
-    && kept.legacy === JSON.stringify(store) && !kept.visual && kept.stored && kept.view === 'pages' && shown && title.includes('Legacy version') && exported.schemaVersion === 4 && exported.design.schema === 4
-    && JSON.stringify(exported.design.detailDesigns) === JSON.stringify(store) && !('visualDesigns' in exported.design) && refusal.includes('A blueprint import would discard them') && kept.legacy === await h.js(() => JSON.stringify(design().detailDesigns)),
-  { notice, kept: { ...kept, legacy: kept.legacy.length }, shown, title, schema: exported.schemaVersion, refusal }, 'Seeded failed-upgrade browser storage, real startup restore and Export control; blueprint import called directly');
+// A previous multi-project workspace: only outlines that are valid current designs are offered; the original is kept.
+export async function previousWorkspaceAdoption(h) {
+  const key = await h.js(() => LEGACY_STORAGE_KEY), outline = { ...savedDesign, history: [], future: [] };
+  const previous = JSON.stringify({ schema: 1, projects: [{ name: 'Retired outline', id: 'retired-outline', author: 'Concept test', description: 'Saved in a retired schema', version: '0.1.0', design: { ...outline, schema: 4 } },
+    { name: 'Current outline', id: 'current-outline', author: 'Concept test', description: 'Saved as schema 6', version: '0.1.0', design: outline }] });
+  await h.load({ [key]: previous });
+  await h.act('vault-legacy'); await h.opened();
+  const offered = await h.page().locator('#legacy-choice option').allInnerTexts();
+  await h.act('vault-legacy-adopt', undefined, '#modal'); await h.closed();
+  const adopted = await h.js(() => ({ id: project().id, schema: design().schema, pages: veStore().pages.length, valid: validSavedDesign(design()), original: localStorage.getItem(LEGACY_STORAGE_KEY) }));
+  h.check('previous-workspace adoption offers only current outlines, copies one and keeps the original', offered.length === 1 && offered[0].includes('Current outline') && adopted.id === 'current-outline' && adopted.schema === 6
+    && adopted.pages === outline.visualDesigns.pages.length && adopted.valid && adopted.original === previous, { offered, adopted: { ...adopted, original: adopted.original === previous } }, 'Seeded previous-workspace storage, real recovery dialog');
 }
 
 export async function surfaceRemovalAndOrphans(h) {
-  const owner = await h.js(() => veStore().pages.find(p => !design().nodes.some(n => n.parent === p.ownerId)).ownerId), page = h.page();
+  // A designed leaf surface that no sitemap route, journey step or feature names: the imported-orphan fixture below leaves
+  // only the page design dangling (schema 6 sitemap records are validated against the surfaces too).
+  const owner = await h.js(() => { const d = design(), named = id => (d.sitemap?.routes ?? []).some(r => r.surface === id) || (d.sitemap?.journeys ?? []).some(j => j.steps.some(s => s.surface === id)) || (d.features?.items ?? []).some(f => f.surfaces.includes(id));
+    return veStore().pages.find(p => !d.nodes.some(n => n.parent === p.ownerId) && !named(p.ownerId)).ownerId; }), page = h.page();
   await h.navigate('sitemap');
   const card = page.locator(`.map-node[data-node="${owner}"]`); await card.focus(); await page.keyboard.press('Delete'); await h.opened();
   const before = await h.snapshot(), dialog = await h.modalText(), confirm = await page.locator('#modal [data-action="design-remove-confirm"]').count(); await h.escape();

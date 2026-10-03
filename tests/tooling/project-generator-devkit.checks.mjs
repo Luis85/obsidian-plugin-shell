@@ -10,9 +10,10 @@ import { planProject, applyProject } from '../../bin/compiler/adapters/project-p
 import { renderTemplate } from '../../bin/compiler/emitters/devkit-files.ts';
 import { rebaseMarkdown, relocatedPath } from '../../bin/compiler/emitters/framework-docs.ts';
 import { inspectWorkflow, markdownLinks } from '../../scripts/quality/check-repository.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const starter = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
+const starter = starterDocument('quick-capture');
 const document = structuredClone(starter.document ?? starter);
 const entries = await projectFiles(root, projectModel(document));
 const files = new Map(entries.map(entry => [entry.path, entry]));

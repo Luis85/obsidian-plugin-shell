@@ -56,7 +56,7 @@ const DESIGN_LIMITS = {nodes:60,links:120,history:20,importBytes:900000};
 const designCopy = value => JSON.parse(JSON.stringify(value));
 function createDesign(blueprint='workspace') {
  const b=BLUEPRINTS.find(x=>x.id===blueprint)||BLUEPRINTS[2];
- const d={schema:1,revision:1,blueprint:b.id,goal:'Help people capture, organize and use their notes.',platform:'desktop',nodes:[],links:[],nextId:1,emitted:{},retired:[],history:[],future:[],generatedRevision:0};
+ const d={schema:COMPANION_VERSION,revision:1,blueprint:b.id,goal:'Help people capture, organize and use their notes.',platform:'desktop',nodes:[],links:[],nextId:1,emitted:{},retired:[],history:[],future:[],generatedRevision:0};
  const add=(label,kind,layout='single',placement=b.placement,parent=null)=>{const n={id:'node-'+d.nextId++,slug:label.toLowerCase().replace(/[^a-z0-9]+/g,'-'),label,kind,layout,placement,parent,nav:kind==='page',command:kind==='view',ribbon:false,entry:false,instance:'reuse',patterns:[],goal:'',entity:''};d.nodes.push(n);return n;};
  if(b.id==='blank')return ensureProductModel(d);
  let main;

@@ -165,14 +165,3 @@ npm 11.19.1) while other workloads ran, so times are indicative only:
 ## Optional Airship contracts
 
 `npm run test:airship` uses the `airship` suite for data validation, generator opt-in, source-location metadata, approved launch behavior and ownership preservation. The `Airship generated-project compatibility` workflow adds independent generated-project install/build and live upstream proxy/browser qualification. It does not submit AI-provider prompts. See [Airship integration](../tooling/AIRSHIP.md).
-
-## Native source handoff
-
-`node scripts/testing/suites.mjs native-handoff` explicitly runs the Python 3.12+
-recovery contracts under `docs/concepts/native-file-integration-handoff/tests`.
-This optional, maintainer-only suite is separate from active native runtime tests
-and default consumer setup. It reports not-run when its excluded source is absent.
-The `native-source-handoff` workflow adds historical-baseline reconstruction and
-readback on Linux, Windows and macOS; the generator suite owns the companion Node
-distribution/template-loader regression. See the handoff's `README.md` and
-`REVIEW.md` for commands and exact-source evidence boundaries.

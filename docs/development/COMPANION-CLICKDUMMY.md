@@ -81,7 +81,7 @@ The modern integrated authoring build is produced by:
 node scripts/concepts/build-mvp.mjs
 ```
 
-It writes `reports/companion-mvp/index.html`, the full v6 `companion-project.json` and a build hash receipt. The retained checked-in v5 concept remains a compatibility fixture during this transition; it is not silently relabelled as the new build.
+It writes `reports/companion-mvp/index.html`, the full v6 `companion-project.json` and a build hash receipt. The checked-in v5 concept is only the build base of this build until it is v6-native; it is not silently relabelled as the new build and is not a supported import format.
 
 With the qualified npm explicitly selected and browser tooling provisioned:
 

@@ -5,11 +5,11 @@ import { canonicalJson, validateArtifacts } from '../domain/artifacts.ts';
 import type { CompileRequest, CompilerPorts } from './ports.ts';
 
 export const compilerVersion = '1.0.0';
-const phases: readonly Phase[] = ['parse', 'migrate', 'validate', 'resolve', 'lower', 'emit'];
+const phases: readonly Phase[] = ['parse', 'validate', 'resolve', 'lower', 'emit'];
 /** One pipeline for CLI, editor and agent callers. No filesystem, network, clock or process access. */
 export async function runCompiler<Model>(request: CompileRequest, ports: CompilerPorts<Model>, control: Control = {}): Promise<Compilation<Model>> {
   const output: Compilation<Model> = { protocolVersion: 1, compilerVersion, status: 'ok', outputKind: request.outputKind ?? 'obsidian-plugin',
-    migration: null, diagnostics: [], artifacts: [], fingerprint: null,
+    diagnostics: [], artifacts: [], fingerprint: null,
     readiness: { generation: 'not-run', dependencies: 'not-checked', bundle: 'not-run', typecheck: 'not-run', tests: 'not-run', productAcceptance: 'not-inferred' } };
   let current: Phase = 'parse';
   function checkpoint(): void {
@@ -28,15 +28,14 @@ export async function runCompiler<Model>(request: CompileRequest, ports: Compile
       try { return JSON.parse(request.source) as unknown; }
       catch (error) { throw new CompilerError(diagnostic('COMPILER_JSON_INVALID', 'parse', 'Invalid project JSON.', { file: request.sourceName ?? 'project.json', jsonPointer: '' }), { cause: error }); }
     });
-    // Diagnose independent references against the original input before a legacy validator stops at the first failure.
+    // Diagnose independent references against the original input before the contract validator stops at the first failure.
     output.diagnostics = referenceDiagnostics(raw, request.sourceName ?? 'project.json');
     if (output.diagnostics.some(d => d.severity === 'error')) {
       output.status = 'failed'; output.readiness.generation = 'failed';
       event({ phase: 'resolve', event: 'failed' });
       return output;
     }
-    const migrated = await phase('migrate', () => ports.migrate(raw)); output.migration = migrated.report;
-    const model = await phase('validate', () => ports.validate(migrated.document));
+    const model = await phase('validate', () => ports.validate(raw));
     await phase('resolve', () => ports.resolve(model)); output.model = model;
     if (!request.template) return output;
     const template = request.template;

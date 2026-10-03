@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { emptyStorymaps, validateStorymaps } from '../../scripts/companion/storymap-contract.mjs';
-import { parseCompanionDocument, validateCompanionDocument, COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
+import { parseAuthoringDocument, validateAuthoringDocument, AUTHORING_VERSION } from '../../scripts/companion/authoring-contract.ts';
+import { selfProject } from '../support/starter-documents.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 
-const seed = JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'));
+const seed = selfProject();
 const source = await readFile('docs/concepts/companion/src/storymap-model.js', 'utf8');
 const ctx = vm.createContext({ emptyStorymaps, validateStorymaps });
 vm.runInContext(source + '\n' + await readFile('docs/concepts/companion/src/storymap-export.js', 'utf8'), ctx);
@@ -17,8 +19,8 @@ const plain = value => JSON.parse(JSON.stringify(value));
 test('[STORYMAP-SCHEMA] empty and self-project collections have bounded stable identities', () => {
   assert.equal(validateStorymaps(emptyStorymaps()).maps.length, 0);
   assert.equal(validateStorymaps(fixture()).maps[0].stories.length, 5);
-  assert.equal(seed.schemaVersion, COMPANION_VERSION); assert.equal(seed.design.schema, COMPANION_VERSION);
-  assert.deepEqual(parseCompanionDocument(JSON.stringify(seed)), seed);
+  assert.equal(seed.schemaVersion, AUTHORING_VERSION); assert.equal(seed.design.schema, AUTHORING_VERSION);
+  assert.deepEqual(parseAuthoringDocument(JSON.stringify(seed)), seed);
 });
 for (const [name, mutate] of [
   ['future collection version', s => s.schema = 2],
@@ -106,11 +108,13 @@ test('[STORYMAP-MARKDOWN] authored content is escaped and release order is retai
   assert.ok(out.indexOf('First usable experience') < out.indexOf('Refine and review')); assert.match(out, /Unplanned/);
   assert.equal(out, ctx.smMarkdown(m, d));
 });
-test('[STORYMAP-VERSION] legacy projects remain readable; old-version envelopes cannot conceal storymaps', () => {
-  const legacy = copy(seed); legacy.schemaVersion = 1; legacy.design.schema = 1; delete legacy.design.storymaps; delete legacy.design.visualDesigns;
-  assert.deepEqual(validateCompanionDocument(legacy), legacy);
-  legacy.design.storymaps = fixture(); assert.throws(() => validateCompanionDocument(legacy), /version 2/);
-  const future = copy(seed); future.schemaVersion = 999; assert.throws(() => validateCompanionDocument(future), /Unsupported companion/);
+test('[STORYMAP-VERSION] only schema 6 carries storymaps; retired and future envelopes are refused, never migrated', () => {
+  for (const version of [1, 5]) {
+    const retired = retiredProject(version); retired.design.storymaps = fixture();
+    assert.throws(() => validateAuthoringDocument(retired), /COMPANION_VERSION: .*only schema 6 is supported/, 'schema ' + version);
+  }
+  const future = copy(seed); future.schemaVersion = 999; assert.throws(() => validateAuthoringDocument(future), /COMPANION_VERSION/);
+  const mismatched = copy(seed); mismatched.design.schema = 5; assert.throws(() => validateAuthoringDocument(mismatched), /schema versions must match/);
 });
 test('[STORYMAP-LARGE] 500-story layout remains deterministic without coordinate persistence', () => {
   const s = fixture(), m = s.maps[0], example = copy(m.stories[0]); m.stories = [];

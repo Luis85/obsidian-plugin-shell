@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { status } from '../../bin/adapters/framework/inspection.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -16,7 +17,7 @@ test('doctor is clean right after generation from a differently formatted input,
   // Canonical path: macOS tmpdir() sits under the /var symlink, which the CLI refuses in input paths.
   const vault = await realpath(await mkdtemp(join(tmpdir(), 'doctor-generation-')));
   try {
-    const starter = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
+    const starter = JSON.parse(starterDocumentText('quick-capture'));
     // Four-space indentation and no trailing newline: the generator writes its own normalized design/project.json.
     const raw = JSON.stringify(starter.document ?? starter, null, 4);
     const input = join(vault, 'project.json'); await writeFile(input, raw);

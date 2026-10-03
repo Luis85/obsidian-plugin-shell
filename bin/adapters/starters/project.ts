@@ -4,13 +4,13 @@ import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
-import { customizeStarter } from '../../../scripts/companion/starter-contract.mjs';
+import { customizeStarter } from './customize.ts';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
 import { hash, readJson } from '../framework/files.ts';
 import { derivedPluginId, pluginIdProblem } from '../framework/plugin-id.ts';
 import { storybookFlags } from '../framework/storybook-options.ts';
 import { requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
-import { loadDefinitions, companionCatalog } from './repository.ts';
+import { loadDefinitions } from './repository.ts';
 import { renderFiles, renderProcesses, resolveValues, interpolate } from './render.ts';
 import { record, readProcesses } from './validation.ts';
 import type { InputValue, StarterReceipt, LoadedStarter, StarterDefinition, StarterProcess } from './types.ts';
@@ -63,7 +63,7 @@ async function companionPlan(request: Request, context: Context, place: Placemen
   const customization: Record<string, string> = {};
   for (const key of ['id', 'name', 'author', 'version', 'description', 'codebaseFolder', 'testsFolder', 'extension', 'extensions']) if (values[key] !== undefined) customization[key] = String(values[key]);
   for (const key of ['extension', 'extensions']) if (request.options[key] !== undefined) customization[key] = stringOption(request.options, key)!;
-  const document = withAirshipOption(customizeStarter(companionCatalog([selected]), selected.definition.id, customization), request.options);
+  const document = withAirshipOption(customizeStarter(selected, customization), request.options);
   const scratch = await mkdtemp(join(tmpdir(), 'workbench-starter-'));
   try {
     const input = join(scratch, 'project.json'); await writeFile(input, JSON.stringify(document) + '\n', { flag: 'wx' });

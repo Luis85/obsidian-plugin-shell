@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../bin/adapters/framework/prototype-skill.ts';
 import { shellOperation, npmOperation } from '../../.claude/skills/companion-prototype-design/scripts/lib/framework.mjs';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = path.join(root, prototypeSkillRoot, 'scripts/prototype.mjs');
 function scratch(t) {
@@ -23,9 +24,9 @@ test('actual CLI discovers the shell registry, maker contracts and matching proj
   assert.deepEqual(found.data.profiles.test, ['unit', 'project', 'browser', 'native', 'obsidian']);
   assert.match(found.data.scripts['test:prototypes'], /suites\.mjs prototypes/);
 });
-test('actual project inspector, styles inspector and maker discovery accept the real blank starter', async () => {
-  for (const args of [['project', 'inspect', '--input', 'docs/concepts/companion/starters/blank.companion.json'],
-    ['styles', 'inspect', '--input', 'docs/concepts/companion/starters/blank.companion.json'], ['make', 'describe', 'feature']]) {
+test('actual project inspector, styles inspector and maker discovery accept the real blank starter', async t => {
+  const input = path.join(scratch(t), 'blank.json'); fs.writeFileSync(input, starterDocumentText('blank'));
+  for (const args of [['project', 'inspect', '--input', input], ['styles', 'inspect', '--input', input], ['make', 'describe', 'feature']]) {
     const outcome = await shellOperation(root, args); assert.equal(outcome.status, 'ok', JSON.stringify(outcome.diagnostics));
   }
   const preview = await npmOperation(root, 'check:source');

@@ -19,9 +19,11 @@ const provider = process.argv.includes('--provider-fixture');
 const output = authoring ? join(root,'reports/companion-mvp/generation') : join(root, 'reports/project-generator', ...(boundary ? ['boundaries'] : provider ? ['providers'] : [])); await mkdir(output, { recursive: true });
 // Canonical path: Windows 8.3 temp aliases break test-module resolution in the generated workspace.
 const vault = await realpath(await mkdtemp(join(process.env.COMPANION_QUALIFICATION_ROOT ?? process.env.RUNNER_TEMP ?? tmpdir(), 'companion-qualification-')));
-let input = evidence?.input ?? join(root,'docs/concepts/companion/companion-project.json');
-// The boundary fixture is authored as legacy detail data on the last v4 self-project (retained as a migration fixture).
-if(boundary || provider){const document=boundary?boundaryProject(JSON.parse(await readFile(join(root,'tests/fixtures/companion/detail-v4.json'),'utf8'))):providerProject(JSON.parse(await readFile(input,'utf8')));input=join(vault,'boundary-project.json');await writeFile(input,JSON.stringify(document,null,2));}
+// The current self-project is the golden project v6 starter; qualification writes its document into the isolated vault.
+const selfProject = async () => JSON.parse(await readFile(join(root,'configs/starters/companion-plugin.json'),'utf8')).generator.document;
+let input = evidence?.input;
+if(boundary || provider){const base=await selfProject(),document=boundary?boundaryProject(base):providerProject(base);input=join(vault,'boundary-project.json');await writeFile(input,JSON.stringify(document,null,2));}
+else if(!input){input=join(vault,'companion-project.json');await writeFile(input,JSON.stringify(await selfProject(),null,2)+'\n');}
 const options = { input, vault, target: boundary ? 'boundary-companion' : provider ? 'provider-companion' : 'companion' };
 const result = await planProject(options); await writeFile(join(output, 'plan.json'), JSON.stringify(reviewProject(result), null, 2));
 await applyProject(result, result.hash); const target = join(vault, options.target);

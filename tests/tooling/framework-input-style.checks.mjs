@@ -13,8 +13,9 @@ import { parseCliArguments, validateRequest, descriptor } from '../../bin/adapte
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { exportDesignSystem } from '../../bin/adapters/framework/style-export.ts';
 import { compileDesignSystem } from '../../scripts/companion/design-system-css.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+const seed = selfProject();
 async function fixture(t) {
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'framework-input-style-')));
   t.after(() => rm(folder, { recursive: true, force: true }));

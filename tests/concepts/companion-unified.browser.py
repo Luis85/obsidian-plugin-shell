@@ -143,8 +143,9 @@ with sync_playwright() as pw:
         ok('Loss-of-focus cancellation clears drawing state',j(p,'!flowUi.connecting&&!flowUi.api.connectionStartHandle.value'),'synthetic window-focus lifecycle fixture')
         photo(p,'02-refined-card')
         p.close();p=new();compact(p)
-        # Controlled two-position scene; the actual guideline gesture is driven by mouse.
-        j(p,'''(()=>{const d=design();d.nodes=d.nodes.filter(n=>["node-1","node-2"].includes(n.id));d.links=[];d.nodes.forEach(n=>n.parent=null);const c=canvasState();c.positions={"node-1":{x:80,y:110},"node-2":{x:470,y:200}};c.snap=false;c.custom=true;c.zoom=.75;c.pan={x:100,y:20};c.fitted=true;render()})()''');wait(p)
+        # Controlled two-position scene; the actual guideline gesture is driven by mouse. Two top-level views: a schema 6
+        # design (and so its undo history) never holds a page outside a native view.
+        j(p,'''(()=>{const d=design();d.nodes=d.nodes.filter(n=>["node-1","node-2"].includes(n.id));d.links=[];d.nodes.forEach(n=>{n.parent=null;n.kind='view';});const c=canvasState();c.positions={"node-1":{x:80,y:110},"node-2":{x:470,y:200}};c.snap=false;c.custom=true;c.zoom=.75;c.pan={x:100,y:20};c.fitted=true;render()})()''');wait(p)
         fp=j(p,'designFingerprint(design())');origin=j(p,'canvasState().positions["node-2"]')
         drag(p,'node-2',0,(110-200)*.75,hold=True);wait(p)
         ok('Dragging near a peer displays real alignment guides',p.locator('.alignment-guide').count()>0)

@@ -7,13 +7,13 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { stripTypeScriptTypes } from 'node:module';
 import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { starterDocument } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const template=await loadTemplateSnapshot(root);
-const seed=JSON.parse(await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8'));
+const seed=starterDocument('quick-capture');
 function definition(custom=false){
-  const d=migrateAuthoringDocument(seed).document;
+  const d=structuredClone(seed);
   if(custom)d.settings={codebaseFolder:'application/source',testsFolder:'checks'};
   d.design.editors={schema:1,bindings:[{surface:d.design.nodes.find(n=>n.kind==='page').id,editor:'journey-lens'}]};return d;
 }
@@ -73,7 +73,7 @@ entry.forEach(visit);console.log(JSON.stringify([...seen]));`;
   assert.ok(visited.includes('scripts/companion/journey/project-store.ts'));assert.ok(!visited.some(p=>p.endsWith('journey-vault.ts')));
 });
 test('binding remains opt-in and unsupported code-like bindings fail before emission',async()=>{
-  const plain=await compile(migrateAuthoringDocument(seed).document);assert.equal(plain.files.has('design/journey-lens.json'),false);
+  const plain=await compile(structuredClone(seed));assert.equal(plain.files.has('design/journey-lens.json'),false);
   const invalid=definition();invalid.design.editors.bindings[0].editor='https://example.invalid/editor.js';
   const result=await compileProject({source:JSON.stringify(invalid),template});assert.notEqual(result.status,'ok');
   assert.equal(result.artifacts.length,0);

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { derivedId, derivedName, enclosingVault, invocationDirectory, pluginIdProblem } from '../../bin/adapters/framework/starter-project.ts';
 import { pluginIdWordProblem } from '../../bin/adapters/framework/plugin-id.ts';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-new-project-')));
@@ -60,9 +60,7 @@ test('--yes creates a blank project with the chosen identity and refuses a secon
   assert.equal(manifest.id, 'field-kit'); assert.equal(manifest.name, 'Field Kit'); assert.equal(manifest.author, 'Example Author');
   assert.equal(pkg.name, 'field-kit'); assert.ok(pkg.scripts['verify:project'] && pkg.scripts['test:watch']);
   assert.deepEqual(design.project, { ...design.project, id: 'field-kit', name: 'Field Kit', author: 'Example Author' });
-  const starter = await json(join(root, 'docs/concepts/companion/starters/blank.companion.json'));
-  // Generation reads through the transfer migration, so the recorded design is the starter's current-schema (v5) form.
-  assert.deepEqual(design.design, migrateCompanionDocument(starter).document.design, 'identity only, never label rewrites');
+  assert.deepEqual(design.design, starterDocument('blank').design, 'identity only, never label rewrites');
   assert.match(design.notes.at(-1), /Definition: blank @ 1\.0\.0/);
   assert.equal((await json(join(target, '.companion/generation.json'))).projectId, 'field-kit');
   assert.ok(!existsSync(join(cwd, '.codex-authoring.lock')));

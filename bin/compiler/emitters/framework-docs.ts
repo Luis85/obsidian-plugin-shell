@@ -14,12 +14,11 @@ export function relocatedPath(path: string): string {
 }
 /** The maintainer runner script, the policy test for maintainer CI triggers, the project handoff qualification (it generates
  * projects from the framework's starters) and the standalone design prototypes (their own apps and retained evidence) are not copied. */
-const maintainerFiles: ReadonlySet<string> = new Set(['docs/concepts/companion/companion-project.json', '.github/workflows/starter-distribution.yml',
-  'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/native-file-integration-handoff', '.github/workflows/native-source-handoff.yml',
-  'tests/tooling/project-generator-native-handoff.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
+const maintainerFiles: ReadonlySet<string> = new Set(['.github/workflows/starter-distribution.yml',
+  'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
   'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs']);
-const maintainerPrefixes = ['docs/concepts/companion/seeds/', 'configs/starters/', 'docs/concepts/companion/starters/', '.github/scripts/',
-  'docs/concepts/sitemap-editor/', 'docs/concepts/native-file-integration-handoff/', 'docs/concepts/jev-prompt-editor/', 'scripts/testing/handoff-'];
+const maintainerPrefixes = ['configs/starters/', '.github/scripts/',
+  'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/testing/handoff-'];
 export function maintainerOnly(path: string): boolean {
   return frameworkOnlyPath(path) || maintainerFiles.has(path) || maintainerPrefixes.some(prefix => path.startsWith(prefix));
 }

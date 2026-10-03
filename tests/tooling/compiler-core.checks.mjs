@@ -10,7 +10,7 @@ import { dependencyReadiness } from '../../bin/compiler/adapters/dependencies.ts
 const artifact = (path, content = 'safe') => ({path, content, ownership:'managed', producer:'fixture'});
 const template = Object.freeze({fingerprint:'fixture',frameworkFiles:[],skillFiles:[],text(){throw new Error('unexpected template read');}});
 const hash = value => createHash('sha256').update(value).digest('hex');
-const ports = overrides => ({migrate:value=>({document:value,report:null}),validate:value=>value,resolve:()=>{},lower:()=>[],
+const ports = overrides => ({validate:value=>value,resolve:()=>{},lower:()=>[],
   emit:async()=>[artifact('src/main.ts')],dependencies:()=>({ready:true,diagnostics:[]}),hash,...overrides});
 const request = {source:'{}',template};
 
@@ -18,7 +18,7 @@ test('pure compilation has explicit phases, deterministic output and honest not-
   const events=[];const first=await runCompiler(request,ports(),{onEvent:e=>events.push(e)});
   assert.equal(first.status,'ok');assert.equal(first.readiness.bundle,'not-run');assert.equal(first.readiness.tests,'not-run');
   assert.equal(first.readiness.productAcceptance,'not-inferred');assert.equal(first.readiness.generation,'completed');
-  assert.deepEqual(events.filter(e=>e.event==='completed').map(e=>e.phase),['parse','migrate','validate','resolve','lower','emit']);
+  assert.deepEqual(events.filter(e=>e.event==='completed').map(e=>e.phase),['parse','validate','resolve','lower','emit']);
   assert.deepEqual(first,await runCompiler(request,ports()));assert.equal(request.source,'{}');
 });
 test('analysis does not emit or inspect a template',async()=>{

@@ -38,7 +38,7 @@ function smCommit(change, token = smToken()) {
     const next = smFind(store, old.id);
     if (!next || JSON.stringify({ ...next, status: old.status, revision: old.revision, updatedAt: old.updatedAt }) !== JSON.stringify(old)) throw Error('Restore this archived map before editing it.');
   }
-  validateStorymaps(store); candidate.schema = Math.max(previous.schema, 2); candidate.storymaps = store; candidate.revision++;
+  validateStorymaps(store); candidate.storymaps = store; candidate.revision++;
   candidate.history = [...previous.history, designSnapshot(previous)].slice(-DESIGN_LIMITS.history); candidate.future = [];
   return smPersistDesign(candidate, previous);
 }
@@ -55,7 +55,7 @@ function smTravel(direction) {
   candidate.semantic = snapshot.semantic || emptySemantic(); candidate.dataSources = snapshot.dataSources || emptyDataSources();
   candidate.semantic.nextId = Math.max(previous.semantic?.nextId || 1, candidate.semantic.nextId);
   candidate.dataSources.nextId = Math.max(previous.dataSources?.nextId || 1, candidate.dataSources.nextId);
-  candidate.nextId = Math.max(previous.nextId, candidate.nextId); candidate.schema = Math.max(previous.schema, 2); candidate.revision = previous.revision + 1;
+  candidate.nextId = Math.max(previous.nextId, candidate.nextId); candidate.revision = previous.revision + 1;
   veRestoreVisual(candidate, snapshot, previous);
   smPersistDesign(candidate, previous); render(); notify('Design ' + direction + ' complete. Source files and external artifacts were not deleted.');
 }

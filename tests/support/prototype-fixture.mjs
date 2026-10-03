@@ -1,9 +1,7 @@
-import { readFileSync } from 'node:fs';
 import { prototypeApi as api } from '../../scripts/companion/prototypes/api.ts';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-const seed = JSON.parse(readFileSync(new URL('../../docs/concepts/companion/starters/quick-capture.companion.json',import.meta.url),'utf8'));
+import { starterDocument } from './starter-documents.mjs';
 export function document(label = 'Sitemap A') {
-  const doc = migrateAuthoringDocument(structuredClone(seed)).document;
+  const doc = starterDocument('quick-capture');
   doc.project = { ...doc.project, id:'design-lab', name:'Design Lab', author:'Example Author' };
   doc.design.goal = label;
   doc.design.sitemap = { schema:1, routes:[{id:'route-inbox',surface:'node-2',path:label === 'Sitemap A' ? '/inbox' : '/dashboard'}],journeys:[] };

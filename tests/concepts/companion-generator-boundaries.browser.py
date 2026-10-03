@@ -33,6 +33,16 @@ def history(direction): page.locator(f'.ve-toolbar [data-action="ve-{direction}"
 def insert(entry):
     act('ve-left','insert');act('ve-insert-tab','components');act('ve-insert',entry);return js('veUi.selected')
 
+GOLDEN = ROOT / 'configs/starters/companion-plugin.json'
+
+
+def open_golden():
+    """Review the self-project, the external golden starter's schema 6 document, through the real import dialog."""
+    js('openCompanionImport()')
+    page.locator('#project-import-text').fill(json.dumps(json.loads(GOLDEN.read_text())['generator']['document']))
+    page.locator('#modal [data-action="project-import-review"]').click()
+
+
 with sync_playwright() as pw:
     browser=pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
     page=browser.new_page(viewport={'width':1600,'height':1000});page.set_default_timeout(7000)
@@ -41,8 +51,8 @@ with sync_playwright() as pw:
     page.on('request',lambda r:requests.append(r.url))
     try:
         page.set_content(STORAGE+HTML.read_text())
-        act('project-example');page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
-        initial_schema = json.loads((ROOT / 'docs/concepts/companion/companion-project.json').read_text())['design']['visualDesigns']['schema']
+        open_golden();page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
+        initial_schema = json.loads(GOLDEN.read_text())['generator']['document']['design']['visualDesigns']['schema']
         check('Loading the existing companion preserves its declared visual designs schema',js('veStore().schema')==initial_schema and js("!('detailDesigns' in design())"))
         act('nav','pages','#sidebar');owner=js('design().nodes.find(n=>n.slug==="import-project").id');act('ve-open-page',owner)
         input_id=js('visualNodes(veCurrentPage().root).find(n=>n.ref?.entryId==="u-input").id');select_node(input_id)

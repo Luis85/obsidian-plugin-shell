@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm, realpath } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
@@ -7,12 +7,13 @@ import {
   readPrototypeDocument as relocatedReadDocument,
   readPrototypeBundle as relocatedReadBundle,
 } from '../../bin/adapters/framework/prototype-workspace.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
-const projectText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
+const projectText = starterDocumentText('companion-plugin');
 
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'prototype-workspace-')));

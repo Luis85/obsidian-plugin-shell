@@ -15,7 +15,8 @@ import * as journeyDraft from '../../scripts/companion/sitemap/journey-draft.ts'
 import * as validate from '../../scripts/companion/sitemap/validate.ts';
 import * as safety from '../../scripts/companion/sitemap/safety.ts';
 import { canonicalKey, assertJson } from '../../scripts/companion/sitemap/safety.ts';
-import { validateAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { selfProject } from '../support/starter-documents.mjs';
 const root = new URL('../../', import.meta.url);
 // These are the same maintained runtime files used by the concept, not arbitrary imported project scripts.
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js', root), 'utf8') + ';Vue;');
@@ -30,7 +31,7 @@ vm.runInThisContext('(function(require,exports){' + javascript + '\n})')(name =>
   assert.ok(dependency, 'Unexpected composable dependency: ' + name); return dependency;
 }, exports);
 async function fixture(t) {
-  let document = migrateAuthoringDocument(JSON.parse(readFileSync(new URL('docs/concepts/companion/companion-project.json', root), 'utf8'))).document;
+  let document = selfProject();
   let revision = 1, writes = 0, selected = '';
   const pinia = Pinia.createPinia();
   const host = {
@@ -190,7 +191,7 @@ test('journey authoring selects an explicit branch, edits one saved journey and 
   store.form.journeyName='Renamed journey';await store.applyForm();
   const updated=document().design.sitemap.journeys.find(j=>j.id===id);
   assert.equal(updated.name,'Renamed journey');assert.deepEqual(updated.steps,saved.steps);
-  assert.equal(document().design.sitemap.journeys.length,1);
+  assert.equal(document().design.sitemap.journeys.length,(original.sitemap?.journeys.length??0)+1,'one journey added beside the self-project journeys');
   assert.deepEqual(document().design.nodes,original.nodes);assert.deepEqual(document().design.links,original.links);
   assert.deepEqual(document().design.visualDesigns,original.visualDesigns);
   await store.undo();assert.deepEqual(document().design.sitemap.journeys.find(j=>j.id===id),saved);

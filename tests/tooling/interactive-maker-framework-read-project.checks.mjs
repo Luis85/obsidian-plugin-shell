@@ -3,18 +3,15 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { companionReader, readCompanionInput, readCompanionProject } from '../../bin/adapters/framework/read-project.ts';
+import { readCompanionInput, readCompanionProject } from '../../bin/adapters/framework/read-project.ts';
 
 // Bounded companion-project reads (read-project.ts): contained vault targets, regular files only, 4 MB, UTF-8, no writes.
 const windows = process.platform === 'win32';
 const linkType = windows ? 'junction' : 'dir';
-/** A recording reader keeps the checks independent of the full companion contract. */
+/** A recording parser keeps the checks independent of the full companion contract. */
 function recordingReader(settings = { codebaseFolder: 'src', testsFolder: 'tests' }) {
   const calls = [];
-  return { calls, reader: {
-    parse: text => { calls.push(['parse', text]); return { parsed: text }; },
-    migrate: value => { calls.push(['migrate', value]); return { document: { settings }, report: { migrated: true } }; },
-  } };
+  return { calls, reader: text => { calls.push(['parse', text]); return { settings }; } };
 }
 async function workspace(run) {
   const base = await realpath(await mkdtemp(join(tmpdir(), 'read-project-')));
@@ -26,20 +23,24 @@ async function workspace(run) {
   } finally { await rm(base, { recursive: true, force: true }); }
 }
 
-test('a project read returns the exact bytes, the migrated document and the contained target', () => workspace(async ({ vault, input }) => {
+test('a project read returns the exact bytes, the parsed document and the contained target', () => workspace(async ({ vault, input }) => {
   const { calls, reader } = recordingReader();
   const read = await readCompanionProject({ input, target: 'plugin', vault }, reader);
   assert.deepEqual(read, { content: Buffer.from('{"x":1}'), document: { settings: { codebaseFolder: 'src', testsFolder: 'tests' } },
-    migration: { migrated: true }, vault, target: join(vault, 'plugin') });
-  assert.deepEqual(calls, [['parse', '{"x":1}'], ['migrate', { parsed: '{"x":1}' }]]);
+    vault, target: join(vault, 'plugin') });
+  assert.deepEqual(calls, [['parse', '{"x":1}']]);
   const root = await readCompanionProject({ input, target: '.', vault }, recordingReader({ codebaseFolder: 'plugin/src', testsFolder: 'later/tests' }).reader);
   assert.equal(root.target, vault);
 }));
 
-test('the default reader parses the full companion contract and refuses invalid JSON', () => workspace(async ({ vault, input }) => {
-  await assert.rejects(readCompanionProject({ input, target: 'plugin', vault }, companionReader), { message: /^COMPANION_INVALID: / });
+test('the default reader parses the full schema 6 contract, refuses invalid JSON and never migrates earlier schemas', () => workspace(async ({ vault, input }) => {
+  await assert.rejects(readCompanionProject({ input, target: 'plugin', vault }), { message: /^COMPANION_INVALID: / });
   await writeFile(input, 'not json');
-  await assert.rejects(readCompanionProject({ input, target: 'plugin', vault }, companionReader), { message: 'COMPANION_INVALID: Expected valid UTF-8 JSON.' });
+  await assert.rejects(readCompanionProject({ input, target: 'plugin', vault }), { message: 'COMPANION_INVALID: Expected valid JSON.' });
+  for (const schemaVersion of [1, 5]) {
+    await writeFile(input, JSON.stringify({ kind: 'obsidian-companion-project', schemaVersion }));
+    await assert.rejects(readCompanionProject({ input, target: 'plugin', vault }), { message: new RegExp(`^COMPANION_VERSION: Unsupported project schemaVersion ${schemaVersion}; only schema 6 is supported`) });
+  }
 }));
 
 test('requests need an input file and a portable target inside an existing vault directory', () => workspace(async ({ base, vault, input }) => {

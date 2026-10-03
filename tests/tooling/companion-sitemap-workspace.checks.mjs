@@ -6,11 +6,12 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import * as storage from '../../scripts/companion/journey/project-store.ts';
 import { SitemapSession } from '../../scripts/companion/sitemap/session.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = new URL('../../', import.meta.url);
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js',root),'utf8')+';Vue;');
 const source=readFileSync(new URL('docs/concepts/companion/editor/workspace/use-workspace.ts',root),'utf8');
 const domSource=readFileSync(new URL('docs/concepts/companion/editor/dom.ts',root),'utf8');
-const seed=readFileSync(new URL('docs/concepts/companion/starters/quick-capture.companion.json',root),'utf8');
+const seed=starterDocumentText('quick-capture');
 async function load(env,urlApi){
   const dependencies={vue:Vue,'./contracts.ts':{useWorkspaceEnvironment:()=>env},'project-store.ts':storage};
   const compile=(code,exports)=>{

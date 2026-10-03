@@ -16,11 +16,11 @@ function parsed(bytes: Buffer, path: string): unknown {
   try { return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); }
   catch { throw new OperationError('PROJECT_JSON_MALFORMED', `${path} is not valid UTF-8 JSON.`, reexport); }
 }
-/** A newer export gets its own code: it is not corrupt, this framework is older. */
+/** Another schema gets its own code: a newer export needs a newer framework, and earlier formats are not migrated. */
 function versionProblem(value: unknown): number | null {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return null;
   const { kind, schemaVersion } = value as { kind?: unknown; schemaVersion?: unknown };
-  return kind === COMPANION_FORMAT && typeof schemaVersion === 'number' && schemaVersion > COMPANION_VERSION ? schemaVersion : null;
+  return kind === COMPANION_FORMAT && typeof schemaVersion === 'number' && schemaVersion !== COMPANION_VERSION ? schemaVersion : null;
 }
 export async function exportedProject(request: Request, context: Context, idProblem: (id: string) => string | null): Promise<ExportedProject> {
   const from = stringOption(request.options, 'from');
@@ -33,8 +33,9 @@ export async function exportedProject(request: Request, context: Context, idProb
     if (error instanceof OperationError && error.code === 'INPUT_LIMIT') throw new OperationError('INPUT_LIMIT', `${path} must be a regular file of at most 4 MB (the companion export limit).`);
     throw error;
   }
-  const value = parsed(bytes, path), future = versionProblem(value);
-  if (future !== null) throw new OperationError('PROJECT_VERSION_UNSUPPORTED', `${path} uses companion project schema ${future}; this framework reads schema ${COMPANION_VERSION} and earlier.`, 'Upgrade the framework, or export from a companion that matches this framework version.');
+  const value = parsed(bytes, path), other = versionProblem(value);
+  if (other !== null && other > COMPANION_VERSION) throw new OperationError('PROJECT_VERSION_UNSUPPORTED', `${path} uses companion project schema ${other}; this framework reads only schema ${COMPANION_VERSION}.`, 'Upgrade the framework, or export from a companion that matches this framework version.');
+  if (other !== null) throw new OperationError('PROJECT_VERSION_UNSUPPORTED', `${path} uses the retired companion project schema ${other}; this framework reads only schema ${COMPANION_VERSION} and never migrates earlier formats.`, 'Export the project again from a current Companion.');
   let document: CompanionDocument;
   try { document = validateCompanionDocument(value); }
   catch (error) { throw new OperationError('PROJECT_INVALID', `${path} is not a complete companion project export: ${contractMessage(error)}`, reexport); }

@@ -307,7 +307,7 @@ const optionOverrides: OptionOverride[] = [
   [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility.')],
   [option('ci', 'execute'), describe('Run the job\'s run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed.')],
   [option('setup resume', 'stage'), doc => { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }],
-  [option('project schema', 'version'), doc => { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }],
+  [option('project schema', 'version'), doc => { doc.description = 'Published project schema version; only the current schema 6 exists.'; doc.values = ['6']; doc.default = '6'; }],
   [option('release prepare', 'version'), describe('Release version x.y.z.')],
   [option('make', 'format'), doc => { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }],
   [option('docs export', 'out'), doc => { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }],

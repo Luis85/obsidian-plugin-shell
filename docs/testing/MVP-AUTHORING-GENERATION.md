@@ -1,5 +1,7 @@
 # MVP execution: integrated authoring to generated clickdummy
 
+> Historical record. Since this record, the project format is schema 6 only: the eleven v5 starters were converted to v6, earlier formats are rejected rather than migrated, and the checked-in v5 artifact is only the build base of the authoring build. Rows below keep their original scope.
+
 Date: 2026-09-27. PR #28 remains a draft stacked on PR #5. This record extends the historical [sitemap-core record](MVP-SITEMAP-CORE.md); it does not replace earlier evidence or claim completion of the whole [MVP plan](../prds/MVP-IMPLEMENTATION-PLAN.md).
 
 ## Implemented path

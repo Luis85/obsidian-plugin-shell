@@ -8,8 +8,9 @@ import { createHash } from 'node:crypto';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { starterDocument } from '../support/starter-documents.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
-const template = JSON.parse(await readFile(join(frameworkRoot,'docs/concepts/companion/starters/blank.companion.json'),'utf8'));
+const template = starterDocument('blank');
 const hash = value => createHash('sha256').update(value).digest('hex');
 const run = (context, args) => executeOperation(parseCliArguments(args), context);
 async function workspace(t, setup = true) {

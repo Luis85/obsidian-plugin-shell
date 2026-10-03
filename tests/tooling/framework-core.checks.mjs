@@ -22,10 +22,12 @@ import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
 import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
 import { capabilityCatalog, catalogDigest } from '../../bin/adapters/operations/catalog.ts';
 import * as typedJsonData from '../../scripts/contracts/json-data.ts';
+import { selfProject } from '../support/starter-documents.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
-// The last v4 self-project, retained as a migration input.
-const legacy = JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8'));
+const seed = selfProject();
+// A synthetic retired v4 project, used only as a rejected input.
+const legacy = retiredProject(4);
 const identity = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
 async function fixture(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-cli-')));
@@ -83,7 +85,7 @@ test('configured/imported differences require a deliberate resolution policy', a
   const imported = await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes']);
   assert.equal(imported.status, 'applied', JSON.stringify(imported));
   const saved = JSON.parse(await readFile(join(ctx.root, 'design/project.json'), 'utf8'));
-  assert.equal(saved.project.id, identity.id); assert.equal(saved.schemaVersion, 5);
+  assert.equal(saved.project.id, identity.id); assert.equal(saved.schemaVersion, 6);
   assert.equal('detailDesigns' in saved.design, false); assert.ok(saved.design.visualDesigns);
   assert.equal((await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes'])).status, 'unchanged');
 });
@@ -92,14 +94,20 @@ test('import preserves foreign and manually edited design snapshots', async t =>
   const result = await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes']);
   assert.equal(result.diagnostics[0].code, 'IMPORT_OWNERSHIP'); assert.equal(await readFile(join(ctx.root, 'design/project.json'), 'utf8'), 'foreign');
 });
-test('file and stdin inspection accept full v4 while rejecting executable/future envelopes', async t => {
+test('file and stdin inspection read the same v6 project while rejecting executable envelopes', async t => {
+  const ctx = await fixture(t); await writeFile(join(ctx.root, 'project.json'), JSON.stringify(seed));
+  const inspected = await run(ctx, ['project', 'inspect', '--input', 'project.json']); assert.equal(inspected.status, 'ok'); assert.equal(inspected.data.screens, 28);
+  assert.equal(inspected.data.schemaVersion, 6);
+  const stdin = await run({ ...ctx, inputText: JSON.stringify(seed) }, ['project', 'inspect', '--input', '-']); assert.deepEqual(stdin.data, inspected.data);
+  const bad = { ...seed, executable: true }; const result = await run({ ...ctx, inputText: JSON.stringify(bad) }, ['project', 'inspect', '--input', '-']); assert.equal(result.status, 'failed');
+});
+test('file and stdin inspection reject a retired v4 project with its version diagnostic', async t => {
   const ctx = await fixture(t); await writeFile(join(ctx.root, 'project.json'), JSON.stringify(legacy));
   assert.equal(legacy.schemaVersion, 4);
-  const inspected = await run(ctx, ['project', 'inspect', '--input', 'project.json']); assert.equal(inspected.status, 'ok'); assert.equal(inspected.data.screens, 28);
-  assert.equal(inspected.data.schemaVersion, 5, 'file-based inspection migrates a v4 input to v5');
-  const stdin = await run({ ...ctx, inputText: JSON.stringify(legacy) }, ['project', 'inspect', '--input', '-']); assert.deepEqual(stdin.data, inspected.data);
-  assert.equal(stdin.data.schemaVersion, 5, 'stdin inspection migrates a v4 input to v5, matching the file branch');
-  const bad = { ...legacy, executable: true }; const result = await run({ ...ctx, inputText: JSON.stringify(bad) }, ['project', 'inspect', '--input', '-']); assert.equal(result.status, 'failed');
+  for (const result of [await run(ctx, ['project', 'inspect', '--input', 'project.json']), await run({ ...ctx, inputText: JSON.stringify(legacy) }, ['project', 'inspect', '--input', '-'])]) {
+    assert.equal(result.status, 'failed'); assert.equal(result.diagnostics[0].code, 'COMPANION_VERSION');
+    assert.match(result.diagnostics[0].message, /schemaVersion 4; only schema 6 is supported/);
+  }
 });
 test('unsafe and overlapping folders fail before writing', () => {
   for (const source of ['../src', '/tmp/src', 'scripts', 'design', 'docs', 'Docs/site', 'node_modules/x', 'tests/nested']) {

@@ -37,10 +37,6 @@
       "optional": true
     },
     {
-      "path": "docs/concepts/native-file-integration-handoff/tests",
-      "optional": true
-    },
-    {
       "path": "plugins"
     }
   ],
@@ -56,14 +52,6 @@
     "showcase-current-build": {
       "file": "reports/feature-showcase/clickdummy.html",
       "hint": "Generate the feature-showcase starter outside this checkout, install/build it, and copy its clickdummy.html here; see COMPANION-STARTERS.md."
-    },
-    "handoff-python": {
-      "probe": [
-        "{python}",
-        "-c",
-        "import sys; assert sys.version_info >= (3, 12)"
-      ],
-      "hint": "Use Python 3.12+ or set PYTHON; native-handoff is an explicit maintainer-only suite."
     },
     "python3": {
       "probe": [
@@ -175,36 +163,6 @@
       "workflows": [
         "ci",
         "interactive-maker"
-      ]
-    },
-    {
-      "name": "native-handoff",
-      "purpose": "Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics.",
-      "runner": {
-        "type": "command",
-        "commands": [
-          [
-            "{python}",
-            "-B",
-            "-m",
-            "unittest",
-            "discover",
-            "-s",
-            "docs/concepts/native-file-integration-handoff/tests",
-            "-v"
-          ]
-        ]
-      },
-      "include": [
-        "docs/concepts/native-file-integration-handoff/tests/test_*.py"
-      ],
-      "prerequisites": [
-        "handoff-python"
-      ],
-      "optional": true,
-      "verify": "opt-in",
-      "workflows": [
-        "native-source-handoff"
       ]
     },
     {
@@ -416,7 +374,7 @@
     },
     {
       "name": "visual",
-      "purpose": "Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, migration, session and generated model tests.",
+      "purpose": "Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, session and generated model tests.",
       "runner": {
         "type": "node-test"
       },
@@ -432,7 +390,7 @@
     },
     {
       "name": "companion",
-      "purpose": "Companion concept contracts: project JSON, storymaps, legacy detail and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
+      "purpose": "Companion concept contracts: schema 6 project JSON, storymaps and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
       "runner": {
         "type": "node-test"
       },
@@ -951,12 +909,6 @@
     "tooling": "Every suite that verify runs in its serialized node --test tooling step."
   },
   "helpers": [
-    {
-      "purpose": "Native handoff isolated source and Git test fixtures",
-      "include": [
-        "docs/concepts/native-file-integration-handoff/tests/fixtures.py"
-      ]
-    },
     {
       "purpose": "Synthetic vault copied for each real-Obsidian case",
       "include": [

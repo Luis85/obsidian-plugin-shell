@@ -3717,7 +3717,7 @@
         {
           "name": "version",
           "kind": "value",
-          "description": "Published project schema version. Legacy documents use project validate.",
+          "description": "Published project schema version; only the current schema 6 exists.",
           "values": [
             "6"
           ],
@@ -3755,7 +3755,7 @@
     },
     {
       "id": "project validate",
-      "summary": "Validate/migrate complete project JSON without generation or writes; no authored content in reports.",
+      "summary": "Validate complete project v6 JSON without generation or writes; no authored content in reports.",
       "effect": "read",
       "maxArgs": 0,
       "group": "start",

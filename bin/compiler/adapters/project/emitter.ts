@@ -100,7 +100,7 @@ function targetFiles(files: Record<string, string>, selected: ProjectSelection, 
     else files[`src/targets/${target}/main.ts`] = browserSource(selected, id, target);
   }
 }
-/** Pure target adapter downstream of the shared parser, migration, model and reference validation. */
+/** Pure target adapter downstream of the shared parser, model and reference validation. */
 export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection, adapterOverride?: FrameworkAdapter): Artifact[] {
   const selected = validateProjectSelection(input);
   const adapter = adapterOverride ?? requireFrameworkAdapter(selected.framework);

@@ -36,7 +36,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_references_distinguish_data_source_and_execution(self):
         text = (ROOT/'references/repository-contract.md').read_text(encoding='utf-8')
-        for phrase in ['schemaVersion: 5', 'Data-compatible', 'Generator-compatible',
+        for phrase in ['schemaVersion: 6', 'Data-compatible', 'Generator-compatible',
                        'Experience-compatible', 'not a generator', 'does not append/merge',
                        'framework-free', 'Preflight']:
             with self.subTest(phrase=phrase): self.assertIn(phrase, text)

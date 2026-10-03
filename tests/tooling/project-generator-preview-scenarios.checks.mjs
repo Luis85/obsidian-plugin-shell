@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -8,7 +8,8 @@ import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { visualSpecs } from '../../bin/compiler/emitters/visual-model.ts';
 import { clickdummyCode } from '../../bin/compiler/emitters/clickdummy-code.ts';
 import { clickdummyScenariosCode } from '../../bin/compiler/emitters/clickdummy-scenarios-code.ts';
-const document = JSON.parse(await readFile(new URL('../../docs/concepts/companion/starters/quick-capture.companion.json', import.meta.url), 'utf8'));
+import { starterDocument } from '../support/starter-documents.mjs';
+const document = starterDocument('quick-capture');
 const model = projectModel(document);
 function emit(m = model) { let source; clickdummyScenariosCode(m, (path, content) => { assert.equal(path, 'harness/prototype/clickdummy-scenarios.ts'); source = content; }); return source; }
 async function load(t, source = emit()) {
@@ -41,7 +42,7 @@ test('returned scenario metadata is detached and cannot poison later previews', 
   assert.deepEqual(scenariosForSurface('node-2'), original);
 });
 test('empty starters have no invented sample scenarios and require no runtime dependencies', async t => {
-  const blank = projectModel(JSON.parse(await readFile(new URL('../../docs/concepts/companion/starters/blank.companion.json', import.meta.url), 'utf8')));
+  const blank = projectModel(starterDocument('blank'));
   const source = emit(blank), api = await load(t, source);
   assert.deepEqual(api.scenariosForSurface('any'), []); assert.equal(api.resolveScenario('any', ''), null);
   assert.doesNotMatch(source, /\bimport\b|\bfetch\s*\(/);

@@ -1,16 +1,20 @@
-"""Actual starter selection/export controls and isolated canonical safety fixtures."""
+"""Actual external-starter selection/export controls and isolated canonical safety fixtures."""
 import hashlib
 import json
 import os
 import subprocess
 import tempfile
+import time
 import traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[2]
 HTML=ROOT/'docs/concepts/companion/index.html'
 OUT=ROOT/'reports/concepts/project-starters';OUT.mkdir(parents=True,exist_ok=True)
-STORAGE="""<script>window.__saved={};Object.defineProperty(window,'localStorage',{value:{getItem:k=>__saved[k]??null,setItem:(k,v)=>{__saved[k]=v},removeItem:k=>delete __saved[k]}});</script>"""
+# Explicit host-boundary substitutions: in-memory Storage, and SHA-256 through Node because an inline page is not a secure context.
+STORAGE="""<script>window.__saved={};Object.defineProperty(window,'localStorage',{value:{getItem:k=>__saved[k]??null,setItem:(k,v)=>{__saved[k]=v},removeItem:k=>delete __saved[k]}});Object.defineProperty(window.crypto,'subtle',{value:{digest:async(name,bytes)=>new Uint8Array(await window.testDigest(new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes))).buffer}});</script>"""
+# The twelve focused example starters are external JSON definitions; the workspace embeds none.
+EXAMPLES=['agent-ready','blank','command-utility','context-menu','custom-file-view','daily-journal','import-integration','knowledge-collection','note-inspector','quick-capture','tasks-projects','vault-dashboard']
 checks,errors,requests,fatal=[],[],[],None
 
 def check(name,value,scope='Actual controls and canonical state readback'):
@@ -22,25 +26,27 @@ def js(code,arg=None):return page.evaluate(code,arg)
 def act(action,value=None,scope='#content'):
     suffix='' if value is None else '[data-value='+json.dumps(value)+']'
     page.locator(f'{scope} [data-action="{action}"]{suffix}').first.click()
+def settle():
+    for _ in range(200):
+        if not js('starterWorkspaceUi.loading'):return
+        time.sleep(0.05)
+    raise AssertionError('Starter definitions did not finish loading')
+def load_examples():
+    page.locator('#starter-definition-files').set_input_files([str(ROOT/'configs/starters'/(identifier+'.json')) for identifier in EXAMPLES]);settle()
 def reset():
     page.goto('about:blank')
-    page.set_content(STORAGE+HTML.read_text());act('nav','starters','#sidebar')
+    page.set_content(STORAGE+HTML.read_text());act('nav','starters','#sidebar');load_examples()
 def configure(identifier):act('starter-open',identifier)
 def review():act('starter-review',scope='#modal')
-def apply():page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
+def apply():
+    page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
+    # A confirmed starter opens the untrusted setup review; close it to keep designing.
+    if js('modalType==="wizard"'):act('close',scope='#modal')
 def handoff_checks():
-    modal=page.locator('#modal');text=modal.inner_text();commands=js('handoffCommands().map(([,c])=>c)')
-    check('Handoff lists the current journey with the project id',commands==['node bin/app new ../capture-tools --from capture-tools.companion.json','cd ../capture-tools','npm ci','npm run check','npm run dev:obsidian'] and all(c in text for c in commands) and 'companion:scaffold' not in text)
-    check('Every command has its own labelled copy button',all(modal.locator('.handoff-commands [data-action="copy"][data-value='+json.dumps(c)+']').get_attribute('aria-label')=='Copy: '+c for c in commands))
-    check('Generated-project scripts and the download are disclosed','scripts of the generated project' in text and 'dist/main.js' in text and modal.locator('.dialog-footer [data-action="project-backup"]').inner_text().strip()=='Download project JSON')
-    prompt=page.locator('#handoff-agent-prompt');ids=js('allRequirements(project().design).map(r=>r.id)');value=prompt.input_value()
-    check('Agent prompt is labelled, read-only and names the plugin and every requirement',page.locator('label[for="handoff-agent-prompt"]').inner_text()=='Agent prompt' and prompt.get_attribute('readonly') is not None and len(ids)>0 and all(i in value for i in ids) and all(t in value for t in ['capture-tools','Capture Tools','AGENTS.md','design/traceability.json','npm run test:tdd','npm run check','--from capture-tools.companion.json']))
-    check('Agent prompt stays short and curated',len(value.splitlines())<=12 and len(value)<=1400)
-    check('Dialog opens with focus on the primary download',js('document.activeElement.dataset.action')=='project-backup')
-    js('window.__copied=[];Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:async t=>{window.__copied.push(t)}}});void 0')
-    modal.get_by_role('button',name='Copy agent prompt').click();modal.get_by_role('button',name='Copy all commands').click();modal.get_by_role('button',name='Copy: npm run check',exact=True).click()
-    page.wait_for_function('window.__copied.length===3')
-    check('Copy buttons copy exact text and execute nothing',js('window.__copied')==[value,'\n'.join(commands),'npm run check'] and js('state.runs.length')==0 and modal.locator('#handoff-agent-prompt').count()==1)
+    modal=page.locator('#modal');text=modal.inner_text();command=modal.locator('.command code').inner_text()
+    check('Generation shows the starter command with the project id and reviewed recipe',command=='node bin/app new ../capture-tools --starter quick-capture' and 'companion:scaffold' not in text)
+    check('Execution stays a separate reviewed shell step','This browser does not run processes' in text and '--yes' in text and 'starters run' in text and js('state.runs.length')==0)
+    check('Starter and project exports are both offered',modal.locator('.dialog-footer [data-action="starter-export"]').count()==1 and modal.locator('.dialog-footer [data-action="project-export"]').count()==1)
     page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(OUT/'05-handoff-narrow.png'))
     check('Handoff has no horizontal overflow at phone width',js('(()=>{const d=document.getElementById("modal");return d.scrollWidth<=d.clientWidth+1&&[...d.querySelectorAll(".command")].every(e=>e.getBoundingClientRect().right<=d.getBoundingClientRect().right+1)})()'))
     page.set_viewport_size({'width':1440,'height':1000})
@@ -49,53 +55,60 @@ with sync_playwright() as pw:
     browser=pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
     page=browser.new_page(viewport={'width':1440,'height':1000},accept_downloads=True);page.set_default_timeout(8000)
     page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append(r.url))
+    page.expose_function('testDigest',lambda text:list(hashlib.sha256(text.encode('utf-8')).digest()))
     try:
         page.set_content(STORAGE+HTML.read_text())
         check('Welcome exposes a starter entry without creating a project',page.locator('#content [data-action="nav"][data-value="starters"]').count()==1 and js('project()===null'))
         act('nav','starters','#sidebar')
-        check('Gallery shows eleven built-in project starters',page.locator('.starter-card').count()==11)
-        check('Starters with development tooling are not offered by the retained v5 concept',js('starterCatalog.starters.length===12 && starterOffered().length===11 && !starterOffered().some(s=>s.document.tooling!==undefined)') and page.locator('[data-action="starter-open"][data-value="agent-ready"]').count()==0)
+        check('The workspace starts with no embedded starter definitions',page.locator('.starter-card').count()==0 and js('starterCatalog.starters.length===0') and 'No starter definitions loaded' in page.locator('#content').inner_text())
+        load_examples()
+        check('Gallery shows the twelve selected example starter definitions',page.locator('.starter-card').count()==12 and not js('starterWorkspaceUi.error'))
+        check('A starter with development tooling is offered and keeps its tooling',page.locator('[data-action="starter-open"][data-value="agent-ready"]').count()==1 and js('starterEntry("agent-ready").document.tooling.airship.enabled===true && starterEntry("agent-ready").document.tooling.hindsight.enabled===true'))
         check('Browsing does not initialize the project',js('project()===null'))
-        check('Gallery calls out the runnable shell and remaining work','not a finished plugin' in page.locator('#content').inner_text())
+        check('Gallery calls out external definitions and a separate shell','External, editable JSON definitions' in page.locator('#content').inner_text())
         page.screenshot(path=str(OUT/'01-gallery-dark.png'))
         page.locator('#starter-search').fill('research')
         check('Search finds a use case by tags',page.locator('.starter-card').count()==1 and 'Knowledge Collection' in page.locator('.starter-card').inner_text())
         check('Search retains the focused field',page.locator('#starter-search').evaluate('(e)=>e===document.activeElement'))
         page.locator('#starter-search').fill('does-not-exist')
-        check('No-results state retains Start Blank',page.locator('.starter-empty [data-action="starter-open"][data-value="blank"]').count()==1)
+        check('No-results state offers clearing filters and a blank project',page.locator('.starter-empty [data-action="starter-clear"]').count()==1 and page.locator('.starter-empty [data-action="starter-blank"]').count()==1)
         act('starter-clear');page.locator('#starter-category').select_option('Capture')
         check('Category filter yields capture and journal starters',page.locator('.starter-card').count()==2)
         page.locator('#starter-category').select_option('all');configure('quick-capture')
-        check('Configuration previews scope without project mutation',js('project()===null') and 'Still yours to implement' in page.locator('#modal').inner_text())
-        page.locator('#f-starter-name').fill('Abandoned draft');act('close',scope='#modal')
+        check('Configuration previews scope without project mutation',js('project()===null') and 'Remaining development and qualification' in page.locator('#modal').inner_text())
+        page.locator('#starter-name').fill('Abandoned draft');act('close',scope='#modal')
         check('Dirty starter form requires explicit discard',page.locator('#discard-dialog').is_visible())
         page.locator('#discard-confirm').click();check('Discard preserves empty workspace',js('project()===null'))
-        configure('quick-capture');page.locator('#f-starter-id').fill('../unsafe');review()
+        configure('quick-capture');page.locator('#starter-id').fill('../unsafe');review()
         check('Invalid identity is rejected without mutation',js('project()===null') and len(page.locator('#starter-error').inner_text())>0)
-        page.locator('#f-starter-id').fill('capture-tools');page.locator('#f-starter-name').fill('Capture Tools');review()
+        page.locator('#starter-id').fill('capture-tools');page.locator('#starter-name').fill('Capture Tools');review()
         check('Reviewed copy retains configured identity and original internal labels',js('projectTransferUi.candidate.id==="capture-tools" && projectTransferUi.candidate.name==="Capture Tools" && projectTransferUi.candidate.design.nodes.some(n=>n.label==="Capture an idea")'))
         check('Starter provenance is disclosed in review',page.locator('#starter-review-context').count()==1)
         act('starter-back',scope='#modal')
-        check('Back preserves configured identity',page.locator('#f-starter-id').input_value()=='capture-tools')
-        page.locator('.starter-folders summary').click();page.locator('#f-starter-codebaseFolder').fill('plugin/src');page.locator('#f-starter-testsFolder').fill('plugin/tests');review()
+        check('Back preserves configured identity',page.locator('#starter-id').input_value()=='capture-tools')
+        page.locator('#starter-codebaseFolder').fill('plugin/src');page.locator('#starter-testsFolder').fill('plugin/tests');review()
         check('Custom folders survive configuration and review',js('projectTransferUi.candidate.folders.codebaseFolder==="plugin/src" && projectTransferUi.candidate.folders.testsFolder==="plugin/tests"'))
         act('project-import-apply',scope='#modal')
         check('Explicit confirmation is mandatory',js('project()===null') and 'confirm' in page.locator('#project-transfer-error').inner_text())
-        page.screenshot(path=str(OUT/'02-starter-review.png'));apply()
+        page.screenshot(path=str(OUT/'02-starter-review.png'));page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
+        check('Confirmation opens the untrusted setup review',js('modalType==="wizard" && !state.wizard.trusted'));act('close',scope='#modal')
         check('Confirmation installs exactly one planning project',js('project().id==="capture-tools" && !project().trusted && !project().enabled && project().phase==="planning" && validState(state)'))
         check('Starter provenance survives normal export',js('JSON.parse(companionJson()).notes.some(n=>n.includes("quick-capture @ 1.0.0"))'))
         original=js('companionProjectToken()');act('starter-generate');handoff_checks()
-        with page.expect_download() as event:act('project-backup',scope='#modal')
+        act('starter-export',scope='#modal');starter=json.loads(js('modalData.text'))
+        check('Starter export carries the edited project, identity defaults and the unapproved recipe',starter['id']=='quick-capture' and starter['generator']['document']==json.loads(js('companionJson()')) and next(i for i in starter['inputs'] if i['id']=='id')['default']=='capture-tools' and starter['generator']['document']['executable'] is False)
+        act('close',scope='#modal');act('starter-generate');act('project-export',scope='#modal')
+        with page.expect_download() as event:act('download-text',scope='#modal')
         download=event.value;download.save_as(str(OUT/'configured-project.json'));exported=(OUT/'configured-project.json').read_text()
-        check('Actual handoff download is the complete configured project',json.loads(exported)==json.loads(js('companionJson()')) and download.suggested_filename=='capture-tools.companion.json')
-        probe=subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',"import {projectModel} from './bin/compiler/emitters/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=20)
+        check('Actual project download is the complete configured schema 6 project',json.loads(exported)==json.loads(js('companionJson()')) and json.loads(exported)['schemaVersion']==6 and download.suggested_filename=='capture-tools.companion.json')
+        model="import {projectModel} from './bin/compiler/emitters/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"
+        probe=subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',model],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=20)
         check('Actual browser download is consumed by the real compiler',probe.returncode==0 and json.loads(probe.stdout)=={'id':'capture-tools','source':'plugin/src/generated','tests':'plugin/tests/project'},'Actual Node compiler subprocess on downloaded bytes')
         with tempfile.TemporaryDirectory(prefix='companion-handoff-') as scratch:
-            work=Path(scratch)/'framework-checkout';work.mkdir();(work/download.suggested_filename).write_text(exported)
-            shown=page.locator('#modal .handoff-commands code').first.inner_text().split()
-            run=subprocess.run(['node',str(ROOT/'bin/app'),*shown[2:],'--json'],text=True,capture_output=True,cwd=work,timeout=120)
+            work=Path(scratch)/'framework-checkout';(work/'configs/starters').mkdir(parents=True);(work/'configs/starters/quick-capture.json').write_text(json.dumps(starter,indent=2)+'\n')
+            run=subprocess.run(['node',str(ROOT/'bin/app'),'new','../capture-tools','--starter','quick-capture','--json'],text=True,capture_output=True,cwd=work,timeout=120)
             result=json.loads(run.stdout) if run.returncode==0 else {}
-            check('Displayed new --from command plans the actual download without writing',shown[:3]==['node','bin/app','new'] and result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the downloaded bytes; preview only')
+            check('The displayed starter command plans the exported starter without writing',result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the exported starter: '+run.stderr[-400:])
         act('close',scope='#modal');act('nav','starters','#sidebar');configure('blank');review();act('close',scope='#modal')
         check('Cancelled replacement preserves the full current project and files',js('companionProjectToken()')==original)
         # Controlled states are safety negative proofs, not real native operations.
@@ -110,16 +123,16 @@ with sync_playwright() as pw:
         configure('blank');review();apply()
         check('Start Blank has no example domain, recipes, PRDs or page and component designs',js('project().design.semantic.entities.length===0 && project().design.dataSources.sources.length===0 && project().design.prds.length===0 && project().design.library.length===0 && veStore(project().design).pages.length===0 && veStore(project().design).components.length===0'))
         check('Confirmed replacement retains unrelated host files',js('state.vaultFiles["unrelated.md"]==="changed after review"'))
-        # Every built-in goes through real configuration/review/confirm, not just JSON parsing.
-        for identifier in js('starterOffered().map(s=>s.id)'):
+        # Every loaded example goes through real configuration/review/confirm, not just JSON parsing.
+        for identifier in js('starterCatalog.starters.map(s=>s.id)'):
             act('nav','starters','#sidebar');before=js('JSON.stringify(starterCatalog)');configure(identifier)
-            if identifier=='custom-file-view':page.locator('#f-starter-extension').fill('board')
-            if identifier=='context-menu':page.locator('#f-starter-extensions').fill('md,txt')
+            if identifier=='custom-file-view':page.locator('#starter-extension').fill('board')
+            if identifier=='context-menu':page.locator('#starter-extensions').fill('md,txt')
             review();apply()
             if identifier=='custom-file-view':check('Configured native extension survives actual project export',js('JSON.parse(companionJson()).design.nativeIntegrations.fileTypes[0].extension==="board"'))
             if identifier=='context-menu':check('Configured file-menu filters survive actual project export',js('JSON.parse(companionJson()).design.nativeIntegrations.contextMenus[0].extensions')==['md','txt'])
             check(identifier+' can be selected, reviewed, retained and round-tripped',js('validState(state) && companionCandidate(companionJson()).id===project().id'))
-            check(identifier+' leaves the built-in source unchanged',js('JSON.stringify(starterCatalog)')==before)
+            check(identifier+' leaves the loaded definition unchanged',js('JSON.stringify(starterCatalog)')==before)
         native_before=js('JSON.stringify(design().nativeIntegrations)')
         js('recordDesign();delete design().nativeIntegrations;designChanged();designTravel("undo")')
         check('Undo restores native declarations exactly',js('JSON.stringify(design().nativeIntegrations)')==native_before)

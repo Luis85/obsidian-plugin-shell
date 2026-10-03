@@ -78,7 +78,7 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
         "id": "vault-dashboard-plugin",
@@ -92,7 +92,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Adapt for a home view, reading dashboard or project health overview.",
         "platform": "desktop",

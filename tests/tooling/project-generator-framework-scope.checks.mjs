@@ -1,6 +1,5 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
@@ -9,9 +8,10 @@ import { projectFiles } from '../support/project-render.mjs';
 import { frameworkOnlyPath, referenceDocPath, withBanner, rewriteDocReferences, maintainerScript, frameworkBanner } from '../../bin/compiler/emitters/framework-scope.ts';
 import { clickdummyBuilderFiles } from '../../bin/compiler/emitters/clickdummy-builder-files.ts';
 import { buildClickdummy } from '../../bin/adapters/framework/clickdummy.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const starter = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
+const starter = JSON.parse(starterDocumentText('quick-capture'));
 const files = new Map((await projectFiles(root, projectModel(structuredClone(starter.document ?? starter)))).map(entry => [entry.path, entry]));
 const text = path => { const entry = files.get(path); assert.ok(entry, `missing ${path}`); return entry.content; };
 const paths = [...files.keys()];
