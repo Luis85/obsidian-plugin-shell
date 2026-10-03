@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { build } from 'vite';
 
-export const CONTRACT_ENTRY = 'scripts/companion/concept-contract.ts';
+export const CONTRACT_ENTRY = 'scripts/concepts/concept-contract.ts';
 export const CONTRACT_GLOBAL = 'CompanionContract';
 /** Deterministic, unminified IIFE text for the pinned bundler; the concept's --check verifies the embedded bytes. */
 export async function conceptContractScript(root = process.cwd()) {

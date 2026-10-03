@@ -2,7 +2,7 @@
   "entry": [
     "scripts/concepts/export-golden-project.mjs",
     "scripts/concepts/contract-bundle.mjs",
-    "scripts/companion/concept-contract.ts",
+    "scripts/concepts/concept-contract.ts",
     "bin/compiler/index.ts",
     "scripts/compiler/build-clickdummy.mjs",
     "src/main.ts",

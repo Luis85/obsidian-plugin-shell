@@ -19,8 +19,10 @@ class AssemblyContract(unittest.TestCase):
         shutil.copytree(ROOT / 'docs/concepts/companion/src', self.concept / 'src')
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
-        # The schema 6 project contract is bundled from the copied sources with the pinned local toolchain.
+        # The schema 6 project contract is bundled from the copied sources with the pinned local toolchain;
+        # its browser starter model lives with the starter adapters in bin/.
         shutil.copytree(ROOT / 'scripts', self.root / 'scripts', ignore=shutil.ignore_patterns('__pycache__'))
+        shutil.copytree(ROOT / 'bin', self.root / 'bin', ignore=shutil.ignore_patterns('__pycache__'))
         (self.root / 'node_modules').symlink_to(ROOT / 'node_modules', target_is_directory=True)
         shutil.copy(ROOT / 'package.json', self.root / 'package.json')
         (self.root / 'configs/quality').mkdir(parents=True, exist_ok=True)
@@ -59,7 +61,7 @@ class AssemblyContract(unittest.TestCase):
     def test_bundled_project_contract_requires_explicit_inventory(self):
         config = self.root / 'configs/quality/fallow.json'
         original = config.read_text()
-        for path in ['scripts/companion/concept-contract.ts', 'scripts/concepts/contract-bundle.mjs']:
+        for path in ['scripts/concepts/concept-contract.ts', 'scripts/concepts/contract-bundle.mjs']:
             with self.subTest(path=path):
                 value = json.loads(original)
                 value['entry'].remove(path)

@@ -87,7 +87,7 @@ def build(output: Path, check: bool = False):
  extension=engine+'\n'+adapters+'\n'+'\n'.join((ROOT/'src'/m).read_text(encoding='utf-8') for m in modules)
  s=s.replace('</head>', '<script type="application/json" id="test-data-tool-sources">'+json.dumps(tool_sources).replace('<','\\u003c')+'</script>\n</head>',1)
  change("window.addEventListener('beforeunload',save);\nrender();", "window.addEventListener('beforeunload',save);\n"+extension+"\nrender();")
- for path in ['scripts/companion/concept-contract.ts','scripts/concepts/contract-bundle.mjs']:
+ for path in ['scripts/concepts/concept-contract.ts','scripts/concepts/contract-bundle.mjs']:
   if path not in config['entry']:raise ValueError('Bundled project contract missing from analyzer inventory: '+path)
  storymap_contract=ROOT.parents[2]/'scripts/companion/storymap-contract.mjs'
  if 'scripts/companion/storymap-contract.mjs' not in config['entry']:raise ValueError('Shared storymap contract missing from analyzer inventory')

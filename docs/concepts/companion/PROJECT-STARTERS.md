@@ -52,7 +52,7 @@ Focused starters provide original PRD acceptance TODOs and detailed compositions
 
 Starters are the external definitions in `configs/starters/*.json` (see `scripts/starters/starter.schema.json`); a Companion starter embeds one complete ordinary **project schema 6** document. There is no starter-specific project schema or executable payload, and the concept HTML embeds no starter.
 
-The concept loads selected definition files into its session catalog, hashes their exact bytes, and validates and configures them with the same bundled contract the shell uses (`scripts/companion/concept-contract.ts`: `bin/adapters/starters/browser.ts` and `scripts/companion/starter-contract.mjs`). The generator consumes the normal exported project document, not catalog metadata.
+The concept loads selected definition files into its session catalog, hashes their exact bytes, and validates and configures them with the same bundled contract the shell uses (`scripts/concepts/concept-contract.ts`: `bin/adapters/starters/browser.ts` and `scripts/companion/starter-contract.mjs`). The generator consumes the normal exported project document, not catalog metadata.
 
 A provenance note records starter ID/version/source hash. It is informational Markdown and grants no execution authority. The source hash identifies the built-in template bytes, not the later customized project. Renaming plugin identity does not rewrite domain labels, entity slugs, internal IDs or design tokens.
 

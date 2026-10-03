@@ -76,7 +76,7 @@ test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still 
   const sources = Object.fromEntries(await Promise.all(entry.map(async path => [path, await readFile(path, 'utf8')])));
   assert.equal(entry.length, 138, 'Exact authored, vendor and test-kit assembly inventory');
   assert.ok(entry.includes('docs/concepts/companion/src/companion-contract.js'), 'Concept names for the bundled project contract must remain inventoried');
-  assert.ok(config.entry.includes('scripts/companion/concept-contract.ts') && config.entry.includes('scripts/concepts/contract-bundle.mjs'), 'Bundled schema 6 project contract must remain an analyzer entry');
+  assert.ok(config.entry.includes('scripts/concepts/concept-contract.ts') && config.entry.includes('scripts/concepts/contract-bundle.mjs'), 'Bundled schema 6 project contract must remain an analyzer entry');
   assert.ok(config.entry.includes('scripts/companion/storymap-contract.mjs'), 'Shared storymap validator must remain an analyzer entry');
   for (const retired of ['scripts/companion/project-contract.mjs', 'scripts/companion/detail-contract.mjs', 'scripts/companion/visual/visual-migrate.mjs']) assert.ok(!config.entry.includes(retired), 'Retired v5 contract stays removed: ' + retired);
   assert.ok(entry.includes('docs/concepts/companion/src/style-guide-frontend.js'), 'Concurrent Design System frontend must remain inventoried');

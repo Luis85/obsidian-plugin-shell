@@ -66,7 +66,7 @@ migrated. The history of the retired formats lives in Git.
 The checked-in `index.html` in **this directory** is the schema 6 **build base** that
 `npm run companion:build` mounts the Journey Lens and prototype editors into. It is
 assembled by `scripts/concepts/build-companion.py` from `src/`, the pinned `vendor/`
-and `test-kit/` inputs, and the one project contract (`scripts/companion/concept-contract.ts`,
+and `test-kit/` inputs, and the one project contract (`scripts/concepts/concept-contract.ts`,
 bundled as `CompanionContract`), so the page and the shell validate with the same code.
 It embeds no project or starter data: the golden self-project and every example are the
 external definitions in `configs/starters`. Do not hand-edit it; rebuild it with
