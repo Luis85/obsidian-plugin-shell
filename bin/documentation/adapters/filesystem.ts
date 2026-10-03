@@ -1,12 +1,15 @@
+import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { lstat, readdir, realpath, open, type FileHandle } from 'node:fs/promises';
 import { constants, type Stats } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
-import { sha256 } from '../../shared/hash.ts';
+import { sha256 } from '../../../scripts/shared/hash.ts';
 import { insist } from '../domain/contracts.ts';
 export const documentationDigest = (value: string | Uint8Array): string => sha256(value);
 const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 export function portable(path: string): string {
   insist(typeof path === 'string' && path.length <= 1024 && !isAbsolute(path) && !path.includes('\\'), 'DOCS_PATH', 'Use a portable project-relative path.');
+  // Intentional portability boundary: reject Windows-reserved and ASCII control characters in path segments.
+  // oxlint-disable-next-line no-control-regex
   insist(path.split('/').every(part => part && part !== '.' && part !== '..' && !/[<>:"|?*\u0000-\u001f]/.test(part) && !/[ .]$/.test(part) && !reserved.test(part)), 'DOCS_PATH', 'Unsafe path segment.');
   return path;
 }
@@ -62,7 +65,7 @@ function glob(pattern: string): RegExp {
   }
   return new RegExp(result + '$', 'i');
 }
-const ignored = new Set(['.git', '.obsidian', '.framework', '.companion', 'node_modules', '.codex-authoring.lock']);
+const ignored = new Set(['.git', defaultVaultConfigDirectory, '.framework', '.companion', 'node_modules', '.codex-authoring.lock']);
 interface DiscoveryOptions { recursive: boolean; include: string[]; exclude: string[] }
 interface Discovery { options: DiscoveryOptions; includes: RegExp[]; excludes: RegExp[]; found: Map<string, DocumentationSource>; total: number; visited: number }
 const isIgnored = (part: string): boolean => ignored.has(part.toLowerCase());

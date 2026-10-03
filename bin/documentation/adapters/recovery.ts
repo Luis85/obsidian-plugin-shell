@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { writeFile, mkdir, unlink, rm } from 'node:fs/promises';
-import { createFilePlan } from '../../shared/file-plan.ts';
+import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { docsObject as object, array, insist, stable } from '../domain/contracts.ts';
 import { readBytes, decode, documentationDigest as digest, portable } from './filesystem.ts';
 interface Change { path: string; beforeHash: string | null; afterHash: string | null; status: string }

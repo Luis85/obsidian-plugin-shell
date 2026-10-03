@@ -4,7 +4,7 @@ import type { Readable } from 'node:stream';
 import * as timers from 'node:timers';
 import { isAbsolute, join } from 'node:path';
 import { readConfiguration } from './files.ts';
-import { readDocumentationSettings } from '../../../scripts/application-docs/adapters/settings.ts';
+import { readDocumentationSettings } from '../../documentation/adapters/settings.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 
 const minimum = [1, 12, 7] as const;
@@ -123,7 +123,7 @@ async function documentationRoots(context: Context): Promise<string[]> {
 /** Reads each candidate once within the aggregate bound and classifies it as typed, untyped or invalid. */
 async function classifyNotes(port: ObsidianCliPort, vault: string, candidates: string[]) {
   // The YAML-backed parser loads only for prepare, so the CLI catalog stays importable without installed packages.
-  const { parseMarkdown } = await import('../../../scripts/application-docs/adapters/markdown.ts');
+  const { parseMarkdown } = await import('../../documentation/adapters/markdown.ts');
   const typed: string[] = [], untyped: string[] = [], invalid: string[] = []; let bytes = 0;
   for (const path of candidates) {
     const content = await inVault(port, vault, 'read', `path=${path}`); bytes += Buffer.byteLength(content);

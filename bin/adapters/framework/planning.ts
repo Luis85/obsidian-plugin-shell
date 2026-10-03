@@ -101,7 +101,7 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
   const fresh = await planOperation(planned.request, context);
   requireThat(fresh.planHash === expected && fresh.conflicts.length === 0, 'PLAN_STALE', 'Inputs changed after review; inspect a new plan.');
   const journal = fresh.request.command.startsWith('docs ')
-    ? (await import('../../../scripts/application-docs/adapters/recovery.ts')).journalHook(fresh.plan) : null;
+    ? (await import('../../documentation/adapters/recovery.ts')).journalHook(fresh.plan) : null;
   return applyFilePlan(fresh.plan, { async beforeWrite() {
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
     await journal?.();

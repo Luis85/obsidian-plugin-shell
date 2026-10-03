@@ -1,6 +1,6 @@
-import { validateAuthoringDocument, migrateAuthoringDocument, type AuthoringDocument } from '../../companion/authoring-contract.ts';
-import { visualNodes, type UiNode } from '../../companion/visual/visual-ir.mjs';
-import { docsObject as object, array, text, insist, keyOf, equal, validateEntity, type Entity, type DocType, type ObjectData } from '../domain/contracts.ts';
+import { validateAuthoringDocument, migrateAuthoringDocument, type AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
+import { visualNodes, type UiNode } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { docsObject as object, array, text, insist, keyOf, equal, validateEntity, type Entity, type ObjectData } from '../domain/contracts.ts';
 import { restoreProject } from './restore.ts';
 const list = (value: unknown): ObjectData[] => value === undefined ? [] : array(value).map(object);
 const collections = [

@@ -1,6 +1,6 @@
 import { result, stringOption, type Context, type Request, type ResultStatus } from './contracts.ts';
 import type { FilePlan } from '../../../scripts/shared/file-plan.ts';
-import { DOC_TYPES, fieldNames } from '../../../scripts/application-docs/domain/contracts.ts';
+import { DOC_TYPES, fieldNames } from '../../documentation/domain/contracts.ts';
 
 interface DocumentationStatus {
   conflicts: unknown[];
@@ -48,7 +48,7 @@ export async function docsRead(request: Request, context: Context, dependencies:
 
   if (request.command === 'docs recover') {
     const recoverDocuments = dependencies.recoverDocuments
-      ?? (await import('../../../scripts/application-docs/adapters/recovery.ts')).recoverDocuments;
+      ?? (await import('../../documentation/adapters/recovery.ts')).recoverDocuments;
     const outcome = await recoverDocuments(
       context.root,
       request.options.yes === true && !request.options['dry-run'],
@@ -58,7 +58,7 @@ export async function docsRead(request: Request, context: Context, dependencies:
   }
 
   const documentationStatus = dependencies.documentationStatus
-    ?? (await import('../../../scripts/application-docs/adapters/plan.ts')).documentationStatus;
+    ?? (await import('../../documentation/adapters/plan.ts')).documentationStatus;
   const data = await documentationStatus(context.root, request.args, request.command === 'docs validate');
   return result(
     request.command,
@@ -69,7 +69,7 @@ export async function docsRead(request: Request, context: Context, dependencies:
 
 export async function docsPlan(request: Request, context: Context, dependencies: DocsDependencies = {}): Promise<DocumentationPlan> {
   const documentationPlan = dependencies.documentationPlan
-    ?? (await import('../../../scripts/application-docs/adapters/plan.ts')).documentationPlan;
+    ?? (await import('../../documentation/adapters/plan.ts')).documentationPlan;
   return documentationPlan(
     context.root,
     request.args,

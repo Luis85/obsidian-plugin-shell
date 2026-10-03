@@ -160,7 +160,7 @@ export function renderMarkdown(entity: Entity, original?: MarkdownDocument, gene
   validateEntity(entity);
   const newline = original?.source.includes('\r\n') ? '\r\n' : '\n';
   if (!original) return '---\n' + stringify({ ...frontmatter(entity), doc_status: 'draft', tags: ['application-docs'] }, { lineWidth: 0 }) +
-    '---\n\n# ' + entity.title.replace(/[\[\]<>]/g, '') + '\n\n## Purpose\n\nDescribe the intent and expected outcome.\n\n' + block(entity.data, '\n') +
+    '---\n\n# ' + entity.title.replace(/[[\]<>]/g, '') + '\n\n## Purpose\n\nDescribe the intent and expected outcome.\n\n' + block(entity.data, '\n') +
     '\n## Acceptance criteria\n\nDocument acceptance criteria here; prose does not create executable behavior.\n' + (generated ? '\n' + generated : '');
   const edits: Array<Span & { value: string }> = [];
   if (!equal(frontmatter(entity), frontmatter(original.entity))) edits.push({ ...original.header, value: headerText(original, entity, newline) });

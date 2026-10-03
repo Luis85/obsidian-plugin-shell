@@ -8,8 +8,8 @@ import { spawnSync } from 'node:child_process';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { parseMarkdown, renderMarkdown } from '../../scripts/application-docs/adapters/markdown.ts';
-import { documentationDigest as digest } from '../../scripts/application-docs/adapters/filesystem.ts';
+import { parseMarkdown, renderMarkdown } from '../../bin/documentation/adapters/markdown.ts';
+import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 const run = (context, args) => executeOperation(parseCliArguments(args), context);
 async function directory(t) {
@@ -112,7 +112,7 @@ test('non-regular documentation inputs are rejected before a blocking file open'
     const fifo = spawnSync('mkfifo', [input], { encoding: 'utf8', timeout: 3000 });
     assert.ifError(fifo.error); assert.equal(fifo.status, 0, fifo.stderr);
   }
-  const reader = new URL('../../scripts/application-docs/adapters/filesystem.ts', import.meta.url).href;
+  const reader = new URL('../../bin/documentation/adapters/filesystem.ts', import.meta.url).href;
   const code = `import {readBytes} from ${JSON.stringify(reader)};
     try { await readBytes(${JSON.stringify(input)}); process.exitCode = 2; }
     catch (error) { if (error.code !== 'DOCS_LIMIT') throw error; console.log(error.code); }`;
@@ -123,7 +123,7 @@ test('non-regular documentation inputs are rejected before a blocking file open'
 
 test('documentation digest matches the shared sha256 implementation for exact bytes', async () => {
   const { sha256 } = await import('../../scripts/shared/hash.ts');
-  const { documentationDigest } = await import('../../scripts/application-docs/adapters/filesystem.ts');
+  const { documentationDigest } = await import('../../bin/documentation/adapters/filesystem.ts');
   for (const value of ['literal text with UTF-8 café', Buffer.from([0, 255, 16, 32])]) {
     assert.equal(documentationDigest(value), sha256(value));
   }

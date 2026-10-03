@@ -26,6 +26,8 @@ export function array(value: unknown): unknown[] {
   insist(Array.isArray(value), 'DOCS_SHAPE', 'Expected an array.'); return value;
 }
 export function text(value: unknown, name = 'value'): string {
+  // Intentional identity boundary: reject ASCII control characters in managed text.
+  // oxlint-disable-next-line no-control-regex
   insist(typeof value === 'string' && value.length > 0 && value.length <= 240 && !/[\u0000-\u001f\u007f]/u.test(value),
     'DOCS_FIELD', `${name} needs nonempty, bounded text.`); return value;
 }

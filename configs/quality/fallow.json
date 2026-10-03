@@ -223,19 +223,22 @@
       {
         "name": "maker-domain",
         "patterns": [
-          "bin/domain/**"
+          "bin/domain/**",
+          "bin/documentation/domain/**"
         ]
       },
       {
         "name": "maker-application",
         "patterns": [
-          "bin/application/**"
+          "bin/application/**",
+          "bin/documentation/application/**"
         ]
       },
       {
         "name": "maker-host",
         "patterns": [
           "bin/adapters/**",
+          "bin/documentation/adapters/**",
           "bin/presentation/**",
           "bin/app.ts",
           "plugins/**"

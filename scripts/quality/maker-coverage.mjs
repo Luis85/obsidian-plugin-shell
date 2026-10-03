@@ -12,5 +12,5 @@ const report = JSON.parse(readFileSync('reports/maker-coverage/coverage-summary.
 assertCoverageInventory(report, files);
 const { coverage } = loadThresholds();
 const production = assertSelectedCoreGate(report, files, coverage.maker);
-const core = assertSelectedCoreGate(report, [...sources('bin/domain'), ...sources('bin/application'), ...sources('bin/compiler/domain'), ...sources('bin/compiler/application')], coverage.makerCore);
+const core = assertSelectedCoreGate(report, [...sources('bin/domain'), ...sources('bin/application'), ...sources('bin/compiler/domain'), ...sources('bin/compiler/application'), ...sources('bin/documentation/domain'), ...sources('bin/documentation/application')], coverage.makerCore);
 console.log(JSON.stringify({ production, core }, null, 2));

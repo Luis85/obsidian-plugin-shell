@@ -2,12 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
-import { projectEntities, applyEntities } from '../../scripts/application-docs/adapters/model.ts';
+import { projectEntities, applyEntities } from '../../bin/documentation/adapters/model.ts';
 import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { newDocument } from '../../bin/domain/document.ts';
-import { mergeEntity } from '../../scripts/application-docs/domain/merge.ts';
-import { keyOf, normalizePayload } from '../../scripts/application-docs/domain/contracts.ts';
-import { reconcile } from '../../scripts/application-docs/application/reconcile.ts';
+import { mergeEntity } from '../../bin/documentation/domain/merge.ts';
+import { keyOf, normalizePayload } from '../../bin/documentation/domain/contracts.ts';
+import { reconcile } from '../../bin/documentation/application/reconcile.ts';
 const selected = () => projectEntities(projectFixture().project).find(entity => entity.type === 'page');
 const changed = (entity, patch) => ({ ...structuredClone(entity), ...patch });
 test('real pages, component, owner-bound event, route, transition and journey round-trip', () => {

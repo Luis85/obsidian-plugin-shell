@@ -1,8 +1,8 @@
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdir } from 'node:fs/promises';
-import { createFilePlan } from '../../shared/file-plan.ts';
-import type { AuthoringDocument } from '../../companion/authoring-contract.ts';
+import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import type { AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { documentationProjectIntake } from './project-intake.ts';
 import { keyOf, equal, stable, insist, type DocsIndex, type Entity, type Conflict } from '../domain/contracts.ts';
 import { reconcile } from '../application/reconcile.ts';
@@ -49,7 +49,7 @@ async function adapterFingerprint(): Promise<string> {
 function navigation(workspace: Workspace, index: DocsIndex): string {
   const from = workspace.settings.root + '/generated/index.md';
   const links = Object.entries(index.entries).sort(([a], [b]) => a < b ? -1 : 1).map(([, entry]) => {
-    const relative = posix.relative(posix.dirname(from), entry.path), label = entry.baseline.title.replace(/[\[\]|]/g, '');
+    const relative = posix.relative(posix.dirname(from), entry.path), label = entry.baseline.title.replace(/[[\]|]/g, '');
     return workspace.settings.linkFormat === 'wikilink' ? `- [[${entry.path.replace(/\.md$/i, '')}|${label}]]` : `- [${label}](${encodePath(relative)}) — ${entry.baseline.type}`;
   });
   return '<!-- shell:application-docs:index:v1 -->\n# Application documentation\n\nGenerated navigation; edit the linked typed documents.\n\n' + links.join('\n') + '\n';

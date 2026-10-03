@@ -18,12 +18,12 @@ import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { projectEntities } from '../../scripts/application-docs/adapters/model.ts';
-import { keyOf } from '../../scripts/application-docs/domain/contracts.ts';
-import { parseMarkdown, renderMarkdown } from '../../scripts/application-docs/adapters/markdown.ts';
-import { journalHook, recoverDocuments } from '../../scripts/application-docs/adapters/recovery.ts';
-import { documentationDigest as digest } from '../../scripts/application-docs/adapters/filesystem.ts';
-import { documentationStatus } from '../../scripts/application-docs/adapters/plan.ts';
+import { projectEntities } from '../../bin/documentation/adapters/model.ts';
+import { keyOf } from '../../bin/documentation/domain/contracts.ts';
+import { parseMarkdown, renderMarkdown } from '../../bin/documentation/adapters/markdown.ts';
+import { journalHook, recoverDocuments } from '../../bin/documentation/adapters/recovery.ts';
+import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
+import { documentationStatus } from '../../bin/documentation/adapters/plan.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 test('documentation status adapter remains an explicit lazy-load contract', () => { assert.equal(typeof documentationStatus, 'function'); });
 async function directory(t) { const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-docs-'))); t.after(() => rm(dir, { recursive: true, force: true })); return dir; }
@@ -198,7 +198,7 @@ for (const boundary of [0, 1, 3]) test(`terminated writer recovers at destinatio
   const entries = [{path:'docs/page.md',content:'After page'}, {path:'docs/added.md',content:'New document'},
     {path:'design/project.json',content:'{"after":true}\n'}, {path:'design/docs-index.json',content:'{"baseline":"after"}\n'}];
   const writer = new URL('../../scripts/shared/file-plan.ts', import.meta.url).href;
-  const journal = new URL('../../scripts/application-docs/adapters/recovery.ts', import.meta.url).href;
+  const journal = new URL('../../bin/documentation/adapters/recovery.ts', import.meta.url).href;
   const code = `import {createFilePlan,applyFilePlan} from ${JSON.stringify(writer)}; import {journalHook} from ${JSON.stringify(journal)};
     const plan=await createFilePlan(${JSON.stringify(root)},${JSON.stringify(entries)}), record=journalHook(plan);
     await applyFilePlan(plan,{async beforeWrite(change,index){await record();if(index===${boundary})process.kill(process.pid,'SIGKILL');}});`;

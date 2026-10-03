@@ -1,6 +1,6 @@
-import { createFilePlan } from '../../shared/file-plan.ts';
-import { configurationPlan } from '../../../bin/adapters/framework/changes.ts';
-import type { AuthoringDocument } from '../../companion/authoring-contract.ts';
+import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { configurationPlan } from '../../adapters/framework/changes.ts';
+import type { AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { docsObject as object, insist } from '../domain/contracts.ts';
 import { decode } from './filesystem.ts';
 import type { Workspace } from './workspace.ts';
