@@ -33,7 +33,7 @@ test('all twenty-six standalone definitions validate and carry their metadata, s
   }
   // Every embedded Companion design is the current project v6 format; there is no historical catalog to mirror.
   const companion = entries.filter(entry => entry.definition.generator.kind === 'companion');
-  assert.equal(companion.length, 13);
+  assert.equal(companion.length, 14);
   for (const { definition } of companion) {
     assert.equal(definition.generator.document.schemaVersion, 6, definition.id); assert.equal(definition.generator.document.design.schema, 6, definition.id);
   }

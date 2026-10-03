@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { prototypesRead, prototypesCompare, prototypesPlan } from '../../bin/adapters/framework/prototypes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
-const projectText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
+const projectText = starterDocumentText('companion-plugin');
 const code = async pending => { try { await pending; return 'resolved'; } catch (error) { return error.code ?? error.message.split(':')[0]; } };
 /** A project with one managed prototype (alpha / v1 / main) created through the reviewed plan. */
 async function withWorkspace(check) {

@@ -20,7 +20,8 @@ test('every real workflow in .github/workflows parses into jobs with steps and c
   const names = (await readdir(join(root, '.github/workflows'))).filter(name => /\.ya?ml$/.test(name));
   const workflows = await loadWorkflows(root);
   assert.equal(workflows.length, names.length);
-  assert.ok(workflows.length >= 19, 'the repository keeps its qualification workflows');
+  // 18 since the retired native source handoff workflow was removed with the schema 5 concept data.
+  assert.ok(workflows.length >= 18, 'the repository keeps its qualification workflows');
   for (const item of workflows) {
     assert.ok(item.jobs.length > 0, `${item.file} has jobs`);
     assert.ok(item.triggers.length > 0, `${item.file} has triggers`);

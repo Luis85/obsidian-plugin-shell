@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { starterProjectPlan, completeStarterProject, starterCatalog, starterInvocation, invocationDirectory, enclosingVault, derivedId, derivedName } from '../../bin/adapters/framework/starter-project.ts';
+import { starterProjectPlan, completeStarterProject, companionStarterSet, starterInvocation, invocationDirectory, enclosingVault, derivedId, derivedName } from '../../bin/adapters/framework/starter-project.ts';
 import { result } from '../../bin/adapters/framework/contracts.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
@@ -40,8 +40,8 @@ test('--from refuses starter-only options before any planning', () => withWorksp
 }));
 
 test('an exported project plans a new directory with its own or an overridden identity', () => withWorkspace(async root => {
-  const { catalog } = await starterCatalog({ root: frameworkRoot, frameworkRoot });
-  const document = catalog.starters.find(entry => entry.id === 'blank').document;
+  const { starters } = await companionStarterSet({ root: frameworkRoot, frameworkRoot });
+  const document = starters.find(entry => entry.definition.id === 'blank').document;
   await writeFile(join(root, 'export.json'), JSON.stringify({ ...document, project: { ...document.project, id: 'exported-app', name: 'Exported App' } }));
   const context = { root, frameworkRoot };
   const own = await starterProjectPlan(request(['nested/out'], { from: 'export.json' }), context);

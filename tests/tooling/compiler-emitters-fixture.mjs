@@ -4,22 +4,20 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { starterDocument as currentStarter } from '../support/starter-documents.mjs';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const json = async path => JSON.parse(await readFile(join(root, path), 'utf8'));
-const detail = migrateCompanionDocument(await json('tests/fixtures/companion/detail-v3.json')).document;
-const starters = new Map();
+const detail = validateAuthoringDocument(await json('tests/fixtures/companion/visual-project.json'));
 export const template = await loadTemplateSnapshot(root);
 
 /** The visual-design fixture (two pages, one authored component and the authoring vault source). */
 export const detailDocument = () => structuredClone(detail);
-/** A migrated companion starter document by id (blank, quick-capture, tasks-projects, ...). */
+/** A current (project v6) companion starter document by id (blank, quick-capture, tasks-projects, ...). */
 export async function starterDocument(id) {
-  if (!starters.has(id)) starters.set(id, migrateAuthoringDocument(await json(`docs/concepts/companion/starters/${id}.companion.json`)).document);
-  return structuredClone(starters.get(id));
+  return currentStarter(id);
 }
 export const model = document => projectModel(document);
 /** Collects emitted artifacts; a duplicate path is a defect the generator itself would also refuse. */

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { extractKit } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 // A real extracted developer kit: bundled bin/app.js, editable sources only under bin/template and no
 // project-level bin/adapters. Generated custom-maker and locale checks must pass there without path probing.
@@ -26,7 +27,7 @@ test('generated custom-maker and locale checks run in an extracted kit through i
   await extractKit(root, dir);
   // Packaging only: the kit's template tree carries the recipe catalog; no consumer code reads that copy.
   assert.ok(existsSync(join(dir, 'bin/app.js')) && existsSync(join(dir, 'bin/template', 'bin/adapters/makers/recipes.json')));
-  const design = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+  const design = JSON.parse(starterDocumentText('companion-plugin'));
   design.project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
   await writeFile(join(dir, 'input.json'), JSON.stringify(design));
   cli(dir, ['setup', '--input', 'input.json', '--yes']);

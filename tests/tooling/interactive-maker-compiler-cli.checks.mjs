@@ -1,6 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,11 +9,12 @@ import { createRecorder, formatDiagnostics, writeReports } from '../../bin/compi
 import { dependencyReadiness } from '../../bin/compiler/adapters/dependencies.ts';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 // Drives the compiler host CLI adapters (bin/compiler/adapters/{cli,reporting,dependencies,template-snapshot}.ts).
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const source = await readFile(join(root, 'docs/concepts/companion/starters/blank.companion.json'), 'utf8');
+const source = starterDocumentText('blank');
 const context = { root, frameworkRoot: root, inputText: source };
 // Compiler adapters throw CompilerError, whose stable code lives on its diagnostic.
 const failsWith = code => error => error?.diagnostic?.code === code;
@@ -59,7 +60,7 @@ test('file input is decoded strictly and invalid UTF-8 is a typed parse diagnost
 
 test('inspection returns the IR or the artifact inventory, never both', async () => {
   const ir = await compilerOperation(request('compiler inspect'), context);
-  assert.equal(ir.data.ir.project.id, JSON.parse(source).project.id); assert.equal(ir.data.inventory, undefined); assert.ok('migration' in ir.data);
+  assert.equal(ir.data.ir.project.id, JSON.parse(source).project.id); assert.equal(ir.data.inventory, undefined); assert.equal('migration' in ir.data, false);
   const artifacts = await compilerOperation(request('compiler inspect', { stage: 'artifacts', 'output-kind': 'clickdummy' }), context);
   assert.equal(artifacts.status, 'ok'); assert.equal(artifacts.data.ir, undefined); assert.equal(artifacts.data.outputKind, 'clickdummy');
   assert.ok(artifacts.data.inventory.length > 0);

@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { main } from '../../bin/adapters/framework-cli.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function capture(isTTY = false) {
@@ -62,7 +63,7 @@ test('human output renders results and exit codes follow the result status', asy
 });
 
 test('stdin input, starter listing and --from paths resolve without touching the project', async () => {
-  const project = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
+  const project = starterDocumentText('companion-plugin');
   const inspected = await run(['project', 'inspect', '--input', '-', '--json'], { stdin: project });
   assert.equal(inspected.code, 0, inspected.stderr); assert.equal(JSON.parse(inspected.stdout).command, 'project inspect');
   const listed = await run(['new', '--list', '--json']);
@@ -83,7 +84,7 @@ test('interactive sessions run reads directly and cancel unapproved plans', asyn
   const version = await run(['version'], { answers: [] });
   assert.equal(version.code, 0); assert.match(version.stdout, /version: ok/);
   await withRoot(async root => {
-    await writeFile(join(root, 'project.json'), await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await writeFile(join(root, 'project.json'), starterDocumentText('companion-plugin'));
     const dry = await run(['setup', '--input', 'project.json', '--root', root, '--dry-run', '--no-airship', '--no-mcp'], { answers: [] });
     assert.equal(dry.code, 0, dry.stderr); assert.match(dry.stdout, /setup: planned/);
     const declined = await run(['setup', '--input', 'project.json', '--root', root, '--no-airship', '--no-mcp'], { answers: ['n'] });

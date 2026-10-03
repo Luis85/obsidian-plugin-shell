@@ -1,15 +1,14 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { projectEntities, applyEntities, coverage } from '../../bin/documentation/adapters/model.ts';
 import { restoreProject } from '../../bin/documentation/adapters/restore.ts';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { companionStarterIds, selfProject, starterDocument } from '../support/starter-documents.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 import { newDocument } from '../../bin/domain/document.ts';
 
 // Drives the lossless project projection and restore (bin/documentation/adapters/{model,restore}.ts) under the maker floors.
-const retained = async path => migrateAuthoringDocument(JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8'))).document;
-const companion = () => retained('../../docs/concepts/companion/companion-project.json');
+const companion = async () => selfProject();
 const of = (entities, type) => entities.filter(entity => entity.type === type);
 function rich() {
   const fixture = projectFixture();
@@ -18,8 +17,8 @@ function rich() {
 }
 const restoreFails = (project, entities, code) => assert.throws(() => restoreProject(project, entities), { code });
 
-test('every retained project round-trips through the projection, also from a blank project', async () => {
-  for (const project of [rich().project, await companion(), await retained('../fixtures/companion/detail-v4.json'), await retained('../fixtures/companion/detail-v3.json')]) {
+test('every current schema 6 project round-trips through the projection, also from a blank project', async () => {
+  for (const project of [rich().project, await companion(), ...companionStarterIds().map(starterDocument)]) {
     const entities = projectEntities(project);
     assert.deepEqual(applyEntities(project, entities), project);
     assert.deepEqual(applyEntities(project, [...entities].reverse()), project);
@@ -88,8 +87,12 @@ test('interactions attach to their owner node and refuse unknown owners or sourc
   assert.ok(JSON.stringify(moved.design.visualDesigns.pages).includes(interaction.id));
 });
 
+test('retired schema 3-5 projects are refused by the projection, never migrated', () => {
+  for (const version of [3, 4, 5]) assert.throws(() => projectEntities(retiredProject(version)), /only schema 6 is supported/);
+});
+
 test('published revisions are immutable and identity counters never move backwards', async () => {
-  const project = await retained('../fixtures/companion/detail-v4.json'), entities = projectEntities(project);
+  const project = await companion(), entities = projectEntities(project);
   const revision = of(entities, 'component-revision')[0]; revision.data.notes = 'Rewritten';
   assert.throws(() => applyEntities(project, entities), { code: 'DOCS_REVISION_IMMUTABLE' });
   const fixture = projectFixture().project; fixture.design.nextId = 1;

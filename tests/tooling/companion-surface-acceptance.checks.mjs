@@ -1,9 +1,8 @@
-// Optional per-surface UX acceptance block: validator behavior, defaults and backward compatibility.
+// Optional per-surface UX acceptance block: validator behavior, defaults and the schema 6 only boundary.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { resolveSurfaceAcceptance, validateSurfaceAcceptance } from '../../scripts/companion/sitemap/acceptance.ts';
 import { companionProjectSchema } from '../../scripts/companion/schema/project.mjs';
 
@@ -27,11 +26,9 @@ test('the starter worked example and every documented member validate', () => {
   validateAuthoringDocument(withBlock({ states: ['default', 'loading', 'empty', 'error', 'disabled'], keyboardPath: ['Save', 'vn-4'], focusReturn: false, minWidth: 120, themes: ['light'], notes: '' }));
   validateAuthoringDocument(withBlock({}));
 });
-test('the frozen legacy contract embedded in the concept still accepts a document that carries the block', () => {
+test('a retired schema 5 envelope is refused even when it carries the block; it is never migrated', () => {
   const legacy = structuredClone(starter); legacy.schemaVersion = 5; legacy.design.schema = 5;
-  for (const key of ['sitemap', 'features', 'editors']) delete legacy.design[key];
-  delete legacy.tooling;
-  validateCompanionDocument(legacy);
+  assert.throws(() => validateAuthoringDocument(legacy), { message: /^COMPANION_VERSION: Unsupported project schemaVersion 5; only schema 6 is supported/ });
 });
 const invalid = [
   ['unknown state', { states: ['sleeping'] }, /unsupported value; use default, loading, empty, error, disabled/],
