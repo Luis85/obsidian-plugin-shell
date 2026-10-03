@@ -33,8 +33,9 @@ commands and [authoring tools](../docs/development/AUTHORING-TOOLS.md) for suppo
 recipes. `release/cli.mjs` exposes authenticated planning and separately authorized
 execution through the retained-candidate engine and GitHub adapter; read
 [release execution](../docs/development/RELEASE-EXECUTION.md) before opting in.
-Entity catalog/check commands exist; separate event catalog/check commands remain
-an open requirement. Keep root configuration thin and shared policy here.
+Entity catalog/check commands (`entities:catalog`, `entities:check`) and event
+catalog/check commands (`events:catalog`, `events:check`) exist. Keep root
+configuration thin and shared policy here.
 
 Node tests cover tooling and retained fixture acceptance. Vitest exercises actual
 application services/components; Playwright serves the real harness. These scopes

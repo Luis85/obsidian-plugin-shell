@@ -56,9 +56,9 @@ node bin/app new guide --starter plugin-angular --json
 
 See [project starters](../../../bin/PROJECT-STARTERS.md) for the agent request format and generated package.
 
-## 2B. Start from an extracted developer kit
+## 2B. Start from an extracted framework kit
 
-Obtain an actually published developer-kit archive for the intended release, verify its provenance and any supplied checksums, and extract into a new project folder. Do not substitute an arbitrary source ZIP and assume it contains compiled kit modules. Checksum agreement detects changed bytes; it does not independently authenticate the publisher.
+Obtain an actually published framework kit archive for the intended release, verify its provenance and any supplied checksums, and extract into a new project folder. Do not substitute an arbitrary source ZIP and assume it contains compiled kit modules. Checksum agreement detects changed bytes; it does not independently authenticate the publisher.
 
 Open a terminal in that folder:
 

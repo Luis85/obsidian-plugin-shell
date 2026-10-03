@@ -89,7 +89,7 @@ The CI workflow generates from the actual bundled export, installs the generated
 
 ## Regeneration and safety
 
-The generator uses `scripts/shared/file-plan.mjs`, the same lock, precondition checks and rollback engine as framework makers/setup. Explicit base64 entries support the existing compressed host CSS fixture without interpreting bytes as UTF-8; decoded bytes are hashed, validated and written by the same engine. Text behavior remains compatible.
+The generator uses `scripts/shared/file-plan.ts` (executing `scripts/shared/file-plan-runtime.ts`), the same lock, precondition checks and rollback engine as framework makers/setup. Explicit base64 entries support the existing compressed host CSS fixture without interpreting bytes as UTF-8; decoded bytes are hashed, validated and written by the same engine. Text behavior remains compatible.
 
 `.companion/generation.json` records generated hashes and ownership. Unchanged output is a no-op. Unmodified generated files may update. Customized extension/framework files are preserved byte-for-byte (including a UTF-8 BOM) when their template is unchanged; a customized text file that is not valid UTF-8 is reported as a conflict rather than rewritten through lossy decoding. A new design/template that also needs to alter a customized file is a conflict. Customized managed registries, unowned destinations and removed owned files require reconciliation. No files are implicitly deleted. Retired ownership remains tracked. The receipt is local ownership metadata, not a signature or authority token.
 

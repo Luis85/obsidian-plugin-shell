@@ -27,7 +27,7 @@ The original delivery was a local patch only. This contribution applies that pat
 
 ## Integration acceptance still required
 
-In a complete checkout of this candidate, verify command discovery/schema/help, setup-generated handout inclusion in the reviewed plan, saved-plan stale-input rejection, repeated setup preservation, explicit refresh preservation and noninteractive exit behavior through the actual framework adapters. Both dedicated test files now match the existing CLI suite include pattern `tests/tooling/framework-*.checks.mjs`; no suite threshold or exclusion was changed. Run the normal framework and maintainability gates and build/test the compiled developer kit so the new question/model/workspace/adapter modules are demonstrably included.
+In a complete checkout of this candidate, verify command discovery/schema/help, setup-generated handout inclusion in the reviewed plan, saved-plan stale-input rejection, repeated setup preservation, explicit refresh preservation and noninteractive exit behavior through the actual framework adapters. Both dedicated test files now match the existing CLI suite include pattern `tests/tooling/framework-*.checks.mjs`; no suite threshold or exclusion was changed. Run the normal framework and maintainability gates and build/test the compiled framework kit so the new question/model/workspace/adapter modules are demonstrably included.
 
 Reconcile settings-path, external-starter, typed-Markdown and first-run workstreams against the actual applied head; do not infer their completion from the handout’s questions or preferences.
 
