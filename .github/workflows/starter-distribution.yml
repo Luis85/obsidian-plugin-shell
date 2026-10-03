@@ -14,7 +14,6 @@ on:
       - 'docs/licenses/**'
       - 'tests/concepts/*-showcase.browser.mjs'
       - 'tests/concepts/starter-workspace.browser.mjs'
-      - 'scripts/framework/release-bundle.mjs'
       - 'bin/adapters/framework/**'
       - 'bin/adapters/framework-cli.ts'
       - 'bin/presentation/terminal/**'

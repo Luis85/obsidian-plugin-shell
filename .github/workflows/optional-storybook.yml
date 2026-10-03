@@ -7,7 +7,6 @@ on:
       - 'templates/**'
       - 'scripts/compiler/**'
       - 'bin/compiler/**'
-      - 'scripts/framework/release-bundle.mjs'
       - 'bin/adapters/framework/**'
       - 'bin/adapters/framework-cli.ts'
       - 'bin/presentation/terminal/**'

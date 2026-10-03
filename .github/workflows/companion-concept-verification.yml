@@ -9,7 +9,6 @@ on:
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
       - 'templates/**'
-      - 'scripts/framework/release-bundle.mjs'
       - 'bin/adapters/framework/**'
       - 'bin/adapters/framework-cli.ts'
       - 'bin/presentation/terminal/**'

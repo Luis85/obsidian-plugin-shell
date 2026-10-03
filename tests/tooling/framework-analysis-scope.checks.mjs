@@ -128,5 +128,6 @@ test('framework typechecking includes the production CLI rather than removed wra
   const types = JSON.parse(await readFile(new URL('configs/types/tsconfig.framework.json', root), 'utf8'));
   assert.ok(types.include.includes('../../bin/**/*.ts'));
   assert.ok(!types.include.includes('../../scripts/framework/**/*.ts'));
-  assert.deepEqual((await readdir(new URL('scripts/framework/', root))).filter(name => name.endsWith('.ts')), []);
+  // The release bundler was the folder's last module; scripts/framework no longer exists.
+  await assert.rejects(readdir(new URL('scripts/framework/', root)), { code: 'ENOENT' });
 });

@@ -114,5 +114,6 @@
   "scripts/starters/repository.ts": "bin/adapters/starters/repository.ts",
   "scripts/starters/types.ts": "bin/adapters/starters/types.ts",
   "scripts/starters/validation.ts": "bin/adapters/starters/validation.ts",
-  "scripts/companion/starter-files.mjs": "bin/adapters/starters/catalog.ts"
+  "scripts/companion/starter-files.mjs": "bin/adapters/starters/catalog.ts",
+  "scripts/framework/release-bundle.mjs": "bin/adapters/framework/release-bundle.ts"
 }

@@ -1,5 +1,5 @@
 import { docsParserFiles } from './docs-vendor.ts';
-import { bundleReleaseCli } from '../../../scripts/framework/release-bundle.mjs';
+import { bundleReleaseCli } from './release-bundle.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { prototypeSkillFiles } from '../../../scripts/companion/prototype-skill.mjs';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';

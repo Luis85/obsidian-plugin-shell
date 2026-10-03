@@ -7,7 +7,6 @@ on:
       - '.nvmrc'
       - 'bin/adapters/framework/**'
       - 'bin/presentation/terminal/**'
-      - 'scripts/framework/release-bundle.mjs'
       - 'bin/compiler/domain/**'
       - 'scripts/documentation/**'
       - 'tests/tooling/framework-manual.checks.mjs'
