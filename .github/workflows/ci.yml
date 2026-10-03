@@ -188,7 +188,7 @@ jobs:
   source-archive:
     name: Template authoring / source archive
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - *checkout
       - *setup-node
