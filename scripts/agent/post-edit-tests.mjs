@@ -2,11 +2,12 @@
  * Exit 0 = passed or nothing to run (silent). Exit 2 = related tests failed; stderr is the bounded
  * failure summary, which Claude Code shows to the agent (the edit itself already happened).
  * Exit 1 = the hook could not run (missing dependencies, timeout); a non-blocking notice. */
-import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { boundedOutput, inputProblem, projectRootFor, readHookInput } from './hook-io.mjs';
+import { hookTimeout, runInProcessGroup } from './process-group.mjs';
+import { qualifiedEnv } from './session-toolchain.mjs';
 import { codeRoots } from '../shared/project-roots.mjs';
 import { projectConfigPath, projectConfigs } from '../shared/project-configs.mjs';
 
@@ -48,8 +49,10 @@ async function runHook(input) {
   const target = editedTarget(input);
   if (!target) return { code: 0, message: '' };
   if (!existsSync(join(target.root, 'node_modules/vitest/vitest.mjs'))) return { code: 1, message: 'Vitest is not installed in this project; run npm ci.' };
-  const run = spawnSync(process.execPath, relatedArguments(target.file, projectConfigPath(target.root, 'vitest') ?? undefined), { cwd: target.root, encoding: 'utf8', timeout: TIMEOUT_MS,
-    maxBuffer: 16 * 1024 * 1024, env: { ...process.env, FORCE_COLOR: '0' } });
+  const toolchain = qualifiedEnv(target.root, process.env);
+  const node = toolchain === process.env ? process.execPath : 'node'; // the qualified Node leads PATH when this process runs another one
+  const timeout = hookTimeout(process.env, 'SHELL_POST_EDIT_TIMEOUT_MS', TIMEOUT_MS);
+  const run = await runInProcessGroup(node, relatedArguments(target.file, projectConfigPath(target.root, 'vitest') ?? undefined), { cwd: target.root, timeout, env: { ...toolchain, FORCE_COLOR: '0' } });
   return postEditOutcome(target, run);
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
