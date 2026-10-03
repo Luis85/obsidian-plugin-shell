@@ -3,11 +3,13 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import icons from '@iconify-json/lucide/icons.json' with { type: 'json' };
+import { checkDependencyPins } from './dependency-pins.mjs';
 const require = createRequire(import.meta.url);
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
+const pins = await checkDependencyPins(process.cwd());
 const pkg = await json('package.json'); const lock = await json('package-lock.json');
 const policy = await json('scripts/security/dependency-policy.json');
-for (const group of ['dependencies', 'devDependencies']) for (const [name, version] of Object.entries(pkg[group])) {
+for (const group of ['dependencies', 'devDependencies']) for (const [name, version] of Object.entries(pkg[group] ?? {})) {
   if (!/^\d+\.\d+\.\d+$/.test(version) || lock.packages[''][group][name] !== version || lock.packages[`node_modules/${name}`]?.version !== version)
     throw new Error(`DEPENDENCY_NOT_EXACT: ${name}`);
   if ((await json(`node_modules/${name}/package.json`)).version !== version) throw new Error(`INSTALLED_VERSION_MISMATCH: ${name}`);
@@ -29,3 +31,4 @@ const result = await transformCSS({ dev: false, processCSSVariables: true, fonts
 const css = result.toString();
 if (!css.includes('@font-face') || !css.includes('/fixture.woff2') || css.includes('undefined')) throw new Error('FONTLESS_TRANSFORM_REGRESSION');
 console.log('Exact direct/installed versions, reviewed transitive transform, installer source hashes, narrow hooks and local icons passed. No network used.');
+console.log(JSON.stringify({ dependencyPins: pins }));

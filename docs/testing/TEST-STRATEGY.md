@@ -99,8 +99,8 @@ Use mutation testing selectively after a working core exists—for validation, c
 | --- | --- | --- |
 | Baseline (implemented) | Node available, declared fixture/tool source present. | Strict plan/source inventory, exact real test IDs, all repeated runs pass, no skip/todo/empty suite or source drift. |
 | Specimen browser (implemented, provisioning required) | Explicit local Playwright and browser; HTTP navigation permitted for served mode. | Eight real browser assertions, fresh contexts, exact fault expectations, stable outcomes, correct evidence mode. |
-| Fast development (future) | Qualified TypeScript/Vitest/lint projects. | Selected finite static/unit checks, clearly partial. |
-| Pull request/full verify (future) | Implemented runtime and installed pinned browsers/toolchain. | All relevant static/coverage/contract/component/browser checks plus gate fixtures. |
+| Fast development (implemented) | Installed qualified toolchain. | `node bin/app check` runs every step without fail-fast; `check --fast` narrows tests to changed files. Both are clearly partial and never replace `verify`. |
+| Pull request/full verify (implemented; browser separate) | Installed pinned toolchain. | `npm run verify` runs the static/service/coverage/artifact/baseline gates and gate fixtures; `--keep-going`, `--only`, `--skip`, `--json` and `reports/verify/summary.{json,md}` expose per-step status. Served browser evidence stays `npm run test:e2e`; native/release qualification stays separate. See [quality assurance](../development/QUALITY-ASSURANCE.md#npm-run-verify-steps-partial-runs-and-reports). |
 | Template qualification (future) | Working setup/makers. | Fixed set of generated repositories, identity/removal/installation/upgrade/release tests, no recursion. |
 | Release (blocked now) | Actual candidate assets and independent host evidence. | Full requirements, approved exceptions, exact hashes/source/host/devices, no high-risk unresolved defect. |
 

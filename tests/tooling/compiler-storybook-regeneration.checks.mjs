@@ -6,8 +6,8 @@ import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
+import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { starterDocument } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -15,22 +15,23 @@ const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 async function sourceFixture(directory) {
   const snapshot = await loadTemplateSnapshot(root);
   const files = [...snapshot.frameworkFiles, ...snapshot.skillFiles].map(file => ({
-    path: '.framework/template/' + file.path, bytes: Buffer.from(file.content, file.encoding ?? 'utf8'),
+    path: 'bin/template/' + file.path, bytes: Buffer.from(file.content, file.encoding ?? 'utf8'),
   }));
-  // verifyKit checks both directories. This inert marker supplies no compiled executable.
-  files.push({ path: '.framework/compiled/package.json', bytes: Buffer.from('{"private":true}\n') });
+  // verifyKit inventories the complete bin-owned runtime. This inert app.js marker supplies no executable behavior.
+  files.push({ path: 'bin/app.js', bytes: Buffer.from('// source fixture; compiled execution qualified elsewhere\n') });
   for (const file of files) {
     await mkdir(dirname(join(directory, file.path)), { recursive: true });
     await writeFile(join(directory, file.path), file.bytes, { flag: 'wx' });
   }
   const bootstrap = [];
-  for (const path of ['shell.mjs', 'package.json', 'README.md', 'LICENSE']) {
+  for (const path of ['bin/app', 'package.json', 'README.md', 'LICENSE']) {
     const bytes = Buffer.from(snapshot.text(path));
+    await mkdir(dirname(join(directory, path)), { recursive: true });
     await writeFile(join(directory, path), bytes, { flag: 'wx' });
     bootstrap.push({ path, hash: digest(bytes) });
   }
-  await writeFile(join(directory, '.framework/kit.json'), JSON.stringify({
-    schemaVersion: 1, version: JSON.parse(snapshot.text('package.json')).version,
+  await writeFile(join(directory, 'bin/kit.json'), JSON.stringify({
+    schemaVersion: 2, version: JSON.parse(snapshot.text('package.json')).version,
     compilerVersion: 'source-fixture-no-compilation', sourceHash: snapshot.fingerprint, bootstrap,
     files: files.map(file => ({ path: file.path, hash: digest(file.bytes), bytes: file.bytes.length })),
   }));

@@ -1,6 +1,7 @@
 import { globSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { loadThresholds } from './thresholds.mjs';
 export function assertCoverageInventory(summary, files) {
   if (!summary || typeof summary !== 'object' || Array.isArray(summary)) throw new Error('INVALID_COVERAGE_REPORT');
   const recorded = new Set(Object.keys(summary).filter(key => key !== 'total').map(key => resolve(key)));
@@ -33,8 +34,9 @@ export function assertCoverageGates(summary, files) {
   if (!records.length || !core.length) throw new Error('EMPTY_COVERAGE_SCOPE');
   const scopes = { production: aggregate(records.map(([, entry]) => entry)), domainApplicationFeatures: aggregate(core.map(([, entry]) => entry)) };
   const reported = aggregate([summary.total]);
+  const { coverage } = loadThresholds();
   for (const [name, totals] of Object.entries(scopes)) {
-    const floor = name === 'production' ? { lines: 90, statements: 90, functions: 90, branches: 85 } : { lines: 95, statements: 95, functions: 95, branches: 90 };
+    const floor = name === 'production' ? coverage.production : coverage.productionCore;
     for (const metric of metrics) {
       if (totals[metric].total === 0) throw new Error(`EMPTY_COVERAGE_SCOPE: ${name}.${metric}`);
       if (totals[metric].pct < floor[metric]) throw new Error(`COVERAGE_BELOW_THRESHOLD: ${name}.${metric} ${totals[metric].pct} < ${floor[metric]}`);
@@ -61,7 +63,7 @@ export function assertSelectedCoreGate(summary, files, thresholds) {
   return { status: 'passed', selectedCoreInputs: inputs.length, totals };
 }
 async function selectedCoreScope() {
-  const { default: config } = await import(pathToFileURL(resolve('vitest.config.mjs')).href);
+  const { default: config } = await import(pathToFileURL(resolve('configs/testing/vitest.config.mjs')).href);
   const { include, thresholds } = config.test.coverage;
   return { files: include.flatMap(pattern => globSync(pattern)), thresholds };
 }

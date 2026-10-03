@@ -41,3 +41,43 @@ jobs:
           path: reports/project-starters
           if-no-files-found: error
           retention-days: 7
+  project-handoff:
+    # A pushed project, cloned fresh, in a cloud-like session: Node 22 is the only Node, the SessionStart hook provisions the
+    # qualified Node and the dependencies, then the commands an agent starts with run (check, doctor, ui status, e2e).
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        # feature-showcase joins once its generated journey editor passes `npm run check` (the report names the failing step).
+        starter: [quick-capture]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Remember the Node 22 prefix (the simulated cloud default)
+        run: echo "CLOUD_NODE=$(dirname "$(dirname "$(command -v node)")")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install exact repository toolchain
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Provision Chromium for the e2e step
+        run: npx playwright install --with-deps chromium
+      - name: Generate, push-simulate (git clone) and replay a cloud session start
+        run: node scripts/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json'
+      - name: Retain the step summary
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: project-handoff-${{ matrix.starter }}
+          path: reports/project-handoff-${{ matrix.starter }}.json
+          if-no-files-found: warn
+          retention-days: 7

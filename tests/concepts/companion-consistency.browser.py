@@ -33,7 +33,7 @@ def js(code):
 
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'),
                                  headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width':1440, 'height':1000})
     page.set_default_timeout(8000)

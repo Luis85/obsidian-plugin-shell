@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 async function probe(sources, transform = value => value, { full = false, entry = Object.keys(sources) } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'companion-boundary-'));
   try {
-    const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+    const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
     const boundaries = transform(structuredClone(config.boundaries));
     await writeFile(join(root, '.fallowrc.json'), JSON.stringify({ entry, boundaries }));
     await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'companion-boundary-fixture', type: 'module' }));
@@ -66,7 +66,7 @@ test('[CONCEPT-OUTBOUND] concept implementation cannot become a runtime adapter'
 
 
 test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still rejects extra files', async () => {
-  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+  const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   // Same owned assembly roots as build-companion.py; editor TypeScript is a separately registered test-import entry.
   const owned = ['src/', 'vendor/', 'test-kit/'].map(root => 'docs/concepts/companion/' + root);
   const entry = config.entry.filter(path => owned.some(root => path.startsWith(root)));

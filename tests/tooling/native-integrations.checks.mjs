@@ -4,13 +4,13 @@ import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { validateNativeIntegrations, nativeReservedExtensions } from '../../scripts/companion/native-contract.mjs';
 import { reservedFileExtensions } from '../../src/domain/native-integrations.ts';
-import { nativeCode } from '../../scripts/companion/compiler/native-code.ts';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { companionStarters, loadDefinitions } from '../../scripts/starters/repository.ts';
-import { customizeStarter as customizeLoaded } from '../../scripts/starters/customize.ts';
-import { planMaker } from '../../scripts/makers/plan.mjs';
-import { parseArguments } from '../../scripts/makers/arguments.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { companionStarters, loadDefinitions } from '../../bin/adapters/starters/repository.ts';
+import { customizeStarter as customizeLoaded } from '../../bin/adapters/starters/customize.ts';
+import { planMaker } from '../../bin/adapters/makers/plan.ts';
+import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
 const file = {
   id: 'folio',

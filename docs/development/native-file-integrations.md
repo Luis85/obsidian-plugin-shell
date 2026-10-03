@@ -7,9 +7,9 @@
 `context-menu` adds **Inspect file details** to matching files. Its default filter is `.md`. The generated handler receives an immutable-shaped plain file snapshot and returns a title/message. The host adapter renders that result as literal text in a native dialog; it does not modify the file or replace Markdown's view.
 
 ```sh
-node shell.mjs new --list
-node shell.mjs new ../folio-tools --starter custom-file-view --extension folio --yes
-node shell.mjs new ../file-tools --starter context-menu --extensions md,txt --yes
+node bin/app new --list
+node bin/app new ../folio-tools --starter custom-file-view --extension folio --yes
+node bin/app new ../file-tools --starter context-menu --extensions md,txt --yes
 ```
 
 Without `--yes`, inspect the dry-run/review first. Interactive `new` asks for the native suffix or filters when omitted. The companion starter dialog offers the same choices. The full project JSON retains declarations through export/import, blueprint transfer, replacement, undo and redo. Its browser preview does not claim to register an Obsidian file type.
@@ -19,10 +19,10 @@ Without `--yes`, inspect the dry-run/review first. Interactive `new` asks for th
 Create a feature owner once, then add one or both recipes:
 
 ```sh
-node shell.mjs make feature documents --yes
-node shell.mjs make file-extension board --feature documents --extension board --format json --dry-run
-node shell.mjs make file-extension board --feature documents --extension board --format json --yes
-node shell.mjs make context-menu inspect --feature documents --extensions md,board --yes
+node bin/app make feature documents --yes
+node bin/app make file-extension board --feature documents --extension board --format json --dry-run
+node bin/app make file-extension board --feature documents --extension board --format json --yes
+node bin/app make context-menu inspect --feature documents --extensions md,board --yes
 ```
 
 Use `--format text` for plain text with an empty initial file. JSON starts with a valid versioned object. Edit `src/features/documents/board.file-extension.ts` or `inspect.context-menu.ts` to define your format, domain validation, and behavior. Matching generated unit tests live in `tests/runtime/generated`. Makers update the explicit arrays in `src/bootstrap/native-integrations.ts`; they do not patch `main.ts` or register arbitrary strings as executable code.

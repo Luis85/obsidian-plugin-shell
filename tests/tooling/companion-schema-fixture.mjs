@@ -6,6 +6,9 @@ export function schemaCorpus() {
   const ids = companionStarterIds();
   const positive = ids.map(id => ({ name: starterPath(id), document: validateAuthoringDocument(starterDocument(id)) }));
   const full = positive[ids.indexOf('companion-plugin')].document;
+  const accepted = structuredClone(full);
+  accepted.design.nodes.find(node => node.kind === 'view').acceptance = { states: ['default', 'empty'], keyboardPath: ['Save', 'Cancel'], focusReturn: true, minWidth: 420, themes: ['dark'], notes: 'Worked example.' };
+  positive.push({ name: 'surface with a UX acceptance block', document: accepted });
   const negative = [];
   const bad = (name, edit, schemaRejects = true) => {
     const document = structuredClone(full); edit(document);
@@ -14,6 +17,20 @@ export function schemaCorpus() {
     if (!rejected) throw new Error('CORPUS_INVALID_NEGATIVE: ' + name);
     negative.push({ name, document, schemaRejects });
   };
+  const view = doc => doc.design.nodes.find(node => node.kind === 'view');
+  const withAcceptance = acceptance => doc => { view(doc).acceptance = acceptance; };
+  bad('surface acceptance unknown state', withAcceptance({ states: ['sleeping'] }));
+  bad('surface acceptance duplicate state', withAcceptance({ states: ['error', 'error'] }));
+  bad('surface acceptance empty themes', withAcceptance({ themes: [] }));
+  bad('surface acceptance unknown theme', withAcceptance({ themes: ['sepia'] }));
+  bad('surface acceptance non-numeric width', withAcceptance({ minWidth: 'wide' }));
+  bad('surface acceptance width below range', withAcceptance({ minWidth: 50 }));
+  bad('surface acceptance fractional width', withAcceptance({ minWidth: 360.5 }));
+  bad('surface acceptance blank keyboard step', withAcceptance({ keyboardPath: ['save', '  '] }));
+  bad('surface acceptance keyboard path not a list', withAcceptance({ keyboardPath: 'save' }));
+  bad('surface acceptance focusReturn not boolean', withAcceptance({ focusReturn: 'yes' }));
+  bad('surface acceptance unknown member', withAcceptance({ timeoutMs: 5 }));
+  bad('surface acceptance notes too long', withAcceptance({ notes: 'x'.repeat(2001) }));
   bad('future version', doc => { doc.schemaVersion = 7; });
   bad('retired version', doc => { doc.schemaVersion = 5; doc.design.schema = 5; });
   bad('retired detail designs', doc => { doc.design.detailDesigns = { schema: 2, nextId: 1, documents: [], revisions: [] }; });

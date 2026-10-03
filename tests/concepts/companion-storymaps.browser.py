@@ -58,7 +58,7 @@ def open_golden():
 
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
     page.set_default_timeout(7000)
     page.on('pageerror', lambda e: errors.append(str(e)))
@@ -190,7 +190,7 @@ with sync_playwright() as pw:
         act('close', scope='#modal')
         with tempfile.TemporaryDirectory(prefix='storymap-cli-') as tmp:
             vault=Path(tmp)/'vault'; vault.mkdir(); keep=vault/'keep.md';keep.write_text('foreign record')
-            cli=lambda path: subprocess.run(['node',str(ROOT/'scripts/companion/generate.mjs'),'--input',str(path),'--vault',str(vault),'--target','plugins/companion'],capture_output=True,timeout=15)
+            cli=lambda path: subprocess.run(['node',str(ROOT/'scripts/companion-tools/generate.mjs'),'--input',str(path),'--vault',str(vault),'--target','plugins/companion'],capture_output=True,timeout=15)
             exported=json.loads((OUT/'project.companion.json').read_text())
             check('The concept exports project schema 6 directly',exported['schemaVersion']==6 and exported['design']['schema']==6)
             run=cli(OUT/'project.companion.json')

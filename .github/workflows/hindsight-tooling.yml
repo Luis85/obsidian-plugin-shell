@@ -6,9 +6,9 @@ on:
       - 'tests/hindsight/**'
       - 'tests/support/hindsight-fixture.mjs'
       - 'tests/suites.json'
-      - 'shell.mjs'
+      - 'bin/app'
       - 'package.json'
-      - 'tsconfig.hindsight.json'
+      - 'configs/types/tsconfig.hindsight.json'
       - '.github/workflows/hindsight-tooling.yml'
   push:
     branches: [main]

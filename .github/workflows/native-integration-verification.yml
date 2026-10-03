@@ -27,9 +27,9 @@ jobs:
       - name: Verify contracts, makers and host lifecycle
         run: |
           node --test tests/tooling/native-integrations.checks.mjs
-          node node_modules/vitest/vitest.mjs run tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.generator.json
+          node node_modules/vitest/vitest.mjs run --config configs/testing/vitest.config.mjs tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.generator.json
           node node_modules/vue-tsc/bin/vue-tsc.js --noEmit
           python3 scripts/concepts/build-companion.py --check
   generated-starters:
@@ -55,7 +55,7 @@ jobs:
         env:
           QUALIFIED_NPM: ${{ runner.temp }}/native-npm/node_modules/npm/bin/npm-cli.js
           STARTER: ${{ matrix.starter }}
-        run: node scripts/companion/qualify-starter.mjs "$STARTER"
+        run: node scripts/companion-tools/qualify-starter.mjs "$STARTER"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:

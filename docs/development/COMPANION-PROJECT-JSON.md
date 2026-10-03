@@ -18,7 +18,7 @@ npm run --silent companion:generate -- \
 The equivalent direct invocation does not require dependency installation:
 
 ```sh
-node scripts/companion/generate.mjs \
+node scripts/companion-tools/generate.mjs \
   --input ./my-plugin.companion.json \
   --vault "/path/to/my-vault" \
   --target "."
@@ -85,8 +85,8 @@ Import and folder changes refuse observed stale storage, modified owned Project.
 
 - `scripts/companion/storymap-contract.mjs`: shared bounded Storymaps records and reference validation, no I/O.
 - `scripts/companion/authoring-contract.ts`: shared schema 6 transport/path validation, no I/O.
-- `scripts/companion/read-project.mjs`: bounded file read and contained target inspection; returns `{content, document, vault, target}` without writing.
-- `scripts/companion/generate.mjs`: CLI arguments and stdout/stderr contract, **read-only v1**.
+- `bin/adapters/framework/read-project.ts`: bounded file read and contained target inspection; returns `{content, document, vault, target}` without writing.
+- `scripts/companion-tools/generate.mjs`: CLI arguments and stdout/stderr contract, **read-only v1**.
 - `docs/concepts/companion/src/project-transfer.js`: reviewed import/export and folder settings.
 - `docs/concepts/companion/src/companion-project.js`: declarative self-project seed, not an implemented native plugin.
 
@@ -94,7 +94,7 @@ Import and folder changes refuse observed stale storage, modified owned Project.
 node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs
 python -B scripts/concepts/build-companion.py --check
 python -B tests/concepts/companion-assembly.test.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
 The browser suite downloads an actual project export and passes those bytes to the real CLI in a temporary vault, verifies full semantic round trips, checks replacement failures and renders the seed's editors. The separate storage suite tests actual two-window storage and reload when loopback navigation is permitted. The golden JSON must match the executable seed's export. Exact-artifact results and environment limits belong in the current verification receipt rather than this contract.
@@ -105,7 +105,7 @@ The next writer increment must define a reviewed deterministic plan from this en
 
 ## Implementation workspace generation
 
-The read-only handoff command above remains separate from workspace generation. The shell now also provides `node shell.mjs generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
+The read-only handoff command above remains separate from workspace generation. The shell now also provides `node bin/app generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
 
 ## Page and component designs
 

@@ -1,7 +1,7 @@
 // Synthetic qualification design over the current (project v6) self-project starter. Never substituted for the actual companion export.
 import { readFileSync } from 'node:fs';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { noteWireSchemas } from '../../scripts/companion/compiler/note-contracts.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { noteWireSchemas } from '../../bin/compiler/emitters/note-contracts.ts';
 // Reviewed visual page (IDs vp-5993, vn-5994..vn-6008, vi-6009) with typed controls, a mapped save and a slotted component.
 const boundaryPage = JSON.parse(readFileSync(new URL('./companion/boundary-page.json', import.meta.url), 'utf8'));
 export function boundaryProject(original) {

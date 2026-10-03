@@ -1,17 +1,19 @@
 /** Code roots of a project, derived from its own configuration instead of a hard-coded `src`.
  * A generated project names its product folders (for example `<codebaseFolder>/generated`) in
- * tsconfig.project.json and its test roots in tests/suites.json; the shell repository has neither. */
+ * configs/types/tsconfig.project.json and its test roots in tests/suites.json; the shell repository has neither. */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { projectConfigPath, projectRelativeInclude } from './project-configs.mjs';
 
 function readJson(root, path) {
   try { return JSON.parse(readFileSync(join(root, path), 'utf8')); } catch { return null; }
 }
-/** The literal folder in front of each tsconfig.project.json include glob (`a/b/**\/*.ts` -> `a/b`). */
+/** The literal folder in front of each project tsconfig include glob (`a/b/**\/*.ts` -> `a/b`). */
 function tsconfigRoots(root) {
-  const include = readJson(root, 'tsconfig.project.json')?.include;
+  const config = projectConfigPath(root, 'typescript');
+  const include = config ? readJson(root, config)?.include : null;
   const roots = new Set();
-  for (const pattern of Array.isArray(include) ? include : []) {
+  for (const pattern of Array.isArray(include) ? projectRelativeInclude(config, include.map(String)) : []) {
     const base = String(pattern).replace(/\\/g, '/').split('/**')[0].replace(/\/+$/, '');
     if (base && !base.includes('*') && !base.startsWith('.') && !base.split('/').includes('..')) roots.add(base);
   }

@@ -5,32 +5,39 @@ import { fileSymlink } from './file-symlink.mjs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { companionStarters, loadDefinitions } from '../../scripts/starters/repository.ts';
-import { customizeStarter } from '../../scripts/starters/customize.ts';
-import { starterProjection } from '../../scripts/starters/browser.ts';
+import { companionStarters, loadDefinitions } from '../../bin/adapters/starters/repository.ts';
+import { customizeStarter } from '../../bin/adapters/starters/customize.ts';
+import { starterProjection } from '../../bin/adapters/starters/browser.ts';
 import { validateStarterCatalog } from '../../scripts/companion/starter-contract.mjs';
-import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { projectModel, symbol } from '../../bin/compiler/emitters/model.ts';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { AUTHORING_VERSION as COMPANION_VERSION } from '../../scripts/companion/authoring-contract.ts';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { exampleStarterIds } from '../support/starter-documents.mjs';
 import { retiredProject } from '../support/retired-projects.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),examples=new Set(exampleStarterIds());
-// The eleven focused example starters, converted once from their v5 models to project v6.
+// The twelve focused example starters: eleven converted once from their v5 models, plus the agent-ready tooling preset, all project v6.
 const starters=companionStarters(await loadDefinitions(root)).filter(entry=>examples.has(entry.definition.id));
 const starter=id=>starters.find(entry=>entry.definition.id===id);
 // The current authoring workspace projects the same definitions into its session catalog.
 const catalog={schemaVersion:1,starters:starters.map(entry=>starterProjection(entry.definition,entry.sha256))};
 // Page counts equal the page designs each starter carries.
-const pageCounts={blank:0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4,'custom-file-view':3,'context-menu':3};
+const pageCounts={blank:0,'agent-ready':0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4,'custom-file-view':3,'context-menu':3};
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
 async function temporary(work){const folder=await mkdtemp(join(tmpdir(),'project-starters-'));try{return await work(folder);}finally{await rm(folder,{recursive:true,force:true});}}
-test('eleven example starters include a genuinely domain-free minimal shell',()=>{
- assert.equal(starters.length,11);assert.equal(validateStarterCatalog(catalog),catalog);
+test('twelve example starters include a genuinely domain-free minimal shell',()=>{
+ assert.equal(starters.length,12);assert.equal(validateStarterCatalog(catalog),catalog);
  const blank=starter('blank').document.design;
  assert.equal(blank.nodes.length,2);assert.equal(blank.nodes[0].kind,'view');assert.equal(blank.nodes[1].kind,'settings');
  assert.equal(blank.semantic.entities.length,0);assert.equal(blank.dataSources.sources.length,0);assert.equal(blank.prds.length,0);assert.equal(blank.library.length,0);
  assert.equal('detailDesigns' in blank,false);assert.deepEqual([blank.visualDesigns.pages.length,blank.visualDesigns.components.length,blank.visualDesigns.layouts.length,blank.visualDesigns.revisions.length],[0,0,0,0]);
+});
+test('agent-ready is an explicit inert tooling preset over the same blank product surface',()=>{
+ const d=starter('agent-ready').document;
+ assert.equal(d.design.blueprint,'blank');assert.equal(d.design.semantic.entities.length,0);assert.equal(d.design.prds.length,0);
+ assert.deepEqual(d.tooling.airship,{enabled:true,agent:'claude',targetPort:5173,port:5174});
+ assert.deepEqual(d.tooling.hindsight,{enabled:true,agents:['claude-code','codex'],git:'message',sessions:false});
+ assert.match(d.notes.at(-1),/does not install Hindsight/);
 });
 for(const loaded of starters){
  const entry={id:loaded.definition.id,sha256:loaded.sha256,document:loaded.document};
@@ -59,7 +66,7 @@ for(const loaded of starters){
   assert.equal(pkg.name,'my-new-plugin');assert.ok(pkg.scripts['verify:project']);assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
   assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),document);
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8'));assert.ok(trace.requirements.every(r=>r.verification==='todo'));
-  if(entry.id!=='blank')assert.ok(trace.requirements.length>=4);
+  if(!['blank','agent-ready'].includes(entry.id))assert.ok(trace.requirements.length>=4);
   if(entry.document.design.dataSources.sources.length){
    assert.match(await readFile(join(target,'src/generated/presentation/stores/starter-records.ts'),'utf8'),/defineStore/);
    const source=document.design.dataSources.sources[0],module=await import(pathToFileURL(join(target,'src/generated/infrastructure/sources/starter-records.ts')).href);
@@ -86,7 +93,7 @@ for(const [label,fields,pattern] of [
  ['absolute source',{codebaseFolder:'/tmp/src'},/relative/],['traversal source',{codebaseFolder:'../src'},/relative/],['host folder',{testsFolder:'.obsidian'},/reserved|protected/i],['overlapping paths',{codebaseFolder:'app',testsFolder:'APP/tests'},/overlap/i],['tooling collision',{codebaseFolder:'scripts'},/tooling/i],['unknown choice',{runScript:'evil'},/Unknown configuration/],
 ])test('refuses '+label+' without altering the starter',()=>{const before=JSON.stringify(starter('quick-capture').document);assert.throws(()=>customizeStarter(starter('quick-capture'),{...choices,...fields}),pattern);assert.equal(JSON.stringify(starter('quick-capture').document),before);});
 for(const [label,mutate] of [
- ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id='blank'],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
+ ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id=c.starters[0].id],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
 test('catalog rejects a retired v4 document: starters carry only project schema 6',()=>{
  const c=structuredClone(catalog);c.starters[0].document=retiredProject(4);

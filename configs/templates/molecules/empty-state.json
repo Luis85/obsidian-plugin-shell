@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "molecule.empty-state",
+  "name": "Empty State",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "molecule",
+  "category": "Feedback",
+  "description": "Explains why content is absent and offers a next action.",
+  "tags": [
+    "molecule",
+    "feedback",
+    "empty"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "empty-state",
+    "call-to-action"
+  ],
+  "states": [
+    "empty",
+    "default"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "atom.button"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "recipe",
+    "recipeId": "recipe-empty-state"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

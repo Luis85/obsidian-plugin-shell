@@ -4,16 +4,22 @@ on:
     paths:
       - 'configs/starters/**'
       - 'scripts/starters/**'
+      - 'bin/adapters/starters/**'
       - 'scripts/companion/**'
+      - 'scripts/companion-tools/**'
+      - 'templates/**'
       - 'scripts/compiler/**'
+      - 'bin/compiler/**'
       - 'scripts/concepts/**'
       - 'scripts/bundling/**'
       - 'docs/licenses/**'
       - 'tests/concepts/*-showcase.browser.mjs'
       - 'tests/concepts/starter-workspace.browser.mjs'
-      - 'scripts/framework/**'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
       - 'scripts/companion/starter-*.mjs'
-      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'bin/compiler/emitters/framework-docs.ts'
       - 'tests/tooling/starter-*.checks.mjs'
       - '.github/workflows/starter-distribution.yml'
   workflow_dispatch:
@@ -54,10 +60,10 @@ jobs:
           node scripts/concepts/build-mvp.mjs
           node scripts/concepts/export-golden-project.mjs
           node scripts/concepts/export-golden-project.mjs --check
-          node shell.mjs starters coverage feature-showcase --require-model-coverage --json
+          node bin/app starters coverage feature-showcase --require-model-coverage --json
       - name: Generate and independently install the visual-feature showcase
         run: |
-          node shell.mjs new "$RUNNER_TEMP/workbench-feature-showcase" --starter feature-showcase --yes --json
+          node bin/app new "$RUNNER_TEMP/workbench-feature-showcase" --starter feature-showcase --yes --json
           cd "$RUNNER_TEMP/workbench-feature-showcase"
           node "$QUALIFIED_NPM" ci --strict-allow-scripts
           node "$QUALIFIED_NPM" run typecheck:project
@@ -99,8 +105,8 @@ jobs:
           SOURCE_COMMIT: ${{ steps.identity.outputs.source }}
         run: |
           mkdir -p reports/workbench-distributions
-          node shell.mjs framework pack --out "reports/workbench-distributions/workbench-shell-$RELEASE_VERSION.zip" --yes --json
-          node shell.mjs starters pack --out "reports/workbench-distributions/workbench-starters-$RELEASE_VERSION.zip" --yes --json
+          node bin/app framework pack --out "reports/workbench-distributions/workbench-shell-$RELEASE_VERSION.zip" --yes --json
+          node bin/app starters pack --out "reports/workbench-distributions/workbench-starters-$RELEASE_VERSION.zip" --yes --json
           node --input-type=module <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
           import { createHash } from 'node:crypto';

@@ -32,7 +32,7 @@ def command(args, cwd=ROOT):
 
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width': 1440, 'height': 1000}, accept_downloads=True)
     page.set_default_timeout(8000)
     page.on('pageerror', lambda error: errors.append(str(error)))
@@ -62,13 +62,13 @@ with sync_playwright() as pw:
             vault = Path(temporary)
             keep = vault / 'keep.md'
             keep.write_text('Unrelated note')
-            args = [str(ROOT / 'shell.mjs'), 'generate', '--input', str(exported), '--vault', str(vault), '--target', 'implementation']
-            plan = command(args)
-            check('Real generator accepts downloaded browser bytes without conflicts', plan['mode'] == 'plan' and not plan['conflicts'])
-            check('Planning creates no implementation directory or vault data', list(vault.iterdir()) == [keep])
-            result = command(args + ['--apply', plan['planHash']])
             target = vault / 'implementation'
-            check('Exact reviewed approval produces the independent source project', result['mode'] == 'applied' and (target / 'src/main.ts').is_file())
+            args = [str(ROOT / 'bin/app'), 'new', str(target), '--from', str(exported), '--json']
+            plan = command(args)
+            check('Real generator accepts downloaded browser bytes without conflicts', plan['status'] == 'planned' and plan['data']['written'] is False and not plan['data']['conflicts'])
+            check('Planning creates no implementation directory or vault data', list(vault.iterdir()) == [keep])
+            result = command(args + ['--apply', plan['data']['planHash']])
+            check('Exact reviewed approval produces the independent source project', result['status'] == 'applied' and (target / 'src/main.ts').is_file())
             manifest = json.loads((target / 'scripts/test-data/manifest.json').read_text())
             check('Browser preview and generated manifest agree exactly', manifest == preview['manifest'])
             fixture_plan = command(['scripts/test-data/cli.mjs', 'plan'], target)

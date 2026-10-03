@@ -1,9 +1,9 @@
 import { readFile, readdir, lstat, realpath } from 'node:fs/promises';
 import { resolve, relative, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
 import { release } from 'node:os';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
+import { resolveBrowserExecutable } from './browser-executable.mjs';
 import { validateRetained } from '../release/candidate.mjs';
 
 const protocol = 'executable-evidence/2';
@@ -81,8 +81,9 @@ export async function evidenceIdentity(root, producer) {
   if (!policyFiles.length) throw new Error('EVIDENCE_PROTOCOL_MISSING');
   let browser = null;
   if (producer === 'browser') {
-    const playwright = await import(pathToFileURL(join(root, 'node_modules/playwright-core/index.mjs')).href);
-    const executable = process.env.SHELL_CHROMIUM || playwright.chromium.executablePath();
+    const resolved = resolveBrowserExecutable({ root });
+    if (!resolved.executablePath) throw new Error(`EVIDENCE_BROWSER_UNAVAILABLE: ${resolved.hint}`);
+    const executable = resolved.executablePath;
     const bytes = await readFile(executable);
     browser = { executable, bytes: bytes.length, sha256: sha256(bytes) };
   }

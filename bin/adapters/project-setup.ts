@@ -2,9 +2,9 @@ import { validateDocumentationSettings } from './settings-documentation.ts';
 import { lstat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { hash } from '../../scripts/framework/files.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
+import { hash } from './framework/files.ts';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { newDocument, openDocument, documentText } from '../domain/document.ts';
 import { object, keys, text, list } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
@@ -19,7 +19,7 @@ import { boilerplatePlan } from './compiler.ts';
 import { intakePrds, type Intake } from './prd-intake.ts';
 export { setupSchema, setupExample } from '../application/setup-schema.ts';
 interface SetupContext { root: string; frameworkRoot: string; signal?: AbortSignal }
-/** Project setup runs the installed Angular webapp starter, read beside shell.mjs like every project starter. */
+/** Project setup runs the installed Angular webapp starter, read from configs/starters in the package root like every project starter. */
 const setupStarter = 'webapp-angular';
 export async function angularSetupGuide(frameworkRoot: string) {
   const { selection } = await projectStarter(frameworkRoot, setupStarter);
@@ -131,7 +131,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
     ignoredMarkdown: intake.ignored, phase: state.phase, prototypePrepared: state.prototypePrepared, boilerplatePrepared: state.boilerplatePrepared,
     installed: false, built: false, runtimeAccepted: false, businessImplemented: false,
     start: data.boilerplate ? { cwd: settings.paths.app, commands: [['npm', 'install'], ['npm', 'run', 'typecheck'], ['npm', 'test'], ['npm', 'start']] } : null,
-    next: 'Use shell.mjs sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
+    next: 'Use node bin/app sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
   return { ...result, validate: async () => {
     await setupPrerequisites(root, settings.preferences.vaultConfigDirectory);
     requireSketch(intakeIdentity(await intakePrds(root, settings, data.prds)) === intakeHash, 'SETUP_STALE_PRDS', 'PRD inventory changed after preview; review setup again.');

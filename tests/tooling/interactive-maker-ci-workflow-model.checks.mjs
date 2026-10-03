@@ -1,0 +1,213 @@
+import assert from 'node:assert/strict';
+import { readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { loadWorkflows, parseWorkflowText, workflowParser } from '../../bin/adapters/framework/ci-workflows.ts';
+import { evaluateCondition, substitute } from '../../bin/domain/ci-expression.ts';
+import { chooseCombination, expandMatrix, parseMatrixSelector, summarizeMatrix } from '../../bin/domain/ci-matrix.ts';
+import { installsDependencies, jobRefusals, runnerOs } from '../../bin/domain/ci-safety.ts';
+import { parseCommandFile, shellInvocation } from '../../bin/domain/ci-shell.ts';
+import { summarizeWorkflow } from '../../bin/domain/ci-listing.ts';
+import { setupActions } from '../../bin/domain/ci-workflow.ts';
+import { executionBlockers, planJob, skipReason } from '../../bin/domain/ci-plan.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+const root = fileURLToPath(new URL('../../', import.meta.url));
+const parseDocument = await workflowParser();
+const workflow = text => parseWorkflowText('sample.yml', text, parseDocument);
+const job = (body, extra = '') => workflow(`name: Sample\non: push\n${extra}jobs:\n  work:\n${body}`).jobs[0];
+
+test('every real workflow in .github/workflows parses into jobs with steps and classified actions', async () => {
+  const names = (await readdir(join(root, '.github/workflows'))).filter(name => /\.ya?ml$/.test(name));
+  const workflows = await loadWorkflows(root);
+  assert.equal(workflows.length, names.length);
+  assert.ok(workflows.length >= 19, 'the repository keeps its qualification workflows');
+  for (const item of workflows) {
+    assert.ok(item.jobs.length > 0, `${item.file} has jobs`);
+    assert.ok(item.triggers.length > 0, `${item.file} has triggers`);
+    for (const entry of item.jobs) {
+      assert.ok(entry.steps.length > 0, `${item.file}/${entry.id} has steps`);
+      for (const step of entry.steps) {
+        if (step.uses) assert.equal(step.kind, setupActions.includes(step.uses.split('@')[0]) ? 'setup' : 'external');
+        else assert.equal(step.kind, 'run');
+      }
+    }
+  }
+});
+test('ci.yml exposes its known jobs, triggers and resolved YAML anchors', async () => {
+  const ci = (await loadWorkflows(root)).find(item => item.stem === 'ci');
+  const ids = ci.jobs.map(entry => entry.id);
+  for (const id of ['baseline', 'showcase', 'framework-cli']) assert.ok(ids.includes(id), `ci.yml job ${id}`);
+  for (const trigger of ['pull_request', 'push', 'workflow_dispatch']) assert.ok(ci.triggers.includes(trigger));
+  const showcase = ci.jobs.find(entry => entry.id === 'showcase');
+  assert.match(showcase.steps[0].uses, /^actions\/checkout@/, '*checkout alias resolves to the anchored step');
+  assert.ok(showcase.matrix, 'showcase carries a matrix expression');
+  const summary = summarizeWorkflow(ci).jobs.find(entry => entry.id === 'showcase');
+  assert.equal(summary.reference, 'ci/showcase'); assert.equal(summary.matrix.computed, true);
+});
+test('schedules, path filters and branches are listed per workflow', async () => {
+  const all = await loadWorkflows(root);
+  assert.ok(all.some(item => item.schedules.length > 0 && item.triggers.includes('schedule')), 'a scheduled workflow exists');
+  assert.ok(all.some(item => item.filters.some(filter => filter.paths?.length)), 'a path-filtered workflow exists');
+  const sample = workflow('name: S\non:\n  push:\n    branches: [main]\n    paths: ["src/**"]\n    paths-ignore: ["docs/**"]\n  schedule:\n    - cron: "1 2 * * 3"\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hi\n');
+  assert.deepEqual(sample.triggers, ['push', 'schedule']); assert.deepEqual(sample.schedules, ['1 2 * * 3']);
+  assert.deepEqual(sample.filters, [{ event: 'push', branches: ['main'], paths: ['src/**'], pathsIgnore: ['docs/**'] }]);
+});
+test('unsupported or malformed workflow syntax fails loudly with a code', () => {
+  const rejects = (text, code, pattern) => assert.throws(() => workflow(text), error => error.code === code && pattern.test(error.message));
+  rejects('name: X\njobs:\n  a:\n    steps: []\n', 'CI_UNSUPPORTED', /on/);
+  rejects('name: X\non: push\non: pull_request\njobs: {}\n', 'CI_WORKFLOW_INVALID', /key|duplicate/i);
+  rejects('name: X\non: push\njobs:\n  a:\n    steps:\n      - name: both\n        run: echo\n        uses: actions/checkout@v4\n', 'CI_UNSUPPORTED', /exactly one/);
+  rejects('name: X\non: push\njobs:\n  a:\n    steps: nope\n', 'CI_UNSUPPORTED', /steps/);
+  rejects('name: X\non: push\njobs:\n  a:\n    steps:\n      - run: [echo]\n', 'CI_UNSUPPORTED', /string/);
+  rejects('name: X\non: [push\n', 'CI_WORKFLOW_INVALID', /./);
+});
+test('expressions resolve only literal context paths and report everything else', () => {
+  const lookup = path => ({ 'matrix.os': 'ubuntu-latest', 'runner.os': 'Linux' })[path];
+  assert.deepEqual(substitute('on ${{ matrix.os }} / ${{ runner.os }}', lookup), { text: 'on ubuntu-latest / Linux', unresolved: [] });
+  const open = substitute('${{ github.sha }} ${{ fromJSON(matrix.os) }} ${{ github.sha }}', lookup);
+  assert.equal(open.text, '${{ github.sha }} ${{ fromJSON(matrix.os) }} ${{ github.sha }}');
+  assert.deepEqual(open.unresolved, ['github.sha', 'fromJSON(matrix.os)']);
+});
+test('conditions are settled three-valued: true, false or unknown', () => {
+  const options = { lookup: path => ({ 'runner.os': 'Linux', 'matrix.starter': 'cli' })[path], success: true };
+  const cases = [
+    ["runner.os == 'Linux'", true], ["runner.os == 'Windows'", false], ["runner.os != 'Windows'", true], ['always()', true], ['success()', true], ['failure()', false],
+    ['${{ !cancelled() }}', true], ["${{ !cancelled() && runner.os == 'Linux' }}", true], ["!cancelled() && runner.os == 'Windows'", false],
+    ["matrix.starter != 'cli'", false], ["github.event_name == 'push'", undefined], ["${{ inputs.draft_snapshot != '' }}", undefined],
+    ["github.event_name == 'push' && runner.os == 'Windows'", false], ["github.event_name == 'push' || runner.os == 'Linux'", true],
+    ["(runner.os == 'Linux' || runner.os == 'macOS') && matrix.starter == 'cli'", true], ["contains(runner.os, 'Lin')", undefined],
+    ["runner.os == 'Linux' &&", undefined], ["runner.os ==", undefined], ["'it''s' == 'IT''S'", true], ['', undefined],
+  ];
+  for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
+  assert.equal(evaluateCondition('failure()', { ...options, success: false }), true);
+});
+test('matrix expansion honours axes, exclude and include; selection is explicit or fails', () => {
+  const raw = { os: ['a', 'b'], node: [20, 22], exclude: [{ os: 'b', node: 20 }], include: [{ os: 'a', extra: 'x' }, { os: 'c', node: 24 }] };
+  const all = expandMatrix(raw, {});
+  assert.deepEqual(all, [{ os: 'a', node: '20', extra: 'x' }, { os: 'a', node: '22', extra: 'x' }, { os: 'b', node: '22' }, { os: 'c', node: '24' }]);
+  assert.deepEqual(expandMatrix({ include: [{ group: 1, ids: 'a b' }, { group: 2, ids: 'c' }] }, {}), [{ group: '1', ids: 'a b' }, { group: '2', ids: 'c' }]);
+  assert.deepEqual(expandMatrix(undefined, {}), [{}]);
+  assert.deepEqual(summarizeMatrix(raw), { axes: ['os', 'node', 'extra'], combinations: 4, computed: false });
+  assert.deepEqual(chooseCombination(all, { os: 'b' }, raw, () => false), { combination: { os: 'b', node: '22' }, available: 4, mode: 'selected' });
+  assert.equal(chooseCombination(all, {}, raw, combo => combo.os === 'b').combination.os, 'b');
+  assert.equal(chooseCombination(all, {}, raw, () => false).mode, 'default');
+  assert.deepEqual(chooseCombination([{}], {}, undefined, () => true), { combination: {}, available: 1, mode: 'none' });
+  assert.throws(() => chooseCombination(all, { os: 'z' }, raw, () => true), error => error.code === 'CI_MATRIX_NO_MATCH' && /Available: os=a,node=20,extra=x/.test(error.message));
+  assert.throws(() => chooseCombination(all, { os: 'a' }, raw, () => true), error => error.code === 'CI_MATRIX_AMBIGUOUS');
+});
+test('matrices computed by expressions need an explicit selector and never guess', () => {
+  assert.throws(() => expandMatrix({ os: '${{ fromJSON(x) }}' }, {}), error => error.code === 'CI_MATRIX_UNRESOLVED' && /--matrix os=<value>/.test(error.message));
+  assert.deepEqual(expandMatrix({ os: '${{ fromJSON(x) }}', n: [1, 2] }, { os: 'linux' }), [{ os: 'linux', n: '1' }, { os: 'linux', n: '2' }]);
+  assert.throws(() => expandMatrix('${{ fromJSON(x) }}', {}), error => error.code === 'CI_MATRIX_UNRESOLVED');
+  assert.deepEqual(expandMatrix('${{ fromJSON(x) }}', { a: 'b' }), [{ a: 'b' }]);
+  assert.deepEqual(summarizeMatrix({ os: '${{ fromJSON(x) }}' }), { axes: ['os'], combinations: null, computed: true });
+  assert.deepEqual(parseMatrixSelector('os=ubuntu-latest, group = 2,ids=a=b'), { os: 'ubuntu-latest', group: '2', ids: 'a=b' });
+  for (const bad of ['', 'os', '=x', ',']) assert.throws(() => parseMatrixSelector(bad), error => error.code === 'CI_MATRIX_SELECTOR');
+});
+test('safety rules refuse secrets, publication and deployment but allow rehearsals and read-only git', () => {
+  const refused = run => { const sample = workflow(`name: S\non: push\njobs:\n  work:\n    runs-on: ubuntu-latest\n    steps:\n      - run: ${JSON.stringify(run)}\n`); return jobRefusals(sample, sample.jobs[0]); };
+  for (const command of ['npm publish --access public', 'pnpm publish', 'git push origin main', 'git tag v1.0.0', 'gh release create v1', 'gh api repos/x/y -X POST', 'docker push img',
+    'node bin/app release operate --input a.json --execute', 'node scripts/release/cli.mjs --authorize abc', 'echo ${{ secrets.TOKEN }}', 'curl -H "Authorization: ${{ github.token }}" x']) {
+    assert.ok(refused(command).length > 0, command);
+  }
+  for (const command of ['git tag --list', 'git tag -l "v*"', 'git show-ref refs/tags/v1', 'node "$QUALIFIED_NPM" run release:rehearse -- --commit abc', 'node bin/app framework pack --yes']) {
+    assert.deepEqual(refused(command), [], command);
+  }
+  assert.match(job('    runs-on: ubuntu-latest\n    steps:\n      - run: echo\n        env:\n          T: ${{ secrets.NPM_TOKEN }}\n').steps[0].env.T, /secrets/);
+  const sample = workflow('name: S\non: push\nenv:\n  K: ${{ secrets.K }}\njobs:\n  work:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo\n');
+  assert.match(jobRefusals(sample, sample.jobs[0]).join(), /secrets/);
+  const named = workflow('name: S\non: push\njobs:\n  publish-site:\n    runs-on: ubuntu-latest\n    environment: production\n    services: {db: {image: x}}\n    steps:\n      - uses: softprops/action-gh-release@v1\n');
+  const reasons = jobRefusals(named, named.jobs[0]).join('\n');
+  for (const part of [/deployment environment/, /service containers/, /publishing action/, /release, publish or deploy/]) assert.match(reasons, part);
+  const rehearsal = workflow('name: S\non: push\njobs:\n  rehearsal:\n    name: Release rehearsal\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo\n');
+  assert.match(jobRefusals(rehearsal, rehearsal.jobs[0]).join(), /named as a release/, 'release in a job name is conservative');
+});
+test('runner OS detection, shell invocation and command-file parsing mirror the hosted runner', () => {
+  assert.deepEqual(['ubuntu-24.04', 'windows-latest', 'macos-latest', 'self-hosted', '${{ matrix.os }}'].map(runnerOs), ['Linux', 'Windows', 'macOS', null, null]);
+  assert.deepEqual(shellInvocation('bash', false, 'x').args, ['-e', '-c', 'x']);
+  assert.deepEqual(shellInvocation('bash', true, 'x').args, ['--noprofile', '--norc', '-eo', 'pipefail', '-c', 'x']);
+  assert.equal(shellInvocation('pwsh', true, 'x').file, 'pwsh'); assert.match(shellInvocation('pwsh', true, 'x').args.at(-1), /\$ErrorActionPreference = 'stop'\nx\n/);
+  assert.equal(shellInvocation('cmd', true, 'x'), null); assert.equal(shellInvocation('bash {0}', true, 'x'), null);
+  assert.deepEqual(parseCommandFile('A=1\nB=two=2\nnoise\nC<<EOF\nline1\nline2\nEOF\nD=4\n'), { A: '1', B: 'two=2', C: 'line1\nline2', D: '4' });
+});
+test('condition grammar edge cases stay unknown instead of throwing or guessing', () => {
+  const options = { lookup: path => ({ 'runner.os': 'Linux' })[path], success: true };
+  const unknown = ["runner.os == 'Linux'  junk", "(runner.os == 'Linux'", 'foo()', 'contains(runner.os)', "runner.os == 'unterminated", 'a b', '== 1', '()', '&& true'];
+  for (const expression of unknown) assert.equal(evaluateCondition(expression, options), undefined, expression);
+  const cases = [["runner.os == 'Linux'  ", true], ['1 == 1', true], ['-1 == 1', false], ['null == \'\'', true], ['true && true', true], ['false || false', false], ['!false', true], ['!true', false],
+    ['!github.x', undefined], ['github.x && true', undefined], ['github.x || false', undefined], ['github.x && false', false], ['github.x || true', true], ["github.x == 'a' || github.y != 'b'", undefined],
+    ['!!runner.os', true], ["'' && true", false], ["'x' && true", true], ['cancelled()', false], ["runner.os != github.x", undefined], ['true == true', true]];
+  for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
+});
+test('workflow normalization accepts the documented shapes and rejects the rest', () => {
+  assert.deepEqual(workflow('name: A\non: push\njobs: {}\n').triggers, ['push']);
+  assert.deepEqual(workflow('name: A\non: [push, pull_request]\njobs: {}\n').triggers, ['push', 'pull_request']);
+  const nulls = workflow('on:\n  pull_request:\n  workflow_dispatch:\njobs: {}\n');
+  assert.deepEqual([nulls.name, nulls.triggers, nulls.filters], ['sample', ['pull_request', 'workflow_dispatch'], []]);
+  const full = workflow(`name: Full
+on: push
+env:
+  NUM: 3
+  FLAG: true
+jobs:
+  reusable:
+    uses: ./.github/workflows/other.yml
+  main:
+    name: Main \${{ matrix.k }}
+    needs: reusable
+    if: github.event_name != 'push'
+    runs-on: [self-hosted, linux]
+    strategy:
+      matrix:
+        k: [1]
+    defaults:
+      run:
+        shell: sh
+        working-directory: sub
+    container: node:24
+    steps:
+      - uses: actions/cache@v4
+      - id: named
+        run: echo hi
+      - if: false
+        run: echo never
+`);
+  assert.deepEqual(full.env, { NUM: '3', FLAG: 'true' });
+  assert.deepEqual(full.jobs[0].blockers, ['calls a reusable workflow']); assert.deepEqual(full.jobs[0].steps, []);
+  const main = full.jobs[1];
+  assert.deepEqual([main.needs, main.runsOn, main.shell, main.workingDirectory, main.blockers], [['reusable'], '["self-hosted","linux"]', 'sh', 'sub', ['runs in a container']]);
+  const plan = planJob(full, main, { localOs: 'Linux', selector: {} });
+  assert.deepEqual(plan.steps.map(step => [step.id, step.name, step.disposition]), [['step-1', 'actions/cache@v4', 'setup'], ['named', 'echo hi', 'run'], ['step-3', 'echo never', 'skip-condition']]);
+  assert.deepEqual([plan.name, plan.steps[1].shell, plan.steps[1].shellExplicit, plan.steps[1].workingDirectory, plan.steps[1].env, plan.jobCondition.result], ['Main 1', 'sh', true, 'sub', { NUM: '3', FLAG: 'true' }, 'unknown']);
+  assert.match(skipReason(plan.steps[2]), /"false" is false on this machine/); assert.match(skipReason(plan.steps[0]), /Setup action/);
+  assert.deepEqual(executionBlockers(plan, () => true), ['refused: the job runs in a container']);
+  assert.match(executionBlockers({ ...plan, runsOn: '', runnerOs: null }, () => true).join(), /an unknown runner/);
+  assert.match(executionBlockers({ ...plan, steps: [{ ...plan.steps[1], unresolved: ['inputs.x', 'inputs.x'] }] }, () => false).join(), /inputs\.x$/);
+  for (const [text, pattern] of [['name: A\non: push\njobs:\n  a:\n    env: x\n', /env must be a mapping/], ['name: A\non: push\njobs:\n  a:\n    needs: [1, {a: b}]\n', /must be a string/],
+    ['name: A\non: push\njobs: [a]\n', /jobs must be a mapping/], ['name: A\non: [1, {a: b}]\njobs: {}\n', /must be a string/], ['name: A\non:\n  schedule: daily\njobs: {}\n', /cron entries/],
+    ['name: A\non:\n  schedule:\n    - cron: [1]\njobs: {}\n', /cron/], ['name: A\non:\n  push:\n    paths: [1, {a: b}]\njobs: {}\n', /must be a string/], ['name: A\non:\n  push:\n    paths: {a: b}\njobs: {}\n', /string or a list/],
+    ['[]\n', /must be a mapping/], ['name: A\non: push\njobs:\n  a:\n    steps:\n      - [x]\n', /must be a mapping/]]) {
+    assert.throws(() => workflow(text), error => error.code === 'CI_UNSUPPORTED' && pattern.test(error.message), text);
+  }
+});
+test('matrix and shell edge cases fail loudly or fall back predictably', () => {
+  assert.deepEqual(expandMatrix({ node: 20 }, {}), [{ node: '20' }]);
+  assert.deepEqual(expandMatrix({ include: [{ cfg: { a: 1 } }] }, {}), [{ cfg: '{"a":1}' }]);
+  assert.deepEqual(expandMatrix({ os: ['a'], exclude: [{ os: 'a' }] }, {}), [{}], 'excluding every combination leaves one empty combination');
+  assert.deepEqual(expandMatrix({ os: ['a', 'b'], include: [{ extra: 1 }, { extra: 2 }] }, {}), [{ os: 'a', extra: '2' }, { os: 'b', extra: '2' }]);
+  for (const bad of ['plain', ['a'], 7]) assert.throws(() => expandMatrix(bad, {}), error => error.code === 'CI_UNSUPPORTED', String(bad));
+  assert.throws(() => expandMatrix({ include: 'x' }, {}), error => error.code === 'CI_UNSUPPORTED');
+  assert.throws(() => summarizeMatrix({ include: 'x' }), error => error.code === 'CI_UNSUPPORTED');
+  assert.deepEqual(summarizeMatrix('${{ fromJSON(x) }}'), { axes: [], combinations: null, computed: true });
+  assert.deepEqual(summarizeMatrix(undefined), { axes: [], combinations: null, computed: false });
+  const many = Array.from({ length: 14 }, (_, index) => ({ n: String(index) }));
+  assert.throws(() => chooseCombination(many, { n: 'x' }, {}, () => true), error => / \| \.\.\.\.$/.test(error.message));
+  assert.throws(() => chooseCombination([{}, { a: '1' }], { a: '2' }, {}, () => true), error => /\(none\) \| a=1/.test(error.message));
+  assert.deepEqual(shellInvocation('sh', false, 'x'), { file: 'sh', args: ['-e', '-c', 'x'], display: 'sh -e' });
+  assert.equal(shellInvocation('powershell', false, 'x').file, 'pwsh'); assert.deepEqual(shellInvocation('python', true, 'print(1)').args, ['-c', 'print(1)']);
+  assert.deepEqual(parseCommandFile('A<<EOF\nunterminated\nB=1\n'), {}, 'an unterminated block is dropped, like the runner');
+});
+test('dependency installs into the checkout are recognised, isolated prefixes are not', () => {
+  for (const command of ['npm ci', 'npm ci --no-fund', 'npm install', 'set -e\nnode "$QUALIFIED_NPM" ci --no-fund', 'cd x && npm i', 'node /x/npm-cli.js install']) assert.equal(installsDependencies(command), true, command);
+  for (const command of ['npm install --prefix "$RUNNER_TEMP/npm" --ignore-scripts npm@11', 'npm run build', 'node scripts/setup.mjs', 'npm --prefix tooling/documentation run build']) assert.equal(installsDependencies(command), false, command);
+});

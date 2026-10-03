@@ -3,7 +3,7 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { compileProject, compilerVersion, loadTemplateSnapshot } from './index.ts';
+import { compileProject, compilerVersion, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 
 const GOLDEN_FILE = 'tests/fixtures/compiler/starter-golden.json';
 const STARTERS = 'configs/starters';

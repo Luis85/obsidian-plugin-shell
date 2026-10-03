@@ -2,7 +2,7 @@
   "$schema": "https://typedoc.org/schema.json",
   "name": "Shell CLI user manual",
   "tsconfig": "./tsconfig.json",
-  "entryPoints": ["../framework/catalog.ts", "../framework/help-text.ts", "../framework/contracts.ts", "../compiler/domain/contracts.ts", "../compiler/domain/diagnostics.ts"],
+  "entryPoints": ["../../bin/adapters/framework/catalog.ts", "../../bin/adapters/framework/help-text.ts", "../../bin/adapters/framework/contracts.ts", "../contracts/result.ts", "../../bin/compiler/domain/contracts.ts", "../../bin/compiler/domain/diagnostics.ts"],
   "readme": "../../docs/user-manual/shell-cli/index.md",
   "projectDocuments": [
     "../../docs/user-manual/shell-cli/getting-started.md",

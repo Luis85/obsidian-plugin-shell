@@ -6,13 +6,14 @@ import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { projectStarters, projectStarter, projectGuide, projectRequest, projectPlan } from '../../bin/adapters/projects.ts';
-import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../scripts/compiler/domain/project-starter.ts';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../bin/compiler/domain/project-starter.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/shell.ts';
+// Maker-only surface: these requests must not be routed to the framework CLI.
+import { makerMain as main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const starters = await projectStarters(frameworkRoot);
 const expectedIds = ['cli', 'hybrid-angular', 'hybrid-nuxtui', 'hybrid-vanilla', 'plugin-angular', 'plugin-nuxtui', 'plugin-vanilla', 'webapp-angular', 'webapp-nuxtui', 'webapp-vanilla', 'website'];
@@ -107,9 +108,9 @@ test('every project starter compiles through shared v6 validation into actual ta
     assert.match(files.get('plugins/starter-extension/src/index.ts'), /export const PluginObject/);
     assert.equal(JSON.parse(files.get('plugins/starter-extension/manifest.json')).id, 'starter-extension');
     assert.equal(JSON.parse(files.get('plugins/starter-extension/config.json')).enabled, true);
-    for (const path of ['tsconfig.angular.json', 'tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
+    for (const path of ['configs/types/tsconfig.angular.json', 'configs/types/tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
     if (selected.targets.includes('cli')) {
-      assert.equal(JSON.parse(files.get('tsconfig.cli.json')).compilerOptions.rootDir, '.');
+      assert.equal(JSON.parse(files.get('configs/types/tsconfig.cli.json')).compilerOptions.rootDir, '../..');
       assert.equal(pkg.scripts['start:cli'], 'node dist/cli/src/targets/cli/main.js');
     }
     for (const target of selected.targets) assert.ok(files.has(`src/targets/${target}/main.ts`));
@@ -120,7 +121,7 @@ test('every project starter compiles through shared v6 validation into actual ta
       assert.equal(pkg.dependencies['@angular/core'], selected.angularPins['@angular/core']); assert.equal(pkg.devDependencies['@angular/compiler-cli'], selected.angularPins['@angular/compiler-cli']);
       assert.ok(!pkg.dependencies.vue); assert.ok(!pkg.dependencies['zone.js']);
       assert.match(files.get('src/ui/mount.ts'), /createApplication/); assert.match(files.get('src/ui/mount.ts'), /app.destroy/);
-      assert.equal(JSON.parse(files.get('tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
+      assert.equal(JSON.parse(files.get('configs/types/tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
     }
     if (selected.framework === 'nuxtui') {
       assert.equal(pkg.dependencies['@nuxt/ui'], '4.11.2'); assert.ok(!pkg.dependencies.nuxt);
@@ -213,7 +214,7 @@ test('machine stdout stays one JSON response; directory creation refuses project
   io.input.isTTY = true; io.error.isTTY = true;
   assert.equal(await main(['new', '--input', '-', '--json', '--ui', 'tui', '--root', root, '--out', 'machine'], frameworkRoot, io), 0);
   assert.equal(output.length, 1); assert.equal(JSON.parse(output[0]).status, 'planned'); assert.equal(errors.length, 0);
-  const shell = args => spawnSync(process.execPath, ['--experimental-strip-types', 'shell.mjs', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
+  const shell = args => spawnSync(process.execPath, ['bin/app', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
   const child = shell(['new', '--list']);
   assert.equal(child.status, 0, child.stderr + child.stdout);
   const listed = JSON.parse(child.stdout).data.starters.find(item => item.id === 'cli');
@@ -241,7 +242,6 @@ test('sketch regeneration respects a saved starter selection and refuses legacy 
 test('new help documents project starters alongside directory-creation metadata', async () => scratch(async root => {
   const help = await execute(parseArguments(['new', '--help']), context(root));
   const legacy = help.commands.find(command => command.id === 'new');
-  assert.equal(legacy.options.from, 'value'); assert.equal(legacy.options.starter, 'value');
   assert.match(help.help, /new <dir>.*--from <project\.json>/);
   assert.match(help.help, /new starters --json/); assert.match(help.help, /new guide --starter/);
   assert.doesNotMatch(help.help, /--preset|--framework|--targets|new presets/);

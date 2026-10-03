@@ -35,7 +35,7 @@ function owned(value: unknown, p: Paths, expected: JsonObject): boolean {
   if ([5, 7].includes(args.length) && args[0] === '--experimental-strip-types' && typeof args[1] === 'string'
       && args[2] === 'mcp' && args[3] === '--agent' && ['claude-code', 'codex'].includes(String(args[4]))) {
     const path = relative(join(p.state, 'launchers'), resolve(args[1])).replaceAll('\\', '/');
-    if (/^[a-f0-9]{64}\/cli\.ts$/.test(path) && (args.length === 5 || (args[5] === '--root' && typeof args[6] === 'string'))) return true;
+    if (/^[a-f0-9]{64}\/hindsight\/cli\.ts$/.test(path) && (args.length === 5 || (args[5] === '--root' && typeof args[6] === 'string'))) return true;
   }
   return args.length === 1 && [join(dirname(p.installer), 'mcp-server.js'), join(p.home, '.hindsight/coding-agents/dist/mcp-server.js')].includes(String(args[0]));
 }

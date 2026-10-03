@@ -7,12 +7,13 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import ts from 'typescript';
 import { chromium } from '@playwright/test';
-import { clickdummyHostCode } from '../companion/compiler/clickdummy-host-code.ts';
+import { chromiumLaunchOptions } from '../testing/browser-executable.mjs';
+import { clickdummyHostCode } from '../../bin/compiler/emitters/clickdummy-host-code.ts';
 let source; clickdummyHostCode((_path, content) => { source = content; });
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
 const root = await mkdtemp(join(tmpdir(), 'preview-host-browser-')), file = join(root, 'index.html');
 await writeFile(file, '<!doctype html><html lang="en"><title>Preview host contract</title><body><button id="trigger">Open</button><label for="clickdummy-surface">Browse surfaces</label><select id="clickdummy-surface"><option>Inbox</option></select><script type="module">' + javascript + '\nwindow.hostApi = { createDialogHost, createPreviewLifecycle };<\/script></body></html>');
-const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_EXECUTABLE ? { executablePath: process.env.CHROMIUM_EXECUTABLE } : {}) });
+const browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() });
 const cases = [], errors = [], network = [];
 try {
   const context = await browser.newContext();

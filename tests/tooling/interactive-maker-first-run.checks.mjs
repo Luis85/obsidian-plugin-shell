@@ -5,14 +5,14 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { firstRunPlan, firstRunTool, firstRunReport } from '../../bin/adapters/first-run-plan.ts';
 import { executeFirstRun } from '../../bin/adapters/first-run.ts';
 import { settingsPlan } from '../../bin/adapters/user-settings.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { claimFirstRun, assertNoFirstRun } from '../../bin/adapters/first-run-lock.ts';
 import { projectStarter } from '../../bin/adapters/projects.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const json = value => JSON.stringify(value, null, 2) + '\n';
 async function scratch(fn) {

@@ -32,8 +32,8 @@ is read; earlier formats are rejected, never migrated.
 Generate using the normal reviewed command:
 
 ```sh
-node shell.mjs new ../folio-tools --from ./project.companion.json
-node shell.mjs new ../folio-tools --from ./project.companion.json --apply <reviewed-plan-hash>
+node bin/app new ../folio-tools --from ./project.companion.json
+node bin/app new ../folio-tools --from ./project.companion.json --apply <reviewed-plan-hash>
 cd ../folio-tools
 npm ci
 npm run verify:project

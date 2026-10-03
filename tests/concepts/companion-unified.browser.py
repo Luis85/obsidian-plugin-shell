@@ -42,7 +42,7 @@ def draw(p,source='node-3',target='node-5'):
     p.wait_for_selector('#modal[open] [data-action="design-link-save"]')
 
 with sync_playwright() as pw:
-    browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
+    browser=pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
     def new(width=1600,height=1000,theme='light'):
         p=browser.new_page(viewport={'width':width,'height':height});p.set_default_timeout(6500)
         p.on('pageerror',lambda e:errors.append(str(e)))

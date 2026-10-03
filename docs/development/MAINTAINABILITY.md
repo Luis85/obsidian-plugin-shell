@@ -87,6 +87,11 @@ change any measured production denominator or add Python to default setup.
 Unreviewed files in those directories still fail `METRIC_UNCLASSIFIED_INPUT`.
 The separate optional-memory workflow owns adapter tests and provider acceptance.
 
+The one POSIX shell file, `scripts/agent/cloud-setup.sh` (the paste-in setup script for
+Claude Code cloud environments), is inventoried by exact path with its bytes and
+`measurement: not-measured`; `tests/tooling/agent-cloud-setup.checks.mjs` runs it
+against a local download server. Other shell files still fail `METRIC_UNCLASSIFIED_INPUT`.
+
 Four measured views are retained: production, executable tooling/configuration,
 test/harness fixtures, and executable example-removal templates. Tooling and
 fixture/template complexity and duplication are diagnostic reports, without a

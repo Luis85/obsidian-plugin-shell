@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { companionProjectSchema } from '../../scripts/companion/schema/project.mjs';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { schemaCorpus } from './companion-schema-fixture.mjs';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 import { retiredProjectText } from '../support/retired-projects.mjs';
@@ -16,7 +16,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const corpus = schemaCorpus();
 const sha = text => createHash('sha256').update(text).digest('hex');
 function cli(args, cwd = root, input) {
-  const output = spawnSync(process.execPath, ['--experimental-strip-types', join(root, 'shell.mjs'), ...args, '--json'], {
+  const output = spawnSync(process.execPath, ['--experimental-strip-types', join(root, 'bin/app'), ...args, '--json'], {
     cwd, input, encoding: 'utf8', timeout: 30000, maxBuffer: 10_000_000,
   });
   assert.equal(output.error, undefined);

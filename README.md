@@ -8,7 +8,7 @@ The three promises are **saving time without sacrificing quality**, **documentin
 
 Start with the [product vision](docs/product/PRODUCT-VISION.md), [product principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md). The [product and delivery overview](SHELL-FIRST-OVERVIEW.md) connects the available entry points; the [2026-09-29 vision review](docs/product/PR5-VISION-REVIEW.md) distinguishes inspected implementation from intended direction.
 
-**Implementation boundary:** Workbench builds on the reusable shell, CLI, compiler and authoring concept in PR #5. A generated scaffold is not a finished application, and the browser authoring concept is not the fully accepted native product. Existing `shell.mjs` commands, package/manifest IDs, schema names and `companion` paths remain unchanged. Generated projects retain the user's chosen identity.
+**Implementation boundary:** Workbench builds on the reusable shell, CLI, compiler and authoring concept in PR #5. A generated scaffold is not a finished application, and the browser authoring concept is not the fully accepted native product. The supported CLI entry is `node bin/app`; package/manifest IDs, schema names and `companion` paths remain unchanged. Generated projects retain the user's chosen identity.
 
 ## Companion and UI-feature starters
 
@@ -18,7 +18,7 @@ inputs, then enter setup. `configs/starters/companion-plugin.json` is the canoni
 Companion development model; `configs/starters/feature-showcase.json` exercises the
 catalogued visual controls and actions with explicit mock scenarios.
 
-Run `node shell.mjs starters coverage feature-showcase --json` to inspect model
+Run `node bin/app starters coverage feature-showcase --json` to inspect model
 coverage. This is not native acceptance: the golden Companion still has unbound
 business interactions and missing native authoring adapters. See the
 [Companion starter guide](docs/development/COMPANION-STARTERS.md) for the exact
@@ -43,7 +43,8 @@ npm run new -- ../my-plugin --starter blank --yes --install --trust-processes   
 npm run new -- ../my-plugin --from my-plugin.companion.json   # any project JSON exported by the companion
 ```
 
-In a terminal, `npm run new` without arguments asks for the folder, starter and
+`npm run new` is `node bin/app new`; `node bin/app` is the only CLI entry (there is
+no root launcher script). In a terminal, `npm run new` without arguments asks for the folder, starter and
 identity, then shows the plan before writing. The result is scaffolding with TODO
 acceptance obligations, not a finished or natively qualified plugin. Details:
 [Framework CLI](docs/development/FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter).
@@ -51,7 +52,7 @@ The new project has its own README and short `AGENTS.md`, Claude Code hooks, ski
 and permissions, VS Code debugging, product CI and an in-memory Obsidian example test
 ([what it contains](docs/development/COMPANION-GENERATOR.md#what-the-generated-project-contains)).
 
-`node shell.mjs help` shows the golden path (new, install, dev, test, check, make).
+`node bin/app help` shows the golden path (new, install, dev, test, check, make).
 `npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`
 covers changed files only), and `npm run check:submission` mirrors documented
 Obsidian review rules locally. Neither replaces `npm run verify`. See
@@ -303,7 +304,7 @@ release promotion require separate evidence and authorization.
 ## Generate a plugin from a companion design
 
 Export Project JSON from the companion HTML concept. From this framework checkout, run
-`node shell.mjs generate --input /path/to/project.json --vault /path/to/vault --target projects/my-plugin`
+`node bin/app generate --input /path/to/project.json --vault /path/to/vault --target projects/my-plugin`
 to inspect the file plan, then repeat with `--apply <planHash>`. The npm equivalent is
 `npm run companion:scaffold -- ...`. In the generated project run `npm ci`,
 `npm run verify:project`, then `npm run test:tdd`. Generation performs no installation, activation or publishing.

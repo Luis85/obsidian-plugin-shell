@@ -1,21 +1,24 @@
 /** Hash actual executable inputs, including new files. Not a whole-repository attestation. */
-import { sha256 } from '../shared/hash.mjs';
-export { sha256 } from '../shared/hash.mjs';
+import { sha256 } from '../shared/hash.ts';
+export { sha256 } from '../shared/hash.ts';
 import { readdir, readFile, lstat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
 import { codeLines } from './code-lines.mjs';
+import { loadThresholds } from '../quality/thresholds.mjs';
 
-const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts'];
+const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'configs'];
 export function physicalLines(text) {
   if (!text) return 0;
   const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   return normalized.split('\n').length - (normalized.endsWith('\n') ? 1 : 0);
 }
+let limits;
 export function lineLimit(path) {
   if (!/\.(?:[cm]?[jt]sx?|vue|css|html)$/.test(path)) return null;
-  if (path === 'src/main.ts') return 100;
-  return path.startsWith('tests/') ? 450 : 400;
+  limits ??= loadThresholds().codeLines;
+  if (path === 'src/main.ts') return limits.mainTs;
+  return path.startsWith('tests/') ? limits.tests : limits.source;
 }
 // This optional executable sidecar is present with the companion concept. It
 // must participate in archive transport and evidence freshness when installed.
@@ -40,11 +43,10 @@ async function defaultRoots(root) {
   const roots = [...inputRoots];
   // Optional installed capabilities and their actual reference input must travel
   // with source-only archives and invalidate receipts when their bytes change.
-  for (const extra of ['shell.mjs', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.generator.json', 'tsconfig.framework.json', 'vitest.obsidian.config.mjs',
-    '.agents/skills/companion-prototype-design/SKILL.md']) {
+  for (const extra of ['.agents/skills/companion-prototype-design/SKILL.md']) {
     if (await optionalInput(root, extra)) roots.push(extra);
   }
-  for (const directory of ['configs/starters', 'bin', 'plugins', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', '.claude/skills/companion-prototype-design']) {
+  for (const directory of ['bin', 'templates', 'plugins', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', '.claude/skills/companion-prototype-design']) {
     if (await optionalInput(root, directory, true)) roots.push(directory);
   }
   return roots;

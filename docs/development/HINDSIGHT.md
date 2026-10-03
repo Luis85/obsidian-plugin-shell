@@ -2,7 +2,7 @@
 
 ## What is and is not automatic
 
-The project exposes `node shell.mjs memory <command>`, `node shell.mjs help memory` and the equivalent `npm run memory -- <command>`. Help, provider discovery and installation previews do not need project npm dependencies, Python, a provider key or a running daemon. Operations on a bank require a Git checkout. This is developer tooling, not part of the Obsidian plugin runtime or companion UI.
+The project exposes `node bin/app memory <command>`, `node bin/app help memory` and the equivalent `npm run memory -- <command>`. Help, provider discovery and installation previews do not need project npm dependencies, Python, a provider key or a running daemon. Operations on a bank require a Git checkout. This is developer tooling, not part of the Obsidian plugin runtime or companion UI.
 
 Nothing installs or activates Hindsight during clone, ordinary `npm install`, setup, tests or builds. Once a contributor explicitly runs memory setup and approves the connection, opening an opted-in **local** project in Claude's Code tab or Codex can start the already installed profile and provide the official MCP tools. Desktop trust/permission prompts still belong to the user. A cloud execution session is a different machine and cannot access the workstation's loopback API.
 
@@ -28,12 +28,18 @@ These are upstream-supported provider routes, not a claim that every subscriptio
 Desktop sign-in alone is not proof that Hindsight can read usable file-backed credentials. Follow the installed Codex client's documented sign-in flow and verify the expected auth location without printing its contents. Upstream warns that long-lived services sharing rotating credentials with interactive sessions can lose refresh access. A dedicated auth home is supported:
 
 ```sh
-node shell.mjs memory setup --agents claude-code,codex --provider openai-codex --auth-home /absolute/private/hindsight-codex
+node bin/app memory setup --agents claude-code,codex --provider openai-codex --auth-home /absolute/private/hindsight-codex
 ```
 
 Authenticate that home separately using the official client first. The path is non-secret configuration; its contents are private. The helper persists the path so desktop launches do not depend on a terminal's `CODEX_HOME`. This option changes the **Python service's** auth home, not the desktop client's configuration location. The latter follows the normal `CODEX_HOME` of the process running `connect`.
 
 For Claude, use the official authenticated Agent SDK route; no token spoofing or OAuth-to-API proxy is introduced. Both account-backed routes need access to their remote provider and can consume account allowance. Use local inference when that distinction is unsuitable.
+
+### Agent-ready starter defaults
+
+The `agent-ready` starter declares inert Hindsight defaults in `design/project.json`: Claude Code and Codex as the proposed agents, Git-message ingestion, and session retention off. This is configuration input only. Creating the project does **not** install Hindsight, choose an inference provider, process repository data, start a daemon, or connect MCP clients.
+
+When those defaults are present, `node bin/app memory setup --provider ...` uses them in its read-only preview. Command-line `--agents`, `--git`, and `--sessions` choices override the project defaults. Any installation still requires a second invocation with `--apply --accept-data-processing`.
 
 ## First-time setup
 
@@ -42,21 +48,21 @@ Use the repo's qualified Node/npm toolchain (`.nvmrc` and `packageManager`). Opt
 Preview a full desktop setup, choosing just the agents you use:
 
 ```sh
-node shell.mjs memory setup --agents claude-code,codex --provider openai-codex
+node bin/app memory setup --agents claude-code,codex --provider openai-codex
 ```
 
 After reviewing its provider prerequisites, installation effects and data processing:
 
 ```sh
-node shell.mjs memory setup --agents claude-code,codex --provider openai-codex --apply --accept-data-processing
+node bin/app memory setup --agents claude-code,codex --provider openai-codex --apply --accept-data-processing
 ```
 
 No `HINDSIGHT_API_LLM_API_KEY` or generic LLM environment variable is required for explicit keyless providers. Alternative previews:
 
 ```sh
-node shell.mjs memory setup --agents claude-code --provider claude-code
-node shell.mjs memory setup --agents claude-code,codex --provider ollama --model YOUR_DOWNLOADED_MODEL
-node shell.mjs memory setup --agents codex --provider none
+node bin/app memory setup --agents claude-code --provider claude-code
+node bin/app memory setup --agents claude-code,codex --provider ollama --model YOUR_DOWNLOADED_MODEL
+node bin/app memory setup --agents codex --provider none
 ```
 
 Replace the local model placeholder before applying. `--base-url` is limited to credential-free HTTP loopback URLs for Ollama/LM Studio. Default local endpoints are ports 11434/1234 with `/v1`. `--python PATH` selects the installation interpreter. On Windows, the equivalent `npm run memory -- ...` entry supplies npm's Node-based launcher when needed.
@@ -80,9 +86,9 @@ Claude's local Code tab shares CLI MCP configuration; Codex's desktop/CLI/IDE su
 To connect existing installations or the optional Claude chat surface:
 
 ```sh
-node shell.mjs memory connect --client claude-code
-node shell.mjs memory connect --client codex
-node shell.mjs memory connect --client claude-desktop
+node bin/app memory connect --client claude-code
+node bin/app memory connect --client codex
+node bin/app memory connect --client claude-desktop
 ```
 
 Each is a preview. Repeat with `--apply`; optionally bind approval to the returned `--plan HASH`. Only owned MCP entries are changed. Foreign/customized entries, malformed configuration and ambiguous TOML layouts are refused. Unrelated settings and TOML comments outside the edited table survive. Existing files receive private backups; this helper coordinates its own writes with a lock and checks preimages, not a universal lock against external editors.
@@ -118,7 +124,7 @@ Useful diagnosis order: inspect `doctor`; run `doctor --live`; warm with `start 
 
 ## No-LLM mode and tool limitations
 
-`--provider none` makes storage and the CLI `recall` path available without a generative model, API key or account. It still needs upstream local embeddings/reranking. `reflect` fails explicitly with `REFLECT_REQUIRES_LLM`. The pinned official MCP surface provides knowledge-page search/read/list, reflection, capture/import and diagnostics, **not a raw recall tool**. Therefore none mode does not provide the complete page/reflection experience in a chat-only MCP client. A coding agent with terminal access can use `node shell.mjs memory recall --query ... --apply`; choose an account-backed or local generative provider for the full official MCP experience. No reflection is faked or delegated secretly to the desktop conversation.
+`--provider none` makes storage and the CLI `recall` path available without a generative model, API key or account. It still needs upstream local embeddings/reranking. `reflect` fails explicitly with `REFLECT_REQUIRES_LLM`. The pinned official MCP surface provides knowledge-page search/read/list, reflection, capture/import and diagnostics, **not a raw recall tool**. Therefore none mode does not provide the complete page/reflection experience in a chat-only MCP client. A coding agent with terminal access can use `node bin/app memory recall --query ... --apply`; choose an account-backed or local generative provider for the full official MCP experience. No reflection is faked or delegated secretly to the desktop conversation.
 
 ## Privacy, sharing and recovery
 

@@ -4,9 +4,9 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { handoutSections } from '../../scripts/framework/handout-questions.ts';
-import { digest, makeSnapshot, renderHandout, parseAnswers, readSnapshot, validateHandout, refreshHandout, HANDOUT_PATH } from '../../scripts/framework/handout-model.ts';
-import { loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout, portablePath } from '../../scripts/framework/handout-workspace.ts';
+import { handoutSections } from '../../bin/adapters/framework/handout-questions.ts';
+import { digest, makeSnapshot, renderHandout, parseAnswers, readSnapshot, validateHandout, refreshHandout, HANDOUT_PATH } from '../../bin/adapters/framework/handout-model.ts';
+import { loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout, portablePath } from '../../bin/adapters/framework/handout-workspace.ts';
 const base = makeSnapshot('docs/prds', [{ path: 'docs/prds/PRD-1.md', sha256: digest('# PRD') }]);
 const full = () => renderHandout(base).replace(/- \[ \] \*\*REQUIRED\*\*/g, '- [x] **REQUIRED**')
   .replace(/  - Answer:.*$/gm, '  - Answer: Reviewed concrete decision with details in docs/prds/PRD-1.md#scope.')
@@ -213,27 +213,30 @@ test('oversized and binary inputs fail closed', async t => {
   await writeFile(join(root, 'docs/prds/binary.md'), Buffer.from([0, 0, 1]));
   await assert.rejects(prepareHandout(root), /HANDOUT_INPUT_LIMIT/);
 });
-test('standalone CLI previews without writing, creates only explicitly and preserves edits', async t => {
+test('canonical handout CLI previews without writing, creates only explicitly and preserves edits', async t => {
   const root = await workspace(t);
-  const cli = resolve('scripts/handout.mjs');
-  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  const cli = resolve('bin/app');
+  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, 'handout', ...args, '--root', root, '--json'], { encoding: 'utf8' });
   const preview = run('generate', '--dry-run');
   assert.equal(preview.status, 0, preview.stderr);
   assert.equal(JSON.parse(preview.stdout).status, 'planned');
   await assert.rejects(readFile(join(root, HANDOUT_PATH)), { code: 'ENOENT' });
-  assert.equal(JSON.parse(run('generate', '--write').stdout).status, 'applied');
+  assert.equal(JSON.parse(run('generate', '--yes').stdout).status, 'applied');
   await writeFile(join(root, HANDOUT_PATH), '# Existing human note');
-  assert.equal(JSON.parse(run('generate', '--write').stdout).status, 'unchanged');
+  assert.equal(JSON.parse(run('generate', '--yes').stdout).status, 'unchanged');
   assert.equal(await readFile(join(root, HANDOUT_PATH), 'utf8'), '# Existing human note');
 });
-test('standalone CLI returns a nonzero blocked status for an incomplete handout and rejects mixed effects', async t => {
+test('canonical handout CLI returns a nonzero blocked status for an incomplete handout and rejects mixed effects', async t => {
   const root = await workspace(t);
-  const cli = resolve('scripts/handout.mjs');
-  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, ...args, '--root', root, '--json'], { encoding: 'utf8' });
-  run('generate', '--write');
+  const cli = resolve('bin/app');
+  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, 'handout', ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  run('generate', '--yes');
   assert.equal(run('validate').status, 1);
   assert.equal(JSON.parse(run('inspect').stdout).data.executionAuthorized, false);
-  assert.equal(run('generate', '--write', '--dry-run').status, 1);
+  const before = await readFile(join(root, HANDOUT_PATH), 'utf8');
+  assert.equal(JSON.parse(run('generate', '--yes', '--dry-run').stdout).status, 'planned');
+  assert.equal(await readFile(join(root, HANDOUT_PATH), 'utf8'), before);
+  assert.equal(run('generate', '--write').status, 1);
   assert.equal(run('validate', '--write').status, 1);
   assert.equal(run('generate', '--unknown').status, 1);
 });
@@ -282,4 +285,45 @@ test('checked but rejected or missing trio approvals cannot produce readiness', 
 });
 test('an impossible approval date is rejected', () => {
   assert.ok(validateHandout(full().replace('date=2026-09-29', 'date=2026-02-30'), base).diagnostics.some(item => item.code === 'HANDOUT_APPROVAL_OPEN'));
+});
+
+test('handout uses only bin/app and applies the exact reviewed plan hash', async t => {
+  const root = await workspace(t);
+  await assert.rejects(readFile(resolve('scripts/handout.mjs')), { code: 'ENOENT' });
+  const run = args => spawnSync(process.execPath, [resolve('bin/app'), 'handout', ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  const preview = run(['generate', '--dry-run']);
+  assert.equal(preview.status, 0, preview.stderr + preview.stdout);
+  const planned = JSON.parse(preview.stdout);
+  assert.equal(planned.status, 'planned');
+  await assert.rejects(readFile(join(root, HANDOUT_PATH)), { code: 'ENOENT' });
+  const created = run(['generate', '--apply', planned.data.planHash]);
+  assert.equal(created.status, 0, created.stderr + created.stdout);
+  const outcome = JSON.parse(created.stdout);
+  assert.equal(outcome.status, 'applied');
+  assert.equal(outcome.command, 'handout generate');
+  assert.ok(outcome.data.applied.written.includes(HANDOUT_PATH));
+});
+
+test('canonical sha256 helper preserves framework and handout byte fingerprints', async () => {
+  const { sha256 } = await import('../../scripts/shared/hash.ts');
+  const { hash } = await import('../../bin/adapters/framework/files.ts');
+  assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  for (const bytes of ['Unicode ⛄', Buffer.from([0, 255, 1, 0])]) {
+    assert.equal(hash(bytes), sha256(bytes));
+    assert.equal(digest(bytes), sha256(bytes));
+  }
+});
+
+test('shared filesystem presence preserves broken symlinks and missing-path semantics', async t => {
+  const { exists, statIfPresent } = await import('../../scripts/shared/fs-presence.ts');
+  const root = await workspace(t);
+  const missing = join(root, 'missing.md');
+  assert.equal(await exists(missing), false);
+  assert.equal(await statIfPresent(missing), null);
+  const path = join(root, 'docs/prds/PRD-1.md');
+  assert.equal(await exists(path), true);
+  const link = join(root, 'broken-link.md');
+  await symlink(missing, link);
+  assert.equal(await exists(link), true);
+  assert.equal((await statIfPresent(link)).isSymbolicLink(), true);
 });

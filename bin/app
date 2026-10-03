@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+// Single CLI entry point for both source checkouts and packaged distributions.
+import { existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const binRoot = dirname(fileURLToPath(import.meta.url));
+const frameworkRoot = resolve(binRoot, '..');
+const bundle = resolve(binRoot, 'app.js');
+const args = process.argv.slice(2);
+let runtime = null;
+
+try {
+  if (existsSync(bundle)) {
+    runtime = await import(pathToFileURL(bundle).href);
+    process.exitCode = await runtime.main(args, frameworkRoot);
+  } else if (process.features.typescript || process.execArgv.includes('--experimental-strip-types')) {
+    runtime = await import('./app.ts');
+    process.exitCode = await runtime.main(args, frameworkRoot);
+  } else {
+    const child = spawnSync(process.execPath, ['--experimental-strip-types', fileURLToPath(import.meta.url), ...args], { stdio: 'inherit' });
+    if (child.error) throw child.error;
+    process.exitCode = child.status ?? 1;
+  }
+} catch (error) {
+  const message = error instanceof Error ? error.message : 'Unable to start the Workbench CLI.';
+  if (args.includes('--json')) {
+    const sourceEnvelope = await import('../scripts/contracts/result-runtime.mjs').catch(() => null);
+    const packagedEnvelope = await import('./template/scripts/contracts/result-runtime.mjs').catch(() => null);
+    const resultEnvelope = runtime?.resultEnvelope ?? sourceEnvelope?.resultEnvelope ?? packagedEnvelope?.resultEnvelope;
+    const diagnostics = [{ code: 'BOOTSTRAP_FAILED', message }];
+    process.stdout.write(JSON.stringify(resultEnvelope ? resultEnvelope('bootstrap', null, 'failed', diagnostics)
+      : { protocolVersion: 1, command: 'bootstrap', status: 'failed', data: null, diagnostics }) + '\n');
+  } else process.stderr.write(message + '\n');
+  process.exitCode = 1;
+}

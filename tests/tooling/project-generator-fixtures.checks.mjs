@@ -3,13 +3,15 @@ import assert from 'node:assert/strict';
 import { readFile, readdir, mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { fixtureManifest, fixtureCode } from '../../scripts/companion/compiler/fixture-code.ts';
-import { validateSourceOverrides } from '../../scripts/companion/runtime/source-overrides.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { fixtureManifest, renderFixtureCode } from '../../bin/compiler/adapters/fixture-emitter.ts';
+import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
+import { validateSourceOverrides } from '../../templates/companion/runtime/source-overrides.ts';
 import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engine.mjs';
 import { planFixtures, applyFixtures } from '../../docs/concepts/companion/test-kit/storage.mjs';
 import { selfProject } from '../support/starter-documents.mjs';
 const root=process.cwd();
+const template=await loadTemplateSnapshot(root);
 const seed=selfProject();
 
 test('actual companion export resolves every enabled recipe with readable native metadata and no credentials',()=>{
@@ -30,7 +32,7 @@ test('malformed and dangling recipes fail generation rather than generating brok
  }
 });
 test('generated kit preserves engine bytes, creates a read-only plan, and applies only approved test-vault notes',async()=>{
- const m=projectModel(seed);const files=new Map();assert.equal(await fixtureCode(root,m,(p,c)=>files.set(p,c)),true);
+ const m=projectModel(seed);const files=new Map();assert.equal(await renderFixtureCode(template,m,(p,c)=>files.set(p,c)),true);
  assert.equal(files.get('scripts/test-data/engine.mjs'),await readFile('docs/concepts/companion/test-kit/engine.mjs','utf8'));
  assert.ok(files.has('tests/project/recipes/authoring-vault-list-requirements.test.mjs'));
  const scratch=await mkdtemp(join(tmpdir(),'generator-recipes-'));

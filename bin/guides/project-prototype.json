@@ -209,7 +209,7 @@
     },
     {
       "path": "README.md",
-      "template": "# {{title}} \u2014 project prototype preparation\n\nThis package contains the agreed selection/brief, execution-prompt.md, a complete Companion v6 document and independently buildable source. It is NOT a completed prototype. Start with execution-prompt.md.\n\nproject.config.json records the chosen project starter and its target/framework selection outside the Companion envelope. source/project.config.json is the same selection. project-request.json is the exact replay request for `node shell.mjs new --input <request> --out <folder> --json`; review its plan before --apply. The exact guide is retained in prototype-guide.json.\n\nSee source/README.md for target-specific dependency resolution/build commands. Dependencies, builds, business acceptance and native activation were not performed by preparation.\n"
+      "template": "# {{title}} \u2014 project prototype preparation\n\nThis package contains the agreed selection/brief, execution-prompt.md, a complete Companion v6 document and independently buildable source. It is NOT a completed prototype. Start with execution-prompt.md.\n\nproject.config.json records the chosen project starter and its target/framework selection outside the Companion envelope. source/project.config.json is the same selection. project-request.json is the exact replay request for `node bin/app new --input <request> --out <folder> --json`; review its plan before --apply. The exact guide is retained in prototype-guide.json.\n\nSee source/README.md for target-specific dependency resolution/build commands. Dependencies, builds, business acceptance and native activation were not performed by preparation.\n"
     },
     {
       "path": "INTEGRATION.md",

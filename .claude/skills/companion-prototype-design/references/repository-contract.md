@@ -17,13 +17,13 @@ AGENTS.md
 package.json, package-lock.json, .nvmrc
 README.md, TEMPLATE-GUIDE.md
 scripts/companion/authoring-contract.ts
-scripts/companion/read-project.mjs
-scripts/companion/generate.mjs
+bin/adapters/framework/read-project.ts
+scripts/companion-tools/generate.mjs
 scripts/companion/visual/visual-validate.mjs
 scripts/companion/visual/visual-ir.mjs (locate the actual IR/types file)
 scripts/companion/visual/visual-catalog.mjs (locate the actual catalog file)
-scripts/companion/compiler/ (actual emitted paths and extension ownership)
-scripts/companion/devkit/ (generated developer kit)
+bin/compiler/emitters/ (actual emitted paths and extension ownership)
+templates/companion/devkit/ (generated developer kit)
 docs/development/COMPANION-PROJECT-JSON.md
 docs/development/COMPANION-GENERATOR.md
 docs/development/FRAMEWORK-CLI.md
@@ -98,14 +98,15 @@ label native work still pending. Never count acceptance TODOs as passing tests.
 
 ## Read-only handoff versus generation
 
-`node scripts/companion/generate.mjs --input <json> --vault <existing-dir> --target <relative>`
+`node scripts/companion-tools/generate.mjs --input <json> --vault <existing-dir> --target <relative>`
 validates and echoes the **original bytes**. `npm run companion:generate` is the same
 read-only path. It is not a generator.
 
-`node shell.mjs generate --input <json> --vault <existing-dir> --target <relative>`
-plans; `--apply <reviewed-planHash>` applies after reconstructing the plan.
+`node bin/app generate` plans in-place generation for an already configured project
+from its `design/project.json` (after `project import`); `--apply <reviewed-planHash>`
+applies after reconstructing the plan.
 
-`node shell.mjs new <empty-outside-checkout> --from <json>` is the current recommended
+`node bin/app new <empty-outside-checkout> --from <json>` is the current recommended
 new-project path. It plans first; explicit `--apply <planHash>` or `--yes` writes.
 Prefer hash-reviewed apply in this workflow; never treat JSON as approval.
 

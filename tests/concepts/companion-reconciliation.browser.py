@@ -38,7 +38,7 @@ def canonical(p):
     return js(p, 'JSON.stringify(design().nodes.find(n=>n.id==="node-2"))')
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
     def new(width=1600, height=1000, theme='light'):
         p = browser.new_page(viewport={'width': width, 'height': height}, accept_downloads=True)
         p.set_default_timeout(6000)

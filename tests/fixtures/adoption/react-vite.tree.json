@@ -1,0 +1,27 @@
+{
+  "description": "React 18 with Vite, Vitest, Tailwind, flat ESLint, Prettier and GitLab CI: a non-Angular frontend.",
+  "files": {
+    "package.json": {
+      "name": "storefront",
+      "private": true,
+      "version": "1.2.0",
+      "type": "module",
+      "scripts": { "dev": "vite", "build": "tsc -b && vite build", "test": "vitest run", "lint": "eslint ." },
+      "dependencies": { "react": "^18.3.1", "react-dom": "^18.3.1", "react-router-dom": "^6.26.0" },
+      "devDependencies": { "@testing-library/react": "^16.0.0", "@vitejs/plugin-react": "^4.3.1", "eslint": "^9.9.0", "prettier": "^3.3.3", "tailwindcss": "^3.4.10", "typescript": "~5.5.4", "vite": "^5.4.1", "vitest": "^2.0.5" }
+    },
+    "package-lock.json": { "name": "storefront", "lockfileVersion": 3, "packages": {} },
+    ".nvmrc": ["20.18.0"],
+    ".prettierrc.json": { "semi": true },
+    "eslint.config.js": ["export default [];"],
+    "vite.config.ts": ["import { defineConfig } from 'vite';", "export default defineConfig({});"],
+    "tailwind.config.js": ["export default { content: ['./index.html', './src/**/*.{ts,tsx}'] };"],
+    "tsconfig.json": { "compilerOptions": { "strict": true, "jsx": "react-jsx", "target": "ES2020" }, "include": ["src"] },
+    "index.html": ["<!doctype html>", "<html><body><div id=\"root\"></div><script type=\"module\" src=\"/src/main.tsx\"></script></body></html>"],
+    "src/main.tsx": ["import { createRoot } from 'react-dom/client';", "import App from './App';", "createRoot(document.getElementById('root')!).render(<App />);"],
+    "src/App.tsx": ["import { useState } from 'react';", "export default function App() { const [count, setCount] = useState(0); return <button onClick={() => setCount(count + 1)}>{count}</button>; }"],
+    "src/App.test.tsx": ["import { render } from '@testing-library/react';", "import App from './App';", "it('renders', () => { render(<App />); });"],
+    "src/index.css": ["@tailwind base;", "@tailwind components;", "@tailwind utilities;"],
+    ".gitlab-ci.yml": ["stages: [verify]", "verify:", "  stage: verify", "  image: node:20", "  script:", "    - npm ci", "    - npm run lint && npm test && npm run build"]
+  }
+}

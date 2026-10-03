@@ -13,8 +13,8 @@ HTML=ROOT/'docs/concepts/companion/index.html'
 OUT=ROOT/'reports/concepts/project-starters';OUT.mkdir(parents=True,exist_ok=True)
 # Explicit host-boundary substitutions: in-memory Storage, and SHA-256 through Node because an inline page is not a secure context.
 STORAGE="""<script>window.__saved={};Object.defineProperty(window,'localStorage',{value:{getItem:k=>__saved[k]??null,setItem:(k,v)=>{__saved[k]=v},removeItem:k=>delete __saved[k]}});Object.defineProperty(window.crypto,'subtle',{value:{digest:async(name,bytes)=>new Uint8Array(await window.testDigest(new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes))).buffer}});</script>"""
-# The eleven focused example starters are external JSON definitions; the workspace embeds none.
-EXAMPLES=['blank','command-utility','context-menu','custom-file-view','daily-journal','import-integration','knowledge-collection','note-inspector','quick-capture','tasks-projects','vault-dashboard']
+# The twelve focused example starters are external JSON definitions; the workspace embeds none.
+EXAMPLES=['agent-ready','blank','command-utility','context-menu','custom-file-view','daily-journal','import-integration','knowledge-collection','note-inspector','quick-capture','tasks-projects','vault-dashboard']
 checks,errors,requests,fatal=[],[],[],None
 
 def check(name,value,scope='Actual controls and canonical state readback'):
@@ -44,7 +44,7 @@ def apply():
     if js('modalType==="wizard"'):act('close',scope='#modal')
 def handoff_checks():
     modal=page.locator('#modal');text=modal.inner_text();command=modal.locator('.command code').inner_text()
-    check('Generation shows the starter command with the project id and reviewed recipe',command=='node shell.mjs new ../capture-tools --starter quick-capture' and 'companion:scaffold' not in text)
+    check('Generation shows the starter command with the project id and reviewed recipe',command=='node bin/app new ../capture-tools --starter quick-capture' and 'companion:scaffold' not in text)
     check('Execution stays a separate reviewed shell step','This browser does not run processes' in text and '--yes' in text and 'starters run' in text and js('state.runs.length')==0)
     check('Starter and project exports are both offered',modal.locator('.dialog-footer [data-action="starter-export"]').count()==1 and modal.locator('.dialog-footer [data-action="project-export"]').count()==1)
     page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(OUT/'05-handoff-narrow.png'))
@@ -52,7 +52,7 @@ def handoff_checks():
     page.set_viewport_size({'width':1440,'height':1000})
 
 with sync_playwright() as pw:
-    browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
+    browser=pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
     page=browser.new_page(viewport={'width':1440,'height':1000},accept_downloads=True);page.set_default_timeout(8000)
     page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append(r.url))
     page.expose_function('testDigest',lambda text:list(hashlib.sha256(text.encode('utf-8')).digest()))
@@ -62,7 +62,8 @@ with sync_playwright() as pw:
         act('nav','starters','#sidebar')
         check('The workspace starts with no embedded starter definitions',page.locator('.starter-card').count()==0 and js('starterCatalog.starters.length===0') and 'No starter definitions loaded' in page.locator('#content').inner_text())
         load_examples()
-        check('Gallery shows the eleven selected example starter definitions',page.locator('.starter-card').count()==11 and not js('starterWorkspaceUi.error'))
+        check('Gallery shows the twelve selected example starter definitions',page.locator('.starter-card').count()==12 and not js('starterWorkspaceUi.error'))
+        check('A starter with development tooling is offered and keeps its tooling',page.locator('[data-action="starter-open"][data-value="agent-ready"]').count()==1 and js('starterEntry("agent-ready").document.tooling.airship.enabled===true && starterEntry("agent-ready").document.tooling.hindsight.enabled===true'))
         check('Browsing does not initialize the project',js('project()===null'))
         check('Gallery calls out external definitions and a separate shell','External, editable JSON definitions' in page.locator('#content').inner_text())
         page.screenshot(path=str(OUT/'01-gallery-dark.png'))
@@ -100,12 +101,12 @@ with sync_playwright() as pw:
         with page.expect_download() as event:act('download-text',scope='#modal')
         download=event.value;download.save_as(str(OUT/'configured-project.json'));exported=(OUT/'configured-project.json').read_text()
         check('Actual project download is the complete configured schema 6 project',json.loads(exported)==json.loads(js('companionJson()')) and json.loads(exported)['schemaVersion']==6 and download.suggested_filename=='capture-tools.companion.json')
-        model="import {projectModel} from './scripts/companion/compiler/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"
+        model="import {projectModel} from './bin/compiler/emitters/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"
         probe=subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',model],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=20)
         check('Actual browser download is consumed by the real compiler',probe.returncode==0 and json.loads(probe.stdout)=={'id':'capture-tools','source':'plugin/src/generated','tests':'plugin/tests/project'},'Actual Node compiler subprocess on downloaded bytes')
         with tempfile.TemporaryDirectory(prefix='companion-handoff-') as scratch:
             work=Path(scratch)/'framework-checkout';(work/'configs/starters').mkdir(parents=True);(work/'configs/starters/quick-capture.json').write_text(json.dumps(starter,indent=2)+'\n')
-            run=subprocess.run(['node',str(ROOT/'shell.mjs'),'new','../capture-tools','--starter','quick-capture','--json'],text=True,capture_output=True,cwd=work,timeout=120)
+            run=subprocess.run(['node',str(ROOT/'bin/app'),'new','../capture-tools','--starter','quick-capture','--json'],text=True,capture_output=True,cwd=work,timeout=120)
             result=json.loads(run.stdout) if run.returncode==0 else {}
             check('The displayed starter command plans the exported starter without writing',result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the exported starter: '+run.stderr[-400:])
         act('close',scope='#modal');act('nav','starters','#sidebar');configure('blank');review();act('close',scope='#modal')

@@ -5,10 +5,10 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { formatDiagnostics, createRecorder, writeReports } from '../../scripts/compiler/adapters/reporting.ts';
-import { diagnostic } from '../../scripts/compiler/domain/diagnostics.ts';
-import { operationSchemas } from '../../scripts/framework/schemas.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { formatDiagnostics, createRecorder, writeReports } from '../../bin/compiler/adapters/reporting.ts';
+import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
+import { operationSchemas } from '../../bin/adapters/framework/schema.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const source=starterDocumentText('blank');
@@ -34,7 +34,7 @@ test('explain and argument validation are machine discoverable',async()=>{
   }
 });
 test('JSON stdout contains one parseable document; human output names the location and remedy',()=>{
-  const base=[join(root,'shell.mjs'),'compiler','check','--input','-'];
+  const base=[join(root,'bin/app'),'compiler','check','--input','-'];
   const machine=spawnSync(process.execPath,[...base,'--json'],{cwd:root,input:'{',encoding:'utf8'});
   assert.equal(machine.status,1);assert.equal(JSON.parse(machine.stdout).diagnostics[0].code,'COMPILER_JSON_INVALID');
   const human=spawnSync(process.execPath,base,{cwd:root,input:'{',encoding:'utf8'});assert.match(human.stderr,/stdin.json/);assert.match(human.stderr,/UTF-8/);

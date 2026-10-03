@@ -10,8 +10,8 @@ test('foundation native driver retains separate failed attempts and their origin
   try {
     await cp(resolve('scripts/testing'), join(root, 'scripts/testing'), { recursive: true });
     await cp(resolve('scripts/shared'), join(root, 'scripts/shared'), { recursive: true });
-    await copyFile(resolve('scripts/examples/templates/scripts__testing__check-native.mjs.txt'), join(root, 'scripts/testing/check-native.mjs'));
-    await copyFile(resolve('scripts/examples/templates/scripts__testing__native-profile.json.txt'), join(root, 'scripts/testing/native-profile.json'));
+    await copyFile(resolve('templates/examples/scripts__testing__check-native.mjs.txt'), join(root, 'scripts/testing/check-native.mjs'));
+    await copyFile(resolve('templates/examples/scripts__testing__native-profile.json.txt'), join(root, 'scripts/testing/native-profile.json'));
     await writeFile(join(root, 'package.json'), JSON.stringify({ type: 'module' }));
     await mkdir(join(root, 'dist'));
     await writeFile(join(root, 'dist/manifest.json'), JSON.stringify({ id: 'retention-fixture', name: 'Retention Fixture', version: '1.0.0' }));

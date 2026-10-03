@@ -39,7 +39,7 @@ def shot(name):
 
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'),
                                  headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
     page.set_default_timeout(8000)
@@ -84,7 +84,7 @@ with sync_playwright() as pw:
         check('Actual download contains the complete document', (OUT / 'project.companion.json').read_text() == original)
         with tempfile.TemporaryDirectory(prefix='companion-browser-cli-') as tmp:
             vault = Path(tmp) / 'vault'; vault.mkdir(); (vault / 'keep.md').write_text('preserve')
-            run = subprocess.run(['node', str(ROOT / 'scripts/companion/generate.mjs'), '--input', str(OUT / 'project.companion.json'),
+            run = subprocess.run(['node', str(ROOT / 'scripts/companion-tools/generate.mjs'), '--input', str(OUT / 'project.companion.json'),
                                   '--vault', str(vault), '--target', 'plugins/companion'], capture_output=True, timeout=15)
             check('Read-only shell returns the exact schema 6 export bytes', run.returncode == 0 and run.stdout == (OUT / 'project.companion.json').read_bytes() and not run.stderr, 'Actual CLI subprocess on exported browser bytes')
             check('Shell handoff creates no files or target directory', list(vault.iterdir()) == [vault / 'keep.md'] and (vault / 'keep.md').read_text() == 'preserve', 'Actual isolated filesystem before/after')

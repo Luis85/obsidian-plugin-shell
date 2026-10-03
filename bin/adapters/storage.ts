@@ -1,14 +1,13 @@
 import { assertNoFirstRun } from './first-run-lock.ts';
 import { join } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { configurationPlan } from '../../scripts/framework/changes.ts';
-import { hash, readBounded, exists } from '../../scripts/framework/files.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { createFilePlan, applyFilePlan, type FilePlan } from '../../scripts/shared/file-plan.ts';
+import { configurationPlan } from './framework/changes.ts';
+import { hash, readBounded, exists } from './framework/files.ts';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { openDocument, documentText, type SketchDocument } from '../domain/document.ts';
 import { requireSketch } from '../domain/errors.ts';
 export interface Snapshot { document: SketchDocument | null; beforeHash: string | null }
 export interface Entry { path: string; content: string; encoding?: 'base64' }
-export type FilePlan = Awaited<ReturnType<typeof createFilePlan>>;
 export interface Prepared { plan: FilePlan; planHash: string; data: Record<string, unknown>; validate?: () => Promise<void> }
 export async function readData(path: string): Promise<unknown> {
   return parseJsonData(new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(path, 4_000_000)));

@@ -29,7 +29,7 @@ class Terminal:
         for key in ["CI", "SHELL_ACCESSIBLE", "SHELL_UI"]:
             env.pop(key, None)
         self.process = subprocess.Popen(
-            [node, "--experimental-strip-types", str(repo / "shell.mjs"),
+            [node, "--experimental-strip-types", str(repo / "bin" / "app"),
              command, "--root", str(root), "--ui", "tui", "--no-color"],
             stdin=self.slave, stdout=subprocess.PIPE, stderr=self.slave,
             cwd=repo, env=env,
@@ -146,7 +146,7 @@ def agent_parity(node, repo, target, human):
         {"op": "page.add", "title": "Overview", "as": "page"},
         {"op": "page.attach", "page": "@page", "components": [{"title": "Card"}, {"title": "Filters"}]},
     ]}
-    command = [node, "--experimental-strip-types", str(repo / "shell.mjs"), "sketch", "--root", str(target),
+    command = [node, "--experimental-strip-types", str(repo / "bin" / "app"), "sketch", "--root", str(target),
                "--input", "-", "--json", "--no-interaction"]
     preview = subprocess.run(command, input=json.dumps(request), text=True, capture_output=True, timeout=30, cwd=repo)
     assert preview.returncode == 0, preview.stderr + preview.stdout
@@ -178,6 +178,7 @@ def cancel(node, repo, target, evidence, mode):
 
 
 def new_project(node, repo, target, agent, evidence):
+    folder_name = "projects/prepared-project"
     terminal = Terminal(node, repo, target, "new")
     try:
         terminal.expect("Which project starter do you want to run?")
@@ -195,12 +196,14 @@ def new_project(node, repo, target, agent, evidence):
         terminal.send("\x1b[B\r", "Project package output folder")
         terminal.send("\r", "Review before writing")
         terminal.send("\r", "Apply this reviewed plan?")
-        terminal.send("\x1b[B\r")
+        terminal.send("\x1b[B\r", "Create a Claude Design folder")
+        terminal.send("\r")  # No is the default: the package stays identical to the agent's.
         result = terminal.finish(0)
+        assert not (target / folder_name / "source/docs/design").exists(), "Declining the design folder wrote files"
         request = {"schemaVersion": 2, "starter": "cli",
                    "interview": {"schemaVersion": 1, "guideId": "project-prototype", "guideVersion": 1,
                                         "answers": {"title": "PTY project", "approved": True}}}
-        command = [node, "--experimental-strip-types", str(repo / "shell.mjs"), "new", "--root", str(agent),
+        command = [node, "--experimental-strip-types", str(repo / "bin" / "app"), "new", "--root", str(agent),
                    "--input", "-", "--json", "--no-interaction"]
         preview = subprocess.run(command, input=json.dumps(request), text=True, capture_output=True, timeout=30, cwd=repo)
         assert preview.returncode == 0, preview.stderr + preview.stdout
@@ -208,7 +211,7 @@ def new_project(node, repo, target, agent, evidence):
         applied = subprocess.run(command + ["--apply", plan["data"]["planHash"]], input=json.dumps(request),
                                  text=True, capture_output=True, timeout=30, cwd=repo)
         assert applied.returncode == 0, applied.stderr + applied.stdout
-        folder = Path("projects/prepared-project")
+        folder = Path(folder_name)
         files = lambda root: {str(path.relative_to(root / folder)): path.read_bytes()
                               for path in (root / folder).rglob("*") if path.is_file()}
         assert files(target) == files(agent), "Interactive and agent project packages differ"

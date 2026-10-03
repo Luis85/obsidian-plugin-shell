@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "baseline_id": "WB-MVP-2026-09-29-v1",
+  "baseline_id": "WB-MVP-2026-09-30-v2",
   "product": "Workbench",
   "release": "MVP",
   "source_commit": "22821c4d8b2764e014dc12569b470af9e05d86b0",
@@ -58,7 +58,8 @@
     "WB-PBI-051",
     "WB-PBI-052",
     "WB-PBI-053",
-    "WB-PBI-054"
+    "WB-PBI-054",
+    "WB-PBI-055"
   ],
   "scope_rule": "Baseline IDs remain in the denominator after deferral or sunset. Rebaseline only with an explicit reviewed change record; never silently delete, replace or double-count split items.",
   "lifecycle": [

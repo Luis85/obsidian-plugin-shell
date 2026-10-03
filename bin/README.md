@@ -10,7 +10,7 @@ from the repository's `AGENTS.md` and exact lockfile; this feature adds no depen
 
 ## Set up an existing vault for Angular
 
-Run `node shell.mjs project-setup --root <existing-vault>` for the existing-Git,
+Run `node bin/app project-setup --root <existing-vault>` for the existing-Git,
 existing-Obsidian-vault workflow. It configures `configs/user-settings.json`,
 imports typed Markdown PRDs, optionally prepares an Angular prototype, edits
 application bricks, and optionally generates the product scaffold in one reviewed
@@ -27,7 +27,7 @@ guide includes reviewed path migration and configured canonical-project behavior
 
 ## Create a project
 
-Run `node shell.mjs new` (or `node shell.mjs` without a saved project) to choose an
+Run `node bin/app new` (or `node bin/app` without a saved project) to choose an
 installed project starter and start the prototype interview. Running a starter is the
 only way to create a project; each starter fixes its targets and frontend. Plugin,
 webapp, website, CLI and hybrid targets generate matching source adapters; design
@@ -35,11 +35,27 @@ agreement and file-write approval remain separate. See the
 [project starter and agent guide](PROJECT-STARTERS.md) for the shipped starters,
 noninteractive requests, generated artifacts and build-qualification boundaries.
 
+## Prepare a Claude Design folder
+
+After the prototype maker or `new` writes a prototype, the app asks whether to create a design folder
+at `docs/design/<prototype>` (configurable as `paths.design`). It is a self-contained folder for Claude
+Design: brief, screens, components, design tokens and agent instructions, plus `prototypes/`,
+`assets/`, `notes/` and an implementation map that sync never touches. Agents use the same reviewed
+plan/apply protocol:
+
+```sh
+node bin/app design status --json
+node bin/app design prepare --name issue-desk --json   # then repeat with --apply <planHash>
+node bin/app design sync --name issue-desk --json      # after the project model changed
+```
+
+See [Claude Design folders](../docs/development/CLAUDE-DESIGN-HANDOFF.md).
+
 ## Make a page
 
 ```sh
-node shell.mjs sketch
-# A saved project also opens its editor through: node shell.mjs
+node bin/app sketch
+# A saved project also opens its editor through: node bin/app
 ```
 
 Enter a project title, choose **Sketch a new page**, and enter its title. The page
@@ -76,10 +92,10 @@ prompts/progress are on stderr. Exit 0 means the requested operation completed
 `ready`/`pending` in prototype validation, not only its exit code.
 
 ```sh
-node shell.mjs sketch schema --json
-node shell.mjs sketch show --json
-node shell.mjs sketch export --json
-node shell.mjs sketch --input sketch-request.json --json --no-interaction
+node bin/app sketch schema --json
+node bin/app sketch show --json
+node bin/app sketch export --json
+node bin/app sketch --input sketch-request.json --json --no-interaction
 ```
 
 Example `sketch-request.json` (title is required only for a new project):
@@ -107,8 +123,8 @@ The first run only returns a plan. Inspect `data.document`, `changes` and `planH
 Repeat the **same command and unchanged input** with `--apply <planHash>` to write:
 
 ```sh
-node shell.mjs sketch --input sketch-request.json --json --apply <reviewed-planHash>
-node shell.mjs sketch generate --kind obsidian-plugin --out generated/issue-desk --json
+node bin/app sketch --input sketch-request.json --json --apply <reviewed-planHash>
+node bin/app sketch generate --kind obsidian-plugin --out generated/issue-desk --json
 # Review, then repeat with --apply <the-generation-planHash>.
 ```
 
@@ -129,11 +145,11 @@ filesystem transactions. Do not blindly retry an uncertain write; inspect recove
 ## Prepare a prototype
 
 ```sh
-node shell.mjs prototype
-# aliases: node shell.mjs make prototype; npm run make -- prototype
-node shell.mjs prototype guide --json
-node shell.mjs prototype validate --input prototype-answers.json --json
-node shell.mjs prototype --input prototype-answers.json --out prototypes/issue-desk --json
+node bin/app prototype
+# Use node bin/app prototype directly; no make-prototype alias is retained.
+node bin/app prototype guide --json
+node bin/app prototype validate --input prototype-answers.json --json
+node bin/app prototype --input prototype-answers.json --out prototypes/issue-desk --json
 # Review the prompt and full file manifest, then repeat with --apply <planHash>.
 ```
 
@@ -200,7 +216,7 @@ Unsafe, duplicate or colliding artifact paths fail in the shared writer.
 `application/` owns transactions, discovery schema, outline and history.
 `adapters/` integrates bounded IO, the existing compiler, versioned input and safe
 plans. `presentation/` maps terminal choices into exactly those operations.
-`bin/shell.ts` is the process composition root. The legacy CLI remains available.
+`bin/app.ts` is the process composition root. The legacy CLI remains available.
 
 ```sh
 npm run typecheck:maker
@@ -223,4 +239,4 @@ include maker checks. The dedicated CI job uses the exact pinned toolchain.
 
 ## Project starters
 
-`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` beside `shell.mjs`, `generator.kind: "project"`). Projects use the strict `project.config.json` sidecar, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.
+`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` in the package root beside `bin/`, `generator.kind: "project"`). Projects use the strict `project.config.json` sidecar, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.

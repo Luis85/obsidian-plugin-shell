@@ -1,8 +1,8 @@
 import { validateDocumentationSettings } from './settings-documentation.ts';
 import { join } from 'node:path';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { hash, readBounded } from '../../scripts/framework/files.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
+import { hash, readBounded } from './framework/files.ts';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { defaultSettings, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { prepared, type Entry } from './storage.ts';

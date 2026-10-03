@@ -7,21 +7,21 @@ The project compiler emits a browser composition alongside the normal plugin sou
 From an inspected framework checkout with its qualified toolchain:
 
 ```sh
-node shell.mjs new ../my-concept --from ./project.companion.json
+node bin/app new ../my-concept --from ./project.companion.json
 # Review the input, file inventory, warnings and plan hash before applying.
-node shell.mjs new ../my-concept --from ./project.companion.json --apply <reviewed-plan-hash>
+node bin/app new ../my-concept --from ./project.companion.json --apply <reviewed-plan-hash>
 cd ../my-concept
 npm ci
 npm run verify:project
 npm run build:clickdummy
 ```
 
-`npm run build:clickdummy` calls `node shell.mjs clickdummy build`. The fixed output is `clickdummy.html` in the generated project root. Open that file directly in a browser. Initial dependency installation needs the registry; the built HTML embeds its runtime, CSS, notices and complete project JSON and does not use runtime CDN imports.
+`npm run build:clickdummy` calls `node bin/app clickdummy build`. The fixed output is `clickdummy.html` in the generated project root. Open that file directly in a browser. Initial dependency installation needs the registry; the built HTML embeds its runtime, CSS, notices and complete project JSON and does not use runtime CDN imports.
 
 ```sh
-node shell.mjs clickdummy build --dry-run --json
-node shell.mjs clickdummy build --json
-node shell.mjs clickdummy build --replace --json
+node bin/app clickdummy build --dry-run --json
+node bin/app clickdummy build --json
+node bin/app clickdummy build --replace --json
 ```
 
 Dry run launches no process and writes nothing. The real build runs trusted project code with the existing bounded process adapter. `--replace` explicitly permits replacing a previous clickdummy, but the shipped worker preserves last-good output until compilation and static offline validation succeed. No new CLI output path, arbitrary source entry, shell command or dependency version is accepted from project JSON.
@@ -56,16 +56,18 @@ implementation points, not a sandbox for arbitrary code.
 
 See [scenario execution and limits](../testing/GENERATED-PREVIEW-SCENARIOS.md).
 
+To look at every surface, state and scenario in light and dark at wide and narrow widths, run `npm run ui:gallery`; it writes screenshots and an index for human review (not acceptance) as described in [UI review gallery](UI-REVIEW-GALLERY.md).
+
 ## Ownership and implementation
 
 | Source | Responsibility |
 | --- | --- |
-| `scripts/companion/compiler/clickdummy-code.ts` | Generate the browser entry, thin preview component, context and synthetic source factory |
-| `scripts/companion/compiler/clickdummy-scenarios-code.ts` | Emit surface-scoped scenario metadata without duplicating sample values |
+| `bin/compiler/emitters/clickdummy-code.ts` | Generate the browser entry, thin preview component, context and synthetic source factory |
+| `bin/compiler/emitters/clickdummy-scenarios-code.ts` | Emit surface-scoped scenario metadata without duplicating sample values |
 | Existing page/component/compiler modules | Generate the shared runtime UI, bindings, effects and contracts |
-| `scripts/framework/clickdummy.ts` | Validate generated-project context and invoke the fixed shipped build worker |
+| `bin/adapters/framework/clickdummy.ts` | Validate generated-project context and invoke the fixed shipped build worker |
 | `.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs` | Reuse the pinned Vue/Nuxt UI build, CSS ownership, license notices and single-file assembler |
-| `scripts/companion/authoring-evidence.mjs` | Bind qualification to the exact modern companion HTML and full exported JSON |
+| `scripts/companion-tools/authoring-evidence.mjs` | Bind qualification to the exact modern companion HTML and full exported JSON |
 
 Browser host CSS is the original shell harness simulation, not an extracted Obsidian stylesheet. It is imported only by the browser entry. Native styles retain the existing ownership pipeline. No font binaries, live vault adapter, Obsidian module or Node module may enter the browser bundle. The worker's existing CSP/static checks and browser suite verify the boundary separately.
 
@@ -84,7 +86,7 @@ It writes `reports/companion-mvp/index.html`, the full v6 `companion-project.jso
 With the qualified npm explicitly selected and browser tooling provisioned:
 
 ```sh
-node scripts/companion/qualify-project.mjs --authoring-fixture
+node scripts/companion-tools/qualify-project.mjs --authoring-fixture
 python -B tests/concepts/companion-mvp.browser.py --clickdummy
 ```
 

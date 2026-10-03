@@ -47,8 +47,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     # Guided setup runs the complete verify gates once before the served showcase.
     # The integrated Windows suites exceed 30 minutes before coverage finishes.
-    # Match setup-compatibility's job budget; keep every test and threshold intact.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 30 }}
+    # Match setup-compatibility's job budget (75 minutes on Windows), which runs
+    # the same setup and complete verify; keep every test and threshold intact.
+    # This is a job budget, not a test deadline or product performance threshold.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -90,6 +92,22 @@ jobs:
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
+      - name: Capture the UI review gallery (evidence for human review, not acceptance)
+        if: always() && runner.os == 'Linux'
+        run: node "$QUALIFIED_NPM" run ui:gallery
+      - name: Retain the UI review gallery
+        id: ui-gallery
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-review-gallery
+          path: reports/ui-gallery/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Link the UI review gallery in the job summary
+        if: always() && runner.os == 'Linux' && steps.ui-gallery.outputs.artifact-url != ''
+        run: |
+          echo "UI review gallery for reviewers (open gallery.html): ${{ steps.ui-gallery.outputs.artifact-url }} - evidence for human review, not acceptance, not a baseline." >> "$GITHUB_STEP_SUMMARY"
       - name: Archive tracked source only
         if: always()
         run: git archive --format=zip --output=candidate-source.zip HEAD
@@ -148,7 +166,7 @@ jobs:
       - name: Verify the complete renamed and extended template
         run: |
           set -o pipefail
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/verify.txt
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/verify-summary 2>&1 | tee reports/template-authoring/verify.txt
           node scripts/quality/check-artifacts.mjs > reports/template-authoring/assets.json
       - *playwright-version
       - *playwright-cache
@@ -243,13 +261,13 @@ jobs:
           node "$QUALIFIED_NPM" run examples:remove -- --dry-run --json > reports/template-authoring/removal-plan.json
           node "$QUALIFIED_NPM" run examples:remove -- --yes --no-interaction --json > reports/template-authoring/removal.json
           sha256sum --check reports/template-authoring/consumer-before.sha256
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/foundation-verify.txt
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/foundation-verify-summary 2>&1 | tee reports/template-authoring/foundation-verify.txt
           node "$QUALIFIED_NPM" run test:e2e
       - name: Generate and qualify another working feature after removal
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run make -- feature reading --entity reading-item --yes --no-interaction
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/extended-foundation-verify-summary 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
           node scripts/testing/evidence-cli.mjs run runtime
           node scripts/testing/evidence-cli.mjs run coverage
           node scripts/testing/evidence-cli.mjs run artifact
@@ -313,14 +331,14 @@ jobs:
           node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.sitemap.json
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.sitemap.json
           node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
@@ -401,15 +419,15 @@ jobs:
           node "$QUALIFIED_NPM" run test:visual
       - name: Generate, independently install, build and test the companion project
         run: |
-          node scripts/companion/qualify-project.mjs
-          node scripts/companion/qualify-project.mjs --boundary-fixture
-          node scripts/companion/qualify-project.mjs --provider-fixture
+          node scripts/companion-tools/qualify-project.mjs
+          node scripts/companion-tools/qualify-project.mjs --boundary-fixture
+          node scripts/companion-tools/qualify-project.mjs --provider-fixture
       - *playwright-version
       - *playwright-cache
       - name: Exercise generated stylesheet against real Nuxt UI components
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
-          node scripts/companion/qualify-styles.mjs
+          node scripts/companion-tools/qualify-styles.mjs
       - name: Retain exact source and generated project without dependencies or machine state
         if: always()
         run: |
@@ -458,7 +476,7 @@ jobs:
           failed=""
           for id in $STARTER_IDS; do
             echo "::group::Starter $id"
-            node scripts/companion/qualify-starter.mjs "$id" || failed="$failed $id"
+            node scripts/companion-tools/qualify-starter.mjs "$id" || failed="$failed $id"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi

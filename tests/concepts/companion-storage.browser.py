@@ -51,7 +51,7 @@ threading.Thread(target=server.serve_forever, daemon=True).start()
 url = f'http://127.0.0.1:{server.server_port}/'
 try:
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+        browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
         context = browser.new_context(viewport={'width': 1280, 'height': 1000})
         context.on('request', lambda request: requests.append(request.url) if not request.url.startswith(url) else None)
         p = context.new_page()

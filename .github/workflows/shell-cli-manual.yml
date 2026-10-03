@@ -2,11 +2,12 @@ name: Shell CLI manual
 on:
   pull_request:
     paths:
-      - 'shell.mjs'
+      - 'bin/app'
       - 'package.json'
       - '.nvmrc'
-      - 'scripts/framework/**'
-      - 'scripts/compiler/domain/**'
+      - 'bin/adapters/framework/**'
+      - 'bin/presentation/terminal/**'
+      - 'bin/compiler/domain/**'
       - 'scripts/documentation/**'
       - 'tests/tooling/framework-manual.checks.mjs'
       - 'tooling/documentation/**'

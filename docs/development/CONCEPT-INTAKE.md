@@ -7,14 +7,14 @@ dependencies, implement business logic or complete native companion acceptance.
 ## Inspect, review, apply, generate
 
 ```sh
-node shell.mjs concept schema --json
-node shell.mjs concept inspect --json
-node shell.mjs concept inspect --input docs/concepts/capture/concept.json --json
-node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json
-node shell.mjs plan inspect concept.plan.json
-node shell.mjs plan apply concept.plan.json --yes
-node shell.mjs generate --plan-out generation.plan.json
-node shell.mjs plan apply generation.plan.json --yes
+node bin/app concept schema --json
+node bin/app concept inspect --json
+node bin/app concept inspect --input docs/concepts/capture/concept.json --json
+node bin/app concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json
+node bin/app plan inspect concept.plan.json
+node bin/app plan apply concept.plan.json --yes
+node bin/app generate --plan-out generation.plan.json
+node bin/app plan apply generation.plan.json --yes
 ```
 
 `concept schema` is project-independent data discovery. Inspection without `--input`
@@ -123,7 +123,7 @@ subsequent generation uses its existing conflict and preservation rules.
 ## Implementation and verification
 
 `scripts/companion/concepts/` owns framework-free data contracts and candidate
-transformation. `scripts/framework/concept-input.ts` owns bounded local file and
+transformation. `bin/adapters/framework/concept-input.ts` owns bounded local file and
 HTML decoding; `concepts.ts` composes the shared import/file-plan infrastructure.
 CLI catalog, help and programmatic operations expose the same three commands.
 No second generator, storage writer or process execution path is introduced.

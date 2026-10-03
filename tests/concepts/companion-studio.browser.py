@@ -2,11 +2,12 @@
 Uses exact HTML injection because file navigation is blocked by managed Chromium.
 Storage cases use an explicit stand-in; no file-origin persistence claim is made.
 """
+import os
 from pathlib import Path
 import argparse, json, time, hashlib
 from playwright.sync_api import sync_playwright
 R=Path(__file__).resolve().parents[2]
-a=argparse.ArgumentParser();a.add_argument('--html',default=str(R/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(R/'reports/concepts/companion-studio'));a.add_argument('--browser',default='/usr/bin/chromium');args=a.parse_args()
+a=argparse.ArgumentParser();a.add_argument('--html',default=str(R/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(R/'reports/concepts/companion-studio'));a.add_argument('--browser',default=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'));args=a.parse_args()
 HTML=Path(args.html);OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];requests=[];started=time.time()
 def check(name,ok=True,scope='browser concept'):

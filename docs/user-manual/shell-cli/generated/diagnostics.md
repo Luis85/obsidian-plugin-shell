@@ -4,7 +4,7 @@
 
 These stable codes and recovery hints come directly from the compiler diagnostic catalog. Other operation errors can also occur; this is not an exhaustive list of every CLI failure.
 
-Inspect a code with `node shell.mjs compiler explain CODE`. Do not automatically repeat a write after a failure.
+Inspect a code with `node bin/app compiler explain CODE`. Do not automatically repeat a write after a failure.
 
 ## COMPILER_ADAPTER_REQUIRED
 

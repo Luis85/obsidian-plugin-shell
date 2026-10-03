@@ -4,9 +4,9 @@ import { mkdtemp, readFile, writeFile, mkdir, rm, realpath, symlink, readdir } f
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { storybookOperation } from '../../scripts/framework/storybook.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { storybookOperation } from '../../bin/adapters/framework/storybook.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const source = starterDocumentText('quick-capture');

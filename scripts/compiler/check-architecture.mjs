@@ -5,18 +5,20 @@ import { posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const pureEntrypoints = [
-  'scripts/compiler/adapters/plugin-emitter.ts', 'scripts/compiler/adapters/clickdummy-emitter.ts',
-  'scripts/compiler/adapters/target-lowering.ts', 'scripts/compiler/adapters/project/emitter.ts',
-  'scripts/compiler/adapters/frontend.ts', 'scripts/compiler/adapters/dependencies.ts', 'scripts/compiler/adapters/origins.ts',
+  'bin/compiler/adapters/plugin-emitter.ts', 'bin/compiler/adapters/clickdummy-emitter.ts',
+  'bin/compiler/adapters/target-lowering.ts', 'bin/compiler/adapters/project/emitter.ts',
+  'bin/compiler/adapters/frontend.ts', 'bin/compiler/adapters/dependencies.ts', 'bin/compiler/adapters/origins.ts',
 ];
 // Existing runtime modules expose pure validators alongside deferred runtime operations.
 // Only function-local timers in these two legacy modules are permitted; module-level effects stay forbidden.
-const deferredRuntimeTimers = new Set(['scripts/companion/runtime/json-http.ts', 'docs/concepts/companion/test-kit/adapters.mjs']);
+const deferredRuntimeTimers = new Set(['templates/companion/runtime/json-http.ts', 'docs/concepts/companion/test-kit/adapters.mjs']);
 function deferredTimer(path, node) {
   if (!deferredRuntimeTimers.has(path)) return false;
   for (let parent = node.parent; parent; parent = parent.parent) if (ts.isFunctionLike(parent)) return true;
   return false;
 }
+// The inward-only compiler core lives in bin/compiler/{domain,application}; host adapters live beside it in bin/compiler/adapters.
+const compilerDomain = 'bin/compiler/domain/', compilerApplication = 'bin/compiler/application/';
 const safePureImports = new Set(['node:crypto', 'node:path']);
 /** Uses a syntax tree: imports inside generated source string literals are not compiler dependencies. */
 export function inspectModule(path, text) {
@@ -52,11 +54,11 @@ export function checkCompilerBoundaries(sources) {
     return modules.has(path) ? path : null;
   }
   for (const [path, module] of modules) {
-    const domain = path.startsWith('scripts/compiler/domain/'), application = path.startsWith('scripts/compiler/application/');
+    const domain = path.startsWith(compilerDomain), application = path.startsWith(compilerApplication);
     if (!domain && !application) continue;
     for (const dependency of module.dependencies) {
       const target = resolveImport(path, dependency.specifier);
-      const allowed = target && (target.startsWith('scripts/compiler/domain/') || (application && target.startsWith('scripts/compiler/application/')));
+      const allowed = target && (target.startsWith(compilerDomain) || (application && target.startsWith(compilerApplication)));
       if (!allowed) failures.push(`${path}: inward-only compiler layer cannot import ${dependency.specifier}`);
     }
     for (const name of module.globals) failures.push(`${path}: compiler core cannot use ${name}`);
@@ -87,11 +89,15 @@ export async function compilerSourceInventory(root) {
       else if (entry.isFile() && /\.(?:ts|mjs)$/.test(path)) sources.set(path, await readFile(resolve(root,path),'utf8'));
     }
   }
-  for (const folder of ['scripts/compiler','scripts/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
+  for (const folder of ['bin/compiler','scripts/compiler','scripts/companion','scripts/companion-tools','templates/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
   return sources;
 }
+/** A listed pure entrypoint outside the inventory would otherwise be skipped silently. */
+export function missingPureEntrypoints(sources) {
+  return pureEntrypoints.filter(entry => !sources.has(entry)).map(entry => `${entry}: pure entrypoint is missing from the compiler source inventory`);
+}
 export async function checkCompilerArchitecture(root) {
-  const sources = await compilerSourceInventory(root), failures = checkCompilerBoundaries(sources);
+  const sources = await compilerSourceInventory(root), failures = [...missingPureEntrypoints(sources), ...checkCompilerBoundaries(sources)];
   if (failures.length) throw new Error('COMPILER_ARCHITECTURE_FAILED\n' + failures.join('\n'));
   return { files: sources.size, pureEntrypoints: pureEntrypoints.length };
 }

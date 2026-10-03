@@ -1,5 +1,5 @@
-import { applyOperation, planOperation } from '../../scripts/framework/planning.ts';
-import type { Request } from '../../scripts/framework/contracts.ts';
+import { applyOperation, planOperation } from '../adapters/framework/planning.ts';
+import type { Request } from '../adapters/framework/contracts.ts';
 import { brainstormContext, brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification,
   type BrainstormOptions } from '../adapters/brainstorm.ts';
 import { slug } from '../domain/errors.ts';

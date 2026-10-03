@@ -145,7 +145,7 @@ export function brainstormSchema() {
       output: { enum: outputKinds, default: 'definition' },
       verification: { enum: verificationKinds, default: 'none' },
     },
-    'x-semantic-validation': 'node shell.mjs brainstorm validate --input request.json --json',
+    'x-semantic-validation': 'node bin/app brainstorm validate --input request.json --json',
   };
 }
 function freshNumber(used: Set<string>, prefix: string, start: number): [string, number] {

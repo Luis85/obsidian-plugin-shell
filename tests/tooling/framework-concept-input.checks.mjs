@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
-import { decodeConceptInput } from '../../scripts/framework/concept-input.ts';
+import { decodeConceptInput } from '../../bin/adapters/framework/concept-input.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const project = starterDocumentText('blank');
 const direct = `<script type="application/json" id="companion-project">${project}</script>`;

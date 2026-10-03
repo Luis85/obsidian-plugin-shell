@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../scripts/companion/prototype-skill.mjs';
+import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../bin/adapters/framework/prototype-skill.ts';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -47,9 +47,9 @@ test('source-only evidence inventories include the skill and enforce existing pe
 });
 test('actual archive assembler preserves exact skill bytes in its verified template inventory', { timeout: 60000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
-  const { assembleKit } = await import('../../scripts/framework/kit.ts');
+  const { assembleKit } = await import('../../bin/adapters/framework/kit.ts');
   let compiler;
-  try { const { installedCompiler } = await import('../../scripts/framework/kit.ts'); compiler = await installedCompiler(); }
+  try { const { installedCompiler } = await import('../../bin/adapters/framework/kit.ts'); compiler = await installedCompiler(); }
   catch (error) {
     // Explicitly test assembly only on a dependency-free host. This is NOT TS compilation evidence.
     if (error.code !== 'ERR_MODULE_NOT_FOUND') throw error;
@@ -57,9 +57,9 @@ test('actual archive assembler preserves exact skill bytes in its verified templ
     compiler = { version: 'assembly-test-no-transpilation', compile: () => '// Assembly test only; not runnable compiled code.\n' };
   }
   const files = await assembleKit({ root, frameworkRoot: root }, compiler);
-  const inventory = JSON.parse(files.find(file => file.path === '.framework/kit.json').bytes);
+  const inventory = JSON.parse(files.find(file => file.path === 'bin/kit.json').bytes);
   for (const expected of await prototypeSkillFiles(root)) {
-    const key = '.framework/template/' + expected.path;
+    const key = 'bin/template/' + expected.path;
     const shipped = files.find(file => file.path === key);
     assert.ok(shipped?.bytes.equals(expected.bytes), key);
     assert.equal(inventory.files.find(file => file.path === key)?.bytes, expected.bytes.length);

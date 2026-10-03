@@ -1,9 +1,9 @@
 import { join } from 'node:path';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
-import { hash, readBounded } from '../../scripts/framework/files.ts';
-import { readInput } from '../../scripts/framework/input.ts';
-import { runNode } from '../../scripts/framework/process.ts';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
+import { hash, readBounded } from './framework/files.ts';
+import { readInput } from '../../scripts/shared/input.ts';
+import { runNode } from './framework/process.ts';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { firstRunInventory } from './first-run-inventory.ts';
 import { firstRunTool } from './first-run-plan.ts';
 import { compile } from './compiler.ts';
@@ -139,8 +139,8 @@ function handoff(request: FeatureBrainstorm, out: string, conceptPath: string,
     'Actors/entities and acceptance criteria remain planning information; use the canonical semantic, requirement and visual editors to refine them.',
     'Sitemap transitions describe intended navigation and do not prove executable page events.', '',
     '## Import (independent review and approval)',
-    '1. Inspect the concept: node shell.mjs concept inspect --input ' + conceptPath + ' --json',
-    '2. Review the separate import plan: node shell.mjs concept import --input ' + conceptPath + ' --json',
+    '1. Inspect the concept: node bin/app concept inspect --input ' + conceptPath + ' --json',
+    '2. Review the separate import plan: node bin/app concept import --input ' + conceptPath + ' --json',
     '3. If approved, repeat the import command with --apply <fresh-planHash> --json.',
     'Use the configured project importer. If this root is an unconfigured maker workspace, configure a project before importing.', '',
     '## Generated source',
@@ -149,7 +149,7 @@ function handoff(request: FeatureBrainstorm, out: string, conceptPath: string,
     ...(compiler ? ['- Compiler evidence: ' + JSON.stringify(compiler)] : []), '',
     '## Execution (separate approval; no implicit npm or browser processes)',
     ...(request.verification === 'none' ? ['- No automated verification requested.'] : [
-      '- Request a fresh verification plan: node shell.mjs brainstorm verify --out ' + out + ' --json',
+      '- Request a fresh verification plan: node bin/app brainstorm verify --out ' + out + ' --json',
       '- After reviewing the scripts, pinned toolchain and process effects, repeat with --apply <fresh-planHash> --json.']),
     '- Project/native acceptance and publication remain separate from compilation and local test/build results.',
   ].join('\n') + '\n';

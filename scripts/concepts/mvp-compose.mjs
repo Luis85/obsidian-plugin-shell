@@ -6,6 +6,7 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
   if(markers.length!==1)throw Error('MVP_ASSEMBLY: Expected one concept program.');
   const marker=markers[0];let program=marker[1];
   const replacements={
+
     sitemapView:'function sitemapView(){return `<div id="jm-root" class="ps--plugin-shell" data-plugin-ui="plugin-shell"></div>`;}',
     vaultWelcomeView:'function vaultWelcomeView(){return jmWelcomeView();}',
   };

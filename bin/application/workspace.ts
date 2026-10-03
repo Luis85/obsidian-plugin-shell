@@ -1,4 +1,6 @@
-import { documentText, type SketchDocument } from '../domain/document.ts';
+import { documentText, editDocument, type SketchDocument } from '../domain/document.ts';
+import { instantiateComponentTemplate } from '../domain/template-instantiation.ts';
+import type { ComponentTemplate } from '../domain/component-template.ts';
 import { runOperations } from './operations.ts';
 /** In-memory editing history; only the persistence adapter can commit it. */
 export class Workspace {
@@ -16,6 +18,12 @@ export class Workspace {
     const result = runOperations(this.document, operations);
     this.past.push(this.document); if (this.past.length > 50) this.past.shift();
     this.future = []; this.document = result.document; return result;
+  }
+  instantiateTemplate(templates: readonly ComponentTemplate[], templateId: string, name?: string) {
+    let created: ReturnType<typeof instantiateComponentTemplate> | undefined;
+    const next = editDocument(this.document, draft => { created = instantiateComponentTemplate(draft, templates, templateId, name); });
+    this.past.push(this.document); if (this.past.length > 50) this.past.shift();
+    this.future = []; this.document = next; return created!;
   }
   undo(): boolean {
     const previous = this.past.pop(); if (!previous) return false;

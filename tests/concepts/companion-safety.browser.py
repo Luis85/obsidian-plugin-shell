@@ -45,7 +45,7 @@ def fixture_script(initial=None):
 
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
 
     def new(width=1600, stored=None, sample=True):
         p = browser.new_page(viewport={'width': width, 'height': 1100}, accept_downloads=True)

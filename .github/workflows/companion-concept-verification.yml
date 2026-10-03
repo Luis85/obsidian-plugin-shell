@@ -4,13 +4,19 @@ on:
     paths: &concept-inputs
       - 'configs/starters/**'
       - 'scripts/starters/**'
+      - 'bin/adapters/starters/**'
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
-      - 'scripts/framework/**'
+      - 'scripts/companion-tools/**'
+      - 'templates/**'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
       - 'tests/tooling/*prototypes*.checks.mjs'
       - 'tests/support/prototype-fixture.mjs'
       - 'scripts/compiler/**'
+      - 'bin/compiler/**'
       - 'scripts/bundling/**'
       - 'tests/tooling/compiler-journey*.checks.mjs'
       - 'tests/tooling/companion-project.checks.mjs'
@@ -25,7 +31,7 @@ on:
       - 'tests/tooling/jev-concept-distribution.checks.mjs'
       - 'tests/concepts/**'
       - 'tests/tooling/test-data-*'
-      - '.fallowrc.json'
+      - 'configs/quality/fallow.json'
       - 'scripts/quality/maintainability-inventory.mjs'
       - 'tests/tooling/maintainability.checks.mjs'
       - '.github/workflows/companion-concept-verification.yml'
@@ -68,10 +74,12 @@ jobs:
               records.append({'path': str(path), 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)})
           print(json.dumps({'status': 'passed', 'scope': 'Python syntax only; no execution or JS complexity claim', 'files': records}))
           PYTHON
-      - name: Install exact locked dependencies for the schema 6 contract bundle
+      - name: Install exact locked dependencies for the schema 6 contract bundle and kit assembly without lifecycle scripts
+        shell: bash
         run: |
+          set -euo pipefail
           npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund --ignore-scripts
       - name: Check exact offline concept assembly
         run: python3 scripts/concepts/build-companion.py --check
       - name: Exercise assembly, inventory and tamper rejection
@@ -151,7 +159,7 @@ jobs:
           from playwright.sync_api import sync_playwright
           with sync_playwright() as pw:
               with open(os.environ['GITHUB_ENV'], 'a') as output:
-                  output.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
+                  output.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
           PYTHON
       # The aggregated runner stops at the first failing suite; run the page and component editors on their own first.
       - name: Exercise the page and component editors on the exact artifact
@@ -201,15 +209,15 @@ jobs:
           from playwright.sync_api import sync_playwright
           with sync_playwright() as pw:
               with open(os.environ['GITHUB_ENV'], 'a') as env:
-                  env.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
+                  env.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
           PY
       - name: Typecheck shared contracts and actual Vue authoring components
         shell: bash
         run: |
           set -o pipefail
           mkdir -p reports/companion-mvp
-          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
+          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
           node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
       - name: Build the empty companion and explicitly derive golden qualification input
         run: |
@@ -221,11 +229,11 @@ jobs:
         run: |
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py
           "$PYTHON" -B tests/concepts/companion-prototypes.browser.py
-          node shell.mjs project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
+          node bin/app project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
           git rev-parse HEAD > reports/companion-mvp/source-commit.txt
       - name: Generate and independently build the exact v6 self-project and offline clickdummy
         run: |
-          node scripts/companion/qualify-project.mjs --authoring-fixture
+          node scripts/companion-tools/qualify-project.mjs --authoring-fixture
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py --clickdummy
       - name: Retain exact authoring artifacts and browser evidence
         if: always()
@@ -266,7 +274,7 @@ jobs:
           mkdir -p reports/journey-native
           node scripts/concepts/build-mvp.mjs 2>&1 | tee reports/journey-native/definition-build.log
           node scripts/concepts/export-golden-project.mjs 2>&1 | tee reports/journey-native/golden-source.log
-          node scripts/companion/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
+          node scripts/companion-tools/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
       - name: Exercise create, edit, reopen and independent leaves against the generated plugin
         env:
           SOURCE_COMMIT: ${{ github.sha }}

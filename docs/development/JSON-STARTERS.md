@@ -47,8 +47,11 @@ from that archive. The resulting starter files must sit next to the launcher as
 
 ```text
 workspace/
-  shell.mjs
-  .framework/
+  bin/
+    app
+    app.js
+    kit.json
+    template/
   configs/
     starters/
       blank.json
@@ -57,11 +60,11 @@ workspace/
 ```
 
 ```sh
-node shell.mjs starters list
-node shell.mjs new --list --json
-node shell.mjs starters show webapp --json
-node shell.mjs starters validate --json
-node shell.mjs starters schema --json
+node bin/app starters list
+node bin/app new --list --json
+node bin/app starters show webapp --json
+node bin/app starters validate --json
+node bin/app starters schema --json
 ```
 
 Discovery uses the invocation project, not the installed framework's source tree.
@@ -79,9 +82,11 @@ its JSON files to a configured alternative folder explicitly.
 
 ## Definition structure
 
-The editor schema is `scripts/starters/starter.schema.json`; the runtime validator
-also checks semantic rules such as path containment, dependency cycles, identity
-fields, current Companion version, and input type/default compatibility.
+The editor schema is `scripts/starters/starter.schema.json` (catalog data, kept beside
+the other JSON catalogs so starter files and in-place kit projects can reference it);
+the runtime validator in `bin/adapters/starters/validation.ts` also checks semantic
+rules such as path containment, dependency cycles, identity fields, current
+Companion version, and input type/default compatibility.
 `schemaVersion` versions this contract; `version` versions the individual starter.
 A content SHA-256 identifies the exact local bytes but is **not** a signature or
 proof that a starter is safe to execute.
@@ -143,10 +148,10 @@ the existing shared compiler. It does not reference one of the old fixture files
 `framework`, canonical-order `targets` and, for Angular only, exact `angularPins`.
 Its `inputs`, `files`, `processes` and `firstRun` must be empty: the maker's
 prototype interview supplies identity and design, and the compiler owns every file.
-Project starters run through `node shell.mjs new` (terminal) or `new guide --starter
+Project starters run through `node bin/app new` (terminal) or `new guide --starter
 <id>` / `new --input` (agents), which prepare a reviewed prototype package; `new <dir>
 --starter <project-starter>` refuses with `STARTER_KIND`. The maker reads them from
-the starters folder beside `shell.mjs`. See [project starters](../../bin/PROJECT-STARTERS.md).
+the `configs/starters/` folder in the package root beside `bin/`. See [project starters](../../bin/PROJECT-STARTERS.md).
 Generic compiler/runtime/template code still belongs to the shell; starter-specific
 project designs and choices belong to the JSON. Native feature behavior retains
 the existing compiler's scaffold and acceptance boundaries.
@@ -170,21 +175,21 @@ or use reserved Windows device names. Extra files cannot replace compiler output
 
 ```sh
 # Preview the whole output, without writing or running processes.
-node shell.mjs new ../my-app --starter webapp --name "My App" --json
+node bin/app new ../my-app --starter webapp --name "My App" --json
 
 # Create after reviewing the plan. A previous plan hash can replace --yes.
-node shell.mjs new ../my-app --starter webapp --name "My App" --yes
+node bin/app new ../my-app --starter webapp --name "My App" --yes
 
 # Supply all custom fields through JSON rather than new CLI-specific code.
-node shell.mjs new ../my-other-app --starter webapp --values values.json --yes
+node bin/app new ../my-other-app --starter webapp --values values.json --yes
 
 # Validate and preview installation of a new definition.
-node shell.mjs starters add --input hello.json
-node shell.mjs starters add --input hello.json --yes
+node bin/app starters add --input hello.json
+node bin/app starters add --input hello.json --yes
 
 # Edit a separate candidate file, review its plan, then apply.
-node shell.mjs starters edit hello --input hello-edited.json
-node shell.mjs starters edit hello --input hello-edited.json --yes
+node bin/app starters edit hello --input hello-edited.json
+node bin/app starters edit hello --input hello-edited.json --yes
 ```
 
 Directly editing an installed JSON file is also supported; the next read sees it.
@@ -215,18 +220,18 @@ argv entries; no command shell expands substituted values.
 
 ```sh
 # Review a generated project's process graph and direct input fingerprints.
-node shell.mjs starters run --project ../my-app --process verify,build --json
+node bin/app starters run --project ../my-app --process verify,build --json
 
 # Execute exactly the reviewed plan; a changed process graph or input fingerprint fails as stale.
-node shell.mjs starters run --project ../my-app --process verify,build --yes --trust-processes --apply <planHash>
+node bin/app starters run --project ../my-app --process verify,build --yes --trust-processes --apply <planHash>
 
 # Without --apply, --yes plans and runs in one step; that run is not compared with an earlier review.
 
 # Create and explicitly request the starter's declared firstRun sequence.
-node shell.mjs new ../first-run-app --starter webapp --yes --install --trust-processes
+node bin/app new ../first-run-app --starter webapp --yes --install --trust-processes
 
 # Select a different declared process sequence instead of firstRun.
-node shell.mjs new ../selected-run-app --starter webapp --yes --run verify,build --trust-processes
+node bin/app new ../selected-run-app --starter webapp --yes --run verify,build --trust-processes
 ```
 
 `--install` is a compatibility alias for selecting `firstRun`; its exact effects
@@ -253,8 +258,8 @@ plan does not automatically run subsequent processes.
 
 ```sh
 mkdir -p reports/workbench-distributions
-node shell.mjs framework pack --out reports/workbench-distributions/workbench-shell-0.4.0.zip --yes
-node shell.mjs starters pack --out reports/workbench-distributions/workbench-starters-0.4.0.zip --yes
+node bin/app framework pack --out reports/workbench-distributions/workbench-shell-0.4.0.zip --yes
+node bin/app starters pack --out reports/workbench-distributions/workbench-starters-0.4.0.zip --yes
 ```
 
 Use the version committed in `package.json`; `0.4.0` is the implementation baseline.

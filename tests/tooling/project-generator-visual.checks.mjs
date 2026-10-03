@@ -10,17 +10,17 @@ import { selfProject } from '../support/starter-documents.mjs';
 // Resolves through ancestor node_modules so the check also runs inside git worktrees.
 const tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
 test('visual runtime type-checks under the generator configuration', () => {
-  const run = spawnSync(process.execPath, [tsc, '--noEmit', '--project', 'tsconfig.generator.json'], { encoding: 'utf8' });
+  const run = spawnSync(process.execPath, [tsc, '--noEmit', '--project', 'configs/types/tsconfig.generator.json'], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stdout + run.stderr);
 });
 test('runtime exposes the IR surface used by generated SFCs', async () => {
-  const text = await readFile('scripts/companion/runtime/use-visual.ts', 'utf8');
+  const text = await readFile('templates/companion/runtime/use-visual.ts', 'utf8');
   for (const name of ['visible', 'style', 'text', 'a11y', 'props', 'attrs', 'on', 'message', 'attach', 'theme', 'state', 'external']) assert.match(text, new RegExp('\\b' + name + '\\b'));
   assert.doesNotMatch(text, /\beval\b|new Function/);
 });
 
-const { useVisual, provideVisualContext } = await import('../../scripts/companion/runtime/use-visual.ts');
-const { visualIndex } = await import('../../scripts/companion/runtime/visual-runtime.ts');
+const { useVisual, provideVisualContext } = await import('../../templates/companion/runtime/use-visual.ts');
+const { visualIndex } = await import('../../templates/companion/runtime/visual-runtime.ts');
 const dom = new Window();
 globalThis.HTMLElement ??= dom.HTMLElement;
 
@@ -219,8 +219,8 @@ test('external adapters mount after render and never mount an element removed be
   assert.equal(created, 1); assert.deepEqual(log, [['mount', true, 'v'], ['destroy']]);
 });
 
-const { projectModel } = await import('../../scripts/companion/compiler/model.ts');
-const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
+const { projectModel } = await import('../../bin/compiler/emitters/model.ts');
+const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualContractNames, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../bin/compiler/emitters/visual-model.ts');
 const self = structuredClone(selfProject());
 test('model exposes validated definitions and explicit Nuxt UI imports', () => {
   const m = projectModel(self), store = visualDefinitions(m);
@@ -264,7 +264,10 @@ test('Nuxt UI imports are unique, sorted and cover slot content', () => {
 test('component contracts declare typed props, emits and slots', () => {
   const source = visualContractTypes({ props: [{ name: 'title', type: 'string', required: true }, { name: 'count', type: 'number', required: false }], slots: [{ name: 'actions', required: false }, { name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }, { name: 'pick', payloadType: 'unknown' }, { name: 'toggle', payloadType: 'boolean' }], variants: [] });
   assert.equal(source, 'export interface ComponentProps {\n  "title": string;\n  "count"?: number;\n}\nexport interface ComponentEvents {\n  "close": [payload: undefined];\n  "pick": [payload: unknown];\n  "toggle": [payload: boolean];\n}\nexport interface ComponentSlots {\n  "actions"?: () => unknown;\n  "body": () => unknown;\n}\n');
-  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n}\nexport interface ComponentEvents {\n}\nexport interface ComponentSlots {\n}\n');
+  // An empty interface fails the generated no-empty-object-type rule, so only declared members are emitted.
+  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export {};\n');
+  assert.equal(visualContractTypes({ props: [{ name: 'title', type: 'string', required: false }], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n  "title"?: string;\n}\n');
+  assert.deepEqual(visualContractNames({ props: [], slots: [{ name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }] }), ['ComponentEvents', 'ComponentSlots']);
 });
 test('declared component packages merge as exact pins and framework conflicts name both versions', () => {
   const withDeps = dependencies => { const doc = structuredClone(self); doc.design.visualDesigns.components[0].dependencies = dependencies; return projectModel(doc); };
@@ -276,7 +279,7 @@ test('declared component packages merge as exact pins and framework conflicts na
   assert.throws(() => visualPackages(withDeps([{ package: 'vue', version: '3.0.0', purpose: 'Old' }]), framework), { message: 'VISUAL_INVALID: vue is pinned to 3.5.43 by the framework and 3.0.0 by ' + name + '.' });
 });
 
-const { visualSfc } = await import('../../scripts/companion/compiler/visual-code.ts');
+const { visualSfc } = await import('../../bin/compiler/emitters/visual-code.ts');
 const { writeFile } = await import('node:fs/promises');
 const { readFileSync } = await import('node:fs');
 const { visualNodes } = await import('../../scripts/companion/visual/visual-ir.mjs');
@@ -378,7 +381,7 @@ test('names and identifiers that could escape template syntax stop lowering', ()
   assert.ok(scripted.includes(`case "${lt}/script${gt}${lt}script${gt}x": if (typeof payload === "string")`));
 });
 
-const { projectFiles } = await import('../../scripts/companion/compiler/project-files.ts');
+const { projectFiles } = await import('../support/project-render.mjs');
 test('self-project generates visual files and no detail artifacts', async () => {
   const files = await projectFiles(process.cwd(), projectModel(self)); const paths = files.map(f => f.path);
   assert.ok(paths.some(p => /presentation\/components\/details\/vp-\d+\.vue$/.test(p)));

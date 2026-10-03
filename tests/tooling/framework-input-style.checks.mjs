@@ -1,4 +1,4 @@
-import { parseJsonData, parseDesignData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData, parseDesignData } from '../../scripts/contracts/json-data.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PassThrough } from 'node:stream';
@@ -6,10 +6,12 @@ import { mkdtemp, realpath, readFile, writeFile, readdir, mkdir, rm } from 'node
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { readInput, ask } from '../../scripts/framework/input.ts';
-import { parseCliArguments, validateRequest, descriptor } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { exportDesignSystem } from '../../scripts/framework/style-export.ts';
+import { readInput, ask } from '../../scripts/shared/input.ts';
+import { readInput as sharedReadInput, ask as sharedAsk } from '../../scripts/shared/input.ts';
+import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
+import { parseCliArguments, validateRequest, descriptor } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { exportDesignSystem } from '../../bin/adapters/framework/style-export.ts';
 import { compileDesignSystem } from '../../scripts/companion/design-system-css.mjs';
 import { selfProject } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -129,4 +131,15 @@ test('larger design-data profile does not relax small operation input or hostile
   assert.equal(parseDesignData(large).description.length, 1_100_000);
   assert.throws(() => parseDesignData(JSON.stringify({description: 'x'.repeat(4_000_000)})), /JSON_DATA_INVALID/);
   assert.throws(() => parseDesignData('{"constructor":{}}'), /JSON_DATA_INVALID/);
+});
+
+test('shared confirmation policy keeps yes/no semantics explicit and case-insensitive', () => {
+  for (const value of ['y', 'Y', 'yes', ' YES ']) assert.equal(parseConfirmation(value), true);
+  for (const value of ['', ' ', 'n', 'N', 'no', ' NO ']) assert.equal(parseConfirmation(value), false);
+  for (const value of ['maybe', '1', 'yep']) assert.equal(parseConfirmation(value), null);
+});
+
+test('framework input entry remains a compatibility re-export of shared typed transport', () => {
+  assert.equal(readInput, sharedReadInput);
+  assert.equal(ask, sharedAsk);
 });

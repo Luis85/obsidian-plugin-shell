@@ -1,7 +1,7 @@
 import { readFile, lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 async function optional(path) { try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; } }
 async function safeRead(root, path) {
   const inspected = await createFilePlan(root, [{ path, content: null }]); // Validate/hash only; this inspection plan is never applied.

@@ -1,8 +1,8 @@
 import { readFirstRunReport } from '../domain/first-run-report.ts';
 import { dirname, join, resolve } from 'node:path';
-import { npmEntry } from '../../scripts/framework/process.ts';
-import { hash, readBounded } from '../../scripts/framework/files.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { npmEntry } from './framework/process.ts';
+import { hash, readBounded } from './framework/files.ts';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { object, text } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { installCommand, readFirstRunRequest, type FirstRunRequest } from '../domain/first-run.ts';

@@ -24,7 +24,7 @@ export function companionStarterIds() {
 }
 /** The current self-project: the golden Companion starter. */
 export const selfProject = () => starterDocument('companion-plugin');
-/** The eleven focused example starters (every Companion starter except the self-project and the feature showcase). */
+/** The twelve focused example starters (every Companion starter except the self-project and the feature showcase). */
 export function exampleStarterIds() {
   return companionStarterIds().filter(id => !['companion-plugin', 'feature-showcase'].includes(id));
 }

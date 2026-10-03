@@ -33,10 +33,10 @@ function accepted(root) {
   json(root,'evidence/test-acceptance.json',{...common,type:'PBI-Acceptance',decision:'accepted',reviewed_by:'Synthetic PO',reviewed_on:'2026-09-29'});
 }
 
-test('real baseline has 54 new PBIs, 216 criteria and no invented acceptance',()=>{
+test('real baseline has 55 new PBIs, 220 criteria and no invented acceptance',()=>{
   const r=assess(source,{asOf:'2026-09-29'});
-  assert.equal(r.scope.total,54); assert.equal(r.criterion_total,216); assert.equal(r.scope.accepted,0);
-  assert.equal(r.status_counts.new,54); assert.equal(r.accepted_point_fraction,null); assert.equal(r.unassigned,54);
+  assert.equal(r.scope.total,55); assert.equal(r.criterion_total,220); assert.equal(r.scope.accepted,0);
+  assert.equal(r.status_counts.new,55); assert.equal(r.accepted_point_fraction,null); assert.equal(r.unassigned,55);
 });
 test('duplicate frontmatter keys and unsupported YAML fail closed',()=>{
   assert.throws(()=>parsePbi('---\ntype: PBI\ntype: PBI\n---\n### WB-PBI-001-AC01\n'),/Duplicate/);
@@ -54,7 +54,7 @@ test('missing baseline file cannot shrink the denominator',()=>sandbox(root=>{
   rmSync(join(root,file)); assert.throws(()=>assess(root),/scope\/file count/);
 }));
 test('deferred item stays in scope and earns no completion',()=>sandbox(root=>{
-  edit(root,file,d=>d.status='deferred');const r=assess(root);assert.equal(r.scope.total,54);assert.equal(r.scope.accepted,0);
+  edit(root,file,d=>d.status='deferred');const r=assess(root);assert.equal(r.scope.total,55);assert.equal(r.scope.accepted,0);
 }));
 test('unknown dependencies and dependency cycles are rejected',()=>sandbox(root=>{
   edit(root,file,d=>d.depends_on=['WB-PBI-003']);

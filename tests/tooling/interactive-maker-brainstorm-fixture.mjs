@@ -3,11 +3,11 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, rm } from 'node:fs/promi
 import { Readable } from 'node:stream';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { hash } from '../../scripts/framework/files.ts';
-import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
+import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
-import { applyOperation, planOperation } from '../../scripts/framework/planning.ts';
+import { applyOperation, planOperation } from '../../bin/adapters/framework/planning.ts';
 import { Back } from '../../bin/presentation/prompts.ts';
 
 export const frameworkRoot = resolve(import.meta.dirname, '../..');

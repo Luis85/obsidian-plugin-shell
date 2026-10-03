@@ -23,3 +23,4 @@ export function validateStarterCatalog(value) {
   // Empty installations and a single custom starter are valid; no bundled blank fallback.
   return value;
 }
+

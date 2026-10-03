@@ -1,12 +1,12 @@
 # Workbench MVP progress
 
-Baseline: **WB-MVP-2026-09-29-v1**. As of: **2026-09-29**. Candidate: per-PBI candidate; unknown where unset.
+Baseline: **WB-MVP-2026-09-30-v2**. As of: **2026-09-30**. Candidate: per-PBI candidate; unknown where unset.
 
-**Accepted: 0/54 PBIs. Verified criteria: 0/216. Shipped: 0/54.**
+**Accepted: 0/55 PBIs. Verified criteria: 0/220. Shipped: 0/55.**
 
-Unassigned: 54. Unestimated: 54. Missing refined verification plans: 54. Stale evidence: 0.
+Unassigned: 55. Unestimated: 55. Missing refined verification plans: 55. Stale evidence: 0.
 
-Explicitly blocked: 0. Waiting for PBI acceptance prerequisites: 52. Open questions: 5.
+Explicitly blocked: 0. Waiting for PBI acceptance prerequisites: 52. Open questions: 8.
 
 Weighted completion: not available; estimates are incomplete. Accepted in the preceding 28 days: 0.
 
@@ -14,7 +14,7 @@ Weighted completion: not available; estimates are incomplete. Accepted in the pr
 
 | Status | PBIs |
 | --- | --- |
-| new | 54 |
+| new | 55 |
 | designed | 0 |
 | scoped | 0 |
 | tech refined | 0 |
@@ -37,7 +37,7 @@ Weighted completion: not available; estimates are incomplete. Accepted in the pr
 | WB-E03 | 7 | 0 | 0 | 0 |
 | WB-E04 | 9 | 0 | 0 | 0 |
 | WB-E05 | 6 | 0 | 0 | 0 |
-| WB-E06 | 7 | 0 | 0 | 0 |
+| WB-E06 | 8 | 0 | 0 | 0 |
 | WB-E07 | 5 | 0 | 0 | 0 |
 | WB-E08 | 2 | 0 | 0 | 0 |
 
@@ -68,7 +68,7 @@ Weighted completion: not available; estimates are incomplete. Accepted in the pr
 | WB-F21 | 2 | 0 | 0 | 0 |
 | WB-F22 | 1 | 0 | 0 | 0 |
 | WB-F23 | 2 | 0 | 0 | 0 |
-| WB-F24 | 2 | 0 | 0 | 0 |
+| WB-F24 | 3 | 0 | 0 | 0 |
 | WB-F25 | 2 | 0 | 0 | 0 |
 | WB-F26 | 2 | 0 | 0 | 0 |
 | WB-F27 | 1 | 0 | 0 | 0 |
@@ -80,14 +80,14 @@ Weighted completion: not available; estimates are incomplete. Accepted in the pr
 | --- | --- | --- | --- | --- |
 | O-TIME | 24 | 0 | 0 | 0 |
 | O-DOCS | 10 | 0 | 0 | 0 |
-| O-DX | 54 | 0 | 0 | 0 |
-| O-QUALITY | 35 | 0 | 0 | 0 |
+| O-DX | 55 | 0 | 0 | 0 |
+| O-QUALITY | 36 | 0 | 0 | 0 |
 
 ## Lane
 
 | Lane | Scope | Verified | Accepted | Shipped |
 | --- | --- | --- | --- | --- |
-| foundation | 39 | 0 | 0 | 0 |
+| foundation | 40 | 0 | 0 | 0 |
 | concept | 8 | 0 | 0 | 0 |
 | publication | 2 | 0 | 0 | 0 |
 | native | 4 | 0 | 0 | 0 |
@@ -100,7 +100,7 @@ Weighted completion: not available; estimates are incomplete. Accepted in the pr
 | I0 | 3 | 0 | 0 | 0 |
 | I1 | 9 | 0 | 0 | 0 |
 | I2 | 22 | 0 | 0 | 0 |
-| I3 | 14 | 0 | 0 | 0 |
+| I3 | 15 | 0 | 0 | 0 |
 | I4 | 1 | 0 | 0 | 0 |
 | I5 | 4 | 0 | 0 | 0 |
 | I6 | 1 | 0 | 0 | 0 |
@@ -109,8 +109,8 @@ Weighted completion: not available; estimates are incomplete. Accepted in the pr
 
 | Gate contribution | Scope | Verified | Accepted | Shipped |
 | --- | --- | --- | --- | --- |
-| SH-022 | 39 | 0 | 0 | 0 |
-| SH-034 | 1 | 0 | 0 | 0 |
+| SH-022 | 40 | 0 | 0 | 0 |
+| SH-034 | 2 | 0 | 0 | 0 |
 | CX-007 | 0 | 0 | 0 | 0 |
 | CP-010 | 12 | 0 | 0 | 0 |
 | PUB-004 | 1 | 0 | 0 | 0 |

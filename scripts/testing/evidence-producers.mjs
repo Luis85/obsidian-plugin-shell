@@ -49,9 +49,9 @@ export async function readFrameworkReport(output) {
 // Trusted code owns commands and modes. Reports cannot supply hooks or arguments.
 export function producerCommand(root, producer, files, output) {
   switch (producer) {
-    case 'runtime': return ['node_modules/vitest/vitest.mjs', 'run', '--retry=0', '--allowOnly=false', '--reporter=json', '--reporter=./scripts/testing/evidence-vitest-reporter.mjs', `--outputFile=${join(output, 'framework.json')}`];
-    case 'coverage': return ['node_modules/vitest/vitest.mjs', 'run', '--retry=0', '--allowOnly=false', '--coverage', '--config', 'vitest.production.config.mjs', '--reporter=json', '--reporter=./scripts/testing/evidence-vitest-reporter.mjs', `--outputFile=${join(output, 'framework.json')}`];
-    case 'browser': return ['node_modules/@playwright/test/cli.js', 'test', '--retries=0', '--repeat-each=1', '--forbid-only', '--reporter=json'];
+    case 'runtime': return ['node_modules/vitest/vitest.mjs', 'run', '--retry=0', '--allowOnly=false', '--config', 'configs/testing/vitest.config.mjs', '--reporter=json', '--reporter=./scripts/testing/evidence-vitest-reporter.mjs', `--outputFile=${join(output, 'framework.json')}`];
+    case 'coverage': return ['node_modules/vitest/vitest.mjs', 'run', '--retry=0', '--allowOnly=false', '--coverage', '--config', 'configs/testing/vitest.production.config.mjs', '--reporter=json', '--reporter=./scripts/testing/evidence-vitest-reporter.mjs', `--outputFile=${join(output, 'framework.json')}`];
+    case 'browser': return ['node_modules/@playwright/test/cli.js', 'test', '--config', 'configs/testing/playwright.config.ts', '--retries=0', '--repeat-each=1', '--forbid-only', '--reporter=json'];
     case 'tooling': return ['--unhandled-rejections=strict', '--test', '--test-concurrency=1', `--test-reporter=${pathToFileURL(join(root, 'scripts/testing/node-reporter.mjs')).href}`, ...files];
     case 'artifact': return ['scripts/quality/check-artifacts.mjs'];
     case 'native': return ['scripts/testing/check-native.mjs', '--allow-download'];

@@ -1,12 +1,13 @@
 import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
+import { designCommand } from './design-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
-import { descriptor, parameterKinds } from '../../scripts/framework/catalog.ts';
+import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { resolve } from 'node:path';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
-import { readInput } from '../../scripts/framework/input.ts';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
+import { readInput } from '../../scripts/shared/input.ts';
 import type { Readable } from 'node:stream';
 import { newDocument, documentText } from '../domain/document.ts';
 import { object, keys } from '../domain/data.ts';
@@ -24,56 +25,59 @@ export { option, type Arguments } from '../domain/command-options.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
 const makerHelp = `Shell maker — make first, generate when ready
-  node shell.mjs first-run             Optional install → typecheck → test → build → showcase
-  node shell.mjs first-run schema --json
-  node shell.mjs first-run --input first-run.json --json
-  node shell.mjs first-run status --json
-  node shell.mjs project-setup         Angular setup in an existing Git + Obsidian vault
-  node shell.mjs project-setup schema --json
-  node shell.mjs project-setup guide --json
-  node shell.mjs project-setup scan --json
-  node shell.mjs project-setup --input setup.json --json
-  node shell.mjs project-setup status --json
-  node shell.mjs project-setup checkpoint --input partial-setup.json --json
-  node shell.mjs project-setup resume --json
-  node shell.mjs project-setup checkpoint-status --json
-  node shell.mjs project-setup discard-checkpoint --json
-  node shell.mjs settings              Edit configs/user-settings.json
-  node shell.mjs settings show --json
-  node shell.mjs settings schema --json
-  node shell.mjs settings --input settings.json --json
-  node shell.mjs settings migrate --input paths.json --json
-  node shell.mjs                       Open saved workspace or create a project (terminal only)
-  node shell.mjs new                   Project starter → prototype guide → reviewed package
-  node shell.mjs new --starter plugin-angular   Preselect an installed project starter
-  node shell.mjs new starters --json   Discover installed project starters (configs/starters beside shell.mjs)
-  node shell.mjs new guide --starter plugin-angular --json
-  node shell.mjs new validate --input request.json --json
-  node shell.mjs new --input request.json --out projects/demo --json
-  node shell.mjs new <dir> (--starter <id> | --from <project.json>)  File/Companion starters and exports
-  node shell.mjs help new              Directory-creation options and approval policy
-  node shell.mjs brainstorm            Guided feature definition, optional prototype/boilerplate and reviewed verification
-  node shell.mjs brainstorm guide --json      Discover questions and the two sub-use-case roadmap
-  node shell.mjs brainstorm schema --json     Machine-readable request schema
-  node shell.mjs brainstorm context --json    Current project identity, saved base hash and existing surfaces
-  node shell.mjs brainstorm validate --input feature.json --json
-  node shell.mjs brainstorm feature --input feature.json --out brainstorms/my-feature --json
-  node shell.mjs brainstorm feature --input feature.json --out brainstorms/my-feature --apply <planHash> --json
-  node shell.mjs brainstorm verify --out brainstorms/my-feature --json
-  node shell.mjs brainstorm verify --out brainstorms/my-feature --apply <verificationPlanHash> --json
-  node shell.mjs sketch                Interactive page/component editor
-  node shell.mjs sketch show --json    Inspect saved IDs and page composition
-  node shell.mjs sketch schema --json  Discover the versioned transaction schema
-  node shell.mjs sketch --input request.json --json
-  node shell.mjs sketch generate --out generated/my-plugin --kind obsidian-plugin --json
-  node shell.mjs prototype             Data-driven prototype preparation guide
-  node shell.mjs prototype guide --json
-  node shell.mjs prototype validate --input answers.json --json
-  node shell.mjs prototype --input answers.json --out prototypes/my-prototype --json
+  node bin/app first-run             Optional install → typecheck → test → build → showcase
+  node bin/app first-run schema --json
+  node bin/app first-run --input first-run.json --json
+  node bin/app first-run status --json
+  node bin/app project-setup         Angular setup in an existing Git + Obsidian vault
+  node bin/app project-setup schema --json
+  node bin/app project-setup guide --json
+  node bin/app project-setup scan --json
+  node bin/app project-setup --input setup.json --json
+  node bin/app project-setup status --json
+  node bin/app project-setup checkpoint --input partial-setup.json --json
+  node bin/app project-setup resume --json
+  node bin/app project-setup checkpoint-status --json
+  node bin/app project-setup discard-checkpoint --json
+  node bin/app settings              Edit configs/user-settings.json
+  node bin/app settings show --json
+  node bin/app settings schema --json
+  node bin/app settings --input settings.json --json
+  node bin/app settings migrate --input paths.json --json
+  node bin/app                       Open saved workspace or create a project (terminal only)
+  node bin/app new                   Project starter → prototype guide → reviewed package
+  node bin/app new --starter plugin-angular   Preselect an installed project starter
+  node bin/app new starters --json   Discover installed project starters (configs/starters in the package root)
+  node bin/app new guide --starter plugin-angular --json
+  node bin/app new validate --input request.json --json
+  node bin/app new --input request.json --out projects/demo --json
+  node bin/app new <dir> (--starter <id> | --from <project.json>)  File/Companion starters and exports
+  node bin/app help new              Directory-creation options and approval policy
+  node bin/app brainstorm            Guided feature definition, optional prototype/boilerplate and reviewed verification
+  node bin/app brainstorm guide --json      Discover questions and the two sub-use-case roadmap
+  node bin/app brainstorm schema --json     Machine-readable request schema
+  node bin/app brainstorm context --json    Current project identity, saved base hash and existing surfaces
+  node bin/app brainstorm validate --input feature.json --json
+  node bin/app brainstorm feature --input feature.json --out brainstorms/my-feature --json
+  node bin/app brainstorm feature --input feature.json --out brainstorms/my-feature --apply <planHash> --json
+  node bin/app brainstorm verify --out brainstorms/my-feature --json
+  node bin/app brainstorm verify --out brainstorms/my-feature --apply <verificationPlanHash> --json
+  node bin/app sketch                Interactive page/component editor
+  node bin/app sketch show --json    Inspect saved IDs and page composition
+  node bin/app sketch schema --json  Discover the versioned transaction schema
+  node bin/app sketch --input request.json --json
+  node bin/app sketch generate --out generated/my-plugin --kind obsidian-plugin --json
+  node bin/app prototype             Data-driven prototype preparation guide
+  node bin/app prototype guide --json
+  node bin/app prototype validate --input answers.json --json
+  node bin/app prototype --input answers.json --out prototypes/my-prototype --json
+  node bin/app design status --json  Claude Design folders under docs/design (configurable paths.design)
+  node bin/app design prepare --name my-prototype --json   Prepare docs/design/my-prototype for Claude Design
+  node bin/app design sync --name my-prototype --json      Regenerate its context; design work is never touched
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
---starter <project-starter-id> (new, new guide),
+--starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -86,7 +90,7 @@ Workbench plugins registered in plugins/registry.ts may add top-level CLI comman
 function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
   const booleans = ['json', 'no-interaction', 'help', 'no-color', ...(extension?.options?.booleans ?? [])];
-  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter', ...(extension?.options?.values ?? [])];
+  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter', 'name', 'package', ...(extension?.options?.values ?? [])];
   while (tokens.length) {
     const flag = tokens.shift()!;
     requireSketch(flag.startsWith('--'), 'MAKER_ARGUMENT', `Unexpected argument ${flag}.`);
@@ -103,7 +107,7 @@ function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<stri
 export function parseArguments(argv: string[], extensions: readonly PluginCliCommand[] = pluginCliCommands()): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  const builtins = ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm'];
+  const builtins = ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design'];
   requireSketch(extensions.every(item => !builtins.includes(item.id)), 'PLUGIN_COMMAND_CONFLICT', 'A plugin CLI command conflicts with a built-in maker command.');
   const extension = first ? extensions.find(item => item.id === first) : undefined;
   requireSketch(first === undefined || builtins.includes(first) || extension, 'MAKER_COMMAND', 'Use a built-in maker command or a registered plugin command.');
@@ -167,9 +171,9 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
 function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): Record<string, unknown> {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
     const pluginHelp = extensions.length
-      ? '\nPlugin commands:\n' + extensions.map(item => `  node shell.mjs ${item.id} — ${item.summary}`).join('\n') + '\n'
+      ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -186,6 +190,7 @@ function directCommand(args: Arguments, context: CommandContext): Record<string,
   if (args.flags.help || args.command === 'studio') return helpResult(args, context.plugins?.cliCommands ?? pluginCliCommands());
   if (args.command === 'new') return newProjectCommand(args, context);
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
+  if (args.command === 'design') return designCommand(args, context);
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
   return undefined;
 }

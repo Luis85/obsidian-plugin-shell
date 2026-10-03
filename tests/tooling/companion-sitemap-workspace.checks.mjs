@@ -10,13 +10,18 @@ import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = new URL('../../', import.meta.url);
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js',root),'utf8')+';Vue;');
 const source=readFileSync(new URL('docs/concepts/companion/editor/workspace/use-workspace.ts',root),'utf8');
+const domSource=readFileSync(new URL('docs/concepts/companion/editor/dom.ts',root),'utf8');
 const seed=starterDocumentText('quick-capture');
 async function load(env,urlApi){
   const dependencies={vue:Vue,'./contracts.ts':{useWorkspaceEnvironment:()=>env},'project-store.ts':storage};
-  const javascript=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-  const exports={};vm.runInThisContext('(function(require,exports,URL){'+javascript+'\n})')(name=>{
-    const dependency=dependencies[name]??dependencies[name.split('/').at(-1)];assert.ok(dependency,name);return dependency;
-  },exports,urlApi);return exports;
+  const compile=(code,exports)=>{
+    const javascript=ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+    vm.runInThisContext('(function(require,exports,URL){'+javascript+'\n})')(name=>{
+      const dependency=dependencies[name]??dependencies[name.split('/').at(-1)];assert.ok(dependency,name);return dependency;
+    },exports,urlApi);return exports;
+  };
+  dependencies['dom.ts']=compile(domSource,{});
+  return compile(source,{});
 }
 const element=()=>({children:[],parent:null});
 const renderer=Vue.createRenderer({createElement:element,createText:element,createComment:element,
@@ -43,7 +48,7 @@ async function fixture(t,{present=true,mode='native'}={}){
   const urlApi={createObjectURL(blob){downloads.push(blob);return 'blob:controlled-'+downloads.length;},revokeObjectURL(url){revoked.push(url);}};
   const {useWorkspace}=await load(env,urlApi);let model;
   const view=renderer.createApp({setup(){model=useWorkspace();model.root.value={closest:()=>null,ownerDocument:{
-    defaultView:{setTimeout(callback){timers.push(callback);}},createElement(tag){assert.equal(tag,'a');const link={click(){this.clicked=true;}};links.push(link);return link;}}};
+    defaultView:{setTimeout(callback){timers.push(callback);}},createElementNS(namespace,tag){assert.equal(namespace,'http://www.w3.org/1999/xhtml');assert.equal(tag,'a');const link={click(){this.clicked=true;},setAttribute(name,value){this[name]=value;}};links.push(link);return link;}}};
     return()=>Vue.h('div');}});
   view.mount(element());await settled(model);
   t.after(()=>{view.unmount();owner.dispose();});

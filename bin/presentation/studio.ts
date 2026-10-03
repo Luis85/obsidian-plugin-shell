@@ -17,6 +17,8 @@ import { review } from './review.ts';
 import { workspaceContext } from './context.ts';
 import { choose, input, titleInput, confirm, reportError, type Prompts } from './prompts.ts';
 import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
+import { browseComponentTemplates } from './template-browser.ts';
+import { offerDesignFolder } from './design-folder.ts';
 export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime }
 async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
   const snapshot = await readSnapshot(options.root, options.project);
@@ -33,7 +35,11 @@ export async function prototypeWizard(ui: Prompts, options: StudioOptions, works
     input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers } });
   if (!await review(ui, plan, options.signal)) return;
   const completion = `Start with ${out}/execution-prompt.md. The complete source scaffold is under ${out}/source/.\n`;
-  ui.write(completion); return completion;
+  ui.write(completion);
+  // The prepared package holds the exact prototype model and brief; the design folder follows them on sync.
+  const design = await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: String(answers.title),
+    project: `${out}/companion.project.json`, package: out, signal: options.signal });
+  return completion + (design ?? '');
 }
 async function save(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const plan = await savePlan(options.root, options.project, workspace.document, workspace.beforeHash);
@@ -71,6 +77,7 @@ export function studioActions(ui: Prompts, options: StudioOptions, workspace: Wo
     page: { label: 'Continue an existing page', run: () => selectPage(ui, workspace) },
     bricks: { label: 'Edit sitemap, layout, entities, data sources and journeys', run: () => editBricks(ui, workspace) },
     library: { label: 'Create or rename components', run: () => library(ui, workspace) },
+    templates: { label: 'Browse component and page templates', run: () => browseComponentTemplates(ui, workspace, options) },
     brainstorm: { label: 'Brainstorm a new project or feature', run: async () => {
       if (workspace.dirty) {
         if (!await confirm(ui, 'Save current project before starting a feature brainstorm?')) return;
@@ -81,6 +88,10 @@ export function studioActions(ui: Prompts, options: StudioOptions, workspace: Wo
     } },
     prototype: { label: 'Prepare a prototype with the guided maker', run: () => prototypeWizard(ui, { ...options, out: undefined }, workspace) },
     save: { label: 'Save Companion project JSON', run: () => save(ui, options, workspace) },
+    design: { label: 'Prepare or sync a Claude Design folder for this project', run: async () => {
+      if (workspace.dirty) { ui.write('Save the project first; the design folder is prepared from the saved project JSON.\n'); return; }
+      await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: workspace.document.project.name, project: options.project, signal: options.signal });
+    } },
     'first-run': { label: 'Install, build and showcase the generated application', run: () => firstRunWizard(ui, options) },
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },

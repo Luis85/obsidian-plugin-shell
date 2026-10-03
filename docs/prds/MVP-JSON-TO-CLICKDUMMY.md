@@ -64,7 +64,7 @@ A green scaffold is not native acceptance. A native acceptance result is not pub
 | 2 | Create a new project folder | No existing vault or maintainer checkout required; MVP-01 |
 | 3 | Extract the kit into that folder | Launcher and trusted kit inventory present; MVP-01 |
 | 4 | Open a terminal there | Commands resolve against this project root; MVP-01 |
-| 5 | Run `node shell.mjs setup` | Preflight and guided setup start before dependency installation; MVP-02 |
+| 5 | Run `node bin/app setup` | Preflight and guided setup start before dependency installation; MVP-02 |
 | 6 | Choose “Install a starter” or “Import project JSON” | Starter gallery includes Start Blank; JSON path is validated and reviewed; MVP-02 |
 | 7 | Configure the project and optional GitHub association | Review identity, folders, source and remote changes; MVP-03 |
 | 8 | Confirm installation | Generated project, exact dependency install and verification have distinct outcomes; MVP-04 |
@@ -142,7 +142,7 @@ Validation must reject duplicate IDs, containment/composition cycles, conflictin
 | MVP-17 | Whole-companion generation | From the exact exported companion JSON and released kit alone, generate/install/build the complete companion. Core sitemap/page/component authoring, project import/export and native save/reopen work without manually patching output. |
 | MVP-18 | Safe regeneration | Repeating identical generation produces a no-op. Scope selection changes only reviewed dependent outputs. Preserve handwritten/extension files; surface edited managed-file conflicts; reject stale plans; never silently delete retired files. |
 
-Full-project, feature, page, component and clickdummy generation use one normalization/compiler pipeline and existing file-plan infrastructure. Keep read-only `companion:generate` compatible; do not rebrand its byte echo as code generation. Prefer extending `shell.mjs generate`/existing makers and discovery rather than introducing independent template engines.
+Full-project, feature, page, component and clickdummy generation use one normalization/compiler pipeline and existing file-plan infrastructure. Keep read-only `companion:generate` compatible; do not rebrand its byte echo as code generation. Prefer extending `bin/app generate`/existing makers and discovery rather than introducing independent template engines.
 
 The compiler separates semantic model, capability resolution, rendering and filesystem application. Generated Vue remains thin; behavior lives in TypeScript application services/composables; Pinia owns view state; host/process/file access stays behind adapters. Generated code follows the shell's dependency and code-size rules. Use scoped Nuxt UI, local icons and the approved style pipeline; do not introduce Nuxt framework routing or global host resets.
 

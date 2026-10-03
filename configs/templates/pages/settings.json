@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "page.settings",
+  "name": "Settings Page",
+  "version": "1.0.0",
+  "templateType": "page-with-bricks",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Settings navigation and grouped preferences.",
+  "tags": [
+    "page",
+    "pages",
+    "settings"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "settings"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.sidebar",
+      "slot": "navigation"
+    },
+    {
+      "template": "organism.settings-group",
+      "slot": "content"
+    }
+  ],
+  "slots": [
+    {
+      "id": "navigation",
+      "role": "navigation",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "content",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    }
+  ],
+  "design": {
+    "kind": "page",
+    "layout": "grid"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

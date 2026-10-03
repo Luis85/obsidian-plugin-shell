@@ -24,7 +24,7 @@ test('candidate qualification includes every execution-policy JSON while narrati
   for (const file of ['docs/testing/acceptance-crosswalk.json', 'docs/testing/native-evidence-checks.json',
     'docs/testing/test-plan.json', 'docs/design/obsidian-tokens.json', 'src/main.ts', 'harness/app/main.ts',
     'scripts/testing/evidence-runner.mjs', 'tests/runtime/items.test.ts', 'package-lock.json',
-    '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.github/workflows/candidate-qualification.yml']) {
+    'configs/quality/fallow.json', 'configs/lint/oxlintrc.json', '.gitignore', '.github/workflows/candidate-qualification.yml']) {
     assert.equal(selected(push, file), true, `Execution input must trigger qualification: ${file}`);
   }
   for (const file of ['README.md', 'AGENTS.md', 'docs/development/FRAMEWORK-GUIDE.md',

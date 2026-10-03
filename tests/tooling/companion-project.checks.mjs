@@ -10,10 +10,10 @@ import { spawnSync } from 'node:child_process';
 import { parseAuthoringDocument as parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, authoringDesignKey } from '../../scripts/companion/authoring-contract.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 import { retiredProjectText } from '../support/retired-projects.mjs';
-import { readCompanionProject } from '../../scripts/companion/read-project.mjs';
+import { readCompanionProject } from '../../bin/adapters/framework/read-project.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const cli = join(root, 'scripts/companion/generate.mjs');
+const cli = join(root, 'scripts/companion-tools/generate.mjs');
 const seed = starterDocumentText('companion-plugin');
 const document = JSON.parse(seed);
 // Build an own JSON property, not an object-literal prototype or a newline-dependent splice.

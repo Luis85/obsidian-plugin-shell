@@ -6,12 +6,12 @@ import { studioActions } from '../../../bin/presentation/studio.ts';
 import { Workspace } from '../../../bin/application/workspace.ts';
 import { newDocument, documentText } from '../../../bin/domain/document.ts';
 import { runOperations } from '../../../bin/application/operations.ts';
-import { compileProject, loadTemplateSnapshot } from '../../../scripts/compiler/index.ts';
-import { packageFiles } from '../../../scripts/compiler/adapters/project/configuration.ts';
-import { defineFrameworkAdapter } from '../../../scripts/compiler/adapters/project/framework-adapter.ts';
-import { renderStarterProject } from '../../../scripts/compiler/adapters/project/emitter.ts';
-import { projectSelection } from '../../../scripts/compiler/domain/project-starter.ts';
-import { loadDefinitions } from '../../../scripts/starters/repository.ts';
+import { compileProject, loadTemplateSnapshot } from '../../../bin/compiler/index.ts';
+import { packageFiles } from '../../../bin/compiler/adapters/project/configuration.ts';
+import { defineFrameworkAdapter } from '../../../bin/compiler/adapters/project/framework-adapter.ts';
+import { renderStarterProject } from '../../../bin/compiler/adapters/project/emitter.ts';
+import { projectSelection } from '../../../bin/compiler/domain/project-starter.ts';
+import { loadDefinitions } from '../../../bin/adapters/starters/repository.ts';
 import { definePluginEvent, type WorkbenchPluginObject } from '../../api.ts';
 import { createPluginRuntime, pluginFrameworkAdapters, pluginStarterDefinitions } from '../../runtime.ts';
 import { PluginObject, exampleNotice, reactAdapter, reactStarter } from '../src/index.ts';
@@ -139,7 +139,7 @@ void test('one invocation shares the event bus across activation, CLI and TUI co
   const helpArgs = parseArguments(['--help'], runtime.cliCommands);
   const help = await execute(helpArgs, { root: '/workspace', frameworkRoot: '/framework', input, plugins: runtime });
   assert.ok(Array.isArray(help.commands) && help.commands.includes('example'));
-  assert.match(String(help.help), /node shell\.mjs example/);
+  assert.match(String(help.help), /node bin\/app example/);
   assert.deepEqual(help.pluginCommands, [{ id: 'example', summary: 'Dispatch the example plugin event.', options: { values: ['message'] } }]);
 
   const args = parseArguments(['example', 'send', '--message', 'Hello'], runtime.cliCommands);
@@ -213,5 +213,58 @@ void test('plugin event bus bounds recursive dispatch without crashing the invoc
   });
   runtime.eventBus.dispatch(recursive, { value: 0 });
   assert.ok(errors.includes('WORKBENCH_PLUGIN_EVENT_RECURSION'));
+  runtime.dispose();
+});
+
+
+void test('plugin template catalog exposes merged discovery and undoable instantiation', async () => {
+  const templatePlugin = {
+    ...enabled,
+    manifest: { ...enabled.manifest, id: 'template-extension' },
+    events: [],
+    cli: [],
+    tui: [],
+    frameworks: [],
+    starters: [],
+    activate: undefined,
+    componentTemplates: [{
+      schemaVersion: 1,
+      id: 'atom.extension-chip',
+      name: 'Extension Chip',
+      version: '1.0.0',
+      templateType: 'component',
+      atomicLevel: 'atom',
+      category: 'Data display',
+      description: 'Plugin-contributed compact status chip.',
+      tags: ['plugin', 'chip'],
+      recommendedFor: ['webapp'],
+      useWhen: ['An extension needs compact status.'],
+      avoidWhen: ['Plain text is sufficient.'],
+      capabilities: ['status'],
+      states: ['default', 'disabled'],
+      props: [],
+      events: [],
+      children: [],
+      slots: [],
+      design: { kind: 'catalog', entryId: 'u-badge' },
+      accessibility: {
+        notes: 'Expose readable text and sufficient contrast.',
+        keyboard: ['No keyboard interaction is required for a passive chip.'],
+        aria: ['Use visible text as the accessible name.'],
+      },
+    }],
+  } satisfies WorkbenchPluginObject;
+  const input = Readable.from([]);
+  const runtime = await createPluginRuntime({
+    root: process.cwd(), frameworkRoot: process.cwd(), input, registry: [templatePlugin],
+  });
+  const all = await runtime.commandContext.templates.list();
+  assert.ok(all.some(template => template.id === 'atom.button'));
+  assert.equal((await runtime.commandContext.templates.get('atom.extension-chip'))?.name, 'Extension Chip');
+  const workspace = new Workspace(newDocument('Template extension'), null);
+  const added = await runtime.commandContext.templates.instantiate(workspace, 'atom.extension-chip', 'Status');
+  assert.equal(added.kind, 'component');
+  assert.ok(workspace.document.design.library.some(item => item.templateId === 'atom.extension-chip'));
+  assert.equal(workspace.undo(), true);
   runtime.dispose();
 });

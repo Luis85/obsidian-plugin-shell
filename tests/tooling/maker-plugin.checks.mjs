@@ -4,9 +4,9 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
-import { parseArguments } from '../../scripts/makers/arguments.mjs';
-import { planMaker } from '../../scripts/makers/plan.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { planMaker } from '../../bin/adapters/makers/plan.ts';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 
 async function seedRegistry(root) {
   await mkdir(join(root, 'plugins'), { recursive: true });
@@ -25,7 +25,7 @@ test('[MAKER-PLUGIN] make plugin requires the Workbench SDK source checkout', ()
 test('[MAKER-PLUGIN] make plugin creates one self-contained registered extension and reruns safely', () => makerFixture(async root => {
   await seedRegistry(root);
   const shell = spawnSync(process.execPath, [
-    resolve(makerSourceRoot, 'shell.mjs'), 'make', 'plugin', 'metrics',
+    resolve(makerSourceRoot, 'bin/app'), 'make', 'plugin', 'metrics',
     '--root', root, '--dry-run', '--json', '--no-interaction',
   ], { cwd: makerSourceRoot, encoding: 'utf8', timeout: 30000 });
   assert.equal(shell.status, 0, shell.stdout + shell.stderr);
@@ -34,12 +34,12 @@ test('[MAKER-PLUGIN] make plugin creates one self-contained registered extension
   assert.ok(shellPreview.data.changes.some(change => change.path === 'plugins/metrics/manifest.json'));
 
   const cli = spawnSync(process.execPath, [
-    resolve(makerSourceRoot, 'scripts/makers/cli.mjs'), 'plugin', 'metrics', '--dry-run', '--json',
+    resolve(makerSourceRoot, 'bin/app'), 'make', 'plugin', 'metrics', '--root', root, '--dry-run', '--json',
   ], { cwd: root, encoding: 'utf8', timeout: 20000 });
   assert.equal(cli.status, 0, cli.stdout + cli.stderr);
   const preview = JSON.parse(cli.stdout);
-  assert.equal(preview.status, 'planned');
-  assert.ok(preview.plan.changes.some(change => change.path === 'plugins/metrics/manifest.json'));
+  assert.equal(preview.status, 'planned'); assert.equal(preview.command, 'make');
+  assert.ok(preview.data.changes.some(change => change.path === 'plugins/metrics/manifest.json'));
   const request = parseArguments(['plugin', 'metrics']);
   const planned = await planMaker(root, request);
   const paths = planned.plan.changes.map(change => change.path);

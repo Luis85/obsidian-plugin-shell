@@ -63,8 +63,8 @@ export async function projectSetupWizard(ui: Prompts, context: SetupContext): Pr
 }
 async function finish(ui: Prompts, context: SetupContext, boilerplate: boolean, app: string): Promise<string> {
   const completion = boilerplate
-    ? `Project prepared in ${app}. Continue editing with shell.mjs sketch; first run has a separate execution review.\n`
-    : 'Project specifications saved. Continue with shell.mjs sketch; generate the application with shell.mjs sketch generate.\n';
+    ? `Project prepared in ${app}. Continue editing with node bin/app sketch; first run has a separate execution review.\n`
+    : 'Project specifications saved. Continue with node bin/app sketch; generate the application with node bin/app sketch generate.\n';
   ui.write(completion);
   return boilerplate ? await firstRunWizard(ui, context) ?? completion : completion;
 }

@@ -2,12 +2,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { visualSpecs, visualContractTypes, visualDefinitions } from '../../scripts/companion/compiler/visual-model.ts';
-import { visualSfc } from '../../scripts/companion/compiler/visual-code.ts';
-import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
-import { detailValue } from '../../scripts/companion/runtime/detail-actions.ts';
-import { visualTextValue, visualIndex } from '../../scripts/companion/runtime/visual-runtime.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { visualSpecs, visualContractTypes, visualDefinitions } from '../../bin/compiler/emitters/visual-model.ts';
+import { visualSfc } from '../../bin/compiler/emitters/visual-code.ts';
+import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
+import { detailValue } from '../../templates/companion/runtime/detail-actions.ts';
+import { visualTextValue, visualIndex } from '../../templates/companion/runtime/visual-runtime.ts';
 import { visualSession, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
 import { visualNodes } from '../../scripts/companion/visual/visual-ir.mjs';
 const fixture = JSON.parse(await readFile(new URL('../fixtures/companion/visual-project.json', import.meta.url), 'utf8'));

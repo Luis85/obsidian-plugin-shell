@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.form",
+  "name": "Form",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "organism",
+  "category": "Forms",
+  "description": "Validated form boundary with reusable field groups.",
+  "tags": [
+    "organism",
+    "forms",
+    "form",
+    "validated"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "validated-form"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "molecule.form-field"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-form"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

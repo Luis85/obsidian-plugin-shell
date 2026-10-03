@@ -2,6 +2,7 @@
  * Hooks read one JSON document on stdin, must stay fast and must never print unbounded logs. */
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { projectConfigPath } from '../shared/project-configs.mjs';
 
 /** PostToolUse events carry the edited file's content, so large edits need a generous bound. */
 export const MAX_INPUT = 20 * 1024 * 1024;
@@ -30,7 +31,17 @@ export async function readHookInput(stream = process.stdin) {
 export function projectRootFor(start) {
   let current = resolve(start);
   for (;;) {
-    if (existsSync(join(current, 'package.json')) && existsSync(join(current, 'vitest.project.config.mjs'))) return current;
+    if (existsSync(join(current, 'package.json')) && projectConfigPath(current, 'vitest')) return current;
+    const parent = dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+/** Nearest ancestor (including `start`) with a package.json: the repository checkout or generated project a hook runs in. */
+export function packageRootFor(start) {
+  let current = resolve(start);
+  for (;;) {
+    if (existsSync(join(current, 'package.json'))) return current;
     const parent = dirname(current);
     if (parent === current) return null;
     current = parent;

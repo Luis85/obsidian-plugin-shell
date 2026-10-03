@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { supportSnapshot, supportReport } from '../../scripts/framework/support-report.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { supportSnapshot, supportReport } from '../../bin/adapters/framework/support-report.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const observation=()=>({data:{generated:true,imported:true,dependencies:true,designStale:false,acceptanceObligations:31,
   root:'/private/secret',manifest:{id:'private-name'},configuration:{token:'private-token'},note:'private-note'},
@@ -52,7 +52,7 @@ test('read failures and cancellation cannot expose private filesystem errors',as
 // Exercise the actual launcher, including root discovery before the support handler.
 test('CLI root-discovery errors and invalid support arguments never disclose private paths',()=>{
   for(const leading of [false,true])for(const args of [['--root','/private-client-canary-does-not-exist'],['--private-client-canary-option']]){
-    const run=spawnSync(process.execPath,[join(root,'shell.mjs'),...(leading?['--json']:[]),'support','report',...args,...(leading?[]:['--json'])],{encoding:'utf8',env:{...process.env,NODE_NO_WARNINGS:'1'}});
+    const run=spawnSync(process.execPath,[join(root,'bin/app'),...(leading?['--json']:[]),'support','report',...args,...(leading?[]:['--json'])],{encoding:'utf8',env:{...process.env,NODE_NO_WARNINGS:'1'}});
     assert.equal(run.status,1);assert.equal(run.stderr,'');
     const response=JSON.parse(run.stdout);assert.equal(response.command,'support report');
     assert.equal(response.status,'blocked');assert.equal(response.diagnostics[0].code,'SUPPORT_UNAVAILABLE');

@@ -2,18 +2,18 @@
 
 Creating a project always runs a **project starter**: a JSON definition in
 `configs/starters/<id>.json` whose `generator.kind` is `project`. The shell ZIP
-contains no starters. Extract the separate `workbench-starters-<version>.zip` beside
-`shell.mjs` (or add your own definition) first; the maker reads project starters
+contains no starters. Extract the separate `workbench-starters-<version>.zip` into the same package root
+(or add your own definition) first; the maker reads project starters
 from that folder, honoring its `configs/user-settings.json` `paths.startersFolder`.
 An empty folder lists no starters, and creation fails closed rather than falling back.
 
 ## Start here
 
 ```sh
-node shell.mjs new
-# No saved project? `node shell.mjs` opens the same new-project guide.
-node shell.mjs new --starter plugin-angular
-node shell.mjs new starters --json
+node bin/app new
+# No saved project? `node bin/app` opens the same new-project guide.
+node bin/app new --starter plugin-angular
+node bin/app new starters --json
 ```
 
 Creation proceeds through **starter → prototype interview → explicit design agreement → file-plan review → default-No apply**. Escape goes back; Ctrl+C cancels and restores the terminal. Plain and accessibility modes follow the same starters and interview. Choosing another starter invalidates agreement. A saved workspace retains its page editor, with an additional Create another project action.
@@ -51,7 +51,7 @@ A starter fixes its project type, frontend and targets; there is no creation-tim
 override. To use another compatible combination, add a starter definition, for
 example a copy of `hybrid-vanilla.json` under a new `id` and filename with
 `"targets": ["plugin", "cli"]`, and
-validate it with `node shell.mjs starters validate --json`. Nuxt UI means Vue/Vite
+validate it with `node bin/app starters validate --json`. Nuxt UI means Vue/Vite
 components, **not the Nuxt application framework**. A CLI-only starter uses
 `framework: "none"` and never acquires frontend dependencies. Hybrid visual targets
 share one frontend while CLI remains headless; it implies shared local code, not
@@ -83,15 +83,15 @@ CLI-only requires `none`; visual targets require a frontend. `angularPins` is
 required for Angular (exact versions, one `@angular` version) and forbidden otherwise.
 A project starter declares empty `inputs`, `files`, `processes` and `firstRun`: its
 identity and design come from the interview, and the project compiler owns every
-emitted file. Unknown fields fail validation. `node shell.mjs new <dir> --starter
+emitted file. Unknown fields fail validation. `node bin/app new <dir> --starter
 <project-starter>` refuses with `STARTER_KIND`; directory creation serves file and
 Companion starters.
 
 ## Agent interface
 
 ```sh
-node shell.mjs new starters --json
-node shell.mjs new guide --starter plugin-angular --json
+node bin/app new starters --json
+node bin/app new guide --starter plugin-angular --json
 ```
 
 Use the response's `data.input` as the request; it is deliberately not approved. The nested field is `interview`, not the reserved JSON property `prototype`. Existing anti-prototype-pollution validation is unchanged.
@@ -118,9 +118,9 @@ Use the response's `data.input` as the request; it is deliberately not approved.
 Review the complete defaults and answers with `new validate`; set `approved: true` only after explicit design agreement. Resolve open questions and requested concept-board exploration first. Image generation is not performed by the CLI.
 
 ```sh
-node shell.mjs new validate --input request.json --json
-node shell.mjs new --input request.json --out projects/issue-desk --json
-node shell.mjs new --input request.json --out projects/issue-desk --apply <reviewed-planHash> --json
+node bin/app new validate --input request.json --json
+node bin/app new --input request.json --out projects/issue-desk --json
+node bin/app new --input request.json --out projects/issue-desk --apply <reviewed-planHash> --json
 ```
 
 `--input -` reads bounded JSON from stdin. JSON, CI and noninteractive paths never take terminal ownership or prompt. `--starter` is for discovery and interactive creation, never a silent override of a reviewed input file. Validation/discovery reject write flags. The plan hash covers the selected starter (including its content hash), full model, source and documentation. No `--yes` bypass is added. Requests and sidecars from the retired preset catalog (`schemaVersion: 1`) are rejected, not migrated.

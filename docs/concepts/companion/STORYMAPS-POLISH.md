@@ -82,7 +82,7 @@ python -B scripts/concepts/build-companion.py --check
 python -B tests/concepts/companion-assembly.test.py
 node --test tests/tooling/companion-details.checks.mjs tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/test-data-*.checks.mjs
 node --test tests/tooling/project-generator.checks.mjs
-CHROMIUM_EXECUTABLE=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
 Use the repository's supported Node/npm toolchain for hosted/root qualification. The last command requires permitted loopback browser navigation. Local Node 22 required `--experimental-strip-types` for the generator command. Complete root/template workflows remain necessary beyond these focused commands.

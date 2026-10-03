@@ -4,7 +4,7 @@ import { JourneyProjectStore, importJourneyProject, projectFilePath } from '../.
 import { SitemapSession } from '../../scripts/companion/sitemap/session.ts';
 import { canonicalKey } from '../../scripts/companion/sitemap/safety.ts';
 import { editorBindings } from '../../scripts/companion/sitemap/editor-bindings.ts';
-import { journeyVaultFiles } from '../../scripts/companion/runtime/journey-vault.ts';
+import { journeyVaultFiles } from '../../templates/companion/runtime/journey-vault.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const seed = starterDocumentText('quick-capture');
 function fixture(t) {

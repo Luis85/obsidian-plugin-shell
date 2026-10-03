@@ -1,16 +1,18 @@
-import { frameworkLabels, type ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
+import { frameworkLabels, type ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { projectGuide, projectPlan, projectStarters } from '../adapters/projects.ts';
 import { guideInput } from '../adapters/prototype.ts';
 import { requireSketch } from '../domain/errors.ts';
 import type { Guide, Answers } from '../domain/guide.ts';
 import { interview } from './guide.ts';
 import { review } from './review.ts';
+import { offerDesignFolder } from './design-folder.ts';
+import { join } from 'node:path';
 import { Back, choose, input, reportError, type Prompts } from './prompts.ts';
 export interface ProjectWizardOptions { root: string; frameworkRoot: string; out?: string; starter?: string; signal?: AbortSignal }
 type Starter = Awaited<ReturnType<typeof projectStarters>>[number];
 interface WizardState { starterId: string; answers: Answers; out: string; stage: number }
 function initialState(starters: Starter[], options: ProjectWizardOptions): WizardState {
-  requireSketch(starters.length, 'PROJECT_STARTER_UNKNOWN', 'No project starters are installed. Extract the separate starters ZIP beside shell.mjs (configs/starters/).');
+  requireSketch(starters.length, 'PROJECT_STARTER_UNKNOWN', 'No project starters are installed. Extract the separate starters ZIP into the shell root (configs/starters/).');
   requireSketch(!options.starter || starters.some(item => item.id === options.starter), 'PROJECT_STARTER_UNKNOWN', `Choose an installed project starter: ${starters.map(item => item.id).join(', ')}.`);
   return { starterId: options.starter ?? starters[0]!.id, answers: {}, out: options.out ?? 'projects/prepared-project', stage: 0 };
 }
@@ -39,7 +41,11 @@ async function writeReview(ui: Prompts, options: ProjectWizardOptions, state: Wi
     interview: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: state.answers } } });
   if (!await review(ui, plan, options.signal)) { ui.write('No project files written.\n'); return {}; }
   const completion = `Start with ${state.out}/execution-prompt.md. Starter: ${selection.starter.id}; targets: ${selection.targets.join(', ')}; framework: ${selection.framework}. Source: ${state.out}/source/.\n`;
-  ui.write(completion); return { completion };
+  ui.write(completion);
+  ui.write(`The design folder belongs to the new project in ${state.out}/source/, next to its design/project.json.\n`);
+  const design = await offerDesignFolder(ui, { root: join(options.root, state.out, 'source'), frameworkRoot: options.frameworkRoot,
+    title: String(state.answers.title), briefFrom: join(options.root, state.out, 'design-brief.md'), signal: options.signal });
+  return { completion: completion + (design ?? '') };
 }
 async function advance(ui: Prompts, starters: Starter[], options: ProjectWizardOptions, state: WizardState): Promise<false | { completion?: string }> {
   if (state.stage === 0) { await chooseStarter(ui, starters, state); return false; }

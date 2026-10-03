@@ -5,18 +5,20 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { runCheckSteps, checkSteps, checkOperation, outputTail } from '../../scripts/framework/check.ts';
+import { runCheckSteps, checkSteps, checkOperation, outputTail } from '../../bin/adapters/framework/check.ts';
 import { codeRoots, sourceRoots } from '../../scripts/shared/project-roots.mjs';
+import { projectConfigPath } from '../../scripts/shared/project-configs.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-check-')));
   t.after(() => rm(dir, { recursive: true, force: true })); return dir;
 }
 function cli(args, env = process.env) {
-  const output = spawnSync(process.execPath, [join(root, 'shell.mjs'), ...args, '--json'], { cwd: root, encoding: 'utf8', timeout: 60000, env });
+  const output = spawnSync(process.execPath, [join(root, 'bin/app'), ...args, '--json'], { cwd: root, encoding: 'utf8', timeout: 60000, env });
   assert.equal(output.stdout.trim().split('\n').length, 1, output.stderr);
   return { exit: output.status, result: JSON.parse(output.stdout) };
 }
+const stepOf = (plan, id) => plan.steps.find(step => step.id === id);
 function git(cwd, ...args) {
   const output = spawnSync('git', ['-c', 'user.email=check@example.invalid', '-c', 'user.name=Check', '-c', 'commit.gpgsign=false', ...args], { cwd, encoding: 'utf8' });
   assert.equal(output.status, 0, output.stderr);
@@ -52,28 +54,29 @@ test('check without installed tools fails every step honestly and points to inst
   assert.equal(result.data.gate, 'check'); assert.equal(result.data.verify, 'not-run'); assert.equal(result.data.scope, 'shell-repository');
   assert.deepEqual(result.data.steps.map(step => [step.id, step.status, step.code]), [['typecheck', 'failed', 'TOOL_MISSING'], ['lint', 'failed', 'TOOL_MISSING'], ['eslint', 'failed', 'TOOL_MISSING'], ['test', 'failed', 'TOOL_MISSING']]);
   assert.deepEqual(result.data.summary.failed, 4);
-  assert.equal(result.diagnostics[0].code, 'CHECK_FAILED'); assert.equal(result.diagnostics[0].next, 'node shell.mjs install --yes');
-  const human = spawnSync(process.execPath, [join(root, 'shell.mjs'), 'check', '--root', dir], { encoding: 'utf8', timeout: 60000 });
+  assert.equal(result.diagnostics[0].code, 'CHECK_FAILED'); assert.equal(result.diagnostics[0].next, 'node bin/app install --yes');
+  const human = spawnSync(process.execPath, [join(root, 'bin/app'), 'check', '--root', dir], { encoding: 'utf8', timeout: 60000 });
   assert.equal(human.status, 1);
   assert.match(human.stdout, /^ {2}\[FAIL\] typecheck {2}vue-tsc --noEmit +\d+ms$/m);
   assert.match(human.stdout, /^ {2}Summary {2}0 passed, 4 failed, 0 skipped in /m);
-  assert.match(human.stdout, /^Next: node shell\.mjs install --yes$/m);
+  assert.match(human.stdout, /^Next: node bin\/app install --yes$/m);
 });
 test('scope detection selects project-suite steps in a generated project', async t => {
   const dir = await scratch(t);
   const shell = await checkSteps(dir, false);
   assert.deepEqual(shell.steps.map(step => [step.id, step.entry, step.args.join(' ')]), [
     ['typecheck', 'node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'], ['lint', 'scripts/quality/lint-source.mjs', ''],
-    ['eslint', 'node_modules/eslint/bin/eslint.js', 'src --max-warnings 0'], ['test', 'node_modules/vitest/vitest.mjs', 'run']]);
-  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}'); await writeFile(join(dir, 'tsconfig.project.json'), '{}');
+    ['eslint', 'node_modules/eslint/bin/eslint.js', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'node_modules/vitest/vitest.mjs', 'run --config configs/testing/vitest.config.mjs']]);
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');
   const project = await checkSteps(dir, false);
   assert.equal(project.scope, 'generated-project');
   assert.deepEqual(project.steps.map(step => [step.id, step.args.join(' ')]), [
-    ['typecheck', '--noEmit --project tsconfig.project.json'], ['eslint', 'src --max-warnings 0'], ['test', 'run --config vitest.project.config.mjs']]);
+    ['typecheck', '--noEmit --project configs/types/tsconfig.project.json'], ['eslint', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'run --config configs/testing/vitest.project.config.mjs']]);
   const { exit, result } = cli(['check', '--root', dir, '--dry-run']);
   assert.equal(exit, 0); assert.equal(result.status, 'planned'); assert.equal(result.data.execution, 'not-run');
   assert.deepEqual(result.data.steps.map(step => step.status), ['not-run', 'not-run', 'not-run']);
-  assert.deepEqual((await readdir(dir)).sort(), ['.companion', 'tsconfig.project.json']);
+  assert.deepEqual((await readdir(dir)).sort(), ['.companion', 'configs']);
 });
 test('fast mode runs tests related to changed and untracked source files only', async t => {
   const dir = await scratch(t);
@@ -81,17 +84,18 @@ test('fast mode runs tests related to changed and untracked source files only', 
   await writeFile(join(dir, 'README.md'), 'readme');
   git(dir, 'init', '-q'); git(dir, 'add', '.'); git(dir, 'commit', '-q', '-m', 'initial');
   const clean = await checkSteps(dir, true);
-  assert.deepEqual(clean.changes, { source: 'git', files: [] });
-  assert.equal(clean.steps[1].skip, 'No changed source files since HEAD.');
+  assert.deepEqual([clean.changes.source, clean.changes.files, clean.changes.paths], ['git', [], []]);
+  assert.equal(clean.changes.base.source, 'head');
+  assert.equal(stepOf(clean, 'test').skip, 'No changed source files since HEAD.');
   await writeFile(join(dir, 'src/a.ts'), 'export const a = 2;\n'); await writeFile(join(dir, 'src/Ünïcode note.ts'), 'y');
   await writeFile(join(dir, 'src/View.vue'), '<template />'); await writeFile(join(dir, 'src/nouvelle-vue été.ts'), 'z');
   await writeFile(join(dir, 'README.md'), 'changed docs');
   await mkdir(join(dir, 'node_modules/pkg'), { recursive: true }); await writeFile(join(dir, 'node_modules/pkg/index.js'), '');
   const changed = await checkSteps(dir, true);
   // Non-ASCII paths arrive verbatim (git -z), not as core.quotePath-quoted strings that would be dropped.
-  assert.deepEqual(changed.changes, { source: 'git', files: ['src/View.vue', 'src/a.ts', 'src/nouvelle-vue été.ts', 'src/Ünïcode note.ts'].sort() });
-  assert.deepEqual(changed.steps.map(step => step.id), ['typecheck', 'test']);
-  assert.deepEqual(changed.steps[1].args, ['related', '--run', '--passWithNoTests', ...changed.changes.files]);
+  assert.deepEqual(changed.changes.files, ['src/View.vue', 'src/a.ts', 'src/nouvelle-vue été.ts', 'src/Ünïcode note.ts'].sort());
+  assert.deepEqual(changed.steps.map(step => step.id), ['typecheck', 'lint', 'eslint', 'test', 'suites']);
+  assert.deepEqual(stepOf(changed, 'test').args, ['related', '--run', '--passWithNoTests', '--config', 'configs/testing/vitest.config.mjs', ...changed.changes.files]);
   const nested = await checkSteps(join(dir, 'src'), true);
   assert.deepEqual(nested.changes.files, ['View.vue', 'a.ts', 'nouvelle-vue été.ts', 'Ünïcode note.ts'].sort(), 'paths are relative to the checked root');
 });
@@ -101,21 +105,21 @@ test('fast mode runs the full suite when deleted, configuration or non-code test
   await writeFile(join(dir, 'src/a.ts'), 'a'); await writeFile(join(dir, 'src/gone.ts'), 'x'); await writeFile(join(dir, 'tests/fixtures/data.json'), '{}');
   await writeFile(join(dir, 'package.json'), '{}'); await writeFile(join(dir, 'README.md'), 'readme');
   git(dir, 'init', '-q'); git(dir, 'add', '.'); git(dir, 'commit', '-q', '-m', 'initial');
-  const full = ['run'];
+  const full = ['run', '--config', 'configs/testing/vitest.config.mjs'];
   await unlink(join(dir, 'src/gone.ts'));
   const deleted = await checkSteps(dir, true);
   assert.deepEqual(deleted.changes.untraceable, ['src/gone.ts']); assert.match(deleted.changes.reason, /deleted, configuration or non-code files changed \(src\/gone\.ts\); running the full suite/);
-  assert.deepEqual(deleted.steps[1].args, full);
+  assert.deepEqual(stepOf(deleted, 'test').args, full);
   git(dir, 'add', '-A'); git(dir, 'commit', '-q', '-m', 'delete');
-  for (const [path, content] of [['tests/fixtures/data.json', '{"changed":true}'], ['package.json', '{"type":"module"}'], ['vitest.project.config.mjs', 'export default {};'], ['tests/fixtures/new.md', 'new']]) {
-    await writeFile(join(dir, path), content);
+  for (const [path, content] of [['tests/fixtures/data.json', '{"changed":true}'], ['package.json', '{"type":"module"}'], ['configs/testing/vitest.project.config.mjs', 'export default {};'], ['tests/fixtures/new.md', 'new']]) {
+    await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), content);
     const outcome = await checkSteps(dir, true);
-    assert.deepEqual(outcome.changes.untraceable, [path], path); assert.deepEqual(outcome.steps[1].args, full, path);
+    assert.deepEqual(outcome.changes.untraceable, [path], path); assert.deepEqual(stepOf(outcome, 'test').args, full, path);
     git(dir, 'add', '-A'); git(dir, 'commit', '-q', '-m', path);
   }
   await writeFile(join(dir, 'README.md'), 'docs only');
   const docs = await checkSteps(dir, true);
-  assert.equal(docs.changes.untraceable, undefined); assert.equal(docs.steps[1].skip, 'No changed source files since HEAD.');
+  assert.equal(docs.changes.untraceable, undefined); assert.equal(stepOf(docs, 'test').skip, 'No changed source files since HEAD.');
   const { exit, result } = cli(['check', '--fast', '--dry-run', '--root', dir]);
   assert.equal(exit, 0); assert.equal(result.data.changes.reason, undefined);
   await unlink(join(dir, 'src/a.ts'));
@@ -125,10 +129,11 @@ test('a generated project lints and watches its configured product roots, not on
   const dir = await scratch(t);
   await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
   await mkdir(join(dir, 'product/code/generated'), { recursive: true }); await mkdir(join(dir, 'src'));
-  await writeFile(join(dir, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts', 'product/code/generated/**/*.vue', 'verification/specs/project/**/*.ts', 'tests/runtime/generated/**/*.ts'] }));
+  await mkdir(join(dir, 'configs/types'), { recursive: true });
+  await writeFile(join(dir, 'configs/types/tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts', 'product/code/generated/**/*.vue', 'verification/specs/project/**/*.ts', 'tests/runtime/generated/**/*.ts'].map(path => '../../' + path) }));
   await mkdir(join(dir, 'tests')); await writeFile(join(dir, 'tests/suites.json'), JSON.stringify({ roots: [{ path: 'verification/specs/project' }] }));
   const full = await checkSteps(dir, false);
-  assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['src', 'product/code/generated', '--max-warnings', '0']);
+  assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'product/code/generated', '--max-warnings', '0']);
   assert.deepEqual(sourceRoots(dir), ['src', 'product/code/generated'], 'the dev watchers use the same product roots; test roots are excluded');
   assert.deepEqual(codeRoots(dir), ['src', 'tests', 'product/code/generated', 'verification/specs/project']);
   await writeFile(join(dir, 'product/code/generated/data.ts'), 'export {};');
@@ -140,16 +145,16 @@ test('fast mode falls back to the full suite without git or with too many change
   const dir = await scratch(t);
   const missing = await checkSteps(dir, true, async () => null);
   assert.equal(missing.changes.source, 'unavailable'); assert.match(missing.changes.reason, /full suite/);
-  assert.deepEqual(missing.steps[1].args, ['run']);
+  assert.deepEqual(stepOf(missing, 'test').args, ['run', '--config', 'configs/testing/vitest.config.mjs']);
   const names = Array.from({ length: 201 }, (_, index) => `f${index}.ts`);
   for (const name of names) await writeFile(join(dir, name), '');
   const many = await checkSteps(dir, true, async (_, args) => args[0] === 'diff' ? names.map(name => `M\0${name}\0`).join('') : '');
   assert.equal(many.changes.files.length, 201); assert.match(many.changes.reason, /more than 200/);
-  assert.deepEqual(many.steps[1].args, ['run']);
+  assert.deepEqual(stepOf(many, 'test').args, ['run', '--config', 'configs/testing/vitest.config.mjs']);
   const nodeOnly = { ...process.env, PATH: dirname(process.execPath) };
   const { exit, result } = cli(['check', '--fast', '--dry-run', '--root', dir], nodeOnly);
   assert.equal(exit, 0); assert.equal(result.data.mode, 'fast');
-  assert.equal(result.data.changes.source, 'unavailable'); assert.equal(result.data.steps[1].command, 'vitest run');
+  assert.equal(result.data.changes.source, 'unavailable'); assert.equal(result.data.steps.find(step => step.id === 'test').command, 'vitest run --config configs/testing/vitest.config.mjs');
 });
 test('cancellation skips remaining steps and reports cancelled', async t => {
   const dir = await scratch(t);
@@ -157,4 +162,28 @@ test('cancellation skips remaining steps and reports cancelled', async t => {
   const outcome = await checkOperation({ command: 'check', args: [], options: {} }, { root: dir, frameworkRoot: root, signal: controller.signal });
   assert.equal(outcome.status, 'cancelled');
   assert.ok(outcome.data.steps.every(step => step.status === 'skipped' && step.reason === 'cancelled'));
+});
+test('retired root configuration is ignored and only canonical configs are selected', async t => {
+  const dir = await scratch(t);
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await writeFile(join(dir, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts'] }));
+  await writeFile(join(dir, 'vitest.project.config.mjs'), 'export default {};');
+  assert.equal(projectConfigPath(dir, 'typescript'), null);
+  assert.equal(projectConfigPath(dir, 'vitest'), null);
+  assert.deepEqual(sourceRoots(dir), ['src']);
+  // Root copies remain untouched and never become fallback configuration.
+  await mkdir(join(dir, 'configs/types'), { recursive: true }); await mkdir(join(dir, 'configs/testing'), { recursive: true });
+  await writeFile(join(dir, 'configs/types/tsconfig.project.json'), JSON.stringify({ include: ['../../src/**/*.ts', '../../app/generated/**/*.ts'] }));
+  await writeFile(join(dir, 'configs/testing/vitest.project.config.mjs'), 'export default {};');
+  assert.equal(projectConfigPath(dir, 'vitest'), 'configs/testing/vitest.project.config.mjs');
+  assert.deepEqual(sourceRoots(dir), ['src', 'app/generated']);
+  assert.equal(projectConfigPath(dir, 'preview'), null);
+});
+test('check without installed tools in a generated project points to the same npm ci as AGENTS.md', async t => {
+  const dir = await scratch(t);
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');
+  const { exit, result } = cli(['check', '--root', dir]);
+  assert.equal(exit, 1); assert.equal(result.data.scope, 'generated-project');
+  assert.equal(result.diagnostics[0].code, 'CHECK_FAILED'); assert.equal(result.diagnostics[0].next, 'npm ci');
 });

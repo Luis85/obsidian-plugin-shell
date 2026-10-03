@@ -18,8 +18,8 @@ Use **Generate plugin shell** on the project overview to open the handoff. It of
 2. Terminal commands, each with its own copy button (and **Copy all commands**):
 
 ```sh
-node shell.mjs new ../my-plugin --from my-plugin.companion.json   # preview: plan + plan hash, writes nothing
-node shell.mjs new ../my-plugin --from my-plugin.companion.json --yes   # or --apply <planHash>
+node bin/app new ../my-plugin --from my-plugin.companion.json   # preview: plan + plan hash, writes nothing
+node bin/app new ../my-plugin --from my-plugin.companion.json --yes   # or --apply <planHash>
 cd ../my-plugin
 npm ci
 npm run check          # generated-project script
@@ -28,7 +28,7 @@ npm run dev:obsidian   # generated-project script; isolated sandbox vault only
 
 3. **Copy agent prompt**: a short prompt for Claude Code, Codex or another coding agent with the plugin ID/name, the `new --from` command, "read AGENTS.md", the requirement IDs in `design/traceability.json`, the `npm run test:tdd` loop and "finish only when `npm run check` passes".
 
-`new --from` validates the JSON with the same shared contract, keeps its identity (unless `--id/--name/--author` override it) and plans with the unchanged compiler; see [Companion handoff](../../development/COMPANION-HANDOFF.md). The lower-level `node shell.mjs generate --input … --vault … --target …` (alias `npm run companion:scaffold --`) remains available. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
+`new --from` validates the JSON with the same shared contract, keeps its identity (unless `--id/--name/--author` override it) and plans with the unchanged compiler; see [Companion handoff](../../development/COMPANION-HANDOFF.md). The lower-level `node bin/app generate --input … --vault … --target …` (alias `npm run companion:scaffold --`) remains available. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
 
 The custom folders configure **generated product code and tests**, such as `plugin/src/generated` and `plugin/tests/project`. They do not relocate the shell's internal foundation. No handoff command is executed in the browser.
 
@@ -52,7 +52,7 @@ Focused starters provide original PRD acceptance TODOs and detailed compositions
 
 Starters are the external definitions in `configs/starters/*.json` (see `scripts/starters/starter.schema.json`); a Companion starter embeds one complete ordinary **project schema 6** document. There is no starter-specific project schema or executable payload, and the concept HTML embeds no starter.
 
-The concept loads selected definition files into its session catalog, hashes their exact bytes, and validates and configures them with the same bundled contract the shell uses (`scripts/companion/concept-contract.ts`: `scripts/starters/browser.ts` and `scripts/companion/starter-contract.mjs`). The generator consumes the normal exported project document, not catalog metadata.
+The concept loads selected definition files into its session catalog, hashes their exact bytes, and validates and configures them with the same bundled contract the shell uses (`scripts/companion/concept-contract.ts`: `bin/adapters/starters/browser.ts` and `scripts/companion/starter-contract.mjs`). The generator consumes the normal exported project document, not catalog metadata.
 
 A provenance note records starter ID/version/source hash. It is informational Markdown and grants no execution authority. The source hash identifies the built-in template bytes, not the later customized project. Renaming plugin identity does not rewrite domain labels, entity slugs, internal IDs or design tokens.
 
@@ -86,7 +86,7 @@ python3 scripts/concepts/run-browser-checks.py --real-storage
 
 Use Node 24.21.0 and npm 11.19.1 for qualification. Local Node22 strip-types checks are supplementary, not substitutes for pinned-toolchain evidence.
 
-The generator workflow has a per-starter matrix. `scripts/companion/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
+The generator workflow has a per-starter matrix. `scripts/companion-tools/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
 
 ## Companion self-project
 

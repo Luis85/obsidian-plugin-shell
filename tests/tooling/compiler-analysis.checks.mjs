@@ -5,28 +5,30 @@ import { join, resolve } from 'node:path';
 import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
 test('compiler public exports are recognized without exempting private compiler implementations', async () => {
-  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
-  assert.ok(config.entry.includes('scripts/compiler/index.ts'));
+  const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
+  assert.ok(config.entry.includes('bin/compiler/index.ts'));
+  assert.ok(!config.entry.includes('scripts/compiler/index.ts'));
   assert.ok(config.entry.includes('scripts/compiler/build-clickdummy.mjs'));
   await archiveCommandFixture(async ({ scratch, command }) => {
-    await mkdir(join(scratch, 'scripts/compiler/application'), { recursive: true });
+    await mkdir(join(scratch, 'bin/compiler/application'), { recursive: true });
     await mkdir(join(scratch, 'scripts/quality'), { recursive: true });
     await writeFile(join(scratch, 'package.json'), '{"name":"compiler-analysis","private":true,"type":"module"}');
-    await writeFile(join(scratch, '.fallowrc.json'), JSON.stringify({ ...config, plugins: [],
-      entry: ['scripts/compiler/index.ts', 'scripts/quality/check-analyzer.mjs', 'scripts/quality/fallow-contract.mjs'] }));
+    await mkdir(join(scratch, 'configs/quality'), { recursive: true });
+    await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify({ ...config, plugins: [],
+      entry: ['bin/compiler/index.ts', 'scripts/quality/check-analyzer.mjs', 'scripts/quality/fallow-contract.mjs'] }));
     for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs'])
       await copyFile(`scripts/quality/${script}`, join(scratch, 'scripts/quality', script));
     await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-    await writeFile(join(scratch, 'scripts/compiler/index.ts'),
+    await writeFile(join(scratch, 'bin/compiler/index.ts'),
       'export { compile } from "./application/internal";\nexport type { CompilerDiagnostic } from "./application/internal";\n');
     const internal = 'export const compile = () => 1;\nexport interface CompilerDiagnostic { readonly message: string }\n';
-    await writeFile(join(scratch, 'scripts/compiler/application/internal.ts'), internal);
+    await writeFile(join(scratch, 'bin/compiler/application/internal.ts'), internal);
     const check = () => command(process.execPath, ['scripts/quality/check-analyzer.mjs'], scratch,
       { ...process.env, FALLOW_TELEMETRY_DISABLED: '1' });
     const clean = check();
     assert.equal(clean.status, 0, clean.stdout + clean.stderr);
-    await writeFile(join(scratch, 'scripts/compiler/application/internal.ts'), internal + 'export const unusedPrivate = 2;\n');
-    await writeFile(join(scratch, 'scripts/compiler/application/orphan.ts'), 'export const orphan = 1;\n');
+    await writeFile(join(scratch, 'bin/compiler/application/internal.ts'), internal + 'export const unusedPrivate = 2;\n');
+    await writeFile(join(scratch, 'bin/compiler/application/orphan.ts'), 'export const orphan = 1;\n');
     const bad = check();
     assert.equal(bad.status, 1, bad.stdout + bad.stderr);
     const report = JSON.parse(await readFile(join(scratch, 'reports/analyzer/fallow.json'), 'utf8'));

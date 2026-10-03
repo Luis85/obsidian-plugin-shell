@@ -27,13 +27,13 @@ below; they are orientation, not budgets.
 | Suite | Purpose | Command | Runner | Prerequisites | In `verify` | Measured |
 | --- | --- | --- | --- | --- | --- | --- |
 | `runtime` | Plugin runtime: domain, application services, adapters, Vue/Pinia, in-memory Obsidian test kit (73 files) | `npm test` / `npm run test:runtime` | Vitest `vitest.config.mjs` | none | own step (production coverage run) | 48 s |
-| `cli` | Central `shell.mjs` CLI: parsing, plans, processes, kit/archive distribution, `new`, capability discovery (7) | `npm run test:cli` | `node --test` | none | tooling | 91 s |
+| `cli` | Central `bin/app` CLI: parsing, plans, processes, kit/archive distribution, `new`, capability discovery (7) | `npm run test:cli` | `node --test` | none | tooling | 91 s |
 | `cli:journey` | Packs the framework ZIP, extracts it and builds generated consumers (1 script) | `npm run test:cli:journey` | node script | `QUALIFIED_NPM` | opt-in | 190 s |
 | `generator` | Project compiler, runtime guards, starters and the shared safe file-plan engine (15) | `npm run test:generator` | `node --test` | none | tooling | 187 s |
 | `visual` | Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, migration, session and generated model tests (7) | `npm run test:visual` | `node --test` | none | tooling | not measured |
 | `companion` | Companion concept contracts: project JSON, storymaps, legacy detail/composition contracts, visual editor harnesses, isolation zone, concept metrics (11) | `npm run test:companion` | `node --test` | none | tooling | 13 s |
 | `companion:assembly` | Offline assembly check, Python assembly/tamper test, syntax check of every concept module | `npm run test:companion` (runs with `companion`) | Python + `node --check` | `python3` | opt-in | 5 s |
-| `companion:browser` | Aggregated concept browser suites, including real-origin storage, on one exact artifact (23 Python scripts; the runner also executes the Node suite below) | `npm run test:companion:browser` | Python Playwright + Node Playwright | `PYTHON` with `playwright`, `CHROMIUM_EXECUTABLE`, Node Playwright Chromium | opt-in | 411 s |
+| `companion:browser` | Aggregated concept browser suites, including real-origin storage, on one exact artifact (23 Python scripts; the runner also executes the Node suite below) | `npm run test:companion:browser` | Python Playwright + Node Playwright | `PYTHON` with `playwright`, `SHELL_CHROMIUM`, Node Playwright Chromium | opt-in | 411 s |
 | `companion:visual-browser` | Page and component editors end to end: both editors, keyboard-only paths, Back navigation, legacy migration, hostile imports (1 script) | `node scripts/testing/suites.mjs companion:visual-browser` | Node Playwright via `run-browser-checks.py --only visual-editors` | `python3`, Node Playwright Chromium | opt-in | 45 s |
 | `companion:browser-manual` | Historical concept browser scripts the aggregated runner does not execute (8) | see [concept verification](../concepts/companion/VERIFICATION.md) | manual | Python `playwright` | opt-in | not automated |
 | `test-data` | Companion test-data kit: generators, storage plans, loopback server/client, inventory (5) | `npm run test:test-data` | `node --test` | none | tooling | 7 s |
@@ -46,7 +46,7 @@ below; they are orientation, not budgets.
 | `baseline` | Dependency-free verification baseline and HTTP style specimen, repeated three times (8) | `npm run test:baseline` | `verify-baseline.mjs` | none | own step | 20 s |
 | `browser-specimen` | Host-style specimen assertions in a real browser | `node scripts/testing/suites.mjs browser-specimen` | node script + Playwright | Chromium | opt-in | 11 s |
 | `e2e` | Served harness in Chromium: showcase, modals, persistence, accessibility, design system (11) | `npm run test:e2e` | Playwright | Chromium, `npm run harness:build` | opt-in | 78 s |
-| `project` | Generated product tests under `tests/project` (only in companion-generated projects) | `npm test` in the generated project | Vitest `vitest.project.config.mjs` | generated project | opt-in | n/a here |
+| `project` | Generated product tests under `tests/project` (only in companion-generated projects) | `npm test` in the generated project | Vitest `configs/testing/vitest.project.config.mjs` | generated project | opt-in | n/a here |
 | `project:ui-effects` | Generated composition/UI-effect checks (generated projects only) | `npm run test:ui-effects` in the generated project | `node --test` | generated project | opt-in | n/a here |
 | `obsidian` | Vitest-driven E2E against a real sandboxed Obsidian (`tests/obsidian`, added by the native dev loop) | `npm run test:obsidian` | npm script | provisioned native runner | opt-in | ~30 s, 4 cases (Obsidian 1.13.7 under Xvfb) |
 
@@ -57,7 +57,7 @@ runs only the npm install policy file of the `setup` suite.
 
 ### Why these boundaries
 
-- **CLI vs generator vs companion.** `shell.mjs` operations, packaging and
+- **CLI vs generator vs companion.** `bin/app` operations, packaging and
   project creation change independently from the compiler that lowers a design
   into files, and both change independently from the companion concept's JSON
   contracts. Each has its own CI job (`framework-cli`, `generated-companion` and
@@ -102,7 +102,10 @@ its browser runner) are `optional`: their absence is valid, but a runner present
 without its tests (or the reverse) still fails. Prerequisites are probed before a
 suite starts; a missing browser, Python package, environment variable or build
 output reports the suite as `not-run` with a provisioning hint and a nonzero exit,
-never as passed. Manual suites also exit nonzero.
+never as passed. A Chromium revision that differs from the one Playwright pins is
+reported as `not-run` with the reason `browser-revision-mismatch` and the exact
+`SHELL_CHROMIUM=<path>` opt-in (see the cloud and agent sessions section of the
+developer workflow). Manual suites also exit nonzero.
 
 ## How `verify` uses the manifest
 
@@ -151,7 +154,7 @@ npm 11.19.1) while other workloads ran, so times are indicative only:
   `companion:assembly` 5 s (15 Python tests plus the concept syntax check).
 - Opt-in, provisioned in scratch directories: `browser-specimen` 11 s and `e2e`
   78 s (50 tests) with `PLAYWRIGHT_BROWSERS_PATH`; `companion:browser` 411 s (26
-  suites) with a scratch Python venv and `CHROMIUM_EXECUTABLE`; `cli:journey`
+  suites) with a scratch Python venv and `SHELL_CHROMIUM`; `cli:journey`
   190 s (packed ZIP, two extracted kits, independent generated consumers) with `QUALIFIED_NPM` and `RUNNER_TEMP` in a scratch directory.
 - `native:host` was not run: its isolated native runner was not provisioned, and
   the runner reported it as `not-run` with exit code 1. `project` and

@@ -15,7 +15,7 @@ const rawShowcase = await readFile(resolve(root, 'configs/starters/feature-showc
 const checks = [], errors = [], requests = [];
 let activePage;
 await mkdir(output, { recursive: true });
-const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_EXECUTABLE ? { executablePath: process.env.CHROMIUM_EXECUTABLE } : {}), args: ['--no-sandbox'] });
+const browser = await chromium.launch({ headless: true, ...(process.env.SHELL_CHROMIUM ? { executablePath: process.env.SHELL_CHROMIUM } : {}), args: ['--no-sandbox'] });
 async function check(name, action) { await action(); checks.push({ name, result: 'passed' }); }
 async function load(context, storage = {}) {
   const page = await context.newPage(); page.setDefaultTimeout(12000);

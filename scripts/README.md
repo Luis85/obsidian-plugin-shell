@@ -1,5 +1,11 @@
 # Tooling directory
 
+The developer CLI starts at `bin/app` (run `node bin/app <command>`) and its whole core lives in `bin/`.
+This folder holds real scripts plus three justified non-tooling holdings: the typed contract zones in
+`contracts/` and `shared/`, the starter schema data in `starters/` and the companion contract library in
+`companion/` (its tooling entries are in `companion-tools/`). Each remaining item and its reason is listed in
+[scripts consolidation](../docs/development/SCRIPTS-CONSOLIDATION.md).
+
 ## Implemented now
 
 - `harness/serve-style-fixture.mjs`: fixed-allowlist loopback HTTP specimen server.
@@ -38,7 +44,7 @@ See [strategy](../docs/testing/TEST-STRATEGY.md) and [concept](../docs/testing/T
 
 ## Native stylesheet and token tools
 
-`styles/check-tokens.mjs` verifies the pinned snapshot, reviewed aliases, inventories and profile order offline. `styles/export-host-css.mjs` exports verified runtime CSS to stdout; redirection is explicit. `harness/style-profile.mjs` defines the extracted versus simulated inputs. These tools do not download dependencies, regenerate the source snapshot, or publish. See [the token contract](../docs/design/OBSIDIAN-TOKENS.md).
+`styles/check-tokens.mjs` verifies the pinned snapshot, reviewed aliases, inventories and profile order offline. `styles/export-host-css.mjs` exports verified runtime CSS to stdout; redirection is explicit. `harness/style-profile.mjs` defines the extracted versus simulated inputs. `styles/check-style-literals.mjs` (`npm run check:style-literals`, part of verify) rejects raw colour literals (hex, rgb/hsl and other colour functions, named colours) in `src/**/*.css`, Vue `<style>` blocks and simple inline template styles, listing `file:line:column`, the literal and reviewed Obsidian tokens to use; `var(--token)`, `color-mix()` over tokens, `transparent`, `currentColor` and `inherit` pass. Exact-file exceptions need a reason in `styles/style-literal-allowlist.json` and go stale-checked; `styles/generated-style-literal-allowlist.json` serves the generated-project test. These tools do not download dependencies, regenerate the source snapshot, or publish. See [the token contract](../docs/design/OBSIDIAN-TOKENS.md).
 
 ## Design-first prototype tooling
 

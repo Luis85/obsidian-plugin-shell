@@ -8,16 +8,16 @@ editors and generator. They do not create a separate executable documentation mo
 ## Start from a configured project
 
 Use an existing project containing `shell.config.json` and `design/project.json`.
-For a new project, complete `node shell.mjs setup` first. Interactive extracted-kit
+For a new project, complete `node bin/app setup` first. Interactive extracted-kit
 setup offers documentation import before source generation, and a separately
 approved documentation export. Headless commands never prompt or install packages.
 
 The safest first authoring step is to export the project you already have:
 
 ```sh
-node shell.mjs docs export --dry-run --plan-out docs-export.plan.json --json
-node shell.mjs plan inspect docs-export.plan.json
-node shell.mjs plan apply docs-export.plan.json --yes
+node bin/app docs export --dry-run --plan-out docs-export.plan.json --json
+node bin/app plan inspect docs-export.plan.json
+node bin/app plan apply docs-export.plan.json --yes
 ```
 
 The saved plan binds application to the reviewed request and inputs. Alternatively,
@@ -105,9 +105,9 @@ block whose exact language/info string is `yaml shell-data` or `json shell-data`
 An ordinary YAML example is not interpreted as application data.
 
 ```sh
-node shell.mjs docs validate docs/application --json
-node shell.mjs docs import docs/application --dry-run --plan-out docs-import.plan.json --json
-node shell.mjs plan apply docs-import.plan.json --yes
+node bin/app docs validate docs/application --json
+node bin/app docs import docs/application --dry-run --plan-out docs-import.plan.json --json
+node bin/app plan apply docs-import.plan.json --yes
 ```
 
 One file, multiple files, or folders may be supplied. Omitting paths scans configured
@@ -145,7 +145,7 @@ file bytes and modification times. Obsolete managed properties are removed when 
 corresponding project field disappears, without deleting adjacent custom properties.
 
 ```sh
-node shell.mjs docs status --json
+node bin/app docs status --json
 ```
 
 The index records the previous semantic baseline. Markdown-only changes import;
@@ -168,8 +168,8 @@ Combine them as `entity#/field` in a resolution JSON file, for example:
 Each value must be `markdown` or `project`; there is no silent global winner.
 
 ```sh
-node shell.mjs docs import --resolutions docs-resolutions.json --dry-run --plan-out docs-resolved.plan.json --json
-node shell.mjs plan apply docs-resolved.plan.json --yes
+node bin/app docs import --resolutions docs-resolutions.json --dry-run --plan-out docs-resolved.plan.json --json
+node bin/app plan apply docs-resolved.plan.json --yes
 ```
 
 Stale or unused resolution keys fail. Missing bound documents and edited generated
@@ -227,7 +227,7 @@ index is written last. Normal write failures trigger rollback. Process terminati
 may leave `.codex-authoring.lock` with a documentation journal and staged preimages.
 
 ```sh
-node shell.mjs docs recover --dry-run --json
+node bin/app docs recover --dry-run --json
 ```
 
 Apply with `docs recover --apply <recoveryHash> --yes`, substituting the reported

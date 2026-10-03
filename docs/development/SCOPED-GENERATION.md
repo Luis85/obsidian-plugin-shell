@@ -1,9 +1,9 @@
 # Selected generation over a canonical project
 
 ```sh
-node shell.mjs generate --scope feature:workspace --json
-node shell.mjs generate --scope page:vp-2 --json
-node shell.mjs generate --scope component:vc-3 --json
+node bin/app generate --scope feature:workspace --json
+node bin/app generate --scope page:vp-2 --json
+node bin/app generate --scope component:vc-3 --json
 # Review the exact plan and repeat the same request with --apply <planHash>.
 ```
 
@@ -19,4 +19,4 @@ An excluded artifact must already exist with a matching previous generated defin
 
 Repeated identical generation is a no-op. An excluded file changed after review invalidates the plan; a retired file is never silently deleted. A template update that affects excluded artifacts requires a full or widened review. No dependency installation, acceptance, source execution or publication follows implicitly.
 
-The pure closure model is `scripts/compiler/domain/selection.ts`; the existing-emitter mapping is `scripts/compiler/adapters/selection.ts`; the shared safe writer remains the owner of mutations. `compiler-selection.checks.mjs` tests the real emitted mapping and actual guarded file operations. `framework-kit-improvements.checks.mjs` replays the public interface from a compiled, extracted archive without consumer dependencies or Git. Native and browser acceptance remain separate.
+The pure closure model is `bin/compiler/domain/selection.ts`; the existing-emitter mapping is `bin/compiler/adapters/selection.ts`; the shared safe writer remains the owner of mutations. `compiler-selection.checks.mjs` tests the real emitted mapping and actual guarded file operations. `framework-kit-improvements.checks.mjs` replays the public interface from a compiled, extracted archive without consumer dependencies or Git. Native and browser acceptance remain separate.

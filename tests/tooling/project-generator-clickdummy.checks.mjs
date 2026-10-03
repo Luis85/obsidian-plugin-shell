@@ -5,10 +5,10 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
-import { clickdummyCode } from '../../scripts/companion/compiler/clickdummy-code.ts';
-import { matches } from '../../scripts/companion/runtime/contract.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { projectFiles } from '../support/project-render.mjs';
+import { clickdummyCode } from '../../bin/compiler/emitters/clickdummy-code.ts';
+import { matches } from '../../templates/companion/runtime/contract.ts';
 import { selfProject } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../',import.meta.url));
 const document = selfProject();
@@ -33,9 +33,9 @@ test('generated source reads return detached schema-valid fixtures and writes fa
   // Include one writable operation to prove the browser never imports or calls a native writer.
   const m = structuredClone(model), source=m.sources[0], operation=source.operations[0];
   source.operations.push({...structuredClone(operation), id:'write-fixture',slug:'write-fixture',direction:'write'});
-  const {dataCode}=await import('../../scripts/companion/compiler/data-code.ts');
+  const {dataCode}=await import('../../bin/compiler/emitters/data-code.ts');
   const files=emitted(m); dataCode(m,(path,content)=>files.set(path,{content}));
-  files.set(`${m.sourceRoot}/domain/contract.ts`,{content:await readFile(join(root,'scripts/companion/runtime/contract.ts'),'utf8')});
+  files.set(`${m.sourceRoot}/domain/contract.ts`,{content:await readFile(join(root,'templates/companion/runtime/contract.ts'),'utf8')});
   for (const [path,file] of files) if(path.endsWith('.ts') && /(?:application\/|domain\/contract|clickdummy-sources)/.test(path)) {
     await mkdir(dirname(join(dir,path)),{recursive:true}); await writeFile(join(dir,path),file.content);
   }
@@ -54,7 +54,7 @@ test('custom source folders produce contained valid relative imports and escaped
 });
 test('full generator includes the public command, fixed browser entry and native-state forwarding', async () => {
   const files=new Map((await projectFiles(root,model)).map(f=>[f.path,f]));
-  assert.equal(JSON.parse(files.get('package.json').content).scripts['build:clickdummy'],'node shell.mjs clickdummy build');
+  assert.equal(JSON.parse(files.get('package.json').content).scripts['build:clickdummy'],'node bin/app clickdummy build');
   assert.ok(files.has('harness/prototype/clickdummy.ts'));
   assert.match(files.get(`${model.sourceRoot}/presentation/components/ProjectWorkbench.vue`).content,/design-state/);
   const page=[...files].find(([path])=>path.includes('/screens/')&&files.get(path).content.includes('import Detail'));

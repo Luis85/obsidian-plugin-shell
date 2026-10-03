@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { outputs } from '../../scripts/documentation/manual.mjs';
 
-const launcher = fileURLToPath(new URL('../../shell.mjs', import.meta.url));
+const launcher = fileURLToPath(new URL('../../bin/app', import.meta.url));
 async function isolated(work) {
   const root = await mkdtemp(join(tmpdir(), 'starter-routing-'));
   try {
@@ -28,7 +28,7 @@ function command(root, args) {
 }
 
 for (const name of ['settings', 'project-setup', 'first-run']) {
-  test(`merged launcher routes help ${name} to the real setup CLI without writes`, async () => isolated(root => {
+  test(`bin/app routes help ${name} to the real setup CLI without writes`, async () => isolated(root => {
     const result = command(root, ['help', name]);
     assert.equal(result.command, name);
     assert.equal(typeof result.data.help, 'string');
@@ -36,7 +36,7 @@ for (const name of ['settings', 'project-setup', 'first-run']) {
   }));
 }
 for (const args of [['--values', 'answers.json'], ['--answers', '{}'], ['--run', 'build'], ['--trust-processes']]) {
-  test(`merged launcher preserves external starter routing for ${args[0]}`, async () => isolated(root => {
+  test(`bin/app preserves external starter routing for ${args[0]}`, async () => isolated(root => {
     const result = command(root, ['new', ...args, '--help']);
     assert.equal(result.command, 'new');
     assert.equal(result.data.scope, 'command', 'Do not route starter options to the preset maker.');
@@ -46,8 +46,8 @@ test('empty invoking workspace remains empty when starter discovery follows the 
   const result = command(root, ['starters', 'list']);
   assert.deepEqual(result.data.starters, []);
 }));
-test('without --root, discovery reads the pack beside shell.mjs, never the invoking folder', async () => isolated(async root => {
-  // A maintainer checkout carries the canonical pack; an extracted shell has none until the separate pack is added.
+test('without --root, discovery reads the pack from the CLI package root, never the invoking folder', async () => isolated(async root => {
+  // A maintainer checkout carries the canonical pack; an extracted CLI has none until the separate pack is added.
   const expected = await readdir(fileURLToPath(new URL('../../configs/starters/', import.meta.url))).catch(error => { if (error.code === 'ENOENT') return []; throw error; });
   for (const args of [['starters', 'list'], ['new', '--list']]) {
     const run = spawnSync(process.execPath, [launcher, ...args, '--json'], { cwd: root, env: { ...process.env, CI: 'true' }, encoding: 'utf8', timeout: 15_000 });

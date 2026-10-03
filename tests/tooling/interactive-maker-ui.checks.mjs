@@ -14,7 +14,7 @@ import { interview } from '../../bin/presentation/guide.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { Back } from '../../bin/presentation/prompts.ts';
-import { main } from '../../bin/shell.ts';
+import { main, makerMain } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0; const transcript = [];
@@ -66,7 +66,8 @@ test('workspace guides and agent commands share the persistence and compiler pat
 test('prototype-only guide loads the saved baseline and writes a complete preparation package', async () => scratch(async root => {
   const ui = scripted(['P', 'new', 'Home', 'back', 'save', 'y', 'exit']);
   await studio(ui, { root, frameworkRoot, project: 'design/project.json' });
-  const guide = await loadGuide(), wizard = scripted([...guideAnswers(guide), 'prepared', 'y']);
+  // The trailing 'n' declines the optional Claude Design folder offered after the package is written.
+  const guide = await loadGuide(), wizard = scripted([...guideAnswers(guide), 'prepared', 'y', 'n']);
   await prototypeWizard(wizard, { root, frameworkRoot, project: 'design/project.json' }); wizard.done();
   const answers = JSON.parse(await readFile(join(root, 'prepared/prototype-answers.json'), 'utf8'));
   assert.deepEqual(answers.answers.pages, ['Home']);
@@ -86,15 +87,15 @@ test('CLI human help, human failures and terminal cancellation do not pollute ma
   const output = [], errors = [];
   const stdout = new Writable({ write(chunk, _encoding, done) { output.push(String(chunk)); done(); } });
   const stderr = new Writable({ write(chunk, _encoding, done) { errors.push(String(chunk)); done(); } });
-  assert.equal(await main(['--help'], frameworkRoot, { input: Readable.from([]), output: stdout, error: stderr }), 0);
+  assert.equal(await makerMain(['--help'], frameworkRoot, { input: Readable.from([]), output: stdout, error: stderr }), 0);
   assert.match(output.join(''), /make first/);
-  assert.equal(await main(['sketch', '--input', '-', '--root', root], frameworkRoot, { input: Readable.from(['not-json']), output: stdout, error: stderr }), 1);
+  assert.equal(await makerMain(['sketch', '--input', '-', '--root', root], frameworkRoot, { input: Readable.from(['not-json']), output: stdout, error: stderr }), 1);
   assert.ok(errors.length > 0);
   const input = new PassThrough(); input.isTTY = true;
   const terminal = new Writable({ write(chunk, _encoding, done) {
     if (String(chunk).includes('Project title')) queueMicrotask(() => input.end());
     done();
   } }); terminal.isTTY = true;
-  assert.equal(await main(['sketch', '--root', root], frameworkRoot, { input, output: stdout, error: terminal, env: {} }), 130);
+  assert.equal(await makerMain(['sketch', '--root', root], frameworkRoot, { input, output: stdout, error: terminal, env: {} }), 130);
   input.destroy();
 }));

@@ -101,8 +101,8 @@ Use the repository's supported Node/npm toolchain for complete integration quali
 node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/test-data-*.checks.mjs
 python -B scripts/concepts/build-companion.py --check
 python -B tests/concepts/companion-assembly.test.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python -B tests/concepts/companion-storymaps.browser.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python -B tests/concepts/companion-storymaps.browser.py
+SHELL_CHROMIUM=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
 The final command requires an environment permitting loopback browser navigation. Run the normal root/template workflows as well; the commands above cover the concept/handoff scope only.

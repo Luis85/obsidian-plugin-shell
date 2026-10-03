@@ -17,7 +17,7 @@ export async function stagedBuild({ root = process.cwd(), build = viteBuild, tar
   try {
     stage = await mkdtemp(join(root, '.shell-build-'));
     const output = join(stage, 'candidate');
-    await build({ root, configFile: join(root, 'vite.config.mjs'), ...(logLevel ? { logLevel } : {}),
+    await build({ root, configFile: join(root, 'configs/bundling/vite.config.mjs'), ...(logLevel ? { logLevel } : {}),
       build: { outDir: output, emptyOutDir: true, ...(sourcemap ? { sourcemap } : {}) } });
     await copyFile(join(root, 'manifest.json'), join(output, 'manifest.json'));
     for (const name of names) {

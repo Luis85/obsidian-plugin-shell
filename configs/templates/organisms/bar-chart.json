@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.bar-chart",
+  "name": "Bar Chart",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "organism",
+  "category": "Visualization",
+  "description": "Categorical comparison chart container with accessible explanatory content.",
+  "tags": [
+    "organism",
+    "visualization",
+    "chart",
+    "bar-chart"
+  ],
+  "recommendedFor": [
+    "dashboard",
+    "analytics",
+    "webapp"
+  ],
+  "useWhen": [
+    "Users need to compare a small set of categorical values at a glance."
+  ],
+  "avoidWhen": [
+    "Exact tabular comparison is more important than visual magnitude, or the data is primarily time-series."
+  ],
+  "capabilities": [
+    "categorical-comparison",
+    "data-visualization"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "recipe",
+    "recipeId": "recipe-bar-chart"
+  },
+  "accessibility": {
+    "notes": "Keep category names and numeric values visible in text so the comparison does not rely on bar length or color alone.",
+    "keyboard": [
+      "The baseline chart is read-only; interactive drill-down actions must be keyboard reachable when added."
+    ],
+    "aria": [
+      "Expose each category and value as readable text and preserve the chart title as its accessible context."
+    ]
+  }
+}

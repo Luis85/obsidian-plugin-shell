@@ -56,7 +56,7 @@ python -B scripts/concepts/build-companion.py --check
 python -B tests/concepts/companion-assembly.test.py
 node --test tests/tooling/test-data-*.checks.mjs
 # Provision the pinned browser tooling in an isolated environment first.
-CHROMIUM_EXECUTABLE=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
 `reports/concepts/browser-summary.json` is the aggregate. Each suite retains named assertions, HTML identity and error/request observations. `reports/concepts/product-audit/` contains current candidate screenshots for welcome, overview, modal feedback, recovery, source contracts, test-data operation, incomplete palette coverage, tour and responsive overviews. `reports/concepts/storage/checks.json` is actual-origin evidence only when that suite executes successfully.

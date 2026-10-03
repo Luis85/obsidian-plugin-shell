@@ -6,7 +6,7 @@ import ts from 'typescript';
 import { composeMvp } from '../../scripts/concepts/mvp-compose.mjs';
 import { createHash } from 'node:crypto';
 import { validateAuthoringDocument, parseAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { starterProjection } from '../../scripts/starters/browser.ts';
+import { starterProjection } from '../../bin/adapters/starters/browser.ts';
 import { companionStarterIds, starterDocument, starterPath } from '../support/starter-documents.mjs';
 import { retiredProject } from '../support/retired-projects.mjs';
 const root = new URL('../../', import.meta.url);
