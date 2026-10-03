@@ -26,7 +26,7 @@ node bin/app new <dir> --starter <id> --apply <planHash>
   folder. Pass `--inside-vault` only for a disposable test vault you own.
 - Plugin IDs use lowercase letters, digits and single hyphens, start with a letter and
   must not contain `obsidian` or `plugin` (the same rule `check submission` applies,
-  from `scripts/framework/plugin-id.ts`). An explicit `--id my-plugin` is refused with
+  from `bin/adapters/framework/plugin-id.ts`). An explicit `--id my-plugin` is refused with
   a suggestion. The default ID is the folder name without the words `obsidian` and
   `plugin`; a remainder shorter than three characters is combined with the starter's
   ID (`../my-plugin` with `quick-capture` gives `my-quick-capture`, with `blank` it
@@ -329,7 +329,7 @@ Fixture commands reuse the real exported fixture engine, validators and ownershi
 
 ## Shared API and remaining gates
 
-`scripts/framework/operations.ts` exports `executeOperation(request, context)`. Terminal and headless companion-facing tests submit the same validated requests and get the same plans/results. Contracts and schemas contain no terminal state; Node adapters own file/process access. The native companion has not been converted and direct mobile/runtime RPC is not implemented.
+`bin/adapters/framework/operations.ts` exports `executeOperation(request, context)`. Terminal and headless companion-facing tests submit the same validated requests and get the same plans/results. Contracts and schemas contain no terminal state; Node adapters own file/process access. The native companion has not been converted and direct mobile/runtime RPC is not implemented.
 
 Existing MJS makers, file plans, fixture and release services are reused unchanged or selectively reconciled; their full TypeScript migration, unified legacy/current metadata, arbitrary source migrations and broader native/runtime adapters remain follow-on scope. Do not describe the 57-task backlog as complete because the central workflow runs.
 

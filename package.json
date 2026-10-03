@@ -104,7 +104,7 @@
     "events:catalog": "node scripts/events/catalog.mjs",
     "events:check": "node scripts/events/catalog.mjs --check",
     "release:operate": "node scripts/release/cli.mjs",
-    "companion:generate": "node scripts/companion/generate.mjs",
+    "companion:generate": "node scripts/companion-tools/generate.mjs",
     "companion:scaffold": "node bin/app generate",
     "test:generator": "node scripts/testing/suites.mjs generator",
     "test:visual": "node scripts/testing/suites.mjs visual",

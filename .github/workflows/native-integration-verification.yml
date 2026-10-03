@@ -55,7 +55,7 @@ jobs:
         env:
           QUALIFIED_NPM: ${{ runner.temp }}/native-npm/node_modules/npm/bin/npm-cli.js
           STARTER: ${{ matrix.starter }}
-        run: node scripts/companion/qualify-starter.mjs "$STARTER"
+        run: node scripts/companion-tools/qualify-starter.mjs "$STARTER"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:

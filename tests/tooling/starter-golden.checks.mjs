@@ -11,7 +11,7 @@ import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
 import { parseJsonData, assertJsonData, assertDesignData } from '../../scripts/contracts/json-data.ts';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { exportGoldenProject } from '../../scripts/concepts/export-golden-project.mjs';
-import { authoringEvidence } from '../../scripts/companion/authoring-evidence.mjs';
+import { authoringEvidence } from '../../scripts/companion-tools/authoring-evidence.mjs';
 const root = new URL('../../', import.meta.url), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const text = await readFile(new URL('configs/starters/companion-plugin.json', root), 'utf8'), golden = parseBrowserStarter(text);
 const showcase = parseBrowserStarter(await readFile(new URL('configs/starters/feature-showcase.json', root), 'utf8'));

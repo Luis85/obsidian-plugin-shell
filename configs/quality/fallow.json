@@ -193,7 +193,7 @@
     "docs/concepts/companion/src/project-handoff.js",
     "docs/concepts/companion/src/project-starter-views.js",
     "docs/concepts/companion/src/project-starters.css",
-    "scripts/companion/qualify-starter.mjs",
+    "scripts/companion-tools/qualify-starter.mjs",
     "scripts/concepts/mvp-bridge.js",
     "scripts/concepts/prototype-bridge.js",
     "bin/app.ts",
@@ -285,7 +285,11 @@
           "scripts/companion/storymap-contract.mjs",
           "scripts/companion/detail-contract.mjs",
           "scripts/companion/composition-contract.mjs",
-          "scripts/companion/prd-limits.mjs"
+          "scripts/companion/prd-limits.mjs",
+          "scripts/companion/design-system-css.mjs",
+          "scripts/companion/starter-contract.mjs",
+          "scripts/companion/test-data-manifest.mjs",
+          "scripts/companion/schema/**"
         ]
       },
       {

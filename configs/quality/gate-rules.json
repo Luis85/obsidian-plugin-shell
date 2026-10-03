@@ -11,7 +11,7 @@
     "companion": ["scripts/companion/**", "scripts/concepts/**", "templates/**"],
     "visual": ["scripts/companion/visual/**"],
     "airship": ["scripts/airship/**", "bin/adapters/framework/airship*.ts"],
-    "prototypes": ["scripts/companion/prototypes/**", "scripts/companion/prototype-skill.mjs", "bin/adapters/prototype*.ts", "bin/adapters/framework/prototype*.ts"],
+    "prototypes": ["scripts/companion/prototypes/**", "bin/adapters/prototype*.ts", "bin/adapters/framework/prototype*.ts"],
     "native": ["scripts/testing/native-*", "scripts/testing/obsidian-*", "scripts/dev/**"],
     "setup": ["scripts/setup.mjs", "scripts/setup/**", "scripts/shared/npm-install.mjs", "scripts/bundling/**"],
     "release": ["scripts/release/**", "scripts/security/**", "scripts/maintenance/**"],

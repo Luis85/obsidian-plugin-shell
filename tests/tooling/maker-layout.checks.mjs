@@ -4,8 +4,8 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The maker engine and recipes moved to bin/adapters/makers as strict TypeScript; scripts/makers keeps only
-// the entity catalog entry, the recipe catalog data and the consumer-owned custom registry.
+// The maker engine and recipes moved to bin/adapters/makers as strict TypeScript, with the recipe catalog data beside
+// them; scripts/makers keeps only the entity catalog entry and the consumer-owned custom registry.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const moved = ['arguments', 'custom-contract', 'dispatch', 'engine', 'entities-recipe', 'extra-recipes', 'load-catalog', 'native', 'native-registrations',
   'pending-locale', 'plan', 'plugin-recipe', 'primitives', 'registry', 'setting', 'templates', 'ui', 'ui-component-tests', 'ui-tests'];
@@ -15,9 +15,10 @@ async function files(folder) {
   return nested.flat();
 }
 
-test('scripts/makers holds only catalog data and the consumer custom registry; every engine module lives in bin', async () => {
+test('scripts/makers holds only the catalog entry and the consumer custom registry; the engine and its recipe catalog live in bin', async () => {
   assert.deepEqual((await files('scripts/makers')).filter(path => !path.startsWith('scripts/makers/custom/') || path.endsWith('/registry.mjs')).sort(),
-    ['scripts/makers/custom/registry.mjs', 'scripts/makers/entities.mjs', 'scripts/makers/recipes.json']);
+    ['scripts/makers/custom/registry.mjs', 'scripts/makers/entities.mjs']);
+  assert.ok((await files('bin/adapters/makers')).includes('bin/adapters/makers/recipes.json'));
   const owned = new Set(await files('bin/adapters/makers'));
   for (const name of [...moved, 'format-generated']) assert.ok(owned.has(`bin/adapters/makers/${name}.ts`), name);
 });
