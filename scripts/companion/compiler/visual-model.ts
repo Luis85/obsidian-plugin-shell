@@ -66,12 +66,18 @@ export function visualNuxtImports(nodes: UiNode[]): { name: string; path: string
 }
 
 const visualEventTypes: Record<string, string> = { void: 'undefined', string: 'string', number: 'number', boolean: 'boolean', unknown: 'unknown' };
-/** TypeScript contract module for a component: props, emitted events and slots. */
+/** Contract interfaces a component declares. An empty interface is never emitted or imported: it breaks the generated lint rules. */
+export function visualContractNames(component: Pick<Contract, 'props' | 'emits' | 'slots'>): Array<'ComponentProps' | 'ComponentEvents' | 'ComponentSlots'> {
+  return [component.props.length ? 'ComponentProps' as const : null, component.emits.length ? 'ComponentEvents' as const : null, component.slots.length ? 'ComponentSlots' as const : null]
+    .filter(name => name !== null);
+}
+/** TypeScript contract module for a component: its non-empty props, emitted events and slots. */
 export function visualContractTypes(component: Contract): string {
-  const block = (name: string, lines: string[]) => `export interface ${name} {\n${lines.map(line => `  ${line};\n`).join('')}}\n`;
+  const block = (name: string, lines: string[]) => lines.length ? `export interface ${name} {\n${lines.map(line => `  ${line};\n`).join('')}}\n` : '';
   return block('ComponentProps', component.props.map(p => `${literal(p.name)}${p.required ? '' : '?'}: ${p.type}`))
     + block('ComponentEvents', component.emits.map(e => `${literal(e.name)}: [payload: ${visualEventTypes[e.payloadType]}]`))
-    + block('ComponentSlots', component.slots.map(s => `${literal(s.name)}${s.required ? '' : '?'}: () => unknown`));
+    + block('ComponentSlots', component.slots.map(s => `${literal(s.name)}${s.required ? '' : '?'}: () => unknown`))
+    || 'export {};\n';
 }
 
 /** Library entries without a component definition keep the implementation placeholder component. */

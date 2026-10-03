@@ -1,10 +1,10 @@
-import type { UiNode, VisualDesigns, ComponentDefinition, EmitDefinition, PropDefinition, SlotDefinition } from '../visual/visual-ir.mjs';
+import type { UiNode, VisualDesigns, ComponentDefinition, EmitDefinition } from '../visual/visual-ir.mjs';
 import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '../visual/visual-ir.mjs';
 import { visualCatalogEntry, visualReservedExport } from '../visual/visual-catalog.mjs';
 import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport } from './file-code.ts';
-import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath } from './visual-model.ts';
+import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath, visualContractNames } from './visual-model.ts';
 
 /** Authored names reach template syntax only after matching these patterns; all authored text goes through model.text(). */
 const vcId = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/, vcExport = /^[A-Z][A-Za-z0-9]*$/, vcSlot = /^[a-z][A-Za-z0-9-]*$/;
@@ -96,15 +96,20 @@ function vcEmitCase(emit: EmitDefinition): string {
   return `case ${literal(emit.name)}: if (${guard}) ${call} throw new Error('VISUAL_EMIT_PAYLOAD');`;
 }
 
+/** The component's declared contract interface, when it has one, intersected with the generator's own members. */
+function vcIntersect(name: 'ComponentProps' | 'ComponentEvents', component: ComponentDefinition | null, own: string): string {
+  return component && visualContractNames(component).includes(name) ? `${name} & ${own}` : own;
+}
+
 /** Today's implementation-point component for a definition without template nodes (only the type imports changed). */
-function vcPlaceholder(libraryId: string, props: PropDefinition[], slots: SlotDefinition[], ctx: Lowering): string {
+function vcPlaceholder(libraryId: string, component: ComponentDefinition, ctx: Lowering): string {
+  const { props, slots } = component, names = visualContractNames(component).filter(name => name !== 'ComponentSlots');
   const hasTitle = props.some(p => p.name === 'title' && p.type === 'string');
   return `<script setup lang="ts">
 import { specification } from '../../../domain/components/${libraryId}.ts';
-import type { ComponentProps, ComponentEvents } from '../../../domain/components/contracts/${libraryId}.ts';
-import type { VisualState, VisualRequest } from '../../../domain/visual-runtime.ts';
-const props = defineProps<ComponentProps & { designState?: VisualState; designScenario?: string }>();
-defineEmits<ComponentEvents & { interaction: [request: VisualRequest] }>();
+${names.length ? `import type { ${names.join(', ')} } from '../../../domain/components/contracts/${libraryId}.ts';\n` : ''}import type { VisualState, VisualRequest } from '../../../domain/visual-runtime.ts';
+const props = defineProps<${vcIntersect('ComponentProps', component, '{ designState?: VisualState; designScenario?: string }')}>();
+defineEmits<${vcIntersect('ComponentEvents', component, '{ interaction: [request: VisualRequest] }')}>();
 </script>
 <template>
 <section class="generated-component" :aria-label="specification.name" :data-design-state="props.designState">
@@ -128,7 +133,7 @@ export function visualSfc(m: Model, spec: VisualSpec, store: VisualDesigns): str
     const exportName = vcName(ctx, component.exportName, vcExport, 'export name');
     visualAssert(!visualReservedExport(exportName), `${where}: export name ${exportName} is reserved in generated components.`);
   }
-  if (component && !component.template.length) return vcPlaceholder(libraryId, component.props, component.slots, ctx);
+  if (component && !component.template.length) return vcPlaceholder(libraryId, component, ctx);
   ctx.path = component ? visualComponentPath(m, component) : page ? visualPagePath(m, page) : '';
   const roots = component ? component.template : page ? page.root : [];
   const body = vcList(ctx, roots, 0).join('\n');
@@ -139,7 +144,8 @@ export function visualSfc(m: Model, spec: VisualSpec, store: VisualDesigns): str
     return `import ${name} from ${literal(relativeImport(ctx.path, visualComponentPath(m, target)))};`;
   });
   const adapters = component ? ctx.externals.map((adapter, i) => `import { createAdapter as createAdapter_${i} } from ${literal(relativeImport(ctx.path, visualAdapterPath(m, component, adapter)))};`) : [];
-  const contract = component ? `import type { ComponentProps, ComponentEvents, ComponentSlots } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/components/contracts/${libraryId}.ts`))};\n` : '';
+  const names = component ? visualContractNames(component) : [];
+  const contract = names.length ? `import type { ${names.join(', ')} } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/components/contracts/${libraryId}.ts`))};\n` : '';
   const emitted = component ? [...component.emits.map(vcEmitCase), "default: throw new Error('VISUAL_EMIT_UNKNOWN');"].map(line => `    ${line}\n`).join('') : '';
   const declared = component ? `, (${component.emits.length ? 'name, payload' : 'name'}) => {\n  switch (name) {\n${emitted}  }\n}` : '';
   const imports = [...nuxt, ...projects, ...adapters].map(line => line + '\n').join('');
@@ -147,9 +153,9 @@ export function visualSfc(m: Model, spec: VisualSpec, store: VisualDesigns): str
 import { useVisual } from '../../composables/use-visual.ts';
 import type { VisualState, VisualRequest } from '../../../domain/visual-runtime.ts';
 ${contract}import { specification as spec } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/visual/${id}.ts`))};
-${imports}const props = defineProps<${component ? 'ComponentProps & ' : ''}{ designState?: VisualState; designScenario?: string }>();
-const emit = defineEmits<${component ? 'ComponentEvents & ' : ''}{ interaction: [request: VisualRequest] }>();
-${component ? 'defineSlots<ComponentSlots>();\n' : ''}const model = useVisual(spec, props, request => emit('interaction', request)${declared});
+${imports}const props = defineProps<${vcIntersect('ComponentProps', component, '{ designState?: VisualState; designScenario?: string }')}>();
+const emit = defineEmits<${vcIntersect('ComponentEvents', component, '{ interaction: [request: VisualRequest] }')}>();
+${names.includes('ComponentSlots') ? 'defineSlots<ComponentSlots>();\n' : ''}const model = useVisual(spec, props, request => emit('interaction', request)${declared});
 </script>
 <template>
 <section :ref="model.attach" :style="model.theme.value" class="generated-detail" data-design-document="${id}" :data-design-state="model.state.value" :aria-label="${component ? 'spec.exportName' : 'spec.name'}" :aria-busy="model.state.value === 'loading'">

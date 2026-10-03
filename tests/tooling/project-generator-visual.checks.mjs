@@ -220,7 +220,7 @@ test('external adapters mount after render and never mount an element removed be
 
 const { projectModel } = await import('../../scripts/companion/compiler/model.ts');
 const { migrateCompanionDocument } = await import('../../scripts/companion/project-contract.mjs');
-const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
+const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualContractNames, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
 const self = migrateCompanionDocument(JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'))).document;
 test('model exposes validated definitions and explicit Nuxt UI imports', () => {
   const m = projectModel(self), store = visualDefinitions(m);
@@ -264,7 +264,10 @@ test('Nuxt UI imports are unique, sorted and cover slot content', () => {
 test('component contracts declare typed props, emits and slots', () => {
   const source = visualContractTypes({ props: [{ name: 'title', type: 'string', required: true }, { name: 'count', type: 'number', required: false }], slots: [{ name: 'actions', required: false }, { name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }, { name: 'pick', payloadType: 'unknown' }, { name: 'toggle', payloadType: 'boolean' }], variants: [] });
   assert.equal(source, 'export interface ComponentProps {\n  "title": string;\n  "count"?: number;\n}\nexport interface ComponentEvents {\n  "close": [payload: undefined];\n  "pick": [payload: unknown];\n  "toggle": [payload: boolean];\n}\nexport interface ComponentSlots {\n  "actions"?: () => unknown;\n  "body": () => unknown;\n}\n');
-  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n}\nexport interface ComponentEvents {\n}\nexport interface ComponentSlots {\n}\n');
+  // An empty interface fails the generated no-empty-object-type rule, so only declared members are emitted.
+  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export {};\n');
+  assert.equal(visualContractTypes({ props: [{ name: 'title', type: 'string', required: false }], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n  "title"?: string;\n}\n');
+  assert.deepEqual(visualContractNames({ props: [], slots: [{ name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }] }), ['ComponentEvents', 'ComponentSlots']);
 });
 test('declared component packages merge as exact pins and framework conflicts name both versions', () => {
   const withDeps = dependencies => { const doc = structuredClone(self); doc.design.visualDesigns.components[0].dependencies = dependencies; return projectModel(doc); };
