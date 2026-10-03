@@ -109,7 +109,7 @@ test('[GENERATOR-DEVKIT-08] pre-approved agent commands are exact safe forms; do
     assert.notEqual(permission(settings, command), 'allow', command);
   assert.match(text('CLAUDE.md'), /Obsidian downloads \(`--allow-download`,\n {2}`OBSIDIAN_ALLOW_DOWNLOAD`\) are denied/);
 });
-test('[GENERATOR-DEVKIT-09] the agent kit has a brief, PR template, task template, self-review skill and Codex parity', () => {
+test('[GENERATOR-DEVKIT-10] the agent kit has a brief, PR template, task template, self-review skill and Codex parity', () => {
   const brief = text('BRIEF.md');
   assert.match(brief, new RegExp(`^# Product brief: ${identity.name}\\n`)); assert.match(brief, /TODO\(owner\)/); assert.ok(brief.includes(identity.description));
   for (const screen of projectModel(document).screens) assert.ok(brief.includes(screen.label), screen.label);

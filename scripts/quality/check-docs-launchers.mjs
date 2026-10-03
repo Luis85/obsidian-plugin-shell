@@ -11,6 +11,8 @@ export const RULES = Object.freeze({
 });
 const SCANNED = /\.(?:md|json|ya?ml|[cm]?[jt]s|vue|sh)$/;
 const SKIPPED_DIRS = new Set(['node_modules', '.git', 'reports', '.dev-vault', 'dist', 'coverage', '.vite', '.fallow']);
+// Nested agent worktrees are separate checkouts of this repository, not its content.
+const SKIPPED_PATHS = new Set(['.claude/worktrees']);
 const ALLOWLIST_PATH = 'scripts/quality/docs-launchers-allowlist.json';
 
 export function findReferences(text) {
@@ -39,7 +41,7 @@ async function collect(root, folder = '') {
   const files = [];
   for (const entry of await readdir(join(root, folder), { withFileTypes: true })) {
     const path = folder ? `${folder}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) { if (!SKIPPED_DIRS.has(entry.name)) files.push(...await collect(root, path)); }
+    if (entry.isDirectory()) { if (!SKIPPED_DIRS.has(entry.name) && !SKIPPED_PATHS.has(path)) files.push(...await collect(root, path)); }
     else if (entry.isFile() && SCANNED.test(entry.name)) files.push(path);
   }
   return files;

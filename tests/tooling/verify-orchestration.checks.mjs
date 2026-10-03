@@ -147,6 +147,15 @@ test('[VERIFY-SUMMARY] GITHUB_STEP_SUMMARY receives the Markdown appended and is
   assert.equal(await readFile(join(root, 'rep/summary.md'), 'utf8') + '\n', text.slice(text.indexOf('## npm run verify: FAILED')) , 'second report equals the last appended block');
 });
 
+test('[VERIFY-SUMMARY] an absolute --report-dir is used as given, never re-rooted under the repository', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'verify-root-')), elsewhere = await mkdtemp(join(tmpdir(), 'verify-abs-'));
+  t.after(() => Promise.all([rm(root, { recursive: true, force: true }), rm(elsewhere, { recursive: true, force: true })]));
+  const { execute } = executor({});
+  await runVerifyCli({ argv: ['--report-dir', elsewhere], steps: table, execute, env: {}, root, stdout: sink(), stderr: sink() });
+  assert.match(await readFile(join(elsewhere, 'summary.md'), 'utf8'), /## npm run verify: PASSED/);
+  await assert.rejects(readFile(join(root, elsewhere, 'summary.md'), 'utf8'), { code: 'ENOENT' });
+});
+
 test('[VERIFY-SUMMARY] unwritable report locations warn but never change the verdict', async t => {
   const root = await mkdtemp(join(tmpdir(), 'verify-unwritable-'));
   t.after(() => rm(root, { recursive: true, force: true }));

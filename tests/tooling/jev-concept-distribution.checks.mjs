@@ -16,7 +16,7 @@ test('Jev concept is excluded from generated project scaffolds', () => {
   for (const file of files) assert.equal(maintainerOnly(root + file), true, file);
 });
 test('ordinary documentation remains available to consumers', () => {
-  for (const file of ['docs/product/PRD.md', 'docs/concepts/companion/PROJECT-JSON.md']) {
+  for (const file of ['docs/development/FRAMEWORK-CLI.md', 'docs/concepts/companion/PROJECT-JSON.md']) {
     assert.equal(included(file), true, file);
     assert.equal(maintainerOnly(file), false, file);
   }

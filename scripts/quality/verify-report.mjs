@@ -1,6 +1,6 @@
 /** Versioned result, Markdown summary and report files for `npm run verify`. */
 import { appendFile, mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { resultEnvelope } from '../contracts/result-runtime.mjs';
 
 const ansi = new RegExp(String.fromCharCode(27) + '\\[[0-9;?]*[ -/]*[@-~]', 'g');
@@ -62,7 +62,7 @@ export function renderMarkdown(result) {
 }
 /** Always writes summary.json and summary.md; appends the Markdown to GITHUB_STEP_SUMMARY when set. Returns warnings. */
 export async function writeReports({ result, root, reportDir, env }) {
-  const markdown = renderMarkdown(result), warnings = [], directory = join(root, reportDir);
+  const markdown = renderMarkdown(result), warnings = [], directory = resolve(root, reportDir);
   try {
     await mkdir(directory, { recursive: true });
     await writeFile(join(directory, 'summary.json'), JSON.stringify(result, null, 2) + '\n');

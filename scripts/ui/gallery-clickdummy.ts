@@ -23,8 +23,10 @@ async function openSurface(page: Page, url: string, id: string): Promise<void> {
   await page.waitForSelector('html[data-prototype-ready="true"]');
   await page.waitForFunction(`document.querySelector(${JSON.stringify(SURFACE)}).value === ${JSON.stringify(id)}`);
 }
+/** A project without authored scenarios ships a disabled, empty scenario picker; it has nothing to select. */
 async function scenarioVariants(page: Page): Promise<Variant[]> {
   const variants: Variant[] = [];
+  if (await page.locator(SCENARIO).isDisabled()) return variants;
   for (const scenario of (await values(page, SCENARIO)).filter(option => option.value !== '')) {
     await page.selectOption(SCENARIO, scenario.value);
     variants.push({ state: await page.inputValue(STATE), scenario: scenario.value });

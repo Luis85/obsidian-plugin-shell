@@ -82,3 +82,13 @@ test('the repository itself is clean under the committed allowlist, via the npm-
   assert.equal(rejected.status, 1);
   assert.match(rejected.stderr, /NO_ARGUMENTS_SUPPORTED/);
 });
+
+test('nested agent worktrees are separate checkouts and are not scanned, but look-alike folders are', async () => {
+  const files = { [`.claude/worktrees/agent-a/docs/old.md`]: `node ${shellLauncher}\n`, 'docs/ok.md': 'node bin/app check\n' };
+  await withFixture(files, async root => {
+    assert.deepEqual(await checkDocsLaunchers(root, emptyAllowlist), { status: 'passed', scanned: 1, allowedHistorical: 0, allowlistEntries: 0 });
+  });
+  await withFixture({ 'docs/worktrees/old.md': `node ${shellLauncher}\n` }, async root => {
+    await assert.rejects(checkDocsLaunchers(root, emptyAllowlist), /docs\/worktrees\/old\.md:1: retired-launcher/);
+  });
+});
