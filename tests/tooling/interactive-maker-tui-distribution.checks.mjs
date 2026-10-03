@@ -5,7 +5,6 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
-import * as legacyFrameworkKit from '../../bin/adapters/framework/kit.ts';
 import { assembleStarterPack } from '../../scripts/starters/operations.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
@@ -15,7 +14,6 @@ catch (error) { if (error.code !== 'ENOENT') throw error; }
 const qualified = compilerVersion === '6.0.3';
 if (process.env.CI && process.env.CI !== 'false') assert.equal(qualified, true, 'CI requires repository-local TypeScript 6.0.3.');
 const check = qualified ? test : test.skip;
-check('relocated framework kit keeps compatibility identity', () => { assert.equal(legacyFrameworkKit.assembleKit, assembleKit); assert.equal(legacyFrameworkKit.installedCompiler, installedCompiler); });
 check('compiled maker kit discovers contracts without dependencies and refuses repacking an example-removed consumer', async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-compiled-'));
   try {

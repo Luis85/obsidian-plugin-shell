@@ -4,7 +4,6 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { manifestRules, versionsRule, lintRule, submissionCheck } from '../../bin/adapters/framework/submission.ts';
-import * as legacySubmission from '../../bin/adapters/framework/submission.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const valid = {
@@ -20,10 +19,6 @@ const failed = rules => rules.filter(item => item.status === 'fail').map(item =>
 const status = (rules, id) => rules.find(item => item.id === id)?.status;
 
 test('relocated submission adapter preserves compatibility identity and manifest policy', () => {
-  assert.equal(legacySubmission.manifestRules, manifestRules);
-  assert.equal(legacySubmission.versionsRule, versionsRule);
-  assert.equal(legacySubmission.lintRule, lintRule);
-  assert.equal(legacySubmission.submissionCheck, submissionCheck);
 
   assert.deepEqual(failed(manifestRules(JSON.stringify(valid))), []);
   const cases = [

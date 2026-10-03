@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { runNode, npmEntry } from '../../bin/adapters/framework/process.ts';
 import { runNodeProcess, runNodeScript as typedSharedRunNode } from '../../scripts/shared/process.ts';
-import { runNodeScript as legacySharedRunNode } from '../../scripts/shared/process.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { failure } from '../../bin/adapters/framework/contracts.ts';
@@ -85,12 +84,11 @@ test('dry-run dominates public execution flags and never launches a release adap
   assert.ok(!(await readdir(ctx.root)).includes('release-adapter-started'));
 });
 
-test('typed shared process runner remains the canonical compatibility implementation', async t => {
-  assert.equal(legacySharedRunNode, typedSharedRunNode);
+test('typed shared process runner preserves successful and failed child exits', async t => {
   const ctx = await fixture(t, `process.exitCode = Number(process.argv[2] ?? 0);`);
   const entry = join(ctx.root, 'child.mjs');
   await typedSharedRunNode(entry, ['0'], { cwd: ctx.root, stdio: 'ignore' });
-  await assert.rejects(legacySharedRunNode(entry, ['7'], { cwd: ctx.root, stdio: 'ignore' }), error => {
+  await assert.rejects(typedSharedRunNode(entry, ['7'], { cwd: ctx.root, stdio: 'ignore' }), error => {
     assert.equal(error.exitCode, 7);
     assert.equal(error.signal, null);
     return true;
@@ -98,6 +96,7 @@ test('typed shared process runner remains the canonical compatibility implementa
 });
 
 test('framework process adapter uses the shared Node spawn lifecycle', async t => {
+  await assert.rejects(readFile(join(root, 'scripts/framework/process.ts')), { code: 'ENOENT' });
   const source = await readFile(join(root, 'bin/adapters/framework/process.ts'), 'utf8');
   assert.doesNotMatch(source, /node:child_process|StringDecoder/);
   assert.match(source, /runNodeProcess/);

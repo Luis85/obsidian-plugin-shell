@@ -7,7 +7,6 @@ import {
   readPrototypeDocument as relocatedReadDocument,
   readPrototypeBundle as relocatedReadBundle,
 } from '../../bin/adapters/framework/prototype-workspace.ts';
-import * as legacy from '../../bin/adapters/framework/prototype-workspace.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -22,8 +21,6 @@ async function fixture(t) {
 }
 
 test('relocated prototype workspace preserves compatibility and empty-workspace reads', async t => {
-  assert.equal(legacy.loadPrototypeWorkspace, relocatedLoad);
-  assert.equal(legacy.readPrototypeDocument, relocatedReadDocument);
   const context = await fixture(t);
   const loaded = await relocatedLoad(context);
   assert.equal(loaded.workspace, null);

@@ -3,7 +3,6 @@ import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { planOperation, applyOperation, saveOperationPlan, loadPlan } from '../../bin/adapters/framework/planning.ts';
-import * as legacy from '../../bin/adapters/framework/planning.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -17,10 +16,6 @@ async function fixture(t){
 const setup={command:'setup',args:[],options:{id:'planning-test',name:'Planning Test',author:'Test',blank:true}};
 
 test('relocated planning preserves compatibility and hash-bound setup application', async t=>{
-  assert.equal(legacy.planOperation,planOperation);
-  assert.equal(legacy.applyOperation,applyOperation);
-  assert.equal(legacy.saveOperationPlan,saveOperationPlan);
-  assert.equal(legacy.loadPlan,loadPlan);
   const context=await fixture(t);
   const planned=await planOperation(setup,context);
   assert.match(planned.planHash,/^[a-f0-9]{64}$/);

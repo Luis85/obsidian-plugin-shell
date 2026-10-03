@@ -107,12 +107,17 @@ test('typed bounded concurrency helper is isolated from implementation layers', 
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-bounded-map-contract'), false);
 });
 
-test('removed compatibility entries stay deleted; callers import the typed owners', async () => {
-  // Nothing has been released, so the former JavaScript and scripts/framework re-export entries are gone, not shimmed.
-  for (const path of ['scripts/contracts/json-data.mjs', 'scripts/shared/process.mjs', 'scripts/shared/confirmation.mjs', 'scripts/shared/hash.mjs',
-    'scripts/shared/fs-presence.mjs', 'scripts/shared/project-path.mjs', 'scripts/shared/bounded-map.mjs', 'scripts/shared/file-plan.mjs']) {
-    await assert.rejects(readFile(new URL(path, root), 'utf8'), { code: 'ENOENT' }, path);
-    await access(new URL(path.replace(/\.mjs$/, '.ts'), root));
+test('retired compatibility modules are absent and canonical implementations exist', async () => {
+  const owners = JSON.parse(await readFile(new URL('tests/fixtures/tooling/retired-module-owners.json', root), 'utf8'));
+  for (const [retired, owner] of Object.entries(owners)) {
+    await assert.rejects(access(new URL(retired, root)), { code: 'ENOENT' }, retired);
+    await access(new URL(owner, root));
   }
+});
+
+test('framework typechecking includes the production CLI rather than removed wrappers', async () => {
+  const types = JSON.parse(await readFile(new URL('configs/types/tsconfig.framework.json', root), 'utf8'));
+  assert.ok(types.include.includes('../../bin/**/*.ts'));
+  assert.ok(!types.include.includes('../../scripts/framework/**/*.ts'));
   assert.deepEqual((await readdir(new URL('scripts/framework/', root))).filter(name => name.endsWith('.ts')), []);
 });

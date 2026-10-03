@@ -3,10 +3,12 @@ on:
   pull_request:
     paths:
       - 'bin/documentation/**'
-      - 'bin/adapters/framework/docs.ts'
       - 'bin/adapters/settings-documentation.ts'
-      - 'scripts/framework/**'
-      - 'scripts/shared/file-plan.ts'
+      - 'scripts/framework/release-bundle.mjs'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
+      - 'scripts/shared/file-plan*.ts'
       - 'tests/tooling/framework-docs-*'
       - 'tests/tooling/interactive-maker-documentation-*'
       - 'tests/fixtures/application-docs/**'

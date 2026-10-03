@@ -63,7 +63,7 @@ test('generated consumers retain framework design constraints and rebase product
 
 test('generated handout references and project-setup links remain inside the distributed documentation', async () => {
   const analyzer = JSON.parse(await readFile(join(root, 'configs/quality/fallow.json'), 'utf8'));
-  assert.ok(analyzer.entry.includes('scripts/handout.mjs'), 'Analyze the documented standalone executable as an explicit entry, not an ignored file.');
+  assert.ok(!analyzer.entry.includes('scripts/handout.mjs'), 'The removed handout entry is not part of the analyzer inventory.');
   const entries = await projectFiles(root, projectModel(projectFixture().project));
   const files = new Map(entries.map(entry => [entry.path, entry]));
   const name = 'PROJECT-SETUP-HANDOUT.md', path = 'docs/framework/' + name;

@@ -161,17 +161,15 @@ test('cancellation skips remaining steps and reports cancelled', async t => {
   assert.equal(outcome.status, 'cancelled');
   assert.ok(outcome.data.steps.every(step => step.status === 'skipped' && step.reason === 'cancelled'));
 });
-test('a project generated before configs/<concern>/ keeps using its retired root configs until it regenerates', async t => {
+test('retired root configuration is ignored and only canonical configs are selected', async t => {
   const dir = await scratch(t);
   await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
   await writeFile(join(dir, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts'] }));
   await writeFile(join(dir, 'vitest.project.config.mjs'), 'export default {};');
-  const legacy = await checkSteps(dir, false);
-  assert.equal(legacy.scope, 'generated-project');
-  assert.deepEqual(legacy.steps.map(step => [step.id, step.args.at(-1)]).filter(([id]) => id !== 'eslint'),
-    [['typecheck', 'tsconfig.project.json'], ['test', 'vitest.project.config.mjs']]);
-  assert.deepEqual(sourceRoots(dir), ['src', 'product/code/generated']);
-  // Once regeneration writes the configs/ copies they win, even while the retired root copies remain.
+  assert.equal(projectConfigPath(dir, 'typescript'), null);
+  assert.equal(projectConfigPath(dir, 'vitest'), null);
+  assert.deepEqual(sourceRoots(dir), ['src']);
+  // Root copies remain untouched and never become fallback configuration.
   await mkdir(join(dir, 'configs/types'), { recursive: true }); await mkdir(join(dir, 'configs/testing'), { recursive: true });
   await writeFile(join(dir, 'configs/types/tsconfig.project.json'), JSON.stringify({ include: ['../../src/**/*.ts', '../../app/generated/**/*.ts'] }));
   await writeFile(join(dir, 'configs/testing/vitest.project.config.mjs'), 'export default {};');

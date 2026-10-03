@@ -242,7 +242,6 @@ test('sketch regeneration respects a saved starter selection and refuses legacy 
 test('new help documents project starters alongside directory-creation metadata', async () => scratch(async root => {
   const help = await execute(parseArguments(['new', '--help']), context(root));
   const legacy = help.commands.find(command => command.id === 'new');
-  assert.equal(legacy.options.from, 'value'); assert.equal(legacy.options.starter, 'value');
   assert.match(help.help, /new <dir>.*--from <project\.json>/);
   assert.match(help.help, /new starters --json/); assert.match(help.help, /new guide --starter/);
   assert.doesNotMatch(help.help, /--preset|--framework|--targets|new presets/);

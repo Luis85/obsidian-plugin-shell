@@ -3,7 +3,6 @@ import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { inspectConcept as relocatedInspect, conceptImportPlan as relocatedImport } from '../../bin/adapters/framework/concepts.ts';
-import * as legacy from '../../bin/adapters/framework/concepts.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -19,8 +18,6 @@ async function fixture(t) {
 const request = (command, input) => ({ command, args: [], options: input ? { input } : {} });
 
 test('relocated concept adapter preserves compatibility identity and requires a base without input', async t => {
-  assert.equal(legacy.inspectConcept, relocatedInspect);
-  assert.equal(legacy.conceptImportPlan, relocatedImport);
   await assert.rejects(relocatedInspect(request('concept inspect'), await fixture(t)), /CONCEPT_BASE_REQUIRED/);
 });
 

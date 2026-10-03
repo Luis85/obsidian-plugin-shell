@@ -213,27 +213,30 @@ test('oversized and binary inputs fail closed', async t => {
   await writeFile(join(root, 'docs/prds/binary.md'), Buffer.from([0, 0, 1]));
   await assert.rejects(prepareHandout(root), /HANDOUT_INPUT_LIMIT/);
 });
-test('standalone CLI previews without writing, creates only explicitly and preserves edits', async t => {
+test('canonical handout CLI previews without writing, creates only explicitly and preserves edits', async t => {
   const root = await workspace(t);
-  const cli = resolve('scripts/handout.mjs');
-  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  const cli = resolve('bin/app');
+  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, 'handout', ...args, '--root', root, '--json'], { encoding: 'utf8' });
   const preview = run('generate', '--dry-run');
   assert.equal(preview.status, 0, preview.stderr);
   assert.equal(JSON.parse(preview.stdout).status, 'planned');
   await assert.rejects(readFile(join(root, HANDOUT_PATH)), { code: 'ENOENT' });
-  assert.equal(JSON.parse(run('generate', '--write').stdout).status, 'applied');
+  assert.equal(JSON.parse(run('generate', '--yes').stdout).status, 'applied');
   await writeFile(join(root, HANDOUT_PATH), '# Existing human note');
-  assert.equal(JSON.parse(run('generate', '--write').stdout).status, 'unchanged');
+  assert.equal(JSON.parse(run('generate', '--yes').stdout).status, 'unchanged');
   assert.equal(await readFile(join(root, HANDOUT_PATH), 'utf8'), '# Existing human note');
 });
-test('standalone CLI returns a nonzero blocked status for an incomplete handout and rejects mixed effects', async t => {
+test('canonical handout CLI returns a nonzero blocked status for an incomplete handout and rejects mixed effects', async t => {
   const root = await workspace(t);
-  const cli = resolve('scripts/handout.mjs');
-  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, ...args, '--root', root, '--json'], { encoding: 'utf8' });
-  run('generate', '--write');
+  const cli = resolve('bin/app');
+  const run = (...args) => spawnSync(process.execPath, ['--experimental-strip-types', cli, 'handout', ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  run('generate', '--yes');
   assert.equal(run('validate').status, 1);
   assert.equal(JSON.parse(run('inspect').stdout).data.executionAuthorized, false);
-  assert.equal(run('generate', '--write', '--dry-run').status, 1);
+  const before = await readFile(join(root, HANDOUT_PATH), 'utf8');
+  assert.equal(JSON.parse(run('generate', '--yes', '--dry-run').stdout).status, 'planned');
+  assert.equal(await readFile(join(root, HANDOUT_PATH), 'utf8'), before);
+  assert.equal(run('generate', '--write').status, 1);
   assert.equal(run('validate', '--write').status, 1);
   assert.equal(run('generate', '--unknown').status, 1);
 });
@@ -284,16 +287,16 @@ test('an impossible approval date is rejected', () => {
   assert.ok(validateHandout(full().replace('date=2026-09-29', 'date=2026-02-30'), base).diagnostics.some(item => item.code === 'HANDOUT_APPROVAL_OPEN'));
 });
 
-test('legacy handout entry delegates to the integrated reviewed-plan protocol', async t => {
+test('handout uses only bin/app and applies the exact reviewed plan hash', async t => {
   const root = await workspace(t);
-  const run = (entry, args) => spawnSync(process.execPath, ['--experimental-strip-types', resolve(entry), ...args, '--root', root, '--json'], { encoding: 'utf8' });
-  const legacy = run('scripts/handout.mjs', ['generate', '--dry-run']);
-  const integrated = run('bin/app', ['handout', 'generate', '--dry-run']);
-  assert.equal(legacy.status, 0, legacy.stderr + legacy.stdout);
-  assert.equal(integrated.status, 0, integrated.stderr + integrated.stdout);
-  assert.deepEqual(JSON.parse(legacy.stdout), JSON.parse(integrated.stdout));
+  await assert.rejects(readFile(resolve('scripts/handout.mjs')), { code: 'ENOENT' });
+  const run = args => spawnSync(process.execPath, [resolve('bin/app'), 'handout', ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  const preview = run(['generate', '--dry-run']);
+  assert.equal(preview.status, 0, preview.stderr + preview.stdout);
+  const planned = JSON.parse(preview.stdout);
+  assert.equal(planned.status, 'planned');
   await assert.rejects(readFile(join(root, HANDOUT_PATH)), { code: 'ENOENT' });
-  const created = run('scripts/handout.mjs', ['generate', '--write']);
+  const created = run(['generate', '--apply', planned.data.planHash]);
   assert.equal(created.status, 0, created.stderr + created.stdout);
   const outcome = JSON.parse(created.stdout);
   assert.equal(outcome.status, 'applied');

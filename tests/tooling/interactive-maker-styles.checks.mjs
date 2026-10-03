@@ -3,7 +3,6 @@ import { mkdtemp, readFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { inspectStyles as relocatedInspect, styleExportPlan as relocatedPlan } from '../../bin/adapters/framework/styles.ts';
-import * as legacy from '../../bin/adapters/framework/styles.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -19,8 +18,6 @@ async function fixture(t) {
 const request = (command, options = {}) => ({ command, args: [], options: { input: '-', ...options } });
 
 test('relocated style adapter preserves compatibility and inspect output', async t => {
-  assert.equal(legacy.inspectStyles, relocatedInspect);
-  assert.equal(legacy.styleExportPlan, relocatedPlan);
   const result = await relocatedInspect(request('styles inspect'), await fixture(t));
   assert.deepEqual(result.formats, ['css', 'json', 'markdown', 'html']);
   assert.match(result.inputHash, /^[a-f0-9]{64}$/);

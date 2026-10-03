@@ -8,7 +8,6 @@ import {
   vaultPlan as relocatedVaultPlan,
   releaseVersionPlan as relocatedReleaseVersionPlan,
 } from '../../bin/adapters/framework/changes.ts';
-import * as legacy from '../../bin/adapters/framework/changes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
@@ -24,10 +23,6 @@ async function fixture(t) {
 }
 
 test('relocated change planner preserves compatibility identity and stdin inspection', async t => {
-  assert.equal(legacy.inspectDesign, relocatedInspect);
-  assert.equal(legacy.configurationPlan, relocatedConfigurationPlan);
-  assert.equal(legacy.vaultPlan, relocatedVaultPlan);
-  assert.equal(legacy.releaseVersionPlan, relocatedReleaseVersionPlan);
   const context = { ...await fixture(t), inputText: projectText };
   const inspected = await relocatedInspect(context, '-');
   assert.ok(inspected.model.project.id);

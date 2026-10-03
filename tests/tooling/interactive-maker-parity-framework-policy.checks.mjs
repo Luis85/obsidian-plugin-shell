@@ -1,7 +1,6 @@
-import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, legacyFrameworkFiles, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, legacyFrameworkConfiguration, relocatedNpmEntry, relocatedRunNode, legacyFrameworkProcess, relocatedTerminateProcessTree, legacyProcessTree, relocatedHandoutPlan, relocatedHandoutRead, legacyHandoutAdapter, applySharedFilePlan, relocatedProjectContractOperation, legacyProjectContract, relocatedMeasureProject, legacyProjectMeasure, relocatedSampleSummary, relocatedMeasureOperation, legacyMeasurement, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, legacySupportReport, relocatedStatus, relocatedReleaseCheck, legacyInspection, relocatedPortableFile, legacyArchivePath, relocatedZip, legacyZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, legacyPluginId, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, legacyTerminalStyle, relocatedCommandHelp, relocatedHelpIndex, legacyHelpText, relocatedHelpText, legacyTerminalHelp, relocatedSetupDocumentation, legacyDocsSetup, relocatedDocsParserFiles, legacyDocsVendor, relocatedExportedProject, legacyProjectFrom, relocatedStorybookOperation, legacyStorybook, relocatedAirshipPlan, legacyAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, legacyAirship, relocatedBuildClickdummy, legacyClickdummy, relocatedDocsRead, relocatedDocsPlan, legacyDocs, relocatedFixtureOperation, legacyFixtures, relocatedGuidedSetup, relocatedContinueSetup, legacySetupTerminal, relocatedGuidedStarter, relocatedStarterText, legacyStarterTerminal, relocatedRenderHuman, legacyTerminalRender, relocatedSetupSnapshot, legacySetupState, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
+import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedDocsParserFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
 
 test('relocated project measurement preserves dry-run and bounded local measurement semantics', async () => {
-  assert.equal(legacyProjectMeasure.measureProject, relocatedMeasureProject);
   const inputText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
   const context = { root: frameworkRoot, frameworkRoot, inputText };
 
@@ -32,8 +31,6 @@ test('relocated project measurement preserves dry-run and bounded local measurem
 
 
 test('relocated measurement helper preserves deterministic statistics and synchronous-only timing', async () => {
-  assert.equal(legacyMeasurement.sampleSummary, relocatedSampleSummary);
-  assert.equal(legacyMeasurement.measureOperation, relocatedMeasureOperation);
 
   assert.deepEqual(relocatedSampleSummary([4, 1, 3, 2]), {
     count: 4, minMs: 1, maxMs: 4, medianMs: 2, p95Ms: 4, meanMs: 2.5,
@@ -63,9 +60,6 @@ test('relocated measurement helper preserves deterministic statistics and synchr
 
 
 test('relocated support report preserves allowlist privacy and unavailable outcomes', async () => {
-  assert.equal(legacySupportReport.supportSnapshot, relocatedSupportSnapshot);
-  assert.equal(legacySupportReport.supportReport, relocatedSupportReport);
-  assert.equal(legacySupportReport.unavailableSupport, relocatedUnavailableSupport);
 
   const observation = {
     ...operationResult('doctor', {
@@ -106,8 +100,6 @@ test('relocated support report preserves allowlist privacy and unavailable outco
 
 
 test('relocated inspection preserves status and blocked release-readiness diagnostics', async () => {
-  assert.equal(legacyInspection.status, relocatedStatus);
-  assert.equal(legacyInspection.releaseCheck, relocatedReleaseCheck);
 
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-inspection-')));
   try {
@@ -187,8 +179,6 @@ test('relocated inspection covers generated identity, traceability, doctor drift
 
 
 test('relocated archive helpers preserve portable paths and deterministic ZIP bytes', () => {
-  assert.equal(legacyArchivePath.portableFile, relocatedPortableFile);
-  assert.equal(legacyZip.zip, relocatedZip);
 
   for (const path of ['README.md', 'docs/guide.md', 'assets/icon-2.svg']) assert.equal(relocatedPortableFile(path), true, path);
   for (const path of ['', '../escape', 'a/../b', 'a//b', 'a\\b', 'CON', 'folder/trailing.', 'folder/trailing ']) {
@@ -217,11 +207,6 @@ test('relocated archive helpers preserve portable paths and deterministic ZIP by
 
 
 test('relocated plugin ID policy preserves creation, derivation and export review rules', () => {
-  assert.equal(legacyPluginId.pluginIdWordProblem, relocatedPluginIdWordProblem);
-  assert.equal(legacyPluginId.derivedPluginId, relocatedDerivedPluginId);
-  assert.equal(legacyPluginId.pluginIdProblem, relocatedPluginIdProblem);
-  assert.equal(legacyPluginId.exportedIdProblem, relocatedExportedIdProblem);
-  assert.equal(legacyPluginId.exportedIdWarning, relocatedExportedIdWarning);
 
   assert.match(relocatedPluginIdWordProblem('obsidian-notes'), /obsidian/);
   assert.match(relocatedPluginIdWordProblem('notes-plugin'), /end with/);
@@ -260,8 +245,6 @@ test('relocated Storybook option policy preserves explicit on/off semantics', ()
 
 
 test('relocated terminal style preserves plain/rich formatting and runnable hints', () => {
-  assert.equal(legacyTerminalStyle.terminalStyle, relocatedTerminalStyle);
-  assert.equal(legacyTerminalStyle.runnable, relocatedRunnable);
 
   assert.deepEqual(relocatedTerminalStyle({ isTTY: false }, {}), { color: false, unicode: false });
   assert.deepEqual(relocatedTerminalStyle({ isTTY: true }, { TERM: 'xterm' }), { color: true, unicode: true });

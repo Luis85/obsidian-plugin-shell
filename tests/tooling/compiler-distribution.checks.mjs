@@ -19,6 +19,16 @@ test('packed compiled CLI and source CLI return equivalent analysis and errors w
       const invoke=directory=>spawnSync(process.execPath,[join(directory,'bin/app'),'compiler','check','--input','-','--json'],{cwd:directory,input:source,encoding:'utf8',timeout:30000});
       const a=invoke(root),b=invoke(destination);assert.equal(b.status,a.status,b.stderr);assert.deepEqual(JSON.parse(b.stdout),JSON.parse(a.stdout));
     }
+    const inspected = spawnSync(process.execPath, [join(destination, 'bin/app'), 'compiler', 'inspect', '--input', '-', '--stage', 'artifacts', '--json'],
+      { cwd: destination, input: valid, encoding: 'utf8', timeout: 30000 });
+    assert.equal(inspected.status, 0, inspected.stderr + inspected.stdout);
+    const inventory = JSON.parse(inspected.stdout);
+    assert.equal(inventory.status, 'ok');
+    assert.ok(inventory.data.inventory.some(file => file.path === 'design/project.json'));
+    assert.ok(inventory.data.inventory.some(file => file.path === 'src/main.ts'));
+    assert.equal(inventory.data.readiness.bundle, 'not-run');
+    assert.equal(inventory.data.readiness.tests, 'not-run');
+    await assert.rejects(readFile(join(destination, 'design/project.json')), { code: 'ENOENT' });
     assert.ok(files.some(file=>file.path==='bin/app.js'));assert.ok(!files.some(file=>file.path.startsWith('bin/scripts/')));
     assert.ok(files.some(file=>file.path==='bin/template/scripts/compiler/check-architecture.mjs'));
   }finally{await rm(destination,{recursive:true,force:true});}

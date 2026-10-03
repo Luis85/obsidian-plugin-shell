@@ -24,11 +24,10 @@ function acceptProfile(command: string, profile: string | undefined): void {
 }
 
 type ProjectConfigKind = keyof typeof projectConfigs;
-/** Generated projects keep tool configs under configs/<concern>/; older projects keep their retired root copy. */
+/** Generated projects use only canonical tool configuration under configs/<concern>/. */
 async function projectConfig(root: string, kind: ProjectConfigKind, existsPath: typeof exists): Promise<string | null> {
   const config = projectConfigs[kind];
-  if (await existsPath(join(root, config.path))) return config.path;
-  return await existsPath(join(root, config.legacy)) ? config.legacy : null;
+  return await existsPath(join(root, config.path)) ? config.path : null;
 }
 async function vitestArguments(root: string, profile: string | undefined, existsPath: typeof exists): Promise<string[]> {
   const project = await projectConfig(root, 'vitest', existsPath);

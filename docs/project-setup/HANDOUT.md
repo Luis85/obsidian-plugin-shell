@@ -46,18 +46,18 @@ node bin/app plan apply handout-refresh.plan.json --yes --json
 
 Refresh updates only the generated source-snapshot comment and the actual review checkboxes, preserving answers and free-form notes. If source fingerprints are unchanged, refresh is a byte-for-byte no-op. A changed snapshot resets all review marks rather than guessing which decisions remain valid. Retained answers must be checked against changed inputs. Damaged/unsupported forms are preserved and must be repaired or explicitly migrated; refresh does not silently replace them.
 
-## Standalone source entry
+## Project-root selection
 
-The bundled source entry works without installing third-party packages. It supports dependency-free preparation without loading the broader framework adapter.
+Use the same canonical CLI entry to operate on an explicit project directory. Source checkouts use the repository’s locked toolchain; extracted developer kits run the bundled CLI.
 
 ```sh
-node --experimental-strip-types scripts/handout.mjs generate --root /path/to/project --dry-run --json
-node --experimental-strip-types scripts/handout.mjs generate --root /path/to/project --write --json
-node --experimental-strip-types scripts/handout.mjs validate --root /path/to/project --json
-node --experimental-strip-types scripts/handout.mjs inspect --root /path/to/project --json
+node bin/app handout generate --root /path/to/project --dry-run --json
+node bin/app handout generate --root /path/to/project --yes --json
+node bin/app handout validate --root /path/to/project --json
+node bin/app handout inspect --root /path/to/project --json
 ```
 
-The standalone entry supports only create-only generation, validation and inspection. `--write` explicitly authorizes exclusive creation of the one root Markdown file; it cannot replace an existing file. Refresh deliberately requires the integrated reviewed-plan route. Use Node with type-stripping support (the source entry was tested with Node 22.16.0); the existing compiled-kit pipeline remains the intended release mechanism.
+All four handout commands use this entry. `--yes` applies the freshly rebuilt generation plan, which preserves an existing handout. Use `handout refresh` to review source-snapshot changes without replacing authored answers. The retired `scripts/handout.mjs` entry is no longer available.
 
 ## Input paths and settings compatibility
 

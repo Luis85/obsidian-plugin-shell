@@ -3,7 +3,6 @@ import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { decodeConceptInput as relocatedDecode, readConceptInput as relocatedRead } from '../../bin/adapters/framework/concept-input.ts';
-import * as legacy from '../../bin/adapters/framework/concept-input.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -12,8 +11,6 @@ const frameworkRoot = resolve(import.meta.dirname, '../..');
 const projectText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
 
 test('relocated concept input preserves compatibility and canonical JSON decoding', () => {
-  assert.equal(legacy.decodeConceptInput, relocatedDecode);
-  assert.equal(legacy.readConceptInput, relocatedRead);
   const decoded = relocatedDecode(Buffer.from(projectText), 'json');
   assert.equal(decoded.status, 'data');
   assert.match(decoded.payloadSha256, /^[a-f0-9]{64}$/);

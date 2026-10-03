@@ -47,7 +47,7 @@ test('a generated consumer can retain provenance without owning the source proto
   assert.equal(calls, 1);
   assert.equal(await readFile(join(context.root, '.companion/prototype-selection.json'), 'utf8'), receipt);
 });
-test('ordinary unrelated concept documents retain standalone compatibility and are never modified', async t => {
+test('ordinary unrelated concept documents remain unmanaged and are never modified', async t => {
   const context = await fixture(t);
   await mkdir(join(context.root, 'docs/concepts/unmanaged'), {recursive:true});
   await writeFile(join(context.root, 'docs/concepts/unmanaged/prototype.manifest.json'), '{"format":"unrelated-concept"}');

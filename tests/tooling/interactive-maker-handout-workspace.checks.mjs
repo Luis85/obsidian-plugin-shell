@@ -5,7 +5,6 @@ import { join } from 'node:path';
 import {
   portablePath, loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout,
 } from '../../bin/adapters/framework/handout-workspace.ts';
-import * as legacy from '../../bin/adapters/framework/handout-workspace.ts';
 import { HANDOUT_PATH, readSnapshot } from '../../bin/adapters/framework/handout-model.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
@@ -20,8 +19,6 @@ async function workspace(t) {
 }
 
 test('relocated handout workspace preserves compatibility and deterministic read-only preparation', async t => {
-  assert.equal(legacy.prepareHandout,prepareHandout);
-  assert.equal(legacy.inspectHandout,inspectHandout);
   const root=await workspace(t);
   const first=await prepareHandout(root),second=await prepareHandout(root);
   assert.deepEqual(first,second);

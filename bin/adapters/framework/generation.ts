@@ -25,6 +25,7 @@ async function inPlaceKit(request: Request, context: Context, input: string) {
   return kit;
 }
 export async function generateSourcePlan(request: Request, context: Context) {
+  requireThat(request.options.vault === undefined && request.options.target === undefined, 'INVALID_OPTION', 'Generation runs in the configured project; --vault and --target are not supported.');
   const input = resolve(context.root, stringOption(request.options, 'input') ?? designFile);
   const outputKind = stringOption(request.options, 'output-kind');
   requireThat(outputKind === undefined || ['obsidian-plugin','clickdummy'].includes(outputKind),'INVALID_OUTPUT_KIND','Use obsidian-plugin or clickdummy.');

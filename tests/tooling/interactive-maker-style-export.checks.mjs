@@ -1,10 +1,8 @@
 import assert from 'node:assert/strict';
 import { exportDesignSystem as relocated } from '../../bin/adapters/framework/style-export.ts';
-import * as legacy from '../../bin/adapters/framework/style-export.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 test('relocated style renderer preserves compatibility identity and all supported formats', () => {
-  assert.equal(legacy.exportDesignSystem, relocated);
   for (const format of ['css', 'json', 'markdown', 'html']) {
     const result = relocated(undefined, 'style-test', format);
     assert.equal(typeof result.content, 'string');

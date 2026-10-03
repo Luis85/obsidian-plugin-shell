@@ -130,7 +130,7 @@ filesystem transactions. Do not blindly retry an uncertain write; inspect recove
 
 ```sh
 node bin/app prototype
-# aliases: node bin/app make prototype; npm run make -- prototype
+# Use node bin/app prototype directly; no make-prototype alias is retained.
 node bin/app prototype guide --json
 node bin/app prototype validate --input prototype-answers.json --json
 node bin/app prototype --input prototype-answers.json --out prototypes/issue-desk --json
