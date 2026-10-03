@@ -15,6 +15,9 @@
     { "glob": "tests/tooling/project-generator-contract.checks.mjs", "rules": ["retired-launcher"], "reason": "Negative assertion: the generated project config must not name the retired launchers." },
     { "glob": "bin/FIRST-RUN.md", "rules": ["kit-layout-path"], "reason": "Extracted CLI kit kept under tools/shell-cli of the project, where the CLI is not at the repository root." },
     { "glob": "bin/PROJECT-SETUP.md", "rules": ["kit-layout-path"], "reason": "Extracted CLI kit kept under tools/shell-cli of the project; the source-checkout form is stated beside it." },
-    { "glob": "scripts/testing/qualify-angular-setup.mjs", "rules": ["kit-layout-path"], "reason": "Qualification builds that kit layout on purpose and runs the CLI from it." }
+    { "glob": "scripts/testing/qualify-angular-setup.mjs", "rules": ["kit-layout-path"], "reason": "Qualification builds that kit layout on purpose and runs the CLI from it." },
+    { "glob": "docs/development/ADOPT-EXISTING-PROJECT.md", "rules": ["kit-layout-path"], "reason": "The adoption workflow runs the released kit extracted under tools/shell-cli of an existing project; the checkout form is stated beside it." },
+    { "glob": ".claude/skills/adopt-existing-project/SKILL.md", "rules": ["kit-layout-path"], "reason": "The skill is installed into existing projects whose kit lives under tools/shell-cli; it names both launch forms." },
+    { "glob": "templates/adoption/claude-skill/SKILL.md", "rules": ["kit-layout-path"], "reason": "Shipped copy of the adoption skill, byte-identical to .claude/skills/adopt-existing-project/SKILL.md." }
   ]
 }

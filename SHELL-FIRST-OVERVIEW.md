@@ -20,6 +20,7 @@ Keep three choices separate: where Workbench authoring runs, what runtime the us
 | --- | --- |
 | Understand Workbench and its direction | [Product vision](docs/product/PRODUCT-VISION.md); intended outcomes, not completed-feature claims |
 | Develop using the existing Obsidian foundation | [Root README](README.md), [framework guide](docs/development/FRAMEWORK-GUIDE.md), [feature guide](docs/development/BUILD-A-FEATURE.md) |
+| Add Workbench to an existing project (for example a legacy Angular webapp) | [Adopt an existing project](docs/development/ADOPT-EXISTING-PROJECT.md); `node bin/app adopt analyze` is read-only and `adopt plan` writes one reviewed Markdown plan, not an integration |
 | Create an independent consumer or inspect CLI capabilities | [CLI guide](docs/development/FRAMEWORK-CLI.md); use the documented plans and supported options |
 | Inspect or compile a declarative design | [Dedicated compiler](docs/development/compiler/README.md); generation is separate from dependency installation and acceptance |
 | Use the current authoring build | [Authoring guide](docs/concepts/companion/README.md); `npm run companion:build` emits the integrated v6 HTML/JSON under `reports/companion-mvp` |

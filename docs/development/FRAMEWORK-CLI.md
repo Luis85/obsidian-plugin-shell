@@ -74,6 +74,10 @@ will fail, with a suggested `--id`; an explicit `--id` must follow the creation 
 Editing the file after review makes its plan hash stale. See
 [Companion handoff](COMPANION-HANDOFF.md).
 
+## Adopt an existing project
+
+`node bin/app adopt analyze|plan|skill` adds Workbench to a project that already exists. `analyze` is a bounded, read-only scan that never executes project code and reports stack, tooling and compatibility findings (`workbench-adoption-report/v1`). `plan` renders that report as one Markdown integration plan, previews it with its SHA-256 and writes only that file after `--yes` or `--apply <hash>`. `skill` installs the `adopt-existing-project` agent skill. These commands work on any folder (`--target`), without `shell.config.json`. See [Adopt an existing project](ADOPT-EXISTING-PROJECT.md).
+
 ## Golden path, help and the check gate
 
 `node bin/app help` starts with the golden path (`new` → `install` → `dev` → `test`
