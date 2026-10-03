@@ -1,5 +1,5 @@
 /** Reproducible dependency-free release CLI; runtime and templates are packaged below bin/. */
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import { relative, resolve, isAbsolute, sep, posix, basename } from 'node:path';
 import type { OnLoadArgs, OnLoadResult, Plugin, PluginBuild } from 'esbuild';
 import type TS from 'typescript';
@@ -77,7 +77,8 @@ function templateLocations(ts: Typescript, root: string): Plugin {
 }
 
 export async function bundleReleaseCli(frameworkRoot: string): Promise<Buffer> {
-  const root = resolve(frameworkRoot);
+  // esbuild reports symlink-resolved module paths (macOS tmpdir is /var -> /private/var); compare against the same form.
+  const root = await realpath(resolve(frameworkRoot));
   const { build } = await import('esbuild');
   const ts = (await import('typescript')).default;
   const result = await build({
