@@ -2,7 +2,7 @@ import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { spawnSync } from 'node:child_process';
 import { hash } from './framework/files.ts';
 import { artifactOrigins } from '../compiler/adapters/origins.ts';
-import { prototypeSkillRoot } from '../../scripts/companion/prototype-skill.mjs';
+import { prototypeSkillRoot } from './framework/prototype-skill.ts';
 import { newDocument, documentText, type SketchDocument } from '../domain/document.ts';
 import { readGuide, resolveAnswers, guideBrief, renderTemplate, type Guide, type Answers } from '../domain/guide.ts';
 import { requireSketch, slug } from '../domain/errors.ts';

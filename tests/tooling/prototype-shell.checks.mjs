@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../scripts/companion/prototype-skill.mjs';
+import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../bin/adapters/framework/prototype-skill.ts';
 import { discoverTooling, shellOperation, npmOperation } from '../../.claude/skills/companion-prototype-design/scripts/lib/framework.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = path.join(root, prototypeSkillRoot, 'scripts/prototype.mjs');

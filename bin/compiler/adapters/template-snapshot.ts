@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { readBounded, hash } from '../../adapters/framework/files.ts';
 import { maintainerOnly, relocatedPath } from '../emitters/framework-docs.ts';
 import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
-import { prototypeSkillFiles } from '../../../scripts/companion/prototype-skill.mjs';
+import { prototypeSkillFiles } from '../../adapters/framework/prototype-skill.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
 
