@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { starterDocument as currentStarter } from '../support/starter-documents.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -15,10 +15,6 @@ export const template = await loadTemplateSnapshot(root);
 
 /** The visual-design fixture (two pages, one authored component and the authoring vault source). */
 export const detailDocument = () => structuredClone(detail);
-/** A current (project v6) companion starter document by id (blank, quick-capture, tasks-projects, ...). */
-export async function starterDocument(id) {
-  return currentStarter(id);
-}
 export const model = document => projectModel(document);
 /** Collects emitted artifacts; a duplicate path is a defect the generator itself would also refuse. */
 export function recorder() {

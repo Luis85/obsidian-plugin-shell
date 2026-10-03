@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { visualSpecs, visualDefinitions, visualNuxtImports, visualContractTypes, visualLibraryWithoutDefinition, visualPackages, visualComponentName } from '../../bin/compiler/emitters/visual-model.ts';
 import { visualSfc } from '../../bin/compiler/emitters/visual-code.ts';
 import { visualSources, visualPorts } from '../../bin/compiler/emitters/visual-ports.ts';
-import { richVisualDocument, detailDocument, starterDocument, model, recorder } from './compiler-emitters-fixture.mjs';
+import { richVisualDocument, detailDocument, model, recorder } from './compiler-emitters-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 // Visual definitions to Vue (visual-model.ts, visual-code.ts) and their validated source ports (visual-ports.ts).
 const rich = () => { const m = model(richVisualDocument()); return { m, specs: visualSpecs(m), store: visualDefinitions(m) }; };

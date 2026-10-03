@@ -4,7 +4,8 @@ import { devkitFiles, renderTemplate, makerTests } from '../../bin/compiler/emit
 import { componentFile, relativeImport, rewriteTemplate, copiedTemplateTest, copiedTemplateMarker } from '../../bin/compiler/emitters/file-code.ts';
 import { relocatedPath, maintainerOnly, rebaseMarkdown, relocateFrameworkDocuments } from '../../bin/compiler/emitters/framework-docs.ts';
 import { projectModel, schema, symbol, literal, text, rows } from '../../bin/compiler/emitters/model.ts';
-import { starterDocument, dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 // Developer kit (devkit-files.ts), file helpers (file-code.ts), framework document relocation (framework-docs.ts) and model validation (model.ts).
 const invalid = message => ({ message: 'GENERATOR_INVALID: ' + message });

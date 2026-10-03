@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { journeyCode } from '../../bin/compiler/emitters/journey-code.ts';
 import { journeyBootstrapCode } from '../../bin/compiler/emitters/journey-bootstrap-code.ts';
 import { journeyTestCode } from '../../bin/compiler/emitters/journey-test-code.ts';
-import { journeyDocument, starterDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { journeyDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 // Journey Lens emission (journey-{code,bootstrap-code,test-code}.ts): relocation, import rewriting, refusals and generated wiring.
 const prefix = 'docs/concepts/companion/editor/';
