@@ -1,7 +1,7 @@
 import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
 import { relationshipScope } from './relationship-model.ts';
 import { literal, requireValue, symbol, type Model, type Entity } from './model.ts';
-import type { Schema } from '../runtime/contract.ts';
+import type { Schema } from '../../../templates/companion/runtime/contract.ts';
 import { relativeImport, type Add } from './file-code.ts';
 import { sampleCode, typeCode } from './schema-code.ts';
 import { validateNoteWire } from './note-contracts.ts';
@@ -119,5 +119,5 @@ it('composes every generated repository with the actual retained framework regis
 });
 `);
   const sourceFile = `${m.sourceRoot}/application/note-operations.ts`;
-  add(sourceFile, await templateRoot.text(['scripts/companion/runtime/note-operations.ts'].join('/')));
+  add(sourceFile, await templateRoot.text(['templates/companion/runtime/note-operations.ts'].join('/')));
 }

@@ -31,7 +31,7 @@ export async function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add:
   const values = { name: oneLine(project.name) || String(m.project.id), id: String(m.project.id),
     description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot };
   for (const [path, template] of templates) {
-    add(path, renderTemplate(await templateRoot.text(['scripts/companion/devkit', template].join('/')), values), 'extension');
+    add(path, renderTemplate(await templateRoot.text(['templates/companion/devkit', template].join('/')), values), 'extension');
   }
   for (const file of templateRoot.skillFiles) add(file.path, file.content, 'extension');
   add('configs/testing/vitest.project.config.mjs', projectVitestConfig(m), 'extension');

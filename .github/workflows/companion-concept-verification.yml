@@ -7,6 +7,7 @@ on:
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
+      - 'templates/**'
       - 'scripts/framework/**'
       - 'tests/tooling/*prototypes*.checks.mjs'
       - 'tests/support/prototype-fixture.mjs'

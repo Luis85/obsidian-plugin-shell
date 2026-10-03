@@ -5,6 +5,7 @@ on:
       - 'configs/starters/**'
       - 'scripts/starters/**'
       - 'scripts/companion/**'
+      - 'templates/**'
       - 'scripts/compiler/**'
       - 'bin/compiler/**'
       - 'scripts/concepts/**'

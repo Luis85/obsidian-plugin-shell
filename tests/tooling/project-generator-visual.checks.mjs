@@ -13,13 +13,13 @@ test('visual runtime type-checks under the generator configuration', () => {
   assert.equal(run.status, 0, run.stdout + run.stderr);
 });
 test('runtime exposes the IR surface used by generated SFCs', async () => {
-  const text = await readFile('scripts/companion/runtime/use-visual.ts', 'utf8');
+  const text = await readFile('templates/companion/runtime/use-visual.ts', 'utf8');
   for (const name of ['visible', 'style', 'text', 'a11y', 'props', 'attrs', 'on', 'message', 'attach', 'theme', 'state', 'external']) assert.match(text, new RegExp('\\b' + name + '\\b'));
   assert.doesNotMatch(text, /\beval\b|new Function/);
 });
 
-const { useVisual, provideVisualContext } = await import('../../scripts/companion/runtime/use-visual.ts');
-const { visualIndex } = await import('../../scripts/companion/runtime/visual-runtime.ts');
+const { useVisual, provideVisualContext } = await import('../../templates/companion/runtime/use-visual.ts');
+const { visualIndex } = await import('../../templates/companion/runtime/visual-runtime.ts');
 const dom = new Window();
 globalThis.HTMLElement ??= dom.HTMLElement;
 

@@ -1,9 +1,9 @@
 import type { UiNode, ComponentNode, Interaction, Mapping, ComponentDefinition, VisualState } from '../visual/visual-ir.mjs';
 import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import { visualSession, visualTransition, visualVisible, type Session } from '../visual/visual-session.mjs';
-import { visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, type VisualSpec } from '../runtime/visual-runtime.ts';
-import { mapDetailPayload } from '../runtime/detail-actions.ts';
-import { parseDetailControl, copyDetailData, type DetailData } from '../runtime/detail-controls.ts';
+import { visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
+import { mapDetailPayload } from '../../../templates/companion/runtime/detail-actions.ts';
+import { parseDetailControl, copyDetailData, type DetailData } from '../../../templates/companion/runtime/detail-controls.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
 import { sample, sampleCode } from './schema-code.ts';

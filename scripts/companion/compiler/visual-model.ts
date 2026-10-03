@@ -3,7 +3,7 @@ import { emptyVisualDesigns, visualNodes, visualAssert } from '../visual/visual-
 import { validateVisualDesigns } from '../visual/visual-validate.mjs';
 import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import { validateCompositionDesignSystem } from '../composition-contract.mjs';
-import type { VisualSpec } from '../runtime/visual-runtime.ts';
+import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, row, type Model, type Row } from './model.ts';
 import { componentFile } from './file-code.ts';
 

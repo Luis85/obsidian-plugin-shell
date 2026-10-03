@@ -1,7 +1,7 @@
 import type { UiNode, VisualDesigns, ComponentDefinition, EmitDefinition, PropDefinition, SlotDefinition } from '../visual/visual-ir.mjs';
 import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '../visual/visual-ir.mjs';
 import { visualCatalogEntry, visualReservedExport } from '../visual/visual-catalog.mjs';
-import type { VisualSpec } from '../runtime/visual-runtime.ts';
+import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport } from './file-code.ts';
 import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath } from './visual-model.ts';

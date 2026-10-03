@@ -11,7 +11,7 @@ export const pureEntrypoints = [
 ];
 // Existing runtime modules expose pure validators alongside deferred runtime operations.
 // Only function-local timers in these two legacy modules are permitted; module-level effects stay forbidden.
-const deferredRuntimeTimers = new Set(['scripts/companion/runtime/json-http.ts', 'docs/concepts/companion/test-kit/adapters.mjs']);
+const deferredRuntimeTimers = new Set(['templates/companion/runtime/json-http.ts', 'docs/concepts/companion/test-kit/adapters.mjs']);
 function deferredTimer(path, node) {
   if (!deferredRuntimeTimers.has(path)) return false;
   for (let parent = node.parent; parent; parent = parent.parent) if (ts.isFunctionLike(parent)) return true;
@@ -89,7 +89,7 @@ export async function compilerSourceInventory(root) {
       else if (entry.isFile() && /\.(?:ts|mjs)$/.test(path)) sources.set(path, await readFile(resolve(root,path),'utf8'));
     }
   }
-  for (const folder of ['bin/compiler','scripts/compiler','scripts/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
+  for (const folder of ['bin/compiler','scripts/compiler','scripts/companion','templates/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
   return sources;
 }
 /** A listed pure entrypoint outside the inventory would otherwise be skipped silently. */

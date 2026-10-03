@@ -7,8 +7,8 @@ import { migrateCompanionDocument } from '../../scripts/companion/project-contra
 import { visualSpecs, visualContractTypes, visualDefinitions } from '../../scripts/companion/compiler/visual-model.ts';
 import { visualSfc } from '../../scripts/companion/compiler/visual-code.ts';
 import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
-import { detailValue } from '../../scripts/companion/runtime/detail-actions.ts';
-import { visualTextValue, visualIndex } from '../../scripts/companion/runtime/visual-runtime.ts';
+import { detailValue } from '../../templates/companion/runtime/detail-actions.ts';
+import { visualTextValue, visualIndex } from '../../templates/companion/runtime/visual-runtime.ts';
 import { visualSession, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
 import { visualNodes } from '../../scripts/companion/visual/visual-ir.mjs';
 const fixture = migrateCompanionDocument(JSON.parse(await readFile(new URL('../fixtures/companion/detail-v3.json', import.meta.url), 'utf8'))).document;

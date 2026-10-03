@@ -16,6 +16,6 @@
   },
   "include": [
     "../../scripts/companion/compiler/**/*.ts",
-    "../../scripts/companion/runtime/**/*.ts"
+    "../../templates/companion/runtime/**/*.ts"
   ]
 }

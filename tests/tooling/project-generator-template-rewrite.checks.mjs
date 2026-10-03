@@ -21,19 +21,19 @@ const nodeTest = "import { test } from 'node:test';";
 const drifts = [
   [relationshipCode, relationshipTests, copiedTemplateMarker],
   [relationshipCode, relationshipTests, nodeTest],
-  [relationshipCode, relationshipTests, '../../scripts/companion/runtime/relationships.ts'],
-  [relationshipCode, relationshipTests, '../../scripts/companion/runtime/relationship-session.ts'],
-  [relationshipCode, 'scripts/companion/runtime/relationship-session.ts', "'./relationships.ts'"],
-  [relationshipCode, 'scripts/companion/runtime/relationship-session.ts', "'./note-values.ts'"],
+  [relationshipCode, relationshipTests, '../../templates/companion/runtime/relationships.ts'],
+  [relationshipCode, relationshipTests, '../../templates/companion/runtime/relationship-session.ts'],
+  [relationshipCode, 'templates/companion/runtime/relationship-session.ts', "'./relationships.ts'"],
+  [relationshipCode, 'templates/companion/runtime/relationship-session.ts', "'./note-values.ts'"],
   [httpCode, httpTests, copiedTemplateMarker],
   [httpCode, httpTests, nodeTest],
-  [httpCode, httpTests, '../../scripts/companion/runtime/json-http.ts'],
-  [httpCode, 'scripts/companion/runtime/json-http.ts', "'./contract.ts'"],
+  [httpCode, httpTests, '../../templates/companion/runtime/json-http.ts'],
+  [httpCode, 'templates/companion/runtime/json-http.ts', "'./contract.ts'"],
 ];
 const outputs = {
   [relationshipTests]: '/relationships.test.mjs', [httpTests]: '/http.test.mjs',
-  'scripts/companion/runtime/relationship-session.ts': '/application/relationship-session.ts',
-  'scripts/companion/runtime/json-http.ts': '/infrastructure/json-http.ts',
+  'templates/companion/runtime/relationship-session.ts': '/application/relationship-session.ts',
+  'templates/companion/runtime/json-http.ts': '/infrastructure/json-http.ts',
 };
 function drifted(path, literal) {
   return { ...live, text: requested => {
@@ -62,7 +62,7 @@ test('the copied template suites start with the marker the generator removes', a
   for (const name of ['relationships.test.mjs', 'http.test.mjs']) {
     const content = files.get(`${model.testRoot}/${name}`);
     assert.ok(content?.startsWith("import { test } from 'vitest';\n"), name);
-    assert.ok(!content.includes('Copied template text') && !content.includes('scripts/companion/runtime'), name);
+    assert.ok(!content.includes('Copied template text') && !content.includes('templates/companion/runtime'), name);
   }
 });
 

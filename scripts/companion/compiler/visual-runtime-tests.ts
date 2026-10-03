@@ -1,7 +1,7 @@
 import type { ComponentDefinition, ExternalNode, UiNode, ValueExpression } from '../visual/visual-ir.mjs';
 import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import { visualRead, visualSession, visualVisible } from '../visual/visual-session.mjs';
-import { visualTextValue, type VisualSpec } from '../runtime/visual-runtime.ts';
+import { visualTextValue, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, symbol, type Model } from './model.ts';
 import { componentFile, relativeImport, type Add } from './file-code.ts';
 import { sample, sampleCode } from './schema-code.ts';

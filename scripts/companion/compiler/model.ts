@@ -1,5 +1,5 @@
 import { PRD_LIMITS } from '../prd-limits.mjs';
-import { matches, type Schema } from '../runtime/contract.ts';
+import { matches, type Schema } from '../../../templates/companion/runtime/contract.ts';
 import { createHash } from 'node:crypto';
 import { companionRelativeFolder } from '../project-contract.mjs';
 import { validateAuthoringDocument as validateCompanionDocument } from '../authoring-contract.ts';

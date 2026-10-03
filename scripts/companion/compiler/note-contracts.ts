@@ -1,5 +1,5 @@
 import { requireValue, type Entity, type Operation } from './model.ts';
-import type { Schema } from '../runtime/contract.ts';
+import type { Schema } from '../../../templates/companion/runtime/contract.ts';
 function noteValueSchema(entity: Entity): Schema {
   return {type:'object',properties:Object.fromEntries(Object.entries(entity.schema.properties ?? {}).filter(([key]) => !['id','type'].includes(key))),required:entity.schema.required?.filter(key => !['id','type'].includes(key)) ?? [],additionalProperties:false};
 }

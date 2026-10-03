@@ -1,6 +1,6 @@
 import { relationshipScope } from './relationship-model.ts';
 import { noteEntity } from './persistence-code.ts';
-import type { Schema } from '../runtime/contract.ts';
+import type { Schema } from '../../../templates/companion/runtime/contract.ts';
 import { literal, json, symbol, type Model } from './model.ts';
 import { typeCode, sampleCode } from './schema-code.ts';
 import { relativeImport, type Add } from './file-code.ts';

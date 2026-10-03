@@ -31,8 +31,8 @@ export async function maintainabilityInventory(root) {
     const data = await readFile(absolute);
     if (path === vendorArchive) decodeVendor(data);
     let view = 'unsupported';
-    // Generated-project template sources (templates/): the example-removal templates stored as `.ts.txt`/`.vue.txt`,
-    // measured as their source language in the templates view.
+    // Generated-project template sources (templates/): the companion runtime copied into generated projects and the
+    // example-removal templates stored as `.ts.txt`/`.vue.txt`, measured as their source language in the templates view.
     const template = path.startsWith('templates/') && executable.test(path.replace(/\.txt$/, ''));
     // Reviewed generated-output fixtures (golden SFCs, a retained pre-visual runtime module) are stored as `.vue.txt` /
     // `.ts.txt` so the analyzer and bundlers never resolve their generated-project imports; they stay measured as
@@ -48,7 +48,7 @@ export async function maintainabilityInventory(root) {
     const terminalPython = path === 'tests/tooling/interactive-maker-pty.py';
     const python = conceptPython.test(path) || memoryPython.has(path) || terminalPython;
     // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings) are rendered text, not code.
-    const templateData = (path.startsWith('templates/examples/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^scripts\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path);
+    const templateData = (path.startsWith('templates/examples/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^templates\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path);
     if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData && !python) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
     let templateRegion = null;
     if (/\.vue(?:\.txt)?$/.test(path)) {

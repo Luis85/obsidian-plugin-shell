@@ -2,7 +2,7 @@ import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts
 import type { ComponentDefinition, ExternalNode, Interaction } from '../visual/visual-ir.mjs';
 import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
 import { visualTestSource } from '../visual/visual-session.mjs';
-import type { VisualSpec } from '../runtime/visual-runtime.ts';
+import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, json, requireValue, type Model } from './model.ts';
 import { componentFile, relativeImport, rewriteTemplate, type Add } from './file-code.ts';
 import { visualDefinitions, visualSpecs, visualDefinitionPath, visualAdapterPath, visualContractTypes } from './visual-model.ts';
@@ -31,15 +31,17 @@ function vfFileId(value: string, what: string): string {
 }
 /** Runtime modules are copied from the trusted template with import paths rewritten to the generated layout. */
 async function vfRuntime(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
+  // Runtime templates live in templates/companion/runtime; the composition and visual contracts they import stay in scripts/companion.
   const read = (path: string) => templateRoot.text(['scripts/companion', path].join('/')), domain = `${m.sourceRoot}/domain`;
-  for (const file of ['detail-controls.ts', 'detail-actions.ts']) add(`${domain}/${file}`, await read('runtime/' + file));
-  add(`${domain}/visual-runtime.ts`, rewriteTemplate(await read('runtime/visual-runtime.ts'), [["'../visual/visual-ir.mjs'", "'./visual/visual-ir.mjs'"]], 'visual-runtime.ts'));
+  const runtime = (file: string) => templateRoot.text(['templates/companion/runtime', file].join('/')), contract = '../../../scripts/companion/';
+  for (const file of ['detail-controls.ts', 'detail-actions.ts']) add(`${domain}/${file}`, await runtime(file));
+  add(`${domain}/visual-runtime.ts`, rewriteTemplate(await runtime('visual-runtime.ts'), [[`'${contract}visual/visual-ir.mjs'`, "'./visual/visual-ir.mjs'"]], 'visual-runtime.ts'));
   for (const name of ['composition-contract.mjs', 'composition-contract.d.mts']) add(`${domain}/${name}`, await read(name));
   for (const name of ['visual-ir.mjs', 'visual-ir.d.mts', 'visual-session.mjs', 'visual-session.d.mts']) add(`${domain}/visual/${name}`, await read('visual/' + name));
-  add(`${m.sourceRoot}/presentation/composables/use-visual.ts`, rewriteTemplate(await read('runtime/use-visual.ts'), [
+  add(`${m.sourceRoot}/presentation/composables/use-visual.ts`, rewriteTemplate(await runtime('use-visual.ts'), [
     ["'./detail-controls.ts'", "'../../domain/detail-controls.ts'"], ["'./detail-actions.ts'", "'../../domain/detail-actions.ts'"],
-    ["'../composition-contract.mjs'", "'../../domain/composition-contract.mjs'"], ["'../visual/visual-session.mjs'", "'../../domain/visual/visual-session.mjs'"],
-    ["'../visual/visual-ir.mjs'", "'../../domain/visual/visual-ir.mjs'"], ["'./visual-runtime.ts'", "'../../domain/visual-runtime.ts'"],
+    [`'${contract}composition-contract.mjs'`, "'../../domain/composition-contract.mjs'"], [`'${contract}visual/visual-session.mjs'`, "'../../domain/visual/visual-session.mjs'"],
+    [`'${contract}visual/visual-ir.mjs'`, "'../../domain/visual/visual-ir.mjs'"], ["'./visual-runtime.ts'", "'../../domain/visual-runtime.ts'"],
   ], 'use-visual.ts'));
 }
 /** Extension-owned bridge to a declared package: typed props, stubs that fail loudly until implemented. */

@@ -1,0 +1,46 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+
+// Generated-project template sources live in templates/: the companion runtime copied into generated projects,
+// the developer-kit text templates and the example-removal templates. The shared companion contracts stay in scripts/companion.
+const root = fileURLToPath(new URL('../../', import.meta.url));
+const removed = ['scripts/companion/runtime', 'scripts/companion/devkit', 'scripts/examples/templates'];
+async function files(folder) {
+  const entries = await readdir(join(root, folder), { withFileTypes: true }).catch(error => error.code === 'ENOENT' ? [] : Promise.reject(error));
+  const nested = await Promise.all(entries.filter(entry => entry.name !== 'node_modules')
+    .map(entry => entry.isDirectory() ? files(`${folder}/${entry.name}`) : [`${folder}/${entry.name}`]));
+  return nested.flat();
+}
+
+test('templates/ holds only the runtime, developer-kit and example-removal templates', async () => {
+  const all = await files('templates');
+  const kinds = [[/^templates\/companion\/runtime\/[\w-]+\.ts$/, 'runtime'], [/^templates\/companion\/devkit\/[\w.-]+\.tmpl$/, 'devkit'], [/^templates\/examples\/[\w.-]+\.txt$/, 'examples']];
+  const unexpected = all.filter(path => !kinds.some(([pattern]) => pattern.test(path)));
+  assert.deepEqual(unexpected, []);
+  for (const [pattern, name] of kinds) assert.ok(all.some(path => pattern.test(path)), `${name} templates are present`);
+  for (const folder of removed) assert.deepEqual(await files(folder), [], `${folder} was removed`);
+});
+
+test('the template snapshot copies every templates/ file and the contracts stay in scripts/companion', async () => {
+  const snapshot = await loadTemplateSnapshot(root);
+  const paths = new Set(snapshot.frameworkFiles.map(file => file.path));
+  for (const path of await files('templates')) assert.ok(paths.has(path), path);
+  assert.match(snapshot.text('templates/companion/runtime/contract.ts'), /export function matches/);
+  for (const contract of ['scripts/companion/composition-contract.mjs', 'scripts/companion/visual/visual-ir.mjs', 'scripts/companion/journey/project-store.ts']) assert.ok(paths.has(contract), contract);
+});
+
+test('no source, test, plugin, workflow or configuration file names a removed template path', async () => {
+  const self = 'tests/tooling/compiler-template-layout.checks.mjs';
+  const sources = (await Promise.all(['bin', 'scripts', 'templates', 'tests', 'plugins', 'configs', '.github', '.claude'].map(files))).flat()
+    .filter(path => /\.(?:[cm]?[jt]s|json|ya?ml|md|py)$/.test(path) && path !== self);
+  const offenders = [];
+  for (const path of sources) {
+    const text = await readFile(join(root, path), 'utf8');
+    for (const name of removed) if (text.includes(name + '/') || text.includes(`'${name}'`)) offenders.push(`${path}: ${name}`);
+  }
+  assert.deepEqual(offenders, []);
+});

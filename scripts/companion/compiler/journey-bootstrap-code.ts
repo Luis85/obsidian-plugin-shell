@@ -31,7 +31,7 @@ export function provideJourney(app:App,pinia:Pinia,runtime:JourneyRuntime): void
   const native=`${base}/journey-native.ts`;
   add(native,`import type { Vault } from 'obsidian';
 import { JourneyProjectStore } from ${literal(relativeImport(native,'scripts/companion/journey/project-store.ts'))};
-import { journeyVaultFiles } from ${literal(relativeImport(native,'scripts/companion/runtime/journey-vault.ts'))};
+import { journeyVaultFiles } from ${literal(relativeImport(native,'templates/companion/runtime/journey-vault.ts'))};
 import type { JourneyRuntime } from './journey-workspace.ts';
 export function createJourneyNative(vault:Vault,report:()=>void): JourneyRuntime {
   const store=new JourneyProjectStore(journeyVaultFiles(vault),report);

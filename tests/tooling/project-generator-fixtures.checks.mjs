@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { fixtureManifest, renderFixtureCode } from '../../bin/compiler/adapters/fixture-emitter.ts';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
-import { validateSourceOverrides } from '../../scripts/companion/runtime/source-overrides.ts';
+import { validateSourceOverrides } from '../../templates/companion/runtime/source-overrides.ts';
 import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engine.mjs';
 import { planFixtures, applyFixtures } from '../../docs/concepts/companion/test-kit/storage.mjs';
 const root=process.cwd();

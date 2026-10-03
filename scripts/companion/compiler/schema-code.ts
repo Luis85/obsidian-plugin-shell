@@ -1,4 +1,4 @@
-import type { Schema } from '../runtime/contract.ts';
+import type { Schema } from '../../../templates/companion/runtime/contract.ts';
 import { literal } from './model.ts';
 export function typeCode(s: Schema | null): string {
   if (!s) return 'undefined';

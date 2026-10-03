@@ -5,5 +5,5 @@
     "allowImportingTsExtensions": true, "allowJs": true, "checkJs": false,
     "skipLibCheck": true, "types": ["node"]
   },
-  "include": ["../../scripts/framework/**/*.ts", "../../scripts/contracts/**/*.ts", "../../scripts/shared/**/*.ts", "../../scripts/companion/compiler/**/*.ts", "../../scripts/companion/runtime/contract.ts"]
+  "include": ["../../scripts/framework/**/*.ts", "../../scripts/contracts/**/*.ts", "../../scripts/shared/**/*.ts", "../../scripts/companion/compiler/**/*.ts", "../../templates/companion/runtime/contract.ts"]
 }

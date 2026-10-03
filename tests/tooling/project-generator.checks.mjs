@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { projectModel, schema, literal } from '../../scripts/companion/compiler/model.ts';
 import { sample, typeCode } from '../../scripts/companion/compiler/schema-code.ts';
-import { matches } from '../../scripts/companion/runtime/contract.ts';
+import { matches } from '../../templates/companion/runtime/contract.ts';
 import { planProject, applyProject, reviewProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));

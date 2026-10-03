@@ -159,7 +159,7 @@
     "docs/concepts/companion/editor/prototypes.css",
     "scripts/companion/native-contract.mjs",
     "scripts/companion/project-contract.mjs",
-    "scripts/companion/runtime/operation.ts",
+    "templates/companion/runtime/operation.ts",
     "docs/concepts/companion/src/storymap-model.js",
     "docs/concepts/companion/src/storymap-review.js",
     "docs/concepts/companion/src/storymap-actions.js",
@@ -171,9 +171,9 @@
     "docs/concepts/companion/src/storymap.css",
     "scripts/companion/storymap-contract.mjs",
     "scripts/companion/detail-contract.mjs",
-    "scripts/companion/runtime/use-visual.ts",
-    "scripts/companion/runtime/visual-runtime.ts",
-    "scripts/companion/runtime/detail-actions.ts",
+    "templates/companion/runtime/use-visual.ts",
+    "templates/companion/runtime/visual-runtime.ts",
+    "templates/companion/runtime/detail-actions.ts",
     "docs/concepts/companion/src/style-guide-frontend.js",
     "scripts/companion/design-system-roles.mjs",
     "scripts/companion/design-system-contract.mjs",
@@ -270,6 +270,7 @@
           "scripts/companion/tooling-contract.mjs",
           "scripts/companion/tooling-options.ts",
           "scripts/companion/concepts/**",
+          "scripts/companion/journey/**",
           "scripts/companion/sitemap/**",
           "scripts/companion/prototypes/**",
           "scripts/companion/visual/**",
@@ -281,6 +282,12 @@
           "scripts/companion/detail-contract.mjs",
           "scripts/companion/composition-contract.mjs",
           "scripts/companion/prd-limits.mjs"
+        ]
+      },
+      {
+        "name": "project-templates",
+        "patterns": [
+          "templates/**"
         ]
       },
       {
@@ -497,6 +504,7 @@
           "styles",
           "companion-test-kit",
           "companion-authoring-contract",
+          "project-templates",
           "prototype-skill",
           "maker-domain",
           "maker-application",
@@ -546,6 +554,7 @@
           "styles",
           "companion-test-kit",
           "companion-authoring-contract",
+          "project-templates",
           "maker-domain",
           "maker-application",
           "maker-host",
@@ -584,6 +593,13 @@
         "allow": [
           "companion-authoring-contract",
           "cli-data-contract"
+        ]
+      },
+      {
+        "from": "project-templates",
+        "allow": [
+          "project-templates",
+          "companion-authoring-contract"
         ]
       },
       {

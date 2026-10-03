@@ -1,8 +1,8 @@
 // Copied template text: generated projects receive this suite with this line removed, a vitest import and rewritten runtime paths. Keep the plain node:test import.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { inspectRelationships, assertRelationshipMutation } from '../../scripts/companion/runtime/relationships.ts';
-import { createRelationshipSession, protectNoteRelationships } from '../../scripts/companion/runtime/relationship-session.ts';
+import { inspectRelationships, assertRelationshipMutation } from '../../templates/companion/runtime/relationships.ts';
+import { createRelationshipSession, protectNoteRelationships } from '../../templates/companion/runtime/relationship-session.ts';
 const rule={id:'parent',source:'child',target:'parent',key:'parent_ref',sourceCard:'0..*',targetCard:'1',onDelete:'restrict'};
 const parent={entity:'parent',id:'p',path:'Parents/one.md',values:{title:'Parent'}};
 const child={entity:'child',id:'c',path:'Children/one.md',values:{title:'Child',parent_ref:'[[Parents/one]]'}};
