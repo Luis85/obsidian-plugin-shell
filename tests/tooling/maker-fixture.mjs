@@ -54,8 +54,10 @@ export const exampleEventCatalog: readonly EventCatalogEntry[] = [];
 `,
 };
 
-export async function makerFixture(work, { temporaryRoot = tmpdir() } = {}) {
-  const requested = await mkdtemp(join(temporaryRoot, 'template-maker-'));
+// Default to the canonical temporary directory: on macOS tmpdir() lives under the /var symlink,
+// which the file-plan root check correctly refuses. Callers may still pass an alias explicitly.
+export async function makerFixture(work, { temporaryRoot } = {}) {
+  const requested = await mkdtemp(join(temporaryRoot ?? await realpath(tmpdir()), 'template-maker-'));
   const root = await realpath(requested);
   try {
     // Keep root/link validation on the original spelling, then use one canonical
