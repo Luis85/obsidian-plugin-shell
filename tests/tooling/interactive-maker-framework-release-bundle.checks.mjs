@@ -1,6 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bundleReleaseCli } from '../../bin/adapters/framework/release-bundle.ts';
@@ -42,6 +42,13 @@ test('release bundle rebases real module locations and plugin configs only insid
   const bundle = await bundleReleaseCli(root);
   assert.ok(Buffer.isBuffer(bundle));
   assert.equal(bundle.toString('utf8'), expected);
+}));
+
+test('release bundle rebases the same way when the framework root is reached through a symlink', () => framework(sources, async root => {
+  // macOS temp directories live under the /var -> /private/var symlink; esbuild reports the real paths.
+  const linked = join(root, '..', 'linked-framework');
+  await symlink(root, linked, 'junction');
+  assert.equal((await bundleReleaseCli(linked)).toString('utf8'), expected);
 }));
 
 test('release bundle keeps other meta properties and adds no URL helper without dirname', () => framework({
