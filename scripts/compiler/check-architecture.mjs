@@ -89,7 +89,7 @@ export async function compilerSourceInventory(root) {
       else if (entry.isFile() && /\.(?:ts|mjs)$/.test(path)) sources.set(path, await readFile(resolve(root,path),'utf8'));
     }
   }
-  for (const folder of ['bin/compiler','scripts/compiler','scripts/companion','templates/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
+  for (const folder of ['bin/compiler','scripts/compiler','scripts/companion','scripts/companion-tools','templates/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
   return sources;
 }
 /** A listed pure entrypoint outside the inventory would otherwise be skipped silently. */
