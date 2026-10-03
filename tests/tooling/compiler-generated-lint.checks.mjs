@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, mkdtemp, mkdir, writeFile, rm, symlink } from 'node:fs/promises';
+import { readFile, mkdtemp, mkdir, writeFile, rm, symlink, realpath } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
@@ -16,7 +16,8 @@ async function emitProject(starter, t) {
   const definition = parseBrowserStarter(await readFile(join(root, 'configs/starters', starter + '.json'), 'utf8'));
   const result = await compileProject({ source: JSON.stringify(definition.generator.document), sourceName: starter + '.json', template });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
-  const dir = await mkdtemp(join(tmpdir(), 'journey-lint-'));
+  // Canonical path: ESLint reports real paths (macOS tmpdir() is under the /var symlink).
+  const dir = await realpath(await mkdtemp(join(tmpdir(), 'journey-lint-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
   for (const file of result.artifacts) {
     const target = join(dir, file.path);
@@ -34,7 +35,7 @@ function lint(dir, files) {
   const run = spawnSync(process.execPath, [eslint, '-c', 'configs/lint/eslint.config.mjs', '--max-warnings', '0', '--format', 'json', ...files],
     { cwd: dir, encoding: 'utf8', timeout: 480_000, maxBuffer: 20_000_000 });
   assert.ok(run.stdout, 'ESLint produced no report: ' + run.stderr);
-  const messages = JSON.parse(run.stdout).flatMap(report => report.messages.map(message => ({ file: report.filePath.slice(dir.length + 1), rule: message.ruleId, severity: message.severity, line: message.line, text: message.message })));
+  const messages = JSON.parse(run.stdout).flatMap(report => report.messages.map(message => ({ file: relative(dir, report.filePath).split(sep).join('/'), rule: message.ruleId, severity: message.severity, line: message.line, text: message.message })));
   return { status: run.status, messages };
 }
 
