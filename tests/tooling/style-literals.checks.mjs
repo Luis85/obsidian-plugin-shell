@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, writeFile, copyFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { scanStyleSource } from '../../scripts/styles/style-literals.mjs';
 import { suggestTokens } from '../../scripts/styles/style-literal-suggestions.mjs';
@@ -132,6 +132,8 @@ test('[STYLE-08] the allowlist is exact-file and reasoned; it cannot hide other 
 test('[STYLE-09] the repository CLI passes on the real sources and exits non-zero on a violation', async () => {
   const run = spawnSync(process.execPath, ['scripts/styles/check-style-literals.mjs', '--json'], { cwd: root, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr); const result = JSON.parse(run.stdout);
-  assert.equal(result.status, 'passed'); assert.ok(result.files >= 19); assert.deepEqual(result.findings, []);
+  // Counted independently, so a consumer that removed the example features (fewer SFCs) is still checked exactly.
+  const sources = (await readdir(join(root, 'src'), { recursive: true })).filter(path => /\.(?:vue|css)$/.test(path));
+  assert.equal(result.status, 'passed'); assert.ok(sources.length > 0); assert.equal(result.files, sources.length); assert.deepEqual(result.findings, []);
   assert.equal(spawnSync(process.execPath, ['scripts/styles/check-style-literals.mjs', '--bogus'], { cwd: root, encoding: 'utf8' }).status, 1);
 });
