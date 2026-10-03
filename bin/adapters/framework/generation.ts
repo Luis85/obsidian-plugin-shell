@@ -3,10 +3,10 @@ import { serializeJson as json } from '../../../scripts/contracts/serialization.
 import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
-import { readConfiguration, readBounded, hash, exists } from './files.ts';
+import { readConfiguration, readBounded, hash } from './files.ts';
 import { designFile, object } from './configuration.ts';
 import { inspectDesign } from './changes.ts';
-import { verifyKit } from './kit-integrity.ts';
+import { kitPresent, verifyKit } from './kit-integrity.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
 import { managedGenerationPlan } from './prototype-generation.ts';
 export async function generationPlan(request: Request, context: Context) {
@@ -16,7 +16,7 @@ export async function generationPlan(request: Request, context: Context) {
 async function inPlaceKit(request: Request, context: Context, input: string) {
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup and project import first.');
   requireThat(input === resolve(context.root, designFile), 'INPUT_REQUIRES_IMPORT', 'In-place generation compiles the imported ' + designFile + '; run project import to adopt a different file.');
-  requireThat(await exists(join(context.root, 'bin/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit.');
+  requireThat(await kitPresent(context.root), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit.');
   const kit = await verifyKit(context.root);
   const { model } = await inspectDesign(context, input);
   const identityMatches = Object.entries(config.project).every(([key, value]) => model.project[key] === value);

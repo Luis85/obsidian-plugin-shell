@@ -32,15 +32,15 @@ export function renderTemplate(text: string, values: Readonly<Record<string, str
 /** Where the framework makers put the tests of generated features; product checks run them too. */
 export const makerTests = 'tests/runtime/generated';
 const oneLine = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim();
-export async function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
+export function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add: Add): void {
   const project = m.project as unknown as Record<string, unknown>;
   const values = { name: oneLine(project.name) || String(m.project.id), id: String(m.project.id),
     description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot, ...briefValues(m) };
-  const read = (template: string) => templateRoot.text(['templates/companion/devkit', template].join('/'));
-  for (const [path, template] of templates) add(path, renderTemplate(await read(template), values), 'extension');
-  const adapter = await read('skill-codex-adapter.md.tmpl');
+  const read = (template: string) => templateRoot.text(`templates/companion/devkit/${template}`);
+  for (const [path, template] of templates) add(path, renderTemplate(read(template), values), 'extension');
+  const adapter = read('skill-codex-adapter.md.tmpl');
   for (const skill of productSkills) {
-    const skillDescription = /^description: (.+)$/m.exec(await read(`skill-${skill}.md.tmpl`))?.[1];
+    const skillDescription = /^description: (.+)$/m.exec(read(`skill-${skill}.md.tmpl`))?.[1];
     if (!skillDescription) throw new Error('GENERATOR_TEMPLATE_SKILL_DESCRIPTION: ' + skill);
     add(`.agents/skills/${skill}/SKILL.md`, renderTemplate(adapter, { skill, skillDescription }), 'extension');
   }
@@ -53,7 +53,7 @@ init(addIcon);
 `, 'managed');
   // The copied suite manifest classifies product tests under tests/project; follow a custom tests folder.
   if (m.testRoot !== 'tests/project') {
-    const suites = await templateRoot.text(['tests/suites.json'].join('/'));
+    const suites = templateRoot.text('tests/suites.json');
     add('tests/suites.json', suites.replaceAll('"tests/project', JSON.stringify(m.testRoot).slice(0, -1)), 'framework');
   }
   const example = `${m.testRoot}/plugin-host.test.ts`;

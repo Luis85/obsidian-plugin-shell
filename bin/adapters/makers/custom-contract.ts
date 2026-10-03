@@ -21,12 +21,14 @@ function validDescription(value: unknown): value is string {
 function optionalText(value: unknown): value is string | undefined {
   return value === undefined || typeof value === 'string';
 }
-/** Recipe code is trusted but untyped: the injected primitive revalidates its request before composing anything. */
+/**
+ * Recipe code is trusted but untyped: only the request's shape is checked here. The shared action primitive then applies
+ * the same owner/name/event slug rules and preference allowlist built-in recipes use, before composing any path or source.
+ */
 function actionRequest(request: unknown): ActionRequest {
   const candidate = isRecord(request) ? request : {};
-  const { kind, preference, event } = candidate;
-  if (typeof kind !== 'string' || !optionalText(preference) || !optionalText(event)) throw new Error('CUSTOM_ACTION_INVALID');
-  const owner = slug(candidate.owner, 'action owner'), name = slug(candidate.name, 'action name');
+  const { owner, name, kind, preference, event } = candidate;
+  if (typeof kind !== 'string' || typeof owner !== 'string' || typeof name !== 'string' || !optionalText(preference) || !optionalText(event)) throw new Error('CUSTOM_ACTION_INVALID');
   return { owner, name, kind, ...(preference === undefined ? {} : { preference }), ...(event === undefined ? {} : { event }) };
 }
 /** Builds the frozen context a local recipe receives: no root, edit or finish, and one bound primitive. */

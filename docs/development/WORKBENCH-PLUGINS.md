@@ -31,7 +31,7 @@ npm run make -- plugin my-extension --dry-run
 npm run make -- plugin my-extension --yes
 ```
 
-The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed. This authoring command targets the Workbench source checkout itself; generated applications and extracted immutable developer kits use their own extension boundaries and do not mutate the reviewed Workbench plugin registry.
+The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed. This authoring command targets the Workbench source checkout itself; generated applications and extracted immutable framework kits use their own extension boundaries and do not mutate the reviewed Workbench plugin registry.
 
 Run:
 
@@ -95,7 +95,7 @@ cli: [{
 }],
 ```
 
-Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in maker commands and framework command roots cannot be shadowed. The top-level `bin/app` launcher resolves registered plugin command IDs before dispatch, so `node bin/app <plugin-command> ...` reaches the plugin in both source and compiled developer-kit modes. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
+Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in maker commands and framework command roots cannot be shadowed. The top-level `bin/app` launcher resolves registered plugin command IDs before dispatch, so `node bin/app <plugin-command> ...` reaches the plugin in both source and compiled framework kit modes. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
 
 ## Extending Studio / the TUI
 

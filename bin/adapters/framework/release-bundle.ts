@@ -4,6 +4,7 @@ import { relative, resolve, isAbsolute, sep, posix, basename } from 'node:path';
 import type { OnLoadArgs, OnLoadResult, Plugin, PluginBuild } from 'esbuild';
 import type TS from 'typescript';
 import { requireThat } from './contracts.ts';
+import type { BundledPackage } from './docs-vendor.ts';
 
 type Typescript = typeof TS;
 type Location = 'url' | 'dirname';
@@ -76,9 +77,19 @@ function templateLocations(ts: Typescript, root: string): Plugin {
   };
 }
 
-export async function bundleReleaseCli(frameworkRoot: string): Promise<Buffer> {
-  // esbuild reports real paths; a root reached through a symlink (macOS /var -> /private/var) would otherwise place
-  // every module outside it and silently skip the location rebasing.
+/** Every node_modules package whose files esbuild read into the bundle; metafile paths are root-relative with `/`. */
+function bundledPackages(inputs: readonly string[]): BundledPackage[] {
+  const found = new Map<string, BundledPackage>();
+  for (const input of inputs) {
+    // Greedy prefix: the innermost package owns a file inside a nested node_modules install.
+    const match = /^(.*node_modules\/((?:@[^/]+\/)?[^/]+))\//.exec(input);
+    if (match?.[1] && match[2]) found.set(match[1], { name: match[2], directory: match[1] });
+  }
+  return [...found.values()].sort((a, b) => a.directory.localeCompare(b.directory));
+}
+
+export async function bundleReleaseCli(frameworkRoot: string): Promise<{ bytes: Buffer; packages: BundledPackage[] }> {
+  // esbuild reports symlink-resolved module paths (macOS tmpdir is /var -> /private/var); compare against the same form.
   const root = await realpath(resolve(frameworkRoot));
   const { build } = await import('esbuild');
   const ts = (await import('typescript')).default;
@@ -87,18 +98,18 @@ export async function bundleReleaseCli(frameworkRoot: string): Promise<Buffer> {
     entryPoints: [resolve(root, 'bin/app.ts')],
     outfile: resolve(root, 'bin/app.js'),
     bundle: true, write: false, platform: 'node', format: 'esm', target: 'node22',
-    packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent',
+    packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent', metafile: true,
     // Whitespace only: identifiers, syntax and inline legal notices are unchanged. It keeps the single bundled file
-    // well inside the 8 MB per-file limit that every kit reader enforces (Prettier alone is about 5.6 MB unminified).
+    // well inside the 8 MB per-file limit that every kit reader enforces.
     minifyWhitespace: true,
     // Bundled CommonJS dependencies (yaml's node build) require Node built-ins; ESM output needs a real require.
     banner: { js: "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);" },
-    // These are maintainer-only/optional tools. Regular extracted-kit commands never load them.
-    external: ['node:*', 'typescript', 'esbuild'],
+    // Installed devDependencies loaded on first use (makers, packing). Regular pre-install kit commands never load them.
+    external: ['node:*', 'typescript', 'esbuild', 'prettier'],
     plugins: [templateLocations(ts, root)],
   });
   const [output, ...rest] = result.outputFiles ?? [];
   requireThat(output !== undefined && rest.length === 0 && basename(output.path) === 'app.js', 'KIT_BUNDLE', 'Release build must emit one app.js.');
   requireThat(output.contents.length <= 8_000_000, 'KIT_BUNDLE', 'Bundled CLI exceeds the verified per-file archive limit.');
-  return Buffer.from(output.contents);
+  return { bytes: Buffer.from(output.contents), packages: bundledPackages(Object.keys(result.metafile.inputs)) };
 }

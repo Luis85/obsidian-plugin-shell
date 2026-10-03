@@ -53,6 +53,18 @@ test('collections provision exact Markdown CRUD contracts for users and agent tr
   assert.throws(() => runOperations(result.document, [{ op: 'collection.add', title: 'Missing', path: 'Records/Missing', entity: 'missing' }]));
 });
 
+test('collection record schemas type a one-or-more relationship as a required reference array', () => {
+  const setup = runOperations(base(), [{ op: 'entity.add', title: 'Task', as: 'task' }, { op: 'entity.add', title: 'Project', as: 'project' }]);
+  const relationship = { id: 'er-relationship-9', name: 'Projects', source: setup.aliases.task, target: setup.aliases.project, key: 'project_refs', sourceCard: '0..*', targetCard: '1..*', onDelete: 'restrict' };
+  setup.document.design.semantic.relationships.push(relationship);
+  const add = { op: 'collection.add', title: 'Tasks', path: 'Records/Tasks', entity: setup.aliases.task };
+  const create = runOperations(setup.document, [add]).document.design.dataSources.sources[0].operations.find(operation => operation.slug === 'create');
+  const record = create.output.schema.properties.record;
+  assert.deepEqual(record.properties.project_refs, { type: 'array', items: { type: 'string' } });
+  assert.deepEqual(record.required, ['id', 'type', 'project_refs']);
+  relationship.targetCard = '1..+';
+  assert.throws(() => runOperations(setup.document, [add]), { code: 'BRICK_COLLECTION_ENTITY' });
+});
 test('collection leases distinguish multiple Markdown records at the same revision', async () => {
   const records = new Map([['a', { id: 'a', revision: 1, values: { title: 'Alpha' } }], ['b', { id: 'b', revision: 1, values: { title: 'Beta' } }]]);
   const updated = [], deleted = [];

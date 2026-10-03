@@ -32,14 +32,12 @@ async function surface(context: MakerContext, input: MakerInput): Promise<void> 
 }
 async function primitive(context: MakerContext, input: MakerInput): Promise<void> {
   const { owner, name, maker, options } = owned(input);
-  const preference = options['--preference'];
-  const event = maker === 'listener' ? slug(options['--event'], 'existing event name (--event)') : undefined;
-  await action(context, { owner, name, kind: maker, preference, event });
+  await action(context, { owner, name, kind: maker, preference: options['--preference'], event: options['--event'] });
 }
 async function setting(context: MakerContext, input: MakerInput): Promise<void> {
   const preference = input.options['--preference'];
+  // A bound shared preference is validated by the action primitive against the one allowlist.
   if (preference === undefined) return settingRecipe(context, owned(input).owner, input.name);
-  if (!['notifySuccess', 'hideObsidianViewHeader'].includes(preference)) throw new Error('Unknown --preference; select notifySuccess|hideObsidianViewHeader');
   return primitive(context, input);
 }
 async function style(context: MakerContext, input: MakerInput): Promise<void> {

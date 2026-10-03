@@ -1,4 +1,4 @@
-/** Compatibility facade. Compile in memory first; compare/apply use the original guarded writer. */
+/** Compile in memory first; compare/apply use the guarded file-plan writer. */
 import { fileURLToPath } from 'node:url';
 import { resolve, basename } from 'node:path';
 import { readCompanionInput } from '../../adapters/framework/read-project.ts';

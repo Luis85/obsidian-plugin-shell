@@ -18,12 +18,14 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   await visit(resolve(root, 'src'));
   if ((await readdir(root)).includes('bin')) await visit(resolve(root, 'bin'));
   if ((await readdir(root)).includes('plugins')) await visit(resolve(root, 'plugins'));
+  // Companion runtime templates become generated plugin source; a generated project may not carry them.
+  if (existsSync(resolve(root, 'templates/companion/runtime'))) await visit(resolve(root, 'templates/companion/runtime'));
   files.sort();
   if (!files.length) throw new Error('LINT_SOURCE_EMPTY');
   if (only) {
     const wanted = new Set(only), owned = files.filter(file => wanted.has(file.split(sep).join('/')));
     files.splice(0, files.length, ...owned);
-    if (!files.length) return { status: 'passed', files: 0, scope: 'none of the requested files is an owned src/bin/plugins input' };
+    if (!files.length) return { status: 'passed', files: 0, scope: 'none of the requested files is an owned src/bin/plugins/templates/companion/runtime input' };
   }
   // The project's own rules win; a bare source tree (archive probe) uses this framework's reviewed rules.
   const config = [join(root, 'configs/lint/oxlintrc.json'), fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url))].find(path => existsSync(path));
@@ -31,7 +33,7 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   for (let offset = 0; offset < files.length; offset += 100) {
     await runNode(tool, ['-c', config, ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
   }
-  return { status: 'passed', files: files.length, scope: only ? 'the requested owned src/bin/plugins inputs, explicit paths' : 'every owned src/bin/plugins JS/TS/Vue input, explicit paths' };
+  return { status: 'passed', files: files.length, scope: only ? 'the requested owned src/bin/plugins/templates/companion/runtime inputs, explicit paths' : 'every owned src/bin/plugins/templates/companion/runtime JS/TS/Vue input, explicit paths' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {

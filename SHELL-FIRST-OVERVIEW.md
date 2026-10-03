@@ -8,7 +8,7 @@ Workbench is a developer-focused tool to create and manage declarative user inte
 
 ## One product, complementary capabilities
 
-The **visual authoring experience** helps users describe and connect pages, reusable components, interactions, routes and journeys. The **CLI and developer kit** support inspectable preparation, validation, generation and ongoing development. The **shared compiler** translates supported declarative definitions into artifact data. The **reusable shell** provides the maintained Obsidian foundation and host/persistence/lifecycle contracts.
+The **visual authoring experience** helps users describe and connect pages, reusable components, interactions, routes and journeys. The **CLI and framework kit** support inspectable preparation, validation, generation and ongoing development. The **shared compiler** translates supported declarative definitions into artifact data. The **reusable shell** provides the maintained Obsidian foundation and host/persistence/lifecycle contracts.
 
 These are capabilities and delivery surfaces within Workbench, not alternative public product names. A generated consumer owns its source and must remain usable without an installed authoring interface or maintainer checkout. Design-only authoring remains legitimate; it does not require every downstream build tool.
 
@@ -45,7 +45,7 @@ The target for `new` must be a new or empty independent directory. Review the re
 
 For the existing template itself, `npm run setup` uses reviewed setup and the exact dependencies. The optional `--profile native` installs assets only into the contained development vault. Open it separately and deliberately enable the plugin. Do not use a personal vault; setup does not authorize activation or change Restricted Mode. The [setup guide](docs/development/SETUP-IDENTITY.md) retains identity, protected-data and resume behavior.
 
-The product name is Workbench, but the executable is `bin/app` (run it as `node bin/app`; no root launcher or compatibility shim remains) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
+The product name is Workbench, but the entry point is `bin/app` (`bin/app.ts` in source, bundled `bin/app.js` in a kit; run it as `node bin/app`; no root launcher or compatibility shim remains) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
 
 ## Intended connected workflow
 

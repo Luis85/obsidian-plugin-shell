@@ -5,7 +5,7 @@ The interactive workspace now has a full-screen keyboard-driven TUI. See
 for the line-oriented presentation. Existing agent commands remain available.
 
 `bin/` is the TypeScript application for make-first authoring. It is included in
-framework release kits and compiler-generated projects. Use the qualified toolchain
+framework kits and compiler-generated projects. Use the qualified toolchain
 from the repository's `AGENTS.md` and exact lockfile; this feature adds no dependency.
 
 ## Set up an existing vault for Angular

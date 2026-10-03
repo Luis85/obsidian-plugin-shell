@@ -1,4 +1,4 @@
-import { makerSymbol as symbol, title } from './arguments.ts';
+import { makerSymbol as symbol, slug, title } from './arguments.ts';
 import type { RecipeContext } from './contracts.ts';
 
 export const registryPath = 'src/bootstrap/authoring.ts';
@@ -149,6 +149,24 @@ async function listenerAction(context: RecipeContext, spec: ActionSpec, { owner,
   spec.assertion = `const publisher = f.services.events.publisher(${descriptor}); publisher.publish({ type: '${owner}.${event}', payload: { sequence: 1 } });\n    expect(f.notices()).toBe(1);\n    extension.dispose();\n    publisher.publish({ type: '${owner}.${event}', payload: { sequence: 2 } });\n    expect(f.notices()).toBe(1);`;
 }
 const actionKinds: Readonly<Record<string, Configure>> = { command: commandAction, modal: modalAction, usecase: usecaseAction, setting: settingAction, event: eventAction, listener: listenerAction };
+/** The one shared-preference allowlist: built-in dispatch and the injected local-recipe primitive resolve through it. */
+const actionPreferences: readonly string[] = Object.freeze(['notifySuccess', 'hideObsidianViewHeader']);
+function actionPreference(value: unknown): string {
+  if (value === undefined) throw new Error('MAKER_PREFERENCE_REQUIRED: select notifySuccess|hideObsidianViewHeader');
+  if (typeof value !== 'string' || !actionPreferences.includes(value)) throw new Error('Unknown --preference; select notifySuccess|hideObsidianViewHeader');
+  return value;
+}
+/** Every request, built-in or local recipe, is revalidated before any path or source text is composed from it. */
+function validatedAction({ owner, name, kind, preference, event }: ActionRequest): ActionRequest {
+  if (!Object.hasOwn(actionKinds, kind)) throw new Error(`Unsupported action primitive: ${kind}`);
+  if (kind !== 'setting' && preference !== undefined) throw new Error(`MAKER_OPTION_UNSUPPORTED: preference is only valid for setting, not ${kind}`);
+  if (kind !== 'listener' && event !== undefined) throw new Error(`MAKER_OPTION_UNSUPPORTED: event is only valid for listener, not ${kind}`);
+  return {
+    owner: slug(owner, 'action owner'), name: slug(name, 'action name'), kind,
+    ...(kind === 'setting' ? { preference: actionPreference(preference) } : {}),
+    ...(kind === 'listener' ? { event: slug(event, 'existing event name (--event)') } : {}),
+  };
+}
 /** Hosted dialogs report failures; the generated action returns them instead of claiming success. */
 function reportFailures(kind: string, spec: ActionSpec & { execute: string }): void {
   if (['command', 'modal', 'listener'].includes(kind)) {
@@ -177,7 +195,8 @@ async function eventContractTest(context: RecipeContext, owner: string, name: st
     `import { expect, it } from 'vitest';\nimport type { EventPayload } from '../../../src/features/api';\nimport { ${descriptor} } from '../../../src/features/${owner}/${name}.event-definition';\n\nit('validates unknown event payloads and retains a literal typed contract', () => {\n  // @ts-expect-error This must remain a numeric payload; widening the contract breaks this negative check.\n  const invalid: EventPayload<typeof ${descriptor}> = { sequence: 'wrong' };\n  for (const value of [null, false, {}, invalid, { sequence: 0 }, { sequence: -1 }, { sequence: 1.5 }, { sequence: Infinity }, { sequence: 1, extra: true }]) expect(${descriptor}.valid(value)).toBe(false);\n  expect(${descriptor}.valid({ sequence: 1 })).toBe(true);\n});\n`,
   );
 }
-export async function action(context: RecipeContext, { owner, name, kind, preference, event }: ActionRequest): Promise<void> {
+export async function action(context: RecipeContext, request: ActionRequest): Promise<void> {
+  const { owner, name, kind, preference, event } = validatedAction(request);
   const local = localName(owner, name, kind);
   const prefix = await locales(context, owner, `${name}-${kind}`);
   const id = `${owner}-${name}-${kind}`;
@@ -190,8 +209,7 @@ export async function action(context: RecipeContext, { owner, name, kind, prefer
     cleanup: `services.modals.closeOwner('${id}'); services.notices.dismissOwner('${id}');`,
     assertion: `const result = command.execute();\n    expect(f.dialogs).toHaveLength(1);\n    f.dialogs[0]?.callbacks.cancel(); await result;\n    expect(f.closed()).toBe(1);`,
   };
-  const configure = Object.hasOwn(actionKinds, kind) ? actionKinds[kind] : undefined;
-  await configure?.(context, spec, { owner, name, prefix, id, local, preference, event: event ?? '' });
+  await actionKinds[kind]?.(context, spec, { owner, name, prefix, id, local, preference, event: event ?? '' });
   const { execute: configured } = spec;
   if (!configured) throw new Error(`Unsupported action primitive: ${kind}`);
   const ready = { ...spec, execute: configured };

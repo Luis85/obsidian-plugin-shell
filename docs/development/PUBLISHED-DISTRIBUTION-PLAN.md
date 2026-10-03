@@ -14,6 +14,15 @@ The distribution contract is:
 
 The first published implementation does not preserve the unreleased `app.mjs`, `shell.mjs`, or `.framework/` layouts.
 
+## Glossary
+
+- **Framework kit:** the deterministic ZIP that `node bin/app framework pack` builds: `bin/app`, the bundled `bin/app.js` and the runtime-owned support files below `bin/`. Documentation calls this artifact the framework kit; older text that says "developer kit" or "release kit" for the same ZIP means the framework kit. Code identifiers and CLI help strings keep their current names.
+- **`templates/`** (source checkout): generated-project template sources (`templates/companion/{runtime,devkit}`, `templates/examples`) that the compiler copies or rewrites into generated projects.
+- **`bin/template/`** (inside a framework kit only): the packed snapshot of the framework roots that a kit instantiates new projects from; it does not exist in a source checkout.
+- **`bin/app templates …`:** the component-template library commands (`templates list`, `show`, `validate`, `instantiate` and others) over the JSON definitions in `configs/templates/`; unrelated to either folder above.
+
+Follow-up, not done here: rename the kit's `bin/template/` snapshot folder so it is not confused with `templates/` or `bin/app templates`. The rename touches the kit layout, the compiler template snapshot and their tests, so it needs its own reviewed change.
+
 ## Target user flows
 
 ### Published CLI

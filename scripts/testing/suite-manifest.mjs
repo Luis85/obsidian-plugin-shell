@@ -68,6 +68,8 @@ export function validateManifest(manifest) {
   if (!Array.isArray(manifest.roots) || !manifest.roots.length || manifest.roots.some(root => typeof root?.path !== 'string'))
     throw new Error('SUITE_MANIFEST_INVALID: roots');
   assertStrings(manifest.helperRoots ?? [], 'helperRoots', { allowEmpty: true });
+  if (manifest.documentation !== undefined && (typeof manifest.documentation !== 'string' || !manifest.documentation))
+    throw new Error('SUITE_MANIFEST_INVALID: documentation must be a repository-relative path');
   const prerequisites = manifest.prerequisites ?? {};
   if (!Array.isArray(manifest.suites) || !manifest.suites.length) throw new Error('SUITE_MANIFEST_INVALID: suites');
   const names = new Set();
@@ -203,14 +205,26 @@ function scriptFailures(manifest, scripts) {
   return failures;
 }
 
-/** Classification; with an evidence inventory also npm-script wiring and parity with evidence tooling. */
+/** Every suite needs a `| \`name\` |` table row in the declared suite guide, so the guide cannot drift. */
+async function documentationFailures(root, manifest) {
+  const path = manifest.documentation;
+  if (!path) return [];
+  let text;
+  try { text = await readFile(join(root, path), 'utf8'); }
+  catch (error) { return [`SUITE_DOCUMENTATION_MISSING: ${manifestPath} names ${path}, which cannot be read (${error.code ?? error.message}).`]; }
+  const rows = new Set([...text.matchAll(/^\|\s*`([^`]+)`\s*\|/gm)].map(match => match[1]));
+  return manifest.suites.filter(suite => !rows.has(suite.name))
+    .map(suite => `SUITE_UNDOCUMENTED: suite "${suite.name}" has no \`${suite.name}\` row in ${path}. Add one to its suite table.`);
+}
+
+/** Classification; with an evidence inventory also npm-script wiring, suite-guide rows and parity with evidence tooling. */
 export async function checkSuites(root, { evidenceInventory } = {}) {
   const manifest = await loadManifest(root);
   const result = await classify(root, manifest);
   const failures = [...result.failures];
   if (evidenceInventory) {
     const scripts = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).scripts ?? {};
-    failures.push(...scriptFailures(manifest, scripts));
+    failures.push(...scriptFailures(manifest, scripts), ...await documentationFailures(root, manifest));
     const verifyTooling = new Set(result.suites.filter(suite => suite.verify === 'tooling').flatMap(suite => suite.files));
     for (const path of await evidenceInventory()) {
       if (!verifyTooling.has(path)) failures.push(`TOOLING_NOT_IN_VERIFY: ${path} runs in evidence tooling but belongs to no verify "tooling" suite. ${edit}.`);
