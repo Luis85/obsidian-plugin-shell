@@ -159,6 +159,21 @@ test('npm scripts must exist and run the suite they are declared for', async t =
   assert.match(run(await fixture(t, { 'package.json': absent }), ['--check']).stderr, /SUITE_SCRIPT_MISSING: package.json has no "test:alpha" script/);
 });
 
+test('every suite needs a row in the declared suite guide, which must exist', async t => {
+  assert.throws(() => validateManifest(manifest({ documentation: '' })), /documentation must be/);
+  const documented = manifest({ documentation: 'docs/SUITES.md' });
+  const table = rows => `| Suite | Purpose |\n| --- | --- |\n${rows.map(name => `| \`${name}\` | text |`).join('\n')}\n`;
+  const partial = run(await fixture(t, { 'docs/SUITES.md': `${table(['alpha'])}\nProse naming \`beta\` is not a row.\n` }, documented), ['--check']);
+  assert.equal(partial.status, 1);
+  assert.match(partial.stderr, /SUITE_UNDOCUMENTED: suite "beta" has no `beta` row in docs\/SUITES\.md/);
+  assert.doesNotMatch(partial.stderr, /suite "alpha"/);
+  const missing = run(await fixture(t, {}, documented), ['--check']);
+  assert.equal(missing.status, 1);
+  assert.match(missing.stderr, /SUITE_DOCUMENTATION_MISSING: tests\/suites\.json names docs\/SUITES\.md, which cannot be read \(ENOENT\)/);
+  const complete = run(await fixture(t, { 'docs/SUITES.md': table(['alpha', 'beta']) }, documented), ['--check']);
+  assert.equal(complete.status, 0, complete.stdout + complete.stderr);
+});
+
 test('runner-declared inventories must equal the suite files in both directions', async t => {
   const browser = { name: 'browser', purpose: 'browser', runner: { type: 'command', commands: [['{python}', 'runner.py']] }, include: ['tests/concepts/*.browser.py'],
     inventory: { source: 'runner.py', pattern: "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json'\\)", file: 'tests/concepts/companion-$1.browser.py' }, verify: 'opt-in', optional: true };
