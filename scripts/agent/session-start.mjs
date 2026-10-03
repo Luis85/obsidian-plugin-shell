@@ -1,135 +1,78 @@
 /** Agent SessionStart hook (framework checkout and generated projects): report the toolchain, make cloud sessions usable.
  * Stdout becomes the agent's context, so it is a short plain-text status (at most 10 lines). It never fails the session:
  * every problem is reported as text and the exit code is always 0. When everything is fine it is read-only and fast.
- *  - Node/npm: actual versus the qualified ones from .nvmrc, package.json engines and packageManager. When Node is not the
- *    qualified one but a qualified install exists in a well-known place, it is put on PATH for the session (CLAUDE_ENV_FILE).
- *  - Dependencies: a missing node_modules is restored with `npm ci --ignore-scripts`, only in cloud sessions
- *    (CLAUDE_CODE_REMOTE=true) or when SHELL_SESSION_START_INSTALL=1; SHELL_SESSION_START_INSTALL=0 never installs.
- *  - Browser: reported through the shared resolver (SHELL_CHROMIUM override, pinned revision, mismatch). Never downloads. */
-import { spawnSync } from 'node:child_process';
-import { appendFileSync, existsSync, readFileSync, statSync } from 'node:fs';
+ *  - Node/npm: actual versus the qualified ones from .nvmrc, package.json engines and packageManager. A qualified install in
+ *    a well-known place (or the Workbench cache) is put on PATH for the session (CLAUDE_ENV_FILE). In cloud sessions
+ *    (CLAUDE_CODE_REMOTE=true) a missing qualified Node is downloaded, checksum-verified and cached under the user's cache
+ *    directory with its pinned npm (session-node.mjs); SHELL_SESSION_START_NODE=0 never, =1 also locally.
+ *  - Dependencies: a missing node_modules is restored with `npm ci --ignore-scripts` using that toolchain, in cloud sessions
+ *    or when SHELL_SESSION_START_INSTALL=1; SHELL_SESSION_START_INSTALL=0 never installs.
+ *  - Browser: reported through the shared resolver; in cloud sessions an older installed Chromium is adopted via
+ *    SHELL_CHROMIUM and labelled non-pinned. Never downloads a browser.
+ *  `--provision-only` (environment setup scripts) opts in to Node provisioning and installation regardless of the session kind. */
+import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { boundedOutput, npmCommand, packageRootFor, readHookInput } from './hook-io.mjs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { packageRootFor, readHookInput } from './hook-io.mjs';
+import { browserLine, loadResolver } from './session-browser.mjs';
+import { dependencyLine, installDependencies, stale } from './session-install.mjs';
+import { cachedNodeBin, nodeProvisionDecision, pinNpm, provisionNode } from './session-node.mjs';
+import { bundledNpm, realNodeIo } from './session-node-io.mjs';
+import { exportPath, exportVariable, findQualifiedNode, pathNpm, toolLine } from './session-toolchain.mjs';
+import { qualifiedToolchain, readText, sameVersion } from './session-version.mjs';
 
-const INSTALL_TIMEOUT_MS = 480_000;
 const MAX_LINES = 10;
-const version = text => /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? ''))?.slice(1, 4).map(Number) ?? null;
-function compare(a, b) { return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; }
-const operators = { '>=': d => d >= 0, '>': d => d > 0, '<=': d => d <= 0, '<': d => d < 0, '=': d => d === 0, '': d => d === 0 };
-/** Space-separated comparators only (`>=22.13.0`, `>=11.19.1 <13`); anything else is "unknown" (null), never a false verdict. */
-export function satisfies(actual, range) {
-  const have = version(actual);
-  if (!have || !range || range.includes('||')) return null;
-  const parts = range.trim().split(/\s+/).map(part => /^(>=|<=|>|<|=)?v?(\d+)(?:\.(\d+))?(?:\.(\d+))?$/.exec(part));
-  if (parts.some(part => !part)) return null;
-  return parts.every(([, operator = '', major, minor = '0', patch = '0']) => operators[operator](compare(have, [Number(major), Number(minor), Number(patch)])));
+/** Everything the hook does must end inside Claude Code's 600 s SessionStart timeout. */
+const BUDGET_MS = 570_000;
+const pathPhrase = (deps, env, directory) => deps.exportPath(env, directory) ? 'put first on PATH for this session' : `run: export PATH="${directory}:$PATH"`;
+/** The qualified Node's bin directory (found or provisioned) and the status line explaining how. */
+async function resolveNode(qualified, env, deps) {
+  const found = deps.findNode(qualified.node, { env, home: deps.home });
+  if (found) return { directory: found, line: `Qualified Node ${qualified.node} found at ${found}; ${pathPhrase(deps, env, found)}.` };
+  const hint = `No qualified Node ${qualified.node} found in known locations; install it (nvm install ${qualified.node}).`;
+  const decision = nodeProvisionDecision(env);
+  if (!decision.provision) return { directory: null, line: `${hint} Not downloading it (${decision.why}).` };
+  const outcome = await deps.provisionNode(qualified, env);
+  if (!outcome.ok) return { directory: null, line: `${hint} Provisioning failed, nothing is qualified: ${outcome.text}.` };
+  return { directory: outcome.binDirectory, line: `Qualified Node ${qualified.node} provisioned at ${outcome.binDirectory} (${outcome.text}); ${pathPhrase(deps, env, outcome.binDirectory)}.` };
 }
-const readText = path => { try { return readFileSync(path, 'utf8'); } catch { return null; } };
-const readJson = path => { try { return JSON.parse(readText(path)); } catch { return null; } };
-/** The qualified toolchain a checkout declares; missing declarations stay null. */
-export function qualifiedToolchain(root, read = readText) {
-  const pkg = (() => { try { return JSON.parse(read(join(root, 'package.json'))) ?? {}; } catch { return {}; } })();
-  const nvmrc = String(read(join(root, '.nvmrc')) ?? '').trim().replace(/^v/, '');
-  const manager = /^npm@(\d+\.\d+\.\d+)/.exec(pkg.packageManager ?? '');
-  return { node: version(nvmrc) ? nvmrc : null, nodeRange: pkg.engines?.node ?? null, npm: manager?.[1] ?? null, npmRange: pkg.engines?.npm ?? null };
-}
-/** One status line per tool: matches, satisfies only the engines range, or is outside it. */
-export function toolLine(label, actual, qualified, range) {
-  if (!actual) return `${label}: not found${qualified ? ` (qualified ${qualified})` : ''}.`;
-  if (qualified && version(actual)?.join('.') === version(qualified).join('.')) return `${label} ${actual}: qualified.`;
-  const inRange = satisfies(actual, range);
-  if (inRange === false) return `${label} ${actual}: UNQUALIFIED, outside engines ${range}${qualified ? ` (qualified ${qualified})` : ''}.`;
-  if (qualified) return `${label} ${actual}: not the qualified ${qualified}${inRange ? ` (satisfies engines ${range})` : ''}; results may differ from the qualified toolchain.`;
-  return `${label} ${actual}: no qualified version declared.`;
-}
-/** Directories that commonly hold another Node install, most specific first. */
-function nodeCandidates(qualified, env, home) {
-  const major = version(qualified)?.[0];
-  return [env.SHELL_NODE_BIN, `/opt/node${major}/bin`, join(env.NVM_DIR ?? join(home, '.nvm'), 'versions', 'node', `v${qualified}`, 'bin'),
-    `/usr/local/n/versions/node/${qualified}/bin`, join(home, '.volta', 'tools', 'image', 'node', qualified, 'bin')].filter(Boolean);
-}
-const probeNode = directory => {
-  const result = spawnSync(join(directory, process.platform === 'win32' ? 'node.exe' : 'node'), ['--version'], { encoding: 'utf8', timeout: 5000 });
-  return result.status === 0 ? result.stdout.trim().replace(/^v/, '') : null;
-};
-/** A bin directory whose node is exactly the qualified version, else null. */
-export function findQualifiedNode(qualified, { env, home, exists = existsSync, probe = probeNode }) {
-  if (!version(qualified)) return null;
-  return nodeCandidates(qualified, env, home).find(directory => exists(directory) && probe(directory) === qualified) ?? null;
-}
-/** Persist the qualified Node for the session's later shell commands; false when no env file is offered. */
-export function exportPath(env, directory, append = appendFileSync) {
-  if (!env.CLAUDE_ENV_FILE) return false;
-  try { append(env.CLAUDE_ENV_FILE, `export PATH="${directory}:$PATH"\n`); return true; } catch { return false; }
-}
-export function installDecision(env) {
-  if (env.SHELL_SESSION_START_INSTALL === '0') return { install: false, why: 'SHELL_SESSION_START_INSTALL=0' };
-  if (env.SHELL_SESSION_START_INSTALL === '1') return { install: true, why: 'opted in' };
-  return env.CLAUDE_CODE_REMOTE === 'true' ? { install: true, why: 'cloud session' } : { install: false, why: 'local session; set SHELL_SESSION_START_INSTALL=1 to allow' };
-}
-/** `npm ci --ignore-scripts` with the chosen toolchain first on PATH; bounded failure text, never throws. */
-export function installDependencies(root, env, nodeDirectory, run = spawnSync) {
-  const childEnv = { ...env, FORCE_COLOR: '0', ...(nodeDirectory ? { PATH: `${nodeDirectory}${process.platform === 'win32' ? ';' : ':'}${env.PATH ?? ''}` } : {}) };
-  const npm = npmCommand(['ci', '--ignore-scripts', '--no-audit', '--no-fund'], { ...childEnv, npm_execpath: undefined });
-  const started = Date.now();
-  const result = run(npm.command, npm.args, { cwd: root, encoding: 'utf8', timeout: INSTALL_TIMEOUT_MS, shell: npm.shell, maxBuffer: 16 * 1024 * 1024, env: childEnv });
-  const seconds = Math.round((Date.now() - started) / 1000);
-  if (!result.error && !result.signal && result.status === 0) return { ok: true, text: `restored with npm ci --ignore-scripts (${seconds}s).` };
-  const why = result.error || result.signal ? `did not finish (${result.error?.code ?? result.error?.message ?? result.signal})` : `failed (exit ${result.status})`;
-  return { ok: false, text: `npm ci --ignore-scripts ${why}: ${boundedOutput(`${result.stderr ?? ''}\n${result.stdout ?? ''}`, 400).replace(/\s+/g, ' ')}` };
-}
-function dependencyLine(root, env, nodeDirectory, deps) {
-  if (deps.exists(join(root, 'node_modules'))) return deps.stale(root) ? 'Dependencies: node_modules is older than package-lock.json; run npm ci --ignore-scripts if imports fail.' : null;
-  const decision = installDecision(env);
-  if (!decision.install) return `Dependencies: node_modules MISSING; not installing (${decision.why}). Run npm ci --ignore-scripts.`;
-  const outcome = deps.install(root, env, nodeDirectory);
-  return `Dependencies: node_modules was missing, ${outcome.text}`;
-}
-async function loadResolver(root) {
-  try { return (await import(pathToFileURL(join(root, 'scripts/testing/browser-executable.mjs')).href)).resolveBrowserExecutable; } catch { return null; }
-}
-/** Browser readiness line; silent when the project has no Playwright dependency to resolve. */
-function browserLine(resolveBrowser, root, env) {
-  if (!resolveBrowser) return null;
-  const result = resolveBrowser({ env, root });
-  if (result.reason === 'playwright-not-installed') return null;
-  if (result.status === 'pinned') return `Browser: pinned Chromium r${result.expectedRevision} ready.`;
-  if (result.status === 'override') return `Browser: SHELL_CHROMIUM override ${result.executablePath}.`;
-  if (result.status === 'revision-mismatch') return `Browser: REVISION MISMATCH (expects r${result.expectedRevision}, has ${result.availableRevisions.join(',')}); browser suites report not-run. Opt in to the older build: SHELL_CHROMIUM=${result.candidateExecutable}`;
-  return `Browser: NOT READY. ${result.hint}`;
-}
-const stale = root => {
-  try { return statSync(join(root, 'node_modules/.package-lock.json')).mtimeMs < statSync(join(root, 'package-lock.json')).mtimeMs; } catch { return false; }
-};
-/** npm bundled beside a node binary (Unix `bin/../lib/node_modules/npm`, Windows `node_modules/npm`). */
-const bundledNpm = binDirectory => ['../lib/node_modules/npm', 'node_modules/npm'].map(path => readJson(join(binDirectory, path, 'package.json'))?.version).find(Boolean) ?? null;
-function pathNpm(run = spawnSync) {
-  const npm = npmCommand(['--version'], {});
-  const result = run(npm.command, npm.args, { encoding: 'utf8', timeout: 10000, shell: npm.shell });
-  return result.status === 0 ? result.stdout.trim() : null;
+/** npm inside the Workbench cache is ours to pin (a download with an unpinned npm, or an earlier failed pin); any other npm is never touched. */
+function pinPrivateNpm(qualified, env, deps, directory) {
+  const ours = directory && qualified.npm && resolve(directory) === resolve(deps.cacheBin(qualified.node, env));
+  if (!ours || !nodeProvisionDecision(env).provision || sameVersion(deps.npmVersion(directory), qualified.npm)) return null;
+  const outcome = deps.pinNpm(qualified, env, directory);
+  return outcome.ok ? null : `npm: ${outcome.text}.`;
 }
 /** Build the status text. `deps` carries every side effect so tests can fake the file system, processes and environment. */
 export async function sessionStatus(root, env, deps) {
   const qualified = qualifiedToolchain(root, deps.read);
   const lines = [`Session toolchain (${root}):`];
-  const nodeOk = qualified.node && version(deps.nodeVersion)?.join('.') === version(qualified.node).join('.');
-  let nodeDirectory = null;
+  let directory = null;
   lines.push(toolLine('Node', deps.nodeVersion, qualified.node, qualified.nodeRange));
-  if (qualified.node && !nodeOk) {
-    nodeDirectory = deps.findNode(qualified.node, { env, home: deps.home });
-    lines.push(nodeDirectory ? `Qualified Node ${qualified.node} found at ${nodeDirectory}; ${deps.exportPath(env, nodeDirectory) ? 'put first on PATH for this session' : `run: export PATH="${nodeDirectory}:$PATH"`}.`
-      : `No qualified Node ${qualified.node} found in known locations; install it (nvm install ${qualified.node}).`);
+  if (qualified.node && !sameVersion(deps.nodeVersion, qualified.node)) {
+    const resolved = await resolveNode(qualified, env, deps);
+    directory = resolved.directory;
+    lines.push(resolved.line);
   }
-  lines.push(toolLine(nodeDirectory ? 'npm (with the qualified Node)' : 'npm', deps.npmVersion(nodeDirectory), qualified.npm, qualified.npmRange));
-  for (const line of [dependencyLine(root, env, nodeDirectory, deps), browserLine(deps.resolveBrowser, root, env)]) if (line) lines.push(line);
+  const pinNote = pinPrivateNpm(qualified, env, deps, directory ?? (qualified.node && sameVersion(deps.nodeVersion, qualified.node) ? deps.nodeBin : null));
+  if (pinNote) lines.push(pinNote);
+  lines.push(toolLine(directory ? 'npm (with the qualified Node)' : 'npm', deps.npmVersion(directory), qualified.npm, qualified.npmRange));
+  const budget = (deps.remaining ?? (() => BUDGET_MS))() - 10_000;
+  for (const line of [dependencyLine(root, env, directory, deps, budget), browserLine(deps.resolveBrowser, root, env, deps.exportVariable)]) if (line) lines.push(line);
   return lines.slice(0, MAX_LINES).join('\n');
 }
-async function realDeps() {
-  return { read: readText, nodeVersion: process.versions.node, npmVersion: directory => directory ? bundledNpm(directory) : bundledNpm(dirname(process.execPath)) ?? pathNpm(), home: homedir(), exists: existsSync, stale, findNode: findQualifiedNode,
-    exportPath, install: installDependencies, resolveBrowser: await loadResolver(resolve(dirname(fileURLToPath(import.meta.url)), '../..')) };
+async function realDeps(root, deadline = Date.now() + BUDGET_MS) {
+  const home = homedir();
+  const remaining = () => deadline - Date.now();
+  const provision = (qualified, env) => provisionNode({ version: qualified.node, npm: qualified.npm, env, home, platform: process.platform, arch: process.arch, distBase: env.SHELL_NODE_DIST || undefined, remaining, token: `${process.pid}-${Date.now()}` }, realNodeIo({ env }));
+  const pin = (qualified, env, directory) => pinNpm(directory, dirname(directory), { npm: qualified.npm, env, remaining }, realNodeIo({ env }));
+  return { read: readText, nodeVersion: process.versions.node, nodeBin: dirname(process.execPath), cacheBin: (version, env) => cachedNodeBin(version, { env, home }) ?? '', pinNpm: pin, npmVersion: directory => directory ? bundledNpm(directory) : bundledNpm(dirname(process.execPath)) ?? pathNpm(), home, exists: existsSync, stale,
+    findNode: findQualifiedNode, exportPath, exportVariable, install: installDependencies, provisionNode: provision, remaining,
+    resolveBrowser: await loadResolver(resolve(dirname(fileURLToPath(import.meta.url)), '../..')) };
 }
+/** Environment setup scripts: provision and install regardless of the session kind, unless explicitly switched off. */
+export const provisionEnvironment = env => ({ ...env, SHELL_SESSION_START_NODE: env.SHELL_SESSION_START_NODE ?? '1', SHELL_SESSION_START_INSTALL: env.SHELL_SESSION_START_INSTALL ?? '1' });
 export async function runSessionStart(input, env = process.env, makeDeps = realDeps) {
   try {
     const start = typeof input?.cwd === 'string' ? input.cwd : env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -141,6 +84,8 @@ export async function runSessionStart(input, env = process.env, makeDeps = realD
   }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  process.stdout.write(`${await runSessionStart(await readHookInput().catch(() => ({})))}\n`);
+  const provisionOnly = process.argv.includes('--provision-only');
+  const input = provisionOnly ? {} : await readHookInput().catch(() => ({}));
+  process.stdout.write(`${await runSessionStart(input, provisionOnly ? provisionEnvironment(process.env) : process.env)}\n`);
   process.exitCode = 0;
 }

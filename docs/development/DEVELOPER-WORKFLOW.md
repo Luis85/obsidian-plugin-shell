@@ -185,13 +185,19 @@ reports problems as text). It is read-only and fast when everything is fine:
 
 - **Toolchain report:** actual Node/npm versus the qualified ones, distinguishing "qualified", "satisfies engines
   but is not the qualified version" and "outside engines". If another qualified Node exists in a well-known place
-  (`/opt/node<major>/bin`, nvm, n, Volta, or `SHELL_NODE_BIN`), it is put first on `PATH` for the session through
-  `CLAUDE_ENV_FILE`; otherwise the report names the install command. Version drift is reported, never hidden.
+  (`/opt/node<major>/bin`, nvm, n, Volta, `SHELL_NODE_BIN` or the Workbench cache), it is put first on `PATH` for the
+  session through `CLAUDE_ENV_FILE`. In a cloud session without one, the exact `.nvmrc` Node is downloaded from
+  nodejs.org, checked against the official SHA-256, cached under `${XDG_CACHE_HOME:-~/.cache}/workbench` with its
+  pinned npm and used (`SHELL_SESSION_START_NODE=0` disables it); otherwise the report names the install command.
+  Version drift is reported, never hidden. Details, switches and troubleshooting: [CLOUD-AND-LOCAL-SESSIONS.md](CLOUD-AND-LOCAL-SESSIONS.md).
 - **Dependencies:** a missing `node_modules` is restored with `npm ci --ignore-scripts`, using the qualified Node
   when one was found. This only happens in cloud sessions (`CLAUDE_CODE_REMOTE=true`) or when
   `SHELL_SESSION_START_INSTALL=1`; `SHELL_SESSION_START_INSTALL=0` disables it everywhere. Local sessions are never
-  changed unasked. Lifecycle scripts stay off and nothing is downloaded beyond the locked packages.
-- **Browser:** reported through the single resolver, `scripts/testing/browser-executable.mjs`. It never downloads.
+  changed unasked. Lifecycle scripts stay off and nothing is downloaded beyond the locked packages (and, in cloud
+  sessions, the qualified Node itself).
+- **Browser:** reported through the single resolver, `scripts/testing/browser-executable.mjs`. It never downloads a
+  browser. In a cloud session an installed Chromium of another revision is exported as `SHELL_CHROMIUM` and
+  labelled non-pinned; locally only the hint is printed.
 
 Browser executable selection has one canonical override, `SHELL_CHROMIUM` (an absolute path to a Chromium
 executable; Playwright config, browser scripts, the evidence browser producer and the Python concept checks all

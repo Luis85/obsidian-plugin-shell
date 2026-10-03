@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { exportPath, findQualifiedNode, installDecision, installDependencies, qualifiedToolchain, runSessionStart, satisfies, sessionStatus, toolLine } from '../../scripts/agent/session-start.mjs';
+import { delimiter, join, resolve } from 'node:path';
+import { provisionEnvironment, runSessionStart, sessionStatus } from '../../scripts/agent/session-start.mjs';
+import { installDecision, installDependencies } from '../../scripts/agent/session-install.mjs';
+import { exportPath, exportVariable, findQualifiedNode, qualifiedEnv, toolLine } from '../../scripts/agent/session-toolchain.mjs';
+import { qualifiedToolchain, satisfies } from '../../scripts/agent/session-version.mjs';
 
 const hook = resolve(import.meta.dirname, '../../scripts/agent/session-start.mjs');
 const files = { '/p/.nvmrc': '24.21.0\n', '/p/package.json': JSON.stringify({ engines: { node: '>=22.13.0', npm: '>=11.19.1 <13' }, packageManager: 'npm@11.19.1' }) };
@@ -12,10 +15,13 @@ const readFrom = table => path => table[path] ?? null;
 const mismatch = { status: 'revision-mismatch', reason: 'browser-revision-mismatch', expectedRevision: '1243', availableRevisions: ['1194'], candidateExecutable: '/pw/chromium-1194/chrome-linux/chrome', hint: 'long' };
 /** Fake side effects that record what the hook would have done. */
 function fakes(overrides = {}) {
-  const calls = { install: [], exported: [], found: [] };
+  const calls = { install: [], exported: [], found: [], variables: [], provisioned: 0, pinned: [], pinResult: { ok: true, text: 'npm pinned to 11.19.1' } };
   const deps = { read: readFrom(files), nodeVersion: '24.21.0', npmVersion: () => '11.19.1', home: '/h', exists: () => true, stale: () => false,
     findNode: (qualified, context) => { calls.found.push([qualified, context.home]); return null; },
     exportPath: (env, directory) => { calls.exported.push(directory); return Boolean(env.CLAUDE_ENV_FILE); },
+    exportVariable: (env, name, value) => { calls.variables.push([name, value]); return Boolean(env.CLAUDE_ENV_FILE); },
+    provisionNode: async () => { calls.provisioned += 1; return { ok: false, text: 'unused' }; },
+    nodeBin: '/usr/bin', cacheBin: () => '/h/.cache/workbench/node-v24.21.0-linux-x64/bin', pinNpm: (qualified, env, directory) => { calls.pinned.push(directory); return calls.pinResult; },
     install: (root, env, directory) => { calls.install.push([root, directory]); return { ok: true, text: 'restored with npm ci --ignore-scripts (3s).' }; },
     resolveBrowser: () => ({ status: 'pinned', expectedRevision: '1243' }), ...overrides };
   return { deps, calls };
@@ -130,7 +136,7 @@ async function hookRun(t, project, input = '{}', env = {}) {
   const root = await mkdtemp(join(tmpdir(), 'session start ü-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const [path, content] of Object.entries(project)) { await mkdir(join(root, path, '..'), { recursive: true }); await writeFile(join(root, path), content); }
-  const environment = { ...process.env, CLAUDE_CODE_REMOTE: 'false', SHELL_SESSION_START_INSTALL: '0', CLAUDE_PROJECT_DIR: root, ...env };
+  const environment = { ...process.env, CLAUDE_CODE_REMOTE: 'false', SHELL_SESSION_START_INSTALL: '0', SHELL_SESSION_START_NODE: '0', CLAUDE_PROJECT_DIR: root, ...env };
   delete environment.NODE_TEST_CONTEXT; delete environment.CLAUDE_ENV_FILE;
   return { root, result: spawnSync(process.execPath, [hook], { input, encoding: 'utf8', timeout: 60000, env: { ...environment, ...env } }) };
 }
@@ -162,4 +168,108 @@ test('[SESSION-START-12] the PATH export appends one shell line to the offered f
   assert.equal(await readFile(file, 'utf8'), 'export PATH="/opt/node24/bin:$PATH"\n');
   assert.equal(exportPath({}, '/opt/node24/bin'), false, 'no file offered');
   assert.equal(exportPath({ CLAUDE_ENV_FILE: join(dir, 'missing/dir/env.sh') }, '/opt/node24/bin'), false, 'an unwritable file is a false, not a crash');
+});
+
+const cloud = { CLAUDE_CODE_REMOTE: 'true', CLAUDE_ENV_FILE: '/tmp/env' };
+const missingModules = { exists: path => !path.endsWith('node_modules') };
+const old = { nodeVersion: '22.22.0', npmVersion: directory => directory ? '11.19.1' : '10.9.0' };
+
+test('[SESSION-START-13] a cloud session without a qualified Node provisions it, uses it for npm ci and puts it on PATH', async () => {
+  const requests = [];
+  const provisionNode = async (qualified, env) => { requests.push([qualified.node, qualified.npm, env.CLAUDE_CODE_REMOTE]); return { ok: true, binDirectory: '/h/.cache/workbench/node-v24.21.0-linux-x64/bin', text: 'downloaded node-v24.21.0-linux-x64.tar.gz (SHA-256 verified); npm pinned to 11.19.1' }; };
+  const { text, calls } = await status(cloud, { ...old, ...missingModules, provisionNode });
+  assert.deepEqual(requests, [['24.21.0', '11.19.1', 'true']]);
+  assert.match(text, /Qualified Node 24\.21\.0 provisioned at \/h\/\.cache\/workbench\/node-v24\.21\.0-linux-x64\/bin \(downloaded .*SHA-256 verified.*pinned to 11\.19\.1\); put first on PATH for this session\./);
+  assert.match(text, /npm \(with the qualified Node\) 11\.19\.1: qualified\./);
+  assert.deepEqual(calls.exported, ['/h/.cache/workbench/node-v24.21.0-linux-x64/bin']);
+  assert.deepEqual(calls.install, [['/p', '/h/.cache/workbench/node-v24.21.0-linux-x64/bin']], 'npm ci runs with the provisioned toolchain');
+});
+
+test('[SESSION-START-14] a failed provisioning is reported, claims nothing and still lets the install try the system toolchain', async () => {
+  const provisionNode = async () => ({ ok: false, text: 'SHA-256 mismatch for node.tar.gz; refused, nothing was extracted' });
+  const { text, calls } = await status(cloud, { ...old, ...missingModules, provisionNode });
+  assert.match(text, /No qualified Node 24\.21\.0 found in known locations; install it \(nvm install 24\.21\.0\)\. Provisioning failed, nothing is qualified: SHA-256 mismatch/);
+  assert.doesNotMatch(text, /provisioned at|npm \(with the qualified Node\)/);
+  assert.deepEqual(calls.exported, []);
+  assert.deepEqual(calls.install, [['/p', null]]);
+  assert.match(text, /npm 10\.9\.0: UNQUALIFIED/);
+});
+
+test('[SESSION-START-15] provisioning follows cloud/local/opt-in/opt-out; a qualified Node already present or in use is never replaced', async () => {
+  const attempts = async (env, overrides = {}) => {
+    const { calls } = await status(env, { ...old, provisionNode: async () => ({ ok: true, binDirectory: '/n/bin', text: 'x' }), ...overrides, findNode: overrides.findNode ?? (() => null) });
+    return calls.exported.length;
+  };
+  assert.equal(await attempts({ CLAUDE_CODE_REMOTE: 'true' }), 1);
+  assert.equal(await attempts({ CLAUDE_CODE_REMOTE: 'true', SHELL_SESSION_START_NODE: '0' }), 0, 'opt-out wins in the cloud');
+  assert.equal(await attempts({}), 0, 'a local session never downloads unasked');
+  assert.equal(await attempts({ SHELL_SESSION_START_NODE: '1' }), 1, 'a local session can opt in');
+  assert.equal(await attempts({ CLAUDE_CODE_REMOTE: 'true' }, { findNode: () => '/opt/node24/bin' }), 1, 'found, not provisioned (the one export is the found directory)');
+  assert.equal(await attempts({ CLAUDE_CODE_REMOTE: 'true' }, { nodeVersion: '24.21.0' }), 0, 'the running Node is already qualified');
+  const local = await status({}, old);
+  assert.match(local.text, /Not downloading it \(local session; set SHELL_SESSION_START_NODE=1 to allow\)\./);
+  const off = await status({ CLAUDE_CODE_REMOTE: 'true', SHELL_SESSION_START_NODE: '0' }, old);
+  assert.match(off.text, /Not downloading it \(SHELL_SESSION_START_NODE=0\)\./);
+  const found = await status({ CLAUDE_CODE_REMOTE: 'true' }, { ...old, findNode: () => '/opt/node24/bin', provisionNode: () => assert.fail('must not provision') });
+  assert.match(found.text, /found at \/opt\/node24\/bin/);
+});
+
+test('[SESSION-START-16] a mismatched Chromium is adopted only in cloud sessions with an env file, and is labelled non-pinned', async () => {
+  const browser = async (env, resolveBrowser = () => mismatch) => { const { text, calls } = await status(env, { resolveBrowser }); return { line: text.split('\n').find(row => row.startsWith('Browser')), variables: calls.variables }; };
+  const adopted = await browser(cloud);
+  assert.deepEqual(adopted.variables, [['SHELL_CHROMIUM', '/pw/chromium-1194/chrome-linux/chrome']]);
+  assert.match(adopted.line, /REVISION MISMATCH \(expects r1243, has 1194\); SHELL_CHROMIUM=\/pw\/chromium-1194\/chrome-linux\/chrome exported for this session, so browser evidence uses a NON-PINNED Chromium/);
+  const local = await browser({ CLAUDE_ENV_FILE: '/tmp/env' });
+  assert.deepEqual(local.variables, [], 'locally only the hint is printed');
+  assert.match(local.line, /Opt in to the older build: SHELL_CHROMIUM=\/pw\//);
+  const noFile = await browser({ CLAUDE_CODE_REMOTE: 'true' });
+  assert.match(noFile.line, /Cloud session without an env file: export SHELL_CHROMIUM=/);
+  const none = await browser(cloud, () => ({ ...mismatch, candidateExecutable: null }));
+  assert.deepEqual(none.variables, []);
+  const pinned = await browser(cloud, () => ({ status: 'pinned', expectedRevision: '1243' }));
+  assert.deepEqual(pinned.variables, [], 'a pinned browser needs no override');
+});
+
+test('[SESSION-START-17] env-file exports are one escaped shell line each; opt-in provisioning forces provisioning and install unless switched off', async t => {
+  const dir = await mkdtemp(join(tmpdir(), 'session-env-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const file = join(dir, 'env.sh'); const env = { CLAUDE_ENV_FILE: file };
+  assert.equal(exportPath(env, '/opt/a b/bin'), true);
+  assert.equal(exportVariable(env, 'SHELL_CHROMIUM', '/pw/chrome $HOME "x"'), true);
+  assert.equal(await readFile(file, 'utf8'), 'export PATH="/opt/a b/bin:$PATH"\nexport SHELL_CHROMIUM="/pw/chrome \\$HOME \\"x\\""\n');
+  assert.equal(exportVariable({}, 'X', 'y'), false);
+  assert.equal(exportVariable({ CLAUDE_ENV_FILE: join(dir, 'no/such/env.sh') }, 'X', 'y'), false);
+  assert.deepEqual(provisionEnvironment({}), { SHELL_SESSION_START_NODE: '1', SHELL_SESSION_START_INSTALL: '1' });
+  assert.deepEqual(provisionEnvironment({ SHELL_SESSION_START_NODE: '0', SHELL_SESSION_START_INSTALL: '0' }), { SHELL_SESSION_START_NODE: '0', SHELL_SESSION_START_INSTALL: '0' });
+});
+
+test('[SESSION-START-18] hooks run project commands with the qualified Node first only when they run another Node and one exists', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'session-qenv-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await writeFile(join(root, '.nvmrc'), '24.21.0\n');
+  const env = { PATH: '/usr/bin', HOME: '/h' };
+  const find = (qualified, context) => { assert.equal(qualified, '24.21.0'); assert.equal(context.home, '/h'); return '/opt/node24/bin'; };
+  assert.equal(qualifiedEnv(root, env, '24.21.0', find), env, 'already running the qualified Node');
+  assert.equal(qualifiedEnv(root, env, '22.22.0', () => null), env, 'nothing qualified to use');
+  assert.equal(qualifiedEnv(tmpdir(), env, '22.22.0', find), env, 'no .nvmrc declared');
+  assert.equal(qualifiedEnv(root, env, '22.22.0', find).PATH, `/opt/node24/bin${delimiter}/usr/bin`);
+});
+
+test('[SESSION-START-19] npm is pinned only inside the Workbench cache, only when provisioning is allowed and only when it differs', async () => {
+  const cacheBin = '/h/.cache/workbench/node-v24.21.0-linux-x64/bin';
+  const inCache = { nodeBin: cacheBin, npmVersion: () => '11.9.0' };
+  const pinned = [];
+  const pin = result => (qualified, env, directory) => { pinned.push(directory); return result; };
+  const unpinned = await status(cloud, { ...inCache, pinNpm: pin({ ok: true, text: 'npm pinned to 11.19.1' }) });
+  assert.deepEqual(pinned, [cacheBin]);
+  assert.doesNotMatch(unpinned.text, /\nnpm: /, 'a successful pin adds no noise');
+  const failed = await status(cloud, { ...inCache, pinNpm: pin({ ok: false, text: 'npm 11.9.0 kept: npm install -g npm@11.19.1 failed (exit 1)' }) });
+  assert.match(failed.text, /\nnpm: npm 11\.9\.0 kept: npm install -g npm@11\.19\.1 failed \(exit 1\)\.\n/);
+  assert.match(failed.text, /\nnpm 11\.9\.0: not the qualified|\nnpm 11\.9\.0: UNQUALIFIED/, 'the npm line still tells the truth');
+  pinned.length = 0;
+  for (const [label, env, overrides] of [['system npm', cloud, { npmVersion: () => '11.9.0' }], ['local session', {}, inCache], ['opt-out', { ...cloud, SHELL_SESSION_START_NODE: '0' }, inCache],
+    ['already pinned', cloud, { nodeBin: cacheBin, npmVersion: () => '11.19.1' }]]) {
+    await status(env, { ...overrides, pinNpm: pin({ ok: true, text: '' }) });
+    assert.deepEqual(pinned, [], label);
+  }
 });
