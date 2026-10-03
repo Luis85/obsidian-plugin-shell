@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
+import { mkdir, readFile, readdir, utimes } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { cacheDirectory, cachedNodeBin, nodeArchive, nodeProvisionDecision, parseShasums, pinNpm, provisionNode } from '../../scripts/agent/session-node.mjs';
@@ -23,6 +23,7 @@ function fakeIo(overrides = {}) {
     exists: path => present.has(path),
     mkdir: path => { log.push(['mkdir', path]); },
     rm: path => { log.push(['rm', path]); present.delete(path); },
+    sweep: path => { log.push(['sweep', path]); },
     rename: (from, to) => { log.push(['rename', from, to]); present.add(to); versions.set(`${to}/bin`, VERSION); },
     fetchText: async url => { log.push(['fetchText', url]); return `${GOOD}  ${FILE}\n${'b'.repeat(64)}  other.tar.gz\n`; },
     download: async (url, destination, timeout) => { log.push(['download', url, destination, timeout]); },
@@ -58,7 +59,7 @@ test('[SESSION-NODE-02] a verified download lands in the private cache with its 
   const { io, log, present } = fakeIo();
   const result = await provisionNode(BASE, io);
   assert.deepEqual(result, { ok: true, binDirectory: `${PREFIX}/bin`, npmPinned: true, text: `downloaded ${FILE} (SHA-256 verified); npm pinned to 11.19.1` });
-  assert.deepEqual(steps(log).filter(step => step !== 'probe'), ['mkdir', 'fetchText', 'download', 'extract', 'mkdir', 'rename', 'rm', 'run']);
+  assert.deepEqual(steps(log).filter(step => step !== 'probe'), ['sweep', 'mkdir', 'fetchText', 'download', 'extract', 'mkdir', 'rename', 'rm', 'run']);
   assert.deepEqual(log.find(entry => entry[0] === 'rename'), ['rename', `/cache/workbench/.tmp-t1/node-v${VERSION}-linux-x64`, PREFIX]);
   assert.deepEqual(log.find(entry => entry[0] === 'download').slice(1, 3), [`https://nodejs.org/dist/v24.21.0/${FILE}`, `/cache/workbench/.tmp-t1/${FILE}`]);
   assert.deepEqual(log.at(-2), ['rm', '/cache/workbench/.tmp-t1']);
@@ -130,13 +131,17 @@ const hostRequest = dist => ({ ...BASE, platform: process.platform, arch: proces
 
 test('[SESSION-NODE-07] the real io downloads through curl, verifies, extracts and pins npm in the cache (local server, no internet)', { skip: noOfficialBuild }, async t => {
   const dist = await localNodeDist(t);
+  // Scratch an interrupted hook left behind is swept once it is stale; a recent one may belong to a concurrent session.
+  for (const name of ['.tmp-1-stale', '.tmp-2-live']) await mkdir(join(dist.cache, name), { recursive: true });
+  const old = new Date(Date.now() - 7 * 3600 * 1000);
+  await utimes(join(dist.cache, '.tmp-1-stale'), old, old);
   const result = await provisionNode(hostRequest(dist), realNodeIo({ env: dist.env }));
   assert.equal(result.ok, true, result.text);
   assert.equal(result.npmPinned, true, result.text);
   const prefix = join(dist.cache, dist.archive.name);
   assert.equal(result.binDirectory, join(prefix, 'bin'));
   assert.equal(JSON.parse(await readFile(join(prefix, 'lib/node_modules/npm/package.json'), 'utf8')).version, '11.19.1');
-  assert.deepEqual(await readdir(dist.cache), [dist.archive.name], 'no scratch left behind');
+  assert.deepEqual((await readdir(dist.cache)).sort(), ['.tmp-2-live', dist.archive.name], 'its own scratch is gone, the stale one was swept, the live one stays');
   const again = await provisionNode(hostRequest(dist), realNodeIo({ env: dist.env }));
   assert.match(again.text, /reused the cached copy/);
 });

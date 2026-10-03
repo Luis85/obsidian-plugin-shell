@@ -2,7 +2,7 @@
  * cloud proxy sets; Node's global fetch ignores them unless NODE_USE_ENV_PROXY=1, so it is only the fallback. */
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { createReadStream, createWriteStream, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
+import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -15,6 +15,15 @@ export function probeNode(directory, run = spawnSync, platform = process.platfor
 }
 /** npm bundled beside a node binary (Unix `bin/../lib/node_modules/npm`, Windows `node_modules/npm`). */
 export const bundledNpm = binDirectory => ['../lib/node_modules/npm', 'node_modules/npm'].map(path => readJson(join(binDirectory, path, 'package.json'))?.version).find(Boolean) ?? null;
+const STALE_SCRATCH_MS = 6 * 60 * 60 * 1000;
+/** Remove download scratch directories an interrupted hook left behind (older than six hours, so a concurrent session's live one stays). */
+function sweepScratch(cache, now = Date.now()) {
+  try {
+    for (const name of readdirSync(cache)) {
+      if (name.startsWith('.tmp-') && now - statSync(join(cache, name)).mtimeMs > STALE_SCRATCH_MS) rmSync(join(cache, name), { recursive: true, force: true });
+    }
+  } catch { /* no cache yet, or a concurrent session removed it */ }
+}
 const CURL = ['-fsSL', '--retry', '3', '--retry-delay', '2', '--connect-timeout', '20'];
 function curlFailure(result) {
   if (result.error?.code === 'ENOENT') return 'curl not found';
@@ -36,6 +45,7 @@ export function realNodeIo({ env = process.env, spawn = spawnSync, fetchImpl = g
     exists: existsSync,
     mkdir: path => mkdirSync(path, { recursive: true }),
     rm: path => rmSync(path, { recursive: true, force: true }),
+    sweep: sweepScratch,
     rename: renameSync,
     run: (command, args, options) => spawn(command, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, ...options }),
     extract: (archive, destination) => {

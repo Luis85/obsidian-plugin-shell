@@ -104,6 +104,7 @@ export async function provisionNode(request, io) {
   const binDirectory = join(prefix, 'bin');
   let note = 'reused the cached copy';
   if (io.probe(binDirectory) !== request.version) {
+    io.sweep(dirname(prefix));
     const outcome = await downloadNode(target, prefix, request, io);
     if (!outcome.ok) return outcome;
     note = outcome.text;
