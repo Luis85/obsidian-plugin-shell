@@ -8,19 +8,14 @@ import { migrateCompanionDocument } from '../../scripts/companion/project-contra
 import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 
-export const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = fileURLToPath(new URL('../../', import.meta.url));
 const json = async path => JSON.parse(await readFile(join(root, path), 'utf8'));
 const detail = migrateCompanionDocument(await json('tests/fixtures/companion/detail-v3.json')).document;
-const companion = await json('docs/concepts/companion/companion-project.json');
-const legacy = await json('tests/fixtures/companion/detail-v4.json');
 const starters = new Map();
 export const template = await loadTemplateSnapshot(root);
 
 /** The visual-design fixture (two pages, one authored component and the authoring vault source). */
 export const detailDocument = () => structuredClone(detail);
-/** The full companion self-project export and the last retained v4 self-project. */
-export const companionDocument = () => structuredClone(companion);
-export const legacyDocument = () => structuredClone(legacy);
 /** A migrated companion starter document by id (blank, quick-capture, tasks-projects, ...). */
 export async function starterDocument(id) {
   if (!starters.has(id)) starters.set(id, migrateAuthoringDocument(await json(`docs/concepts/companion/starters/${id}.companion.json`)).document);
