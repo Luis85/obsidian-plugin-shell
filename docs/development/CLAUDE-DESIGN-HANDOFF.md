@@ -42,7 +42,7 @@ every other maker command. There is no `--yes`.
 
 | Option | Meaning |
 | --- | --- |
-| `--name <slug>` | Folder name: a lowercase slug (letters, digits, single hyphens, at most 40 characters). |
+| `--name <slug>` | Folder name: a lowercase prototype slug (letters, digits, single hyphens, at most 48 characters, like a managed prototype ID). |
 | `--project <path>` | Use this project JSON as the source instead of a managed prototype or the folder's saved source. |
 | `--package <folder>` | A prepared prototype package; its `design-brief.md` becomes the folder's brief. |
 | `--root <folder>` | Project root, as for the other maker commands. |
@@ -88,9 +88,13 @@ itself is described: an Obsidian plugin with a Vue 3 and Nuxt UI frontend.
 - Design-work files are created once, when absent, and never changed or deleted afterwards.
 - A generated file that a newer version no longer produces is reported as `retired` and left in place.
 - Applying re-checks the source hash; a project changed after review fails with `MAKER_STALE`.
+- A recorded brief that is gone keeps its reference: `prepare` and `sync` fail with
+  `DESIGN_BRIEF_MISSING` until it is restored or the folder is prepared again with `--package`.
 - `status` reports `current`, `stale` (the source changed, or the folder moved since it was rendered),
-  `source-missing` or `unmanaged` (a folder without a manifest), plus edited generated files, the
-  prototype files and the implementation-map status counts. It never writes.
+  `source-missing` or `unmanaged` (a folder without a manifest), plus the brief reference and whether it
+  is missing, edited generated files, the prototype files and the implementation-map status counts. Only
+  an absent source counts as `source-missing`; cancellation, corrupt project JSON and other read errors
+  are reported as errors. It never writes.
 
 ## Configuration
 

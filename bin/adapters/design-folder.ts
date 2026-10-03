@@ -6,10 +6,10 @@ import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { exists, hash } from './framework/files.ts';
 import { prepared, type Prepared } from './storage.ts';
 import { guardedText, jsonText, loadSettings } from './user-settings.ts';
-import { currentSourceHash, designTarget, designTemplates, designTokens, readBrief, resolveDesignSource } from './design-source.ts';
+import { currentSourceHash, designTarget, designTemplates, designTokens, readBrief, readBriefFile, resolveDesignSource } from './design-source.ts';
 import { renderDesignFolder } from '../application/design-folder.ts';
 import { designRoot } from '../domain/user-settings.ts';
-import { designFolderName, designManifestFile, designerOwned, keptBrief, readDesignManifest, type DesignBrief, type DesignManifest } from '../domain/design-folder.ts';
+import { designFolderName, designManifestFile, designerOwned, isDesignSlug, keptBrief, readDesignManifest, type DesignBrief, type DesignManifest } from '../domain/design-folder.ts';
 import { requireSketch } from '../domain/errors.ts';
 export interface DesignFolderOptions {
   root: string; frameworkRoot: string; name: string; mode: 'prepare' | 'sync';
@@ -17,8 +17,8 @@ export interface DesignFolderOptions {
   project?: string;
   /** A prepared prototype package whose design-brief.md becomes the folder's brief. */
   package?: string;
-  /** Brief text from a package outside the root; it is kept as notes/prototype-brief.md so sync can reread it. */
-  briefText?: string; title?: string; signal?: AbortSignal;
+  /** A prepared brief file outside the root; its text is kept as notes/prototype-brief.md so sync can reread it. */
+  briefFile?: string; title?: string; signal?: AbortSignal;
 }
 const overlaps = (a: string, b: string) => { a = a.toLowerCase(); b = b.toLowerCase(); return a === b || a.startsWith(b + '/') || b.startsWith(a + '/'); };
 async function configuredRoot(root: string) {
@@ -34,18 +34,23 @@ async function readManifest(root: string, folder: string): Promise<{ manifest: D
 const conflictHelp = 'Move the edits into notes/ or prototypes/, or delete the file to regenerate it. Nothing was written.';
 function briefSource(options: DesignFolderOptions, previous: DesignManifest | null): DesignBrief | null {
   if (options.package) return { scope: 'root', path: `${options.package}/design-brief.md` };
-  return options.briefText !== undefined ? keptBrief : previous?.brief ?? null;
+  return options.briefFile !== undefined ? keptBrief : previous?.brief ?? null;
 }
-/** A package brief is reread from the root; brief text from outside the root is kept inside the folder. */
+const briefPath = (folder: string, brief: DesignBrief) => brief.scope === 'folder' ? `${folder}/${brief.path}` : brief.path;
+/** A package brief is reread from the root; a brief file from outside the root is kept inside the folder. A recorded brief that is gone fails closed, like a missing source. */
 async function briefFor(options: DesignFolderOptions, folder: string, previous: DesignManifest | null): Promise<{ source: DesignBrief | null; text: string | null }> {
   const source = briefSource(options, previous);
   if (!source) return { source, text: null };
-  const kept = source.scope === 'folder';
-  const text = await readBrief(options.root, kept ? `${folder}/${source.path}` : source.path) ?? (kept ? options.briefText ?? null : null);
-  requireSketch(!options.package || text !== null, 'DESIGN_BRIEF_MISSING', `No design-brief.md in ${options.package}.`);
-  return { source: text === null ? null : source, text };
+  const text = await readBrief(options.root, briefPath(folder, source)) ?? (source.scope === 'folder' && options.briefFile !== undefined ? await readBriefFile(options.briefFile) : null);
+  requireSketch(text !== null, 'DESIGN_BRIEF_MISSING', options.package ? `No design-brief.md in ${options.package}.`
+    : `The design brief ${briefPath(folder, source)} is missing. Restore it, or prepare again with --package <prepared folder>. Nothing was written.`);
+  return { source, text };
 }
 type Entries = { path: string; content: string }[];
+/** A brief kept inside the folder is seeded once, like the other design-owned files. */
+function withKeptBrief(seeded: Entries, brief: { source: DesignBrief | null; text: string | null }): Entries {
+  return brief.source?.scope === 'folder' && brief.text !== null ? [...seeded, { path: keptBrief.path, content: brief.text }] : seeded;
+}
 /** A generated path may be written while absent, identical, or still holding the bytes this tool recorded. */
 function assertOwned(folder: string, managed: Entries, before: Map<string, string | null>, previous: DesignManifest | null): void {
   const owned = new Map((previous?.managed ?? []).map(file => [file.path, file.sha256]));
@@ -67,15 +72,16 @@ export async function designFolderPlan(options: DesignFolderOptions): Promise<Pr
   const title = options.title ?? previous.manifest?.title ?? resolved.title, target = await designTarget(root);
   const { managed, seeded: rendered } = renderDesignFolder({ name, title, folder, sourcePath: resolved.source.path, document: resolved.document, brief: brief.text,
     target, tokens: await designTokens(root, options.frameworkRoot), templates: await designTemplates() });
-  const seeded = brief.source?.scope === 'folder' ? [...rendered, { path: keptBrief.path, content: brief.text! }] : rendered;
+  const seeded = withKeptBrief(rendered, brief);
   const at = (path: string) => `${folder}/${path}`;
   const inspected = await createFilePlan(root, [...managed, ...seeded].map(entry => ({ path: at(entry.path), content: null })));
   const before = new Map(inspected.changes.map(change => [change.path, change.beforeHash]));
   assertOwned(folder, managed, before, previous.manifest);
   const created = seeded.filter(entry => before.get(at(entry.path)) === null);
-  const manifest: DesignManifest = { kind: 'workbench-design-folder', schemaVersion: 1, name, title, folder,
+  // The writer validates with the reader, so status, sync and prepare can always read back what was written.
+  const manifest = readDesignManifest({ kind: 'workbench-design-folder', schemaVersion: 1, name, title, folder,
     project: { id: resolved.document.project.id, name: resolved.document.project.name }, source: resolved.source, brief: brief.source,
-    targets: target.targets, framework: target.framework, managed: managed.map(entry => ({ path: entry.path, sha256: hash(entry.content) })), designerOwned: [...designerOwned] };
+    targets: target.targets, framework: target.framework, managed: managed.map(entry => ({ path: entry.path, sha256: hash(entry.content) })), designerOwned: [...designerOwned] });
   const plan = await createFilePlan(root, [...managed, ...created, { path: designManifestFile, content: jsonText(manifest) }].map(entry => ({ path: at(entry.path), content: entry.content })));
   requireSketch(plan.changes.every(change => change.beforeHash === (change.path === at(designManifestFile) ? previous.beforeHash : before.get(change.path))),
     'MAKER_STALE', 'The design folder changed while planning. Review it again.');
@@ -97,11 +103,11 @@ async function folderFiles(directory: string, prefix: string, limit = 400): Prom
   }
   return found.sort();
 }
-/** Implementation-map rows: `| Screen | `id` | status | ...`. Counts only; the table belongs to the design work. */
+/** Implementation-map rows: `| Screen | `id` | status | ...`; a screen title may hold an escaped `\|`. Counts only; the table belongs to the design work. */
 function mapStatuses(markdown: string | null): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const line of (markdown ?? '').split('\n')) {
-    const status = /^\|[^|]*\|\s*`[^`]+`\s*\|\s*([a-z-]+)\s*\|/.exec(line)?.[1];
+    const status = /^\|(?:[^|\\]|\\.)*\|\s*`[^`]+`\s*\|\s*([a-z-]+)\s*\|/.exec(line)?.[1];
     if (status) counts[status] = (counts[status] ?? 0) + 1;
   }
   return counts;
@@ -114,8 +120,9 @@ async function folderStatus(root: string, frameworkRoot: string, base: string, p
   const current = await currentSourceHash({ root, frameworkRoot, name, configuredProject: project, previous: manifest });
   const prototypes = (await folderFiles(join(root, folder, 'prototypes'), 'prototypes/')).filter(path => path !== 'prototypes/README.md');
   const stale = !current || current.sha256 !== manifest.source.sha256 || current.path !== manifest.source.path || manifest.folder !== folder;
+  const brief = manifest.brief && { ...manifest.brief, missing: !await exists(join(root, briefPath(folder, manifest.brief))) };
   return { name, folder, state: !current ? 'source-missing' as const : stale ? 'stale' as const : 'current' as const, title: manifest.title,
-    source: manifest.source, edited, prototypes, implementation: mapStatuses((await guardedText(root, `${folder}/handoff/implementation-map.md`)).content) };
+    source: manifest.source, brief, edited, prototypes, implementation: mapStatuses((await guardedText(root, `${folder}/handoff/implementation-map.md`)).content) };
 }
 /** Read-only: every folder under the design root, or one named folder. */
 export async function designFolderStatus(root: string, frameworkRoot: string, name?: string) {
@@ -129,7 +136,7 @@ async function folderNames(directory: string): Promise<string[]> {
   const names: string[] = [];
   for await (const entry of await opendir(directory)) {
     requireSketch(names.length < 200, 'DESIGN_LIMIT', 'More than 200 entries in the design root.');
-    if (entry.isDirectory() && /^[a-z][a-z0-9-]{0,39}$/.test(entry.name)) names.push(entry.name);
+    if (entry.isDirectory() && isDesignSlug(entry.name)) names.push(entry.name);
   }
   return names.sort();
 }

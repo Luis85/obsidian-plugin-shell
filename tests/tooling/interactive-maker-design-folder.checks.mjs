@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { designFolderPlan, designFolderStatus } from '../../bin/adapters/design-folder.ts';
+import { currentSourceHash } from '../../bin/adapters/design-source.ts';
+import { offerDesignFolder } from '../../bin/presentation/design-folder.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { prototypesPlan } from '../../bin/adapters/framework/prototypes.ts';
 import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
@@ -170,3 +172,70 @@ test('a managed prototype is the source of its own design folder, following its 
   const explicit = await designFolderPlan({ root, frameworkRoot, name: 'alpha', mode: 'sync', project: 'project.json' });
   assert.deepEqual(explicit.data.source, { kind: 'project', path: 'project.json', sha256: sha256(await read(root, 'project.json')) });
 }));
+const prototypeStep = async (root, command, args, options) => applyFilePlan((await prototypesPlan({ command: `prototypes ${command}`, args, options }, { root, frameworkRoot })).plan);
+test('a 48-character prototype slug with long version and variant ids round-trips through prepare, status and sync', async () => scratch(async root => {
+  await saveProject(root, issueDesk, 'project.json');
+  const id = 'p'.repeat(48), version = 'v'.repeat(48), variant = 'w'.repeat(48);
+  await prototypeStep(root, 'create', [id], { input: 'project.json', name: 'Long concept' });
+  await prototypeStep(root, 'version', [id], { version, from: 'v1' });
+  await prototypeStep(root, 'fork', [id], { version, variant: 'main', as: variant });
+  await prototypeStep(root, 'status', [id], { version, variant: 'main', status: 'archived' });
+  const prepared = await designFolderPlan({ root, frameworkRoot, name: id, mode: 'prepare' });
+  assert.deepEqual(prepared.data.source.selection, { prototypeId: id, versionId: version, variantId: variant });
+  await applyPrepared(prepared, prepared.planHash);
+  assert.deepEqual((await designFolderStatus(root, frameworkRoot)).folders.map(item => [item.name, item.state]), [[id, 'current']]);
+  const sync = await designFolderPlan({ root, frameworkRoot, name: id, mode: 'sync' });
+  assert.ok(sync.plan.changes.every(change => change.status === 'unchanged'));
+}));
+test('the offered folder name always satisfies the folder-name rule, even for a long title that starts with a digit', async () => scratch(async root => {
+  await saveProject(root);
+  const ui = scriptedAnswers(['y', 'y']);
+  const completion = await offerDesignFolder(ui, { root, frameworkRoot, title: '2026 quarterly planning board for the whole product team', project: 'design/project.json' });
+  ui.done();
+  assert.match(completion ?? ui.transcript.join(''), /Design folder ready: docs\/design\/prototype-2026-quarterly-planning-board-for-the\./);
+}));
+test('an offered brief outside the root is read bounded and as strict UTF-8; invalid bytes write nothing', async () => scratch(async root => {
+  await saveProject(root);
+  await writeFile(join(root, 'outside-brief.md'), Buffer.from([0x23, 0x20, 0xff, 0xfe, 0x0a]));
+  const ui = scriptedAnswers(['y']);
+  assert.equal(await offerDesignFolder(ui, { root, frameworkRoot, title: 'Issue desk', briefFrom: join(root, 'outside-brief.md') }), undefined);
+  ui.done();
+  assert.match(ui.transcript.join(''), /encoded data was not valid/i);
+  await assert.rejects(() => read(root, `${folder}/design.manifest.json`));
+}));
+test('a missing brief keeps its reference: status reports it and sync fails closed instead of dropping the link', async () => scratch(async root => {
+  await saveProject(root);
+  await put(root, 'prepared/design-brief.md', '# Brief\n\n## Problem\n\nSlow triage.\n');
+  await apply(root, { package: 'prepared' });
+  const path = `${folder}/design.manifest.json`, before = await read(root, path);
+  await unlink(join(root, 'prepared/design-brief.md'));
+  const status = (await designFolderStatus(root, frameworkRoot)).folders[0];
+  assert.deepEqual([status.state, status.brief], ['current', { scope: 'root', path: 'prepared/design-brief.md', missing: true }]);
+  await assert.rejects(() => designFolderPlan({ root, frameworkRoot, name: 'issue-desk', mode: 'sync' }), { code: 'DESIGN_BRIEF_MISSING' });
+  assert.equal(await read(root, path), before);
+}));
+test('a failure other than an absent source is reported, never relabelled as source-missing or stale', async () => scratch(async root => {
+  await saveProject(root, issueDesk, 'project.json');
+  await prototypeStep(root, 'create', ['alpha'], { input: 'project.json', name: 'Alpha' });
+  const controller = new AbortController(); controller.abort();
+  const request = { root, frameworkRoot, name: 'alpha', configuredProject: 'design/project.json', previous: null };
+  assert.equal((await currentSourceHash(request)).path.startsWith('docs/concepts/alpha/'), true);
+  await assert.rejects(() => currentSourceHash({ ...request, signal: controller.signal }), { code: 'CANCELLED' });
+  await saveProject(root);
+  await apply(root);
+  await put(root, 'design/project.json', '{"kind": broken');
+  await assert.rejects(() => designFolderStatus(root, frameworkRoot, 'issue-desk'), error => error.code !== 'DESIGN_SOURCE_MISSING');
+  await rm(join(root, 'design/project.json'));
+  assert.equal((await designFolderStatus(root, frameworkRoot, 'issue-desk')).folders[0].state, 'source-missing');
+}));
+test('implementation-map rows whose screen title holds an escaped pipe are counted', async () => scratch(async root => {
+  await saveProject(root, [...issueDesk, { op: 'page.add', title: 'Inbox | Archive' }]);
+  await apply(root);
+  assert.match(await read(root, `${folder}/handoff/implementation-map.md`), /\| Inbox \\\| Archive \| `node-\d+` \| todo \|/);
+  assert.deepEqual((await designFolderStatus(root, frameworkRoot)).folders[0].implementation, { todo: 3 });
+}));
+function scriptedAnswers(answers) {
+  let cursor = 0; const transcript = [];
+  return { transcript, ask: async prompt => { assert.ok(cursor < answers.length, `Missing answer for ${prompt}`); transcript.push(prompt); return answers[cursor++]; },
+    write: line => transcript.push(line), done: () => assert.equal(cursor, answers.length) };
+}
