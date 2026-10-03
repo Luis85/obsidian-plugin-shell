@@ -285,7 +285,11 @@
           "scripts/companion/storymap-contract.mjs",
           "scripts/companion/detail-contract.mjs",
           "scripts/companion/composition-contract.mjs",
-          "scripts/companion/prd-limits.mjs"
+          "scripts/companion/prd-limits.mjs",
+          "scripts/companion/design-system-css.mjs",
+          "scripts/companion/starter-contract.mjs",
+          "scripts/companion/test-data-manifest.mjs",
+          "scripts/companion/schema/**"
         ]
       },
       {

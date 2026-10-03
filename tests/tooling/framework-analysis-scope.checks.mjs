@@ -131,3 +131,13 @@ test('framework typechecking includes the production CLI rather than removed wra
   // The release bundler was the folder's last module; scripts/framework no longer exists.
   await assert.rejects(readdir(new URL('scripts/framework/', root)), { code: 'ENOENT' });
 });
+
+test('scripts/companion holds only the companion contract library; its tooling entries and bin-only readers left it', async () => {
+  const config = JSON.parse(await readFile(new URL('configs/quality/fallow.json', root), 'utf8'));
+  const patterns = config.boundaries.zones.find(zone => zone.name === 'companion-authoring-contract').patterns;
+  const inZone = path => patterns.some(pattern => pattern.endsWith('/**') ? path.startsWith(pattern.slice(0, -2)) : pattern === path);
+  const sources = (await readdir(new URL('scripts/companion/', root), { recursive: true }))
+    .map(name => 'scripts/companion/' + name.replaceAll('\\', '/')).filter(path => /\.(?:mjs|ts)$/.test(path) && !path.endsWith('.d.mts'));
+  assert.deepEqual(sources.filter(path => !inZone(path)), []);
+  for (const path of sources) assert.doesNotMatch(await readFile(new URL(path, root), 'utf8'), /from\s*['"](?:\.\.\/)+bin\//, path);
+});
