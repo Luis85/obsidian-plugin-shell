@@ -12,16 +12,21 @@ const invalid = message => ({ message: 'GENERATOR_INVALID: ' + message });
 test('the developer kit renders every template, follows custom roots and owns its files as extensions', async () => {
   const document = await starterDocument('blank'); document.settings = { codebaseFolder: 'app', testsFolder: 'checks' }; document.project.description = '  Multi\n line  ';
   const out = recorder(); await devkitFiles(template, model(document), out.add);
-  const rendered = ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', ...['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test'].map(skill => `.claude/skills/${skill}/SKILL.md`),
+  const skills = ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test', 'self-review'];
+  const rendered = ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', ...skills.map(skill => `.claude/skills/${skill}/SKILL.md`),
+    'BRIEF.md', 'docs/project-tasks/TEMPLATE.md', '.github/pull_request_template.md',
     '.github/copilot-instructions.md', '.cursor/rules/project.mdc', '.vscode/extensions.json', '.vscode/settings.json', '.vscode/launch.json', '.vscode/tasks.json', '.editorconfig',
-    '.github/workflows/ci.yml', '.github/workflows/obsidian.yml'];
-  assert.deepEqual([...out.files.keys()], [...rendered, ...template.skillFiles.map(file => file.path), 'configs/testing/vitest.project.config.mjs', 'checks/project/ui-bootstrap.mjs',
+    '.github/workflows/ci.yml', '.github/workflows/obsidian.yml', ...skills.map(skill => `.agents/skills/${skill}/SKILL.md`)];
+  // Only the prototype skill's offline click-dummy worker ships (under scripts/clickdummy/), never the maintainer skill itself.
+  const clickdummyBuilder = ['build-single-file.mjs', 'lib/build-output.mjs', 'lib/build-worker.mjs', 'lib/io.mjs', 'lib/offline.mjs', 'lib/worker-output.mjs'].map(file => `scripts/clickdummy/${file}`);
+  assert.deepEqual([...out.files.keys()], [...rendered, ...clickdummyBuilder, 'configs/testing/vitest.project.config.mjs', 'checks/project/ui-bootstrap.mjs',
     'tests/suites.json', 'checks/project/plugin-host.test.ts']);
+  assert.ok(![...out.files.keys()].some(path => path.includes('companion-prototype-design')));
   assert.deepEqual([...out.files].filter(([, entry]) => entry.ownership !== 'extension').map(([path, entry]) => [path, entry.ownership]), [['checks/project/ui-bootstrap.mjs', 'managed'], ['tests/suites.json', 'framework']]);
   assert.ok(out.text('README.md').startsWith('# My Plugin\n\nMulti line\n'));
   assert.ok(!/\{\{[A-Za-z]+\}\}/.test(rendered.map(path => out.text(path)).join('\n')));
   const config = out.text('configs/testing/vitest.project.config.mjs');
-  assert.ok(config.includes(`  include: ["checks/project/**/*.test.{ts,mjs}", "${makerTests}/**/*.test.ts"], environment: 'node', fileParallelism: false,\n  setupFiles: ["checks/project/ui-bootstrap.mjs"],\n`));
+  assert.ok(config.includes(`  include: ["checks/project/**/*.test.{ts,mjs}", "${makerTests}/**/*.test.ts"], environment: 'node', fileParallelism: false,\n  // Playwright specs (npm run test:e2e) run in a browser, never in Vitest.\n  exclude: [...configDefaults.exclude, 'tests/e2e/**'],\n  setupFiles: ["checks/project/ui-bootstrap.mjs"],\n`));
   assert.equal(out.text('checks/project/ui-bootstrap.mjs'), "// Install the actual locally bundled icons, not a mock or a remote provider.\nimport { addIcon } from '@iconify/vue';\nimport { init } from 'virtual:nuxt-ui-icons';\ninit(addIcon);\n");
   assert.equal(out.text('tests/suites.json'), (await template.text('tests/suites.json')).replaceAll('"tests/project', '"checks/project'));
   const host = out.text('checks/project/plugin-host.test.ts');
@@ -68,7 +73,8 @@ test('framework documents and maintainer workflows move under docs/framework wit
     ['.github/workflows/ci.yml', { path: '.github/workflows/ci.yml', content: 'on: push', ownership: 'framework' }], ['AGENTS.md', { path: 'AGENTS.md', content: 'own', ownership: 'extension' }]]);
   relocateFrameworkDocuments(entries);
   assert.deepEqual([...entries].map(([path, entry]) => [path, entry.path, entry.content]), [['docs/x.md', 'docs/x.md', 'plain'], ['docs/y.md', 'docs/y.md', '[r](framework/README.md)'], ['logo.png.md', 'logo.png.md', 'AA'], ['AGENTS.md', 'AGENTS.md', 'own'],
-    ['docs/framework/README.md', 'docs/framework/README.md', '[a](AGENTS.md)'], ['docs/framework/workflows/ci.yml', 'docs/framework/workflows/ci.yml', 'on: push']]);
+    ['docs/framework/README.md', 'docs/framework/README.md', "> **Framework reference — not this project's backlog or instructions; follow ./AGENTS.md**\n\n[a](AGENTS.md)"],
+    ['docs/framework/workflows/ci.yml', 'docs/framework/workflows/ci.yml', 'on: push']]);
 });
 
 test('model schemas keep supported JSON Schema and refuse silent weakening', () => {

@@ -2,6 +2,15 @@ import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
 import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
 import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
+/** Whether a transition gets an executable navigation test (otherwise a business-interaction TODO). */
+function navigationExecutable(m: Model, edge: Model['links'][number]): boolean {
+  const target = m.screens.find(s => s.id === edge.to)!;
+  return ['navigate','open'].includes(String(edge.kind)) && !['action','group'].includes(target.kind) && !m.screens.some(s=>s.id===edge.from && ['action','group'].includes(s.kind));
+}
+/** Executable navigation tests with their endpoints and deterministic id (file#title). */
+export function navigationTests(m: Model): { from: string; to: string; id: string }[] {
+  return m.links.filter(edge => navigationExecutable(m, edge)).map(edge => ({ from: String(edge.from), to: String(edge.to), id: `${m.testRoot}/navigation.test.ts#[${String(edge.id)}] ${String(edge.label)}` }));
+}
 export function navigationCode(m: Model, add: Add): void {
   const journey = editorBindings(m.document.design as SitemapDesign).length > 0;
   const root = m.sourceRoot; const test = `${m.testRoot}/navigation.test.ts`;
@@ -30,7 +39,7 @@ export const useNavigation = defineStore(${literal(String(m.project.id)+':naviga
 `);
   const cases = m.links.map(edge => {
     const target = m.screens.find(s => s.id === edge.to)!;
-    if (!['navigate','open'].includes(String(edge.kind)) || ['action','group'].includes(target.kind) || m.screens.some(s=>s.id===edge.from && ['action','group'].includes(s.kind))) return `it.todo(${literal('['+edge.id+'] '+edge.label+' requires business interaction behavior')});`;
+    if (!navigationExecutable(m, edge)) return `it.todo(${literal('['+edge.id+'] '+edge.label+' requires business interaction behavior')});`;
     return `it(${literal('['+edge.id+'] '+edge.label)}, () => { const pinia = createPinia(); try { const nav = useNavigation(pinia); nav.open(${literal(edge.from)}); const result = nav.follow(${literal(edge.id)}); expect(result).toEqual({kind:${literal(target.kind === 'modal' ? 'modal' : 'navigate')},target:${literal(target.id)}}); expect(nav.current).toBe(${literal(target.kind === 'modal' ? edge.from : target.id)}); } finally { disposePinia(pinia); } });`;
   });
   add(test,`import { it, expect } from 'vitest';\nimport { createPinia, disposePinia } from 'pinia';\nimport { useNavigation } from ${literal(relativeImport(test,`${root}/presentation/stores/navigation.ts`))};\n${cases.join('\n')}\nit('refuses unknown screens without changing state', () => { const pinia = createPinia(); try { const nav = useNavigation(pinia); const before = nav.current; expect(() => nav.open('missing')).toThrow('SCREEN_NOT_NAVIGABLE'); expect(nav.current).toBe(before); } finally { disposePinia(pinia); } });\n`);

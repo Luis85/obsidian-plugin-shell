@@ -21,35 +21,9 @@ const sources = {
   'node_modules/fake/package.json': '{"name":"fake","type":"module","main":"index.js"}\n',
   'node_modules/fake/index.js': 'export default import.meta.url;\n',
 };
-// Exact bytes of the fixture bundle, recorded from the pre-move scripts/framework/release-bundle.mjs.
-const expected = banner + `
-// bin/data.ts
-import { fileURLToPath as __kitFileURLToPath } from "node:url";
-var here = new URL("./template/bin/data.ts", import.meta.url).href;
-var dir = __kitFileURLToPath(new URL("./template/bin/", import.meta.url));
-
-// bin/plain.js
-var plain_default = 1;
-
-// bin/meta.mjs
-var meta_default = \`\${new URL("./template/bin/meta.mjs", import.meta.url).href}import.meta.dirname\`;
-
-// plugins/demo/config.json
-import { readFileSync } from "node:fs";
-var config_default = JSON.parse(readFileSync(new URL("./plugins/demo/config.json", import.meta.url), "utf8"));
-
-// nested/plugins/demo/config.json
-var config_default2 = { nested: true };
-
-// ../outside.mjs
-var outside = import.meta.url;
-
-// node_modules/fake/index.js
-var fake_default = import.meta.url;
-
-// bin/app.ts
-console.log(here, dir, plain_default, meta_default, config_default, config_default2, outside, fake_default, import.meta.env);
-`;
+// Exact bytes of the fixture bundle. The release bundle is whitespace-minified (identifiers, syntax and legal
+// notices unchanged), so module boundaries are no longer annotated; the rebased locations are what matters.
+const expected = banner + "import{fileURLToPath as __kitFileURLToPath}from\"node:url\";var here=new URL(\"./template/bin/data.ts\",import.meta.url).href;var dir=__kitFileURLToPath(new URL(\"./template/bin/\",import.meta.url));var plain_default=1;var meta_default=`${new URL(\"./template/bin/meta.mjs\",import.meta.url).href}import.meta.dirname`;import{readFileSync}from\"node:fs\";var config_default=JSON.parse(readFileSync(new URL(\"./plugins/demo/config.json\",import.meta.url),\"utf8\"));var config_default2={nested:true};var outside=import.meta.url;var fake_default=import.meta.url;console.log(here,dir,plain_default,meta_default,config_default,config_default2,outside,fake_default,import.meta.env);\n";
 
 async function framework(files, run) {
   const base = await mkdtemp(join(tmpdir(), 'release-bundle-'));
@@ -71,6 +45,7 @@ test('release bundle rebases real module locations and plugin configs only insid
 }));
 
 test('release bundle rebases the same locations when the framework root is reached through a symlink', () => framework(sources, async root => {
+  // macOS temp directories live under the /var -> /private/var symlink; esbuild reports the real paths.
   const linked = join(root, '..', 'linked-framework');
   await symlink(root, linked, process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal((await bundleReleaseCli(linked)).toString('utf8'), expected);
@@ -80,17 +55,7 @@ test('release bundle keeps other meta properties and adds no URL helper without 
   'bin/app.ts': "import { here } from './data.mjs';\nexport const value: number = 1;\nconsole.log(here, value);\n",
   'bin/data.mjs': 'export const here = import.meta.url;\nexport function Made() { return new.target; }\n',
 }, async root => {
-  assert.equal((await bundleReleaseCli(root)).toString('utf8'), banner + `
-// bin/data.mjs
-var here = new URL("./template/bin/data.mjs", import.meta.url).href;
-
-// bin/app.ts
-var value = 1;
-console.log(here, value);
-export {
-  value
-};
-`);
+  assert.equal((await bundleReleaseCli(root)).toString('utf8'), banner + "var here=new URL(\"./template/bin/data.mjs\",import.meta.url).href;var value=1;console.log(here,value);export{value};\n");
 }));
 
 test('release bundle refuses a CLI above the archive limit and surfaces build failures', async () => {

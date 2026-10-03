@@ -74,6 +74,10 @@ will fail, with a suggested `--id`; an explicit `--id` must follow the creation 
 Editing the file after review makes its plan hash stale. See
 [Companion handoff](COMPANION-HANDOFF.md).
 
+## Adopt an existing project
+
+`node bin/app adopt analyze|plan|skill` adds Workbench to a project that already exists. `analyze` is a bounded, read-only scan that never executes project code and reports stack, tooling and compatibility findings (`workbench-adoption-report/v1`). `plan` renders that report as one Markdown integration plan, previews it with its SHA-256 and writes only that file after `--yes` or `--apply <hash>`. `skill` installs the `adopt-existing-project` agent skill. These commands work on any folder (`--target`), without `shell.config.json`. See [Adopt an existing project](ADOPT-EXISTING-PROJECT.md).
+
 ## Golden path, help and the check gate
 
 `node bin/app help` starts with the golden path (`new` → `install` → `dev` → `test`
@@ -101,6 +105,8 @@ documented exit code 1 for rejected requests; JSON results carry the candidates 
 ```sh
 node bin/app check                 # or npm run check
 node bin/app check --fast --json   # or npm run check:fast; for agent Stop hooks
+node bin/app check --fast --base origin/main   # diff merge-base(origin/main, HEAD) to the working tree
+node bin/app check --plan --json   # the definition of done for the diff; runs nothing
 node bin/app check --dry-run       # list the steps without running them
 node bin/app check submission      # or npm run check:submission
 ```
@@ -115,7 +121,7 @@ native qualification stay in `verify` and CI.
 
 | Scope | Detected by | Steps |
 |---|---|---|
-| Shell repository | default | `vue-tsc --noEmit`, `scripts/quality/lint-source.mjs`, `eslint src --max-warnings 0`, `vitest run` |
+| Shell repository | default | `vue-tsc --noEmit`, `scripts/quality/lint-source.mjs`, `eslint src bin --max-warnings 0`, `vitest run`, `tsc --project configs/types/tsconfig.maker.json`, the `maker` suite |
 | Generated project | `.companion/generation.json` and `configs/types/tsconfig.project.json` | `vue-tsc --noEmit --project configs/types/tsconfig.project.json`, `eslint src <product roots> --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
 
 A generated project's product roots are the folders named in `configs/types/tsconfig.project.json`
@@ -125,17 +131,77 @@ them from `scripts/shared/project-roots.mjs`. After a passing run in a generated
 project, the summary points to `npm run verify:project`; in the shell it points to
 `verify`.
 
-`check --fast` runs the typecheck plus `vitest related --run --passWithNoTests` over
-code files changed against `HEAD` (`git diff --name-status --no-renames -z --relative
-HEAD` plus untracked, non-ignored files from `git ls-files -z`, so non-ASCII paths
-arrive verbatim; `node_modules` is excluded). With no changed code files the test step
-is skipped. It runs the full test suite, and says so in `data.changes.reason`, when git
-or a HEAD commit is unavailable, more than 200 files changed, or a change cannot be
-traced by `vitest related`: a deleted code file or any deleted file in a code root, a
-non-code file inside a code root (JSON/Markdown fixtures, snapshots), or build/test
-configuration (`package.json`, `package-lock.json`, `tsconfig*.json`,
-`vite*.config.*`, `vitest*.config.*`, `tests/suites.json`). Documentation outside the
-code roots does not select tests.
+`check --fast` narrows every step to the diff. The changed set is
+`merge-base(<base>, HEAD)` to the working tree: committed, staged, unstaged and
+untracked files (`git diff --name-status --no-renames -z --relative <merge-base>` plus
+`git ls-files -z --others --exclude-standard`, so non-ASCII paths arrive verbatim;
+`node_modules` is excluded). `--base <ref>` picks the base. The default is the
+merge-base with `origin/main` when that ref exists, else `HEAD` (the previous behaviour,
+under which a committed change selects nothing). An unknown explicit `--base` fails
+with `BASE_NOT_FOUND`. `data.changes.base` reports the `source` (`option`,
+`origin-main` or `head`), `ref` and merge-base `commit` that were used.
+
+| Fast step | Narrowed to | Falls back to |
+|---|---|---|
+| `typecheck`, `maker-types` | unchanged | unchanged |
+| `lint` (`scripts/quality/lint-source.mjs`) | changed `src`, `bin`, `plugins` files | every owned input |
+| `eslint` | changed code files under the eslint roots (`--no-warn-ignored`) | the full roots |
+| `test` | `vitest related --run --passWithNoTests` over changed code files; skipped when none | `vitest run` |
+| `suites` | `node scripts/testing/suites.mjs <names>` for the node `--test` suites a changed path selects (below); skipped when none | none |
+
+A node suite is selected when a changed path matches its `include` globs in
+`tests/suites.json` (a changed test file), or a source glob in
+`configs/quality/gate-rules.json` `suiteSources` (the code the suite protects, for
+example `templates/**`, `bin/compiler/**` and `scripts/companion/**` for `generator`;
+`bin/adapters/makers/**` and `scripts/makers/**` for `maker`), or a change-type rule that
+names it. `data.suites[]` lists each selected suite with the matched pattern and sample
+paths. The slow `maker` suite therefore runs only when something it covers changed;
+the full `check` still always runs it. The lint, eslint and test steps fall back to
+their full form, and say why in `data.changes.reason`, when more than 200 files
+changed, a code file or a file in a code root was deleted, a non-code file inside a code
+root changed (JSON/Markdown fixtures, snapshots), or configuration changed
+(`package.json`, `package-lock.json`, `tsconfig*.json`, `vite*.config.*`,
+`vitest*.config.*`, `tests/suites.json`, `configs/**`). When git or a commit is
+unavailable the changed set cannot be computed: every step runs unscoped (the full
+`check` step list) and `data.changes.source` is `unavailable` with a reason that says so.
+Documentation outside the code roots does not select tests.
+
+`check --plan [--base <ref>] [--json]` computes the definition of done for the same
+diff without running anything. It joins the changed paths to gates through the test
+suites manifest (`include`, `workflows`), the workflows' `paths:` filters (parsed with
+the pinned `yaml` library, including anchors and `!` negation) and the change-type rules
+in `configs/quality/gate-rules.json`. Rule data, not code, defines: the gate commands,
+the suite source globs, the change-type rules, the documentation globs and the final
+gate. The JSON result keeps the check protocol (`protocolVersion` 1, `command` `check`,
+`status` `planned`, `data`):
+
+- `data.base`, `data.changes` and `data.classification` (matched rule ids, or
+  `docs-only`);
+- `data.gates[]`, in order, each with `id`, exact `command`, `kind`
+  (`check`, `suite`, `script`, `verify`), `required`, `viaCheck` (also executed by
+  `check --fast`), `why[]` (`kind` is `suite-include`, `suite-source`, `rule`,
+  `workflow-paths` or `change-type`; with the matched pattern or rule, sample `paths`
+  and a `count`), `estimateSeconds` (the Measured column of
+  `docs/testing/TEST-SUITES.md`, else `null`), `prerequisites` and `needs`
+  (`browser`, `native`, `python`, ...), and `ci[]` (each workflow named by the suite or gate with
+  whether it runs for this diff and why: `always`, `paths`, `no-match` or `manual-only`);
+  the `check` gate also lists its exact `steps`;
+- `data.flags[]` (a change under `configs/quality/**` or the threshold code carries
+  `THRESHOLD_CHANGE`: "threshold change: requires owner review"), `data.notes[]`
+  (generated-snapshot regeneration for `templates/**`, `bin/compiler/**`, `scripts/compiler/**`,
+  `scripts/companion/**`; workflow changes; dependency manifests; documentation-only
+  diffs), `data.workflows[]` (workflows that run for this diff) and `data.estimate`.
+
+Rules: `src/**` requires `check` and `npm run test:coverage:production`;
+`src/presentation/**` adds `check:presentation`; event files add `events:check`; a
+documentation-only diff requires only the documentation checks. Every plan ends with
+`npm run verify`, the pre-PR full gate (`npm run verify:project` in a generated project).
+A suite selected only because a path-filtered workflow runs it is reported with
+`required: false`. Without git the plan has the single gate `node bin/app check` and a
+`GIT_UNAVAILABLE` warning. `--plan` cannot be combined with `--fast`, and `--base` needs
+`--fast` or `--plan`. Human output is one compact table (`#`, gate, command, estimate,
+CI workflows, because) followed by flags, notes and `Next: npm run verify`. A plan is
+orientation: it does not prove that any gate passed, and `verify` stays the authority.
 
 `check submission` is a local mirror of documented Obsidian community review rules.
 It writes nothing, but it runs the project's ESLint configuration and plugins, so its

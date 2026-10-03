@@ -6,7 +6,7 @@ export interface RouteExtensions { pluginCommands: ReadonlySet<string>; framewor
 // `new <dir> --starter <id>` creates from file/Companion starters; `new [--starter <id>]` without a directory runs project starters.
 const directoryNewFlags = new Set([
   '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions',
-  '--install', '--inside-vault', '--storybook', '--storybook-stories', '--airship', '--no-airship',
+  '--install', '--inside-vault', '--no-git', '--storybook', '--storybook-stories', '--airship', '--no-airship',
   '--yes', '--dry-run', '--plan-out', '--timeout', '--values', '--answers', '--run', '--trust-processes',
 ]);
 const makerCommands = new Set([

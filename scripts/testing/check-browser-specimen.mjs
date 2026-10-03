@@ -11,23 +11,23 @@ import { readVendor, runtimeVendorCss, upstreamBlob } from '../styles/vendor-pol
 import { hostFiles, assertProfile, profilePage } from '../harness/style-profile.mjs';
 import { inlineSpecimen } from './browser-input.mjs';
 import { specimenChecks } from '../../tests/browser-specimen/specimen.checks.mjs';
+import { chromiumLaunchOptions } from './browser-executable.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const options = { mode: 'served', repeat: 2, host: 'extracted', driver: null, browser: null };
+const options = { mode: 'served', repeat: 2, host: 'extracted', driver: null };
 for (let i = 2; i < process.argv.length; i++) {
   const flag = process.argv[i];
   if (flag === '--host') options.host = assertProfile(process.argv[++i]);
   else if (flag === '--mode') options.mode = process.argv[++i];
   else if (flag === '--repeat') options.repeat = Number(process.argv[++i]);
   else if (flag === '--driver') options.driver = process.argv[++i];
-  else if (flag === '--browser') options.browser = process.argv[++i];
   else if (flag === '--help') {
-    console.log('node scripts/testing/check-browser-specimen.mjs [--host extracted|simulated] [--mode served|inline] [--repeat 2..5] [--driver /absolute/preprovisioned/playwright/index.mjs] [--browser /absolute/chromium]');
+    console.log('node scripts/testing/check-browser-specimen.mjs [--host extracted|simulated] [--mode served|inline] [--repeat 2..5] [--driver /absolute/preprovisioned/playwright/index.mjs]  (browser override: SHELL_CHROMIUM=/absolute/chromium)');
     process.exit(0);
   } else throw new Error('UNKNOWN_ARGUMENT');
 }
 if (!['served','inline'].includes(options.mode) || !Number.isInteger(options.repeat) ||
-    options.repeat < 2 || options.repeat > 5 || (options.driver && !isAbsolute(options.driver)) || (options.browser && !isAbsolute(options.browser))) throw new Error('INVALID_OPTIONS');
+    options.repeat < 2 || options.repeat > 5 || (options.driver && !isAbsolute(options.driver)) || (process.env.SHELL_CHROMIUM && !isAbsolute(process.env.SHELL_CHROMIUM))) throw new Error('INVALID_OPTIONS');
 const mode = options.mode === 'served' ? 'browser-specimen' : 'browser-inline-diagnostic';
 const input = await sourceInputs(root);
 const directory = resolve(root,'reports/browser-specimen',`run-${Date.now()}-${randomUUID()}`);
@@ -45,7 +45,9 @@ try {
     const pkg = JSON.parse(await readFile(resolve(dirname(options.driver),'package.json'),'utf8'));
     driverVersion = { name: pkg.name, version: pkg.version };
   }
-  browser = await api.chromium.launch({ headless: true, ...(options.browser ? { executablePath:options.browser } : {}) }); browserVersion = browser.version();
+  // A custom driver ships its own browser revision, so only the explicit override applies to it.
+  const launchOptions = options.driver ? (process.env.SHELL_CHROMIUM ? { executablePath: process.env.SHELL_CHROMIUM } : {}) : chromiumLaunchOptions({ root });
+  browser = await api.chromium.launch({ headless: true, ...launchOptions }); browserVersion = browser.version();
   let url;
   if (options.mode === 'served') {
     server = createFixtureServer();

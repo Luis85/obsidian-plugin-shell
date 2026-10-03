@@ -4,11 +4,12 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium, expect } from '@playwright/test';
+import { chromiumLaunchOptions } from '../testing/browser-executable.mjs';
 import { visualNodes } from '../companion/visual/visual-ir.mjs';
 const [path, projectPath, evidenceDirectory] = process.argv.slice(2);
 if (!path || !projectPath) throw new Error('Supply the built clickdummy.html and its canonical design/project.json paths.');
 const project = JSON.parse(await readFile(resolve(projectPath), 'utf8'));
-const browser = await chromium.launch({ headless: true }); const errors = [], network = [], cases = [];
+const browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() }); const errors = [], network = [], cases = [];
 try {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   await context.route('**/*', route => {

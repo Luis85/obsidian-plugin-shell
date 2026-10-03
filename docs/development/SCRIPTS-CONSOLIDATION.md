@@ -280,8 +280,7 @@ on PR #60. Every stage runs the relevant suites plus
 | `./bin/app <command>` | macOS/Linux with the executable bit. |
 | `npx obs-shell <command>` | Inside a project only; package `bin` maps `obs-shell` → `bin/app`. Flags pass through. |
 | `npm run app -- <command>` | npm consumes flags unless they follow `--`. `npm run shell` is kept as an alias. |
-| `node app.mjs <command>` | The launcher; package scripts use it. |
-| `node shell.mjs <command>` | Compatibility shim for existing kits, generated projects and scripts. |
+| `node app.mjs <command>`, `node shell.mjs <command>` | Retired in PR #67 (stage A history). `node bin/app` is the only CLI entry. |
 
 `bin/app` is classified by exact path in `scripts/quality/maintainability-inventory.mjs` (measured as
 `.mjs`) and linted through an explicit ESLint `files` entry; no directory was exempted.

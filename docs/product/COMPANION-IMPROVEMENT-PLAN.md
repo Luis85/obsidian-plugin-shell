@@ -10,7 +10,7 @@ Read the [delivery strategy](DELIVERY-STRATEGY.md), [task index](../tasks/README
 
 ## Integration update — 2026-09-25
 
-PR #20's TypeScript project compiler and `shell.mjs` entry now exist in the base and are preserved by the PR #18 reconciliation. [SH-035](../tasks/shell/SH-035.md) retains that compiler task, formerly a colliding SH-023, under verification; SH-028 extends its existing behavior. The [generator guide](../development/COMPANION-GENERATOR.md) describes commands available now. Earlier pending descriptions below specify the complete framework target, not a request to discard or recreate the implemented compiler. A compiled developer-kit release and native companion readiness remain unqualified.
+PR #20's TypeScript project compiler and `bin/app` CLI entry (a root launcher at that date) now exist in the base and are preserved by the PR #18 reconciliation. [SH-035](../tasks/shell/SH-035.md) retains that compiler task, formerly a colliding SH-023, under verification; SH-028 extends its existing behavior. The [generator guide](../development/COMPANION-GENERATOR.md) describes commands available now. Earlier pending descriptions below specify the complete framework target, not a request to discard or recreate the implemented compiler. A compiled developer-kit release and native companion readiness remain unqualified.
 
 ## 1. Product relationship
 

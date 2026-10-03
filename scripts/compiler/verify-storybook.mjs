@@ -4,6 +4,8 @@ import { readFile, writeFile, realpath, stat } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
 import assert from 'node:assert/strict';
 import { chromium } from '@playwright/test';
+import { auditStories, auditFailures, storyIds, themes } from './storybook-a11y.mjs';
+import { chromiumLaunchOptions } from '../testing/browser-executable.mjs';
 const target = await realpath(process.argv[2]), output = await realpath(process.argv[3]);
 const root = await realpath(join(target, 'storybook/storybook-static'));
 const types = { '.html': 'text/html', '.js': 'application/javascript', '.mjs': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
@@ -21,7 +23,7 @@ const base = 'http://127.0.0.1:' + server.address().port;
 let browser;
 const report = { schemaVersion: 1, status: 'failed', assertions: [], errors: [], externalRequests: [] };
 try {
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() });
   const context = await browser.newContext(); context.setDefaultTimeout(15000);
   await context.route('**/*', async route => {
     if (new URL(route.request().url()).origin !== base) { report.externalRequests.push(route.request().url()); await route.abort(); }
@@ -72,6 +74,10 @@ try {
     assert.ok((levels[1] + 0.05) / (levels[0] + 0.05) >= 4.5, 'Fixture host text must remain readable');
   }
   report.palette = { light, dark }; report.assertions.push('Light/dark host tokens resolve to readable contrasting surfaces');
+  const audit = await auditStories({ page, base, ids: storyIds(index) }); report.a11y = audit;
+  for (const theme of themes) assert.ok(audit.themes[theme].visited.length > 0, 'Accessibility audit visited no story in the ' + theme + ' theme');
+  assert.deepEqual(auditFailures(audit), [], 'Serious or critical axe violations in light/dark stories; inspect retained browser.json');
+  report.assertions.push('Stories audited with axe in both Obsidian themes; body theme classes follow the toolbar global');
   assert.deepEqual(report.errors, []); assert.deepEqual(report.externalRequests, []);
   await page.locator('[data-story-host]').screenshot({ path: join(output, 'component-dark.png') });
   report.status = 'passed';

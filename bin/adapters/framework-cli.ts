@@ -7,6 +7,7 @@ import { ask, readInput } from '../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments } from './framework/catalog.ts';
 import { executeOperation } from './framework/operations.ts';
+import { adoptInvocation, isAdoptCommand } from './framework/adopt-invocation.ts';
 import { projectRoot, exists } from './framework/files.ts';
 import { failure, type Context, type Request, type Result } from './framework/contracts.ts';
 import { invocationDirectory, starterInvocation } from './framework/starter-project.ts';
@@ -47,6 +48,7 @@ async function resolveInvocation(argv: string[], frameworkRoot: string): Promise
   const request = starters?.request ?? parsed;
   // Discovery is decided on the parsed request, as before starter resolution.
   if (isDiscovery(parsed)) return { request, root: resolve(selected) };
+  if (isAdoptCommand(parsed.command)) return adoptInvocation(parsed);
   if (starters) return { request, root: starters.root };
   return { request, root: await projectRoot(selected, typeof request.options.root === 'string') };
 }

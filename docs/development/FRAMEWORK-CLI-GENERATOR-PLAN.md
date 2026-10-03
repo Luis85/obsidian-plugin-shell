@@ -7,7 +7,7 @@ Read the [delivery strategy](../product/DELIVERY-STRATEGY.md), [task index](../t
 
 ## Current implementation baseline — 2026-09-25
 
-PR #20 has been merged into the base at `1dfa991df77ea5fa742d8bd5e300c877d0d45151`. Preserve its TypeScript compiler, runtime contracts, `shell.mjs` dispatch, binary-safe file-plan extension and generator workflow/tests. The [generator guide](COMPANION-GENERATOR.md) documents current `node shell.mjs generate` and `companion:scaffold` behavior; setup/make currently forward to existing handlers. The implementation is tracked under [SH-035](../tasks/shell/SH-035.md), resolving its concurrent SH-023 collision without dropping scope.
+PR #20 has been merged into the base at `1dfa991df77ea5fa742d8bd5e300c877d0d45151`. Preserve its TypeScript compiler, runtime contracts, CLI dispatch (a root launcher at that date, now `node bin/app`), binary-safe file-plan extension and generator workflow/tests. The [generator guide](COMPANION-GENERATOR.md) documents current `node bin/app generate` and `companion:scaffold` behavior; setup/make currently forward to existing handlers. The implementation is tracked under [SH-035](../tasks/shell/SH-035.md), resolving its concurrent SH-023 collision without dropping scope.
 
 This does not complete the central TypeScript CLI or compiled developer kit: the present compiler launches TypeScript at runtime, expects a separate vault-relative target, retains framework `src`/`tests` roots, and preserves PRD acceptance as explicit TODOs. SH-028 now depends on SH-035 to extend the existing compiler. Other command examples and packaging contracts below remain targets, not availability claims. The dated PR #5 review retains its original scope and has an integration addendum.
 
@@ -27,7 +27,7 @@ Proposed layout before setup:
 
 ```text
 my-plugin/
-  shell.mjs                 # generated bundle from authored TypeScript
+  bin/app                   # CLI entry; compiled bundle from authored TypeScript
   package.json              # bootstrap aliases, no interactive lifecycle hook
   README.md
   LICENSE
@@ -47,11 +47,11 @@ Framework, CLI, template, transfer schema, operation protocol, generator and plu
 Required equivalent entry points:
 
 ```sh
-node shell.mjs setup
+node bin/app setup
 npm run setup
-node shell.mjs status
+node bin/app status
 npm run --silent shell -- status --json
-node shell.mjs make feature bookmarks --dry-run
+node bin/app make feature bookmarks --dry-run
 npm run make -- feature bookmarks --dry-run
 ```
 

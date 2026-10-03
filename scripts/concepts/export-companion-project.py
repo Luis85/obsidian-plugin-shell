@@ -22,7 +22,7 @@ NODE_EXPORT = """
 import { chromium } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 const [html, storage, expression] = process.argv.slice(1), errors = [];
-const executable = process.env.CHROMIUM_EXECUTABLE;
+const executable = process.env.SHELL_CHROMIUM;
 const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'], ...(executable ? { executablePath: executable } : {}) });
 try {
   const page = await browser.newPage();
@@ -39,7 +39,7 @@ try {
 def export_with_python(sync_playwright):
     errors = []
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+        browser = playwright.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
         page = browser.new_page()
         page.route('**/*', lambda route: route.abort())
         page.on('pageerror', lambda error: errors.append(str(error)))

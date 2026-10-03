@@ -94,7 +94,7 @@ Import and folder changes refuse observed stale storage, modified owned Project.
 node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs
 python -B scripts/concepts/build-companion.py --check
 python -B tests/concepts/companion-assembly.test.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
 The browser suite downloads an actual project export and passes those bytes to the real CLI in a temporary vault, verifies full semantic round trips, checks replacement failures and renders the seed's editors. The separate storage suite tests actual two-window storage and reload when loopback navigation is permitted. The golden JSON must match the executable seed's export. Exact-artifact results and environment limits belong in the current verification receipt rather than this contract.

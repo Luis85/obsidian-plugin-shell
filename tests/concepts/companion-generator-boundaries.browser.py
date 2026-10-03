@@ -34,7 +34,7 @@ def insert(entry):
     act('ve-left','insert');act('ve-insert-tab','components');act('ve-insert',entry);return js('veUi.selected')
 
 with sync_playwright() as pw:
-    browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
+    browser=pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
     page=browser.new_page(viewport={'width':1600,'height':1000});page.set_default_timeout(7000)
     page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)

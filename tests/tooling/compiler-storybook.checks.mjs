@@ -121,6 +121,14 @@ test('workspace separates managed inventory from custom configuration and guards
   assert.match(get(r, 'storybook/.storybook/main.ts'), /generateStories === true \? generated : \[\]/);
   assert.match(get(r, 'storybook/.storybook/main.ts'), /disableTelemetry: true/);
   assert.match(get(r, 'storybook/vite.config.mjs'), /sharedConfig/);
+  const workspace = JSON.parse(get(r, 'storybook/package.json')).devDependencies;
+  assert.equal(workspace['@storybook/addon-a11y'], workspace.storybook, 'a11y addon must match the pinned Storybook version');
+  assert.match(get(r, 'storybook/.storybook/main.ts'), /addons: \[packageRoot\('@storybook\/addon-docs'\), packageRoot\('@storybook\/addon-a11y'\)\]/);
+  const preview = get(r, 'storybook/.storybook/preview.ts');
+  assert.match(preview, /decorators: \[withObsidianTheme\]/); assert.match(preview, /document\.body\.classList\.toggle\('theme-' \+ name, name === theme\)/);
+  assert.match(preview, /items: \[\{ value: 'light', title: 'Light' \}, \{ value: 'dark', title: 'Dark' \}\]/); assert.match(preview, /initialGlobals: \{ theme: 'light' \}/);
+  assert.doesNotThrow(() => stripTypeScriptTypes(preview, { mode: 'strip' }));
+  assert.match(get(r, 'storybook/DEPENDENCIES.md'), /a11y/);
   assert.equal(r.artifacts.find(f => f.path === 'storybook/.storybook/main.ts').ownership, 'extension');
   assert.equal(r.artifacts.find(f => f.path === 'storybook/.storybook/generated.json').ownership, 'managed');
   const host = get(r, 'storybook/generated/with-project.ts');

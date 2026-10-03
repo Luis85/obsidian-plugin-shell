@@ -129,3 +129,87 @@ See the [quality adoption plan](TYPESCRIPT-QUALITY-TOOLS-PLAN.md) for the full
 remaining work, including external security/dependency-review scanners and broader
 style/documentation tooling. These local checks do not activate external services,
 alter permissions or certify those unprovisioned scanners.
+
+## `npm run verify`: steps, partial runs and reports
+
+`npm run verify` runs the explicit step table in `scripts/quality/verify-steps.mjs`
+(ids, order, commands and genuine `needs` dependencies; `--list` prints it). The
+default is fail-fast: the first failing step stops the run and every later step is
+reported `not-run`. Options after `--`:
+
+| Option | Behavior |
+| --- | --- |
+| `--keep-going` | After a failure keep running every independent step. A step whose dependency failed, or was itself skipped for that reason, is `skipped` with `dependency <id> did not pass`. |
+| `--only a,b` | Runs only those ids **plus their transitive dependencies** (auto-included, listed under `data.selection.addedDependencies`). Other steps get no outcome and are listed under `data.selection.unselected`. |
+| `--skip a,b` | Reports those ids `skipped` (`excluded by --skip`). A user skip does not block dependents; you accept responsibility for the missing input, for example an existing build. |
+| `--list` | Prints ids, commands and dependencies (honoring `--only`/`--skip`) without executing or writing reports. |
+| `--json` | Prints only the versioned result on stdout; child output goes to stderr. |
+| `--report-dir <dir>` | Report location, default `reports/verify`. CI uses it to keep each rerun's report. |
+
+Unknown ids or options exit 2 and list the valid ids. A green `--only`/`--skip`
+run reports `data.complete: false` and a `PARTIAL_RUN` diagnostic: it is never a
+complete verify verdict, and the default success sentence is printed only for a
+complete run. The tooling suites remain one `tooling` step that runs every group
+even after a group failure, then fails listing them.
+
+The result has the same envelope as `node bin/app check --json`:
+`protocolVersion`, `command: "verify"`, `status` (`ok`, `failed`, `cancelled`),
+`data` and `diagnostics` (a failure carries a `next:` rerun hint). `data.steps[]`
+holds `id`, `command`, `status` (`passed|failed|skipped|not-run`), `durationMs`,
+`exitCode`, `reason` (failed, skipped and not-run steps) and, for failed steps only,
+an ANSI-stripped `outputTail` of at most 60 lines/6000 characters. `data.summary`
+counts the statuses and total duration. Every run, including a failed or partial
+one, writes `<report-dir>/summary.json` (the same JSON) and `summary.md` (a table of
+step, status, duration and the first failing lines, plus the output tail of each
+failure). When `GITHUB_STEP_SUMMARY` is set, the Markdown is also appended there, so
+CI shows the verdict without opening logs. `reports/` is gitignored and CI already
+uploads it. A report that cannot be written warns on stderr and never changes the
+verdict.
+
+## Self-review before handover
+
+`.github/pull_request_template.md` structures every pull request: summary, change
+type, the gate commands each marked "result pasted" or "not run" with a reason,
+evidence paths, a UI/UX checklist (human-review evidence, never acceptance),
+threshold/ignore changes, untested scope and an explicit statement that the PR
+authorizes no release or publication. `.github/CODEOWNERS` routes the quality
+configuration, lint and test configuration, `tests/suites.json`, workflows,
+`package.json`, lockfile and agent instructions to the maintainer.
+
+The flow, also written for agents in `.claude/skills/self-review/SKILL.md`
+(mirrored for Codex in `.agents/skills/self-review/SKILL.md`):
+
+1. `node bin/app check --plan --base origin/main`, then `node bin/app check`,
+   `npm run verify -- --json` and the relevant `node scripts/testing/suites.mjs <suite>`
+   runs; browser and native runs only when provisioned.
+2. `npm run check:self-review [-- --base <ref>] [--json] [--warn-only]`.
+3. An adversarial re-read of the diff against `AGENTS.md`, then the template
+   filled with real output and the untested scope.
+
+`scripts/quality/self-review.mjs` compares the working tree (including untracked
+files) with the merge-base of `HEAD` and `origin/main`, falling back to `main` and
+`origin/HEAD`, or with `--base`. It parses the unified diff and inspects only added
+lines (plus removed lines where a deletion loosens a gate). Findings print as
+`[RULE] file:line message` and exit 1; `--warn-only` reports without failing, `--json`
+emits `{status, base, files, violations[]}`, and an unresolvable base or bad usage
+exits 2. Rules:
+
+| Rule | Flags |
+| --- | --- |
+| `SR-QUALITY-CONFIG` | any change to `configs/quality/**`, the threshold floors or a Fallow rc file |
+| `SR-COVERAGE-THRESHOLD` | threshold literals or exclusions added to, or wiring removed from, a Vitest config |
+| `SR-LINT-CONFIG` | lint rules turned off, downgraded or ignored, or severities removed, in `configs/lint/**` |
+| `SR-LINT-DISABLE`, `SR-TS-SUPPRESSION`, `SR-COVERAGE-IGNORE`, `SR-ANALYZER-IGNORE` | suppression comments added |
+| `SR-UNSAFE-CAST` | casts to the catch-all type or through the unknown type (comment-only lines are skipped) |
+| `SR-SCREENSHOT-BASELINE` | screenshot or snapshot assertions in tests, and added snapshot baseline files |
+| `SR-UNCLASSIFIED-TEST` | added or moved test files that `tests/suites.json` does not classify exactly once (shares the suite manifest checker) |
+| `SR-FOCUSED-TEST` | focused, skipped, fixme or todo tests outside fixtures and generated files |
+| `SR-LINE-LIMIT` | changed files over the code-line limits (shares `sourceInputs` with `check:source`) |
+| `SR-RETIRED-LAUNCHER` | references to the retired root launchers (a changelog entry is exempt) |
+
+The guard is a diff heuristic with stated scope: it neither replaces the full gates
+nor proves a change correct. A flagged line that is genuinely justified needs an
+owner-approved note in the pull request; the guard has no inline waiver, so
+loosening is never silent. Fixtures in `tests/tooling/agent-self-review*.checks.mjs`
+run each rule against real temporary Git repositories, including a clean change, and
+prove that removed and context lines never trigger findings.

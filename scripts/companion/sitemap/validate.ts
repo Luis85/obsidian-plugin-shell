@@ -2,6 +2,7 @@ import type { SitemapDesign, SitemapFinding } from './model.ts';
 import { SITEMAP_LIMITS } from './model.ts';
 import { assertJson, distinct, id, list, sitemapObject as object, record, requireSitemap, sitemapText as text } from './safety.ts';
 import { validateFeatureExtension, validateSitemapExtension } from './extension.ts';
+import { validateSurfaceAcceptance } from './acceptance.ts';
 
 function assertDesign(value: unknown): asserts value is SitemapDesign {
   requireSitemap(record(value), 'SITEMAP_SHAPE', 'Expected the canonical design object.');
@@ -17,6 +18,7 @@ function assertDesign(value: unknown): asserts value is SitemapDesign {
     if (node.slug !== undefined) text(node.slug, 120, false);
     for (const key of ['nav', 'entry']) requireSitemap(node[key] === undefined || typeof node[key] === 'boolean',
       'SITEMAP_SHAPE', 'Surface flags must be booleans.');
+    if (node.acceptance !== undefined) validateSurfaceAcceptance(node.acceptance);
     surfaceIds.push(node.id); parents.set(node.id, node.parent); kinds.set(node.id, String(node.kind));
   }
   distinct(surfaceIds, 'surfaces');

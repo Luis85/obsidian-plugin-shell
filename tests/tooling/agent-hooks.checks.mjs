@@ -77,11 +77,14 @@ test('[AGENT-HOOKS-05] the Stop hook blocks once on a failing fast check, then r
   const passed = run('stop-check.mjs', input);
   assert.equal(passed.status, 0, passed.stderr); assert.equal(passed.stderr, '');
   const blocked = run('stop-check.mjs', input, { FAKE_CHECK_EXIT: '1' });
-  assert.equal(blocked.status, 2); assert.match(blocked.stderr, /Do not finish yet\. npm run check -- --fast failed \(exit 1\)/);
-  assert.match(blocked.stderr, /\["--fast"\]/);
+  assert.equal(blocked.status, 2); assert.match(blocked.stderr, /Do not finish yet\. npm run check -- --fast --base HEAD failed \(exit 1\)/);
+  assert.match(blocked.stderr, /\["--fast","--base","HEAD"\]/);
   const retried = run('stop-check.mjs', { ...input, stop_hook_active: true }, { FAKE_CHECK_EXIT: '1' });
   assert.equal(retried.status, 0); assert.match(JSON.parse(retried.stdout).systemMessage, /still fails after one retry/);
-  assert.deepEqual(stopOutcome({}, { status: null, error: Object.assign(new Error('x'), { code: 'ETIMEDOUT' }) }).code, 2);
+  const timedOut = stopOutcome({}, { status: null, error: Object.assign(new Error('x'), { code: 'ETIMEDOUT' }) });
+  assert.equal(timedOut.code, 0, 'an unfinished run is reported, never blocking');
+  assert.match(JSON.parse(timedOut.stdout).systemMessage, /did not finish within 300s, so this stop was not gated/);
+  assert.equal(stopOutcome({}, { status: null, signal: 'SIGKILL' }).code, 2, 'a killed check still blocks once');
   await writeFile(join(root, 'package.json'), JSON.stringify({ scripts: {} }));
   assert.equal(run('stop-check.mjs', input, { FAKE_CHECK_EXIT: '1' }).status, 0);
 });
@@ -99,7 +102,20 @@ test('[AGENT-HOOKS-06] unusable hook input is reported: post-edit says tests did
   const failing = raw('stop-check.mjs', 'x'.repeat(MAX_INPUT + 10), { ...env, FAKE_CHECK_EXIT: '1' });
   assert.equal(failing.status, 0, 'never blocks: stop_hook_active may have been lost');
   const message = JSON.parse(failing.stdout).systemMessage;
-  assert.match(message, /Stop hook input could not be read \(hook input exceeds 20 MB\)/); assert.match(message, /npm run check -- --fast failed \(exit 1\)/);
+  assert.match(message, /Stop hook input could not be read \(hook input exceeds 20 MB\)/); assert.match(message, /npm run check -- --fast --base HEAD failed \(exit 1\)/);
   const passing = raw('stop-check.mjs', 'not json', env);
   assert.equal(passing.status, 0); assert.match(JSON.parse(passing.stdout).systemMessage, /could not be read \(hook input is not valid JSON\).*It passed\./);
+});
+test('[AGENT-HOOKS-07] the Stop hook also guards the framework checkout, which has a check script but no generated-project Vitest config', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'agent hooks checkout-')); t.after(() => rm(root, { recursive: true, force: true }));
+  await mkdir(join(root, 'bin'), { recursive: true });
+  await writeFile(join(root, 'package.json'), JSON.stringify({ scripts: { check: 'node check.mjs' } }));
+  await writeFile(join(root, 'check.mjs'), 'console.log(JSON.stringify(process.argv.slice(2)));\nprocess.exit(Number(process.env.FAKE_CHECK_EXIT ?? 0));\n');
+  const input = { hook_event_name: 'Stop', cwd: join(root, 'bin'), stop_hook_active: false };
+  const pinned = { CLAUDE_PROJECT_DIR: root }; // the fallback must never reach the repository running this test
+  assert.equal(run('stop-check.mjs', input, pinned).status, 0);
+  const blocked = run('stop-check.mjs', input, { ...pinned, FAKE_CHECK_EXIT: '1' });
+  assert.equal(blocked.status, 2); assert.match(blocked.stderr, /npm run check -- --fast --base HEAD failed \(exit 1\)[\s\S]*\["--fast","--base","HEAD"\]/);
+  await writeFile(join(root, 'package.json'), JSON.stringify({ scripts: {} }));
+  assert.equal(run('stop-check.mjs', input, { ...pinned, FAKE_CHECK_EXIT: '1' }).status, 0, 'no check script, nothing to enforce');
 });

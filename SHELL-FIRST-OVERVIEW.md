@@ -20,6 +20,7 @@ Keep three choices separate: where Workbench authoring runs, what runtime the us
 | --- | --- |
 | Understand Workbench and its direction | [Product vision](docs/product/PRODUCT-VISION.md); intended outcomes, not completed-feature claims |
 | Develop using the existing Obsidian foundation | [Root README](README.md), [framework guide](docs/development/FRAMEWORK-GUIDE.md), [feature guide](docs/development/BUILD-A-FEATURE.md) |
+| Add Workbench to an existing project (for example a legacy Angular webapp) | [Adopt an existing project](docs/development/ADOPT-EXISTING-PROJECT.md); `node bin/app adopt analyze` is read-only and `adopt plan` writes one reviewed Markdown plan, not an integration |
 | Create an independent consumer or inspect CLI capabilities | [CLI guide](docs/development/FRAMEWORK-CLI.md); use the documented plans and supported options |
 | Inspect or compile a declarative design | [Dedicated compiler](docs/development/compiler/README.md); generation is separate from dependency installation and acceptance |
 | Use the current authoring build | [Authoring guide](docs/concepts/companion/README.md); `npm run companion:build` emits the integrated v6 HTML/JSON under `reports/companion-mvp` |
@@ -44,7 +45,7 @@ The target for `new` must be a new or empty independent directory. Review the re
 
 For the existing template itself, `npm run setup` uses reviewed setup and the exact dependencies. The optional `--profile native` installs assets only into the contained development vault. Open it separately and deliberately enable the plugin. Do not use a personal vault; setup does not authorize activation or change Restricted Mode. The [setup guide](docs/development/SETUP-IDENTITY.md) retains identity, protected-data and resume behavior.
 
-The product name is Workbench, but the executable is `app.mjs` (run it as `node bin/app`; `shell.mjs` remains a compatibility shim) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
+The product name is Workbench, but the executable is `bin/app` (run it as `node bin/app`; no root launcher or compatibility shim remains) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
 
 ## Intended connected workflow
 

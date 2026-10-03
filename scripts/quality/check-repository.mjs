@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { parseDocument } from 'yaml';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
+import { checkDocsLaunchers } from './check-docs-launchers.mjs';
 
 export function inspectWorkflow(text) {
   const document = parseDocument(text, { uniqueKeys: true });
@@ -111,6 +112,6 @@ export async function checkRepository(root = process.cwd()) {
   return { status: 'passed', ...counts, scope: 'read-only workflow subset, owned CSS syntax/selectors, Markdown fences/local inline file links' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await checkRepository())); }
+  try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await checkRepository())); console.log(JSON.stringify(await checkDocsLaunchers())); }
   catch (error) { console.error(error.message); process.exitCode = 1; }
 }

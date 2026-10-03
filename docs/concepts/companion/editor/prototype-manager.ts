@@ -3,6 +3,7 @@ import type { PrototypeAction, PrototypeSelection } from '../../../../scripts/co
 import { prototypeView } from './prototype-view.ts';
 import { prototypeNavigation, type PrototypeBrowse } from './prototype-navigation.ts';
 import type { PrototypeForm, PrototypeHost } from './prototype-host.ts';
+import { htmlElement } from './dom.ts';
 /** Typed DOM island; the existing host remains the only project persistence owner. */
 export function mountPrototypes(root: HTMLElement, host: PrototypeHost) {
   let selection: PrototypeSelection | null = null, mode: PrototypeForm = '', message = '', error = false, busy = false, closed = false;
@@ -64,8 +65,8 @@ export function mountPrototypes(root: HTMLElement, host: PrototypeHost) {
       if (!closed) {
         try { draw(); focusAfter(action); }
         catch {
-          const alert = document.createElement('p'); alert.className = 'pm-alert'; alert.setAttribute('role','alert'); alert.tabIndex = -1;
-          alert.textContent = 'The project is unavailable. Reopen Manage prototypes to refresh. Unsubmitted form text is retained below.';
+          const alert = htmlElement(document, 'p'); alert.className = 'pm-alert'; alert.setAttribute('role','alert'); alert.tabIndex = -1;
+          alert.textContent = 'The project is unavailable. Reopen the prototype manager to refresh. Unsubmitted form text is retained below.';
           root.prepend(alert); alert.focus();
         }
       }

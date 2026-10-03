@@ -1,10 +1,10 @@
-import type { UiNode, ElementNode, TextNode, SlotNode, ExternalNode, ComponentNode, VisualDesigns, ComponentDefinition, EmitDefinition, PageDefinition, PropDefinition, SlotDefinition } from '../../../scripts/companion/visual/visual-ir.mjs';
+import type { UiNode, ElementNode, TextNode, SlotNode, ExternalNode, ComponentNode, VisualDesigns, ComponentDefinition, EmitDefinition, PageDefinition } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { visualCatalogEntry, visualReservedExport } from '../../../scripts/companion/visual/visual-catalog.mjs';
 import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport } from './file-code.ts';
-import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath } from './visual-model.ts';
+import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath, visualContractNames } from './visual-model.ts';
 
 /** Authored names reach template syntax only after matching these patterns; all authored text goes through model.text(). */
 const vcId = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/, vcExport = /^[A-Z][A-Za-z0-9]*$/, vcSlot = /^[a-z][A-Za-z0-9-]*$/;
@@ -109,15 +109,20 @@ function vcEmitCase(emit: EmitDefinition): string {
   return `case ${literal(emit.name)}: if (${guard}) ${call} throw new Error('VISUAL_EMIT_PAYLOAD');`;
 }
 
+/** The component's declared contract interface, when it has one, intersected with the generator's own members. */
+function vcIntersect(name: 'ComponentProps' | 'ComponentEvents', component: ComponentDefinition | null, own: string): string {
+  return component && visualContractNames(component).includes(name) ? `${name} & ${own}` : own;
+}
+
 /** Today's implementation-point component for a definition without template nodes (only the type imports changed). */
-function vcPlaceholder(libraryId: string, props: PropDefinition[], slots: SlotDefinition[], ctx: Lowering): string {
+function vcPlaceholder(libraryId: string, component: ComponentDefinition, ctx: Lowering): string {
+  const { props, slots } = component, names = visualContractNames(component).filter(name => name !== 'ComponentSlots');
   const hasTitle = props.some(p => p.name === 'title' && p.type === 'string');
   return `<script setup lang="ts">
 import { specification } from '../../../domain/components/${libraryId}.ts';
-import type { ComponentProps, ComponentEvents } from '../../../domain/components/contracts/${libraryId}.ts';
-import type { VisualState, VisualRequest } from '../../../domain/visual-runtime.ts';
-const props = defineProps<ComponentProps & { designState?: VisualState; designScenario?: string }>();
-defineEmits<ComponentEvents & { interaction: [request: VisualRequest] }>();
+${names.length ? `import type { ${names.join(', ')} } from '../../../domain/components/contracts/${libraryId}.ts';\n` : ''}import type { VisualState, VisualRequest } from '../../../domain/visual-runtime.ts';
+const props = defineProps<${vcIntersect('ComponentProps', component, '{ designState?: VisualState; designScenario?: string }')}>();
+defineEmits<${vcIntersect('ComponentEvents', component, '{ interaction: [request: VisualRequest] }')}>();
 </script>
 <template>
 <section class="generated-component" :aria-label="specification.name" :data-design-state="props.designState">
@@ -154,21 +159,22 @@ function vcComponentScript(m: Model, ctx: Lowering, libraryId: string): { contra
   const component = ctx.component;
   if (!component) return { contract: '', declared: '' };
   const emitted = [...component.emits.map(vcEmitCase), "default: throw new Error('VISUAL_EMIT_UNKNOWN');"].map(line => `    ${line}\n`).join('');
-  return { contract: `import type { ComponentProps, ComponentEvents, ComponentSlots } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/components/contracts/${libraryId}.ts`))};\n`,
+  const names = visualContractNames(component), from = literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/components/contracts/${libraryId}.ts`));
+  return { contract: names.length ? `import type { ${names.join(', ')} } from ${from};\n` : '',
     declared: `, (${component.emits.length ? 'name, payload' : 'name'}) => {\n  switch (name) {\n${emitted}  }\n}` };
 }
 function vcSource(m: Model, ctx: Lowering, id: string, body: string, imports: string, script: { contract: string; declared: string }): string {
-  const component = ctx.component !== null;
+  const component = ctx.component, slots = component !== null && visualContractNames(component).includes('ComponentSlots');
   return `<script setup lang="ts">
 import { useVisual } from '../../composables/use-visual.ts';
 import type { VisualState, VisualRequest } from '../../../domain/visual-runtime.ts';
 ${script.contract}import { specification as spec } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/visual/${id}.ts`))};
-${imports}const props = defineProps<${component ? 'ComponentProps & ' : ''}{ designState?: VisualState; designScenario?: string }>();
-const emit = defineEmits<${component ? 'ComponentEvents & ' : ''}{ interaction: [request: VisualRequest] }>();
-${component ? 'defineSlots<ComponentSlots>();\n' : ''}const model = useVisual(spec, props, request => emit('interaction', request)${script.declared});
+${imports}const props = defineProps<${vcIntersect('ComponentProps', component, '{ designState?: VisualState; designScenario?: string }')}>();
+const emit = defineEmits<${vcIntersect('ComponentEvents', component, '{ interaction: [request: VisualRequest] }')}>();
+${slots ? 'defineSlots<ComponentSlots>();\n' : ''}const model = useVisual(spec, props, request => emit('interaction', request)${script.declared});
 </script>
 <template>
-<section :ref="model.attach" :style="model.theme.value" class="generated-detail" data-design-document="${id}" :data-design-state="model.state.value" :aria-label="${component ? 'spec.exportName' : 'spec.name'}" :aria-busy="model.state.value === 'loading'">
+<section :ref="model.attach" :style="model.theme.value" class="generated-detail" data-design-document="${id}" :data-design-state="model.state.value" :aria-label="${component !== null ? 'spec.exportName' : 'spec.name'}" :aria-busy="model.state.value === 'loading'">
 ${body}
 <p v-if="model.message.value" role="status">{{ model.message.value }}</p>
 </section>
@@ -188,7 +194,7 @@ export function visualSfc(m: Model, spec: VisualSpec, store: VisualDesigns): str
   const page = !component && 'root' in spec ? spec : null;
   const ctx: Lowering = { store, where: vcWhere(component, page), path: '', component, projects: new Map(), externals: [] };
   const { id, libraryId } = vcIdentity(ctx, spec, page);
-  if (component && !component.template.length) return vcPlaceholder(libraryId, component.props, component.slots, ctx);
+  if (component && !component.template.length) return vcPlaceholder(libraryId, component, ctx);
   const { path, roots } = vcTarget(m, component, page);
   ctx.path = path;
   const body = vcList(ctx, roots, 0).join('\n');

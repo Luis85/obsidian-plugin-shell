@@ -102,9 +102,9 @@ python3 -B scripts/concepts/build-companion.py
 python3 -B scripts/concepts/build-companion.py --check
 python3 -B tests/concepts/companion-assembly.test.py
 node --test tests/tooling/test-data-*.checks.mjs
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py
+SHELL_CHROMIUM=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py
 # Require actual browser Storage, loopback HTTP and two pages as well:
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
 # Visual page/component editors only (Node Playwright suite, same checks.json contract):
 python3 -B scripts/concepts/run-browser-checks.py --only visual-editors
 ```

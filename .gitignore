@@ -6,6 +6,8 @@ coverage/
 test-results/
 playwright-report/
 dist/
+# Generated projects rebuild the click-dummy (npm run build:clickdummy; the e2e web server does it too); it is a build artifact.
+/clickdummy.html
 .dev-vault/
 *.tsbuildinfo
 
@@ -19,6 +21,8 @@ node-qualified
 .obsidian-sandbox*/
 # Personal Claude Code overrides; the shared .claude/settings.json is committed.
 .claude/settings.local.json
+# Claude Code agent worktrees are separate checkouts of this repository.
+.claude/worktrees/
 
 .shell-build-lock/
 .shell-build-*/

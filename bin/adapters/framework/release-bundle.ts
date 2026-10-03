@@ -77,7 +77,8 @@ function templateLocations(ts: Typescript, root: string): Plugin {
 }
 
 export async function bundleReleaseCli(frameworkRoot: string): Promise<Buffer> {
-  // esbuild reports symlink-resolved module paths (macOS tmpdir is /var -> /private/var); compare against the same form.
+  // esbuild reports real paths; a root reached through a symlink (macOS /var -> /private/var) would otherwise place
+  // every module outside it and silently skip the location rebasing.
   const root = await realpath(resolve(frameworkRoot));
   const { build } = await import('esbuild');
   const ts = (await import('typescript')).default;
@@ -87,6 +88,9 @@ export async function bundleReleaseCli(frameworkRoot: string): Promise<Buffer> {
     outfile: resolve(root, 'bin/app.js'),
     bundle: true, write: false, platform: 'node', format: 'esm', target: 'node22',
     packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent',
+    // Whitespace only: identifiers, syntax and inline legal notices are unchanged. It keeps the single bundled file
+    // well inside the 8 MB per-file limit that every kit reader enforces (Prettier alone is about 5.6 MB unminified).
+    minifyWhitespace: true,
     // Bundled CommonJS dependencies (yaml's node build) require Node built-ins; ESM output needs a real require.
     banner: { js: "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);" },
     // These are maintainer-only/optional tools. Regular extracted-kit commands never load them.

@@ -1871,7 +1871,7 @@ Use the structure of `tests/concepts/companion-details.browser.py:1-45` (same `c
 25. `component dependency: declare @tiptap/vue-3@2.11.5, insert external editor node, range version rejected inline, removing the used dependency refused` (spec §13).
 
 - [ ] **Step 1:** Write the suite with all named checks.
-- [ ] **Step 2:** Run `python3 tests/concepts/companion-visual-editors.browser.py` (needs `CHROMIUM_EXECUTABLE`; on Windows set it to the local Chromium/Chrome path) — Expected: every named check `passed`, zero console errors, zero requests.
+- [ ] **Step 2:** Run `python3 tests/concepts/companion-visual-editors.browser.py` (needs `SHELL_CHROMIUM`; on Windows set it to the local Chromium/Chrome path) — Expected: every named check `passed`, zero console errors, zero requests.
 - [ ] **Step 3:** Run `python3 scripts/concepts/run-browser-checks.py` — the legacy `details`, `detail-polish` and `composition` suites may fail until Task 20; record exactly which checks fail and why in the commit body. Any other suite failing is a regression to fix now.
 - [ ] **Step 4: Commit** `git commit -m "test(concept): qualify visual editors end to end in the browser"`
 

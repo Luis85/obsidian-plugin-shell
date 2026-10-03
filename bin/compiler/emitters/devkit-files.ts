@@ -6,11 +6,17 @@ import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { posix } from 'node:path';
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
+import { clickdummyBuilderFiles } from './clickdummy-builder-files.ts';
+import { briefValues } from './devkit-brief.ts';
 
+/** Product skills; each also gets a Codex entrypoint under `.agents/skills/` pointing at the canonical Claude skill. */
+const productSkills = ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test', 'self-review'] as const;
 const templates: ReadonlyArray<readonly [string, string]> = [
   ['README.md', 'README.md.tmpl'], ['AGENTS.md', 'AGENTS.md.tmpl'], ['CLAUDE.md', 'CLAUDE.md.tmpl'],
   ['.claude/settings.json', 'claude-settings.json.tmpl'],
-  ...['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test'].map(skill => [`.claude/skills/${skill}/SKILL.md`, `skill-${skill}.md.tmpl`] as const),
+  ...productSkills.map(skill => [`.claude/skills/${skill}/SKILL.md`, `skill-${skill}.md.tmpl`] as const),
+  ['BRIEF.md', 'BRIEF.md.tmpl'], ['docs/project-tasks/TEMPLATE.md', 'project-task-template.md.tmpl'],
+  ['.github/pull_request_template.md', 'pull-request-template.md.tmpl'],
   ['.github/copilot-instructions.md', 'agent-pointer.md.tmpl'], ['.cursor/rules/project.mdc', 'cursor-rule.mdc.tmpl'],
   ['.vscode/extensions.json', 'vscode-extensions.json.tmpl'], ['.vscode/settings.json', 'vscode-settings.json.tmpl'],
   ['.vscode/launch.json', 'vscode-launch.json.tmpl'], ['.vscode/tasks.json', 'vscode-tasks.json.tmpl'],
@@ -29,11 +35,16 @@ const oneLine = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').tri
 export async function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
   const project = m.project as unknown as Record<string, unknown>;
   const values = { name: oneLine(project.name) || String(m.project.id), id: String(m.project.id),
-    description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot };
-  for (const [path, template] of templates) {
-    add(path, renderTemplate(await templateRoot.text(['templates/companion/devkit', template].join('/')), values), 'extension');
+    description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot, ...briefValues(m) };
+  const read = (template: string) => templateRoot.text(['templates/companion/devkit', template].join('/'));
+  for (const [path, template] of templates) add(path, renderTemplate(await read(template), values), 'extension');
+  const adapter = await read('skill-codex-adapter.md.tmpl');
+  for (const skill of productSkills) {
+    const skillDescription = /^description: (.+)$/m.exec(await read(`skill-${skill}.md.tmpl`))?.[1];
+    if (!skillDescription) throw new Error('GENERATOR_TEMPLATE_SKILL_DESCRIPTION: ' + skill);
+    add(`.agents/skills/${skill}/SKILL.md`, renderTemplate(adapter, { skill, skillDescription }), 'extension');
   }
-  for (const file of templateRoot.skillFiles) add(file.path, file.content, 'extension');
+  for (const file of clickdummyBuilderFiles(templateRoot.skillFiles)) add(file.path, file.content, 'extension');
   add('configs/testing/vitest.project.config.mjs', projectVitestConfig(m), 'extension');
   add(`${m.testRoot}/ui-bootstrap.mjs`, `// Install the actual locally bundled icons, not a mock or a remote provider.
 import { addIcon } from '@iconify/vue';
@@ -51,7 +62,7 @@ init(addIcon);
 /** Same shared build config and throwing `obsidian` boundary as the framework's own Vitest config. */
 function projectVitestConfig(m: Model): string {
   return `import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import { sharedConfig } from '../../scripts/bundling/vite-shared.mjs';
 const shared = sharedConfig();
 // Product tests. A bare \`obsidian\` import throws on purpose: each test file opts in to the
@@ -66,6 +77,8 @@ const testKit = { '@test/obsidian': fileURLToPath(new URL('../../tests/support/o
 // \`npm run make\` writes the tests of the features it creates to ${makerTests}.
 export default defineConfig({ ...shared, resolve: { ...shared.resolve, alias: { ...shared.resolve?.alias, ...testKit } }, plugins: [...shared.plugins, hostBoundary], test: {
   include: [${literal(m.testRoot + '/**/*.test.{ts,mjs}')}, ${literal(makerTests + '/**/*.test.ts')}], environment: 'node', fileParallelism: false,
+  // Playwright specs (npm run test:e2e) run in a browser, never in Vitest.
+  exclude: [...configDefaults.exclude, 'tests/e2e/**'],
   setupFiles: [${literal(m.testRoot + '/ui-bootstrap.mjs')}],
 } });
 `;

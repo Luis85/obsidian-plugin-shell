@@ -6,19 +6,21 @@ import { fileURLToPath } from 'node:url';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 
 // Generated-project template sources live in templates/: the companion runtime copied into generated projects,
-// the developer-kit text templates and the example-removal templates. The shared companion contracts stay in scripts/companion.
+// the developer-kit text templates, the example-removal templates and the adoption skill the kit installs into existing projects. The shared companion contracts stay in scripts/companion.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const removed = ['scripts/companion/runtime', 'scripts/companion/devkit', 'scripts/examples/templates'];
 async function files(folder) {
   const entries = await readdir(join(root, folder), { withFileTypes: true }).catch(error => error.code === 'ENOENT' ? [] : Promise.reject(error));
-  const nested = await Promise.all(entries.filter(entry => entry.name !== 'node_modules')
+  // Agent worktrees under .claude/worktrees are separate checkouts of this repository, not its sources.
+  const nested = await Promise.all(entries.filter(entry => entry.name !== 'node_modules' && `${folder}/${entry.name}` !== '.claude/worktrees')
     .map(entry => entry.isDirectory() ? files(`${folder}/${entry.name}`) : [`${folder}/${entry.name}`]));
   return nested.flat();
 }
 
-test('templates/ holds only the runtime, developer-kit and example-removal templates', async () => {
+test('templates/ holds only the runtime, developer-kit, example-removal and adoption-skill templates', async () => {
   const all = await files('templates');
-  const kinds = [[/^templates\/companion\/runtime\/[\w-]+\.ts$/, 'runtime'], [/^templates\/companion\/devkit\/[\w.-]+\.tmpl$/, 'devkit'], [/^templates\/examples\/[\w.-]+\.txt$/, 'examples']];
+  const kinds = [[/^templates\/companion\/runtime\/[\w-]+\.ts$/, 'runtime'], [/^templates\/companion\/devkit\/[\w.-]+\.tmpl$/, 'devkit'], [/^templates\/examples\/[\w.-]+\.txt$/, 'examples'],
+    [/^templates\/adoption\/(?:claude|agents)-skill\/SKILL\.md$/, 'adoption skill']];
   const unexpected = all.filter(path => !kinds.some(([pattern]) => pattern.test(path)));
   assert.deepEqual(unexpected, []);
   for (const [pattern, name] of kinds) assert.ok(all.some(path => pattern.test(path)), `${name} templates are present`);
