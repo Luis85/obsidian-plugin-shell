@@ -1,8 +1,10 @@
 # Tooling directory
 
-The developer CLI starts at `bin/app` (run `node bin/app <command>`). Much of its core still lives
-here (`framework/`, `compiler/`, `companion/`); the staged plan to leave only real scripts in this
-folder is in [scripts consolidation](../docs/development/SCRIPTS-CONSOLIDATION.md).
+The developer CLI starts at `bin/app` (run `node bin/app <command>`) and its whole core lives in `bin/`.
+This folder holds real scripts plus three justified non-tooling holdings: the typed contract zones in
+`contracts/` and `shared/`, the starter schema data in `starters/` and the companion contract library in
+`companion/` (its tooling entries are in `companion-tools/`). Each remaining item and its reason is listed in
+[scripts consolidation](../docs/development/SCRIPTS-CONSOLIDATION.md).
 
 ## Implemented now
 
