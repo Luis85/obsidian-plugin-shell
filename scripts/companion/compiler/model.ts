@@ -22,47 +22,64 @@ function slug(value: unknown): string { const name = text(value, 60); requireVal
 function unique<T>(items: T[], key: (item: T) => string): void { const seen = new Set<string>(); for (const item of items) { const id = key(item).toLowerCase(); requireValue(!seen.has(id), 'Duplicate identity: ' + id); seen.add(id); } }
 function names(value: unknown): string[] { requireValue(Array.isArray(value), 'Expected references.'); return value.map(v => text(v, 120)); }
 function fieldName(value: unknown): string { const key = text(value, 60); requireValue(/^[A-Za-z][A-Za-z0-9_-]*$/.test(key) && !['constructor', 'prototype', '__proto__'].includes(key), 'Unsafe property name.'); return key; }
-export function schema(value: unknown, depth = 0, budget = { count: 0 }): Schema {
-  requireValue(depth <= 6 && ++budget.count <= 120, 'Schema exceeds its complexity limit.');
-  const v = row(value); const types = Array.isArray(v.type) ? v.type : [v.type];
+/** Declared types, accepted keywords and primitive-only unions; returns the declared type list. */
+function schemaTypes(v: Row): unknown[] {
+  const types = Array.isArray(v.type) ? v.type : [v.type];
   requireValue(types.length > 0 && types.length <= 7 && types.every(t => ['string','number','integer','boolean','object','array','null'].includes(String(t))), 'Unsupported schema type.');
   requireValue(Object.keys(v).every(k => ['$schema','type','properties','required','additionalProperties','items','description','format','enum'].includes(k)), 'Unsupported JSON Schema keyword; no silent weakening.');
   requireValue(!Array.isArray(v.type) || types.every(t => !['object','array'].includes(String(t))), 'Only primitive schema unions are supported.');
-  const out: Schema = { type: types.length === 1 ? String(types[0]) : types.map(String) };
+  return types;
+}
+function schemaValues(v: Row, out: Schema): void {
   if (v.enum !== undefined) { requireValue(Array.isArray(v.enum) && v.enum.length > 0 && v.enum.length <= 30 && v.enum.every(item => item === null || ['string','number','boolean'].includes(typeof item)), 'Invalid enum.'); out.enum = v.enum; }
   if (v.format !== undefined) { requireValue(v.type === 'string' && ['date','date-time','uuid','email','uri'].includes(String(v.format)), 'Unsupported string format.'); out.format = String(v.format); }
-  if (v.type === 'object') {
-    const props = row(v.properties ?? {}); requireValue(Object.keys(props).length <= 40, 'Too many schema properties.');
-    out.properties = Object.fromEntries(Object.entries(props).map(([k,s]) => [fieldName(k), schema(s, depth + 1, budget)]));
-    out.required = names(v.required ?? []); requireValue(out.required.every(k => Object.hasOwn(out.properties!, k)), 'Missing required property definition.');
-    requireValue(v.additionalProperties === undefined || typeof v.additionalProperties === 'boolean', 'Unsupported additionalProperties schema.');
-    out.additionalProperties = v.additionalProperties !== false;
-  } else requireValue(v.properties === undefined && v.required === undefined && v.additionalProperties === undefined, 'Object constraints on non-object.');
+}
+function schemaObject(v: Row, out: Schema, depth: number, budget: { count: number }): void {
+  if (v.type !== 'object') { requireValue(v.properties === undefined && v.required === undefined && v.additionalProperties === undefined, 'Object constraints on non-object.'); return; }
+  const props = row(v.properties ?? {}); requireValue(Object.keys(props).length <= 40, 'Too many schema properties.');
+  const properties = Object.fromEntries(Object.entries(props).map(([k,s]) => [fieldName(k), schema(s, depth + 1, budget)]));
+  out.properties = properties;
+  out.required = names(v.required ?? []); requireValue(out.required.every(k => Object.hasOwn(properties, k)), 'Missing required property definition.');
+  requireValue(v.additionalProperties === undefined || typeof v.additionalProperties === 'boolean', 'Unsupported additionalProperties schema.');
+  out.additionalProperties = v.additionalProperties !== false;
+}
+export function schema(value: unknown, depth = 0, budget = { count: 0 }): Schema {
+  requireValue(depth <= 6 && ++budget.count <= 120, 'Schema exceeds its complexity limit.');
+  const v = row(value); const types = schemaTypes(v);
+  const out: Schema = { type: types.length === 1 ? String(types[0]) : types.map(String) };
+  schemaValues(v, out); schemaObject(v, out, depth, budget);
   if (v.type === 'array') out.items = schema(v.items, depth + 1, budget);
   else requireValue(v.items === undefined, 'Array constraints on non-array.');
   requireValue(!out.enum || out.enum.every(item => matches(item,{...out,enum:undefined})), 'Enum does not match its type/format.');
   return out;
 }
+function entityProperty(p: Row): Schema {
+  const type = { text:'string', number:'number', checkbox:'boolean', date:'string', datetime:'string', tags:'array', list:'array' }[String(p.type)];
+  requireValue(type, 'Unsupported entity property type.'); requireValue(typeof p.required === 'boolean', 'Invalid required flag.');
+  if (type === 'array') return { type, items: { type: p.type === 'list' ? ['string','number'] : 'string' } };
+  return { type, ...(p.type === 'date' ? { format:'date' } : p.type === 'datetime' ? { format:'date-time' } : {}) };
+}
+/** Relationship keys become string references (arrays for to-many); a required target makes the key required. */
+function relationshipProperty(r: Row, properties: Record<string, Schema>, required: string[]): void {
+  const key = fieldName(r.key); requireValue(!Object.hasOwn(properties, key), 'Relationship/property collision.');
+  requireValue(['0..1','1','1..1','0..*','1..+'].includes(String(r.targetCard)), 'Unsupported relationship cardinality.');
+  properties[key] = String(r.targetCard).endsWith('*') ? { type:'array', items:{type:'string'} } : {type:'string'};
+  if (String(r.targetCard).startsWith('1')) required.push(key);
+}
+function entityModel(e: Row, relations: Row[]): Entity {
+  const properties: Record<string, Schema> = { id: { type: 'string' }, type: { type: 'string', enum:[slug(e.slug)] } }; const required = ['id','type'];
+  for (const p of rows(e.properties ?? [], 40)) {
+    const key = fieldName(p.key); requireValue(!Object.hasOwn(properties, key), 'Duplicate/reserved entity property: ' + key);
+    properties[key] = entityProperty(p);
+    if (p.required) required.push(key);
+  }
+  for (const r of relations.filter(r => r.source === e.id)) relationshipProperty(r, properties, required);
+  const folder = text(e.folder, 120); requireValue(folder === '' || companionRelativeFolder(folder), 'Unsafe entity folder.');
+  return { id:text(e.id,120), slug:slug(e.slug), name:text(e.name,80), folder, schema:{type:'object', properties, required, additionalProperties:true} };
+}
 function entities(design: Row): Entity[] {
   const semantic = row(design.semantic ?? {}); const relations = rows(semantic.relationships ?? [], 120);
-  const result = rows(semantic.entities ?? [], 60).map(e => {
-    const properties: Record<string, Schema> = { id: { type: 'string' }, type: { type: 'string', enum:[slug(e.slug)] } }; const required = ['id','type'];
-    for (const p of rows(e.properties ?? [], 40)) {
-      const key = fieldName(p.key); requireValue(!Object.hasOwn(properties, key), 'Duplicate/reserved entity property: ' + key);
-      const type = { text:'string', number:'number', checkbox:'boolean', date:'string', datetime:'string', tags:'array', list:'array' }[String(p.type)];
-      requireValue(type, 'Unsupported entity property type.'); requireValue(typeof p.required === 'boolean', 'Invalid required flag.');
-      properties[key] = type === 'array' ? { type, items: { type: p.type === 'list' ? ['string','number'] : 'string' } } : { type, ...(p.type === 'date' ? { format:'date' } : p.type === 'datetime' ? { format:'date-time' } : {}) };
-      if (p.required) required.push(key);
-    }
-    for (const r of relations.filter(r => r.source === e.id)) {
-      const key = fieldName(r.key); requireValue(!Object.hasOwn(properties, key), 'Relationship/property collision.');
-      requireValue(['0..1','1','1..1','0..*','1..+'].includes(String(r.targetCard)), 'Unsupported relationship cardinality.');
-      properties[key] = String(r.targetCard).endsWith('*') ? { type:'array', items:{type:'string'} } : {type:'string'};
-      if (String(r.targetCard).startsWith('1')) required.push(key);
-    }
-    const folder = text(e.folder, 120); requireValue(folder === '' || companionRelativeFolder(folder), 'Unsafe entity folder.');
-    return { id:text(e.id,120), slug:slug(e.slug), name:text(e.name,80), folder, schema:{type:'object', properties, required, additionalProperties:true} };
-  });
+  const result = rows(semantic.entities ?? [], 60).map(e => entityModel(e, relations));
   unique(result, e => e.id); unique(result, e => e.slug);
   requireValue(relations.every(r => result.some(e => e.id === r.source) && result.some(e => e.id === r.target)), 'Dangling relationship.');
   return result;

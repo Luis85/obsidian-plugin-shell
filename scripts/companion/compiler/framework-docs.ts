@@ -13,14 +13,13 @@ export function relocatedPath(path: string): string {
 }
 /** The maintainer runner script, the policy test for maintainer CI triggers and the standalone
  * standalone design prototypes (their own apps and retained evidence) are not copied. */
+const maintainerFiles: ReadonlySet<string> = new Set(['docs/concepts/companion/companion-project.json', '.github/workflows/starter-distribution.yml',
+  'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/native-file-integration-handoff', '.github/workflows/native-source-handoff.yml',
+  'tests/tooling/project-generator-native-handoff.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs']);
+const maintainerFolders = ['docs/concepts/companion/seeds/', 'configs/starters/', 'docs/concepts/companion/starters/', '.github/scripts/',
+  'docs/concepts/sitemap-editor/', 'docs/concepts/native-file-integration-handoff/', 'docs/concepts/jev-prompt-editor/'];
 export function maintainerOnly(path: string): boolean {
-  return path === 'docs/concepts/companion/companion-project.json' || path.startsWith('docs/concepts/companion/seeds/')
-    || path.startsWith('configs/starters/') || path.startsWith('docs/concepts/companion/starters/') || path === '.github/workflows/starter-distribution.yml'
-    || path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
-    || path.startsWith('docs/concepts/sitemap-editor/')
-    || path === 'docs/concepts/native-file-integration-handoff' || path === '.github/workflows/native-source-handoff.yml'
-    || path.startsWith('docs/concepts/native-file-integration-handoff/') || path === 'tests/tooling/project-generator-native-handoff.checks.mjs'
-    || path.startsWith('docs/concepts/jev-prompt-editor/') || path === 'tests/tooling/jev-concept-distribution.checks.mjs';
+  return maintainerFiles.has(path) || maintainerFolders.some(folder => path.startsWith(folder));
 }
 const external = /^(?:[a-z][a-z\d+.-]*:|#|\/\/|\/)/i;
 function relink(value: string, from: string, to: string): string {
@@ -57,7 +56,8 @@ export function rebaseMarkdown(text: string, from: string, to: string): string {
 }
 /** Move the root framework documents and maintainer workflows; rebase links in copied Markdown. */
 export function relocateFrameworkDocuments(entries: Map<string, Entry>): void {
-  for (const [path, entry] of [...entries]) {
+  // Iterate a snapshot: relocated entries are re-inserted under their new paths.
+  for (const [path, entry] of Array.from(entries)) {
     if (entry.ownership !== 'framework') continue;
     const to = relocatedPath(path);
     const content = !entry.encoding && path.endsWith('.md') ? rebaseMarkdown(entry.content, path, to) : entry.content;

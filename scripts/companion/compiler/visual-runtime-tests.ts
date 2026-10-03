@@ -1,4 +1,4 @@
-import type { ComponentDefinition, ExternalNode, UiNode, ValueExpression } from '../visual/visual-ir.mjs';
+import type { ComponentDefinition, ComponentNode, ExternalNode, UiNode, ValueExpression } from '../visual/visual-ir.mjs';
 import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import { visualRead, visualSession, visualVisible } from '../visual/visual-session.mjs';
 import { visualTextValue, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
@@ -189,6 +189,23 @@ function vrComponentName(specs: VisualSpec[], node: UiNode): string {
   const ref = node.ref, target = specs.find(s => s.id === ref.componentId);
   return target?.kind === 'component' ? componentFile(target.libraryId, 'component') : '';
 }
+/** Accessor keys of a declared literal column list, or the keys of the first row when none is declared. */
+function vrColumns(node: ComponentNode, rows: unknown[]): string[] {
+  const declared = node.props.columns;
+  if (declared?.kind === 'literal' && Array.isArray(declared.value))
+    return declared.value.flatMap(c => (c && typeof c === 'object' && typeof (c as { accessorKey?: unknown }).accessorKey === 'string' ? [(c as { accessorKey: string }).accessorKey] : []));
+  return Object.keys(rows[0] && typeof rows[0] === 'object' ? rows[0] : {});
+}
+/** Table data is also asserted row by row (at most vrRows) for every primitive cell. */
+function vrTableLines(node: ComponentNode, selector: string, expected: unknown): string[] {
+  const rows = Array.isArray(expected) ? expected.slice(0, vrRows) : [], columns = vrColumns(node, rows);
+  const lines = [`expect(wrapper.get(${selector}).findAll('tbody tr')).toHaveLength(${rows.length || 1});`];
+  rows.forEach((row, i) => columns.forEach((key, j) => {
+    const text = vrCell(row && typeof row === 'object' ? (row as Record<string, unknown>)[key] : undefined);
+    if (text !== null) lines.push(`expect(wrapper.get(${selector}).findAll('tbody tr')[${i}]!.findAll('td')[${j}]!.text()).toBe(${literal(text)});`);
+  }));
+  return lines;
+}
 /** Assertions for one source expression: text content, element attribute, or the prop the rendered component instance received. */
 function vrExpect(specs: VisualSpec[], node: UiNode, name: string | null, expected: unknown): string[] {
   const selector = literal(`[data-design-node="${node.id}"]`);
@@ -197,17 +214,8 @@ function vrExpect(specs: VisualSpec[], node: UiNode, name: string | null, expect
   // External props reach the adapter, not the DOM; the adapter lifecycle test covers their delivery.
   if (node.kind !== 'component') return [`expect(wrapper.find(${selector}).exists()).toBe(true);`];
   const lines = [`expect(bound(wrapper.findAllComponents({ name: ${literal(vrComponentName(specs, node))} }), ${literal(node.id)}, ${literal(name)})).toEqual(${expected === undefined ? 'undefined' : literal(expected)});`];
-  if (node.ref.kind !== 'nuxt-ui' || node.ref.entryId !== 'u-table' || name !== 'data') return lines;
-  const rows = Array.isArray(expected) ? expected.slice(0, vrRows) : [], declared = node.props.columns;
-  const columns = declared?.kind === 'literal' && Array.isArray(declared.value)
-    ? declared.value.flatMap(c => (c && typeof c === 'object' && typeof (c as { accessorKey?: unknown }).accessorKey === 'string' ? [(c as { accessorKey: string }).accessorKey] : []))
-    : Object.keys(rows[0] && typeof rows[0] === 'object' ? rows[0] : {});
-  lines.push(`expect(wrapper.get(${selector}).findAll('tbody tr')).toHaveLength(${rows.length || 1});`);
-  rows.forEach((row, i) => columns.forEach((key, j) => {
-    const text = vrCell(row && typeof row === 'object' ? (row as Record<string, unknown>)[key] : undefined);
-    if (text !== null) lines.push(`expect(wrapper.get(${selector}).findAll('tbody tr')[${i}]!.findAll('td')[${j}]!.text()).toBe(${literal(text)});`);
-  }));
-  return lines;
+  const table = node.ref.kind === 'nuxt-ui' && node.ref.entryId === 'u-table' && name === 'data';
+  return table ? [...lines, ...vrTableLines(node, selector, expected)] : lines;
 }
 /** Source-bound nodes render validated store output through the real Pinia store and generated context; every source expression is asserted. */
 function vrBindings(m: Model, specs: VisualSpec[], spec: VisualSpec, add: Add): void {

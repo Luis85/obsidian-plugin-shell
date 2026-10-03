@@ -1,4 +1,4 @@
-import type { UiNode, ComponentNode, Interaction, Mapping, ComponentDefinition, VisualState } from '../visual/visual-ir.mjs';
+import type { UiNode, ComponentNode, Interaction, Mapping, ComponentDefinition, VisualState, VisualAction, Scalar, Scenario } from '../visual/visual-ir.mjs';
 import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import { visualSession, visualTransition, visualVisible, type Session } from '../visual/visual-session.mjs';
 import { visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
@@ -18,19 +18,23 @@ const vtSlotted = new Set(['u-button', 'u-card', 'u-form', 'u-form-field', 'u-ba
 const vtNative: Record<string, string[]> = { 'u-button': ['click', 'focus', 'blur', 'keydown'], 'u-input': ['click', 'focus', 'blur', 'keydown', 'change', 'input'], 'u-textarea': ['click', 'focus', 'blur', 'keydown', 'change', 'input'] };
 const vtDom = new Set(['click', 'focus', 'blur', 'keydown', 'change', 'input', 'submit']);
 export interface Rendered { node: UiNode; marked: boolean }
+const vtEntry = (node: UiNode) => (node.kind === 'component' && node.ref.kind === 'nuxt-ui' ? node.ref.entryId : null);
+/** Child lists this SFC renders: element children, slot fallbacks and the authored slots of slotted entries. */
+function vtRenderedChildren(node: UiNode, entry: string | null): UiNode[][] {
+  if (node.kind === 'element') return [node.children];
+  if (node.kind === 'slot') return [node.fallback];
+  return node.kind === 'component' && entry && vtSlotted.has(entry) ? Object.values(node.slots) : [];
+}
 /** Nodes this SFC renders itself; project-instance slot content is rendered (and tested) by the child definition. */
 export function visualRendered(roots: UiNode[]): Rendered[] {
   const out: Rendered[] = [];
   const visit = (list: UiNode[]): void => { for (const node of list) {
-    const entry = node.kind === 'component' && node.ref.kind === 'nuxt-ui' ? node.ref.entryId : null;
+    const entry = vtEntry(node);
     out.push({ node, marked: entry === null || vtMarked.has(entry) });
-    if (node.kind === 'element') visit(node.children);
-    else if (node.kind === 'slot') visit(node.fallback);
-    else if (node.kind === 'component' && entry && vtSlotted.has(entry)) for (const children of Object.values(node.slots)) visit(children);
+    for (const children of vtRenderedChildren(node, entry)) visit(children);
   } };
   visit(roots); return out;
 }
-const vtEntry = (node: UiNode) => (node.kind === 'component' && node.ref.kind === 'nuxt-ui' ? node.ref.entryId : null);
 const vtVisibility = (spec: VisualSpec, rendered: Rendered[], session: Session) => Object.fromEntries(rendered.filter(r => r.marked).map(r => [r.node.id, visualVisible(spec, session, r.node.id)]));
 const vtSession = (state: VisualState): Session => ({ ...visualSession(), state });
 /** Fixture raw input per control, mirroring what a person types or toggles. */
@@ -55,78 +59,125 @@ const vtPropValue = (type: string, changed = false): unknown => (type === 'boole
 export const visualFixtureProps = (spec: VisualSpec | ComponentDefinition): Record<string, unknown> => ('template' in spec ? Object.fromEntries(spec.props.map(p => [p.name, vtPropValue(p.type)])) : {});
 const vtExpectValue = (value: unknown) => (value === undefined ? 'undefined' : literal(value));
 
-/** Assertions for one designed (node, event): dispatch, hooks, navigation, mapped source/emit payloads and executable local effects. */
-function vtGroup(m: Model, spec: VisualSpec, rendered: Rendered[], node: UiNode, event: string, group: Interaction[], state: VisualState, ports: string[]): string {
-  const props = visualFixtureProps(spec), ids = group.map(i => i.id), local = group.every(i => i.actions.length && i.actions.every(a => ['set-state', 'toggle', 'set-value', 'focus'].includes(a.kind)));
-  const controls = local ? [] : rendered.flatMap(r => (r.node.kind === 'component' && VISUAL_RUNTIME_CONTROLS.includes(vtEntry(r.node) ?? '') && visualVisible(spec, vtSession(state), r.node.id) ? [r.node] : []));
+const vtLocalKinds = ['set-state', 'toggle', 'set-value', 'focus'];
+/** One designed (node, event) group in the state where its node is visible. */
+interface VtCase { m: Model; spec: VisualSpec; rendered: Rendered[]; node: UiNode; group: Interaction[]; state: VisualState; ports: string[] }
+/** Fixture input for every visible runtime control, unless the group only runs local effects. */
+function vtFills(c: VtCase): { values: Record<string, DetailData>; fills: string[] } {
   const values: Record<string, DetailData> = {}, fills: string[] = [];
-  for (const control of controls) {
+  if (c.group.every(i => i.actions.length && i.actions.every(a => vtLocalKinds.includes(a.kind)))) return { values, fills };
+  for (const { node: control } of c.rendered) {
+    if (control.kind !== 'component' || !VISUAL_RUNTIME_CONTROLS.includes(vtEntry(control) ?? '') || !visualVisible(c.spec, vtSession(c.state), control.id)) continue;
     const raw = vtRaw(control), parsed = vtParsed(control, raw); if (parsed === undefined) continue;
     values[control.id] = parsed; fills.push(`await fill(wrapper.findAllComponents({ name: ${literal(visualCatalogEntry(vtEntry(control) ?? '')?.component.slice(1))} }), ${literal(control.id)}, ${literal(raw)});`);
   }
-  const lines = [`expect((wrapper.emitted<[VisualRequest]>('interaction') ?? []).map(([request]) => request.interactionId).slice(-${ids.length})).toEqual(${literal(ids)});`];
-  const todo = group.filter(i => !i.actions.length).map(i => i.id);
-  lines.push(todo.length ? `expect(f.handle.mock.calls.map(([request]) => request.interactionId)).toEqual(${literal(todo)});` : 'expect(f.handle).not.toHaveBeenCalled();');
-  const actions = group.flatMap(i => i.actions), targets = actions.flatMap(a => (a.kind === 'navigate' ? [a.surfaceId] : []));
-  lines.push(targets.length ? `expect(f.navigate.mock.calls.map(([target]) => target)).toEqual(${literal(targets)});` : 'expect(f.navigate).not.toHaveBeenCalled();');
-  for (const action of actions) {
-    if (action.kind === 'source') {
-      const mapped = vtMapped(m, action.input, values, props), port = ports.indexOf(action.sourceId + '\u0000' + action.operationId);
-      if (mapped) lines.push(`expect(f.runs[${port}]).toHaveBeenCalledWith(${vtExpectValue(mapped.value)});`);
-    } else if (action.kind === 'emit' && spec.kind === 'component') {
-      const mapped = vtMapped(m, action.payload, values, props), emit = spec.emits.find(e => e.name === action.event);
-      if (!mapped || !emit) continue;
-      const fits = emit.payloadType === 'unknown' || (emit.payloadType === 'void' ? mapped.value === undefined : typeof mapped.value === emit.payloadType);
-      // The generated guard refuses payloads that violate the emit contract instead of emitting them.
-      lines.push(fits ? `expect(wrapper.emitted(${literal(action.event)})?.at(-1)).toEqual([${vtExpectValue(mapped.value)}]);` : `expect(wrapper.emitted(${literal(action.event)})).toBeUndefined();`);
-    }
-  }
-  let session: Session | null = vtSession(state);
-  try { for (const i of group) if (i.actions.length) session = visualTransition(spec, session!, node.id, i.id); } catch { session = null; }
-  if (session && actions.some(a => ['set-state', 'toggle', 'set-value', 'focus'].includes(a.kind))) {
-    if (actions.some(a => a.kind === 'set-state')) lines.push(`expect(wrapper.attributes('data-design-state')).toBe(${literal(session.state)});`);
-    lines.push(`expectVisible(wrapper.element, ${literal(vtVisibility(spec, rendered, session))});`);
-    for (const a of actions) {
-      const nodeId = 'nodeId' in a ? a.nodeId : null, target = rendered.find(r => r.marked && r.node.id === nodeId)?.node;
-      if (!target || !visualVisible(spec, session, target.id)) continue;
-      if (a.kind === 'set-value' && ['u-input', 'u-textarea'].includes(vtEntry(target) ?? '') && typeof a.value !== 'boolean') lines.push(`expect(marked(wrapper.element, ${literal(target.id)}).value).toBe(${literal(a.value === null ? '' : String(a.value))});`);
-      if (a.kind === 'set-value' && ['u-checkbox', 'u-switch'].includes(vtEntry(target) ?? '') && typeof a.value === 'boolean') lines.push(`expect(marked(wrapper.element, ${literal(target.id)}).getAttribute('aria-checked')).toBe(${literal(String(a.value))});`);
-      if (a.kind === 'focus' && session.focused === target.id) lines.push(`expect(marked(wrapper.element, ${literal(target.id)}).contains(document.activeElement)).toBe(true);`);
-    }
-  }
+  return { values, fills };
+}
+/** The interaction requests, business hooks and navigation the group must dispatch. */
+function vtDispatchLines(group: Interaction[]): string[] {
+  const ids = group.map(i => i.id), todo = group.filter(i => !i.actions.length).map(i => i.id);
+  const targets = group.flatMap(i => i.actions).flatMap(a => (a.kind === 'navigate' ? [a.surfaceId] : []));
+  return [`expect((wrapper.emitted<[VisualRequest]>('interaction') ?? []).map(([request]) => request.interactionId).slice(-${ids.length})).toEqual(${literal(ids)});`,
+    todo.length ? `expect(f.handle.mock.calls.map(([request]) => request.interactionId)).toEqual(${literal(todo)});` : 'expect(f.handle).not.toHaveBeenCalled();',
+    targets.length ? `expect(f.navigate.mock.calls.map(([target]) => target)).toEqual(${literal(targets)});` : 'expect(f.navigate).not.toHaveBeenCalled();'];
+}
+/** A mapped emit is asserted only when its payload is known; the generated guard refuses payloads that violate the contract. */
+function vtEmitLine(c: VtCase, action: VisualAction & { kind: 'emit' }, values: Record<string, DetailData>, props: Record<string, unknown>): string[] {
+  if (c.spec.kind !== 'component') return [];
+  const mapped = vtMapped(c.m, action.payload, values, props), emit = c.spec.emits.find(e => e.name === action.event);
+  if (!mapped || !emit) return [];
+  const fits = emit.payloadType === 'unknown' || (emit.payloadType === 'void' ? mapped.value === undefined : typeof mapped.value === emit.payloadType);
+  return [fits ? `expect(wrapper.emitted(${literal(action.event)})?.at(-1)).toEqual([${vtExpectValue(mapped.value)}]);` : `expect(wrapper.emitted(${literal(action.event)})).toBeUndefined();`];
+}
+/** Mapped source calls and component emits, in authored order. */
+function vtActionLines(c: VtCase, values: Record<string, DetailData>, props: Record<string, unknown>): string[] {
+  return c.group.flatMap(i => i.actions).flatMap(action => {
+    if (action.kind === 'emit') return vtEmitLine(c, action, values, props);
+    if (action.kind !== 'source') return [];
+    const mapped = vtMapped(c.m, action.input, values, props), port = c.ports.indexOf(action.sourceId + '\u0000' + action.operationId);
+    return mapped ? [`expect(f.runs[${port}]).toHaveBeenCalledWith(${vtExpectValue(mapped.value)});`] : [];
+  });
+}
+function vtValueLine(id: string, entry: string, value: Scalar): string[] {
+  if (['u-input', 'u-textarea'].includes(entry) && typeof value !== 'boolean') return [`expect(marked(wrapper.element, ${literal(id)}).value).toBe(${literal(value === null ? '' : String(value))});`];
+  if (['u-checkbox', 'u-switch'].includes(entry) && typeof value === 'boolean') return [`expect(marked(wrapper.element, ${literal(id)}).getAttribute('aria-checked')).toBe(${literal(String(value))});`];
+  return [];
+}
+/** Observable result of one local effect on a marked node that stays visible. */
+function vtTargetLines(c: VtCase, action: VisualAction, session: Session): string[] {
+  const nodeId = 'nodeId' in action ? action.nodeId : null, target = c.rendered.find(r => r.marked && r.node.id === nodeId)?.node;
+  if (!target || !visualVisible(c.spec, session, target.id)) return [];
+  if (action.kind === 'set-value') return vtValueLine(target.id, vtEntry(target) ?? '', action.value);
+  return action.kind === 'focus' && session.focused === target.id ? [`expect(marked(wrapper.element, ${literal(target.id)}).contains(document.activeElement)).toBe(true);`] : [];
+}
+/** The session after the group's transitions; null when a transition is refused. */
+function vtTransitions(c: VtCase): Session | null {
+  let session = vtSession(c.state);
+  try { for (const i of c.group) if (i.actions.length) session = visualTransition(c.spec, session, c.node.id, i.id); } catch { return null; }
+  return session;
+}
+/** Executable local effects: resulting state, visibility, values and focus after the group's transitions. */
+function vtEffectLines(c: VtCase): string[] {
+  const actions = c.group.flatMap(i => i.actions), session = vtTransitions(c);
+  if (!session || !actions.some(a => vtLocalKinds.includes(a.kind))) return [];
+  return [...(actions.some(a => a.kind === 'set-state') ? [`expect(wrapper.attributes('data-design-state')).toBe(${literal(session.state)});`] : []),
+    `expectVisible(wrapper.element, ${literal(vtVisibility(c.spec, c.rendered, session))});`, ...actions.flatMap(a => vtTargetLines(c, a, session))];
+}
+/** Assertions for one designed (node, event): dispatch, hooks, navigation, mapped source/emit payloads and executable local effects. */
+function vtGroup(c: VtCase, event: string): string {
+  const props = visualFixtureProps(c.spec), ids = c.group.map(i => i.id), { values, fills } = vtFills(c);
+  const lines = [...vtDispatchLines(c.group), ...vtActionLines(c, values, props), ...vtEffectLines(c)];
   return `it(${literal('[' + ids.join(', ') + '] dispatches the designed ' + event + ' interaction')}, async () => {
-  const f = fixture(); const wrapper = mount(Subject, { attachTo: document.body, props: { ...${literal(props)}, designState: ${literal(state)} }, global: { provide: { [visualKey as symbol]: f.context } } });
+  const f = fixture(); const wrapper = mount(Subject, { attachTo: document.body, props: { ...${literal(props)}, designState: ${literal(c.state)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try {
-    ${fills.map(line => line + '\n    ').join('')}${fills.length ? 'f.reset();\n    ' : ''}await wrapper.get(${literal(`[data-design-node="${node.id}"]`)}).trigger(${literal(event)}); await flushPromises();
+    ${fills.map(line => line + '\n    ').join('')}${fills.length ? 'f.reset();\n    ' : ''}await wrapper.get(${literal(`[data-design-node="${c.node.id}"]`)}).trigger(${literal(event)}); await flushPromises();
     ${lines.join('\n    ')}
   } finally { wrapper.unmount(); }
 });`;
 }
 
 const vtPorts = (m: Model) => m.sources.flatMap(s => s.operations.map(o => ({ key: s.id + '\u0000' + o.id, code: `{ sourceId: ${literal(s.id)}, operationId: ${literal(o.id)}, direction: ${literal(o.direction)}, requiresInput: ${o.input !== null}, data: ${sampleCode(o.output)}, pending: false, error: null, run: runs[RUN]! }` })));
-/** One describe block per definition: per-state visibility and disabled controls, scenarios and natively dispatched interactions. */
-function vtDefinition(m: Model, spec: VisualSpec, subject: string): string[] {
-  const roots = spec.kind === 'page' ? spec.root : spec.template, rendered = visualRendered(roots), props = visualFixtureProps(spec), ports = vtPorts(m);
-  const states = vtStates.map(state => {
-    const disabled = ['loading', 'disabled'].includes(state) ? rendered.filter(r => r.marked && VISUAL_RUNTIME_INTERACTIVE.includes(vtEntry(r.node) ?? '') && r.node.kind === 'component' && !Object.hasOwn(r.node.props, 'disabled') && visualVisible(spec, vtSession(state), r.node.id)).map(r => r.node.id) : [];
-    return `it(${literal('renders declared ' + state + ' visibility including hidden ancestors')}, () => {
+/** Interactive controls that the loading and disabled states must disable. */
+function vtDisabled(spec: VisualSpec, rendered: Rendered[], state: VisualState): string[] {
+  if (!['loading', 'disabled'].includes(state)) return [];
+  return rendered.filter(r => r.marked && VISUAL_RUNTIME_INTERACTIVE.includes(vtEntry(r.node) ?? '') && r.node.kind === 'component' && !Object.hasOwn(r.node.props, 'disabled') && visualVisible(spec, vtSession(state), r.node.id)).map(r => r.node.id);
+}
+function vtStateCase(spec: VisualSpec, rendered: Rendered[], props: Record<string, unknown>, state: VisualState): string {
+  const disabled = vtDisabled(spec, rendered, state);
+  return `it(${literal('renders declared ' + state + ' visibility including hidden ancestors')}, () => {
   const f = fixture(); const wrapper = mount(Subject, { props: { ...${literal(props)}, designState: ${literal(state)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try { expectVisible(wrapper.element, ${literal(vtVisibility(spec, rendered, vtSession(state)))});${disabled.length ? `\n    for (const id of ${literal(disabled)}) expect(disabledWithin(marked(wrapper.element, id)), id).toBe(true);` : ''}
   } finally { wrapper.unmount(); }
 });`;
-  });
-  const scenarios = roots.length ? spec.scenarios.map(scenario => `it(${literal('scenario ' + scenario.name + ' renders its state and visibility')}, () => {
+}
+function vtScenarioCase(spec: VisualSpec, rendered: Rendered[], props: Record<string, unknown>, scenario: Scenario): string {
+  return `it(${literal('scenario ' + scenario.name + ' renders its state and visibility')}, () => {
   const f = fixture(); const wrapper = mount(Subject, { props: { ...${literal(props)}, designScenario: ${literal(scenario.id)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try { expect(wrapper.attributes('data-design-state')).toBe(${literal(scenario.state)}); expectVisible(wrapper.element, ${literal(vtVisibility(spec, rendered, visualSession(scenario)))}); } finally { wrapper.unmount(); }
-});`) : [];
-  const groups: string[] = [];
-  for (const { node, marked } of rendered) {
-    const entry = vtEntry(node), events = node.kind === 'element' || (node.kind === 'component' && entry) ? node.events : [];
-    if (!marked || (node.kind === 'component' && !vtNative[entry ?? ''])) continue;
-    const state = (['default', 'empty', 'error'] as const).find(s => visualVisible(spec, vtSession(s), node.id)); if (!state) continue;
-    for (const event of [...new Set(events.map(i => i.event))].filter(e => vtDom.has(e) && (node.kind === 'element' || vtNative[entry ?? '']?.includes(e))))
-      groups.push(vtGroup(m, spec, rendered, node, event, events.filter(i => i.event === event), state, ports.map(p => p.key)));
-  }
+});`;
+}
+/** Designed interactions on a marked node whose DOM event can be dispatched natively. */
+function vtDispatchable(node: UiNode, marked: boolean): Interaction[] {
+  const native = vtNative[vtEntry(node) ?? ''];
+  if (!marked) return [];
+  if (node.kind === 'element') return node.events.filter(i => vtDom.has(i.event));
+  return node.kind === 'component' && native ? node.events.filter(i => vtDom.has(i.event) && native.includes(i.event)) : [];
+}
+/** One case per dispatchable (node, event), run in the first enabled state that shows the node. */
+function vtInteractionCases(m: Model, spec: VisualSpec, rendered: Rendered[], ports: string[]): string[] {
+  return rendered.flatMap(({ node, marked }) => {
+    const events = vtDispatchable(node, marked);
+    const state = events.length ? (['default', 'empty', 'error'] as const).find(s => visualVisible(spec, vtSession(s), node.id)) : undefined;
+    if (!state) return [];
+    return [...new Set(events.map(i => i.event))].map(event => vtGroup({ m, spec, rendered, node, group: events.filter(i => i.event === event), state, ports }, event));
+  });
+}
+/** One describe block per definition: per-state visibility and disabled controls, scenarios and natively dispatched interactions. */
+function vtDefinition(m: Model, spec: VisualSpec, subject: string): string[] {
+  const roots = spec.kind === 'page' ? spec.root : spec.template, rendered = visualRendered(roots), props = visualFixtureProps(spec);
+  const states = vtStates.map(state => vtStateCase(spec, rendered, props, state));
+  const scenarios = roots.length ? spec.scenarios.map(scenario => vtScenarioCase(spec, rendered, props, scenario)) : [];
+  const groups = vtInteractionCases(m, spec, rendered, vtPorts(m).map(p => p.key));
   const name = spec.kind === 'page' ? spec.name : spec.exportName;
   return [...states, ...scenarios, ...groups].map(test => `describe(${literal(spec.id + ' ' + name)}, () => {\nconst Subject = ${subject};\n${test}\n});`);
 }
