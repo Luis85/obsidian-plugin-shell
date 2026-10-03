@@ -130,7 +130,7 @@ filesystem transactions. Do not blindly retry an uncertain write; inspect recove
 
 ```sh
 node bin/app prototype
-# aliases: node bin/app make prototype; npm run make -- prototype
+# Use node bin/app prototype directly; no make-prototype alias is retained.
 node bin/app prototype guide --json
 node bin/app prototype validate --input prototype-answers.json --json
 node bin/app prototype --input prototype-answers.json --out prototypes/issue-desk --json
@@ -223,4 +223,4 @@ include maker checks. The dedicated CI job uses the exact pinned toolchain.
 
 ## Project starters
 
-`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` beside `shell.mjs`, `generator.kind: "project"`). Projects use the strict `project.config.json` sidecar, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.
+`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` in the package root beside `bin/`, `generator.kind: "project"`). Projects use the strict `project.config.json` sidecar, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.

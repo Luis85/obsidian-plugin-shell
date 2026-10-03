@@ -17,10 +17,8 @@ const makerHelpCommands = new Set([
   'sketch', 'prototype', 'studio', 'settings', 'project-setup', 'first-run', 'brainstorm',
 ]);
 
-function normalizeAliases(argv: readonly string[]): string[] {
+function normalizeHelp(argv: readonly string[]): string[] {
   const [first, second] = argv;
-  if (first === 'make' && second === 'project') return ['new', ...argv.slice(2)];
-  if (first === 'make' && second === 'prototype') return ['prototype', ...argv.slice(2)];
   // Keep `help new` on the framework catalog; `new --help` describes the project-starter maker.
   if (first === 'help' && makerHelpCommands.has(second ?? '')) return [second!, '--help', ...argv.slice(2)];
   return [...argv];
@@ -30,11 +28,11 @@ function memoryArguments(args: string[]): string[] | undefined {
   if (args[0] === 'help' && args[1] === 'memory') return ['--help', ...args.slice(2)];
   return undefined;
 }
-function legacyNew(args: string[]): boolean {
+function directoryNew(args: string[]): boolean {
   if (args[0] !== 'new') return false;
   const next = args[1];
-  const legacyPath = Boolean(next && !next.startsWith('--') && !['starters', 'guide', 'validate'].includes(next));
-  return legacyPath || args.slice(1).some(arg => directoryNewFlags.has(arg));
+  const hasDirectory = Boolean(next && !next.startsWith('--') && !['starters', 'guide', 'validate'].includes(next));
+  return hasDirectory || args.slice(1).some(arg => directoryNewFlags.has(arg));
 }
 
 /** Plugin commands belong to the maker surface; framework commands keep precedence over a plugin with the same root. */
@@ -44,12 +42,12 @@ function pluginRoute(args: string[], extensions: RouteExtensions): RoutedArgumen
   return undefined;
 }
 
-/** Route without I/O or project reads. Aliases are normalized before selecting the owning surface. */
+/** Route without I/O or project reads. Help topics are normalized before selecting the owning surface. */
 export function routeArguments(argv: readonly string[], extensions?: RouteExtensions): RoutedArguments {
-  const args = normalizeAliases(argv);
+  const args = normalizeHelp(argv);
   const memory = memoryArguments(args);
   if (memory) return { surface: 'memory', args: memory };
-  const maker = args.length === 0 || (args[0] === 'new' && !legacyNew(args)) || makerCommands.has(args[0] ?? '');
+  const maker = args.length === 0 || (args[0] === 'new' && !directoryNew(args)) || makerCommands.has(args[0] ?? '');
   if (maker) return { surface: 'maker', args };
   return (extensions && pluginRoute(args, extensions)) ?? { surface: 'framework', args };
 }

@@ -1,7 +1,6 @@
-import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, legacyFrameworkFiles, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, legacyFrameworkConfiguration, relocatedNpmEntry, relocatedRunNode, legacyFrameworkProcess, relocatedTerminateProcessTree, legacyProcessTree, relocatedHandoutPlan, relocatedHandoutRead, legacyHandoutAdapter, applySharedFilePlan, relocatedProjectContractOperation, legacyProjectContract, relocatedMeasureProject, legacyProjectMeasure, relocatedSampleSummary, relocatedMeasureOperation, legacyMeasurement, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, legacySupportReport, relocatedStatus, relocatedReleaseCheck, legacyInspection, relocatedPortableFile, legacyArchivePath, relocatedZip, legacyZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, legacyPluginId, relocatedStorybookFlags, legacyStorybookOptions, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, legacyTerminalStyle, relocatedCommandHelp, relocatedHelpIndex, legacyHelpText, relocatedHelpText, legacyTerminalHelp, relocatedSetupDocumentation, legacyDocsSetup, relocatedDocsParserFiles, legacyDocsVendor, relocatedExportedProject, legacyProjectFrom, relocatedStorybookOperation, legacyStorybook, relocatedAirshipPlan, legacyAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, legacyAirship, relocatedBuildClickdummy, legacyClickdummy, relocatedDocsRead, relocatedDocsPlan, legacyDocs, relocatedFixtureOperation, legacyFixtures, relocatedGuidedSetup, relocatedContinueSetup, legacySetupTerminal, relocatedGuidedStarter, relocatedStarterText, legacyStarterTerminal, relocatedRenderHuman, legacyTerminalRender, relocatedSetupSnapshot, legacySetupState, relocatedSetupProgress, legacySetupProgress, relocatedKitManifest, relocatedListKitFiles, relocatedVerifyKit, relocatedBootstrapFiles, legacyKitIntegrity, relocatedDistributedIncluded, relocatedStandaloneSource, relocatedUpdateOwnership, legacyDistribution, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
+import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedDocsParserFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
 
 test('relocated fixture adapter preserves approval, target, reset and cancellation boundaries', async () => {
-  assert.equal(legacyFixtures.fixtureOperation, relocatedFixtureOperation);
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-fixtures-relocated-')));
   try {
     const context = { root, frameworkRoot };
@@ -146,8 +145,6 @@ test('relocated fixture adapter preserves approval, target, reset and cancellati
 
 
 test('relocated setup terminal preserves interview and separately approved continuation flow', async () => {
-  assert.equal(legacySetupTerminal.guidedSetup, relocatedGuidedSetup);
-  assert.equal(legacySetupTerminal.continueSetup, relocatedContinueSetup);
 
   const prompts = [];
   const answers = ['blank', '', '', 'Example Author', 'yes', 'yes'];
@@ -226,8 +223,6 @@ test('relocated setup terminal preserves interview and separately approved conti
 
 
 test('relocated starter terminal preserves compatibility, from-short-circuit and human rendering', async () => {
-  assert.equal(legacyStarterTerminal.guidedStarter, relocatedGuidedStarter);
-  assert.equal(legacyStarterTerminal.starterText, relocatedStarterText);
 
   const from = await relocatedGuidedStarter(
     { command: 'new', args: [], options: { from: 'source.json' } },
@@ -269,7 +264,6 @@ test('relocated starter terminal preserves compatibility, from-short-circuit and
 
 
 test('relocated terminal renderer preserves compatibility and generic/check views', () => {
-  assert.equal(legacyTerminalRender.renderHuman, relocatedRenderHuman);
   const style = { color: false, unicode: false };
   const generic = relocatedRenderHuman(operationResult('inspect', { one: 1, nested: { two: 'value' } }), style);
   assert.match(generic.text, /inspect: ok/);
@@ -288,7 +282,6 @@ test('relocated terminal renderer preserves compatibility and generic/check view
 
 
 test('relocated setup-state fingerprinting preserves identity, source and generation bindings', async () => {
-  assert.equal(legacySetupState.setupSnapshot, relocatedSetupSnapshot);
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-setup-state-relocated-')));
   try {
     const context = { root, frameworkRoot };

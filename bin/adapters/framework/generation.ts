@@ -2,7 +2,7 @@ import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';
-import { planProject } from '../../../scripts/companion/compiler/plan.ts';
+import { planProject } from '../../compiler/adapters/project-plan.ts';
 import { readConfiguration, readBounded, hash, exists } from './files.ts';
 import { designFile, object } from './configuration.ts';
 import { inspectDesign } from './changes.ts';
@@ -14,10 +14,9 @@ export async function generationPlan(request: Request, context: Context) {
 }
 /** In-place generation compiles the imported design with a verified kit whose configuration still matches it. */
 async function inPlaceKit(request: Request, context: Context, input: string) {
-  requireThat(request.options.vault === undefined, 'TARGET_REQUIRED', '--vault requires an explicit legacy --target.');
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup and project import first.');
   requireThat(input === resolve(context.root, designFile), 'INPUT_REQUIRES_IMPORT', 'In-place generation compiles the imported ' + designFile + '; run project import to adopt a different file.');
-  requireThat(await exists(join(context.root, '.framework/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit; legacy --vault/--target remains available.');
+  requireThat(await exists(join(context.root, 'bin/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit.');
   const kit = await verifyKit(context.root);
   const { model } = await inspectDesign(context, input);
   const identityMatches = Object.entries(config.project).every(([key, value]) => model.project[key] === value);
@@ -26,21 +25,21 @@ async function inPlaceKit(request: Request, context: Context, input: string) {
   return kit;
 }
 export async function generateSourcePlan(request: Request, context: Context) {
+  requireThat(request.options.vault === undefined && request.options.target === undefined, 'INVALID_OPTION', 'Generation runs in the configured project; --vault and --target are not supported.');
   const input = resolve(context.root, stringOption(request.options, 'input') ?? designFile);
   const outputKind = stringOption(request.options, 'output-kind');
   requireThat(outputKind === undefined || ['obsidian-plugin','clickdummy'].includes(outputKind),'INVALID_OUTPUT_KIND','Use obsidian-plugin or clickdummy.');
   const compilation = {storybook:storybookFlags(request.options),outputKind:outputKind as 'obsidian-plugin'|'clickdummy'|undefined,signal:context.signal,scope:stringOption(request.options, 'scope')};
-  const target = stringOption(request.options, 'target');
-  if (target !== undefined) return planProject({ ...compilation, input, target, vault: resolve(context.root, stringOption(request.options, 'vault') ?? '.'), templateRoot: context.frameworkRoot });
   const kit = await inPlaceKit(request, context, input);
-  const templateRoot = join(context.root, '.framework/template');
+  const templateRoot = join(context.root, 'bin/template');
   const intakePath = '.framework/intake.json';
   const intakeBytes = await readBounded(join(context.root, intakePath));
   const intake = object(JSON.parse(intakeBytes.toString('utf8')));
   const inputHash = hash(await readBounded(join(context.root, designFile), 4_000_000));
   requireThat(intake.schemaVersion === 1 && object(intake.files)[designFile] === inputHash, 'IMPORT_OWNERSHIP', 'The imported design changed outside the reviewed intake operation.');
   const bootstrap = [...kit.bootstrap, { path: designFile, hash: inputHash }];
-  const planned = await planProject({ ...compilation, input, vault: context.root, target: '.', templateRoot, bootstrap });
+  // The kit owns bin/ (its runtime and template); generation never writes the template's own bin sources over it.
+  const planned = await planProject({ ...compilation, input, vault: context.root, target: '.', templateRoot, bootstrap, reservedRoot: 'bin' });
   const generatedDesign = planned.plan.changes.find(change => change.path === designFile);
   if (!generatedDesign || generatedDesign.afterHash === inputHash) return planned;
   // Overrides replace the canonical input in this same plan. Both receipts must describe

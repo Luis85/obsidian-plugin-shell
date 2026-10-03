@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { setupSource as relocated } from '../../bin/adapters/framework/setup-source.ts';
-import * as legacy from '../../scripts/framework/setup-source.ts';
-import { starterCatalog } from '../../scripts/framework/starter-project.ts';
+import { starterCatalog } from '../../bin/adapters/framework/starter-project.ts';
 import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
@@ -10,7 +9,6 @@ const frameworkRoot = resolve(import.meta.dirname, '../..');
 const context = { root: frameworkRoot, frameworkRoot };
 
 test('relocated setup source preserves compatibility and ordinary input passthrough', async () => {
-  assert.equal(legacy.setupSource, relocated);
   const request = { command: 'setup', args: [], options: { input: 'project.json' } };
   const result = await relocated(request, context, null);
   assert.equal(result.input, 'project.json');

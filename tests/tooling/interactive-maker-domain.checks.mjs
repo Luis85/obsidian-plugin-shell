@@ -6,10 +6,10 @@ import { runOperations } from '../../bin/application/operations.ts';
 import { outline } from '../../bin/application/summary.ts';
 import { Workspace } from '../../bin/application/workspace.ts';
 import { sketchSchema } from '../../bin/application/schema.ts';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
-import { noteOperations } from '../../scripts/companion/runtime/note-operations.ts';
-import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { noteEntity } from '../../bin/compiler/emitters/persistence-code.ts';
+import { noteOperations } from '../../templates/companion/runtime/note-operations.ts';
+import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
 import { visualAllocate, visualText } from '../../scripts/companion/visual/visual-ir.mjs';
 const base = () => newDocument('My sketch');
 function page() { return runOperations(base(), [{ op: 'page.add', title: 'Home', as: 'home' }]); }

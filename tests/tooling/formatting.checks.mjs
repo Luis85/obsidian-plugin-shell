@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { formatGenerated, checkGenerated } from '../../scripts/quality/format-generated.mjs';
+import { formatGenerated, checkGenerated } from '../../bin/adapters/makers/format-generated.ts';
 
 test('generated-code formatter detects defects, is idempotent and preserves exact Markdown fixtures', async () => {
   const entries = [

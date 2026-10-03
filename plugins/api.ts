@@ -1,8 +1,8 @@
 import type { Readable } from 'node:stream';
 import type { Workspace } from '../bin/application/workspace.ts';
 import type { Prompts } from '../bin/presentation/prompts.ts';
-import type { FrameworkAdapter } from '../scripts/compiler/adapters/project/framework-adapter.ts';
-import type { StarterDefinition } from '../scripts/starters/types.ts';
+import type { FrameworkAdapter } from '../bin/compiler/adapters/project/framework-adapter.ts';
+import type { StarterDefinition } from '../bin/adapters/starters/types.ts';
 import type { ComponentTemplate } from '../bin/domain/component-template.ts';
 
 export interface PluginManifest {

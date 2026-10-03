@@ -6,7 +6,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { loadGuide, prototypePlan } from '../../bin/adapters/prototype.ts';
 import { applyPrepared, readData } from '../../bin/adapters/storage.ts';
 import { openDocument } from '../../bin/domain/document.ts';
-import { checkSteps } from '../../scripts/framework/check.ts';
+import { checkSteps } from '../../bin/adapters/framework/check.ts';
 import { compile } from '../../bin/adapters/compiler.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 test('prototype maker creates real compiler boilerplate, docs and a fully expanded prompt', async () => {

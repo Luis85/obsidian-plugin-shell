@@ -6,8 +6,8 @@ import { serializeJson as json } from '../../../scripts/contracts/serialization.
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { parseAuthoringDocument as parseCompanionDocument, authoringReader, AUTHORING_VERSION as COMPANION_VERSION } from '../../../scripts/companion/authoring-contract.ts';
-import { readCompanionProject } from '../../../scripts/companion/read-project.mjs';
-import { projectModel } from '../../../scripts/companion/compiler/model.ts';
+import { readCompanionProject } from './read-project.ts';
+import { projectModel } from '../../compiler/emitters/model.ts';
 import { defaults, configuration, identity, object, configFile, designFile, resolveImport, type Configuration } from './configuration.ts';
 import { exists, hash, readBounded, readConfiguration, readJson } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';

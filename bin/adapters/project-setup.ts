@@ -3,7 +3,7 @@ import { lstat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from './framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { newDocument, openDocument, documentText } from '../domain/document.ts';
 import { object, keys, text, list } from '../domain/data.ts';
@@ -19,7 +19,7 @@ import { boilerplatePlan } from './compiler.ts';
 import { intakePrds, type Intake } from './prd-intake.ts';
 export { setupSchema, setupExample } from '../application/setup-schema.ts';
 interface SetupContext { root: string; frameworkRoot: string; signal?: AbortSignal }
-/** Project setup runs the installed Angular webapp starter, read beside shell.mjs like every project starter. */
+/** Project setup runs the installed Angular webapp starter, read from configs/starters in the package root like every project starter. */
 const setupStarter = 'webapp-angular';
 export async function angularSetupGuide(frameworkRoot: string) {
   const { selection } = await projectStarter(frameworkRoot, setupStarter);

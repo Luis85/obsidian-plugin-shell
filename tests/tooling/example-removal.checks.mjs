@@ -5,13 +5,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { planExampleRemoval } from '../../scripts/examples/plan.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 
 async function fixture(work) {
   const root = await mkdtemp(join(tmpdir(), 'remove-owned-examples-'));
   try {
     await mkdir(join(root, 'src/bootstrap'), { recursive: true });
-    await mkdir(join(root, 'scripts/examples/templates'), { recursive: true });
+    await mkdir(join(root, 'templates/examples'), { recursive: true });
+    await mkdir(join(root, 'scripts/examples'), { recursive: true });
     await writeFile(join(root, 'src/bootstrap/features.ts'), `import { createNoteFeatures } from '../application/note-feature';
 import { taskFeature } from '../features/tasks/definition';
 import { projectFeature } from '../features/projects/definition';
@@ -91,11 +92,11 @@ test('template escapes, symlink redirects and changing template/manifest inputs 
     manifest.files[0].template = '../outside.txt'; await writeFile(path, JSON.stringify(manifest));
     await assert.rejects(planExampleRemoval(root), /EXAMPLES_INVALID_MANIFEST/);
     manifest.files[0].template = 'replacement.txt'; await writeFile(path, JSON.stringify(manifest));
-    const template = join(root, 'scripts/examples/templates/replacement.txt'); await writeFile(template, 'replacement\n');
+    const template = join(root, 'templates/examples/replacement.txt'); await writeFile(template, 'replacement\n');
     await assert.rejects(planExampleRemoval(root, { beforeFinalize: () => writeFile(template, 'concurrent replacement\n') }), /EXAMPLES_STALE_TEMPLATE_OR_MANIFEST/);
     await assert.rejects(planExampleRemoval(root, { beforeFinalize: () => writeFile(path, JSON.stringify(manifest) + '\n') }), /EXAMPLES_STALE_TEMPLATE_OR_MANIFEST/);
-    await rename(join(root, 'scripts/examples/templates'), join(root, 'scripts/examples/redirected'));
-    await symlink(join(root, 'scripts/examples/redirected'), join(root, 'scripts/examples/templates'), process.platform === 'win32' ? 'junction' : 'dir');
+    await rename(join(root, 'templates/examples'), join(root, 'templates/redirected'));
+    await symlink(join(root, 'templates/redirected'), join(root, 'templates/examples'), process.platform === 'win32' ? 'junction' : 'dir');
     await assert.rejects(planExampleRemoval(root), /PLAN_SYMLINK/);
     assert.equal(await readFile(join(root, 'example.txt'), 'utf8'), 'reviewed example\n');
   });

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { planProject, applyProject } from './adapters/project-plan.ts';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { migrateAuthoringDocument } from '../companion/authoring-contract.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), npm = process.env.QUALIFIED_NPM;
 if (!npm) throw Error('QUALIFIED_NPM_REQUIRED: no implicit global installation.');
@@ -26,7 +26,7 @@ try {
   visual.nextId = Math.max(visual.nextId, 101);
   const input = join(vault, 'project.json'); await writeFile(input, JSON.stringify(document));
   const plan = await planProject({ input, vault, target: 'project', templateRoot: root }); await applyProject(plan, plan.hash);
-  const target = join(vault, 'project'), shell = join(target, 'app.mjs');
+  const target = join(vault, 'project'), shell = join(target, 'bin/app');
   const hash = async path => createHash('sha256').update(await readFile(join(target, path))).digest('hex');
   const rootLockBefore = await hash('package-lock.json');
   await command('project-install', [resolve(npm), 'ci', '--no-fund'], target);

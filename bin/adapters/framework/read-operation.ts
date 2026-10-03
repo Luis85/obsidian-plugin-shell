@@ -2,10 +2,10 @@ import { join } from 'node:path';
 import { conceptSchema } from '../../../scripts/companion/concepts/contract.ts';
 import { inspectSitemapSummary } from '../../../scripts/companion/sitemap/summary.ts';
 import { handoutRead } from './handout-adapter.ts';
-import { inspectDesign } from '../../../scripts/framework/changes.ts';
+import { inspectDesign } from './changes.ts';
 import { readConfiguration, readJson, exists } from './files.ts';
 import { status, releaseCheck } from './inspection.ts';
-import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
+import { verifyKit } from './kit-integrity.ts';
 import { measureProject } from './project-measure.ts';
 import { projectContractOperation } from './project-contract.ts';
 import { prototypesRead, prototypesCompare } from './prototypes.ts';
@@ -15,8 +15,8 @@ import { supportReport } from './support-report.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 
 async function versionInfo(context: Context) {
-  const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
-  const metadata = await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')) as { version?: string };
+  const kit = await exists(join(context.frameworkRoot, 'bin/kit.json'));
+  const metadata = await readJson(join(context.frameworkRoot, kit ? 'bin/kit.json' : 'package.json')) as { version?: string };
   return { frameworkVersion: metadata.version, nodeVersion: process.version, protocolVersion: 1, distribution: kit ? 'compiled-kit' : 'source' };
 }
 async function configurationInfo(context: Context) {

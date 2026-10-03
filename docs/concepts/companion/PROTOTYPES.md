@@ -71,32 +71,33 @@ To persist a browser workspace safely, use `prototypes import`. Extracting its f
 
 ```sh
 # Import the full workspace exported by the browser; preview and save a plan.
-node shell.mjs prototypes import --input design-lab.prototypes.json --plan-out prototypes-import.plan.json
-node shell.mjs plan apply prototypes-import.plan.json --yes
-node shell.mjs prototypes list --json
+node bin/app prototypes import --input design-lab.prototypes.json --plan-out prototypes-import.plan.json
+node bin/app plan apply prototypes-import.plan.json --yes
+node bin/app prototypes list --json
 
 # Alternatively capture an ordinary project export, then fork a saved variant.
-node shell.mjs prototypes create exploration --input project-a.json --name "Solution exploration" --yes
-node shell.mjs prototypes fork exploration --version v1 --variant main --as sitemap-b --name "Sitemap B" --yes
-node shell.mjs prototypes save exploration --version v1 --variant sitemap-b --input project-b.json --yes
+node bin/app prototypes create exploration --input project-a.json --name "Solution exploration" --yes
+node bin/app prototypes fork exploration --version v1 --variant main --as sitemap-b --name "Sitemap B" --yes
+node bin/app prototypes save exploration --version v1 --variant sitemap-b --input project-b.json --yes
 
 # Approve and activate A. Both steps remain explicit.
-node shell.mjs prototypes status exploration --version v1 --variant main --status approved --yes
-node shell.mjs prototypes activate exploration --version v1 --variant main --yes
+node bin/app prototypes status exploration --version v1 --variant main --status approved --yes
+node bin/app prototypes activate exploration --version v1 --variant main --yes
 
-# Generate an independent target from the exact active source.
-node shell.mjs prototypes generate --target previews/sitemap-a --plan-out generation.plan.json
-node shell.mjs plan apply generation.plan.json --yes
+# Adopt the exact active source, then generate the configured project in place.
+node bin/app prototypes adopt --yes
+node bin/app prototypes generate --plan-out generation.plan.json
+node bin/app plan apply generation.plan.json --yes
 
 # Create an immutable checkpoint, then continue in an editable new version.
-node shell.mjs prototypes seal exploration --version v1 --yes
-node shell.mjs prototypes version exploration --from v1 --version v2 --yes
-node shell.mjs prototypes export --out prototypes-review.json --yes
+node bin/app prototypes seal exploration --version v1 --yes
+node bin/app prototypes version exploration --from v1 --version v2 --yes
+node bin/app prototypes export --out prototypes-review.json --yes
 ```
 
 `details` updates a draft variant's display name/hypothesis. `archive` and `restore` manage whole prototypes; `status --status archived` archives one inactive variant. `deactivate` clears generation selection. `help prototypes <command>` and `capabilities --json` expose every registered operation.
 
-Default `generate` honors an existing prototype registry. An explicit `generate --input project.json` intentionally retains standalone compatibility and does not consult the registry. `prototypes generate` always requires an active managed source and does not offer that bypass.
+Default `generate` honors an existing prototype registry. An explicit `generate --input design/project.json` compiles the imported design without consulting the registry. `prototypes generate` always requires an active managed source that is also the adopted canonical design, and does not offer that bypass. Both generate in place inside an extracted, verified kit.
 
 For **in-place generation**, review `prototypes adopt` first. It imports the active snapshot through the existing project/configuration conflict workflow; generation refuses to proceed while canonical `design/project.json` differs from that saved snapshot. Inspect any reported configuration conflicts and choose the appropriate explicit resolution. Changing the application's canonical identity or folder settings is not hidden inside activation.
 
@@ -106,15 +107,15 @@ Generated output receives `.companion/prototype-selection.json`, recording the s
 
 ```sh
 # Read only: compare complete saved A/B documents.
-node shell.mjs prototypes compare exploration --version v1 --variant main --with-variant sitemap-b --json
+node bin/app prototypes compare exploration --version v1 --variant main --with-variant sitemap-b --json
 
 # Labels do not rename folders or activate a variant.
-node shell.mjs prototypes prototype-details exploration --name "Product alternatives" --description "Compare navigation approaches" --yes
-node shell.mjs prototypes version-details exploration --version v2 --label "Next iteration" --yes
+node bin/app prototypes prototype-details exploration --name "Product alternatives" --description "Compare navigation approaches" --yes
+node bin/app prototypes version-details exploration --version v2 --label "Next iteration" --yes
 
 # Restore saved v1/main into editable v2/sitemap-b with a sealed recovery version.
-node shell.mjs prototypes restore-snapshot exploration --version v2 --variant sitemap-b --from-version v1 --from-variant main --recovery-version recovery-1 --plan-out restore.plan.json
-node shell.mjs plan apply restore.plan.json --yes
+node bin/app prototypes restore-snapshot exploration --version v2 --variant sitemap-b --from-version v1 --from-variant main --recovery-version recovery-1 --plan-out restore.plan.json
+node bin/app plan apply restore.plan.json --yes
 ```
 
 Comparison accepts optional `--with-prototype` and `--with-version`; omitted values use the selected prototype/version. Restore accepts optional `--from-prototype`; its source version/variant and new recovery version are explicit. This is different from `prototypes restore`, which only unarchives a whole prototype. All mutating commands retain reviewed-plan and stale-plan checks.
@@ -129,7 +130,7 @@ The transport supports at most 40 prototypes, 40 versions per prototype, 40 vari
 
 ## Implementation and verification boundaries
 
-The shared typed domain lives in `scripts/companion/prototypes/`; shell adapters are `scripts/framework/prototype*.ts`. The maintained browser editor and trusted host bridge are composed into the current build, leaving v5 fixtures unchanged. Test recipes are registered in `tests/suites.json` and the existing companion workflow.
+The shared typed domain lives in `scripts/companion/prototypes/`; shell adapters are `bin/adapters/framework/prototype*.ts`. The maintained browser editor and trusted host bridge are composed into the current build, leaving v5 fixtures unchanged. Test recipes are registered in `tests/suites.json` and the existing companion workflow.
 
 See [verification record](PROTOTYPES-VERIFICATION.md) for executed checks and outstanding hosted evidence. This increment implements browser authoring plus shell persistence/generation. It does **not** convert the companion into a natively accepted Obsidian plugin, add real vault writes to the browser, merge variants automatically, or mark the broader PR #5 MVP complete.
 

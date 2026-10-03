@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { firstRunPlan, firstRunTool, firstRunReport } from '../../bin/adapters/first-run-plan.ts';
 import { executeFirstRun } from '../../bin/adapters/first-run.ts';
 import { settingsPlan } from '../../bin/adapters/user-settings.ts';

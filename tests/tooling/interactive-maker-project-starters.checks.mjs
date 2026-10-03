@@ -6,8 +6,8 @@ import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { projectStarters, projectStarter, projectGuide, projectRequest, projectPlan } from '../../bin/adapters/projects.ts';
-import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../scripts/compiler/domain/project-starter.ts';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../bin/compiler/domain/project-starter.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
@@ -214,7 +214,7 @@ test('machine stdout stays one JSON response; directory creation refuses project
   io.input.isTTY = true; io.error.isTTY = true;
   assert.equal(await main(['new', '--input', '-', '--json', '--ui', 'tui', '--root', root, '--out', 'machine'], frameworkRoot, io), 0);
   assert.equal(output.length, 1); assert.equal(JSON.parse(output[0]).status, 'planned'); assert.equal(errors.length, 0);
-  const shell = args => spawnSync(process.execPath, ['--experimental-strip-types', 'shell.mjs', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
+  const shell = args => spawnSync(process.execPath, ['bin/app', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
   const child = shell(['new', '--list']);
   assert.equal(child.status, 0, child.stderr + child.stdout);
   const listed = JSON.parse(child.stdout).data.starters.find(item => item.id === 'cli');
@@ -242,7 +242,6 @@ test('sketch regeneration respects a saved starter selection and refuses legacy 
 test('new help documents project starters alongside directory-creation metadata', async () => scratch(async root => {
   const help = await execute(parseArguments(['new', '--help']), context(root));
   const legacy = help.commands.find(command => command.id === 'new');
-  assert.equal(legacy.options.from, 'value'); assert.equal(legacy.options.starter, 'value');
   assert.match(help.help, /new <dir>.*--from <project\.json>/);
   assert.match(help.help, /new starters --json/); assert.match(help.help, /new guide --starter/);
   assert.doesNotMatch(help.help, /--preset|--framework|--targets|new presets/);

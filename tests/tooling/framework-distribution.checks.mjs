@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
-import { standaloneSource, updateOwnership } from '../../scripts/framework/distribution.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { standaloneSource, updateOwnership } from '../../bin/adapters/framework/distribution.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const projectFixture = 'docs/concepts/companion/companion-project.json';
@@ -114,7 +114,7 @@ test('reviewed style removal preserves tokens across checkout line endings', asy
   await copy('src/bootstrap/features.ts');
   for (const file of ownership.files) {
     if (file.sha256 !== null) assert.equal(hash(await copy(file.path)), file.sha256, file.path);
-    if (file.template) await copy('scripts/examples/templates/' + file.template);
+    if (file.template) await copy('templates/examples/' + file.template);
   }
   const report = await planExampleRemoval(folder);
   const shell = report.plan.changes.find(change => change.path === 'src/styles/shell.css');

@@ -7,8 +7,8 @@ import { validateTooling, airshipOptions, toolingSchema } from '../../scripts/co
 import { withStorybookOptions, storybookOptions } from '../../scripts/companion/tooling-contract.ts';
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
 import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const template = await loadTemplateSnapshot(root);
 const source = JSON.parse(await readFile(new URL('../fixtures/companion/detail-v3.json', import.meta.url), 'utf8'));

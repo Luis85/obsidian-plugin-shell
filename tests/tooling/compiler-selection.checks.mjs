@@ -4,14 +4,14 @@ import { readFile, writeFile, mkdtemp, rm, readdir, realpath } from 'node:fs/pro
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseSelection, selectionClosure } from '../../scripts/compiler/domain/selection.ts';
-import { generationSelection } from '../../scripts/compiler/adapters/selection.ts';
-import { planArtifacts, applyProject } from '../../scripts/compiler/adapters/workspace-plan.ts';
-import { planProject } from '../../scripts/companion/compiler/plan.ts';
-import { projectModel, digest } from '../../scripts/companion/compiler/model.ts';
+import { parseSelection, selectionClosure } from '../../bin/compiler/domain/selection.ts';
+import { generationSelection } from '../../bin/compiler/adapters/selection.ts';
+import { planArtifacts, applyProject } from '../../bin/compiler/adapters/workspace-plan.ts';
+import { planProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { projectModel, digest } from '../../bin/compiler/emitters/model.ts';
 import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
-import { descriptor } from '../../scripts/framework/catalog.ts';
+import { projectFiles } from '../support/project-render.mjs';
+import { descriptor } from '../../bin/adapters/framework/catalog.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const starter = migrateAuthoringDocument(JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'))).document;

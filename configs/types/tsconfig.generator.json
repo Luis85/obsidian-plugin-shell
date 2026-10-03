@@ -15,7 +15,7 @@
     ]
   },
   "include": [
-    "../../scripts/companion/compiler/**/*.ts",
-    "../../scripts/companion/runtime/**/*.ts"
+    "../../bin/compiler/emitters/**/*.ts",
+    "../../templates/companion/runtime/**/*.ts"
   ]
 }

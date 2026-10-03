@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 import { checkDependencyPins } from '../security/dependency-pins.mjs';
 
 export function stableVersion(value) {

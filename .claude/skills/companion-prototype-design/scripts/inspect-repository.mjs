@@ -4,9 +4,9 @@ import { spawnSync } from 'node:child_process';
 import { args, need, readBytes, readJson, readText, sha256, noLinks, isMain, cli } from './lib/io.mjs';
 
 const FILES = [
-  'AGENTS.md', 'package.json', 'package-lock.json', '.nvmrc', 'shell.mjs',
-  'scripts/companion/project-contract.mjs', 'scripts/companion/read-project.mjs',
-  'scripts/companion/generate.mjs', 'scripts/companion/visual/visual-validate.mjs',
+  'AGENTS.md', 'package.json', 'package-lock.json', '.nvmrc', 'bin/app',
+  'scripts/companion/project-contract.mjs', 'bin/adapters/framework/read-project.ts',
+  'scripts/companion-tools/generate.mjs', 'scripts/companion/visual/visual-validate.mjs',
   'docs/development/COMPANION-PROJECT-JSON.md', 'docs/development/COMPANION-GENERATOR.md',
   'docs/concepts/companion/VISUAL-EDITORS.md',
 ];

@@ -35,11 +35,19 @@ async function withRoot(check) {
   try { await check(root); } finally { await rm(root, { recursive: true, force: true }); }
 }
 
-test('the published generator protocol keeps its raw help and plain-text failures', async () => {
+test('generation shares the canonical help, argument validation and result protocol', async () => {
   const help = await run(['generate', '--help']);
-  assert.equal(help.code, 0); assert.ok(help.stdout.length > 0 || help.stderr.length >= 0);
-  const missing = await run(['generate', '--target', 'out', '--input', join(tmpdir(), 'missing-project.json'), '--vault', tmpdir()]);
-  assert.equal(missing.code, 1); assert.ok(missing.stderr.trim().length > 0);
+  assert.equal(help.code, 0); assert.match(help.stdout, /generate/);
+  assert.doesNotMatch(help.stdout, /--vault|--target/);
+  for (const option of ['target', 'vault']) {
+    const result = await run(['generate', '--' + option, 'out', '--json']);
+    assert.equal(result.code, 1); assert.equal(result.stderr, '');
+    const response = JSON.parse(result.stdout);
+    assert.equal(response.protocolVersion, 1);
+    assert.equal(response.status, 'failed');
+    assert.equal(response.diagnostics[0].code, 'INVALID_OPTION');
+    assert.match(response.diagnostics[0].message, new RegExp('--' + option));
+  }
 });
 
 test('human output renders results and exit codes follow the result status', async () => {

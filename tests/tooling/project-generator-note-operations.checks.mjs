@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { noteOperations } from '../../scripts/companion/runtime/note-operations.ts';
+import { noteOperations } from '../../templates/companion/runtime/note-operations.ts';
 function fixture() {
  const calls=[],snap={id:'one',revision:1,values:{title:'Original'}};
  const success=value=>({ok:true,value});

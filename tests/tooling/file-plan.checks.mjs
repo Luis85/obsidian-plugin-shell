@@ -1,12 +1,12 @@
 import { test } from 'node:test';
-import { mapBounded } from '../../scripts/shared/bounded-map.mjs';
+import { mapBounded } from '../../scripts/shared/bounded-map.ts';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, readFile, mkdir, readdir, rm, symlink, access, realpath, rename, cp } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 async function fixture(work) {
   const root = await mkdtemp(join(tmpdir(), 'template-file-plan-'));
   try { await work(root); } finally { await rm(root, { recursive: true, force: true }); }

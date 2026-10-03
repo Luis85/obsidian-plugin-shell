@@ -5,26 +5,23 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
-import { result as frameworkResult, OperationError as frameworkOperationError, requireThat as frameworkRequireThat } from '../../scripts/framework/contracts.ts';
+import { parseCliArguments, validateRequest } from '../../bin/adapters/framework/catalog.ts';
+import { result as frameworkResult, OperationError as frameworkOperationError, requireThat as frameworkRequireThat } from '../../bin/adapters/framework/contracts.ts';
 import { result as canonicalResult } from '../../scripts/contracts/result.ts';
 import { resultEnvelope as bootstrapResultEnvelope } from '../../scripts/contracts/result-runtime.mjs';
 import { OperationError as canonicalOperationError, requireThat as canonicalRequireThat } from '../../scripts/contracts/errors.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
-import { configuration, defaults } from '../../scripts/framework/configuration.ts';
-import { readBounded } from '../../scripts/framework/files.ts';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { configuration, defaults } from '../../bin/adapters/framework/configuration.ts';
+import { readBounded } from '../../bin/adapters/framework/files.ts';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { createFilePlan as createTypedFilePlan, applyFilePlan as applyTypedFilePlan } from '../../scripts/shared/file-plan.ts';
-import { sha256 } from '../../scripts/shared/hash.mjs';
+import { sha256 } from '../../scripts/shared/hash.ts';
 import { mapBounded as typedMapBounded } from '../../scripts/shared/bounded-map.ts';
-import { mapBounded as legacyMapBounded } from '../../scripts/shared/bounded-map.mjs';
 import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
 import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
-import { exists as legacyExists, statIfPresent as legacyStatIfPresent } from '../../scripts/shared/fs-presence.mjs';
-import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
+import { capabilityCatalog, catalogDigest } from '../../bin/adapters/operations/catalog.ts';
 import * as typedJsonData from '../../scripts/contracts/json-data.ts';
-import * as legacyJsonData from '../../scripts/contracts/json-data.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
 // The last v4 self-project, retained as a migration input.
@@ -44,7 +41,7 @@ async function configured(t) {
   return ctx;
 }
 function cli(args, cwd = root) {
-  return spawnSync(process.execPath, [join(root, 'app.mjs'), ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 5_000_000 });
+  return spawnSync(process.execPath, [join(root, 'bin/app'), ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 5_000_000 });
 }
 test('command parser rejects unknown, duplicated and mismatched options', () => {
   for (const args of [['unknown'], ['status', '--input', 'x'], ['status', '--json', '--json'], ['setup', '--id'], ['status', 'extra']]) assert.throws(() => parseCliArguments(args));
@@ -194,13 +191,11 @@ test('file plans and capability discovery use the canonical shared digest', asyn
   assert.equal(catalogDigest(catalog), sha256(JSON.stringify(catalog)));
 });
 
-test('typed JSON data contract remains the canonical compatibility implementation', () => {
-  assert.equal(legacyJsonData.assertJsonData, typedJsonData.assertJsonData);
-  assert.equal(legacyJsonData.parseJsonData, typedJsonData.parseJsonData);
+test('typed JSON data contract validates data without invoking executable members', () => {
   const value = Object.assign(Object.create(null), { safe: ['café', 7, true, null] });
   assert.equal(typedJsonData.assertJsonData(value), true);
   // JSON.parse always yields plain objects; the null-prototype input is accepted, not reproduced.
-  assert.deepEqual(legacyJsonData.parseJsonData(JSON.stringify(value)), { ...value });
+  assert.deepEqual(typedJsonData.parseJsonData(JSON.stringify(value)), { ...value });
   let invoked = 0;
   const poisoned = {};
   Object.defineProperty(poisoned, 'value', { enumerable: true, get() { invoked++; return 1; } });
@@ -251,10 +246,8 @@ test('framework operation errors reuse the canonical contract primitives', () =>
   });
 });
 
-test('typed filesystem helpers preserve compatibility and exact-byte hashing', async t => {
+test('typed filesystem helpers preserve exact-byte hashing and filesystem observations', async t => {
   assert.equal(sha256, typedSha256);
-  assert.equal(legacyExists, typedExists);
-  assert.equal(legacyStatIfPresent, typedStatIfPresent);
   assert.equal(typedSha256('Grüße'), sha256('Grüße'));
 
   const ctx = await fixture(t);
@@ -264,11 +257,10 @@ test('typed filesystem helpers preserve compatibility and exact-byte hashing', a
   const present = join(ctx.root, 'present.txt');
   await writeFile(present, 'present');
   assert.equal((await typedStatIfPresent(present))?.isFile(), true);
-  assert.equal(await legacyExists(present), true);
+  assert.equal(await typedExists(present), true);
 });
 
-test('typed bounded-map preserves compatibility, order and stop-on-failure scheduling', async () => {
-  assert.equal(legacyMapBounded, typedMapBounded);
+test('typed bounded-map preserves order and stop-on-failure scheduling', async () => {
   const completed = [];
   const values = await typedMapBounded([3, 1, 2], 2, async (value, index) => {
     completed.push(index);

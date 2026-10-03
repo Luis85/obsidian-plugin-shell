@@ -4,8 +4,12 @@ on:
   pull_request:
     paths:
       - 'scripts/companion/**'
+      - 'templates/**'
       - 'scripts/compiler/**'
-      - 'scripts/framework/**'
+      - 'bin/compiler/**'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
       - 'scripts/bundling/**'
       - 'tests/tooling/compiler-storybook*.checks.mjs'
       - 'package*.json'

@@ -39,10 +39,10 @@ class Inventory {
 }
 async function collectInventory(context: Context, config: Config): Promise<Inventory> {
   const inventory = new Inventory(context.root);
-  for (const path of [configFile, designFile, '.framework/kit.json', '.companion/generation.json', 'package.json', 'package-lock.json', 'manifest.json', 'app.mjs', 'bin/app', 'shell.mjs']) await inventory.file(path);
+  for (const path of [configFile, designFile, 'bin/kit.json', '.companion/generation.json', 'package.json', 'package-lock.json', 'manifest.json', 'bin/app']) await inventory.file(path);
   // Custom folders relocate generated product code, not the inherited framework.
   // Both still execute during verification; neither can be omitted from approval.
-  const sourceRoots = new Set(['src', 'tests', 'scripts', 'harness', 'configs', config.paths.codebaseFolder, config.paths.testsFolder]);
+  const sourceRoots = new Set(['src', 'tests', 'scripts', 'templates', 'harness', 'configs', config.paths.codebaseFolder, config.paths.testsFolder]);
   for (const path of sourceRoots) if (await exists(join(context.root, path))) await inventory.visit(path);
   // Root configs can execute during a build. Include new and modified configs, not only package.json.
   for (const name of (await readdir(context.root)).sort()) if (/\.(?:[cm]?[jt]s|json)$/.test(name)) await inventory.file(name);
@@ -58,10 +58,10 @@ async function generationRecorded(context: Context, config: Config, inventory: I
 /** Fingerprint code as well as design: an edited or newly added consumer file invalidates prior progress. */
 export async function setupSnapshot(context: Context) {
   const config = await checkedConfiguration(context);
-  const kit = await exists(join(context.root, '.framework/kit.json')) ? await verifyKit(context.root) : null;
+  const kit = await exists(join(context.root, 'bin/kit.json')) ? await verifyKit(context.root) : null;
   const inventory = await collectInventory(context, config), files = inventory.files;
   const generated = await generationRecorded(context, config, inventory);
-  const binding = { configuration: files.get(configFile), design: files.get(designFile), kit: files.get('.framework/kit.json') ?? null };
+  const binding = { configuration: files.get(configFile), design: files.get(designFile), kit: files.get('bin/kit.json') ?? null };
   return { fingerprint: hash(JSON.stringify([...files].sort(([a], [b]) => a.localeCompare(b)))), binding: hash(JSON.stringify(binding)),
     files: files.size, bytes: inventory.total, kitVerified: kit !== null, generated };
 }

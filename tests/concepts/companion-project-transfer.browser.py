@@ -81,7 +81,7 @@ with sync_playwright() as pw:
         check('Actual download contains the complete document', (OUT / 'project.companion.json').read_text() == original)
         with tempfile.TemporaryDirectory(prefix='companion-browser-cli-') as tmp:
             vault = Path(tmp) / 'vault'; vault.mkdir(); (vault / 'keep.md').write_text('preserve')
-            run = subprocess.run(['node', str(ROOT / 'scripts/companion/generate.mjs'), '--input', str(OUT / 'project.companion.json'),
+            run = subprocess.run(['node', str(ROOT / 'scripts/companion-tools/generate.mjs'), '--input', str(OUT / 'project.companion.json'),
                                   '--vault', str(vault), '--target', 'plugins/companion'], capture_output=True, timeout=15)
             check('Shell v1 consumes the actual browser export and prints exact bytes', run.returncode == 0 and run.stdout == original.encode() and not run.stderr, 'Actual CLI subprocess on exported browser bytes')
             check('Shell handoff creates no files or target directory', list(vault.iterdir()) == [vault / 'keep.md'] and (vault / 'keep.md').read_text() == 'preserve', 'Actual isolated filesystem before/after')

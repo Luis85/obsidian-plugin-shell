@@ -26,10 +26,19 @@ test('typed JSON data contract is an explicit narrow architecture boundary', () 
   assert.deepEqual(zone?.patterns, ['scripts/contracts/json-data.ts']);
   const own = config.boundaries.rules.find(item => item.from === 'cli-data-contract');
   assert.deepEqual(own?.allow, ['cli-data-contract']);
-  for (const source of ['test', 'tooling', 'maker-host', 'companion-authoring-contract', 'fixture-compiler']) {
+  for (const source of ['test', 'tooling', 'maker-host', 'companion-authoring-contract', 'compiler-host']) {
     assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-data-contract'), source);
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-data-contract'), false);
+});
+
+test('companion code emitters own a zone that may read the project templates; compiler-host may not', () => {
+  const rule = name => config.boundaries.rules.find(item => item.from === name)?.allow;
+  assert.deepEqual(config.boundaries.zones.find(item => item.name === 'compiler-emitters')?.patterns, ['bin/compiler/emitters/**']);
+  assert.deepEqual(rule('compiler-emitters'), ['compiler-emitters', 'compiler-domain', 'companion-authoring-contract', 'project-templates', 'tooling']);
+  for (const source of ['compiler-host', 'maker-host', 'test', 'tooling']) assert.ok(rule(source)?.includes('compiler-emitters'), source);
+  assert.equal(rule('compiler-host')?.includes('project-templates'), false);
+  for (const core of ['compiler-domain', 'compiler-application', 'maker-domain', 'maker-application']) assert.equal(rule(core)?.includes('compiler-emitters'), false, core);
 });
 
 test('canonical CLI result envelope is isolated from implementation layers', () => {
@@ -107,37 +116,28 @@ test('typed bounded concurrency helper is isolated from implementation layers', 
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-bounded-map-contract'), false);
 });
 
-test('legacy core entries remain compatibility-only shims over typed owners', async () => {
-  const wrappers = new Map([
-    ['scripts/contracts/json-data.mjs', './json-data.ts'],
-    ['scripts/shared/process.mjs', './process.ts'],
-    ['scripts/shared/confirmation.mjs', './confirmation.ts'],
-    ['scripts/shared/hash.mjs', './hash.ts'],
-    ['scripts/shared/fs-presence.mjs', './fs-presence.ts'],
-    ['scripts/shared/project-path.mjs', './project-path.ts'],
-    ['scripts/shared/bounded-map.mjs', './bounded-map.ts'],
-    ['scripts/shared/file-plan.mjs', './file-plan.ts'],
-  ]);
-  for (const [path, target] of wrappers) {
-    const source = await readFile(new URL(path, root), 'utf8');
-    const executable = source.split('\n').map(line => line.trim())
-      .filter(line => line && !line.startsWith('//'));
-    assert.deepEqual(executable, [`export * from '${target}';`], path);
+test('retired compatibility modules are absent and canonical implementations exist', async () => {
+  const owners = JSON.parse(await readFile(new URL('tests/fixtures/tooling/retired-module-owners.json', root), 'utf8'));
+  for (const [retired, owner] of Object.entries(owners)) {
+    await assert.rejects(access(new URL(retired, root)), { code: 'ENOENT' }, retired);
+    await access(new URL(owner, root));
   }
 });
 
+test('framework typechecking includes the production CLI rather than removed wrappers', async () => {
+  const types = JSON.parse(await readFile(new URL('configs/types/tsconfig.framework.json', root), 'utf8'));
+  assert.ok(types.include.includes('../../bin/**/*.ts'));
+  assert.ok(!types.include.includes('../../scripts/framework/**/*.ts'));
+  // The release bundler was the folder's last module; scripts/framework no longer exists.
+  await assert.rejects(readdir(new URL('scripts/framework/', root)), { code: 'ENOENT' });
+});
 
-test('Stage D leaves scripts/framework as compatibility-only entries', async () => {
-  const directory = new URL('scripts/framework/', root);
-  const files = (await readdir(directory)).filter(name => name.endsWith('.ts')).sort();
-  assert.ok(files.length > 40, 'expected the retained compatibility surface');
-  for (const name of files) {
-    const source = await readFile(new URL(name, directory), 'utf8');
-    const executable = source.split('\n').map(line => line.trim())
-      .filter(line => line && !line.startsWith('//'));
-    assert.ok(source.length < 500, `${name} still contains a substantive implementation`);
-    assert.ok(executable.length >= 1, `${name} is an empty compatibility entry`);
-    assert.ok(executable.every(line => line.startsWith('export ')), `${name}: ${executable.join(' | ')}`);
-    assert.ok(source.includes('../../bin/') || source.includes('../shared/'), `${name} does not delegate to a relocated owner`);
-  }
+test('scripts/companion holds only the companion contract library; its tooling entries and bin-only readers left it', async () => {
+  const config = JSON.parse(await readFile(new URL('configs/quality/fallow.json', root), 'utf8'));
+  const patterns = config.boundaries.zones.find(zone => zone.name === 'companion-authoring-contract').patterns;
+  const inZone = path => patterns.some(pattern => pattern.endsWith('/**') ? path.startsWith(pattern.slice(0, -2)) : pattern === path);
+  const sources = (await readdir(new URL('scripts/companion/', root), { recursive: true }))
+    .map(name => 'scripts/companion/' + name.replaceAll('\\', '/')).filter(path => /\.(?:mjs|ts)$/.test(path) && !path.endsWith('.d.mts'));
+  assert.deepEqual(sources.filter(path => !inZone(path)), []);
+  for (const path of sources) assert.doesNotMatch(await readFile(new URL(path, root), 'utf8'), /from\s*['"](?:\.\.\/)+bin\//, path);
 });

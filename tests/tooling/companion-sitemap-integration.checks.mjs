@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { executeOperation } from '../../scripts/framework/operations.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { inspectSitemapSummary } from '../../scripts/companion/sitemap/summary.ts';
 import { applySitemapCommand } from '../../scripts/companion/sitemap/commands.ts';
 

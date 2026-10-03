@@ -144,7 +144,7 @@ test('MCP discovery refuses a wrong package version or unapproved repository bef
   fails(() => discoverTools({ ...f.repo, root: join(f.root, 'other'), mainRoot: undefined }, f.p, 'codex'), 'NOT_ENABLED');
 });
 test('shell memory and help memory work without framework dependencies, Git or Python', t => {
-  const f = fixture(t); const shell = new URL('../../app.mjs', import.meta.url);
+  const f = fixture(t); const shell = new URL('../../bin/app', import.meta.url);
   const result = spawnSync(process.execPath, [fileURLToPath(shell), 'help', 'memory', '--json'], { cwd: f.home, env: f.env, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr); assert.match(JSON.parse(result.stdout).help, /--provider/);
   assert.deepEqual(readdirSync(f.home), []);

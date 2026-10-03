@@ -6,12 +6,12 @@ import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '../../../scripts/shared/file-plan.ts';
-import { parseArguments as makerArguments, builtinRecipes } from '../../../scripts/makers/arguments.mjs';
+import { parseArguments as makerArguments, builtinRecipes } from '../makers/arguments.ts';
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
 import { conceptImportPlan } from './concepts.ts';
-import { editStarterPlan } from '../../../scripts/starters/operations.ts';
+import { editStarterPlan } from '../starters/operations.ts';
 import { componentTemplatePlan } from './component-templates.ts';
 import { starterProjectPlan } from './starter-project.ts';
 import { styleExportPlan } from './styles.ts';
@@ -27,7 +27,7 @@ async function makerPlan(request: Request, context: Context): Promise<Planned> {
   const args = [recipe, name];
   const fields = descriptor('make').options;
   for (const [key, value] of Object.entries(request.options)) if (Object.hasOwn(fields, key) && !['list', 'trust-custom'].includes(key)) { args.push('--' + key); if (typeof value === 'string') args.push(value); }
-  const { planMaker } = await import('../../../scripts/makers/plan.mjs');
+  const { planMaker } = await import('../makers/plan.ts');
   const planned = await planMaker(context.root, makerArguments(args));
   return { plan: planned.plan, summary: { maker: planned.maker, checks: planned.checks.map(check => ({ ...check, status: 'not-run' })) }, conflicts: [] };
 }
@@ -101,7 +101,7 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
   const fresh = await planOperation(planned.request, context);
   requireThat(fresh.planHash === expected && fresh.conflicts.length === 0, 'PLAN_STALE', 'Inputs changed after review; inspect a new plan.');
   const journal = fresh.request.command.startsWith('docs ')
-    ? (await import('../../../scripts/application-docs/adapters/recovery.ts')).journalHook(fresh.plan) : null;
+    ? (await import('../../documentation/adapters/recovery.ts')).journalHook(fresh.plan) : null;
   return applyFilePlan(fresh.plan, { async beforeWrite() {
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
     await journal?.();

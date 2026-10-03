@@ -4,6 +4,7 @@ on:
     paths:
       - 'bin/**'
       - 'scripts/compiler/**'
+      - 'templates/**'
       - 'configs/starters/**'
       - '.github/workflows/offline-qualification-inputs.yml'
   workflow_dispatch:

@@ -5,17 +5,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { commands } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { groups, goldenPath } from '../../scripts/framework/help-text.ts';
-import { suggestions } from '../../scripts/framework/suggest.ts';
-import { renderHuman } from '../../scripts/framework/terminal-render.ts';
-import { terminalStyle } from '../../scripts/framework/terminal-style.ts';
+import { commands } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { groups, goldenPath } from '../../bin/adapters/framework/help-text.ts';
+import { suggestions } from '../../bin/adapters/framework/suggest.ts';
+import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
+import { terminalStyle } from '../../bin/presentation/terminal/terminal-style.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 /** The real entry point with piped (non-TTY) streams; NO_COLOR is controlled per call. */
 function cli(args, env = {}) {
   const base = Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NO_COLOR' && key !== 'FORCE_COLOR'));
-  return spawnSync(process.execPath, [join(root, 'app.mjs'), ...args], { cwd: root, encoding: 'utf8', timeout: 60000, maxBuffer: 10_000_000, env: { ...base, ...env } });
+  return spawnSync(process.execPath, [join(root, 'bin/app'), ...args], { cwd: root, encoding: 'utf8', timeout: 60000, maxBuffer: 10_000_000, env: { ...base, ...env } });
 }
 function machine(args) {
   const output = cli([...args, '--json']);

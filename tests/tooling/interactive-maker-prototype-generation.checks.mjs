@@ -3,7 +3,6 @@ import { mkdtemp, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { managedGenerationPlan as relocated } from '../../bin/adapters/framework/prototype-generation.ts';
-import * as legacy from '../../scripts/framework/prototype-generation.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -16,7 +15,6 @@ async function fixture(t) {
 }
 
 test('relocated managed generation preserves compatibility and explicit-input passthrough', async t => {
-  assert.equal(legacy.managedGenerationPlan, relocated);
   const context = await fixture(t);
   const request = { command: 'generate', args: [], options: { input: 'project.json' } };
   let seen;

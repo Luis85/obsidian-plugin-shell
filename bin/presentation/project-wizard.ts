@@ -1,4 +1,4 @@
-import { frameworkLabels, type ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
+import { frameworkLabels, type ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { projectGuide, projectPlan, projectStarters } from '../adapters/projects.ts';
 import { guideInput } from '../adapters/prototype.ts';
 import { requireSketch } from '../domain/errors.ts';
@@ -10,7 +10,7 @@ export interface ProjectWizardOptions { root: string; frameworkRoot: string; out
 type Starter = Awaited<ReturnType<typeof projectStarters>>[number];
 interface WizardState { starterId: string; answers: Answers; out: string; stage: number }
 function initialState(starters: Starter[], options: ProjectWizardOptions): WizardState {
-  requireSketch(starters.length, 'PROJECT_STARTER_UNKNOWN', 'No project starters are installed. Extract the separate starters ZIP beside shell.mjs (configs/starters/).');
+  requireSketch(starters.length, 'PROJECT_STARTER_UNKNOWN', 'No project starters are installed. Extract the separate starters ZIP into the shell root (configs/starters/).');
   requireSketch(!options.starter || starters.some(item => item.id === options.starter), 'PROJECT_STARTER_UNKNOWN', `Choose an installed project starter: ${starters.map(item => item.id).join(', ')}.`);
   return { starterId: options.starter ?? starters[0]!.id, answers: {}, out: options.out ?? 'projects/prepared-project', stage: 0 };
 }

@@ -1,4 +1,4 @@
-import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, legacyFrameworkFiles, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, legacyFrameworkConfiguration, relocatedNpmEntry, relocatedRunNode, legacyFrameworkProcess, relocatedTerminateProcessTree, legacyProcessTree, relocatedHandoutPlan, relocatedHandoutRead, legacyHandoutAdapter, applySharedFilePlan, relocatedProjectContractOperation, legacyProjectContract, relocatedMeasureProject, legacyProjectMeasure, relocatedSampleSummary, relocatedMeasureOperation, legacyMeasurement, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, legacySupportReport, relocatedStatus, relocatedReleaseCheck, legacyInspection, relocatedPortableFile, legacyArchivePath, relocatedZip, legacyZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, legacyPluginId, relocatedStorybookFlags, legacyStorybookOptions, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, legacyTerminalStyle, relocatedCommandHelp, relocatedHelpIndex, legacyHelpText, relocatedHelpText, legacyTerminalHelp, relocatedSetupDocumentation, legacyDocsSetup, relocatedDocsParserFiles, legacyDocsVendor, relocatedExportedProject, legacyProjectFrom, relocatedStorybookOperation, legacyStorybook, relocatedAirshipPlan, legacyAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, legacyAirship, relocatedBuildClickdummy, legacyClickdummy, relocatedDocsRead, relocatedDocsPlan, legacyDocs, relocatedFixtureOperation, legacyFixtures, relocatedGuidedSetup, relocatedContinueSetup, legacySetupTerminal, relocatedGuidedStarter, relocatedStarterText, legacyStarterTerminal, relocatedRenderHuman, legacyTerminalRender, relocatedSetupSnapshot, legacySetupState, relocatedSetupProgress, legacySetupProgress, relocatedKitManifest, relocatedListKitFiles, relocatedVerifyKit, relocatedBootstrapFiles, legacyKitIntegrity, relocatedDistributedIncluded, relocatedStandaloneSource, relocatedUpdateOwnership, legacyDistribution, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
+import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedDocsParserFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
 
 test('relocated process-operation adapter selects trusted commands without launching real tools', async () => {
   const context = { root: frameworkRoot, frameworkRoot };
@@ -175,15 +175,12 @@ test('relocated framework contracts preserve option, failure and compiler diagno
 
 
 test('relocated framework filesystem adapter preserves root discovery, bounded reads and compatibility identity', async () => {
-  assert.equal(legacyFrameworkFiles.readBounded, relocatedReadBounded);
-  assert.equal(legacyFrameworkFiles.projectRoot, relocatedProjectRoot);
-  assert.equal(legacyFrameworkFiles.exists, relocatedExists);
-  assert.equal(legacyFrameworkFiles.hash, relocatedHash);
 
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-files-')));
   try {
     await mkdir(join(root, 'nested'));
-    await writeFile(join(root, 'app.mjs'), 'export {};\n');
+    await mkdir(join(root, 'bin'));
+    await writeFile(join(root, 'bin/app'), 'export {};\n');
     await writeFile(join(root, 'payload.txt'), 'bounded payload\n');
     assert.equal(await relocatedProjectRoot(join(root, 'nested')), root);
     assert.equal(await relocatedProjectRoot(root, true), root);
@@ -198,10 +195,6 @@ test('relocated framework filesystem adapter preserves root discovery, bounded r
 
 
 test('relocated framework configuration preserves defaults, validation and compatibility identity', () => {
-  assert.equal(legacyFrameworkConfiguration.configuration, relocatedConfiguration);
-  assert.equal(legacyFrameworkConfiguration.defaults, relocatedDefaults);
-  assert.equal(legacyFrameworkConfiguration.identity, relocatedIdentity);
-  assert.equal(legacyFrameworkConfiguration.resolveImport, relocatedResolveImport);
 
   const project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '1.2.3', description: 'Demo' };
   const config = relocatedDefaults(project);
@@ -223,9 +216,6 @@ test('relocated framework configuration preserves defaults, validation and compa
 
 
 test('relocated framework process policy preserves npm selection and child execution diagnostics', async () => {
-  assert.equal(legacyFrameworkProcess.npmEntry, relocatedNpmEntry);
-  assert.equal(legacyFrameworkProcess.runNode, relocatedRunNode);
-  assert.equal(legacyProcessTree.terminateProcessTree, relocatedTerminateProcessTree);
 
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-process-policy-')));
   const previousQualified = process.env.QUALIFIED_NPM;
@@ -264,8 +254,6 @@ test('relocated framework process policy preserves npm selection and child execu
 
 
 test('relocated handout adapter preserves reviewed plan and blocked readiness semantics', async () => {
-  assert.equal(legacyHandoutAdapter.handoutPlan, relocatedHandoutPlan);
-  assert.equal(legacyHandoutAdapter.handoutRead, relocatedHandoutRead);
 
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-handout-adapter-')));
   try {
@@ -294,7 +282,6 @@ test('relocated handout adapter preserves reviewed plan and blocked readiness se
 
 
 test('relocated project contract preserves schema publication and stdin validation', async () => {
-  assert.equal(legacyProjectContract.projectContractOperation, relocatedProjectContractOperation);
   const context = { root: frameworkRoot, frameworkRoot };
 
   const schema = await relocatedProjectContractOperation({ command: 'project schema', args: [], options: {} }, context);

@@ -5,10 +5,12 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
-import { loadPrototypeWorkspace } from '../../scripts/framework/prototype-workspace.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { loadPrototypeWorkspace } from '../../bin/adapters/framework/prototype-workspace.ts';
+import { extractKit } from './framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { api, document, main, alternate } from '../support/prototype-fixture.mjs';
 const frameworkRoot=fileURLToPath(new URL('../../',import.meta.url));
 async function fixture(t) {
@@ -21,6 +23,21 @@ async function apply(context,args) {const result=await run(context,[...args,'--y
 async function created(t) {const ctx=await fixture(t);await apply(ctx,['create','exploration','--input','source.json']);return ctx;}
 async function activated(t) {const ctx=await created(t);await apply(ctx,['status',...pick,'--status','approved']);await apply(ctx,['activate',...pick]);return ctx;}
 const snapshot=ctx=>loadPrototypeWorkspace(ctx).then(r=>r.workspace);
+const goal=async ctx=>JSON.parse(await readFile(join(ctx.root,'design/project.json'),'utf8')).design;
+// In-place generation runs inside an extracted, verified kit configured from the same source document.
+async function kitCreated(t) {
+  if (await reviewedExamplesRemoved(frameworkRoot)) { t.skip('Framework kit requires the reviewed example sources.'); return null; }
+  const root=await realpath(await mkdtemp(join(tmpdir(),'workbench-prototypes-kit-')));t.after(()=>rm(root,{recursive:true,force:true}));
+  await extractKit(frameworkRoot,root);await writeFile(join(root,'source.json'),JSON.stringify(document()));
+  const ctx={root,frameworkRoot:root};
+  assert.equal((await executeOperation(parseCliArguments(['setup','--input','source.json','--yes']),ctx)).status,'applied');
+  await apply(ctx,['create','exploration','--input','source.json']);return ctx;
+}
+async function kitAdopted(t) {const ctx=await kitCreated(t);if(!ctx)return null;await apply(ctx,['status',...pick,'--status','approved']);await apply(ctx,['activate',...pick]);await apply(ctx,['adopt']);return ctx;}
+async function saveB(ctx) {
+  await apply(ctx,['fork',...pick,'--as','sitemap-b']);await writeFile(join(ctx.root,'b.json'),JSON.stringify(document('Sitemap B')));
+  const b=['exploration','--version','v1','--variant','sitemap-b'];await apply(ctx,['save',...b,'--input','b.json']);return b;
+}
 test('create previews without writes, then applies exact prototype folders and reloads',async t=>{
   const ctx=await fixture(t), before=await readdir(ctx.root), preview=await run(ctx,['create','exploration','--input','source.json']);
   assert.equal(preview.status,'planned',JSON.stringify(preview));assert.deepEqual(await readdir(ctx.root),before);
@@ -52,39 +69,43 @@ test('browser-compatible workspace JSON round-trips through shell export/import 
   assert.equal(api.selected(await snapshot(copy),alternate).variant.document.design.sitemap.routes[0].path,'/dashboard');
   assert.deepEqual(api.selected(await snapshot(copy),main).variant.document.design.dataSources,document().design.dataSources);
 });
-test('a workspace without an active variant blocks both managed and default generation',async t=>{
-  const ctx=await created(t), result=await run(ctx,['generate','--target','generated']);assert.equal(result.status,'failed');assert.match(result.diagnostics[0].message,/active variant|activate/i);
-  const standard=await executeOperation(parseCliArguments(['generate','--target','generated']),ctx);assert.equal(standard.status,'failed');
-  assert.ok(!(await readdir(ctx.root)).includes('generated'));
+test('a workspace without an active variant blocks both managed and default generation',{timeout:180000},async t=>{
+  const ctx=await kitCreated(t);if(!ctx)return;const before=await readdir(ctx.root);
+  const result=await run(ctx,['generate']);assert.equal(result.status,'failed');assert.match(result.diagnostics[0].message,/active variant|activate/i);
+  const standard=await executeOperation(parseCliArguments(['generate']),ctx);assert.equal(standard.status,'failed');assert.match(standard.diagnostics[0].message,/active variant|activate/i);
+  assert.deepEqual(await readdir(ctx.root),before);assert.ok(!before.includes('.companion')&&!before.includes('src'));
 });
-test('managed generation compiles the pinned A snapshot, not unsaved B, and records exact provenance',async t=>{
-  const ctx=await activated(t);await writeFile(join(ctx.root,'source.json'),JSON.stringify(document('Sitemap B')));
-  const preview=await run(ctx,['generate','--target','generated']);assert.equal(preview.status,'planned',JSON.stringify(preview));
+test('managed generation compiles the pinned A snapshot, not unsaved B, and records exact provenance',{timeout:180000},async t=>{
+  const ctx=await kitAdopted(t);if(!ctx)return;await writeFile(join(ctx.root,'source.json'),JSON.stringify(document('Sitemap B')));
+  const preview=await run(ctx,['generate']);assert.equal(preview.status,'planned',JSON.stringify(preview));
   assert.deepEqual(preview.data.summary.prototypeSelection.prototypeId,'exploration');
-  const result=await apply(ctx,['generate','--target','generated','--apply',preview.data.planHash]);
-  const generated=JSON.parse(await readFile(join(ctx.root,'generated/design/project.json'),'utf8'));
-  assert.equal(generated.design.goal,'Sitemap A');assert.deepEqual(generated.design.sitemap.routes,document().design.sitemap.routes);
-  const receipt=JSON.parse(await readFile(join(ctx.root,'generated/.companion/prototype-selection.json'),'utf8'));
+  const result=await apply(ctx,['generate','--apply',preview.data.planHash]);
+  const generated=await goal(ctx);
+  assert.equal(generated.goal,'Sitemap A');assert.deepEqual(generated.sitemap.routes,document().design.sitemap.routes);
+  const receipt=JSON.parse(await readFile(join(ctx.root,'.companion/prototype-selection.json'),'utf8'));
   assert.equal(receipt.variantId,'main');assert.equal(receipt.snapshotPath,api.snapshotPath(main));assert.match(receipt.snapshotHash,/^[a-f0-9]{64}$/);
   assert.equal(result.data.summary.prototypeSelection.snapshotHash,receipt.snapshotHash);
-  assert.equal((await run(ctx,['generate','--target','generated','--yes'])).status,'unchanged');
+  assert.equal((await run(ctx,['generate','--yes'])).status,'unchanged');
 });
-test('switching activation invalidates a generation review; fresh generation uses B',async t=>{
-  const ctx=await activated(t);await apply(ctx,['fork',...pick,'--as','sitemap-b']);await writeFile(join(ctx.root,'b.json'),JSON.stringify(document('Sitemap B')));
-  const b=['exploration','--version','v1','--variant','sitemap-b'];await apply(ctx,['save',...b,'--input','b.json']);await apply(ctx,['status',...b,'--status','approved']);
-  const request=parseCliArguments(['prototypes','generate','--target','generated']),planned=await planOperation(request,ctx);
-  await apply(ctx,['activate',...b]);await assert.rejects(applyOperation(planned,ctx,planned.planHash),/stale|Inputs changed/i);
-  await apply(ctx,['generate','--target','generated']);const output=JSON.parse(await readFile(join(ctx.root,'generated/design/project.json'),'utf8'));
-  assert.equal(output.design.goal,'Sitemap B');assert.equal(output.design.sitemap.routes[0].path,'/dashboard');
+test('switching activation invalidates a generation review; fresh generation uses B',{timeout:180000},async t=>{
+  const ctx=await kitAdopted(t);if(!ctx)return;const b=await saveB(ctx);await apply(ctx,['status',...b,'--status','approved']);
+  const request=parseCliArguments(['prototypes','generate']),planned=await planOperation(request,ctx);
+  // In place, the newly active variant must be adopted before it can be generated; neither state replays the A review.
+  await apply(ctx,['activate',...b]);await assert.rejects(applyOperation(planned,ctx,planned.planHash),{code:'PROTOTYPE_IMPORT_REQUIRED'});
+  const unadopted=await run(ctx,['generate']);assert.equal(unadopted.status,'failed');assert.equal(unadopted.diagnostics[0].code,'PROTOTYPE_IMPORT_REQUIRED');
+  await apply(ctx,['adopt']);await assert.rejects(applyOperation(planned,ctx,planned.planHash),/stale|Inputs changed/i);
+  await apply(ctx,['generate']);const output=await goal(ctx);
+  assert.equal(output.goal,'Sitemap B');assert.equal(output.sitemap.routes[0].path,'/dashboard');
+  assert.equal(JSON.parse(await readFile(join(ctx.root,'.companion/prototype-selection.json'),'utf8')).variantId,'sitemap-b');
 });
 test('tampered snapshots and future registries never fall back to the working source',async t=>{
   const ctx=await activated(t);await writeFile(join(ctx.root,api.snapshotPath(main)),JSON.stringify(document('Sitemap B')));
-  const response=await run(ctx,['generate','--target','generated']);assert.equal(response.status,'failed');assert.match(response.diagnostics[0].message,/bytes differ/);
+  const response=await run(ctx,['generate']);assert.equal(response.status,'failed');assert.match(response.diagnostics[0].message,/bytes differ/);
   const ctx2=await created(t),path=join(ctx2.root,'docs/concepts/prototypes.json'),registry=JSON.parse(await readFile(path,'utf8'));registry.schemaVersion=999;await writeFile(path,JSON.stringify(registry));
-  assert.equal((await run(ctx2,['list'])).status,'failed');assert.equal((await run(ctx2,['generate','--target','generated'])).status,'failed');
+  assert.equal((await run(ctx2,['list'])).status,'failed');assert.equal((await run(ctx2,['generate'])).status,'failed');
 });
 test('real shell entry routes plural prototypes separately from the prototype maker',async t=>{
-  const ctx=await created(t),output=spawnSync(process.execPath,[join(frameworkRoot,'app.mjs'),'prototypes','list','--root',ctx.root,'--json'],{encoding:'utf8',timeout:30000});
+  const ctx=await created(t),output=spawnSync(process.execPath,[join(frameworkRoot,'bin/app'),'prototypes','list','--root',ctx.root,'--json'],{encoding:'utf8',timeout:30000});
   assert.equal(output.status,0,output.stderr);assert.equal(JSON.parse(output.stdout).data.prototypes[0].id,'exploration');
 });
 test('workspace import does not overwrite a sealed or active saved document',async t=>{
@@ -105,10 +126,9 @@ test('compare is a read-only real CLI operation and metadata edits retain the sa
   await apply(ctx,['version-details','exploration','--version','v1','--label','Baseline']);
   assert.deepEqual(api.active(await snapshot(ctx)).variant.document,api.active(before).variant.document);
 });
-test('restore shell plan retains a sealed checkpoint and invalidates a reviewed generation plan',async t=>{
-  const ctx=await activated(t);await apply(ctx,['fork',...pick,'--as','sitemap-b']);await writeFile(join(ctx.root,'b.json'),JSON.stringify(document('Sitemap B')));
-  const b=['exploration','--version','v1','--variant','sitemap-b'];await apply(ctx,['save',...b,'--input','b.json']);
-  const prior=await snapshot(ctx), generation=await planOperation(parseCliArguments(['prototypes','generate','--target','out']),ctx);
+test('restore shell plan retains a sealed checkpoint and invalidates a reviewed generation plan',{timeout:180000},async t=>{
+  const ctx=await kitAdopted(t);if(!ctx)return;const b=await saveB(ctx);
+  const prior=await snapshot(ctx), generation=await planOperation(parseCliArguments(['prototypes','generate']),ctx);
   const args=['restore-snapshot',...b,'--from-version','v1','--from-variant','main','--recovery-version','recovery-one'];
   const preview=await run(ctx,args);assert.equal(preview.status,'planned');assert.deepEqual(await snapshot(ctx),prior);
   await apply(ctx,args);const after=await snapshot(ctx), backup={...alternate,versionId:'recovery-one'};
@@ -123,13 +143,15 @@ test('in-place managed generation names adoption when canonical design is absent
   assert.equal(result.status,'failed');assert.match(result.diagnostics[0].message,/adopt/);
 });
 test('managed-generation adapter rejects a lookalike provenance receipt before any writes',async t=>{
-  const {managedGenerationPlan}=await import('../../scripts/framework/prototype-generation.ts');
-  const {createFilePlan}=await import('../../scripts/shared/file-plan.mjs');
-  const ctx=await activated(t),target=join(ctx.root,'generated'),receipt=join(target,'.companion/prototype-selection.json');
+  const {managedGenerationPlan}=await import('../../bin/adapters/framework/prototype-generation.ts');
+  const {createFilePlan}=await import('../../scripts/shared/file-plan.ts');
+  // In place: the canonical design is the adopted active variant and the receipt sits at the project root.
+  const ctx=await activated(t),target=ctx.root,receipt=join(target,'.companion/prototype-selection.json');
+  await mkdir(join(ctx.root,'design'),{recursive:true});await writeFile(join(ctx.root,'design/project.json'),JSON.stringify(document()));
   await mkdir(dirname(receipt),{recursive:true});
   const foreign=JSON.stringify({schemaVersion:1,projectId:'design-lab',foreign:true});await writeFile(receipt,foreign);
   // Compiler port supplies no files: the real adapter must still validate its separately owned receipt.
   const compile=async()=>({summary:{target},plan:await createFilePlan(ctx.root,[])});
-  await assert.rejects(managedGenerationPlan(parseCliArguments(['generate','--target','generated']),ctx,compile),/PROTOTYPE_SHAPE/);
+  await assert.rejects(managedGenerationPlan(parseCliArguments(['generate']),ctx,compile),/PROTOTYPE_SHAPE/);
   assert.equal(await readFile(receipt,'utf8'),foreign);
 });

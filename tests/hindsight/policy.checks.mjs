@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { consent, identity, loopback, object, configured, disabled, requireEnabled, document, seedPlan, digest } from '../../scripts/hindsight/policy.ts';
-import { sha256 } from '../../scripts/shared/hash.mjs';
+import { sha256 } from '../../scripts/shared/hash.ts';
 import { install, installationPlan } from '../../scripts/hindsight/install.ts';
 import { paths } from '../../scripts/hindsight/io.ts';
 const repo = identity('/work/repo', '/work/repo/.git', 'git@github.com:Owner/Repo.git');

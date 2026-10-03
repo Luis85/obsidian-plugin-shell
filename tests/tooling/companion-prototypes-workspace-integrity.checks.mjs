@@ -4,10 +4,10 @@ import { mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } f
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { loadPrototypeWorkspace } from '../../scripts/framework/prototype-workspace.ts';
-import { managedGenerationPlan } from '../../scripts/framework/prototype-generation.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { loadPrototypeWorkspace } from '../../bin/adapters/framework/prototype-workspace.ts';
+import { managedGenerationPlan } from '../../bin/adapters/framework/prototype-generation.ts';
 import { document } from '../support/prototype-fixture.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t) {
@@ -33,7 +33,7 @@ test('default generation never reaches the compiler fallback after registry loss
   const context = await orphaned(t); let calls = 0;
   // Only the compiler port is injected; registry detection executes the real filesystem adapter.
   const compile = async () => { calls++; return {source:'unmanaged-fallback'}; };
-  await assert.rejects(managedGenerationPlan(parseCliArguments(['generate','--target','preview']), context, compile), {code:'PROTOTYPE_REGISTRY_MISSING'});
+  await assert.rejects(managedGenerationPlan(parseCliArguments(['generate']), context, compile), {code:'PROTOTYPE_REGISTRY_MISSING'});
   assert.equal(calls, 0);
 });
 test('a generated consumer can retain provenance without owning the source prototype library', async t => {
@@ -43,23 +43,23 @@ test('a generated consumer can retain provenance without owning the source proto
   await writeFile(join(context.root, '.companion/prototype-selection.json'), receipt);
   assert.deepEqual(await loadPrototypeWorkspace(context), {workspace:null, files:new Map()});
   let calls = 0;
-  await managedGenerationPlan(parseCliArguments(['generate','--target','preview']), context, async () => {calls++; return {};});
+  await managedGenerationPlan(parseCliArguments(['generate']), context, async () => {calls++; return {};});
   assert.equal(calls, 1);
   assert.equal(await readFile(join(context.root, '.companion/prototype-selection.json'), 'utf8'), receipt);
 });
-test('ordinary unrelated concept documents retain standalone compatibility and are never modified', async t => {
+test('ordinary unrelated concept documents remain unmanaged and are never modified', async t => {
   const context = await fixture(t);
   await mkdir(join(context.root, 'docs/concepts/unmanaged'), {recursive:true});
   await writeFile(join(context.root, 'docs/concepts/unmanaged/prototype.manifest.json'), '{"format":"unrelated-concept"}');
   const before = await readdir(context.root, {recursive:true});
   assert.deepEqual(await loadPrototypeWorkspace(context), {workspace:null, files:new Map()});
   let calls = 0;
-  await managedGenerationPlan(parseCliArguments(['generate','--target','preview']), context, async () => {calls++; return {};});
+  await managedGenerationPlan(parseCliArguments(['generate']), context, async () => {calls++; return {};});
   assert.equal(calls, 1); assert.deepEqual(await readdir(context.root, {recursive:true}), before);
 });
 test('explicit standalone input still bypasses managed selection intentionally', async t => {
   const context = await orphaned(t); let calls = 0;
-  const result = await managedGenerationPlan(parseCliArguments(['generate','--input','source.json','--target','preview']), context,
+  const result = await managedGenerationPlan(parseCliArguments(['generate','--input','source.json']), context,
     async () => {calls++; return {standalone:true};});
   assert.equal(calls, 1); assert.deepEqual(result, {standalone:true});
 });

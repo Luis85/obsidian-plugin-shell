@@ -1,5 +1,5 @@
-import { sha256 } from '../shared/hash.mjs';
-export { sha256 } from '../shared/hash.mjs';
+import { sha256 } from '../shared/hash.ts';
+export { sha256 } from '../shared/hash.ts';
 import { lstat, readFile, readdir, mkdir, writeFile, rename, mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';

@@ -148,10 +148,22 @@ transaction. Failed operations can leave newly created empty parent directories.
 ## Local custom recipes
 
 The explicit `customMakers` registry contains metadata (`name`, `version`,
-`description`) and an async `plan(context, request)` method. Request name/owner
-are validated. Context supplies read-only source access and declarative
-`add`/`editArray` planning methods plus targeted test paths. Builtin primitives are
-reusable. The runner owns review, formatting, hashes, locking, writes and checks.
+`description`) and an async `plan(context, request)` method. The runner validates
+each recipe object and its request name/owner. It then injects a frozen context:
+read-only source access, the declarative `add`/`editArray` planning methods,
+targeted test paths and the reusable builtin `action` primitive, which revalidates
+its request. Recipe files import nothing from the framework, so the same file
+works in a source checkout and in an extracted kit. The context has no `root`,
+`edit` or `finish`. The runner owns review, formatting, hashes, locking, writes
+and checks.
+
+A generated recipe's test checks this contract with a recording context. The
+framework's own recipe tests prove the composed command and its registrations.
+`make locale <name>` writes a test that runs the project's own CLI:
+`node bin/app make locale <name> --check --json`. The `--check` flag is
+read-only. It compares the pending draft keys with the current base keys and
+reports `missing`, `extra` and `selectable`. Drift fails with
+`LOCALE_DRAFT_DRIFT`. It plans nothing and refuses write options.
 
 Local recipe code is trusted developer code, not a sandbox. There is no remote
 loader, JSON command hook or automatic package installation. Recipes must return

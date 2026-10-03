@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { planExampleRemoval } from '../../scripts/examples/plan.mjs';
-import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 
 const reviewed = '# Reviewed template\n';
 const replacement = '# Independent foundation\n';
@@ -13,13 +13,14 @@ async function fixture(work) {
   const root = await mkdtemp(join(tmpdir(), 'readme-ownership-'));
   try {
     await mkdir(join(root, 'src/bootstrap'), { recursive: true });
-    await mkdir(join(root, 'scripts/examples/templates'), { recursive: true });
+    await mkdir(join(root, 'templates/examples'), { recursive: true });
+    await mkdir(join(root, 'scripts/examples'), { recursive: true });
     await writeFile(join(root, 'src/bootstrap/features.ts'), `import { createNoteFeatures } from '../application/note-feature';
 export function createFeatures(services) { return createNoteFeatures(services, () => ({})); }
 `);
     await writeFile(join(root, 'scripts/examples/ownership.json'), JSON.stringify({ version: 1, registrations: [],
       files: [{ path: 'README.md', sha256: createHash('sha256').update(reviewed).digest('hex'), template: 'README.md.txt' }] }));
-    await writeFile(join(root, 'scripts/examples/templates/README.md.txt'), replacement);
+    await writeFile(join(root, 'templates/examples/README.md.txt'), replacement);
     await writeFile(join(root, 'README.md'), reviewed);
     await writeFile(join(root, 'consumer.txt'), 'business source\n');
     await work(root);

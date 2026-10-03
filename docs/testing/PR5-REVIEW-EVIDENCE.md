@@ -87,14 +87,14 @@ Paths below are relative to the reviewed source. Later edits require fresh compa
 
 | Review area | Primary source seams |
 | --- | --- |
-| CLI entry, setup, scopes and discovery | [CLI](../../scripts/framework/cli.ts), [catalog](../../scripts/framework/catalog.ts), [operations](../../scripts/framework/operations.ts), [schemas](../../scripts/framework/schemas.ts), [inspection](../../scripts/framework/inspection.ts) |
+| CLI entry, setup, scopes and discovery | [CLI](../../bin/adapters/framework-cli.ts), [catalog](../../bin/adapters/framework/catalog.ts), [operations](../../bin/adapters/framework/operations.ts), [schemas](../../bin/adapters/framework/schema.ts), [inspection](../../bin/adapters/framework/inspection.ts) |
 | v6 and compatibility | [authoring contract](../../scripts/companion/authoring-contract.ts), [post-MVP compiler integration](../development/compiler/POST-MVP-INTEGRATION.md), [sitemap model](../../scripts/companion/sitemap/model.ts) |
-| Compiler boundaries | [pipeline](../../scripts/compiler/application/pipeline.ts), [frontend adapter](../../scripts/compiler/adapters/frontend.ts), [architecture](../development/compiler/ARCHITECTURE.md), [generation](../../scripts/framework/generation.ts) |
-| Concept intake and regeneration | [concept operations](../../scripts/framework/concepts.ts), [pure application](../../scripts/companion/concepts/apply.ts), [contract](../development/CONCEPT-INTAKE.md), [file planner](../../scripts/shared/file-plan.mjs) |
+| Compiler boundaries | [pipeline](../../bin/compiler/application/pipeline.ts), [frontend adapter](../../bin/compiler/adapters/frontend.ts), [architecture](../development/compiler/ARCHITECTURE.md), [generation](../../bin/adapters/framework/generation.ts) |
+| Concept intake and regeneration | [concept operations](../../bin/adapters/framework/concepts.ts), [pure application](../../scripts/companion/concepts/apply.ts), [contract](../development/CONCEPT-INTAKE.md), [file planner](../../scripts/shared/file-plan.ts) |
 | Editor interaction and layout | [graph composable](../concepts/companion/editor/composables/use-graph.ts), [editor composable](../concepts/companion/editor/composables/use-editor.ts), [visual editor guide](../concepts/companion/VISUAL-EDITORS.md), [browser assertions](../../tests/concepts/companion-mvp.browser.py) |
 | Native starters | [custom TextFileView](../../src/infrastructure/obsidian/custom-file-view.ts), [registrations](../../src/infrastructure/obsidian/native-integrations.ts), [native guide](../development/native-file-integrations.md) |
 | Optional tooling | [Hindsight verification](../development/HINDSIGHT-VERIFICATION.md), [Jev guide](../concepts/jev-prompt-editor/README.md), [Jev runner](../concepts/jev-prompt-editor/src/domain/logic/runner.ts), [prototype skill](../../.claude/skills/companion-prototype-design/SKILL.md) |
-| Quality and distribution | [suite inventory](../../tests/suites.json), [CI](../../.github/workflows/ci.yml), [kit distribution](../../scripts/framework/distribution.ts), [submission checks](../../scripts/framework/submission.ts), [delivery gates](../product/DELIVERY-STRATEGY.md) |
+| Quality and distribution | [suite inventory](../../tests/suites.json), [CI](../../.github/workflows/ci.yml), [kit distribution](../../bin/adapters/framework/distribution.ts), [submission checks](../../bin/adapters/framework/submission.ts), [delivery gates](../product/DELIVERY-STRATEGY.md) |
 
 External review criteria were checked against primary W3C WCAG 2.2 material and current official Obsidian developer-policy/submission pages, linked where used in the review/plan. No market, pricing, legal-compliance or formal accessibility claim was inferred.
 

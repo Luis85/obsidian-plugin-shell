@@ -1,4 +1,4 @@
-import { parseJsonData, parseDesignData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData, parseDesignData } from '../../scripts/contracts/json-data.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PassThrough } from 'node:stream';
@@ -6,12 +6,12 @@ import { mkdtemp, realpath, readFile, writeFile, readdir, mkdir, rm } from 'node
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { readInput, ask } from '../../scripts/framework/input.ts';
+import { readInput, ask } from '../../scripts/shared/input.ts';
 import { readInput as sharedReadInput, ask as sharedAsk } from '../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
-import { parseCliArguments, validateRequest, descriptor } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { exportDesignSystem } from '../../scripts/framework/style-export.ts';
+import { parseCliArguments, validateRequest, descriptor } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { exportDesignSystem } from '../../bin/adapters/framework/style-export.ts';
 import { compileDesignSystem } from '../../scripts/companion/design-system-css.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));

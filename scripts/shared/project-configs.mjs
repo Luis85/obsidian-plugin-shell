@@ -1,22 +1,18 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-/**
- * Generated-project tool configuration lives under configs/<concern>/. Projects generated before that
- * layout keep their root copy: regeneration never removes a retired file, so readers fall back to it.
- */
+/** Generated-project configuration has one canonical location under configs/<concern>/. */
 export const projectConfigs = Object.freeze({
-  vitest: { path: 'configs/testing/vitest.project.config.mjs', legacy: 'vitest.project.config.mjs' },
-  typescript: { path: 'configs/types/tsconfig.project.json', legacy: 'tsconfig.project.json' },
-  preview: { path: 'configs/bundling/vite.preview.config.mjs', legacy: 'vite.preview.config.mjs' },
+  vitest: { path: 'configs/testing/vitest.project.config.mjs' },
+  typescript: { path: 'configs/types/tsconfig.project.json' },
+  preview: { path: 'configs/bundling/vite.preview.config.mjs' },
 });
 
-/** The project-relative config path to use, or null when the project has neither location. */
+/** The project-relative config path to use, or null when the canonical file is absent. */
 export function projectConfigPath(root, kind) {
   const config = projectConfigs[kind];
   if (!config) throw new Error(`Unknown project config: ${kind}`);
-  if (existsSync(join(root, config.path))) return config.path;
-  return existsSync(join(root, config.legacy)) ? config.legacy : null;
+  return existsSync(join(root, config.path)) ? config.path : null;
 }
 
 /** tsconfig include globs are relative to the config file; report them project-relative. */

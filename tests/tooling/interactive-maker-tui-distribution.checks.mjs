@@ -5,8 +5,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
-import * as legacyFrameworkKit from '../../scripts/framework/kit.ts';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 let compilerVersion;
@@ -15,7 +14,6 @@ catch (error) { if (error.code !== 'ENOENT') throw error; }
 const qualified = compilerVersion === '6.0.3';
 if (process.env.CI && process.env.CI !== 'false') assert.equal(qualified, true, 'CI requires repository-local TypeScript 6.0.3.');
 const check = qualified ? test : test.skip;
-check('relocated framework kit keeps compatibility identity', () => { assert.equal(legacyFrameworkKit.assembleKit, assembleKit); assert.equal(legacyFrameworkKit.installedCompiler, installedCompiler); });
 check('compiled maker kit discovers contracts without dependencies and refuses repacking an example-removed consumer', async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-compiled-'));
   try {
@@ -23,11 +21,11 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
     if (await reviewedExamplesRemoved(frameworkRoot)) {
       // Consumer verification has no pristine showcase to package. Enforce that boundary instead.
       await assert.rejects(assembleKit({ root, frameworkRoot }, compiler), { code: 'KIT_OWNERSHIP' });
-      await assert.rejects(readFile(join(root, 'app.mjs')), { code: 'ENOENT' });
+      await assert.rejects(readFile(join(root, 'bin/app.js')), { code: 'ENOENT' });
       return;
     }
     const files = await assembleKit({ root, frameworkRoot }, compiler);
-    // Extract the release kit as shipped: the bundled CLI reads its guides and schemas from .framework/template.
+    // Extract the release kit as shipped: the bundled CLI reads its guides and schemas from bin/template.
     for (const file of files) {
       const target = join(root, file.path); await mkdir(dirname(target), { recursive: true }); await writeFile(target, file.bytes);
     }
@@ -35,14 +33,14 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
     // The shell carries no starters: project creation and setup wait for the separate pack.
     const bare = spawnSync(process.execPath, ['bin/app', 'new', 'starters', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
     assert.equal(bare.status, 0, bare.stderr + bare.stdout); assert.deepEqual(JSON.parse(bare.stdout).data.starters, []);
-    const noSetup = spawnSync(process.execPath, ['shell.mjs', 'project-setup', 'guide', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
+    const noSetup = spawnSync(process.execPath, ['bin/app', 'project-setup', 'guide', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
     assert.equal(noSetup.status, 1); assert.equal(JSON.parse(noSetup.stdout).diagnostics[0].code, 'PROJECT_STARTER_UNKNOWN');
     for (const file of await assembleStarterPack({ root: frameworkRoot, frameworkRoot })) {
       const target = join(root, file.path); await mkdir(dirname(target), { recursive: true }); await writeFile(target, file.bytes);
     }
     for (const args of [['studio', '--help', '--json'], ['sketch', 'schema', '--json'], ['prototype', 'guide', '--json'], ['project-setup', 'schema', '--json'], ['project-setup', 'guide', '--json'], ['first-run', 'schema', '--json'], ['first-run', 'status', '--json'], ['settings', 'schema', '--json'], ['settings', 'show', '--json'], ['new', 'starters', '--json'], ['new', 'guide', '--starter', 'cli', '--json']]) {
-      // Alternate the extensionless entry and the legacy shim; both must reach the compiled maker.
-      const run = spawnSync(process.execPath, [args[0] === 'settings' ? 'shell.mjs' : 'bin/app', ...args], { cwd: root, encoding: 'utf8', timeout: 20000 });
+      // The single extensionless bin/app entry must reach the compiled maker.
+      const run = spawnSync(process.execPath, ['bin/app', ...args], { cwd: root, encoding: 'utf8', timeout: 20000 });
       assert.equal(run.status, 0, run.stderr + run.stdout);
       const result = JSON.parse(run.stdout); assert.equal(result.status, 'ok');
       if (args[0] === 'studio') assert.match(result.data.help, /--ui <auto\|tui\|plain>/);
@@ -50,11 +48,11 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
       if (args[0] === 'project-setup' && args[1] === 'guide') assert.equal(result.data.selection.starter.id, 'webapp-angular');
       if (args[0] === 'prototype') assert.equal(result.data.guide.id, 'companion-prototype');
     }
-    const bundle = await readFile(join(root, '.framework/compiled/app.js'), 'utf8');
+    const bundle = await readFile(join(root, 'bin/app.js'), 'utf8');
     assert.match(bundle, /node:readline/);
     // Only executable module locations are rebased; generated-project source text in templates stays verbatim.
     assert.ok(bundle.includes('loadVaultFixtures(join(import.meta.dirname, '), 'devkit test template keeps import.meta.dirname');
     assert.ok(bundle.includes("fileURLToPath(new URL('../../tests/support/obsidian/index.ts', import.meta.url))"), 'devkit Vitest template keeps import.meta.url');
-    assert.match(bundle, /new URL\("\.\.\/template\/[^"]+", import\.meta\.url\)\.href/);
+    assert.match(bundle, /new URL\("\.\/template\/[^"]+", import\.meta\.url\)\.href/);
   } finally { await rm(root, { recursive: true, force: true }); }
 });

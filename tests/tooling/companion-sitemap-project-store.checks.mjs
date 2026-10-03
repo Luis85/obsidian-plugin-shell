@@ -5,7 +5,7 @@ import { JourneyProjectStore, importJourneyProject, projectFilePath } from '../.
 import { SitemapSession } from '../../scripts/companion/sitemap/session.ts';
 import { canonicalKey } from '../../scripts/companion/sitemap/safety.ts';
 import { editorBindings } from '../../scripts/companion/sitemap/editor-bindings.ts';
-import { journeyVaultFiles } from '../../scripts/companion/runtime/journey-vault.ts';
+import { journeyVaultFiles } from '../../templates/companion/runtime/journey-vault.ts';
 const seed = await readFile(new URL('../../docs/concepts/companion/starters/quick-capture.companion.json', import.meta.url), 'utf8');
 function fixture(t) {
   let raw = seed, writes = 0, outcome = null, release = null;

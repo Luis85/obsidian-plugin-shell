@@ -11,7 +11,7 @@ node bin/app version --json
 node bin/app doctor
 ```
 
-Run from the folder containing the intended `app.mjs` (the project root; `node bin/app` is the extensionless entry and `shell.mjs` a compatibility shim). Commands normally discover a project root from the working directory; use `--root` when you need to select it explicitly. Quote paths containing spaces. Avoid developing directly inside your personal Obsidian vault.
+Run from the project or CLI package root and invoke `node bin/app`; it is the single supported launcher. Commands normally discover a project root from the working directory; use `--root` when you need to select it explicitly. Quote paths containing spaces. Avoid developing directly inside your personal Obsidian vault.
 
 The extracted kit contains compiled CLI modules and can start before project dependency installation. The source launcher uses Node's TypeScript support, requesting type stripping where necessary. Starting the CLI is different from installing dependencies required to build or test a generated application.
 

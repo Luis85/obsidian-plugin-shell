@@ -6,28 +6,31 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
+import { extractKit } from './framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { newDocument } from '../../bin/domain/document.ts';
 import { savePlan, applyPrepared } from '../../bin/adapters/storage.ts';
 import { openDocument } from '../../bin/domain/document.ts';
 import { addPage } from '../../bin/domain/pages.ts';
 import { attachComponents } from '../../bin/domain/components.ts';
-import { defaults } from '../../scripts/framework/configuration.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
-import { projectEntities } from '../../scripts/application-docs/adapters/model.ts';
-import { keyOf } from '../../scripts/application-docs/domain/contracts.ts';
-import { parseMarkdown, renderMarkdown } from '../../scripts/application-docs/adapters/markdown.ts';
-import { journalHook, recoverDocuments } from '../../scripts/application-docs/adapters/recovery.ts';
-import { documentationDigest as digest } from '../../scripts/application-docs/adapters/filesystem.ts';
-import { documentationStatus } from '../../scripts/application-docs/adapters/plan.ts';
+import { defaults } from '../../bin/adapters/framework/configuration.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
+import { projectEntities } from '../../bin/documentation/adapters/model.ts';
+import { keyOf } from '../../bin/documentation/domain/contracts.ts';
+import { parseMarkdown, renderMarkdown } from '../../bin/documentation/adapters/markdown.ts';
+import { journalHook, recoverDocuments } from '../../bin/documentation/adapters/recovery.ts';
+import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
+import { documentationStatus } from '../../bin/documentation/adapters/plan.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 test('documentation status adapter remains an explicit lazy-load contract', () => { assert.equal(typeof documentationStatus, 'function'); });
 async function directory(t) { const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-docs-'))); t.after(() => rm(dir, { recursive: true, force: true })); return dir; }
 async function write(path, value) { await mkdir(dirname(path), { recursive: true }); await writeFile(path, value); }
-async function fixture(t, project = projectFixture().project) {
-  const root = await directory(t), ctx = { root, frameworkRoot, inputText: JSON.stringify(project) };
+async function fixture(t, project = projectFixture().project, kit = false) {
+  const root = await directory(t), ctx = { root, frameworkRoot: kit ? root : frameworkRoot, inputText: JSON.stringify(project) };
+  if (kit) await extractKit(frameworkRoot, root);
   const response = await executeOperation(parseCliArguments(['setup', '--input', '-', '--yes']), ctx);
   assert.equal(response.status, 'applied', JSON.stringify(response)); delete ctx.inputText;
   return ctx;
@@ -166,13 +169,13 @@ test('an interaction can move to another existing source while retaining its sta
   assert.equal((await run(ctx,['docs','import',entry.path,'--yes'])).status,'applied');const project=await readJson(join(ctx.root,'design/project.json')), events=projectEntities(project).filter(e=>e.type==='interaction');assert.equal(events.length,1);assert.equal(events[0].id,fixtureData.interaction);assert.equal(events[0].fields.source_node_id,destination);
 });
 test('machine schema discovery succeeds outside a configured project without prompting', async t=>{
-  const root=await directory(t);await write(join(root,'shell.config.json'),'broken');const response=spawnSync(process.execPath,[join(frameworkRoot,'app.mjs'),'docs','schema','--json','--no-interaction'],{cwd:root,encoding:'utf8',timeout:30000});
+  const root=await directory(t);await write(join(root,'shell.config.json'),'broken');const response=spawnSync(process.execPath,[join(frameworkRoot,'bin/app'),'docs','schema','--json','--no-interaction'],{cwd:root,encoding:'utf8',timeout:30000});
   assert.equal(response.status,0,response.stderr);const result=JSON.parse(response.stdout);assert.equal(result.command,'docs schema');assert.ok(result.data.types.includes('journey'));assert.equal(response.stdout.trim().split('\n').length,1);
 });
 
 test('interactive setup reviews docs import before generation and offers independent docs export', async () => {
-  const { continueSetup } = await import('../../scripts/framework/setup-terminal.ts');
-  const { result } = await import('../../scripts/framework/contracts.ts');
+  const { continueSetup } = await import('../../bin/presentation/terminal/setup-terminal.ts');
+  const { result } = await import('../../bin/adapters/framework/contracts.ts');
   const answers=['no','yes','docs/application','yes','no','yes','yes'], calls=[];
   const execute=async request=>{calls.push(request);return request.options.apply ? result(request.command,{},'applied') : result(request.command,{planHash:'a'.repeat(64)},'planned');};
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},execute,async()=>answers.shift(),()=>{},result('setup',{},'applied'));
@@ -180,7 +183,7 @@ test('interactive setup reviews docs import before generation and offers indepen
   assert.deepEqual(calls[0].args,['docs/application']);assert.equal(calls[1].options.apply,'a'.repeat(64));assert.equal(answers.length,0);
 });
 test('declining reviewed docs changes cancels setup rather than applying or generating', async()=>{
-  const { continueSetup }=await import('../../scripts/framework/setup-terminal.ts');const { result }=await import('../../scripts/framework/contracts.ts');
+  const { continueSetup }=await import('../../bin/presentation/terminal/setup-terminal.ts');const { result }=await import('../../bin/adapters/framework/contracts.ts');
   const answers=['no','yes','','no'], calls=[];
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},async request=>{calls.push(request.command);return result(request.command,{planHash:'b'.repeat(64)},'planned');},async()=>answers.shift(),()=>{},result('setup',{},'applied'));
   assert.equal(outcome.status,'cancelled');assert.deepEqual(calls,['docs import']);
@@ -194,8 +197,8 @@ for (const boundary of [0, 1, 3]) test(`terminated writer recovers at destinatio
   const original = await snapshot(root);
   const entries = [{path:'docs/page.md',content:'After page'}, {path:'docs/added.md',content:'New document'},
     {path:'design/project.json',content:'{"after":true}\n'}, {path:'design/docs-index.json',content:'{"baseline":"after"}\n'}];
-  const writer = new URL('../../scripts/shared/file-plan.mjs', import.meta.url).href;
-  const journal = new URL('../../scripts/application-docs/adapters/recovery.ts', import.meta.url).href;
+  const writer = new URL('../../scripts/shared/file-plan.ts', import.meta.url).href;
+  const journal = new URL('../../bin/documentation/adapters/recovery.ts', import.meta.url).href;
   const code = `import {createFilePlan,applyFilePlan} from ${JSON.stringify(writer)}; import {journalHook} from ${JSON.stringify(journal)};
     const plan=await createFilePlan(${JSON.stringify(root)},${JSON.stringify(entries)}), record=journalHook(plan);
     await applyFilePlan(plan,{async beforeWrite(change,index){await record();if(index===${boundary})process.kill(process.pid,'SIGKILL');}});`;
@@ -225,8 +228,10 @@ test('merged command discovery retains documentation, handout and prototype hand
   assert.equal((await run(ctx, ['docs', 'schema'])).status, 'ok');
 });
 
-test('Markdown intake preserves the active prototype and requires explicit variant promotion before generation', async t => {
-  const ctx = await fixture(t), selected = ['exploration', '--version', 'v1', '--variant', 'main'];
+test('Markdown intake preserves the active prototype and requires explicit variant promotion before generation', { timeout: 180000 }, async t => {
+  if (await reviewedExamplesRemoved(frameworkRoot)) { t.skip('In-place generation requires the framework kit and its reviewed example sources.'); return; }
+  // In-place generation runs inside an extracted, verified kit.
+  const ctx = await fixture(t, undefined, true), selected = ['exploration', '--version', 'v1', '--variant', 'main'];
   async function apply(args) {
     const result = await run(ctx, [...args, '--yes']);
     assert.ok(['applied', 'unchanged'].includes(result.status), JSON.stringify(result));
@@ -243,16 +248,17 @@ test('Markdown intake preserves the active prototype and requires explicit varia
   const blocked = await run(ctx, ['generate', '--dry-run']);
   assert.equal(blocked.status, 'failed', JSON.stringify(blocked));
   assert.equal(blocked.diagnostics[0].code, 'PROTOTYPE_IMPORT_REQUIRED');
-  const pinned = await run(ctx, ['prototypes', 'generate', '--target', 'pinned-preview', '--dry-run']);
-  assert.equal(pinned.status, 'planned', JSON.stringify(pinned));
-  assert.equal(pinned.data.summary.prototypeSelection.variantId, 'main');
+  // The pinned variant is never compiled over the Markdown-edited canonical design either.
+  const pinned = await run(ctx, ['prototypes', 'generate', '--dry-run']);
+  assert.equal(pinned.status, 'failed', JSON.stringify(pinned));
+  assert.equal(pinned.diagnostics[0].code, 'PROTOTYPE_IMPORT_REQUIRED');
   assert.deepEqual(await snapshot(join(ctx.root, 'docs/concepts')), saved);
   await apply(['prototypes', 'fork', ...selected, '--as', 'markdown-edit']);
   const next = ['exploration', '--version', 'v1', '--variant', 'markdown-edit'];
   await apply(['prototypes', 'save', ...next]);
   await apply(['prototypes', 'status', ...next, '--status', 'approved']);
   await apply(['prototypes', 'activate', ...next]);
-  const generation = await run(ctx, ['generate', '--target', 'markdown-preview', '--dry-run']);
+  const generation = await run(ctx, ['generate', '--dry-run']);
   assert.equal(generation.status, 'planned', JSON.stringify(generation));
   assert.equal(generation.data.summary.prototypeSelection.variantId, 'markdown-edit');
   const project = await readJson(join(ctx.root, 'design/project.json'));

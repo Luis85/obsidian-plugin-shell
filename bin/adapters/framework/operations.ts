@@ -1,11 +1,11 @@
 import { resolve } from 'node:path';
-import { packStarterOperation, readStarterOperation } from '../../../scripts/starters/operations.ts';
-import { starterProcessOperation } from '../../../scripts/starters/processes.ts';
+import { packStarterOperation, readStarterOperation } from '../starters/operations.ts';
+import { starterProcessOperation } from '../starters/processes.ts';
 import { airshipOperation } from './airship.ts';
 import { buildClickdummy } from './clickdummy.ts';
 import { checkOperation } from './check.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
-import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
+import { compilerOperation } from '../../compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
 import { obsidianRead } from './obsidian-cli.ts';
 import { fixtureOperation } from './fixtures.ts';
@@ -16,8 +16,8 @@ import { starterListing, completeStarterProject } from './starter-project.ts';
 import { storybookOperation } from './storybook.ts';
 import { submissionCheck } from './submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
-import { capabilityCatalog } from '../../../scripts/operations/catalog.mjs';
-import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { capabilityCatalog } from '../operations/catalog.ts';
+import { result, failure, requireThat, stringOption, OperationError, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
 import { fileOperation } from './file-operation.ts';
 import { processOperation } from './process-operation.ts';
@@ -58,6 +58,22 @@ function makerDiscovery(request: Request): Result {
   requireThat(makers.length > 0, 'MAKER_UNKNOWN',
     `Supply an existing recipe ID; use make list.${didYouMean(suggestions(request.args[1] ?? '', catalog.map(item => item.id)), value => `"${value}"`)}`);
   return result(request.command, { makers });
+}
+const isMakerCheck = (request: Request) => request.command === 'make' && request.options.check === true;
+const checkOptions = ['check', 'json', 'root', 'no-interaction', 'dry-run'];
+/** make locale <name> --check compares the pending draft with the current base keys; it plans and writes nothing. */
+async function makerCheck(request: Request, context: Context): Promise<Result> {
+  const [recipe, name] = request.args;
+  requireThat(recipe === 'locale' && name, 'MAKER_CHECK_UNSUPPORTED', 'Only make locale <name> --check has a read-only check.');
+  requireThat(Object.keys(request.options).every(key => checkOptions.includes(key)), 'MAKER_CHECK_OPTIONS', '--check is read-only; it accepts only --json, --root, --no-interaction and --dry-run.');
+  const { slug } = await import('../makers/arguments.ts');
+  const { createMakerContext } = await import('../makers/engine.ts');
+  const { checkPendingLocale } = await import('../makers/pending-locale.ts');
+  const check = await checkPendingLocale(createMakerContext(context.root).read, slug(name, 'locale name'));
+  if (!check.missing.length && !check.extra.length && check.selectable === false) return result(request.command, check);
+  const drift = new OperationError('LOCALE_DRAFT_DRIFT', `Pending locale ${check.locale} differs from the base keys or is selectable.`, 'Restore missing keys, remove extra keys and keep the draft unselectable until its translation review.');
+  drift.details = check;
+  throw drift;
 }
 async function newProject(request: Request, context: Context): Promise<Result> {
   if (request.options.list) return starterListing(context);
@@ -105,6 +121,7 @@ const routes: Route[] = [
   [(request, effect) => request.command.startsWith('docs ') && effect !== 'plan', docsRead],
   [(_request, effect) => effect === 'fixtures', (request, context) => fixtureOperation(request, context)],
   [isMakerDiscovery, makerDiscovery],
+  [isMakerCheck, makerCheck],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],
   [prefixed('storybook '), (request, context) => storybookOperation(request, context)],

@@ -13,6 +13,7 @@ import { stdin, stdout, stderr } from 'node:process';
 import type { Readable, Writable } from 'node:stream';
 import { ask } from '../scripts/shared/input.ts';
 import { failure } from './adapters/framework/contracts.ts';
+export { resultEnvelope } from '../scripts/contracts/result-runtime.mjs';
 import { result as operationResult, type ResultStatus } from '../scripts/contracts/result.ts';
 import { SketchError } from './domain/errors.ts';
 import { parseArguments, execute, option, type Arguments, type CommandContext } from './adapters/commands.ts';

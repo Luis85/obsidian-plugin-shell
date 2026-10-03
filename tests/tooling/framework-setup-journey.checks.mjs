@@ -4,13 +4,13 @@ import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath, symlink } f
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { setupProgress } from '../../scripts/framework/setup-progress.ts';
-import { guidedSetup, continueSetup } from '../../scripts/framework/setup-terminal.ts';
-import { result } from '../../scripts/framework/contracts.ts';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
-import { zip } from '../../scripts/framework/zip.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { setupProgress } from '../../bin/adapters/framework/setup-progress.ts';
+import { guidedSetup, continueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
+import { result } from '../../bin/adapters/framework/contracts.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t) {

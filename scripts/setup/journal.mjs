@@ -1,8 +1,8 @@
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { sha256 } from '../shared/hash.mjs';
-import { statIfPresent as present } from '../shared/fs-presence.mjs';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { sha256 } from '../shared/hash.ts';
+import { statIfPresent as present } from '../shared/fs-presence.ts';
+import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 const journalPath = '.template-state/setup.json';
 export const digest = value => sha256(value);
 function invalidAgentMcp(value) {
@@ -45,7 +45,7 @@ export async function inputFingerprint(root, toolchain, options) {
     if (stat.isDirectory()) for (const name of (await readdir(absolute)).sort()) await visit(`${path}/${name}`);
     else if (stat.isFile()) files.push([path, digest(await readFile(absolute))]);
   }
-  for (const path of ['src', 'scripts', 'harness', 'tests', '.github', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'docs/testing/test-plan.json', 'docs/design/obsidian-tokens.json', 'tsconfig.json', 'configs']) await visit(path);
+  for (const path of ['src', 'scripts', 'templates', 'harness', 'tests', '.github', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'docs/testing/test-plan.json', 'docs/design/obsidian-tokens.json', 'tsconfig.json', 'configs']) await visit(path);
   return digest(JSON.stringify({ files, toolchain, profile: options.profile, skipInstall: Boolean(options['skip-install']), deferVerify: Boolean(options['defer-verify']),
     browser: Boolean(options['provision-browser']), mcp: Boolean(options.mcp) }));
 }

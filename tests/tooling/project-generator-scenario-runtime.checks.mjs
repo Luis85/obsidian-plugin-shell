@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp, effectScope, nextTick, reactive, ref } from 'vue';
-import { useVisual, provideVisualContext } from '../../scripts/companion/runtime/use-visual.ts';
+import { useVisual, provideVisualContext } from '../../templates/companion/runtime/use-visual.ts';
 const literal = value => ({ kind: 'literal', value });
 const button = (id, actions) => ({ id, kind: 'component', ref: { kind: 'nuxt-ui', entryId: 'u-button' }, props: {}, slots: {}, events: [{ id: 'vi-' + id, event: 'click', label: id, notes: '', acceptance: '', actions }] });
 const layout = { mode: 'row', ui: { gap: 8, padding: 4, columns: 2, align: 'start', justify: 'start', wrap: false, overflow: 'visible', widthMode: 'fill', width: 320, minWidth: 0, maxWidth: 1200, narrow: { layout: 'stack', columns: 1, hidden: false }, tokens: { gap: '', padding: '', color: '', background: '', radius: '', typography: '' } } };

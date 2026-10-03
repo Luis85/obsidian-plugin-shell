@@ -4,11 +4,11 @@ import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
-import { renderTemplate } from '../../scripts/companion/compiler/devkit-files.ts';
-import { rebaseMarkdown, relocatedPath } from '../../scripts/companion/compiler/framework-docs.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { projectFiles } from '../support/project-render.mjs';
+import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { renderTemplate } from '../../bin/compiler/emitters/devkit-files.ts';
+import { rebaseMarkdown, relocatedPath } from '../../bin/compiler/emitters/framework-docs.ts';
 import { inspectWorkflow, markdownLinks } from '../../scripts/quality/check-repository.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

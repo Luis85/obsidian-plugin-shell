@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fc from 'fast-check';
-import { referenceDiagnostics } from '../../scripts/compiler/domain/references.ts';
-import { artifactCollector, validateArtifacts, canonicalJson } from '../../scripts/compiler/domain/artifacts.ts';
+import { referenceDiagnostics } from '../../bin/compiler/domain/references.ts';
+import { artifactCollector, validateArtifacts, canonicalJson } from '../../bin/compiler/domain/artifacts.ts';
 const file=path=>({path,content:'data',ownership:'managed',producer:'p'});
 test('property: valid navigation chains and precisely located missing parents',()=>{
   fc.assert(fc.property(fc.integer({min:1,max:100}),fc.string({maxLength:100}), (count,label)=>{

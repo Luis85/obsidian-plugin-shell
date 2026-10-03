@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readdir } from 'node:fs/promises';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
 import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
 import { BACK, brainstormScratch, scriptedRich, quickNote, readText, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';

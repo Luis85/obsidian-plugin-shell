@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { included, standaloneSource } from '../../scripts/framework/distribution.ts';
-import { maintainerOnly, rebaseMarkdown } from '../../scripts/companion/compiler/framework-docs.ts';
+import { included, standaloneSource } from '../../bin/adapters/framework/distribution.ts';
+import { maintainerOnly, rebaseMarkdown } from '../../bin/compiler/emitters/framework-docs.ts';
 
 const root = 'docs/concepts/native-file-integration-handoff/';
 const cases = ['README.md', 'restore.py', 'MANIFEST.json', 'source-only.patch', 'source/src/domain/native-file.ts', 'source/docs/concepts/companion/index.html'];
@@ -48,7 +48,7 @@ test('documentation links to the excluded directory or workflow become readable 
 });
 
 test('the real template loader excludes the archive and preserves the active native implementation', async () => {
-  const { loadTemplateSnapshot } = await import('../../scripts/compiler/adapters/template-snapshot.ts');
+  const { loadTemplateSnapshot } = await import('../../bin/compiler/adapters/template-snapshot.ts');
   const { fileURLToPath } = await import('node:url');
   const repository = fileURLToPath(new URL('../../', import.meta.url));
   const snapshot = await loadTemplateSnapshot(repository);
@@ -61,8 +61,8 @@ test('the real template loader excludes the archive and preserves the active nat
   // Native starter definitions moved to the separate pack: never template input, yet still carried and valid there.
   for (const path of ['docs/concepts/companion/starters/custom-file-view.companion.json', 'docs/concepts/companion/starters/context-menu.companion.json',
     'configs/starters/custom-file-view.json', 'configs/starters/context-menu.json']) assert.ok(!paths.includes(path), path);
-  const { assembleStarterPack } = await import('../../scripts/starters/operations.ts');
-  const { companionCatalog, loadDefinitions } = await import('../../scripts/starters/repository.ts');
+  const { assembleStarterPack } = await import('../../bin/adapters/starters/operations.ts');
+  const { companionCatalog, loadDefinitions } = await import('../../bin/adapters/starters/repository.ts');
   const pack = await assembleStarterPack({ root: repository, frameworkRoot: repository });
   for (const id of ['custom-file-view', 'context-menu']) assert.ok(pack.some(file => file.path === `configs/starters/${id}.json`), id);
   const native = Object.fromEntries(companionCatalog(await loadDefinitions(repository)).starters.map(entry => [entry.id, entry.document.design.nativeIntegrations]));

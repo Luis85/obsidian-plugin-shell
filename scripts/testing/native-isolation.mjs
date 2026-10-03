@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, lstat, realpath } from 'node:fs/promises';
 import { resolve, dirname, basename, sep, posix } from 'node:path';
 import { tmpdir } from 'node:os';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 /** Launcher 3.2.1 reads os.tmpdir() per launch; scope it to this contained run. */
 export async function nativeScratch(root = process.cwd()) {
   root = (await createFilePlan(root, [{ path: '.nq/.ownership', content: null }])).root;

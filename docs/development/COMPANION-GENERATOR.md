@@ -33,7 +33,7 @@ Starter shortcut: `node bin/app new ../my-plugin --starter quick-capture --autho
 
 ## What the generated project contains
 
-Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `scripts/companion/devkit/*.tmpl` by `scripts/companion/compiler/devkit-files.ts`:
+Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `templates/companion/devkit/*.tmpl` by `bin/compiler/emitters/devkit-files.ts`:
 
 | Path | Purpose |
 | --- | --- |
@@ -55,7 +55,7 @@ The framework's own `README.md`, `AGENTS.md`, `TEMPLATE-GUIDE.md` and `SHELL-FIR
 
 Generated plugins also register the shell's `debug-toggle` and `debug-report` commands (the dev loop enables debug logging after each load), use `<id>-view-*` view types that the shell's view-header binding accepts, and name Vue component files with multiple words so `npm run check` is lint-clean for every starter.
 
-The original `npm run companion:generate` and `scripts/companion/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
+The original `npm run companion:generate` and `scripts/companion-tools/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
 
 ## Generated implementation contracts
 
@@ -112,7 +112,7 @@ The output is a development shell. Components without detail designs remain impl
 ## Visual page and component generation (companion v5)
 
 The compiler reads validated `design.visualDesigns`; v3/v4 inputs are migrated first (`migrateCompanionDocument`), so
-the detail-schema sections below are historical. `scripts/companion/compiler/visual-*.ts` lower each page to
+the detail-schema sections below are historical. `bin/compiler/emitters/visual-*.ts` lower each page to
 `presentation/components/details/<pageId>.vue` and each component to its library SFC with `defineProps`/`defineEmits`/
 `defineSlots` from the typed contract. Elements become their tags, text becomes escaped interpolation or a typed
 binding, slots become `<slot>`, project components are imported by export name and Nuxt UI entries become explicitly
