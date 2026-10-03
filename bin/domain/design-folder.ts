@@ -17,6 +17,8 @@ export interface DesignManifest {
   kind: 'workbench-design-folder'; schemaVersion: 1; name: string; title: string; folder: string;
   project: { id: string; name: string }; source: DesignSource; brief: DesignBrief | null;
   targets: string[]; framework: string; managed: DesignFile[]; designerOwned: string[];
+  /** Fingerprint of the project files ENGINEERING_HANDOFF_GUIDE.md was generated from; null in folders prepared before the guide existed. */
+  facts: string | null;
 }
 /** Folders are named after prototypes, so names, version and variant IDs share the prototype slug rule and its 48-character limit. */
 const designNameLimit = 48;
@@ -68,7 +70,7 @@ function readBrief(value: unknown): DesignBrief {
 /** Validates a saved manifest and every manifest before it is written; an edited or foreign manifest is refused, never repaired silently. */
 export function readDesignManifest(value: unknown): DesignManifest {
   const raw = object(value);
-  keys(raw, ['kind', 'schemaVersion', 'name', 'title', 'folder', 'project', 'source', 'brief', 'targets', 'framework', 'managed', 'designerOwned']);
+  keys(raw, ['kind', 'schemaVersion', 'name', 'title', 'folder', 'project', 'source', 'brief', 'targets', 'framework', 'managed', 'designerOwned', 'facts']);
   requireSketch(raw.kind === 'workbench-design-folder' && raw.schemaVersion === 1, 'DESIGN_MANIFEST', 'Unsupported design folder manifest. It has not been changed.');
   const project = object(raw.project); keys(project, ['id', 'name']);
   const managed = list(raw.managed, 'managed', 200).map(item => {
@@ -82,7 +84,7 @@ export function readDesignManifest(value: unknown): DesignManifest {
     project: { id: text(project.id, 'project.id', 80), name: text(project.name, 'project.name', 120) }, source: readSource(raw.source),
     brief: raw.brief === null ? null : readBrief(raw.brief),
     targets: list(raw.targets, 'targets', 8).map(item => text(item, 'target', 20)), framework: text(raw.framework, 'framework', 40),
-    managed, designerOwned: [...designerOwned] };
+    managed, designerOwned: [...designerOwned], facts: raw.facts === undefined || raw.facts === null ? null : digest(raw.facts, 'facts') };
 }
 /** One line of a surface's UX acceptance block with its documented defaults applied, or null when it declares none. */
 export function acceptanceSummary(block: unknown): string | null {

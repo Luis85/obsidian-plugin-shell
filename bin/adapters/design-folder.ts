@@ -6,7 +6,8 @@ import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { exists, hash } from './framework/files.ts';
 import { prepared, type Prepared } from './storage.ts';
 import { guardedText, jsonText, loadSettings } from './user-settings.ts';
-import { currentSourceHash, designTarget, designTemplates, designTokens, readBrief, readBriefFile, resolveDesignSource } from './design-source.ts';
+import { currentSource, currentSourceHash, designTarget, designTemplates, designTokens, readBrief, readBriefFile, resolveDesignSource } from './design-source.ts';
+import { engineeringFacts } from './design-facts.ts';
 import { renderDesignFolder } from '../application/design-folder.ts';
 import { designRoot } from '../domain/user-settings.ts';
 import { designFolderName, designManifestFile, designerOwned, isDesignSlug, keptBrief, readDesignManifest, type DesignBrief, type DesignManifest } from '../domain/design-folder.ts';
@@ -68,8 +69,9 @@ export async function designFolderPlan(options: DesignFolderOptions): Promise<Pr
   const request = { ...options, name, configuredProject: project, previous: previous.manifest };
   const resolved = await resolveDesignSource(request), brief = await briefFor(options, folder, previous.manifest);
   const title = options.title ?? previous.manifest?.title ?? resolved.title, target = await designTarget(root);
+  const facts = await engineeringFacts(root, resolved.document.settings);
   const { managed, seeded: rendered } = renderDesignFolder({ name, title, folder, sourcePath: resolved.source.path, document: resolved.document, brief: brief.text,
-    target, tokens: await designTokens(root, options.frameworkRoot), templates: await designTemplates() });
+    target, tokens: await designTokens(root, options.frameworkRoot), templates: await designTemplates(), facts });
   const seeded = withKeptBrief(rendered, brief);
   const at = (path: string) => `${folder}/${path}`;
   const inspected = await createFilePlan(root, [...managed, ...seeded].map(entry => ({ path: at(entry.path), content: null })));
@@ -79,7 +81,7 @@ export async function designFolderPlan(options: DesignFolderOptions): Promise<Pr
   // The writer validates with the reader, so status, sync and prepare can always read back what was written.
   const manifest = readDesignManifest({ kind: 'workbench-design-folder', schemaVersion: 1, name, title, folder,
     project: { id: resolved.document.project.id, name: resolved.document.project.name }, source: resolved.source, brief: brief.source,
-    targets: target.targets, framework: target.framework, managed: managed.map(entry => ({ path: entry.path, sha256: hash(entry.content) })), designerOwned: [...designerOwned] });
+    targets: target.targets, framework: target.framework, managed: managed.map(entry => ({ path: entry.path, sha256: hash(entry.content) })), designerOwned: [...designerOwned], facts: facts.fingerprint });
   const plan = await createFilePlan(root, [...managed, ...created, { path: designManifestFile, content: jsonText(manifest) }].map(entry => ({ path: at(entry.path), content: entry.content })));
   requireSketch(plan.changes.every(change => change.beforeHash === (change.path === at(designManifestFile) ? previous.beforeHash : before.get(change.path))),
     'MAKER_STALE', 'The design folder changed while planning. Review it again.');
@@ -110,17 +112,25 @@ function mapStatuses(markdown: string | null): Record<string, number> {
   }
   return counts;
 }
+type Current = Awaited<ReturnType<typeof currentSource>>;
+/** The engineering guide is stale once any project file it cites changes, even when the design source did not. */
+async function freshness(root: string, folder: string, manifest: DesignManifest, current: Current) {
+  if (!current) return { state: 'source-missing' as const, facts: 'changed' as const };
+  const facts = (await engineeringFacts(root, current.document.settings)).fingerprint === manifest.facts ? 'current' as const : 'changed' as const;
+  const moved = current.source.sha256 !== manifest.source.sha256 || current.source.path !== manifest.source.path || manifest.folder !== folder;
+  return { state: moved || facts === 'changed' ? 'stale' as const : 'current' as const, facts };
+}
 async function folderStatus(root: string, frameworkRoot: string, base: string, project: string, name: string) {
   const folder = `${base}/${name}`, { manifest } = await readManifest(root, folder);
   if (!manifest) return { name, folder, state: 'unmanaged' as const };
   const inspected = await createFilePlan(root, manifest.managed.map(file => ({ path: `${folder}/${file.path}`, content: null })));
   const edited = manifest.managed.filter((file, index) => inspected.changes[index]!.beforeHash !== file.sha256).map(file => file.path);
-  const current = await currentSourceHash({ root, frameworkRoot, name, configuredProject: project, previous: manifest });
+  const current = await currentSource({ root, frameworkRoot, name, configuredProject: project, previous: manifest });
   const prototypes = (await folderFiles(join(root, folder, 'prototypes'), 'prototypes/')).filter(path => path !== 'prototypes/README.md');
-  const stale = !current || current.sha256 !== manifest.source.sha256 || current.path !== manifest.source.path || manifest.folder !== folder;
+  const { state, facts } = await freshness(root, folder, manifest, current);
   const brief = manifest.brief && { ...manifest.brief, missing: !await exists(join(root, briefPath(folder, manifest.brief))) };
-  return { name, folder, state: !current ? 'source-missing' as const : stale ? 'stale' as const : 'current' as const, title: manifest.title,
-    source: manifest.source, brief, edited, prototypes, implementation: mapStatuses((await guardedText(root, `${folder}/handoff/implementation-map.md`)).content) };
+  return { name, folder, state, title: manifest.title,
+    source: manifest.source, brief, facts, edited, prototypes, implementation: mapStatuses((await guardedText(root, `${folder}/handoff/implementation-map.md`)).content) };
 }
 /** Read-only: every folder under the design root, or one named folder. */
 export async function designFolderStatus(root: string, frameworkRoot: string, name?: string) {

@@ -22,7 +22,7 @@ const issueDesk = [
   { op: 'interaction.add', page: '@issues', title: 'Open issue', as: 'open' },
   { op: 'interaction.action', page: '@issues', id: '@open', action: { kind: 'navigate', target: '@details' } },
 ];
-const generated = ['README.md', 'AGENTS.md', 'CLAUDE.md', 'handoff/HANDOFF.md', 'context/brief.md', 'context/screens.md', 'context/components.md',
+const generated = ['README.md', 'AGENTS.md', 'CLAUDE.md', 'handoff/HANDOFF.md', 'ENGINEERING_HANDOFF_GUIDE.md', 'context/brief.md', 'context/screens.md', 'context/components.md',
   'context/design-tokens.md', 'context/project.json', 'context/obsidian-tokens.json'];
 const seeded = ['prototypes/README.md', 'assets/README.md', 'notes/decisions.md', 'handoff/implementation-map.md'];
 async function scratch(fn) {
@@ -84,7 +84,8 @@ test('sync follows the changed project and never touches the design work', async
   assert.equal((await designFolderStatus(root, frameworkRoot, 'issue-desk')).folders[0].state, 'stale');
   const sync = await designFolderPlan({ root, frameworkRoot, name: 'issue-desk', mode: 'sync' });
   const changed = sync.plan.changes.filter(change => change.status !== 'unchanged').map(change => change.path.slice(folder.length + 1)).sort();
-  assert.deepEqual(changed, ['context/brief.md', 'context/project.json', 'context/screens.md', 'design.manifest.json']);
+  // The engineering guide maps every screen, so a new screen regenerates it too.
+  assert.deepEqual(changed, ['ENGINEERING_HANDOFF_GUIDE.md', 'context/brief.md', 'context/project.json', 'context/screens.md', 'design.manifest.json']);
   assert.ok(sync.plan.changes.every(change => !change.path.includes('/prototypes/') && !change.path.includes('/notes/') && !change.path.endsWith('implementation-map.md')));
   await applyPrepared(sync, sync.planHash);
   assert.match(await read(root, `${folder}/context/screens.md`), /## Settings \(`node-\d+`\)/);

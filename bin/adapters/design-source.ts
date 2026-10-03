@@ -50,15 +50,16 @@ export async function resolveDesignSource(request: SourceRequest): Promise<Resol
 }
 /** Only an absent source maps to null; cancellation, corrupt data and other I/O failures are reported, never relabelled. */
 const absent = (error: unknown) => error instanceof Error && 'code' in error && ['DESIGN_SOURCE_MISSING', 'ENOENT', 'ENOTDIR'].includes(String(error.code));
-/** The current hash of a folder's source, or null when it no longer exists. Read-only. */
-export async function currentSourceHash(request: SourceRequest): Promise<{ path: string; sha256: string } | null> {
-  try {
-    const resolved = await resolveDesignSource(request);
-    return { path: resolved.source.path, sha256: resolved.source.sha256 };
-  } catch (error) {
+/** A folder's current source, or null when it no longer exists. Read-only. */
+export async function currentSource(request: SourceRequest): Promise<ResolvedDesignSource | null> {
+  try { return await resolveDesignSource(request); } catch (error) {
     if (absent(error)) return null;
     throw error;
   }
+}
+export async function currentSourceHash(request: SourceRequest): Promise<{ path: string; sha256: string } | null> {
+  const resolved = await currentSource(request);
+  return resolved && { path: resolved.source.path, sha256: resolved.source.sha256 };
 }
 export async function readBrief(root: string, path: string | null): Promise<string | null> {
   if (path === null) return null;
@@ -71,7 +72,7 @@ export async function readBriefFile(path: string): Promise<string> {
 }
 export async function designTarget(root: string): Promise<DesignTarget> {
   const selection = await savedProjectSelection(root);
-  return selection ? { targets: [...selection.targets], framework: selection.framework } : shellTarget;
+  return selection ? { targets: [...selection.targets], framework: selection.framework, source: 'project.config.json' } : shellTarget;
 }
 /** The reviewed Obsidian token names ship with the shell and with generated projects at the same path. */
 export async function designTokens(root: string, frameworkRoot: string): Promise<string | null> {

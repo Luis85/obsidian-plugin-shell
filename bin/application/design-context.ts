@@ -2,10 +2,10 @@
 import type { SketchDocument } from '../domain/document.ts';
 import { acceptanceSummary } from '../domain/design-folder.ts';
 import { interactions } from '../domain/interactions.ts';
-interface Screen { id: string; title: string; kind: string; route: string }
-const cell = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').replaceAll('|', '\\|').trim() || '—';
+export interface Screen { id: string; title: string; kind: string; route: string }
+export const cell = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').replaceAll('|', '\\|').trim() || '—';
 const words = (value: unknown) => typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
-function screens(document: SketchDocument): Screen[] {
+export function screens(document: SketchDocument): Screen[] {
   const routes = document.design.sitemap?.routes ?? [];
   return document.design.nodes.filter(node => !['group', 'action'].includes(node.kind)).map(node => ({
     id: node.id, title: node.label, kind: node.kind, route: routes.find(route => route.surface === node.id)?.path ?? '' }));
