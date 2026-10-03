@@ -32,6 +32,15 @@ test('typed JSON data contract is an explicit narrow architecture boundary', () 
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-data-contract'), false);
 });
 
+test('companion code emitters own a zone that may read the project templates; compiler-host may not', () => {
+  const rule = name => config.boundaries.rules.find(item => item.from === name)?.allow;
+  assert.deepEqual(config.boundaries.zones.find(item => item.name === 'compiler-emitters')?.patterns, ['bin/compiler/emitters/**']);
+  assert.deepEqual(rule('compiler-emitters'), ['compiler-emitters', 'compiler-domain', 'companion-authoring-contract', 'project-templates', 'tooling']);
+  for (const source of ['compiler-host', 'maker-host', 'test', 'tooling']) assert.ok(rule(source)?.includes('compiler-emitters'), source);
+  assert.equal(rule('compiler-host')?.includes('project-templates'), false);
+  for (const core of ['compiler-domain', 'compiler-application', 'maker-domain', 'maker-application']) assert.equal(rule(core)?.includes('compiler-emitters'), false, core);
+});
+
 test('canonical CLI result envelope is isolated from implementation layers', () => {
   const zone = config.boundaries.zones.find(item => item.name === 'cli-result-contract');
   assert.deepEqual(zone?.patterns, ['scripts/contracts/result-runtime.mjs', 'scripts/contracts/result.ts', 'scripts/contracts/errors.ts']);

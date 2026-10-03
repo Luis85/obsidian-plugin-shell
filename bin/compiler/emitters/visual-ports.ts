@@ -1,6 +1,6 @@
-import type { Mapping, VisualAction, EmitDefinition, Interaction, UiNode } from '../visual/visual-ir.mjs';
-import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
-import { visualSession, visualVisible } from '../visual/visual-session.mjs';
+import type { Mapping, VisualAction, EmitDefinition, Interaction, UiNode } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualAssert, visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualSession, visualVisible } from '../../../scripts/companion/visual/visual-session.mjs';
 import { visualExpressions, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { matches, type Schema } from '../../../templates/companion/runtime/contract.ts';
 import { literal, symbol, type Model, type Operation, type Source } from './model.ts';

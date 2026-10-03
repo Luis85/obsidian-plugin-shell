@@ -62,8 +62,8 @@ To look at every surface, state and scenario in light and dark at wide and narro
 
 | Source | Responsibility |
 | --- | --- |
-| `scripts/companion/compiler/clickdummy-code.ts` | Generate the browser entry, thin preview component, context and synthetic source factory |
-| `scripts/companion/compiler/clickdummy-scenarios-code.ts` | Emit surface-scoped scenario metadata without duplicating sample values |
+| `bin/compiler/emitters/clickdummy-code.ts` | Generate the browser entry, thin preview component, context and synthetic source factory |
+| `bin/compiler/emitters/clickdummy-scenarios-code.ts` | Emit surface-scoped scenario metadata without duplicating sample values |
 | Existing page/component/compiler modules | Generate the shared runtime UI, bindings, effects and contracts |
 | `scripts/framework/clickdummy.ts` | Validate generated-project context and invoke the fixed shipped build worker |
 | `.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs` | Reuse the pinned Vue/Nuxt UI build, CSS ownership, license notices and single-file assembler |

@@ -1,4 +1,4 @@
-import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
+import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { relationshipScope } from './relationship-model.ts';
 import { literal, requireValue, symbol, type Model, type Entity, type Operation } from './model.ts';
 import type { Schema } from '../../../templates/companion/runtime/contract.ts';

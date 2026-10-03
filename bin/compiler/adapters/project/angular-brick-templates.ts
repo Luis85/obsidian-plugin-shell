@@ -1,4 +1,4 @@
-import { literal } from '../../../../scripts/companion/compiler/model.ts';
+import { literal } from '../../emitters/model.ts';
 import { VISUAL_DOM_EVENTS, type UiNode, type ValueExpression, type Interaction, type Contract } from '../../../../scripts/companion/visual/visual-ir.mjs';
 import { compositionStyle } from '../../../../scripts/companion/composition-contract.mjs';
 export interface AngularDefinition { key: string; name: string; selector: string; nodes: UiNode[]; contract?: Contract; adapterRequired?: string; designSystem?: unknown }

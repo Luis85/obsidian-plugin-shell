@@ -2,7 +2,7 @@ import { mapBounded } from '../../../scripts/shared/bounded-map.ts';
 import { lstat, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { readBounded, hash } from '../../adapters/framework/files.ts';
-import { maintainerOnly, relocatedPath } from '../../../scripts/companion/compiler/framework-docs.ts';
+import { maintainerOnly, relocatedPath } from '../emitters/framework-docs.ts';
 import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
 import { prototypeSkillFiles } from '../../../scripts/companion/prototype-skill.mjs';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';

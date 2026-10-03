@@ -1,6 +1,6 @@
-import type { UiNode, ComponentNode, Interaction, Mapping, ComponentDefinition, VisualState, VisualAction, Scalar, Scenario } from '../visual/visual-ir.mjs';
-import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
-import { visualSession, visualTransition, visualVisible, type Session } from '../visual/visual-session.mjs';
+import type { UiNode, ComponentNode, Interaction, Mapping, ComponentDefinition, VisualState, VisualAction, Scalar, Scenario } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualCatalogEntry } from '../../../scripts/companion/visual/visual-catalog.mjs';
+import { visualSession, visualTransition, visualVisible, type Session } from '../../../scripts/companion/visual/visual-session.mjs';
 import { visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, type VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { mapDetailPayload } from '../../../templates/companion/runtime/detail-actions.ts';
 import { parseDetailControl, copyDetailData, type DetailData } from '../../../templates/companion/runtime/detail-controls.ts';

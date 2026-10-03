@@ -1,7 +1,7 @@
 import { posix } from 'node:path';
-import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
-import { editorBindings } from '../sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../sitemap/model.ts';
+import type { TemplateSnapshot } from '../domain/contracts.ts';
+import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
 import { componentFile, relativeImport, type Add } from './file-code.ts';
 import { literal, type Model } from './model.ts';
 import { journeyBootstrapCode } from './journey-bootstrap-code.ts';

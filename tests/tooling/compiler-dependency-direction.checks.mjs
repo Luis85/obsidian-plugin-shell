@@ -5,8 +5,8 @@ import { posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inspectModule } from '../../scripts/compiler/check-architecture.mjs';
 
-// Dependency direction between the compiler and the companion generator library:
-// executable compiler modules may consume companion emitters, never the reverse.
+// Dependency direction between the compiler and the companion contracts: executable compiler modules,
+// including the code emitters in bin/compiler/emitters, may consume companion contracts, never the reverse.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // The former companion facades and the whole compiler moved to bin/compiler;
 // nothing may recreate or import the removed paths.
@@ -32,7 +32,7 @@ const owners = new Map([
     'framework-adapter', 'framework-registry', 'plugin-extension', 'serve-source', 'sources']
     .map(name => [`scripts/compiler/adapters/project/${name}.ts`, `bin/compiler/adapters/project/${name}.ts`]),
 ]);
-const executableCompiler = /^bin\/compiler\/(?:index\.ts$|adapters\/|application\/)/;
+const executableCompiler = /^bin\/compiler\/(?:index\.ts$|adapters\/|application\/|emitters\/)/;
 const compilerDomain = /^bin\/compiler\/domain\//;
 const qualificationEntry = /^scripts\/companion\/qualify-[^/]+\.mjs$/;
 function resolved(from, specifier) {
@@ -81,6 +81,8 @@ test('repository sources keep the compiler -> companion dependency direction', a
 });
 
 test('the former companion compiler facades are gone and their compiler owners exist', async () => {
+  // E4: the code emitters moved to bin/compiler/emitters; the whole former folder is gone.
+  await assert.rejects(readdir(resolve(root, 'scripts/companion/compiler')), { code: 'ENOENT' });
   for (const [path, owner] of owners) {
     await assert.rejects(readFile(resolve(root, path), 'utf8'), { code: 'ENOENT' }, path);
     assert.ok((await readFile(resolve(root, owner), 'utf8')).includes('export '), owner);
@@ -88,28 +90,29 @@ test('the former companion compiler facades are gone and their compiler owners e
 });
 
 test('companion code cannot import executable compiler modules, re-exports included', () => {
-  const emitter = 'scripts/companion/compiler/example-code.ts';
-  for (const specifier of ['../../../bin/compiler/index.ts', '../../../bin/compiler/adapters/selection.ts', '../../../bin/compiler/application/compile.ts']) {
-    const findings = directionFindings(new Map([[emitter, `import { x } from '${specifier}';\nexport const y = x;`]]));
+  const companionModule = 'scripts/companion/visual/example-contract.ts';
+  for (const specifier of ['../../../bin/compiler/index.ts', '../../../bin/compiler/adapters/selection.ts', '../../../bin/compiler/application/compile.ts',
+    '../../../bin/compiler/emitters/model.ts']) {
+    const findings = directionFindings(new Map([[companionModule, `import { x } from '${specifier}';\nexport const y = x;`]]));
     assert.equal(findings.length, 1, specifier);
     assert.match(findings[0], /executable compiler module/);
   }
-  const lazy = directionFindings(new Map([[emitter, "export const load = () => import('../../../bin/compiler/adapters/cli.ts');"]]));
+  const lazy = directionFindings(new Map([[companionModule, "export const load = () => import('../../../bin/compiler/adapters/cli.ts');"]]));
   assert.equal(lazy.length, 1);
   const contract = 'scripts/companion/project-store.mjs';
   assert.equal(directionFindings(new Map([[contract, "import '../../bin/compiler/adapters/project-plan.ts';"]])).length, 1);
   const reexport = "export * from '../../../bin/compiler/adapters/selection.ts';";
-  assert.equal(directionFindings(new Map([[emitter, reexport]])).length, 1);
+  assert.equal(directionFindings(new Map([[companionModule, reexport]])).length, 1);
   assert.deepEqual(directionFindings(new Map([['scripts/companion/qualify-example.mjs', "import '../../bin/compiler/adapters/project-plan.ts';"]])), []);
   const moved = directionFindings(new Map([['scripts/compiler/qualify-example.mjs', "import { compileProject } from './index.ts';"]]));
   assert.equal(moved.length, 1); assert.match(moved[0], /bin\/compiler\/index\.ts instead of removed facade/);
 });
 
 test('companion code reaches compiler domain contracts through import type only', () => {
-  const emitter = 'scripts/companion/compiler/example-code.ts';
+  const companionModule = 'scripts/companion/visual/example-contract.ts';
   const typed = "import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';\nexport type T = TemplateSnapshot;";
-  assert.deepEqual(directionFindings(new Map([[emitter, typed]])), []);
-  const value = directionFindings(new Map([[emitter, "import { CompilationFailure } from '../../../bin/compiler/domain/diagnostics.ts';\nexport { CompilationFailure };"]]));
+  assert.deepEqual(directionFindings(new Map([[companionModule, typed]])), []);
+  const value = directionFindings(new Map([[companionModule, "import { CompilationFailure } from '../../../bin/compiler/domain/diagnostics.ts';\nexport { CompilationFailure };"]]));
   assert.equal(value.length, 1);
   assert.match(value[0], /only with import type/);
 });

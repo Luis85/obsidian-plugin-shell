@@ -1,17 +1,20 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { persistenceCode, noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
-import { relationshipCode } from '../../scripts/companion/compiler/relationship-code.ts';
-import { relationshipDefinitions, relationshipScope } from '../../scripts/companion/compiler/relationship-model.ts';
-import { httpCode } from '../../scripts/companion/compiler/http-code.ts';
-import { fixtureNoteTests } from '../../scripts/companion/compiler/fixture-notes-code.ts';
-import { nativeCode } from '../../scripts/companion/compiler/native-code.ts';
+import { persistenceCode, noteEntity } from '../../bin/compiler/emitters/persistence-code.ts';
+import { relationshipCode } from '../../bin/compiler/emitters/relationship-code.ts';
+import { relationshipDefinitions, relationshipScope } from '../../bin/compiler/emitters/relationship-model.ts';
+import { httpCode } from '../../bin/compiler/emitters/http-code.ts';
+import { fixtureNoteTests } from '../../bin/compiler/emitters/fixture-notes-code.ts';
+import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
 import { dataDocument, starterDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 
 // Native persistence, relationship integrity, HTTPS providers, fixture-note and native-integration emission.
 const withFeatures = text => ({ ...template, text: async path => path === 'src/bootstrap/features.ts' ? text : template.text(path) });
-const persist = async (m, snapshot = template) => { const out = recorder(); await persistenceCode(snapshot, m, out.add); return out; };
 const registry = body => `import x from 'y';\nexport function createFeatures(services) {\n  return createNoteFeatures(services, ${body}));\n}\n`;
+// The live src/bootstrap/features.ts is consumer-owned: renaming, `make feature` and example removal rewrite it,
+// so every check reads this pinned registry instead of the checkout's current one.
+const pinnedRegistry = withFeatures(registry('register => ({\n    items: register(itemFeature),\n  }'));
+const persist = async (m, snapshot = pinnedRegistry) => { const out = recorder(); await persistenceCode(snapshot, m, out.add); return out; };
 
 test('native repositories get typed documents, a persistence test and one registry entry each', async () => {
   const out = await persist(model(await dataDocument([['estimate', 'number'], ['done', 'checkbox', true], ['labels', 'tags']])));
@@ -31,9 +34,9 @@ test('native repositories get typed documents, a persistence test and one regist
     '"estimate": fields.optional(f3),', '"done": f4,', '"labels": fields.optional(f5),', '"project_ref": fields.optional(f6),']);
   assert.equal(task.at(-2), 'export const feature = defineNoteFeature({document,defaultFolder:"Starter/Task"});');
   assert.equal(out.text('src/generated/application/documents/starter-project.ts').split('\n')[0], 'import { defineEntity, fields } from "../../../domain/entity.ts";');
-  const features = out.text('src/bootstrap/features.ts');
-  assert.ok(features.startsWith('import { feature as GStarterTask } from "../generated/application/documents/starter-task.ts";\nimport { feature as GStarterProject } from "../generated/application/documents/starter-project.ts";\n'));
-  assert.ok(features.includes('    items: register(itemFeature),\n    GStarterTask: register(GStarterTask),\n    GStarterProject: register(GStarterProject),\n  }));\n'));
+  assert.equal(out.text('src/bootstrap/features.ts'), 'import { feature as GStarterTask } from "../generated/application/documents/starter-task.ts";\n'
+    + 'import { feature as GStarterProject } from "../generated/application/documents/starter-project.ts";\n'
+    + registry('register => ({\n    items: register(itemFeature),\n    GStarterTask: register(GStarterTask),\n    GStarterProject: register(GStarterProject),\n  }'));
   const persistence = out.text('tests/project/persistence/starter-task.test.ts');
   assert.ok(persistence.includes('\n  const values = {"title":"fixture","status":"fixture","due_date":"2026-01-01","estimate":1,"done":false,"labels":["fixture"],"project_ref":"fixture","parent_ref":"fixture"};\n'));
   assert.ok(out.text('tests/project/persistence/registry.test.ts').includes('  try { expect((await registry.repositories.GStarterTask.list()).ok).toBe(true);\nexpect((await registry.repositories.GStarterProject.list()).ok).toBe(true); }\n'));
@@ -44,8 +47,8 @@ test('a project with only a title-only entity and no required optional fields im
   const document = await dataDocument(); const task = document.design.semantic.entities[0];
   task.properties = task.properties.filter(p => p.key === 'title'); document.design.semantic.relationships = [];
   document.design.dataSources.sources[0].operations.pop();
-  const m = model(document), wire = (await import('../../scripts/companion/compiler/note-contracts.ts')).noteWireSchemas(m.entities[0], 'create');
-  for (const op of m.sources[1].operations) Object.assign(op, (await import('../../scripts/companion/compiler/note-contracts.ts')).noteWireSchemas(m.entities[0], op.slug.replace('-tasks', '')));
+  const m = model(document), wire = (await import('../../bin/compiler/emitters/note-contracts.ts')).noteWireSchemas(m.entities[0], 'create');
+  for (const op of m.sources[1].operations) Object.assign(op, (await import('../../bin/compiler/emitters/note-contracts.ts')).noteWireSchemas(m.entities[0], op.slug.replace('-tasks', '')));
   assert.ok(wire.input);
   const out = await persist(m);
   assert.equal(out.text('src/generated/application/documents/starter-task.ts').split('\n')[0], 'import { defineEntity } from "../../../domain/entity.ts";');
@@ -74,7 +77,7 @@ test('native repositories refuse framework keys, untitled entities and nested va
   await refuse(document => { document.design.semantic.entities[1].properties[0].key = 'Title'; }, 'Native property mapping requires portable frontmatter keys.');
   await refuse(document => { document.design.semantic.entities[1].properties[1].type = 'list'; },
     'Native notes require scalar values or string lists; nested objects need a separate declared codec.');
-  const none = recorder(); await persistenceCode(template, model(await starterDocument('blank')), none.add); assert.equal(none.files.size, 0);
+  assert.equal((await persist(model(await starterDocument('blank')))).files.size, 0);
 });
 
 test('note entities resolve only exact declared native mappings or read-only entity lists', async () => {

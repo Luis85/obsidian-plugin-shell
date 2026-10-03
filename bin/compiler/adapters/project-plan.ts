@@ -7,7 +7,7 @@ import { CompilationFailure } from '../domain/diagnostics.ts';
 import { generationSelection } from './selection.ts';
 import { parseSelection } from '../domain/selection.ts';
 import { planArtifacts } from './workspace-plan.ts';
-import type { Entry } from '../../../scripts/companion/compiler/file-code.ts';
+import type { Entry } from '../emitters/file-code.ts';
 import type { OutputKind, StorybookOptions } from '../domain/contracts.ts';
 export { applyProject, reviewProject } from './workspace-plan.ts';
 export interface GenerateOptions {

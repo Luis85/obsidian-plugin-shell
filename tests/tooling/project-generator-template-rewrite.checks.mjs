@@ -5,10 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { copiedTemplateMarker, rewriteTemplate } from '../../scripts/companion/compiler/file-code.ts';
-import { relationshipCode } from '../../scripts/companion/compiler/relationship-code.ts';
-import { httpCode } from '../../scripts/companion/compiler/http-code.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { copiedTemplateMarker, rewriteTemplate } from '../../bin/compiler/emitters/file-code.ts';
+import { relationshipCode } from '../../bin/compiler/emitters/relationship-code.ts';
+import { httpCode } from '../../bin/compiler/emitters/http-code.ts';
 
 // Copied template text is rewritten by exact literals; a drifted literal must stop generation, never emit stale text.
 const root = fileURLToPath(new URL('../../', import.meta.url));

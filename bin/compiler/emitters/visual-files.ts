@@ -1,7 +1,7 @@
-import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
-import type { ComponentDefinition, ExternalNode, Interaction, UiNode, VisualDesigns } from '../visual/visual-ir.mjs';
-import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
-import { visualTestSource } from '../visual/visual-session.mjs';
+import type { TemplateSnapshot } from '../domain/contracts.ts';
+import type { ComponentDefinition, ExternalNode, Interaction, UiNode, VisualDesigns } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualAssert, visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualTestSource } from '../../../scripts/companion/visual/visual-session.mjs';
 import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, json, requireValue, type Model } from './model.ts';
 import { componentFile, relativeImport, rewriteTemplate, type Add } from './file-code.ts';

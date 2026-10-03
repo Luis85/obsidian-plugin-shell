@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { visualSpecs, visualDefinitions, visualNuxtImports, visualContractTypes, visualLibraryWithoutDefinition, visualPackages, visualComponentName } from '../../scripts/companion/compiler/visual-model.ts';
-import { visualSfc } from '../../scripts/companion/compiler/visual-code.ts';
-import { visualSources, visualPorts } from '../../scripts/companion/compiler/visual-ports.ts';
+import { visualSpecs, visualDefinitions, visualNuxtImports, visualContractTypes, visualLibraryWithoutDefinition, visualPackages, visualComponentName } from '../../bin/compiler/emitters/visual-model.ts';
+import { visualSfc } from '../../bin/compiler/emitters/visual-code.ts';
+import { visualSources, visualPorts } from '../../bin/compiler/emitters/visual-ports.ts';
 import { richVisualDocument, detailDocument, starterDocument, model, recorder } from './compiler-emitters-fixture.mjs';
 
 // Visual definitions to Vue (visual-model.ts, visual-code.ts) and their validated source ports (visual-ports.ts).

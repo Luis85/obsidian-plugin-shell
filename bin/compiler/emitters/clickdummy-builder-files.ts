@@ -3,7 +3,7 @@
  * and its repository-specific description) is not copied; only the worker and the helpers it imports are, under
  * scripts/clickdummy/ with their relative layout intact. */
 import { posix } from 'node:path';
-import type { Artifact } from '../../../bin/compiler/domain/contracts.ts';
+import type { Artifact } from '../domain/contracts.ts';
 
 const skillScripts = '.claude/skills/companion-prototype-design/scripts/';
 const clickdummyBuilderRoot = 'scripts/clickdummy/';

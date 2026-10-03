@@ -1,8 +1,8 @@
-import type { VisualDesigns, PageDefinition, ComponentDefinition, Contract, UiNode } from '../visual/visual-ir.mjs';
-import { emptyVisualDesigns, visualNodes, visualAssert } from '../visual/visual-ir.mjs';
-import { validateVisualDesigns } from '../visual/visual-validate.mjs';
-import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
-import { validateCompositionDesignSystem } from '../composition-contract.mjs';
+import type { VisualDesigns, PageDefinition, ComponentDefinition, Contract, UiNode } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { emptyVisualDesigns, visualNodes, visualAssert } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { validateVisualDesigns } from '../../../scripts/companion/visual/visual-validate.mjs';
+import { visualCatalogEntry } from '../../../scripts/companion/visual/visual-catalog.mjs';
+import { validateCompositionDesignSystem } from '../../../scripts/companion/composition-contract.mjs';
 import type { VisualSpec } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, row, type Model, type Row } from './model.ts';
 import { componentFile } from './file-code.ts';

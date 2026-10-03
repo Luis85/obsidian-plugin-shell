@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, readdir, mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { fixtureManifest, renderFixtureCode } from '../../bin/compiler/adapters/fixture-emitter.ts';
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 import { validateSourceOverrides } from '../../templates/companion/runtime/source-overrides.ts';

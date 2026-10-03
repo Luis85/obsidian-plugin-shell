@@ -4,10 +4,10 @@ import { readFile } from 'node:fs/promises';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
-import { frameworkOnlyPath, referenceDocPath, withBanner, rewriteDocReferences, maintainerScript, frameworkBanner } from '../../scripts/companion/compiler/framework-scope.ts';
-import { clickdummyBuilderFiles } from '../../scripts/companion/compiler/clickdummy-builder-files.ts';
+import { frameworkOnlyPath, referenceDocPath, withBanner, rewriteDocReferences, maintainerScript, frameworkBanner } from '../../bin/compiler/emitters/framework-scope.ts';
+import { clickdummyBuilderFiles } from '../../bin/compiler/emitters/clickdummy-builder-files.ts';
 import { buildClickdummy } from '../../bin/adapters/framework/clickdummy.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

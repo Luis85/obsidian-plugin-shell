@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { angularBrickFiles } from '../../bin/compiler/adapters/project/angular-bricks.ts';
 import { angularDefinitionSource } from '../../bin/compiler/adapters/project/angular-brick-templates.ts';
 import { visualLiteral, visualAllocate, visualText } from '../../scripts/companion/visual/visual-ir.mjs';

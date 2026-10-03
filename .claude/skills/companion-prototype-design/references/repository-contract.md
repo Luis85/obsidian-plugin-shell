@@ -22,7 +22,7 @@ scripts/companion/generate.mjs
 scripts/companion/visual/visual-validate.mjs
 scripts/companion/visual/visual-ir.mjs (locate the actual IR/types file)
 scripts/companion/visual/visual-catalog.mjs (locate the actual catalog file)
-scripts/companion/compiler/ (actual emitted paths and extension ownership)
+bin/compiler/emitters/ (actual emitted paths and extension ownership)
 templates/companion/devkit/ (generated developer kit)
 docs/development/COMPANION-PROJECT-JSON.md
 docs/development/COMPANION-GENERATOR.md

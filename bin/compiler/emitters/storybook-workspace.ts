@@ -1,4 +1,4 @@
-import type { Artifact, TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
+import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
 import { json, requireValue } from './model.ts';
 export const storybookVersion = '10.6.0';
 /** Isolated optional dependencies: the normal project's package.json and lockfile are never changed. */

@@ -1,4 +1,4 @@
-import { airshipConfig, airshipOptions } from '../tooling-contract.mjs';
+import { airshipConfig, airshipOptions } from '../../../scripts/companion/tooling-contract.mjs';
 import { json, literal, type Model } from './model.ts';
 import type { Add } from './file-code.ts';
 /** Every generated project has a source-backed preview; optional agent tooling never enters src/. */

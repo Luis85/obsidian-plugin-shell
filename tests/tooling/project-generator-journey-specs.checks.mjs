@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { authoredJourneyCode } from '../../scripts/companion/compiler/authored-journey-code.ts';
+import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { authoredJourneyCode } from '../../bin/compiler/emitters/authored-journey-code.ts';
 import { projectFiles } from '../support/project-render.mjs';
 import { parseBrowserStarter } from '../../scripts/starters/browser.ts';
 

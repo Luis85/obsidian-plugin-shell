@@ -18,7 +18,7 @@ on:
       - 'bin/adapters/framework-cli.ts'
       - 'bin/presentation/terminal/**'
       - 'scripts/companion/starter-*.mjs'
-      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'bin/compiler/emitters/framework-docs.ts'
       - 'tests/tooling/starter-*.checks.mjs'
       - '.github/workflows/starter-distribution.yml'
   workflow_dispatch:

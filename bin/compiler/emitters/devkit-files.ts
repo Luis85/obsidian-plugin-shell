@@ -1,4 +1,4 @@
-import type { TemplateSnapshot } from '../../../bin/compiler/domain/contracts.ts';
+import type { TemplateSnapshot } from '../domain/contracts.ts';
 /** The generated project's developer and agent kit: product README/AGENTS.md, Claude Code settings
  * and skills, VS Code configuration, product CI, and a Vitest config wired to the Obsidian test kit.
  * Every file is 'extension' ownership: regeneration keeps a developer's edits and reports a conflict

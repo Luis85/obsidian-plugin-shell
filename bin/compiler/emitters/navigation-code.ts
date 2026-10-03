@@ -1,7 +1,7 @@
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
-import { editorBindings } from '../sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../sitemap/model.ts';
+import { editorBindings } from '../../../scripts/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '../../../scripts/companion/sitemap/model.ts';
 /** Whether a transition gets an executable navigation test (otherwise a business-interaction TODO). */
 function navigationExecutable(m: Model, edge: Model['links'][number]): boolean {
   const target = m.screens.find(s => s.id === edge.to)!;
