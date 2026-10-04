@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { planExampleRemoval } from '../../scripts/examples/plan.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 
 const reviewed = '# Reviewed template\n';
@@ -100,8 +101,10 @@ test('[OWN-README-06] unrecorded, invalid or changing receipts fail closed', () 
   await writeFile(join(root, 'scripts/examples/ownership.json'), JSON.stringify(manifest));
   await assert.rejects(planExampleRemoval(root), /EXAMPLES_INVALID_MANIFEST/);
 }));
-test('[OWN-README-07] a freshly generated blank project plans example removal without conflicts', async () => {
-  const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url)), vault = await mkdtemp(join(tmpdir(), 'readme-generated-'));
+test('[OWN-README-07] a freshly generated blank project plans example removal without conflicts', async t => {
+  const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
+  if (await reviewedExamplesRemoved(frameworkRoot)) { t.skip('Generated projects carry examples only from a checkout that still has the reviewed example sources.'); return; }
+  const vault = await mkdtemp(join(tmpdir(), 'readme-generated-'));
   try {
     const loaded = (await loadDefinitions(frameworkRoot)).find(entry => entry.definition.id === 'blank');
     const document = customizeStarter(loaded, { id: 'fresh-blank', name: 'Fresh Blank', author: 'Test', description: 'Blank', version: '0.1.0', codebaseFolder: 'src', testsFolder: 'tests' });
