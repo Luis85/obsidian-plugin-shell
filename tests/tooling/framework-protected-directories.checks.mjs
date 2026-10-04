@@ -8,7 +8,7 @@ import { FILE_PLAN_PROTECTED_ROOTS, PROTECTED_PROJECT_SEGMENTS, RESERVED_FOLDER_
 import { hasProtectedProjectRoot } from '../../scripts/shared/project-path.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { portablePath as starterPath } from '../../bin/adapters/starters/validation.ts';
-import { portablePath as handoutPath } from '../../bin/adapters/framework/handout-workspace.ts';
+import { loadHandoutWorkspace } from '../../bin/adapters/framework/handout-workspace.ts';
 import { packStarterOperation } from '../../bin/adapters/starters/operations.ts';
 import { packKit } from '../../bin/adapters/framework/kit.ts';
 import { configuration } from '../../bin/adapters/framework/configuration.ts';
@@ -39,7 +39,7 @@ test('every path consumer refuses every protected segment, whatever its case', a
     for (const segment of [name, upper(name)]) {
       assert.equal(hasProtectedProjectRoot(segment + '/file.json'), true, segment);
       assert.equal(starterPath('nested/' + segment + '/file.txt'), false, segment);
-      assert.throws(() => handoutPath('docs/' + segment + '/prd.md'), /protected folders/, segment);
+      await assert.rejects(loadHandoutWorkspace(frameworkRoot, { prds: 'docs/' + segment + '/prds' }), /protected folders/, segment);
       assert.throws(() => readSettings({ schemaVersion: 1, paths: { project: segment + '/project.json' } }), undefined, segment);
     }
   }

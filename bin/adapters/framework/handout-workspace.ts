@@ -9,7 +9,7 @@ const CONFIGURATION_FILES = ['configs/user-settings.json', 'shell.config.json'];
 const MAX_SOURCE_BYTES = 16_000_000;
 const MAX_FILE_BYTES = 1_000_000;
 export interface WorkspaceOptions { prds?: string; virtualFiles?: Record<string, string> }
-export function portablePath(path: string): string {
+export function handoutPath(path: string): string {
   // oxlint-disable-next-line no-control-regex
   ensure(typeof path === 'string' && path.length > 0 && path.length <= 1024 && !isAbsolute(path) && !/[\\:\u0000-\u001f]/.test(path), 'HANDOUT_PATH', 'Use a bounded project-relative path with forward slashes.');
   ensure(path.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !isProtectedSegment(part)), 'HANDOUT_PATH', 'The PRD path must stay inside the project and outside protected folders.');
@@ -23,7 +23,7 @@ async function localRoot(root: string): Promise<string> {
   return realpath(absolute);
 }
 async function inspectLocalPath(root: string, path: string) {
-  portablePath(path);
+  handoutPath(path);
   let parent = root;
   for (const [index, part] of path.split('/').entries()) {
     parent = join(parent, part);
@@ -94,7 +94,7 @@ async function walkPrds(local: Local, path: string, depth: number, inventory: In
   ensure(stat.isDirectory(), 'HANDOUT_PRD_FOLDER', 'The PRD input must be a folder.');
   for (const name of (await readdir(join(local, path))).sort()) {
     ensure(++inventory.visited <= 5000, 'HANDOUT_INPUT_LIMIT', 'Too many entries in the PRD folder.');
-    const relative = portablePath(path + '/' + name), child = await inspectLocalPath(local, relative);
+    const relative = handoutPath(path + '/' + name), child = await inspectLocalPath(local, relative);
     ensure(child, 'HANDOUT_SOURCE_CHANGED', 'PRD input changed while reading; try again after edits stop.');
     if (child.isDirectory()) await walkPrds(local, relative, depth + 1, inventory);
     else if (name.toLowerCase().endsWith('.md')) await readPrd(local, relative, inventory);
@@ -130,7 +130,7 @@ function pathsSuggestion(configuredPaths: Record<string, unknown>, projectPaths:
   const paths = pathDefaults(projectPaths, prdsRoot);
   for (const key of Object.keys(paths)) {
     const value = optionalString(configuredPaths[key], 'paths.' + key);
-    if (value !== undefined) paths[key] = ['testVault', 'obsidianConfig'].includes(key) ? value : portablePath(value);
+    if (value !== undefined) paths[key] = ['testVault', 'obsidianConfig'].includes(key) ? value : handoutPath(value);
   }
   paths.prds = prdsRoot;
   return {
@@ -150,7 +150,7 @@ export async function loadHandoutWorkspace(root: string, options: WorkspaceOptio
   assertVirtualInputs(options);
   const settings = object(configTexts['configs/user-settings.json'] ?? null), projectConfig = object(configTexts['shell.config.json'] ?? null);
   const configuredPaths = record(settings.paths), projectPaths = record(projectConfig.paths);
-  const prdsRoot = portablePath(options.prds ?? optionalString(configuredPaths.prds, 'paths.prds') ?? 'docs/prds');
+  const prdsRoot = handoutPath(options.prds ?? optionalString(configuredPaths.prds, 'paths.prds') ?? 'docs/prds');
   await walkPrds(local, prdsRoot, 0, inventory);
   const suggestions: Record<string, Suggestion> = {};
   const prds = prdSuggestion(inventory.files, prdsRoot), identity = identitySuggestion(projectConfig);

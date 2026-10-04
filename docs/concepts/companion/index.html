@@ -15890,6 +15890,57 @@ Edge: ${id2}`,
 		return checkData(value, designLimits);
 	}
 	//#endregion
+	//#region scripts/shared/protected-directories.ts
+	/**
+	* The one framework-free source of protected project directory names. Every set is lower-case; callers compare a
+	* case-folded path segment, so `.GIT` or `Node_Modules` on case-insensitive volumes are refused as well.
+	* Purpose-specific sets are named compositions of the same base groups, never independent copies.
+	*/
+	var folded = (names) => Object.freeze([...new Set(names.map((name) => name.toLowerCase()))]);
+	/** Version control, installed dependencies and the CLI's own cross-process lock files. */
+	var repositoryInternals = folded([
+		".git",
+		"node_modules",
+		".codex-authoring.lock",
+		".shell-first-run.lock"
+	]);
+	/** Framework, companion-generation and starter ownership records. */
+	var ownershipDirectories = folded([
+		".framework",
+		".companion",
+		".workbench"
+	]);
+	/** Native and qualification scratch areas created by gates and runners. */
+	var qualificationDirectories = folded([
+		".worktrees",
+		".qualification",
+		".native-runner"
+	]);
+	/** The conventional host configuration folder (a configurable default, not a running vault's configDir). */
+	var hostConfigDirectory = ".obsidian";
+	var testVaultDirectory = ".test-vault";
+	var developmentVaultDirectory = ".dev-vault";
+	/** Segments that CLI-authored project paths, saved plans, exports and archives never enter. */
+	var PROTECTED_PROJECT_SEGMENTS = folded([
+		...folded([
+			...repositoryInternals,
+			...ownershipDirectories,
+			...qualificationDirectories
+		]),
+		hostConfigDirectory,
+		testVaultDirectory,
+		developmentVaultDirectory
+	]);
+	folded([
+		...repositoryInternals,
+		...qualificationDirectories,
+		developmentVaultDirectory
+	]);
+	/** True when a single path segment names a member of `names` (default: every protected project segment). */
+	function isProtectedSegment(segment, names = PROTECTED_PROJECT_SEGMENTS) {
+		return names.includes(segment.toLowerCase());
+	}
+	//#endregion
 	//#region bin/compiler/domain/diagnostics.ts
 	/** Codes are public API. Catalog changes require documentation and protocol tests. */
 	var diagnosticCatalog = Object.freeze({
@@ -16054,16 +16105,7 @@ Edge: ${id2}`,
 	}
 	function portablePath(value, dot = false) {
 		if (dot && value === ".") return true;
-		return value.length <= 240 && value.split("/").every((part) => /^[a-zA-Z0-9_.-][a-zA-Z0-9_. -]*$/.test(part) && ![
-			".",
-			"..",
-			".git",
-			".obsidian",
-			".framework",
-			".companion",
-			".workbench",
-			".codex-authoring.lock"
-		].includes(part.toLowerCase()) && !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
+		return value.length <= 240 && value.split("/").every((part) => /^[a-zA-Z0-9_.-][a-zA-Z0-9_. -]*$/.test(part) && part !== "." && part !== ".." && !isProtectedSegment(part) && !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 	}
 	function inputValue(value, input) {
 		requireThat((input.type === "string" ? typeof value === "string" && value.length <= 4e3 && !hasControl(value) : input.type === "boolean" ? typeof value === "boolean" : typeof value === "number" && Number.isSafeInteger(value)) && (!input.required || value !== ""), "STARTER_INPUT", `Invalid input ${input.id}.`);

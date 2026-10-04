@@ -214,21 +214,35 @@ const decodeFrame = (parts: readonly Buffer[]): string => Buffer.concat(parts).t
  * Newline-delimited frames, holding at most MAX_REQUEST_BYTES of any one frame: the bytes of an oversized frame are
  * dropped as they arrive and the frame is reported once at its newline. UTF-8 split across chunks decodes intact.
  */
-async function* frames(input: Readable): AsyncGenerator<Frame> {
-  let parts: Buffer[] = [], size = 0, oversized = false;
-  for await (const chunk of input) {
-    let data = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
-    for (let newline = data.indexOf(10); ; newline = data.indexOf(10)) {
-      const piece = newline === -1 ? data : data.subarray(0, newline);
-      if (!oversized && size + piece.length > MAX_REQUEST_BYTES) { oversized = true; parts = []; size = 0; }
-      if (!oversized) { parts.push(piece); size += piece.length; }
-      if (newline === -1) break;
-      yield oversized ? OVERSIZED : decodeFrame(parts);
-      parts = []; size = 0; oversized = false; data = data.subarray(newline + 1);
-    }
+class FrameBuffer {
+  private parts: Buffer[] = [];
+  private size = 0;
+  private oversized = false;
+  /** Adds bytes of the current frame; once the frame exceeds the bound its bytes are dropped, not held. */
+  add(piece: Buffer): void {
+    if (!this.oversized && this.size + piece.length > MAX_REQUEST_BYTES) { this.oversized = true; this.parts = []; }
+    if (!this.oversized) { this.parts.push(piece); this.size += piece.length; }
   }
-  if (oversized) yield OVERSIZED;
-  else if (size) yield decodeFrame(parts);
+  /** Completes the current frame and starts the next one. */
+  take(): Frame {
+    const frame = this.oversized ? OVERSIZED : decodeFrame(this.parts);
+    this.parts = []; this.size = 0; this.oversized = false;
+    return frame;
+  }
+  get pending(): boolean { return this.oversized || this.size > 0; }
+}
+function* splitChunk(buffer: FrameBuffer, chunk: Buffer): Generator<Frame> {
+  let data = chunk;
+  for (let newline = data.indexOf(10); newline !== -1; newline = data.indexOf(10)) {
+    buffer.add(data.subarray(0, newline)); yield buffer.take();
+    data = data.subarray(newline + 1);
+  }
+  buffer.add(data);
+}
+async function* frames(input: Readable): AsyncGenerator<Frame> {
+  const buffer = new FrameBuffer();
+  for await (const chunk of input) yield* splitChunk(buffer, Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+  if (buffer.pending) yield buffer.take();
 }
 /** Parses one frame; oversized or malformed input is answered here and yields no message. */
 function parseFrame(frame: Frame, send: Send): JsonRpc | null {
