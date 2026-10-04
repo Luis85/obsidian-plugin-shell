@@ -59,7 +59,7 @@ test('file helpers name components, relativize imports and rewrite copied templa
 test('framework documents and maintainer workflows move under docs/framework with rebased links', () => {
   assert.deepEqual(['README.md', 'AGENTS.md', '.github/workflows/ci.yml', 'docs/a.md', 'README.txt'].map(relocatedPath),
     ['docs/framework/README.md', 'docs/framework/AGENTS.md', 'docs/framework/workflows/ci.yml', 'docs/a.md', 'README.txt']);
-  for (const path of ['configs/starters/blank.json',
+  for (const path of ['configs/starters/blank.json', 'DEVELOPER_GUIDE.md',
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
     'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs'])
     assert.equal(maintainerOnly(path), true, path);
