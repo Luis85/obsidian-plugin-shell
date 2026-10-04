@@ -13,8 +13,8 @@ const invalid = (message: string) => new CompilerError(diagnostic('COMPILER_TEMP
 /** Caches, maintainer-only inputs and files a generated project already holds at their relocated path
  * (docs/framework/...) are not framework input: the product's own README/AGENTS.md/CI are never read. */
 async function excluded(root: string, path: string): Promise<boolean> {
-  // bin/plugins holds the user's installed app plugins, never template input.
-  if (path === 'bin/plugins' || path.split('/').includes('__pycache__') || /\.py[co]$/.test(path) || maintainerOnly(path)) return true;
+  // bin/plugins holds the user's installed app plugins, never template input; only its developer guide ships.
+  if ((path.startsWith('bin/plugins/') && path !== 'bin/plugins/DEVELOPER-GUIDE.md') || path.split('/').includes('__pycache__') || /\.py[co]$/.test(path) || maintainerOnly(path)) return true;
   const moved = relocatedPath(path);
   return moved !== path && await statIfPresent(join(root, moved)) !== null;
 }
