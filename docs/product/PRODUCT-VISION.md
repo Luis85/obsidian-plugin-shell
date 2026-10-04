@@ -1,5 +1,7 @@
 # Workbench — product vision
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 > **Version:** 1.0 · **Date:** 2026-09-29 · **Product owner:** Luis85
 > **Status:** Product direction. This document establishes the name and intended value; it is not an implementation, qualification or release claim.
 > **Review baseline:** PR #5 at `15f74eaec78b5555bed94e4310472db841e371f7`.

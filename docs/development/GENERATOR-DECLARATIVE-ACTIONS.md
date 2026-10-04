@@ -1,5 +1,7 @@
 # Declarative actions and native note generation
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > Historical authoring workflow: the Page/Component element forms below belonged to the retired detail editors. Current authoring uses the [visual editors](../concepts/companion/VISUAL-EDITORS.md); legacy detail-schema actions and slot assignments are migrated to visual interactions and instance slots. The payload and native note contracts remain the generator's input semantics.
 
 ## Authoring workflow

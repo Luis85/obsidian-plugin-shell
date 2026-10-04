@@ -1,6 +1,8 @@
 # Framework CLI and developer-kit workflow
 
-Implementation on PR #18, 2026-09-25. This is a developer-facing TypeScript CLI and assembled ZIP workflow, not a published framework release or native companion conversion. The [framework-first plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) remains broader than the implemented and qualified scope below.
+> Type: reference · Part of the [docs index](../README.md)
+
+`node bin/app` is a developer-facing TypeScript CLI with an assembled ZIP workflow. It is not a published framework release or native companion conversion. The historical [framework-first plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) is broader than the implemented and qualified scope below.
 
 ## Start a new plugin from a starter
 

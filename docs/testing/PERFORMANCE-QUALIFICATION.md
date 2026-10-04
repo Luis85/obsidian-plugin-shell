@@ -1,5 +1,7 @@
 # Performance and ownership qualification
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 These are separate measurements: deterministic owner cleanup, native correctness,
 controlled-reference timing, shared-runner timing and retained asset sizes. None
 promotes the 96-case legacy acceptance plan or authorizes a release. The NFR-02/03

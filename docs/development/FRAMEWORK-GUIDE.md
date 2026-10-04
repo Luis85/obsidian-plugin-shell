@@ -1,5 +1,7 @@
 # Develop a plugin with the template framework
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 Start with a feature, keep its business rules in `src/features/<name>`, and import
 the public building blocks from `src/features/api.ts`. Generated source is ordinary
 editable TypeScript/Vue. Bootstrap supplies host adapters and runtime ownership;

@@ -1,5 +1,7 @@
 # Guided setup and maker tooling
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 > **Contract:** Retained complete PRD 0.4 target. Current implementation includes reviewed
 > [identity setup/resume](SETUP-IDENTITY.md) and the integrated
 > [maker catalog](AUTHORING-TOOLS.md). Recipe details and bounds in that current guide

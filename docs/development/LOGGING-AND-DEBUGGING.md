@@ -1,5 +1,7 @@
 # Structured logging and runtime debugging
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 The runtime exposes `services.logger` and `services.debugging`. Logging starts at
 `info`; detailed debug logging is off until explicitly enabled. The setting belongs
 to the current plugin runtime and resets on reload. No preference migration,

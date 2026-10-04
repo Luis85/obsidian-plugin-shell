@@ -1,5 +1,7 @@
 # Optional Storybook and generated stories
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Two **independent**, default-off switches are accepted in the top-level project JSON:
 
 ```json

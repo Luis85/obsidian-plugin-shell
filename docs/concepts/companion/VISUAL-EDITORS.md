@@ -137,8 +137,8 @@ in component templates and their revisions.
 
 Full rules: spec §2 and §11–§13. The runtime contract lives in `scripts/companion/visual/*.mjs`
 (`ir`, `catalog`, `validate`, `composition`, `layout`, `session`, `commands`, `mapping`). The concept
-inlines these modules and the generator imports them; `visual-migrate.mjs` is inlined only into the v5 build base
-and is removed with it.
+inlines these modules and the generator imports them; the former `visual-migrate.mjs` was removed
+with the v5 build base.
 
 ```js
 design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1 },  // ↔ generated @nuxt/ui 4.11.2
@@ -176,7 +176,7 @@ design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1
 The current project format is Companion project schema 6 only. Schema 1–5 documents, including v3/v4 documents
 that carry `detailDesigns`, are rejected by the shell, compiler and current authoring build with a
 `COMPANION_VERSION` diagnostic and are never migrated; the retired formats' history lives in Git. The checked-in
-`index.html` is only the v5 build base of the current authoring build until that build is v6-native.
+`index.html` is only the schema 6 build base of the current authoring build.
 
 ## Keyboard map
 

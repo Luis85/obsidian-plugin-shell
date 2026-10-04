@@ -1,5 +1,7 @@
 # Design-first prototype tooling
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 The [companion-prototype-design skill](../../.claude/skills/companion-prototype-design/SKILL.md)
 conducts an approved design interview and emits a complete fresh-session execution
 prompt. Its helpers compose the existing shell rather than inventing another generator.

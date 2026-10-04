@@ -1,5 +1,7 @@
 # Optional Airship integration
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Every generated plugin and clickdummy project has a source-backed browser preview: `npm run dev:preview`. It uses the actual generated Vue pages/components and synthetic read adapters, not a second renderer. Native host behavior and unimplemented business operations are not simulated as accepted functionality.
 
 ## Enable and use

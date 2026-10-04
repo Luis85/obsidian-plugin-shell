@@ -1,5 +1,7 @@
 # Add commands and ribbon icons
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Feature authors declare commands in a dedicated file and add one factory to the
 explicit registry in `src/bootstrap/commands.ts`. `main.ts`, native registration
 and generic dispatch do not change for each new feature.

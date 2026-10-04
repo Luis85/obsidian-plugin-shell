@@ -4,6 +4,8 @@
 
 Workbench is a developer-focused tool to create and manage declarative user interfaces for webapps and Obsidian plugins. Start with the product direction, then use the appropriate scoped requirements and evidence.
 
+This page maps the product documents and how their authority relates. For every other current document (tutorials, how-to guides, reference and explanation) use the [docs index](../README.md); it also lists these documents by type.
+
 ## Product direction
 
 | Document | Authority |
@@ -11,7 +13,7 @@ Workbench is a developer-focused tool to create and manage declarative user inte
 | [Product vision](PRODUCT-VISION.md) | Canonical Workbench name, users, problem hypothesis, value, scope and success measures. |
 | [Product principles](PRODUCT-PRINCIPLES.md) | Decision rules for declarative authoring, documentation, ownership, configuration, starters, quality and developer experience. |
 | [Design constraints](../../DESIGN-CONSTRAINTS.md) | Cross-product constraint register with stable DC IDs, scoped owners, inherited/MVP/proposed rule distinctions, verification methods and acceptance mapping. |
-| [PR #5 vision review](../_archive/product/PR5-VISION-REVIEW.md) | Source-grounded review at the 2026-09-29 baseline; separates inspected capabilities from intended direction. |
+| [PR #5 vision review](../_archive/product/PR5-VISION-REVIEW.md) (archived) | Historical source-grounded review at the 2026-09-29 baseline; separates inspected capabilities from intended direction. |
 | [Product and delivery overview](../../SHELL-FIRST-OVERVIEW.md) | Practical entry points and the relationship between Workbench, its reusable foundation and delivery gates. The filename is retained for compatibility. |
 
 ## Mandatory MVP output quality
@@ -26,7 +28,7 @@ The document contains ten BQ acceptance clauses, ten BQA test protocols, explici
 | --- | --- |
 | [MVP improvement plan](MVP-IMPROVEMENT-PLAN.md) | Nineteen work packages covering configuration, external starters, setup/first run, typed Markdown, operational fixture-backed UI, backend integration, safe changes, quality, native Workbench and staged shipment. Version 1.1 integrates MVP-QR-01. |
 | [MVP vision acceptance](MVP-VISION-ACCEPTANCE.md) | Twenty scenarios, evidence rules and mapping to every retained A01–A20 case, tightened by the ten additional BQA protocols in the quality requirement. |
-| [MVP baseline and requirement crosswalk](../_archive/product/MVP-VISION-BASELINE.md) | Dated source observations at `f3778ed`, reconciliation with IP-01–15 and coverage of MVP-01–24; the later MVP-QR-01 amendment adds requirements, not new implementation evidence. |
+| [MVP baseline and requirement crosswalk](../_archive/product/MVP-VISION-BASELINE.md) (archived) | Dated source observations at `f3778ed`, reconciliation with IP-01–15 and coverage of MVP-01–24; the later MVP-QR-01 amendment adds requirements, not new implementation evidence. |
 
 These documents define required outcomes and planned execution, not executed qualification. They supplement the retained contracts below without changing task states or authorizing publication. The native full-product obligation remains; an earlier framework shipment does not close the complete MVP.
 
@@ -48,7 +50,7 @@ The initial records are `new` and unaccepted until existing implementation and c
 | [Authoring and native-plugin requirements](COMPANION-PLUGIN-PRD.md) | Workbench authoring scope and native conversion, including retained companion requirements. The filename is retained. |
 | [JSON-to-clickdummy MVP](../prds/MVP-JSON-TO-CLICKDUMMY.md) | Bounded end-to-end MVP obligations, strengthened by MVP-QR-01 for operational fixture-backed output; framework shipment alone does not complete them. |
 | [Delivery strategy](DELIVERY-STRATEGY.md) | Foundation readiness and approved shipment before the agreed native conversion and native acceptance; publication remains separately authorized. |
-| [Integrated improvement plan](../_archive/product/PR5-IMPROVEMENT-PLAN.md) | September 27 work-package structure retained; the vision-aligned plan and quality amendment reconcile later direction without rewriting historical execution results. |
+| [Integrated improvement plan](../_archive/product/PR5-IMPROVEMENT-PLAN.md) (archived) | September 27 work-package structure retained; the vision-aligned plan and quality amendment reconcile later direction without rewriting historical execution results. |
 | [Task index](../tasks/README.md) | Detailed execution and acceptance tracking. Product prose does not mark tasks complete. |
 
 ## Implementation and evidence

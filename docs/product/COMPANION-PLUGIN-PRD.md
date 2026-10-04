@@ -1,5 +1,7 @@
 # Workbench — authoring and native-plugin requirements
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Revision:** 0.4.0 documentation contract · **Date:** 2026-09-24 · **Owner:** Luis85
 > **Product alignment:** 2026-09-29; naming and product context only. Existing requirement IDs and acceptance obligations remain unchanged.
 > **Status:** Evolving concept and proposed native product. Not feature-complete, not a native implementation, not release-qualified.

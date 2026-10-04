@@ -1,5 +1,7 @@
 # Executable evidence and acceptance reconciliation
 
+> Type: reference · Part of the [docs index](../README.md)
+
 The versioned adapters connect actual framework results to reviewed, case-specific
 acceptance links. They supplement the finite [legacy plan](test-plan.json), whose
 96 rows, normative modes and blocked release guard remain unchanged. The additive

@@ -1,5 +1,7 @@
 # Setup: npm install-script policy
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 For current identity/profile/resume behavior, use [Setup and identity](SETUP-IDENTITY.md).
 The original error report below predates the dependency remediation; historical
 warnings are distinguished from the current locked graph.

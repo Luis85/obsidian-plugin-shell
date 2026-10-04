@@ -1,5 +1,7 @@
 # Workbench — product principles
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 > **Version:** 1.0 · **Date:** 2026-09-29
 > **Status:** Product and design guidance derived from the [vision](PRODUCT-VISION.md). Requirements and proposed follow-up acceptance below are not claims that every capability is implemented.
 

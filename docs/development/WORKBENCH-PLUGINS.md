@@ -1,5 +1,7 @@
 # Workbench plugin development
 
+> Type: reference · Part of the [docs index](../README.md)
+
 Workbench has a trusted TypeScript plugin SDK for extending the **development framework itself** without adding framework IDs, starter IDs, CLI commands or Studio actions to central switch statements.
 
 This is separate from the plugin system emitted into generated projects. Workbench plugins extend project creation and authoring; generated-project plugins extend the generated application.

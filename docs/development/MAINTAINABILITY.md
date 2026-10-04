@@ -1,5 +1,7 @@
 # Maintainability measurement
 
+> Type: reference · Part of the [docs index](../README.md)
+
 `npm run check:maintainability` measures the entire current source tree with the
 qualified Fallow 3.30.0 CLI. It never rewrites application source. Reports and the
 unaltered JSON/stderr of each tool invocation go to a new timestamped directory

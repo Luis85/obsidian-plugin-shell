@@ -1,5 +1,7 @@
 # Modal and notice services
 
+> Type: reference · Part of the [docs index](../README.md)
+
 Feature code receives `services.modals` and `services.notices` from composition.
 Both are framework-free application APIs with injected native/browser adapters.
 Features do not construct Obsidian `Modal` or `Notice` objects.

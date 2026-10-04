@@ -1,6 +1,8 @@
 # JSON-defined project starters
 
-Workbench starter contract v1. Builds on PR #5; public product name is Workbench.
+> Type: reference · Part of the [docs index](../README.md)
+
+Workbench starter contract v1. The public product name is Workbench.
 The existing repository, plugin and CLI identifiers remain unchanged.
 
 ## Product contract
@@ -20,10 +22,9 @@ installs definitions. This includes Blank; there is no hidden fallback starter.
 The canonical installed definitions live under `configs/starters/`. Every
 Companion definition embeds a **project schema 6** document; a definition that
 embeds schema 1–5 fails with `STARTER_VERSION` and is never migrated. The retired
-v5 `.companion.json` copies under `docs/concepts/companion/starters/` are only an
-input of the v5 authoring build base until that build is v6-native; they are not
-discovery inputs and are excluded from shell distributions and copied framework
-content. Eleven definitions carry the focused Companion examples; `webapp.json` provides a
+v5 `.companion.json` copies that lived under `docs/concepts/companion/starters/`
+were removed; the schema 6 authoring build base embeds no starter data, and only
+`configs/starters/` is a discovery input. Eleven definitions carry the focused Companion examples; `webapp.json` provides a
 complete dependency-free browser example using the file-generation primitive, and
 further Companion/file definitions cover the Workbench showcases. Eleven **project
 starters** (`generator.kind: "project"`) replace the former eight-preset maker

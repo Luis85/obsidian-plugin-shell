@@ -1,5 +1,7 @@
 # Project setup handout
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Workbench’s root [PROJECT-SETUP-HANDOUT.md](../../PROJECT-SETUP-HANDOUT.md) turns an existing set of PRDs and a product-trio discussion into a reviewed brief for the first bespoke prototype. It is not a PRD replacement, a second application model, or an executable process manifest.
 
 ## What the meeting produces

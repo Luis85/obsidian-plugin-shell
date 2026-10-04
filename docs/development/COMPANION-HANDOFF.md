@@ -1,5 +1,7 @@
 # Companion handoff: one artifact, two front ends
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 The shell has two front ends: the terminal (`node bin/app …`) and the companion
 (today the offline browser concept in `docs/concepts/companion/index.html`). This page
 is the contract between them. The research behind it is the "Dual interface" section

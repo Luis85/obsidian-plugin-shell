@@ -1,5 +1,7 @@
 # Hindsight: keyless, opt-in developer memory
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 ## What is and is not automatic
 
 The project exposes `node bin/app memory <command>`, `node bin/app help memory` and the equivalent `npm run memory -- <command>`. Help, provider discovery and installation previews do not need project npm dependencies, Python, a provider key or a running daemon. Operations on a bank require a Git checkout. This is developer tooling, not part of the Obsidian plugin runtime or companion UI.

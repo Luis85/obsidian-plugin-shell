@@ -1,5 +1,7 @@
 # Native file extensions and file context menus
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 ## Choose a starter
 
 `custom-file-view` creates a plugin for a dedicated text/JSON file format. Its default is `.folio`. The generated plugin registers a `TextFileView`, a **Create Folio document** command, folder **Create** actions, and matching-file **Open** actions. Files open through the normal Obsidian file explorer. The starter editor is a raw-text baseline with validation, not a finished domain-specific visual editor.

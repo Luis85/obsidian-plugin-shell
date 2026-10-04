@@ -1,5 +1,7 @@
 # MVP PRD: JSON to clickdummy and generated companion
 
+> Type: reference · Part of the [docs index](../README.md)
+
 | Field | Value |
 | --- | --- |
 | Status | Proposed MVP delivery contract; not implementation or qualification evidence |

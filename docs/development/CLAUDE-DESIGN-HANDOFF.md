@@ -1,5 +1,7 @@
 # Claude Design folders
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Every prototype can have its own **design folder**: a self-contained workspace that a designer imports
 into Claude Design on its own, without the rest of the repository. It carries the prototype's brief,
 screens, components, the platform's design tokens and agent instructions. Interactive prototypes made

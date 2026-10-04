@@ -1,5 +1,7 @@
 # Local and cloud sessions
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 How a Workbench project, or this framework checkout, goes from "created locally" to "an agent
 works in a fresh cloud container" without manual setup. Applies to this framework repository
 and to every project generated with `node bin/app new`.

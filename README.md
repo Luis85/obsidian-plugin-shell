@@ -275,29 +275,20 @@ release promotion require separate evidence and authorization.
 
 ## Documentation
 
+The [docs index](docs/README.md) lists every current document by type (tutorials,
+how-to guides, reference and explanation), together with plans, workspaces and the
+[archive](docs/_archive/README.md) of historical plans, reviews and records. Start with:
+
 | Document | Purpose |
 | --- | --- |
-| [Workbench product vision](docs/product/PRODUCT-VISION.md) | Product name, intended users, value, scope and success measures. |
-| [Workbench product principles](docs/product/PRODUCT-PRINCIPLES.md) | Declarative authoring, documentation, developer experience and quality decisions. |
-| [Product documentation map](docs/product/README.md) | Relationship between vision, scoped requirements, implementation and dated evidence. |
-| [Iteration-four plan](docs/_archive/development/ITERATION-FOUR-PLAN.md) | Baseline gaps, coordinated ownership and acceptance order. |
-| [Iteration-four review](docs/_archive/development/ITERATION-FOUR-REVIEW.md) | Independent findings, fixes and remaining limitations. |
-| [Iteration-three guide](docs/_archive/development/ITERATION-THREE.md) | Executable entity/repository API, compatibility, safety and remaining scope. |
-| [Iteration-three review](docs/_archive/development/ITERATION-THREE-REVIEW.md) | Independent findings, regression fixes and improvement pass. |
-| [Iteration-two guide](docs/_archive/development/ITERATION-TWO.md) | Historical layout/header operation, build/install and dependency decisions. |
-| [Iteration-two review](docs/_archive/development/ITERATION-TWO-REVIEW.md) | Evidence, fixes, regressions and remaining risks. |
-| [Iteration-one guide](docs/_archive/development/ITERATION-ONE.md) | Historical installation and architecture context; the iteration-three guide supplies current capabilities. |
-| [Test record](docs/_archive/testing/ITERATION-FOUR.md) | Actual tests, coverage denominators, native/served evidence and remaining gaps. |
-| [Framework PRD](docs/product/PRD.md) | Reusable Obsidian foundation requirements and retained baseline; Workbench product direction is defined above. |
-| [Nuxt UI implementation plan](docs/_archive/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
-| [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Required evidence model and verification architecture. |
-| [TypeScript quality-tool research](docs/_archive/research/2026-09-23-typescript-quality-tools.md) | Repository-specific assessment, compatibility caveats and primary sources. |
-| [Quality-tool adoption plan](docs/_archive/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) | Proposed additional tools, negative controls and CI placement; not blanket implementation claims. |
-| [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Retained full contract; the authoring guide states executable recipes and limitations. |
-| [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Full entity-to-Markdown contract. |
-| [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Canonical outcomes, recovery and notification roadmap. |
-| [Obsidian tokens](docs/design/OBSIDIAN-TOKENS.md) | Native tokens, aliases and pinned host fixture provenance. |
-| [Maintenance/release](docs/development/MAINTENANCE-AND-RELEASE.md) | Full update/candidate/promotion contract. |
+| [Build a feature](docs/development/BUILD-A-FEATURE.md) | Tutorial: add a business feature on the template. |
+| [Framework guide](docs/development/FRAMEWORK-GUIDE.md) | The reusable developer API, from feature to qualification. |
+| [Framework CLI](docs/development/FRAMEWORK-CLI.md) | `node bin/app` reference: new, setup, the check gate and the kit workflow. |
+| [Test suites](docs/testing/TEST-SUITES.md) | Every suite, its command and prerequisites, and how to add a test. |
+| [Test strategy](docs/testing/TEST-STRATEGY.md) | The testing approach and the normative TST rules. |
+| [Quality assurance](docs/development/QUALITY-ASSURANCE.md) | What `npm run verify` runs, partial runs and reports. |
+| [Framework PRD](docs/product/PRD.md) | Reusable Obsidian foundation requirements; Workbench direction is in the [product vision](docs/product/PRODUCT-VISION.md). |
+| [Upstream lint dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion. |
 
 [Agent instructions](AGENTS.md) · [License](LICENSE)
 

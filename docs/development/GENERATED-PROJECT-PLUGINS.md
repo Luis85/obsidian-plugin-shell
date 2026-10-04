@@ -1,5 +1,7 @@
 # Generated project plugin system
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Two plugin layers:** this document describes plugins inside a generated application. To extend Workbench itself—framework adapters, project starters, the maker event bus, CLI commands or Studio/TUI actions—use the [Workbench plugin SDK](./WORKBENCH-PLUGINS.md).
 
 Every project starter emits the same local TypeScript extension contract. The goal is to let application developers add or remove capabilities without changing Workbench's generator or mixing plugin-specific code into the shared core.

@@ -1,5 +1,7 @@
 # Obsidian tokens and native host styling
 
+> Type: reference · Part of the [docs index](../README.md)
+
 **Version:** 1.0 · **Date:** 2026-09-22 · **PRD:** 0.7, TOK-01–06 (product requirements; executable test IDs are separately scoped).
 
 ## Developer use

@@ -1,10 +1,13 @@
 # Error handling and notifications
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Normative contract:** PRD 0.5; extends ERR-01–06 and LOG-01–06 with ERR-07–18 and NTF-01–12.  
-> **Implementation status:** This remains the complete target. Iteration 03 adds
-> executable owned timing/queue/action policies; see
-> [runtime services](../development/RUNTIME-SERVICES.md) for exact behavior and
-> remaining qualification. The historical stylesheet specimen is separate.
+> **Implementation status:** This remains the complete target. Owned timing, queue
+> and recovery-action policies are implemented; see
+> [runtime services](../development/RUNTIME-SERVICES.md) and
+> [modal and notice services](../development/MODALS-AND-NOTICES.md) for exact behavior
+> and remaining qualification. The historical stylesheet specimen is separate.
 > **Sources:** [Review research](../_archive/research/2026-09-22-reliability-harness-review.md), P01–P12.
 
 ## 1. One outcome, one feedback owner

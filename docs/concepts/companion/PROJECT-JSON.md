@@ -1,7 +1,7 @@
 # Full-project JSON, self-project and folder settings
 
 > Current page and component editors: [Visual Page and Component editors](VISUAL-EDITORS.md). [Verification scope](VISUAL-EDITORS-VERIFICATION.md). Older verification receipts retain their original scope.
-**Current format: project schema 6 only · Offline authoring plus separate read-only inspection and reviewed generation.** The checked-in `index.html` below is the v5 build base of the current authoring build; its own v5 exports are not a supported import format for the shell.
+**Current format: project schema 6 only · Offline authoring plus separate read-only inspection and reviewed generation.** The checked-in `index.html` below is the schema 6 build base of the current authoring build; it embeds no project data and is not an import format for the shell.
 
 The HTML prototype contains a loadable **Plugin Companion** project. It uses the same editors, persistence, import review and JSON contract as a user-authored project; it is not a separate hardcoded presentation or a second active project. The existing simpler example and blank-project entry remain available.
 

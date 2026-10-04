@@ -59,8 +59,8 @@ remain authoritative. Full project v6 import/export retains page designs, compon
 revisions, requirements, storymaps and source bindings. No schema bump or second
 Journey Lens document is introduced by this integration pass.
 
-The checked-in v5 HTML/JSON pair is only the build base this build composes from
-until the authoring build is v6-native; project schema 1–5 imports are rejected,
+The checked-in `index.html` is only the schema 6 build base this build composes
+from; project schema 1–5 imports are rejected,
 never migrated. Do not use it to review the replacement. No old qualification
 result is relabeled as new evidence.
 

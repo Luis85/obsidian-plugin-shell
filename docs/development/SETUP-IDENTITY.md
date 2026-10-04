@@ -1,5 +1,7 @@
 # Identity setup and resumable qualification
 
+> Type: reference · Part of the [docs index](../README.md)
+
 `npm run setup` starts without project dependencies. Its default profile is
 browser-first. It reviews the chosen identity, exact file hashes, selected commands,
 dependency lifecycle allowlist and excluded actions before applying anything.

@@ -1,5 +1,7 @@
 # Optional Obsidian CLI adapter
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 The shell exposes a deliberately narrow adapter over the official Obsidian CLI. It requires Obsidian CLI **1.12.7 or newer** and an explicit `--obsidian-vault <name-or-id>` on every call. It never falls back to whichever vault happens to be active.
 
 ## Read-only surface

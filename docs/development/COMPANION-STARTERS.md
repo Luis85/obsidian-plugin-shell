@@ -1,5 +1,7 @@
 # Companion golden starter and visual-feature showcase
 
+> Type: reference · Part of the [docs index](../README.md)
+
 The current Companion build starts with an empty workspace (or reopens the user's
 saved project). It does not embed the Companion self-project or a starter catalog.
 The shell and current authoring build share the external starter contract.
@@ -12,7 +14,7 @@ The shell and current authoring build share the external starter contract.
 | `configs/starters/feature-showcase.json` | Executable examples of every currently catalogued visual primitive, control kind, action kind, state and layout. |
 | `reports/companion-mvp/index.html` | Current empty authoring build, created by `npm run companion:build`. |
 | `reports/companion-mvp/companion-project*.json` | Explicit, derived qualification inputs only; not maintained project authorities or starter distribution assets. |
-| `docs/concepts/companion/index.html`, its project JSON, starters and visual seed | The **v5 build base** that `npm run companion:build` composes from until the authoring build is v6-native. Not a supported import format, the current empty entry point or the golden development template. |
+| `docs/concepts/companion/index.html` | The generated schema 6 **build base** that `npm run companion:build` mounts the Journey Lens and prototype editors into (built by `scripts/concepts/build-companion.py`). It embeds no project or starter data. Not a supported import format, the current empty entry point or the golden development template. |
 
 The canonical starter holds the full design, not a screenshot or an HTML wrapper.
 It contains 28 surfaces, 27 visual pages, 54 components and 54 pinned component
@@ -203,10 +205,10 @@ compatibility. Do not relabel their reports as hosted/native acceptance.
 
 `companion:starter-browser` in the suite manifest requires the current authoring
 build and a copied compiled artifact at `reports/feature-showcase/clickdummy.html`.
-The concept browser suites of the v5 build base remain separate and retain all their assertions.
+The concept browser suites of the build base remain separate and retain all their assertions.
 
-Shell packaging excludes current definitions and the build base's starter data,
-self-project JSON and visual seeds. Only a closed list of reviewed Vue Flow
+Shell packaging excludes the current starter definitions; the build base embeds no
+starter data, self-project JSON or visual seed. Only a closed list of reviewed Vue Flow
 runtime assets and notices remains: the generated Journey Lens needs this engine
 code, not a starter. The standalone starter ZIP contains definitions only.
 

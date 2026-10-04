@@ -1,6 +1,8 @@
 # Saved design system → Nuxt UI stylesheet
 
-The companion and shell share a deterministic, dependency-free token validator and CSS compiler. This implements the design-system styling path on PR #5; it is not native companion conversion or arbitrary page/component-layout generation.
+> Type: how-to guide · Part of the [docs index](../README.md)
+
+The companion and shell share a deterministic, dependency-free token validator and CSS compiler. This implements the design-system styling path; it is not native companion conversion or arbitrary page/component-layout generation.
 
 ## Author, export, generate
 

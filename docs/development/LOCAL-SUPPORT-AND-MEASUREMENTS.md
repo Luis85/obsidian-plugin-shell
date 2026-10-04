@@ -1,5 +1,7 @@
 # Local support reports and authoring measurements
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 These commands use the same CLI catalog and typed operation dispatcher as other shell commands. Neither executes imported project code, installs dependencies, launches Obsidian, sends telemetry or writes files. Redirecting stdout is an explicit action performed by the invoking shell.
 
 ## Share a minimal support report

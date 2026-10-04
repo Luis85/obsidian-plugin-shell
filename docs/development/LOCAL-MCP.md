@@ -1,5 +1,7 @@
 # Project-local Workbench MCP
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Workbench can expose its complete CLI surface to coding agents through a repository-local stdio MCP server. The server is **off by default**.
 
 ## Opt in during setup

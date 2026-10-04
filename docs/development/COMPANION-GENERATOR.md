@@ -1,6 +1,8 @@
 # Companion project compiler
 
-Related: issue #19, PR #5's full project JSON contract. This is shell tooling, not a completed native companion implementation.
+> Type: reference · Part of the [docs index](../README.md)
+
+The compiler turns a full Companion project JSON (schema 6) into a generated workspace. This is shell tooling, not a completed native companion implementation.
 
 ## User journey
 

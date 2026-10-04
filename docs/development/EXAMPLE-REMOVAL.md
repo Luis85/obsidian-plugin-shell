@@ -1,5 +1,7 @@
 # Remove optional examples
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Run `npm run examples:remove -- --dry-run` to review exact file hashes, removals,
 replacement foundation files and checks still to run. Apply with
 `npm run examples:remove -- --yes --no-interaction` only after reviewing that plan.

@@ -1,5 +1,7 @@
 # Product requirements: Obsidian Plugin Shell
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Version:** 0.11.0 · **Updated:** 2026-09-23 · **Owner:** Luis85
 > **Implementation milestone:** Authoring, optional examples, shared durable persistence
 > and executable qualification milestone, plugin version 0.4.0. Final platform/public-release

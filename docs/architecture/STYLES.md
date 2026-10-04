@@ -1,7 +1,9 @@
 # Modular CSS and composed styles.css
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Contract:** PRD 0.3 extension; requirements CSS-01–12.  
-> **Status:** Required build/authoring behavior, not an implemented stylesheet pipeline.  
+> **Status:** Normative target; the shared pipeline exists. `src/styles/index.css` and Vue SFC styles compose through the shared Vite configuration (`scripts/bundling/vite-shared.mjs`) and selector scoping (`scripts/bundling/css-ownership.mjs`) into one `dist/styles.css`; `npm run check:tokens` and `npm run check:style-literals` guard token use. File layouts below are illustrative; CSS-01–12 remain in force.  
 > **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
 
 ## 1. The intended result

@@ -1,5 +1,7 @@
 # Reviewed concept intake
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 **Implemented:** data-only project, feature and improvement intake through the
 existing shell-cli project-import planner. This does not execute prototypes, install
 dependencies, implement business logic or complete native companion acceptance.

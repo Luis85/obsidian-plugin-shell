@@ -1,5 +1,7 @@
 # Workbench MVP — operational boilerplate quality requirement
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Requirement:** MVP-QR-01 · **Version:** 1.0 · **Date:** 2026-09-29
 > **Authority:** Owner-directed mandatory MVP quality requirement, not an optional enhancement.
 > **Change baseline:** PR #5, `docs/companion-plugin-prd`, `40799d9489e0bd436a47f819732292e8a35a4774`.

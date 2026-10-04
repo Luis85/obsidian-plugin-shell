@@ -1,5 +1,7 @@
 # Companion project JSON → shell
 
+> Type: reference · Part of the [docs index](../README.md)
+
 **Project schema 6 only; earlier formats are rejected, never migrated. `companion:generate` remains read-only; `companion:scaffold` is the separate workspace compiler.**
 
 The companion exports a complete **saved authoring definition**. The shell accepts that definition and a target inside an explicitly chosen vault. The first script version validates the transfer envelope and paths, then returns the original JSON bytes. It does not generate, install, activate, run tests, acquire a template or create a target directory.

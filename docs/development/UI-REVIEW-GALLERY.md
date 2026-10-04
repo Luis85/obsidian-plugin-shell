@@ -1,5 +1,7 @@
 # UI review gallery
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 > **Evidence for human review — not acceptance, not a baseline.** The gallery shows what a surface looked like in one browser at one commit so a person can look at it. It is never compared with stored images, never passes or fails a gate and never accepts a requirement.
 
 Screenshots from the browser tests used to disappear inside one large `reports/` archive with no index. The gallery captures a fixed matrix and indexes it, so a reviewer opens one page.

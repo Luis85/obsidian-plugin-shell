@@ -1,5 +1,7 @@
 # Architecture contract: the companion is a shell consumer
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 **Status:** Proposed implementation contract, 2026-09-24. No production conversion is claimed. The [delivery strategy](../product/DELIVERY-STRATEGY.md) governs sequencing; [CP-001](../tasks/companion/CP-001.md) is the explicit integration task.
 
 ## Dependency direction

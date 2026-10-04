@@ -1,5 +1,7 @@
 # JSON to an offline clickdummy
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 The project compiler emits a browser composition alongside the normal plugin source. Both outputs use the same generated Vue pages, component definitions, source contracts, local effects and navigation store. The browser composition is not an iframe around the companion concept and is not a second hand-maintained mockup.
 
 ## Generate and build
@@ -81,7 +83,7 @@ The modern integrated authoring build is produced by:
 node scripts/concepts/build-mvp.mjs
 ```
 
-It writes `reports/companion-mvp/index.html`, the full v6 `companion-project.json` and a build hash receipt. The checked-in v5 concept is only the build base of this build until it is v6-native; it is not silently relabelled as the new build and is not a supported import format.
+It writes `reports/companion-mvp/index.html`, the full v6 `companion-project.json` and a build hash receipt. The checked-in concept (`docs/concepts/companion/index.html`) is only the schema 6 build base of this build; it is not relabelled as the new build and is not a supported import format.
 
 With the qualified npm explicitly selected and browser tooling provisioned:
 

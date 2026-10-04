@@ -1,5 +1,7 @@
 # Diagnostics and debugging
 
+> Type: reference · Part of the [docs index](../../README.md)
+
 The shell retains result `protocolVersion: 1`. Compiler diagnostic fields are additive: code, severity, phase, message, help, retryable, source and related locations. There is no English-message parsing for native compiler errors. Known legacy validator prefixes are adapted at the boundary; unexpected errors become `COMPILER_INTERNAL`.
 
 Diagnostics name original source JSON pointers where known. Migrated-only locations are explicitly marked `normalized`. They are sorted deterministically and capped at 100 with an explicit truncation diagnostic. `retryable: false` never authorizes a file change; no proposed repair is automatically applied.

@@ -1,6 +1,8 @@
 # Focused sitemap authoring and arrangement
 
-This increment builds on the existing Vue 3/Pinia/Nuxt UI/Vue Flow island; it does not replace the surrounding companion or create a second saved format. Build current authoring with `npm run companion:build`. The checked-in v5 compatibility HTML is not this output.
+> Type: reference · Part of the [docs index](../README.md)
+
+This increment builds on the existing Vue 3/Pinia/Nuxt UI/Vue Flow island; it does not replace the surrounding companion or create a second saved format. Build current authoring with `npm run companion:build`. The checked-in build base (`docs/concepts/companion/index.html`) is not this output.
 
 ## Explicit editing behavior
 

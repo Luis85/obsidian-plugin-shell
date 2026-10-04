@@ -1,5 +1,7 @@
 # Delivery strategy: ship the framework before companion conversion
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 Repository overview: [shell-first delivery](../../SHELL-FIRST-OVERVIEW.md). The [root README](../../README.md) remains the current template operational guide.
 
 **Decision date:** 2026-09-24. **Status:** Owner-directed delivery order; implementation, qualification and publication approval remain outstanding. Read with the [parent PRD](PRD.md), [companion PRD](COMPANION-PLUGIN-PRD.md), [improvement plan](COMPANION-IMPROVEMENT-PLAN.md), [CLI/generator implementation plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [task index](../tasks/README.md).

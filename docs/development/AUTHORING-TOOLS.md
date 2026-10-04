@@ -1,5 +1,7 @@
 # Authoring tools
 
+> Type: reference · Part of the [docs index](../README.md)
+
 The maker catalog generates ordinary, registered source through one reviewed file
 planner. Feature authors keep domain rules in `src/features/<owner>`; Vue markup
 stays in `src/presentation/components`, with behavior in composables and per-view

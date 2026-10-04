@@ -1,5 +1,7 @@
 # Adopt an existing project
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Workbench is usually used to start a project. `adopt` is for the other case: a project that already exists, for example a legacy Angular webapp, and that should gain Workbench later. It first analyzes the project read-only, then writes one Markdown integration plan. It does not integrate anything, and it does not claim that Workbench is released or qualified.
 
 ## Workflow

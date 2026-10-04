@@ -1,8 +1,10 @@
 # Workbench — product and delivery overview
 
+> Type: explanation · Part of the [docs index](docs/README.md)
+
 **Focus on your idea. Save time. Not quality.**
 
-Workbench is a developer-focused tool to create and manage declarative user interfaces for **webapps and Obsidian plugins**. Its three product promises are time savings without quality loss, documentation along the way, and developer experience. Read the [product vision](docs/product/PRODUCT-VISION.md), [principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md).
+Workbench is a developer-focused tool to create and manage declarative user interfaces for **webapps and Obsidian plugins**. Its three product promises are time savings without quality loss, documentation along the way, and developer experience. Read the [product vision](docs/product/PRODUCT-VISION.md), [principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md); every current document is listed by type in the [docs index](docs/README.md).
 
 **Documentation update:** 2026-09-29. The [vision review](docs/_archive/product/PR5-VISION-REVIEW.md) examined PR #5 at `15f74eaec78b5555bed94e4310472db841e371f7`. It is a product/documentation review, not a new runtime qualification. This filename is retained so existing links keep working.
 
@@ -24,7 +26,7 @@ Keep three choices separate: where Workbench authoring runs, what runtime the us
 | Create an independent consumer or inspect CLI capabilities | [CLI guide](docs/development/FRAMEWORK-CLI.md); use the documented plans and supported options |
 | Inspect or compile a declarative design | [Dedicated compiler](docs/development/compiler/README.md); generation is separate from dependency installation and acceptance |
 | Use the current authoring build | [Authoring guide](docs/concepts/companion/README.md); `npm run companion:build` emits the integrated v6 HTML/JSON under `reports/companion-mvp` |
-| Understand the authoring build base | [Checked-in HTML](docs/concepts/companion/index.html) and adjacent JSON are only the v5 build base of the current v6 build; the current project format is schema 6 only |
+| Understand the authoring build base | [Checked-in HTML](docs/concepts/companion/index.html) is only the generated schema 6 build base of `npm run companion:build`; it embeds no project or starter data and is not an import format |
 | Build a generated offline preview | [Clickdummy guide](docs/development/COMPANION-CLICKDUMMY.md); generated Vue source, synthetic reads and explicit unavailable business writes |
 | Integrate an approved concept | [Data-only concept intake](docs/development/CONCEPT-INTAKE.md); intake and selected-output compilation are different operations |
 | Add a custom extension/view or file menu | [Native integration guide](docs/development/native-file-integrations.md); host integration still needs relevant native acceptance |
@@ -59,7 +61,7 @@ This is the product direction, not a claim that every step is complete in every 
 
 The [compiler implementation](bin/compiler/index.ts) emits readiness states with bundle, typecheck and tests initially `not-run`, and product acceptance `not-inferred`. Its project-starter path describes a navigable starting scaffold that still needs visual component and business-action implementation. Compilation success does not establish a complete product.
 
-The [authoring guide](docs/concepts/companion/README.md) distinguishes the current browser concept, its v5 build base and the independently generated clickdummy. None is a substitute for full native Workbench acceptance. Preserve separate evidence for authored definitions, generated source, built previews, behavior tests, native operation and user acceptance.
+The [authoring guide](docs/concepts/companion/README.md) distinguishes the current browser concept, its schema 6 build base and the independently generated clickdummy. None is a substitute for full native Workbench acceptance. Preserve separate evidence for authored definitions, generated source, built previews, behavior tests, native operation and user acceptance.
 
 The [2026-09-27 integrated review](docs/_archive/product/PR5-PRODUCT-REVIEW.md), [improvement plan](docs/_archive/product/PR5-IMPROVEMENT-PLAN.md) and [evidence record](docs/_archive/testing/PR5-REVIEW-EVIDENCE.md) retain their historical scope. Their test counts, pending requirements, release observations and CI failure are not current-head claims. Recheck the exact candidate before closing a gate; neither old success nor an old blocker should be repeated as live status without that check.
 

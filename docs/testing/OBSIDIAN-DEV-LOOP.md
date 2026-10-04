@@ -1,5 +1,7 @@
 # Real-Obsidian dev loop and E2E tests
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Two commands run the built plugin inside a real Obsidian desktop app. Both use
 only contained vaults inside this checkout; they never open a personal vault.
 

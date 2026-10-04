@@ -1,5 +1,7 @@
 # UI implementation status
 
+> Type: reference · Part of the [docs index](../README.md)
+
 `node bin/app ui status [--json] [--root <project>]` is the single read-only place that shows how
 far the generated UI has been implemented. It ships in generated projects because their `bin/` is
 the same CLI. It never writes, runs a test, starts a browser or reads outside the project.

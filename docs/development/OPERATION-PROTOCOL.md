@@ -1,5 +1,7 @@
 # Data-only capability discovery and operation protocol
 
+> Type: reference · Part of the [docs index](../README.md)
+
 ## Real entrypoints and trust boundary
 
 ```sh
