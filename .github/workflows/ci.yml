@@ -1,14 +1,32 @@
 name: CI
-# Every always-on pull-request gate in one place. Path-filtered checks stay in
+# Every always-on Integration-tier gate in one place. Path-filtered checks stay in
 # setup-compatibility.yml and companion-concept-verification.yml; heavy native
-# qualification of main is candidate-qualification.yml; releases are manual.
+# qualification of main is candidate-qualification.yml; release.yml calls this
+# workflow with tier release on release/X.Y.Z branches. dev.yml is the Dev tier.
 # "CI result" aggregates every gate job below, so branch protection can require
 # that single check instead of each matrix leg.
+# Integration tier: every gate job is skipped on a draft pull request and on a
+# release/* head (release.yml qualifies that head instead), so "CI result" then
+# passes with every gate skipped. Drafts cannot merge, marking one ready for review
+# (ready_for_review) runs every gate, and Publish requires "Release result" first.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg and push-skipped job)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -16,6 +34,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   baseline:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Baseline / ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -48,6 +67,7 @@ jobs:
           if-no-files-found: error
 
   showcase:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Showcase / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # Guided setup runs the complete verify gates once before the served showcase.
@@ -139,6 +159,7 @@ jobs:
   # Three independent template-authoring journeys run in parallel. Each still
   # runs every gate on its own fresh checkout.
   renamed-feature:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / renamed feature
     runs-on: ubuntu-24.04
     # Measured at 30-37 minutes on #60 and 44 minutes on #68 (identity adoption,
@@ -212,6 +233,7 @@ jobs:
           if-no-files-found: error
 
   source-archive:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / source archive
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -249,6 +271,7 @@ jobs:
           if-no-files-found: error
 
   example-removal:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / example removal
     runs-on: ubuntu-24.04
     # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
@@ -316,14 +339,15 @@ jobs:
           if-no-files-found: error
 
   # Framework CLI, real Obsidian and generator jobs run on pull requests and
-  # manual dispatch only, as before consolidation.
+  # manual dispatch only, as before consolidation, and always in the release tier.
   framework-cli:
     name: Framework CLI / ${{ matrix.os }}
-    if: github.event_name != 'push'
+    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-latest, macos-latest]
+        # Integration runs the Linux leg; the release tier runs every OS.
+        os: ${{ fromJSON(inputs.tier == 'release' && '["ubuntu-24.04", "windows-latest", "macos-latest"]' || '["ubuntu-24.04"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     defaults:
@@ -369,7 +393,7 @@ jobs:
 
   real-obsidian:
     name: Real Obsidian E2E
-    if: github.event_name != 'push'
+    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -408,7 +432,7 @@ jobs:
 
   generated-companion:
     name: Project generator / generated companion
-    if: github.event_name != 'push'
+    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -464,7 +488,7 @@ jobs:
   # disposable workspace; three per job avoids nine runner slots of setup.
   starter:
     name: Project generator / starters ${{ matrix.ids }}
-    if: github.event_name != 'push'
+    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -500,12 +524,30 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+  # Blocking in Integration (Dev runs the same guard with --warn-only): the
+  # diff-based self-review guard against the pull request's base branch.
+  self-review:
+    name: Self-review guard
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+      - name: Self-review guard against the pull request base
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node "$QUALIFIED_NPM" run check:self-review -- --base "origin/$BASE_REF"
+
   # Informational, not a gate: a live audit regression shows as a failed job on
   # the pull request without failing the workflow. The unchanged blocking gate
-  # is candidate-qualification.yml's live security gate on main.
+  # is candidate-qualification.yml's live security gate on main and release/*.
   security-audit:
     name: Security audit (informational)
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     continue-on-error: true
@@ -525,14 +567,15 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
-  # One required check for branch protection. A job skipped by its own event
-  # condition (framework-cli, real-obsidian and the generators on push) counts
-  # as passing; any failure or cancellation fails this check. The informational
+  # One required check for branch protection. A job skipped by its own condition
+  # (framework-cli, real-obsidian and the generators on push, self-review outside
+  # pull requests, every gate on a draft or release/* pull request) counts as
+  # passing; any failure or cancellation fails this check. The informational
   # security-audit job is deliberately not listed.
   ci-result:
     name: CI result
     if: always()
-    needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter]
+    needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter, self-review]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

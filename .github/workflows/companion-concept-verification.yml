@@ -1,6 +1,7 @@
 name: Companion concept source verification
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths: &concept-inputs
       - 'configs/starters/**'
       - 'scripts/starters/**'
@@ -39,7 +40,20 @@ on:
   push:
     branches: [main]
     paths: *concept-inputs
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -47,6 +61,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   source:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -122,6 +137,7 @@ jobs:
           retention-days: 7
           if-no-files-found: error
   browser:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -172,6 +188,7 @@ jobs:
           retention-days: 7
           if-no-files-found: error
   journey-editor:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -230,6 +247,7 @@ jobs:
 
   journey-native:
     name: Generated Journey Lens / real Obsidian file lifecycle
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -286,6 +304,7 @@ jobs:
 
   jev-typescript6:
     name: Jev / locked TypeScript 6 build and regression checks
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:

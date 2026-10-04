@@ -1,7 +1,21 @@
 name: Interactive maker qualification
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -9,10 +23,12 @@ concurrency:
   cancel-in-progress: true
 jobs:
   maker:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-latest, macos-latest]
+        # Integration (ready pull requests, main) runs the Linux leg; the release tier runs every OS.
+        os: ${{ fromJSON(inputs.tier == 'release' && '["ubuntu-24.04", "windows-latest", "macos-latest"]' || '["ubuntu-24.04"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
     defaults:
