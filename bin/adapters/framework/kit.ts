@@ -13,6 +13,7 @@ import { OperationError, requireThat, type Context } from './contracts.ts';
 import { stat } from 'node:fs/promises';
 import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { templateRootFiles as templateFiles, templateRoots } from '../../compiler/domain/template-inputs.ts';
+import { communityPluginsFolder } from '../../domain/community-plugin.ts';
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = await import('typescript');
@@ -29,6 +30,7 @@ export const kitScripts: Readonly<Record<string, string>> = Object.freeze({
   app: 'node bin/app', help: 'node bin/app help', setup: 'node bin/app setup', new: 'node bin/app new', make: 'node bin/app make',
   generate: 'node bin/app generate', status: 'node bin/app status', doctor: 'node bin/app doctor', 'framework:status': 'node bin/app framework status',
 });
+const pluginGuide = `${communityPluginsFolder}/DEVELOPER-GUIDE.md`;
 async function bootstrapSource(root: string, path: string): Promise<Buffer> {
   const bytes = standaloneSource(path, await readBounded(join(root, path), 8_000_000));
   return path === 'README.md' ? kitRootReadme(bytes) : bytes;
@@ -36,7 +38,10 @@ async function bootstrapSource(root: string, path: string): Promise<Buffer> {
 export async function assembleKit(context: Context, compiler: Compiler): Promise<ArchiveFile[]> {
   const skill = new Map((await prototypeSkillFiles(context.frameworkRoot)).map(file => [file.path, file.bytes]));
   const paths = [...templateFiles, ...skill.keys()];
-  for (const folder of templateRoots) paths.push(...await listFiles(context.frameworkRoot, folder));
+  // The source checkout's own bin/plugins holds locally installed app plugins: never walked, never shipped. Only the
+  // app plugin developer guide ships, fingerprinted in the template and copied beside the user's plugins.
+  for (const folder of templateRoots) paths.push(...await listFiles(context.frameworkRoot, folder, path => path === communityPluginsFolder));
+  paths.push(pluginGuide);
   const files: ArchiveFile[] = [], records: KitFile[] = [];
   const add = (path: string, bytes: Buffer) => { files.push({ path, bytes }); records.push({ path, hash: hash(bytes), bytes: bytes.length }); };
   const sourceInventory: Array<{path: string; hash: string}> = [];
@@ -51,6 +56,7 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     // The bundle reads each Workbench plugin's config.json beside app.js, so enabling a plugin stays a data edit:
     // that copy is schema-checked editable data, not inventory; its fingerprinted default is the template copy.
     if (/^plugins\/[^/]+\/config\.json$/.test(path)) files.push({ path: 'bin/' + path, bytes });
+    if (path === pluginGuide) files.push({ path, bytes });
   }
   const ownership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json')!;
   const shipped = new Map(files.filter(file => file.path.startsWith('bin/template/')).map(file => [file.path.slice('bin/template/'.length), file.bytes]));
@@ -123,9 +129,11 @@ export async function upgradePlan(context: Context, from: string) {
     entries.push({ path: launcher.path, content: (await readBounded(join(nextRoot, launcher.path))).toString('utf8') });
   }
   const configs = await pluginConfigPlan(context.root, current, nextRoot, next);
-  entries.push(...configs.entries, { path: 'bin/kit.json', content: json(next) });
+  const guide = await pluginGuidePlan(context.root, current, nextRoot, next);
+  entries.push(...configs.entries, ...guide, { path: 'bin/kit.json', content: json(next) });
   return { plan: await createFilePlan(context.root, entries), conflicts: configs.conflicts,
-    summary: { from: current.version, to: next.version, sourceRegeneration: 'separate-reviewed-operation', dependencies: 'unchanged', preservedPluginConfigs: configs.preserved } };
+    summary: { from: current.version, to: next.version, sourceRegeneration: 'separate-reviewed-operation', dependencies: 'unchanged', preservedPluginConfigs: configs.preserved,
+      pluginGuide: guide.length ? 'updated' : 'unchanged-or-edited' } };
 }
 /**
  * Runtime plugin configs are user data. An unedited config follows the new shipped default; an edit is kept when the
@@ -146,4 +154,13 @@ async function pluginConfigPlan(root: string, current: Kit, nextRoot: string, ne
     if (await installed(path) === defaults) entries.push({ path, content: null }); else conflicts.push(path);
   }
   return { entries, conflicts, preserved };
+}
+/** The shipped bin/plugins guide follows the new kit unless the user edited it; an edited guide is kept. */
+async function pluginGuidePlan(root: string, current: Kit, nextRoot: string, next: Kit): Promise<Array<{ path: string; content: string; encoding: 'base64' }>> {
+  const shipped = (kit: Kit) => kit.files.find(file => file.path === 'bin/template/' + pluginGuide);
+  const defaults = shipped(next);
+  if (!defaults) return [];
+  const installed = await exists(join(root, pluginGuide)) ? hash(await readBounded(join(root, pluginGuide), 8_000_000)) : undefined;
+  if (installed !== undefined && installed !== shipped(current)?.hash) return [];
+  return [{ path: pluginGuide, content: (await readBounded(join(nextRoot, defaults.path), 8_000_000)).toString('base64'), encoding: 'base64' }];
 }

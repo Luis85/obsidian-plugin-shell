@@ -87,6 +87,7 @@ Use page.collection-table to insert a Collection-backed UTable, page.bind for ty
 First-run guide: bin/FIRST-RUN.md. Execution is separately approved; generated source is kept on failure.
 All existing shell setup/make/generate/check commands remain available.
 Workbench plugins registered in plugins/registry.ts may add top-level CLI commands and Studio/TUI actions.
+App plugins enabled in bin/plugins (node bin/app plugins list) add node bin/app <plugin-id> <command> and Studio actions.
 `;
 function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
