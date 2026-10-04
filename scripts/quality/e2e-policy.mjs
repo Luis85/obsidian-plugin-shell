@@ -15,7 +15,7 @@ const e2eCommands = Object.freeze([
   { kind: 'UI review gallery', pattern: /\bui:gallery\b/ },
   { kind: 'real Obsidian host', pattern: /\btest:obsidian\b|scripts\/dev\/obsidian-dev\.mjs|check-native\.mjs|evidence-cli\.mjs run native\b|obsidian-launcher@/ },
   { kind: 'served browser evidence', pattern: /evidence-cli\.mjs run browser\b/ },
-  { kind: 'browser suite', pattern: /\.browser\.(?:mjs|py)\b|run-browser-checks\.py|tests\/browser\.test\.py|qualify-styles\.mjs/ },
+  { kind: 'browser suite', pattern: /\.browser\.(?:mjs|py)\b|run-browser-checks\.py|tests\/browser\.test\.py|qualify-styles\.mjs|check-browser-specimen\.mjs/ },
   { kind: 'browser provisioning', pattern: /@playwright\/test\/cli\.js install|-m playwright install|pip install [^\n]*\bplaywright==/ },
   { kind: 'browser acceptance of generated output', pattern: /airship\/qualify\.mjs/ },
   { kind: 'browser acceptance of generated output', pattern: /qualify-angular-setup\.mjs|qualify:compiler\b|qualify-storybook\.mjs|qualify-project-starters\.mjs[^\n]*--execute/, unless: '--no-browser' },
