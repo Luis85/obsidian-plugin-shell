@@ -1047,6 +1047,7 @@
           "tests/tooling/delivery-done.checks.mjs",
           "tests/tooling/delivery-handoff.checks.mjs",
           "tests/tooling/delivery-ready.checks.mjs",
+          "tests/tooling/delivery-rules-reference.checks.mjs",
           "tests/tooling/maintenance.checks.mjs",
           "tests/tooling/qualification-trigger.checks.mjs",
           "tests/tooling/release-remote.checks.mjs",

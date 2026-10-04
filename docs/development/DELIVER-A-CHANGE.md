@@ -10,7 +10,25 @@ check is listed in [GitHub Actions workflows](WORKFLOWS.md). Agents follow the
 same steps through the `feature-delivery` skill
 (`.claude/skills/feature-delivery/SKILL.md`).
 
-## 1. Start a branch
+## 1. Start from an increment
+
+Every pull request carries an increment: the documents that the "Definition of
+Ready" and "Definition of Done" checks read. Plan a new one, or a change pull
+request of an existing one:
+
+```sh
+node bin/app increment new <id> --title "<title>" --owner <name> --dry-run
+node bin/app pr new <id> --title "<title>" --delivers AC-1 --switch --dry-run
+```
+
+Rerun with `--yes` (or `--apply <planHash>`) after reviewing the plan.
+`increment new` creates the increment branch `increment/<id>` and the kick-off
+pull request document; `pr new` creates a change pull request on
+`pr/<id>/<pr-id>` from the increment branch, so its base is `increment/<id>`.
+The full walk-through is [Your first increment](FIRST-INCREMENT.md); a small fix
+without an increment workflow can still branch by hand as below, but the
+Definition of Ready needs its Increment document in the diff or a `Handoff:` line
+in the pull request body.
 
 From `main`:
 
@@ -38,6 +56,10 @@ drafts, so early pushes stay fast.
 - GitHub CLI: `git push -u origin <topic-branch>`, then
   `gh pr create --draft --base main --fill` (use `--base <their-branch>` when stacked).
 - GitHub UI: open the pull request and choose **Create draft pull request**.
+- Workbench CLI: `node bin/app pr publish <pr-id> --dry-run`, then
+  `--apply <planHash>`. It pushes the head branch if it is missing on the remote,
+  creates the draft with the managed description (including the `Handoff:` line)
+  and records it in the PullRequest document and its sync record; commit both.
 - Claude Code: ask for the `feature-delivery` skill. It asks whether to branch from
   `main` or stack on a pull request, and opens the draft only after you agree.
 
@@ -55,7 +77,13 @@ node scripts/testing/suites.mjs --check
 npm run check:repository
 node scripts/release/changelog.mjs check
 npm run check:self-review -- --base origin/main --warn-only
+node bin/app increment check <id>
 ```
+
+Each push also runs "Definition of Ready". Do not start implementing while it is
+red: answer its refinement brief in the increment and push again (see
+[Definition of Ready and Done](DEFINITION-OF-READY-AND-DONE.md)). Once it passes,
+set the increment to Ready with `node bin/app increment status <id> Ready --yes`.
 
 `node bin/app check --fast --base origin/main` (without `--skip-suites`) also runs
 the `node --test` suites the diff selects; `node bin/app check --plan --base origin/main`
@@ -95,6 +123,11 @@ npm run test:e2e
   step); record "not run" otherwise.
 - Reproduce a specific Integration job with `node bin/app ci --job <workflow>/<job>`
   (dry run) and, where allowed, `--execute` in a scratch copy.
+- Run the Definition of Done for this pull request:
+  `node scripts/delivery/done.mjs --base origin/<base>` (`--write` generates the
+  Completion record, the Unreleased entries and the docs index rows; review them
+  before committing). A change pull request is checked against its PullRequest
+  document, the kick-off against the whole increment.
 - Agents run the `self-review` skill here. A gate you did not run is "not run" with
   the reason, never "passed".
 
@@ -104,16 +137,16 @@ npm run test:e2e
 - GitHub UI: **Ready for review** at the bottom of the pull request.
 
 The `ready_for_review` event starts the Integration tier: `ci.yml` with every gate
-job, the blocking self-review guard, and each other pull-request workflow whose
-path filters match. Pushes after this point rerun the Integration tier, so batch
+job, the blocking self-review guard, "Definition of Done", and each other
+pull-request workflow whose path filters match. Pushes after this point rerun the Integration tier, so batch
 fixes where you can. Converting back to a draft (`gh pr ready --undo`) returns to
 the Dev tier when you need to iterate freely again.
 
 End-to-end steps (served UI in Chromium, browser suites, real Obsidian; the list is
 in [GitHub Actions workflows](WORKFLOWS.md#end-to-end-opt-in)) are skipped unless
 you opt in. Add the `e2e` label (`gh pr edit <number> --add-label e2e`) when the
-change touches served UI, browser or host behaviour, and always when its task
-handoff says `e2e: required`. Adding the label starts only the jobs that hold
+change touches served UI, browser or host behaviour, and always when its
+increment says `e2e: required` (the Definition of Done fails without the label). Adding the label starts only the jobs that hold
 end-to-end steps, reported as "E2E result"; while the label stays, every later
 push runs them inside "CI result". The Release tier runs them all regardless.
 
@@ -135,7 +168,8 @@ never replaces "CI result"; treat a red "E2E result" as a finding like any other
 
 ## 8. Merge the green pull request
 
-Merge when "Dev checks", "CI result" and the other triggered workflows are green
+Merge when "Dev checks", "Definition of Ready", "CI result", "Definition of Done"
+and the other triggered workflows are green
 (with the `e2e` label, "E2E result" too) and review is complete. This repository merges with a merge commit
 ("Merge pull request #N from ..."): use **Create a merge commit** in the UI or
 `gh pr merge <number> --merge`. Delete the topic branch afterwards
@@ -146,6 +180,11 @@ upper one: GitHub retargets it to `main` automatically when the lower branch is
 deleted on merge; otherwise use **Edit** on the pull request or
 `gh pr edit <number> --base main`. If the lower pull request changed during review,
 update the upper branch (`git merge origin/main`) and push; its checks run again.
+
+A change pull request merges into its increment branch; afterwards run
+`node bin/app pr sync <pr-id> --yes` so its document records the merge. The
+kick-off pull request merges the increment branch into `main` last, once the
+whole increment passes its Definition of Done.
 
 A release pull request (`release/X.Y.Z`) is different: never merge it yourself.
 Publish merges it; see [Cut and publish a release](CUT-AND-PUBLISH-A-RELEASE.md).
