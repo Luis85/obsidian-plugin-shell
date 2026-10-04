@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "configs/schemas/fake-data-generation.schema.json",
+  "title": "Workbench fake-data generation config",
+  "description": "Editor support only. bin/domain/fake-data-config.ts is the authoritative validator; the file name must be <id>.json. Re-running a config reproduces byte-identical notes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "title", "entity", "count", "out", "seed"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$", "maxLength": 60 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "description": { "type": "string", "maxLength": 400 },
+    "entity": { "type": "string", "description": "Entity id, semantic:<project entity id or slug>, or file:<relative entity definition .json>." },
+    "count": { "type": "integer", "minimum": 1, "maximum": 1000 },
+    "out": { "type": "string", "minLength": 1, "maxLength": 160, "description": "Target folder relative to the project root." },
+    "seed": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+    "base": { "type": "boolean", "default": false, "description": "Also write <out>/<entity id>.base, an Obsidian Bases table of the collection." },
+    "referenceDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "default": "2026-01-01", "description": "Fixed day relative dates are measured from." }
+  }
+}

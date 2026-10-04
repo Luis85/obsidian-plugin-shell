@@ -1,0 +1,21 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "fake-data-property",
+  "version": 1,
+  "title": "Fake data property",
+  "description": "One frontmatter property of a fake-data entity: key, Obsidian property type and an allowlisted generator or a fixed list of values.",
+  "commit": "fake-data.property",
+  "fields": [
+    { "id": "key", "kind": "text", "label": "Property key", "required": true, "maxLength": 40, "help": "Start with a letter; use letters, digits, _ or -." },
+    { "id": "type", "kind": "select", "label": "Property type", "default": "text", "choices": [
+      { "id": "text", "label": "Text" }, { "id": "number", "label": "Number" }, { "id": "checkbox", "label": "Checkbox" },
+      { "id": "date", "label": "Date" }, { "id": "datetime", "label": "Date and time" }, { "id": "list", "label": "List" },
+      { "id": "tags", "label": "Tags" }, { "id": "link", "label": "Link ([[note]])" }
+    ] },
+    { "id": "generator", "kind": "select", "label": "How should {{property.key}} be generated?", "choicesFrom": "fake-data.generators" },
+    { "id": "choices", "kind": "list", "label": "Values to pick from", "suffix": " (separate with ;)", "required": true, "maxItems": 100, "maxLength": 200, "when": { "field": "generator", "equals": "choices" } },
+    { "id": "required", "kind": "boolean", "label": "Fill {{property.key}} in every note?", "yes": "Yes", "no": "No, leave it out of about one note in five", "default": true },
+    { "id": "unique", "kind": "boolean", "label": "Must every note have a different {{property.key}}? (text, number, date and link)", "default": false }
+  ]
+}

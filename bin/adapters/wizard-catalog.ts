@@ -14,7 +14,8 @@ async function definitionFiles(folder: string): Promise<string[]> {
   try { return (await readdir(folder)).filter(name => name.endsWith('.json')).sort(); }
   catch (error) { if ((error as { code?: string }).code === 'ENOENT') return []; throw error; }
 }
-async function readFolder<T extends { id: string }>(folder: string, read: (value: unknown) => T): Promise<Map<string, T>> {
+/** Every `<id>.json` in one folder, validated by `read`; an invalid or misnamed file fails the whole folder. */
+export async function readFolder<T extends { id: string }>(folder: string, read: (value: unknown) => T): Promise<Map<string, T>> {
   const result = new Map<string, T>();
   for (const name of await definitionFiles(folder)) {
     let definition: T;

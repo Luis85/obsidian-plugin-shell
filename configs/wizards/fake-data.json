@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "fake-data",
+  "version": 1,
+  "title": "Generate fake data",
+  "description": "Seeded fake notes (YAML frontmatter + Markdown) from a built-in, project or newly defined entity, an optional Obsidian Bases table, one reviewed write, then an optional reusable generation config.",
+  "context": { "title": "Fake data", "details": ["Entity → amount and folder → sample → review → save config", "Nothing is written until a reviewed plan is approved.", "Escape: previous step. Ctrl+C: cancel."] },
+  "cancelMessage": "Fake data generation cancelled. Nothing was written.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "fake-data.load" },
+    { "id": "start", "kind": "form", "title": "Start", "fields": [
+      { "id": "start", "kind": "select", "label": "What do you want to generate?", "choicesFrom": "fake-data.starts" }
+    ] },
+    { "id": "config", "kind": "form", "title": "Saved generation", "when": { "path": "start", "equals": "config" }, "fields": [
+      { "id": "configId", "kind": "select", "label": "Which saved generation config do you want to run?", "choicesFrom": "fake-data.configs" }
+    ] },
+    { "id": "use-config", "kind": "action", "action": "fake-data.use-config", "when": { "path": "start", "equals": "config" } },
+    { "id": "entity", "kind": "form", "title": "Entity", "when": { "path": "start", "equals": "entity" }, "fields": [
+      { "id": "entity", "kind": "select", "label": "Which entity should the notes describe?", "choicesFrom": "fake-data.entities", "bind": "run.entity" }
+    ] },
+    { "id": "draft", "kind": "form", "title": "Define an entity", "form": "fake-data-entity", "bind": "draft", "when": { "path": "start", "equals": "define" } },
+    { "id": "properties", "kind": "action", "action": "fake-data.properties", "interactive": true, "when": { "path": "start", "equals": "define" } },
+    { "id": "naming", "kind": "form", "title": "Note names", "when": { "path": "start", "equals": "define" }, "fields": [
+      { "id": "titleProperty", "kind": "select", "label": "Which text property names each note?", "choicesFrom": "fake-data.title-properties", "bind": "draft.titleProperty" }
+    ] },
+    { "id": "save-entity", "kind": "action", "action": "fake-data.save-entity", "when": { "path": "start", "equals": "define" }, "retry": "draft" },
+    { "id": "prepare", "kind": "action", "action": "fake-data.prepare", "retry": "start" },
+    { "id": "run", "kind": "form", "title": "Amount and folder", "form": "fake-data-run", "bind": "run" },
+    { "id": "review", "kind": "action", "action": "fake-data.review", "retry": "run" },
+    { "id": "save", "kind": "form", "title": "Reuse", "bind": "save", "initial": "saveDefaults", "barrier": true, "when": { "path": "entitySaved", "notEquals": false }, "fields": [
+      { "id": "saveConfig", "kind": "boolean", "label": "Save this run as a reusable generation config?", "default": false },
+      { "id": "id", "kind": "text", "label": "Config id (lowercase kebab-case)", "required": true, "maxLength": 60, "when": { "field": "saveConfig", "equals": true } },
+      { "id": "title", "kind": "text", "label": "Config title", "required": true, "maxLength": 80, "when": { "field": "saveConfig", "equals": true } }
+    ] },
+    { "id": "save-config", "kind": "action", "action": "fake-data.save-config", "when": { "path": "save.saveConfig", "equals": true }, "retry": "save" },
+    { "id": "done", "kind": "end", "text": "Generated {{run.count}} {{run.entity}} notes in {{run.out}} (seed {{run.seed}})." }
+  ]
+}

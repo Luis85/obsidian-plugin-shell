@@ -16,6 +16,7 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `prototype` | `node bin/app prototype` | Prototype brief, output folder, reviewed package, optional design folder |
 | `brainstorm` | `node bin/app brainstorm` | Eight capture sections, reviewed request and file plan, optional import and verification |
 | `framework-setup` | `node bin/app setup` (terminal) | Source (starter or project JSON), identity and explicit Airship/MCP opt-ins; only missing answers are asked |
+| `fake-data` | `node bin/app fake-data` | Entity, `fake-data-run` form (or a new entity via `fake-data-entity`/`fake-data-property`), sample note, reviewed write, optional saved generation config |
 | `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship and single native-extension options; only missing answers are asked |
 | `framework-setup-stages` | after `setup` applies | Documentation import, then generate/install/verify/preview, each separately approved, then documentation export |
 

@@ -1,0 +1,12 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "fake-data-entity",
+  "version": 1,
+  "title": "Fake data entity",
+  "description": "Name of a new fake-data entity. Its properties are asked one by one afterwards; the definition is saved to configs/fake-data/entities through a reviewed plan.",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Entity name (for example Recipe)", "maxLength": 80 },
+    { "id": "description", "kind": "text", "label": "Short description (optional)", "maxLength": 400 }
+  ]
+}

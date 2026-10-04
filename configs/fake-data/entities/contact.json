@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "contact",
+  "title": "Contact",
+  "description": "People with reserved example.com addresses, companies, roles, cities, birthdays and relationship tags.",
+  "folder": "Contacts",
+  "titleProperty": "name",
+  "properties": [
+    { "key": "name", "label": "Name", "type": "text", "generator": { "faker": "person.fullName" }, "unique": true },
+    { "key": "email", "label": "Email", "type": "text", "generator": { "faker": "internet.exampleEmail" }, "unique": true },
+    { "key": "company", "label": "Company", "type": "text", "generator": { "faker": "company.name" } },
+    { "key": "role", "label": "Role", "type": "text", "generator": { "faker": "person.jobTitle" } },
+    { "key": "city", "label": "City", "type": "text", "generator": { "faker": "location.city" }, "required": false },
+    { "key": "birthday", "label": "Birthday", "type": "date", "generator": { "faker": "date.birthdate", "args": { "min": 18, "max": 80 } }, "required": false },
+    { "key": "favorite", "label": "Favorite", "type": "checkbox", "generator": { "faker": "datatype.boolean", "args": { "probability": 0.2 } } },
+    { "key": "tags", "type": "tags", "generator": { "choices": ["family", "friend", "work", "client", "supplier"] }, "items": { "min": 1, "max": 2 } },
+    { "key": "notes", "type": "text", "generator": { "faker": "lorem.paragraph", "args": { "min": 2, "max": 4 } }, "frontmatter": false }
+  ],
+  "body": "# {{name}}\n\n{{role}} at {{company}}.\n\n## Notes\n\n{{notes}}\n"
+}
