@@ -6,6 +6,8 @@ import { requireThat } from './contracts.ts';
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies. */
 const excludedRoots = ['configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/'];
 const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
+  // The developer guide describes working in the framework checkout, not an extracted kit.
+  'DEVELOPER_GUIDE.md',
   // Starter-pack qualification reads canonical definitions and concept builders that only the maintainer checkout carries.
   '.github/workflows/starter-distribution.yml', ...['golden', 'definitions', 'lifecycle', 'classic-assembly', 'distribution'].map(name => `tests/tooling/starter-${name}.checks.mjs`)]);
 /** These reviewed runtime libraries are compiler dependencies, not starter content. */
@@ -32,7 +34,7 @@ function mapLinks(source: string, mapper: LinkMapper): string {
 }
 /** Keep the reference prose, but do not leave local links to deliberately unshipped prototype files. */
 function documentation(path: string, source: string): string {
-  return mapLinks(source, (original, label, target) => availableLink(path, target) ? original : `${label} (prototype asset not included in this kit)`);
+  return mapLinks(source, (original, label, target) => availableLink(path, target) ? original : `${label} (maintainer asset, not included in this kit)`);
 }
 /**
  * The kit root README sits beside bin/, while the documents it links ship under bin/template/.
