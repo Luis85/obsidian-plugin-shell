@@ -25,7 +25,7 @@ async function fixture(root, code = '') {
   await mkdir(join(root, '.obsidian')); await writeFile(join(root, '.obsidian/app.json'), 'preserve');
   const app = join(root, 'apps/product'); await mkdir(join(app, '.maker'), { recursive: true });
   const { selection } = await projectStarter(frameworkRoot, 'webapp-angular');
-  await writeFile(join(app, 'project.config.json'), json(selection));
+  await mkdir(join(app, 'configs')); await writeFile(join(app, 'configs/product-config.json'), json(selection));
   await writeFile(join(app, '.nvmrc'), process.versions.node + '\n');
   await writeFile(join(app, '.maker/receipt.json'), json({ schemaVersion: 1, files: [] }));
   await writeFile(join(app, 'package.json'), json({ name: 'fixture', packageManager: 'npm@11.19.1', scripts: { typecheck: 'fixture typecheck', test: 'fixture test', build: 'fixture build' }, dependencies: { fixture: '1.0.0' } }));

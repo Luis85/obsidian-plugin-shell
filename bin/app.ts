@@ -110,7 +110,7 @@ export async function makerMain(argv: string[], frameworkRoot: string, io: IO = 
     const progress = (message: string) => { io.error.write(safe(message)); };
     plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress,
       onError: code => progress(code + '\n') });
-    const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins };
+    const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins, config: option(args, 'config') || undefined };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await execute(args, context);
     const result = operationResult(command, data, (data.status ?? 'ok') as ResultStatus);

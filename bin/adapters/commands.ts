@@ -5,6 +5,7 @@ import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
+import { projectConfigPattern } from '../compiler/domain/project-config.ts';
 import { resolve } from 'node:path';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { readInput } from '../../scripts/shared/input.ts';
@@ -23,7 +24,8 @@ import { pluginCliCommands, type WorkbenchPluginRuntime } from '../../plugins/ru
 import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
-export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
+/** config is the explicit --config project configuration path; without it the single configs/*-config.json is used. */
+export interface CommandContext { root: string; frameworkRoot: string; input: Readable; config?: string; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
 const makerHelp = `Shell maker — make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
   node bin/app first-run schema --json
@@ -77,7 +79,7 @@ const makerHelp = `Shell maker — make first, generate when ready
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
---starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),
+--starter <project-starter-id> (new, new guide), --config <configs/<project-id>-config.json> (choose among several saved project configurations), --name <prototype-slug> and --package <prepared folder> (design),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -125,10 +127,10 @@ async function generate(args: Arguments, context: CommandContext): Promise<Recor
   const path = option(args, 'project', 'design/project.json');
   const snapshot = await readSnapshot(context.root, path);
   requireSketch(snapshot.document, 'MAKER_PROJECT_MISSING', 'Save a sketch before generating.');
-  const selected = await savedProjectSelection(context.root);
+  const selected = await savedProjectSelection(context.root, context.config);
   const kind = option(args, 'kind', selected ? 'project' : 'obsidian-plugin');
   requireSketch(['obsidian-plugin', 'clickdummy', 'project'].includes(kind), 'MAKER_KIND', 'Use project, obsidian-plugin or clickdummy.');
-  requireSketch(kind !== 'project' || selected, 'MAKER_KIND', 'Project output needs a validated project.config.json from a project starter (run new).');
+  requireSketch(kind !== 'project' || selected, 'MAKER_KIND', `Project output needs a validated ${projectConfigPattern} from a project starter (run new).`);
   const out = option(args, 'out', `generated/${snapshot.document.project.id}`);
   const plan = await boilerplatePlan(context.root, context.frameworkRoot, out, snapshot.document, kind as 'project' | 'obsidian-plugin' | 'clickdummy', context.signal, kind === 'project' ? selected : undefined);
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
@@ -158,7 +160,7 @@ async function sketch(args: Arguments, context: CommandContext): Promise<Record<
     : { document: snapshot.document, content: documentText(snapshot.document) };
 }
 async function prototype(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  const { guide, selection } = await prototypeContext(context.root, option(args, 'guide') || undefined);
+  const { guide, selection } = await prototypeContext(context.root, option(args, 'guide') || undefined, context.config);
   if (args.action === 'guide') return { guide, selection, input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: Object.fromEntries(guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => [field.id, field.default])) } };
   const input = await inputData(args, context);
   if (args.action === 'validate') { const result = guideInput(guide, input); return { ...result, ready: !result.pending.length }; }
@@ -195,7 +197,7 @@ function directCommand(args: Arguments, context: CommandContext): Record<string,
 }
 async function savedProjectCommand(input: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   const args = await configuredArguments(input, context.root);
-  requireSketch(!args.flags.starter, 'PROJECT_OPTION', 'Starter selection is only available on new; saved projects keep project.config.json.');
+  requireSketch(!args.flags.starter, 'PROJECT_OPTION', `Starter selection is only available on new; saved projects keep ${projectConfigPattern}.`);
   return args.command === 'sketch' ? sketch(args, context) : args.command === 'brainstorm' ? brainstormCommand(args, context) : prototype(args, context);
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {

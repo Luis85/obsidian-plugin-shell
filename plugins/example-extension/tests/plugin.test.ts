@@ -95,7 +95,8 @@ void test('plugin framework adapter compiles a real React project through the pu
   const pkg = JSON.parse(files.get('package.json') ?? '{}');
   assert.equal(pkg.dependencies.react, '19.3.0');
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
-  assert.equal(JSON.parse(files.get('project.config.json') ?? '{}').framework, 'react');
+  assert.equal(JSON.parse(files.get('configs/react-extension-config.json') ?? '{}').framework, 'react');
+  assert.equal(files.has('project.config.json'), false);
 });
 
 void test('plugin framework adapter drives the real project emitter', () => {
@@ -115,7 +116,7 @@ void test('plugin framework adapter drives the real project emitter', () => {
   const artifacts = renderStarterProject(model as never, template as never, selection, reactAdapter);
   const files = new Map(artifacts.map(item => [item.path, item.content]));
   const pkg = JSON.parse(files.get('package.json')!);
-  assert.equal(JSON.parse(files.get('project.config.json')!).framework, 'react');
+  assert.equal(JSON.parse(files.get('configs/react-app-config.json')!).framework, 'react');
   assert.equal(pkg.dependencies.react, '19.3.0');
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
   assert.match(files.get('src/ui/mount.ts')!, /react-dom\/client/);

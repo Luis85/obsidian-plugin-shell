@@ -79,7 +79,7 @@ function artifactEntry(out: string, item: CompilerArtifact): Entry {
 async function generatedEntries(request: FeatureBrainstorm, result: ReturnType<typeof featureConcept>,
   options: BrainstormOptions, out: string): Promise<GeneratedPackage> {
   if (request.output === 'definition') return { entries: [], compiler: null, sourceReceiptSha256: null };
-  const selection = await savedProjectSelection(options.root);
+  const selection = await savedProjectSelection(options.root, options.config);
   const kind = request.output === 'prototype' ? 'clickdummy' : selection ? 'project' : 'obsidian-plugin';
   const selected = kind === 'obsidian-plugin' ? undefined : selection;
   const emitted = await compile(result.candidate, options.frameworkRoot, kind, options.signal, selected);
