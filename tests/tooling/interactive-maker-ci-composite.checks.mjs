@@ -9,6 +9,7 @@ import { expandLocalActions, localActionName, normalizeAction, referencedActions
 import { summarizeWorkflow } from '../../bin/domain/ci-listing.ts';
 import { planJob } from '../../bin/domain/ci-plan.ts';
 import { jobRefusals } from '../../bin/domain/ci-safety.ts';
+import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
 const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const parseDocument = await workflowParser();
@@ -157,7 +158,8 @@ test('the adapter reads action.yml or action.yaml bounded and refuses invalid or
   assert.equal((await withLocalActions(yml, workflowOnly, parseDocument)).jobs[0].steps.length, 4);
 });
 test('jobs that call this repository\'s setup-qualified action are reproducible and resolve its install input', async () => {
-  const listing = (await ciOperation({ command: 'ci', args: [], options: { list: true } }, { root, frameworkRoot: root })).data;
+  const listed = await ciOperation({ command: 'ci', args: [], options: { list: true } }, { root, frameworkRoot: root }), listing = listed.data;
+  assert.match(renderHuman(listed, { color: false, unicode: false }).text, /compiler-qualification\/contracts +\$\{\{ matrix\.os \}\}; matrix os x3; \d+ run steps; expands \.\/\.github\/actions\/setup-qualified; reproducible; executable/);
   const jobs = listing.workflows.flatMap(item => item.jobs).filter(job => job.actions.includes('./.github/actions/setup-qualified'));
   assert.ok(jobs.length >= 10, `${jobs.length} jobs use setup-qualified`);
   for (const job of jobs) assert.ok(job.reproducible, `${job.reference}: ${job.reasons.join('; ')}`);
