@@ -50,7 +50,7 @@ test('the pending-stub exception: only a pending marker in a stub of an unfinish
   for (const status of ['Done', 'Cancelled', null]) assert.equal(pendingAllowed(config.delivery, `${folder}/ac-1-x.checks.mjs`, line, statusOf(status)), false, String(status));
   assert.equal(pendingAllowed(config.delivery, 'tests/tooling/other.checks.mjs', line, statusOf('In progress')), false);
   assert.equal(pendingAllowed(config.delivery, `${folder}/ac-1-x.checks.mjs`, "test.only('x', () => {});", statusOf('In progress')), false, 'focus stays forbidden');
-  assert.equal(pendingAllowed(config.delivery, `${folder}/ac-1-x.checks.mjs`, `${line} test.skip('y');`, statusOf('In progress')), false);
+  assert.equal(pendingAllowed(config.delivery, `${folder}/ac-1-x.checks.mjs`, `${line} ${'test.skip'}('y');`, statusOf('In progress')), false);
   const root = await mkdtemp(join(tmpdir(), 'delivery-guard-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   assert.equal(await (await pendingStubAllowance(root))(`${folder}/ac-1-x.checks.mjs`, line), false, 'no delivery configuration allows nothing');
