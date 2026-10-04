@@ -2,6 +2,7 @@ import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
 import { designCommand } from './design-command.ts';
 import { definitionCommand } from './wizard-command.ts';
+import { learningCommand } from './learning-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -84,10 +85,16 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app form list --json      Reusable data-driven forms (configs/forms)
   node bin/app form show --name user-settings --json
   node bin/app form validate --name project-identity --input identity.json --json
+  node bin/app learn                 Follow a step-by-step learning path (configs/learning/paths); resume later
+  node bin/app learn list --json     Learning paths with your progress; learn show --name <id> --json
+  node bin/app learn check --json    Validate every path, its content, forms, wizards and documentation links
+  node bin/app learn status --name author-a-wizard --json             Progress and win conditions per step
+  node bin/app learn complete-step --name <id> --step <step> --input step.json --json   Plan a step completion
+  node bin/app learn restart --name <id> --json                       Plan removing saved progress
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
---starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),
+--starter <project-starter-id> (new, new guide), --step <step-id> (learn complete-step), --name <prototype-slug> and --package <prepared folder> (design),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -182,7 +189,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'learn', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -209,7 +216,11 @@ async function savedProjectCommand(input: Arguments, context: CommandContext): P
   requireSketch(!args.flags.starter, 'PROJECT_OPTION', 'Starter selection is only available on new; saved projects keep project.config.json.');
   return args.command === 'sketch' ? sketch(args, context) : args.command === 'brainstorm' ? brainstormCommand(args, context) : prototype(args, context);
 }
+/** `learn` reads only configs/learning and the learner's progress; its help stays with the shared maker help. */
+function learnExecution(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> | undefined {
+  return args.command === 'learn' && !args.flags.help ? learningCommand(args, context) : undefined;
+}
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  return pluginExecution(args, context.plugins) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
+  return pluginExecution(args, context.plugins) ?? learnExecution(args, context) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
 }
