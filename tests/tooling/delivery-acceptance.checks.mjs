@@ -13,7 +13,7 @@ import { reviewChanges } from '../../scripts/quality/self-review.mjs';
 const config = await configs();
 const settings = config.delivery.acceptance;
 const template = await readFile(join(repositoryRoot, settings.template), 'utf8');
-const folder = 'tests/tooling/acceptance/sample-increment';
+const folder = 'tests/acceptance/sample-increment';
 const pendingCall = ['test', 'todo'].join('.');
 const withoutEvidence = text => text.replaceAll(' Evidence: `tests/greeting.checks.mjs`', '');
 
@@ -21,7 +21,7 @@ test('stubs: one per criterion, named by id and text, pending, linked to the inc
   assert.equal(criterionSlug('Given a `vault`, When the user runs it, Then the palette lists the greeting command and much more text', 48), 'given-a-when-the-user-runs-it-then-the-palette');
   assert.equal(criterionSlug('!!!', 48), 'criterion');
   assert.equal(stubPath(settings, 'sample-increment', { id: 'AC-12', text: 'The palette lists it.' }), `${folder}/ac-12.checks.mjs`);
-  const slugged = { ...settings, pattern: 'tests/tooling/acceptance/{increment}/{ac}-{slug}.checks.mjs' };
+  const slugged = { ...settings, pattern: 'tests/acceptance/{increment}/{ac}-{slug}.checks.mjs' };
   assert.equal(stubPath(slugged, 'sample-increment', { id: 'AC-12', text: 'The palette lists it.' }), `${folder}/ac-12-the-palette-lists-it.checks.mjs`);
   const stub = renderStub(template, { incrementId: 'sample-increment', incrementPath: handoffPath, criterion: { id: 'AC-1', text: "Given a vault, When the user's command runs, Then it greets" } });
   assert.match(stub, /^\/\/ sample-increment AC-1: acceptance test stub/);
@@ -37,7 +37,7 @@ test('stubs: one per criterion, named by id and text, pending, linked to the inc
   assert.ok(plan.incrementText.replace(/ Evidence: `[^`]+`/g, '') === text, 'only the evidence is added');
   const real = planStubs(settings, { incrementId: 'sample-increment', incrementPath: handoffPath, incrementText: readyHandoff(), model: parseHandoff(readyHandoff()), files: ['tests/greeting.checks.mjs'], template });
   assert.deepEqual([real.create, real.evidence], [[], []], 'a criterion that already names an existing test needs no stub');
-  assert.deepEqual([...stubsOf(settings, 'sample-increment', [existing, orphan, 'tests/tooling/acceptance/other/ac-1.checks.mjs']).keys()], ['AC-1', 'AC-7']);
+  assert.deepEqual([...stubsOf(settings, 'sample-increment', [existing, orphan, 'tests/acceptance/other/ac-1.checks.mjs']).keys()], ['AC-1', 'AC-7']);
   assert.equal(withEvidence('- [ ] AC-1: first\n  continued\n- [ ] AC-2: x\n', [{ line: 1, path: 'p.mjs' }], 'Evidence:'), '- [ ] AC-1: first\n  continued Evidence: `p.mjs`\n- [ ] AC-2: x\n');
 });
 
@@ -45,7 +45,7 @@ test('the pending-stub exception: only a pending marker in a stub of an unfinish
   const statusOf = status => () => status;
   const line = `${pendingCall}('sample-increment AC-1: x');`;
   assert.equal(stubIncrement(settings, `${folder}/ac-1-x.checks.mjs`), 'sample-increment');
-  for (const path of [`${folder}/helper.mjs`, `${folder}/deep/ac-1.checks.mjs`, 'tests/tooling/ac-1-x.checks.mjs', 'tests/tooling/acceptance/ac-1.checks.mjs']) assert.equal(stubIncrement(settings, path), null, path);
+  for (const path of [`${folder}/helper.mjs`, `${folder}/deep/ac-1.checks.mjs`, 'tests/tooling/ac-1-x.checks.mjs', 'tests/acceptance/ac-1.checks.mjs']) assert.equal(stubIncrement(settings, path), null, path);
   assert.equal(pendingAllowed(config.delivery, `${folder}/ac-1-x.checks.mjs`, line, statusOf('In progress')), true);
   for (const status of ['Done', 'Cancelled', null]) assert.equal(pendingAllowed(config.delivery, `${folder}/ac-1-x.checks.mjs`, line, statusOf(status)), false, String(status));
   assert.equal(pendingAllowed(config.delivery, 'tests/tooling/other.checks.mjs', line, statusOf('In progress')), false);
@@ -64,8 +64,8 @@ test('the pending-stub exception: only a pending marker in a stub of an unfinish
     return (await reviewChanges(root, files)).filter(item => item.rule === 'SR-FOCUSED-TEST').map(item => item.file);
   };
   assert.deepEqual(await findings([added(`${folder}/ac-1-x.checks.mjs`, line)]), [], 'a generated stub of an In progress increment may stay pending');
-  const negatives = [added('tests/tooling/acceptance/done-increment/ac-1-x.checks.mjs', line), added('tests/tooling/feature.checks.mjs', line),
-    added(`${folder}/ac-2-y.checks.mjs`, "test.only('y', () => {});"), added(`${folder}/helper.checks.mjs`, line), added('tests/tooling/acceptance/missing/ac-1-x.checks.mjs', line)];
+  const negatives = [added('tests/acceptance/done-increment/ac-1-x.checks.mjs', line), added('tests/tooling/feature.checks.mjs', line),
+    added(`${folder}/ac-2-y.checks.mjs`, "test.only('y', () => {});"), added(`${folder}/helper.checks.mjs`, line), added('tests/acceptance/missing/ac-1-x.checks.mjs', line)];
   assert.deepEqual((await findings(negatives)).sort(), negatives.map(file => file.path).sort(), 'everywhere else, and after Done, a pending or focused test stays a finding');
 });
 

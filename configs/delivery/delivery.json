@@ -42,7 +42,7 @@
     "pullRequest": "pr/{increment}/{pr}"
   },
   "acceptance": {
-    "pattern": "tests/tooling/acceptance/{increment}/{ac}.checks.mjs",
+    "pattern": "tests/acceptance/{increment}/{ac}.checks.mjs",
     "template": "configs/delivery/acceptance-stub.checks.mjs.tmpl",
     "suite": "acceptance",
     "maxSlugLength": 48,
