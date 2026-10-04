@@ -133,6 +133,11 @@ test('unsupported feature registries fail with stable codes before any edit', as
   await rejects(features('register => ({ task: register(taskFeature), Task: register(taskFeature) })'), 'REGISTRY_DUPLICATE_KEY: Task');
   await rejects(features('register => ({ task: register(unknownFeature) })'), 'REGISTRY_UNKNOWN_IMPORT: unknownFeature');
   await rejects(features('register => ({ task: register(taskFeature) })', "import { taskFeature } from './local';\n"), 'REGISTRY_UNKNOWN_IMPORT: taskFeature');
+  for (const from of ['../generated/../escape', '../generated', '../features/tasks/../x', '../other/thing'])
+    await rejects(features('register => ({ task: register(taskFeature) })', `import { taskFeature } from '${from}';\n`), 'REGISTRY_UNKNOWN_IMPORT: taskFeature');
+  // The project compiler registers generated documents from ../generated/; their explicit .ts specifier is kept.
+  const generated = await readRegistry(root, features('register => ({ GRequirement: register(GRequirement) })', "import { feature as GRequirement } from '../generated/application/documents/requirement.ts';\n"));
+  assert.deepEqual(generated.registrations.map(item => [item.key, item.exported, item.from]), [['GRequirement', 'feature', '../generated/application/documents/requirement.ts']]);
   await rejects('export const create = services => createNoteFeatures(services, () => ({}));\n', 'REGISTRY_MISSING_IMPORTS');
   await assert.rejects(readRegistry(root), { code: 'ENOENT' });
 });

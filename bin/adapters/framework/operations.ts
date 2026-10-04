@@ -87,6 +87,11 @@ async function makerCheck(request: Request, context: Context): Promise<Result> {
   drift.details = check;
   throw drift;
 }
+/** The registered entity catalog, bundled from checked-in definitions; the same handler serves source checkouts and kits. */
+async function entityCatalog(request: Request, context: Context): Promise<Result> {
+  const { loadCatalog } = await import('../makers/load-catalog.ts');
+  return result(request.command, await loadCatalog(context.root));
+}
 async function newProject(request: Request, context: Context): Promise<Result> {
   if (request.options.list) return starterListing(context);
   return completeStarterProject(await fileOperation(request, context), request, context);
@@ -135,6 +140,7 @@ const routes: Route[] = [
   [(_request, effect) => effect === 'fixtures', (request, context) => fixtureOperation(request, context)],
   [isMakerDiscovery, makerDiscovery],
   [isMakerCheck, makerCheck],
+  [prefixed('entities '), entityCatalog],
   [named('adopt analyze'), adoptAnalyze],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],

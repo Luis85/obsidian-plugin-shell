@@ -118,6 +118,8 @@
         "check submission",
         "ci",
         "make",
+        "entities check",
+        "entities catalog",
         "styles inspect",
         "styles export"
       ]
@@ -5804,6 +5806,90 @@
       ],
       "parserOnlyOptions": [
         "timeout"
+      ]
+    },
+    {
+      "id": "entities check",
+      "summary": "Validate the explicitly registered entity definitions with the installed Vite toolchain; writes nothing.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "develop",
+      "usage": "node bin/app entities check",
+      "examples": [
+        "node bin/app entities check",
+        "npm run entities:check"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "entities catalog",
+      "summary": "Print the source-derived entity catalog (backend, schema, fields, defaults, Markdown mappings); writes nothing.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "develop",
+      "usage": "node bin/app entities catalog",
+      "examples": [
+        "node bin/app entities catalog --json",
+        "npm run entities:catalog"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
       ]
     },
     {

@@ -35,7 +35,12 @@ test('generated custom-maker and locale checks run in an extracted kit through i
   assert.equal(existsSync(join(dir, 'bin/adapters')), false, 'an extracted kit has no project-level maker sources');
   // The makers parse TypeScript through the project's installed toolchain, as after `npm ci`.
   await symlink(join(root, 'node_modules'), join(dir, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  cli(dir, ['make', 'maker', 'nudge', '--yes']);
+  // Apply runs the planned checks for real in the kit layout, including the CLI-owned entity catalog.
+  const made = cli(dir, ['make', 'maker', 'nudge', '--yes']);
+  assert.deepEqual(made.data.summary.checks.map(check => [check.id, check.status]),
+    [['typecheck', 'passed'], ['tooling-test:custom-nudge', 'passed'], ['events-check', 'passed'], ['entities-check', 'passed']]);
+  const entities = run(dir, ['scripts/makers/entities.mjs', '--check']);
+  assert.equal(entities.status, 0, entities.stderr); assert.equal(JSON.parse(entities.stdout).status, 'passed');
   const recipe = await readFile(join(dir, 'scripts/makers/custom/nudge.mjs'), 'utf8');
   assert.doesNotMatch(recipe, /\bimport\b|existsSync|bin\/adapters|bin\/template/);
   assert.equal(cli(dir, ['make', 'nudge', 'review', '--feature', 'tasks', '--trust-custom', '--yes']).status, 'applied');

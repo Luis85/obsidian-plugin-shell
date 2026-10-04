@@ -210,8 +210,11 @@ npm run entities:catalog
 npm run --silent entities:catalog -- --json
 ```
 
-The catalog derives actual source from explicit registries with the installed
-Vite toolchain. It reports backend, schema, fields/defaults and Markdown mappings
+These scripts call the project's own CLI (`node bin/app entities check` and
+`node bin/app entities catalog`), so they work the same in a source checkout and
+in a project generated from an extracted kit. The catalog derives actual source
+from explicit registries with the installed Vite toolchain; registrations come
+from `../features/<owner>/` or, for compiler-generated documents, `../generated/`. It reports backend, schema, fields/defaults and Markdown mappings
 where present. Domain/plugin-data entries need no document mapping. Duplicate
 entity identities and incomplete Markdown mappings fail; no second schema database
 or user-note mutation is involved.
