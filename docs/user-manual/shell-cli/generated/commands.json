@@ -170,6 +170,16 @@
       ]
     },
     {
+      "id": "plugins",
+      "title": "App plugins (bin/plugins)",
+      "commands": [
+        "plugins list",
+        "plugins show",
+        "plugins enable",
+        "plugins disable"
+      ]
+    },
+    {
       "id": "agent-mcp",
       "title": "Optional local agent MCP",
       "commands": [
@@ -6227,6 +6237,203 @@
         "plan-out",
         "timeout",
         "yes"
+      ]
+    },
+    {
+      "id": "plugins list",
+      "summary": "List the app plugins in bin/plugins (main.js, manifest.json, settings.json), their enabled state and issues; never runs plugin code.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "plugins",
+      "usage": "node bin/app plugins list",
+      "examples": [
+        "node bin/app plugins list --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "plugins show",
+      "summary": "Inspect one app plugin: manifest, enabled state, settings.json and validation issues; never runs plugin code.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "plugins",
+      "usage": "node bin/app plugins show <plugin-id> [--json]",
+      "examples": [
+        "node bin/app plugins show hello-world --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "plugins enable",
+      "summary": "Review enabling one app plugin in bin/plugins/community-plugins.json; its main.js loads from the next invocation.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "plugins",
+      "usage": "node bin/app plugins enable <plugin-id> [--yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app plugins enable hello-world",
+        "node bin/app plugins enable hello-world --yes"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "plugins disable",
+      "summary": "Review disabling one app plugin; its folder and settings.json are kept.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "plugins",
+      "usage": "node bin/app plugins disable <plugin-id> [--yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app plugins disable hello-world --yes"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
       ]
     },
     {
