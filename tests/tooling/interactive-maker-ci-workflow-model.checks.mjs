@@ -27,7 +27,9 @@ test('every real workflow in .github/workflows parses into jobs with steps and c
     assert.ok(item.jobs.length > 0, `${item.file} has jobs`);
     assert.ok(item.triggers.length > 0, `${item.file} has triggers`);
     for (const entry of item.jobs) {
-      assert.ok(entry.steps.length > 0, `${item.file}/${entry.id} has steps`);
+      // A job that calls a reusable workflow (release.yml) has no steps of its own and is never reproducible locally.
+      const calls = entry.blockers.includes('calls a reusable workflow');
+      assert.ok(calls ? entry.steps.length === 0 : entry.steps.length > 0, `${item.file}/${entry.id} has steps unless it calls a workflow`);
       for (const step of entry.steps) {
         if (step.uses) assert.equal(step.kind, setupActions.includes(step.uses.split('@')[0]) ? 'setup' : 'external');
         else assert.equal(step.kind, 'run');
@@ -190,6 +192,23 @@ test('every pull-request workflow runs its jobs only on ready, non-release pull 
       if (!['security-audit', 'self-review'].includes(job.id)) assert.equal(release, true, `${item.file}/${job.id} runs in the release tier`);
     }
   }
+});
+test('the release tier calls every gated pull-request workflow and candidate qualification, and Release result requires each call', async () => {
+  const workflows = await loadWorkflows(root), parse = await workflowParser();
+  const release = parse(await readFile(join(root, '.github/workflows/release.yml'), 'utf8')).toJS();
+  const calls = Object.entries(release.jobs).filter(([, job]) => job.uses);
+  const expected = workflows.filter(item => item.triggers.includes('pull_request') && item.stem !== 'dev').map(item => item.file).concat('candidate-qualification.yml').sort();
+  assert.deepEqual(calls.map(([, job]) => job.uses.replace('./.github/workflows/', '')).sort(), expected);
+  for (const [id, job] of calls) {
+    assert.deepEqual(job.needs, 'metadata', id); assert.equal(job.secrets, undefined, id);
+    if (id !== 'candidate-qualification') assert.deepEqual(job.with, { tier: 'release' }, id);
+  }
+  const result = release.jobs['release-result'];
+  assert.equal(result.name, 'Release result'); assert.equal(result.if, 'always()');
+  assert.deepEqual([...result.needs].sort(), Object.keys(release.jobs).filter(id => id !== 'release-result').sort());
+  assert.match(result.steps[0].run, /select\(\.value\.result != "success"\)[\s\S]*exit 1/);
+  assert.match(release.jobs.metadata.steps.map(step => step.run ?? '').join('\n'), /branch\.mjs verify --version "\$VERSION"/);
+  assert.ok(!Object.values(release.jobs).some(job => job.permissions), 'the release tier stays read-only');
 });
 test('workflow normalization accepts the documented shapes and rejects the rest', () => {
   assert.deepEqual(workflow('name: A\non: push\njobs: {}\n').triggers, ['push']);

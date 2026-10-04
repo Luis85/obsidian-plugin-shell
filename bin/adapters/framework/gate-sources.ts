@@ -84,13 +84,13 @@ export async function loadGateRules(root: string): Promise<GateRules | null> {
   try { return parseGateRules(JSON.parse(text)); }
   catch (error) { throw error instanceof OperationError ? error : new OperationError('GATE_RULES_INVALID', 'configs/quality/gate-rules.json is not valid JSON.'); }
 }
-interface EventFilter { paths?: string[]; pathsIgnore?: string[] }
+interface EventFilter { paths?: string[]; pathsIgnore?: string[]; branches?: string[] }
 export interface Workflow { stem: string; name: string; events: Record<string, EventFilter | null> }
 function eventFilter(value: unknown): EventFilter | null {
   if (!isRecord(value)) return null;
   const list = (item: unknown) => Array.isArray(item) ? item.filter((entry): entry is string => typeof entry === 'string') : undefined;
-  const paths = list(value.paths), pathsIgnore = list(value['paths-ignore']);
-  return { ...(paths ? { paths } : {}), ...(pathsIgnore ? { pathsIgnore } : {}) };
+  const paths = list(value.paths), pathsIgnore = list(value['paths-ignore']), branches = list(value.branches);
+  return { ...(paths ? { paths } : {}), ...(pathsIgnore ? { pathsIgnore } : {}), ...(branches ? { branches } : {}) };
 }
 /** Parses one workflow with the pinned YAML library (inert core schema; anchors such as `&inputs` resolve). */
 export async function parseWorkflow(stem: string, text: string): Promise<Workflow | null> {
@@ -147,11 +147,14 @@ function filterResult(toolkit: Toolkit, event: string, filter: EventFilter | nul
   }
   return { runs: true, event, via: 'always' };
 }
-/** Whether a workflow runs for a diff: pull_request first, else push; schedule/dispatch-only is manual. */
+/** Whether a workflow runs for a diff: pull_request first, else push to main; schedule, dispatch and other-branch pushes are manual. */
 export function workflowTrigger(toolkit: Toolkit, workflow: Workflow, paths: string[]): TriggerResult {
   const event = ['pull_request', 'push'].find(name => name in workflow.events);
   if (!event) return { runs: false, event: Object.keys(workflow.events)[0] ?? 'none', via: 'manual-only' };
-  return filterResult(toolkit, event, workflow.events[event] ?? null, paths);
+  const filter = workflow.events[event] ?? null;
+  // A push limited to other branches (release.yml's release/**) never runs for a change headed to main.
+  if (event === 'push' && filter?.branches && !toolkit.glob(filter.branches)('main')) return { runs: false, event, via: 'manual-only' };
+  return filterResult(toolkit, event, filter, paths);
 }
 /** `| \`suite\` | … | 91 s |` rows of the Measured column in docs/testing/TEST-SUITES.md. */
 export function parseDurations(markdown: string): Record<string, number> {

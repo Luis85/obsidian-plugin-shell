@@ -150,6 +150,10 @@ test('workflow paths: filters follow GitHub order, negation, anchors, paths-igno
   assert.equal(await parse('name: [unclosed'), null);
   const catchAll = await parse('name: W\non:\n  push:\n    paths: ["**", "!docs/**"]\njobs: {}\n');
   assert.equal(workflowTrigger(toolkit, catchAll, ['src/a.ts']).via, 'always', 'a catch-all filter is not path-specific');
+  const releaseBranches = await parse("name: W\non:\n  push:\n    branches: ['release/**']\n  workflow_dispatch:\njobs: {}\n");
+  assert.deepEqual(workflowTrigger(toolkit, releaseBranches, ['src/a.ts']), { runs: false, event: 'push', via: 'manual-only' }, 'a release-branch push is not a diff trigger');
+  const mainBranch = await parse('name: W\non:\n  push:\n    branches: [main]\njobs: {}\n');
+  assert.deepEqual([mainBranch.events.push, workflowTrigger(toolkit, mainBranch, ['src/a.ts']).via], [{ branches: ['main'] }, 'always']);
 });
 
 test('the shipped workflows parse, the durations table is read, and the gate rules reference real suites and gates', async () => {

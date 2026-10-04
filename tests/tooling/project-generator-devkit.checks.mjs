@@ -39,6 +39,8 @@ test('[GENERATOR-DEVKIT-01] the product owns the root docs; framework docs and m
   assert.deepEqual(workflows, ['.github/workflows/ci.yml', '.github/workflows/obsidian.yml']);
   for (const path of workflows) assert.ok(inspectWorkflow(text(path)).jobs >= 1);
   assert.ok(files.has('docs/framework/workflows/candidate-qualification.yml'));
+  for (const name of ['dev', 'release', 'release-cut', 'publish']) assert.ok(!files.has(`docs/framework/workflows/${name}.yml`), `${name}.yml is the framework's own delivery pipeline`);
+  assert.ok(![...files.keys()].some(path => path.startsWith('.github/PULL_REQUEST_TEMPLATE/')));
   assert.ok(files.has('.github/dependabot.yml')); assert.ok(![...files.keys()].some(path => path.startsWith('.github/scripts/')));
   assert.ok(!files.has('tests/tooling/qualification-trigger.checks.mjs'));
 });

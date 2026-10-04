@@ -5,6 +5,7 @@ import { posix } from 'node:path';
 import type { Entry } from './file-code.ts';
 import { frameworkOnlyPath, referenceDocPath, rewriteDocReferences, withBanner } from './framework-scope.ts';
 import { requireValue } from './model.ts';
+import { deliveryPipelineFiles, deliveryPipelineFolder } from '../domain/template-inputs.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
   ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'].map(name => [name, `docs/framework/${name}`]));
@@ -14,11 +15,12 @@ export function relocatedPath(path: string): string {
   return frameworkDocuments.get(path) ?? referenceDocPath(path) ?? (path.startsWith(maintainerWorkflows) ? 'docs/framework/workflows/' + path.slice(maintainerWorkflows.length) : path);
 }
 /** The maintainer runner script, the policy test for maintainer CI triggers, the project handoff qualification (it generates
- * projects from the framework's starters) and the standalone design prototypes (their own apps and retained evidence) are not copied. */
-const maintainerFiles: ReadonlySet<string> = new Set(['.github/workflows/starter-distribution.yml',
+ * projects from the framework's starters), the framework's delivery pipeline and the standalone design prototypes (their own
+ * apps and retained evidence) are not copied. */
+const maintainerFiles: ReadonlySet<string> = new Set(['.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles,
   'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
   'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs']);
-const maintainerPrefixes = ['configs/starters/', '.github/scripts/',
+const maintainerPrefixes = ['configs/starters/', '.github/scripts/', deliveryPipelineFolder,
   'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/testing/handoff-'];
 export function maintainerOnly(path: string): boolean {
   return frameworkOnlyPath(path) || maintainerFiles.has(path) || maintainerPrefixes.some(prefix => path.startsWith(prefix));

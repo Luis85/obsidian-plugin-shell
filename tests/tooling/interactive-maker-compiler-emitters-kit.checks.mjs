@@ -61,8 +61,11 @@ test('framework documents and maintainer workflows move under docs/framework wit
     ['docs/framework/README.md', 'docs/framework/AGENTS.md', 'docs/framework/workflows/ci.yml', 'docs/a.md', 'README.txt']);
   for (const path of ['configs/starters/blank.json',
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
-    'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs'])
+    'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs',
+    '.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/PULL_REQUEST_TEMPLATE/release.md'])
     assert.equal(maintainerOnly(path), true, path);
+  // The framework's delivery pipeline stays behind, but the qualification workflows it calls remain inert reference.
+  for (const path of ['.github/workflows/ci.yml', '.github/workflows/candidate-qualification.yml', '.github/pull_request_template.md']) assert.equal(maintainerOnly(path), false, path);
   // The retired schema 5 concept data and the removed native source handoff are no longer special-cased.
   for (const path of ['docs/concepts/companion/companion-project.json', 'docs/concepts/companion/starters/x.json', 'docs/concepts/native-file-integration-handoff/a.md'])
     assert.equal(maintainerOnly(path), false, path);

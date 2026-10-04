@@ -1,8 +1,10 @@
 name: Candidate qualification
 # Heavy qualification of main after merge: fixed-source rehearsal, repeated
 # runtime suites, served browser, three native sessions and the live audit.
-# Narrative-only documentation changes do not trigger it.
+# Narrative-only documentation changes do not trigger it. release.yml also calls
+# it on release/X.Y.Z, where GITHUB_SHA is the release branch head it rehearses.
 on:
+  workflow_call:
   push:
     branches: [main]
     paths:
