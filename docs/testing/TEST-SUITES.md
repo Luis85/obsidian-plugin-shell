@@ -92,6 +92,11 @@ runs only the npm install policy file of the `setup` suite.
   fixtures, apart from the product code they gate.
 - **Browser suites** (`e2e`, `browser-specimen`, `companion:browser`, `companion:visual-browser`) and slow
   journeys (`cli:journey`) are opt-in because they need explicit provisioning.
+- **End-to-end in CI.** The browser and real-host suites (`e2e`, `browser-specimen`, `companion:browser`,
+  `companion:visual-browser`, `companion:starter-browser`, `companion:mvp`, `obsidian`, `native:host`) are
+  end-to-end: in workflows they run only when a run opts in (the pull request label `e2e`, or the `e2e`
+  input) and always in the Release tier. The command list is in
+  [GitHub Actions workflows](../development/WORKFLOWS.md#end-to-end-opt-in).
 
 ## Fail-closed classification
 

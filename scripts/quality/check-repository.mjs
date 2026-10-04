@@ -5,6 +5,7 @@ import { parseDocument } from 'yaml';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { checkDocsLaunchers } from './check-docs-launchers.mjs';
+import { inspectE2eWorkflow, releaseE2eFailures } from './e2e-policy.mjs';
 import { callableWorkflow, checkPermissions, inspectJobPrivileges, inspectWorkflowPrivileges, localWorkflowCall, privilegedWorkflows } from './workflow-policy.mjs';
 
 const untrustedInterpolation = /\$\{\{\s*(?:github\.event\.(?:pull_request|issue|comment)|inputs\.)/;
@@ -66,6 +67,16 @@ export function inspectWorkflow(text, file = '') {
   }
   return { jobs: jobs.length, localActions: [...localActions].sort(), localWorkflows: [...localWorkflows].sort(), callable: callableWorkflow(data.on) };
 }
+/**
+ * This repository's e2e opt-in policy (e2e-policy.mjs), applied by checkRepository only: inspectWorkflow stays the
+ * portable subset that also reviews a generated project's workflows, which have no `tier` input.
+ * Returns whether a workflow holds e2e work, its call tier default and its reusable calls for the release rule.
+ */
+export function e2eFacts(text, file = '') {
+  const data = parseDocument(text, { uniqueKeys: true }).toJS(), facts = inspectE2eWorkflow(data);
+  const calls = Object.values(data.jobs).flatMap(job => localWorkflowCall(job?.uses) ? [{ workflow: localWorkflowCall(job.uses), tier: job.with?.tier }] : []);
+  return { file, ...facts, calls };
+}
 /** Owned styles only. Full compiled containment remains the artifact gate's job. */
 export function inspectOwnedCss(text, name = 'owned.css') {
   const ast = postcss.parse(text, { from: name }); let declarations = 0;
@@ -121,7 +132,7 @@ export async function checkRepository(root = process.cwd()) {
   try { await walk('.github/actions', /^action\.ya?ml$/); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   for (const name of ['README.md', 'AGENTS.md', 'CHANGELOG.md']) { try { await access(join(root, name)); files.push(name); } catch (error) { if (error.code !== 'ENOENT') throw error; } }
   const counts = { workflows: 0, actions: 0, styles: 0, markdown: 0, localLinks: 0 }; const failures = []; const references = [];
-  const callable = new Map(), calls = [];
+  const callable = new Map(), calls = [], e2e = [];
   for (const file of files) {
     try {
       const text = await readFile(join(root, file), 'utf8');
@@ -132,7 +143,7 @@ export async function checkRepository(root = process.cwd()) {
       } else if (/\.ya?ml$/.test(file)) {
         const inspected = inspectWorkflow(text, parts.at(-1));
         references.push(...inspected.localActions.map(name => [file, name])); calls.push(...inspected.localWorkflows.map(name => [file, name]));
-        callable.set(parts.at(-1), inspected.callable); counts.workflows++;
+        callable.set(parts.at(-1), inspected.callable); counts.workflows++; e2e.push(e2eFacts(text, parts.at(-1)));
       }
       else if (file.endsWith('.css')) { inspectOwnedCss(text, file); counts.styles++; }
       else {
@@ -152,9 +163,11 @@ export async function checkRepository(root = process.cwd()) {
     if (!callable.has(name)) failures.push(`${file}: WORKFLOW_LOCAL_WORKFLOW_MISSING: ${name}`);
     else if (!callable.get(name)) failures.push(`${file}: WORKFLOW_LOCAL_WORKFLOW_NOT_CALLABLE: ${name}`);
   }
+  const release = e2e.find(item => item.file === 'release.yml');
+  failures.push(...releaseE2eFailures(e2e.filter(item => item.e2e), release?.calls ?? []));
   if (failures.length) throw new Error(failures.join('\n'));
   if (!counts.workflows || !counts.styles || !counts.markdown) throw new Error('REPOSITORY_INPUTS_MISSING');
-  return { status: 'passed', ...counts, scope: 'read-only workflow (scoped release allowlist), local composite action and reusable workflow subset, owned CSS syntax/selectors, Markdown fences/local inline file links' };
+  return { status: 'passed', ...counts, scope: 'read-only workflow (scoped release allowlist), opt-in e2e mandatory in the release tier, local composite action and reusable workflow subset, owned CSS syntax/selectors, Markdown fences/local inline file links' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await checkRepository())); console.log(JSON.stringify(await checkDocsLaunchers())); }
