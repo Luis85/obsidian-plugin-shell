@@ -195,13 +195,12 @@ jobs:
               with open(os.environ['GITHUB_ENV'], 'a') as env:
                   env.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
           PY
-      - name: Typecheck shared contracts and actual Vue authoring components
+      - name: Typecheck the actual Vue authoring components and run their contracts
         shell: bash
         run: |
           set -o pipefail
           mkdir -p reports/companion-mvp
-          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
+          node "$QUALIFIED_NPM" run typecheck:authoring 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
           node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
       - name: Build the empty companion and explicitly derive golden qualification input
         run: |

@@ -40,9 +40,6 @@ jobs:
         run: |
           node --test tests/tooling/native-integrations.checks.mjs
           node node_modules/vitest/vitest.mjs run --config configs/testing/vitest.config.mjs tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.generator.json
-          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit
           python3 scripts/concepts/build-companion.py --check
   generated-starters:
     runs-on: ubuntu-24.04

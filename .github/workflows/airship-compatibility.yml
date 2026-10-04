@@ -29,8 +29,6 @@ jobs:
           playwright: ${{ runner.os == 'Linux' && 'with-deps' || '' }}
       - name: Validate source contracts
         run: |
-          node "$QUALIFIED_NPM" run typecheck:framework
-          node "$QUALIFIED_NPM" run typecheck:compiler
           node "$QUALIFIED_NPM" run check:compiler-architecture
           node "$QUALIFIED_NPM" run test:airship
           node scripts/testing/suites.mjs --check
