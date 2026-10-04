@@ -184,9 +184,9 @@ void test('plugin command parsing rejects reserved Workbench command roots', asy
   }), /WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID/);
 });
 
-void test('every built-in maker command and option is reserved for plugins, including design, --name and --package', async () => {
+void test('every built-in maker command and option is reserved for plugins, including design, --name, --package and --config', async () => {
   const runtimeFor = (cli: PluginCliCommand[]) => createPluginRuntime({ root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [{ ...enabled, cli }] });
-  const commands = new Set([...makerCommandIds, 'design']), options = new Set([...makerBooleanOptions, ...makerValueOptions, 'name', 'package']);
+  const commands = new Set([...makerCommandIds, 'design']), options = new Set([...makerBooleanOptions, ...makerValueOptions, 'name', 'package', 'config']);
   for (const id of commands) {
     assert.doesNotThrow(() => parseArguments([id, '--help'], []), id);
     await assert.rejects(() => runtimeFor([{ id, summary: 'shadow', execute: () => ({}) }]), new RegExp(`WORKBENCH_PLUGIN_CLI_RESERVED:${id}$`), id);
