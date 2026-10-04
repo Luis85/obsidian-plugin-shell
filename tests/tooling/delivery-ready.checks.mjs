@@ -10,10 +10,10 @@ const ready = (text, overrides) => results('ready', config, baseContext(config, 
 const failing = outcome => Object.values(outcome).filter(rule => rule.status === 'fail').map(rule => rule.id);
 const replace = (from, to) => readyHandoff().replace(from, to);
 
-test('a complete handoff passes every Definition of Ready rule', () => {
+test('a complete handoff passes every Definition of Ready rule; without PullRequest or Issue documents their rules skip', () => {
   const outcome = ready(readyHandoff());
   assert.deepEqual(Object.keys(outcome), Object.keys(readyRules));
-  assert.deepEqual(Object.values(outcome).filter(rule => rule.status !== 'pass').map(rule => rule.id), []);
+  assert.deepEqual(Object.values(outcome).filter(rule => rule.status !== 'pass').map(rule => `${rule.id}:${rule.status}`), ['DOR-16', 'DOR-17', 'DOR-18', 'DOR-19', 'DOR-20', 'DOR-21', 'DOR-22'].map(id => `${id}:skip`));
 });
 
 test('negative: each defect fails exactly its own rule with a hint', () => {
@@ -40,7 +40,7 @@ test('negative: each defect fails exactly its own rule with a hint', () => {
 });
 
 test('size budgets, missing sections and the template placeholders are reported with details', () => {
-  const big = replace('size: S', 'size: S').replace('- [ ] AC-2:', ['- [ ] AC-2: b.', '- [ ] AC-3: c.', '- [ ] AC-4: d.', '- [ ] AC-5: e.', '- [ ] AC-6: f.', '- [ ] AC-7:'].join('\n'));
+  const big = replace('size: S', 'size: S').replace('- [ ] AC-2:', ['- [ ] AC-2: b.', '- [ ] AC-3: c.', '- [ ] AC-4: d.', '- [ ] AC-5: e.', '- [ ] AC-6: f.', '- [ ] AC-7:'].map(line => line.endsWith('.') ? `${line} Evidence: \`tests/greeting.checks.mjs\`` : line).join('\n'));
   const outcome = ready(big);
   assert.deepEqual(failing(outcome), ['DOR-12']); assert.match(outcome['DOR-12'].details[0], /7 acceptance criteria > 5/);
   const cut = readyHandoff().replace(/## Dependencies[\s\S]*?## Open questions/, '## Open questions');
@@ -90,7 +90,7 @@ test('a not-ready run carries a refinement brief naming the skills, and --write 
   assert.match(refinementMarkdown(result), /^# Refinement brief: docs\/increments\/sample-increment\.md[\s\S]*Who decides|Which open question/);
   assert.match(humanReport(result), /FAIL {2}DOR-07[\s\S]*fix: Resolve each question/);
   const json = jsonReport(result);
-  assert.equal(json.protocolVersion, 1); assert.equal(json.status, 'not-ready'); assert.equal(json.rules.length, 15);
+  assert.equal(json.protocolVersion, 1); assert.equal(json.status, 'not-ready'); assert.equal(json.rules.length, Object.keys(readyRules).length);
   assert.deepEqual(Object.keys(json.rules[0]), ['id', 'title', 'severity', 'status', 'message', 'hint']);
   assert.equal(refinementBrief({ rules: [{ id: 'DOR-14', status: 'warn', severity: 'warning' }] }, readyRules, config.delivery), null, 'warnings alone need no refinement');
 });
@@ -108,9 +108,9 @@ test('wikilinks in refs and the body resolve by path or basename; an unresolved 
 test('status vocabulary: New and Refining warn under DOR-15; rules declare the document kinds they apply to', () => {
   for (const status of ['New', 'Refining', 'Cancelled']) assert.equal(ready(replace('status: In progress', `status: ${status}`))['DOR-15'].status, 'warn', status);
   assert.equal(ready(replace('status: In progress', 'status: Ready'))['DOR-15'].status, 'pass');
-  assert.ok(Object.values(readyRules).every(rule => rule.appliesTo.includes('Increment')));
-  const other = evaluate(readyRules, config.ready, { ...baseContext(config), kind: 'PullRequest' });
-  assert.ok(other.every(rule => rule.status === 'skip' && /PullRequest/.test(rule.message)), 'a later PullRequest rule set plugs into the same engine');
+  assert.deepEqual(Object.entries(readyRules).filter(([, rule]) => !rule.appliesTo.includes('Increment')).map(([id]) => id), ['DOR-16', 'DOR-17', 'DOR-18', 'DOR-19', 'DOR-20', 'DOR-21', 'DOR-22']);
+  const other = evaluate(readyRules, config.ready, { ...baseContext(config), kinds: ['Issue'] });
+  assert.ok(other.filter(rule => !['DOR-16', 'DOR-17', 'DOR-21', 'DOR-22'].includes(rule.id)).every(rule => rule.status === 'skip' && /this run checks Issue/.test(rule.message)), 'rules for other kinds skip');
 });
 
 test('a changed PullRequest document names the Increment through its increment field', () => {

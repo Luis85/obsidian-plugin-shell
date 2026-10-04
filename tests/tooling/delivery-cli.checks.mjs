@@ -104,9 +104,9 @@ test('end to end: exemptions, refinement output, handoff choice, usage, configur
   assert.equal(usage.exit, 2); assert.match(usage.stderr, /DELIVERY_USAGE: unknown argument --bogus[\s\S]*Exit codes/);
   assert.equal(repo.run('done.mjs', ['--base', 'no-such-ref']).exit, 2);
   assert.match(repo.run('done.mjs', ['--base', 'no-such-ref', '--json']).json().error, /DELIVERY_BASE_UNRESOLVED/);
-  await repo.write('configs/delivery/definition-of-done.json', (await repo.read('configs/delivery/definition-of-done.json')).replace('"DOD-11"', '"DOD-12"'));
+  await repo.write('configs/delivery/definition-of-done.json', (await repo.read('configs/delivery/definition-of-done.json')).replace('"DOD-18"', '"DOD-19"'));
   const invalid = repo.run('done.mjs', ['--base', 'main']);
-  assert.equal(invalid.exit, 2); assert.match(invalid.stderr, /DELIVERY_CONFIG_INVALID: configs\/delivery\/definition-of-done\.json: unknown rule "DOD-12"/);
+  assert.equal(invalid.exit, 2); assert.match(invalid.stderr, /DELIVERY_CONFIG_INVALID: configs\/delivery\/definition-of-done\.json: unknown rule "DOD-19"/);
   assert.match(repo.run('ready.mjs', ['--help']).stdout, /--summary/);
 });
 
@@ -123,10 +123,12 @@ test('the Definition of Ready and Done workflows are read-only, dependency-free 
     assert.ok(job['timeout-minutes'] <= 5, file); assert.doesNotMatch(text, /npm (?:ci|install)|setup-qualified/, `${file} installs nothing`);
     assert.match(job.if, /!startsWith\(github\.head_ref, 'release\/'\)/, `${file} leaves release heads to release.yml`);
     assert.equal(job.env.DELIVERY_PR_BODY, '${{ github.event.pull_request.body }}'); assert.equal(job.env.DELIVERY_ACTOR, '${{ github.event.pull_request.user.login }}');
+    assert.equal(job.env.DELIVERY_BASE_REF, '${{ github.base_ref }}'); assert.equal(job.env.DELIVERY_HEAD_REF, '${{ github.head_ref }}', `${file} passes both branches for the kind`);
+    assert.equal(data.on.pull_request.branches, undefined, `${file} also runs on pull requests into increment branches`);
     assert.deepEqual(job.steps[0].with, { 'fetch-depth': 0, 'persist-credentials': false });
     assert.equal(job.steps[1].with['node-version-file'], '.nvmrc');
     const run = job.steps.find(step => step.run).run;
-    assert.match(run, new RegExp(`node scripts/delivery/${id === 'ready' ? 'ready' : 'done'}\\.mjs --base "origin/\\$BASE_REF" --summary "\\$GITHUB_STEP_SUMMARY" --out`));
+    assert.match(run, new RegExp(`node scripts/delivery/${id === 'ready' ? 'ready' : 'done'}\\.mjs --base "origin/\\$DELIVERY_BASE_REF" --summary "\\$GITHUB_STEP_SUMMARY" --out`));
     assert.doesNotMatch(run, /--write|\$\{\{/, 'CI never writes and never interpolates');
     const upload = job.steps.find(step => step.uses?.startsWith('actions/upload-artifact@'));
     assert.equal(upload.with['retention-days'], 7); assert.equal(upload.if, '${{ !cancelled() }}');

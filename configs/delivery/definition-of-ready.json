@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "description": "Definition of Ready: deterministic checks of the increment handoff before implementation (scripts/delivery/ready.mjs). Every rule the script knows must be listed with exactly its params; severity error blocks, warning reports.",
+  "description": "Definition of Ready: deterministic checks of the increment handoff, the PullRequest and Issue documents this pull request changes and the acceptance criterion test stubs before implementation (scripts/delivery/ready.mjs). DOR-01..15 check the Increment, DOR-16..22 PullRequest/Issue documents, DOR-23 their links back, DOR-24..25 the stubs. Every rule the script knows must be listed with exactly its params; severity error blocks, warning reports.",
   "rules": {
     "DOR-01": { "severity": "error", "enabled": true, "params": {} },
     "DOR-02": { "severity": "error", "enabled": true, "params": { "allowUnknownKeys": false } },
@@ -16,6 +16,16 @@
     "DOR-12": { "severity": "error", "enabled": true, "params": {} },
     "DOR-13": { "severity": "error", "enabled": true, "params": { "idPattern": "^[A-Z]{2,}(?:-[A-Z]+)*-\\d+$", "idRoots": ["docs/requirements/", "docs/tasks/", "docs/prds/"], "externalPattern": "^(?:https://\\S+|(?:PR |issue )?#\\d+)$" } },
     "DOR-14": { "severity": "warning", "enabled": true, "params": { "uiRoots": ["src/presentation/**", "src/styles/**", "harness/**", "templates/companion/runtime/**", "docs/concepts/companion/**"], "reasonPattern": "^E2E\\b" } },
-    "DOR-15": { "severity": "warning", "enabled": true, "params": { "notReady": ["New", "Refining", "Cancelled"] } }
+    "DOR-15": { "severity": "warning", "enabled": true, "params": { "notReady": ["New", "Refining", "Cancelled"] } },
+    "DOR-16": { "severity": "error", "enabled": true, "params": { "allowUnknownKeys": false, "criterionPattern": "^AC-\\d+$" } },
+    "DOR-17": { "severity": "error", "enabled": true, "params": {} },
+    "DOR-18": { "severity": "error", "enabled": true, "params": {} },
+    "DOR-19": { "severity": "error", "enabled": true, "params": { "min": 1 } },
+    "DOR-20": { "severity": "error", "enabled": true, "params": { "inScope": "In scope", "outOfScope": "Out of scope" } },
+    "DOR-21": { "severity": "error", "enabled": true, "params": {} },
+    "DOR-22": { "severity": "error", "enabled": true, "params": { "externalPattern": "^(?:https://\\S+|(?:PR |issue )?#\\d+)$" } },
+    "DOR-23": { "severity": "error", "enabled": true, "params": { "externalPattern": "^(?:https://\\S+|(?:PR |issue )?#\\d+)$" } },
+    "DOR-24": { "severity": "error", "enabled": true, "params": {} },
+    "DOR-25": { "severity": "warning", "enabled": true, "params": {} }
   }
 }

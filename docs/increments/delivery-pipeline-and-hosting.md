@@ -40,6 +40,7 @@ Diataxis type, and a generated project gets the pipeline of its hosting platform
 - The ideation skill chain, the `feature-delivery` and `release` skills and their Codex adapters.
 - The GitHub, Azure DevOps or no hosting choice for `setup`, `new` and `hosting show|set`, with the generated `azure-pipelines.yml`.
 - The Definition of Ready and Definition of Done checks, their configuration, workflows and this Increment document.
+- PullRequest and Issue documents, the kick-off and change pull request kinds of the increment branch model and the acceptance criterion test stubs in those checks.
 
 ### Out of scope
 
@@ -60,6 +61,7 @@ Diataxis type, and a generated project gets the pipeline of its hosting platform
 - [x] AC-8: The Definition of Ready fails an incomplete Increment document with a hint per rule and a refinement brief naming the `increment-handoff` and ideation skills, and exempts release and dependabot pull requests. Evidence: `tests/tooling/delivery-ready.checks.mjs`, `tests/tooling/delivery-handoff.checks.mjs`, `configs/delivery/definition-of-ready.json`
 - [x] AC-9: The Definition of Done checks criteria evidence, tests, changelog, typed and indexed docs, forbidden additions and the `e2e` label, and generates the Completion record, changelog entries and index rows with `--write` while CI stays read-only. Evidence: `tests/tooling/delivery-done.checks.mjs`, `tests/tooling/delivery-cli.checks.mjs`, `.github/workflows/definition-of-done.yml`
 - [x] AC-10: Neither the framework kit nor a generated project receives the Dev, Release, Release cut, Publish, Definition of Ready or Definition of Done workflows. Evidence: `tests/tooling/interactive-maker-compiler-emitters-kit.checks.mjs`, `tests/tooling/starter-distribution.checks.mjs`
+- [x] AC-11: The Definition of Ready checks the PullRequest and Issue documents a pull request changes and their links to the Increment, requires one test stub (or an existing test as evidence) per acceptance criterion, and the Definition of Done completes a change pull request against its PullRequest document and the kick-off against the whole Increment. Evidence: `tests/tooling/delivery-documents.checks.mjs`, `tests/tooling/delivery-acceptance.checks.mjs`, `configs/delivery/delivery.json`
 
 ## Affected areas
 
@@ -85,6 +87,7 @@ Diataxis type, and a generated project gets the pipeline of its hosting platform
 - `.github/workflows/**`: the tiers, release workflows and delivery checks.
 - `.github/PULL_REQUEST_TEMPLATE/release.md`: the release pull-request template.
 - `.github/CODEOWNERS`: owners of the pipeline and delivery configuration.
+- `.github/pull_request_template.md`: the opt-in end-to-end label in the pull-request template.
 - `.claude/skills/**`: ideation, delivery and release skills.
 - `.agents/skills/**`: their Codex adapters.
 - `bin/**`: hosting command, CI plan, adoption and compiler scope.
@@ -96,8 +99,11 @@ Diataxis type, and a generated project gets the pipeline of its hosting platform
 - `scripts/setup/**`: the hosting prompt.
 - `scripts/setup.mjs`: the hosting flags.
 - `scripts/companion/**`: the hosting contract.
+- `scripts/compiler/**`: generator qualifiers skip only their browser runs.
 - `scripts/examples/**`: link updates.
 - `scripts/help.mjs`: new npm scripts in the help.
+- `scripts/testing/suite-manifest.mjs`: optional tooling suites without files are not run.
+- `scripts/testing/evidence-identity.mjs`: the tooling inventory includes acceptance criterion tests.
 - `scripts/README.md`: the release and delivery scripts.
 - `templates/companion/devkit/**`: the Azure Pipelines template and hosting hints.
 - `tests/**`: tests and the suite manifest.
@@ -119,6 +125,8 @@ Diataxis type, and a generated project gets the pipeline of its hosting platform
 - New test `tests/tooling/delivery-done.checks.mjs`: every Definition of Done rule and the generators.
 - New test `tests/tooling/delivery-handoff.checks.mjs`: the parser and strict configuration.
 - New test `tests/tooling/delivery-cli.checks.mjs`: end to end in a temporary repository and the workflow shape.
+- New test `tests/tooling/delivery-documents.checks.mjs`: PullRequest and Issue rules, drift and the kick-off and change Definition of Done.
+- New test `tests/tooling/delivery-acceptance.checks.mjs`: acceptance stubs from a new increment to an implemented one and the pending-stub guard exception.
 - E2E: optional, because no rendered view changes; the companion concept bundle only re-assembles the hosting contract, which its own browser suites cover in the companion concept workflow.
 
 ## Docs impact
@@ -141,6 +149,7 @@ Diataxis type, and a generated project gets the pipeline of its hosting platform
 - Added: `feature-delivery` and `release` skills that drive a draft pull request through the Dev and Integration tiers to a green merge, and a release from cut to publish, without acting on remote state unless the user explicitly asks.
 - Added: Setup and creation ask which hosting platform a project uses (GitHub, Azure DevOps or none): `--hosting` with `--azure-organization`, `--azure-project` and `--azure-repository` for `node bin/app setup`, `node bin/app new <dir>` and `npm run setup`. Generated projects get the matching pipeline (`azure-pipelines.yml` or GitHub Actions), pull-request template and `gh`/`az` hints; `node bin/app hosting show|set` switches an existing project through a reviewed plan that deletes nothing; `doctor` checks `az` and its azure-devops extension read-only. Nothing runs `gh` or `az`, adds a remote or stores a token.
 - Added: Definition of Ready and Definition of Done checks: a pull request carries an Increment document (`docs/increments/<slug>.md`, created with `npm run increment:new`) that `npm run dor` checks before implementation and `npm run dod` checks against the implemented diff, with rules, severities and exemptions in `configs/delivery/`. The read-only "Definition of Ready" and "Definition of Done" workflows report a refinement brief or the generated Completion record, changelog entries and docs index rows, which `npm run dod -- --write` applies locally.
+- Added: Increment documents in the Definition of Ready and Done: PullRequest documents (`docs/pull-requests/`, kind kickoff or change) and Issue documents (`docs/issues/`) are checked with their links to the Increment; the Definition of Done is chosen by the pull request: a change pull request into the increment branch (`increment/<id>`) completes its PullRequest document (tasks, delivered criteria, its own Completion record), the kick-off into `main` completes the Increment once every other pull request and issue is closed. Each acceptance criterion gets a generated pending test stub (`npm run dor -- --write` or `node scripts/delivery/acceptance.mjs stubs`) that the Definition of Ready requires and the Definition of Done requires implemented; `node scripts/delivery/increment.mjs new --kickoff` also writes the kick-off PullRequest document.
 - Changed: This changelog now follows Keep a Changelog 1.1.0, and release candidates carry only the released version's section as release notes.
 
 ## Risks and rollback
@@ -166,8 +175,8 @@ None.
 
 <!-- Generated by `npm run dod -- --write`; regenerate it instead of editing. -->
 
-- Base: `origin/claude/exciting-brown-c6ipwt` (merge base `adef1fac2053`)
-- Changed files: 465 (103 added, 224 modified, 137 renamed, 1 deleted)
+- Base: `origin/claude/exciting-brown-c6ipwt` (merge base `02c377d9f63c`)
+- Changed files: 534 (159 added, 237 modified, 137 renamed, 1 deleted)
 - E2E decision: optional; `e2e` label not verifiable locally
 
 ### Changed files by area
@@ -196,22 +205,26 @@ None.
 | `.github/workflows/**` | 20 |
 | `.github/PULL_REQUEST_TEMPLATE/release.md` | 1 |
 | `.github/CODEOWNERS` | 1 |
-| `.claude/skills/**` | 21 |
-| `.agents/skills/**` | 8 |
-| `bin/**` | 36 |
-| `configs/delivery/**` | 4 |
+| `.github/pull_request_template.md` | 1 |
+| `.claude/skills/**` | 26 |
+| `.agents/skills/**` | 9 |
+| `bin/**` | 63 |
+| `configs/delivery/**` | 5 |
 | `configs/quality/fallow.json` | 1 |
 | `scripts/release/**` | 9 |
-| `scripts/delivery/**` | 13 |
-| `scripts/quality/**` | 3 |
+| `scripts/delivery/**` | 23 |
+| `scripts/quality/**` | 5 |
 | `scripts/setup/**` | 5 |
 | `scripts/setup.mjs` | 1 |
 | `scripts/companion/**` | 5 |
+| `scripts/compiler/**` | 3 |
 | `scripts/examples/**` | 1 |
 | `scripts/help.mjs` | 1 |
+| `scripts/testing/suite-manifest.mjs` | 1 |
+| `scripts/testing/evidence-identity.mjs` | 1 |
 | `scripts/README.md` | 1 |
-| `templates/companion/devkit/**` | 4 |
-| `tests/**` | 47 |
+| `templates/companion/devkit/**` | 6 |
+| `tests/**` | 62 |
 | `package.json` | 1 |
 | Outside the affected areas | 0 |
 
@@ -229,6 +242,7 @@ None.
 | AC-8 | yes | `tests/tooling/delivery-ready.checks.mjs`, `tests/tooling/delivery-handoff.checks.mjs`, `configs/delivery/definition-of-ready.json` |
 | AC-9 | yes | `tests/tooling/delivery-done.checks.mjs`, `tests/tooling/delivery-cli.checks.mjs`, `.github/workflows/definition-of-done.yml` |
 | AC-10 | yes | `tests/tooling/interactive-maker-compiler-emitters-kit.checks.mjs`, `tests/tooling/starter-distribution.checks.mjs` |
+| AC-11 | yes | `tests/tooling/delivery-documents.checks.mjs`, `tests/tooling/delivery-acceptance.checks.mjs`, `configs/delivery/delivery.json` |
 
 ### Gates
 

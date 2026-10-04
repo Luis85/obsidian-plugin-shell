@@ -5,18 +5,22 @@
  *
  * Without --write it prints the handoff (a dry run). --write creates docs/increments/<slug>.md and never
  * overwrites an existing file. --from adds the PRD/PBI/task path to `refs` and takes its title when none is given.
+ * --kickoff also writes the kick-off PullRequest document (and --issue an Issue document) and links them.
  */
 import { execFileSync } from 'node:child_process';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { access, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig } from './config.mjs';
 import { readyRules } from './rules-ready.mjs';
 import { parseFrontmatter } from './handoff.mjs';
 import { safeRelative } from './paths.mjs';
+import { kickoffDocuments } from './increment-kickoff.mjs';
 
-const usage = `node scripts/delivery/increment.mjs new <slug> [--title "Title"] [--owner name] [--from <prd|pbi|task path>] [--write]
-Prints a new increment handoff from the template; --write creates docs/increments/<slug>.md (never overwrites).`;
+const usage = `node scripts/delivery/increment.mjs new <slug> [--title "Title"] [--owner name] [--from <prd|pbi|task path>] [--kickoff [--issue]] [--write]
+Prints a new increment handoff from the template; --write creates docs/increments/<slug>.md (never overwrites).
+--kickoff also writes the kick-off PullRequest document (head increment/<slug>, base main) and links it;
+--issue also writes an Issue document for the increment.`;
 const failure = message => Object.assign(new Error(`INCREMENT_USAGE: ${message}`), { code: 'INCREMENT_USAGE' });
 const quote = value => `"${String(value).replace(/["\\]/g, '\\$&')}"`;
 
@@ -28,13 +32,14 @@ export function parseIncrementArguments(args) {
   const options = { slug };
   for (let index = 0; index < rest.length; index++) {
     const flag = rest[index];
-    if (flag === '--write') { options.write = true; continue; }
+    if (['--write', '--kickoff', '--issue'].includes(flag)) { options[flag.slice(2)] = true; continue; }
     if (!['--title', '--owner', '--from'].includes(flag)) throw failure(`unknown argument ${flag}`);
     const value = rest[++index];
     if (!value || value.startsWith('--')) throw failure(`${flag} needs a value`);
     if (options[flag.slice(2)] !== undefined) throw failure(`duplicate ${flag}`);
     options[flag.slice(2)] = value;
   }
+  if (options.issue && !options.kickoff) throw failure('--issue needs --kickoff');
   return options;
 }
 
@@ -56,21 +61,31 @@ export async function createIncrement(root, args) {
   const source = options.from ? await readFile(join(root, options.from), 'utf8').catch(() => { throw failure(`--from ${options.from} cannot be read`); }) : null;
   let owner = options.owner;
   if (!owner) try { owner = execFileSync('git', ['config', 'user.name'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || undefined; } catch { owner = undefined; }
-  const text = renderHandoff(await readFile(join(root, settings.template), 'utf8'), { ...options, owner, source });
+  if (options.kickoff && `${options.slug}-kickoff`.length > settings.maxSlugLength) throw failure(`slug "${options.slug}" leaves no room for the kick-off id ${options.slug}-kickoff (at most ${settings.maxSlugLength} characters)`);
   const path = settings.glob.replace('*', options.slug);
-  if (options.write) {
-    await mkdir(dirname(join(root, path)), { recursive: true });
-    await writeFile(join(root, path), text, { flag: 'wx' }).catch(error => { throw error.code === 'EEXIST' ? failure(`${path} exists; it is never overwritten`) : error; });
+  let text = renderHandoff(await readFile(join(root, settings.template), 'utf8'), { ...options, owner, source });
+  let files = {};
+  if (options.kickoff) {
+    const title = parseFrontmatter(text.split('\n')).data.title;
+    ({ files, incrementText: text } = kickoffDocuments(delivery, { slug: options.slug, title, incrementPath: path, incrementText: text, issue: options.issue }));
   }
-  return { path, text, written: Boolean(options.write) };
+  const all = { [path]: text, ...files };
+  if (options.write) {
+    for (const target of Object.keys(all)) if (await access(join(root, target)).then(() => true, () => false)) throw failure(`${target} exists; it is never overwritten`);
+    for (const [target, body] of Object.entries(all)) {
+      await mkdir(dirname(join(root, target)), { recursive: true });
+      await writeFile(join(root, target), body, { flag: 'wx' }).catch(error => { throw error.code === 'EEXIST' ? failure(`${target} exists; it is never overwritten`) : error; });
+    }
+  }
+  return { path, text, files, written: Boolean(options.write) };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const result = await createIncrement(process.cwd(), process.argv.slice(2));
     if (result.help) console.log(result.help);
-    else if (result.written) console.log(`Created ${result.path}. Fill it in, then run: npm run dor`);
-    else { process.stdout.write(result.text); console.error(`Dry run: add --write to create ${result.path}.`); }
+    else if (result.written) console.log(`Created ${[result.path, ...Object.keys(result.files)].join(', ')}. Fill it in, then run: npm run dor`);
+    else { process.stdout.write(result.text); console.error(`Dry run: add --write to create ${[result.path, ...Object.keys(result.files)].join(', ')}.`); }
   } catch (error) {
     console.error(error.message);
     process.exitCode = ['INCREMENT_USAGE', 'DELIVERY_CONFIG_INVALID'].includes(error.code) ? 2 : 1;
