@@ -49,6 +49,17 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [UI review gallery](development/UI-REVIEW-GALLERY.md) | Capture and index browser screenshots for human review. |
 | [Project setup handout](project-setup/HANDOUT.md) | Run the product-trio meeting that turns PRDs into a prototype brief. |
 
+**Deliver and release**
+
+| Page | Task |
+| --- | --- |
+| [Deliver a change](development/DELIVER-A-CHANGE.md) | Branch, open a draft pull request, pass the Dev and Integration tiers and merge a green pull request. |
+| [Cut and publish a release](development/CUT-AND-PUBLISH-A-RELEASE.md) | Cut `release/X.Y.Z`, watch the Release tier, fix forward, publish and recover. |
+| [Developer workflow](development/DEVELOPER-WORKFLOW.md) | The daily loop: setup, a first feature change, feedback, events, styles and verification. |
+| [Maintenance operations](development/MAINTENANCE-OPERATIONS.md) | Run freshness discovery and review dependency updates. |
+| [Release rehearsal](development/RELEASE-REHEARSAL.md) | Rehearse a fixed candidate offline (manual tool). |
+| [Release execution](development/RELEASE-EXECUTION.md) | Operate a retained candidate packet with explicit authorization (manual tool). |
+
 **Test and qualify**
 
 | Page | Task |
@@ -117,6 +128,15 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Executable evidence](testing/EXECUTABLE-EVIDENCE.md) | Evidence adapters and the [acceptance crosswalk](testing/acceptance-crosswalk.json). |
 | [Legacy test plan and baseline](testing/TEST-CONCEPT.md) | The [`test-plan.json`](testing/test-plan.json) contract, `verify-baseline` command and evidence identity. |
 
+**Delivery and CI**
+
+| Page | Facts |
+| --- | --- |
+| [GitHub Actions workflows](development/WORKFLOWS.md) | Every workflow's tier, triggers, jobs, permissions, artifacts, required checks and the repository policy. |
+| [Quality assurance](development/QUALITY-ASSURANCE.md) | Source assurance checks, `npm run verify` steps and reports, and the self-review guard rules. |
+| [Maintenance and release contract](development/MAINTENANCE-AND-RELEASE.md) | Dependency, freshness and release requirements (normative). |
+| [Release operation plans](development/RELEASE-OPERATION-PLANS.md) | The offline draft/promotion plan input and output contract. |
+
 **Product requirements**
 
 | Page | Facts |
@@ -137,6 +157,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Delivery strategy](product/DELIVERY-STRATEGY.md) | Why the framework ships before the companion conversion. |
 | [Product and delivery overview](../SHELL-FIRST-OVERVIEW.md) | How the authoring experience, CLI, compiler and shell fit together. |
 | [Framework guide](development/FRAMEWORK-GUIDE.md) | The reusable developer API and the path from feature to qualification. |
+| [Delivery pipeline](development/DELIVERY-PIPELINE.md) | Why checks tighten from draft to ready to release, how the tiers gate, and why publish merges before it tags. |
 | [Repository layout](development/REPOSITORY-LAYOUT.md) | What each top-level folder owns and the dependency direction between them. |
 | [Presentation concerns](development/PRESENTATION-STRUCTURE.md) | Why Vue markup, composables, stores and context are separated. |
 | [Entity-backed Markdown documents](development/ENTITY-DOCUMENTS.md) | The full entity-to-Markdown contract and its design. |
@@ -154,18 +175,14 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 
 ## Delivery and CI
 
-The development workflow, quality gates, maintenance and release operations are
-documented in [Developer workflow](development/DEVELOPER-WORKFLOW.md),
-[Quality assurance](development/QUALITY-ASSURANCE.md),
-[Maintenance and release](development/MAINTENANCE-AND-RELEASE.md),
-[Maintenance operations](development/MAINTENANCE-OPERATIONS.md),
-[Release rehearsal](development/RELEASE-REHEARSAL.md),
-[Release operation plans](development/RELEASE-OPERATION-PLANS.md) and
-[Release execution](development/RELEASE-EXECUTION.md). Changes are recorded in
-[`CHANGELOG.md`](../CHANGELOG.md) at the repository root. A dedicated delivery pipeline guide is being
-added; until then these pages remain the reference.
-
-<!-- pipeline-docs: delivery pipeline links go here -->
+Work moves from idea to release through progressive tiers: a draft pull request
+runs the fast Dev tier, marking it ready runs the Integration tier, and a
+`release/X.Y.Z` branch runs the Release tier before an owner-dispatched Publish.
+Start with the [delivery pipeline](development/DELIVERY-PIPELINE.md) explanation,
+then [deliver a change](development/DELIVER-A-CHANGE.md) or
+[cut and publish a release](development/CUT-AND-PUBLISH-A-RELEASE.md); the
+[workflow reference](development/WORKFLOWS.md) lists every workflow. Changes are
+recorded in [`CHANGELOG.md`](../CHANGELOG.md) (Keep a Changelog) at the repository root.
 
 ## Plans and backlog (not Diataxis)
 
@@ -197,7 +214,9 @@ Claude Code skills live in [`.claude/skills/`](../.claude/skills/) with thin Cod
 adapters in `.agents/skills/`. This index is framework-only: generated projects do not
 receive it and carry their own skill set.
 
-- [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`).
+- [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`), handing off to `feature-delivery`.
+- [Feature delivery](../.claude/skills/feature-delivery/SKILL.md): branch or stack, keep a draft pull request through the Dev tier, prepare it for the Integration tier and merge it green on request.
+- [Release](../.claude/skills/release/SKILL.md): choose the version, dispatch the cut, follow the Release tier, publish on explicit request and verify the result.
 - [Self-review](../.claude/skills/self-review/SKILL.md): check a change against AGENTS.md and run the real gates before handover.
 - [Adopt an existing project](../.claude/skills/adopt-existing-project/SKILL.md): write an adoption plan for an existing project.
 - [Companion prototype design](../.claude/skills/companion-prototype-design/SKILL.md): design-first discovery and prototype prompts (framework only).

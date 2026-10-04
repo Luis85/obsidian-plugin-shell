@@ -1,5 +1,7 @@
 # Maintenance operations
 
+> Type: how-to · Part of the [docs index](../README.md)
+
 The executable implementation is discovery and reviewed updates. It does not
 certify every discovered candidate as compatible or mutate dependency versions.
 
@@ -28,7 +30,10 @@ five routine PRs per ecosystem, exact-version updates, and 3-day patch/minor and
 minor/patch updates are grouped; majors and Obsidian API remain visible separately.
 The Actions cooldown is three days. Security updates bypass version cooldowns;
 repository owners must enable/verify security update settings. No automerge rule,
-publication trigger or broad permanent major ignore is configured.
+publication trigger or broad permanent major ignore is configured. Dependabot pull
+requests go through the same [delivery tiers](DELIVER-A-CHANGE.md) as any change; a
+merged update ships only through the owner-dispatched
+[release path](CUT-AND-PUBLISH-A-RELEASE.md).
 
 GitHub's [Dependabot options](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference)
 and [security update documentation](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configure-security-updates)

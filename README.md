@@ -85,8 +85,9 @@ and remaining scope. This does not establish complete template release readiness
 
 The integration baseline includes [opt-in release execution](docs/development/RELEASE-EXECUTION.md)
 from a retained candidate. [Readiness ledger](docs/_archive/development/TEMPLATE-READINESS-LEDGER.md)
-tracks remaining requirements; real publication and the privileged Actions interface
-remain unqualified. No release has been published by this implementation task.
+tracks remaining requirements. The owner-dispatched Release cut and Publish workflows
+exist (see [How work flows](#how-work-flows)) but have not been exercised on GitHub;
+real publication remains unqualified. No release has been published by this implementation task.
 
 A TypeScript/Vue/Pinia plugin with typed entity definitions, separate document
 recipes, Markdown CRUD and explicit plugin-data entities. Task is an optional example;
@@ -273,6 +274,26 @@ and `release:rehearse`. They report discovery failures and retained asset identi
 they do not publish. Expanded native/device, manual accessibility and public
 release promotion require separate evidence and authorization.
 
+## How work flows
+
+Checks tighten as a change matures, so early iteration is not slowed by the full
+qualification:
+
+| Stage | Trigger | Checks |
+| --- | --- | --- |
+| Draft pull request | every push | Dev tier: "Dev checks", a fast diff-scoped gate |
+| Ready for review | marking it ready, then every push | Integration tier: "CI result" and every pull-request workflow |
+| `release/X.Y.Z` branch | owner-dispatched Release cut | Release tier: every workflow on every matrix leg; the owner-dispatched Publish then merges, tags `X.Y.Z` and creates the GitHub release |
+
+Claude Code skills drive each stage: the ideation chain (`ideation-journey` through
+`ideation-boilerplate`) from an idea to a checked prototype skeleton,
+`feature-delivery` from a draft pull request to a green merge, `self-review` before
+review and `release` for cut and publish. Read the
+[delivery pipeline](docs/development/DELIVERY-PIPELINE.md),
+[deliver a change](docs/development/DELIVER-A-CHANGE.md),
+[cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md) and the
+[workflow reference](docs/development/WORKFLOWS.md).
+
 ## Documentation
 
 The [docs index](docs/README.md) lists every current document by type (tutorials,
@@ -287,6 +308,7 @@ how-to guides, reference and explanation), together with plans, workspaces and t
 | [Test suites](docs/testing/TEST-SUITES.md) | Every suite, its command and prerequisites, and how to add a test. |
 | [Test strategy](docs/testing/TEST-STRATEGY.md) | The testing approach and the normative TST rules. |
 | [Quality assurance](docs/development/QUALITY-ASSURANCE.md) | What `npm run verify` runs, partial runs and reports. |
+| [Deliver a change](docs/development/DELIVER-A-CHANGE.md) | Draft pull request, Dev and Integration tiers, green merge. |
 | [Framework PRD](docs/product/PRD.md) | Reusable Obsidian foundation requirements; Workbench direction is in the [product vision](docs/product/PRODUCT-VISION.md). |
 | [Upstream lint dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion. |
 

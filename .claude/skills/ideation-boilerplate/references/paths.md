@@ -31,8 +31,10 @@ node bin/app check
 
 ## Delivery tiers (owned by `feature-delivery`)
 
+These are the tiers of the framework repository (`docs/development/DELIVERY-PIPELINE.md`). A generated project follows its own CI; `feature-delivery` reads its workflows or pipelines before promising a tier.
+
 | Trigger | Tier | Purpose |
 | --- | --- | --- |
-| Draft pull request | Dev | fast checks on changed areas |
-| Ready for review | Integration | full integration gates |
-| Release branch | Release | release qualification; never started from this chain |
+| Draft pull request | Dev | "Dev checks": fast diff-scoped check, suite registration, repository policy, changelog structure |
+| Ready for review | Integration | "CI result" and every pull-request workflow (Linux legs), blocking self-review guard |
+| `release/X.Y.Z` branch | Release | every workflow on every matrix leg, then owner-dispatched Publish; never started from this chain (the `release` skill owns it) |

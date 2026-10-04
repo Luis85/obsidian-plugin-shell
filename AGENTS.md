@@ -26,6 +26,8 @@ qualification and release authorization are separate. Milestone background is in
 | `harness/` | Browser harness for the served UI; never shipped in the plugin. |
 | `docs/` | Product, development and testing docs; `docs/concepts/companion` is the authoring concept. |
 | `docs/development/ADOPT-EXISTING-PROJECT.md` | Adding Workbench to an existing project: `node bin/app adopt analyze`, `adopt plan` and `adopt skill`, with the `adopt-existing-project` skill. |
+| `.claude/skills/ideation-*` | Ideation chain: `ideation-journey` → `-brainstorm` → `-concept` → `-design` → `-prototype` → `-boilerplate` → `feature-delivery` → `self-review`; overview in `.claude/skills/ideation-journey/references/chain.md`. |
+| `.claude/skills/feature-delivery`, `.claude/skills/release` | Draft pull request to green merge, and release cut to publish (Codex adapters in `.agents/skills/`). |
 | `docs/design/<prototype>/` | Per-prototype Claude Design folders (`node bin/app design status\|prepare\|sync`); see [Claude Design folders](docs/development/CLAUDE-DESIGN-HANDOFF.md). Generated files there are owned by sync, including `ENGINEERING_HANDOFF_GUIDE.md`, which is built only from facts read from the project's files; `prototypes/`, `assets/`, `notes/` and `handoff/implementation-map.md` are design work. |
 
 **Setup.** Use the qualified Node 24.21.0/npm 11.19.1 (`.nvmrc`) and `npm ci` with
@@ -41,6 +43,7 @@ qualified Node themselves and an environment setup script exists: see
 | Need | Command |
 | --- | --- |
 | Fast gate on changed files | `node bin/app check --fast --base origin/main` |
+| Dev tier (draft pull request) | `node bin/app check --fast --skip-suites --base origin/main`, `node scripts/testing/suites.mjs --check`, `node scripts/release/changelog.mjs check` |
 | What do I need to run? | `node bin/app check --plan --base origin/main` |
 | Agent gate (types, lint, tests) | `node bin/app check` |
 | Full pre-PR | `npm run verify -- --json --keep-going` |
@@ -62,6 +65,19 @@ execution or release authorization. This is not the final release-ready GitHub
 template: retain all existing product requirements and qualify each extension with
 its relevant tests. Locale output is a pending translation draft, not a newly
 reviewed selectable language.
+
+**Delivery process.** Branch from `main` (or stack on another pull request's
+branch) and keep a **draft** pull request: only the fast Dev tier ("Dev checks")
+runs. Marking it ready for review starts the Integration tier ("CI result" and every
+pull-request workflow); merge a green pull request with a merge commit. A
+`release/X.Y.Z` branch runs the Release tier, and the owner-dispatched Publish
+workflow merges its pull request, tags `X.Y.Z` and creates the GitHub release; never
+merge a release pull request manually. Agents never dispatch Release cut or Publish,
+tag, merge or push to a release branch without the user's explicit request in this
+conversation. Add user-facing changes under `## [Unreleased]` in `CHANGELOG.md`. See
+[delivery pipeline](docs/development/DELIVERY-PIPELINE.md),
+[deliver a change](docs/development/DELIVER-A-CHANGE.md) and
+[cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md).
 
 Read first when relevant: [README](README.md),
 [authoring](docs/development/AUTHORING-TOOLS.md),

@@ -1,6 +1,8 @@
 # Maintenance and release guide
 
-> **Status:** Full implementation contract. Iteration 04 implements [maintenance discovery/configuration](MAINTENANCE-OPERATIONS.md), safe version preparation and [fixed-commit retained-asset rehearsal](RELEASE-REHEARSAL.md). The subsequent [opt-in local executor](RELEASE-EXECUTION.md) implements authenticated draft/upload/promotion operations; the privileged Actions interface and real first/subsequent public-release qualification remain open. No publication or permissions change is authorized by this document.
+> Type: reference · Part of the [docs index](../README.md)
+
+> **Status:** Full implementation contract. Iteration 04 implements [maintenance discovery/configuration](MAINTENANCE-OPERATIONS.md), safe version preparation and [fixed-commit retained-asset rehearsal](RELEASE-REHEARSAL.md). The [opt-in local executor](RELEASE-EXECUTION.md) implements authenticated draft/upload/promotion operations. The automated [delivery pipeline](DELIVERY-PIPELINE.md) adds the privileged Actions interface: **Release cut** and **Publish** are dispatch-only workflows whose write jobs wait for the protected `release` environment, under a scoped repository policy. Real first/subsequent public-release qualification remains open: neither path has published a release yet. No publication or permissions change is authorized by this document.
 
 This guide implements the workflow intent of [PRD sections 5, 15, and 17](../product/PRD.md). [Research references R01–R35](../_archive/research/2026-09-22-template-research.md) identify the primary sources. Policy values below are chosen defaults, not vendor guarantees.
 
@@ -102,9 +104,11 @@ A local developer may use GitHub CLI, but the standard interface is the reposito
 
 A release workflow is not automatically safe because it is automated. Its source selection, artifact identity, permissions, and retry behavior must be tested.
 
+**Implemented automated path.** [Cut and publish a release](CUT-AND-PUBLISH-A-RELEASE.md) realizes this design with a release branch instead of a separately selected source commit: Release cut prepares the version on `release/X.Y.Z` and opens a draft release pull request; the Release tier builds, tests and retains the candidate (Candidate qualification, including three automated native sessions); Publish takes that retained candidate, merges the tested head into the default branch, tags it, creates the release with the candidate's assets and deletes the branch, in one owner-dispatched, environment-approved run. Publish does not consume manual native acceptance records: the `release` environment reviewer decides whether the Release tier's evidence covers the declared platforms (section 7). The [manual executor](RELEASE-EXECUTION.md) remains the path for retained-candidate operations outside a release branch.
+
 ## 5. Prepare the release
 
-The intended local command is:
+The local command, which Release cut also runs on the release branch, is:
 
 ```sh
 npm run release:prepare -- --version 0.1.0
@@ -205,7 +209,7 @@ Do not use blanket asset clobbering for published versions. Re-running a draft w
 
 ## 10. Workflow security and repository setup
 
-Use read-only permissions for builds/tests and narrowly scoped `contents: write` only for the release mutation stage. Do not run untrusted pull-request code with release privileges. Pin third-party actions by full revision and keep those pins updated. [R28]
+Use read-only permissions for builds/tests and narrowly scoped `contents: write` only for the release mutation stage. In this repository only `release-cut.yml` and `publish.yml` may hold write scopes, both dispatch-only and behind the `release` environment; `npm run check:repository` enforces it ([workflow policy](WORKFLOWS.md#repository-policy-npm-run-checkrepository)). Do not run untrusted pull-request code with release privileges. Pin third-party actions by full revision and keep those pins updated. [R28]
 
 Generated repository owners must verify Actions permissions, required checks, protected publication approval where available, dependency update settings, and template/repository identity. Configuration files do not automatically establish all administration settings.
 

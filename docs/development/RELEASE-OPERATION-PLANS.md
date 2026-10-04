@@ -1,7 +1,12 @@
 # Draft and promotion operation plans
 
+> Type: reference · Part of the [docs index](../README.md)
+
 For authenticated discovery and separately authorized execution, use
 [release execution](RELEASE-EXECUTION.md). This offline planner remains read-only.
+Both are manual tools for retained candidates; a new version is normally released
+through the automated [cut and publish](CUT-AND-PUBLISH-A-RELEASE.md) path, which
+does not use operation plans.
 
 `npm run release:plan -- --input <operation-input.json>` validates retained local
 bytes and supplied state/evidence, then prints exact `gh` argument arrays. It never

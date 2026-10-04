@@ -1,10 +1,14 @@
 # Developer workflow
 
+> Type: how-to · Part of the [docs index](../README.md)
+
 **Current applicability:** Read the [capability matrix](../product/PRD.md#current-capabilities)
 and [iteration 03 plan](../_archive/development/ITERATION-THREE-PLAN.md). The repository now has a real
 Vue/Obsidian plugin, application services and pinned toolchain. Reviewed setup,
 identity/resume, contained settings migration and note-feature/entity makers are
-implemented. Broader maker recipes and release automation remain planned.
+implemented. Broader maker recipes remain planned. Pull requests, CI tiers and
+releases follow [Deliver a change](DELIVER-A-CHANGE.md) and
+[Cut and publish a release](CUT-AND-PUBLISH-A-RELEASE.md).
 
 ## 1. What you can run now
 
@@ -91,60 +95,24 @@ Native modal/settings roots need their own owned namespace/tokens. CSS does not 
 
 ## 6. Verification and evidence
 
-Use the implemented `dev:ui`, `verify`, `test:e2e` and optional explicitly provisioned
-`test:native` commands; broader maker/release workflows remain pending. Run targeted
-checks during changes and full required checks before handoff. Source/CSS/tooling
-≤400 code lines, tests/helpers ≤450, composition-only main.ts ≤100. Count code
-across complete SFCs; exclude comments and blank lines. Name executable files for
-their behavior or responsibility, such as `layout-and-header.spec.ts`.
+Run targeted checks during changes and the full required checks before handoff:
+`node bin/app check --fast` while iterating, then `node bin/app check`,
+`npm run verify` and, for UI changes, `npm run test:e2e`; native smoke only when
+explicitly provisioned. Which gates run in which pull-request state is described in
+[Deliver a change](DELIVER-A-CHANGE.md); [Quality assurance](QUALITY-ASSURANCE.md)
+documents `verify` and the self-review guard. Source/CSS/tooling ≤400 code lines,
+tests/helpers ≤450, composition-only main.ts ≤100. Count code across complete SFCs;
+exclude comments and blank lines. Name executable files for their behavior or
+responsibility, such as `layout-and-header.spec.ts`.
 
 Browser checks must observe caught Vue/application errors in addition to console/pageerror. Negative scenarios assert exact expected codes/counts and no extras. A rendered fallback is not enough to pass. Screenshots and static Markdown specimens do not prove persistence or native APIs.
 
 Use the declared scenario/theme/locale/seed and owned readiness signals. Record source/build/style identity, actual commands, and missing environments. Never accept baselines or suppress errors just to complete a task.
 
-### Reproduce a CI job locally
-
-The workflows keep their explicit commands; `node bin/app ci` reads them so a failing job can be reproduced
-without copying commands by hand. It parses `.github/workflows/*.yml` with the pinned `yaml` library (strict
-YAML 1.2, no new dependency) and never contacts GitHub.
-
-```text
-node bin/app ci --list [--json]                       # workflows -> jobs: triggers, path filters, runner/matrix, reproducible?
-node bin/app ci --job ci/baseline --matrix os=ubuntu-latest        # dry run: the exact ordered shell commands
-node bin/app ci --job ci/baseline --matrix os=ubuntu-latest --execute --json   # run the run: steps, stop at the first failure
-```
-
-- **Reference** a job as `<workflow-file-stem>/<job-id>` (`ci/baseline` is job `baseline` in `ci.yml`).
-- **Dry run** (default) prints each step in order with its shell, `working-directory`, the job/workflow/step `env`
-  and the `run:` text. `${{ matrix.* }}` and `${{ runner.os }}` are resolved (the runner is this machine); any other
-  `${{ }}` expression stays verbatim and is flagged as unresolved. `if:` conditions are settled three-valued:
-  a condition that is false here (`runner.os == 'Windows'` on Linux) is skipped, one that cannot be decided locally
-  (`github.event_name`, `inputs.*`, `steps.*` outputs in a condition) is shown as unknown and not run.
-- **Matrix:** without `--matrix` the first combination that targets this machine is used and the note says how many
-  exist. `--matrix key=value,...` selects one combination by exact values (`group=1`); no match or more than one
-  match is an error that lists the available combinations. A matrix computed by an expression (`fromJSON(...)`)
-  needs the values from `--matrix`.
-- **Reproducible** means every step is a `run:` step or a known setup action (`actions/checkout`,
-  `actions/setup-node`, `actions/cache`, `actions/upload-artifact`: nothing to run locally). Any other `uses:` step is
-  marked `external`, skipped and noted, and the job is listed as not reproducible.
-- **`--execute`** runs the `run:` steps sequentially through bash (default `bash -e`, explicit `shell: bash` adds
-  `pipefail`; `pwsh` only when installed), in the project root with the job's literal env, `CI=true`, a scratch
-  `RUNNER_TEMP` and emulated `GITHUB_ENV`, `GITHUB_OUTPUT`, `GITHUB_PATH` and `GITHUB_STEP_SUMMARY` files, so
-  later steps see exported variables and step outputs. It stops at the first failure and reports every step in the
-  same versioned result shape as `check --json`: `status`, `durationMs`, `exitCode`, `code` and an `outputTail`
-  of failing output; steps after a failure are `not-run`. `--timeout` applies per step (default 600000 ms).
-- **Refused, with the reason printed** (`status: blocked`, `CI_EXECUTE_REFUSED`; nothing runs): `secrets.` or
-  `github.token` references, publication or tagging commands (`npm publish`, `git push`, `git tag <name>`,
-  `gh release|api`, `docker push`, guarded `release operate`/`--authorize`), jobs named release/publish/deploy or
-  using an `environment`, container or service jobs, a runner OS other than this machine, unresolved expressions
-  other than step outputs and `runner.temp`, and a missing shell. The dry run is always available and reports
-  `executable` and `blockers`.
-
-A dry run also notes steps that run `npm ci` or `npm install` in the project folder, because `--execute` would
-replace this checkout's `node_modules`; the many jobs that start with such a step are best reproduced in a scratch
-copy. A local run is a reproduction aid, not proof of CI: hosted-runner images, the `needs:` job results, uploaded
-artifacts, `github.*` event data, caches and external actions are not reproduced, and many jobs install, download or
-write under `reports/`. Jobs that need a Windows or macOS runner can only be inspected here.
+To reproduce a failing CI job, `node bin/app ci --list` lists the workflows and
+`node bin/app ci --job <workflow>/<job>` prints the job's exact commands (dry run);
+dry runs, matrix selection, `--execute` and its refusals are documented in
+[GitHub Actions workflows](WORKFLOWS.md#reproduce-a-job-locally).
 
 ## 7. Native work and release
 
@@ -155,7 +123,11 @@ separate explicit provisioning and uses its isolated fixture, not a personal vau
 
 Real host/device checks remain separate from specimen and real-component harness evidence. Confirm native Notice/Modal behavior, pop-outs, created Task frontmatter, no-overwrite writes, and claimed mobile functionality using the exact candidate.
 
-The [maintenance/release guide](MAINTENANCE-AND-RELEASE.md) retains reviewed dependency updates and fixed-commit draft/promotion. No dependency update auto-publishes; no native acceptance based solely on fixture tests. First directory submission is separate.
+Releases are cut from `main` and published by owner-dispatched workflows; see
+[Cut and publish a release](CUT-AND-PUBLISH-A-RELEASE.md). The
+[maintenance/release guide](MAINTENANCE-AND-RELEASE.md) retains reviewed dependency
+updates and the release contract. No dependency update auto-publishes; no native
+acceptance based solely on fixture tests. First directory submission is separate.
 
 ## 8. Troubleshooting principles
 

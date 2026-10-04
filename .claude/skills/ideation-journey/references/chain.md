@@ -9,8 +9,11 @@ ideation-journey (router: detect stage, recommend, run step by step)
   3 ideation-design       definition      -> agreed design brief, optional docs/design/<slug>/
   4 ideation-prototype    agreed brief    -> prototypes/<slug>/ package | clickdummy | managed prototype
   5 ideation-boilerplate  prototype       -> project skeleton that passes node bin/app check
-  -> feature-delivery (draft PR, Dev tier checks) and self-review
+  -> feature-delivery (draft PR: Dev tier; ready: Integration tier; green merge) and self-review
+  -> release (release/X.Y.Z: Release tier; owner-dispatched Publish), only on the user's request
 ```
+
+The delivery tiers are explained in `docs/development/DELIVERY-PIPELINE.md`; `.claude/skills/feature-delivery/SKILL.md` and `.claude/skills/release/SKILL.md` own them.
 
 ## How to start
 
@@ -28,4 +31,4 @@ Ask Claude Code to "start the ideation journey" or invoke `/ideation-journey`. T
 
 - Command coverage per skill: [tool-map.md](tool-map.md)
 - Stage signals: [stage-detection.md](stage-detection.md)
-- Structural test: `tests/tooling/agent-ideation-skills.checks.mjs` (quality suite)
+- Structural tests: `tests/tooling/agent-ideation-skills.checks.mjs` and, for the delivery skills, `tests/tooling/agent-delivery-skills.checks.mjs` (quality suite)
