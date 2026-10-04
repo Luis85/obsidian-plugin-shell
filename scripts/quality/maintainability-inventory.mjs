@@ -4,7 +4,8 @@ import { sha256, physicalLines } from '../testing/source-inputs.mjs';
 import { decodeVendor, vendorArchive } from '../styles/vendor-policy.mjs';
 
 const executable = /\.(?:[cm]?[jt]sx?|vue)$/;
-const nonExecutable = /\.(?:json|css|html|md)$/;
+// Obsidian Bases files (.base) are YAML view configuration read as data, like JSON; nothing executes them.
+const nonExecutable = /\.(?:json|css|html|md|base)$/;
 // Exact extensionless launchers. Node loads them as ES modules through the package "type"; measure them as .mjs.
 const extensionless = new Map([['bin/app', 'mjs']]);
 // The concept uses Python to assemble and test its offline artifact. Keep these
