@@ -219,6 +219,7 @@
           "tests/tooling/interactive-maker-increment-branches.checks.mjs",
           "tests/tooling/interactive-maker-increment-documents.checks.mjs",
           "tests/tooling/interactive-maker-increment-transitions.checks.mjs",
+          "tests/tooling/interactive-maker-increment-views.checks.mjs",
           "tests/tooling/interactive-maker-issue-documents.checks.mjs",
           "tests/tooling/interactive-maker-operations-catalog.checks.mjs",
           "tests/tooling/interactive-maker-pull-request-documents.checks.mjs",
