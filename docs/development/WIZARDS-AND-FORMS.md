@@ -22,6 +22,9 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `risk-new` | `node bin/app risk new` | `risk` form, note preview, reviewed write with the next free id |
 | `risk-edit` | `node bin/app risk edit [--id <id>]` | Pick a risk, pre-filled `risk` form (allowed transitions only), reviewed in-place update |
 | `risk-review` | `node bin/app risk review` | Walk open high/critical or overdue risks with `risk-review`, one reviewed write each |
+| `learning-new` | `node bin/app learning new` | Capture one learning with the `learning` form; one reviewed write |
+| `learning-edit` | `node bin/app learning edit [--id LRN-0001]` | Edit a learning pre-filled from its note; allowed transitions only |
+| `learning-review` | `node bin/app learning review` | Walk validated high-impact or overdue learnings with `learning-review`, one reviewed write each |
 | `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship and single native-extension options; only missing answers are asked |
 | `framework-setup-stages` | after `setup` applies | Documentation import, then generate/install/verify/preview, each separately approved, then documentation export |
 

@@ -36,6 +36,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Data-driven business processes](development/BUSINESS-PROCESSES.md) | Manage processes, their steps, business rules and docs; check, document, run and simulate them. |
 | [Learning paths](development/LEARNING-PATHS.md) | Follow or write a step-by-step course for `node bin/app learn` in `configs/learning`. |
 | [Manage risks](development/RISK-MANAGEMENT.md) | Keep a risk register as typed Markdown notes with `node bin/app risk`: model, note format, checks and the generated register. |
+| [Manage learnings](development/LEARNINGS.md) | Keep lessons learned as typed Markdown notes with `node bin/app learning`: lifecycle, note format, checks, review and the generated register. |
 | [Typed-note collections](development/NOTE-COLLECTIONS.md) | Engine API and the steps to add a collection (a JSON definition, a settings path, forms/wizards and a command root). |
 | [Generate fake data](development/FAKE-DATA.md) | Generate seeded sample notes, Bases tables and reusable generation configs with `node bin/app fake-data`. |
 | [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | Render a JSON form inside the plugin from `src/features/<feature>/forms` and receive validated values. |
