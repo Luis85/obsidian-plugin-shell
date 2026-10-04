@@ -78,7 +78,7 @@ async function repository(t) {
     if (result.status !== 0) throw new Error(`fixture git ${args.join(' ')}: ${result.stderr}`);
   };
   const write = async (path, text) => { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), text); };
-  for (const name of ['delivery.json', 'definition-of-ready.json', 'definition-of-done.json', 'increment-handoff.template.md', 'acceptance-stub.checks.mjs.tmpl'])
+  for (const name of ['delivery.json', 'definition-of-ready.json', 'definition-of-done.json', 'increment-handoff.template.md', 'acceptance-stub.template.md'])
     await write(`configs/delivery/${name}`, await readFile(join(repositoryRoot, 'configs/delivery', name), 'utf8'));
   const files = { 'package.json': '{ "scripts": { "check": "node bin/app check" } }\n', 'tests/suites.json': '{ "suites": [{ "name": "release" }] }\n', 'CHANGELOG.md': changelog,
     'docs/README.md': docsIndex, 'docs/prds/MVP.md': '# MVP\n', 'docs/requirements/WB-PBI-001.md': '# PBI\n', 'scripts/tool.mjs': 'export {};\n', 'tests/greeting.checks.mjs': 'export {};\n' };

@@ -4,7 +4,7 @@
  *   node scripts/delivery/acceptance.mjs stubs --increment <id|docs/increments/<id>.md> [--write] [--json]
  *
  * Without --write it lists the stubs it would create (a dry run). --write creates them from
- * configs/delivery/acceptance-stub.checks.mjs.tmpl, never overwriting a file, and sets an empty `Evidence:` of each
+ * configs/delivery/acceptance-stub.template.md, never overwriting a file, and sets an empty `Evidence:` of each
  * criterion to its stub. Stubs of criteria that no longer exist are reported as orphans and never deleted.
  * Exit codes: 0 done, 1 the increment does not exist, 2 usage or configuration error.
  */

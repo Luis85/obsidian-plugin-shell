@@ -43,7 +43,7 @@
   },
   "acceptance": {
     "pattern": "tests/acceptance/{increment}/{ac}.checks.mjs",
-    "template": "configs/delivery/acceptance-stub.checks.mjs.tmpl",
+    "template": "configs/delivery/acceptance-stub.template.md",
     "suite": "acceptance",
     "maxSlugLength": 48,
     "pendingPattern": "\\b(?:test|it|describe|suite)\\.todo\\(",

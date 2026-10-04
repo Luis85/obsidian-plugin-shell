@@ -47,10 +47,13 @@ function steps(text) {
 const quoted = text => text.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 const comment = text => text.replace(/\s+/g, ' ').replace(/\*\//g, '* /').trim();
 
-/** A new stub from the template text; the template line that only holds `{{steps}}` becomes the Given/When/Then lines. */
+/** The stub body of a template: the first fenced block of a Markdown template, else the whole text. */
+const templateBody = template => /^(`{3,})[^\n]*\n([\s\S]*?)\n\1\s*$/m.exec(String(template))?.[2].concat('\n') ?? String(template);
+
+/** A new stub from the template; the template line that holds `{{steps}}` becomes the Given/When/Then lines. */
 export function renderStub(template, { incrementId, incrementPath, criterion }) {
   const values = { increment: incrementId, incrementPath: incrementPath.replace(/\.md$/, ''), criterion: criterion.id, text: comment(criterion.text), title: quoted(comment(criterion.text)) };
-  return template.split(lineEnd).flatMap(line => (line.includes('{{steps}}') ? steps(criterion.text) : [line.replace(/\{\{(\w+)\}\}/g, (match, key) => values[key] ?? match)])).join('\n');
+  return templateBody(template).split(lineEnd).flatMap(line => (line.includes('{{steps}}') ? steps(criterion.text) : [line.replace(/\{\{(\w+)\}\}/g, (match, key) => values[key] ?? match)])).join('\n');
 }
 
 /** The Increment text with `Evidence: \`path\`` appended to each listed criterion that names no evidence yet. */

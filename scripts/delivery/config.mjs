@@ -90,7 +90,7 @@ function validateBranches(file, branches) {
   for (const name of names) for (const other of names) if (other.startsWith(`${name}/`)) fail(file, `branches: "${other}" would nest inside the branch "${name}"; both cannot exist at once`);
 }
 /** Defaults of the optional acceptance keys; `acceptance` may also be just the pattern string. */
-const acceptanceDefaults = Object.freeze({ template: 'configs/delivery/acceptance-stub.checks.mjs.tmpl', suite: 'acceptance', maxSlugLength: 48,
+const acceptanceDefaults = Object.freeze({ template: 'configs/delivery/acceptance-stub.template.md', suite: 'acceptance', maxSlugLength: 48,
   pendingPattern: '\\b(?:test|it|describe|suite)\\.todo\\(', assertionPattern: '\\bassert(?:\\.\\w+)*\\(|\\bexpect\\(',
   evidencePattern: '^tests/.+\\.(?:checks|test|spec)\\.[cm]?[jt]s$', pendingStatuses: ['New', 'Refining', 'Ready', 'In progress'] });
 function validateAcceptance(file, raw, statuses) {
