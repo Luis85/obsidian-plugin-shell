@@ -15,10 +15,11 @@ export interface UserSettings {
   preferences: { author: string; ui: 'auto' | 'tui' | 'plain'; vaultConfigDirectory: string; scanRecursive: boolean; firstRun: FirstRunPreferences };
 }
 /**
- * Folders of the typed-note collections in configs/collections (one Markdown note per item). Like design they are
- * optional, so existing settings and saved setup state keep their exact path set; collectionRoot resolves the default.
+ * Folders of the typed-note collections in configs/collections (one Markdown note per item) and of the release
+ * candidate documents (one folder per version). Like design they are optional, so existing settings and saved setup
+ * state keep their exact path set; collectionRoot resolves the default.
  */
-export const collectionPathDefaults = { risks: 'docs/risks', learnings: 'docs/learnings' } as const;
+export const collectionPathDefaults = { risks: 'docs/risks', learnings: 'docs/learnings', increments: 'docs/releases/increments', releaseCandidates: 'docs/releases/candidates' } as const;
 export type CollectionPathKey = keyof typeof collectionPathDefaults;
 export const collectionPathKeys = Object.keys(collectionPathDefaults) as CollectionPathKey[];
 export const defaultSettings: UserSettings = {

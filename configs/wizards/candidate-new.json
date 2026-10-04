@@ -1,0 +1,16 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "candidate-new",
+  "version": 1,
+  "title": "New release candidate",
+  "description": "Create docs/releases/candidates/<version>/README.md (paths.releaseCandidates) as a draft release candidate and move the chosen ready increments to included, in one reviewed write.",
+  "context": { "title": "Release candidates", "details": ["Folder: {{folder}}", "Increments: {{increments}}", "Nothing is written until a reviewed plan is approved.", "Escape: previous step. Ctrl+C: cancel."] },
+  "cancelMessage": "No release candidate was written.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "candidate.load" },
+    { "id": "edit", "kind": "form", "title": "Release candidate", "form": "candidate", "bind": "draft" },
+    { "id": "review", "kind": "action", "action": "candidate.plan-new", "retry": "edit" },
+    { "id": "done", "kind": "end", "text": "Created release candidate {{created.version}} in {{created.path}}." }
+  ]
+}

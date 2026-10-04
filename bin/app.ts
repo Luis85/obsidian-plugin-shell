@@ -14,6 +14,7 @@ import { interactiveProcess } from './adapters/process-command.ts';
 import { collectionWizard } from './presentation/collection.ts';
 import { collectionCommandRoots } from './domain/command-options.ts';
 import { collectionInteractiveActions } from './adapters/collection-command.ts';
+import { candidateInteractiveActions } from './adapters/release-candidate-command.ts';
 import { readSnapshot } from './adapters/storage.ts';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -36,6 +37,7 @@ interface IO { env?: Record<string, string | undefined>; input: Readable & { isT
 /** Whether the command and action name a terminal flow at all; TTY, CI and flags are checked by canInteract. */
 function interactiveCommand(args: Arguments): boolean {
   if (Object.hasOwn(collectionCommandRoots, args.command)) return collectionInteractiveActions.includes(args.action);
+  if (args.command === 'candidate') return candidateInteractiveActions.includes(args.action);
   if (!studioCommands.includes(args.command) && !Object.hasOwn(launchers, args.command)) return false;
   return !args.action || interactiveProcess(args);
 }
@@ -83,6 +85,7 @@ const launchers: Readonly<Record<string, (launch: Launch) => Promise<string | un
   'fake-data': ({ ui, args, options }) => startWizard(ui, 'fake-data', { ...options, flags: args.flags }),
   learn: ({ ui, args, options }) => launchLearning(ui, args, { ...options }),
   process: ({ ui, args, options }) => launchProcess(ui, args, { ...options }),
+  candidate: ({ ui, args, options }) => startWizard(ui, 'candidate-new', { ...options, flags: args.flags }),
 };
 const studioCommands = ['studio', 'new', 'sketch', 'prototype'];
 async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {

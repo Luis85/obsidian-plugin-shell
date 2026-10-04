@@ -5,8 +5,8 @@
 A **note collection** is a folder of Markdown notes of one `type`, each with a stable id, a status workflow and
 typed frontmatter, that the `node bin/app` shell lists, checks, creates, updates, reviews and reports on. The engine
 is generic; a collection is described by one JSON definition in `configs/collections/<id>.json`. The
-[risk register](RISK-MANAGEMENT.md) (`risk`) is the first collection; [learnings](LEARNINGS.md) (`learning`) was added
-with the steps under [Add a collection](#add-a-collection).
+[risk register](RISK-MANAGEMENT.md) (`risk`) is the first collection; [learnings](LEARNINGS.md) (`learning`) and
+[release increments](RELEASE-CANDIDATES.md) (`increment`) were added with the steps under [Add a collection](#add-a-collection).
 
 Code is added only for what data cannot express: a pure **collection hook** (for example the risk score and level),
 named by the definition the same way wizards name actions.
@@ -18,9 +18,10 @@ All names are prefixed `collection*`/`Collection*`. Domain modules are framework
 | Module | Exports | Responsibility |
 | --- | --- | --- |
 | `bin/domain/collection-definition.ts` | `readCollectionDefinition`, `collectionField`, `collectionStatus`, `collectionInputName`, `CollectionDefinition`, `CollectionField`, `CollectionStatus`, … | Fail-closed validation of a definition |
-| `bin/domain/collection-record.ts` | `readCollectionRecord`, `collectionCreate`, `collectionUpdate`, `collectionValue`, `nextCollectionId`, `collectionOverdue`, `isCollectionDate`, `CollectionHook`, `CollectionRecord`, `CollectionIssue` | Reading stored frontmatter into a record plus issues; new and changed frontmatter; transitions, stamps, derived values; id allocation |
+| `bin/domain/collection-record.ts` | `readCollectionRecord`, `collectionCreate`, `collectionUpdate`, `collectionManagedUpdate`, `collectionValue`, `nextCollectionId`, `collectionOverdue`, `isCollectionDate`, `CollectionHook`, `CollectionRecord`, `CollectionIssue` | Reading stored frontmatter into a record plus issues; new and changed frontmatter; transitions, stamps, derived values; managed changes by other modules; id allocation |
+| `bin/domain/collection-reference.ts` | `readCollectionAccepts`, `collectionReferenceOk`, `collectionAcceptsText`, `collectionReleaseVersion` | The `accepts` reference kinds: project paths, release versions and id prefixes |
 | `bin/domain/collection-query.ts` | `sortCollection`, `filterCollection`, `collectionReviewQueue`, `collectionCheck`, `collectionRow`, `collectionCell`, `CollectionEntry` | Report order, filters, review queue, duplicate and overdue checks, list rows |
-| `bin/domain/collection-register.ts` | `collectionRegister`, `mergeCollectionRegister`, `collectionBase`, `collectionTableText` | The generated register, marker/hash preservation, the `.base` data |
+| `bin/domain/collection-register.ts` | `collectionRegister`, `mergeCollectionRegister`, `mergeCollectionBlock`, `collectionBlock`, `collectionBase`, `collectionTableText` | The generated register, marker/hash preservation of any named block (registers, release candidate READMEs), the `.base` data |
 | `bin/domain/collection-hooks.ts` | `collectionHooks` | The explicit hook registry (`risk.scoring`) |
 | `bin/adapters/collection-catalog.ts` | `loadCollection`, `LoadedCollection` | Built-in or project definition, its hook and model validation |
 | `bin/adapters/collection-notes.ts` | `parseCollectionNote`, `patchCollectionNote`, `renderCollectionNote`, `scanCollectionFolder` | Safe YAML reading, in-place patching with candidate verification, rendering (the fake-data serializer), folder scanning |
@@ -53,10 +54,10 @@ completion. `readCollectionDefinition` is authoritative.
 | `hook` | Optional name in `collectionHooks`; required when a field is `derived` |
 | `forms.edit`, `forms.review` | Form ids used by the generic wizard actions |
 | `wizards.new`, `wizards.edit`, `wizards.review` | Wizard ids run by `<root> new|edit|review` in a terminal |
-| `statuses[]` | `{ id, label, open, transitions[], stamp? }`. `open` drives overdue, `requiredWhenOpen` and review. `stamp` names a stamp field dated on entering the status and removed on leaving it. |
+| `statuses[]` | `{ id, label, open, transitions[], stamp?, managed? }`. `open` drives overdue, `requiredWhenOpen` and review. `stamp` names a stamp field dated on entering the status and removed on leaving it. `managed: true` marks a status only another module enters or leaves (see below); no transition and no `initialStatus` may name it. |
 | `initialStatus` | Default status of new notes |
 | `vocabularies` | `name → [{ id, label }]`, referenced by `choice`, `integer` (whole-number ids) and `list` fields |
-| `fields[]` | `{ key, label, kind, source?, required?, requiredWhenOpen?, frontmatter?, multiline?, overdue?, maxLength?, vocabulary?, default?, idPrefix? }` |
+| `fields[]` | `{ key, label, kind, source?, required?, requiredWhenOpen?, frontmatter?, multiline?, overdue?, maxLength?, vocabulary?, default?, idPrefix?, accepts? }` |
 | `body` | Template rendered once for new notes; `{{input}}` or `{{input|fallback}}` of input fields, never evaluated |
 | `list.columns`, `report.columns` | System keys (`id`, `status`, `created`, `updated`, …) or frontmatter field keys |
 | `report.file`, `report.title`, `report.sort[]`, `report.base` | Register file in the folder, its heading, sort keys (`asc`/`desc`, choices by vocabulary order), optional `.base` file |
@@ -64,11 +65,15 @@ completion. `readCollectionDefinition` is authoritative.
 | `model` | Hook-specific data, validated by the hook |
 
 Field kinds are `text` (single-line unless `multiline`), `date` (`YYYY-MM-DD`), `integer`, `choice` and `list`.
-Sources are `input` (answered), `derived` (computed by the hook; never input; stored values must match) and `stamp`
-(dated by the engine). `frontmatter: false` marks body-only input text. `default: "today"` fills a date. `idPrefix`
+Sources are `input` (answered), `derived` (computed by the hook; never input; stored values must match), `stamp`
+(dated by the engine) and `managed` (optional frontmatter that is never input; only another module's reviewed plan
+writes it through `collectionManagedUpdate`, for example the increment's `candidate`). `frontmatter: false` marks body-only input text. `default: "today"` fills a date. `idPrefix`
 (for example `"RISK-"`) makes a frontmatter text or list field (without a vocabulary) hold references: every value must be
 an id with that prefix and 3–9 digits, such as `RISK-0001`. Only the format is checked; whether the referenced note exists
-is not (hooks are pure and never read other folders). The engine owns
+is not (hooks are pure and never read other folders). `accepts` generalizes this for frontmatter text and list fields
+without a vocabulary or `idPrefix`: each value must match one of the listed kinds, `path` (a portable project-relative
+path outside protected roots such as `.git`, `.obsidian` and `node_modules`), `release-version` (`1.2.3` or
+`1.2.3-rc.1`) or an id prefix such as `"RISK-"`; an id-shaped value must use a listed prefix. The engine owns
 `type`, `id`, `status`, `created`, `updated` and `schema_version`.
 
 ## Guarantees
@@ -81,6 +86,10 @@ is not (hooks are pure and never read other folders). The engine owns
   comments and body bytes, verify the candidate by parsing it again, and apply only if the file still has the read hash.
 - The register is replaced only between intact, hash-stamped markers; text outside them is preserved.
 - Every write is one reviewed file plan applied with its exact `planHash` (or a default-No prompt).
+- People never enter a `managed` status or write a `managed` field: `new`/`update` input and the generic forms refuse
+  or omit them. `collectionManagedUpdate(definition, hook, record, { status?, set? }, asOf)` is the one way in: it skips
+  people's transitions but applies stamps, derived values and completeness, and its result is patched like any update.
+  Release candidates use it to move increments to `included`, `shipped` or back to `ready` in the candidate's own plan.
 
 ## Add a collection
 

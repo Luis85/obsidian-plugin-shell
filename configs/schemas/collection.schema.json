@@ -22,16 +22,19 @@
     "wizards": { "type": "object", "additionalProperties": false, "required": ["new", "edit"], "properties": { "new": { "type": "string" }, "edit": { "type": "string" }, "review": { "type": "string" } } },
     "statuses": { "type": "array", "minItems": 1, "maxItems": 30, "items": { "type": "object", "additionalProperties": false, "required": ["id", "label", "open", "transitions"], "properties": {
       "id": { "type": "string" }, "label": { "type": "string" }, "open": { "type": "boolean" },
-      "transitions": { "type": "array", "items": { "type": "string" } }, "stamp": { "type": "string", "description": "A stamp field dated when the note enters this status and removed when it leaves." } } } },
+      "transitions": { "type": "array", "items": { "type": "string" } }, "stamp": { "type": "string", "description": "A stamp field dated when the note enters this status and removed when it leaves." },
+      "managed": { "type": "boolean", "description": "Entered and left only by another module's reviewed plan (collectionManagedUpdate), never by people; no transition may name it." } } } },
     "initialStatus": { "type": "string" },
     "vocabularies": { "type": "object", "additionalProperties": { "type": "array", "minItems": 1, "maxItems": 60, "items": { "type": "object", "additionalProperties": false, "required": ["id", "label"],
       "properties": { "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$" }, "label": { "type": "string", "maxLength": 80 } } } } },
     "fields": { "type": "array", "maxItems": 40, "items": { "type": "object", "additionalProperties": false, "required": ["key", "label", "kind"], "properties": {
       "key": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$" }, "label": { "type": "string", "maxLength": 80 },
-      "kind": { "enum": ["text", "date", "integer", "choice", "list"] }, "source": { "enum": ["input", "derived", "stamp"] },
+      "kind": { "enum": ["text", "date", "integer", "choice", "list"] }, "source": { "enum": ["input", "derived", "stamp", "managed"] },
       "required": { "type": "boolean" }, "requiredWhenOpen": { "type": "boolean" }, "frontmatter": { "type": "boolean" }, "multiline": { "type": "boolean" },
       "overdue": { "type": "boolean" }, "maxLength": { "type": "integer", "minimum": 1, "maximum": 8000 }, "vocabulary": { "type": "string" }, "default": { "const": "today" },
-      "idPrefix": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{0,9}-$", "description": "Frontmatter text or list items must be ids with this prefix and 3-9 digits, for example RISK- for RISK-0001." } } } },
+      "idPrefix": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{0,9}-$", "description": "Frontmatter text or list items must be ids with this prefix and 3-9 digits, for example RISK- for RISK-0001." },
+      "accepts": { "type": "array", "minItems": 1, "maxItems": 12, "uniqueItems": true, "items": { "type": "string", "pattern": "^(?:path|release-version|[A-Z][A-Z0-9]{0,9}-)$" },
+        "description": "Frontmatter text or list items must be references of these kinds: path (portable project-relative), release-version (1.2.3 or 1.2.3-rc.1) or id prefixes such as RISK-." } } } },
     "body": { "type": "string", "maxLength": 8000 },
     "list": { "type": "object", "additionalProperties": false, "required": ["columns"], "properties": { "columns": { "type": "array", "items": { "type": "string" } } } },
     "report": { "type": "object", "additionalProperties": false, "required": ["file", "title", "columns"], "properties": {
