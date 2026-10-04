@@ -1,0 +1,54 @@
+# Workbench Companion: implementation workspace
+
+Start with [README.md](README.md) (commands, testing, debugging) and
+[AGENTS.md](AGENTS.md) (definition of done and rules). This file records what the
+generator produced and what it deliberately left to you. It is regenerated.
+
+## Generated
+
+- Product code in `src/generated/`, product tests in `tests/project/`. The reusable
+  shell foundation stays in the rest of `src/`; its own tests remain in
+  `tests/runtime` (`npm run test:framework`).
+- Every DataSource has an application port, a validated service, a host-adapter
+  extension point and a per-view Pinia store. Declared native note operations use the
+  shell's note repository with exact wire schemas. HTTPS JSON sources stay
+  network-disabled until you configure a provider in
+  `src/generated/bootstrap/source-providers.ts`; custom and database sources need
+  complete typed provider overrides.
+- Navigation, views, modals, settings tabs, the `open-project` command and the
+  `debug-toggle`/`debug-report` commands are connected. Authored page and component
+  visual designs compile to Vue templates with explicitly imported Nuxt UI components
+  and typed component contracts; library entries without a visual component
+  definition are placeholders. Interactions without actions call hooks in
+  `src/generated/application/interactions/` that throw until you implement them.
+- Enabled test-data recipes generate a reviewed `.test-vault` seeding kit
+  (`npm run testdata:*` when present).
+
+## Left to you
+
+- The behaviour behind each requirement: every entry in `design/traceability.json`
+  has an implementation path and a TODO acceptance test (`npm run test:tdd`).
+  A TODO is never passing evidence, and a green scaffold build accepts nothing.
+- Write and payload-bearing flows need an explicit source-action mapping; nothing is
+  inferred from prose. Domain rules, custom drivers and translations are product work.
+- Native qualification beyond the real-Obsidian tests in this project, mobile
+  support and store submission.
+
+Details: `docs/framework/development/GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md`,
+`docs/framework/development/GENERATOR-DECLARATIVE-ACTIONS.md`,
+`docs/framework/development/COMPANION-GENERATOR.md`.
+
+## Component library dependencies
+
+No visual component declares a third-party package.
+
+## Traceability and regeneration
+
+`design/project.json` keeps the full design export; `design/traceability.json` and
+`design/visual-traceability.json` link requirements, visual definitions, interaction
+hooks and external adapters to code and tests. `.companion/generation.json` records each generated file's hash and ownership.
+Re-running the same reviewed generation updates files you have not edited, keeps
+your edits to extension files (including README.md, AGENTS.md, `.claude/`,
+`.vscode/` and CI workflows), and reports a conflict instead of overwriting when
+both changed. Files are never deleted implicitly. Generation never installs
+dependencies, builds, enables plugins, publishes or authorizes a release.

@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev:obsidian",
+      "detail": "Build, launch the contained Obsidian sandbox, hot-reload on save and stream logs",
+      "type": "npm",
+      "script": "dev:obsidian",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dev-obsidian",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": { "regexp": "\\b(src/[^\\s:()]+):(\\d+):(\\d+)", "file": 1, "line": 2, "column": 3 },
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "\\[dev:obsidian\\] (Contained sandbox|✗ build/reload failed)",
+          "endsPattern": "\\[dev:obsidian\\] [✓✗] (initial load|rebuilt|reload)"
+        }
+      }
+    },
+    {
+      "label": "check",
+      "detail": "Typecheck, lint and product tests (definition of done)",
+      "type": "npm",
+      "script": "check",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "test:watch",
+      "detail": "Product tests in Vitest watch mode",
+      "type": "npm",
+      "script": "test:watch",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

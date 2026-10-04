@@ -1,0 +1,35 @@
+{
+  "kind": "iteration-planner-source-transfer-evidence",
+  "schemaVersion": 1,
+  "date": "2026-09-28",
+  "status": "incomplete",
+  "repository": "Luis85/obsidian-plugin-shell",
+  "pullRequest": 45,
+  "parentCommit": "14d55558fca71fb9bd2c9610c233d09d965fa781",
+  "sourceTree": "17fa37402812f9edb00ddd35fff76e8711c5b67b",
+  "testsTree": "03b8d5c2f777e388edc6c62e2ded4e6110e8b507",
+  "scope": "Clean partial directory with the 14 accepted source/build files and tests/domain.test.mjs; neither blocked source module nor HTML present.",
+  "toolchain": { "node": "22.16.0", "npm": "10.9.2", "repositoryQualifiedToolchain": false },
+  "checks": [
+    { "command": "npm ci --ignore-scripts", "cwd": "source", "status": "passed", "exitCode": 0 },
+    { "command": "npm test", "cwd": "source", "status": "passed", "exitCode": 0, "passed": 38, "failed": 0, "skipped": 0, "todo": 0 },
+    { "command": "npm run prototype:build", "cwd": "source", "status": "failed", "exitCode": 1, "reason": "ENOENT reading source/planning.ts; source/app.ts is also absent." },
+    { "command": "Independent git write-tree and remote subtree comparison", "status": "passed", "scope": "source and tests subtree byte identities, not UI acceptance" }
+  ],
+  "output": {
+    "path": "transfer-checks.log",
+    "sha256": "ae703806b12126046b59d5924c307f851e30ce06f51c90248199a143e69fd874",
+    "format": "Install and build output plus domain summary excerpt; the local build-root path is normalized to <candidate>."
+  },
+  "blockedUploads": [
+    { "path": "source/planning.ts", "attemptsThisRetry": 2, "originalBlob": "a992ab1350496c5f1fed0d9e0fc982f02078fe25" },
+    { "path": "source/app.ts", "attemptsThisRetry": 1, "originalBlob": "d61dc162ebfac801aea4b9d68c0f8c921140e7de" }
+  ],
+  "notRun": ["repository-wide qualification", "qualified TypeScript type check", "browser journeys for partial checkout", "Companion import/compiler qualification", "native Obsidian acceptance"],
+  "limitations": [
+    "The partial checkout cannot produce the clickdummy.",
+    "prototype.html and tests/browser_journeys.py are not committed.",
+    "The original complete attachment's passing build and earlier browser results are separate evidence.",
+    "The current implementation is the documented TypeScript/native-browser fallback, not the canonical Vue/Pinia/Nuxt pipeline."
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "description": "Historical or deliberate references to retired CLI launchers. `node bin/app` is the only CLI entry (PR #67). Each entry needs a reason; an entry that no longer matches any reference fails the check, so remove it when the file is cleaned up.",
+  "entries": [
+    { "glob": "docs/development/PR5-FRAMEWORK-READINESS-REVIEW.md", "rules": ["retired-launcher"], "reason": "Dated review of PR #5 and its integration addendum." },
+    { "glob": "docs/development/PUBLISHED-DISTRIBUTION-PLAN.md", "rules": ["retired-launcher"], "reason": "States that the retired layouts are not shipped and asserts their absence from the package." },
+    { "glob": "docs/development/SCRIPTS-CONSOLIDATION.md", "rules": ["retired-launcher"], "reason": "Consolidation record; stage A describes the launcher rename and its later removal." },
+    { "glob": "docs/research/**", "rules": ["retired-launcher"], "reason": "Dated research written against the repository at that date." },
+    { "glob": "docs/tasks/shell/SH-026.md", "rules": ["retired-launcher"], "reason": "Historical task record for the earlier compiled root launcher." },
+    { "glob": "docs/tasks/shell/SH-028.md", "rules": ["retired-launcher"], "reason": "Historical task record written when the root launcher existed." },
+    { "glob": "docs/testing/MVP-AUTHORING-GENERATION.md", "rules": ["retired-launcher"], "reason": "Dated execution record." },
+    { "glob": "docs/testing/MVP-SITEMAP-CORE.md", "rules": ["retired-launcher"], "reason": "Dated execution record with the commands as run." },
+    { "glob": "docs/testing/PR18-MERGE-RECONCILIATION.md", "rules": ["retired-launcher"], "reason": "Dated merge reconciliation record." },
+    { "glob": "tests/tooling/interactive-maker-tui-hardening.checks.mjs", "rules": ["retired-launcher"], "reason": "Negative fixture: the retired launcher names must be rejected as TUI entry points." },
+    { "glob": "tests/tooling/project-generator-contract.checks.mjs", "rules": ["retired-launcher"], "reason": "Negative assertion: the generated project config must not name the retired launchers." },
+    { "glob": "bin/FIRST-RUN.md", "rules": ["kit-layout-path"], "reason": "Extracted CLI kit kept under tools/shell-cli of the project, where the CLI is not at the repository root." },
+    { "glob": "bin/PROJECT-SETUP.md", "rules": ["kit-layout-path"], "reason": "Extracted CLI kit kept under tools/shell-cli of the project; the source-checkout form is stated beside it." },
+    { "glob": "scripts/testing/qualify-angular-setup.mjs", "rules": ["kit-layout-path"], "reason": "Qualification builds that kit layout on purpose and runs the CLI from it." },
+    { "glob": "docs/development/ADOPT-EXISTING-PROJECT.md", "rules": ["kit-layout-path"], "reason": "The adoption workflow runs the released kit extracted under tools/shell-cli of an existing project; the checkout form is stated beside it." },
+    { "glob": ".claude/skills/adopt-existing-project/SKILL.md", "rules": ["kit-layout-path"], "reason": "The skill is installed into existing projects whose kit lives under tools/shell-cli; it names both launch forms." },
+    { "glob": "templates/adoption/claude-skill/SKILL.md", "rules": ["kit-layout-path"], "reason": "Shipped copy of the adoption skill, byte-identical to .claude/skills/adopt-existing-project/SKILL.md." }
+  ]
+}

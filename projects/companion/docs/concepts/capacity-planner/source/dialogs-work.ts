@@ -1,0 +1,74 @@
+import {activeScenario,announce,commit,dialog,esc,num,personById,roleById,stateRef,taskById,uid} from "./core.ts";
+import {actualHoursFor,allocatedTaskHours,cellLoad,personAvailability,personLoad,remainingTaskHours,rolePlan,taskEstimateHours} from "./metrics.ts";
+import {render} from "./render.ts";
+import {openDialog} from "./dialogs-common.ts";
+
+function eligiblePeople(task=null) {
+  const retained=new Set([...(task?.assigneeIds||[]),task?.ownerPersonId].filter(Boolean));
+  return stateRef.state.project.people.filter(person=>!person.inactive||retained.has(person.id));
+}
+function ownerOptions(task) {
+  return `<option value="">No owner</option>${eligiblePeople(task).map(person=>`<option value="${esc(person.id)}" ${person.id===task?.ownerPersonId?"selected":""}>${esc(person.name)} · ${esc(roleById(person.roleId)?.name||"No role")}</option>`).join("")}`;
+}
+function peopleChecklist(task) {
+  const selected=new Set(task?.assigneeIds||[]),people=eligiblePeople(task);
+  if(!people.length)return `<div class="empty compact-empty">Add people in Team before assigning task members.</div>`;
+  return `<fieldset class="people-picker"><legend>Assigned people <span>Choose everyone who may contribute to this task.</span></legend><div>${people.map(person=>`<label class="person-choice"><input type="checkbox" name="assigneeId" value="${esc(person.id)}" ${selected.has(person.id)?"checked":""}><span><strong>${esc(person.name)}</strong><small>${esc(roleById(person.roleId)?.name||"No role")}${person.id===task?.ownerPersonId?" · owner":""}</small></span></label>`).join("")}</div></fieldset>`;
+}
+function allocatedPeople(taskId) {
+  const ids=[];
+  for(const scenario of stateRef.state.scenarios)for(const allocation of scenario.allocations||[])if(allocation.taskId===taskId&&allocation.personId)ids.push(allocation.personId);
+  return [...new Set(ids)];
+}
+
+export function taskDialog(taskId=null) {
+  const p=stateRef.state.project,task=taskId?p.tasks.find(item=>item.id===taskId):null;
+  openDialog(task?`Task · ${task.title}`:"Add task",`
+    <div class="form-grid"><label class="wide">Task title<input name="title" required maxlength="120" value="${task?esc(task.title):""}"></label><label>Estimate (${esc(p.unitName)})<input name="units" type="number" min="0" step="any" required value="${task?esc(task.units):"5"}"></label><label>Status<select name="inactive"><option value="false" ${!task?.inactive?"selected":""}>Active</option><option value="true" ${task?.inactive?"selected":""}>Archived</option></select></label><label class="wide">Owner<select name="ownerPersonId">${ownerOptions(task)}</select></label></div>
+    ${peopleChecklist(task)}
+    ${task?`<div class="metric-preview"><span>Allocated in active plan</span><strong>${num.format(allocatedTaskHours(task.id))} / ${num.format(taskEstimateHours(task))} h</strong><small>${num.format(remainingTaskHours(task))} h remaining · ${(task.assigneeIds||[]).length} assigned people</small></div>`:""}
+    <div class="formula">The owner is accountable for the task and is always part of its assigned people. A task may have many assigned people and may still span several role × iteration × person allocation slices. People with existing allocation slices remain assigned until those slices are removed.</div>`,(data,form)=>{
+      const title=String(data.get("title")||"").trim(),units=Number(data.get("units")),inactive=String(data.get("inactive"))==="true",ownerPersonId=String(data.get("ownerPersonId")||"")||null;
+      if(!title||!Number.isFinite(units)||units<0){announce("Enter a valid title and estimate.");return false;}
+      if(ownerPersonId&&!personById(ownerPersonId)){announce("Choose a valid task owner.");return false;}
+      const checked=[...form.querySelectorAll('input[name="assigneeId"]:checked')].map(input=>input.value),retained=task?allocatedPeople(task.id):[];
+      const assigneeIds=[...new Set([...checked,...retained,...(ownerPersonId?[ownerPersonId]:[])])];
+      if(task){task.title=title;task.units=units;task.inactive=inactive;task.ownerPersonId=ownerPersonId;task.assigneeIds=assigneeIds;commit("task.updated",title);}
+      else{p.tasks.push({id:uid("task"),title,units,inactive:false,ownerPersonId,assigneeIds});commit("task.created",title);}
+      render();announce(task?"Task saved.":`${title} added.`);return true;
+    },task?"Save task":"Add task");
+  const owner=dialog.querySelector('[name="ownerPersonId"]');
+  owner?.addEventListener("change",()=>{if(!owner.value)return;const checkbox=dialog.querySelector(`input[name="assigneeId"][value="${CSS.escape(owner.value)}"]`);if(checkbox)checkbox.checked=true;});
+}
+
+function personOptions(task,roleId,selectedId) {
+  const assigned=new Set(task?.assigneeIds||[]),owner=task?.ownerPersonId;
+  const people=stateRef.state.project.people.filter(person=>(!person.inactive||person.id===selectedId)&&person.roleId===roleId).sort((a,b)=>Number(b.id===owner)-Number(a.id===owner)||Number(assigned.has(b.id))-Number(assigned.has(a.id))||a.name.localeCompare(b.name));
+  return `<option value="">Role-level / no named person</option>${people.map(person=>`<option value="${esc(person.id)}" ${person.id===selectedId?"selected":""}>${esc(person.name)}${person.id===owner?" · owner":assigned.has(person.id)?" · task team":""}</option>`).join("")}`;
+}
+export function allocationDialog(taskId,allocationId=null,presetRoleId=null,presetIterationId=null) {
+  const scenario=activeScenario(),task=taskById(taskId),allocation=allocationId?scenario.allocations.find(item=>item.id===allocationId):null,p=stateRef.state.project;if(!task)return;
+  const roles=p.roles.filter(role=>!role.inactive||role.id===allocation?.roleId),roleId=presetRoleId||allocation?.roleId||roles[0]?.id,iterationId=presetIterationId||allocation?.iterationId||p.iterations[0]?.id,currentHours=Number(allocation?.hours||0),allocatedOther=allocatedTaskHours(task.id,scenario)-currentHours,maxHours=Math.max(0,taskEstimateHours(task)-allocatedOther),defaultHours=allocation?currentHours:Math.max(.25,remainingTaskHours(task,scenario));
+  const roleOptions=roles.map(role=>`<option value="${esc(role.id)}" ${role.id===roleId?"selected":""}>${esc(role.name)}</option>`).join(""),iterationOptions=p.iterations.map(it=>`<option value="${esc(it.id)}" ${it.id===iterationId?"selected":""}>${esc(it.name)}</option>`).join("");
+  openDialog(`${allocation?"Edit":"Allocate"} · ${task.title}`,`<div class="form-grid"><label>Role<select name="roleId">${roleOptions}</select></label><label>Iteration<select name="iterationId">${iterationOptions}</select></label><label>Person<select name="personId">${personOptions(task,roleId,allocation?.personId)}</select></label><label>Planned hours<input name="hours" type="number" min=".25" max="${maxHours}" step="any" required value="${esc(Math.min(defaultHours,maxHours||defaultHours))}"></label></div><div class="task-team-note"><strong>Task owner:</strong> ${esc(personById(task.ownerPersonId)?.name||"No owner")} · <strong>Assigned:</strong> ${esc((task.assigneeIds||[]).map(id=>personById(id)?.name).filter(Boolean).join(", ")||"No named people")}</div><div id="allocation-preview" class="assignment-preview"></div><div class="formula">This slice may be one of several allocations for the task. Selecting another role member also adds that person to the task team. Total allocations cannot exceed the task estimate of ${num.format(taskEstimateHours(task))} h.</div>`,data=>{
+    const nextRoleId=String(data.get("roleId")),nextIterationId=String(data.get("iterationId")),personId=String(data.get("personId")||"")||null,hours=Number(data.get("hours"));
+    if(!roleById(nextRoleId)||!p.iterations.some(it=>it.id===nextIterationId)||!Number.isFinite(hours)||hours<=0||hours>maxHours+.001){announce("Choose a valid role, iteration and allocation within the remaining estimate.");return false;}
+    if(personId&&personById(personId)?.roleId!==nextRoleId){announce("The selected person is not assigned to that role.");return false;}
+    if(personId&&!task.assigneeIds.includes(personId))task.assigneeIds.push(personId);
+    if(allocation){allocation.roleId=nextRoleId;allocation.iterationId=nextIterationId;allocation.personId=personId;allocation.hours=hours;commit("allocation.updated",`${task.title}: ${num.format(hours)} h`);}
+    else{scenario.allocations.push({id:uid("allocation"),taskId:task.id,roleId:nextRoleId,iterationId:nextIterationId,personId,hours});commit("allocation.created",`${task.title}: ${num.format(hours)} h`);}
+    render();announce(allocation?"Allocation saved.":"Task allocation added.");return true;
+  },allocation?"Save allocation":"Add allocation");
+  const roleSelect=dialog.querySelector('[name="roleId"]'),itSelect=dialog.querySelector('[name="iterationId"]'),personSelect=dialog.querySelector('[name="personId"]'),hoursInput=dialog.querySelector('[name="hours"]'),preview=dialog.querySelector("#allocation-preview");
+  const refreshPeople=()=>{const current=personSelect.value;personSelect.innerHTML=personOptions(task,roleSelect.value,current);};
+  const updatePreview=()=>{const role=roleById(roleSelect.value),it=p.iterations.find(item=>item.id===itSelect.value),hours=Number(hoursInput.value||0);if(!role||!it)return;const plan=rolePlan(role,it,scenario),existing=cellLoad(role.id,it.id,scenario)-currentHours,projected=existing+hours,personId=personSelect.value,person=personId?personById(personId):null,personProjected=person?personLoad(person.id,it.id,scenario)-(allocation?.personId===person.id&&allocation?.iterationId===it.id?currentHours:0)+hours:0,personAvailable=person?personAvailability(person,it).hours:0,over=projected>plan.hours+.01,personOver=person&&personProjected>personAvailable+.01;preview.className=`assignment-preview ${over||personOver?"bad":"good"}`;preview.innerHTML=`<div><span>Role task load</span><strong>${num.format(projected)} / ${num.format(plan.hours)} h</strong></div><div><span>Role utilization</span><strong>${plan.hours>0?num.format(projected/plan.hours*100):"∞"}%</strong></div><div><span>Person load</span><strong>${person?`${num.format(personProjected)} / ${num.format(personAvailable)} h`:"Role-level"}</strong></div>${over?`<p>Role task load exceeds planned capacity by ${num.format(projected-plan.hours)} h.</p>`:""}${personOver?`<p>${esc(person.name)} exceeds available capacity by ${num.format(personProjected-personAvailable)} h.</p>`:""}`;};
+  roleSelect.addEventListener("change",()=>{refreshPeople();updatePreview();});itSelect.addEventListener("change",updatePreview);personSelect.addEventListener("change",updatePreview);hoursInput.addEventListener("input",updatePreview);updatePreview();
+}
+export function removeAllocation(allocationId) {
+  const scenario=activeScenario(),allocation=scenario.allocations.find(item=>item.id===allocationId);if(!allocation)return;const task=taskById(allocation.taskId);scenario.allocations=scenario.allocations.filter(item=>item.id!==allocationId);commit("allocation.removed",`${task?.title||"Task"}: ${num.format(allocation.hours)} h returned to scope`);render();announce("Allocation removed; hours returned to unallocated scope.");
+}
+export function actualDialog(allocationId) {
+  const scenario=activeScenario(),allocation=scenario.allocations.find(item=>item.id===allocationId);if(!allocation)return;
+  const task=taskById(allocation.taskId),existing=actualHoursFor(allocation),role=roleById(allocation.roleId),iteration=stateRef.state.project.iterations.find(item=>item.id===allocation.iterationId),defaultRate=role&&iteration?rolePlan(role,iteration,scenario).rate:Number(role?.dayRate||0);
+  openDialog(`Record actual · ${task?.title||"Task"}`,`<div class="form-grid"><div class="metric-preview"><span>Planned slice</span><strong>${num.format(allocation.hours)} h</strong><small>Existing actual ${num.format(existing)} h</small></div><label>Additional actual hours<input name="hours" type="number" min=".01" step="any" required value="1"></label><label>Actual rate (€ / PT)<input name="dayRate" type="number" min="0" step="any" required value="${esc(defaultRate)}"></label><label class="wide">Note<input name="note" maxlength="120" placeholder="Optional evidence or booking note"></label></div><div class="formula">The rate is snapshotted with this actual entry. Actual cost therefore stays stable when another scenario uses different future rates.</div>`,data=>{const hours=Number(data.get("hours")),dayRate=Number(data.get("dayRate")),note=String(data.get("note")||"").trim();if(!Number.isFinite(hours)||hours<=0||!Number.isFinite(dayRate)||dayRate<0){announce("Enter positive actual hours and a valid rate.");return false;}stateRef.state.project.actuals.push({id:uid("actual"),taskId:allocation.taskId,roleId:allocation.roleId,personId:allocation.personId||null,iterationId:allocation.iterationId,hours,dayRate,note,at:new Date().toISOString()});commit("actual.recorded",`${task?.title||"Task"}: ${num.format(hours)} h @ ${num.format(dayRate)} €/PT`);render();announce("Actual effort recorded.");return true;},"Record actual");
+}

@@ -1,0 +1,40 @@
+# Task: <short, outcome-first title>
+
+Copy this file to `docs/project-tasks/<yyyy-mm-dd>-<slug>.md` for any change that is
+bigger than one commit. Keep it short; delete sections that do not apply.
+
+- Status: todo | in progress | done
+- Journey in `BRIEF.md`: <which must-have journey this serves, or "none: explain">
+
+## Why
+
+One or two sentences: the user problem, not the solution.
+
+## Traceability
+
+- Requirement keys (`design/traceability.json`): `req-...`
+- Interaction ids (`design/visual-traceability.json`, `vi-...` with `business-todo`): `vi-...`
+- Acceptance tests to make real: `{{testRoot}}/acceptance/...`
+
+## Acceptance
+
+Given / when / then, with the exact data written or shown. Include the failure case
+(the draft is kept, nothing is written, the error is recoverable).
+
+## Plan
+
+1. The failing test first (which file, what it asserts).
+2. The smallest implementation (files expected to change).
+3. UI evidence needed: `npm run test:ui-quality`, `npm run ui:gallery`, real Obsidian or "not needed".
+
+## Out of scope
+
+What this task deliberately leaves alone.
+
+## Evidence
+
+Commands run and their real results (paste the summary line, not the full output).
+
+## Untested scope
+
+What was not run or cannot be verified here, and why.

@@ -1,0 +1,41 @@
+import { vi } from 'vitest';
+import { success, failure, type Result } from '../../src/domain/outcome';
+import { NoteRepository } from '../../src/application/note-repository';
+import { taskDocument } from '../../src/features/tasks/definition';
+import { projectDocument } from '../../src/features/projects/definition';
+import { markdownCodec } from '../../src/infrastructure/markdown';
+import { TypedEventBus } from '../../src/infrastructure/events/typed-event-bus';
+import type { ShellEvents } from '../../src/application/events';
+import type { DocumentStorage } from '../../src/application/ports';
+export function repositoryFixture() {
+  const files = new Map<string, string>();
+  const trash = new Map<string, string>();
+  const errors = { report: vi.fn() };
+  const events = new TypedEventBus<ShellEvents>(errors);
+  const storage = {
+    create: vi.fn(async (path: string, markdown: string): Promise<Result<void>> => {
+      if (files.has(path)) return failure('conflict', 'error.conflict');
+      files.set(path, markdown); return success(undefined);
+    }),
+    list: vi.fn(async (folder: string) => success([...files.keys()].filter(path => path.startsWith(`${folder}/`)))),
+    read: vi.fn(async (path: string) => { const found = files.get(path); return found === undefined ? failure('storage', 'error.read') : success(found); }),
+    replace: vi.fn(async (path: string, expected: string, markdown: string): Promise<Result<void>> => {
+      if (files.get(path) !== expected) return failure('stale', 'error.stale');
+      files.set(path, markdown); return success(undefined);
+    }),
+    trash: vi.fn(async (path: string, expected: string): Promise<Result<void>> => {
+      if (files.get(path) !== expected) return failure('stale', 'error.stale');
+      trash.set(path, expected); files.delete(path); return success(undefined);
+    }),
+  } satisfies DocumentStorage;
+  let folder = 'Tasks'; let id = 0;
+  const nextId = () => `entity-${++id}`;
+  const now = () => '2026-09-22T12:00:00.000Z';
+  const tasks = new NoteRepository(taskDocument, storage, markdownCodec, events, () => folder, nextId, now, errors);
+  const projects = new NoteRepository(projectDocument, storage, markdownCodec, events, () => 'Projects', nextId, now, errors);
+  return { files, trash, storage, errors, events, tasks, projects, folder(value: string) { folder = value; } };
+}
+export function unwrap<T>(result: Result<T>): T {
+  if (!result.ok) throw new Error(`Unexpected result: ${result.error.code}/${result.error.key}`);
+  return result.value;
+}

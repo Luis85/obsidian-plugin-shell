@@ -1,0 +1,106 @@
+# Generated from projects/companion/.github/workflows/ci.yml by `npm run projects:sync`.
+# Edit the project's own workflow and re-run the sync; never edit this copy.
+
+name: "companion: CI"
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - projects/companion/**
+      - .github/workflows/projects--companion--ci.yml
+  pull_request:
+    paths:
+      - projects/companion/**
+      - .github/workflows/projects--companion--ci.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: projects-companion-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: projects/companion/.nvmrc
+          cache: npm
+          cache-dependency-path: projects/companion/package-lock.json
+      - name: Select the pinned npm
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pinned-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "PINNED_NPM=$RUNNER_TEMP/pinned-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install exact dependencies
+        run: node "$PINNED_NPM" ci --no-fund
+      - name: Gate (typecheck, lint, product tests)
+        run: node "$PINNED_NPM" run check
+      - name: Release build, UI-effect tests and test data (what verify:project adds to check)
+        run: node "$PINNED_NPM" run verify:artifacts
+      # Advisory: a new project has no author in manifest.json yet, which this mirror of the community-review
+      # rules reports as a failure. Remove continue-on-error once the manifest is ready to publish.
+      - name: Community-review rules (manifest, lint, bundle; advisory)
+        continue-on-error: true
+        run: node "$PINNED_NPM" run check:submission
+  # Browser journeys and the UI review gallery. Evidence for human review on every pull request; the gallery
+  # is never acceptance. A step is skipped, with a warning, when its npm script does not exist.
+  ui:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: projects/companion/.nvmrc
+          cache: npm
+          cache-dependency-path: projects/companion/package-lock.json
+      - name: Select the pinned npm
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pinned-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "PINNED_NPM=$RUNNER_TEMP/pinned-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install exact dependencies
+        run: node "$PINNED_NPM" ci --no-fund
+      - name: Install Chromium and its system libraries
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - name: Browser journeys and UI quality (Playwright)
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.['test:e2e'] ? 0 : 1)"; then
+            node "$PINNED_NPM" run test:e2e
+          else
+            echo "::warning::package.json has no test:e2e script; no browser tests ran"
+          fi
+      - name: UI review gallery
+        if: always()
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.['ui:gallery'] ? 0 : 1)"; then
+            node "$PINNED_NPM" run ui:gallery
+            echo "UI review gallery: download the \`ui-review-gallery\` artifact and open \`gallery.html\`. It is evidence for human review, not acceptance." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::package.json has no ui:gallery script; no gallery was produced"
+          fi
+      - name: Keep the UI review gallery
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-review-gallery
+          path: projects/companion/reports/ui-gallery/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Keep the browser test reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-e2e-reports
+          path: projects/companion/reports/e2e/
+          retention-days: 14
+          if-no-files-found: warn
+defaults:
+  run:
+    working-directory: projects/companion

@@ -1,0 +1,6 @@
+import type { ProjectCodec } from '../../application/ports/project-codec'
+import type { EditorProject } from '../../domain/shared/project'
+export class JsonProjectCodec implements ProjectCodec {
+ encode(project:EditorProject){return JSON.stringify(project,null,2)}
+ decode(source:string):EditorProject{const x=JSON.parse(source);if(x?.schema!=='companion.vue-ir'||x?.version!==3)throw new Error('Unsupported project schema/version');return x as EditorProject}
+}

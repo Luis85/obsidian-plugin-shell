@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "description": "Exact files that may contain raw colour literals. No directories or globs. Every entry needs a reason; an entry whose file is missing or already clean fails check:style-literals so it cannot go stale.",
+  "entries": []
+}

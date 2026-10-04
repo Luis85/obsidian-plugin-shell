@@ -1,0 +1,49 @@
+name: Projects boundary
+# The only shell workflow that watches projects/: it never installs, builds or tests a
+# project (each project's own synced workflows do that). It proves that every project
+# is standalone, links its prototypes, and that its workflows are synced exactly and
+# stay isolated from the shell's. A site project's Bases collection snapshots must match
+# their current .base files, so any .base edit re-runs it. See projects/README.md.
+on:
+  pull_request:
+    paths: &boundary-inputs
+      - 'projects/**'
+      - 'scripts/projects/**'
+      - '**/*.base'
+      - 'bin/domain/site-*.ts'
+      - 'bin/domain/obsidian-base.ts'
+      - 'bin/domain/base-*.ts'
+      - 'bin/adapters/obsidian-base.ts'
+      - 'templates/sites/catalog.json'
+      - 'scripts/quality/check-repository.mjs'
+      - '.github/dependabot.yml'
+      - '.github/workflows/**'
+      - '.github/actions/setup-qualified/**'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches: [main]
+    paths: *boundary-inputs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: projects-boundary-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  boundary:
+    name: Projects boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund --ignore-scripts
+      - name: Standalone projects, prototype links, synced and isolated workflows
+        run: node scripts/projects/projects.mjs check
+      - name: Shell workflow security floor (also covers the synced project copies)
+        run: node scripts/quality/check-repository.mjs

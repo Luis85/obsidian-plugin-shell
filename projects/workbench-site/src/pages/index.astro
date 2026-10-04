@@ -1,0 +1,26 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import CollectionCards from '../components/CollectionCards.astro';
+import CollectionTable from '../components/CollectionTable.astro';
+import project from '../../workbench.project.json';
+
+/** Project page: a summary, the "roadmap" collection as a table, the "backlog" collection as a table and "updates" as cards. */
+---
+<SiteLayout>
+  <section class="hero" aria-labelledby="hero-title">
+    <h1 id="hero-title">{project.title}</h1>
+    <p>{project.summary}</p>
+  </section>
+  <section aria-labelledby="roadmap">
+    <h2 id="roadmap">Roadmap</h2>
+    <CollectionTable name="roadmap" caption="Roadmap milestones" />
+  </section>
+  <section aria-labelledby="backlog">
+    <h2 id="backlog">Backlog</h2>
+    <CollectionTable name="backlog" caption="Open backlog items" />
+  </section>
+  <section aria-labelledby="updates">
+    <h2 id="updates">Updates</h2>
+    <CollectionCards name="updates" />
+  </section>
+</SiteLayout>

@@ -1,0 +1,72 @@
+{
+  "rules": [
+    {
+      "id": "er-relationship-56",
+      "source": "requirement",
+      "target": "plugin-project",
+      "key": "project_ref",
+      "sourceCard": "0..*",
+      "targetCard": "0..1",
+      "onDelete": "restrict"
+    },
+    {
+      "id": "er-relationship-57",
+      "source": "screen",
+      "target": "plugin-project",
+      "key": "project_ref",
+      "sourceCard": "0..*",
+      "targetCard": "0..1",
+      "onDelete": "restrict"
+    },
+    {
+      "id": "er-relationship-58",
+      "source": "requirement",
+      "target": "screen",
+      "key": "screen_refs",
+      "sourceCard": "0..*",
+      "targetCard": "0..*",
+      "onDelete": "restrict"
+    },
+    {
+      "id": "er-relationship-59",
+      "source": "screen",
+      "target": "component",
+      "key": "component_refs",
+      "sourceCard": "0..*",
+      "targetCard": "0..*",
+      "onDelete": "restrict"
+    },
+    {
+      "id": "er-relationship-60",
+      "source": "source-operation",
+      "target": "data-source",
+      "key": "source_ref",
+      "sourceCard": "0..*",
+      "targetCard": "0..1",
+      "onDelete": "restrict"
+    },
+    {
+      "id": "er-relationship-61",
+      "source": "test-recipe",
+      "target": "source-operation",
+      "key": "operation_ref",
+      "sourceCard": "0..*",
+      "targetCard": "0..1",
+      "onDelete": "restrict"
+    },
+    {
+      "id": "er-relationship-62",
+      "source": "design-token",
+      "target": "plugin-project",
+      "key": "project_ref",
+      "sourceCard": "0..*",
+      "targetCard": "0..1",
+      "onDelete": "restrict"
+    }
+  ],
+  "writeGuard": [
+    "er-relationship-60",
+    "er-relationship-61"
+  ],
+  "scope": "generated-runtime-preflight-not-cross-process-transaction"
+}

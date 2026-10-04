@@ -1,0 +1,7 @@
+<script setup lang="ts">
+import { componentCatalog } from '../../../domain/catalog/component-catalog'
+const query=ref('');const group=ref('Application')
+const groups=computed(()=>group.value==='Application'?['App shell','Navigation','Data display','Data entry','Feedback','Overlays','Layout']:['Marketing / web'])
+const filtered=computed(()=>componentCatalog.filter(x=>groups.value.includes(x.group)&&(`${x.label} ${x.description}`).toLowerCase().includes(query.value.toLowerCase())))
+</script>
+<template><div class="p-3 space-y-3"><UInput v-model="query" icon="i-lucide-search" placeholder="Find a component…"/><UTabs v-model="group" :items="[{label:'Application',value:'Application'},{label:'Website',value:'Website'}]"/><div v-for="g in groups" :key="g"><p class="text-xs uppercase tracking-wide text-muted font-semibold my-3">{{g}}</p><div class="grid grid-cols-2 gap-2"><UButton v-for="item in filtered.filter(x=>x.group===g)" :key="item.id" color="neutral" variant="outline" class="h-auto py-3 justify-start" :title="item.description"><span class="text-left"><span class="block text-xs font-medium">{{item.label}}</span><span v-if="item.nuxtUi" class="block text-[10px] text-muted mt-1">{{item.nuxtUi}}</span></span></UButton></div></div></div></template>

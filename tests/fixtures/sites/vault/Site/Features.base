@@ -1,0 +1,11 @@
+filters: file.inFolder("Features")
+properties:
+  note.summary:
+    displayName: Summary
+views:
+  - type: cards
+    name: Cards
+    order: [file.name, summary, status, rank]
+    sort:
+      - property: note.rank
+        direction: ASC

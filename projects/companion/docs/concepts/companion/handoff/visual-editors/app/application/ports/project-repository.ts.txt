@@ -1,0 +1,2 @@
+import type { EditorProject } from '../../domain/shared/project'
+export interface ProjectRepository { load():Promise<EditorProject|null>; save(project:EditorProject):Promise<void> }

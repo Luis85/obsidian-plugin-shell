@@ -98,6 +98,8 @@
     "release:rehearse": "node scripts/release/rehearse.mjs",
     "check:test-quality": "node scripts/quality/check-test-quality.mjs",
     "check:repository": "node scripts/quality/check-repository.mjs",
+    "check:projects": "node scripts/projects/projects.mjs check",
+    "projects:sync": "node scripts/projects/projects.mjs sync",
     "check:docs-launchers": "node scripts/quality/check-docs-launchers.mjs",
     "test:mutation": "node scripts/quality/mutation-smoke.mjs",
     "release:plan": "node scripts/release/promotion-plan.mjs",

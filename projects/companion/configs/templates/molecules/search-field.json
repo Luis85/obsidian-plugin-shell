@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "molecule.search-field",
+  "name": "Search Field",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "molecule",
+  "category": "Forms",
+  "description": "Search input with a clear or submit action.",
+  "tags": [
+    "molecule",
+    "forms",
+    "search"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "search"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "atom.text-input"
+    },
+    {
+      "template": "atom.icon-button"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "composition",
+    "tag": "div",
+    "layout": "row"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}
