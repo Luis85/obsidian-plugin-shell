@@ -5,7 +5,7 @@
 **What this repo is.** Workbench is a reusable Obsidian plugin shell with three
 parts: the plugin runtime in `src/` (Vue, Pinia, Nuxt UI), the `node bin/app` CLI
 that sets up, checks and extends projects (`new`, `setup`, `make`, `generate`,
-`check`, `ci`, `ui`, `memory`, `adopt`, `design`), and the authoring path from the browser companion
+`check`, `ci`, `ui`, `memory`, `adopt`, `design`, `increment`, `pr`, `issue`), and the authoring path from the browser companion
 concept through the dedicated compiler to independent generated projects (project
 starters, `node bin/app new`). Generated projects carry their own short
 `AGENTS.md` and the same `check` gate. `node bin/app` is the only CLI entry; there
@@ -79,6 +79,23 @@ conversation. Add user-facing changes under `## [Unreleased]` in `CHANGELOG.md`.
 [deliver a change](docs/development/DELIVER-A-CHANGE.md) and
 [cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md).
 
+**Increments.** Plan work as an increment with `node bin/app increment`, `pr` and
+`issue`. The Increment, PullRequest and Issue documents (`docs/increments/`,
+`docs/pull-requests/`, `docs/issues/`) are the source of truth; change them
+through the CLI's reviewed plans (preview, then `--apply <planHash>` or `--yes`),
+never by hand-editing generated lists or bindings. Implement only after the
+Definition of Ready passes (`node bin/app increment check <id>`), refined in the
+kick-off pull request (`increment/<id>` into `main`); deliver in change pull
+requests stacked on the increment branch, and pass the Definition of Done
+(`node scripts/delivery/done.mjs --base origin/<base>`) before marking a pull
+request ready or merging it. Never run `pr publish`, `pr sync` or a push without
+the user's explicit request in this conversation, and never retry an uncertain
+remote write (exit 2) blindly. `e2e: required` means the `e2e` label. Every new
+test file has a test-pyramid level in `tests/suites.json`
+(`node scripts/testing/suites.mjs --check`). Rules:
+[Definition of Ready and Done](docs/development/DEFINITION-OF-READY-AND-DONE.md);
+guide: [your first increment](docs/development/FIRST-INCREMENT.md).
+
 Read first when relevant: [README](README.md),
 [developer guide](DEVELOPER_GUIDE.md) (requirements and setup),
 [authoring](docs/development/AUTHORING-TOOLS.md),
@@ -100,7 +117,7 @@ typecheck scripts; they select workspace compiler entrypoints, never PATH tools.
 
 `npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. End-to-end tests (served UI, browser suites, real Obsidian) are opt-in in workflows and processes (pull request label `e2e` or the `e2e` input) and mandatory in the Release tier; `check:repository` enforces both, see docs/development/WORKFLOWS.md. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. `check:docs-launchers` fails on references to retired launchers in live docs, skills, templates and source. Use actual tool output, not assumed success.
 
-Hosting is a project choice (`tooling.hosting`: `github` default, `azure-devops`, `none`). Prepare it with `--hosting` or `node bin/app hosting set`; never run `gh`/`az`, add remotes or store tokens on the user's behalf, and never delete `.github` or retired platform files unless asked.
+Hosting is a project choice (`tooling.hosting`: `github` default, `azure-devops`, `none`). Prepare it with `--hosting` or `node bin/app hosting set`; never run `gh`/`az` (including through `node bin/app pr publish|sync`), add remotes or store tokens on the user's behalf without their explicit request, and never delete `.github` or retired platform files unless asked.
 
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.
 
