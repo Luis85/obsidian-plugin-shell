@@ -351,7 +351,8 @@
       "Bash(git push * -f)",
       "PowerShell(git push * -f)",
       "Bash(git push * -f *)",
-      "PowerShell(git push * -f *)"
+      "PowerShell(git push * -f *)",
+      "Edit(/configs/quality/self-review-approvals.json)"
     ]
   },
   "hooks": {

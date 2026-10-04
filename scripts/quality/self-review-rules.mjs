@@ -17,7 +17,9 @@ const testPath = path => /(?:^|\/)(?:tests|__tests__)\//.test(path) || /\.(?:tes
 const generatedPath = path => /(?:^|\/)(?:fixtures|__generated__|generated)\//.test(path) || /\.generated\./.test(path);
 const vitestConfigPath = path => /(?:^|\/)vitest[^/]*\.config\.[cm]?[jt]s$/.test(path);
 const lintConfigPath = path => path.startsWith('configs/lint/');
-const qualityConfigPath = path => path.startsWith('configs/quality/') || path === 'scripts/quality/thresholds.mjs' || /(?:^|\/)\.?fallowrc[^/]*$/.test(path);
+// The owner approval record is CODEOWNERS-reviewed and only approves exact lines, so it is not itself a threshold change.
+const approvalRecord = 'configs/quality/self-review-approvals.json';
+const qualityConfigPath = path => (path.startsWith('configs/quality/') && path !== approvalRecord) || path === 'scripts/quality/thresholds.mjs' || /(?:^|\/)\.?fallowrc[^/]*$/.test(path);
 const commentLine = text => /^\s*(?:\/\/|\/\*|\*|<!--)/.test(text);
 
 /** Line rules: `side` selects added or removed lines; `code: true` skips pure comment lines; `outsideStrings` skips quoted fixture text. */
