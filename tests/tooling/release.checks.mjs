@@ -10,6 +10,9 @@ import { parseRehearsalArguments } from '../../scripts/release/rehearse.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { collectAssets, retainCandidate, validateRetained, fixedSource, git, sha256, assetNames } from '../../scripts/release/candidate.mjs';
 
+const links = '[Unreleased]: https://github.com/Example/different-plugin/compare/0.3.0...HEAD\n[0.3.0]: https://github.com/Example/different-plugin/releases/tag/0.3.0\n';
+const changelog = (unreleased = '### Added\n\n- Pending capability.\n\n') => `# Changelog\n\n## [Unreleased]\n\n${unreleased}## [0.3.0] - 2026-09-01\n\nExisting notes.\n\n${links}`;
+const commitAll = (root, message) => git(root, ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--quiet', '-am', message]);
 async function fixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'release-rehearsal-'));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -18,7 +21,7 @@ async function fixture(t) {
     'package-lock.json': { version: '0.3.0', lockfileVersion: 3, packages: { '': { version: '0.3.0', dependencies: { alpha: '1.2.3' } }, 'node_modules/alpha': { version: '1.2.3' } } },
     'versions.json': { '0.1.0': '1.13.7', '0.3.0': '1.13.7' } };
   for (const [name, content] of Object.entries(files)) await writeFile(join(root, name), JSON.stringify(content, null, 2) + '\n');
-  await writeFile(join(root, 'CHANGELOG.md'), '# Changelog\n\n## 0.3.0\n\nExisting notes.\n');
+  await writeFile(join(root, 'CHANGELOG.md'), changelog());
   await writeFile(join(root, '.gitignore'), 'dist/\nreports/\n');
   git(root, ['init', '--quiet']); git(root, ['add', '.']);
   git(root, ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--quiet', '-m', 'Create fixture']);
@@ -31,14 +34,41 @@ async function fixture(t) {
 test('prepare reviews all five files without writes then preserves history on apply', async t => {
   const { root } = await fixture(t);
   const before = await readFile(join(root, 'package.json'), 'utf8');
-  const result = await prepareVersion(root, '0.4.0', 'Add a reviewed capability.');
-  assert.equal(result.hostFloorChanged, false); assert.equal(result.plan.changes.length, 5);
+  const result = await prepareVersion(root, '0.4.0', 'Add a reviewed capability.', { date: '2026-10-01' });
+  assert.equal(result.hostFloorChanged, false); assert.equal(result.plan.changes.length, 5); assert.equal(result.date, '2026-10-01');
   assert.equal(result.dependencyPins.policy, 'exact-npm-pins-v1'); assert.equal(result.dependencyPins.checked.dependencyDeclarations, 1);
   assert.equal(await readFile(join(root, 'package.json'), 'utf8'), before);
   await applyFilePlan(result.plan);
   assert.equal(JSON.parse(await readFile(join(root, 'package-lock.json'))).packages[''].version, '0.4.0');
   assert.deepEqual(JSON.parse(await readFile(join(root, 'versions.json'))), { '0.1.0': '1.13.7', '0.3.0': '1.13.7', '0.4.0': '1.13.7' });
-  assert.match(await readFile(join(root, 'CHANGELOG.md'), 'utf8'), /## 0\.4\.0[\s\S]*## 0\.3\.0/);
+  assert.equal(await readFile(join(root, 'CHANGELOG.md'), 'utf8'), '# Changelog\n\n## [Unreleased]\n\n## [0.4.0] - 2026-10-01\n\nAdd a reviewed capability.\n\n### Added\n\n- Pending capability.\n\n' +
+    '## [0.3.0] - 2026-09-01\n\nExisting notes.\n\n[Unreleased]: https://github.com/Example/different-plugin/compare/0.4.0...HEAD\n[0.4.0]: https://github.com/Example/different-plugin/releases/tag/0.4.0\n[0.3.0]: https://github.com/Example/different-plugin/releases/tag/0.3.0\n');
+});
+test('prepare promotes Unreleased alone, refuses empty notes, reused changelog versions and legacy changelogs', async t => {
+  const { root } = await fixture(t); const path = join(root, 'CHANGELOG.md');
+  const promoted = await prepareVersion(root, '0.4.0', '', { date: '2026-10-01' });
+  assert.equal(promoted.changelog.section, '### Added\n\n- Pending capability.');
+  assert.equal(promoted.plan.changes.find(change => change.path === 'CHANGELOG.md').content.includes('## [Unreleased]\n\n## [0.4.0] - 2026-10-01\n'), true);
+  await writeFile(path, changelog(''));
+  await assert.rejects(prepareVersion(root, '0.4.0', '', { date: '2026-10-01' }), /RELEASE_NOTES_EMPTY/);
+  await assert.rejects(prepareVersion(root, '0.4.0', 'Notes', { date: '2026-02-30' }), /RELEASE_DATE_INVALID/);
+  await writeFile(path, changelog().replace('## [0.3.0]', '## [0.4.0] - 2026-09-02\n\nPremature.\n\n## [0.3.0]').replace('[0.3.0]: ', '[0.4.0]: https://github.com/Example/different-plugin/releases/tag/0.4.0\n[0.3.0]: ').replace('0.3.0...HEAD', '0.4.0...HEAD'));
+  await assert.rejects(prepareVersion(root, '0.4.0', 'Notes'), /CHANGELOG_VERSION_EXISTS/);
+  await writeFile(path, '# Changelog\n\n## 0.3.0\n\nLegacy notes.\n');
+  await assert.rejects(prepareVersion(root, '0.4.0', 'Notes'), /CHANGELOG_INVALID: CHANGELOG_UNRELEASED_REQUIRED, CHANGELOG_VERSION_HEADER_INVALID/);
+  assert.equal(await readFile(path, 'utf8'), '# Changelog\n\n## 0.3.0\n\nLegacy notes.\n');
+});
+test('prepare starts a missing changelog and takes link references from package.json repository', async t => {
+  const { root } = await fixture(t);
+  await rm(join(root, 'CHANGELOG.md'));
+  await assert.rejects(prepareVersion(root, '0.4.0', ''), /RELEASE_NOTES_EMPTY/);
+  const unlinked = await prepareVersion(root, '0.4.0', '### Fixed\n\n- Repair.', { date: '2026-10-01' });
+  assert.equal(unlinked.changelog.linkReferences, 'not-configured');
+  const pkg = JSON.parse(await readFile(join(root, 'package.json'))); pkg.repository = { url: 'git+https://github.com/Example/different-plugin.git' };
+  await writeFile(join(root, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
+  const linked = await prepareVersion(root, '0.4.0', '### Fixed\n\n- Repair.', { date: '2026-10-01' });
+  const content = linked.plan.changes.find(change => change.path === 'CHANGELOG.md').content;
+  assert.match(content, /^# Changelog\n\nAll notable changes[^\n]+\n\n## \[Unreleased\]\n\n## \[0\.4\.0\] - 2026-10-01\n\n### Fixed\n\n- Repair\.\n\n\[Unreleased\]: https:\/\/github\.com\/Example\/different-plugin\/compare\/0\.4\.0\.\.\.HEAD\n\[0\.4\.0\]: https:\/\/github\.com\/Example\/different-plugin\/releases\/tag\/0\.4\.0\n$/);
 });
 test('release preparation and candidate collection cannot bypass exact dependency pins', async t => {
   const { root } = await fixture(t);
@@ -51,7 +81,8 @@ test('release preparation and candidate collection cannot bypass exact dependenc
 test('prepare rejects invalid, reused and lower versions, missing notes and conflicting metadata', async t => {
   const { root } = await fixture(t);
   for (const version of ['v0.4.0', '0.4.0-beta.1', '01.4.0', '0.4', '0.3.0', '0.1.0']) await assert.rejects(prepareVersion(root, version, 'Notes'));
-  await assert.rejects(prepareVersion(root, '0.4.0', ''), /NOTES_REQUIRED/);
+  await writeFile(join(root, 'CHANGELOG.md'), changelog(''));
+  await assert.rejects(prepareVersion(root, '0.4.0', ''), /RELEASE_NOTES_EMPTY/);
   const path = join(root, 'manifest.json'); const manifest = JSON.parse(await readFile(path));
   manifest.minAppVersion = '1.14.0'; await writeFile(path, JSON.stringify(manifest));
   await assert.rejects(prepareVersion(root, '0.4.0', 'Notes'), /HOST_FLOOR_CHANGE/);
@@ -72,6 +103,8 @@ test('retained package has exactly three assets, notes and hash-bound provenance
   assert.equal(record.tools.node, options.qualification.node); assert.equal(record.packagingNode, process.version);
   assert.equal(record.dependencyPins.lockfile.hash, record.lockHash); assert.equal(record.dependencyPins.manifests[0].path, 'package.json');
   assert.equal((await readdir(options.output)).length, 5);
+  assert.equal(await readFile(join(options.output, 'release-notes.md'), 'utf8'), 'Existing notes.\n');
+  assert.equal(record.notesHash, sha256('Existing notes.\n'));
   assert.equal((await validateRetained(options.output, options.commit, options.version)).identity, 'different-plugin');
   await assert.rejects(retainCandidate(options), /CANDIDATE_ALREADY_EXISTS/);
   assert.throws(() => fixedSource(options.root, 'HEAD'), /FIXED_COMMIT_REQUIRED/);
@@ -86,6 +119,15 @@ test('candidate rejects unqualified or changed bytes and extra source files', as
   await assert.rejects(retainCandidate(options), /QUALIFICATION_HASH_MISMATCH/);
   await writeFile(join(options.input, 'personal-note.md'), 'do not ship');
   await assert.rejects(collectAssets(options.root, options.input, options.version), /ASSET_SET_MISMATCH/);
+});
+test('candidate notes require a valid Keep a Changelog section for the version', async t => {
+  const options = await retained(t);
+  for (const [content, expected] of [['# Changelog\n\n## 0.3.0\n\nLegacy notes.\n', /VERSION_NOTES_REQUIRED: CHANGELOG_INVALID/],
+    [changelog().replace('Existing notes.\n', ''), /VERSION_NOTES_REQUIRED: CHANGELOG_INVALID: CHANGELOG_VERSION_EMPTY/]]) {
+    await writeFile(join(options.root, 'CHANGELOG.md'), content); commitAll(options.root, 'Changelog variant');
+    const commit = git(options.root, ['rev-parse', 'HEAD']);
+    await assert.rejects(retainCandidate({ ...options, commit, qualification: { ...options.qualification, sourceCommit: commit } }), expected);
+  }
 });
 test('retained validation rejects altered bytes, provenance, manifest and unexpected files', async t => {
   const options = await retained(t); await retainCandidate(options);
@@ -137,6 +179,8 @@ test('version planning rejects concurrent edits before final hashes can adopt st
   await assert.rejects(prepareVersion(root, '0.4.0', 'Reviewed notes', { beforeFinalize: () => writeFile(join(root, 'CHANGELOG.md'), 'Human change during planning\n') }), /RELEASE_STALE_INPUT: CHANGELOG.md/);
   assert.equal(await readFile(join(root, 'CHANGELOG.md'), 'utf8'), 'Human change during planning\n');
   assert.equal(JSON.parse(await readFile(join(root, 'package.json'))).version, '0.3.0');
+  // Restore a valid changelog so the second case reaches the package.json concurrency check.
+  await writeFile(join(root, 'CHANGELOG.md'), changelog());
   const original = JSON.parse(await readFile(join(root, 'package.json')));
   await assert.rejects(prepareVersion(root, '0.4.0', 'Reviewed notes', { beforeFinalize: () => writeFile(join(root, 'package.json'), JSON.stringify({ ...original, description: 'Concurrent edit' })) }), /RELEASE_STALE_INPUT: package.json/);
   assert.equal(JSON.parse(await readFile(join(root, 'package.json'))).description, 'Concurrent edit');
@@ -150,7 +194,10 @@ test('release CLI argument policies expose help and reject missing, duplicate an
     assert.throws(() => parse(['--help', '--version', '0.4.0']), /HELP_MUST_BE_USED_ALONE/);
     assert.throws(() => parse(['--unknown']), /UNKNOWN_ARGUMENT/);
   }
-  assert.throws(() => parsePrepareArguments(['--version', '0.4.0']), /VERSION_AND_NOTES_FILE_REQUIRED/);
+  assert.deepEqual(parsePrepareArguments(['--version', '0.4.0']), { version: '0.4.0' });
+  assert.throws(() => parsePrepareArguments(['--notes-file', 'notes.md']), /VERSION_REQUIRED/);
+  assert.throws(() => parsePrepareArguments(['--version', '0.4.0', '--date', '2026-13-01']), /RELEASE_DATE_INVALID/);
+  assert.deepEqual(parsePrepareArguments(['--version', '0.4.0', '--date', '2026-10-01']), { version: '0.4.0', date: '2026-10-01' });
   assert.throws(() => parseRehearsalArguments(['--commit', 'main', '--version', '0.4.0']), /FIXED_COMMIT_REQUIRED/);
   assert.deepEqual(parsePrepareArguments(['--version', '0.4.0', '--notes-file', 'notes.md', '--dry-run']), { version: '0.4.0', notes: 'notes.md', dryRun: true });
   assert.deepEqual(parseRehearsalArguments(['--commit', 'a'.repeat(40), '--version', '0.4.0', '--check', 'candidate']), { commit: 'a'.repeat(40), version: '0.4.0', check: 'candidate' });
