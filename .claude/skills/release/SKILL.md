@@ -9,7 +9,7 @@ Release a new version: cut `release/X.Y.Z` from `main`, let the Release tier qua
 
 **Loading this skill authorizes nothing.** Each remote action below (dispatching Release cut, pushing a fix to the release branch, dispatching Publish, rerunning a run) needs the user's explicit confirmation in this conversation, every time. Approving the `release` environment is the owner's act on GitHub, never this skill's. The cut and publish automation has not yet been exercised on GitHub: say so, and treat the first run as its qualification.
 
-`.claude/settings.json` denies agents `npm run release*` and `node bin/app release ...`. Use `node scripts/release/...` directly, and locally only for read-only previews: `cut.mjs` without `--execute`, `publish.mjs` without `--execute`, `changelog.mjs` and `branch.mjs verify`.
+`.claude/settings.json` makes `npm run release*` and `node bin/app release ...` ask for approval every time; run them only when the user asked for that exact step in this conversation. Otherwise use `node scripts/release/...` directly, and locally only for read-only previews: `cut.mjs` without `--execute`, `publish.mjs` without `--execute`, `changelog.mjs` and `branch.mjs verify`.
 
 ## Steps
 

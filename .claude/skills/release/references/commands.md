@@ -24,6 +24,6 @@ Owner and repository: `Luis85` / `obsidian-plugin-shell`. Every row marked **wri
 
 The workflow files are `.github/workflows/release-cut.yml`, `.github/workflows/release.yml` and `.github/workflows/publish.yml`. `node bin/app ci --job release-cut/cut` and `node bin/app ci --job publish/publish` print their commands but refuse `--execute` (secrets, environment, publication).
 
-## Denied locally
+## Gated locally
 
-`.claude/settings.json` denies `npm run release*` and `node bin/app release ...` for agents. Do not route around it: `node scripts/release/cut.mjs --execute`, `--remote` and `node scripts/release/publish.mjs --execute` write to the repository and GitHub and are for the workflows (or the owner) only.
+`.claude/settings.json` asks before `npm run release*`, `node bin/app release ...` and `node scripts/release/* --execute|--remote`; `npm publish` and `gh release create|upload|delete` stay denied. An approval prompt is not a request: do not route around it, and do not run these unasked: `node scripts/release/cut.mjs --execute`, `--remote` and `node scripts/release/publish.mjs --execute` write to the repository and GitHub and are for the workflows (or the owner) only.

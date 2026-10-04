@@ -44,7 +44,7 @@ Read `paths.prds` from `settings show` (default `docs/prds`) and list that folde
 - Do not invent research, users or numbers. Mark assumptions as assumptions.
 - Do not design screens or pick a starter here; that belongs to `ideation-concept` and `ideation-design`.
 - Report real command output; a command you did not run is "not run".
-- `.claude/settings.json` pre-allows the local `node bin/app` commands used here; remote and release commands prompt or are denied. Never work around a prompt.
+- `.claude/settings.json` pre-allows the local `node bin/app` commands used here; remote and release commands prompt. Never work around a prompt.
 
 ## What this skill does not do
 
