@@ -32,8 +32,8 @@ export interface CiWorkflow {
 }
 /** Setup-only actions that are satisfied by the local checkout and toolchain. */
 export const setupActions: readonly string[] = ['actions/checkout', 'actions/setup-node', 'actions/cache', 'actions/upload-artifact'];
-export type Data = Record<string, unknown>;
-export const isData = (value: unknown): value is Data => typeof value === 'object' && value !== null && !Array.isArray(value);
+type Data = Record<string, unknown>;
+const isData = (value: unknown): value is Data => typeof value === 'object' && value !== null && !Array.isArray(value);
 export function record(value: unknown, where: string): Data {
   if (value === undefined) return {};
   if (!isData(value)) throw new CiError('CI_UNSUPPORTED', `${where} must be a mapping.`);
