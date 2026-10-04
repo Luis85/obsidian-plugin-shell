@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "description": "Shared Definition of Ready / Definition of Done settings: where Increment documents (the developer handoff of one pull request) and PullRequest documents live, their frontmatter and sections, exemptions and size budgets. Read by scripts/delivery/*.mjs; unknown keys fail with DELIVERY_CONFIG_INVALID.",
+  "description": "Shared Definition of Ready / Definition of Done settings: where Increment documents (the developer handoff), PullRequest documents (one planned pull request of an increment, kind kickoff or change) and Issue documents live, their frontmatter and sections, the increment branch model, the generated acceptance criterion test stubs, exemptions and size budgets. Read by scripts/delivery/*.mjs; unknown keys fail with DELIVERY_CONFIG_INVALID.",
   "handoff": {
     "glob": "docs/increments/*.md",
     "ignore": ["docs/increments/README.md"],
@@ -12,14 +12,44 @@
     "statuses": ["New", "Refining", "Ready", "In progress", "Done", "Cancelled"],
     "e2e": ["none", "optional", "required"],
     "requiredKeys": ["type", "id", "title", "owner", "size", "status", "e2e"],
-    "optionalKeys": ["refs", "pullRequests"],
+    "optionalKeys": ["refs", "pullRequests", "branch", "base", "issues"],
     "sections": ["Summary", "Outcome", "Scope", "Acceptance criteria", "Affected areas", "Test plan", "Docs impact", "Changelog", "Risks and rollback", "Dependencies", "Open questions"],
     "generatedSection": "Completion record"
   },
   "pullRequests": {
     "glob": "docs/pull-requests/*.md",
+    "ignore": ["docs/pull-requests/README.md"],
     "type": "PullRequest",
-    "incrementKey": "increment"
+    "incrementKey": "increment",
+    "statuses": ["New", "Draft", "Ready", "Merged", "Closed"],
+    "kinds": ["kickoff", "change"],
+    "requiredKeys": ["type", "id", "title", "status", "increment", "base", "head"],
+    "optionalKeys": ["kind", "issues", "delivers", "platform", "repository", "number", "url", "publishedAt", "lastSyncedAt"],
+    "generatedSection": "Completion record"
+  },
+  "issues": {
+    "glob": "docs/issues/*.md",
+    "ignore": ["docs/issues/README.md"],
+    "type": "Issue",
+    "incrementKey": "increment",
+    "statuses": ["New", "Ready", "In progress", "Done", "Cancelled"],
+    "requiredKeys": ["type", "id", "title", "status", "increment"],
+    "optionalKeys": ["pullRequests"]
+  },
+  "branches": {
+    "base": "main",
+    "increment": "increment/{id}",
+    "pullRequest": "pr/{increment}/{pr}"
+  },
+  "acceptance": {
+    "pattern": "tests/tooling/acceptance/{increment}/{ac}.checks.mjs",
+    "template": "configs/delivery/acceptance-stub.checks.mjs.tmpl",
+    "suite": "acceptance",
+    "maxSlugLength": 48,
+    "pendingPattern": "\\b(?:test|it|describe|suite)\\.todo\\(",
+    "assertionPattern": "\\bassert(?:\\.\\w+)*\\(|\\bexpect\\(",
+    "evidencePattern": "^tests/.+\\.(?:checks|test|spec)\\.[cm]?[jt]s$",
+    "pendingStatuses": ["New", "Refining", "Ready", "In progress"]
   },
   "exemptions": {
     "branches": ["release/", "dependabot/"],

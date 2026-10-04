@@ -60,21 +60,67 @@ export function validateRulesConfig(data, definitions, file) {
   return data;
 }
 
-/** Validates the shared delivery.json. */
-export function validateDeliveryConfig(data, file = configFiles.delivery) {
-  exactKeys(file, 'root', data, ['schemaVersion', 'handoff', 'pullRequests', 'exemptions', 'sizes', 'refinement'], ['description']);
-  if (data.schemaVersion !== 1) fail(file, 'schemaVersion must be 1');
-  const handoff = data.handoff;
+const listOf = (file, where, value, { empty = true } = {}) => { if (!Array.isArray(value) || !value.every(checks.string) || (!empty && !value.length)) fail(file, `${where} must be a ${empty ? '' : 'non-empty '}list of strings`); };
+const stringOf = (file, where, value) => { if (!checks.string(value)) fail(file, `${where} must be a non-empty string`); };
+
+function validateHandoff(file, handoff) {
   exactKeys(file, 'handoff', handoff, ['glob', 'ignore', 'template', 'slugPattern', 'maxSlugLength', 'bodyKey', 'type', 'statuses', 'e2e', 'requiredKeys', 'optionalKeys', 'sections', 'generatedSection']);
-  for (const key of ['glob', 'template', 'slugPattern', 'bodyKey', 'type', 'generatedSection']) if (!checks.string(handoff[key])) fail(file, `handoff.${key} must be a non-empty string`);
-  for (const key of ['ignore', 'optionalKeys']) if (!Array.isArray(handoff[key]) || !handoff[key].every(checks.string)) fail(file, `handoff.${key} must be a list of strings`);
-  for (const key of ['statuses', 'e2e', 'requiredKeys', 'sections']) if (!strings(handoff[key]) || !handoff[key].length) fail(file, `handoff.${key} must be a non-empty list of strings`);
+  for (const key of ['glob', 'template', 'slugPattern', 'bodyKey', 'type', 'generatedSection']) stringOf(file, `handoff.${key}`, handoff[key]);
+  for (const key of ['ignore', 'optionalKeys']) listOf(file, `handoff.${key}`, handoff[key]);
+  for (const key of ['statuses', 'e2e', 'requiredKeys', 'sections']) listOf(file, `handoff.${key}`, handoff[key], { empty: false });
   if (!checks.number(handoff.maxSlugLength) || handoff.maxSlugLength < 1) fail(file, 'handoff.maxSlugLength must be a positive integer');
   regex(file, 'handoff.slugPattern', handoff.slugPattern);
-  exactKeys(file, 'pullRequests', data.pullRequests, ['glob', 'type', 'incrementKey']);
-  for (const key of ['glob', 'type', 'incrementKey']) if (!checks.string(data.pullRequests[key])) fail(file, `pullRequests.${key} must be a non-empty string`);
+}
+/** PullRequest and Issue document settings: a glob, frontmatter vocabulary and the key that names the Increment. */
+function validateDocuments(file, where, value, extra) {
+  exactKeys(file, where, value, ['glob', 'ignore', 'type', 'incrementKey', 'statuses', 'requiredKeys', 'optionalKeys', ...extra]);
+  for (const key of ['glob', 'type', 'incrementKey', ...extra.filter(key => key === 'generatedSection')]) stringOf(file, `${where}.${key}`, value[key]);
+  for (const key of ['ignore', 'optionalKeys']) listOf(file, `${where}.${key}`, value[key]);
+  for (const key of ['statuses', 'requiredKeys', ...extra.filter(key => key === 'kinds')]) listOf(file, `${where}.${key}`, value[key], { empty: false });
+  for (const key of ['type', 'id', 'status', value.incrementKey]) if (!value.requiredKeys.includes(key)) fail(file, `${where}.requiredKeys must include "${key}"`);
+}
+function validateBranches(file, branches) {
+  exactKeys(file, 'branches', branches, ['base', 'increment', 'pullRequest']);
+  for (const key of ['base', 'increment', 'pullRequest']) stringOf(file, `branches.${key}`, branches[key]);
+  const placeholders = text => [...text.matchAll(/\{(\w+)\}/g)].map(match => match[1]).sort().join(',');
+  if (placeholders(branches.increment) !== 'id') fail(file, 'branches.increment must use exactly the {id} placeholder');
+  if (placeholders(branches.pullRequest) !== 'increment,pr') fail(file, 'branches.pullRequest must use exactly the {increment} and {pr} placeholders');
+  // A ref store cannot hold refs/heads/a and refs/heads/a/b at once: no branch name may be a folder of another.
+  const names = [branches.base, branches.increment.replace('{id}', 'x'), branches.pullRequest.replace('{increment}', 'x').replace('{pr}', 'y')];
+  for (const name of names) for (const other of names) if (other.startsWith(`${name}/`)) fail(file, `branches: "${other}" would nest inside the branch "${name}"; both cannot exist at once`);
+}
+/** Defaults of the optional acceptance keys; `acceptance` may also be just the pattern string. */
+const acceptanceDefaults = Object.freeze({ template: 'configs/delivery/acceptance-stub.checks.mjs.tmpl', suite: 'acceptance', maxSlugLength: 48,
+  pendingPattern: '\\b(?:test|it|describe|suite)\\.todo\\(', assertionPattern: '\\bassert(?:\\.\\w+)*\\(|\\bexpect\\(',
+  evidencePattern: '^tests/.+\\.(?:checks|test|spec)\\.[cm]?[jt]s$', pendingStatuses: ['New', 'Refining', 'Ready', 'In progress'] });
+function validateAcceptance(file, raw, statuses) {
+  const given = typeof raw === 'string' ? { pattern: raw } : raw;
+  exactKeys(file, 'acceptance', given, ['pattern'], Object.keys(acceptanceDefaults));
+  const acceptance = { ...acceptanceDefaults, ...given };
+  for (const key of ['pattern', 'template', 'suite']) stringOf(file, `acceptance.${key}`, acceptance[key]);
+  const segments = acceptance.pattern.split('/');
+  const placeholders = [...acceptance.pattern.matchAll(/\{(\w+)\}/g)].map(match => match[1]);
+  if (!segments.slice(0, -1).includes('{increment}')) fail(file, 'acceptance.pattern needs a {increment} folder');
+  if (!segments.at(-1).startsWith('{ac}') || placeholders.some(name => !['increment', 'ac', 'slug'].includes(name))) fail(file, 'acceptance.pattern must name the file {ac}… and use only {increment}, {ac} and {slug}');
+  if (!checks.number(acceptance.maxSlugLength) || acceptance.maxSlugLength < 8) fail(file, 'acceptance.maxSlugLength must be an integer of at least 8');
+  for (const key of ['pendingPattern', 'assertionPattern', 'evidencePattern']) { stringOf(file, `acceptance.${key}`, acceptance[key]); regex(file, `acceptance.${key}`, acceptance[key]); }
+  listOf(file, 'acceptance.pendingStatuses', acceptance.pendingStatuses);
+  for (const status of acceptance.pendingStatuses) if (!statuses.includes(status)) fail(file, `acceptance.pendingStatuses: "${status}" is not one of handoff.statuses`);
+  return acceptance;
+}
+
+/** Validates the shared delivery.json. */
+export function validateDeliveryConfig(data, file = configFiles.delivery) {
+  exactKeys(file, 'root', data, ['schemaVersion', 'handoff', 'pullRequests', 'issues', 'branches', 'acceptance', 'exemptions', 'sizes', 'refinement'], ['description']);
+  if (data.schemaVersion !== 1) fail(file, 'schemaVersion must be 1');
+  validateHandoff(file, data.handoff);
+  validateDocuments(file, 'pullRequests', data.pullRequests, ['kinds', 'generatedSection']);
+  for (const kind of ['kickoff', 'change']) if (!data.pullRequests.kinds.includes(kind)) fail(file, `pullRequests.kinds must include "${kind}"`);
+  validateDocuments(file, 'issues', data.issues, []);
+  validateBranches(file, data.branches);
+  data.acceptance = validateAcceptance(file, data.acceptance, data.handoff.statuses);
   exactKeys(file, 'exemptions', data.exemptions, ['branches', 'actors']);
-  for (const key of ['branches', 'actors']) if (!Array.isArray(data.exemptions[key]) || !data.exemptions[key].every(checks.string)) fail(file, `exemptions.${key} must be a list of strings`);
+  for (const key of ['branches', 'actors']) listOf(file, `exemptions.${key}`, data.exemptions[key]);
   if (!isObject(data.sizes) || !Object.keys(data.sizes).length) fail(file, 'sizes must name at least one size');
   for (const [size, budget] of Object.entries(data.sizes)) {
     exactKeys(file, `sizes.${size}`, budget, ['maxAcceptanceCriteria', 'maxAffectedAreas']);
@@ -95,7 +141,8 @@ export async function loadConfig(root, gate, definitions, { read = path => readF
   const paths = { ...configFiles, ...files };
   const delivery = validateDeliveryConfig(await readJson(root, paths.delivery, read), paths.delivery);
   const rules = validateRulesConfig(await readJson(root, paths[gate], read), definitions, paths[gate]);
-  for (const [id, rule] of Object.entries(rules.rules)) for (const key of definitions[id].statusParams ?? [])
-    for (const status of [rule.params[key]].flat()) if (!delivery.handoff.statuses.includes(status)) fail(paths[gate], `${id}.params.${key}: "${status}" is not one of handoff.statuses`);
+  // statusParams: { param: 'handoff' | 'pullRequests' | 'issues' }, the vocabulary each status param must use.
+  for (const [id, rule] of Object.entries(rules.rules)) for (const [key, owner] of Object.entries(definitions[id].statusParams ?? {}))
+    for (const status of [rule.params[key]].flat()) if (!delivery[owner].statuses.includes(status)) fail(paths[gate], `${id}.params.${key}: "${status}" is not one of ${owner}.statuses`);
   return { delivery, rules: rules.rules, files: { delivery: paths.delivery, rules: paths[gate] } };
 }

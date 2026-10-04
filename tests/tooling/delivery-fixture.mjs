@@ -6,6 +6,7 @@ import { readyRules } from '../../scripts/delivery/rules-ready.mjs';
 import { doneRules } from '../../scripts/delivery/rules-done.mjs';
 import { evaluate } from '../../scripts/delivery/run.mjs';
 import { parseHandoff } from '../../scripts/delivery/handoff.mjs';
+import { documentState } from '../../scripts/delivery/documents.mjs';
 import { categories } from '../../scripts/release/changelog.mjs';
 
 export const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -14,7 +15,8 @@ export const handoffPath = 'docs/increments/sample-increment.md';
 /** A handoff that passes every Definition of Ready rule against `baseContext`. */
 export function readyHandoff({ status = 'In progress', e2e = 'optional', checked = false } = {}) {
   const box = checked ? 'x' : ' ';
-  const evidence = id => (checked ? ` Evidence: \`tests/greeting.checks.mjs\`${id === 2 ? ', `docs/guide.md#usage`' : ''}` : '');
+  // An existing test as evidence satisfies the acceptance-stub rule before implementation, too.
+  const evidence = id => ` Evidence: \`tests/greeting.checks.mjs\`${checked && id === 2 ? ', `docs/guide.md#usage`' : ''}`;
   return `---
 type: Increment
 id: sample-increment
@@ -121,10 +123,13 @@ export function baseContext(config, text = readyHandoff(), overrides = {}) {
     { path: 'tests/greeting.checks.mjs', status: 'A', added: [{ line: 1, text: 'test("greets", () => {});' }] },
     { path: 'CHANGELOG.md', status: 'M', added: [{ line: 7, text: '- A greeting command in the palette.' }] },
     { path: 'docs/guide.md', status: 'A', added: [] }, { path: 'docs/README.md', status: 'M', added: [] }];
+  const files = [...new Set(['docs/prds/MVP.md', 'docs/requirements/WB-PBI-001.md', 'scripts/tool.mjs', 'src/features/existing.ts', 'src/presentation/view.vue', 'tests/greeting.checks.mjs', 'docs/guide.md',
+    ...diff.filter(file => file.status !== 'D').map(file => file.path), ...Object.keys(overrides.texts ?? {}).filter(path => !['CHANGELOG.md', 'docs/README.md'].includes(path))])].sort();
+  const readText = path => texts[path] ?? null;
+  const handoff = { path: handoffPath, source: 'diff', text, model: parseHandoff(text) };
+  const state = documentState(config.delivery, { files, diff, readText, refs: overrides.refs ?? { base: '', head: '' } }, handoff);
   return { delivery: config.delivery, categories, suites: ['release', 'quality'], scripts: { check: 'node bin/app check' },
-    files: ['docs/prds/MVP.md', 'docs/requirements/WB-PBI-001.md', 'scripts/tool.mjs', 'src/features/existing.ts', 'src/presentation/view.vue', 'tests/greeting.checks.mjs', 'docs/guide.md', ...diff.filter(file => file.status !== 'D').map(file => file.path)],
-    diff, labels: null, readText: path => texts[path] ?? null, handoffProblem: null, readyFailures: [],
-    handoff: { path: handoffPath, source: 'diff', text, model: parseHandoff(text) }, ...overrides };
+    files, diff, labels: null, readText, handoffProblem: null, readyFailures: [], handoff, ...state, ...overrides };
 }
 
 /** Rule results by id for the ready or done rules. */
@@ -133,3 +138,45 @@ export function results(kind, config, context) {
   return Object.fromEntries(outcome.map(rule => [rule.id, rule]));
 }
 export const read = path => readFile(join(repositoryRoot, path), 'utf8');
+
+/** A PullRequest document of sample-increment; `kind: change` defaults to the increment branch as base. */
+export function pullRequestDoc({ id = 'sample-increment-1', kind = 'change', status = 'Draft', base, head, delivers = ['AC-1'], tasks = ['- [ ] T-1: Add the command.'], issues, extra = '' } = {}) {
+  const branches = { base: base ?? (kind === 'kickoff' ? 'main' : 'increment/sample-increment'), head: head ?? (kind === 'kickoff' ? 'increment/sample-increment' : `pr/sample-increment/${id}`) };
+  return `---
+type: PullRequest
+id: ${id}
+title: "Pull request ${id}"
+increment: sample-increment
+status: ${status}
+kind: ${kind}
+base: ${branches.base}
+head: "${branches.head}"
+${delivers ? `delivers: [${delivers.join(', ')}]\n` : ''}${issues ? `issues: [${issues.join(', ')}]\n` : ''}---
+
+# Pull request ${id}
+
+## Summary
+
+Part of [[docs/increments/sample-increment|Sample increment]].
+
+## Scope
+
+### In scope
+
+- The greeting command.
+
+### Out of scope
+
+- Translations.
+
+## Tasks
+
+${tasks.join('\n')}
+${extra}`;
+}
+/** An Issue document of sample-increment. */
+export const issueDoc = ({ id = 'sample-issue', status = 'In progress', increment = 'sample-increment' } = {}) =>
+  `---\ntype: Issue\nid: ${id}\ntitle: "Issue ${id}"\nstatus: ${status}\nincrement: ${increment}\n---\n\n# Issue ${id}\n\n## Summary\n\nSee [[MVP]].\n`;
+/** readyHandoff with the increment lists of its documents. */
+export const linkedHandoff = ({ pullRequests = [], issues = [], ...options } = {}) =>
+  readyHandoff(options).replace('refs: [', `pullRequests: [${pullRequests.join(', ')}]\nissues: [${issues.join(', ')}]\nrefs: [`);

@@ -28,7 +28,7 @@ function linkedFolder(root, path) {
 }
 
 /** Tracked and untracked (not ignored) files that exist in the working tree. */
-function repositoryFiles(root) {
+export function repositoryFiles(root) {
   const listed = git(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--deduplicate']).split('\0').filter(Boolean);
   return [...new Set(listed)].filter(path => existsSync(join(root, path)) && !linkedFolder(root, path)).sort();
 }
@@ -57,12 +57,27 @@ export function checkPlanGates(root, baseRef) {
   } catch { return null; }
 }
 
+/** A ref as a branch name: `refs/heads/x`, `refs/remotes/origin/x` and `origin/x` (any configured remote) give `x`. */
+export function branchOf(ref, remotes = []) {
+  const name = String(ref ?? '').replace(/^refs\/heads\//, '').replace(/^refs\/remotes\//, '');
+  const remote = remotes.find(item => name.startsWith(`${item}/`));
+  return remote ? name.slice(remote.length + 1) : name;
+}
+function quietGit(root, args) {
+  try { return git(root, args).trim(); } catch { return ''; }
+}
+/** Base and head branch of the pull request: DELIVERY_BASE_REF / DELIVERY_HEAD_REF (CI), else --base and the checked-out branch. */
+function pullRequestRefs(root, baseRef, env) {
+  const remotes = quietGit(root, ['remote']).split('\n').filter(Boolean);
+  return { base: branchOf(env.DELIVERY_BASE_REF || baseRef, remotes), head: env.DELIVERY_HEAD_REF || quietGit(root, ['symbolic-ref', '--quiet', '--short', 'HEAD']) };
+}
+
 /** Everything the rules read from this checkout, gathered once. */
 export function repositorySnapshot(root, baseRef, { env = process.env, labelsEnv = 'PR_LABELS' } = {}) {
   const base = mergeBase(root, baseRef);
   const diff = collectChanges(root, base.sha).filter(file => !(file.status === 'A' && linkedFolder(root, file.path))).map(file => ({ path: file.path, status: file.status, added: file.added }));
   const suites = readJson(root, 'tests/suites.json')?.suites;
-  return { base, diff, files: repositoryFiles(root),
+  return { base, diff, files: repositoryFiles(root), refs: pullRequestRefs(root, baseRef, env),
     suites: Array.isArray(suites) ? suites.map(suite => suite.name) : [],
     scripts: readJson(root, 'package.json')?.scripts ?? {},
     labels: parseLabels(env[labelsEnv]), headRef: env.DELIVERY_HEAD_REF ?? '', actor: env.DELIVERY_ACTOR ?? '', body: env.DELIVERY_PR_BODY ?? '',

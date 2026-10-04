@@ -13,8 +13,8 @@ const done = (text = finished, overrides) => results('done', config, baseContext
 const failing = outcome => Object.values(outcome).filter(rule => rule.status === 'fail').map(rule => rule.id);
 const without = path => baseContext(config).diff.filter(file => file.path !== path);
 
-test('a finished increment passes every Definition of Done rule', () => {
-  assert.deepEqual(Object.values(done()).filter(rule => rule.status !== 'pass').map(rule => `${rule.id}:${rule.message}`), []);
+test('a finished increment passes every Definition of Done rule; the change pull request rules skip', () => {
+  assert.deepEqual(Object.values(done()).filter(rule => rule.status !== 'pass').map(rule => `${rule.id}:${rule.status}`), ['DOD-12', 'DOD-13', 'DOD-14', 'DOD-15', 'DOD-16'].map(id => `${id}:skip`));
 });
 
 test('negative: each unfinished part fails exactly its own rule with a hint', () => {

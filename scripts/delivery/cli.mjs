@@ -24,8 +24,10 @@ Checks the increment handoff ${gate === 'ready' ? 'before implementation (Defini
   --handoff  the handoff to check; default: a "Handoff: <path>" line in DELIVERY_PR_BODY, else the one handoff in the diff
   --summary  append the Markdown report to this file (for $GITHUB_STEP_SUMMARY)
   --out      write generated files there instead of the checkout (CI artifact)
-  --write    ${gate === 'ready' ? 'add missing sections from the template to the handoff' : 'write the Completion record, CHANGELOG entries, docs index rows and status: Done'}
-Environment: DELIVERY_HEAD_REF, DELIVERY_ACTOR (exemptions), DELIVERY_PR_BODY, PR_LABELS (comma-separated).
+  --write    ${gate === 'ready' ? 'add missing sections from the template and one acceptance test stub per criterion (never overwrites)' : 'write the Completion record (the PullRequest document on a change pull request), CHANGELOG entries, docs index rows and status: Done'}
+Kinds: a pull request into an increment branch (increment/<id>) is a change; the increment branch into main is the kick-off.
+Environment: DELIVERY_BASE_REF and DELIVERY_HEAD_REF (the pull request branches; locally --base and the current branch),
+  DELIVERY_ACTOR (exemptions), DELIVERY_PR_BODY, PR_LABELS (comma-separated).
 Exit codes: 0 ${gate === 'ready' ? 'ready' : 'done'} or exempt, 1 not ${gate === 'ready' ? 'ready' : 'done'}, 2 usage, configuration or base error.`;
 }
 
@@ -69,12 +71,14 @@ async function runGate(gate, args, { root = process.cwd(), env = process.env } =
     const labelsEnv = gate === 'done' ? config.rules['DOD-10'].params.env : 'PR_LABELS';
     const snap = () => repositorySnapshot(root, baseRef, { env, labelsEnv });
     const io = { write: (path, text) => writeFileSync(join(root, path), text), refresh: snap,
+      create: (path, text) => { mkdirSync(dirname(join(root, path)), { recursive: true }); writeFileSync(join(root, path), text, { flag: 'wx' }); },
       template: () => readFileSync(join(root, config.delivery.handoff.template), 'utf8'),
+      stubTemplate: () => { try { return readFileSync(join(root, config.delivery.acceptance.template), 'utf8'); } catch { return null; } },
       gates: () => options.noPlan ? null : checkPlanGates(root, baseRef) };
     const result = gate === 'ready' ? runReady(config, snap(), options, io) : runDone(config, snap(), options, io);
     if (options.out) {
       const files = gate === 'done' ? (options.write ? {} : result.generated.files ?? {})
-        : { ...(result.refinement ? { 'refinement-brief.md': refinementMarkdown(result) } : {}), ...(result.generated.scaffolded?.length && !options.write ? { [result.handoff]: result.generated.handoffText } : {}) };
+        : { ...(result.refinement ? { 'refinement-brief.md': refinementMarkdown(result) } : {}), ...(options.write ? {} : result.generated.files) };
       result.generated.out = writeOut(root, options.out, files);
     }
     return { result, exitCode: ['ready', 'done'].includes(result.status) ? 0 : 1, options };
