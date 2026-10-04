@@ -1,11 +1,12 @@
 import { documentationSettings } from '../adapters/settings-documentation.ts';
-import type { UserSettings } from '../domain/user-settings.ts';
+import { incrementsRoot, issuesRoot, pullRequestsRoot, type UserSettings } from '../domain/user-settings.ts';
 import { input, choose, confirm, type Prompts } from './prompts.ts';
 async function booleanPreference(ui: Prompts, label: string, current: boolean): Promise<boolean> {
   return await choose(ui, label, [{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }], current ? 'yes' : 'no') === 'yes';
 }
 export async function advancedSettingsForm(ui: Prompts, settings: UserSettings): Promise<void> {
   settings.paths.firstRunReport = await input(ui, 'First-run report JSON', settings.paths.firstRunReport);
+  await documentFolders(ui, settings);
   settings.preferences.vaultConfigDirectory = await input(ui, 'Existing vault configuration directory', settings.preferences.vaultConfigDirectory);
   const run = settings.preferences.firstRun;
   const install = await choose(ui, 'Dependency installation strategy', ['auto', 'install', 'ci'].map(id => ({ id, label: id })), run.install);
@@ -15,6 +16,15 @@ export async function advancedSettingsForm(ui: Prompts, settings: UserSettings):
     readyTimeoutMs: 'Readiness timeout in milliseconds', showcaseDurationMs: 'Showcase duration in milliseconds' };
   for (const key of Object.keys(labels) as (keyof typeof labels)[]) run[key] = Number(await input(ui, labels[key], String(run[key])));
   if (await confirm(ui, 'Configure Markdown documentation settings?')) await documentationForm(ui, settings);
+}
+/** The optional folders are written only when configured or changed, so accepting the defaults keeps the saved path set. */
+async function documentFolders(ui: Prompts, settings: UserSettings): Promise<void> {
+  const folders = [['increments', 'Increment documents folder', incrementsRoot], ['pullRequests', 'Pull-request documents folder', pullRequestsRoot],
+    ['issues', 'Issue documents folder', issuesRoot]] as const;
+  for (const [key, label, resolve] of folders) {
+    const current = resolve(settings.paths), value = await input(ui, label, current);
+    if (settings.paths[key] !== undefined || value !== current) settings.paths[key] = value;
+  }
 }
 async function documentationForm(ui: Prompts, settings: UserSettings): Promise<void> {
   const current = documentationSettings(settings);

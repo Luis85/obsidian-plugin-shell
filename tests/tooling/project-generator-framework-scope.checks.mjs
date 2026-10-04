@@ -1,15 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { projectModel } from '../../bin/compiler/emitters/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
+import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
 import { frameworkOnlyPath, referenceDocPath, withBanner, rewriteDocReferences, maintainerScript, frameworkBanner } from '../../bin/compiler/emitters/framework-scope.ts';
 import { clickdummyBuilderFiles } from '../../bin/compiler/emitters/clickdummy-builder-files.ts';
 import { buildClickdummy } from '../../bin/adapters/framework/clickdummy.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { evaluateCondition } from '../../bin/domain/ci-expression.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const starter = JSON.parse(starterDocumentText('quick-capture'));
@@ -92,7 +96,10 @@ test('[GENERATOR-SCOPE-05] the generated package.json advertises the product loo
 });
 const workflow = path => parse(text(path));
 const runs = job => job.steps.map(step => step.run ?? '').join('\n');
-test('[GENERATOR-SCOPE-06] CI runs each gate once, adds the submission check and a separate pull-request UI job with review evidence', () => {
+/** A generated workflow condition in one event: absent event and input fields are null (''), as on GitHub. */
+const decide = (condition, values) => evaluateCondition(condition, { lookup: path => values[path] ?? (/^(?:github|inputs)\./.test(path) ? '' : undefined), success: true });
+const pullRequest = { 'github.event_name': 'pull_request', 'github.event.action': 'synchronize' };
+test('[GENERATOR-SCOPE-06] CI runs each gate once, adds the submission check and a separate e2e UI job: always on main, opt-in elsewhere', () => {
   const ci = workflow('.github/workflows/ci.yml');
   assert.deepEqual(Object.keys(ci.jobs), ['check', 'ui']);
   const check = runs(ci.jobs.check);
@@ -102,7 +109,15 @@ test('[GENERATOR-SCOPE-06] CI runs each gate once, adds the submission check and
   // A fresh project has no manifest author yet, so the community-review mirror is advisory until the owner removes this.
   assert.equal(ci.jobs.check.steps.find(step => /check:submission/.test(step.run ?? ''))['continue-on-error'], true);
   const ui = ci.jobs.ui, body = runs(ui);
-  assert.match(ui.if, /pull_request/);
+  // End-to-end is opt-in (label e2e, or the e2e input of a manual run) and mandatory on main, the project's Release tier.
+  assert.equal(ci.jobs.check.if, undefined, 'the gates run on every event, a label run included, so no skipped check stands in for them');
+  assert.ok(ci.on.pull_request.types.includes('labeled')); const input = ci.on.workflow_dispatch.inputs.e2e; assert.deepEqual([input.type, input.default], ['boolean', false]);
+  assert.match(ci.concurrency.group, /github\.event\.label\.name/, 'a label run never cancels the full run');
+  const labels = names => ({ ...pullRequest, 'github.event.pull_request.labels.*.name': names });
+  assert.deepEqual([{ 'github.event_name': 'push' }, labels('e2e'), { 'github.event_name': 'workflow_dispatch', 'inputs.e2e': 'true' },
+    { ...labels('e2e'), 'github.event.action': 'labeled', 'github.event.label.name': 'e2e' }].map(values => decide(ui.if, values)), [true, true, true, true]);
+  assert.deepEqual([pullRequest, labels('docs'), { 'github.event_name': 'workflow_dispatch', 'inputs.e2e': 'false' },
+    { ...labels('e2e'), 'github.event.action': 'labeled', 'github.event.label.name': 'docs' }].map(values => decide(ui.if, values)), [false, false, false, false]);
   assert.match(body, /playwright\/test\/cli\.js install --with-deps chromium/);
   assert.match(body, /run test:e2e/); assert.match(body, /run ui:gallery/);
   assert.ok(body.indexOf('install --with-deps chromium') < body.indexOf('run test:e2e'));
@@ -113,11 +128,12 @@ test('[GENERATOR-SCOPE-06] CI runs each gate once, adds the submission check and
   // Each UI script is guarded: an absent script warns instead of silently passing as evidence.
   for (const script of ['test:e2e', 'ui:gallery']) assert.match(body, new RegExp(`scripts\\?\\.\\['${script}'\\][\\s\\S]*::warning::package\\.json has no ${script} script`));
 });
-test('[GENERATOR-SCOPE-07] real Obsidian also runs on a labelled pull request without weakening the download policy', () => {
+test('[GENERATOR-SCOPE-07] real Obsidian runs on main and, opted in by label e2e or run-obsidian, on a pull request without weakening the download policy', () => {
   const real = workflow('.github/workflows/obsidian.yml'), job = real.jobs['real-obsidian'];
   assert.deepEqual(real.on.push, { branches: ['main'] }); assert.ok('workflow_dispatch' in real.on);
   assert.ok(real.on.pull_request.types.includes('labeled')); assert.ok(!('pull_request_target' in real.on));
-  assert.equal(job.if, "github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-obsidian')");
+  assert.equal(job.if, "github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'e2e') || contains(github.event.pull_request.labels.*.name, 'run-obsidian')");
+  assert.deepEqual(['e2e', 'run-obsidian', 'docs'].map(name => decide(job.if, { ...pullRequest, 'github.event.pull_request.labels.*.name': name })), [true, true, false]);
   assert.deepEqual(real.permissions, { contents: 'read' }); assert.ok(!real.env && !job.env, 'the download opt-in is never workflow- or job-wide');
   const downloads = job.steps.filter(step => step.env?.OBSIDIAN_ALLOW_DOWNLOAD !== undefined);
   assert.deepEqual(downloads.map(step => step.env.OBSIDIAN_ALLOW_DOWNLOAD), ['1', '1']);
@@ -135,4 +151,27 @@ test('[GENERATOR-SCOPE-08] click-dummy build runs the skill worker in the framew
   };
   assert.deepEqual(await run(true), ['.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs']);
   assert.deepEqual(await run(false), ['scripts/clickdummy/lib/build-worker.mjs']);
+});
+test('[GENERATOR-SCOPE-09] shipped framework tests never drive the shell entry a generated src/main.ts replaces; example removal lists only shipped files', async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('The framework entry tests and example ownership exist only while the reviewed example sources are present.'); return; }
+  const drivesEntry = /\.onload\(|\.onunload\(|loadPlugin\(/, importsEntry = /from '(?:\.\.\/)+src\/main'/;
+  const shipped = paths.filter(path => /^tests\/.*\.test\.ts$/.test(path) && importsEntry.test(text(path)));
+  assert.ok(shipped.length >= 2, 'framework runtime tests still use the entry as a plain plugin instance');
+  for (const path of shipped) assert.doesNotMatch(text(path), drivesEntry, `${path} drives the framework src/main.ts lifecycle`);
+  assert.doesNotMatch(text('src/main.ts'), /ShellPlugin|registerView/);
+  // The framework checkout keeps running its entry tests; the generator excludes exactly those files.
+  const entryTests = ['tests/runtime/shell-entry-lifecycle.test.ts', 'tests/runtime/obsidian-test-kit-shell-entry.test.ts'];
+  for (const path of entryTests) {
+    assert.match(await readFile(join(root, path), 'utf8'), drivesEntry, path);
+    assert.ok(!files.has(path), path); assert.equal(maintainerOnly(path), true, path);
+  }
+  const framework = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8')).files.map(file => file.path);
+  const ownership = JSON.parse(text('scripts/examples/ownership.json')).files;
+  for (const path of entryTests) assert.ok(framework.includes(path), path);
+  assert.deepEqual(ownership.map(file => file.path), framework.filter(path => !maintainerOnly(path)));
+  // A listed file that is absent would make examples:remove report an edit conflict in every fresh project.
+  for (const file of ownership) {
+    if (file.sha256 !== null) assert.ok(files.has(file.path), `${file.path} is listed for example removal but not generated`);
+    if (file.template) assert.ok(files.has('templates/examples/' + file.template), file.template);
+  }
 });

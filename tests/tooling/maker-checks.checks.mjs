@@ -82,7 +82,7 @@ test('[MAKER-TRUST] recipes resolve before trust: unknown names suggest, only re
   assert.equal(trusted.status, 'planned', JSON.stringify(trusted.diagnostics));
 }));
 
-test('[MAKER-LOCALE-REFRESH] a drifted pending draft explains its missing keys and refreshes without losing translations', () => makerFixture(async root => {
+test('[MAKER-LOCALE-REFRESH] a drifted pending draft explains its missing and obsolete keys and refreshes without losing surviving translations', () => makerFixture(async root => {
   await prepare(root);
   await applyFilePlan((await planMaker(root, parseArguments(['locale', 'fr']))).plan);
   const draftPath = join(root, 'src/locales/pending/fr.json');
@@ -110,5 +110,20 @@ test('[MAKER-LOCALE-REFRESH] a drifted pending draft explains its missing keys a
   assert.equal(status.selectable, false); assert.equal(status.status, 'pending-translation-review');
   const check = await make(root, ['locale', 'fr'], { check: true });
   assert.equal(check.status, 'ok'); assert.deepEqual([check.data.missing, check.data.extra], [[], []]);
+
+  // Keys the base locale no longer has (for example example keys after examples:remove) are listed, then dropped by --refresh.
+  const stale = { ...refreshed, retired: { notice: 'Ancien avis' }, authoring: { ...refreshed.authoring, [namespace]: { ...refreshed.authoring[namespace], gone: 'Supprimé' } } };
+  await writeFile(draftPath, JSON.stringify(stale, null, 2) + '\n');
+  const obsolete = await make(root, ['locale', 'fr'], { 'dry-run': true });
+  assert.equal(obsolete.diagnostics[0].code, 'LOCALE_DRAFT_DRIFT');
+  assert.match(obsolete.diagnostics[0].message, new RegExp(`keeps 2 key\\(s\\) no longer in the base locale: authoring\\.${namespace}\\.gone, retired\\.notice\\.`));
+  assert.doesNotMatch(obsolete.diagnostics[0].message, /lacks/);
+  await applyFilePlan((await planMaker(root, parseArguments(['locale', 'fr', '--refresh']))).plan);
+  const pruned = JSON.parse(await readFile(draftPath, 'utf8'));
+  assert.deepEqual(pruned, refreshed); assert.equal(pruned.authoring[namespace][key], 'Traduction relue');
+  const prunedStatus = JSON.parse(await readFile(join(root, 'src/locales/pending/fr.status.json'), 'utf8'));
+  assert.deepEqual(prunedStatus, status);
+  const clean = await make(root, ['locale', 'fr'], { check: true });
+  assert.equal(clean.status, 'ok'); assert.deepEqual([clean.data.missing, clean.data.extra], [[], []]);
   await assert.rejects(planMaker(root, parseArguments(['locale', 'de', '--refresh'])), /LOCALE_DRAFT_MISSING/);
 }));

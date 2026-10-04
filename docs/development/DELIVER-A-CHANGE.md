@@ -89,7 +89,10 @@ npm run test:e2e
 - Choose the suites from `node bin/app check --plan --base origin/main` or the
   [test suites](../testing/TEST-SUITES.md) table; `--list` shows them all.
 - `npm run test:e2e` is for served UI changes and needs a provisioned Chromium.
-  Native smoke runs only in its explicitly provisioned scratch vault.
+  Native smoke runs only in its explicitly provisioned scratch vault. End-to-end
+  tests are opt-in until the Release tier: run them locally when your change
+  touches served UI, browser or host behaviour, or opt the pull request in (next
+  step); record "not run" otherwise.
 - Reproduce a specific Integration job with `node bin/app ci --job <workflow>/<job>`
   (dry run) and, where allowed, `--execute` in a scratch copy.
 - Agents run the `self-review` skill here. A gate you did not run is "not run" with
@@ -106,6 +109,14 @@ path filters match. Pushes after this point rerun the Integration tier, so batch
 fixes where you can. Converting back to a draft (`gh pr ready --undo`) returns to
 the Dev tier when you need to iterate freely again.
 
+End-to-end steps (served UI in Chromium, browser suites, real Obsidian; the list is
+in [GitHub Actions workflows](WORKFLOWS.md#end-to-end-opt-in)) are skipped unless
+you opt in. Add the `e2e` label (`gh pr edit <number> --add-label e2e`) when the
+change touches served UI, browser or host behaviour, and always when its task
+handoff says `e2e: required`. Adding the label starts only the jobs that hold
+end-to-end steps, reported as "E2E result"; while the label stays, every later
+push runs them inside "CI result". The Release tier runs them all regardless.
+
 ## 7. Fix failures
 
 1. Open the failing job's log and the artifacts it uploaded (`reports/` evidence).
@@ -119,12 +130,13 @@ the Dev tier when you need to iterate freely again.
 
 "CI result" is the one Integration check branch protection requires; it fails when
 any gate job failed or was cancelled. The informational security audit can fail
-without failing "CI result".
+without failing "CI result". An `e2e` label run reports "E2E result" instead, so it
+never replaces "CI result"; treat a red "E2E result" as a finding like any other.
 
 ## 8. Merge the green pull request
 
 Merge when "Dev checks", "CI result" and the other triggered workflows are green
-and review is complete. This repository merges with a merge commit
+(with the `e2e` label, "E2E result" too) and review is complete. This repository merges with a merge commit
 ("Merge pull request #N from ..."): use **Create a merge commit** in the UI or
 `gh pr merge <number> --merge`. Delete the topic branch afterwards
 (`--delete-branch`).

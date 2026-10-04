@@ -1,14 +1,19 @@
 # Azure Pipelines for this project: the same gates as the GitHub workflows of a GitHub-hosted project.
 # - Check runs each gate once (typecheck, lint, product tests, release build) plus the advisory community-review rules.
-# - UI collects browser journeys and the UI review gallery on pull requests and manual runs: evidence, never acceptance.
-# - Obsidian runs real Obsidian on `main` and when a run sets `runObsidian` (Azure Repos has no pull-request labels).
+# - UI (browser journeys, UI review gallery: evidence, never acceptance) and Obsidian (real Obsidian) are end-to-end:
+#   they always run on `main`, this project's Release tier, and otherwise only when a run opts in with `runE2E`
+#   (`runObsidian` still selects real Obsidian alone). Azure Repos has no pull-request labels.
 # Azure Repos ignores YAML `pr:` triggers: add this pipeline to `main` as a build-validation branch policy so every
-# pull-request update runs Check and UI. Draft detection is unreliable there, so nothing here depends on
+# pull-request update runs Check. Draft detection is unreliable there, so nothing here depends on
 # System.PullRequest.IsDraft. No secret is needed; never add a personal access token to this file.
 trigger:
   branches:
     include: [main]
 parameters:
+  - name: runE2E
+    displayName: Run the end-to-end stages (browser journeys, UI review gallery and real Obsidian)
+    type: boolean
+    default: false
   - name: runObsidian
     displayName: Run real Obsidian (downloads the pinned host into the pipeline cache)
     type: boolean
@@ -54,7 +59,7 @@ stages:
   # A step is skipped, with a warning, when its npm script does not exist.
   - stage: UI
     dependsOn: []
-    condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
+    condition: or(eq('${{ parameters.runE2E }}', 'true'), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main')))
     jobs:
       - job: ui
         timeoutInMinutes: 30
@@ -114,7 +119,7 @@ stages:
   # The download opt-in is set on the two steps that need it, never pipeline- or job-wide.
   - stage: Obsidian
     dependsOn: []
-    condition: or(eq('${{ parameters.runObsidian }}', 'true'), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main')))
+    condition: or(eq('${{ parameters.runE2E }}', 'true'), eq('${{ parameters.runObsidian }}', 'true'), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main')))
     jobs:
       - job: real_obsidian
         timeoutInMinutes: 30

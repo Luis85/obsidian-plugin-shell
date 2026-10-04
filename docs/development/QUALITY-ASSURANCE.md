@@ -173,7 +173,9 @@ The flow, also written for agents in `.claude/skills/self-review/SKILL.md`
 
 1. `node bin/app check --plan --base origin/main`, then `node bin/app check`,
    `npm run verify -- --json` and the relevant `node scripts/testing/suites.mjs <suite>`
-   runs; browser and native runs only when provisioned.
+   runs; browser and native runs only when provisioned. End-to-end is opt-in until
+   the Release tier ([why](DELIVERY-PIPELINE.md#end-to-end-tests-opt-in-mandatory-in-release));
+   in CI the pull request label `e2e` opts in.
 2. `npm run check:self-review [-- --base <ref>] [--json] [--warn-only]`.
 3. An adversarial re-read of the diff against `AGENTS.md`, then the template
    filled with real output and the untested scope.

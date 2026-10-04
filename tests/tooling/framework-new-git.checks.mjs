@@ -13,7 +13,8 @@ const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 const bareGit = home => ({ ...process.env, HOME: home, XDG_CONFIG_HOME: home, GIT_CONFIG_GLOBAL: join(home, 'none'), GIT_CONFIG_SYSTEM: join(home, 'none'), GIT_CONFIG_NOSYSTEM: '1' });
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-new-git-')));
-  t.after(() => rm(dir, { recursive: true, force: true }));
+  // git's detached auto-maintenance can still be writing .git/objects after `new` returns (seen on macOS).
+  t.after(() => rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }));
   await cp(join(root, 'configs'), join(dir, 'configs'), { recursive: true });
   await mkdir(join(dir, 'home'));
   return dir;
