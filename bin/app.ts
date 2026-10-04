@@ -8,6 +8,9 @@ import { settingsWizard } from './presentation/settings.ts';
 import { projectWizard } from './presentation/project-wizard.ts';
 import { launchDefinition } from './presentation/wizards/launch.ts';
 import { startWizard } from './presentation/wizards/registry.ts';
+import { collectionWizard } from './presentation/collection.ts';
+import { collectionCommandRoots } from './domain/command-options.ts';
+import { collectionInteractiveActions } from './adapters/collection-command.ts';
 import { readSnapshot } from './adapters/storage.ts';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -29,10 +32,12 @@ import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } f
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
-  if (!['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'wizard', 'form', 'fake-data'].includes(args.command)) return false;
+  const collection = Object.hasOwn(collectionCommandRoots, args.command);
+  if (!collection && !['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'wizard', 'form', 'fake-data'].includes(args.command)) return false;
   if (env.CI && env.CI !== 'false') return false;
   const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
-  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && !args.action);
+  const action = collection ? collectionInteractiveActions.includes(args.action) : !args.action;
+  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && action);
 }
 async function interactive(args: Arguments, context: CommandContext, io: IO, controller: AbortController): Promise<void> {
   const env = io.env ?? process.env;
@@ -51,7 +56,9 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
   let completion: string | undefined;
   try {
     terminal?.start();
-    completion = await runInteractiveCommand(args, context, ui, options);
+    completion = Object.hasOwn(collectionCommandRoots, args.command)
+      ? await collectionWizard(ui, collectionCommandRoots[args.command]!, args.action, { ...options, flags: args.flags })
+      : await runInteractiveCommand(args, context, ui, options);
   } finally { terminal?.dispose(); }
   if (terminal && completion) io.error.write(safe(completion));
 }

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/fake-data-generation.schema.json",
+  "schemaVersion": 1,
+  "id": "risks-demo",
+  "title": "Risk register demo",
+  "description": "Twenty-five open risks in the default paths.risks folder, ready for node bin/app risk list, check and report, plus a Bases table.",
+  "entity": "risk",
+  "count": 25,
+  "out": "docs/risks",
+  "seed": 11,
+  "base": true,
+  "referenceDate": "2026-01-01"
+}

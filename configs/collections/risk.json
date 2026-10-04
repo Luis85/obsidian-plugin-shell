@@ -1,0 +1,79 @@
+{
+  "$schema": "../schemas/collection.schema.json",
+  "schemaVersion": 1,
+  "id": "risk",
+  "title": "Risk register",
+  "description": "Risks as Markdown notes with type Risk frontmatter in the configured paths.risks folder (default docs/risks), scored probability × impact.",
+  "type": "Risk",
+  "pathKey": "risks",
+  "idPrefix": "RISK-",
+  "idDigits": 4,
+  "titleField": "title",
+  "hook": "risk.scoring",
+  "forms": { "edit": "risk", "review": "risk-review" },
+  "wizards": { "new": "risk-new", "edit": "risk-edit", "review": "risk-review" },
+  "statuses": [
+    { "id": "identified", "label": "Identified", "open": true, "transitions": ["assessed", "mitigating", "accepted", "closed"] },
+    { "id": "assessed", "label": "Assessed", "open": true, "transitions": ["mitigating", "accepted", "closed"] },
+    { "id": "mitigating", "label": "Mitigating", "open": true, "transitions": ["assessed", "accepted", "closed"] },
+    { "id": "accepted", "label": "Accepted", "open": false, "transitions": ["assessed", "mitigating", "closed"] },
+    { "id": "closed", "label": "Closed", "open": false, "transitions": ["identified"], "stamp": "closed" }
+  ],
+  "initialStatus": "identified",
+  "vocabularies": {
+    "dimension": [
+      { "id": "schedule", "label": "Schedule" }, { "id": "cost", "label": "Cost" }, { "id": "scope", "label": "Scope" },
+      { "id": "quality", "label": "Quality" }, { "id": "security", "label": "Security" }, { "id": "compliance", "label": "Compliance" },
+      { "id": "people", "label": "People" }
+    ],
+    "category": [
+      { "id": "technical", "label": "Technical" }, { "id": "external", "label": "External" }, { "id": "organizational", "label": "Organizational" },
+      { "id": "project-management", "label": "Project management" }
+    ],
+    "probability": [
+      { "id": "1", "label": "Rare" }, { "id": "2", "label": "Unlikely" }, { "id": "3", "label": "Possible" },
+      { "id": "4", "label": "Likely" }, { "id": "5", "label": "Almost certain" }
+    ],
+    "impact": [
+      { "id": "1", "label": "Negligible" }, { "id": "2", "label": "Minor" }, { "id": "3", "label": "Moderate" },
+      { "id": "4", "label": "Major" }, { "id": "5", "label": "Severe" }
+    ],
+    "level": [
+      { "id": "low", "label": "Low" }, { "id": "medium", "label": "Medium" }, { "id": "high", "label": "High" }, { "id": "critical", "label": "Critical" }
+    ]
+  },
+  "fields": [
+    { "key": "title", "label": "Title", "kind": "text", "required": true, "maxLength": 160 },
+    { "key": "description", "label": "Description", "kind": "text", "required": true, "maxLength": 1000 },
+    { "key": "next-action", "label": "Next action", "kind": "text", "requiredWhenOpen": true, "maxLength": 500 },
+    { "key": "due", "label": "Due", "kind": "date", "requiredWhenOpen": true, "overdue": true },
+    { "key": "identified", "label": "Identified", "kind": "date", "required": true, "default": "today" },
+    { "key": "reviewed", "label": "Reviewed", "kind": "date", "source": "stamp" },
+    { "key": "closed", "label": "Closed", "kind": "date", "source": "stamp" },
+    { "key": "dimension", "label": "Dimension", "kind": "choice", "vocabulary": "dimension", "required": true },
+    { "key": "category", "label": "Category", "kind": "choice", "vocabulary": "category", "required": true },
+    { "key": "probability", "label": "Probability", "kind": "integer", "vocabulary": "probability", "required": true },
+    { "key": "impact", "label": "Impact", "kind": "integer", "vocabulary": "impact", "required": true },
+    { "key": "score", "label": "Score", "kind": "integer", "source": "derived" },
+    { "key": "level", "label": "Level", "kind": "choice", "vocabulary": "level", "source": "derived" },
+    { "key": "owner", "label": "Owner", "kind": "text", "maxLength": 120 },
+    { "key": "mitigation", "label": "Mitigation", "kind": "text", "frontmatter": false, "multiline": true, "maxLength": 4000 },
+    { "key": "notes", "label": "Notes", "kind": "text", "frontmatter": false, "multiline": true, "maxLength": 4000 }
+  ],
+  "body": "# {{title}}\n\n## Description\n\n{{description}}\n\n## Mitigation\n\n{{mitigation|_No mitigation planned yet._}}\n\n## Notes\n\n{{notes}}\n",
+  "list": { "columns": ["id", "title", "status", "level", "score", "due", "owner", "next-action"] },
+  "report": {
+    "file": "risk-register.md",
+    "title": "Risk register",
+    "columns": ["id", "title", "status", "level", "score", "probability", "impact", "dimension", "category", "owner", "due", "next-action"],
+    "sort": [{ "key": "level", "order": "desc" }, { "key": "score", "order": "desc" }],
+    "base": "risks.base"
+  },
+  "review": { "stamp": "reviewed", "match": [{ "key": "level", "in": ["high", "critical"] }], "overdue": true },
+  "model": {
+    "factors": ["probability", "impact"],
+    "score": "score",
+    "level": "level",
+    "levels": [{ "level": "low", "min": 1 }, { "level": "medium", "min": 5 }, { "level": "high", "min": 10 }, { "level": "critical", "min": 15 }]
+  }
+}

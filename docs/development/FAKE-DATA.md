@@ -110,11 +110,13 @@ listing with its file name.
 | `project` | `Projects` | Plugin Project example identity, number budget, archived checkbox, owner link |
 | `book` | `Books` | Author links, dates in a fixed range, page counts, ratings, read flag |
 | `meeting` | `Meetings` | Date-and-time values, attendee lists, statuses, an agenda body |
+| `risk` | `Risks` | The [risk register](RISK-MANAGEMENT.md) format: `type: Risk`, `RISK-0001` ids, model statuses, dimensions, categories and 1–5 scales; `risk check` accepts the notes |
 
-Two example generation configs are shipped:
+Three example generation configs are shipped:
 
 - `contacts-demo`: 25 contacts in `Fake Data/Contacts` with a `.base` table.
 - `tasks-board`: 40 tasks in `Tasks` with a `.base` table.
+- `risks-demo`: 25 risks in `docs/risks` (the default risk folder) with a `.base` table; generate into a scratch `--root` inside the framework checkout.
 
 ## Entity definition reference
 

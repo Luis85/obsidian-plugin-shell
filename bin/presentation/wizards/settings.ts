@@ -1,7 +1,7 @@
 import { documentationSettings } from '../../adapters/settings-documentation.ts';
 import { settingsMigrationPlan } from '../../adapters/settings-migration.ts';
 import { loadSettings, settingsPlan, guardedText } from '../../adapters/user-settings.ts';
-import { readSettings, setupStatePath, type UserSettings } from '../../domain/user-settings.ts';
+import { readSettings, setupStatePath, withoutImplicitPaths, type UserSettings } from '../../domain/user-settings.ts';
 import type { FormValues } from '../../domain/form-model.ts';
 import { review } from '../review.ts';
 import type { WizardModule } from './module.ts';
@@ -31,7 +31,7 @@ export const settingsModule: WizardModule = {
     },
     /** Moving paths of an initialized project is a migration plan; otherwise a settings plan. Both are reviewed. */
     'settings.review': async ({ ui, state, options }) => {
-      const settings = state.settings as UserSettings, current = state.current as UserSettings;
+      const current = state.current as UserSettings, settings = withoutImplicitPaths(state.settings as UserSettings, current);
       const initialized = (await guardedText(options.root, setupStatePath)).content !== null;
       const moved = JSON.stringify(settings.paths) !== JSON.stringify(current.paths);
       const plan = initialized && moved ? await settingsMigrationPlan(options.root, settings) : await settingsPlan(options.root, settings);

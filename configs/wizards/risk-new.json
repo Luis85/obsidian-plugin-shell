@@ -1,0 +1,16 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "risk-new",
+  "version": 1,
+  "title": "New risk",
+  "description": "Capture one risk as a Markdown note (type Risk) with the next free id in the configured paths.risks folder, through one reviewed write.",
+  "context": { "title": "Risk register", "details": ["Folder: {{folder}}", "Nothing is written until a reviewed plan is approved.", "Escape: previous step. Ctrl+C: cancel."] },
+  "cancelMessage": "No risk was written.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "collection.load", "with": { "collection": "risk" } },
+    { "id": "edit", "kind": "form", "title": "Risk", "form": "risk", "bind": "draft" },
+    { "id": "review", "kind": "action", "action": "collection.plan-new", "retry": "edit" },
+    { "id": "done", "kind": "end", "text": "Created {{created.id}} in {{created.path}}." }
+  ]
+}

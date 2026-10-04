@@ -80,9 +80,9 @@ test('entity definitions are data: unsafe keys, control characters, unknown fiel
 
 test('every shipped entity preset and generation config validates', async () => {
   const entities = (await presets('entities')).map(readFakeEntity);
-  assert.deepEqual(entities.map(item => item.id), ['book', 'contact', 'meeting', 'project', 'task']);
+  assert.deepEqual(entities.map(item => item.id), ['book', 'contact', 'meeting', 'project', 'risk', 'task']);
   const generations = (await presets('generations')).map(readFakeGeneration);
-  assert.deepEqual(generations.map(item => [item.id, item.entity, item.base]), [['contacts-demo', 'contact', true], ['tasks-board', 'task', true]]);
+  assert.deepEqual(generations.map(item => [item.id, item.entity, item.base]), [['contacts-demo', 'contact', true], ['risks-demo', 'risk', true], ['tasks-board', 'task', true]]);
   assert.deepEqual(fakePropertyTypes, ['text', 'number', 'checkbox', 'date', 'datetime', 'list', 'tags', 'link']);
 });
 
@@ -94,7 +94,7 @@ test('one seed always yields byte-identical notes; another seed yields different
 });
 
 test('frontmatter round-trips through YAML with Obsidian-compatible values for every property type', async () => {
-  const [, contact, meeting, project, task] = await presets('entities');
+  const [, contact, meeting, project, , task] = await presets('entities');
   const read = note => { const [, yaml, body] = /^---\n([\s\S]*?)---\n\n([\s\S]*)$/.exec(renderNote(note)); return { properties: parse(yaml), body }; };
   for (const note of notes(contact, 30, fakerSource(1, defaultReferenceDate)).notes) {
     const { properties, body } = read(note);

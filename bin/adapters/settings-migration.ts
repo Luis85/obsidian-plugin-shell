@@ -4,14 +4,14 @@ import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { hash } from './framework/files.ts';
 import { object, list } from '../domain/data.ts';
 import { documentText, openDocument } from '../domain/document.ts';
-import { designRoot, effectivePaths, pathsOverlap, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
+import { collectionPathKeys, designRoot, effectivePaths, pathsOverlap, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { designManifestFile, readDesignManifest } from '../domain/design-folder.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { prepared } from './storage.ts';
 import { guardedText, jsonText, loadSettings } from './user-settings.ts';
 import { migrationFiles, type MigrationFile } from './migration-files.ts';
 import { preparedDesignFolders } from './design-folder.ts';
-const folderPaths = new Set(['prds', 'app', 'prototypes', 'design']);
+const folderPaths = new Set<string>(['prds', 'app', 'prototypes', 'design', ...collectionPathKeys]);
 interface Move { key: string; from: string; to: string; folder: boolean }
 /** The optional design root compares by its effective value, so configuring it for the first time relocates the default root. */
 function movesFor(before: UserSettings, after: UserSettings): Move[] {

@@ -12,6 +12,7 @@
     { "id": "prototypes", "kind": "text", "label": "Prototype package folder", "bind": "paths.prototypes" },
     { "id": "app", "kind": "text", "label": "Angular application folder", "bind": "paths.app" },
     { "id": "brief", "kind": "text", "label": "Project brief Markdown", "bind": "paths.brief" },
+    { "id": "risks", "kind": "text", "label": "Risk register folder (one Markdown note per risk)", "bind": "paths.risks", "default": "docs/risks" },
     { "id": "author", "kind": "text", "label": "Author", "bind": "preferences.author" },
     { "id": "ui", "kind": "select", "label": "Preferred terminal interface", "bind": "preferences.ui", "choices": ["auto", "tui", "plain"] },
     { "id": "scanRecursive", "kind": "boolean", "label": "Scan PRD subfolders recursively?", "bind": "preferences.scanRecursive",

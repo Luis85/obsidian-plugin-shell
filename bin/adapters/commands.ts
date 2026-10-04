@@ -3,6 +3,7 @@ import { firstRunCommand } from './first-run-command.ts';
 import { designCommand } from './design-command.ts';
 import { definitionCommand } from './wizard-command.ts';
 import { fakeDataCommand } from './fake-data-command.ts';
+import { collectionCommand } from './collection-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -24,7 +25,7 @@ import { boilerplatePlan } from './compiler.ts';
 import { pluginCliCommands, type WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
 import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
-import { makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
+import { collectionCommandRoots, makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
 const makerHelp = `Shell maker — make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
@@ -95,11 +96,20 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app fake-data show-config --name contacts-demo --json
   node bin/app fake-data --config contacts-demo [--count 50] [--out <folder>] [--seed 9] --json
   node bin/app fake-data save-config --input generation.json --json
+  node bin/app risk new|edit --id RISK-0001|review   Guided risk capture, edit and review (terminal; folder: paths.risks)
+  node bin/app risk list [--status <id>] [--dimension <id>] [--category <id>] [--level <id>] [--overdue] --json
+  node bin/app risk show --id RISK-0001 --json
+  node bin/app risk new --input risk.json --json             Plan a new risk note (next free id); then --apply <planHash>
+  node bin/app risk update --id RISK-0001 --input changes.json --json   Changed fields and status transitions
+  node bin/app risk check --json     Schema, model values, derived score/level, duplicate ids, overdue and open-risk gaps
+  node bin/app risk report [--base] --json   Regenerate <risks>/risk-register.md (and risks.base) through review
+  node bin/app risk model --json     The effective collection definition (configs/collections/risk.json)
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
 --starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),
 --entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --config <id> and --base (fake-data),
+--id <id>, --as-of <YYYY-MM-DD>, --status/--dimension/--category/--level <id>, --overdue and --base (risk),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -194,7 +204,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -205,6 +215,11 @@ function pluginExecution(args: Arguments, plugins: CommandContext['plugins']): R
   if (!plugins || !extension) return undefined;
   if (args.flags.help) return { help: extension.summary, command: extension.id, options: extension.options ?? {}, interactive: false };
   return extension.execute({ action: args.action, flags: args.flags }, plugins.commandContext);
+}
+/** Note-collection roots (configs/collections) share one engine command; their help stays with the maker help. */
+function collectionExecution(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> | undefined {
+  const id = args.flags.help || !Object.hasOwn(collectionCommandRoots, args.command) ? undefined : collectionCommandRoots[args.command];
+  return id === undefined ? undefined : collectionCommand(id, args, context, () => inputData(args, context));
 }
 /** Commands that never read a saved project's configured arguments; undefined means a saved-project command. */
 function directCommand(args: Arguments, context: CommandContext): Record<string, unknown> | Promise<Record<string, unknown>> | undefined {
@@ -224,5 +239,5 @@ async function savedProjectCommand(input: Arguments, context: CommandContext): P
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  return pluginExecution(args, context.plugins) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
+  return pluginExecution(args, context.plugins) ?? collectionExecution(args, context) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
 }

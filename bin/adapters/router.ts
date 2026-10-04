@@ -1,3 +1,4 @@
+import { collectionCommandRoots } from '../domain/command-options.ts';
 export type CliSurface = 'maker' | 'framework' | 'memory';
 export interface RoutedArguments { surface: CliSurface; args: string[] }
 /** Registered plugin CLI commands and framework catalog roots, injected so routing itself stays free of I/O. */
@@ -11,10 +12,11 @@ const directoryNewFlags = new Set([
 ]);
 const makerCommands = new Set([
   'studio', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design', 'wizard', 'form', 'fake-data',
-  '--ui', '--no-color',
+  ...Object.keys(collectionCommandRoots), '--ui', '--no-color',
 ]);
 const makerHelpCommands = new Set([
   'sketch', 'prototype', 'studio', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design', 'wizard', 'form', 'fake-data',
+  ...Object.keys(collectionCommandRoots),
 ]);
 
 function normalizeHelp(argv: readonly string[]): string[] {
