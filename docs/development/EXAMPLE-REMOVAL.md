@@ -12,6 +12,15 @@ or force option. Consumer-created files and feature registrations are retained.
 The same locked, staged file-plan engine used by setup and makers rechecks hashes
 and preserves concurrent edits. Identical reruns do not rewrite source.
 
+In a generated project (one with `.companion/generation.json`), a manifest entry
+marked `"generated": "retain"` (the README) is the project's own generated file:
+its reviewed preimage is the hash the generation receipt recorded, it is kept
+unchanged, and an edit made after generation conflicts like any edited example.
+A receipt that is invalid, does not record that file, or changes during planning
+stops the removal. The generation receipt itself is not rewritten, so a later
+in-place regeneration reports the removed example files as conflicts instead of
+restoring them.
+
 The replacement UI retains preferences, feedback, native view ownership and the
 extension host. Task, Project and Items registrations and the showcase panels disappear.
 The example event registry and its catalog metadata become empty; custom event

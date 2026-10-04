@@ -6003,7 +6003,7 @@
         {
           "name": "refresh",
           "kind": "flag",
-          "description": "make locale <name> --refresh: add only the base keys a pending draft lacks, keeping every existing translation; review with --dry-run first."
+          "description": "make locale <name> --refresh: add the base keys a pending draft lacks and drop keys the base no longer has, keeping every surviving translation; review with --dry-run first."
         },
         {
           "name": "dry-run",
@@ -6714,7 +6714,7 @@
         {
           "name": "list",
           "kind": "flag",
-          "description": "List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility."
+          "description": "List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. Steps of local composite actions (.github/actions/<name>/action.yml) count as the job's own steps."
         },
         {
           "name": "execute",

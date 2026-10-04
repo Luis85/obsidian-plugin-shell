@@ -57,17 +57,20 @@ export async function localeRecipe(context: MakerContext, name: string, refresh 
   context.tests.add(path);
 }
 /**
- * An existing draft keeps every translation. Without drift a rerun changes nothing; with missing base keys a plain
- * rerun explains the drift, and the reviewed --refresh plan adds only those keys (English values to translate).
+ * An existing draft keeps every translation of a current base key. Without drift a rerun changes nothing; with missing
+ * or obsolete keys a plain rerun lists them, and the reviewed --refresh plan adds the missing keys (English values to
+ * translate) and drops the obsolete ones (for example the showcase keys after examples:remove).
  */
 async function refreshDraft(context: MakerContext, name: string, base: Record<string, unknown>, refresh: boolean): Promise<void> {
   const draftPath = `src/locales/pending/${name}.json`, statusPath = `src/locales/pending/${name}.status.json`;
   const check = await checkPendingLocale(context.read, name);
   if (check.selectable !== false) throw new Error(`LOCALE_DRAFT_SELECTABLE: ${name} is no longer a pending draft; edit enabled translations directly`);
-  if (!check.missing.length) return;
-  const listed = check.missing.slice(0, 10).join(', ') + (check.missing.length > 10 ? `, … ${check.missing.length - 10} more` : '');
-  if (!refresh) throw new Error(`LOCALE_DRAFT_DRIFT: pending locale ${name} lacks ${check.missing.length} current base key(s): ${listed}. Review with make locale ${name} --refresh --dry-run, then apply it with --yes to add only these keys and keep existing translations.`);
-  const merged = fillMissing(parseObject(await context.read(draftPath), draftPath), base);
+  if (!check.missing.length && !check.extra.length) return;
+  const listed = (keys: readonly string[]) => keys.slice(0, 10).join(', ') + (keys.length > 10 ? `, … ${keys.length - 10} more` : '');
+  const drift = [check.missing.length ? `lacks ${check.missing.length} current base key(s): ${listed(check.missing)}` : '',
+    check.extra.length ? `keeps ${check.extra.length} key(s) no longer in the base locale: ${listed(check.extra)}` : ''].filter(Boolean).join('; ');
+  if (!refresh) throw new Error(`LOCALE_DRAFT_DRIFT: pending locale ${name} ${drift}. Review with make locale ${name} --refresh --dry-run, then apply it with --yes to add the missing keys, drop the obsolete ones and keep every surviving translation.`);
+  const merged = reconcile(parseObject(await context.read(draftPath), draftPath), base);
   await context.edit(draftPath, () => JSON.stringify(merged, null, 2) + '\n');
   await context.edit(statusPath, source => JSON.stringify({ ...parseObject(source, statusPath), keys: countKeys(merged) }, null, 2) + '\n');
 }
@@ -78,15 +81,15 @@ function parseObject(source: string, path: string): Json {
   if (!isObject(value)) throw new Error(`LOCALE_DRAFT_INVALID: ${path} must contain a JSON object`);
   return value;
 }
-/** Adds base keys the draft lacks, in place after its own keys; existing values (translations) are never replaced. */
-function fillMissing(draft: Json, base: Json): Json {
-  const merged: Json = { ...draft };
-  for (const [key, value] of Object.entries(base)) {
-    const current = merged[key];
-    if (!Object.hasOwn(merged, key)) merged[key] = value;
-    else if (isObject(value) && isObject(current)) merged[key] = fillMissing(current, value);
-    else if (isObject(value) !== isObject(current)) throw new Error(`LOCALE_DRAFT_SHAPE: ${key} changed between a message and a group; resolve it manually`);
-  }
-  return merged;
+/** The draft's surviving keys keep their order and values (translations); obsolete keys are dropped and missing base
+ * keys follow with their English values. Built from entries, so a stored "__proto__" key stays plain data. */
+function reconcile(draft: Json, base: Json): Json {
+  const kept = Object.entries(draft).filter(([key]) => Object.hasOwn(base, key)).map(([key, current]): [string, unknown] => {
+    const value = base[key];
+    if (isObject(value) !== isObject(current)) throw new Error(`LOCALE_DRAFT_SHAPE: ${key} changed between a message and a group; resolve it manually`);
+    return [key, isObject(value) && isObject(current) ? reconcile(current, value) : current];
+  });
+  const added = Object.entries(base).filter(([key]) => !Object.hasOwn(draft, key));
+  return Object.fromEntries([...kept, ...added]);
 }
 function countKeys(value: object): number { return Object.values(value).reduce((count: number, child: unknown) => count + (child && typeof child === 'object' ? countKeys(child) : 1), 0); }
