@@ -23,6 +23,7 @@ on:
       - 'tests/tooling/starter-*.checks.mjs'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/starter-distribution.yml'
+      - '!projects/**'
   workflow_dispatch:
 permissions:
   contents: read

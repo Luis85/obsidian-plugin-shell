@@ -19,6 +19,11 @@ test('placement refuses missing, framework-internal, vault, invalid, file and no
   const plan = (args, options = { starter: 'blank' }) => code(starterProjectPlan(request(args, options), context));
   assert.equal(await plan([]), 'TARGET_REQUIRED');
   assert.equal(await code(starterProjectPlan(request(['inside'], { starter: 'blank' }), { root: frameworkRoot, frameworkRoot })), 'TARGET_INSIDE_FRAMEWORK');
+  // projects/<name> is the one standalone-project folder inside the checkout; nested or invalid names stay refused.
+  for (const target of ['projects', 'projects/Bad_Name', 'projects/a/b', 'projects/a--b', 'src/projects/a']) {
+    assert.equal(await code(starterProjectPlan(request([target], { starter: 'blank' }), { root: frameworkRoot, frameworkRoot })), 'TARGET_INSIDE_FRAMEWORK', target);
+  }
+  assert.equal(await code(starterProjectPlan(request(['projects/placement-probe'], { from: join(root, 'missing-export.json') }), { root: frameworkRoot, frameworkRoot })), 'PROJECT_FILE_NOT_FOUND');
   await mkdir(join(root, 'vault/.obsidian'), { recursive: true });
   assert.equal(await plan(['vault/project']), 'TARGET_INSIDE_VAULT');
   assert.equal(await plan(['bad*name']), 'TARGET_INVALID');

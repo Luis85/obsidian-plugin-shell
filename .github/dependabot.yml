@@ -29,6 +29,17 @@ updates:
       playwright:
         patterns: ['@playwright/*', playwright]
         update-types: [minor, patch]
+  # Standalone projects (projects/README.md): Dependabot reads only this root file.
+  - package-ecosystem: npm
+    directory: /projects/companion
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    cooldown:
+      semver-patch-days: 3
+      semver-minor-days: 3
+      semver-major-days: 7
   - package-ecosystem: github-actions
     directory: /
     schedule:

@@ -3,9 +3,10 @@ import { posix } from 'node:path';
 import { object } from './configuration.ts';
 import { hash } from './files.ts';
 import { requireThat } from './contracts.ts';
-/** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies. */
-const excludedRoots = ['configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/'];
-const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
+/** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies; so are the projects/<name>
+ * tooling and the workflows it syncs from those standalone projects. */
+const excludedRoots = ['.github/workflows/projects--', 'scripts/projects/', 'configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/'];
+const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', '.github/workflows/projects-boundary.yml', 'tests/tooling/projects-boundary.checks.mjs', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
   // The developer guide describes working in the framework checkout, not an extracted kit.
   'DEVELOPER_GUIDE.md',
   // Starter-pack qualification reads canonical definitions and concept builders that only the maintainer checkout carries.

@@ -16,6 +16,7 @@ on:
       - 'docs/testing/native-evidence-checks.json'
       - 'docs/testing/test-plan.json'
       - 'docs/design/obsidian-tokens.json'
+      - '!projects/**'
   workflow_dispatch:
 permissions:
   contents: read

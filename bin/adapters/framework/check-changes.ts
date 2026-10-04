@@ -73,7 +73,8 @@ async function tally(root: string, entries: Array<[string, string]>): Promise<Ta
   const roots = [...codeRoots(root), 'bin'];
   const sets: Tally = { files: new Set(), untraceable: new Set(), paths: new Set(), configuration: new Set() };
   for (const [status, path] of entries) {
-    if (path.split('/').includes('node_modules')) continue;
+    // projects/<name> are standalone projects with their own lock, gates and workflows (projects/README.md).
+    if (path.split('/').includes('node_modules') || path.startsWith('projects/')) continue;
     sets.paths.add(path);
     if (configuration.test(path)) sets.configuration.add(path);
     if (untraceableChange(status, path, roots.some(item => isWithinRoot(path, item)))) sets.untraceable.add(path);

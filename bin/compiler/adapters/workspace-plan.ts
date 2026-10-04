@@ -8,6 +8,7 @@ import { digest, json, row, rows, text, requireValue } from '../emitters/model.t
 import { visualDefinitions } from '../emitters/visual-model.ts';
 import { visualVerification, visualAcceptanceTodo } from '../emitters/visual-files.ts';
 import { visualNodes, visualRoot } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { frameworkProjectFolder } from '../domain/template-inputs.ts';
 export interface WorkspaceOptions { target:string;templateRoot:string;bootstrap?:ReadonlyArray<{path:string;hash:string}>;selection?:GenerationSelection }
 interface InputSnapshot { content:Buffer;vault:string;target:string }
 
@@ -31,7 +32,7 @@ const encodingField = (file: Entry) => file.encoding ? {encoding:file.encoding} 
 const targetPrefix = (target: string): string => target === '.' ? '' : target+'/';
 function requireOutsideTemplate(options: WorkspaceOptions, input: InputSnapshot): void {
   const within = relative(resolve(options.templateRoot),input.target);
-  requireValue(within === '..' || within.startsWith('..' + sep) || isAbsolute(within), 'Use a target outside this framework checkout; do not recursively copy or overwrite the template.');
+  requireValue(within === '..' || within.startsWith('..' + sep) || isAbsolute(within) || frameworkProjectFolder(within), 'Use a target outside this framework checkout (or projects/<name>); do not recursively copy or overwrite the template.');
 }
 async function previousOwnership(options: WorkspaceOptions, input: InputSnapshot, model: Model, receiptPath: string, receiptBefore: string | null) {
   for (const file of options.bootstrap ?? []) requireValue(bootstrapPaths.includes(file.path) && sha256Hex.test(file.hash), 'Invalid bootstrap ownership.');

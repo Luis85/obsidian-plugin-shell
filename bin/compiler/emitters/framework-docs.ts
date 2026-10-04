@@ -15,11 +15,13 @@ export function relocatedPath(path: string): string {
 }
 /** The maintainer runner script, the policy test for maintainer CI triggers, the project handoff qualification (it generates
  * projects from the framework's starters), the standalone design prototypes (their own apps and retained evidence) and the
- * framework checkout's DEVELOPER_GUIDE.md are not copied. */
+ * framework checkout's DEVELOPER_GUIDE.md are not copied, nor the projects/<name> tooling and the workflows it syncs
+ * (they belong to the checkout's standalone projects). */
 const maintainerFiles: ReadonlySet<string> = new Set(['DEVELOPER_GUIDE.md', '.github/workflows/starter-distribution.yml',
   'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
-  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs']);
-const maintainerPrefixes = ['configs/starters/', '.github/scripts/',
+  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs',
+  '.github/workflows/projects-boundary.yml', 'tests/tooling/projects-boundary.checks.mjs']);
+const maintainerPrefixes = ['configs/starters/', '.github/scripts/', '.github/workflows/projects--', 'scripts/projects/',
   'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/testing/handoff-'];
 export function maintainerOnly(path: string): boolean {
   return frameworkOnlyPath(path) || maintainerFiles.has(path) || maintainerPrefixes.some(prefix => path.startsWith(prefix));

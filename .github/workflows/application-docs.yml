@@ -25,6 +25,7 @@ on:
       - '.nvmrc'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/application-docs.yml'
+      - '!projects/**'
   workflow_dispatch:
 permissions:
   contents: read

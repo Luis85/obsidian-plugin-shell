@@ -1,6 +1,8 @@
 name: Project starter qualification
 on:
   pull_request:
+    paths-ignore:
+      - 'projects/**'
   workflow_dispatch:
 permissions:
   contents: read

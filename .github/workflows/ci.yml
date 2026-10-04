@@ -6,8 +6,12 @@ name: CI
 # that single check instead of each matrix leg.
 on:
   pull_request:
+    paths-ignore:
+      - 'projects/**'
   push:
     branches: [main]
+    paths-ignore:
+      - 'projects/**'
   workflow_dispatch:
 permissions:
   contents: read

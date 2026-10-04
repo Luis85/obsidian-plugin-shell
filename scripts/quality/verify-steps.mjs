@@ -37,6 +37,7 @@ export function verifySteps(env = process.env) {
     script('eslint-tests', eslint, ['-c', 'configs/lint/eslint.config.mjs', 'tests/runtime', 'tests/support', 'tests/e2e', 'tests/obsidian', 'harness/app', '--max-warnings', '0'], ['build']),
     script('test-quality', 'scripts/quality/check-test-quality.mjs'),
     script('repository', 'scripts/quality/check-repository.mjs'),
+    script('projects', 'scripts/projects/projects.mjs', ['check']),
     script('source', 'scripts/quality/check-source.mjs'),
     script('presentation', 'scripts/quality/check-presentation.mjs'),
     script('architecture', 'scripts/quality/check-architecture.mjs'),

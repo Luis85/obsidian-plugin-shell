@@ -15,6 +15,7 @@ on:
       - '.gitattributes'
       - '.nvmrc'
       - '.github/workflows/setup-compatibility.yml'
+      - '!projects/**'
   # The complete verify gates already run on every pull request in CI's
   # showcase and template-authoring jobs (qualified toolchain). This matrix proves the npm
   # install policy and toolchain rows, so it runs when those inputs change.

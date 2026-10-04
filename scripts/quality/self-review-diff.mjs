@@ -97,5 +97,6 @@ export function collectChanges(root, base) {
   const known = new Set(files.map(file => file.path));
   const untracked = git(root, ['ls-files', '--others', '--exclude-standard', '-z']).split('\u0000').filter(Boolean);
   for (const path of untracked) if (!known.has(path)) files.push(untrackedFile(root, path));
-  return files;
+  // projects/<name> are standalone projects reviewed by their own gates (projects/README.md).
+  return files.filter(file => !file.path.startsWith('projects/'));
 }

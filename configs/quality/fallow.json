@@ -206,7 +206,8 @@
     "dist/manifest.json",
     "dist-harness/**",
     "reports/**",
-    "docs/**"
+    "docs/**",
+    "projects/**"
   ],
   "boundaries": {
     "coverage": {
