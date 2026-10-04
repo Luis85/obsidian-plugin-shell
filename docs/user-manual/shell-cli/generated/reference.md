@@ -3242,7 +3242,7 @@ node bin/app make <recipe> <name> [options] | make list | make describe <recipe>
 | --list | flag | List the available entries instead of creating one. | See command semantics |
 | --trust-custom | flag | Run a registered local custom recipe (scripts/makers/custom/&lt;name&gt;.mjs); it executes trusted project code, so review it first. Built-in recipes never need it. | See command semantics |
 | --check | flag | Read-only: compare the pending locale draft (make locale &lt;name&gt; --check) with the current base keys; plans and writes nothing. | See command semantics |
-| --refresh | flag | make locale &lt;name&gt; --refresh: add only the base keys a pending draft lacks, keeping every existing translation; review with --dry-run first. | See command semantics |
+| --refresh | flag | make locale &lt;name&gt; --refresh: add the base keys a pending draft lacks and drop keys the base no longer has, keeping every surviving translation; review with --dry-run first. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |

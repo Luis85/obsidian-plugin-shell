@@ -22,7 +22,7 @@ import { visualDefinitions, visualPackages, visualAdapterPath } from '../emitter
 import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { styleCode } from '../emitters/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../emitters/devkit-files.ts';
-import { maintainerOnly, relocateFrameworkDocuments } from '../emitters/framework-docs.ts';
+import { maintainerOnly, relocateFrameworkDocuments, scopeExampleOwnership } from '../emitters/framework-docs.ts';
 import { hostingProfile, projectHosting, prunedByHosting } from '../../../scripts/companion/hosting-contract.mjs';
 import { maintainerScript, rewriteDocReferences } from '../emitters/framework-scope.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
@@ -86,7 +86,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   // maintainer workflows); links to them in copied docs become plain text.
   const hosting = hostingProfile(projectHosting(m.document));
   const entries = new Map(templateRoot.frameworkFiles.filter(file => !prunedByHosting(hosting, file.path)).map(file => [file.path, { ...file } ]));
-  relocateFrameworkDocuments(entries, path => maintainerOnly(path) || prunedByHosting(hosting, path));
+  relocateFrameworkDocuments(entries, path => maintainerOnly(path) || prunedByHosting(hosting, path)); scopeExampleOwnership(entries);
   const collector = artifactCollector([...entries.values()].map(file => ({ ...file, producer: 'framework' })));
   let producer = 'project';
   const add: Add = (path, content, ownership = 'extension') => {

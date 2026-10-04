@@ -144,7 +144,7 @@ const specific: Record<string, OptionHelp> = {
   preference: { description: 'Preference key for setting makers.' },
   document: { description: 'Note-backed entity (requires the markdown backend).' },
   check: { description: 'Read-only: compare the pending locale draft (make locale <name> --check) with the current base keys; plans and writes nothing.' },
-  refresh: { description: 'make locale <name> --refresh: add only the base keys a pending draft lacks, keeping every existing translation; review with --dry-run first.' },
+  refresh: { description: 'make locale <name> --refresh: add the base keys a pending draft lacks and drop keys the base no longer has, keeping every surviving translation; review with --dry-run first.' },
   'trust-custom': { description: 'Run a registered local custom recipe (scripts/makers/custom/<name>.mjs); it executes trusted project code, so review it first. Built-in recipes never need it.' },
   profile: { description: 'Execution profile.' },
   from: { description: 'Extracted replacement kit folder.' },
