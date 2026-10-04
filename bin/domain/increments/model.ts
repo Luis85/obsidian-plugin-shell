@@ -3,7 +3,8 @@
  * An Increment is the Definition of Ready handoff (configs/delivery/delivery.json); a PullRequest is the
  * plan of one pull request that delivers part of it. Both are frontmatter+Markdown files in a configured folder.
  */
-import { insistDelivery } from './errors.ts';
+import { hasControls } from '../errors.ts';
+import { insistDelivery, type DeliveryErrorCode } from './errors.ts';
 
 export const incrementStatuses = ['New', 'Refining', 'Ready', 'In progress', 'Done', 'Cancelled'] as const;
 export type IncrementStatus = typeof incrementStatuses[number];
@@ -87,6 +88,10 @@ function sameList(actual: unknown, expected: readonly string[], name: string): s
   insistDelivery(isStringList(actual) && actual.join('\n') === expected.join('\n'), 'DELIVERY_SCHEMA_UNSUPPORTED', `delivery.json ${name} must be ${expected.join(', ')}; the increment commands depend on that vocabulary.`);
   return [...actual];
 }
+function sameValue(actual: unknown, expected: string, name: string): string {
+  insistDelivery(actual === expected, 'DELIVERY_SCHEMA_UNSUPPORTED', `delivery.json ${name} must be ${expected}; the increment commands depend on that vocabulary.`);
+  return expected;
+}
 const record = (value: unknown, name: string): Record<string, unknown> => {
   insistDelivery(value !== null && typeof value === 'object' && !Array.isArray(value), 'DELIVERY_SCHEMA_UNSUPPORTED', `delivery.json ${name} must be an object.`);
   return value as Record<string, unknown>;
@@ -119,13 +124,13 @@ export function deliverySchemaFrom(raw: unknown): DeliverySchema {
     handoff: {
       glob: nonEmpty(handoff.glob, 'handoff.glob'), ignore: [...handoff.ignore as string[]], template: nonEmpty(handoff.template, 'handoff.template'),
       slugPattern: nonEmpty(handoff.slugPattern, 'handoff.slugPattern'), maxSlugLength: maxSlugLength as number, bodyKey: nonEmpty(handoff.bodyKey, 'handoff.bodyKey'),
-      type: sameList([handoff.type], [base.type], 'handoff.type')[0]!, statuses: sameList(handoff.statuses, base.statuses, 'handoff.statuses'),
+      type: sameValue(handoff.type, base.type, 'handoff.type'), statuses: sameList(handoff.statuses, base.statuses, 'handoff.statuses'),
       e2e: sameList(handoff.e2e, base.e2e, 'handoff.e2e'), requiredKeys: sameList(handoff.requiredKeys, base.requiredKeys, 'handoff.requiredKeys'),
       optionalKeys: sameList(handoff.optionalKeys, base.optionalKeys, 'handoff.optionalKeys'), sections: sameList(handoff.sections, base.sections, 'handoff.sections'),
-      generatedSection: sameList([handoff.generatedSection], [base.generatedSection], 'handoff.generatedSection')[0]!,
+      generatedSection: sameValue(handoff.generatedSection, base.generatedSection, 'handoff.generatedSection'),
     },
-    pullRequests: { glob: nonEmpty(pullRequests.glob, 'pullRequests.glob'), type: sameList([pullRequests.type], ['PullRequest'], 'pullRequests.type')[0]!,
-      incrementKey: sameList([pullRequests.incrementKey], ['increment'], 'pullRequests.incrementKey')[0]! },
+    pullRequests: { glob: nonEmpty(pullRequests.glob, 'pullRequests.glob'), type: sameValue(pullRequests.type, 'PullRequest', 'pullRequests.type'),
+      incrementKey: sameValue(pullRequests.incrementKey, 'increment', 'pullRequests.incrementKey') },
     sizes: sizes(data.sizes),
   };
 }
@@ -140,4 +145,51 @@ export function deliveryPathsDrift(schema: DeliverySchema, folders: { increments
   const pairs = [['handoff.glob', schema.handoff.glob, folders.increments], ['pullRequests.glob', schema.pullRequests.glob, folders.pullRequests]] as const;
   return pairs.filter(([, glob, folder]) => glob !== folderGlob(folder))
     .map(([key, glob, folder]) => ({ code: 'DELIVERY_PATHS_DRIFT', message: `delivery.json ${key} is ${glob} but the configured folder is ${folder}; migrate the settings or align ${key}.` }));
+}
+/** A single-line title of at most 120 characters, trimmed. */
+export function requireTitle(value: string, code: DeliveryErrorCode = 'INCREMENT_INPUT_INVALID', name = 'title'): string {
+  const text = value.trim();
+  insistDelivery(text.length > 0 && text.length <= limits.title && !hasControls(text), code, `Enter a single-line ${name} of 1 to ${limits.title} characters.`);
+  return text;
+}
+/** A single-line list item or value of bounded length. */
+export function requireLine(value: string, name: string, code: DeliveryErrorCode = 'INCREMENT_INPUT_INVALID', limit: number = limits.item): string {
+  const text = value.trim();
+  insistDelivery(text.length > 0 && text.length <= limit && !hasControls(text), code, `Enter ${name} as one line of 1 to ${limit} characters.`);
+  return text;
+}
+
+/** A folder move of the increments or pull-requests root. */
+export interface FolderMove { from: string; to: string }
+const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function jsonValue(text: string): unknown {
+  try { return JSON.parse(text); } catch { return insistDelivery(false, 'DELIVERY_SCHEMA_UNSUPPORTED', 'delivery.json is not valid JSON.'); }
+}
+/** Replaces the one occurrence of a JSON string token (optionally after `"key": `), keeping every other byte. */
+function replaceToken(text: string, before: string, after: string, key?: string): string {
+  const pattern = new RegExp(`(${key ? `"${key}"\\s*:\\s*` : ''})${escape(JSON.stringify(before))}`, 'g'), found = [...text.matchAll(pattern)];
+  insistDelivery(found.length === 1, 'DELIVERY_PATHS_DRIFT', `delivery.json must contain ${JSON.stringify(before)} exactly once to be migrated.`);
+  const match = found[0]!;
+  return text.slice(0, match.index) + match[1] + JSON.stringify(after) + text.slice(match.index + match[0].length);
+}
+/**
+ * Rewrites delivery.json for a settings migration: `handoff.glob`, `handoff.ignore` entries inside the moved
+ * increments folder and `pullRequests.glob`. Only those string tokens change; a glob that does not match the
+ * old folder refuses with DELIVERY_PATHS_DRIFT instead of guessing.
+ */
+export function retargetDeliveryConfig(text: string, moves: { increments?: FolderMove; pullRequests?: FolderMove }): string {
+  const data = record(jsonValue(text), 'root'), handoff = record(data.handoff, 'handoff'), pullRequests = record(data.pullRequests, 'pullRequests');
+  let next = text;
+  const retarget = (glob: unknown, move: FolderMove, name: string) => {
+    insistDelivery(glob === folderGlob(move.from), 'DELIVERY_PATHS_DRIFT', `delivery.json ${name} is ${String(glob)}, not ${folderGlob(move.from)}; align it before migrating.`);
+    next = replaceToken(next, folderGlob(move.from), folderGlob(move.to), 'glob');
+  };
+  if (moves.increments) {
+    const move = moves.increments;
+    retarget(handoff.glob, move, 'handoff.glob');
+    const ignored = Array.isArray(handoff.ignore) ? handoff.ignore.filter((item): item is string => typeof item === 'string' && item.startsWith(`${move.from}/`)) : [];
+    for (const item of ignored) next = replaceToken(next, item, move.to + item.slice(move.from.length));
+  }
+  if (moves.pullRequests) retarget(pullRequests.glob, moves.pullRequests, 'pullRequests.glob');
+  return next;
 }
