@@ -127,13 +127,48 @@ node bin/app new --input request.json --out projects/issue-desk --apply <reviewe
 
 ## Prepared package and generation
 
-The package contains `design-brief.md`, `execution-prompt.md`, `project.config.json`, replayable `project-request.json`, exact guide/answers, complete `companion.project.json`, preparation/integration/manifest metadata and `source/`. `project.config.json` (`schemaVersion: 2`) records the chosen starter's ID, version and SHA-256 together with its complete selection, so regeneration never needs the starter file again. `source/project.config.json` mirrors it. Target metadata is **never inserted into the closed Companion v6 envelope**.
+The package contains `design-brief.md`, `execution-prompt.md`, `configs/<project-id>-config.json`, replayable `project-request.json`, exact guide/answers, complete `companion.project.json`, preparation/integration/manifest metadata and `source/`. The project configuration (`schemaVersion: 2`) records the chosen starter's ID, version and SHA-256 together with its complete selection, so regeneration never needs the starter file again. `source/configs/<project-id>-config.json` mirrors it. Target metadata is **never inserted into the closed Companion v6 envelope**.
 
 The same compiler parses, migrates, validates and resolves the model. Its `project` output adapter emits `src/core/project.ts`, `src/targets/<target>/main.ts`, the selected UI implementation, dependency manifests, typecheck/build scripts, starter tests, documentation and canonical Claude/Codex skill package. Native entrypoints own plugin/view lifecycle. Angular uses AOT, zoneless per-view applications with cleanup, rather than document-global bootstrap. Nuxt UI reuses the existing static vendor guards and owned CSS. Vanilla uses DOM APIs. CLI commands have structured output and nonzero failure exits.
 
 This is an intentionally honest **starting scaffold**: a navigable page-list projection, target integration and prototype handoff. Component bodies, arbitrary visual trees and agreed business actions remain prototype implementation, not fabricated completed behavior. The entire authoring model is preserved. Source/test base folders currently must remain `src` / `tests`; custom folder adapters fail explicitly rather than silently misrouting files.
 
-`sketch generate` detects a saved `project.config.json`; both machine and studio generation preserve its starter, targets and framework. Explicit `--kind project` requires that sidecar. The safe file planner rejects edited/unowned files and stale approval hashes. Regenerate into another directory when preserving source-owned implementation.
+`sketch generate` detects a saved project configuration (below); both machine and studio generation preserve its starter, targets and framework. Explicit `--kind project` requires that configuration. The safe file planner rejects edited/unowned files and stale approval hashes. Regenerate into another directory when preserving source-owned implementation.
+
+## Project configuration
+
+A project's saved starter selection lives at `configs/<project-id>-config.json`, where
+`<project-id>` is the project's Companion ID (`project.id` in `design/project.json`:
+lowercase letters and digits joined by single hyphens, at most 60 characters). One domain
+rule (`bin/compiler/domain/project-config.ts`) names the file for every writer and reader:
+`project-setup`, `new` packages (`configs/` and `source/configs/`), compiler-generated
+sources and their `scripts/build.mjs`/`scripts/serve.mjs`, `sketch generate`, `prototype`,
+`brainstorm`, `design` and `first-run`.
+
+Commands that need the current project use `--config configs/<project-id>-config.json`
+when given; otherwise they read the single `*-config.json` file directly inside `configs/`.
+Subfolders such as `configs/starters`, `configs/types` and `configs/quality` are never
+searched. No match means no saved project. Several matches fail with
+`PROJECT_CONFIG_AMBIGUOUS`, which lists the candidates and the `--config` option; a
+`*-config.json` name that is not a portable project ID fails with `PROJECT_CONFIG_INVALID`,
+and a `--config` path that does not exist fails with `PROJECT_CONFIG_MISSING`. A linked
+`configs/` folder or configuration file is refused. `project-setup` refuses to add a
+second configuration beside another project's (`PROJECT_CONFIG_CONFLICT`).
+
+The retired root `project.config.json` is never read. When it exists and `configs/` holds
+no project configuration, commands fail with `PROJECT_CONFIG_RELOCATED`. A project made by
+`project-setup` moves it with the reviewed migration, which moves the bytes unchanged to
+`configs/<project-id>-config.json` and removes the root file in one hash-guarded plan:
+
+```sh
+echo '{"schemaVersion":1}' | node bin/app settings migrate --input - --json
+# Review the two changes, then repeat with --apply <planHash>.
+```
+
+The migration refuses when `configs/` already holds a project configuration
+(`MIGRATION_CONFLICT`) and runs before any path migration (`MIGRATION_ORDER`). Elsewhere,
+move the file by hand to the name the project ID gives, or regenerate prepared packages and
+generated sources, which write the new location.
 
 ## Build and readiness boundaries
 

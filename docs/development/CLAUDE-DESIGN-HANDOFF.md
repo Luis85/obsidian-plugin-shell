@@ -78,7 +78,7 @@ The guided prototype maker passes its prepared package (`<out>/companion.project
 | `prototypes/`, `assets/`, `notes/` | Design work | Prototypes, exported images, decisions. |
 | `design.manifest.json` | Generated | Source path and hash, target, folder, the hash of every generated file and the engineering facts fingerprint. |
 
-The platform section follows the saved project starter (`project.config.json`). Without one, the shell
+The platform section follows the saved project starter (`configs/<project-id>-config.json`). Without one, the shell
 itself is described: an Obsidian plugin with a Vue 3 and Nuxt UI frontend.
 
 ## Engineering handoff guide
@@ -89,7 +89,7 @@ project root that holds the design folder; a missing source is stated as missing
 
 | Section | Read from |
 | --- | --- |
-| Target architecture | `project.config.json` (or the shell default), the project model's source and test folders, the design-relevant packages and exact versions in `package.json`, file counts per folder under the source root, and the conventional folders that exist (`presentation/components`, `composables`, `stores`, `features`, `ui`, `core`, `targets`, `generated`, ...). |
+| Target architecture | `configs/<project-id>-config.json` (or the shell default), the project model's source and test folders, the design-relevant packages and exact versions in `package.json`, file counts per folder under the source root, and the conventional folders that exist (`presentation/components`, `composables`, `stores`, `features`, `ui`, `core`, `targets`, `generated`, ...). |
 | Where each screen is implemented | `design/visual-traceability.json` page definitions and `design/compiler-origins.json`, joined with the model's screen IDs. |
 | Interactions and their code hooks | `design/visual-traceability.json` interactions (verification, implementation and test files), otherwise the model's interactions. |
 | Components to build with | `*.vue` and `*.component.ts` files under the source root, and the Nuxt UI components they import or render, counted per file. |
