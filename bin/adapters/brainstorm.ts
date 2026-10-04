@@ -191,7 +191,7 @@ async function featureCommand(args: Arguments, context: CommandContext, options:
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
 export async function brainstormCommand(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  const allowed = ['root', 'project', 'input', 'out', 'apply', 'json', 'no-interaction', 'help', 'no-color', 'ui'];
+  const allowed = ['root', 'project', 'config', 'input', 'out', 'apply', 'json', 'no-interaction', 'help', 'no-color', 'ui'];
   requireSketch(Object.keys(args.flags).every(key => allowed.includes(key)),
     'BRAINSTORM_OPTION', 'Unsupported brainstorm option.');
   const discovered = discovery(args);

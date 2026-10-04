@@ -23,12 +23,6 @@ export function projectConfigId(path: string): string | undefined {
   const id = path.slice(prefix.length, -suffix.length);
   return isPortableId(id) ? id : undefined;
 }
-/** Whether a configured location equals, contains or lies inside a project configuration file. */
-export function overlapsProjectConfig(path: string): boolean {
-  const [folder, name] = path.toLowerCase().split('/');
-  if (folder !== projectConfigFolder) return false;
-  return name === undefined || projectConfigId(`${folder}/${name}`) !== undefined;
-}
 export type ProjectConfigDiscovery =
   | { kind: 'none' } | { kind: 'found'; path: string } | { kind: 'retired'; path: string }
   | { kind: 'ambiguous'; candidates: string[] } | { kind: 'invalid'; path: string } | { kind: 'missing'; path: string };

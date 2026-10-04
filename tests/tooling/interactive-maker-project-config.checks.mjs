@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { discoverProjectConfig, overlapsProjectConfig, projectConfigId, projectConfigPath, projectConfigPattern } from '../../bin/compiler/domain/project-config.ts';
+import { discoverProjectConfig, projectConfigId, projectConfigPath, projectConfigPattern } from '../../bin/compiler/domain/project-config.ts';
 import { savedProjectConfig, locateProjectConfig, projectConfigFiles } from '../../bin/adapters/project-selection.ts';
 import { projectStarter } from '../../bin/adapters/projects.ts';
 import { projectSetupPlan } from '../../bin/adapters/project-setup.ts';
@@ -32,8 +32,6 @@ test('one domain rule names, recognises and discovers configs/<project-id>-confi
   for (const id of ['Issue', '1desk', 'desk-', 'a'.repeat(61), '', '../x']) assert.throws(() => projectConfigPath(id), /portable project ID/);
   assert.equal(projectConfigId('configs/app-config-config.json'), 'app-config');
   for (const path of ['configs/starters/a-config.json', 'project.config.json', 'configs/Issue-config.json', 'other/a-config.json']) assert.equal(projectConfigId(path), undefined, path);
-  assert.ok(overlapsProjectConfig('configs') && overlapsProjectConfig('Configs/Desk-config.json/notes'));
-  assert.ok(!overlapsProjectConfig('configs/prds') && !overlapsProjectConfig('docs/configs'));
   const names = ['starters', 'types', 'quality', 'user-settings.json', 'project-setup.json'];
   assert.deepEqual(discoverProjectConfig({ names, retired: false }), { kind: 'none' });
   assert.deepEqual(discoverProjectConfig({ names, retired: true }), { kind: 'retired', path: 'project.config.json' });
@@ -83,6 +81,12 @@ test('sketch generation reads the discovered configuration and --config chooses 
   assert.equal(child.status, 1); assert.equal(JSON.parse(child.stdout).diagnostics[0].code, 'PROJECT_CONFIG_AMBIGUOUS');
   const chosen = spawnSync(process.execPath, [join(frameworkRoot, 'bin/app'), 'sketch', 'generate', '--root', root, '--out', 'code', '--config', 'configs/cli-config.json', '--json'], { encoding: 'utf8', timeout: 60000 });
   assert.equal(chosen.status, 0, chosen.stdout + chosen.stderr); assert.equal(JSON.parse(chosen.stdout).data.status, 'planned');
+  await put(root, 'request.json', json({ schemaVersion: 1, name: 'Status check', purpose: 'Show the status', actors: ['Operator'], entities: ['Check'],
+    acceptance: ['The status is shown'], pages: [{ title: 'Status', kind: 'view', purpose: 'Show it', interactions: [] }], output: 'boilerplate', verification: 'none' }));
+  const brainstorm = ['brainstorm', 'feature', '--input', 'request.json', '--out', 'ideas/status'];
+  await assert.rejects(() => execute(parseArguments(brainstorm), context()), code('PROJECT_CONFIG_AMBIGUOUS'));
+  const idea = await execute(parseArguments([...brainstorm, '--config', 'configs/cli-config.json']), context('configs/cli-config.json'));
+  assert.equal(idea.status, 'planned'); assert.ok(idea.changes.some(item => item.path === 'ideas/status/source/configs/cli-config.json'), 'brainstorm source follows the chosen configuration');
   for (const [args, expected] of [[['project-setup', 'status'], 'SETUP_OPTION'], [['first-run', 'status'], 'FIRST_RUN_OPTION'], [['new', 'starters'], 'PROJECT_OPTION']])
     await assert.rejects(() => execute(parseArguments([...args, '--config', 'configs/cli-config.json']), context('configs/cli-config.json')), code(expected), args[0] + ' does not read a saved project configuration');
 }));
