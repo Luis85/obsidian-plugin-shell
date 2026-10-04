@@ -14,6 +14,8 @@ export interface CollectionChoice { id: string; label: string }
 export interface CollectionField {
   key: string; input: string; label: string; kind: CollectionFieldKind; source: CollectionFieldSource; required: boolean;
   requiredWhenOpen: boolean; frontmatter: boolean; multiline: boolean; overdue: boolean; maxLength: number; vocabulary?: string; default?: 'today';
+  /** Text or list items must be ids of this form, for example `RISK-` for references to risk notes (`RISK-0001`). */
+  idPrefix?: string;
 }
 export interface CollectionStatus { id: string; label: string; open: boolean; transitions: string[]; stamp?: string }
 export interface CollectionSort { key: string; order: 'asc' | 'desc' }
@@ -68,15 +70,27 @@ function fieldShape(field: CollectionField, name: string, vocab: Record<string, 
   requireSketch((field.default === undefined && !field.overdue) || field.kind === 'date', 'COLLECTION_DEFINITION', `${name}: default today and overdue apply to dates only.`);
   requireSketch(field.frontmatter || (field.kind === 'text' && field.source === 'input'), 'COLLECTION_DEFINITION', `${name}: body-only values are input text.`);
   requireSketch(field.source !== 'stamp' || (field.kind === 'date' && !field.required), 'COLLECTION_DEFINITION', `${name}: a stamp is an optional date.`);
+  requireSketch(!field.idPrefix || (['text', 'list'].includes(field.kind) && !field.vocabulary && field.frontmatter), 'COLLECTION_DEFINITION', `${name}: idPrefix applies to frontmatter text and list fields without a vocabulary.`);
 }
 function fieldVocabulary(field: CollectionField, name: string, vocab: Record<string, CollectionChoice[]>): void {
   requireSketch(field.kind !== 'choice' || field.vocabulary !== undefined, 'COLLECTION_DEFINITION', `${name}: a choice needs a vocabulary.`);
   requireSketch(field.vocabulary === undefined || (Object.hasOwn(vocab, field.vocabulary) && ['choice', 'integer', 'list'].includes(field.kind)), 'COLLECTION_DEFINITION', `${name}: unknown or unsupported vocabulary.`);
   requireSketch(field.kind !== 'integer' || !field.vocabulary || vocab[field.vocabulary]!.every(item => /^-?\d{1,9}$/.test(item.id)), 'COLLECTION_DEFINITION', `${name}: an integer vocabulary needs whole-number ids.`);
 }
+/** Collection id prefixes: upper-case letters and digits ending in `-`, for example `RISK-`. */
+const idPrefixPattern = /^[A-Z][A-Z0-9]{0,9}-$/;
+function idPrefixOf(value: unknown, name: string): string {
+  requireSketch(typeof value === 'string' && idPrefixPattern.test(value), 'COLLECTION_DEFINITION', `${name} is upper-case letters and digits ending in -, for example RISK-.`);
+  return value;
+}
+/** The optional vocabulary, default and id-reference parts of a field, present only when declared. */
+function optionalFieldParts(item: Record<string, unknown>, name: string): Pick<CollectionField, 'vocabulary' | 'default' | 'idPrefix'> {
+  return { ...(item.vocabulary === undefined ? {} : { vocabulary: identifier(item.vocabulary, name + '.vocabulary', keyPattern) }),
+    ...(item.default === undefined ? {} : { default: 'today' as const }), ...(item.idPrefix === undefined ? {} : { idPrefix: idPrefixOf(item.idPrefix, name + '.idPrefix') }) };
+}
 function readField(raw: unknown, index: number, vocab: Record<string, CollectionChoice[]>): CollectionField {
   const item = object(raw), name = `fields[${index}]`;
-  keys(item, ['key', 'label', 'kind', 'source', 'required', 'requiredWhenOpen', 'frontmatter', 'multiline', 'overdue', 'maxLength', 'vocabulary', 'default']);
+  keys(item, ['key', 'label', 'kind', 'source', 'required', 'requiredWhenOpen', 'frontmatter', 'multiline', 'overdue', 'maxLength', 'vocabulary', 'default', 'idPrefix']);
   const key = identifier(item.key, name + '.key', keyPattern);
   requireSketch(kinds.includes(item.kind as CollectionFieldKind), 'COLLECTION_DEFINITION', `${name}.kind must be ${kinds.join(', ')}.`);
   requireSketch(item.source === undefined || sources.includes(item.source as CollectionFieldSource), 'COLLECTION_DEFINITION', `${name}.source must be ${sources.join(', ')}.`);
@@ -85,8 +99,7 @@ function readField(raw: unknown, index: number, vocab: Record<string, Collection
   const field: CollectionField = { key, input: collectionInputName(key), label: text(item.label, name + '.label', 80), kind: item.kind as CollectionFieldKind,
     source: (item.source ?? 'input') as CollectionFieldSource, required: flag(item.required, name + '.required'), requiredWhenOpen: flag(item.requiredWhenOpen, name + '.requiredWhenOpen'),
     frontmatter: flag(item.frontmatter, name + '.frontmatter', true), multiline: flag(item.multiline, name + '.multiline'), overdue: flag(item.overdue, name + '.overdue'),
-    maxLength: Number(item.maxLength ?? 500), ...(item.vocabulary === undefined ? {} : { vocabulary: identifier(item.vocabulary, name + '.vocabulary', keyPattern) }),
-    ...(item.default === undefined ? {} : { default: 'today' as const }) };
+    maxLength: Number(item.maxLength ?? 500), ...optionalFieldParts(item, name) };
   fieldShape(field, name, vocab);
   return field;
 }
@@ -155,7 +168,7 @@ type Header = Pick<CollectionDefinition, 'schemaVersion' | 'id' | 'title' | 'des
 function header(raw: Record<string, unknown>, fields: readonly CollectionField[]): Header {
   requireSketch(raw.schemaVersion === 1, 'COLLECTION_VERSION', 'Expected collection schemaVersion 1.');
   requireSketch(collectionPathKeys.includes(raw.pathKey as CollectionPathKey), 'COLLECTION_DEFINITION', `pathKey must be one of ${collectionPathKeys.join(', ')} (bin/domain/user-settings.ts).`);
-  requireSketch(typeof raw.idPrefix === 'string' && /^[A-Z][A-Z0-9]{0,9}-$/.test(raw.idPrefix), 'COLLECTION_DEFINITION', 'idPrefix is upper-case letters and digits ending in -, for example RISK-.');
+  requireSketch(typeof raw.idPrefix === 'string' && idPrefixPattern.test(raw.idPrefix), 'COLLECTION_DEFINITION', 'idPrefix is upper-case letters and digits ending in -, for example RISK-.');
   requireSketch(Number.isSafeInteger(raw.idDigits) && Number(raw.idDigits) >= 3 && Number(raw.idDigits) <= 8, 'COLLECTION_DEFINITION', 'idDigits must be 3–8.');
   requireSketch(raw.hook !== undefined || fields.every(field => field.source !== 'derived'), 'COLLECTION_DEFINITION', 'Derived fields need a hook.');
   const hook = raw.hook === undefined ? undefined : identifier(raw.hook, 'hook', /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/);

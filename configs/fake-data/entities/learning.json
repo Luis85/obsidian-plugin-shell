@@ -1,0 +1,32 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "learning",
+  "title": "Learning",
+  "description": "Lessons-learned notes in the format of configs/collections/learning.json (type Learning, LRN-0001 ids, its statuses, categories, tags and impact, related risk ids), so node bin/app learning check, list and report read them.",
+  "folder": "Learnings",
+  "titleProperty": "title",
+  "properties": [
+    { "key": "type", "type": "text", "generator": { "value": "Learning" } },
+    { "key": "id", "label": "ID", "type": "text", "generator": { "sequence": "LRN-" }, "unique": true },
+    { "key": "title", "label": "Title", "type": "text", "generator": { "faker": "company.catchPhrase" }, "unique": true },
+    { "key": "status", "label": "Status", "type": "text", "generator": { "choices": ["draft", "validated", "applied", "superseded"] } },
+    { "key": "created", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-06-01", "to": "2025-09-30" } } },
+    { "key": "updated", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-10-01", "to": "2025-12-31" } } },
+    { "key": "observed", "label": "Observed", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-04-01", "to": "2025-05-31" } } },
+    { "key": "context", "label": "Context", "type": "text", "generator": { "faker": "lorem.sentence", "args": { "min": 8, "max": 16 } } },
+    { "key": "insight", "label": "Insight", "type": "text", "generator": { "faker": "lorem.sentence", "args": { "min": 6, "max": 12 } } },
+    { "key": "category", "label": "Category", "type": "text", "generator": { "choices": ["process", "technical", "tooling", "testing", "security", "communication", "planning", "people"] } },
+    { "key": "tags", "label": "Tags", "type": "tags", "generator": { "choices": ["architecture", "automation", "ci", "dependencies", "documentation", "estimation", "incident", "onboarding", "performance", "release", "requirements", "review"] }, "items": { "min": 1, "max": 3 } },
+    { "key": "impact", "label": "Impact", "type": "text", "generator": { "choices": ["low", "medium", "high"] } },
+    { "key": "source", "label": "Source", "type": "text", "generator": { "choices": ["Sprint 12 retrospective", "Sprint 13 retrospective", "Incident review", "Release 1.4 post-mortem", "Pull request review", "Customer interview"] }, "required": false },
+    { "key": "applies-to", "type": "list", "generator": { "choices": ["CI", "release process", "onboarding", "plugin runtime", "documentation", "setup"] }, "items": { "min": 1, "max": 2 }, "required": false },
+    { "key": "follow-up", "type": "text", "generator": { "faker": "company.buzzPhrase" } },
+    { "key": "due", "label": "Due", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2026-01-01", "to": "2026-12-31" } } },
+    { "key": "owner", "label": "Owner", "type": "text", "generator": { "faker": "person.fullName" }, "required": false },
+    { "key": "related-risks", "type": "list", "generator": { "choices": ["RISK-0001", "RISK-0002", "RISK-0003", "RISK-0004", "RISK-0005", "RISK-0006", "RISK-0007", "RISK-0008"] }, "items": { "min": 1, "max": 2 }, "required": false },
+    { "key": "schema_version", "type": "number", "generator": { "value": 1 } },
+    { "key": "evidence", "type": "text", "generator": { "faker": "lorem.paragraph", "args": { "min": 2, "max": 4 } }, "frontmatter": false }
+  ],
+  "body": "# {{title}}\n\n## Context\n\n{{context}}\n\n## Insight\n\n{{insight}}\n\n## Evidence\n\n{{evidence}}\n\n## Follow-up\n\n{{follow-up}}\n"
+}

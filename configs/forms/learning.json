@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "learning",
+  "version": 1,
+  "title": "Learning",
+  "description": "One lessons-learned note in the configured paths.learnings folder. Choices come from configs/collections/learning.json; the collection engine validates the result before a reviewed plan is shown.",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Learning title", "maxLength": 160 },
+    { "id": "context", "kind": "text", "label": "Context: what happened (one line; details go in the note body)", "required": true, "maxLength": 1000 },
+    { "id": "insight", "kind": "text", "label": "Insight: what we learned", "required": true, "maxLength": 1000 },
+    { "id": "status", "kind": "select", "label": "Status", "choicesFrom": "collection.statuses" },
+    { "id": "supersededBy", "kind": "text", "label": "Superseded by (learning id such as LRN-0002, optional)", "maxLength": 20, "when": { "field": "status", "equals": "superseded" } },
+    { "id": "category", "kind": "select", "label": "Category", "choicesFrom": "collection.choices" },
+    { "id": "impact", "kind": "select", "label": "Impact", "choicesFrom": "collection.choices" },
+    { "id": "tags", "kind": "multi", "label": "Tags (at least one)", "choicesFrom": "collection.choices", "required": true },
+    { "id": "source", "kind": "text", "label": "Source (project, PR, incident or retrospective; optional)", "maxLength": 200 },
+    { "id": "appliesTo", "kind": "list", "label": "Applies to (comma-separated areas, optional)", "separator": ",", "joiner": ", ", "maxItems": 60, "maxLength": 80 },
+    { "id": "relatedRisks", "kind": "list", "label": "Related risk ids (comma-separated, such as RISK-0001; optional)", "separator": ",", "joiner": ", ", "maxItems": 60, "maxLength": 20 },
+    { "id": "followUp", "kind": "text", "label": "Follow-up action (required once validated)", "maxLength": 500 },
+    { "id": "due", "kind": "text", "label": "Due date of the follow-up (YYYY-MM-DD, required once validated)", "maxLength": 10 },
+    { "id": "owner", "kind": "text", "label": "Owner (optional)", "maxLength": 120 },
+    { "id": "observed", "kind": "text", "label": "Observed on (YYYY-MM-DD, empty for today)", "maxLength": 10, "when": { "path": "id", "present": false } },
+    { "id": "evidence", "kind": "text", "label": "Evidence (optional, written to the note body)", "maxLength": 4000, "when": { "path": "id", "present": false } }
+  ]
+}

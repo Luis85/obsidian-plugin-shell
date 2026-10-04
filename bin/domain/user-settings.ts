@@ -18,7 +18,7 @@ export interface UserSettings {
  * Folders of the typed-note collections in configs/collections (one Markdown note per item). Like design they are
  * optional, so existing settings and saved setup state keep their exact path set; collectionRoot resolves the default.
  */
-export const collectionPathDefaults = { risks: 'docs/risks' } as const;
+export const collectionPathDefaults = { risks: 'docs/risks', learnings: 'docs/learnings' } as const;
 export type CollectionPathKey = keyof typeof collectionPathDefaults;
 export const collectionPathKeys = Object.keys(collectionPathDefaults) as CollectionPathKey[];
 export const defaultSettings: UserSettings = {

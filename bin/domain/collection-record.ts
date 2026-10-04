@@ -29,7 +29,10 @@ const choices = (definition: CollectionDefinition, field: CollectionField) => fi
 function textValue(field: CollectionField, raw: unknown): string {
   requireSketch(typeof raw === 'string' && raw.trim().length > 0 && raw.length <= field.maxLength && !hasControls(raw, field.multiline),
     'COLLECTION_VALUE', `${field.key} needs ${field.multiline ? '' : 'single-line '}text of 1–${field.maxLength} characters.`);
-  return raw.trim();
+  const value = raw.trim();
+  // The prefix is validated as upper-case letters, digits and a final '-', so it is literal inside the pattern.
+  requireSketch(!field.idPrefix || new RegExp(`^${field.idPrefix}\\d{3,9}$`).test(value), 'COLLECTION_VALUE', `${field.key} must name ids like ${field.idPrefix}0001.`);
+  return value;
 }
 /** One stored or supplied value, validated against its field and vocabulary. */
 export function collectionValue(definition: CollectionDefinition, field: CollectionField, raw: unknown): CollectionValue {

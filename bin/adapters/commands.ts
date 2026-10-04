@@ -121,12 +121,21 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app risk check --json     Schema, model values, derived score/level, duplicate ids, overdue and open-risk gaps
   node bin/app risk report [--base] --json   Regenerate <risks>/risk-register.md (and risks.base) through review
   node bin/app risk model --json     The effective collection definition (configs/collections/risk.json)
+  node bin/app learning new|edit --id LRN-0001|review   Lessons learned: guided capture, edit and review (terminal; folder: paths.learnings)
+  node bin/app learning list [--status <id>] [--category <id>] [--impact <id>] [--overdue] --json
+  node bin/app learning show --id LRN-0001 --json
+  node bin/app learning new --input learning.json --json     Plan a new learning note (next free id); then --apply <planHash>
+  node bin/app learning update --id LRN-0001 --input changes.json --json   Changed fields and draft → validated → applied transitions
+  node bin/app learning check --json  Schema, vocabularies, risk id format, duplicate ids, overdue follow-ups, validated without follow-up
+  node bin/app learning report [--base] --json   Regenerate <learnings>/learnings.md (and learnings.base) through review
+  node bin/app learning model --json  The effective collection definition (configs/collections/learning.json)
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
 --starter <project-starter-id> (new, new guide), --step <step-id> (learn complete-step), --name <prototype-slug> and --package <prepared folder> (design),
 --entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --config <id> and --base (fake-data),
 --id <id>, --as-of <YYYY-MM-DD>, --status/--dimension/--category/--level <id>, --overdue and --base (risk),
+--status/--category/--impact <id> with the same --id, --as-of, --overdue and --base (learning; learn is the separate course runner),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.

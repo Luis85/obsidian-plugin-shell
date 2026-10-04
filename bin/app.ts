@@ -33,14 +33,17 @@ import { routeArguments } from './adapters/router.ts';
 import { commands as frameworkCommands } from './adapters/framework/catalog.ts';
 import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } from '../plugins/runtime.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
+/** Whether the command and action name a terminal flow at all; TTY, CI and flags are checked by canInteract. */
+function interactiveCommand(args: Arguments): boolean {
+  if (Object.hasOwn(collectionCommandRoots, args.command)) return collectionInteractiveActions.includes(args.action);
+  if (!studioCommands.includes(args.command) && !Object.hasOwn(launchers, args.command)) return false;
+  return !args.action || interactiveProcess(args);
+}
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
-  const collection = Object.hasOwn(collectionCommandRoots, args.command);
-  if (!collection && !studioCommands.includes(args.command) && !Object.hasOwn(launchers, args.command)) return false;
   if (env.CI && env.CI !== 'false') return false;
   const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
-  const action = collection ? collectionInteractiveActions.includes(args.action) : !args.action || interactiveProcess(args);
-  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && action);
+  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && interactiveCommand(args));
 }
 async function interactive(args: Arguments, context: CommandContext, io: IO, controller: AbortController): Promise<void> {
   const env = io.env ?? process.env;

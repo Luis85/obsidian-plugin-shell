@@ -30,7 +30,8 @@
       "key": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$" }, "label": { "type": "string", "maxLength": 80 },
       "kind": { "enum": ["text", "date", "integer", "choice", "list"] }, "source": { "enum": ["input", "derived", "stamp"] },
       "required": { "type": "boolean" }, "requiredWhenOpen": { "type": "boolean" }, "frontmatter": { "type": "boolean" }, "multiline": { "type": "boolean" },
-      "overdue": { "type": "boolean" }, "maxLength": { "type": "integer", "minimum": 1, "maximum": 8000 }, "vocabulary": { "type": "string" }, "default": { "const": "today" } } } },
+      "overdue": { "type": "boolean" }, "maxLength": { "type": "integer", "minimum": 1, "maximum": 8000 }, "vocabulary": { "type": "string" }, "default": { "const": "today" },
+      "idPrefix": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{0,9}-$", "description": "Frontmatter text or list items must be ids with this prefix and 3-9 digits, for example RISK- for RISK-0001." } } } },
     "body": { "type": "string", "maxLength": 8000 },
     "list": { "type": "object", "additionalProperties": false, "required": ["columns"], "properties": { "columns": { "type": "array", "items": { "type": "string" } } } },
     "report": { "type": "object", "additionalProperties": false, "required": ["file", "title", "columns"], "properties": {

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/fake-data-generation.schema.json",
+  "schemaVersion": 1,
+  "id": "learnings-demo",
+  "title": "Learnings demo",
+  "description": "Twenty lessons-learned notes in the default paths.learnings folder, ready for node bin/app learning list, check and report, plus a Bases table.",
+  "entity": "learning",
+  "count": 20,
+  "out": "docs/learnings",
+  "seed": 13,
+  "base": true,
+  "referenceDate": "2026-01-01"
+}

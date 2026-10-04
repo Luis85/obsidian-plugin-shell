@@ -5,7 +5,8 @@
 A **note collection** is a folder of Markdown notes of one `type`, each with a stable id, a status workflow and
 typed frontmatter, that the `node bin/app` shell lists, checks, creates, updates, reviews and reports on. The engine
 is generic; a collection is described by one JSON definition in `configs/collections/<id>.json`. The
-[risk register](RISK-MANAGEMENT.md) (`risk`) is the first collection.
+[risk register](RISK-MANAGEMENT.md) (`risk`) is the first collection; [learnings](LEARNINGS.md) (`learning`) was added
+with the steps under [Add a collection](#add-a-collection).
 
 Code is added only for what data cannot express: a pure **collection hook** (for example the risk score and level),
 named by the definition the same way wizards name actions.
@@ -55,7 +56,7 @@ completion. `readCollectionDefinition` is authoritative.
 | `statuses[]` | `{ id, label, open, transitions[], stamp? }`. `open` drives overdue, `requiredWhenOpen` and review. `stamp` names a stamp field dated on entering the status and removed on leaving it. |
 | `initialStatus` | Default status of new notes |
 | `vocabularies` | `name → [{ id, label }]`, referenced by `choice`, `integer` (whole-number ids) and `list` fields |
-| `fields[]` | `{ key, label, kind, source?, required?, requiredWhenOpen?, frontmatter?, multiline?, overdue?, maxLength?, vocabulary?, default? }` |
+| `fields[]` | `{ key, label, kind, source?, required?, requiredWhenOpen?, frontmatter?, multiline?, overdue?, maxLength?, vocabulary?, default?, idPrefix? }` |
 | `body` | Template rendered once for new notes; `{{input}}` or `{{input|fallback}}` of input fields, never evaluated |
 | `list.columns`, `report.columns` | System keys (`id`, `status`, `created`, `updated`, …) or frontmatter field keys |
 | `report.file`, `report.title`, `report.sort[]`, `report.base` | Register file in the folder, its heading, sort keys (`asc`/`desc`, choices by vocabulary order), optional `.base` file |
@@ -64,7 +65,10 @@ completion. `readCollectionDefinition` is authoritative.
 
 Field kinds are `text` (single-line unless `multiline`), `date` (`YYYY-MM-DD`), `integer`, `choice` and `list`.
 Sources are `input` (answered), `derived` (computed by the hook; never input; stored values must match) and `stamp`
-(dated by the engine). `frontmatter: false` marks body-only input text. `default: "today"` fills a date. The engine owns
+(dated by the engine). `frontmatter: false` marks body-only input text. `default: "today"` fills a date. `idPrefix`
+(for example `"RISK-"`) makes a frontmatter text or list field (without a vocabulary) hold references: every value must be
+an id with that prefix and 3–9 digits, such as `RISK-0001`. Only the format is checked; whether the referenced note exists
+is not (hooks are pure and never read other folders). The engine owns
 `type`, `id`, `status`, `created`, `updated` and `schema_version`.
 
 ## Guarantees
@@ -80,8 +84,9 @@ Sources are `input` (answered), `derived` (computed by the hook; never input; st
 
 ## Add a collection
 
-For example lessons learned (`learning`, notes `type: Learning`, ids `LRN-0001`, folder `paths.learnings`, default
-`docs/learnings`). No engine file changes:
+This is how lessons learned (`learning`, notes `type: Learning`, ids `LRN-0001`, folder `paths.learnings`, default
+`docs/learnings`) were added; see [learnings](LEARNINGS.md). The only engine change it needed was the generic `idPrefix`
+field option for its `related-risks` references. Otherwise no engine file changes:
 
 1. **Settings path.** In `bin/domain/user-settings.ts` add the default:
    `export const collectionPathDefaults = { risks: 'docs/risks', learnings: 'docs/learnings' } as const;`
@@ -106,5 +111,6 @@ For example lessons learned (`learning`, notes `type: Learning`, ids `LRN-0001`,
 6. **Hook (only if needed).** Add a pure `CollectionHook` in `bin/domain/` and register it in
    `bin/domain/collection-hooks.ts`.
 7. **Tests.** Add the new wizard and form ids to `shippedWizards`/`shippedForms` in
-   `tests/tooling/interactive-maker-wizard-catalog.checks.mjs`, and add `tests/tooling/interactive-maker-learning-*.checks.mjs`
-   (they run in the `maker` suite). A fake-data preset in `configs/fake-data/entities/` shows the format.
+   `tests/tooling/interactive-maker-wizard-catalog.checks.mjs`, and add `tests/tooling/interactive-maker-<plural>-*.checks.mjs`
+   (they run in the `maker` suite; learnings use `learnings-` because `interactive-maker-learning-*` belongs to the
+   `learn` courses). A fake-data preset in `configs/fake-data/entities/` shows the format.

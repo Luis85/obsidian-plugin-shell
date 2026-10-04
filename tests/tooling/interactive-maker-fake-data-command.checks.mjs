@@ -79,7 +79,7 @@ test('targets stay relative, inside the root and outside framework template inpu
 
 test('saved generation configs list, show, re-run byte-identically, accept overrides and save through reviewed plans', async () => scratch(async root => {
   const listed = await cli(root, 'configs', '--json');
-  assert.deepEqual(listed.configs.map(item => [item.id, item.source]), [['contacts-demo', 'builtin'], ['risks-demo', 'builtin'], ['tasks-board', 'builtin']]);
+  assert.deepEqual(listed.configs.map(item => [item.id, item.source]), [['contacts-demo', 'builtin'], ['learnings-demo', 'builtin'], ['risks-demo', 'builtin'], ['tasks-board', 'builtin']]);
   assert.equal((await cli(root, 'show-config', '--name', 'contacts-demo')).config.seed, 42);
   const generation = { schemaVersion: 1, id: 'team', title: 'Team', entity: 'contact', count: 4, out: 'People/Team', seed: 11, base: false };
   await writeFile(join(root, 'generation.json'), JSON.stringify(generation));
@@ -126,7 +126,7 @@ test('custom entities validate, save, generate by id or file, and project entiti
   await rm(join(root, 'configs/fake-data/entities/contact.json'));
   const semantic = await saveProject(root);
   const entities = await cli(root, 'entities', '--json');
-  assert.deepEqual(entities.entities.map(item => item.source), ['builtin', 'builtin', 'builtin', 'builtin', 'builtin', 'builtin', 'project', 'semantic']);
+  assert.deepEqual(entities.entities.map(item => item.source), ['builtin', 'builtin', 'builtin', 'builtin', 'builtin', 'builtin', 'builtin', 'project', 'semantic']);
   assert.equal(entities.entities.at(-1).ref, `semantic:${semantic.id}`);
   const shown = await cli(root, 'show', '--name', `semantic:${semantic.slug}`);
   assert.deepEqual([shown.source, shown.entity.titleProperty, shown.entity.folder], ['semantic', 'company', 'Records/Clients']);
