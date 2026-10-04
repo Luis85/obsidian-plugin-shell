@@ -177,8 +177,9 @@ function normalizePlan(plan: unknown): Readonly<PlanShape> {
   return Object.freeze({ version: source?.version, root: source?.root, changes });
 }
 
-function validatePlan(plan: Readonly<PlanShape>): void {
-  if (plan.version !== 1 || !Array.isArray(plan.changes)) throw new Error('PLAN_INVALID');
+/** Proves every field FilePlan promises (version, root, each change's path/content/encoding/hashes/status). */
+function validatePlan(plan: Readonly<PlanShape>): asserts plan is FilePlan {
+  if (plan.version !== 1 || typeof plan.root !== 'string' || !Array.isArray(plan.changes)) throw new Error('PLAN_INVALID');
   const seen = new Set<string>();
   for (const raw of plan.changes) {
     if (!raw || typeof raw !== 'object') throw new Error('PLAN_INVALID');
@@ -201,9 +202,8 @@ function validatePlan(plan: Readonly<PlanShape>): void {
 /** Cooperating tools share one lock. External editors are protected by per-write hash checks,
  * not a claim of a filesystem-wide transaction or compare-and-swap primitive. */
 export async function applyFilePlanRuntime(plan: unknown, options: ApplyFilePlanOptions = {}): Promise<ApplyFilePlanReport> {
-  const normalized = normalizePlan(plan);
-  validatePlan(normalized);
-  const typedPlan = normalized as unknown as FilePlan;
+  const typedPlan = normalizePlan(plan);
+  validatePlan(typedPlan);
   const root = await checkedRoot(typedPlan.root);
   const lock = join(root, '.codex-authoring.lock');
   await mkdir(lock).catch((error: unknown) => {
@@ -223,9 +223,8 @@ export async function applyFilePlanRuntime(plan: unknown, options: ApplyFilePlan
       const original = checked[index]!;
       originals.set(change.path, original.bytes);
       if (original.bytes !== null) await writeFile(join(lock, `before-${index}`), original.bytes, { flag: 'wx' });
-      if (change.content !== null) {
-        await writeFile(join(lock, `after-${index}`), contentBytes(change) as string | Uint8Array, { flag: 'wx' });
-      }
+      const bytes = contentBytes(change);
+      if (bytes !== null) await writeFile(join(lock, `after-${index}`), bytes, { flag: 'wx' });
     }
     for (const [index, change] of typedPlan.changes.entries()) {
       if (change.status === 'unchanged') { report.unchanged.push(change.path); continue; }
