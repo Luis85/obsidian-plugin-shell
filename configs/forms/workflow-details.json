@@ -1,0 +1,21 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "workflow-details",
+  "version": 1,
+  "title": "Browser test workflow details",
+  "description": "Title, purpose, status, viewport and step timeout of a browser test workflow (configs/tests/workflows).",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Workflow title", "maxLength": 120 },
+    { "id": "purpose", "kind": "text", "label": "Purpose: what does this workflow prove?", "required": true, "multiline": true, "maxLength": 2000 },
+    { "id": "status", "kind": "select", "label": "Status", "choices": [
+      { "id": "draft", "label": "Draft — being written" },
+      { "id": "active", "label": "Active — run it when the app changes" },
+      { "id": "retired", "label": "Retired — kept for reference" }
+    ], "default": "draft" },
+    { "id": "width", "kind": "number", "label": "Viewport width in pixels", "bind": "viewport.width", "integer": true, "min": 200, "max": 4000, "default": 1280 },
+    { "id": "height", "kind": "number", "label": "Viewport height in pixels", "bind": "viewport.height", "integer": true, "min": 200, "max": 4000, "default": 800 },
+    { "id": "timeoutMs", "kind": "number", "label": "Step timeout in milliseconds", "integer": true, "min": 100, "max": 60000, "default": 5000,
+      "help": "How long each step may wait for its element or assertion. A step can override it in the JSON with timeoutMs." }
+  ]
+}

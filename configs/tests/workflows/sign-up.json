@@ -1,0 +1,48 @@
+{
+  "$schema": "../../schemas/test-workflow.schema.json",
+  "schemaVersion": 1,
+  "id": "sign-up",
+  "title": "Sign up for the demo shop",
+  "purpose": "A visitor opens the shop, follows Create an account to the sign-up page, fills the form with a seeded fake contact and a chosen plan, and lands on the welcome page that greets them by name.",
+  "status": "active",
+  "target": {
+    "kind": "static",
+    "folder": "tests/fixtures/workflows/sign-up"
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "timeoutMs": 5000,
+  "data": {
+    "values": {
+      "plan": "Pro"
+    },
+    "fakeData": {
+      "customer": {
+        "config": "contacts-demo",
+        "index": 0
+      }
+    }
+  },
+  "steps": [
+    { "kind": "goto", "path": "/" },
+    { "kind": "expectTitle", "text": "Demo shop" },
+    { "kind": "click", "target": { "role": "link", "name": "Create an account" } },
+    { "kind": "expectUrl", "path": "/signup.html" },
+    { "kind": "expectVisible", "target": { "role": "heading", "name": "Create your account" } },
+    { "kind": "fill", "id": "name", "target": { "label": "Full name" }, "value": "{{data.customer.name}}" },
+    { "kind": "fill", "id": "email", "target": { "label": "Email" }, "value": "{{data.customer.email}}" },
+    { "kind": "select", "target": { "label": "Plan" }, "value": "{{data.plan}}" },
+    { "kind": "check", "target": { "label": "I accept the terms" } },
+    { "kind": "expectValue", "target": { "placeholder": "you@example.com" }, "value": "{{data.customer.email}}" },
+    { "kind": "screenshot", "name": "sign-up-filled", "fullPage": true, "mask": [{ "label": "Email" }], "caption": "The completed form before submitting; the email is masked." },
+    { "kind": "click", "id": "submit", "target": { "role": "button", "name": "Create account", "within": { "role": "form", "name": "Sign up" } } },
+    { "kind": "expectUrl", "path": "/welcome.html", "match": "contains", "note": "The form submits with GET, so the answers follow in the query." },
+    { "kind": "expectText", "target": { "testId": "greeting" }, "text": "Welcome, {{data.customer.name}}!", "match": "exact" },
+    { "kind": "expectText", "target": { "testId": "plan" }, "text": "{{data.plan}}" },
+    { "kind": "expectCount", "target": { "role": "listitem", "within": { "role": "list", "name": "Next steps" } }, "count": 3 },
+    { "kind": "screenshot", "name": "welcome-greeting", "target": { "role": "main" }, "caption": "The welcome page content for the seeded customer." },
+    { "kind": "expectHidden", "target": { "role": "alert" } }
+  ]
+}

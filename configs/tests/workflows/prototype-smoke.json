@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/test-workflow.schema.json",
+  "schemaVersion": 1,
+  "id": "prototype-smoke",
+  "title": "Prototype opens offline",
+  "purpose": "Pattern for a prepared prototype package: open its built offline HTML, wait for the first heading and confirm that no error alert is shown. Copy it, point target.package at your prototypes/<slug> folder and add the steps of your journey. Until that package is built, workflow run reports not-run.",
+  "status": "draft",
+  "target": {
+    "kind": "prototype",
+    "package": "prototypes/my-prototype"
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "timeoutMs": 10000,
+  "steps": [
+    { "kind": "goto", "path": "/" },
+    { "kind": "waitFor", "target": { "role": "heading", "nth": 0 }, "state": "visible" },
+    { "kind": "expectHidden", "target": { "role": "alert" } }
+  ]
+}

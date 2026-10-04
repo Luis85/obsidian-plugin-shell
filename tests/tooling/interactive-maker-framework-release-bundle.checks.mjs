@@ -97,6 +97,6 @@ test('every node_modules package bundled into the real release CLI has a shipped
   assert.ok(packages.length > 0);
   assert.deepEqual(notices.map(notice => notice.name).sort(), packages.map(entry => entry.name).sort());
   for (const notice of notices) assert.ok(files.some(file => file.path === 'bin/licenses/' + notice.file && file.bytes.length > 0), notice.name);
-  for (const external of ['prettier', 'typescript', 'esbuild']) assert.ok(!packages.some(entry => entry.name === external), external + ' must stay an installed external');
+  for (const external of ['prettier', 'typescript', 'esbuild', '@playwright/test', 'playwright-core']) assert.ok(!packages.some(entry => entry.name === external), external + ' must stay an installed external');
   assert.match(bytes.toString('utf8'), /import\("prettier"\)/, 'makers load the installed prettier on first use');
 });

@@ -37,6 +37,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Learning paths](development/LEARNING-PATHS.md) | Follow or write a step-by-step course for `node bin/app learn` in `configs/learning`, including the idea-to-prototype course with Claude Design. |
 | [Manage risks](development/RISK-MANAGEMENT.md) | Keep a risk register as typed Markdown notes with `node bin/app risk`: model, note format, checks and the generated register. |
 | [Manage learnings](development/LEARNINGS.md) | Keep lessons learned as typed Markdown notes with `node bin/app learning`: lifecycle, note format, checks, review and the generated register. |
+| [Browser test workflows](development/TEST-WORKFLOWS.md) | Define Playwright journeys for projects and prototypes as JSON, run them headless, keep generated docs notes and export specs with `node bin/app workflow`. |
 | [Increments and release candidates](development/RELEASE-CANDIDATES.md) | Product increments, candidate folders per version, freezing, docs regeneration and the path to release approval. |
 | [Typed-note collections](development/NOTE-COLLECTIONS.md) | Engine API and the steps to add a collection (a JSON definition, a settings path, forms/wizards and a command root). |
 | [Generate fake data](development/FAKE-DATA.md) | Generate seeded sample notes, Bases tables and reusable generation configs with `node bin/app fake-data`. |

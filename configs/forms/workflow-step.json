@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "workflow-step",
+  "version": 1,
+  "title": "Browser test workflow step",
+  "description": "One step: an action (visit, click, fill, select, check, press, wait), an assertion or a review screenshot, its element and its input.",
+  "fields": [
+    { "id": "kind", "kind": "select", "label": "Step", "choices": [
+      { "id": "goto", "label": "goto — visit a page (input: /path)" },
+      { "id": "click", "label": "click — click an element" },
+      { "id": "fill", "label": "fill — type into a field (input: text)" },
+      { "id": "select", "label": "select — choose an option in a select (input: option value or label)" },
+      { "id": "check", "label": "check — tick a checkbox or radio" },
+      { "id": "uncheck", "label": "uncheck — clear a checkbox" },
+      { "id": "press", "label": "press — press a key, optionally in an element (input: Enter, Tab, Control+a)" },
+      { "id": "waitFor", "label": "waitFor — wait for an element (input: visible, hidden, attached or detached)" },
+      { "id": "expectVisible", "label": "expectVisible — an element is visible" },
+      { "id": "expectHidden", "label": "expectHidden — an element is hidden or absent" },
+      { "id": "expectText", "label": "expectText — an element shows text (input: text)" },
+      { "id": "expectUrl", "label": "expectUrl — the address is a path (input: /path)" },
+      { "id": "expectTitle", "label": "expectTitle — the page title (input: text)" },
+      { "id": "expectCount", "label": "expectCount — how many elements match (input: number)" },
+      { "id": "expectValue", "label": "expectValue — a field holds a value (input: text)" },
+      { "id": "screenshot", "label": "screenshot — take a screenshot for human review, never compared (input: file name such as checkout-filled)" }
+    ], "default": "click" },
+    { "id": "target", "kind": "text", "label": "Element (empty for goto, expectUrl, expectTitle and page-level press)", "maxLength": 600,
+      "help": "Parent first, separated by >: button \"Save\", link \"Next\", label \"Email\", placeholder \"Search\", text \"Welcome\", testid \"submit\", form \"Sign up\" > button \"Create account\". Add exact for exact matching and #2 for the second match." },
+    { "id": "input", "kind": "text", "label": "Input (path, text, key, number or wait state; see the step list)", "maxLength": 1000,
+      "help": "Use {{data.path}} for test data, for example {{data.customer.email}}. Paths start with /." },
+    { "id": "fullPage", "kind": "boolean", "label": "Capture the full scrollable page?", "yes": "Yes — full page", "no": "No — the viewport, or the element above",
+      "when": { "field": "kind", "equals": "screenshot" } },
+    { "id": "maskLines", "kind": "list", "label": "Elements to mask, such as dynamic data (optional, one locator per line)", "multiline": true, "suffix": " (separate with ;)",
+      "when": { "field": "kind", "equals": "screenshot" }, "help": "Masked elements are painted over in the PNG, for example testid \"clock\"." },
+    { "id": "caption", "kind": "text", "label": "Caption for reviewers (optional)", "maxLength": 300, "when": { "field": "kind", "equals": "screenshot" } },
+    { "id": "match", "kind": "select", "label": "Text and URL matching", "choices": [
+      { "id": "default", "label": "Default — text contains; URL and title are exact" },
+      { "id": "exact", "label": "Exact" },
+      { "id": "contains", "label": "Contains" }
+    ], "default": "default" },
+    { "id": "note", "kind": "text", "label": "Note for the documentation (optional)", "maxLength": 300 }
+  ]
+}

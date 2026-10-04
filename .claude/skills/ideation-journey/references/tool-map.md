@@ -120,3 +120,4 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 | `node bin/app increment list --json` | product increments; recorded after a prototype is implemented |
 | `node bin/app candidate list --json` | release candidates assemble increments; release itself stays a separate authorization |
 | `node bin/app help` | discovery for every skill |
+| `node bin/app workflow list --json` | Playwright test workflows for projects and prototypes; run on request after implementation |
