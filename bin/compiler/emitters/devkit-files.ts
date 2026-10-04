@@ -9,20 +9,37 @@ import { relativeImport, rewriteTemplate, type Add } from './file-code.ts';
 import { journeySuitePairs } from './authored-journey-code.ts';
 import { clickdummyBuilderFiles } from './clickdummy-builder-files.ts';
 import { briefValues } from './devkit-brief.ts';
+import { hostingProfile, projectHosting, type HostingProfile } from '../../../scripts/companion/hosting-contract.mjs';
 
 /** Product skills; each also gets a Codex entrypoint under `.agents/skills/` pointing at the canonical Claude skill. */
 const productSkills = ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test', 'self-review'] as const;
-const templates: ReadonlyArray<readonly [string, string]> = [
+const sharedTemplates: ReadonlyArray<readonly [string, string]> = [
   ['README.md', 'README.md.tmpl'], ['AGENTS.md', 'AGENTS.md.tmpl'], ['CLAUDE.md', 'CLAUDE.md.tmpl'],
   ['.claude/settings.json', 'claude-settings.json.tmpl'],
   ...productSkills.map(skill => [`.claude/skills/${skill}/SKILL.md`, `skill-${skill}.md.tmpl`] as const),
   ['BRIEF.md', 'BRIEF.md.tmpl'], ['docs/project-tasks/TEMPLATE.md', 'project-task-template.md.tmpl'],
-  ['.github/pull_request_template.md', 'pull-request-template.md.tmpl'],
-  ['.github/copilot-instructions.md', 'agent-pointer.md.tmpl'], ['.cursor/rules/project.mdc', 'cursor-rule.mdc.tmpl'],
-  ['.vscode/extensions.json', 'vscode-extensions.json.tmpl'], ['.vscode/settings.json', 'vscode-settings.json.tmpl'],
-  ['.vscode/launch.json', 'vscode-launch.json.tmpl'], ['.vscode/tasks.json', 'vscode-tasks.json.tmpl'],
-  ['.editorconfig', 'editorconfig.tmpl'], ['.github/workflows/ci.yml', 'workflow-ci.yml.tmpl'], ['.github/workflows/obsidian.yml', 'workflow-obsidian.yml.tmpl'],
 ];
+const editorTemplates: ReadonlyArray<readonly [string, string]> = [['.cursor/rules/project.mdc', 'cursor-rule.mdc.tmpl'],
+  ['.vscode/extensions.json', 'vscode-extensions.json.tmpl'], ['.vscode/settings.json', 'vscode-settings.json.tmpl'],
+  ['.vscode/launch.json', 'vscode-launch.json.tmpl'], ['.vscode/tasks.json', 'vscode-tasks.json.tmpl'], ['.editorconfig', 'editorconfig.tmpl']];
+/** Shared files, the platform's review files, editor files, then the platform's CI files (the GitHub order is unchanged). */
+function devkitTemplates(hosting: HostingProfile): ReadonlyArray<readonly [string, string]> {
+  return [...sharedTemplates, ...hosting.reviewFiles, ...editorTemplates, ...hosting.ciFiles];
+}
+/** Platform permissions join the template's lists; without any, the rendered bytes stay exactly as they are. */
+function withHostingPermissions(settings: string, hosting: HostingProfile): string {
+  const extra = hosting.claudePermissions;
+  if (!extra.allow.length && !extra.ask.length && !extra.deny.length) return settings;
+  const parsed: unknown = JSON.parse(settings);
+  const permissions: unknown = parsed && typeof parsed === 'object' ? Reflect.get(parsed, 'permissions') : undefined;
+  if (!permissions || typeof permissions !== 'object') throw new Error('GENERATOR_TEMPLATE_SETTINGS: permissions are missing.');
+  for (const decision of ['allow', 'ask', 'deny'] as const) {
+    const list: unknown = Reflect.get(permissions, decision);
+    if (!Array.isArray(list)) throw new Error('GENERATOR_TEMPLATE_SETTINGS: ' + decision + ' is not a list.');
+    list.push(...extra[decision]);
+  }
+  return JSON.stringify(parsed, null, 2) + '\n';
+}
 /** Single-pass `{{name}}` substitution; an unknown placeholder is a template defect, never output. */
 export function renderTemplate(text: string, values: Readonly<Record<string, string>>): string {
   return text.replace(/\{\{([A-Za-z]+)\}\}/g, (_match, key: string) => {
@@ -35,10 +52,15 @@ export const makerTests = 'tests/runtime/generated';
 const oneLine = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim();
 export function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add: Add): void {
   const project = m.project as unknown as Record<string, unknown>;
+  const hosting = hostingProfile(projectHosting(m.document));
   const values = { name: oneLine(project.name) || String(m.project.id), id: String(m.project.id),
-    description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot, ...briefValues(m) };
+    description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot, ...briefValues(m),
+    prTemplatePath: hosting.prTemplatePath, hostingCli: hosting.cliHints, hostingAgent: hosting.agentHint };
   const read = (template: string) => templateRoot.text(`templates/companion/devkit/${template}`);
-  for (const [path, template] of templates) add(path, renderTemplate(read(template), values), 'extension');
+  for (const [path, template] of devkitTemplates(hosting)) {
+    const content = renderTemplate(read(template), values);
+    add(path, path === '.claude/settings.json' ? withHostingPermissions(content, hosting) : content, 'extension');
+  }
   const adapter = read('skill-codex-adapter.md.tmpl');
   for (const skill of productSkills) {
     const skillDescription = /^description: (.+)$/m.exec(read(`skill-${skill}.md.tmpl`))?.[1];

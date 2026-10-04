@@ -36,8 +36,9 @@ function relink(value: string, from: string, to: string): string {
   if (target === resolved && posix.dirname(from) === posix.dirname(to)) return value;
   return encodeURI(posix.relative(posix.dirname(to), target) || posix.basename(target)) + suffix;
 }
-/** Rewrites inline links outside fenced code blocks; everything else is byte-identical. */
-export function rebaseMarkdown(text: string, from: string, to: string): string {
+/** Rewrites inline links outside fenced code blocks; everything else is byte-identical. A link to an `omitted`
+ * framework input (maintainer-only, or not shipped for the project's hosting platform) becomes plain text. */
+export function rebaseMarkdown(text: string, from: string, to: string, omitted: (path: string) => boolean = maintainerOnly): string {
   let fence: string | null = null;
   return text.split('\n').map(line => {
     const marker = /^\s{0,3}(`{3,}|~{3,})/.exec(line)?.[1];
@@ -51,7 +52,7 @@ export function rebaseMarkdown(text: string, from: string, to: string): string {
         let resolved: string;
         try { resolved = posix.normalize(posix.join(posix.dirname(from), decodeURIComponent(value.split(/[?#]/, 1)[0]!))); }
         catch { return whole; }
-        if (maintainerOnly(resolved)) return open.replace(/^!?\[/, '').slice(0, -2) + ' (maintainer-only asset, not included)';
+        if (omitted(resolved)) return open.replace(/^!?\[/, '').slice(0, -2) + ' (maintainer-only asset, not included)';
       }
       const next = relink(value, from, to);
       return open + (angled ? `<${next}>` : next) + close;
@@ -64,12 +65,12 @@ function referenceBanner(text: string, to: string): string {
   return to.startsWith('docs/framework/') ? withBanner(rewriteDocReferences(text)) : text;
 }
 /** Move the root framework documents and maintainer workflows; rebase links in copied Markdown. */
-export function relocateFrameworkDocuments(entries: Map<string, Entry>): void {
+export function relocateFrameworkDocuments(entries: Map<string, Entry>, omitted: (path: string) => boolean = maintainerOnly): void {
   // Iterate a snapshot: relocated entries are re-inserted under their new paths.
   for (const [path, entry] of Array.from(entries)) {
     if (entry.ownership !== 'framework') continue;
     const to = relocatedPath(path);
-    const content = !entry.encoding && path.endsWith('.md') ? referenceBanner(rebaseMarkdown(entry.content, path, to), to) : entry.content;
+    const content = !entry.encoding && path.endsWith('.md') ? referenceBanner(rebaseMarkdown(entry.content, path, to, omitted), to) : entry.content;
     if (to === path && content === entry.content) continue;
     if (to !== path) {
       // Never let a relocated root document silently replace another file at its new home.
