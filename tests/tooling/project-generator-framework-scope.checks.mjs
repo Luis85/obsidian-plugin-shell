@@ -11,6 +11,7 @@ import { frameworkOnlyPath, referenceDocPath, withBanner, rewriteDocReferences, 
 import { clickdummyBuilderFiles } from '../../bin/compiler/emitters/clickdummy-builder-files.ts';
 import { buildClickdummy } from '../../bin/adapters/framework/clickdummy.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const starter = JSON.parse(starterDocumentText('quick-capture'));
@@ -131,7 +132,8 @@ test('[GENERATOR-SCOPE-08] click-dummy build runs the skill worker in the framew
   assert.deepEqual(await run(true), ['.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs']);
   assert.deepEqual(await run(false), ['scripts/clickdummy/lib/build-worker.mjs']);
 });
-test('[GENERATOR-SCOPE-09] shipped framework tests never drive the shell entry a generated src/main.ts replaces; example removal lists only shipped files', async () => {
+test('[GENERATOR-SCOPE-09] shipped framework tests never drive the shell entry a generated src/main.ts replaces; example removal lists only shipped files', async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('The framework entry tests and example ownership exist only while the reviewed example sources are present.'); return; }
   const drivesEntry = /\.onload\(|\.onunload\(|loadPlugin\(/, importsEntry = /from '(?:\.\.\/)+src\/main'/;
   const shipped = paths.filter(path => /^tests\/.*\.test\.ts$/.test(path) && importsEntry.test(text(path)));
   assert.ok(shipped.length >= 2, 'framework runtime tests still use the entry as a plain plugin instance');
