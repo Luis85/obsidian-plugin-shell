@@ -6,6 +6,27 @@ import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { checkDocsLaunchers } from './check-docs-launchers.mjs';
 
+const untrustedInterpolation = /\$\{\{\s*(?:github\.event\.(?:pull_request|issue|comment)|inputs\.)/;
+const localActionPrefix = './.github/actions/';
+const localAction = /^\.\/\.github\/actions\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
+function pinnedAction(value) {
+  if (typeof value !== 'string' || !/^[\w.-]+\/[\w./-]+@[a-f0-9]{40}$/.test(value)) throw new Error('WORKFLOW_ACTION_NOT_PINNED');
+}
+/** A repository-local composite action: only SHA-pinned external actions, explicit shells and no input interpolation in shell text. */
+export function inspectCompositeAction(text) {
+  const document = parseDocument(text, { uniqueKeys: true });
+  if (document.errors.length) throw new Error('ACTION_YAML_INVALID');
+  const data = document.toJS();
+  if (!data || typeof data !== 'object' || !data.name || !data.runs || data.runs.using !== 'composite' || !Array.isArray(data.runs.steps) || !data.runs.steps.length) throw new Error('ACTION_NOT_COMPOSITE');
+  for (const step of data.runs.steps) {
+    if (!step || typeof step !== 'object' || Boolean(step.uses) === Boolean(step.run)) throw new Error('ACTION_STEP_INVALID');
+    if (step.uses) pinnedAction(step.uses);
+    if (step.uses?.startsWith('actions/checkout@') && step.with?.['persist-credentials'] !== false) throw new Error('WORKFLOW_PERSISTED_CREDENTIALS');
+    if (step.run && !step.shell) throw new Error('ACTION_STEP_INVALID');
+    if (step.run && untrustedInterpolation.test(step.run)) throw new Error('WORKFLOW_UNTRUSTED_SHELL_INTERPOLATION');
+  }
+  return { steps: data.runs.steps.length };
+}
 export function inspectWorkflow(text) {
   const document = parseDocument(text, { uniqueKeys: true });
   if (document.errors.length) throw new Error('WORKFLOW_YAML_INVALID');
@@ -16,8 +37,11 @@ export function inspectWorkflow(text) {
   };
   permissions(data.permissions);
   if (data.on === 'pull_request_target' || (Array.isArray(data.on) && data.on.includes('pull_request_target')) || (typeof data.on === 'object' && Object.hasOwn(data.on, 'pull_request_target'))) throw new Error('PRIVILEGED_PR_TRIGGER_FORBIDDEN');
+  const localActions = new Set();
   const pinned = value => {
-    if (typeof value !== 'string' || !/^[\w.-]+\/[\w./-]+@[a-f0-9]{40}$/.test(value)) throw new Error('WORKFLOW_ACTION_NOT_PINNED');
+    // A repository-local composite action is versioned with this commit; checkRepository inspects it and its own pins.
+    if (typeof value === 'string' && localAction.test(value)) { localActions.add(value.slice(localActionPrefix.length)); return; }
+    pinnedAction(value);
   };
   const jobs = Object.values(data.jobs);
   if (!jobs.length) throw new Error('WORKFLOW_NO_JOBS');
@@ -32,10 +56,10 @@ export function inspectWorkflow(text) {
         pinned(step.uses);
         if (step.uses.startsWith('actions/checkout@') && step.with?.['persist-credentials'] !== false) throw new Error('WORKFLOW_PERSISTED_CREDENTIALS');
       }
-      if (step.run && /\$\{\{\s*(?:github\.event\.(?:pull_request|issue|comment)|inputs\.)/.test(step.run)) throw new Error('WORKFLOW_UNTRUSTED_SHELL_INTERPOLATION');
+      if (step.run && untrustedInterpolation.test(step.run)) throw new Error('WORKFLOW_UNTRUSTED_SHELL_INTERPOLATION');
     }
   }
-  return { jobs: jobs.length };
+  return { jobs: jobs.length, localActions: [...localActions].sort() };
 }
 /** Owned styles only. Full compiled containment remains the artifact gate's job. */
 export function inspectOwnedCss(text, name = 'owned.css') {
@@ -88,12 +112,18 @@ export async function checkRepository(root = process.cwd()) {
   }
   // docs/ is a design working directory (owner decision): its Markdown and links are not a repository gate.
   await walk('.github/workflows', /\.ya?ml$/); await walk('src/styles', /\.css$/);
+  const actions = new Map();
+  try { await walk('.github/actions', /^action\.ya?ml$/); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   for (const name of ['README.md', 'AGENTS.md', 'CHANGELOG.md']) { try { await access(join(root, name)); files.push(name); } catch (error) { if (error.code !== 'ENOENT') throw error; } }
-  const counts = { workflows: 0, styles: 0, markdown: 0, localLinks: 0 }; const failures = [];
+  const counts = { workflows: 0, actions: 0, styles: 0, markdown: 0, localLinks: 0 }; const failures = []; const references = [];
   for (const file of files) {
     try {
       const text = await readFile(join(root, file), 'utf8');
-      if (/\.ya?ml$/.test(file)) { inspectWorkflow(text); counts.workflows++; }
+      const parts = file.split(sep);
+      if (parts[0] === '.github' && parts[1] === 'actions') {
+        if (parts.length !== 4) throw new Error('ACTION_LAYOUT_INVALID');
+        inspectCompositeAction(text); actions.set(parts[2], file); counts.actions++;
+      } else if (/\.ya?ml$/.test(file)) { references.push(...inspectWorkflow(text).localActions.map(name => [file, name])); counts.workflows++; }
       else if (file.endsWith('.css')) { inspectOwnedCss(text, file); counts.styles++; }
       else {
         for (const link of markdownLinks(text)) {
@@ -107,9 +137,10 @@ export async function checkRepository(root = process.cwd()) {
       }
     } catch (error) { failures.push(`${file}: ${error.message}`); }
   }
+  for (const [file, name] of references) if (!actions.has(name)) failures.push(`${file}: WORKFLOW_LOCAL_ACTION_MISSING: ${name}`);
   if (failures.length) throw new Error(failures.join('\n'));
   if (!counts.workflows || !counts.styles || !counts.markdown) throw new Error('REPOSITORY_INPUTS_MISSING');
-  return { status: 'passed', ...counts, scope: 'read-only workflow subset, owned CSS syntax/selectors, Markdown fences/local inline file links' };
+  return { status: 'passed', ...counts, scope: 'read-only workflow and local composite action subset, owned CSS syntax/selectors, Markdown fences/local inline file links' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await checkRepository())); console.log(JSON.stringify(await checkDocsLaunchers())); }
