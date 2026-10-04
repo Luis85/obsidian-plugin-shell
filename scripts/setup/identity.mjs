@@ -3,10 +3,11 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { createFilePlan } from '../shared/file-plan.ts';
 import { planMigration } from './migration.mjs';
+import { azureRepositoryUrl, hostingLine, recordedHosting, requestedHosting } from './hosting.mjs';
 const portable = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const identityDocument = identity => `# Project identity\n\nConfigured by explicit setup. Original attribution remains in LICENSE and repository history.\n\n\`\`\`json\n${json(identity)}\`\`\`\n\nOnly the repository-contained development vault is an installation target.\n`;
+const identityDocument = (identity, hosting) => `# Project identity\n\nConfigured by explicit setup. Original attribution remains in LICENSE and repository history.\n\n\`\`\`json\n${json(identity)}\`\`\`\n\nOnly the repository-contained development vault is an installation target.\n${hostingLine(hosting)}`;
 function plain(value) { return value !== null && typeof value === 'object' && !Array.isArray(value); }
 function dependencyEntries(value) {
   if (!plain(value) || Object.values(value).some(pin => typeof pin !== 'string')) throw new Error('Malformed dependency declarations');
@@ -39,11 +40,15 @@ export async function planIdentity(root, options, previousJournal = null, { afte
   for (const key of ['dependencies', 'devDependencies', 'optionalDependencies']) if (JSON.stringify(dependencyEntries(pkg[key] ?? {})) !== JSON.stringify(dependencyEntries(lock.packages[''][key] ?? {}))) throw new Error(`Package and lockfile ${key} disagree`);
   const repository = typeof pkg.repository === 'string' ? pkg.repository : pkg.repository?.url;
   const repo = typeof repository === 'string' ? /^https:\/\/github\.com\/([^/]+\/[^/]+?)(?:\.git)?$/.exec(repository)?.[1] ?? null : null;
-  const identity = validateIdentity(Object.fromEntries(['id', 'name', 'description', 'author', 'version', 'repo'].map(key => [key, options[key] ?? (key === 'repo' ? repo : manifest[key])])));
+  // An explicit Azure DevOps choice has no GitHub owner/name; --repo stays the GitHub shorthand.
+  const requested = requestedHosting(options);
+  const repoDefault = requested?.platform === 'azure-devops' ? null : repo;
+  const identity = validateIdentity(Object.fromEntries(['id', 'name', 'description', 'author', 'version', 'repo'].map(key => [key, options[key] ?? (key === 'repo' ? repoDefault : manifest[key])])));
   if (typeof manifest.minAppVersion !== 'string' || !/^\d+\.\d+\.\d+$/.test(manifest.minAppVersion)) throw new Error('Invalid manifest host version floor');
   if (Object.hasOwn(versions, identity.version) && versions[identity.version] !== manifest.minAppVersion) throw new Error('Chosen version has a conflicting historical host floor; choose a new version');
   const nextManifest = { ...manifest, id: identity.id, name: identity.name, description: identity.description, author: identity.author, version: identity.version };
   const entries = [];
+  let hosting = requested;
   if (options.identityRequested) {
     const existingDoc = await createFilePlan(root, [{ path: 'PROJECT-IDENTITY.md', content: null }]);
     expectedHashes.set('PROJECT-IDENTITY.md', existingDoc.changes[0].beforeHash);
@@ -51,15 +56,20 @@ export async function planIdentity(root, options, previousJournal = null, { afte
       const previousIdentity = Object.fromEntries(['id', 'name', 'description', 'author', 'version', 'repo'].map(key => [key, key === 'repo' ? repo : manifest[key]]));
       const bytes = await readFile(join(root, 'PROJECT-IDENTITY.md'));
       if (hash(bytes) !== expectedHashes.get('PROJECT-IDENTITY.md')) throw new Error('Identity planning inputs changed; review a new plan');
-      if (bytes.toString('utf8') !== identityDocument(previousIdentity)) throw new Error('PROJECT-IDENTITY.md has user edits; preserve or relocate it before configuring identity');
+      const recorded = recordedHosting(bytes.toString('utf8'));
+      hosting ??= recorded;
+      // A recorded Azure repository must still match the package metadata setup wrote with it.
+      const bound = !azureRepositoryUrl(recorded) || azureRepositoryUrl(recorded) === repository;
+      if (!bound || bytes.toString('utf8') !== identityDocument(previousIdentity, recorded)) throw new Error('PROJECT-IDENTITY.md has user edits; preserve or relocate it before configuring identity');
     }
     const nextPackage = { ...pkg, name: identity.id, version: identity.version, description: identity.description, author: identity.author,
-      ...(identity.repo ? { repository: { type: 'git', url: `https://github.com/${identity.repo}.git` } } : {}) };
+      ...(identity.repo ? { repository: { type: 'git', url: `https://github.com/${identity.repo}.git` } }
+        : azureRepositoryUrl(hosting) ? { repository: { type: 'git', url: azureRepositoryUrl(hosting) } } : {}) };
     const nextLock = { ...lock, name: identity.id, version: identity.version, packages: { ...lock.packages,
       '': { ...lock.packages[''], name: identity.id, version: identity.version } } };
     entries.push({ path: 'manifest.json', content: json(nextManifest) }, { path: 'package.json', content: json(nextPackage) },
       { path: 'package-lock.json', content: json(nextLock) }, { path: 'versions.json', content: json({ ...versions, [identity.version]: manifest.minAppVersion }) },
-      { path: 'PROJECT-IDENTITY.md', content: identityDocument(identity) });
+      { path: 'PROJECT-IDENTITY.md', content: identityDocument(identity, hosting) });
   } else for (const [path, content] of originals) entries.push({ path, content });
   if (options['migrate-from']) validateIdentity({ ...identity, id: options['migrate-from'] });
   const migration = await planMigration(root, { from: options['migrate-from'], to: identity.id, previousId: manifest.id, profile: options.profile,
@@ -67,5 +77,5 @@ export async function planIdentity(root, options, previousJournal = null, { afte
   await afterRead?.();
   const plan = await createFilePlan(root, entries);
   if (plan.changes.some(change => change.beforeHash !== expectedHashes.get(change.path))) throw new Error('Identity planning inputs changed; review a new plan');
-  return { identity, manifest: nextManifest, previousManifest: manifest, plan, migration };
+  return { identity, manifest: nextManifest, previousManifest: manifest, plan, migration, hosting: hosting ?? null };
 }
