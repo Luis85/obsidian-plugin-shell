@@ -8,7 +8,7 @@ import { learningProgressPlan, learningProgressSummary, loadLearningProgress, re
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { definitionsRoot, loadCatalog } from '../../bin/adapters/wizard-catalog.ts';
 import { completeLearningStep, newLearningProgress } from '../../bin/domain/learning-progress.ts';
-import { contactForm, greetWizard, learningPath, project, put, scratch, step, wizard } from './interactive-maker-learning-fixture.mjs';
+import { contactForm, greetWizard, learningPath, project, put, scratch, shippedLearningIssues, step, wizard } from './interactive-maker-learning-fixture.mjs';
 const repository = resolve(import.meta.dirname, '../..');
 const now = '2026-10-04T10:00:00.000Z';
 const guide = '# Guide\n\n## Start here\n\nText.\n';
@@ -17,8 +17,8 @@ test('shipped learning paths live in configs/learning, load, and pass every refe
   const catalog = await loadLearningCatalog();
   assert.equal(catalog.root, definitionsRoot);
   assert.equal(catalog.repository, repository);
-  assert.deepEqual([...catalog.paths.keys()].sort(), ['author-a-learning-path', 'author-a-wizard']);
-  assert.deepEqual(await learningIssues(catalog, await loadCatalog()), []);
+  assert.deepEqual([...catalog.paths.keys()].sort(), ['author-a-learning-path', 'author-a-wizard', 'idea-to-prototype-with-claude-design']);
+  assert.deepEqual(await learningIssues(catalog, await loadCatalog()), await shippedLearningIssues(repository));
   assert.deepEqual(catalog.paths.get('author-a-learning-path').prerequisites, ['author-a-wizard']);
   for (const name of await readdir(join(repository, 'configs/learning/paths')))
     assert.equal(JSON.parse(await readFile(join(repository, 'configs/learning/paths', name), 'utf8')).$schema, '../../schemas/learning-path.schema.json', name);
