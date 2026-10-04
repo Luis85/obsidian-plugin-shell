@@ -1,0 +1,50 @@
+name: Dev
+# Dev tier: fast feedback on every pull-request event, drafts included, so idea
+# and prototype work is never slowed down by the heavy gates. Marking a draft
+# ready for review starts the Integration tier (ci.yml and the other pull-request
+# workflows); release.yml is the Release tier. Branch protection requires
+# "Dev checks" and "CI result".
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+concurrency:
+  group: dev-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  fast:
+    name: Dev checks
+    runs-on: ubuntu-24.04
+    # Targets about ten minutes (locked install plus diff-scoped checks). A diff
+    # that selects the heavy tooling suites, or a dependency manifest change (full
+    # check), takes longer; 30 is a job budget, not a test deadline.
+    timeout-minutes: 30
+    env:
+      BASE_REF: ${{ github.base_ref }}
+    steps:
+      # Full history: the diff-scoped checks compare with the pull request base branch.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+      # Every check below runs even after an earlier one failed, so one push
+      # reports all of its findings.
+      - name: Agent fast gate on the diff against the base branch
+        run: node bin/app check --fast --base "origin/$BASE_REF"
+      - name: Test suite registration and documentation
+        if: ${{ !cancelled() }}
+        run: node scripts/testing/suites.mjs --check
+      - name: Repository policy (workflows, composite actions, owned CSS, root Markdown)
+        if: ${{ !cancelled() }}
+        run: node "$QUALIFIED_NPM" run check:repository
+      - name: Changelog structure
+        if: ${{ !cancelled() }}
+        run: node scripts/release/changelog.mjs check
+      - name: Self-review guard (advisory here, blocking in CI)
+        if: ${{ !cancelled() }}
+        run: node "$QUALIFIED_NPM" run check:self-review -- --base "origin/$BASE_REF" --warn-only
