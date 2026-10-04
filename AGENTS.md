@@ -16,7 +16,7 @@ qualification and release authorization are separate. Milestone background is in
 | Path | Holds |
 | --- | --- |
 | `src/` | The shell's plugin runtime: domain, application, features, infrastructure, presentation, bootstrap, styles, locales; `main.ts` is lifecycle composition only. |
-| `projects/<name>/` | Standalone projects built from concepts (first: `companion`). Each has its own lock, `AGENTS.md`, gates and workflows, and a `workbench.project.json` linking its prototypes. Shell gates and workflows ignore `projects/`. Work inside a project as its own repository, and run `npm run projects:sync` after changing its workflows. See `projects/README.md`. |
+| `projects/<name>/` | Standalone projects built from concepts (first: `companion`). Each has its own lock, `AGENTS.md`, gates and workflows, and a `workbench.project.json` linking its prototypes. Opt-in Astro websites from `templates/sites` render Bases collections (`node bin/app site`; Astro is a site-only dependency). Shell gates and workflows ignore `projects/`. Work inside a project as its own repository, and run `npm run projects:sync` after changing its workflows. See `projects/README.md`. |
 | `bin/` | The `bin/app` CLI: adapters, application, domain, presentation, guides, examples. |
 | `bin/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
 | `templates/` | Templates for generated projects (companion runtime, developer kit, examples). |
