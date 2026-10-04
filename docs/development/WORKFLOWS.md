@@ -81,7 +81,7 @@ What counts as end-to-end is listed once, in `scripts/quality/e2e-policy.mjs`
 | UI review gallery | `npm run ui:gallery` |
 | Real Obsidian host | `npm run test:obsidian`, `scripts/dev/obsidian-dev.mjs`, `evidence-cli.mjs run native`, `check-native.mjs`, installing `obsidian-launcher` |
 | Served browser evidence | `evidence-cli.mjs run browser` |
-| Browser suites | `*.browser.mjs`, `*.browser.py`, `run-browser-checks.py`, Jev `tests/browser.test.py`, `qualify-styles.mjs` |
+| Browser suites | `*.browser.mjs`, `*.browser.py`, `run-browser-checks.py`, Jev `tests/browser.test.py`, `qualify-styles.mjs`, `check-browser-specimen.mjs` |
 | Browser provisioning | `@playwright/test/cli.js install` (and `install-deps`), `python -m playwright install`, `pip install playwright==`, the `playwright` input of `setup-qualified` |
 | Browser acceptance of generated output | `airship/qualify.mjs`; `qualify-angular-setup.mjs`, `qualify:compiler`, `qualify-storybook.mjs`, `qualify-project-starters.mjs --execute` unless `--no-browser` |
 | Cloud-session handoff with e2e | `qualify-project-handoff.mjs` unless `--skip-e2e` |
