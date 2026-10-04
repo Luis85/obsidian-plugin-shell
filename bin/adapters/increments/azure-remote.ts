@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { validateHosting } from '../../../scripts/companion/hosting-contract.mjs';
 import { parseAzureVersion } from '../framework/hosting-cli.ts';
+import { hasControls } from '../../domain/errors.ts';
 import { azureRemoteState } from '../../domain/increments/remote-state.ts';
 import { bodySize } from '../../domain/increments/remote-body.ts';
 import type { LinkTarget } from '../../domain/increments/remote-model.ts';
@@ -43,8 +44,7 @@ function failure(result: CommandResult, step: Step) {
 }
 const invalid = (step: Step) => step === 'read' ? definite('PR_REMOTE_RESPONSE_INVALID', 'Azure DevOps returned an unexpected response.', step) : uncertainWrite(step, 'the response could not be read');
 function requireText(title: string, body: string | undefined, step: Step): void {
-  // oxlint-disable-next-line no-control-regex
-  if (typeof title !== 'string' || !title.trim() || title.length > 400 || /[\u0000-\u001f\u007f]/.test(title)) throw definite('PR_REMOTE_ARGUMENT_UNSAFE', 'A pull-request title is one line of at most 400 characters.', step);
+  if (typeof title !== 'string' || !title.trim() || title.length > 400 || hasControls(title)) throw definite('PR_REMOTE_ARGUMENT_UNSAFE', 'A pull-request title is one line of at most 400 characters.', step);
   const size = body === undefined ? null : bodySize(body, 'azure-devops');
   if (size && !size.fits) throw definite('PR_BODY_TOO_LARGE', `The description has ${size.size} characters; Azure DevOps accepts at most ${size.limit}. It is never truncated.`, step);
 }

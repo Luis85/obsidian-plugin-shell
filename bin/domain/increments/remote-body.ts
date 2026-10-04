@@ -9,6 +9,7 @@
 import { insistRemote, isAmendmentId, isTaskId, limits, normalizeText } from './remote-model.ts';
 import type { HostingPlatform, LinkResolver, LinkTarget, RemoteDocumentLink, RemotePullRequestView } from './remote-model.ts';
 import { blobUrl, remoteToWikilinks, wikilinksToRemote } from './remote-links.ts';
+import { hasControls } from '../errors.ts';
 
 export type MarkerStyle = 'html' | 'reference';
 export interface BodyOptions { links: LinkTarget; resolve?: LinkResolver; markers?: MarkerStyle }
@@ -49,8 +50,7 @@ const list = (items: string[]): string => items.length ? items.map(item => `- ${
 const prose = (text: string): string => normalizeText(text) || none;
 
 function requireLine(text: string, what: string, max: number): void {
-  // oxlint-disable-next-line no-control-regex
-  insistRemote(text.trim().length > 0 && text.length <= max && !/[\u0000-\u001f\u007f-\u009f]/.test(text), 'PR_REMOTE_CONTENT_INVALID', `${what} must be one line of 1-${max} characters.`);
+  insistRemote(text.trim().length > 0 && text.length <= max && !hasControls(text), 'PR_REMOTE_CONTENT_INVALID', `${what} must be one line of 1-${max} characters.`);
 }
 function requireMarkdown(text: string, what: string, max: number): void {
   insistRemote(text.length <= max, 'PR_LIMIT', `${what} exceeds ${max} characters.`);

@@ -5,6 +5,7 @@
  * marks a draft ready, merges or stores credentials.
  */
 import { githubRemoteState } from '../../domain/increments/remote-state.ts';
+import { hasControls } from '../../domain/errors.ts';
 import { bodySize } from '../../domain/increments/remote-body.ts';
 import type { LinkTarget } from '../../domain/increments/remote-model.ts';
 import type { CreatePullRequest, HostingRemote, RemoteDiagnostic, RemoteFailure, RemotePullRequest, RemoteReadiness } from '../../application/increments/remote-port.ts';
@@ -57,8 +58,7 @@ function requireBody(body: string, step: Step): string {
   return body;
 }
 function requireTitle(title: string): string {
-  // oxlint-disable-next-line no-control-regex
-  if (typeof title !== 'string' || !title.trim() || title.length > 256 || /[\u0000-\u001f\u007f]/.test(title)) throw definite('PR_REMOTE_ARGUMENT_UNSAFE', 'A pull-request title is one line of at most 256 characters.', 'read');
+  if (typeof title !== 'string' || !title.trim() || title.length > 256 || hasControls(title)) throw definite('PR_REMOTE_ARGUMENT_UNSAFE', 'A pull-request title is one line of at most 256 characters.', 'read');
   return title;
 }
 
