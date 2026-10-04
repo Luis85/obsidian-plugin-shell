@@ -78,10 +78,17 @@ function statusPasses(data: Data, configured: boolean): string[] {
   if (data.designStale === false) passes.push('Generation matches the accepted design');
   return passes;
 }
+/** Platform, plus what doctor found of the az CLI for an Azure DevOps project. */
+function hostingLine(value: unknown): string | null {
+  if (!value) return null;
+  const hosting = record(value), cli = hosting.azureCli ? record(hosting.azureCli) : null;
+  if (!cli) return String(hosting.platform);
+  return `${String(hosting.platform)}; az ${cli.version ? String(cli.version) : 'not found'}, azure-devops extension ${cli.devopsExtension ? String(cli.devopsExtension) : 'missing'}`;
+}
 function statusView(style: Style, value: Result): string {
   const data = record(value.data), manifest = data.manifest ? record(data.manifest) : null, configured = Boolean(data.configuration);
   let text = rows([['Root', String(data.root)], ['Plugin', pluginLine(manifest)], ['Configured', configured ? 'yes (shell.config.json)' : 'no'],
-    ['Design', designState(data)], ['Generated', data.generated ? 'yes' : 'no'],
+    ['Design', designState(data)], ['Generated', data.generated ? 'yes' : 'no'], ['Hosting', hostingLine(data.hosting)],
     ['Dependencies', data.dependencies ? 'installed' : 'missing'], ['Node', process.version], ['Acceptance', typeof data.acceptanceObligations === 'number' ? `${data.acceptanceObligations} obligations pending` : null]]);
   text += `${bold(style, 'Checks')}\n` + statusPasses(data, configured).map(item => `  ${marker(style, 'pass')} ${item}\n`).join('') + diagnosticsBlock(style, value.diagnostics);
   const next = value.diagnostics.find(item => item.next)?.next ?? (typeof data.next === 'string' ? data.next : null);

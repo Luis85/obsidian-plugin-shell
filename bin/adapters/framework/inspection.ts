@@ -3,6 +3,9 @@ import { join, dirname, resolve } from 'node:path';
 import { exists, readJson, readConfiguration, readBounded, hash } from './files.ts';
 import { object } from './configuration.ts';
 import { requireThat, result, type Context, type Diagnostic } from './contracts.ts';
+import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
+import { projectHosting } from '../../../scripts/companion/hosting-contract.mjs';
+import { azureDiagnostics, probeAzureCli, type AzureProbe } from './hosting-cli.ts';
 /** A generated project continues with its own npm scripts, not the shell's setup flow. */
 function generatedNext(dependencies: boolean, designStale: boolean | null): string {
   return designStale ? 'generate' : !dependencies ? 'npm ci' : 'npm run check';
@@ -45,12 +48,24 @@ async function acceptanceObligations(context: Context, diagnostics: Diagnostic[]
   if (obligations) diagnostics.push({ code: 'ACCEPTANCE_PENDING', message: `${obligations} generated requirements are not accepted. Scaffold tests do not prove their behavior.` });
   return obligations;
 }
+/** The design's hosting platform; doctor also probes the az CLI (read-only) for an Azure DevOps project. */
+async function hostingFacts(context: Context, command: string, diagnostics: Diagnostic[], probe: AzureProbe) {
+  if (!await exists(join(context.root, 'design/project.json'))) return null;
+  let hosting;
+  try { hosting = projectHosting(parseAuthoringDocument((await readBounded(join(context.root, 'design/project.json'), 4_000_000)).toString('utf8'))); }
+  catch { return null; }
+  const platform = hosting?.platform ?? 'github';
+  if (command !== 'doctor' || platform !== 'azure-devops') return { platform, configured: hosting !== undefined };
+  const azureCli = await probe();
+  diagnostics.push(...azureDiagnostics(azureCli));
+  return { platform, configured: true, azureCli };
+}
 function nextStep({ config, generated, dependencies, imported }: Facts, designStale: boolean | null): string {
   if (generated) return generatedNext(dependencies, designStale);
   if (!config) return 'setup';
   return imported ? 'generate' : 'project import';
 }
-export async function status(context: Context, command = 'status') {
+export async function status(context: Context, command = 'status', probe: AzureProbe = probeAzureCli) {
   const facts: Facts = {
     config: await readConfiguration(context.root),
     manifest: await optionalJson(context, 'manifest.json'),
@@ -62,9 +77,10 @@ export async function status(context: Context, command = 'status') {
   const designStale = await designStaleness(context, facts, diagnostics);
   await toolchainDiagnostics(context, command, diagnostics);
   const obligations = await acceptanceObligations(context, diagnostics);
+  const hosting = await hostingFacts(context, command, diagnostics, probe);
   const { config, manifest, generated, imported, dependencies } = facts;
   return { ...result(command, { root: context.root, configuration: config, manifest, generated, imported, dependencies,
-    designStale, acceptanceObligations: obligations, runtime: 'not-connected', next: nextStep(facts, designStale),
+    designStale, acceptanceObligations: obligations, hosting, runtime: 'not-connected', next: nextStep(facts, designStale),
     identityAuthority: generated ? 'manifest.json' : 'shell.config.json', native: 'not-run', publication: 'not-authorized' }), diagnostics };
 }
 async function buildDiagnostics(context: Context): Promise<Diagnostic[]> {

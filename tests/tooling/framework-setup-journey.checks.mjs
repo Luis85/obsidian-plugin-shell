@@ -68,10 +68,13 @@ test('headless import preserves imported identity; wizard does not request a rep
   const document = starterDocument('quick-capture');
   document.project.author = 'Synthetic author';
   await writeFile(join(ctx.root, 'input.json'), JSON.stringify(document));
-  const prompts = [], answers = ['json', 'input.json', '', ''];
+  const prompts = [], answers = ['json', 'input.json', '', '', ''];
   const chosen = await guidedSetup({ command: 'setup', args: [], options: {} }, ctx, async q => { prompts.push(q); return answers.shift(); }, () => {});
-  assert.equal(prompts.length, 4); assert.match(prompts[2], /Airship/); assert.match(prompts[3], /Workbench MCP/);
+  assert.equal(prompts.length, 5); assert.match(prompts[2], /Airship/); assert.match(prompts[3], /Workbench MCP/);
+  // Without a remote the hosting default is GitHub, and accepting it leaves the imported document unchanged.
+  assert.match(prompts[4], /^Hosting platform .*\[github\] $/);
   assert.equal(chosen.options.airship, undefined); assert.equal(chosen.options.mcp, undefined); assert.equal(chosen.options.id, undefined);
+  assert.equal(chosen.options.hosting, undefined);
   assert.ok(prompts.every(q=>!/^Plugin (ID|name)|^Author:/.test(q)));
   const imported = await executeOperation({ ...chosen, options: { ...chosen.options, yes: true } }, ctx);
   assert.equal(imported.status, 'applied', JSON.stringify(imported));
@@ -215,12 +218,16 @@ test('inherited source links are rejected with custom roots and unrelated output
   assert.equal(await readFile(join(outside.root, 'outside.ts'), 'utf8'), 'export const value = 1;');
 });
 
-test('setup Airship and MCP opt-ins are explicit and do not re-interview an imported identity',async t=>{
+test('setup Airship, MCP and hosting opt-ins are explicit and do not re-interview an imported identity',async t=>{
   const ctx=await fixture(t);const prompts=[];
-  const yes=await guidedSetup({command:'setup',args:[],options:{input:'input.json'}},ctx,async message=>{prompts.push(message);return 'yes';},()=>{});
-  assert.equal(prompts.length,2);assert.match(prompts[0],/Airship/);assert.match(prompts[1],/Workbench MCP/);
+  const answers=['yes','yes','azure-devops','https://dev.azure.com/contoso','Demo',''];
+  const yes=await guidedSetup({command:'setup',args:[],options:{input:'input.json'}},ctx,async message=>{prompts.push(message);return answers.shift();},()=>{});
+  assert.equal(prompts.length,6);assert.match(prompts[0],/Airship/);assert.match(prompts[1],/Workbench MCP/);assert.match(prompts[2],/^Hosting platform/);
+  assert.match(prompts[3],/organization URL/);assert.match(prompts[4],/project/);assert.match(prompts[5],/repository \[Demo\]/);
   assert.equal(yes.options.airship,true);assert.equal(yes.options.mcp,true);assert.equal(yes.options.id,undefined);
-  for(const options of [{input:'input.json',airship:true,mcp:true},{input:'input.json','no-airship':true,'no-mcp':true}]) {
+  assert.equal(yes.options.hosting,'azure-devops');assert.equal(yes.options['azure-organization'],'https://dev.azure.com/contoso');
+  assert.equal(yes.options['azure-project'],'Demo');assert.equal(yes.options['azure-repository'],undefined);
+  for(const options of [{input:'input.json',airship:true,mcp:true,hosting:'github'},{input:'input.json','no-airship':true,'no-mcp':true,hosting:'none'}]) {
     const same=await guidedSetup({command:'setup',args:[],options},ctx,async()=>assert.fail('Explicit choice must not prompt'),()=>{});
     assert.deepEqual(same.options,options);
   }

@@ -2,6 +2,8 @@ import { setupDocumentation } from './docs-setup.ts';
 import { setupObsidian } from './obsidian-setup.ts';
 import { companionStarterSet, derivedId, derivedName } from '../../adapters/framework/starter-project.ts';
 import { readConfiguration } from '../../adapters/framework/files.ts';
+import { readOriginUrl } from '../../adapters/framework/adopt-git.ts';
+import { askHosting, hostingNote } from './hosting-terminal.ts';
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
 import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
 
@@ -16,6 +18,7 @@ interface SetupTerminalDependencies {
   derivedId: typeof derivedId;
   derivedName: typeof derivedName;
   readConfiguration: typeof readConfiguration;
+  readOriginUrl: typeof readOriginUrl;
 }
 
 const defaults: SetupTerminalDependencies = {
@@ -25,6 +28,7 @@ const defaults: SetupTerminalDependencies = {
   derivedId,
   derivedName,
   readConfiguration,
+  readOriginUrl,
 };
 
 type Options = Request['options'];
@@ -76,7 +80,9 @@ export async function guidedSetup(
   if (!options.input && !previous) await askIdentity(options, context, prompt, dependencies);
   await askAirship(options, prompt);
   await askMcp(options, prompt);
-  write('GitHub is optional. Setup stays local and preserves every existing remote. Use your reviewed Git client to connect later.\n');
+  const designed = Boolean(options.input || options.starter || options.blank);
+  if (designed) await askHosting(options, prompt, await dependencies.readOriginUrl(context.root));
+  write(hostingNote(options, designed));
   return { ...request, options };
 }
 

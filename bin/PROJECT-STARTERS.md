@@ -135,6 +135,8 @@ This is an intentionally honest **starting scaffold**: a navigable page-list pro
 
 `sketch generate` detects a saved `project.config.json`; both machine and studio generation preserve its starter, targets and framework. Explicit `--kind project` requires that sidecar. The safe file planner rejects edited/unowned files and stale approval hashes. Regenerate into another directory when preserving source-owned implementation.
 
+Hosting: the project-starter interview does not ask for a hosting platform. The directory form `node bin/app new <dir> --starter <id>` (Companion and `--from` starters) takes `--hosting github|azure-devops|none` with the `--azure-*` details and asks interactively; `companion.project.json` can carry `tooling.hosting` for a later `new <dir> --from`. See [hosting platforms](../docs/development/HOSTING-PLATFORMS.md).
+
 ## Build and readiness boundaries
 
 Generated dependencies use exact direct pins. The new target lockfile initially contains only the root manifest and readiness is **resolution-required**, not locked. Review and explicitly `npm install`; retain the resolved lock and prove a clean `npm ci` before claiming reproducibility. Generation never installs or runs code.

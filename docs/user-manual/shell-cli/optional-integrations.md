@@ -61,3 +61,24 @@ commit it. Later optional installs use `npm ci`. Custom stories belong in
 `storybook/custom`. Generation does not install or launch anything. Disabling
 via reviewed `generate --storybook off` blocks retained launchers without
 deleting custom files. See [the full guide](../../development/OPTIONAL-STORYBOOK.md).
+
+## Hosting platform: GitHub, Azure DevOps or none
+
+A project records where its pull requests and CI live in `tooling.hosting`; GitHub is
+the default. The choice selects the generated pipeline, pull-request template, README
+hints and agent permissions. It never installs `gh` or `az`, signs in, stores a token,
+adds a git remote or contacts the host.
+
+```sh
+node bin/app new ../field-notes --starter quick-capture --hosting azure-devops --azure-organization https://dev.azure.com/contoso --azure-project "Field Notes" --dry-run
+node bin/app hosting show
+node bin/app hosting set none --dry-run
+node bin/app doctor
+```
+
+Interactive `new` and `setup` ask for the platform; explicit `--hosting` never prompts.
+`hosting set` previews a reviewed plan, creates the new platform's files only where
+none exist and deletes nothing: remove retired files yourself. For an Azure DevOps
+project, `doctor` checks read-only whether `az` and its `azure-devops` extension are
+installed and prints the command to run yourself. See
+[hosting platforms](../../development/HOSTING-PLATFORMS.md).

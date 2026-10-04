@@ -78,6 +78,31 @@ will fail, with a suggested `--id`; an explicit `--id` must follow the creation 
 Editing the file after review makes its plan hash stale. See
 [Companion handoff](COMPANION-HANDOFF.md).
 
+### Hosting platform: GitHub, Azure DevOps or none
+
+```sh
+node bin/app new <dir> --starter <id> --hosting azure-devops [--azure-organization https://dev.azure.com/<org> --azure-project <name> [--azure-repository <name>]]
+node bin/app setup --input ./my-project.json --hosting none --dry-run
+node bin/app hosting show
+node bin/app hosting set <github|azure-devops|none> [--azure-*] [--dry-run | --apply <planHash> | --yes]
+```
+
+`--hosting` writes `tooling.hosting` into the design that `new` (Companion starters and
+`--from`) and `setup` (`--starter`, `--input`, `--blank`) compile; omitting it keeps the
+document's own value, and absent means GitHub. Azure details need the `azure-devops`
+platform and both an organization and a project (`HOSTING_OPTION_CONFLICT`,
+`HOSTING_OPTION_INCOMPLETE`); invalid values fail with `COMPANION_TOOLING_INVALID`.
+File starters refuse the flags (`STARTER_OPTION`); setup without a design source refuses
+them (`HOSTING_DESIGN_REQUIRED`). The interviews of `new` and `setup` ask for the platform
+unless `--hosting` is given; setup suggests the platform of the folder's `origin` remote.
+`new` prints the `gh repo create` or `az repos create` and `git remote add` commands after
+writing; it never runs them and `git init` never adds a remote. `hosting set` is a reviewed
+plan bound to the design and its receipts; it creates the new platform's pipeline and
+pull-request template when absent, deletes nothing and lists the previous platform's
+files as `retired`. `doctor` reports the platform and, for Azure DevOps, whether `az` and
+its `azure-devops` extension are available, using one read-only `az version` call. See
+[hosting platforms](HOSTING-PLATFORMS.md).
+
 ## Adopt an existing project
 
 `node bin/app adopt analyze|plan|skill` adds Workbench to a project that already exists. `analyze` is a bounded, read-only scan that never executes project code and reports stack, tooling and compatibility findings (`workbench-adoption-report/v1`). `plan` renders that report as one Markdown integration plan, previews it with its SHA-256 and writes only that file after `--yes` or `--apply <hash>`. `skill` installs the `adopt-existing-project` agent skill. These commands work on any folder (`--target`), without `shell.config.json`. See [Adopt an existing project](ADOPT-EXISTING-PROJECT.md).
