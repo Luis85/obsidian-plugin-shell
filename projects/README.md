@@ -50,7 +50,11 @@ npm run check:projects
 
 `projects/<name>` is the only target inside the checkout that `node bin/app new`
 accepts. Git initialization is skipped there, because the folder is already in this
-repository. Then work inside the project as you would in its own repository:
+repository. When a project keeps a saved project configuration, it lives at
+`projects/<name>/configs/<project-id>-config.json`: commands run inside `projects/<name>`
+read only that one, and the shell root never reads it (see
+[project configuration](../bin/PROJECT-STARTERS.md#project-configuration)).
+Then work inside the project as you would in its own repository:
 
 ```sh
 cd projects/<name>

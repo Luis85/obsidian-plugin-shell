@@ -146,9 +146,12 @@ sources and their `scripts/build.mjs`/`scripts/serve.mjs`, `sketch generate`, `p
 `brainstorm`, `design` and `first-run`.
 
 Commands that need the current project use `--config configs/<project-id>-config.json`
-when given; otherwise they read the single `*-config.json` file directly inside `configs/`.
+when given; otherwise they read the single `*-config.json` file directly inside `configs/`
+of the folder they run in (`--root`, by default the current directory).
 Subfolders such as `configs/starters`, `configs/types` and `configs/quality` are never
-searched. No match means no saved project. Several matches fail with
+searched, and neither is `projects/`: a standalone project in `projects/<name>` keeps any
+configuration of its own in `projects/<name>/configs/`, which only commands run inside
+that folder read. No match means no saved project. Several matches fail with
 `PROJECT_CONFIG_AMBIGUOUS`, which lists the candidates and the `--config` option; a
 `*-config.json` name that is not a portable project ID fails with `PROJECT_CONFIG_INVALID`,
 and a `--config` path that does not exist fails with `PROJECT_CONFIG_MISSING`. A linked
@@ -157,8 +160,8 @@ second configuration beside another project's (`PROJECT_CONFIG_CONFLICT`).
 `--config` is a maker option of the commands that read the saved project: `sketch`,
 `prototype`, `studio`, `brainstorm` and `design`. Maker commands that never read it refuse
 it with their own option code: `new` (`PROJECT_OPTION`), `project-setup` and `settings`
-(`SETUP_OPTION`) and `first-run` (`FIRST_RUN_OPTION`). Framework commands such as `setup`
-or `check` reject it as an unknown option (`INVALID_OPTION`).
+(`SETUP_OPTION`) and `first-run` (`FIRST_RUN_OPTION`). Framework commands such as `setup`,
+`check`, `base` or `site` reject it as an unknown option (`INVALID_OPTION`).
 
 The retired root `project.config.json` is never read. When it exists and `configs/` holds
 no project configuration, commands fail with `PROJECT_CONFIG_RELOCATED`. A project made by

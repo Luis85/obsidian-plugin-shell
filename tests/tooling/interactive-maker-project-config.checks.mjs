@@ -15,6 +15,7 @@ import { readSettings } from '../../bin/domain/user-settings.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
+import { commands, parameterKinds, parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const { selection: cli } = await projectStarter(frameworkRoot, 'cli');
 const json = value => JSON.stringify(value, null, 2) + '\n';
@@ -90,6 +91,25 @@ test('sketch generation reads the discovered configuration and --config chooses 
   for (const [args, expected] of [[['project-setup', 'status'], 'SETUP_OPTION'], [['first-run', 'status'], 'FIRST_RUN_OPTION'], [['new', 'starters'], 'PROJECT_OPTION']])
     await assert.rejects(() => execute(parseArguments([...args, '--config', 'configs/cli-config.json']), context('configs/cli-config.json')), code(expected), args[0] + ' does not read a saved project configuration');
 }));
+test('a checkout root never reads projects/<name>/configs, and a command run inside projects/<name> reads that project\'s own configuration', async () => scratch(async root => {
+  const project = join(root, 'projects/demo');
+  await put(root, 'projects/demo/configs/demo-config.json', json(cli)); await put(root, 'projects/demo/configs/starters/x-config.json', json(cli));
+  await put(root, 'projects/demo/design/project.json', documentText(runOperations(newDocument('CLI'), [{ op: 'page.add', title: 'Commands' }]).document));
+  assert.equal(await savedProjectConfig(root), undefined, 'the shell root has no saved project of its own');
+  assert.deepEqual(await projectConfigFiles(root), []);
+  await put(root, 'configs/shell-config.json', json(cli));
+  assert.equal((await savedProjectConfig(root)).path, 'configs/shell-config.json', 'a project inside projects/ never makes the shell root ambiguous');
+  assert.equal((await savedProjectConfig(project)).path, 'configs/demo-config.json');
+  const inside = spawnSync(process.execPath, [join(frameworkRoot, 'bin/app'), 'sketch', 'generate', '--out', 'code', '--json'], { cwd: project, encoding: 'utf8', timeout: 60000 });
+  assert.equal(inside.status, 0, inside.stdout + inside.stderr);
+  const plan = JSON.parse(inside.stdout).data;
+  assert.equal(plan.outputKind, 'project'); assert.ok(plan.changes.some(item => item.path === 'code/configs/cli-config.json'), 'generation inside the project uses its own saved selection');
+}));
+test('framework commands, including base and site, never declare --config and refuse it as an unknown option', () => {
+  assert.deepEqual(commands.filter(command => Object.hasOwn(parameterKinds(command), 'config')).map(command => command.id), []);
+  for (const argv of [['base', 'views', 'a.base'], ['base', 'ingest', 'a.base', '--view', 'v'], ['site', 'templates'], ['site', 'new', 'projects/demo', '--template', 'documentation'], ['site', 'collections', 'projects/demo'], ['config', 'get'], ['check']])
+    assert.throws(() => parseCliArguments([...argv, '--config', 'configs/cli-config.json']), error => error.code === 'INVALID_OPTION', argv.join(' '));
+});
 async function vault(root) {
   assert.equal(spawnSync('git', ['init', root]).status, 0);
   await mkdir(join(root, '.obsidian')); await put(root, 'docs/prds/one.md', '---\ntype: prd\nid: PRD-1\n---\nOriginal.\n');
