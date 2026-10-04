@@ -1,7 +1,17 @@
 /** Shared scratch projects for the learning path checks: a configs/ folder with forms, wizards, paths, content and docs. */
-import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
+import { access, mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+/**
+ * The release-candidate guide is delivered by the separate increment/candidate feature. Until that page exists, the
+ * idea-to-prototype course's two release-candidate steps link it, and these are exactly the issues learn check reports.
+ */
+const releaseCandidatesGuide ='docs/development/RELEASE-CANDIDATES.md';
+export async function shippedLearningIssues(repository) {
+  try { await access(join(repository, releaseCandidatesGuide)); return []; }
+  catch { return ['record-an-increment', 'add-to-the-release-candidate'].map(id =>
+    `path idea-to-prototype-with-claude-design.${id}: broken documentation link [[docs/development/RELEASE-CANDIDATES]]: ${releaseCandidatesGuide} does not exist.`); }
+}
 export async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'learning-'));
   try { return await fn(root); } finally { await rm(root, { recursive: true, force: true }); }

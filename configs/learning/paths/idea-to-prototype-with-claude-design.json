@@ -1,0 +1,227 @@
+{
+  "$schema": "../../schemas/learning-path.schema.json",
+  "schemaVersion": 1,
+  "id": "idea-to-prototype-with-claude-design",
+  "version": 1,
+  "title": "From idea to prototype with Claude Design",
+  "summary": "Take one idea from a brainstorm to a design brief in a new prototype folder, prepare its docs/design folder, design and hand it over in Claude Design, save and sync the result, implement the ready screens in the prototype and plan it into the next release candidate.",
+  "skill": "Design-to-code handoff with Claude Design",
+  "audience": "Product people, designers and developers who want to turn an idea into an implemented prototype with this repository's tools",
+  "prerequisites": [],
+  "estimatedMinutes": 240,
+  "steps": [
+    {
+      "id": "understand-the-journey",
+      "title": "Understand the journey",
+      "goal": "Know the stages from idea to release candidate, the terms they use and every file you will touch.",
+      "markdown": { "file": "idea-to-prototype/01-journey-and-glossary.md" },
+      "docs": ["docs/development/CLAUDE-DESIGN-HANDOFF#Journey", "docs/user-manual/shell-cli/index", "docs/development/LEARNING-PATHS#Progress"],
+      "checklist": [
+        { "id": "stages", "label": "I know the eight stages of the journey" },
+        { "id": "glossary", "label": "I read the glossary" },
+        { "id": "files", "label": "I read where to find what", "required": false }
+      ],
+      "actions": [
+        { "id": "status", "kind": "command", "label": "See the project's configuration and next step", "command": "node bin/app status --json" },
+        { "id": "folders", "kind": "command", "label": "See the configured folders", "command": "node bin/app settings show --json" }
+      ],
+      "winConditions": [{ "kind": "checklist-complete" }]
+    },
+    {
+      "id": "name-your-prototype",
+      "title": "Name your prototype",
+      "goal": "Choose the prototype title, its folder slug and the release candidate version that later steps check against.",
+      "markdown": "Choose three names now; later steps check your files under exactly these names.\n\n- **Title**: the prototype title you will type in the prototype maker, for example `Reading log`.\n- **Slug**: the folder name of the prototype package and the design folder, for example `reading-log`. Use lowercase letters, digits and single hyphens, at most 48 characters. The design-folder question derives its folder from the title, so pick the slug the title produces (`Reading log` → `reading-log`).\n- **Version**: the next release candidate, `x.y.z`, for example `0.5.0`.\n\nYour files will be `prototypes/<slug>/`, `docs/design/<slug>/` and `docs/releases/candidates/<version>/`. See [[docs/development/CLAUDE-DESIGN-HANDOFF#Commands|the --name rules]].",
+      "fields": [
+        { "id": "title", "kind": "text", "label": "Prototype title (e.g. Reading log)", "required": true, "maxLength": 80 },
+        { "id": "slug", "kind": "text", "label": "Prototype slug (lowercase kebab-case, e.g. reading-log)", "required": true, "maxLength": 48 },
+        { "id": "version", "kind": "text", "label": "Next release candidate version (x.y.z, e.g. 0.5.0)", "required": true, "maxLength": 40 }
+      ],
+      "bind": "plan",
+      "winConditions": [
+        { "kind": "form-valid" },
+        { "kind": "answer", "path": "plan.slug", "present": true, "label": "You chose a prototype slug" },
+        { "kind": "answer", "path": "plan.version", "present": true, "label": "You chose a release candidate version" }
+      ]
+    },
+    {
+      "id": "brainstorm-the-idea",
+      "title": "Brainstorm the idea",
+      "goal": "Write down the problem, users, options, risks and non-goals of your idea before designing anything.",
+      "markdown": { "file": "idea-to-prototype/03-brainstorm.md" },
+      "docs": ["docs/user-manual/shell-cli/brainstorm", "docs/development/CONCEPT-INTAKE", "docs/development/WIZARDS-AND-FORMS#Run, inspect and check"],
+      "fields": [
+        { "id": "route", "kind": "select", "label": "How did you brainstorm?", "default": "prd", "choices": [
+          { "id": "prd", "label": "With Claude Code (ideation-brainstorm skill, PRD in docs/prds)" },
+          { "id": "feature", "label": "With node bin/app brainstorm (feature package in brainstorms/)" }
+        ] },
+        { "id": "record", "kind": "text", "label": "Project-relative file that records the result (e.g. docs/prds/reading-log.md)", "required": true, "maxLength": 200 }
+      ],
+      "bind": "idea",
+      "actions": [
+        { "id": "brainstorm", "kind": "wizard", "label": "Brainstorm a feature of the saved project", "wizard": "brainstorm" },
+        { "id": "guide", "kind": "command", "label": "Brainstorm questions for agents", "command": "node bin/app brainstorm guide --json" },
+        { "id": "context", "kind": "command", "label": "Saved project and base hash a feature brainstorm needs", "command": "node bin/app brainstorm context --json" },
+        { "id": "feature", "kind": "command", "label": "Plan a feature package from a request", "command": "node bin/app brainstorm feature --input feature.json --out brainstorms/<slug> --json" }
+      ],
+      "winConditions": [
+        { "kind": "form-valid" },
+        { "kind": "file-exists", "file": "{{idea.record}}", "label": "Your brainstorm result {{idea.record}} exists" }
+      ]
+    },
+    {
+      "id": "write-the-design-brief",
+      "title": "Write the design brief in a new prototype folder",
+      "goal": "Turn the brainstorm into an agreed design brief and a prototype package in prototypes/<slug>.",
+      "markdown": { "file": "idea-to-prototype/04-design-brief.md" },
+      "docs": ["bin/README#Prepare a prototype", "bin/PROJECT-STARTERS#Prepared package and generation", "docs/user-manual/shell-cli/automation-and-safety#The repeatable reviewed-plan pattern"],
+      "checklist": [
+        { "id": "agreed", "label": "I reviewed the brief's defaults before agreeing" },
+        { "id": "folder", "label": "I entered prototypes/<slug> as the package output folder" }
+      ],
+      "actions": [
+        { "id": "maker", "kind": "wizard", "label": "Run the prototype maker", "wizard": "prototype" },
+        { "id": "guide", "kind": "command", "label": "Discover the prototype guide", "command": "node bin/app prototype guide --json" },
+        { "id": "validate", "kind": "command", "label": "Check answers without writing", "command": "node bin/app prototype validate --input prototype-answers.json --json" },
+        { "id": "plan", "kind": "command", "label": "Plan the package (then repeat with --apply <planHash>)", "command": "node bin/app prototype --input prototype-answers.json --out prototypes/<slug> --json" }
+      ],
+      "winConditions": [
+        { "kind": "checklist-complete" },
+        { "kind": "file-exists", "file": "prototypes/{{plan.slug}}/design-brief.md" },
+        { "kind": "file-contains", "file": "prototypes/{{plan.slug}}/design-brief.md", "text": "{{plan.title}}", "label": "The brief is about {{plan.title}}" },
+        { "kind": "file-exists", "file": "prototypes/{{plan.slug}}/execution-prompt.md" },
+        { "kind": "file-exists", "file": "prototypes/{{plan.slug}}/companion.project.json" }
+      ]
+    },
+    {
+      "id": "prepare-the-design-folder",
+      "title": "Create the docs/design folder",
+      "goal": "Answer the design-folder question and prepare docs/design/<slug> for Claude Design through a reviewed plan.",
+      "markdown": { "file": "idea-to-prototype/05-design-folder.md" },
+      "docs": ["docs/development/CLAUDE-DESIGN-HANDOFF", "bin/README#Prepare a Claude Design folder"],
+      "actions": [
+        { "id": "prepare", "kind": "command", "label": "Plan the design folder (then repeat with --apply <planHash>)", "command": "node bin/app design prepare --name <slug> --project prototypes/<slug>/companion.project.json --package prototypes/<slug> --json" },
+        { "id": "status", "kind": "command", "label": "Check the folder", "command": "node bin/app design status --name <slug> --json" }
+      ],
+      "winConditions": [
+        { "kind": "file-exists", "file": "docs/design/{{plan.slug}}/design.manifest.json", "label": "docs/design/{{plan.slug}} is a prepared design folder" },
+        { "kind": "file-contains", "file": "docs/design/{{plan.slug}}/design.manifest.json", "text": "prototypes/{{plan.slug}}/design-brief.md", "label": "The folder keeps your design brief" },
+        { "kind": "file-exists", "file": "docs/design/{{plan.slug}}/ENGINEERING_HANDOFF_GUIDE.md" },
+        { "kind": "file-exists", "file": "docs/design/{{plan.slug}}/handoff/implementation-map.md" }
+      ]
+    },
+    {
+      "id": "design-in-claude-design",
+      "title": "Open the folder in Claude Design and design",
+      "goal": "Import docs/design/<slug> into Claude Design and build interactive prototypes from its screens.",
+      "markdown": { "file": "idea-to-prototype/06-claude-design.md" },
+      "docs": ["docs/development/CLAUDE-DESIGN-HANDOFF#Boundaries", "docs/development/CLAUDE-DESIGN-HANDOFF#Folder layout"],
+      "checklist": [
+        { "id": "current", "label": "design status reported the folder as current before I imported it" },
+        { "id": "imported", "label": "I imported docs/design/<slug> into Claude Design" },
+        { "id": "agents", "label": "I asked Claude Design to read AGENTS.md first" },
+        { "id": "prototype", "label": "Claude Design built an interactive prototype for at least one screen" }
+      ],
+      "actions": [
+        { "id": "status", "kind": "command", "label": "Is the folder current?", "command": "node bin/app design status --name <slug> --json" }
+      ],
+      "winConditions": [{ "kind": "checklist-complete" }]
+    },
+    {
+      "id": "request-the-handover",
+      "title": "Ask Claude Design for the handover files",
+      "goal": "Have Claude Design produce the prototypes, decisions and implementation-map rows that the generated handoff documents require.",
+      "markdown": { "file": "idea-to-prototype/07-handover.md" },
+      "docs": ["docs/development/CLAUDE-DESIGN-HANDOFF#Engineering handoff guide"],
+      "checklist": [
+        { "id": "requested", "label": "I asked Claude Design to prepare the handover as ENGINEERING_HANDOFF_GUIDE.md and AGENTS.md describe" },
+        { "id": "files", "label": "Each finished screen is a prototypes/<screen-id>--<variant>.html file with data-design-id attributes" },
+        { "id": "decisions", "label": "New tokens, components, business rules and open questions are in notes/decisions.md" },
+        { "id": "ready", "label": "Finished rows of handoff/implementation-map.md list their files and acceptance notes and say ready" }
+      ],
+      "winConditions": [{ "kind": "checklist-complete" }]
+    },
+    {
+      "id": "save-and-sync",
+      "title": "Save the design into docs/design and sync",
+      "goal": "Export the design work into docs/design/<slug>, check it with design status and keep the generated files current with design sync.",
+      "markdown": { "file": "idea-to-prototype/08-save-and-sync.md" },
+      "docs": ["docs/development/CLAUDE-DESIGN-HANDOFF#Sync rules", "docs/development/CLAUDE-DESIGN-HANDOFF#Configuration"],
+      "fields": [
+        { "id": "prototypeFile", "kind": "text", "label": "One prototype file you saved in prototypes/ (e.g. node-1--compact.html)", "required": true, "maxLength": 120 }
+      ],
+      "bind": "handover",
+      "actions": [
+        { "id": "status", "kind": "command", "label": "Check prototypes, statuses and edits", "command": "node bin/app design status --name <slug> --json" },
+        { "id": "sync", "kind": "command", "label": "Plan a sync (then repeat with --apply <planHash>)", "command": "node bin/app design sync --name <slug> --json" }
+      ],
+      "winConditions": [
+        { "kind": "form-valid" },
+        { "kind": "file-exists", "file": "docs/design/{{plan.slug}}/prototypes/{{handover.prototypeFile}}" },
+        { "kind": "file-contains", "file": "docs/design/{{plan.slug}}/prototypes/{{handover.prototypeFile}}", "text": "data-design-id", "label": "The prototype maps its elements with data-design-id" },
+        { "kind": "file-contains", "file": "docs/design/{{plan.slug}}/handoff/implementation-map.md", "text": "| ready |", "label": "At least one implementation-map row is ready" }
+      ]
+    },
+    {
+      "id": "implement-in-the-prototype",
+      "title": "Implement the ready screens in the prototype",
+      "goal": "Have Claude Code build the ready rows in the prototype package, following HANDOFF.md and the execution prompt, and record them as implemented.",
+      "markdown": { "file": "idea-to-prototype/09-implement.md" },
+      "docs": ["docs/development/PROTOTYPE-TOOLING", "docs/development/COMPANION-CLICKDUMMY", "docs/user-manual/shell-cli/design-and-generation#Build and review a clickdummy", "bin/ANGULAR-BRICKS", "AGENTS"],
+      "checklist": [
+        { "id": "prompt", "label": "I gave Claude Code the implementation request with HANDOFF.md and execution-prompt.md" },
+        { "id": "model", "label": "Screens, components or interactions the design added went into the project model first, then design sync", "required": false },
+        { "id": "gates", "label": "The gates ran with real output (at least node bin/app check)" }
+      ],
+      "actions": [
+        { "id": "discover", "kind": "command", "label": "Discover the prototype tools", "command": "npm run prototype:tools -- discover --repo ." },
+        { "id": "status", "kind": "command", "label": "Sync check before building", "command": "node bin/app design status --name <slug> --json" },
+        { "id": "check", "kind": "command", "label": "Run the agent gate", "command": "node bin/app check" }
+      ],
+      "winConditions": [
+        { "kind": "checklist-complete" },
+        { "kind": "file-contains", "file": "docs/design/{{plan.slug}}/handoff/implementation-map.md", "text": "| implemented |", "label": "At least one implementation-map row is implemented" }
+      ]
+    },
+    {
+      "id": "record-an-increment",
+      "title": "Record an increment (release-candidate feature)",
+      "goal": "Record the implemented prototype as an increment whose sources point at the prototype package and the design folder.",
+      "markdown": { "file": "idea-to-prototype/10-increment.md" },
+      "fields": [
+        { "id": "incrementId", "kind": "text", "label": "Increment id (e.g. INC-0001)", "required": true, "maxLength": 20 },
+        { "id": "incrementFile", "kind": "text", "label": "Increment note file in docs/releases/increments (e.g. INC-0001-reading-log.md)", "required": true, "maxLength": 120 }
+      ],
+      "bind": "release",
+      "actions": [
+        { "id": "new", "kind": "command", "label": "Record a new increment", "command": "node bin/app increment new" },
+        { "id": "list", "kind": "command", "label": "Find its id and file", "command": "node bin/app increment list --json" },
+        { "id": "check", "kind": "command", "label": "Validate every increment", "command": "node bin/app increment check --json" }
+      ],
+      "winConditions": [
+        { "kind": "form-valid" },
+        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "type: Increment", "label": "Your increment note has type: Increment" },
+        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "{{release.incrementId}}", "label": "Your increment note has the id {{release.incrementId}}" },
+        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "prototypes/{{plan.slug}}", "label": "Its sources list prototypes/{{plan.slug}}" },
+        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "docs/design/{{plan.slug}}", "label": "Its sources list docs/design/{{plan.slug}}" }
+      ]
+    },
+    {
+      "id": "add-to-the-release-candidate",
+      "title": "Add it to the next release candidate (release-candidate feature)",
+      "goal": "Plan the increment into the release candidate for the version you chose.",
+      "markdown": { "file": "idea-to-prototype/11-release-candidate.md" },
+      "actions": [
+        { "id": "new", "kind": "command", "label": "Create the candidate once", "command": "node bin/app candidate new --version <x.y.z>" },
+        { "id": "add", "kind": "command", "label": "Add your increment", "command": "node bin/app candidate add --version <x.y.z> --increment <INC-0001>" },
+        { "id": "show", "kind": "command", "label": "Show the candidate", "command": "node bin/app candidate show --version <x.y.z> --json" },
+        { "id": "check", "kind": "command", "label": "Validate the candidates", "command": "node bin/app candidate check --json" }
+      ],
+      "winConditions": [
+        { "kind": "file-exists", "file": "docs/releases/candidates/{{plan.version}}/README.md" },
+        { "kind": "file-contains", "file": "docs/releases/candidates/{{plan.version}}/README.md", "text": "type: ReleaseCandidate", "label": "The candidate has type: ReleaseCandidate" },
+        { "kind": "file-contains", "file": "docs/releases/candidates/{{plan.version}}/README.md", "text": "{{release.incrementId}}", "label": "The candidate lists {{release.incrementId}}" }
+      ]
+    }
+  ]
+}
