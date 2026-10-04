@@ -21,8 +21,9 @@ function scalar(raw) {
 function listValue(raw) {
   const inner = raw.trim().slice(1, -1).trim();
   if (!inner) return { value: [] };
+  // Items are separated by commas; whitespace may precede a quoted item, whose commas belong to it.
   const items = [];
-  for (const part of inner.match(/"(?:[^"\\]|\\.)*"|'[^']*'|[^,]+/g) ?? []) {
+  for (const [part] of inner.matchAll(/\s*(?:"(?:[^"\\]|\\.)*"|'[^']*'|[^,"'\s][^,]*|["'][^,]*)\s*(?=,|$)/g)) {
     const item = scalar(part);
     if (item.error) return item;
     if (item.value) items.push(item.value);
@@ -120,6 +121,14 @@ export function acceptanceCriteria(section, label = 'Evidence:') {
     const at = item.full.indexOf(label);
     const evidence = at < 0 ? [] : [...item.full.slice(at + label.length).matchAll(/`([^`\n]+)`/g)].map(found => found[1]);
     return { line: item.line, valid: true, checked: match[1] !== ' ', id: match[2], text: match[3], evidence };
+  });
+}
+const taskPattern = /^\[( |x|X)\]\s+(T-\d+):\s*(\S.*)$/;
+/** `- [ ] T-n: text` items of a PullRequest `## Tasks` section; other list lines are reported as invalid. */
+export function taskItems(section) {
+  return listItems(section?.lines ?? []).map(item => {
+    const match = taskPattern.exec(item.text);
+    return match ? { line: item.line, valid: true, checked: match[1] !== ' ', id: match[2], text: match[3] } : { line: item.line, valid: false, text: item.text };
   });
 }
 /** `- \`path or glob\`: note` items. */

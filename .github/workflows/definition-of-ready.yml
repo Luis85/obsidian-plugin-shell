@@ -5,6 +5,8 @@ name: Definition of Ready
 # Dependency-free (no install), read-only, about twenty seconds. Release pull requests
 # skip it (release.yml reports the check for them); dependabot and other configured
 # exemptions pass with a notice. Runs on `edited` so a `Handoff:` line in the body counts.
+# No branch filter: pull requests into increment branches (increment/<id>) run it too, and
+# DELIVERY_BASE_REF/DELIVERY_HEAD_REF let it check their PullRequest documents' branches.
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
@@ -20,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:
-      BASE_REF: ${{ github.base_ref }}
+      DELIVERY_BASE_REF: ${{ github.base_ref }}
       DELIVERY_HEAD_REF: ${{ github.head_ref }}
       DELIVERY_ACTOR: ${{ github.event.pull_request.user.login }}
       DELIVERY_PR_BODY: ${{ github.event.pull_request.body }}
@@ -35,7 +37,7 @@ jobs:
           node-version-file: .nvmrc
           package-manager-cache: false
       - name: Check the increment handoff against the Definition of Ready
-        run: node scripts/delivery/ready.mjs --base "origin/$BASE_REF" --summary "$GITHUB_STEP_SUMMARY" --out "$RUNNER_TEMP/definition-of-ready"
+        run: node scripts/delivery/ready.mjs --base "origin/$DELIVERY_BASE_REF" --summary "$GITHUB_STEP_SUMMARY" --out "$RUNNER_TEMP/definition-of-ready"
       - name: Upload the refinement brief
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

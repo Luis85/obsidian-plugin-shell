@@ -40,6 +40,7 @@ npm run release:publish -- --version X.Y.Z --repository owner/repo  Plan publish
 npm run increment:new -- <slug>  Print an increment handoff from the template; --write creates docs/increments/<slug>.md
 npm run dor -- --base origin/main  Definition of Ready: check the increment handoff before implementation
 npm run dod -- --base origin/main  Definition of Done: check the handoff against the diff; --write generates its docs
+npm run acceptance:stubs -- --increment <id>  List one pending test stub per acceptance criterion; --write creates them (never overwrites)
 
 Browser provisioning: node node_modules/@playwright/test/cli.js install chromium
 Open .dev-vault in Obsidian, deliberately enable the plugin, then run ${openCommand}.

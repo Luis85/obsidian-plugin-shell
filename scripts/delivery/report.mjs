@@ -8,7 +8,7 @@ const failing = result => result.rules.filter(rule => rule.status === 'fail' || 
 
 /** The versioned machine document (protocolVersion 1). */
 export function jsonReport(result) {
-  return { protocolVersion: 1, gate: result.gate, status: result.status, handoff: result.handoff ?? null, base: result.base ?? null,
+  return { protocolVersion: 1, gate: result.gate, status: result.status, handoff: result.handoff ?? null, base: result.base ?? null, scope: result.scope ?? null,
     notices: result.notices ?? [], rules: result.rules.map(rule => ({ id: rule.id, title: rule.title, severity: rule.severity, status: rule.status,
       message: rule.message, hint: rule.hint ?? null, ...(rule.details ? { details: rule.details } : {}) })),
     ...(result.refinement ? { refinement: result.refinement } : {}), generated: result.generated ?? {}, ...(result.error ? { error: result.error } : {}) };
@@ -30,9 +30,14 @@ function briefMarkdown(brief, handoff) {
     ...brief.questions.flatMap(item => [`- **${item.rule} ${item.title}**`, ...item.questions.map(question => `  - ${question}`)]), ''];
 }
 
+const kindLabels = { change: 'change pull request', kickoff: 'kick-off pull request' };
+/** "change pull request docs/pull-requests/x.md" for a change or kick-off, else null. */
+const scopeText = scope => (kindLabels[scope?.kind] ? `${kindLabels[scope.kind]}${scope.pullRequest ? ` ${scope.pullRequest}` : ''}` : null);
+const stubLines = generated => [...(generated?.stubs ?? []).map(path => `stub ${path}`), ...(generated?.orphans ?? []).map(path => `orphan stub ${path} (no matching criterion)`)];
+
 /** Terminal text. */
 export function humanReport(result) {
-  const where = [result.handoff, result.base && `base ${result.base.ref} ${result.base.sha.slice(0, 12)}`].filter(Boolean).join(', ');
+  const where = [result.handoff, scopeText(result.scope), result.base && `base ${result.base.ref} ${result.base.sha.slice(0, 12)}`].filter(Boolean).join(', ');
   const lines = [`${labels[result.gate]}: ${result.status.toUpperCase()}${where ? ` (${where})` : ''}`];
   for (const notice of result.notices ?? []) lines.push(`  notice: ${notice}`);
   if (result.error) lines.push(`  error: ${result.error}`);
@@ -47,6 +52,7 @@ export function humanReport(result) {
     lines.push('', `Refinement needed: run the ${result.refinement.skills.map(skill => `\`${skill}\``).join(', ')} skill(s); questions:`);
     for (const item of result.refinement.questions) for (const question of item.questions) lines.push(`  ${item.rule}: ${question}`);
   }
+  if (!result.generated?.written?.length) for (const line of stubLines(result.generated)) lines.push(`  ${line}${line.startsWith('stub') ? ' (create it with --write)' : ''}`);
   for (const path of result.generated?.written ?? []) lines.push(`  wrote ${path}`);
   for (const path of result.generated?.out ?? []) lines.push(`  generated ${path}${result.gate === 'done' ? ' (apply locally with --write)' : ''}`);
   return lines.join('\n');
@@ -55,7 +61,7 @@ export function humanReport(result) {
 /** Markdown for $GITHUB_STEP_SUMMARY. */
 export function summaryMarkdown(result) {
   const out = [`## ${labels[result.gate]}: ${result.status}`, ''];
-  out.push([result.handoff ? `Handoff: \`${result.handoff}\`` : 'Handoff: none', result.base ? `base \`${result.base.ref}\` (\`${result.base.sha.slice(0, 12)}\`)` : null].filter(Boolean).join(' · '), '');
+  out.push([result.handoff ? `Handoff: \`${result.handoff}\`` : 'Handoff: none', scopeText(result.scope), result.base ? `base \`${result.base.ref}\` (\`${result.base.sha.slice(0, 12)}\`)` : null].filter(Boolean).join(' · '), '');
   for (const notice of result.notices ?? []) out.push(`> ${notice}`, '');
   if (result.error) out.push(`> Error: ${result.error}`, '');
   if (result.rules.length) {
@@ -70,6 +76,8 @@ export function summaryMarkdown(result) {
     out.push('');
   }
   if (result.refinement) out.push(...briefMarkdown(result.refinement, result.handoff));
+  const stubs = stubLines(result.generated);
+  if (stubs.length) out.push('### Acceptance stubs', '', ...stubs.map(line => `- ${line}`), '', 'Create the missing stubs with `npm run dor -- --write`; the job artifact holds them.', '');
   const generated = result.generated ?? {};
   if (generated.completionRecord) {
     out.push('### Generated documentation', '', `Apply it locally with \`npm run ${result.gate === 'done' ? 'dod' : 'dor'} -- --write${result.base ? ` --base ${result.base.ref}` : ''}\`${generated.out?.length ? '; the job artifact holds the generated files' : ''}.`, '');

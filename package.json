@@ -110,6 +110,7 @@
     "increment:new": "node scripts/delivery/increment.mjs new",
     "dor": "node scripts/delivery/ready.mjs",
     "dod": "node scripts/delivery/done.mjs",
+    "acceptance:stubs": "node scripts/delivery/acceptance.mjs stubs",
     "companion:generate": "node scripts/companion-tools/generate.mjs",
     "companion:scaffold": "node bin/app generate",
     "test:generator": "node scripts/testing/suites.mjs generator",

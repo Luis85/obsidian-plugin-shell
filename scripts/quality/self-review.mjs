@@ -6,6 +6,7 @@ import { collectChanges, resolveBase } from './self-review-diff.mjs';
 import { overLimitFiles, unclassifiedTests } from './self-review-files.mjs';
 import { lineViolations } from './self-review-rules.mjs';
 import { ALLOWLIST_PATH, parseAllowlist } from './check-docs-launchers.mjs';
+import { pendingStubAllowance } from '../delivery/acceptance-guard.mjs';
 
 const usage = 'usage: check:self-review [--base <ref>] [--json] [--warn-only]';
 
@@ -29,7 +30,22 @@ const byLocation = (a, b) => a.file.localeCompare(b.file) || a.line - b.line || 
 export async function reviewChanges(root, files) {
   const found = [...lineViolations(files), ...await unclassifiedTests(root, files), ...await overLimitFiles(root, files)];
   const historical = await historicalLauncherFiles(root);
-  return found.filter(item => item.rule !== 'SR-RETIRED-LAUNCHER' || !historical.some(entry => entry.matcher.test(item.file))).sort(byLocation);
+  const pending = await pendingStubs(root, files, found);
+  return found.filter(item => item.rule !== 'SR-RETIRED-LAUNCHER' || !historical.some(entry => entry.matcher.test(item.file)))
+    .filter(item => !pending.has(item)).sort(byLocation);
+}
+
+/** SR-FOCUSED-TEST findings that are the pending marker of a generated acceptance stub of an unfinished Increment (scripts/delivery/acceptance-guard.mjs). */
+async function pendingStubs(root, files, found) {
+  const candidates = found.filter(item => item.rule === 'SR-FOCUSED-TEST');
+  if (!candidates.length) return new Set();
+  const allowed = await pendingStubAllowance(root);
+  const kept = new Set();
+  for (const item of candidates) {
+    const line = files.find(file => file.path === item.file)?.added.find(entry => entry.line === item.line)?.text;
+    if (await allowed(item.file, line)) kept.add(item);
+  }
+  return kept;
 }
 
 /** Files the reviewed docs-launchers allowlist keeps as historical records; one list serves both guards. */

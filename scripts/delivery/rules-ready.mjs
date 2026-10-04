@@ -2,47 +2,25 @@
  * Definition of Ready rules. Each rule is pure: run(context, params) reads only the injected context
  * (parsed handoff, delivery config, repository file list, suites and npm scripts) and returns
  * { status: pass|fail|skip, message, hint?, details? }. `questions` feed the refinement brief.
+ * The Increment rules live here; the PullRequest and Issue rules in rules-ready-documents.mjs and the
+ * acceptance stub rules in rules-acceptance.mjs.
  */
 import { acceptanceCriteria, affectedAreas, bodyText, changelogEntries, docsImpact, listItems, prose, subsection, testPlan, wikilinks, words } from './handoff.mjs';
 import { isGlob, matchesAny, matchesPath, safeRelative, staticPrefix } from './paths.mjs';
+import { fail, frontmatterProblems, increment, known, list, pass, resolveWikilink, skip } from './rules-common.mjs';
+import { documentReadyRules } from './rules-ready-documents.mjs';
+import { acceptanceReadyRules } from './rules-acceptance.mjs';
 
-/** Document kinds a rule checks; a later PullRequest rule set declares ['PullRequest']. */
-export const increment = Object.freeze(['Increment']);
-export const pass = (message, details) => ({ status: 'pass', message, ...(details?.length ? { details } : {}) });
-export const fail = (message, hint, details) => ({ status: 'fail', message, hint, ...(details?.length ? { details } : {}) });
-export const skip = message => ({ status: 'skip', message });
+export { resolveWikilink } from './rules-common.mjs';
 const noHandoff = () => skip('No handoff to check (see DOR-01).');
-const list = (items, limit = 6) => items.slice(0, limit).join(', ') + (items.length > limit ? ` and ${items.length - limit} more` : '');
 const section = (context, name) => context.handoff.model.section(name);
-
-/** True when a repository file is the path, or sits under it as a folder. */
-export function known(files, path) {
-  const folder = path.replace(/\/+$/, '');
-  return files.some(file => file === folder || file.startsWith(`${folder}/`));
-}
 const underRoot = (roots, path) => roots.some(root => path.startsWith(root));
-/** An Obsidian wikilink target resolves to a Markdown file by repository path (with or without .md) or by basename. */
-export function resolveWikilink(files, target) {
-  const name = target.split('|')[0].split('#')[0].trim().replace(/^\.\//, '');
-  if (!name) return false;
-  if (name.includes('/')) return files.includes(name) || files.includes(`${name}.md`);
-  const wanted = name.replace(/\.md$/i, '').toLowerCase();
-  return files.some(file => file.endsWith('.md') && file.split('/').at(-1).slice(0, -3).toLowerCase() === wanted);
-}
 
-function frontmatterProblems(context, params) {
-  const { frontmatter } = context.handoff.model; const settings = context.delivery.handoff; const data = frontmatter.data;
-  if (!frontmatter.present) return ['the file does not start with a --- frontmatter block'];
-  const problems = frontmatter.errors.map(error => `line ${error.line}: ${error.message}`);
-  for (const key of settings.requiredKeys) if (!data[key] || (Array.isArray(data[key]) && !data[key].length)) problems.push(`${key} is missing or empty`);
-  if (!params.allowUnknownKeys) for (const key of Object.keys(data)) if (![...settings.requiredKeys, ...settings.optionalKeys].includes(key)) problems.push(`unknown key ${key}`);
-  if (data.type && data.type !== settings.type) problems.push(`type must be ${settings.type}`);
-  const slug = context.handoff.path.split('/').at(-1).replace(/\.md$/, '');
-  if (data.id && (!new RegExp(settings.slugPattern, 'u').test(data.id) || data.id.length > settings.maxSlugLength)) problems.push(`id "${data.id}" is not a slug of at most ${settings.maxSlugLength} characters`);
-  if (data.id && data.id !== slug) problems.push(`id "${data.id}" differs from the file name "${slug}"`);
-  const enums = [['size', Object.keys(context.delivery.sizes)], ['status', settings.statuses], ['e2e', settings.e2e]];
+function handoffProblems(context, params) {
+  const settings = context.delivery.handoff; const data = context.handoff.model.frontmatter.data;
+  const problems = frontmatterProblems(context.handoff.model.frontmatter, context.handoff.path, settings, { ...params, slugPattern: settings.slugPattern, maxSlugLength: settings.maxSlugLength });
+  const enums = [['size', Object.keys(context.delivery.sizes)], ['e2e', settings.e2e]];
   for (const [key, allowed] of enums) if (data[key] && !allowed.includes(data[key])) problems.push(`${key} must be one of ${allowed.join(', ')}`);
-  if (data.refs !== undefined && !Array.isArray(data.refs)) problems.push('refs must be a [list]');
   return problems;
 }
 
@@ -60,7 +38,7 @@ function areaProblem(context, pattern, roots) {
   return known(context.files, pattern) || underRoot(roots, pattern) ? null : 'does not exist and is outside the roots allowed for new files';
 }
 
-export const readyRules = {
+const incrementReadyRules = {
   'DOR-01': { title: 'Handoff present and unique', appliesTo: increment, params: {},
     questions: ['Which increment does this pull request deliver?', 'Where is its handoff document (docs/increments/<slug>.md), and is it the only one in this pull request?'],
     run: context => context.handoff ? pass(`Handoff ${context.handoff.path} (${context.handoff.source}).`) : fail(context.handoffProblem.message, context.handoffProblem.hint) },
@@ -68,7 +46,7 @@ export const readyRules = {
     questions: ['Who owns the increment and which slug names it?', 'Is it small (S), medium (M) or large (L)?', 'Do the browser end-to-end tests need to run for it (e2e: none, optional or required)?'],
     run: (context, params) => {
       if (!context.handoff) return noHandoff();
-      const problems = frontmatterProblems(context, params);
+      const problems = handoffProblems(context, params);
       return problems.length ? fail(`Frontmatter has ${problems.length} problem(s).`, `Fix the frontmatter keys: ${list(problems, 3)}. The template is ${context.delivery.handoff.template}.`, problems) : pass('Frontmatter is valid.');
     } },
   'DOR-03': { title: 'Required sections present and non-empty', appliesTo: increment, params: { minWords: 'number' },
@@ -196,7 +174,7 @@ export const readyRules = {
       if (decision === 'none') return fail(`UI areas (${list(ui, 3)}) are affected but e2e is none.`, 'Set `e2e: optional` or `e2e: required` and explain it with "- E2E: reason" in ## Test plan.', ui);
       return reason ? pass(`UI areas affected; e2e ${decision} with a reason.`) : fail(`UI areas are affected but the test plan gives no E2E reason.`, 'Add "- E2E: why the browser tests are optional or required" to ## Test plan.', ui);
     } },
-  'DOR-15': { title: 'Status reflects readiness', appliesTo: increment, params: { notReady: 'string[]' }, statusParams: ['notReady'],
+  'DOR-15': { title: 'Status reflects readiness', appliesTo: increment, params: { notReady: 'string[]' }, statusParams: { notReady: 'handoff' },
     questions: ['Has refinement finished, so that the Increment can move to Ready?'],
     run: (context, params) => {
       if (!context.handoff) return noHandoff();
@@ -204,3 +182,6 @@ export const readyRules = {
       return params.notReady.includes(status) ? fail(`Status is ${status}.`, 'Set `status: Ready` once refinement is finished; the status is informational and these checks decide readiness.') : pass(`Status is ${status ?? 'unset'}.`);
     } },
 };
+
+/** Every Definition of Ready rule: the Increment rules, the PullRequest, Issue and link rules, then the acceptance stubs. */
+export const readyRules = { ...incrementReadyRules, ...documentReadyRules, ...acceptanceReadyRules };

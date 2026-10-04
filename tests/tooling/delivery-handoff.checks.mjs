@@ -17,6 +17,9 @@ test('frontmatter accepts key: value, quoted strings and [lists] and reports eve
   const broken = parseFrontmatter(['---', 'id: a', 'id: b', 'no colon here', 'title: "open', '---']);
   assert.deepEqual(broken.errors.map(error => error.line), [3, 4, 5]);
   assert.equal(parseFrontmatter(['# no frontmatter']).present, false);
+  const lists = parseFrontmatter(['---', 'refs: [a, "b, c", d]', 'tight: [a,"b, c"]', "mixed: [it's, 'q, r' , x y ]", 'gaps: [a, , b]', 'links: ["[[docs/prds/a, b]]"]', '---']);
+  assert.deepEqual(lists.data, { refs: ['a', 'b, c', 'd'], tight: ['a', 'b, c'], mixed: ["it's", 'q, r', 'x y'], gaps: ['a', 'b'], links: ['[[docs/prds/a, b]]'] }, 'whitespace may precede a quoted item that holds commas');
+  assert.match(parseFrontmatter(['---', 'refs: [a, "open]', '---']).errors[0].message, /unterminated/);
   assert.match(parseFrontmatter(['---', 'id: a']).errors[0].message, /no closing/);
 });
 
@@ -80,8 +83,17 @@ test('negative: unknown keys, missing rules, bad severities, params and regular 
     value => { value.rules['DOR-04'].params.patterns.push('('); }, value => { value.rules['DOR-07'].params.resolved = '['; }, value => { value.schemaVersion = 2; }];
   for (const mutate of mutations) { const copy = clone(rules); mutate(copy); assert.throws(() => validateRulesConfig(copy, readyRules, 'r.json'), invalid, mutate.toString()); }
   const deliveryMutations = [value => { value.handoff.unknown = true; }, value => { value.pullRequests.incrementKey = ''; }, value => { value.sizes.S.maxAffectedAreas = 0; },
-    value => { value.exemptions.branches = 'release/'; }, value => { delete value.refinement; }, value => { value.handoff.slugPattern = '('; }];
+    value => { value.exemptions.branches = 'release/'; }, value => { delete value.refinement; }, value => { value.handoff.slugPattern = '('; },
+    value => { value.branches.pullRequest = 'increment/{increment}/{pr}'; }, value => { value.branches.increment = 'main/{id}'; }, value => { value.branches.pullRequest = 'pr/{pr}'; },
+    value => { value.branches.extra = 'x'; }, value => { value.pullRequests.kinds = ['change']; }, value => { value.pullRequests.requiredKeys = ['type', 'id', 'status']; },
+    value => { delete value.issues; }, value => { value.issues.statuses = []; }, value => { value.acceptance = 'tests/acceptance/{ac}.checks.mjs'; },
+    value => { value.acceptance.pattern = 'tests/acceptance/{increment}/{name}.checks.mjs'; }, value => { value.acceptance.pendingStatuses = ['Doing']; },
+    value => { value.acceptance.unknown = 1; }, value => { value.acceptance.pendingPattern = '('; }];
   for (const mutate of deliveryMutations) { const copy = clone(delivery); mutate(copy); assert.throws(() => validateDeliveryConfig(copy), invalid, mutate.toString()); }
+  const short = validateDeliveryConfig({ ...clone(delivery), acceptance: 'tests/acceptance/{increment}/{ac}-{slug}.checks.mjs' });
+  assert.equal(short.acceptance.pattern, 'tests/acceptance/{increment}/{ac}-{slug}.checks.mjs'); assert.equal(short.acceptance.suite, 'acceptance', 'a pattern string takes the defaults');
+  assert.equal(validateDeliveryConfig({ ...clone(delivery), acceptance: { pattern: 'tests/acceptance/{increment}/{ac}.checks.mjs' } }).acceptance.maxSlugLength, 48);
+  assert.throws(() => validateDeliveryConfig({ ...clone(delivery), branches: { base: 'main', increment: 'increment/{id}', pullRequest: 'increment/{increment}/{pr}' } }), /would nest inside the branch "increment\/x"/);
   const done = JSON.parse(await read(configFiles.done));
   done.rules['DOD-07'].params.patterns[0].flags = 'i';
   assert.throws(() => validateRulesConfig(done, doneRules, 'd.json'), /unknown key "flags"/);

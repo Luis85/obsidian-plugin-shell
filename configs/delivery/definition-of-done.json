@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "description": "Definition of Done: deterministic checks of the increment handoff against the implemented diff (scripts/delivery/done.mjs). Every rule the script knows must be listed with exactly its params; severity error blocks, warning reports.",
+  "description": "Definition of Done: deterministic checks of the increment handoff against the implemented diff (scripts/delivery/done.mjs), chosen by the pull request kind: a change pull request (base = the increment branch) runs the diff rules and DOD-12..16 for its PullRequest document; the kick-off (head = the increment branch) and any other pull request run the Increment rules and DOD-17. DOD-18 checks the acceptance stubs of both. Every rule the script knows must be listed with exactly its params; severity error blocks, warning reports.",
   "rules": {
     "DOD-01": { "severity": "error", "enabled": true, "params": {} },
     "DOD-02": { "severity": "error", "enabled": true, "params": { "label": "Evidence:" } },
@@ -27,6 +27,13 @@
     "DOD-08": { "severity": "warning", "enabled": true, "params": { "alwaysCovered": ["CHANGELOG.md", "docs/README.md"], "maxListed": 15 } },
     "DOD-09": { "severity": "error", "enabled": true, "params": { "status": "Done" } },
     "DOD-10": { "severity": "error", "enabled": true, "params": { "label": "e2e", "env": "PR_LABELS" } },
-    "DOD-11": { "severity": "warning", "enabled": true, "params": {} }
+    "DOD-11": { "severity": "warning", "enabled": true, "params": {} },
+    "DOD-12": { "severity": "error", "enabled": true, "params": {} },
+    "DOD-13": { "severity": "error", "enabled": true, "params": {} },
+    "DOD-14": { "severity": "error", "enabled": true, "params": { "label": "Evidence:" } },
+    "DOD-15": { "severity": "error", "enabled": true, "params": { "status": "In progress" } },
+    "DOD-16": { "severity": "warning", "enabled": true, "params": {} },
+    "DOD-17": { "severity": "error", "enabled": true, "params": { "pullRequestStatuses": ["Merged", "Closed"], "issueStatuses": ["Done", "Cancelled"] } },
+    "DOD-18": { "severity": "error", "enabled": true, "params": {} }
   }
 }
