@@ -8,33 +8,58 @@ import { adoptAnalyzeView, adoptPlanView } from './adopt-view.ts';
 import { checkPlanView } from './check-plan-view.ts';
 import { ciJobView, ciListView } from './ci-view.ts';
 import { uiStatusView } from './ui-status-view.ts';
+import { isMakerResult, makerChecksView } from './maker-view.ts';
 import type { UiStatusReport } from '../../domain/ui-status.ts';
 import { bold, duration, marker, nextLine, rows, runnable, type Mark, type Style } from './terminal-style.ts';
 export interface Rendered { text: string; diagnosticsShown: boolean }
 type Data = Record<string, unknown>;
 const record = (value: unknown): Data => value && typeof value === 'object' && !Array.isArray(value) ? value as Data : {};
-function scalar(value: unknown): string {
+/** Next steps and output locations are actionable: they are never shortened. */
+const verbatim = /(?:^|\.)(?:next|archive|path|paths|file|files|output|out|root|directory|saved|target|recoveryPath)$/i;
+function scalar(value: unknown, key = ''): string {
   if (typeof value !== 'string') return String(value);
+  if (verbatim.test(key)) return value;
   const first = value.split('\n')[0]!;
   return value.includes('\n') || value.length > 100 ? `${first.slice(0, 80)}… (${value.length} chars; see --json)` : value;
 }
-function arraySummary(value: unknown[]): string {
+const isScalar = (item: unknown): boolean => item === null || typeof item !== 'object';
+function arraySummary(value: unknown[], key: string): string {
   if (!value.length) return 'none';
-  const simple = value.every(item => item === null || typeof item !== 'object');
-  return simple && value.length <= 6 ? value.map(scalar).join(', ') : `${value.length} items`;
+  const shown = value.slice(0, 6).map(item => scalar(item, key)).join(', ');
+  return value.length > 6 ? `${shown}, … ${value.length - 6} more` : shown;
 }
-function flatten(value: unknown, prefix: string, out: Array<[string, string]>, depth: number): void {
-  if (value === null || typeof value !== 'object') { out.push([prefix, scalar(value)]); return; }
-  if (Array.isArray(value)) { out.push([prefix, arraySummary(value)]); return; }
-  const entries = Object.entries(value);
+type Table = { key: string; items: Data[] };
+const nameKeys = ['id', 'name', 'path', 'title', 'command'];
+/** One row per record: its identifying name, then up to three short scalar fields. */
+function tableText({ key, items }: Table): string {
+  const named = items.slice(0, 50).map(item => {
+    const nameKey = nameKeys.find(name => isScalar(item[name]) && item[name] !== undefined);
+    const fields = Object.entries(item).filter(([field, value]) => field !== nameKey && isScalar(value) && value !== '' && value !== undefined).slice(0, 3);
+    return [nameKey ? scalar(item[nameKey], nameKey) : '-', fields.map(([field, value]) => `${field}: ${scalar(value, field).slice(0, 60)}`).join('; ')];
+  });
+  const width = Math.max(0, ...named.map(([name]) => name!.length));
+  const more = items.length > named.length ? `    … ${items.length - named.length} more (see --json)\n` : '';
+  return `  ${key}\n` + named.map(([name, fields]) => `    ${name!.padEnd(width)}  ${fields}`.trimEnd() + '\n').join('') + more;
+}
+/** Scalars join inline, a list of records becomes a table below the rows, and a mixed list keeps its count. */
+function flattenArray(value: unknown[], prefix: string, out: Array<[string, string]>, tables: Table[]): void {
+  if (value.length && value.every(item => isScalar(item))) { out.push([prefix, arraySummary(value, prefix)]); return; }
+  const items = value.filter(item => !isScalar(item) && !Array.isArray(item)).map(record);
+  if (!value.length || items.length !== value.length) { out.push([prefix, value.length ? `${value.length} items` : 'none']); return; }
+  out.push([prefix, `${value.length} (listed below)`]); tables.push({ key: prefix, items });
+}
+function flatten(value: unknown, prefix: string, out: Array<[string, string]>, depth: number, tables: Table[]): void {
+  if (isScalar(value)) { out.push([prefix, scalar(value, prefix)]); return; }
+  if (Array.isArray(value)) { flattenArray(value, prefix, out, tables); return; }
+  const entries = Object.entries(record(value));
   if (depth >= 2 && prefix) { out.push([prefix, `${entries.length} fields`]); return; }
-  for (const [key, item] of entries) flatten(item, prefix ? `${prefix}.${key}` : key, out, depth + 1);
+  for (const [key, item] of entries) flatten(item, prefix ? `${prefix}.${key}` : key, out, depth + 1, tables);
 }
 function generic(data: unknown): string {
   if (data === null || data === undefined) return '';
-  const out: Array<[string, string]> = []; flatten(data, '', out, 0);
+  const out: Array<[string, string]> = [], tables: Table[] = []; flatten(data, '', out, 0, tables);
   const shown = out.slice(0, 30);
-  return rows(shown) + (out.length > shown.length ? `  … ${out.length - shown.length} more fields\n` : '') + 'Full result: add --json.\n';
+  return rows(shown) + (out.length > shown.length ? `  … ${out.length - shown.length} more fields\n` : '') + tables.map(tableText).join('') + 'Full result: add --json.\n';
 }
 function diagnosticsBlock(style: Style, diagnostics: Diagnostic[], mark: Mark = 'warn'): string {
   return diagnostics.map(item => `  ${marker(style, mark)} ${item.code}  ${item.message}\n${item.next ? `         fix: ${runnable(item.next)}\n` : ''}`).join('');
@@ -137,14 +162,17 @@ function writtenCount(data: Data): string | null {
   if (!data.applied) return null;
   return `${(record(data.applied).written as unknown[] | undefined)?.length ?? 0} files`;
 }
-function planView(style: Style, value: Result): string {
+function planView(style: Style, value: Result, details = ''): string {
   const data = record(value.data), changes = (data.changes ?? []) as Data[];
   const width = Math.max(0, ...changes.map(change => String(change.status).length));
   let text = rows(planRows(data, changes));
   const pending = changes.filter(change => change.status !== 'unchanged'), listed = pending.slice(0, 25);
   text += listed.map(change => `    ${String(change.status).padEnd(width)}  ${String(change.path)}\n`).join('');
   if (pending.length > listed.length) text += '    … more changes in --json\n';
+  text += details;
   if (value.status === 'planned') text += nextLine(style, `rerun the same command with --apply ${String(data.planHash)} (or --yes) to write exactly this plan`);
+  // Setup writes configuration only; its later stages are separately approved.
+  else if (value.command === 'setup') text += nextLine(style, 'setup status (lists the remaining generate, install and verify stages; each runs only when you approve it)');
   return text;
 }
 type View = (style: Style, value: Result, data: Data) => string | undefined;
@@ -159,12 +187,16 @@ const views: Array<[View, boolean]> = [
   [(style, value) => value.command === 'ui status' ? uiStatusView(style, value.data as UiStatusReport) : undefined, false],
   [(style, value) => value.command === 'adopt analyze' ? adoptAnalyzeView(style, value) : undefined, false],
   [(style, value, data) => value.command === 'adopt plan' && typeof data.planHash === 'string' ? adoptPlanView(style, value) : undefined, false],
+  [(style, value, data) => isMakerResult(value) && typeof data.planHash === 'string' ? planView(style, value, makerChecksView(style, value)) : undefined, false],
   [(style, value, data) => typeof data.planHash === 'string' && Array.isArray(data.changes) ? planView(style, value) : undefined, false],
 ];
 const isHelp = (value: Result, data: Data) => Array.isArray(data.commands) && (value.command === 'help' || value.command === 'capabilities' || Boolean(data.scope));
+/** Failed results keep their command view only where that view explains the failure (checks, CI jobs, maker checks). */
+const failureView = (value: Result, data: Data) => value.command === 'check' || (value.command === 'ci' && data.gate === 'ci') || isMakerResult(value);
+const headerLabel = (command: string) => command === 'unknown' ? 'Workbench CLI (no command ran)' : command;
 export function renderHuman(value: Result, style: Style): Rendered {
-  const header = `${value.command}: ${value.status}\n`, data = record(value.data);
-  if (value.status === 'failed' && value.command !== 'check' && !(value.command === 'ci' && data.gate === 'ci')) return { text: header + (Object.keys(data).every(key => key === 'suggestions') ? '' : generic(value.data)), diagnosticsShown: false };
+  const header = `${headerLabel(value.command)}: ${value.status}\n`, data = record(value.data);
+  if (value.status === 'failed' && !failureView(value, data)) return { text: header + (Object.keys(data).every(key => key === 'suggestions') ? '' : generic(value.data)), diagnosticsShown: false };
   if (isHelp(value, data)) return { text: helpText(style, value.data as HelpData), diagnosticsShown: false };
   for (const [view, diagnosticsShown] of views) {
     const text = view(style, value, data);

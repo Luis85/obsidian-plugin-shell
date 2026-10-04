@@ -24,7 +24,7 @@ import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
-const makerHelp = `Shell maker — make first, generate when ready
+const makerHelp = `Workbench CLI — maker commands: make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
   node bin/app first-run schema --json
   node bin/app first-run --input first-run.json --json
@@ -74,7 +74,8 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app design status --json  Claude Design folders under docs/design (configurable paths.design)
   node bin/app design prepare --name my-prototype --json   Prepare docs/design/my-prototype for Claude Design
   node bin/app design sync --name my-prototype --json      Regenerate its context; design work is never touched
-Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
+These maker commands apply only with --apply <planHash> on the same command after reviewing its plan; they have no --yes shortcut.
+Framework commands (setup, make <recipe>, generate, new <dir>, ...) accept --yes or --apply <planHash>: node bin/app help.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
 --starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),

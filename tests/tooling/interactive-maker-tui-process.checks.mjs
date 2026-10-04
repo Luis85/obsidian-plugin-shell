@@ -25,7 +25,7 @@ test('machine flags and CI bypass all terminal ownership even with attached TTY 
   const ci = streams();
   try {
     assert.equal(await main(['studio'], frameworkRoot, { ...ci.io, env: { CI: 'true' } }), 0);
-    assert.deepEqual(ci.raw, []); assert.match(ci.output.join(''), /Shell maker/);
+    assert.deepEqual(ci.raw, []); assert.match(ci.output.join(''), /Workbench CLI — maker commands/);
   } finally { ci.close(); }
   assert.throws(() => parseArguments(['studio', '--ui', 'invalid']), /auto, tui or plain/);
 });

@@ -7,7 +7,7 @@ import { buildClickdummy } from './clickdummy.ts';
 import { checkOperation } from './check.ts';
 import { checkPlanOperation } from './check-plan.ts';
 import { ciOperation } from './ci.ts';
-import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
+import { commandGroup, commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
 import { obsidianRead } from './obsidian-cli.ts';
@@ -28,14 +28,22 @@ import { readOperation } from './read-operation.ts';
 import { readComponentTemplateOperation } from './component-templates.ts';
 import { isUiCommand, uiOperation } from './ui-operation.ts';
 
-function helpOperation(request: Request): Result {
+/** One command page, a group of subcommands sharing a root word, every command, or the golden path. */
+function helpSelection(request: Request) {
   const command = request.command;
   const selected = command === 'help' ? request.args.join(' ') : request.options.help ? command : '';
-  const entries = selected ? [descriptor(selected)] : commands;
-  const scope = selected ? 'command' : command === 'capabilities' || request.options.all ? 'all' : 'golden-path';
+  const group = selected && !commands.some(item => item.id === selected) ? commandGroup(selected) : [];
+  if (group.length) return { selected, group, entries: group.map(descriptor), scope: 'group' };
+  if (selected) return { selected, group, entries: [descriptor(selected)], scope: 'command' };
+  return { selected, group, entries: commands, scope: command === 'capabilities' || request.options.all ? 'all' : 'golden-path' };
+}
+function helpOperation(request: Request): Result {
+  const command = request.command;
+  const { selected, group, entries, scope } = helpSelection(request);
   return result(command, {
     protocolVersion: 1,
     scope,
+    ...(group.length ? { group: selected } : {}),
     ...helpIndex(),
     commands: entries.map(entry => ({
       ...entry,
