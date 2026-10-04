@@ -6552,6 +6552,11 @@
           "description": "List, without running anything, the gates the diff requires: exact commands, why each applies, estimated duration, prerequisites and CI coverage; ends with npm run verify."
         },
         {
+          "name": "skip-suites",
+          "kind": "flag",
+          "description": "With --fast: report the node --test suites the diff selects as skipped and leave them to CI; keeps the Dev tier quick and predictable."
+        },
+        {
           "name": "base",
           "kind": "value",
           "description": "With --fast or --plan: diff merge-base(<ref>, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD."

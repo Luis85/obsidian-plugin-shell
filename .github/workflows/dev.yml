@@ -16,10 +16,10 @@ jobs:
   fast:
     name: Dev checks
     runs-on: ubuntu-24.04
-    # Targets about ten minutes (locked install plus diff-scoped checks). A diff
-    # that selects the heavy tooling suites, or a dependency manifest change (full
-    # check), takes longer; 30 is a job budget, not a test deadline.
-    timeout-minutes: 30
+    # Targets about ten minutes: the locked install plus diff-scoped checks without
+    # the node --test suites. A configuration or dependency manifest change widens
+    # lint and tests to the full roots; 20 is a job budget, not a test deadline.
+    timeout-minutes: 20
     env:
       BASE_REF: ${{ github.base_ref }}
     steps:
@@ -34,8 +34,12 @@ jobs:
           install-flags: --no-fund
       # Every check below runs even after an earlier one failed, so one push
       # reports all of its findings.
+      # Typecheck, lint and eslint on changed files, related Vitest tests and the
+      # maker type-check. The node --test suites the diff selects are listed as
+      # skipped (--skip-suites): they take minutes each and run in the Integration
+      # tier (ci.yml verify and the path-filtered workflows), not here.
       - name: Agent fast gate on the diff against the base branch
-        run: node bin/app check --fast --base "origin/$BASE_REF"
+        run: node bin/app check --fast --skip-suites --base "origin/$BASE_REF"
       - name: Test suite registration and documentation
         if: ${{ !cancelled() }}
         run: node scripts/testing/suites.mjs --check

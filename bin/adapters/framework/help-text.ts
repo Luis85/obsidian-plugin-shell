@@ -149,6 +149,7 @@ const specific: Record<string, OptionHelp> = {
   all: { description: 'List every command with its summary, grouped.' },
   replace: { description: 'Replace the previous local clickdummy only after successful build and static offline validation.' },
   fast: { description: 'Typecheck plus tests related to changed files (git), with eslint/lint on those files and the node --test suites they select; for agent Stop hooks.' },
+  'skip-suites': { description: 'With --fast: report the node --test suites the diff selects as skipped and leave them to CI; keeps the Dev tier quick and predictable.' },
   base: { description: 'With --fast or --plan: diff merge-base(<ref>, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD.' },
   plan: { description: 'List, without running anything, the gates the diff requires: exact commands, why each applies, estimated duration, prerequisites and CI coverage; ends with npm run verify.' },
   job: { description: 'Job to reproduce, as <workflow-file-stem>/<job-id> (for example ci/baseline); see ci --list.' },

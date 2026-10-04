@@ -51,7 +51,7 @@ function stepParts(root: string, project: boolean, makers: CheckStep[], config: 
 const fullSteps = (parts: Parts): CheckStep[] => [parts.typecheck, ...(parts.lint ? [parts.lint] : []), parts.eslint, parts.fullTest, ...parts.makers];
 export interface CheckSelection { scope: string; steps: CheckStep[]; changes?: Changes; suites?: Array<{ name: string; reasons: Reason[] }> }
 /** `base` (fast mode only) is the ref whose merge-base with HEAD starts the diff; default origin/main, else HEAD. */
-export async function checkSteps(root: string, fast: boolean, git: Git = runGit, base?: string): Promise<CheckSelection> {
+export async function checkSteps(root: string, fast: boolean, git: Git = runGit, base?: string, skipSuites = false): Promise<CheckSelection> {
   const scope = await checkScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root, project), config = vitestConfig(root, project);
   const parts = stepParts(root, project, makers, config);
@@ -59,7 +59,7 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit,
   const changes = await changedFiles(root, git, base);
   const suites = await fastSuites(root, project, changes);
   const steps = fastSteps({ project, changes, typecheck: parts.typecheck, fullTest: parts.fullTest, vitestConfig: config, full: () => fullSteps(parts),
-    fullLint: parts.lint, eslintRoots: parts.eslintRoots, fullEslint: parts.eslint, makerTypes: makers.filter(step => step.id === 'maker-types'), suites });
+    fullLint: parts.lint, eslintRoots: parts.eslintRoots, fullEslint: parts.eslint, makerTypes: makers.filter(step => step.id === 'maker-types'), suites, skipSuites });
   return { scope, steps, changes, suites };
 }
 /** ANSI escape sequences are removed from captured output. */
@@ -119,11 +119,16 @@ function baseOption(request: Request, fast: boolean): string | undefined {
   if (base !== undefined && !fast) throw new OperationError('INVALID_OPTION', '--base requires --fast (or --plan).', 'node bin/app check --fast --base <branch-or-commit>');
   return base;
 }
+function skipSuitesOption(request: Request, fast: boolean): boolean {
+  const skip = request.options['skip-suites'] === true;
+  if (skip && !fast) throw new OperationError('INVALID_OPTION', '--skip-suites requires --fast.', 'node bin/app check --fast --skip-suites');
+  return skip;
+}
 export async function checkOperation(request: Request, context: Context, run: Runner = runNode, git: Git = runGit): Promise<Result> {
   const fast = request.options.fast === true;
   const timeout = Number(stringOption(request.options, 'timeout') ?? '600000');
   const requestedBase = baseOption(request, fast);
-  const { scope, steps, changes, suites } = await checkSteps(context.root, fast, git, requestedBase);
+  const { scope, steps, changes, suites } = await checkSteps(context.root, fast, git, requestedBase, skipSuitesOption(request, fast));
   const base = { gate: 'check', scope, mode: fast ? 'fast' : 'full', verify: 'not-run', ...changeSummary(changes, suites) };
   if (request.options['dry-run']) return result(request.command, { ...base, execution: 'not-run', steps: plannedSteps(steps) }, 'planned');
   const started = performance.now();
