@@ -38,7 +38,7 @@ Then, with confirmation, dispatch Publish again for the same version. It skips f
 
 ## Branch protection refuses the merge
 
-A merge refused by branch protection is reported as uncertain (exit 2). Common causes: a required approving review, or the latest "CI result" on the head is red because someone marked the release pull request ready after the Release tier reported. The owner approves the pull request, reruns the Release workflow so its aliases report again, or provides `RELEASE_TOKEN`; then Publish is dispatched again.
+A merge refused by branch protection is reported as uncertain (exit 2). Common causes: a required approving review, or a red latest "CI result" on the head because the Release tier had not succeeded on that commit yet. The owner approves the pull request, waits for or reruns the Release workflow, or provides `RELEASE_TOKEN`; then Publish is dispatched again.
 
 ## Conflicts with main
 

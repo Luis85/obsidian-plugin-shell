@@ -57,7 +57,7 @@ test('the CI result job aggregates every ci.yml gate job and nothing information
   assert.ok(!result.needs.includes('security-audit'), 'the informational audit never blocks the required check');
   assert.match(result.steps.map(step => step.run ?? '').join('\n'), /select\(\.value\.result != "success" and \.value\.result != "skipped"\)[\s\S]*exit 1/);
   const hold = result.steps.find(step => step.env?.HEAD_REF === '${{ github.head_ref }}');
-  assert.match(hold?.run ?? '', /release\/\*\)[\s\S]*exit 1/, 'a release pull request never gets an early green CI result');
+  assert.match(hold?.run ?? '', /release\/\*\)[\s\S]*check_name=Release%20result[\s\S]*!= success[\s\S]*exit 1/, 'a release pull request is green only after its Release result succeeded');
 });
 test('application-docs owns the folded command-handbook checks and site build', async () => {
   const docs = (await loadWorkflows(root)).find(item => item.stem === 'application-docs');

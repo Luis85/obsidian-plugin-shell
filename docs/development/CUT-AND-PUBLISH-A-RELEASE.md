@@ -84,9 +84,9 @@ dispatches Release. Prefer the workflow, so the approval is recorded.
 Open the draft "Release X.Y.Z" pull request. Its body states the version, branch,
 base commit, the changelog section and the Release tier checklist. Fill each
 checklist line with a link to the run or job, and the untested scope. Leave it as a
-draft and do not mark it ready yourself: marking it ready starts `ci.yml`, whose
-"CI result" fails on release heads by design and would become the latest check
-after Release reported. Publish marks it ready.
+draft; Publish marks it ready. Marking it ready earlier is harmless but pointless:
+`ci.yml`'s "CI result" on a release head passes only once "Release result" succeeded
+on that commit.
 
 ## 5. Watch the Release tier
 

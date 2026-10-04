@@ -20,4 +20,4 @@ A runner outage, an upstream registry error in the informational live audit, or 
 
 ## Release pull requests
 
-A `release/*` pull request shows a deliberately failing "CI result" until the Release workflow reports. That is not a failure to fix here; it belongs to the `release` skill.
+A `release/*` pull request shows a failing "CI result" until "Release result" succeeded on its head commit. That is not a failure to fix here; it belongs to the `release` skill.

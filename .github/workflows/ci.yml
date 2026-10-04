@@ -583,6 +583,9 @@ jobs:
     name: CI result
     if: always()
     needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter, self-review]
+    permissions:
+      contents: read
+      checks: read
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -597,15 +600,25 @@ jobs:
             exit 1
           fi
       # On a release/* pull request every gate above skips, so this run would report a
-      # green "CI result" before the Release tier finished. Fail instead: the Release
-      # workflow's own "CI result" alias, reported after "Release result" succeeds on
-      # the same head commit, becomes the latest check of that name and unblocks merge.
-      - name: Leave release pull requests to the Release tier
+      # green "CI result" before the Release tier finished. It passes only when the
+      # Release workflow already reported a successful "Release result" on the same
+      # head commit; otherwise it fails, and the Release workflow's own "CI result"
+      # alias, reported after "Release result" succeeds, becomes the latest check of
+      # that name. Marking the release PR ready after Release finished stays green.
+      - name: Hold release pull requests until the Release tier passed on this head
         env:
           HEAD_REF: ${{ github.head_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           case "$HEAD_REF" in
-            release/*)
-              echo "::error::Release pull requests are gated by the Release workflow; wait for its Release result."
-              exit 1;;
+            release/*) ;;
+            *) exit 0;;
           esac
+          conclusion=$(gh api "repos/$REPOSITORY/commits/$HEAD_SHA/check-runs?check_name=Release%20result" \
+            --jq '[.check_runs[] | select(.status == "completed")] | sort_by(.completed_at) | last | .conclusion // "missing"')
+          if [ "$conclusion" != success ]; then
+            echo "::error::Release pull requests are gated by the Release workflow; Release result on $HEAD_SHA is $conclusion."
+            exit 1
+          fi

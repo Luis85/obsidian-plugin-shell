@@ -79,8 +79,11 @@ Two consequences follow.
 First, a skipped-everything `ci.yml` run would report a green "CI result" long
 before the Release tier finished. So when `ci.yml` does run on a release pull
 request (after a push by a person, or when `RELEASE_TOKEN` opened it), its
-"CI result" fails on purpose with "Release pull requests are gated by the Release
-workflow". It stays red until the Release workflow reports.
+"CI result" looks up the "Release result" check on the same head commit (read-only
+`checks: read`) and passes only when that check succeeded. Before the Release tier
+finished it fails with "Release pull requests are gated by the Release workflow", so
+a release pull request never shows an early green required check; a run after a
+successful Release tier (for example when the pull request is marked ready) is green.
 
 Second, a pull request opened with `GITHUB_TOKEN` starts no workflows at all, so
 "Dev checks" and "CI result" would never report and the required checks would
@@ -88,8 +91,8 @@ block Publish's merge. `release.yml` therefore ends with two alias jobs named
 exactly "Dev checks" and "CI result". They pass only when "Release result"
 succeeded. The Release tier is a strict superset of both tiers (it runs `ci.yml`
 in full plus every other workflow), so the aliases say nothing that was not
-checked. The design relies on the alias, reported after the failing run on the
-same head commit, being the latest check of that name, which unblocks the merge.
+checked. Whichever "CI result" reports last on the head commit, it is green only
+after "Release result" succeeded there.
 Both aliases use `if: always()`, because a skipped required check would count as
 passing.
 
