@@ -15597,6 +15597,13 @@ Edge: ${id2}`,
 	var COMPANION_FORMAT = "obsidian-companion-project";
 	var AUTHORING_VERSION = 6;
 	var COMPANION_MAX_BYTES = 4e6;
+	Object.freeze([
+		"0..1",
+		"1",
+		"1..1",
+		"0..*",
+		"1..*"
+	]);
 	var ENVELOPE_KEYS = [
 		"kind",
 		"schemaVersion",

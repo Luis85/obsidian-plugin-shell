@@ -7,7 +7,8 @@ import { diagnostic, diagnosticCatalog, CompilerError, CompilationFailure, order
 import { referenceDiagnostics } from '../../bin/compiler/domain/references.ts';
 import { sourceReferenceDiagnostics } from '../../bin/compiler/domain/source-references.ts';
 import { parseSelection, selectionClosure, SelectionError } from '../../bin/compiler/domain/selection.ts';
-import { readProjectGenerator, projectSelection, validateProjectSelection, frameworkLabels, angularPackages } from '../../bin/compiler/domain/project-starter.ts';
+import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../bin/compiler/domain/project-starter.ts';
+import { frameworkAdapter } from '../../bin/compiler/adapters/project/framework-registry.ts';
 
 // Drives the inward-only compiler core (bin/compiler/{domain,application}) to the maker core floors.
 const artifact = (path, content = 'safe', extra = {}) => ({ path, content, ownership: 'managed', producer: 'fixture', ...extra });
@@ -166,7 +167,7 @@ test('project starter data is strict and labels stay descriptive', () => {
   const identity = { id: 'starter', version: '1.0.0', sha256: 'a'.repeat(64) };
   const selection = projectSelection(identity, generator);
   assert.deepEqual(validateProjectSelection(selection), selection);
-  assert.ok(frameworkLabels.none.includes('command-line'));
+  assert.ok(frameworkAdapter('none')?.label.includes('command-line'));
   for (const value of [null, { ...generator, extra: 1 }, { ...generator, kind: 'other' }, { ...generator, targets: ['cli', 'plugin'] }, { ...generator, framework: 'none' }])
     assert.throws(() => readProjectGenerator(value), error => error instanceof CompilerError && error.diagnostic.code === 'COMPILER_SCHEMA_INVALID');
   for (const value of [{ ...selection, schemaVersion: 1 }, { ...selection, starter: { ...identity, sha256: 'x' } }, { ...selection, starter: { ...identity, version: 'v1' } }])

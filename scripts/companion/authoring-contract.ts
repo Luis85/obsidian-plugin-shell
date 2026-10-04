@@ -13,6 +13,8 @@ import { editorBindings } from './sitemap/editor-bindings.ts';
 export const COMPANION_FORMAT = 'obsidian-companion-project';
 export const AUTHORING_VERSION = 6;
 export const COMPANION_MAX_BYTES = 4_000_000;
+/** Relationship cardinalities the companion ER editor writes; every generator and maker accepts exactly these. */
+export const RELATIONSHIP_CARDINALITIES: readonly string[] = Object.freeze(['0..1', '1', '1..1', '0..*', '1..*']);
 export interface AuthoringDocument {
   kind: 'obsidian-companion-project';
   schemaVersion: 6;

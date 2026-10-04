@@ -14,11 +14,9 @@ import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
 import { configuration, defaults } from '../../bin/adapters/framework/configuration.ts';
 import { readBounded } from '../../bin/adapters/framework/files.ts';
-import { createFilePlan } from '../../scripts/shared/file-plan.ts';
-import { createFilePlan as createTypedFilePlan, applyFilePlan as applyTypedFilePlan } from '../../scripts/shared/file-plan.ts';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { sha256 } from '../../scripts/shared/hash.ts';
 import { mapBounded as typedMapBounded } from '../../scripts/shared/bounded-map.ts';
-import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
 import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
 import { capabilityCatalog, catalogDigest } from '../../bin/adapters/operations/catalog.ts';
 import * as typedJsonData from '../../scripts/contracts/json-data.ts';
@@ -212,13 +210,12 @@ test('typed JSON data contract validates data without invoking executable member
 });
 
 test('typed file-plan facade preserves the reviewed runtime plan/apply boundary', async t => {
-  assert.equal(createFilePlan, createTypedFilePlan);
   const ctx = await fixture(t);
-  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-facade.txt', content: 'typed facade\n' }]);
+  const plan = await createFilePlan(ctx.root, [{ path: 'typed-facade.txt', content: 'typed facade\n' }]);
   assert.equal(plan.version, 1);
   assert.equal(plan.changes[0].status, 'create');
   assert.equal(plan.changes[0].beforeHash, null);
-  const applied = await applyTypedFilePlan(plan);
+  const applied = await applyFilePlan(plan);
   assert.deepEqual(applied.written, ['typed-facade.txt']);
   assert.equal(await readFile(join(ctx.root, 'typed-facade.txt'), 'utf8'), 'typed facade\n');
 });
@@ -227,9 +224,9 @@ test('typed file-plan facade refuses stale preimages and preserves the interveni
   const ctx = await fixture(t);
   const path = join(ctx.root, 'typed-stale.txt');
   await writeFile(path, 'before\n');
-  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-stale.txt', content: 'planned\n' }]);
+  const plan = await createFilePlan(ctx.root, [{ path: 'typed-stale.txt', content: 'planned\n' }]);
   await writeFile(path, 'external edit\n');
-  await assert.rejects(applyTypedFilePlan(plan), /PLAN_STALE/);
+  await assert.rejects(applyFilePlan(plan), /PLAN_STALE/);
   assert.equal(await readFile(path, 'utf8'), 'external edit\n');
   assert.ok(!(await readdir(ctx.root)).includes('.codex-authoring.lock'));
 });
@@ -255,8 +252,8 @@ test('framework operation errors reuse the canonical contract primitives', () =>
 });
 
 test('typed filesystem helpers preserve exact-byte hashing and filesystem observations', async t => {
-  assert.equal(sha256, typedSha256);
-  assert.equal(typedSha256('Grüße'), sha256('Grüße'));
+  // Exact UTF-8 bytes of the NFC string, digested independently with sha256sum.
+  assert.equal(sha256('Grüße'), 'f83e039796c6453a10f5519e39fd113901572316a1a8ea07cb525d2801dfd074');
 
   const ctx = await fixture(t);
   const missing = join(ctx.root, 'missing.txt');

@@ -19,7 +19,7 @@ The tables list options with documented command semantics. Some common flags are
 - [templates validate](#templates-validate) — Validate one template or the complete installed component-template catalog.
 - [templates schema](#templates-schema) — Print the versioned component-template JSON Schema.
 - [templates coverage](#templates-coverage) — Inspect Atomic Design, category, documentation and composition coverage.
-- [templates docs](#templates-docs) — Plan deterministic Markdown documentation generated from component-template JSON.
+- [templates docs](#templates-docs) — Plan deterministic Markdown documentation generated from component-template JSON; replaces only its receipted, unedited output.
 - [templates instantiate](#templates-instantiate) — Plan adding a component or page template to the canonical Companion project model.
 
 ## Prototype versions and variants
@@ -184,7 +184,7 @@ The tables list options with documented command semantics. Some common flags are
 - [verify](#verify) — Run existing full verification; project scope is explicitly separate.
 - [framework status](#framework-status) — Inspect the pinned kit and its integrity.
 - [framework pack](#framework-pack) — Build a deterministic compiled developer-kit ZIP locally.
-- [framework upgrade](#framework-upgrade) — Plan an explicit kit replacement; preserves consumer edits.
+- [framework upgrade](#framework-upgrade) — Plan an explicit kit replacement; deletes only verified retired kit files and keeps edited plugin configs or reports a conflict.
 - [release prepare](#release-prepare) — Plan source version and release-note changes.
 - [release check](#release-check) — Inspect packaging and optionally validate a retained release plan.
 - [release rehearse](#release-rehearse) — Run existing fixed-candidate rehearsal; no public promotion.
@@ -392,7 +392,7 @@ node bin/app templates coverage --json
 
 ## templates docs
 
-Plan deterministic Markdown documentation generated from component-template JSON.
+Plan deterministic Markdown documentation generated from component-template JSON; replaces only its receipted, unedited output.
 
 ```sh
 node bin/app templates docs [options]
@@ -404,7 +404,7 @@ node bin/app templates docs [options]
 
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
-| --out | value | Folder for generated component-library Markdown. | Default: docs/generated/component-library |
+| --out | value | Folder for generated component-library Markdown, outside framework/source roots (bin, src, scripts, configs, templates, plugins, tests, configured code/test/vault folders). | Default: docs/generated/component-library |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
@@ -3852,7 +3852,7 @@ node bin/app framework pack --out ./plugin-framework.zip --yes
 
 ## framework upgrade
 
-Plan an explicit kit replacement; preserves consumer edits.
+Plan an explicit kit replacement; deletes only verified retired kit files and keeps edited plugin configs or reports a conflict.
 
 ```sh
 node bin/app framework upgrade [options]

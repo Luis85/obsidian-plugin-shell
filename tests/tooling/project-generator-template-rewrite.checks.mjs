@@ -67,9 +67,10 @@ test('the copied template suites start with the marker the generator removes', a
 });
 
 for (const [emitter, path, literal] of drifts) {
-  test(`${emitter.name} fails loudly when ${path} no longer contains ${literal.trim()}`, async () => {
+  test(`${emitter.name} fails loudly when ${path} no longer contains ${literal.trim()}`, () => {
     const added = [];
-    await assert.rejects(emitter(drifted(path, literal), model, file => added.push(file)), error => {
+    // Template emitters read the in-memory snapshot synchronously, so drift throws before any file is added.
+    assert.throws(() => emitter(drifted(path, literal), model, file => added.push(file)), error => {
       assert.ok(error.message.startsWith('GENERATOR_INVALID: Template '), error.message);
       assert.ok(error.message.endsWith(`no longer contains ${literal}.`), error.message);
       return true;

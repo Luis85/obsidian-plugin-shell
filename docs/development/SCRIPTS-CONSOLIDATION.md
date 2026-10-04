@@ -26,7 +26,7 @@ source under `bin/`.
 - Legacy preset qualification still reads its declarative compatibility catalog/guide from `bin/guides`; relocating those assets belongs with the later compiler/domain move, not this dependency-direction cleanup.
 - The typed Markdown documentation package lives in `bin/documentation` (E5b); its settings adapter and the maker settings share the neutral project-path policy.
 - Cycles: compiler ↔ companion is broken at the facades (E1): no `scripts/companion` module imports an executable compiler module or any other `bin/` module (the qualification exemption is gone with the entries, M4), and its compiler-domain imports are `import type` only (`tests/tooling/compiler-dependency-direction.checks.mjs`). The code emitters moved into `bin/compiler/emitters` (E4); they and the compiler adapters consume the companion contracts (the intended direction). framework ↔ compiler is gone (E3a, E3d), the maker engine (E6b, E6c) and starter domain (M3) live in `bin/`, and M4 moved the last runtime modules and catalog data that `bin` imported from `scripts/{framework,makers,operations,companion}`. Between `bin/` and `scripts/` there is **no two-way folder pair**: before M4 the direct static imports formed four (`bin/adapters/framework` ↔ `scripts/framework`, `bin/adapters/makers` ↔ `scripts/makers`, `bin/adapters/starters` ↔ `scripts/companion`, `bin/compiler/adapters` ↔ `scripts/companion`); after M4 every `scripts/` → `bin/` edge starts in a tooling entry and every `bin/` → `scripts/` edge ends in a contract zone or one of the three tooling helpers above, with no file-level cycle across the boundary. Inside `bin/`, `bin/adapters/framework` ↔ `bin/adapters/starters` stays a folder-level pair without a file-level cycle (justified in the M4 audit).
-- Compatibility `.mjs` entries for JSON data, process, input, confirmation, hash, project-path, bounded mapping and file plans delegate to typed core modules. The maker engine is strict TypeScript (E6b, E6c); remaining untyped code is real tooling scripts and the companion `.mjs` contracts.
+- No compatibility `.mjs` entries remain for JSON data, process, input, confirmation, hash, project-path, bounded mapping or file plans: the shims were deleted on PR #61 (`8c5d3bc8`, `b91e3185`) and importers use the typed core modules directly (`scripts/contracts/json-data.ts`, `scripts/shared/{process,input,confirmation,hash,project-path,bounded-map,file-plan,file-plan-runtime}.ts`). The only plain-ESM modules left in those zones are real bootstrap-safe modules, not delegates (`scripts/contracts/result-runtime.mjs`, `scripts/shared/{npm-install,project-configs,project-roots}.mjs`). The maker engine is strict TypeScript (E6b, E6c); remaining untyped code is real tooling scripts and the companion `.mjs` contracts.
 
 | Folder | Role today | Direction |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ source under `bin/`.
 | shared, contracts | Libraries | Typed core module set (C) |
 | hindsight | Optional memory app | Stays separate (optional), or `bin/memory` later |
 | setup + `setup.mjs` | Legacy identity setup (`npm run setup`) | Keep until `bin/app setup` fully replaces it, then retire |
-| `handout.mjs` | Standalone duplicate of `handout *` | Thin delegate or removal (B) |
+| `handout.mjs` (removed) | Former standalone duplicate of `handout *` | Delegated in B1, then deleted on PR #67 (`19fb3e1a`); `node bin/app handout *` is the only entry |
 | quality, security, testing, dev, bundling, documentation, events, maintenance, styles, harness, airship, concepts, agent, release, `help.mjs` | Real scripts | Stay. `release/prepare` and `promotion-plan` helpers become a library the CLI imports |
 
 `scripts/bundling`, `scripts/agent`, `scripts/dev/obsidian-dev.mjs` and `templates/companion/runtime/*`
@@ -98,9 +98,14 @@ both folders are in `maker-host`, so this is recorded rather than done in M4.
 | JSON result envelope | Framework/maker adapters plus pre-TypeScript bootstrap | `contracts/result-runtime.mjs` runtime + typed `contracts/result.ts`; framework adds bounded failure diagnostics |
 | Process spawning | `framework/process.ts` `runNode`, `shared/process.mjs` `runNode`, direct `spawnSync('git', …)` in 7 files | One `runNode` + one git helper |
 | fs / JSON / path containment | `exists` ×5, JSON readers ×4, containment checks in ~17 files | Typed fs/plan adapter |
-| Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in legacy CLIs | Shared yes/no policy in `scripts/shared/confirmation.mjs`; presentation layers own rendering |
+| Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in legacy CLIs | Shared yes/no policy in `scripts/shared/confirmation.ts`; presentation layers own rendering |
 
 ## Progress on PR #60
+
+> **Superseded (2026-10-03):** every compatibility path these entries describe (the `.mjs` re-exports,
+> the `scripts/framework` compatibility exports, `app.mjs`, `shell.mjs` and `scripts/handout.mjs`)
+> has since been deleted (PR #61 `bcf56352`/`8c5d3bc8`/`b91e3185`, PR #67 `19fb3e1a`). The C1–C26 and D1–D70
+> entries below are a historical record of the migration, not a description of current paths.
 
 - **A:** Launcher migration, compatibility shim and kit support pushed.
 - **B1:** Legacy standalone handout command delegates to the central reviewed plan and validation CLI; added parity regression.
@@ -242,33 +247,34 @@ both folders are in `maker-host`, so this is recorded rather than done in M4.
 
 ## Stages
 
-Each stage is an independently reviewed milestone; the current continuation pushes milestones
-on PR #60. Every stage runs the relevant suites plus
+Each stage is an independently reviewed milestone. Stages A–C landed on PR #60, Stage D on PR #60
+with its gate and integration repairs on PR #63, the launcher shim removal on PR #61, and Stages E–F
+on PR #67. Every stage runs the relevant suites plus
 `check:maintainability`, `check:analyzer`, `check:architecture`, lint and typecheck with no threshold changes.
 
-1. **A: launcher rename (this PR).**
+1. **A: launcher rename — complete on PR #60; shims removed on PR #61.**
    - `shell.mjs` → `app.mjs`, `bin/shell.ts` → `bin/app.ts`, and an extensionless `bin/app`.
-   - `shell.mjs` stays as a forwarding shim.
-   - Kits carry `app.mjs`, `bin/app` and `shell.mjs`, and still accept the pre-rename bootstrap.
-2. **B: low-risk cleanup.**
+   - `shell.mjs` was a forwarding shim until PR #61 deleted it with `app.mjs` (`bcf56352`); `bin/app` is the only entry.
+   - Kits now carry `bin/app` with the bundled `bin/app.js`; the pre-rename bootstrap is no longer accepted.
+2. **B: low-risk cleanup — complete on PR #60.**
    - One sha256 helper, one `exists`, one confirm prompt.
-   - Make `scripts/handout.mjs` a thin delegate.
+   - Make `scripts/handout.mjs` a thin delegate (later deleted on PR #67).
    - Retire `makers/cli.mjs` behind `bin/app make` (update `operations.json` and capability tests).
    - Remove the three reverse `scripts/ → bin/` imports.
 3. **C: typed core layer — complete on PR #60.**
    - Convert `shared/file-plan.mjs`, `shared/process.mjs` and `contracts/json-data.mjs` to TypeScript.
    - Unify them with `framework/{files,contracts,input,process}.ts`: one envelope, one `runNode`. About 60 import sites.
    - Needs new fallow zones and maker-coverage include/test updates.
-4. **D: CLI core into `bin/` — in progress.**
+4. **D: CLI core into `bin/` — complete on PR #60 (D1–D67), repaired on PR #63 (D68–D70).**
    - Move the routing from `app.mjs` into `bin/app.ts` and merge the two parsers/dispatchers.
    - Move `scripts/framework` into `bin/application/commands`, `bin/adapters/*` and `bin/presentation/terminal`.
    - Split `operations.ts` and `cli.ts` first. Otherwise the production complexity, duplication and coverage gates fail.
-   - Touches about 45 test files, `tsconfig.framework.json`, the documentation tsconfig, `.fallowrc.json` and the kit's compiled paths.
-5. **E: domain packages into `bin/`.**
+   - Touches about 45 test files, `tsconfig.framework.json`, the documentation tsconfig, `configs/quality/fallow.json` and the kit's compiled paths.
+5. **E: domain packages into `bin/` — complete on PR #67 (E1–E9, M1–M4).**
    - Break the compiler ↔ companion cycle first.
    - Then move the compiler core, companion compiler/contracts, application-docs, the maker engine and the operations catalog.
    - Update the `test:compiler:coverage` include paths and `compiler/check-architecture.mjs`.
-6. **F: templates folder — complete (F0, F1).**
+6. **F: templates folder — complete on PR #67 (F0, F1).**
    - Move generated-project templates out of `scripts/`.
    - Update the literal rewrites in `relationship-code.ts`/`http-code.ts` (asserted since F0). Nothing is released, so no migration ships for earlier generated projects; regenerate them.
 
@@ -279,8 +285,11 @@ on PR #60. Every stage runs the relevant suites plus
 | `node bin/app <command>` | Extensionless ES module (`"type": "module"`), all platforms. The form help output and docs use. |
 | `./bin/app <command>` | macOS/Linux with the executable bit. |
 | `npx obs-shell <command>` | Inside a project only; package `bin` maps `obs-shell` → `bin/app`. Flags pass through. |
-| `npm run app -- <command>` | npm consumes flags unless they follow `--`. `npm run shell` is kept as an alias. |
-| `node app.mjs <command>`, `node shell.mjs <command>` | Retired in PR #67 (stage A history). `node bin/app` is the only CLI entry. |
+| `npm run app -- <command>` | npm consumes flags unless they follow `--`. There is no `npm run shell` alias. |
+
+`bin/app` loads the bundled `bin/app.js` in a framework kit and `bin/app.ts` in a source checkout. The former
+`app.mjs` launcher and `shell.mjs` shim were deleted on PR #61 and have no replacement path; `node bin/app` is the
+only CLI entry.
 
 `bin/app` is classified by exact path in `scripts/quality/maintainability-inventory.mjs` (measured as
 `.mjs`) and linted through an explicit ESLint `files` entry; no directory was exempted.

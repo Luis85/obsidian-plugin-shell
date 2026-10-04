@@ -114,6 +114,18 @@ test('an edited valid definition has a new hash without needing a catalog rewrit
  const before=await blank(),p=join(f,'blank.json');await writeFile(p,(await readFile(p,'utf8'))+' ');
  const after=await blank();assert.notEqual(after.sha256,before.sha256);
 }));
+test('a v6 starter with tooling keeps the 4 MB transfer limit for the whole document',()=>{
+ const c=structuredClone(catalog),d=c.starters.find(s=>s.id==='agent-ready').document;
+ assert.equal(d.schemaVersion,6);assert.ok(d.tooling,'agent-ready carries development tooling');
+ const tooling=d.tooling;delete d.tooling;
+ const size=()=>new TextEncoder().encode(JSON.stringify(d)).length,fill=4_000_000-Buffer.byteLength(JSON.stringify(tooling));
+ while(size()+100_010<fill)d.notes.push('x'.repeat(100_000));
+ d.notes.push('x'.repeat(fill-size()-3));
+ assert.ok(size()<=4_000_000);assert.equal(validateStarterCatalog(c),c,'the document without tooling is within the limit');
+ d.tooling=tooling;
+ // The v6 contract bounds the complete JSON document, tooling included, at the same 4 MB.
+ assert.ok(size()>4_000_000);assert.throws(()=>validateStarterCatalog(c),{code:'SITEMAP_LIMIT'});
+});
 test('an installation may omit blank and have no bundled fallback',()=>{
  const c=structuredClone(catalog);c.starters=c.starters.filter(s=>s.id!=='blank');assert.equal(validateStarterCatalog(c),c);
 });

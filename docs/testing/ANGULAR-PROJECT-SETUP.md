@@ -17,7 +17,7 @@ The uploaded complete runtime `bin` tree matched the locally tested tree
 `dbfba06dfa0d8b9370f6bad71445a8b45f85ce6a`. The launcher blob matched
 `520a2ce74b96c0ab4988d77b0756d915308a608c`. Compiler adapter blobs were also compared:
 
-| File under `scripts/compiler/adapters/project/` | Git blob |
+| File under `bin/compiler/adapters/project/` (at `scripts/compiler/adapters/project/` when recorded) | Git blob |
 | --- | --- |
 | `configuration.ts` | `f4eefbcf03eb423f482f3713d8226f5fb8827778` |
 | `emitter.ts` | `6315848ba55174357ef82d4578f6b793b8cfae1e` |

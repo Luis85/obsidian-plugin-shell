@@ -24,7 +24,7 @@ node bin/app framework upgrade --from ../extracted-replacement-kit --dry-run
 
 Upgrade only from a reviewed replacement kit. The upgrade planner guards incompatible removals, edited launchers, reused versions with changed contents and downgrades. Preserve consumer edits and follow an explicit migration when required. Upgrading framework files, regenerating consumer source and changing dependencies are separate decisions; do not describe one successful step as completion of all three.
 
-## Package a developer kit locally
+## Package a framework kit locally
 
 This is a maintainer operation from a clean framework authoring checkout, not a configured consumer project:
 

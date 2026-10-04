@@ -10,7 +10,7 @@ import { dataDocument, model, recorder, template } from './compiler-emitters-fix
 import { starterDocument } from '../support/starter-documents.mjs';
 
 // Native persistence, relationship integrity, HTTPS providers, fixture-note and native-integration emission.
-const withFeatures = text => ({ ...template, text: async path => path === 'src/bootstrap/features.ts' ? text : template.text(path) });
+const withFeatures = text => ({ ...template, text: path => path === 'src/bootstrap/features.ts' ? text : template.text(path) });
 const registry = body => `import x from 'y';\nexport function createFeatures(services) {\n  return createNoteFeatures(services, ${body}));\n}\n`;
 // The live src/bootstrap/features.ts is consumer-owned: renaming, `make feature` and example removal rewrite it,
 // so every check reads this pinned registry instead of the checkout's current one.
@@ -159,7 +159,7 @@ test('HTTPS sources get a typed provider, a provider test and the copied runtime
   assert.ok(suite.startsWith("import { test } from 'vitest';") && suite.includes('../src/generated/infrastructure/json-http.ts') && !suite.includes('templates/companion/runtime'));
   const none = recorder(); await httpCode(template, model(await starterDocument('tasks-projects')), none.add); assert.equal(none.files.size, 0);
   const unsafe = model(await dataDocument()); unsafe.sources[2].contract.locator = 'http://example.invalid';
-  await assert.rejects(httpCode(template, unsafe, recorder().add));
+  assert.throws(() => httpCode(template, unsafe, recorder().add));
 });
 
 test('fixture-note checks cover every native and relationship-scoped entity', async () => {

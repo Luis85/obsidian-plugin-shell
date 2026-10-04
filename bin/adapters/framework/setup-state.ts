@@ -3,7 +3,7 @@ import { lstat, readdir } from 'node:fs/promises';
 import { readBounded, readConfiguration, exists, hash } from './files.ts';
 import { designFile, configFile } from './configuration.ts';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
-import { verifyKit } from './kit-integrity.ts';
+import { kitPresent, verifyKit } from './kit-integrity.ts';
 import { requireThat, type Context } from './contracts.ts';
 
 type Config = NonNullable<Awaited<ReturnType<typeof readConfiguration>>>;
@@ -58,7 +58,7 @@ async function generationRecorded(context: Context, config: Config, inventory: I
 /** Fingerprint code as well as design: an edited or newly added consumer file invalidates prior progress. */
 export async function setupSnapshot(context: Context) {
   const config = await checkedConfiguration(context);
-  const kit = await exists(join(context.root, 'bin/kit.json')) ? await verifyKit(context.root) : null;
+  const kit = await kitPresent(context.root) ? await verifyKit(context.root) : null;
   const inventory = await collectInventory(context, config), files = inventory.files;
   const generated = await generationRecorded(context, config, inventory);
   const binding = { configuration: files.get(configFile), design: files.get(designFile), kit: files.get('bin/kit.json') ?? null };

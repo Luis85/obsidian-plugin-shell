@@ -18,7 +18,7 @@ The generated toolbar gains a project h1, visible focus indicators, minimum 36px
 
 ## Compatibility is checked, not discarded
 
-> Historical record. These v5-keyed compatibility digests and their reversal chain were later retired with the retired project formats; generated output is now pinned by the reviewed project v6 golden baseline described in [compiler testing](../development/compiler/TESTING.md).
+> **Retired (2026-10-03):** the compatibility test described below (`tests/tooling/compiler-compatibility.checks.mjs`) was removed with the unreleased compatibility layer in `b91e3185`, and its v5-keyed `tests/fixtures/compiler/*.json` snapshots and reversal chain were deleted afterwards with the retired project formats. Both remain in Git history; this section is a historical record, not a current gate. Generated output is now pinned by the reviewed project v6 golden baseline described in [compiler testing](../development/compiler/TESTING.md).
 
 `post-mvp-base-code.json` and `template-inputs.json` are unchanged. All twelve original product snapshots were verified before editing. `preview-host-delta.json` records only four intentional generated-file changes per fixture: the new browser-host module, its entry, the preview toolbar component and its stylesheet.
 

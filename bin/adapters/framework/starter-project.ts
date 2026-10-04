@@ -16,7 +16,7 @@ import { companionRelativeFolder } from '../../../scripts/companion/authoring-co
 import { planProject } from '../../compiler/adapters/project-plan.ts';
 import { exists } from './files.ts';
 import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
-import { verifyKit } from './kit-integrity.ts';
+import { resolveTemplateRoot } from '../template-root.ts';
 import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
@@ -25,14 +25,9 @@ import { restoreExecutableBits } from './executable-bits.ts';
 import { initializeRepository, type GitReport } from './git-init.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
 interface StarterSummary { directory: string; nextSteps?: string[] }
-/** A kit or configured consumer carries its verified template under bin/template. */
-async function templateRoot(context: Context): Promise<string> {
-  if (!await exists(join(context.frameworkRoot, 'bin/kit.json'))) return context.frameworkRoot;
-  await verifyKit(context.frameworkRoot); return join(context.frameworkRoot, 'bin/template');
-}
-/** Companion starters from the invocation project's starter folder, with the template that generates them. */
+/** Companion starters from the invocation project's starter folder, with the (verified kit or source) template that generates them. */
 export async function companionStarterSet(context: Context): Promise<{ template: string; starters: CompanionStarter[] }> {
-  const template = await templateRoot(context);
+  const template = await resolveTemplateRoot(context.frameworkRoot);
   return { template, starters: companionStarters(await loadDefinitions(context.root)) };
 }
 export async function starterListing(context: Context): Promise<Result> {
@@ -103,7 +98,7 @@ export async function starterProjectPlan(request: Request, context: Context) {
   requireThat(!from || request.options.starter === undefined, 'SOURCE_CONFLICT', 'Use either --starter <id> or --from <project.json>, not both.');
   requireThat(!from || ['values', 'answers', 'run', 'trust-processes'].every(key => request.options[key] === undefined), 'STARTER_OPTION', 'Definition inputs/processes require --starter, not --from.');
   const place = await placement(context, request.args[0], request.options['inside-vault'] === true);
-  if (!from) return definitionProjectPlan(request, context, place, await templateRoot(context));
+  if (!from) return definitionProjectPlan(request, context, place, await resolveTemplateRoot(context.frameworkRoot));
   const created = await fromExport(request, context);
   const scratch = await mkdtemp(join(tmpdir(), 'shell-new-'));
   try {
@@ -122,7 +117,7 @@ async function fromExport(request: Request, context: Context) {
   const explicit = stringOption(request.options, 'id') !== undefined;
   const exported = await exportedProject(request, context, explicit ? pluginIdProblem : exportedIdProblem);
   const warning = explicit ? null : exportedIdWarning(exported.document.project.id);
-  return { template: await templateRoot(context), document: exported.document, origin: { source: exported.source }, warnings: warning ? [warning] : [] };
+  return { template: await resolveTemplateRoot(context.frameworkRoot), document: exported.document, origin: { source: exported.source }, warnings: warning ? [warning] : [] };
 }
 function nextSteps(directory: string): string[] {
   return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch'];

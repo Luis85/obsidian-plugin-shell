@@ -58,7 +58,7 @@ import { helpText as relocatedHelpText } from '../../bin/presentation/terminal/t
 
 import { setupDocumentation as relocatedSetupDocumentation } from '../../bin/presentation/terminal/docs-setup.ts';
 
-import { docsParserFiles as relocatedDocsParserFiles } from '../../bin/adapters/framework/docs-vendor.ts';
+import { bundledNoticeFiles as relocatedBundledNoticeFiles } from '../../bin/adapters/framework/docs-vendor.ts';
 
 import { exportedProject as relocatedExportedProject } from '../../bin/adapters/framework/project-from.ts';
 
@@ -187,7 +187,7 @@ export {
   relocatedHelpIndex,
   relocatedHelpText,
   relocatedSetupDocumentation,
-  relocatedDocsParserFiles,
+  relocatedBundledNoticeFiles,
   relocatedExportedProject,
   relocatedStorybookOperation,
   relocatedAirshipPlan,

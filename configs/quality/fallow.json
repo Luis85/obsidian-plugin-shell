@@ -401,6 +401,12 @@
         ]
       },
       {
+        "name": "cli-serialization-contract",
+        "patterns": [
+          "scripts/contracts/serialization.ts"
+        ]
+      },
+      {
         "name": "tooling",
         "patterns": [
           "scripts/**",
@@ -523,7 +529,8 @@
           "cli-file-plan-contract",
           "cli-input-contract",
           "cli-files-contract",
-          "cli-bounded-map-contract"
+          "cli-bounded-map-contract",
+          "cli-serialization-contract"
         ]
       },
       {
@@ -573,7 +580,8 @@
           "cli-file-plan-contract",
           "cli-input-contract",
           "cli-files-contract",
-          "cli-bounded-map-contract"
+          "cli-bounded-map-contract",
+          "cli-serialization-contract"
         ]
       },
       {
@@ -655,7 +663,9 @@
           "cli-input-contract",
           "cli-process-contract",
           "cli-files-contract",
-          "cli-bounded-map-contract"
+          "cli-bounded-map-contract",
+          "cli-serialization-contract",
+          "companion-test-kit"
         ]
       },
       {
@@ -679,7 +689,6 @@
           "compiler-application",
           "compiler-domain",
           "maker-host",
-          "tooling",
           "companion-authoring-contract",
           "companion-test-kit",
           "cli-data-contract",
@@ -698,7 +707,13 @@
           "compiler-domain",
           "companion-authoring-contract",
           "project-templates",
-          "tooling"
+          "cli-serialization-contract"
+        ]
+      },
+      {
+        "from": "cli-serialization-contract",
+        "allow": [
+          "cli-serialization-contract"
         ]
       },
       {

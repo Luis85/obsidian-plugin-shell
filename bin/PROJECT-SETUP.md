@@ -46,7 +46,7 @@ node tools/shell-cli/bin/app project-setup --root .
 
 From a source checkout instead, run `node bin/app project-setup --root <vault>`.
 Use the qualified Node 24.21.0/npm 11.19.1 toolchain. Source checks require the locked
-repository TypeScript 6.0.3; release kits carry compiled CLI modules and do not
+repository TypeScript 6.0.3; framework kits carry compiled CLI modules and do not
 require an implicit npm install to discover commands or prepare a plan.
 
 The wizard checks the selected folder is itself the Git working-tree root and has

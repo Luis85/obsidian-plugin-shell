@@ -16,11 +16,11 @@ export function fixtureManifest(m: Model) {
   return manifest;
 }
 /** The same reviewed fixture engine used by the browser validates recipes before any writes. */
-export async function renderFixtureCode(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<boolean> {
+export function renderFixtureCode(templateRoot: TemplateSnapshot, m: Model, add: Add): boolean {
   const manifest = fixtureManifest(m);
   if (!manifest) return false;
   fixtureNoteTests(m,add);
-  for (const name of kitFiles) add('scripts/test-data/' + name, await templateRoot.text(['docs/concepts/companion/test-kit', name].join('/')), 'managed');
+  for (const name of kitFiles) add('scripts/test-data/' + name, templateRoot.text(`docs/concepts/companion/test-kit/${name}`), 'managed');
   add('scripts/test-data/manifest.json', json(manifest), 'managed');
   add('scripts/test-data/adapters.d.mts', `export interface FixtureAdapter {
 execute(id: string, input?: unknown, options?: { signal?: AbortSignal }): Promise<unknown>;

@@ -1,5 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
+import { compileProject } from '../../bin/compiler/index.ts';
 import { devkitFiles, renderTemplate, makerTests } from '../../bin/compiler/emitters/devkit-files.ts';
 import { componentFile, relativeImport, rewriteTemplate, copiedTemplateTest, copiedTemplateMarker } from '../../bin/compiler/emitters/file-code.ts';
 import { relocatedPath, maintainerOnly, rebaseMarkdown, relocateFrameworkDocuments } from '../../bin/compiler/emitters/framework-docs.ts';
@@ -122,4 +123,18 @@ test('project models refuse unsafe roots, identities and dangling references', a
   assert.equal(m.warnings.length, 4);
   const unvisual = await dataDocument(); delete unvisual.design.visualDesigns;
   assert.deepEqual(projectModel(unvisual).warnings, [m.warnings[0], m.warnings[1], m.warnings[3]]);
+});
+
+test('a one-or-more relationship compiles to a required reference array and a malformed cardinality is refused', async () => {
+  const fixture = starterDocument('companion-plugin');
+  const relationship = fixture.design.semantic.relationships.find(item => item.key === 'screen_refs');
+  relationship.targetCard = '1..*';
+  const compiled = await compileProject({ source: JSON.stringify(fixture), sourceName: 'companion-plugin.json' });
+  assert.equal(compiled.status, 'ok', JSON.stringify(compiled.diagnostics));
+  const requirement = compiled.model.entities.find(entity => entity.slug === 'requirement').schema;
+  assert.deepEqual(requirement.properties.screen_refs, { type: 'array', items: { type: 'string' } });
+  assert.ok(requirement.required.includes('screen_refs'));
+  relationship.targetCard = '1..+';
+  const refused = await compileProject({ source: JSON.stringify(fixture), sourceName: 'companion-plugin.json' });
+  assert.equal(refused.status, 'failed'); assert.ok(!refused.model);
 });

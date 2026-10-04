@@ -2,7 +2,7 @@ import { newSitemapSurface } from '../../scripts/companion/sitemap/create.ts';
 import type { SketchDocument } from './document.ts';
 import { object, keys, list, text } from './data.ts';
 import { requireSketch, slug } from './errors.ts';
-import { companionRelativeFolder } from '../../scripts/companion/authoring-contract.ts';
+import { companionRelativeFolder, RELATIONSHIP_CARDINALITIES } from '../../scripts/companion/authoring-contract.ts';
 function collection(document: SketchDocument, store: 'semantic' | 'dataSources', field: 'entities' | 'sources'): Record<string, unknown>[] {
   document.design[store] ??= store === 'semantic' ? { schema: 1, nextId: 1, entities: [], relationships: [], sections: [],
     canvas: { positions: {}, viewport: { x: 40, y: 40, zoom: 1 }, snap: true } } : { schema: 1, nextId: 1, sources: [], flows: [], positions: {} };
@@ -73,7 +73,7 @@ function addCollectionRelationships(document: SketchDocument, entity: Record<str
     const relationship = object(value);
     if (relationship.source !== entity.id) continue;
     const key = text(relationship.key, 'relationship key', 60), card = String(relationship.targetCard);
-    requireSketch(!Object.hasOwn(properties, key) && ['0..1', '1', '1..1', '0..*', '1..+'].includes(card),
+    requireSketch(!Object.hasOwn(properties, key) && RELATIONSHIP_CARDINALITIES.includes(card),
       'BRICK_COLLECTION_ENTITY', 'Collection entity has an unsupported relationship.');
     properties[key] = card.endsWith('*') ? { type: 'array', items: { type: 'string' } } : { type: 'string' };
     if (card.startsWith('1')) required.push(key);

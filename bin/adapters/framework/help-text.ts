@@ -325,7 +325,7 @@ const optionOverrides: OptionOverride[] = [
   [option('adopt plan', 'out'), doc => { doc.description = 'Markdown file for the plan, relative to the target; only an earlier adoption plan can be replaced.'; doc.default = 'docs/workbench/ADOPTION-PLAN.md'; }],
   [(id, name) => id.startsWith('adopt ') && name === 'replace', describe('Replace an earlier report or adoption plan; never replaces an unrelated file.')],
   [option('new', 'from'), describe('Project JSON exported by the companion (instead of --starter).')],
-  [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown.'; doc.default = 'docs/generated/component-library'; }],
+  [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown, outside framework/source roots (bin, src, scripts, configs, templates, plugins, tests, configured code/test/vault folders).'; doc.default = 'docs/generated/component-library'; }],
   [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
   [option('templates instantiate', 'name'), describe('Optional instance/component/page title override; the template name is the default.')],
 ];

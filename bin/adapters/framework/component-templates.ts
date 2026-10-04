@@ -1,7 +1,8 @@
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { parseDesignData } from '../../../scripts/contracts/json-data.ts';
-import { readBounded } from './files.ts';
+import { exists, hash, readBounded, readConfiguration, readJson } from './files.ts';
+import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { componentTemplateDocumentation } from '../../application/component-template-docs.ts';
 import {
   componentTemplateCoverage,
@@ -93,20 +94,52 @@ function contained(root: string, input: string, label: string): string {
   return parts.join('/');
 }
 
+/** Framework- and project-owned roots: generated documentation can never be planned into them. */
+const protectedRoots = ['bin', 'src', 'scripts', 'configs', 'templates', 'plugins', 'tests', 'harness', 'design', 'dist', 'node_modules'];
+const receiptName = 'component-library.receipt.json';
+async function docsOutput(context: Context, input: string): Promise<string> {
+  const output = contained(context.root, input, 'Documentation output');
+  const config = await readConfiguration(context.root);
+  const configured = config ? [config.paths.codebaseFolder, config.paths.testsFolder, config.paths.testVaultFolder] : [];
+  const topLevel = (path: string): string => path.toLowerCase().replace(/\/.*$/, '');
+  const roots = new Set([...protectedRoots, ...configured.map(topLevel)]);
+  requireThat(!roots.has(topLevel(output)), 'TEMPLATE_DOCS_PROTECTED',
+    'Generated documentation cannot be written into framework or project source roots; choose a docs folder.');
+  return output;
+}
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+const sha256Hex = (value: unknown): value is string => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+async function receiptData(path: string): Promise<unknown> {
+  try { return await readJson(path); } catch { return null; }
+}
+/** The receipt records the exact bytes this generator last wrote, so only unedited generated files may be replaced. */
+async function previousReceipt(root: string, path: string, output: string): Promise<Map<string, string>> {
+  if (!await exists(resolve(root, path))) return new Map();
+  const value = await receiptData(resolve(root, path));
+  const files = isRecord(value) && value.schemaVersion === 1 && isRecord(value.files) ? Object.entries(value.files) : [];
+  const owned = new Map<string, string>();
+  for (const [file, digest] of files) if (file.startsWith(output + '/') && sha256Hex(digest)) owned.set(file, digest);
+  requireThat(files.length > 0 && owned.size === files.length, 'TEMPLATE_DOCS_RECEIPT',
+    'The documentation ownership receipt is invalid; preserve and review it before regenerating.');
+  return owned;
+}
+
 async function docsPlan(request: Request, context: Context) {
   const entries = await library(context);
-  const output = contained(
-    context.root,
-    stringOption(request.options, 'out') ?? 'docs/generated/component-library',
-    'Documentation output',
-  );
-  const docs = componentTemplateDocumentation(entries, output);
+  const output = await docsOutput(context, stringOption(request.options, 'out') ?? 'docs/generated/component-library');
+  const docs = componentTemplateDocumentation(entries, output), receiptPath = output + '/' + receiptName;
+  const owned = await previousReceipt(context.root, receiptPath, output);
+  const preview = await createFilePlan(context.root, docs);
+  // An existing file is replaced only when the receipt proves it is this generator's unedited output.
+  const conflicts = preview.changes.filter(change => change.status === 'update' && owned.get(change.path) !== change.beforeHash).map(change => change.path);
+  const receipt = { schemaVersion: 1, generator: 'templates docs', files: Object.fromEntries(docs.map(doc => [doc.path, hash(doc.content)])) };
   return {
-    plan: await createFilePlan(context.root, docs),
-    conflicts: [] as string[],
+    plan: await createFilePlan(context.root, [...docs, { path: receiptPath, content: json(receipt) }]),
+    conflicts,
     summary: {
       source: 'configs/templates/**/*.json',
       output,
+      receipt: receiptPath,
       templates: entries.length,
       files: docs.length,
       sourceOfTruth: 'json',

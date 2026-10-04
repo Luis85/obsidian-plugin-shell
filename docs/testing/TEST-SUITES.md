@@ -21,34 +21,53 @@ node scripts/testing/suites.mjs generator --dry-run                     # print 
 
 ## Suites
 
-Durations are single measured runs on the reference Linux container recorded
-below; they are orientation, not budgets.
+The rows mirror `npm run test:suites -- --list --json` (purpose, classified
+file count, npm script, runner, prerequisites and `verify` mode) for this
+checkout. `--check` fails with `SUITE_UNDOCUMENTED` when a suite in
+`tests/suites.json` has no row here. Durations are single measured runs on the
+reference Linux container recorded below, taken when several suites held fewer
+files; they are orientation, not budgets, and "not measured" suites were added
+or split after that run.
 
-| Suite | Purpose | Command | Runner | Prerequisites | In `verify` | Measured |
-| --- | --- | --- | --- | --- | --- | --- |
-| `runtime` | Plugin runtime: domain, application services, adapters, Vue/Pinia, in-memory Obsidian test kit (73 files) | `npm test` / `npm run test:runtime` | Vitest `vitest.config.mjs` | none | own step (production coverage run) | 48 s |
-| `cli` | Central `bin/app` CLI: parsing, plans, processes, kit/archive distribution, `new`, capability discovery (7) | `npm run test:cli` | `node --test` | none | tooling | 91 s |
-| `cli:journey` | Packs the framework ZIP, extracts it and builds generated consumers (1 script) | `npm run test:cli:journey` | node script | `QUALIFIED_NPM` | opt-in | 190 s |
-| `generator` | Project compiler, runtime guards, starters and the shared safe file-plan engine (15) | `npm run test:generator` | `node --test` | none | tooling | 187 s |
-| `visual` | Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, migration, session and generated model tests (7) | `npm run test:visual` | `node --test` | none | tooling | not measured |
-| `companion` | Companion concept contracts: project JSON, storymaps, legacy detail/composition contracts, visual editor harnesses, isolation zone, concept metrics (11) | `npm run test:companion` | `node --test` | none | tooling | 13 s |
-| `companion:assembly` | Offline assembly check, Python assembly/tamper test, syntax check of every concept module | `npm run test:companion` (runs with `companion`) | Python + `node --check` | `python3` | opt-in | 5 s |
-| `companion:browser` | Aggregated concept browser suites, including real-origin storage, on one exact artifact (23 Python scripts; the runner also executes the Node suite below) | `npm run test:companion:browser` | Python Playwright + Node Playwright | `PYTHON` with `playwright`, `SHELL_CHROMIUM`, Node Playwright Chromium | opt-in | 411 s |
-| `companion:visual-browser` | Page and component editors end to end: both editors, keyboard-only paths, Back navigation, legacy migration, hostile imports (1 script) | `node scripts/testing/suites.mjs companion:visual-browser` | Node Playwright via `run-browser-checks.py --only visual-editors` | `python3`, Node Playwright Chromium | opt-in | 45 s |
-| `companion:browser-manual` | Historical concept browser scripts the aggregated runner does not execute (8) | see [concept verification](../concepts/companion/VERIFICATION.md) | manual | Python `playwright` | opt-in | not automated |
-| `test-data` | Companion test-data kit: generators, storage plans, loopback server/client, inventory (5) | `npm run test:test-data` | `node --test` | none | tooling | 7 s |
-| `makers` | Maker recipes and catalog, event contracts, generated-code formatting, example removal, README ownership (7) | `npm run test:makers` | `node --test` | none | tooling | 98 s |
-| `native` | Native host protocol and dev-loop tooling units, no Obsidian launch (14) | `npm run test:native-tooling` | `node --test` | none | tooling | 3 s |
-| `native:host` | Real Obsidian smoke in an isolated scratch vault | `npm run test:native -- --allow-download` | node script | provisioned `.native-runner` | opt-in | not run here |
-| `setup` | Setup identity, npm install policy, staged build/local install, CSS identity, harness preview (5) | `npm run test:setup` | `node --test` | none | tooling | 6 s |
-| `release` | Release preparation/plans/execution, audit classification, maintenance, qualification triggers (8) | `npm run test:release` | `node --test` | none | tooling | 3 s |
-| `quality` | Analyzer, lint, coverage inventory, maintainability, presentation, repository/test-quality policies, evidence producers, this manifest, agent hooks (15) | `npm run test:quality` | `node --test` | `npm run build` (analyzer-archive copies `dist/`) | tooling | 89 s |
-| `baseline` | Dependency-free verification baseline and HTTP style specimen, repeated three times (8) | `npm run test:baseline` | `verify-baseline.mjs` | none | own step | 20 s |
-| `browser-specimen` | Host-style specimen assertions in a real browser | `node scripts/testing/suites.mjs browser-specimen` | node script + Playwright | Chromium | opt-in | 11 s |
-| `e2e` | Served harness in Chromium: showcase, modals, persistence, accessibility, design system (11) | `npm run test:e2e` | Playwright | Chromium, `npm run harness:build` | opt-in | 78 s |
-| `project` | Generated product tests under `tests/project` (only in companion-generated projects) | `npm test` in the generated project | Vitest `configs/testing/vitest.project.config.mjs` | generated project | opt-in | n/a here |
-| `project:ui-effects` | Generated composition/UI-effect checks (generated projects only) | `npm run test:ui-effects` in the generated project | `node --test` | generated project | opt-in | n/a here |
-| `obsidian` | Vitest-driven E2E against a real sandboxed Obsidian (`tests/obsidian`, added by the native dev loop) | `npm run test:obsidian` | npm script | provisioned native runner | opt-in | ~30 s, 4 cases (Obsidian 1.13.7 under Xvfb) |
+| Suite | Purpose | Files | Command | Runner | Prerequisites | In `verify` | Measured (2026-09-26) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `maker:pty` | Real Linux/macOS pseudo-terminal authoring, agent parity, safe review and OS terminal restoration; standard-library Python only. | 1 | `npm run test:maker:pty` | Python command | `python3` | opt-in | not measured |
+| `maker` | Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages. | 116 | `npm run test:maker` | `node --test` | none | tooling | not measured |
+| `workbench-plugins` | Trusted Workbench plugin SDK: plugin-local contracts, event bus, CLI/TUI contributions, framework adapters and custom starter contributions. | 1 | `npm run test:plugins` | `node --test` | none | own step | not measured |
+| `native-handoff` | Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics. | 2 | `node scripts/testing/suites.mjs native-handoff` | Python command | `handoff-python` | opt-in | not measured |
+| `airship` | Default-off project tooling, source preview mapping, safe explicit processes and regeneration preservation. | 2 | `npm run test:airship` | `node --test` | none | tooling | not measured |
+| `compiler` | Dedicated compiler core, diagnostics, byte-compatibility, architecture, reporting and distribution contracts. | 22 | `npm run test:compiler` | `node --test` | none | tooling | not measured |
+| `compiler:properties` | Seeded fast-check compiler invariants; requires installed development dependencies. | 1 | `npm run test:compiler:properties` | `node --test` | none | tooling | not measured |
+| `prototypes` | Design-first prototype helpers, real shell delegation, shared generation/distribution and single-file build boundaries. | 6 | `npm run test:prototypes` | `node --test` | none | tooling | not measured |
+| `prototypes:python` | Portable prototype package safety and static skill contract tests. | 0 | `npm run test:prototypes:python` | Python command | `python3` | opt-in | not measured |
+| `companion:mvp` | Compiled Vue/Nuxt UI/Vue Flow sitemap, prototype versions/variants and complete v6 authoring round trips. | 2 | `node scripts/testing/suites.mjs companion:mvp` | Node + Python command | `python-playwright`, `concept-chromium` | opt-in | not measured |
+| `runtime` | Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit. | 75 | `npm run test:runtime` | Vitest `configs/testing/vitest.config.mjs` | none | own step | 48 s |
+| `cli` | Central bin/app CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery. | 43 | `npm run test:cli` | `node --test` | none | tooling | 91 s |
+| `cli:journey` | Packs the framework ZIP, extracts it and builds independent generated consumers with a qualified npm (slow, writes reports/framework-cli). | 1 | `npm run test:cli:journey` | Node command | `qualified-npm` | opt-in | 190 s |
+| `generator` | Project compiler: companion JSON to generated project files, runtime guards, starters and the shared safe file-plan engine. | 28 | `npm run test:generator` | `node --test` | none | tooling | 187 s |
+| `visual` | Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, session and generated model tests. | 6 | `npm run test:visual` | `node --test` | none | tooling | not measured |
+| `companion` | Companion concept contracts: schema 6 project JSON, storymaps and composition contracts, visual editor harnesses, concept isolation zone and concept metrics. | 37 | `npm run test:companion` | `node --test` | none | tooling | 13 s |
+| `companion:schema` | Independent Draft 2020-12 structural validation and semantic-only negative controls over the shared current project corpus. | 1 | `node scripts/testing/suites.mjs companion:schema` | Python command | `python3`, `python-jsonschema` | opt-in | not measured |
+| `companion:assembly` | Offline companion assembly check, Python assembly/tamper test and syntax check of every authored concept module. | 1 | `npm run test:companion` | Node + Python command | `python3` | opt-in | 5 s |
+| `companion:browser` | Aggregated companion concept browser suites on one exact assembled artifact (Python Playwright suites plus the Node Playwright suites listed under companion:visual-browser, Chromium). | 23 | `npm run test:companion:browser` | Python command | `python-playwright`, `concept-chromium`, `chromium` | opt-in | 411 s |
+| `companion:visual-browser` | Visual page and component editors end to end in the assembled concept (Node Playwright + Chromium), run through the concept browser runner so the evidence is bound to the exact artifact. | 1 | `node scripts/testing/suites.mjs companion:visual-browser` | Python command | `python3`, `chromium` | opt-in | 45 s |
+| `companion:starter-browser` | Empty current authoring startup, external starter round trip, and independently compiled visual-feature showcase behavior. | 2 | `node scripts/testing/suites.mjs companion:starter-browser` | Node command | `chromium`, `companion-current-build`, `showcase-current-build` | opt-in | not measured |
+| `companion:browser-manual` | Historical concept browser scripts that the aggregated runner does not execute; run individually per docs/concepts/companion/VERIFICATION.md. | 8 | see [concept verification](../concepts/companion/VERIFICATION.md) | manual | `python-playwright`, `concept-chromium` | opt-in | not automated |
+| `test-data` | Companion test-data kit: seeded generators, storage plans, loopback server/client and source inventory. | 5 | `npm run test:test-data` | `node --test` | none | tooling | 7 s |
+| `makers` | Authoring tools: maker recipes and catalog, checks that the custom-maker and locale recipes write into consumer projects, event contracts, generated-code formatting, example removal and README ownership. | 10 | `npm run test:makers` | `node --test` | none | tooling | 98 s |
+| `memory` | Opt-in Hindsight contracts, keyless configuration, real Git/venv/stdio fixtures and desktop registration, without installing Hindsight or calling an LLM. | 4 | `npm run test:memory` | `node --test` | `python3` | own step | not measured |
+| `memory:python` | Stdlib-only Python adapter tests with explicit SDK/manager doubles; not live Hindsight inference. | 2 | `npm run test:memory:python` | Python command | `python3` | own step | not measured |
+| `native` | Native host protocol and dev-loop tooling units (isolation, identity, receipts, diagnostics, performance reports) without launching Obsidian. | 20 | `npm run test:native-tooling` | `node --test` | none | tooling | 3 s |
+| `native:host` | Real Obsidian smoke in an isolated scratch vault (downloads the host; never a personal vault). | 0 | `npm run test:native` | Node command | `native-runner` | opt-in | not run here |
+| `setup` | Guided setup identity, npm install policy, staged build/local install, CSS identity scoping and harness preview. | 6 | `npm run test:setup` | `node --test` | none | tooling | 6 s |
+| `release` | Release preparation, promotion plans, remote execution, audit classification, maintenance discovery and qualification triggers. | 8 | `npm run test:release` | `node --test` | none | tooling | 3 s |
+| `quality` | Repository gates: analyzer, lint, coverage inventory, maintainability, tighten-only thresholds, presentation, repository and test-quality policies, evidence producers and this suite manifest. | 30 | `npm run test:quality` | `node --test` | `build` | tooling | 89 s |
+| `baseline` | Dependency-free verification baseline: fault ledger, policy, runner, report, source, token and HTTP style-specimen checks, repeated three times. | 8 | `npm run test:baseline` | Node command | none | own step | 20 s |
+| `browser-specimen` | Host-style specimen assertions in a real browser (served mode). | 1 | `node scripts/testing/suites.mjs browser-specimen` | Node command | `chromium` | opt-in | 11 s |
+| `e2e` | Served harness in Chromium via Playwright: showcase, modals, persistence lifecycle, accessibility and design system. | 11 | `npm run test:e2e` | Playwright `configs/testing/playwright.config.ts` | `chromium`, `harness-build` | opt-in | 78 s |
+| `project` | Generated product tests (tests/project) that exist only in a project created by the companion compiler. | 0 | `node scripts/testing/suites.mjs project` | Vitest `configs/testing/vitest.project.config.mjs` | none | opt-in | n/a here |
+| `project:ui-effects` | Generated composition/UI-effect checks of a companion-generated project. | 0 | `node scripts/testing/suites.mjs project:ui-effects` | `node --test` | none | opt-in | n/a here |
+| `obsidian` | Vitest-driven end-to-end tests against a real sandboxed Obsidian host. | 4 | `npm run test:obsidian` | npm script `test:obsidian` | `native-runner` | opt-in | ~30 s, 4 cases (Obsidian 1.13.7 under Xvfb) |
 
 `npm run test:generator` and `npm run test:framework-cli` remain as aliases of
 the `generator` and `cli` suites (both now include their whole responsibility:
@@ -92,6 +111,7 @@ match exactly one suite `include` (minus its `exclude`) or one `helpers` entry.
 | `SUITE_INVENTORY_MISMATCH` | A suite with an `inventory` (the concept browser runner) differs from the files its runner actually executes. |
 | `TOOLING_NOT_IN_VERIFY` / `TOOLING_NOT_IN_EVIDENCE` | The `verify` tooling suites must equal the evidence producer's tooling inventory (`tests/tooling/**/*.{checks,test}.mjs`), so `SHELL_EVIDENCE_TOOLING=1` runs the identical set. |
 | `SUITE_SCRIPT_MISSING` / `SUITE_SCRIPT_MISMATCH` | A declared `npmScript` is absent from `package.json` or does not run that suite. |
+| `SUITE_UNDOCUMENTED` / `SUITE_DOCUMENTATION_MISSING` | A suite has no `` | `name` | `` row in the guide named by `documentation` (this page), or that guide cannot be read. |
 
 Tooling fixtures (`*-fixture.mjs`, `file-symlink.mjs`), runtime fixtures/helpers,
 Playwright fixtures and generated project fixtures are helpers, not tests. A new
@@ -123,7 +143,9 @@ remain dedicated `verify` steps (production coverage and `verify-baseline`).
    example `tests/tooling/framework-<behavior>.checks.mjs` for the CLI.
 2. Run `npm run test:suites -- --check`. If it reports the file as unclassified,
    extend the owning suite's `include` in `tests/suites.json`.
-3. Run the suite alone (`npm run test:<suite>`), then `npm run verify`.
+3. When you add a suite, add its row to the table above (`--check` reports
+   `SUITE_UNDOCUMENTED` until you do).
+4. Run the suite alone (`npm run test:<suite>`), then `npm run verify`.
 
 ## Workflow coverage
 
