@@ -74,6 +74,16 @@ test('commands use the project package manager, a CI snippet only for GitHub Act
   const { '.github/workflows/ci.yml': _workflow, ...withoutActions } = angular(22);
   assert.doesNotMatch(renderPlan(report({ ...withoutActions, '.gitlab-ci.yml': 'x' })), /name: workbench-app/);
 });
+test('a detected Azure Pipelines definition gets its own separate pipeline snippet, queued by branch policy', () => {
+  const { '.github/workflows/ci.yml': _workflow, ...withoutActions } = angular(22);
+  const azure = renderPlan(report({ ...withoutActions, 'azure-pipelines.yml': 'x' }));
+  assert.match(azure, /Azure Pipelines detected/); assert.doesNotMatch(azure, /name: workbench-app|GitHub Actions detected/);
+  assert.match(azure, /^trigger: none$/m); assert.match(azure, /build-validation branch policy with the path filter \/apps\/workbench-app\/\*/);
+  assert.match(azure, /versionSpec: '24\.21\.0'/); assert.match(azure, /workingDirectory: apps\/workbench-app\/source/);
+  const both = renderPlan(report({ ...angular(22), 'azure-pipelines.yml': 'x' }));
+  assert.match(both, /GitHub Actions detected/); assert.match(both, /Azure Pipelines detected/);
+  assert.doesNotMatch(renderPlan(report(angular(22))), /Azure Pipelines detected|NodeTool@0/);
+});
 test('phase 3 derives a sketch request from the routes: titles, unique aliases and a bounded page list', () => {
   const request = json(renderPlan(report(angular(22))));
   assert.equal(request.schemaVersion, 1); assert.equal(request.title, 'sample');

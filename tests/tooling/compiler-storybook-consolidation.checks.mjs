@@ -14,11 +14,13 @@ const source = selfProject();
 const get = (result, path) => result.artifacts.find(file => file.path === path)?.content;
 test('both integrations share one strict tooling schema and preserve independent defaults', () => {
   const schema = toolingSchema();
-  assert.deepEqual(Object.keys(schema.properties).sort(), ['airship', 'hindsight', 'storybook']);
+  assert.deepEqual(Object.keys(schema.properties).sort(), ['airship', 'hindsight', 'hosting', 'storybook']);
   assert.equal(schema.additionalProperties, false);
   assert.deepEqual(storybookOptions({}), { enabled: false, generateStories: false });
   assert.equal(airshipOptions({ storybook: { enabled: true } }).enabled, false);
   assert.deepEqual(storybookOptions({ tooling: { airship: { enabled: true } } }), { enabled: false, generateStories: false });
+  assert.deepEqual(storybookOptions({ tooling: { hosting: { platform: 'none' } } }), { enabled: false, generateStories: false });
+  assert.equal(airshipOptions({ hosting: { platform: 'azure-devops' } }).enabled, false);
 });
 test('data-only validation rejects inherited switches, accessors, symbols and undefined without invoking code', () => {
   let invoked = 0;

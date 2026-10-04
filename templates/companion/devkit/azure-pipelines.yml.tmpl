@@ -1,0 +1,172 @@
+# Azure Pipelines for this project: the same gates as the GitHub workflows of a GitHub-hosted project.
+# - Check runs each gate once (typecheck, lint, product tests, release build) plus the advisory community-review rules.
+# - UI collects browser journeys and the UI review gallery on pull requests and manual runs: evidence, never acceptance.
+# - Obsidian runs real Obsidian on `main` and when a run sets `runObsidian` (Azure Repos has no pull-request labels).
+# Azure Repos ignores YAML `pr:` triggers: add this pipeline to `main` as a build-validation branch policy so every
+# pull-request update runs Check and UI. Draft detection is unreliable there, so nothing here depends on
+# System.PullRequest.IsDraft. No secret is needed; never add a personal access token to this file.
+trigger:
+  branches:
+    include: [main]
+parameters:
+  - name: runObsidian
+    displayName: Run real Obsidian (downloads the pinned host into the pipeline cache)
+    type: boolean
+    default: false
+variables:
+  npm_config_cache: $(Pipeline.Workspace)/.npm
+pool:
+  vmImage: ubuntu-latest
+stages:
+  - stage: Check
+    dependsOn: []
+    jobs:
+      - job: check
+        timeoutInMinutes: 20
+        steps:
+          - checkout: self
+            persistCredentials: false
+          - task: NodeTool@0
+            displayName: Use the Node version in .nvmrc
+            inputs:
+              versionSource: fromFile
+              versionFilePath: .nvmrc
+          - task: Cache@2
+            displayName: Restore the npm cache
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
+              path: $(npm_config_cache)
+          - script: |
+              npm install --prefix "$(Agent.TempDirectory)/pinned-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+              echo "##vso[task.setvariable variable=PINNED_NPM]$(Agent.TempDirectory)/pinned-npm/node_modules/npm/bin/npm-cli.js"
+            displayName: Select the pinned npm
+          - script: node "$(PINNED_NPM)" ci --no-fund
+            displayName: Install exact dependencies
+          - script: node "$(PINNED_NPM)" run check
+            displayName: Gate (typecheck, lint, product tests)
+          - script: node "$(PINNED_NPM)" run verify:artifacts
+            displayName: Release build, UI-effect tests and test data (what verify:project adds to check)
+          # Advisory: a new project has no author in manifest.json yet, which this mirror of the community-review
+          # rules reports as a failure. Remove continueOnError once the manifest is ready to publish.
+          - script: node "$(PINNED_NPM)" run check:submission
+            displayName: Community-review rules (manifest, lint, bundle; advisory)
+            continueOnError: true
+  # A step is skipped, with a warning, when its npm script does not exist.
+  - stage: UI
+    dependsOn: []
+    condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
+    jobs:
+      - job: ui
+        timeoutInMinutes: 30
+        steps:
+          - checkout: self
+            persistCredentials: false
+          - task: NodeTool@0
+            displayName: Use the Node version in .nvmrc
+            inputs:
+              versionSource: fromFile
+              versionFilePath: .nvmrc
+          - task: Cache@2
+            displayName: Restore the npm cache
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
+              path: $(npm_config_cache)
+          - script: |
+              npm install --prefix "$(Agent.TempDirectory)/pinned-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+              echo "##vso[task.setvariable variable=PINNED_NPM]$(Agent.TempDirectory)/pinned-npm/node_modules/npm/bin/npm-cli.js"
+            displayName: Select the pinned npm
+          - script: node "$(PINNED_NPM)" ci --no-fund
+            displayName: Install exact dependencies
+          - script: node node_modules/@playwright/test/cli.js install --with-deps chromium
+            displayName: Install Chromium and its system libraries
+          - script: |
+              if node -e "process.exit(require('./package.json').scripts?.['test:e2e'] ? 0 : 1)"; then
+                node "$(PINNED_NPM)" run test:e2e
+              else
+                echo "##vso[task.logissue type=warning]package.json has no test:e2e script; no browser tests ran"
+              fi
+            displayName: Browser journeys and UI quality (Playwright)
+          - script: |
+              if node -e "process.exit(require('./package.json').scripts?.['ui:gallery'] ? 0 : 1)"; then
+                node "$(PINNED_NPM)" run ui:gallery
+                echo "UI review gallery: download the \`ui-review-gallery\` artifact and open \`gallery.html\`. It is evidence for human review, not acceptance." > "$(Agent.TempDirectory)/ui-gallery.md"
+                echo "##vso[task.uploadsummary]$(Agent.TempDirectory)/ui-gallery.md"
+              else
+                echo "##vso[task.logissue type=warning]package.json has no ui:gallery script; no gallery was produced"
+              fi
+            displayName: UI review gallery
+            condition: always()
+          # A missing folder only warns, like the GitHub upload's if-no-files-found: warn.
+          - task: PublishPipelineArtifact@1
+            displayName: Keep the UI review gallery
+            condition: always()
+            continueOnError: true
+            inputs:
+              targetPath: reports/ui-gallery
+              artifact: ui-review-gallery
+          - task: PublishPipelineArtifact@1
+            displayName: Keep the browser test reports
+            condition: always()
+            continueOnError: true
+            inputs:
+              targetPath: reports/e2e
+              artifact: ui-e2e-reports
+  # The download opt-in is set on the two steps that need it, never pipeline- or job-wide.
+  - stage: Obsidian
+    dependsOn: []
+    condition: or(eq('${{ parameters.runObsidian }}', 'true'), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main')))
+    jobs:
+      - job: real_obsidian
+        timeoutInMinutes: 30
+        steps:
+          - checkout: self
+            persistCredentials: false
+          - task: NodeTool@0
+            displayName: Use the Node version in .nvmrc
+            inputs:
+              versionSource: fromFile
+              versionFilePath: .nvmrc
+          - task: Cache@2
+            displayName: Restore the npm cache
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
+              path: $(npm_config_cache)
+          - script: |
+              npm install --prefix "$(Agent.TempDirectory)/pinned-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+              echo "##vso[task.setvariable variable=PINNED_NPM]$(Agent.TempDirectory)/pinned-npm/node_modules/npm/bin/npm-cli.js"
+            displayName: Select the pinned npm
+          - script: node "$(PINNED_NPM)" ci --no-fund
+            displayName: Install exact dependencies
+          - script: node node_modules/@playwright/test/cli.js install-deps chromium
+            displayName: Install Electron system libraries (no browser download)
+          - task: Cache@2
+            displayName: Restore the pinned Obsidian download
+            inputs:
+              key: 'obsidian-host | "$(Agent.OS)" | app-1.13.7-launcher-3.2.1'
+              path: .native-cache
+          - script: node "$(PINNED_NPM)" run test:obsidian
+            displayName: Real-Obsidian tests (private Xvfb display, fresh vault per test)
+            env:
+              OBSIDIAN_ALLOW_DOWNLOAD: '1'
+              SOURCE_COMMIT: $(Build.SourceVersion)
+          - script: |
+              mkdir -p reports/obsidian
+              node scripts/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
+            displayName: Agent loop smoke (build, launch, reload once, JSON summary)
+            condition: always()
+            env:
+              OBSIDIAN_ALLOW_DOWNLOAD: '1'
+          - task: PublishPipelineArtifact@1
+            displayName: Keep the evidence
+            condition: always()
+            continueOnError: true
+            inputs:
+              targetPath: reports/obsidian
+              artifact: real-obsidian-evidence
+          - task: PublishPipelineArtifact@1
+            displayName: Keep the sandbox logs
+            condition: always()
+            continueOnError: true
+            inputs:
+              targetPath: .obsidian-sandbox/logs
+              artifact: real-obsidian-logs

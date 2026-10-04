@@ -25,7 +25,7 @@ Do not skip a step because the change looks small. Report what actually ran.
    implemented (the stub no longer throws, the `it.todo` became an assertion); the ones you
    did not touch are still listed as open. Compare the change with `BRIEF.md`: if it
    implies a product decision the brief does not make, ask the user instead of guessing.
-5. Fill `.github/pull_request_template.md` (also for a local summary): requirement and
+5. Fill `{{prTemplatePath}}` (also for a local summary): requirement and
    interaction IDs, commands with their real result lines, UI evidence (`test:ui-quality`
    result and the `ui:gallery` artifact path), Obsidian evidence or "not run", and the
    untested scope. Do not write "all checks pass" without the output behind it.

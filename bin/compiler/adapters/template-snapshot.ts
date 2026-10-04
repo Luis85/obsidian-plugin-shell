@@ -35,7 +35,8 @@ export async function loadTemplateSnapshot(root: string, signal?: AbortSignal): 
     if (paths.length >= 5000) throw invalid('Template inventory exceeds its supported bound.');
     paths.push(path);
   }
-  for (const path of templateRoots) await copy(path);
+  // A generated project hosted outside GitHub (tooling.hosting) has no .github folder; every other root is required.
+  for (const path of templateRoots) if (path !== '.github' || await statIfPresent(join(root, path))) await copy(path);
   // Only the shell checkout carries relocatable framework documents at the root; a generated project that
   // lacks a relocated copy simply has none.
   for (const path of templateRootFiles) if (relocatedPath(path) === path || await statIfPresent(join(root, path))) await copy(path);

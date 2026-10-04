@@ -29,9 +29,9 @@ Run these before you claim a change works, and show the output:
    `"status": "passed"` and no `errors`; lifecycle or host-API changes also need
    `npm run test:obsidian`.
 4. `npm run verify:project` (what CI runs).
-5. Self-review with the `self-review` skill, then fill `.github/pull_request_template.md`:
+5. Self-review with the `self-review` skill, then fill `{{prTemplatePath}}`:
    requirement/`vi-*` IDs, commands with real output, UI evidence, Obsidian evidence or
-   "not run", untested scope.
+   "not run", untested scope. {{hostingAgent}}
 
 Report the commands you ran and their real results. Never report success from
 reading code alone, and a TODO test is never passing acceptance. If a check cannot run here (for
