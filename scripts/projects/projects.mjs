@@ -3,6 +3,8 @@ import { join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseDocument } from 'yaml';
 import { excludesProjects, parseSyncedName, scopeWorkflow, syncedName, SYNCED_PREFIX } from './workflows.mjs';
+import { readSiteCatalog } from '../../bin/domain/site-template.ts';
+import { repositoryPath, siteIssues } from '../../bin/domain/site-collections.ts';
 
 /**
  * projects/<name>/ holds standalone projects built from concepts. Each one installs, builds and tests inside its own
@@ -21,6 +23,22 @@ export const BOUNDARY_WORKFLOW = 'projects-boundary.yml';
 
 const exists = async path => { try { await lstat(path); return true; } catch (error) { if (error.code === 'ENOENT') return false; throw error; } };
 const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
+// Site template ids belong to this tooling's own templates/sites, not to the checkout being validated.
+const SITE_CATALOG = fileURLToPath(new URL('../../templates/sites/catalog.json', import.meta.url));
+let siteTemplateIds;
+async function siteTemplates() {
+  siteTemplateIds ??= readSiteCatalog(await readJson(SITE_CATALOG)).templates.map(template => template.id);
+  return siteTemplateIds;
+}
+/** A site project (opt-in Astro website) names a known template and valid Bases collections whose .base files exist. */
+async function siteFailures(root, site) {
+  const failures = siteIssues(site, await siteTemplates());
+  for (const entry of Array.isArray(site?.collections) ? site.collections : []) {
+    const base = repositoryPath(entry?.base);
+    if (base?.endsWith('.base') && !await exists(resolve(root, base))) failures.push(`SITE_COLLECTION_BASE_MISSING: ${base}`);
+  }
+  return failures;
+}
 
 /** Every directory directly under projects/ (a stray file is reported, not skipped). */
 export async function listProjects(root) {
@@ -46,8 +64,11 @@ export async function validateManifest(root, name) {
   if (manifest?.schemaVersion !== 1) failures.push('PROJECT_MANIFEST_SCHEMA: schemaVersion must be 1');
   if (manifest?.name !== name) failures.push(`PROJECT_MANIFEST_NAME: name must equal the folder name "${name}"`);
   if (typeof manifest?.title !== 'string' || !manifest.title.trim()) failures.push('PROJECT_MANIFEST_TITLE: title is required');
-  const prototypes = manifest?.prototypes;
-  if (!Array.isArray(prototypes) || !prototypes.length) failures.push('PROJECT_MANIFEST_PROTOTYPES: list at least one prototype');
+  const prototypes = manifest?.prototypes, site = manifest?.site;
+  // A site starts from a template, so it may list no prototype; every other project implements at least one.
+  if (site === undefined && (!Array.isArray(prototypes) || !prototypes.length)) failures.push('PROJECT_MANIFEST_PROTOTYPES: list at least one prototype');
+  if (site !== undefined && prototypes !== undefined && !Array.isArray(prototypes)) failures.push('PROJECT_MANIFEST_PROTOTYPES: prototypes must be a list');
+  if (site !== undefined) failures.push(...await siteFailures(root, site));
   for (const [index, prototype] of (Array.isArray(prototypes) ? prototypes : []).entries()) {
     const target = relativeRepositoryPath(prototype?.path);
     if (!target || !PROTOTYPE_ROOTS.some(prefix => `${target}/`.startsWith(prefix))) failures.push(`PROJECT_PROTOTYPE_PATH: prototypes[${index}].path must be a normalized path under ${PROTOTYPE_ROOTS.join(' or ')}`);
@@ -148,7 +169,8 @@ export async function checkProjects(root = process.cwd()) {
     const { manifest, failures: manifestFailures } = await validateManifest(root, entry.name);
     const own = [...manifestFailures, ...await validateStandalone(root, entry.name)];
     failures.push(...own.map(failure => `${PROJECTS}/${entry.name}: ${failure}`));
-    projects.push({ name: entry.name, title: manifest?.title ?? null, prototypes: (manifest?.prototypes ?? []).map(prototype => prototype?.path), workflows: await projectWorkflows(root, entry.name) });
+    projects.push({ name: entry.name, title: manifest?.title ?? null, prototypes: (Array.isArray(manifest?.prototypes) ? manifest.prototypes : []).map(prototype => prototype?.path),
+      ...(typeof manifest?.site?.template === 'string' ? { site: manifest.site.template } : {}), workflows: await projectWorkflows(root, entry.name) });
   }
   const names = projects.map(project => project.name);
   const { expected, failures: scopeFailures } = await expectedWorkflows(root, names);
@@ -176,7 +198,7 @@ export async function syncWorkflows(root = process.cwd()) {
 
 function print(result, json) {
   if (json) { console.log(JSON.stringify(result, null, 2)); return; }
-  for (const project of result.projects ?? []) console.log(`${project.name.padEnd(20)} ${project.title ?? '(no manifest)'}  prototypes: ${project.prototypes.join(', ') || 'none'}  workflows: ${project.workflows.join(', ') || 'none'}`);
+  for (const project of result.projects ?? []) console.log(`${project.name.padEnd(20)} ${project.title ?? '(no manifest)'}  ${project.site ? `site: ${project.site}  ` : ''}prototypes: ${project.prototypes.join(', ') || 'none'}  workflows: ${project.workflows.join(', ') || 'none'}`);
   for (const file of result.written ?? []) console.log(`synced   .github/workflows/${file}`);
   for (const file of result.removed ?? []) console.log(`removed  .github/workflows/${file}`);
   for (const failure of result.failures ?? []) console.error(failure);
