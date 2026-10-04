@@ -49,10 +49,11 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.equal(pluginResult.command, 'example');
   assert.deepEqual(pluginResult.data, { plugin: 'example-extension', message: 'Compiled extension' });
   assert.match(output.stderr, /Compiled extension/);
+  assert.match(await readFile(join(dir, 'bin/plugins/DEVELOPER-GUIDE.md'), 'utf8'), /^# App plugin developer guide/, 'the guide ships beside the plugins');
   // A user's app plugin in bin/plugins is user data beside the bundle: the kit stays valid and the compiled CLI loads it.
   const appPlugin = join(dir, 'bin/plugins/hello-world');
   await mkdir(appPlugin, { recursive: true });
-  await writeFile(join(appPlugin, 'manifest.json'), JSON.stringify({ id: 'hello-world', name: 'Hello', version: '1.0.0', minAppVersion: '0.0.1', description: 'Greets.', author: 'Tester' }));
+  await writeFile(join(appPlugin, 'manifest.json'), JSON.stringify({ id: 'hello-world', name: 'Hello', version: '1.0.0', minAppVersion: '0.0.1', apiVersion: 1, description: 'Greets.', author: 'Tester', category: 'tool', tags: [] }));
   await writeFile(join(appPlugin, 'settings.json'), '{"greeting":"Hi"}');
   await writeFile(join(appPlugin, 'main.js'), "const { Plugin } = require('workbench');\nmodule.exports = class extends Plugin {\n  async onload() { const { greeting } = await this.loadData(); this.addCommand({ id: 'greet', name: 'Greet', execute: () => ({ greeting }) }); }\n};\n");
   assert.ok((await verifyKit(dir)).files.every(file => !file.path.startsWith('bin/plugins/')), 'installed app plugins are not kit inventory');
@@ -295,6 +296,24 @@ test('kit upgrade preserves an edited plugin config, follows unedited defaults a
   // An edited config whose plugin the new kit retires is a conflict, not a deletion.
   await writeFile(join(old, 'bin/plugins/added/config.json'), edited);
   assert.ok((await upgradePlan({ root: old, frameworkRoot: old }, newDefault)).conflicts.includes('bin/plugins/added/config.json'));
+});
+test('installed app plugins and the plugin guide are user data: verified around and upgraded only when unedited', async t => {
+  const [old, next] = await kitRoots(t, 2);
+  const shippedGuide = 'bin/template/bin/plugins/DEVELOPER-GUIDE.md', guide = 'bin/plugins/DEVELOPER-GUIDE.md';
+  await kitFixture(old, '0.4.0', { 'bin/app.js': 'app', [shippedGuide]: 'guide v1' });
+  await kitFixture(next, '0.4.1', { 'bin/app.js': 'app 2', [shippedGuide]: 'guide v2' });
+  await mkdir(join(old, 'bin/plugins/team-tool'), { recursive: true });
+  for (const name of ['manifest.json', 'main.js', 'settings.json']) await writeFile(join(old, 'bin/plugins/team-tool', name), '{}');
+  await writeFile(join(old, 'bin/plugins/community-plugins.json'), '["team-tool"]');
+  await writeFile(join(old, guide), 'guide v1');
+  await verifyKit(old);
+  let upgrade = await upgradePlan({ root: old, frameworkRoot: old }, next);
+  assert.equal(upgrade.plan.changes.find(change => change.path === guide)?.status, 'update');
+  assert.equal(upgrade.summary.pluginGuide, 'updated');
+  assert.ok(!upgrade.plan.changes.some(change => /^bin\/plugins\/(?:team-tool\/|community-plugins)/.test(change.path)), 'installed plugins are never touched');
+  await writeFile(join(old, guide), 'guide v1 with team notes');
+  upgrade = await upgradePlan({ root: old, frameworkRoot: old }, next);
+  assert.equal(upgrade.plan.changes.find(change => change.path === guide), undefined, 'an edited guide is kept');
 });
 test('kit verification fails with an explicit code for missing configs, stray configs and a missing kit', async t => {
   const [root, legacy] = await kitRoots(t, 2);

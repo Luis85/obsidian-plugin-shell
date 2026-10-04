@@ -24,6 +24,8 @@ interface RuntimeOptions {
   readonly progress?: (message: string) => void;
   readonly registry?: readonly WorkbenchPluginObject[];
   readonly onError?: (code: string, pluginId?: string) => void;
+  /** A bus created earlier for this invocation (app plugins load before the runtime); the runtime owns its disposal. */
+  readonly eventBus?: WorkbenchEventBus;
 }
 const identifier = (value: unknown): value is string =>
   typeof value === 'string' && value.length <= 64 && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value);
@@ -93,7 +95,8 @@ export function pluginStarterDefinitions(registry: readonly WorkbenchPluginObjec
   return Object.freeze([...starters]);
 }
 
-class EventBus implements PluginEventBus {
+/** The invocation event bus. Definitions may be added until disposal, so app plugins can define events while loading. */
+export class WorkbenchEventBus implements PluginEventBus {
   private readonly definitions = new Map<string, PluginEventDefinition>();
   private readonly listeners = new Map<string, Set<Listener>>();
   private disposed = false;
@@ -101,12 +104,25 @@ class EventBus implements PluginEventBus {
   private readonly report: (code: string) => void;
   constructor(definitions: readonly PluginEventDefinition[], report: (code: string) => void) {
     this.report = report;
-    for (const definition of definitions) {
-      if (!/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(definition.id) || typeof definition.valid !== 'function')
-        throw new Error('WORKBENCH_PLUGIN_EVENT_INVALID');
-      if (this.definitions.has(definition.id)) throw new Error('WORKBENCH_PLUGIN_EVENT_DUPLICATE:' + definition.id);
-      this.definitions.set(definition.id, definition);
-    }
+    for (const definition of definitions) this.define(definition);
+  }
+  /** Registers a definition; registering the identical definition again is a no-op, another one with its ID is refused. */
+  define<N extends string, P>(definition: PluginEventDefinition<N, P>): PluginEventDefinition<N, P> {
+    if (!definition || !/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(definition.id) || typeof definition.valid !== 'function')
+      throw new Error('WORKBENCH_PLUGIN_EVENT_INVALID');
+    if (this.disposed) throw new Error('WORKBENCH_PLUGIN_BUS_DISPOSED');
+    const existing = this.definitions.get(definition.id);
+    if (existing && existing !== definition) throw new Error('WORKBENCH_PLUGIN_EVENT_DUPLICATE:' + definition.id);
+    this.definitions.set(definition.id, definition);
+    return definition;
+  }
+  /** The registered definition with this ID, for callers that address events by name. */
+  definition(id: string): PluginEventDefinition | undefined {
+    return this.definitions.get(id);
+  }
+  /** Every registered event ID, sorted. */
+  ids(): string[] {
+    return [...this.definitions.keys()].sort();
   }
   private registered<N extends string, P>(definition: PluginEventDefinition<N, P>): void {
     if (this.definitions.get(definition.id) !== definition) throw new Error('WORKBENCH_PLUGIN_EVENT_UNREGISTERED:' + definition.id);
@@ -186,7 +202,8 @@ export async function createPluginRuntime(options: RuntimeOptions): Promise<Work
     if (!event.id.startsWith(plugin.manifest.id + '.')) throw new Error('WORKBENCH_PLUGIN_EVENT_OWNER:' + event.id);
     return event;
   }));
-  const bus = new EventBus(events, code => options.onError?.(code));
+  const bus = options.eventBus ?? new WorkbenchEventBus([], code => options.onError?.(code));
+  try { for (const event of events) bus.define(event); } catch (error) { bus.dispose(); throw error; }
   const templates = templateCatalog(options, plugins);
   const commandContext: PluginCommandContext = Object.freeze({
     root: options.root, frameworkRoot: options.frameworkRoot, input: options.input,

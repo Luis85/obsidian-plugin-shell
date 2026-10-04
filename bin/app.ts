@@ -26,6 +26,8 @@ import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } f
 import { pluginRegistry } from '../plugins/registry.ts';
 import { communityInventory, communityRoutes, openCommunityPlugins } from './adapters/community-plugins/inventory.ts';
 import type { CommunityPluginHost } from './adapters/community-plugins/loader.ts';
+import { defineDeclaredEvents, invocationEventBus, observeCommand } from './adapters/community-plugins/app-events.ts';
+import type { Context, Request } from './adapters/framework/contracts.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
@@ -117,16 +119,22 @@ export async function makerMain(argv: string[], frameworkRoot: string, io: IO = 
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
   const machine = argv.includes('--json'); let command = 'maker';
   const progress = (message: string) => { io.error.write(safe(message)); };
+  // One bus per invocation, created first so app plugins can subscribe while they load; the runtime adopts it.
+  const bus = invocationEventBus(code => progress(code + '\n'));
+  const session = { bus, report: progress, signal: controller.signal, root: process.cwd(),
+    run: async (request: Request, context: Context) => (await import('./adapters/framework/operations.ts')).executeOperation(request, context) };
   try {
-    community = await openCommunityPlugins(frameworkRoot, progress);
+    defineDeclaredEvents(bus, pluginRegistry);
+    community = await openCommunityPlugins(frameworkRoot, session);
     const registry = [...pluginRegistry, ...community.plugins];
     const args = parseArguments(argv, pluginCliCommands(registry)); command = args.command;
     const root = resolve(option(args, 'root', process.cwd()));
-    plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress, registry,
+    session.root = root;
+    plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress, registry, eventBus: bus,
       onError: code => progress(code + '\n') });
     const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
-    const data = await execute(args, context);
+    const data = await observeCommand(bus, args.command, args.action, () => execute(args, context));
     const result = operationResult(command, data, (data.status ?? 'ok') as ResultStatus);
     if (machine) io.output.write(JSON.stringify(result) + '\n');
     else if (data.help) io.output.write(safe(String(data.help)));
@@ -135,8 +143,10 @@ export async function makerMain(argv: string[], frameworkRoot: string, io: IO = 
   } catch (error) {
     return failed(command, error, machine, io);
   } finally {
+    // App plugins unload first, while the bus still delivers; then the runtime and the bus itself end.
+    try { await community?.unload(); } catch (error) { progress(`COMMUNITY_PLUGIN_UNLOAD_FAILED: ${error instanceof Error ? error.message : 'unload failed'}\n`); }
     try { plugins?.dispose(); } finally {
-      try { await community?.unload(); } catch (error) { progress(`COMMUNITY_PLUGIN_UNLOAD_FAILED: ${error instanceof Error ? error.message : 'unload failed'}\n`); }
+      bus.dispose();
       process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop);
     }
   }

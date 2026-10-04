@@ -29,7 +29,7 @@ guide includes reviewed path migration and configured canonical-project behavior
 
 Drop your own plugin into `bin/plugins/<id>/` with `main.js`, `manifest.json` and `settings.json`, then review and
 enable it with `node bin/app plugins enable <id> --yes`. Its commands run as `node bin/app <id> <command>`, including
-from a compiled kit. The model follows Obsidian community plugins; see [app plugins](../docs/development/APP-PLUGINS.md).
+from a compiled kit. The model follows Obsidian community plugins; see [the app plugin developer guide](plugins/DEVELOPER-GUIDE.md).
 
 ## Create a project
 

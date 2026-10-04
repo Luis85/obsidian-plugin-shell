@@ -6,12 +6,8 @@ import { OperationError, requireThat } from '../framework/contracts.ts';
 import { readBounded } from '../framework/files.ts';
 import { isCommunityPluginId, isSettingsDocument, type CommunityPluginManifest } from '../../domain/community-plugin.ts';
 import type { PluginCommandContext, PluginTuiContext } from '../../../plugins/api.ts';
+import type { WorkbenchApp } from './app-api.ts';
 
-/** What `this.app` exposes to an app plugin: the running app, not a project. Project roots arrive per command. */
-export interface CommunityApp {
-  readonly version: string;
-  readonly frameworkRoot: string;
-}
 export interface CommunityCommandRequest { readonly flags: Readonly<Record<string, string | boolean>> }
 /** One CLI command: `node bin/app <plugin-id> <command-id> [--flags]`, like an Obsidian palette command. */
 export interface CommunityCommand {
@@ -26,7 +22,7 @@ export interface CommunityStudioAction {
   readonly label: string;
   run(context: PluginTuiContext): void | Promise<void>;
 }
-type Cleanup = () => void | Promise<void>;
+export type Cleanup = () => void | Promise<void>;
 export interface PluginBinding {
   readonly directory: string;
   readonly commands: Map<string, CommunityCommand>;
@@ -40,8 +36,9 @@ function binding(plugin: Plugin): PluginBinding {
   if (!bound) throw new OperationError('COMMUNITY_PLUGIN_NOT_LOADED', 'Plugin methods are available once the app has loaded the plugin.');
   return bound;
 }
-export function bindPlugin(plugin: Plugin, directory: string): PluginBinding {
-  const bound: PluginBinding = { directory, commands: new Map(), actions: new Map(), cleanups: [], saving: Promise.resolve() };
+/** Attaches the loader's per-plugin state; `cleanups` may already hold subscriptions made through `this.app`. */
+export function bindPlugin(plugin: Plugin, directory: string, cleanups: Cleanup[] = []): PluginBinding {
+  const bound: PluginBinding = { directory, commands: new Map(), actions: new Map(), cleanups, saving: Promise.resolve() };
   bindings.set(plugin, bound);
   return bound;
 }
@@ -58,9 +55,10 @@ async function readSettings(directory: string): Promise<Record<string, unknown>>
  * `require('workbench')`. Plugin code is trusted code running with the user's permissions; this is not a sandbox.
  */
 export class Plugin {
-  readonly app: CommunityApp;
+  /** The app API: events, commands, files, other plugins and logging. */
+  readonly app: WorkbenchApp;
   readonly manifest: CommunityPluginManifest;
-  constructor(app: CommunityApp, manifest: CommunityPluginManifest) {
+  constructor(app: WorkbenchApp, manifest: CommunityPluginManifest) {
     this.app = app;
     this.manifest = manifest;
   }

@@ -8,10 +8,20 @@ export interface CommunityPluginManifest {
   readonly name: string;
   readonly version: string;
   readonly minAppVersion: string;
+  /** The plugin API contract the plugin is written against; see communityPluginApiVersion. */
+  readonly apiVersion: number;
   readonly description: string;
   readonly author: string;
+  readonly category: CommunityPluginCategory;
+  readonly tags: readonly string[];
   readonly authorUrl?: string;
+  readonly license?: string;
 }
+/** The plugin API this app provides. A plugin written against a newer API does not load. */
+export const communityPluginApiVersion = 1;
+/** What a plugin is for, so lists, agents and reviewers can group and filter plugins. */
+const communityPluginCategories = Object.freeze(['automation', 'tool', 'integration', 'generator', 'quality', 'documentation', 'other'] as const);
+export type CommunityPluginCategory = typeof communityPluginCategories[number];
 export interface CommunityPluginIssue { readonly code: string; readonly message: string }
 
 export const communityPluginsFolder = 'bin/plugins';
@@ -43,25 +53,38 @@ function requiredFields({ manifest, issues }: Fields, folder: string): void {
     if (!text(manifest[key], limit)) issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', `${key} must be a non-empty string of at most ${limit} characters.`));
   for (const key of ['version', 'minAppVersion'])
     if (!isVersion(manifest[key])) issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', `${key} must be an x.y.z version.`));
+  if (!Number.isSafeInteger(manifest.apiVersion) || (manifest.apiVersion as number) < 1)
+    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'apiVersion must be a positive integer plugin API version.'));
+  if (!communityPluginCategories.includes(manifest.category as CommunityPluginCategory))
+    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', `category must be one of ${communityPluginCategories.join(', ')}.`));
+  if (!Array.isArray(manifest.tags) || manifest.tags.length > 10 || !manifest.tags.every(isCommunityPluginId) || new Set(manifest.tags).size !== manifest.tags.length)
+    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'tags must be a list of at most 10 unique kebab-case tags.'));
+  if (manifest.license !== undefined && !(text(manifest.license, 100)))
+    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'license must be a non-empty string such as an SPDX identifier when present.'));
   if (manifest.authorUrl !== undefined && !(text(manifest.authorUrl, 500) && manifest.authorUrl.startsWith('https://')))
     issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'authorUrl must be an https URL when present.'));
 }
 /**
- * Validates manifest.json against its folder and the running app version. Unknown Obsidian fields (fundingUrl,
- * isDesktopOnly) are tolerated and dropped; the returned manifest holds only the declared contract.
+ * Validates manifest.json against its folder, the running app version and the provided plugin API. Unknown Obsidian
+ * fields (fundingUrl, isDesktopOnly) are tolerated and dropped; the returned manifest holds only the declared contract.
  */
 export function validateCommunityManifest(value: unknown, folder: string, appVersion: string): { manifest?: CommunityPluginManifest; issues: CommunityPluginIssue[] } {
   if (!plainObject(value)) return { issues: [issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'manifest.json must be a JSON object.')] };
   const fields: Fields = { manifest: value, issues: [] };
   requiredFields(fields, folder);
   if (fields.issues.length) return { issues: fields.issues };
-  const manifest = Object.freeze({
+  const manifest: CommunityPluginManifest = Object.freeze({
     id: value.id as string, name: value.name as string, version: value.version as string, minAppVersion: value.minAppVersion as string,
-    description: value.description as string, author: value.author as string,
+    apiVersion: value.apiVersion as number, description: value.description as string, author: value.author as string,
+    category: value.category as CommunityPluginCategory, tags: Object.freeze([...value.tags as string[]]),
     ...(typeof value.authorUrl === 'string' ? { authorUrl: value.authorUrl } : {}),
+    ...(typeof value.license === 'string' ? { license: value.license } : {}),
   });
-  const issues = isVersion(appVersion) && compareVersions(manifest.minAppVersion, appVersion) > 0
-    ? [issue('COMMUNITY_PLUGIN_APP_VERSION', `${manifest.id} requires app ${manifest.minAppVersion}; this app is ${appVersion}.`)] : [];
+  const issues: CommunityPluginIssue[] = [];
+  if (isVersion(appVersion) && compareVersions(manifest.minAppVersion, appVersion) > 0)
+    issues.push(issue('COMMUNITY_PLUGIN_APP_VERSION', `${manifest.id} requires app ${manifest.minAppVersion}; this app is ${appVersion}.`));
+  if (manifest.apiVersion > communityPluginApiVersion)
+    issues.push(issue('COMMUNITY_PLUGIN_API_VERSION', `${manifest.id} needs plugin API ${manifest.apiVersion}; this app provides API ${communityPluginApiVersion}.`));
   return { manifest, issues };
 }
 

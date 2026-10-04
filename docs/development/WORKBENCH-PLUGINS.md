@@ -2,7 +2,7 @@
 
 Workbench has a trusted TypeScript plugin SDK for extending the **development framework itself** without adding framework IDs, starter IDs, CLI commands or Studio actions to central switch statements.
 
-This is separate from the plugin system emitted into generated projects. Workbench plugins extend project creation and authoring; generated-project plugins extend the generated application. To add a plugin to an installed or compiled `bin/app` without rebuilding it, use [app plugins](APP-PLUGINS.md) in `bin/plugins/<id>/` instead.
+This is separate from the plugin system emitted into generated projects. Workbench plugins extend project creation and authoring; generated-project plugins extend the generated application. To add a plugin to an installed or compiled `bin/app` without rebuilding it, use [app plugins](../../bin/plugins/DEVELOPER-GUIDE.md) in `bin/plugins/<id>/` instead.
 
 ## Required directory contract
 

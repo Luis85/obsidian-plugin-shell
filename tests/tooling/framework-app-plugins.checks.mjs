@@ -1,60 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { PassThrough, Writable } from 'node:stream';
-import { main } from '../../bin/app.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { enable, frameworkRoot, install, manifestFor, operation, run } from './app-plugins-fixture.mjs';
 import { communityInventory } from '../../bin/adapters/community-plugins/inventory.ts';
 import { bindPlugin, Plugin } from '../../bin/adapters/community-plugins/plugin.ts';
 import { compareVersions, validateCommunityManifest, validateEnabledList, withEnabled } from '../../bin/domain/community-plugin.ts';
-
-const manifestFor = (id, extra = {}) => ({ id, name: 'Hello World', version: '1.0.0', minAppVersion: '0.4.0', description: 'Greets.', author: 'Tester', ...extra });
-const greeter = `const { Plugin } = require('workbench');
-module.exports = class Greeter extends Plugin {
-  async onload() {
-    this.settings = await this.loadData();
-    this.addCommand({ id: 'greet', name: 'Greet', options: { values: ['who'], booleans: ['loud'] }, execute: async request => {
-      this.settings.count = (this.settings.count ?? 0) + 1;
-      await this.saveData(this.settings);
-      const text = this.settings.greeting + ', ' + (request.flags.who ?? 'world') + '!';
-      return { message: request.flags.loud ? text.toUpperCase() : text, count: this.settings.count, app: this.app.version };
-    } });
-    this.addStudioAction({ id: 'wave', label: 'Wave', run: () => {} });
-    this.register(() => process.emit('app-plugin-test', this.manifest.id + ':cleanup'));
-  }
-  onunload() { process.emit('app-plugin-test', this.manifest.id + ':onunload'); }
-};
-`;
-async function frameworkRoot(t) {
-  const root = await realpath(await mkdtemp(join(tmpdir(), 'app-plugins-')));
-  t.after(() => rm(root, { recursive: true, force: true }));
-  await writeFile(join(root, 'package.json'), JSON.stringify({ version: '0.4.0' }));
-  await mkdir(join(root, 'bin/plugins'), { recursive: true });
-  return root;
-}
-async function install(root, id, { source = greeter, manifest = manifestFor(id), settings = { greeting: 'Hello' } } = {}) {
-  const folder = join(root, 'bin/plugins', id);
-  await mkdir(folder, { recursive: true });
-  if (source !== null) await writeFile(join(folder, 'main.js'), source);
-  if (manifest !== null) await writeFile(join(folder, 'manifest.json'), JSON.stringify(manifest));
-  if (settings !== null) await writeFile(join(folder, 'settings.json'), JSON.stringify(settings));
-  return folder;
-}
-const enable = (root, ids) => writeFile(join(root, 'bin/plugins/community-plugins.json'), JSON.stringify(ids));
-function sink() {
-  const chunks = [];
-  const stream = new Writable({ write(chunk, _encoding, done) { chunks.push(String(chunk)); done(); } });
-  return Object.assign(stream, { text: () => chunks.join('') });
-}
-async function run(root, argv) {
-  const input = new PassThrough(); input.end();
-  const output = sink(), error = sink();
-  const status = await main(argv, root, { input, output, error, env: { CI: 'true' } });
-  return { status, stdout: output.text(), stderr: error.text() };
-}
-const operation = (root, command, args = [], options = {}) => executeOperation({ command, args, options }, { root, frameworkRoot: root });
 
 test('manifest, enabled list and version rules follow the Obsidian community-plugin shape', () => {
   assert.deepEqual(validateCommunityManifest(manifestFor('hello-world', { fundingUrl: 'x' }), 'hello-world', '0.4.0').issues, []);
@@ -63,6 +14,10 @@ test('manifest, enabled list and version rules follow the Obsidian community-plu
   assert.equal(validateCommunityManifest(manifestFor('hello-world', { minAppVersion: '9.0.0' }), 'hello-world', '0.4.0').issues[0].code, 'COMMUNITY_PLUGIN_APP_VERSION');
   assert.equal(validateCommunityManifest(manifestFor('hello-world', { authorUrl: 'http://x' }), 'hello-world', '0.4.0').issues[0].code, 'COMMUNITY_PLUGIN_MANIFEST_INVALID');
   assert.equal(validateCommunityManifest([], 'hello-world', '0.4.0').issues[0].code, 'COMMUNITY_PLUGIN_MANIFEST_INVALID');
+  for (const extra of [{ category: 'misc' }, { tags: 'tool' }, { tags: ['A'] }, { tags: ['a', 'a'] }, { apiVersion: 0 }, { apiVersion: '1' }, { license: '' }])
+    assert.equal(validateCommunityManifest(manifestFor('hello-world', extra), 'hello-world', '0.4.0').issues[0].code, 'COMMUNITY_PLUGIN_MANIFEST_INVALID', JSON.stringify(extra));
+  assert.equal(validateCommunityManifest(manifestFor('hello-world', { apiVersion: 2 }), 'hello-world', '0.4.0').issues[0].code, 'COMMUNITY_PLUGIN_API_VERSION');
+  assert.deepEqual(validateCommunityManifest(manifestFor('hello-world', { license: 'MIT' }), 'hello-world', '0.4.0').manifest.tags, ['greeting']);
   assert.deepEqual(validateEnabledList(['a', 'b']).ids, ['a', 'b']);
   for (const value of [{}, ['a', 'a'], ['Bad'], [1]]) assert.equal(validateEnabledList(value).issues[0].code, 'COMMUNITY_PLUGINS_LIST_INVALID');
   assert.deepEqual(withEnabled(['a'], 'b', true), ['a', 'b']);

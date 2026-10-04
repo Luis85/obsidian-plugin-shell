@@ -13,10 +13,10 @@ export const launcherFiles = ['bin/app'];
 export const bootstrapFiles = [...launcherFiles, 'package.json', 'README.md', 'LICENSE'];
 export interface Kit { schemaVersion: 2; version: string; compilerVersion: string; sourceHash: string; files: KitFile[]; bootstrap: Array<{path: string; hash: string}> }
 
-export async function listFiles(root: string, folder: string, skip: ReadonlySet<string> = new Set()): Promise<string[]> {
+export async function listFiles(root: string, folder: string, skip: (path: string) => boolean | Promise<boolean> = () => false): Promise<string[]> {
   const result: string[] = [];
   async function walk(path: string): Promise<void> {
-    if (skip.has(path)) return;
+    if (await skip(path)) return;
     const stat = await lstat(join(root, path));
     requireThat(!stat.isSymbolicLink(), 'KIT_LINK', 'Kit inputs must not contain links.');
     if (stat.isDirectory()) for (const name of (await readdir(join(root, path))).sort()) await walk(path + '/' + name);
@@ -89,14 +89,22 @@ export async function readPluginConfig(root: string, path: string): Promise<Buff
   return bytes;
 }
 
-const userOwnedFolders: ReadonlySet<string> = new Set(['bin/plugins']);
+/**
+ * User-owned app plugin data inside bin/plugins (see bin/plugins/DEVELOPER-GUIDE.md): the enabled list, the shipped guide
+ * and every folder that brings manifest.json or main.js. Anything else there, such as a stray config, stays inventory.
+ */
+async function userOwned(root: string, path: string): Promise<boolean> {
+  if (path === 'bin/plugins/community-plugins.json' || path === 'bin/plugins/DEVELOPER-GUIDE.md') return true;
+  if (!/^bin\/plugins\/[^/]+$/.test(path)) return false;
+  return await exists(join(root, path, 'manifest.json')) || await exists(join(root, path, 'main.js'));
+}
 export async function verifyKit(root: string): Promise<Kit> {
   if (!await kitPresent(root)) throw new OperationError('KIT_REQUIRED', 'No extracted framework kit (bin/kit.json) was found here.',
     'Run this inside an extracted kit folder; from a framework checkout, build one with: node bin/app framework pack --out ../workbench-kit.zip --yes');
   const kit = kitManifest(await readJson(join(root, 'bin/kit.json')));
   const configs = pluginConfigFiles(kit), configPaths = new Set(configs.map(file => file.path));
-  // bin/plugins is user-owned: shipped plugin configs (checked below) and app plugins the user installs (bin/app plugins list).
-  const actual = (await listFiles(root, 'bin', userOwnedFolders)).filter(path => path !== 'bin/app' && path !== 'bin/kit.json' && !configPaths.has(path)).sort();
+  // Shipped plugin configs are checked below; installed app plugins are user data (node bin/app plugins list).
+  const actual = (await listFiles(root, 'bin', path => userOwned(root, path))).filter(path => path !== 'bin/app' && path !== 'bin/kit.json' && !configPaths.has(path)).sort();
   requireThat(JSON.stringify(actual) === JSON.stringify(kit.files.map(file => file.path).sort()), 'KIT_INVENTORY', 'Missing or unlisted kit files.');
   requireThat(kit.files.reduce((total, file) => total + file.bytes, 0) <= 100_000_000, 'KIT_MODIFIED', 'Kit inventory exceeds its byte bound.');
   await mapBounded(kit.files, 8, async file => {

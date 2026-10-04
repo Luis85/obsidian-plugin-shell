@@ -3,7 +3,9 @@ import { join } from 'node:path';
 import { compileFunction } from 'node:vm';
 import { OperationError, requireThat } from '../framework/contracts.ts';
 import { readBounded } from '../framework/files.ts';
-import { bindPlugin, Plugin, pluginApi, type CommunityApp, type PluginBinding } from './plugin.ts';
+import { bindPlugin, Plugin, pluginApi, type Cleanup, type PluginBinding } from './plugin.ts';
+import { createApp, type AppHost, type AppSession, type WorkbenchApp } from './app-api.ts';
+import { pluginsLoaded } from './app-events.ts';
 import { isLoadable, type CommunityPluginInventory } from './discovery.ts';
 import type { CommunityPluginManifest } from '../../domain/community-plugin.ts';
 import type { PluginCliCommand, PluginTuiAction, WorkbenchPluginObject } from '../../../plugins/api.ts';
@@ -17,7 +19,7 @@ export interface CommunityPluginHost {
   unload(): Promise<void>;
 }
 interface Loaded { manifest: CommunityPluginManifest; instance: Plugin; binding: PluginBinding }
-type PluginClass = new (app: CommunityApp, manifest: CommunityPluginManifest) => Plugin;
+type PluginClass = new (app: WorkbenchApp, manifest: CommunityPluginManifest) => Plugin;
 
 const codeOf = (error: unknown): string => error instanceof OperationError ? error.code : /^([A-Z][A-Z_0-9]+):/.exec(error instanceof Error ? error.message : '')?.[1] ?? 'COMMUNITY_PLUGIN_LOAD_FAILED';
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : 'Plugin failed to load.').slice(0, 500);
@@ -82,12 +84,13 @@ function adapt(entry: Loaded): WorkbenchPluginObject {
     tui: Object.freeze(tui),
   });
 }
-async function loadOne(directory: string, manifest: CommunityPluginManifest, app: CommunityApp): Promise<Loaded> {
+async function loadOne(directory: string, manifest: CommunityPluginManifest, host: AppHost): Promise<Loaded> {
   const Constructor = await pluginClass(directory);
-  const instance = new Constructor(app, manifest);
+  const cleanups: Cleanup[] = [];
+  const instance = new Constructor(createApp(host, manifest, cleanup => cleanups.push(cleanup)), manifest);
   requireThat(instance instanceof Plugin, 'COMMUNITY_PLUGIN_EXPORT_INVALID', 'The plugin constructor must return its Plugin instance.');
-  const entry: Loaded = { manifest, instance, binding: bindPlugin(instance, directory) };
-  try { await instance.onload(); } catch (error) { await runCleanups(entry, false); throw error; }
+  const entry: Loaded = { manifest, instance, binding: bindPlugin(instance, directory, cleanups) };
+  try { await entry.instance.onload(); } catch (error) { await runCleanups(entry, false); throw error; }
   return entry;
 }
 
@@ -95,16 +98,21 @@ async function loadOne(directory: string, manifest: CommunityPluginManifest, app
  * Loads every enabled, valid plugin of an inventory in enable order (Obsidian's startup). One failing plugin is
  * reported and skipped; it never stops the others or the app.
  */
-export async function loadCommunityPlugins(inventory: CommunityPluginInventory, frameworkRoot: string): Promise<CommunityPluginHost> {
-  const app: CommunityApp = Object.freeze({ version: inventory.appVersion, frameworkRoot });
+export async function loadCommunityPlugins(inventory: CommunityPluginInventory, frameworkRoot: string, session: AppSession): Promise<CommunityPluginHost> {
+  // The host extends the live session object, so `this.app.root` follows the root parsed after loading.
+  const host: AppHost = Object.assign(session, { frameworkRoot, version: inventory.appVersion, loaded: new Map() });
   const byId = new Map(inventory.plugins.filter(isLoadable).map(plugin => [plugin.id, plugin]));
   const loaded: Loaded[] = [], failures: CommunityPluginFailure[] = [];
   for (const id of inventory.enabled) {
     const plugin = byId.get(id);
     if (!plugin) continue;
-    try { loaded.push(await loadOne(plugin.directory, plugin.manifest, app)); }
-    catch (error) { failures.push({ id, code: codeOf(error), message: messageOf(error) }); }
+    try {
+      const entry = await loadOne(plugin.directory, plugin.manifest, host);
+      loaded.push(entry);
+      host.loaded.set(id, { manifest: entry.manifest, instance: entry.instance });
+    } catch (error) { failures.push({ id, code: codeOf(error), message: messageOf(error) }); }
   }
+  session.bus.dispatch(pluginsLoaded, { plugins: loaded.map(entry => entry.manifest.id) });
   let unloaded = false;
   return Object.freeze({
     plugins: Object.freeze(loaded.map(adapt)),
