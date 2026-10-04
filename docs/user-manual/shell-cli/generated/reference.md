@@ -3563,7 +3563,7 @@ node bin/app ci (--list | --job <workflow-file-stem>/<job-id> [--matrix key=valu
 | --- | --- | --- | --- |
 | --job | value | Job to reproduce, as &lt;workflow-file-stem&gt;/&lt;job-id&gt; (for example ci/baseline); see ci --list. | See command semantics |
 | --matrix | value | Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-24.04); required when an expression computes the matrix. | See command semantics |
-| --list | flag | List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. | See command semantics |
+| --list | flag | List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. Steps of local composite actions (.github/actions/&lt;name&gt;/action.yml) count as the job's own steps. | See command semantics |
 | --execute | flag | Run the job's run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 per step |

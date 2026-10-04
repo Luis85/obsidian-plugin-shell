@@ -43,8 +43,6 @@ jobs:
           install: 'true'
           install-flags: --no-fund
           playwright: browser
-      - name: Type-check the CLI
-        run: node "$QUALIFIED_NPM" run typecheck:maker
       - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
         run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
       - name: Run compiled kit, first run, edit, regeneration and real browser acceptance

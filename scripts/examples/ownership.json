@@ -268,7 +268,8 @@
     {
       "path": "README.md",
       "sha256": "d27e5679d8557757e1095d2dfc0d33fa2d8ad7cc96cb1f3f2854d934e1a96eba",
-      "template": "README.md.txt"
+      "template": "README.md.txt",
+      "generated": "retain"
     },
     {
       "path": "tests/runtime/foundation-view.test.ts",

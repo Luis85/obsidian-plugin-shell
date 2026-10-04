@@ -88,10 +88,6 @@ jobs:
       - name: Record exact toolchain
         run: |
           node -p 'JSON.stringify({node:process.version,yaml:require("yaml/package.json").version,typescript:require("typescript/package.json").version},null,2)' > reports/application-docs/toolchain.json
-      - name: Typecheck the shared operation and documentation boundaries
-        run: |
-          set -o pipefail
-          node "$QUALIFIED_NPM" run typecheck:framework 2>&1 | tee reports/application-docs/typecheck.log
       - name: Full repository analyzer and architecture gates
         if: runner.os == 'Linux'
         run: |

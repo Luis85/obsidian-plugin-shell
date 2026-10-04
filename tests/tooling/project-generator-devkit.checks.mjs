@@ -213,5 +213,10 @@ test('[GENERATOR-DEVKIT-11] project scripts type-check the project config, alway
   assert.ok(![...empty.keys()].some(path => path.startsWith('tests/project/ui-effects/')), 'blank declares no visual definitions');
   assert.match(plain['test:ui-effects'], /^node -e "console\.log\('test:ui-effects skipped: this project declares no visual definitions/);
   assert.equal(plain['test:project'], 'node scripts/testing/suites.mjs project && npm run test:ui-effects');
-  for (const scripts of [visual, plain]) assert.match(scripts['verify:project'], /npm run test:ui-effects/);
+  for (const scripts of [visual, plain]) {
+    // The full gate is `check` (typecheck, oxlint, ESLint, product and maker tooling tests) plus what CI adds after it.
+    assert.equal(scripts['verify:project'], 'npm run check && npm run verify:artifacts');
+    assert.equal(scripts.check, 'node bin/app check');
+    assert.match(scripts['verify:artifacts'], /npm run test:ui-effects/);
+  }
 });

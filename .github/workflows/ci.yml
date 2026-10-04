@@ -366,14 +366,14 @@ jobs:
           node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
+          node "$QUALIFIED_NPM" run typecheck:framework
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.sitemap.json
+          node "$QUALIFIED_NPM" run typecheck:sitemap
           node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
