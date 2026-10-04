@@ -85,7 +85,7 @@
     },
     {
       "path": ".github/dependabot.yml",
-      "hash": "4fb568672790322503657ecf137f9fc7c7c9c09664efccee1193706c254b60c7",
+      "hash": "b2fc9064f513e69c3ec9937b2e7807d2c4df6156939500b67b46c543c6b6c5af",
       "ownership": "framework"
     },
     {
@@ -340,7 +340,7 @@
     },
     {
       "path": "bin/adapters/framework/catalog.ts",
-      "hash": "ff2676474c59f821738bb982f05ad5670a6b98b74b36f891434c486afe0c2473",
+      "hash": "5f6d562f76b7f92d2554b5f4773c5b302d686cfe5ceab6dafde3eb8433adddb9",
       "ownership": "framework"
     },
     {
@@ -420,7 +420,7 @@
     },
     {
       "path": "bin/adapters/framework/distribution.ts",
-      "hash": "b01f6fac82c5eecd09f61158973b692fda78562c257a1c33054dcf5be830f3f0",
+      "hash": "230c9c6f5c46d89ccb2679f4c3b59e335e78a4e3abdc0bdb5dae76453fbea517",
       "ownership": "framework"
     },
     {
@@ -490,7 +490,7 @@
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "hash": "d83eaac874bc1fc1e7f6dd4861440fd5c48ce8711a11e04cfc4ddca97bacbb00",
+      "hash": "018e8d4f5b443b7801210fde947534c5509761b1f5bfbe9741aea78f908f4dd9",
       "ownership": "framework"
     },
     {
@@ -525,12 +525,12 @@
     },
     {
       "path": "bin/adapters/framework/operations.ts",
-      "hash": "d7bdede2b450f7eb33dcd9673929b04d9da5d384765f2181c13df3c8d7e0c492",
+      "hash": "644b0cb5600fb45d7bc928afbc7ed5ded0fcecddf5720512bad8cf7a024a8ba9",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/framework/planning.ts",
-      "hash": "32e9ff78f62d47237e7e0faabd5d56ed8faf3ae671cae51fd9fb005092bf35cd",
+      "hash": "27515c1013acf9b416e435afe9729908b362249e952254571c4e6e5de99d9073",
       "ownership": "framework"
     },
     {
@@ -631,6 +631,11 @@
     {
       "path": "bin/adapters/framework/setup-state.ts",
       "hash": "aa3c9fae8efc6a4bf523755743f3032a3d5972301388a139166e7c70ec351f98",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/framework/site-command.ts",
+      "hash": "21cebde5ab26e5432c47a8e116e610488ff3ef2b52ab4165af99c7cfe4ba2a8d",
       "ownership": "framework"
     },
     {
@@ -916,6 +921,11 @@
     {
       "path": "bin/adapters/setup-command.ts",
       "hash": "75c4d7d8ccf76c206bcd0bf827a63972a4427a706426318f99b77c186f33db18",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/site-templates.ts",
+      "hash": "f938f38df3d81d192c918437a76cb6acece4e23f8ea8f6c49e89da93147f9cb5",
       "ownership": "framework"
     },
     {
@@ -1285,7 +1295,7 @@
     },
     {
       "path": "bin/compiler/emitters/framework-docs.ts",
-      "hash": "74104fde858b829ea8a6905179c55bc272f597305f119718e53ac9737686cd30",
+      "hash": "15558537c057210783ec3dc5adf30e410d3a74b6dbffebd8ad4aa9c2ccc1c999",
       "ownership": "framework"
     },
     {
@@ -1756,6 +1766,16 @@
     {
       "path": "bin/domain/setup-checkpoint.ts",
       "hash": "f0b47972e56bb79a1e69e44b209df2a31595946b00e0651f329a2ad6da3d1cad",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/domain/site-collections.ts",
+      "hash": "b85d2ac440ad7fb96aea6f548e3e5e3cb91e099522b887d579ef618298d20650",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/domain/site-template.ts",
+      "hash": "85ec590a7201f38e6a8fce0388ce2f298a72f94dd813c83d0188255b26df1df2",
       "ownership": "framework"
     },
     {
@@ -4260,7 +4280,7 @@
     },
     {
       "path": "docs/framework/AGENTS.md",
-      "hash": "28eb2d810a387046fd9297b3cca4c0901fa0f1354701f562cdde47246772d075",
+      "hash": "116518c745b0b546aa99416645391ccc4ebee66be732753f07a8bbdfe32bac40",
       "ownership": "framework"
     },
     {
@@ -4321,6 +4341,11 @@
     {
       "path": "docs/framework/development/ADOPT-EXISTING-PROJECT.md",
       "hash": "ec5742ceadfe82a231714d220badc6e82606d5b19a42feb8d90f9aabaebd4a8b",
+      "ownership": "framework"
+    },
+    {
+      "path": "docs/framework/development/ASTRO-SITES.md",
+      "hash": "6c668edb97c8615eb2cb338a56cfaeb10dcf8a173fb83e5448da81e89192b6d6",
       "ownership": "framework"
     },
     {
@@ -4480,7 +4505,7 @@
     },
     {
       "path": "docs/framework/development/OBSIDIAN-BASES.md",
-      "hash": "be82c80631126e375a2fbd776f8264409509f16b62469c29a0b089cbea70506b",
+      "hash": "625b4206c98d4d97f73f45ec5235fe45c77166a8d4490ac3984f3951b591a5f0",
       "ownership": "framework"
     },
     {
@@ -4670,7 +4695,7 @@
     },
     {
       "path": "docs/framework/user-manual/shell-cli/generated/reference.md",
-      "hash": "63cf619276fe37329580dd6d2a2e713379bf4ed1bdef5e7d905098eaa0dd468d",
+      "hash": "1ac04e85b4df34c42f261b5ec050d7be4b710c42d035ea622f9ca0a4f03e0d7d",
       "ownership": "framework"
     },
     {
@@ -4815,12 +4840,12 @@
     },
     {
       "path": "docs/user-manual/shell-cli/generated/commands.json",
-      "hash": "9df29f7674c0517ab7ef0e1ffef57aca1e38d4d2ef270e2d862d9f42cf59de9b",
+      "hash": "c847c595580d8a74eebe350a5e2563b84f614fe5bf21c41ec860abbc54aa64ec",
       "ownership": "framework"
     },
     {
       "path": "docs/user-manual/shell-cli/generated/manifest.json",
-      "hash": "ac616cab354100af9a9cd1bd514c168388ce5e26b7069d1ac6a64c41786d814f",
+      "hash": "45b2c065226a90a8af1530e09e18e5d6a545702e6070f4fc2115212974634781",
       "ownership": "framework"
     },
     {
@@ -5975,7 +6000,7 @@
     },
     {
       "path": "scripts/quality/maintainability-inventory.mjs",
-      "hash": "0e7df48c6cffc7de70a0260ecdca7c7b86131970213ad1fe24d11e528bda8cfa",
+      "hash": "69d58218a67ac0ca1f38c2e6d9c91f4ef10749d5817c9c1ab34d96784470c917",
       "ownership": "framework"
     },
     {
@@ -9894,6 +9919,131 @@
       "ownership": "framework"
     },
     {
+      "path": "templates/sites/base/AGENTS.md.tmpl",
+      "hash": "b6e4ef2847f743d0cd2870e6c59f1effa63b4a0d64bac3e1f0f2e99a4423f90c",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/README.md.tmpl",
+      "hash": "20ed2423a5dc0bd7d21bb3587ddb36075da5c0872a63b40ba085e4646fa4bd06",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/astro.config.mjs.tmpl",
+      "hash": "fc9acfb5f79b3933e6664fc7c49ec46cd88fb7ea19be83012c41aace055b66da",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/dot-github/workflows/ci.yml.tmpl",
+      "hash": "cd52f88c233e23073975c4970d1e00a121f0a4edc04e2ddef0dd8aa25659e2f9",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/dot-gitignore.tmpl",
+      "hash": "287b5f32f6456b16162588488ea4ec5065f4ea5d20dcaca5f4b5e435df407f83",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/dot-nvmrc.tmpl",
+      "hash": "73fb1b615e2043a933be1c0895cde4358036acc28d785692509b822aa53c761f",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/package-lock.json.tmpl",
+      "hash": "3b83301c6d9e5a35a10e67bf6bdabe86a691f7d9b75bc6c83791b76b33af2bdd",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/package.json.tmpl",
+      "hash": "9c60ccd1a496eaa8a163986c8c651454a93e5bf2db020ca5f3482ab1f5aa4215",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/components/CollectionCards.astro.tmpl",
+      "hash": "d075fa54af680bd329d829e64cda2d81feb46aa03a4c8f587d5392d7b4ce8859",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/components/CollectionFields.astro.tmpl",
+      "hash": "0964b4873d07860c488754a2ead04195266bfc97dbb086bbf1683031c057a80c",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/components/CollectionTable.astro.tmpl",
+      "hash": "d86d1fac4394a892b694e0896a0602aa454d4726d7320a82d6cb4de136791148",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/components/EmptyState.astro.tmpl",
+      "hash": "abbf7cdc27571a0f035484b1c284e979188c9d8e250ea6deaf5b996da800f873",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/content.config.ts.tmpl",
+      "hash": "59332a775ad27a7ffa674e63d3be488b920654d64142946b8dadc3d13e1f56db",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/data/collections/README.md.tmpl",
+      "hash": "61e31f4315ae7b07c0cc98fc6ff85733c33ff88722f9d3c722a7d9846f2f5249",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/layouts/SiteLayout.astro.tmpl",
+      "hash": "4b26ecc2e03393d3f9b4c919307f9c54ffcc149d91a958fede96d73850d9cd35",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/lib/collections.ts.tmpl",
+      "hash": "a875d54aa8581275449a873d336602a7b65d89199e1b7a6e39f9a0b30813875d",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/lib/snapshot.ts.tmpl",
+      "hash": "0f77456b8db3910641b2f143c948dbf63d720521f7d20d2126337843768f38c4",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/src/styles/site.css.tmpl",
+      "hash": "122a0d971bab2ffe0a7c100cf90c46ddc9b675b185490d468536f172e6b16aaf",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/base/tsconfig.json.tmpl",
+      "hash": "b5b0a5b04a14cddd7713c5e1c82e86c79c17c2f86b170e26e9b170b3d5e01cd9",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/catalog.json",
+      "hash": "4861665300a236cd833f8996fb20b680b74796151a80093c862d90f1c6181f7b",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/documentation/src/components/DocsNav.astro.tmpl",
+      "hash": "94bb881579527ae885e50be13ac74685139aaa840f80b28d3a1f39a7627a6b30",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/documentation/src/pages/index.astro.tmpl",
+      "hash": "02a32be790d9403e57c7fa8bbf43d85f179e913cb092569e308dbdfe06661677",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/documentation/src/pages/reference/param-collection.astro.tmpl",
+      "hash": "a3163cc3411e109a751caf4c1e58438231c5d111b431f806a084c9b661381705",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/product-page/src/pages/index.astro.tmpl",
+      "hash": "f2c48b894089420fbe59727bc64af46748b96c05b469cd8dde23fb56529417e8",
+      "ownership": "framework"
+    },
+    {
+      "path": "templates/sites/project-page/src/pages/index.astro.tmpl",
+      "hash": "b243fc7d09133f04ce023543681f0f84540438802fe63dfa5b9eed852e62e111",
+      "ownership": "framework"
+    },
+    {
       "path": "tests/browser-specimen/specimen.checks.mjs",
       "hash": "e2252475fc48b8a565b076e112110822fbc3efb0761632263e64dfdd965a6e0e",
       "ownership": "framework"
@@ -10260,7 +10410,7 @@
     },
     {
       "path": "tests/fixtures/compiler/starter-golden.json",
-      "hash": "2f1683e47252973e2c4545dde1fff5f026128ce3f0ee0efec06590e8c23c50f4",
+      "hash": "14d3ae7b271b838a0d4fb5d5e59a7b07138d1eb6d28d7a631162ed9de13f7e8d",
       "ownership": "framework"
     },
     {
@@ -11695,7 +11845,7 @@
     },
     {
       "path": "tests/suites.json",
-      "hash": "a66cd805579eadec6706656b7b1d77158e855485edc457387955b48bfe450b52",
+      "hash": "fd628182d32162ff1b7d8db849db88751be9d9cb617f8462d9b08bd23992d97b",
       "ownership": "framework"
     },
     {
@@ -12190,7 +12340,7 @@
     },
     {
       "path": "tests/tooling/compiler-template-layout.checks.mjs",
-      "hash": "945a3d1d52abdbdb7d5758f9bf36d65a884d90b2ab3c09557e09e96d4a1e4711",
+      "hash": "b99524fcc3c1299c814c339096f0f0c467d2088d9b7978ef7d5ca92fc4164507",
       "ownership": "framework"
     },
     {
@@ -12984,6 +13134,16 @@
       "ownership": "framework"
     },
     {
+      "path": "tests/tooling/interactive-maker-sites-cli.checks.mjs",
+      "hash": "4ffefcc3b12635ed41ab73aa5c5732f9725cff7b439d391a3389746214e44855",
+      "ownership": "framework"
+    },
+    {
+      "path": "tests/tooling/interactive-maker-sites.checks.mjs",
+      "hash": "37fc7d52335bf951deec6e778f5e92fec663eccfc9a62c84e28166c2b3b7592d",
+      "ownership": "framework"
+    },
+    {
       "path": "tests/tooling/interactive-maker-starter-project.checks.mjs",
       "hash": "fc827abd39736e56cb8914dd8001a8f598fae10450d9ff9f830d9c9bfaeb6ac9",
       "ownership": "framework"
@@ -13315,7 +13475,7 @@
     },
     {
       "path": "tests/tooling/project-generator-devkit.checks.mjs",
-      "hash": "8c3761fd67e122f1560e86be2a9236e8cf2a40babff6c580637577d63546652a",
+      "hash": "dabcb85e7ca096ce4031275af1c672131bcd29868c6cae521a7593ecbbc01b08",
       "ownership": "framework"
     },
     {

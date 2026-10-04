@@ -51,7 +51,8 @@ A **Collection** data source can name the base and view that configure it:
   - `sort`, `groupBy`, `limit`
 - **`records`:** matching notes in view order. Each carries its `path`, its view-column `values`
   keyed by property id (`file.name`, `note.title`, `formula.stars`), its `group` when the view
-  groups, and its complete frontmatter `properties`.
+  groups, and its complete frontmatter `properties`. Website snapshots written by
+  `node bin/app site collections` leave `properties` out; see [Astro sites](ASTRO-SITES.md).
 - **`summary`** and **`skipped`:** what was scanned and matched. Linked folders are not followed.
   Notes whose frontmatter is invalid are listed and treated as having no properties, as in
   Obsidian.
@@ -91,6 +92,9 @@ Everything else is refused for the whole view, with the reason, instead of being
 - Filters: 200 items and 20 levels.
 - A scan reads at most 20,000 vault entries, 5,000 notes, 1 MB per note and 32 MB in total.
   Narrow a large vault with a top-level `file.inFolder("…")`: only that folder is read.
+
+A website can render collections too: `node bin/app site collections` snapshots the views a site
+project lists into its Astro content collections. See [Astro website projects](ASTRO-SITES.md).
 
 Code: the framework-free reader and evaluator are in `bin/domain/obsidian-base.ts`,
 `base-expression*.ts` and `base-collection.ts`. File access is in `bin/adapters/obsidian-base.ts`.
