@@ -1,4 +1,5 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { lstat, readdir, readFile, realpath } from 'node:fs/promises';
 import { resolve, join, isAbsolute } from 'node:path';
 import { HANDOUT_LIMIT, HANDOUT_PATH, HandoutError, digest, ensure, makeSnapshot, readSnapshot, renderHandout, refreshHandout, validateHandout, type SourceFile, type Suggestion } from './handout-model.ts';
@@ -7,12 +8,11 @@ import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
 const CONFIGURATION_FILES = ['configs/user-settings.json', 'shell.config.json'];
 const MAX_SOURCE_BYTES = 16_000_000;
 const MAX_FILE_BYTES = 1_000_000;
-const forbidden = new Set(['.git', defaultVaultConfigDirectory, '.framework', '.companion', '.dev-vault', '.test-vault', 'node_modules']);
 export interface WorkspaceOptions { prds?: string; virtualFiles?: Record<string, string> }
 export function portablePath(path: string): string {
   // oxlint-disable-next-line no-control-regex
   ensure(typeof path === 'string' && path.length > 0 && path.length <= 1024 && !isAbsolute(path) && !/[\\:\u0000-\u001f]/.test(path), 'HANDOUT_PATH', 'Use a bounded project-relative path with forward slashes.');
-  ensure(path.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !forbidden.has(part.toLowerCase())), 'HANDOUT_PATH', 'The PRD path must stay inside the project and outside protected folders.');
+  ensure(path.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !isProtectedSegment(part)), 'HANDOUT_PATH', 'The PRD path must stay inside the project and outside protected folders.');
   return path;
 }
 async function localRoot(root: string): Promise<string> {

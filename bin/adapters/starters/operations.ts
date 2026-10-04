@@ -1,4 +1,3 @@
-import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { starterCoverage } from './coverage.ts';
 import { basename, dirname, join, resolve } from 'node:path';
 import { readdir } from 'node:fs/promises';
@@ -11,6 +10,7 @@ import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts
 import { pluginStarterDefinitions } from '../../../plugins/runtime.ts';
 import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
 import { resolveTemplateRoot } from '../template-root.ts';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 export async function listStarters(context: Context, command = 'starters list') {
   const definitions = await loadDefinitions(context.root), folder = await starterFolder(context.root);
   return result(command, { folder, integrity: 'local-content-sha256; not a signature', starters: definitions.map(({ definition: d, sha256, file }) => ({
@@ -84,7 +84,7 @@ export async function assembleStarterPack(context: Context) {
 export async function packStarterOperation(request: Request, context: Context) {
   const output = stringOption(request.options, 'out'); requireThat(output, 'OUTPUT_REQUIRED', 'Supply --out <starters.zip>.');
   const target = resolve(context.root, output);
-  requireThat(target.endsWith('.zip') && !target.split(/[\\/]/).some(part => ['.git', defaultVaultConfigDirectory, '.framework', 'node_modules'].includes(part.toLowerCase())), 'STARTER_PATH', 'Choose a ZIP outside protected directories.');
+  requireThat(target.endsWith('.zip') && !target.split(/[\\/]/).some(part => isProtectedSegment(part)), 'STARTER_PATH', 'Choose a ZIP outside protected directories.');
   const files = await assembleStarterPack(context), bytes = zip(files);
   const report = { archive: target, sha256: hash(bytes), bytes: bytes.length, starters: files.length, publication: 'not-authorized', definitionFormat: 'configs/starters/$starterName.json' };
   if (!request.options.yes || request.options['dry-run']) return result(request.command, { ...report, requires: '--yes' }, 'planned');

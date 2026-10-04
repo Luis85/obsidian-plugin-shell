@@ -3,6 +3,7 @@ import { copyFile, lstat, mkdir, readFile, readdir, realpath, rename, rm, unlink
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { mapBounded } from './bounded-map.ts';
 import { sha256 } from './hash.ts';
+import { FILE_PLAN_PROTECTED_ROOTS, isProtectedSegment } from './protected-directories.ts';
 import type {
   ApplyFilePlanOptions,
   ApplyFilePlanReport,
@@ -24,10 +25,6 @@ type PlanShape = { version?: unknown; root?: unknown; changes?: unknown };
 type InspectedFile = { path: string; bytes: Buffer | null };
 type PlanFailure = Error & { report: ApplyFilePlanReport };
 
-const protectedRoots = new Set([
-  '.git', 'node_modules', '.worktrees', '.qualification', '.dev-vault',
-  '.native-runner', '.codex-authoring.lock', '.shell-first-run.lock',
-]);
 const hash = (value: string | Uint8Array): string => sha256(value);
 
 function errorCode(error: unknown): string | undefined {
@@ -53,7 +50,7 @@ function relativePath(path: unknown): string[] {
   if (typeof path !== 'string' || !path || isAbsolute(path) || path.includes('\\')) throw new Error('PLAN_UNSAFE_PATH');
   const parts = path.split('/');
   if (parts.some(part => !part || part === '.' || part === '..' || /[<>:"|?*\u0000-\u001f]/.test(part) || /[ .]$/.test(part) || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))) throw new Error('PLAN_UNSAFE_PATH');
-  if (protectedRoots.has(parts[0]!.toLowerCase())) throw new Error('PLAN_PROTECTED_PATH');
+  if (isProtectedSegment(parts[0]!, FILE_PLAN_PROTECTED_ROOTS)) throw new Error('PLAN_PROTECTED_PATH');
   return parts;
 }
 
