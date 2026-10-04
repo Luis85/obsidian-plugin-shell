@@ -2,7 +2,7 @@ import { object, keys, text } from './data.ts';
 import { requireSketch } from './errors.ts';
 /** Shared vocabulary of data-driven forms and wizards: bound paths, conditions and inert text templates. */
 export type FieldValue = string | number | boolean | string[];
-export type Values = Record<string, unknown>;
+export type FormValues = Record<string, unknown>;
 export interface FormCondition { field?: string; path?: string; equals?: FieldValue; notEquals?: FieldValue; present?: boolean; changed?: boolean }
 const unsafeSegments = new Set(['__proto__', 'constructor', 'prototype']);
 const segmentPattern = /^[A-Za-z][A-Za-z0-9]*$/;
@@ -18,18 +18,18 @@ export function getPath(source: unknown, path: string): unknown {
   let current: unknown = source;
   for (const part of path.split('.')) {
     if (current === null || typeof current !== 'object' || !Object.hasOwn(current, part)) return undefined;
-    current = (current as Values)[part];
+    current = (current as FormValues)[part];
   }
   return current;
 }
 /** Creates plain intermediate objects; prototype keys are unreachable because every path passed readPath. */
-export function setPath(target: Values, path: string, value: unknown): void {
+export function setPath(target: FormValues, path: string, value: unknown): void {
   const parts = path.split('.'), last = parts.pop()!;
   let current = target;
   for (const part of parts) {
     const next = Object.hasOwn(current, part) ? current[part] : undefined;
     if (next === null || typeof next !== 'object' || Array.isArray(next)) current[part] = {};
-    current = current[part] as Values;
+    current = current[part] as FormValues;
   }
   current[last] = value;
 }

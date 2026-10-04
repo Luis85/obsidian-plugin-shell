@@ -1,7 +1,7 @@
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { prepared } from '../../adapters/storage.ts';
 import { requireSketch } from '../../domain/errors.ts';
-import { getPath, renderText, type Values } from '../../domain/form-model.ts';
+import { getPath, renderText, type FormValues } from '../../domain/form-model.ts';
 import { review } from '../review.ts';
 import { confirm } from '../prompts.ts';
 import type { ActionContext } from '../wizard-runner.ts';
@@ -34,7 +34,7 @@ export const builtinModule: WizardModule = {
     'wizard.save-json': async context => {
       const file = parameter(context, 'file');
       requireSketch(file.endsWith('.json'), 'WIZARD_SAVE', 'wizard.save-json writes a project-relative .json file.');
-      const plan = prepared(await createFilePlan(context.options.root, [{ path: file, content: jsonOf(context) + '\n' }]), { file } as Values);
+      const plan = prepared(await createFilePlan(context.options.root, [{ path: file, content: jsonOf(context) + '\n' }]), { file } as FormValues);
       if (!await review(context.ui, plan, context.options.signal)) return { end: true };
     },
   },

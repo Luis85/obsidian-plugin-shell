@@ -1,9 +1,9 @@
 import { object } from './data.ts';
 import { SketchError } from './errors.ts';
 import { bindingOf, fieldAnswer, fieldVisible, type FormDefinition, type FormField } from './form.ts';
-import { getPath, type Values } from './form-model.ts';
+import { getPath, type FormValues } from './form-model.ts';
 export interface FormIssue { field: string; code: string; message: string }
-function check(field: FormField, value: Values, where: string, issues: FormIssue[], lookup: (id: string) => FormDefinition | undefined): void {
+function check(field: FormField, value: FormValues, where: string, issues: FormIssue[], lookup: (id: string) => FormDefinition | undefined): void {
   const path = `${where}${bindingOf(field)}`, current = getPath(value, bindingOf(field));
   try {
     if (field.kind === 'section') {
@@ -24,7 +24,7 @@ function check(field: FormField, value: Values, where: string, issues: FormIssue
     issues.push({ field: path, code: error instanceof SketchError ? error.code : 'FORM_ANSWER', message: error instanceof Error ? error.message : 'Invalid answer.' });
   }
 }
-function walk(fields: readonly FormField[], value: Values, where: string, issues: FormIssue[], lookup: (id: string) => FormDefinition | undefined): void {
+function walk(fields: readonly FormField[], value: FormValues, where: string, issues: FormIssue[], lookup: (id: string) => FormDefinition | undefined): void {
   for (const field of fields) {
     if (field.transient || field.kind === 'confirm' || !fieldVisible(field, fields, value, Object.create(null), value)) continue;
     check(field, value, where, issues, lookup);

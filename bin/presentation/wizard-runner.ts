@@ -1,4 +1,4 @@
-import { getPath, matches, renderText, setPath, type Values } from '../domain/form-model.ts';
+import { getPath, matches, renderText, setPath, type FormValues } from '../domain/form-model.ts';
 import { requireSketch } from '../domain/errors.ts';
 import type { Guide } from '../domain/guide.ts';
 import type { WizardDefinition, WizardStep } from '../domain/wizard.ts';
@@ -10,37 +10,37 @@ import { Back, reportError, type Prompts } from './prompts.ts';
 export interface WizardOptions { root: string; frameworkRoot: string; signal?: AbortSignal; [option: string]: unknown }
 export type ActionOutcome = void | { end: true; completion?: string };
 export interface ActionContext {
-  ui: Prompts; state: Values; options: WizardOptions; step: WizardStep; env: FormEnvironment;
+  ui: Prompts; state: FormValues; options: WizardOptions; step: WizardStep; env: FormEnvironment;
   /** Run another registered wizard (for example first-run after a setup) with its own state. */
-  run(id: string, state?: Values): Promise<string | undefined>;
+  run(id: string, state?: FormValues): Promise<string | undefined>;
 }
 export type WizardAction = (context: ActionContext) => Promise<ActionOutcome> | ActionOutcome;
 export interface WizardRegistry { actions: Record<string, WizardAction>; hooks: FormHooks }
 interface Session { ui: Prompts; catalog: DefinitionCatalog; registry: WizardRegistry; options: WizardOptions }
-const templateData = (state: Values, options: WizardOptions) => ({ ...state, options });
-function environment(session: Session, state: Values): FormEnvironment {
+const templateData = (state: FormValues, options: WizardOptions) => ({ ...state, options });
+function environment(session: Session, state: FormValues): FormEnvironment {
   return { catalog: session.catalog, hooks: session.registry.hooks, data: templateData(state, session.options) };
 }
 const interactive = (step: WizardStep) => step.kind === 'form' || step.kind === 'guide' || (step.kind === 'action' && step.interactive === true);
-function showContext(session: Session, wizard: WizardDefinition, step: WizardStep, state: Values): void {
+function showContext(session: Session, wizard: WizardDefinition, step: WizardStep, state: FormValues): void {
   if (!wizard.context || !session.ui.rich || !step.title) return;
   const data = templateData(state, session.options);
   session.ui.rich.context({ title: renderText(wizard.context.title, data), location: step.title,
     details: [...(step.details ?? []), ...wizard.context.details].map(item => renderText(item, data)) });
 }
-async function formStep(session: Session, step: WizardStep, state: Values): Promise<void> {
+async function formStep(session: Session, step: WizardStep, state: FormValues): Promise<void> {
   const env = environment(session, state);
   const existing = step.bind ? getPath(state, step.bind) : state;
   const seed = existing ?? (step.initial ? getPath(state, step.initial) : undefined);
-  const value = step.bind ? structuredClone((seed ?? {}) as Values) : state;
+  const value = step.bind ? structuredClone((seed ?? {}) as FormValues) : state;
   const result = step.form ? await runForm(session.ui, formDefinition(env, step.form), value, env) : (await runFields(session.ui, step.fields!, value, env), value);
   if (step.bind) setPath(state, step.bind, result);
 }
-async function guideStep(session: Session, step: WizardStep, state: Values): Promise<void> {
+async function guideStep(session: Session, step: WizardStep, state: FormValues): Promise<void> {
   const guide = getPath(state, step.guide!) as Guide | undefined;
   requireSketch(guide && Array.isArray(guide.steps), 'WIZARD_GUIDE', `${step.id} needs a loaded guide at ${step.guide}.`);
-  const initial = { ...(step.initial ? getPath(state, step.initial) as Values | undefined : undefined), ...(step.agreement ? { approved: false } : {}) };
-  let answers: Values = await interview(session.ui, guide, initial);
+  const initial = { ...(step.initial ? getPath(state, step.initial) as FormValues | undefined : undefined), ...(step.agreement ? { approved: false } : {}) };
+  let answers: FormValues = await interview(session.ui, guide, initial);
   if (step.agreement) {
     const result = guideInput(guide, { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers });
     requireSketch(!result.pending.length, 'PROTOTYPE_AGREEMENT', result.pending.join(' '));
@@ -48,7 +48,7 @@ async function guideStep(session: Session, step: WizardStep, state: Values): Pro
   }
   setPath(state, step.bind ?? step.id, answers);
 }
-async function runStep(session: Session, step: WizardStep, state: Values): Promise<ActionOutcome> {
+async function runStep(session: Session, step: WizardStep, state: FormValues): Promise<ActionOutcome> {
   const data = templateData(state, session.options);
   if (step.kind === 'form') return formStep(session, step, state);
   if (step.kind === 'guide') return guideStep(session, step, state);
@@ -65,7 +65,7 @@ async function runStep(session: Session, step: WizardStep, state: Values): Promi
 }
 const cancelled = (error: unknown) => error instanceof Error && 'code' in error && error.code === 'CANCELLED';
 /** Steps run in order; Back returns to the previous interactive step, and a barrier step forgets everything before it. */
-async function walk(session: Session, wizard: WizardDefinition, state: Values): Promise<string | undefined> {
+async function walk(session: Session, wizard: WizardDefinition, state: FormValues): Promise<string | undefined> {
   const history: number[] = [];
   let index = 0, revisit = false;
   while (index < wizard.steps.length) {
@@ -91,7 +91,7 @@ async function walk(session: Session, wizard: WizardDefinition, state: Values): 
   }
   return undefined;
 }
-async function runDefinition(session: Session, wizard: WizardDefinition, state: Values): Promise<string | undefined> {
+async function runDefinition(session: Session, wizard: WizardDefinition, state: FormValues): Promise<string | undefined> {
   try { return await walk(session, wizard, state); }
   catch (error) {
     if (error instanceof Back && wizard.cancelMessage) { session.ui.write(wizard.cancelMessage + '\n'); return undefined; }
@@ -99,12 +99,12 @@ async function runDefinition(session: Session, wizard: WizardDefinition, state: 
     reportError(session.ui, error); return undefined;
   }
 }
-async function runWizardById(session: Session, id: string, state: Values): Promise<string | undefined> {
+async function runWizardById(session: Session, id: string, state: FormValues): Promise<string | undefined> {
   const wizard = session.catalog.wizards.get(id);
   requireSketch(wizard, 'WIZARD_UNKNOWN', `Unknown wizard ${id}.`);
   return runDefinition(session, wizard, state);
 }
 /** Run one wizard definition against code-registered actions/hooks. State is edited in place and may be pre-seeded. */
-export function runWizard(ui: Prompts, catalog: DefinitionCatalog, registry: WizardRegistry, id: string, options: WizardOptions, state: Values = Object.create(null)): Promise<string | undefined> {
+export function runWizard(ui: Prompts, catalog: DefinitionCatalog, registry: WizardRegistry, id: string, options: WizardOptions, state: FormValues = Object.create(null)): Promise<string | undefined> {
   return runWizardById({ ui, catalog, registry, options }, id, state);
 }

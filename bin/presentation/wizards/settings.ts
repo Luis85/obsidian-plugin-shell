@@ -2,7 +2,7 @@ import { documentationSettings } from '../../adapters/settings-documentation.ts'
 import { settingsMigrationPlan } from '../../adapters/settings-migration.ts';
 import { loadSettings, settingsPlan, guardedText } from '../../adapters/user-settings.ts';
 import { readSettings, setupStatePath, type UserSettings } from '../../domain/user-settings.ts';
-import type { Values } from '../../domain/form-model.ts';
+import type { FormValues } from '../../domain/form-model.ts';
 import { review } from '../review.ts';
 import type { WizardModule } from './module.ts';
 /** Hooks and actions behind configs/forms/user-settings*.json, documentation-settings.json and configs/wizards/settings.json. */
@@ -12,7 +12,7 @@ export const settingsModule: WizardModule = {
       'settings.read': value => readSettings(value),
       /** Authored content is always preserved and conflicts reviewed; the documentation owner validates the result. */
       'documentation.commit': (value, parent) => {
-        const documentation = { ...(parent.documentation as Values | undefined), ...value, preserveAuthoredContent: true, conflictPolicy: 'review', deleteMissing: false };
+        const documentation = { ...(parent.documentation as FormValues | undefined), ...value, preserveAuthoredContent: true, conflictPolicy: 'review', deleteMissing: false };
         documentationSettings({ ...readSettings(parent), documentation });
         return documentation;
       },
@@ -20,7 +20,7 @@ export const settingsModule: WizardModule = {
     prepare: { 'documentation.prepare': parent => ({ ...structuredClone(documentationSettings(readSettings(parent))) }) },
     effects: {
       'documentation.reset-folders': (value, answer) => {
-        if (answer === true) value.paths = Object.fromEntries(Object.keys(value.paths as Values).map(key => [key, `${String(value.root)}/${key}`]));
+        if (answer === true) value.paths = Object.fromEntries(Object.keys(value.paths as FormValues).map(key => [key, `${String(value.root)}/${key}`]));
       },
     },
   },

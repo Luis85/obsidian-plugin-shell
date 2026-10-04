@@ -1,5 +1,5 @@
 import { checkedCatalog, type DefinitionCatalog, type HookNames } from '../../adapters/wizard-catalog.ts';
-import type { Values } from '../../domain/form-model.ts';
+import type { FormValues } from '../../domain/form-model.ts';
 import { requireSketch } from '../../domain/errors.ts';
 import { formDefinition, runForm, type FormHooks } from '../form-runner.ts';
 import { runWizard, type WizardOptions, type WizardRegistry } from '../wizard-runner.ts';
@@ -43,11 +43,11 @@ export function hookNames(registry: WizardRegistry = wizardRegistry): HookNames 
 export function wizardCatalog(root?: string): Promise<DefinitionCatalog> {
   return checkedCatalog(hookNames(), root);
 }
-export async function startWizard(ui: Prompts, id: string, options: WizardOptions, state?: Values): Promise<string | undefined> {
+export async function startWizard(ui: Prompts, id: string, options: WizardOptions, state?: FormValues): Promise<string | undefined> {
   return runWizard(ui, await wizardCatalog(), wizardRegistry, id, options, state);
 }
 /** Run a registered form against `value` (edited in place) and return its committed result. */
-export async function startForm(ui: Prompts, id: string, value: Values, data?: unknown): Promise<unknown> {
+export async function startForm(ui: Prompts, id: string, value: FormValues, data?: unknown): Promise<unknown> {
   const env = { catalog: await wizardCatalog(), hooks: wizardRegistry.hooks, data };
   return runForm(ui, formDefinition(env, id), value, env);
 }

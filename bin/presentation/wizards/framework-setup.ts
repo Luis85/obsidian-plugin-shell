@@ -3,7 +3,7 @@ import { setupObsidian } from '../terminal/obsidian-setup.ts';
 import { companionStarterSet, derivedId, derivedName } from '../../adapters/framework/starter-project.ts';
 import { readConfiguration } from '../../adapters/framework/files.ts';
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
-import type { Values } from '../../domain/form-model.ts';
+import type { FormValues } from '../../domain/form-model.ts';
 import { confirm } from '../prompts.ts';
 import type { ActionContext, WizardOptions } from '../wizard-runner.ts';
 import type { WizardModule } from './module.ts';
@@ -25,7 +25,7 @@ function setupOptions(context: ActionContext): SetupOptions {
   requireThat(isSetupOptions(context.options), 'WIZARD_OPTIONS', 'Framework setup wizards need the setup terminal callbacks.');
   return context.options;
 }
-const setupOf = (state: Values) => state.setup as Request['options'];
+const setupOf = (state: FormValues) => state.setup as Request['options'];
 const succeeded = (value: Result) => ['ok', 'applied', 'unchanged'].includes(value.status);
 /** The generation plan is reviewed and approved before its hash may be applied by setup resume. */
 async function approveGeneration(context: ActionContext): Promise<{ hash?: string; stop?: Result }> {

@@ -2,7 +2,7 @@ import { firstRunPlan } from '../../adapters/first-run-plan.ts';
 import { executeFirstRun } from '../../adapters/first-run.ts';
 import { loadSettings } from '../../adapters/user-settings.ts';
 import { safe } from '../prompts.ts';
-import type { Values } from '../../domain/form-model.ts';
+import type { FormValues } from '../../domain/form-model.ts';
 import type { WizardModule } from './module.ts';
 type Plan = Awaited<ReturnType<typeof firstRunPlan>>;
 /** Actions behind configs/wizards/first-run.json. Blockers end the wizard before any process starts. */
@@ -14,7 +14,7 @@ export const firstRunModule: WizardModule = {
       state.options = { ...preferences, schemaVersion: 1, mode: state.mode, openBrowser: state.mode === 'showcase' && preferences.openBrowser };
     },
     'first-run.plan': async ({ ui, state, options }) => {
-      const plan = await firstRunPlan(options.root, state.options as Values);
+      const plan = await firstRunPlan(options.root, state.options as FormValues);
       const summary = [plan.app, ...plan.review, ...plan.steps.map(step => 'npm ' + step.args.join(' ')), 'Execution plan hash: ' + plan.planHash].join('\n');
       if (ui.rich) await ui.rich.review('Review first-run execution', [{ title: 'Commands and effects', body: summary }, { title: 'Package and scripts', body: JSON.stringify(plan.package, null, 2) }]);
       else ui.write(summary + '\nPackage and scripts:\n' + JSON.stringify(plan.package, null, 2) + '\n');

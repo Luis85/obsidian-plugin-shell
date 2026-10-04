@@ -1,6 +1,6 @@
 import { object, keys, text, list } from './data.ts';
 import { requireSketch, SketchError, title as titleText } from './errors.ts';
-import { definitionId, fieldId, getPath, matches, readCondition, readPath, type FormCondition, type Values } from './form-model.ts';
+import { definitionId, fieldId, getPath, matches, readCondition, readPath, type FormCondition, type FormValues } from './form-model.ts';
 export type FieldKind = 'text' | 'title' | 'number' | 'select' | 'multi' | 'boolean' | 'confirm' | 'list' | 'record' | 'section';
 export interface FormChoice { id: string; label: string }
 export interface FormField {
@@ -35,10 +35,10 @@ function choices(value: unknown, name: string): FormChoice[] {
   requireSketch(result.length > 0 && new Set(result.map(item => item.id)).size === result.length, 'FORM_CHOICES', `${name} needs unique choices.`);
   return result;
 }
-function optionalNumber(item: Values, key: string, name: string): void {
+function optionalNumber(item: FormValues, key: string, name: string): void {
   requireSketch(item[key] === undefined || (typeof item[key] === 'number' && Number.isFinite(item[key])), 'FORM_FIELD', `${name}.${key} must be a finite number.`);
 }
-function fieldShape(item: Values, kind: FieldKind, name: string, known: Set<string>): void {
+function fieldShape(item: FormValues, kind: FieldKind, name: string, known: Set<string>): void {
   if (kind === 'select' || kind === 'multi') {
     requireSketch((item.choices === undefined) !== (item.choicesFrom === undefined), 'FORM_CHOICES', `${name} needs choices or choicesFrom.`);
     if (item.choices !== undefined) item.choices = choices(item.choices, name + '.choices'); else hookName(item.choicesFrom, name + '.choicesFrom');
@@ -144,12 +144,12 @@ function typedAnswer(field: FormField, value: unknown, required: boolean): unkno
 }
 export const bindingOf = (field: FormField) => field.bind ?? field.id;
 /** Field ids resolve to transient answers first, then to the bound value. */
-export function conditionValue(field: FormField | undefined, value: Values, answers: Values): unknown {
+export function conditionValue(field: FormField | undefined, value: FormValues, answers: FormValues): unknown {
   if (!field) return undefined;
   return Object.hasOwn(answers, field.id) ? answers[field.id] : field.transient ? undefined : getPath(value, bindingOf(field));
 }
 /** A `path` condition reads the form value directly; a `field` condition reads an earlier sibling's answer. */
-export function fieldVisible(field: FormField, fields: readonly FormField[], value: Values, answers: Values, initial: Values): boolean {
+export function fieldVisible(field: FormField, fields: readonly FormField[], value: FormValues, answers: FormValues, initial: FormValues): boolean {
   if (!field.when) return true;
   if (field.when.path) return matches(field.when, getPath(value, field.when.path));
   const source = fields.find(item => item.id === field.when!.field);

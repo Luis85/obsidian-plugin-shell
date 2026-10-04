@@ -1,14 +1,14 @@
 import { brainstormContext, brainstormFeaturePlan } from '../../adapters/brainstorm.ts';
 import { slug } from '../../domain/errors.ts';
 import type { BrainstormPage, FeatureBrainstorm } from '../../domain/brainstorm.ts';
-import type { Values } from '../../domain/form-model.ts';
+import type { FormValues } from '../../domain/form-model.ts';
 import { approveCapturedRequest, navigation, optionalImport, optionalVerification, pages, type BrainstormWizardOptions } from '../brainstorm-steps.ts';
 import { review } from '../review.ts';
 import type { WizardOptions } from '../wizard-runner.ts';
 import type { WizardModule } from './module.ts';
 type Context = Awaited<ReturnType<typeof brainstormContext>>;
-const draftOf = (state: Values) => state.draft as Omit<FeatureBrainstorm, 'schemaVersion' | 'projectId' | 'baseSha256'>;
-const requestOf = (state: Values) => state.request as FeatureBrainstorm;
+const draftOf = (state: FormValues) => state.draft as Omit<FeatureBrainstorm, 'schemaVersion' | 'projectId' | 'baseSha256'>;
+const requestOf = (state: FormValues) => state.request as FeatureBrainstorm;
 /** The command context passes through unchanged (plugins, input and progress included). */
 function brainstormOptions(options: WizardOptions): BrainstormWizardOptions {
   return { ...options, project: String(options.project ?? 'design/project.json'), offerImport: options.offerImport === true };

@@ -4,7 +4,7 @@ import { intakePrds } from '../../adapters/prd-intake.ts';
 import { angularSetupGuide, projectSetupPlan, setupPrerequisites } from '../../adapters/project-setup.ts';
 import { openDocument } from '../../domain/document.ts';
 import type { Guide } from '../../domain/guide.ts';
-import type { Values } from '../../domain/form-model.ts';
+import type { FormValues } from '../../domain/form-model.ts';
 import type { SetupDraft } from '../../domain/setup-checkpoint.ts';
 import type { UserSettings } from '../../domain/user-settings.ts';
 import { Workspace } from '../../application/workspace.ts';
@@ -12,9 +12,9 @@ import { beginSetupDraft, pauseSetup } from '../setup-progress.ts';
 import { editBricks } from '../brick-editor.ts';
 import { review } from '../review.ts';
 import type { WizardModule } from './module.ts';
-type Request = SetupDraft & { settings: UserSettings; project: NonNullable<SetupDraft['project']>; prds: Record<string, unknown>; prototypeInterview: Values | null; boilerplate: boolean };
-const draftOf = (state: Values) => state.draft as SetupDraft;
-const requestOf = (state: Values) => state.request as Request;
+type Request = SetupDraft & { settings: UserSettings; project: NonNullable<SetupDraft['project']>; prds: Record<string, unknown>; prototypeInterview: FormValues | null; boilerplate: boolean };
+const draftOf = (state: FormValues) => state.draft as SetupDraft;
+const requestOf = (state: FormValues) => state.request as Request;
 /** Actions behind configs/wizards/project-setup.json. Every stage may checkpoint; nothing is written before review. */
 export const projectSetupModule: WizardModule = {
   hooks: { commit: { 'prd-intake.read': value => value.mode === 'add' ? { mode: 'add', files: value.files ?? [] } : { mode: value.mode } } },

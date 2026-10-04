@@ -1,5 +1,5 @@
 import { bindingOf, conditionValue, fieldAnswer, fieldVisible, type FormChoice, type FormDefinition, type FormField } from '../domain/form.ts';
-import { getPath, renderText, setPath, type Values } from '../domain/form-model.ts';
+import { getPath, renderText, setPath, type FormValues } from '../domain/form-model.ts';
 import { requireSketch } from '../domain/errors.ts';
 import type { DefinitionCatalog } from '../adapters/wizard-catalog.ts';
 import { Back, choose, confirm, input, reportError, selectMany, titleInput, type Prompts } from './prompts.ts';
@@ -9,9 +9,9 @@ import { Back, choose, confirm, input, reportError, selectMany, titleInput, type
  */
 export interface FormHooks {
   choices: Record<string, (data: unknown) => FormChoice[] | Promise<FormChoice[]>>;
-  effects: Record<string, (value: Values, answer: unknown, field: FormField) => void>;
-  prepare: Record<string, (parent: Values) => Values>;
-  commit: Record<string, (value: Values, parent: Values) => unknown>;
+  effects: Record<string, (value: FormValues, answer: unknown, field: FormField) => void>;
+  prepare: Record<string, (parent: FormValues) => FormValues>;
+  commit: Record<string, (value: FormValues, parent: FormValues) => unknown>;
 }
 export interface FormEnvironment { catalog: DefinitionCatalog; hooks: FormHooks; data?: unknown }
 function hook<T>(table: Record<string, T>, name: string, kind: string): T {
@@ -63,30 +63,30 @@ async function askValue(ui: Prompts, field: FormField, current: unknown, env: Fo
     catch (error) { if (error instanceof Back) throw error; reportError(ui, error); }
   }
 }
-async function askRecord(ui: Prompts, field: FormField, value: Values, env: FormEnvironment): Promise<void> {
+async function askRecord(ui: Prompts, field: FormField, value: FormValues, env: FormEnvironment): Promise<void> {
   const record = getPath(value, bindingOf(field));
   requireSketch(record && typeof record === 'object' && !Array.isArray(record), 'FORM_RECORD', `${field.id} is bound to a missing object.`);
   for (const key of Object.keys(record)) {
     const entry: FormField = { id: field.id, kind: 'text', label: renderText(field.label, env.data) + key, ...(field.maxLength ? { maxLength: field.maxLength } : {}) };
-    (record as Values)[key] = await askValue(ui, entry, (record as Values)[key], env);
+    (record as FormValues)[key] = await askValue(ui, entry, (record as FormValues)[key], env);
   }
 }
-async function askSection(ui: Prompts, field: FormField, parent: Values, env: FormEnvironment): Promise<void> {
+async function askSection(ui: Prompts, field: FormField, parent: FormValues, env: FormEnvironment): Promise<void> {
   const gate = field.gate ? renderText(field.gate, env.data) : undefined;
   while (true) {
     if (gate && !await confirm(ui, gate)) return;
     const bound = field.bind ? getPath(parent, field.bind) : parent;
-    const value = field.prepare ? hook(env.hooks.prepare, field.prepare, 'prepare hook')(parent) : field.bind ? structuredClone((bound ?? {}) as Values) : parent;
+    const value = field.prepare ? hook(env.hooks.prepare, field.prepare, 'prepare hook')(parent) : field.bind ? structuredClone((bound ?? {}) as FormValues) : parent;
     const form = field.form ? formDefinition(env, field.form) : undefined;
     try { await runFields(ui, form?.fields ?? field.fields!, value, env); }
     catch (error) { if (error instanceof Back && gate) continue; throw error; }
     if (!field.bind) return;
     const formCommitted = form?.commit ? hook(env.hooks.commit, form.commit, 'commit hook')(value, parent) : value;
-    setPath(parent, field.bind, field.commit ? hook(env.hooks.commit, field.commit, 'commit hook')(formCommitted as Values, parent) : formCommitted);
+    setPath(parent, field.bind, field.commit ? hook(env.hooks.commit, field.commit, 'commit hook')(formCommitted as FormValues, parent) : formCommitted);
     return;
   }
 }
-async function askField(ui: Prompts, field: FormField, value: Values, answers: Values, env: FormEnvironment): Promise<void> {
+async function askField(ui: Prompts, field: FormField, value: FormValues, answers: FormValues, env: FormEnvironment): Promise<void> {
   if (field.kind === 'section') return askSection(ui, field, value, env);
   if (field.kind === 'record') return askRecord(ui, field, value, env);
   const fallback = typeof field.default === 'string' ? renderText(field.default, env.data) : field.default;
@@ -97,8 +97,8 @@ async function askField(ui: Prompts, field: FormField, value: Values, answers: V
   if (field.effect) hook(env.hooks.effects, field.effect, 'effect')(value, answer, field);
 }
 /** Back revisits the previous answered field at this level; at the first field it leaves the form. */
-export async function runFields(ui: Prompts, fields: readonly FormField[], value: Values, env: FormEnvironment): Promise<void> {
-  const initial = structuredClone(value), answers: Values = Object.create(null), visited: number[] = [];
+export async function runFields(ui: Prompts, fields: readonly FormField[], value: FormValues, env: FormEnvironment): Promise<void> {
+  const initial = structuredClone(value), answers: FormValues = Object.create(null), visited: number[] = [];
   let index = 0;
   while (index < fields.length) {
     const field = fields[index]!;
@@ -112,7 +112,7 @@ export async function runFields(ui: Prompts, fields: readonly FormField[], value
   }
 }
 /** Ask every visible field of a form against `value` (edited in place) and return its committed result. */
-export async function runForm(ui: Prompts, form: FormDefinition, value: Values, env: FormEnvironment): Promise<unknown> {
+export async function runForm(ui: Prompts, form: FormDefinition, value: FormValues, env: FormEnvironment): Promise<unknown> {
   await runFields(ui, form.fields, value, env);
   return form.commit ? hook(env.hooks.commit, form.commit, 'commit hook')(value, value) : value;
 }

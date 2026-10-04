@@ -5,7 +5,7 @@ import { readSnapshot } from '../../adapters/storage.ts';
 import { outline } from '../../application/summary.ts';
 import { Workspace } from '../../application/workspace.ts';
 import type { Guide } from '../../domain/guide.ts';
-import type { Values } from '../../domain/form-model.ts';
+import type { FormValues } from '../../domain/form-model.ts';
 import { review } from '../review.ts';
 import { offerDesignFolder } from '../design-folder.ts';
 import type { WizardModule } from './module.ts';
@@ -33,7 +33,7 @@ export const prototypeModule: WizardModule = {
       if (!await review(ui, plan, options.signal)) return { end: true };
     },
     'prototype.complete': async ({ ui, state, options }) => {
-      const out = String(state.out), answers = state.answers as Values;
+      const out = String(state.out), answers = state.answers as FormValues;
       const completion = `Start with ${out}/execution-prompt.md. The complete source scaffold is under ${out}/source/.\n`;
       ui.write(completion);
       // The prepared package holds the exact prototype model and brief; the design folder follows them on sync.
