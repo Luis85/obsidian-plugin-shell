@@ -1,7 +1,7 @@
 name: Project starter qualification
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
   workflow_call:
     inputs:
@@ -9,6 +9,10 @@ on:
         description: integration (ready pull requests and main) or release (every matrix leg)
         type: string
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tier:
@@ -16,10 +20,14 @@ on:
         type: choice
         options: [integration, release]
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: project-starters-${{ github.ref }}
+  group: project-starters-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   # Each starter still runs its own discovery, plan, apply, explicit install,
@@ -28,7 +36,7 @@ jobs:
   # per job (as ci.yml's starter job does) avoids eight runner slots of setup.
   generated-project:
     name: generated-project (${{ matrix.ids }})
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -47,13 +55,27 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Every group holds a browser-target starter, so each provisions Chromium.
+      # Every group holds a browser-target starter, so each provisions Chromium when the e2e smoke runs.
       - uses: ./.github/actions/setup-qualified
         with:
           install: 'true'
           install-flags: --no-fund
-          playwright: with-deps
+          playwright: ${{ (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && 'with-deps' || '' }}
+      # Without the e2e opt-in each starter still generates, installs, typechecks, tests and builds; only the browser smoke waits.
+      - name: Generate, resolve and rebuild each starter without the browser smoke
+        if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
+        env:
+          STARTER_IDS: ${{ matrix.ids }}
+        run: |
+          failed=""
+          for id in $STARTER_IDS; do
+            echo "::group::Starter $id"
+            node scripts/compiler/qualify-project-starters.mjs --starter "$id" --execute --no-browser || failed="$failed $id"
+            echo "::endgroup::"
+          done
+          if [ -n "$failed" ]; then echo "::error::Project starter qualification failed:$failed"; exit 1; fi
       - name: Generate, resolve, rebuild and smoke-test selected targets of each starter
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         env:
           STARTER_IDS: ${{ matrix.ids }}
         run: |
@@ -73,7 +95,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
   project-handoff:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     # A pushed project, cloned fresh, in a cloud-like session: Node 22 is the only Node, the SessionStart hook provisions the
     # qualified Node and the dependencies, then the commands an agent starts with run (check, doctor, ui status, e2e).
     runs-on: ubuntu-24.04
@@ -104,8 +126,21 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
           node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
       - name: Provision Chromium for the e2e step
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      # --skip-e2e exits 3 (incomplete); that passes only when e2e is the one step that did not run and none failed.
+      - name: Generate, push-simulate (git clone) and replay a cloud session start without e2e
+        if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
+        run: |
+          status=0
+          node scripts/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json' --skip-e2e || status=$?
+          if [ "$status" -eq 3 ]; then
+            node -e 'const s = require(process.argv[1]); const open = s.steps.filter(step => step.status !== "passed"); process.exit(open.length === 1 && open[0].name === "e2e" && open[0].status === "not-run" ? 0 : 1)' "$PWD/reports/project-handoff-${{ matrix.starter }}.json"
+          else
+            exit "$status"
+          fi
       - name: Generate, push-simulate (git clone) and replay a cloud session start
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node scripts/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json'
       - name: Retain the step summary
         if: always()

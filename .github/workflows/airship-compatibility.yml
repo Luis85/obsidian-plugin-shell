@@ -1,7 +1,7 @@
 name: Airship generated-project compatibility
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
   workflow_call:
     inputs:
@@ -9,6 +9,10 @@ on:
         description: integration (ready pull requests and main) or release (every matrix leg)
         type: string
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tier:
@@ -16,14 +20,18 @@ on:
         type: choice
         options: [integration, release]
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: airship-${{ github.ref }}
+  group: airship-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   contracts:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     strategy:
       fail-fast: false
       matrix:
@@ -42,15 +50,16 @@ jobs:
         with:
           install: 'true'
           install-flags: --no-fund
-          playwright: ${{ runner.os == 'Linux' && 'with-deps' || '' }}
+          playwright: ${{ runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && 'with-deps' || '' }}
       - name: Validate source contracts
         run: |
           node "$QUALIFIED_NPM" run check:compiler-architecture
           node "$QUALIFIED_NPM" run test:airship
           node scripts/testing/suites.mjs --check
           python -B scripts/concepts/build-companion.py --check
+      # E2E: the generated preview served to Chromium; opt-in, always in the release tier.
       - name: Qualify actual generated preview and pinned Airship
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         run: node scripts/airship/qualify.mjs
       - name: Retain named compatibility evidence
         if: always()

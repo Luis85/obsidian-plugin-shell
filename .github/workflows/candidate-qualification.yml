@@ -3,8 +3,20 @@ name: Candidate qualification
 # runtime suites, served browser, three native sessions and the live audit.
 # Narrative-only documentation changes do not trigger it. release.yml also calls
 # it on release/X.Y.Z, where GITHUB_SHA is the release branch head it rehearses.
+# The served-browser and native-host evidence is e2e: mandatory in the release
+# tier (release.yml calls without inputs, so the call's tier defaults to
+# release), opt-in on main (dispatch with e2e or tier release).
 on:
   workflow_call:
+    inputs:
+      tier:
+        description: release (the default; release.yml calls without inputs) runs the browser and native evidence
+        type: string
+        default: release
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -19,6 +31,16 @@ on:
       - 'docs/testing/test-plan.json'
       - 'docs/design/obsidian-tokens.json'
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (browser and native evidence only with e2e) or release (everything)
+        type: choice
+        options: [integration, release]
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -89,14 +111,18 @@ jobs:
           node scripts/testing/evidence-cli.mjs run artifact
           node scripts/testing/asset-sizes.mjs > reports/candidate-qualification/asset-sizes.json
       - name: Provision pinned Chromium
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           sudo apt-get install -y xdotool
       - name: Exercise actual served components and capture scope-labeled screenshots
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node scripts/testing/evidence-cli.mjs run browser
       - name: Provision isolated native host provider
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node "$QUALIFIED_NPM" install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
       - name: Verify the unchanged installed candidate in three fresh native sessions, no retries
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           for run in 1 2 3; do
             xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/evidence-cli.mjs run native --allow-download
@@ -104,6 +130,7 @@ jobs:
           done
           cp -R reports/native-run-3 reports/native
       - name: Retain shared-runner timing samples separately from reference budgets
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download --performance
       - name: Reconcile every registered evidence attempt and retain all acceptance gaps
         if: always()

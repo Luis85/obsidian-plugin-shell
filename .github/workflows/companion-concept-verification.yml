@@ -1,7 +1,7 @@
 name: Companion concept source verification
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths: &concept-inputs
       - 'configs/starters/**'
       - 'scripts/starters/**'
@@ -47,6 +47,10 @@ on:
         description: integration (ready pull requests and main) or release (every matrix leg)
         type: string
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tier:
@@ -54,14 +58,18 @@ on:
         type: choice
         options: [integration, release]
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: companion-concept-${{ github.ref }}
+  group: companion-concept-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   source:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -136,8 +144,9 @@ jobs:
             ${{ runner.temp }}/companion-review-source.sha256
           retention-days: 7
           if-no-files-found: error
+  # E2E: opt-in, always in the release tier.
   browser:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && (inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -187,8 +196,9 @@ jobs:
             docs/concepts/companion/index.html
           retention-days: 7
           if-no-files-found: error
+  # Typecheck, contracts, build and generation always run; its browser steps are e2e.
   journey-editor:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -200,6 +210,7 @@ jobs:
           install: 'true'
           install-flags: --no-fund
       - name: Provision isolated browser tooling
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           python3 -m venv "$RUNNER_TEMP/authoring-browser"
           "$RUNNER_TEMP/authoring-browser/bin/python" -m pip install playwright==1.57.0
@@ -224,16 +235,21 @@ jobs:
           node scripts/concepts/build-mvp.mjs
           node scripts/concepts/export-golden-project.mjs
       - name: Verify empty startup and external starter lifecycle
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node tests/concepts/starter-workspace.browser.mjs
       - name: Exercise real editor actions, full JSON round trip and offline assets
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py
           "$PYTHON" -B tests/concepts/companion-prototypes.browser.py
+      - name: Inspect the exported project, then generate and independently build the exact v6 self-project and offline clickdummy
+        run: |
           node bin/app project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
           git rev-parse HEAD > reports/companion-mvp/source-commit.txt
-      - name: Generate and independently build the exact v6 self-project and offline clickdummy
-        run: |
           node scripts/companion-tools/qualify-project.mjs --authoring-fixture
+      - name: Exercise the generated offline clickdummy
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: |
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py --clickdummy
       - name: Retain exact authoring artifacts and browser evidence
         if: always()
@@ -246,7 +262,8 @@ jobs:
 
   journey-native:
     name: Generated Journey Lens / real Obsidian file lifecycle
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    # E2E (real Obsidian): opt-in, always in the release tier.
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && (inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -303,7 +320,7 @@ jobs:
 
   jev-typescript6:
     name: Jev / locked TypeScript 6 build and regression checks
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -323,10 +340,14 @@ jobs:
           node docs/concepts/jev-prompt-editor/scripts/build.cjs
           node --test --test-reporter=tap docs/concepts/jev-prompt-editor/tests/domain.test.cjs docs/concepts/jev-prompt-editor/tests/logic.test.cjs > docs/concepts/jev-prompt-editor/evidence/typescript6-domain.tap
           git rev-parse HEAD > docs/concepts/jev-prompt-editor/evidence/typescript6-source.txt
-      - name: Provision isolated pinned browser and schema tooling
+      - name: Provision isolated schema tooling
         run: |
           python3 -m venv "$RUNNER_TEMP/jev-browser"
-          "$RUNNER_TEMP/jev-browser/bin/python" -m pip install playwright==1.57.0 jsonschema==4.25.1
+          "$RUNNER_TEMP/jev-browser/bin/python" -m pip install jsonschema==4.25.1
+      - name: Provision the isolated pinned browser
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: |
+          "$RUNNER_TEMP/jev-browser/bin/python" -m pip install playwright==1.57.0
           "$RUNNER_TEMP/jev-browser/bin/python" -m playwright install --with-deps chromium
           "$RUNNER_TEMP/jev-browser/bin/python" - <<'PYTHON'
           import os
@@ -335,10 +356,13 @@ jobs:
               with open(os.environ['GITHUB_ENV'], 'a') as output:
                   output.write('CHROMIUM=' + pw.chromium.executable_path + '\n')
           PYTHON
-      - name: Exercise rebuilt HTML with explicit test Storage and validate JSON examples
+      - name: Exercise rebuilt HTML with explicit test Storage
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/browser.test.py
           "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/logic.browser.py
+      - name: Validate JSON examples
+        run: |
           "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/schema.test.py
       - name: Retain compiler receipt and exact rebuilt artifact, not native acceptance
         if: always()

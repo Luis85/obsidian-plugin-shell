@@ -22,7 +22,7 @@ Each line needs "result pasted" (summary of the real output) or "not run" with t
 - [ ] `npm run verify -- --json`: <!-- result pasted / not run + reason -->
 - [ ] `npm run check:self-review`: <!-- result pasted / not run + reason -->
 - [ ] Relevant suites, `node scripts/testing/suites.mjs <suite>`: <!-- suite names and results / not run + reason -->
-- [ ] Browser `npm run test:e2e`: <!-- result pasted / not run + reason -->
+- [ ] Browser `npm run test:e2e` (end-to-end is opt-in: run it locally or add the `e2e` label for "E2E result"): <!-- result pasted / not run + reason -->
 - [ ] Native (`npm run test:native`, explicitly provisioned scratch vault only): <!-- result pasted / not run + reason -->
 
 ## Evidence
