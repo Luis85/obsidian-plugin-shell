@@ -1,6 +1,7 @@
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { isAlias, isMap, isScalar, parseDocument, visit, type Document } from 'yaml';
+import type { Document } from 'yaml';
+import { loadYaml, yamlRuntime } from './yaml-runtime.ts';
 import { requireSketch, SketchError } from '../domain/errors.ts';
 import { projectPath } from '../domain/user-settings.ts';
 import type { CollectionValue } from '../domain/collection-record.ts';
@@ -11,11 +12,11 @@ export interface CollectionNoteParts { document: Document; properties: Record<st
 const collectionNoteLimit = 1_000_000;
 const unsafeKeys = new Set(['__proto__', 'prototype', 'constructor', '<<']);
 function safe(document: Document): boolean {
-  if (document.errors.length || document.warnings.length || !isMap(document.contents)) return false;
+  if (document.errors.length || document.warnings.length || !yamlRuntime().isMap(document.contents)) return false;
   let unsafe = false;
-  visit(document, (key, node, path) => {
-    const tagged = isScalar(node) && Boolean(node.tag);
-    if (path.length > 30 || isAlias(node) || tagged || (isScalar(node) && key === 'key' && (typeof node.value !== 'string' || unsafeKeys.has(node.value)))) { unsafe = true; return visit.BREAK; }
+  yamlRuntime().visit(document, (key, node, path) => {
+    const tagged = yamlRuntime().isScalar(node) && Boolean(node.tag);
+    if (path.length > 30 || yamlRuntime().isAlias(node) || tagged || (yamlRuntime().isScalar(node) && key === 'key' && (typeof node.value !== 'string' || unsafeKeys.has(node.value)))) { unsafe = true; return yamlRuntime().visit.BREAK; }
     return undefined;
   });
   return !unsafe;
@@ -31,7 +32,7 @@ export function parseCollectionNote(markdown: string): CollectionNoteParts | nul
   const block = /^---\r?\n(?:([\s\S]*?)\r?\n)?---[ \t]*(?:\r?\n|$)/.exec(markdown);
   requireSketch(block, 'COLLECTION_NOTE_YAML', 'Unclosed frontmatter.');
   let document: Document;
-  try { document = parseDocument(block[1] ?? '', { uniqueKeys: true, strict: true, version: '1.2', schema: 'core', prettyErrors: false }); }
+  try { document = yamlRuntime().parseDocument(block[1] ?? '', { uniqueKeys: true, strict: true, version: '1.2', schema: 'core', prettyErrors: false }); }
   catch { throw new SketchError('COLLECTION_NOTE_YAML', 'Malformed YAML frontmatter.'); }
   requireSketch(safe(document), 'COLLECTION_NOTE_YAML', 'Frontmatter must be a plain YAML mapping without aliases, tags or duplicate keys.');
   const properties: unknown = document.toJS({ maxAliasCount: 0 });
@@ -55,7 +56,7 @@ export function patchCollectionNote(markdown: string, set: Readonly<Record<strin
   for (const [key, value] of Object.entries(set)) {
     if (same(properties[key], value)) continue;
     const node = document.createNode(value);
-    if (isScalar(node) && typeof value === 'string') node.type = 'QUOTE_DOUBLE';
+    if (yamlRuntime().isScalar(node) && typeof value === 'string') node.type = 'QUOTE_DOUBLE';
     document.set(key, node);
   }
   for (const key of remove) if (Object.hasOwn(properties, key)) document.delete(key);
@@ -75,6 +76,7 @@ export interface CollectionFile { path: string; content: string | null; beforeHa
 const scanLimits = { depth: 8, entries: 5000 };
 /** Markdown files under the folder (hidden entries skipped, symbolic links refused), each read once behind its hash guard. */
 export async function scanCollectionFolder(root: string, folder: string): Promise<CollectionFile[]> {
+  await loadYaml();
   await guardedText(root, folder + '/.collection-scan');
   const files: CollectionFile[] = [];
   let count = 0;

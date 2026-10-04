@@ -9,6 +9,9 @@ import { fakeBase, generateCollection, renderBody } from '../../bin/domain/fake-
 import { defaultReferenceDate, fakeCount, fakeGenerationJson, fakeReferenceDate, fakeSeed, inferFakeEntity, readEntityRef, readFakeGeneration } from '../../bin/domain/fake-data-config.ts';
 import { fakerCalls, fakerSource } from '../../bin/adapters/fake-data-faker.ts';
 import { renderBase, renderNote } from '../../bin/adapters/fake-data-plan.ts';
+import { loadYaml } from '../../bin/adapters/yaml-runtime.ts';
+// The renderers are synchronous helpers behind fakeDataPlan's lazy YAML load; load it once as that entry point does.
+await loadYaml();
 const repository = resolve(import.meta.dirname, '../..');
 const presets = async folder => Promise.all((await readdir(join(repository, 'configs/fake-data', folder))).sort()
   .map(async name => JSON.parse(await readFile(join(repository, 'configs/fake-data', folder, name), 'utf8'))));

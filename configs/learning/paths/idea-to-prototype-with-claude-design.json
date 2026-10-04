@@ -185,7 +185,7 @@
     },
     {
       "id": "record-an-increment",
-      "title": "Record an increment (release-candidate feature)",
+      "title": "Record an increment",
       "goal": "Record the implemented prototype as an increment whose sources point at the prototype package and the design folder.",
       "markdown": { "file": "idea-to-prototype/10-increment.md" },
       "fields": [
@@ -208,7 +208,7 @@
     },
     {
       "id": "add-to-the-release-candidate",
-      "title": "Add it to the next release candidate (release-candidate feature)",
+      "title": "Add it to the next release candidate",
       "goal": "Plan the increment into the release candidate for the version you chose.",
       "markdown": { "file": "idea-to-prototype/11-release-candidate.md" },
       "actions": [

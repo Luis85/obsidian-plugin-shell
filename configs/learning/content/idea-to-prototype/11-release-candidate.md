@@ -1,7 +1,7 @@
-# Add the increment to the next release candidate (release-candidate feature)
+# Add the increment to the next release candidate
 
 *This step uses the release-candidate commands described in the
-[[docs/development/RELEASE-CANDIDATES|release candidates guide]], delivered by the release-candidate feature.*
+[[docs/development/RELEASE-CANDIDATES|release candidates guide]].*
 
 A **release candidate** collects the increments planned for one version. It lives in
 `docs/releases/candidates/<version>/README.md` with frontmatter `type: ReleaseCandidate` and an `increments` list.

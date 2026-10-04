@@ -36,7 +36,7 @@ function allowed(item: Record<string, unknown>, keys: readonly string[], at: str
 }
 function text(value: unknown, at: string, max: number, multiline = false): string {
   if (typeof value !== 'string' || !value.trim() || value.length > max || hasControlCharacters(value, multiline)) throw new DefinitionError('form.text', at);
-  need(!value.includes('{{'), 'form.template', at);
+  need(!value.includes('{{'), 'form.cliOnly', at);
   return value.trim();
 }
 const optionalText = (value: unknown, at: string, max: number, multiline = false) => value === undefined ? undefined : text(value, at, max, multiline);

@@ -31,9 +31,9 @@ describe('runtime form definitions', () => {
       return [file, result.ok ? 'ok' : result.error.key];
     }));
     expect(outcomes).toMatchObject({ 'documentation-settings.json': 'form.cliOnly', 'prd-intake.json': 'form.cliOnly', 'project-identity.json': 'ok',
-      'setup-identity.json': 'form.cliOnly', 'user-settings-advanced.json': 'form.cliOnly', 'user-settings.json': 'form.cliOnly' });
+      'risk-review.json': 'form.cliOnly', 'setup-identity.json': 'form.cliOnly', 'user-settings-advanced.json': 'form.cliOnly', 'user-settings.json': 'form.cliOnly' });
     // Every shipped CLI form is either readable at runtime or names a CLI-only construct; no other failure is acceptable.
-    expect(Object.values(outcomes).every(outcome => outcome === 'ok' || outcome === 'form.cliOnly')).toBe(true);
+    expect(Object.entries(outcomes).filter(([, outcome]) => outcome !== 'ok' && outcome !== 'form.cliOnly')).toEqual([]);
     const accepted = readDataForm(form([text('a', { help: 'Two\nlines' }), { id: 'b', kind: 'boolean', label: 'B', yes: 'On', no: 'Off' },
       { id: 'c', kind: 'list', label: 'C', separator: ',', joiner: ', ', suffix: '.', multiline: true }], { $schema: '../schemas/form.schema.json', description: 'D' }));
     expect(accepted.ok && accepted.value.fields[1]).not.toHaveProperty('yes');
@@ -72,7 +72,7 @@ describe('runtime form definitions', () => {
       [form([text('a'), text('a')]), 'form.id', 'fields[1].id'], [form([text('Name')]), 'form.id', 'fields[0].id'],
       [form([text('constructor')]), 'form.id', 'fields[0].id'], [form([text('prototype')]), 'form.id', 'fields[0].id'],
       [form([text('a', { label: 'Bell\u0007' })]), 'form.text', 'fields[0].label'], [form([text('a', { label: 'Line\nbreak' })]), 'form.text', 'fields[0].label'],
-      [form([text('a', { label: 'Hi {{name}}' })]), 'form.template', 'fields[0].label'], [form([text('a', { help: '{{x|y}}' })]), 'form.template', 'fields[0].help'],
+      [form([text('a', { label: 'Hi {{name}}' })]), 'form.cliOnly', 'fields[0].label'], [form([text('a', { help: '{{x|y}}' })]), 'form.cliOnly', 'fields[0].help'],
       [form([text('a', { bind: '__proto__' })]), 'form.path', 'fields[0].bind'], [form([text('a', { bind: 'a.constructor' })]), 'form.path', 'fields[0].bind'],
       [form([text('a', { bind: 'a..b' })]), 'form.path', 'fields[0].bind'], [form([text('a', { bind: 'x'.repeat(201) })]), 'form.path', 'fields[0].bind'],
       [form([{ id: 'b', kind: 'boolean', label: 'B', yes: 3 }]), 'form.text', 'fields[0].yes'],
@@ -92,7 +92,7 @@ describe('runtime form definitions', () => {
       [form([text('a'), text('b', { when: { field: 'a', equals: { nested: true } } })]), 'form.value', 'fields[1].when.equals'],
       [form([text('a'), text('b', { when: { field: 'a', notEquals: [1] } })]), 'form.value', 'fields[1].when.notEquals'],
       [form([select({ choices: [] })]), 'form.choices', 'fields[0].choices'], [form([select({ choices: ['a', 'a'] })]), 'form.choices', 'fields[0].choices'],
-      [form([select({ choices: [{ id: 'a', label: 'A {{b}}' }] })]), 'form.template', 'fields[0].choices[0].label'],
+      [form([select({ choices: [{ id: 'a', label: 'A {{b}}' }] })]), 'form.cliOnly', 'fields[0].choices[0].label'],
       [form([select({ choices: [1] })]), 'form.object', 'fields[0].choices[0]'], [form([select({ choices: undefined })]), 'form.choices', 'fields[0].choices'],
       [form([select({ default: 'c' })]), 'form.default', 'fields[0].default'], [form([select({ default: { a: 1 } })]), 'form.value', 'fields[0].default'],
       [form([text('a', { required: 'yes' })]), 'form.boolean', 'fields[0].required'],

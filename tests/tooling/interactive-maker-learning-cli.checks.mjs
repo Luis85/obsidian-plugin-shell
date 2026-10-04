@@ -5,7 +5,7 @@ import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { main } from '../../bin/app.ts';
 import { learningCommand } from '../../bin/adapters/learning-command.ts';
-import { contactForm, greetWizard, learningPath, project, put, scratch, shippedLearningIssues, step } from './interactive-maker-learning-fixture.mjs';
+import { contactForm, greetWizard, learningPath, project, put, scratch, step } from './interactive-maker-learning-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 /** The real CLI entry with captured streams; machine output is one JSON document. */
 async function run(root, ...argv) {
@@ -18,14 +18,13 @@ async function run(root, ...argv) {
 const complete = (root, name, stepId, ...rest) => run(root, 'learn', 'complete-step', '--name', name, '--step', stepId, ...rest, '--json');
 
 test('learn lists, shows and checks the shipped learning paths for agents', async () => scratch(async root => {
-  const pending = await shippedLearningIssues(frameworkRoot), shippedStatus = pending.length ? 'failed' : 'ok';
   const listed = await run(root, 'learn', 'list', '--json');
   assert.equal(listed.code, 0);
-  assert.deepEqual([listed.json.data.status, listed.json.data.issues ?? []], [shippedStatus, pending]);
+  assert.deepEqual([listed.json.data.status, listed.json.data.issues ?? []], ['ok', []]);
   assert.deepEqual(listed.json.data.paths.map(item => [item.id, item.steps, item.progress.started]),
     [['author-a-learning-path', 3, false], ['author-a-wizard', 6, false], ['idea-to-prototype-with-claude-design', 11, false]]);
   const checked = await run(root, 'learn', 'check', '--json');
-  assert.deepEqual([checked.json.data.paths, checked.json.data.issues, checked.json.data.status], [3, pending, shippedStatus]);
+  assert.deepEqual([checked.json.data.paths, checked.json.data.issues, checked.json.data.status], [3, [], 'ok']);
   const shown = await run(root, 'learn', 'show', '--name', 'author-a-wizard', '--json');
   assert.equal(shown.json.data.definition.steps[0].id, 'read-the-guide');
   assert.deepEqual([...new Set(shown.json.data.steps[0].docs.map(link => link.file))], ['docs/development/WIZARDS-AND-FORMS.md', 'docs/development/LEARNING-PATHS.md']);

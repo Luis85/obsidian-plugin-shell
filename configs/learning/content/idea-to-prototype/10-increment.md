@@ -1,8 +1,7 @@
-# Record an increment (release-candidate feature)
+# Record an increment
 
-*This step uses the increment and release-candidate commands and the
-[[docs/development/RELEASE-CANDIDATES|release candidates guide]]. They are delivered by the release-candidate
-feature; if `node bin/app increment` is an unknown command in your checkout, that feature is not installed yet.*
+*This step uses the increment and release-candidate commands; read the
+[[docs/development/RELEASE-CANDIDATES|release candidates guide]] for the full format.*
 
 An **increment** is one shippable change, recorded as a typed Markdown note (`type: Increment`) with an id such as
 `INC-0001` in `docs/releases/increments/`. Its `sources` field lists where the change came from, so a reviewer can

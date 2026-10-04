@@ -1,4 +1,3 @@
-import { stringify } from 'yaml';
 import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { fakeEntityJson, fakeFolder, type FakeEntity } from '../domain/fake-data-entity.ts';
@@ -6,16 +5,17 @@ import { fakeGenerationJson, type FakeGeneration } from '../domain/fake-data-con
 import { generateCollection, type FakeBase, type FakeNote } from '../domain/fake-data.ts';
 import { outputBoundary } from './package-plan.ts';
 import { prepared, type Prepared } from './storage.ts';
+import { loadYaml, yamlRuntime } from './yaml-runtime.ts';
 import { insideRoot, projectFakeData, type FakeCatalog } from './fake-data-catalog.ts';
 /** One generation: a resolved entity plus the reproducible run parameters. */
 export interface FakeRun { ref: string; entity: FakeEntity; count: number; seed: number; out: string; base: boolean; referenceDate: string }
 const noteLimit = 65_536, totalLimit = 8_000_000;
 /** The same YAML serializer and options as the plugin's note repository (src/infrastructure/markdown.ts). */
 export function renderNote(note: FakeNote): string {
-  return `---\n${stringify(note.frontmatter, { lineWidth: 0, defaultStringType: 'QUOTE_DOUBLE', defaultKeyType: 'PLAIN' })}---\n\n${note.body}`;
+  return `---\n${yamlRuntime().stringify(note.frontmatter, { lineWidth: 0, defaultStringType: 'QUOTE_DOUBLE', defaultKeyType: 'PLAIN' })}---\n\n${note.body}`;
 }
 export function renderBase(base: FakeBase): string {
-  return stringify(base.data, { lineWidth: 0 });
+  return yamlRuntime().stringify(base.data, { lineWidth: 0 });
 }
 /** Generate, render and plan every note (and the optional .base file) as one reviewed file plan. Existing notes are never changed. */
 export async function fakeDataPlan(root: string, frameworkRoot: string, run: FakeRun): Promise<Prepared> {
@@ -23,6 +23,7 @@ export async function fakeDataPlan(root: string, frameworkRoot: string, run: Fak
   insideRoot(root, out);
   outputBoundary(root, frameworkRoot, out);
   const { fakerSource } = await import('./fake-data-faker.ts');
+  await loadYaml();
   const collection = generateCollection(run.entity, { count: run.count, out, base: run.base }, fakerSource(run.seed, run.referenceDate));
   const entries = collection.notes.map(note => ({ path: note.path, content: renderNote(note) }));
   if (collection.base) entries.push({ path: collection.base.path, content: renderBase(collection.base) });

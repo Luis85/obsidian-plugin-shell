@@ -25,6 +25,10 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `learning-new` | `node bin/app learning new` | Capture one learning with the `learning` form; one reviewed write |
 | `learning-edit` | `node bin/app learning edit [--id LRN-0001]` | Edit a learning pre-filled from its note; allowed transitions only |
 | `learning-review` | `node bin/app learning review` | Walk validated high-impact or overdue learnings with `learning-review`, one reviewed write each |
+| `increment-new` | `node bin/app increment new` | Capture one increment with the `increment` form; one reviewed write |
+| `increment-edit` | `node bin/app increment edit [--id INC-0001]` | Edit an increment pre-filled from its note; allowed transitions only (included/shipped belong to candidates) |
+| `increment-review` | `node bin/app increment review` | Walk ready/included high-priority or overdue increments, one reviewed write each |
+| `candidate-new` | `node bin/app candidate new [--version 1.0.0]` | `candidate` form (version, target date, owner, ready increments, goal); one reviewed plan writes the README and includes the increments |
 | `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship and single native-extension options; only missing answers are asked |
 | `framework-setup-stages` | after `setup` applies | Documentation import, then generate/install/verify/preview, each separately approved, then documentation export |
 

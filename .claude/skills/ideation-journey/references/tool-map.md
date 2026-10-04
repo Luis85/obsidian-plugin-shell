@@ -110,4 +110,13 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 | `node bin/app plugin install` | installs into a test vault; out of scope |
 | `node bin/app data plan` | test-vault data; out of scope |
 | `node bin/app project-setup guide --json` | Angular setup inside an existing Git and Obsidian vault; separate guide |
+| `node bin/app wizard list --json` | data-driven guided processes; every chain wizard runs through its own command |
+| `node bin/app form list --json` | reusable data-driven forms; filled inside wizards, not by the chain directly |
+| `node bin/app fake-data entities --json` | seeded demo notes for collections, Bases and tests, on request |
+| `node bin/app learn list --json` | step-by-step courses; `idea-to-prototype-with-claude-design` teaches this chain to people |
+| `node bin/app process list --json` | business processes, their rules and docs; owned by process authors |
+| `node bin/app risk list --json` | risk register notes; record risks the brainstorm or design surfaces, on request |
+| `node bin/app learning list --json` | lessons-learned notes; recorded after delivery, not during prototyping |
+| `node bin/app increment list --json` | product increments; recorded after a prototype is implemented |
+| `node bin/app candidate list --json` | release candidates assemble increments; release itself stays a separate authorization |
 | `node bin/app help` | discovery for every skill |

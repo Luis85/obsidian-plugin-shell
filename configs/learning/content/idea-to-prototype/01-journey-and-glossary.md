@@ -13,8 +13,7 @@ real prototype of your own; every step checks the files you produce.
    `ENGINEERING_HANDOFF_GUIDE.md` describe.
 6. **Save the design into `docs/design/<slug>`** and keep the folder current with `design sync`.
 7. **Implement** the `ready` screens in the prototype with Claude Code.
-8. **Ship it in the next release candidate**: record an increment and add it to the candidate
-   (steps marked *release-candidate feature*).
+8. **Ship it in the next release candidate**: record an increment and add it to the candidate.
 
 The tools prepare files only. They never call Claude Design, upload anything, commit or publish; importing
 into Claude Design and exporting from it are your actions. Every write is shown as a plan first and needs
@@ -56,8 +55,8 @@ your approval (see [[docs/user-manual/shell-cli/automation-and-safety#The repeat
 | `docs/design/<slug>/design.manifest.json` | Source, brief and the hash of every generated file | `design prepare`, `design sync` |
 | `.claude/skills/ideation-journey/SKILL.md` | Router of the ideation skill chain (brainstorm, concept, design, prototype, boilerplate) | Repository skill |
 | `.claude/skills/companion-prototype-design/SKILL.md` | Design interview, concept boards and prototype execution | Repository skill |
-| `docs/releases/increments/` | Increment notes | `node bin/app increment new` (*release-candidate feature*) |
-| `docs/releases/candidates/<version>/README.md` | The release candidate | `node bin/app candidate new` and `candidate add` (*release-candidate feature*) |
+| `docs/releases/increments/` | Increment notes | `node bin/app increment new` |
+| `docs/releases/candidates/<version>/README.md` | The release candidate | `node bin/app candidate new` and `candidate add` |
 
 The repository skills live under `.claude/skills/`; learning paths can only link pages under `docs/`, `bin/`
 and the repository root, so open those skill files directly.

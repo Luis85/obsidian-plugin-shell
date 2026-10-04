@@ -85,6 +85,8 @@ typecheck scripts; they select workspace compiler entrypoints, never PATH tools.
 
 Typed-note collections (configs/collections, e.g. risk) are data; code adds only named collection hooks. Read docs/development/NOTE-COLLECTIONS.md before adding one. Lessons learned (`learning` root, `paths.learnings`) are a data-only note collection, separate from the `learn` course runner.
 
+Release candidates (`node bin/app candidate`) document product increments only; they never run release:cut/publish, tag, push or edit CHANGELOG.md.
+
 `node bin/app fake-data` generates seeded sample notes only through reviewed, hash-approved plans; it never overwrites notes, writes only relative non-hidden folders inside the root, and calls only the allowlisted Faker methods in bin/domain/fake-data-generators.ts.
 
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.

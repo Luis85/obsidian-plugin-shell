@@ -105,10 +105,10 @@ Choices are strings or `{ "id", "label" }` objects.
 | `transient` | Answers that are asked but not stored. They exist only for terminal effects. |
 | section `form` (include) and `gate` | Cross-file includes and gate prompts. Use inline `fields`, and a `boolean` with `when` instead of a gate. |
 | `when.changed` | Compares against the wizard's initial state, which the runtime does not have. |
+| `{{…}}` templates in labels, help or choice labels | They are filled from wizard state, which the runtime does not have. |
 
 The runtime is also stricter than the CLI in a few places:
 - Labels are single-line.
-- Labels, help and choice labels may not contain `{{` templates, because there is no wizard state to fill them.
 - Field ids `constructor` and `prototype` are rejected, because an id is also the default binding.
 - `maxLength` and `maxItems` must be positive integers, and `min` cannot exceed `max`.
 - Sections must not be empty and nest at most 8 deep.
