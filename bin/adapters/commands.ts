@@ -6,6 +6,7 @@ import { fakeDataCommand } from './fake-data-command.ts';
 import { learningCommand } from './learning-command.ts';
 import { processCommand } from './process-command.ts';
 import { collectionCommand } from './collection-command.ts';
+import { candidateCommand } from './release-candidate-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -129,6 +130,20 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app learning check --json  Schema, vocabularies, risk id format, duplicate ids, overdue follow-ups, validated without follow-up
   node bin/app learning report [--base] --json   Regenerate <learnings>/learnings.md (and learnings.base) through review
   node bin/app learning model --json  The effective collection definition (configs/collections/learning.json)
+  node bin/app increment new|edit --id INC-0001|review   Product increments: guided capture, edit and review (terminal; folder: paths.increments)
+  node bin/app increment list [--status <id>] [--kind <id>] [--priority <id>] [--overdue] --json
+  node bin/app increment show --id INC-0001 --json
+  node bin/app increment new --input increment.json --json   Plan a new increment note (next free id); then --apply <planHash>
+  node bin/app increment update --id INC-0001 --input changes.json --json   Changed fields and proposed → ready transitions
+  node bin/app increment check --json   Schema, kinds, source paths and ids, risk ids, duplicate ids, ready without acceptance
+  node bin/app increment report [--base] --json   Regenerate <increments>/increments.md (and increments.base) through review
+  node bin/app increment model --json   The effective collection definition (configs/collections/increment.json)
+  node bin/app candidate new [--version 1.0.0]   Release candidate: version, target date, owner and ready increments (terminal)
+  node bin/app candidate new --version 1.0.0 [--input candidate.json] --json   Plan <releaseCandidates>/1.0.0/README.md (and the increments it includes)
+  node bin/app candidate list --json | candidate show --version 1.0.0 --json | candidate check --json
+  node bin/app candidate add|remove --version 1.0.0 --increment INC-0001 --json   Include a ready increment or return it to ready (draft only)
+  node bin/app candidate status --version 1.0.0 --to <draft|frozen|qualified|released|abandoned> --json   Checked transitions; frozen locks the increments
+  node bin/app candidate docs --version 1.0.0 --json   Regenerate the generated README blocks; authored sections are kept
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
@@ -136,6 +151,7 @@ Options: --root <folder>, --project <relative.json> (design/project.json), --inp
 --entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --config <id> and --base (fake-data),
 --id <id>, --as-of <YYYY-MM-DD>, --status/--dimension/--category/--level <id>, --overdue and --base (risk),
 --status/--category/--impact <id> with the same --id, --as-of, --overdue and --base (learning; learn is the separate course runner),
+--status/--kind/--priority <id> with the same options (increment), --version <x.y.z[-rc.N]>, --increment <id>, --to <status> and --as-of (candidate),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -230,7 +246,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -266,6 +282,7 @@ const directCommands: Readonly<Record<string, Executor>> = {
   'project-setup': withInput(setupCommand),
   learn: learningCommand,
   process: processCommand,
+  candidate: withInput(candidateCommand),
 };
 /** Undefined means a saved-project command. */
 function directCommand(args: Arguments, context: CommandContext): CommandResult | undefined {

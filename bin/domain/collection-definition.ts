@@ -2,22 +2,29 @@ import { object, keys, text, list } from './data.ts';
 import { requireSketch } from './errors.ts';
 import { definitionId, fieldId } from './form-model.ts';
 import { collectionPathKeys, type CollectionPathKey } from './user-settings.ts';
+import { readCollectionAccepts } from './collection-reference.ts';
 /**
  * A typed-note collection described as data (configs/collections/<id>.json): one Markdown note per item with
  * `type: <type>` frontmatter, a stable `<PREFIX><digits>` id, a status workflow, typed fields, a body template and a
  * generated register. Code adds only what data cannot express, through one named CollectionHook.
  */
 export type CollectionFieldKind = 'text' | 'date' | 'integer' | 'choice' | 'list';
-/** input: answered by people; derived: computed by the hook; stamp: dated by the engine (status stamp or review). */
-export type CollectionFieldSource = 'input' | 'derived' | 'stamp';
+/**
+ * input: answered by people; derived: computed by the hook; stamp: dated by the engine (status stamp or review);
+ * managed: never input, written only by another module's reviewed plan (for example a release candidate).
+ */
+export type CollectionFieldSource = 'input' | 'derived' | 'stamp' | 'managed';
 export interface CollectionChoice { id: string; label: string }
 export interface CollectionField {
   key: string; input: string; label: string; kind: CollectionFieldKind; source: CollectionFieldSource; required: boolean;
   requiredWhenOpen: boolean; frontmatter: boolean; multiline: boolean; overdue: boolean; maxLength: number; vocabulary?: string; default?: 'today';
   /** Text or list items must be ids of this form, for example `RISK-` for references to risk notes (`RISK-0001`). */
   idPrefix?: string;
+  /** Text or list items must be references of these kinds: `path`, `release-version` or id prefixes (collection-reference.ts). */
+  accepts?: string[];
 }
-export interface CollectionStatus { id: string; label: string; open: boolean; transitions: string[]; stamp?: string }
+/** A `managed` status is entered and left only by another module's reviewed plan (collectionManagedUpdate), never by people. */
+export interface CollectionStatus { id: string; label: string; open: boolean; transitions: string[]; stamp?: string; managed?: boolean }
 export interface CollectionSort { key: string; order: 'asc' | 'desc' }
 export interface CollectionMatch { key: string; in: string[] }
 export interface CollectionDefinition {
@@ -32,7 +39,7 @@ export interface CollectionDefinition {
 const collectionSystemKeys: readonly string[] = ['type', 'id', 'status', 'created', 'updated', 'schema_version'];
 const keyPattern = /^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$/, choiceId = /^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/, fileName = /^[A-Za-z0-9][A-Za-z0-9 ._-]{0,79}$/;
 const kinds: readonly CollectionFieldKind[] = ['text', 'date', 'integer', 'choice', 'list'];
-const sources: readonly CollectionFieldSource[] = ['input', 'derived', 'stamp'];
+const sources: readonly CollectionFieldSource[] = ['input', 'derived', 'stamp', 'managed'];
 /** `next-action` → `nextAction`: the JSON input, form binding and body template name of a frontmatter key. */
 export const collectionInputName = (key: string) => key.replace(/[-_]([a-z0-9])/g, (_match, letter: string) => letter.toUpperCase());
 const flag = (value: unknown, name: string, fallback = false): boolean => {
@@ -70,7 +77,14 @@ function fieldShape(field: CollectionField, name: string, vocab: Record<string, 
   requireSketch((field.default === undefined && !field.overdue) || field.kind === 'date', 'COLLECTION_DEFINITION', `${name}: default today and overdue apply to dates only.`);
   requireSketch(field.frontmatter || (field.kind === 'text' && field.source === 'input'), 'COLLECTION_DEFINITION', `${name}: body-only values are input text.`);
   requireSketch(field.source !== 'stamp' || (field.kind === 'date' && !field.required), 'COLLECTION_DEFINITION', `${name}: a stamp is an optional date.`);
-  requireSketch(!field.idPrefix || (['text', 'list'].includes(field.kind) && !field.vocabulary && field.frontmatter), 'COLLECTION_DEFINITION', `${name}: idPrefix applies to frontmatter text and list fields without a vocabulary.`);
+  fieldReferences(field, name);
+}
+/** Id references and other accepted references are frontmatter text or lists without a vocabulary; managed values are optional frontmatter. */
+function fieldReferences(field: CollectionField, name: string): void {
+  const plain = ['text', 'list'].includes(field.kind) && !field.vocabulary && field.frontmatter;
+  requireSketch(!field.idPrefix || plain, 'COLLECTION_DEFINITION', `${name}: idPrefix applies to frontmatter text and list fields without a vocabulary.`);
+  requireSketch(!field.accepts || (plain && !field.idPrefix), 'COLLECTION_DEFINITION', `${name}: accepts applies to frontmatter text and list fields without a vocabulary or idPrefix.`);
+  requireSketch(field.source !== 'managed' || (!field.required && !field.requiredWhenOpen && field.frontmatter), 'COLLECTION_DEFINITION', `${name}: a managed value is optional frontmatter.`);
 }
 function fieldVocabulary(field: CollectionField, name: string, vocab: Record<string, CollectionChoice[]>): void {
   requireSketch(field.kind !== 'choice' || field.vocabulary !== undefined, 'COLLECTION_DEFINITION', `${name}: a choice needs a vocabulary.`);
@@ -84,13 +98,14 @@ function idPrefixOf(value: unknown, name: string): string {
   return value;
 }
 /** The optional vocabulary, default and id-reference parts of a field, present only when declared. */
-function optionalFieldParts(item: Record<string, unknown>, name: string): Pick<CollectionField, 'vocabulary' | 'default' | 'idPrefix'> {
+function optionalFieldParts(item: Record<string, unknown>, name: string): Pick<CollectionField, 'vocabulary' | 'default' | 'idPrefix' | 'accepts'> {
   return { ...(item.vocabulary === undefined ? {} : { vocabulary: identifier(item.vocabulary, name + '.vocabulary', keyPattern) }),
-    ...(item.default === undefined ? {} : { default: 'today' as const }), ...(item.idPrefix === undefined ? {} : { idPrefix: idPrefixOf(item.idPrefix, name + '.idPrefix') }) };
+    ...(item.default === undefined ? {} : { default: 'today' as const }), ...(item.idPrefix === undefined ? {} : { idPrefix: idPrefixOf(item.idPrefix, name + '.idPrefix') }),
+    ...(item.accepts === undefined ? {} : { accepts: readCollectionAccepts(item.accepts, name + '.accepts') }) };
 }
 function readField(raw: unknown, index: number, vocab: Record<string, CollectionChoice[]>): CollectionField {
   const item = object(raw), name = `fields[${index}]`;
-  keys(item, ['key', 'label', 'kind', 'source', 'required', 'requiredWhenOpen', 'frontmatter', 'multiline', 'overdue', 'maxLength', 'vocabulary', 'default', 'idPrefix']);
+  keys(item, ['key', 'label', 'kind', 'source', 'required', 'requiredWhenOpen', 'frontmatter', 'multiline', 'overdue', 'maxLength', 'vocabulary', 'default', 'idPrefix', 'accepts']);
   const key = identifier(item.key, name + '.key', keyPattern);
   requireSketch(kinds.includes(item.kind as CollectionFieldKind), 'COLLECTION_DEFINITION', `${name}.kind must be ${kinds.join(', ')}.`);
   requireSketch(item.source === undefined || sources.includes(item.source as CollectionFieldSource), 'COLLECTION_DEFINITION', `${name}.source must be ${sources.join(', ')}.`);
@@ -105,18 +120,19 @@ function readField(raw: unknown, index: number, vocab: Record<string, Collection
 }
 function readStatuses(value: unknown, fields: readonly CollectionField[]): CollectionStatus[] {
   const statuses = list(value, 'statuses', 30).map((raw, index) => {
-    const item = object(raw), name = `statuses[${index}]`; keys(item, ['id', 'label', 'open', 'transitions', 'stamp']);
+    const item = object(raw), name = `statuses[${index}]`; keys(item, ['id', 'label', 'open', 'transitions', 'stamp', 'managed']);
+    const managed = flag(item.managed, name + '.managed');
     requireSketch(typeof item.open === 'boolean', 'COLLECTION_DEFINITION', `${name}.open must be true or false.`);
     const stamp = item.stamp === undefined ? undefined : identifier(item.stamp, name + '.stamp', keyPattern);
     requireSketch(stamp === undefined || fields.some(field => field.key === stamp && field.source === 'stamp'), 'COLLECTION_DEFINITION', `${name}.stamp must name a stamp field.`);
     return { id: identifier(item.id, name + '.id', choiceId), label: text(item.label, name + '.label', 80), open: item.open,
-      transitions: list(item.transitions, name + '.transitions', 30).map(entry => identifier(entry, name + '.transitions', choiceId)), ...(stamp ? { stamp } : {}) };
+      transitions: list(item.transitions, name + '.transitions', 30).map(entry => identifier(entry, name + '.transitions', choiceId)), ...(stamp ? { stamp } : {}), ...(managed ? { managed } : {}) };
   });
   requireSketch(statuses.length > 0, 'COLLECTION_DEFINITION', 'A collection needs at least one status.');
   unique(statuses.map(status => status.id), 'status ids');
   for (const status of statuses) {
     unique(status.transitions, `${status.id} transitions`);
-    requireSketch(status.transitions.every(target => target !== status.id && statuses.some(other => other.id === target)), 'COLLECTION_DEFINITION', `${status.id} transitions must name other statuses.`);
+    requireSketch(status.transitions.every(target => target !== status.id && statuses.some(other => other.id === target && !other.managed)), 'COLLECTION_DEFINITION', `${status.id} transitions must name other statuses that are not managed.`);
   }
   return statuses;
 }
@@ -188,7 +204,7 @@ export function readCollectionDefinition(value: unknown): CollectionDefinition {
   const known = (key: string) => collectionSystemKeys.includes(key) || fields.some(field => field.key === key && field.frontmatter);
   const titleField = text(raw.titleField, 'titleField', 40), initialStatus = text(raw.initialStatus, 'initialStatus', 40);
   requireSketch(fields.some(field => field.key === titleField && field.kind === 'text' && field.required && field.source === 'input' && field.frontmatter), 'COLLECTION_DEFINITION', 'titleField must name a required input text field.');
-  requireSketch(statuses.some(status => status.id === initialStatus), 'COLLECTION_DEFINITION', 'initialStatus must name a status.');
+  requireSketch(statuses.some(status => status.id === initialStatus && !status.managed), 'COLLECTION_DEFINITION', 'initialStatus must name a status that is not managed.');
   const listing = object(raw.list); keys(listing, ['columns']);
   const review = readReview(raw.review, fields, vocab);
   return { ...head, titleField,

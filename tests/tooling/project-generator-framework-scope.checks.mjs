@@ -54,6 +54,10 @@ test('[GENERATOR-SCOPE-03] kept framework reference docs live under docs/framewo
   for (const path of markdown) assert.equal(text(path).replace(/^---\n[\s\S]*?\n---\n/, '').split('\n')[0], frameworkBanner, path);
   assert.match(frameworkBanner, /Framework reference — not this project's backlog or instructions; follow \.\/AGENTS\.md/);
   assert.ok(files.has('docs/framework/development/BUILD-A-FEATURE.md')); assert.ok(files.has('docs/framework/testing/OBSIDIAN-TEST-KIT.md'));
+  // The release-candidate how-to ships as a product guide; the repository's own release records stay out.
+  assert.ok(files.has('docs/framework/development/RELEASE-CANDIDATES.md'));
+  for (const record of ['RELEASE-EXECUTION', 'RELEASE-REHEARSAL', 'RELEASE-OPERATION-PLANS', 'MAINTENANCE-AND-RELEASE'])
+    assert.ok(existsSync(join(root, `docs/development/${record}.md`)) && !paths.some(path => path.endsWith(`/${record}.md`)), record);
   for (const old of ['docs/development/BUILD-A-FEATURE.md', 'docs/testing/OBSIDIAN-TEST-KIT.md', 'docs/architecture/EVENT-BUS.md']) assert.ok(!files.has(old), old);
   // Product-authored text and code comments name the relocated paths, and every named doc exists.
   const product = paths.filter(path => !files.get(path).encoding && files.get(path).ownership !== 'framework' && /\.(?:md|mdc|ts|mjs)$/.test(path));
@@ -69,6 +73,10 @@ test('[GENERATOR-SCOPE-04] scope helpers classify records, relocate guides and k
     'docs/_archive/development/compiler/IMPLEMENTATION.md', 'docs/_archive/testing/OBSIDIAN-TEST-KIT.md', 'docs/testing/FIRST-RUN.md', 'docs/testing/OPTIONAL-STORYBOOK.md']) assert.equal(frameworkOnlyPath(record), true, record);
   for (const kept of ['docs/development/BUILD-A-FEATURE.md', 'docs/testing/OBSIDIAN-TEST-KIT.md', 'docs/testing/test-plan.json', 'docs/licenses/lucide.txt', 'docs/design/obsidian-tokens.json']) assert.equal(frameworkOnlyPath(kept), false, kept);
   assert.equal(referenceDocPath('docs/development/BUILD-A-FEATURE.md'), 'docs/framework/development/BUILD-A-FEATURE.md');
+  // The release-candidate how-to is a product guide; real release records keep their exclusion.
+  assert.equal(referenceDocPath('docs/development/RELEASE-CANDIDATES.md'), 'docs/framework/development/RELEASE-CANDIDATES.md');
+  for (const record of ['docs/development/RELEASE-EXECUTION.md', 'docs/development/RELEASE-REHEARSAL.md', 'docs/development/RELEASE-OPERATION-PLANS.md', 'docs/development/RELEASE-CANDIDATES-PLAN.md',
+    'docs/development/MAINTENANCE-AND-RELEASE.md']) assert.equal(frameworkOnlyPath(record), true, record);
   assert.equal(referenceDocPath('docs/testing/test-plan.json'), null); assert.equal(referenceDocPath('docs/tasks/a.md'), null); assert.equal(referenceDocPath('docs/_archive/testing/ITERATION-FOUR.md'), null); assert.equal(referenceDocPath('docs/x.md'), null);
   assert.equal(withBanner('# T\n'), `${frameworkBanner}\n\n# T\n`);
   assert.equal(withBanner(withBanner('# T\n')), `${frameworkBanner}\n\n# T\n`);

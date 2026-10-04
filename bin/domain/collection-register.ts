@@ -46,14 +46,23 @@ const escaped = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  * hand and is never overwritten.
  */
 export function mergeCollectionRegister(definition: CollectionDefinition, existing: string | null, inner: string, digest: (text: string) => string): string {
-  const start = `<!-- ${definition.id}-register:start`, end = `<!-- ${definition.id}-register:end -->`;
-  const block = `${start} sha256=${digest(inner)} -->\n${inner}${end}\n`;
-  if (existing === null) return `# ${definition.report.title}\n\n${block}`;
+  if (existing === null) return `# ${definition.report.title}\n\n${collectionBlock(`${definition.id}-register`, inner, digest)}`;
+  return mergeCollectionBlock(`${definition.id}-register`, existing, inner, digest);
+}
+/** One generated block, `<!-- <name>:start sha256=<hash of inner> -->` … `<!-- <name>:end -->`. */
+export const collectionBlock = (name: string, inner: string, digest: (text: string) => string) => `<!-- ${name}:start sha256=${digest(inner)} -->\n${inner}<!-- ${name}:end -->\n`;
+/**
+ * The generic marker merge behind registers and other generated documents (release candidates): replaces exactly one
+ * intact named block, appends it when the text has no such markers, and refuses duplicated, broken or hand-edited blocks.
+ */
+export function mergeCollectionBlock(name: string, existing: string, inner: string, digest: (text: string) => string): string {
+  const start = `<!-- ${name}:start`, end = `<!-- ${name}:end -->`;
+  const block = collectionBlock(name, inner, digest);
   const starts = existing.split(start).length - 1, ends = existing.split(end).length - 1;
   if (!starts && !ends) return existing.replace(/\n*$/, existing ? '\n\n' : '') + block;
   const match = new RegExp(`^${escaped(start)} sha256=([0-9a-f]{64}) -->\\n([\\s\\S]*?)^${escaped(end)}[^\\S\\n]*\\n?`, 'm').exec(existing);
   requireSketch(starts === 1 && ends === 1 && match, 'COLLECTION_REGISTER_MARKERS', `Expected exactly one ${start} … ${end} block; nothing was overwritten.`);
-  requireSketch(digest(match[2]!) === match[1], 'COLLECTION_REGISTER_EDITED', 'The generated block was edited by hand. Move your text outside the markers (or restore the block); nothing was overwritten.');
+  requireSketch(digest(match[2]!) === match[1], 'COLLECTION_REGISTER_EDITED', `The generated ${name} block was edited by hand. Move your text outside the markers (or restore the block); nothing was overwritten.`);
   return existing.slice(0, match.index) + block + existing.slice(match.index + match[0].length);
 }
 /** An Obsidian Bases table over the collection's notes beside it, in the fake-data Bases format. */

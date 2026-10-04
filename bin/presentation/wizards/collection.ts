@@ -78,10 +78,10 @@ export const collectionModule: WizardModule = {
         requireSketch(target, 'COLLECTION_FORM', `${field.id} binds no vocabulary field of ${definition.id}.`);
         return definition.vocabularies[target.vocabulary!]!.map(item => ({ id: item.id, label: target.kind === 'integer' ? `${item.id} — ${item.label}` : item.label }));
       },
-      /** A new note may start in any status; an existing one offers its own status and the allowed transitions. */
+      /** A new note may start in any status people own; an existing one offers its own status and the allowed transitions. */
       'collection.statuses': data => {
         const { definition, record } = dataOf(data), current = definition.statuses.find(item => item.id === record?.status);
-        const ids = current ? [current.id, ...current.transitions] : definition.statuses.map(item => item.id);
+        const ids = current ? [current.id, ...current.transitions] : definition.statuses.filter(item => !item.managed).map(item => item.id);
         return ids.map(id => ({ id, label: definition.statuses.find(item => item.id === id)!.label + (id === current?.id ? ' (current)' : '') }));
       },
       'collection.notes': data => (dataOf(data).notes ?? []).map(item => ({ id: item.id, label: `${item.id} — ${item.title} (${item.status})` })),

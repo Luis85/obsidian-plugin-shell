@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "increment",
+  "title": "Increment",
+  "description": "Product increment notes in the format of configs/collections/increment.json (type Increment, INC-0001 ids, proposed, ready and dropped statuses, kinds, priorities, source paths and risk ids), so node bin/app increment check, list and report read them and node bin/app candidate add can include the ready ones.",
+  "folder": "Increments",
+  "titleProperty": "title",
+  "properties": [
+    { "key": "type", "type": "text", "generator": { "value": "Increment" } },
+    { "key": "id", "label": "ID", "type": "text", "generator": { "sequence": "INC-" }, "unique": true },
+    { "key": "title", "label": "Title", "type": "text", "generator": { "faker": "company.catchPhrase" }, "unique": true },
+    { "key": "status", "label": "Status", "type": "text", "generator": { "choices": ["proposed", "ready", "dropped"] } },
+    { "key": "created", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-06-01", "to": "2025-09-30" } } },
+    { "key": "updated", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-10-01", "to": "2025-12-31" } } },
+    { "key": "summary", "label": "Summary", "type": "text", "generator": { "faker": "lorem.sentence", "args": { "min": 8, "max": 16 } } },
+    { "key": "kind", "label": "Kind", "type": "text", "generator": { "choices": ["feature", "fix", "improvement", "docs", "chore"] } },
+    { "key": "priority", "label": "Priority", "type": "text", "generator": { "choices": ["low", "medium", "high"] }, "required": false },
+    { "key": "sources", "label": "Sources", "type": "list", "generator": { "choices": ["prototypes/checkout", "prototypes/onboarding", "docs/design/checkout", "brainstorms/search/feature.definition.json", "docs/prds/payments.md", "RISK-0001", "RISK-0002", "LRN-0001"] }, "items": { "min": 1, "max": 3 } },
+    { "key": "acceptance", "label": "Acceptance", "type": "list", "generator": { "faker": "company.buzzPhrase" }, "items": { "min": 1, "max": 3 } },
+    { "key": "risks", "label": "Risks", "type": "list", "generator": { "choices": ["RISK-0001", "RISK-0002", "RISK-0003", "RISK-0004", "RISK-0005"] }, "items": { "min": 1, "max": 2 }, "required": false },
+    { "key": "owner", "label": "Owner", "type": "text", "generator": { "faker": "person.fullName" }, "required": false },
+    { "key": "proposed", "label": "Proposed", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-04-01", "to": "2025-05-31" } } },
+    { "key": "target", "label": "Target", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2026-01-01", "to": "2026-12-31" } }, "required": false },
+    { "key": "schema_version", "type": "number", "generator": { "value": 1 } },
+    { "key": "notes", "type": "text", "generator": { "faker": "lorem.paragraph", "args": { "min": 2, "max": 4 } }, "frontmatter": false }
+  ],
+  "body": "# {{title}}\n\n## Summary\n\n{{summary}}\n\n## Notes\n\n{{notes}}\n"
+}

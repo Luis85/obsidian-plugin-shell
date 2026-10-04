@@ -2,6 +2,7 @@ import { object } from './data.ts';
 import { hasControls, requireSketch, SketchError } from './errors.ts';
 import { renderText } from './form-model.ts';
 import { collectionStatus, type CollectionDefinition, type CollectionField } from './collection-definition.ts';
+import { collectionAcceptsText, collectionReferenceOk } from './collection-reference.ts';
 /** Frontmatter values the engine writes: text, dates and choices as strings, integers as numbers, lists as string arrays. */
 export type CollectionValue = string | number | string[];
 export type CollectionValues = Record<string, CollectionValue>;
@@ -32,6 +33,7 @@ function textValue(field: CollectionField, raw: unknown): string {
   const value = raw.trim();
   // The prefix is validated as upper-case letters, digits and a final '-', so it is literal inside the pattern.
   requireSketch(!field.idPrefix || new RegExp(`^${field.idPrefix}\\d{3,9}$`).test(value), 'COLLECTION_VALUE', `${field.key} must name ids like ${field.idPrefix}0001.`);
+  requireSketch(!field.accepts || collectionReferenceOk(field.accepts, value), 'COLLECTION_VALUE', `${field.key} must name ${collectionAcceptsText(field.accepts ?? [])}.`);
   return value;
 }
 /** One stored or supplied value, validated against its field and vocabulary. */
@@ -103,16 +105,21 @@ function fieldValues(definition: CollectionDefinition, properties: Record<string
   return values;
 }
 interface Parsed { status?: string; values: Record<string, CollectionValue | null> }
+/** A status people may choose; managed statuses (for example an increment included in a release candidate) are refused. */
+function inputStatus(definition: CollectionDefinition, raw: unknown): string {
+  const people = definition.statuses.filter(item => !item.managed);
+  const status = typeof raw === 'string' ? collectionStatus(definition, raw) : undefined;
+  requireSketch(status, 'COLLECTION_STATUS', `status must be one of ${people.map(item => item.id).join(', ')}.`);
+  requireSketch(!status.managed, 'COLLECTION_MANAGED', `${status.id} is set by another tool's reviewed plan, not by ${definition.id} input; use one of ${people.map(item => item.id).join(', ')}.`);
+  return status.id;
+}
 /** JSON or form input keyed by input names (`nextAction`); `''`, `[]` and (for updates) `null` mean no value. */
 function readInput(definition: CollectionDefinition, input: unknown, mode: 'create' | 'update'): Parsed {
   const raw = object(input), result: Parsed = { values: Object.create(null) };
   const fields = definition.fields.filter(field => field.source === 'input' && (mode === 'create' || field.frontmatter));
   const unknown = Object.keys(raw).filter(key => key !== 'status' && !fields.some(field => field.input === key));
   requireSketch(!unknown.length, 'COLLECTION_INPUT', `Unknown input ${unknown.join(', ')}; use ${['status', ...fields.map(field => field.input)].join(', ')}.`);
-  if (raw.status !== undefined) {
-    requireSketch(typeof raw.status === 'string' && collectionStatus(definition, raw.status), 'COLLECTION_STATUS', `status must be one of ${definition.statuses.map(item => item.id).join(', ')}.`);
-    result.status = raw.status;
-  }
+  if (raw.status !== undefined) result.status = inputStatus(definition, raw.status);
   for (const field of fields) {
     const value = raw[field.input];
     if (value === undefined) continue;
@@ -155,12 +162,24 @@ export function collectionCreate(definition: CollectionDefinition, hook: Collect
   return { frontmatter: ordered(definition, id, status, asOf, asOf, values), body: renderText(definition.body, body).replace(/\n*$/, '\n') };
 }
 export interface CollectionChange { values: CollectionValues; status: string; removed: string[] }
-function statusChange(definition: CollectionDefinition, from: string, to: string, values: CollectionValues, asOf: string): void {
+/** Leaving a status removes its stamp; entering one dates its stamp. */
+function stampChange(definition: CollectionDefinition, from: string, to: string, values: CollectionValues, asOf: string): void {
   if (to === from) return;
   const current = collectionStatus(definition, from)!, next = collectionStatus(definition, to)!;
-  requireSketch(current.transitions.includes(to), 'COLLECTION_TRANSITION', `${from} → ${to} is not allowed; from ${from} use ${current.transitions.join(', ') || 'no other status'}.`);
   if (current.stamp && current.stamp !== next.stamp) delete values[current.stamp];
   if (next.stamp) values[next.stamp] = asOf;
+}
+function statusChange(definition: CollectionDefinition, from: string, to: string, values: CollectionValues, asOf: string): void {
+  const current = collectionStatus(definition, from)!;
+  requireSketch(to === from || current.transitions.includes(to), 'COLLECTION_TRANSITION', `${from} → ${to} is not allowed; from ${from} use ${current.transitions.join(', ') || 'no other status'}.`);
+  stampChange(definition, from, to, values, asOf);
+}
+/** Derived values, completeness, `updated` and the owned keys that disappeared, shared by people's and managed changes. */
+function finishChange(definition: CollectionDefinition, hook: CollectionHook | undefined, record: CollectionRecord, values: CollectionValues, status: string, asOf: string): CollectionChange {
+  withDerived(definition, hook, values);
+  completeness(definition, values, status);
+  const owned = definition.fields.filter(field => field.frontmatter).map(field => field.key);
+  return { values: { ...values, status, updated: asOf }, status, removed: owned.filter(key => values[key] === undefined && record.values[key] !== undefined) };
 }
 /**
  * The complete next frontmatter of an existing, valid note: changed inputs, a checked status transition, stamps,
@@ -180,10 +199,25 @@ export function collectionUpdate(definition: CollectionDefinition, hook: Collect
   const status = parsed.status ?? record.status;
   statusChange(definition, record.status, status, values, asOf);
   if (review) values[definition.review!.stamp] = asOf;
-  withDerived(definition, hook, values);
-  completeness(definition, values, status);
-  const owned = definition.fields.filter(field => field.frontmatter).map(field => field.key);
-  return { values: { ...values, status, updated: asOf }, status, removed: owned.filter(key => values[key] === undefined && record.values[key] !== undefined) };
+  return finishChange(definition, hook, record, values, status, asOf);
+}
+/** A managed change: `set` names managed fields (`null` removes one) and `status` may be any status, without people's transitions. */
+export interface CollectionManagedChange { status?: string; set?: Readonly<Record<string, CollectionValue | null>> }
+/**
+ * The complete next frontmatter of a valid note changed by another module's reviewed plan, for example a release
+ * candidate that includes an increment. Stamps, derived values and completeness apply as for any change.
+ */
+export function collectionManagedUpdate(definition: CollectionDefinition, hook: CollectionHook | undefined, record: CollectionRecord, change: CollectionManagedChange, asOf: string): CollectionChange {
+  const values: CollectionValues = { ...record.values };
+  for (const [key, value] of Object.entries(change.set ?? {})) {
+    const field = definition.fields.find(item => item.key === key && item.source === 'managed');
+    requireSketch(field, 'COLLECTION_MANAGED', `${key} is not a managed field of ${definition.id}.`);
+    if (value === null) delete values[key]; else values[key] = collectionValue(definition, field, value);
+  }
+  const status = change.status ?? record.status;
+  requireSketch(collectionStatus(definition, status), 'COLLECTION_STATUS', `status must be one of ${definition.statuses.map(item => item.id).join(', ')}.`);
+  stampChange(definition, record.status, status, values, asOf);
+  return finishChange(definition, hook, record, values, status, asOf);
 }
 /** The next id: one above the highest `<PREFIX><digits>` mentioned in any note, file name or register, never reused while those survive. */
 export function nextCollectionId(definition: CollectionDefinition, texts: readonly string[]): string {

@@ -1,0 +1,17 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "candidate",
+  "version": 1,
+  "title": "Release candidate",
+  "description": "A new release candidate in the configured paths.releaseCandidates folder: its version (unless --version was given), target date, owner, the ready increments it includes and a goal for the authored Goal section. The candidate domain validates the result before a reviewed plan is shown.",
+  "fields": [
+    { "id": "version", "kind": "text", "label": "Version (x.y.z or x.y.z-rc.N, such as 1.0.0)", "required": true, "maxLength": 40, "when": { "path": "versionFlag", "present": false } },
+    { "id": "targetDate", "kind": "text", "label": "Target date (YYYY-MM-DD, optional)", "maxLength": 10 },
+    { "id": "owner", "kind": "text", "label": "Owner (optional)", "maxLength": 120 },
+    { "id": "pick", "kind": "boolean", "label": "Include ready increments now?", "yes": "Yes, choose increments", "no": "No, add them later with candidate add",
+      "when": { "path": "offer", "equals": true } },
+    { "id": "increments", "kind": "multi", "label": "Ready increments to include", "choicesFrom": "candidate.increments", "required": true, "when": { "field": "pick", "equals": true } },
+    { "id": "goal", "kind": "text", "label": "Goal of this release (optional, written to the Goal section)", "maxLength": 4000 }
+  ]
+}

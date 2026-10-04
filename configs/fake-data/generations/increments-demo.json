@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/fake-data-generation.schema.json",
+  "schemaVersion": 1,
+  "id": "increments-demo",
+  "title": "Increments demo",
+  "description": "Twenty product increments in the default paths.increments folder, ready for node bin/app increment list, check and report and for node bin/app candidate add, plus a Bases table.",
+  "entity": "increment",
+  "count": 20,
+  "out": "docs/releases/increments",
+  "seed": 17,
+  "base": true,
+  "referenceDate": "2026-01-01"
+}
