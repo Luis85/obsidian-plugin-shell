@@ -72,7 +72,7 @@ test('framework documents and maintainer workflows move under docs/framework wit
   for (const path of ['configs/starters/blank.json', 'DEVELOPER_GUIDE.md',
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
     'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs',
-    '.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/PULL_REQUEST_TEMPLATE/release.md'])
+    '.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/workflows/definition-of-ready.yml', '.github/workflows/definition-of-done.yml', '.github/PULL_REQUEST_TEMPLATE/release.md'])
     assert.equal(maintainerOnly(path), true, path);
   // The framework's delivery pipeline stays behind, but the qualification workflows it calls remain inert reference.
   for (const path of ['.github/workflows/ci.yml', '.github/workflows/candidate-qualification.yml', '.github/pull_request_template.md']) assert.equal(maintainerOnly(path), false, path);
