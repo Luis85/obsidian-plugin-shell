@@ -5,7 +5,8 @@ import type { TemplateSnapshot } from '../domain/contracts.ts';
  * instead of overwriting when the template itself changed. */
 import { posix } from 'node:path';
 import { literal, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { relativeImport, rewriteTemplate, type Add } from './file-code.ts';
+import { journeySuitePairs } from './authored-journey-code.ts';
 import { clickdummyBuilderFiles } from './clickdummy-builder-files.ts';
 import { briefValues } from './devkit-brief.ts';
 
@@ -51,13 +52,17 @@ import { addIcon } from '@iconify/vue';
 import { init } from 'virtual:nuxt-ui-icons';
 init(addIcon);
 `, 'managed');
-  // The copied suite manifest classifies product tests under tests/project; follow a custom tests folder.
-  if (m.testRoot !== 'tests/project') {
-    const suites = templateRoot.text('tests/suites.json');
-    add('tests/suites.json', suites.replaceAll('"tests/project', JSON.stringify(m.testRoot).slice(0, -1)), 'framework');
-  }
+  projectSuites(templateRoot, m, add);
   const example = `${m.testRoot}/plugin-host.test.ts`;
   add(example, pluginHostTest(example, posix.relative(posix.dirname(example), 'tests/obsidian/vault')), 'extension');
+}
+/** The copied suite manifest classifies product tests under tests/project (follow a custom tests folder) and must
+ * classify emitted journey specs, or every suite run fails UNCLASSIFIED_TEST_FILE. An unchanged manifest is not re-emitted. */
+function projectSuites(templateRoot: TemplateSnapshot, m: Model, add: Add): void {
+  const template = templateRoot.text('tests/suites.json'), pairs = journeySuitePairs(m);
+  let suites = pairs.length ? rewriteTemplate(template, pairs, 'tests/suites.json') : template;
+  if (m.testRoot !== 'tests/project') suites = suites.replaceAll('"tests/project', JSON.stringify(m.testRoot).slice(0, -1));
+  if (suites !== template) add('tests/suites.json', suites, 'framework');
 }
 /** Same shared build config and throwing `obsidian` boundary as the framework's own Vitest config. */
 function projectVitestConfig(m: Model): string {

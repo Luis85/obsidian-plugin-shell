@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 const openCommand = JSON.parse(readFileSync(new URL('../src/locales/en.json', import.meta.url), 'utf8')).command.open;
-console.log(`Obsidian plugin template — available commands
+console.log(`Workbench CLI — npm script shortcuts (every command: node bin/app help)
 npm run setup             Review identity/profile, install exact dependencies and verify
 npm run setup -- --help   Identity flags, explicit native migration, dry-run and resume
 npm run companion:generate -- --help  Read a companion JSON export; v1 prints data and writes nothing

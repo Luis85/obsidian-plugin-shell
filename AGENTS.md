@@ -64,6 +64,7 @@ its relevant tests. Locale output is a pending translation draft, not a newly
 reviewed selectable language.
 
 Read first when relevant: [README](README.md),
+[developer guide](DEVELOPER_GUIDE.md) (requirements and setup),
 [authoring](docs/development/AUTHORING-TOOLS.md),
 [plugin-data semantics](docs/development/PLUGIN-DATA-ENTITIES.md),
 [metric scope](docs/development/MAINTAINABILITY.md),

@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { handoutSections } from '../../bin/adapters/framework/handout-questions.ts';
 import { digest, makeSnapshot, renderHandout, parseAnswers, readSnapshot, validateHandout, refreshHandout, HANDOUT_PATH } from '../../bin/adapters/framework/handout-model.ts';
-import { loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout, portablePath } from '../../bin/adapters/framework/handout-workspace.ts';
+import { loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout, handoutPath } from '../../bin/adapters/framework/handout-workspace.ts';
 const base = makeSnapshot('docs/prds', [{ path: 'docs/prds/PRD-1.md', sha256: digest('# PRD') }]);
 const full = () => renderHandout(base).replace(/- \[ \] \*\*REQUIRED\*\*/g, '- [x] **REQUIRED**')
   .replace(/  - Answer:.*$/gm, '  - Answer: Reviewed concrete decision with details in docs/prds/PRD-1.md#scope.')
@@ -187,7 +187,7 @@ test('adding or changing settings and PRDs after creation is detected', async t 
   assert.ok((await inspectHandout(root)).diagnostics.some(item => item.code === 'HANDOUT_SOURCES_STALE'));
 });
 test('absolute, traversing, Windows and protected PRD paths are rejected', () => {
-  for (const path of ['../outside', '/etc', 'C:\\data', '.git', '.obsidian', 'a/../b', 'a//b', '.', 'node_modules/docs', 'a\\b']) assert.throws(() => portablePath(path), /HANDOUT_PATH/);
+  for (const path of ['../outside', '/etc', 'C:\\data', '.git', '.obsidian', 'a/../b', 'a//b', '.', 'node_modules/docs', 'a\\b']) assert.throws(() => handoutPath(path), /HANDOUT_PATH/);
 });
 test('symlink input and output paths are refused', async t => {
   const root = await workspace(t);

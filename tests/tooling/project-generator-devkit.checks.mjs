@@ -196,3 +196,25 @@ test('[GENERATOR-DEVKIT-10] a generated project carries the cloud-session kit an
   assert.equal(JSON.parse(text('.claude/settings.json')).hooks.SessionStart[0].hooks[0].timeout, 600, 'the hook may download Node and run npm ci');
   assert.ok(text('.gitignore').split('\n').includes('/clickdummy.html'), 'the e2e web server rebuilds the click-dummy; it must not dirty the tree');
 });
+test('[GENERATOR-DEVKIT-11] project scripts type-check the project config, always have an acceptance check and skip only absent UI-effect suites', async () => {
+  const blankStarter = starterDocument('blank'), blank = structuredClone(blankStarter.document ?? blankStarter);
+  const empty = new Map((await projectFiles(root, projectModel(blank))).map(entry => [entry.path, entry]));
+  for (const output of [files, empty]) {
+    const scripts = JSON.parse(output.get('package.json').content).scripts;
+    assert.equal(scripts.typecheck, scripts['typecheck:project']); assert.match(scripts.typecheck, /--project configs\/types\/tsconfig\.project\.json$/);
+    assert.match(output.get('tests/project/acceptance/traceability.test.ts').content, /keeps its use case and acceptance test/);
+  }
+  const visual = JSON.parse(text('package.json')).scripts, plain = JSON.parse(empty.get('package.json').content).scripts;
+  assert.ok([...files.keys()].some(path => path.startsWith('tests/project/ui-effects/')), 'the visual starter emits UI-effect checks');
+  assert.equal(visual['test:ui-effects'], 'node scripts/testing/suites.mjs project:ui-effects', 'a declared visual design requires a non-empty suite');
+  assert.equal(visual['test:project'], 'node scripts/testing/suites.mjs project project:ui-effects');
+  assert.ok(![...empty.keys()].some(path => path.startsWith('tests/project/ui-effects/')), 'blank declares no visual definitions');
+  assert.match(plain['test:ui-effects'], /^node -e "console\.log\('test:ui-effects skipped: this project declares no visual definitions/);
+  assert.equal(plain['test:project'], 'node scripts/testing/suites.mjs project && npm run test:ui-effects');
+  for (const scripts of [visual, plain]) {
+    // The full gate is `check` (typecheck, oxlint, ESLint, product and maker tooling tests) plus what CI adds after it.
+    assert.equal(scripts['verify:project'], 'npm run check && npm run verify:artifacts');
+    assert.equal(scripts.check, 'node bin/app check');
+    assert.match(scripts['verify:artifacts'], /npm run test:ui-effects/);
+  }
+});

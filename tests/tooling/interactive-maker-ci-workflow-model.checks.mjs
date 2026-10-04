@@ -20,8 +20,9 @@ test('every real workflow in .github/workflows parses into jobs with steps and c
   const names = (await readdir(join(root, '.github/workflows'))).filter(name => /\.ya?ml$/.test(name));
   const workflows = await loadWorkflows(root);
   assert.equal(workflows.length, names.length);
-  // 18 since the retired native source handoff workflow was removed with the schema 5 concept data.
-  assert.ok(workflows.length >= 18, 'the repository keeps its qualification workflows');
+  // 17 since the retired native source handoff workflow was removed with the schema 5 concept data and
+  // shell-cli-manual.yml folded into application-docs.yml (its contracts were a subset of that workflow).
+  assert.ok(workflows.length >= 17, 'the repository keeps its qualification workflows');
   for (const item of workflows) {
     assert.ok(item.jobs.length > 0, `${item.file} has jobs`);
     assert.ok(item.triggers.length > 0, `${item.file} has triggers`);
@@ -44,6 +45,25 @@ test('ci.yml exposes its known jobs, triggers and resolved YAML anchors', async 
   assert.ok(showcase.matrix, 'showcase carries a matrix expression');
   const summary = summarizeWorkflow(ci).jobs.find(entry => entry.id === 'showcase');
   assert.equal(summary.reference, 'ci/showcase'); assert.equal(summary.matrix.computed, true);
+});
+test('the CI result job aggregates every ci.yml gate job and nothing informational', async () => {
+  const ci = (await loadWorkflows(root)).find(item => item.stem === 'ci');
+  const result = ci.jobs.find(entry => entry.id === 'ci-result');
+  assert.equal(result.name, 'CI result'); assert.equal(result.condition, 'always()');
+  const gates = ci.jobs.map(entry => entry.id).filter(id => !['ci-result', 'security-audit'].includes(id));
+  assert.deepEqual([...result.needs].sort(), gates.sort(), 'a new ci.yml job must join the required CI result check');
+  assert.ok(!result.needs.includes('security-audit'), 'the informational audit never blocks the required check');
+  assert.match(result.steps.map(step => step.run ?? '').join('\n'), /select\(\.value\.result != "success" and \.value\.result != "skipped"\)[\s\S]*exit 1/);
+});
+test('application-docs owns the folded command-handbook checks and site build', async () => {
+  const docs = (await loadWorkflows(root)).find(item => item.stem === 'application-docs');
+  assert.deepEqual(docs.jobs.map(entry => entry.id), ['qualify', 'site']);
+  for (const trigger of ['pull_request', 'workflow_dispatch']) assert.ok(docs.triggers.includes(trigger));
+  const qualify = docs.jobs[0].steps.map(step => step.run ?? '').join('\n');
+  assert.match(qualify, /manual\.mjs --check/); assert.doesNotMatch(qualify, /manual\.mjs(?! --check)\b/, 'CI never regenerates the handbook before checking it');
+  assert.ok(qualify.indexOf('manual.mjs --check') < qualify.indexOf(' ci --ignore-scripts'), 'the handbook check runs before any dependency install');
+  assert.deepEqual(docs.jobs[1].needs, ['qualify']);
+  assert.match(docs.jobs[1].steps.map(step => step.run ?? '').join('\n'), / ci --prefix tooling\/documentation /);
 });
 test('schedules, path filters and branches are listed per workflow', async () => {
   const all = await loadWorkflows(root);

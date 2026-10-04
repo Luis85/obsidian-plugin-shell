@@ -126,7 +126,7 @@ export const handoutSections: HandoutSection[] = [
   },
   {
     title: "14 · Project paths, existing work and settings",
-    description: "Agree the filesystem contract and preserve existing work. The handout always lives at the project root. Preferred settings belong in configs/user-settings.json; record a capability gap when the installed version still uses legacy shell.config.json rather than silently pretending migration is complete.",
+    description: "Agree the filesystem contract and preserve existing work. The handout always lives at the project root. Maker paths and preferences belong in configs/user-settings.json; project identity and the source, test and vault folders live in shell.config.json. Record a capability gap when the installed shell does not support a needed setting rather than silently pretending it does.",
     questions: [
       {"id": "setup.root", "required": true, "question": "Which existing directory is the project root and what must be preserved?", "hint": "Confirm that Git is already set up and, when relevant, this folder is the open Obsidian vault. Never reinitialize Git or change remotes as part of prototyping.", "default": "<TBD>"},
       {"id": "setup.paths", "required": true, "question": "What are the exact project-relative paths?", "hint": "List user settings, PRDs, typed docs for pages/components/interactions/journeys, design JSON, source, tests, assets, fixtures, reports, starters and prototype output.", "default": "<TBD>"},

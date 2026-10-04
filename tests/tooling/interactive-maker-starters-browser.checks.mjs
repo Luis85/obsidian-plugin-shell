@@ -22,14 +22,14 @@ test('the projection copies Companion metadata and refuses file starters or unha
     outcome: blank.outcome, includes: blank.includes, implementation: blank.implementation, tags: blank.tags, version: blank.version,
     file: 'blank.companion.json', sha256: sha, document: blank.generator.document });
   projection.includes.push('mutated'); projection.document.project.id = 'mutated';
-  assert.notEqual(blank.includes.at(-1), 'mutated'); assert.equal(blank.generator.document.project.id, 'my-plugin');
+  assert.notEqual(blank.includes.at(-1), 'mutated'); assert.equal(blank.generator.document.project.id, 'my-vault-tool');
   refusal(() => starterProjection(fileStarter(), sha), 'STARTER_KIND', 'This file-only starter can be generated through the CLI, but does not declare an editable Companion model.');
   refusal(() => starterProjection(blank, 'A'.repeat(64)), 'STARTER_HASH', 'Expected the SHA-256 of the actual imported bytes.');
 });
 
 test('configuration applies only the supplied identity and folder fields', () => {
   const document = configureBrowserStarter(blank, sha, { id: 'field-notes', name: 'Field Notes', codebaseFolder: 'app', testsFolder: 'checks' });
-  assert.deepEqual(document.project, { id: 'field-notes', name: 'Field Notes', author: '', version: '0.1.0', description: blank.generator.document.project.description });
+  assert.deepEqual(document.project, { id: 'field-notes', name: 'Field Notes', author: 'Your Name', version: '0.1.0', description: blank.generator.document.project.description });
   assert.deepEqual(document.settings, { codebaseFolder: 'app', testsFolder: 'checks' });
   assert.equal(document.notes.at(-1), '# Project starter\n\nDefinition: blank @ ' + blank.version + '\nSource SHA-256: ' + sha
     + '\n\nThis project is an independent editable copy. Catalog updates never overwrite it. No execution approvals, credentials, machine paths, test results or plugin installation are imported.\n');
@@ -42,7 +42,7 @@ test('export keeps the reviewed recipe and takes defaults from identity, setting
   const project = structuredClone(blank.generator.document);
   project.project = { ...project.project, id: 'exported', name: 'Exported' }; project.settings = { codebaseFolder: 'lib', testsFolder: 'spec' };
   const exported = exportBrowserStarter(definition, sha, project, { id: 'ignored', name: 'Ignored', tone: 'calm' });
-  assert.deepEqual(exported.inputs.map(input => [input.id, input.default]), [['id', 'exported'], ['name', 'Exported'], ['author', ''],
+  assert.deepEqual(exported.inputs.map(input => [input.id, input.default]), [['id', 'exported'], ['name', 'Exported'], ['author', 'Your Name'],
     ['description', blank.generator.document.project.description], ['version', '0.1.0'], ['codebaseFolder', 'lib'], ['testsFolder', 'spec'], ['theme', undefined], ['tone', 'calm']]);
   assert.equal(Object.hasOwn(exported.inputs[7], 'default'), false);
   assert.deepEqual(exported.processes, validateDefinition(blank).processes);

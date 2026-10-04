@@ -110,8 +110,8 @@ YAML 1.2, no new dependency) and never contacts GitHub.
 
 ```text
 node bin/app ci --list [--json]                       # workflows -> jobs: triggers, path filters, runner/matrix, reproducible?
-node bin/app ci --job ci/baseline --matrix os=ubuntu-latest        # dry run: the exact ordered shell commands
-node bin/app ci --job ci/baseline --matrix os=ubuntu-latest --execute --json   # run the run: steps, stop at the first failure
+node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04        # dry run: the exact ordered shell commands
+node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04 --execute --json   # run the run: steps, stop at the first failure
 ```
 
 - **Reference** a job as `<workflow-file-stem>/<job-id>` (`ci/baseline` is job `baseline` in `ci.yml`).

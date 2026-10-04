@@ -39,7 +39,7 @@ export class NodeProcessFailure extends Error {
   }
 }
 
-/** The single Node-script spawn lifecycle used by framework and compatibility callers. */
+/** The single Node-script spawn lifecycle used by every framework, setup and quality caller. */
 export function runNodeProcess(path: string, args: readonly string[] = [], options: NodeProcessOptions = {}): Promise<NodeProcessResult> {
   return new Promise((resolve, reject) => {
     const capture = options.captureOutput === true;
@@ -144,26 +144,4 @@ export function runNodeProcess(path: string, args: readonly string[] = [], optio
       resolve({ exitCode: code, signal, truncated, stdout: captured + decoder.end() });
     });
   });
-}
-
-type RunNodeError = Error & {
-  exitCode: number | null;
-  signal: NodeJS.Signals | null;
-};
-
-/** Legacy low-level shape retained while JavaScript callers migrate. */
-export async function runNodeScript(path: string, args: readonly string[] = [], options: SpawnOptions = {}): Promise<void> {
-  try {
-    await runNodeProcess(path, args, {
-      spawnOptions: { cwd: process.cwd(), stdio: 'inherit', ...options },
-      forwardParentSignals: true,
-    });
-  } catch (error) {
-    if (!(error instanceof NodeProcessFailure)) throw error;
-    if (error.kind === 'start' && error.cause instanceof Error) throw error.cause;
-    const failure = new Error(`Command failed (${error.exitCode ?? 'signal'}): ${path}`) as RunNodeError;
-    failure.exitCode = error.exitCode;
-    failure.signal = error.signal;
-    throw failure;
-  }
 }

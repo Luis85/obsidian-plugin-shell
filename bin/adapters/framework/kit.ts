@@ -8,8 +8,10 @@ import { readBounded, hash, readJson, exists } from './files.ts';
 import { bootstrapFiles, launcherFiles, listFiles, pluginConfigFiles, readPluginConfig, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
 import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
-import { included, standaloneSource, updateOwnership } from './distribution.ts';
-import { requireThat, type Context } from './contracts.ts';
+import { included, kitRootReadme, standaloneSource, updateOwnership } from './distribution.ts';
+import { OperationError, requireThat, type Context } from './contracts.ts';
+import { stat } from 'node:fs/promises';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { templateRootFiles as templateFiles, templateRoots } from '../../compiler/domain/template-inputs.ts';
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
@@ -21,6 +23,15 @@ export async function installedCompiler(): Promise<Compiler> {
     requireThat(!output.diagnostics?.some(item => item.category === ts.DiagnosticCategory.Error), 'KIT_COMPILE', `Cannot compile ${fileName}.`);
     return output.outputText;
   } };
+}
+/** Every script of a freshly extracted kit is a bundled-CLI command; generation replaces package.json with the project's own. */
+export const kitScripts: Readonly<Record<string, string>> = Object.freeze({
+  app: 'node bin/app', help: 'node bin/app help', setup: 'node bin/app setup', new: 'node bin/app new', make: 'node bin/app make',
+  generate: 'node bin/app generate', status: 'node bin/app status', doctor: 'node bin/app doctor', 'framework:status': 'node bin/app framework status',
+});
+async function bootstrapSource(root: string, path: string): Promise<Buffer> {
+  const bytes = standaloneSource(path, await readBounded(join(root, path), 8_000_000));
+  return path === 'README.md' ? kitRootReadme(bytes) : bytes;
 }
 export async function assembleKit(context: Context, compiler: Compiler): Promise<ArchiveFile[]> {
   const skill = new Map((await prototypeSkillFiles(context.frameworkRoot)).map(file => [file.path, file.bytes]));
@@ -52,12 +63,14 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   const bundle = await bundleReleaseCli(context.frameworkRoot);
   add('bin/app.js', bundle.bytes);
   const pkg = object(await readJson(join(context.frameworkRoot, 'package.json')));
-  const rootScripts: Record<string, unknown> = { ...object(pkg.scripts), setup: 'node bin/app setup', app: 'node bin/app', make: 'node bin/app make', new: 'node bin/app new' };
-  delete rootScripts.shell;
-  const rootPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: rootScripts };
+  const templateScripts: Record<string, unknown> = { ...object(pkg.scripts), ...kitScripts };
+  delete templateScripts.shell;
+  const rootPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: templateScripts };
+  // Before generation the kit root holds only bin/; its scripts route through the bundled CLI so each one resolves.
+  const kitPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: { ...kitScripts } };
   const bootstrap: Kit['bootstrap'] = [];
   for (const path of bootstrapFiles) {
-    const bytes = path === 'package.json' ? Buffer.from(json(rootPackage)) : standaloneSource(path, await readBounded(join(context.frameworkRoot, path), 8_000_000));
+    const bytes = path === 'package.json' ? Buffer.from(json(kitPackage)) : await bootstrapSource(context.frameworkRoot, path);
     files.push({ path, bytes }); bootstrap.push({ path, hash: hash(bytes) });
   }
   // Make the template's aliases identical to the initial project-local CLI entry.
@@ -72,11 +85,12 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   return files;
 }
 export async function packKit(context: Context, output: string) {
+  // The requested output is validated before the source is inspected, so a bad path fails the same way everywhere.
+  const destination = resolve(context.root, output), parts = relative(context.root, destination).split(sep);
+  requireThat(destination.endsWith('.zip') && !parts.some(part => isProtectedSegment(part)), 'KIT_OUTPUT_PATH', 'Choose a ZIP output outside protected project directories.');
   requireThat(!await exists(join(context.frameworkRoot, 'shell.config.json')), 'KIT_AUTHORING_ROOT', 'Build framework distributions from a clean framework source, not a configured consumer project.');
   const identity = object(await readJson(join(context.frameworkRoot, 'manifest.json')));
   requireThat(identity.id === 'plugin-shell' && !await exists(join(context.frameworkRoot, '.companion/generation.json')), 'KIT_AUTHORING_ROOT', 'Consumer plugins are not framework distribution sources.');
-  const destination = resolve(context.root, output), parts = relative(context.root, destination).split(sep);
-  requireThat(destination.endsWith('.zip') && !parts.some(part => ['.git', 'node_modules', '.framework', '.companion'].includes(part.toLowerCase())), 'KIT_OUTPUT_PATH', 'Choose a ZIP output outside protected project directories.');
   const compiler = await installedCompiler();
   const files = await assembleKit(context, compiler), bytes = zip(files), path = resolve(context.root, output);
   const plan = await createFilePlan(dirname(path), [{ path: basename(path), content: bytes.toString('base64'), encoding: 'base64' }]);
@@ -84,8 +98,17 @@ export async function packKit(context: Context, output: string) {
   await applyFilePlan(plan);
   return { archive: path, sha256: hash(bytes), bytes: bytes.length, files: files.length, compiler: compiler.version, publication: 'not-authorized' };
 }
+/** An upgrade source is an extracted kit folder; a ZIP or other file gets an explicit extraction step instead of a raw I/O error. */
+async function extractedKitRoot(context: Context, from: string): Promise<string> {
+  const path = resolve(context.root, from);
+  const entry = await stat(path).catch(() => null);
+  if (!entry?.isDirectory()) throw new OperationError(entry ? 'KIT_ARCHIVE_NOT_EXTRACTED' : 'KIT_SOURCE_MISSING',
+    entry ? `${from} is a file, not an extracted kit folder.` : `${from} does not exist.`,
+    `Extract the kit ZIP into a new empty folder, then run: node bin/app framework upgrade --from <extracted-folder>`);
+  return path;
+}
 export async function upgradePlan(context: Context, from: string) {
-  const nextRoot = resolve(context.root, from), current = await verifyKit(context.root), next = await verifyKit(nextRoot);
+  const nextRoot = await extractedKitRoot(context, from), current = await verifyKit(context.root), next = await verifyKit(nextRoot);
   const { compareVersions } = await import('../../../scripts/release/prepare.mjs');
   requireThat(compareVersions(next.version, current.version) >= 0, 'KIT_DOWNGRADE', 'Downgrades require separate migration review.');
   requireThat(next.version !== current.version || (next.sourceHash === current.sourceHash && JSON.stringify(next.files) === JSON.stringify(current.files)), 'KIT_VERSION_REUSED', 'A different kit must have a new version.');

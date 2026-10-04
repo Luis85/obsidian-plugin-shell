@@ -156,7 +156,7 @@ remain dedicated `verify` steps (production coverage and `verify-baseline`).
 | `ci` › `generated-companion`, `starter` | `generator`, `visual`, `companion-project` of `companion`, generated `project` suites |
 | `ci` › `real-obsidian` | `obsidian` |
 | `ci` › `baseline` | `baseline` |
-| `setup-compatibility` | all `verify` suites via setup, npm install policy of `setup` |
+| `setup-compatibility` | all `verify` suites via setup on the Node 24.15.0 / npm 12 legs (the qualified-toolchain legs defer verify to `ci`), npm install policy of `setup` |
 | `companion-concept-verification` | `companion:assembly`, `test-data`, `visual`, the concept `companion` files, `companion:visual-browser` (its own step first), then `companion:browser` |
 | `candidate-qualification` | `runtime`, `e2e`, `native:host` through evidence producers; `release` via rehearsal |
 | `release-rehearsal` | `release` path via `release:rehearse` |

@@ -2,6 +2,8 @@ name: CI
 # Every always-on pull-request gate in one place. Path-filtered checks stay in
 # setup-compatibility.yml and companion-concept-verification.yml; heavy native
 # qualification of main is candidate-qualification.yml; releases are manual.
+# "CI result" aggregates every gate job below, so branch protection can require
+# that single check instead of each matrix leg.
 on:
   pull_request:
   push:
@@ -18,6 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # ubuntu-latest stays here only because the shipped `bin/app ci` help and
+        # manual use `ci/baseline --matrix os=ubuntu-latest` as their example; the
+        # dependency-free baseline does not depend on the image's preinstalled tools.
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
@@ -59,7 +64,7 @@ jobs:
         # On pull requests template-authoring's renamed-feature job already runs
         # setup, the complete verify and served e2e on Ubuntu with the same
         # toolchain; Ubuntu showcase runs on pushes and manual dispatch.
-        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-latest", "windows-latest"]') }}
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-24.04", "windows-latest"]') }}
     steps:
       - *checkout
       - &windows-dev-drive
@@ -135,7 +140,7 @@ jobs:
   # runs every gate on its own fresh checkout.
   renamed-feature:
     name: Template authoring / renamed feature
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Measured at 30-37 minutes on #60 and 44 minutes on #68 (identity adoption,
     # maker, extended verify and served components); 60 minutes is a job budget,
     # not a test deadline.
@@ -208,7 +213,7 @@ jobs:
 
   source-archive:
     name: Template authoring / source archive
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - *checkout
@@ -245,7 +250,7 @@ jobs:
 
   example-removal:
     name: Template authoring / example removal
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
     # evidence sessions); 100 minutes is a job budget, not a test deadline.
     timeout-minutes: 100
@@ -318,7 +323,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     defaults:
@@ -338,14 +343,14 @@ jobs:
           node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
+          node "$QUALIFIED_NPM" run typecheck:framework
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.sitemap.json
+          node "$QUALIFIED_NPM" run typecheck:sitemap
           node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
@@ -365,7 +370,7 @@ jobs:
   real-obsidian:
     name: Real Obsidian E2E
     if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - *checkout
@@ -404,7 +409,7 @@ jobs:
   generated-companion:
     name: Project generator / generated companion
     if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - *checkout
@@ -460,7 +465,7 @@ jobs:
   starter:
     name: Project generator / starters ${{ matrix.ids }}
     if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -494,3 +499,58 @@ jobs:
           path: reports/project-starters/
           retention-days: 7
           if-no-files-found: error
+
+  # Informational, not a gate: a live audit regression shows as a failed job on
+  # the pull request without failing the workflow. The unchanged blocking gate
+  # is candidate-qualification.yml's live security gate on main.
+  security-audit:
+    name: Security audit (informational)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      - name: Install the committed lock without lifecycle scripts
+        run: node "$QUALIFIED_NPM" ci --no-fund --no-audit --ignore-scripts
+      # The audit result is reported, not enforced: a finding becomes a warning
+      # annotation and job summary entry while the check itself stays green.
+      - name: Live audit, all installed dependency categories
+        id: audit
+        continue-on-error: true
+        run: node "$QUALIFIED_NPM" run check:security
+      - name: Report audit findings
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::warning title=Security audit::check:security reported findings; see docs/development/MOMENT-ADVISORY-EXCEPTION.md and the security-audit artifact."
+          echo "### Security audit: findings reported (informational)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: security-audit
+          path: reports/security/
+          retention-days: 14
+          if-no-files-found: warn
+
+  # One required check for branch protection. A job skipped by its own event
+  # condition (framework-cli, real-obsidian and the generators on push) counts
+  # as passing; any failure or cancellation fails this check. The informational
+  # security-audit job is deliberately not listed.
+  ci-result:
+    name: CI result
+    if: always()
+    needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every gate job succeeded or was skipped by its own condition
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | "\(.key)=\(.value.result)"' <<< "$NEEDS")
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<< "$NEEDS"
+          if [ -n "$failed" ]; then
+            echo "::error::CI gate jobs did not succeed: $(tr '\n' ' ' <<< "$failed")"
+            exit 1
+          fi

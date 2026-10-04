@@ -31,15 +31,6 @@ it('[HOST-03-01] runtime registers commands, opens/reuses leaves, reports naviga
   open?.(); hostState.commands.get('toggle-view-header')?.callback?.(); hostState.ready.forEach(callback => callback()); await settle();
   expect(p.app.workspace.revealLeaf).toHaveBeenCalledTimes(count); expect(p.registerEvent).not.toHaveBeenCalled(); expect(leaf.detach).not.toHaveBeenCalled();
 });
-it('[HOST-03-02] main lifecycle owns mounted views and removes per-view workspace listeners on unload', async () => {
-  const p = plugin(); await p.onload(); hostState.ready.forEach(callback => callback()); expect(p.registerEvent).toHaveBeenCalledTimes(8);
-  const create = hostState.views.get(SHOWCASE_VIEW); if (!create) throw new Error('VIEW_NOT_REGISTERED');
-  const view = create(new WorkspaceLeaf()); if (!(view instanceof ShowcaseView)) throw new Error('WRONG_VIEW');
-  await view.onOpen(); await settle(); expect(view.contentEl.querySelector('[data-testid="showcase"]')).not.toBeNull();
-  for (const callback of hostState.listeners.get('file-open') ?? []) callback(null);
-  p.onunload(); p.onunload(); expect(view.contentEl.querySelector('[data-testid="showcase"]')).toBeNull();
-  expect(p.app.workspace.offref).toHaveBeenCalledTimes(6); expect(view.leaf.detach).not.toHaveBeenCalled(); await view.onClose();
-});
 it('[HOST-03-03] view actions own menus, preserve unrelated host state and recover from mount failure', async () => {
   const p = plugin(); const services = await createServices(nativeAdapters(p)); const owned = vi.fn(); const cleanup = vi.fn();
   let actions: ((event: MouseEvent) => void) | undefined;

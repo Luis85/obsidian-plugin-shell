@@ -5,7 +5,7 @@
   "name": "Start Blank",
   "category": "Foundations",
   "level": "Foundation",
-  "summary": "A minimal runnable plugin shell with no example domain or product requirements.",
+  "summary": "A minimal runnable shell with an empty generated workspace and no product requirements; the framework's Task, Project and Items examples stay registered until you run npm run examples:remove.",
   "outcome": "Best when your idea does not fit an existing pattern.",
   "tags": [
     "blank",
@@ -16,7 +16,7 @@
   "includes": [
     "Command and ribbon entry to an empty workspace",
     "Native settings surface and host-friendly design tokens",
-    "No example entities, source recipes or PRDs"
+    "No generated entities, source recipes or PRDs (the framework's example features stay registered; npm run examples:remove removes them)"
   ],
   "implementation": [
     "Your domain model, pages and business behavior",
@@ -41,14 +41,14 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
       "label": "Description",
       "type": "string",
       "required": false,
-      "default": "A minimal runnable plugin shell with no example domain or product requirements."
+      "default": "A minimal starting point with an empty workspace and no product requirements."
     },
     {
       "id": "version",
@@ -79,11 +79,11 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "my-plugin",
-        "name": "My Plugin",
-        "author": "",
+        "id": "my-vault-tool",
+        "name": "My Vault Tool",
+        "author": "Your Name",
         "version": "0.1.0",
-        "description": "A minimal runnable plugin shell with no example domain or product requirements."
+        "description": "A minimal starting point with an empty workspace and no product requirements."
       },
       "settings": {
         "codebaseFolder": "src",
@@ -503,7 +503,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

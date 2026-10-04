@@ -1,8 +1,24 @@
 name: Native integration starters
+# The jobs type-check src, bin and the generator, run runtime and tooling tests,
+# check the companion concept assembly and generate starters from templates, so
+# every non-narrative input triggers them. The filter mirrors
+# candidate-qualification.yml's narrative-documentation exclusion and keeps the
+# concept sources the assembly check reads.
 on:
-  push:
-    branches: [feat/native-file-extension-starters]
   pull_request:
+    paths:
+      - '**'
+      - '.*'
+      - '.*/**'
+      - '!docs/**'
+      - '!README.md'
+      - '!AGENTS.md'
+      - 'docs/concepts/**'
+      - 'docs/testing/acceptance-crosswalk.json'
+      - 'docs/testing/native-evidence-checks.json'
+      - 'docs/testing/test-plan.json'
+      - 'docs/design/obsidian-tokens.json'
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -10,53 +26,41 @@ concurrency:
   cancel-in-progress: true
 jobs:
   contracts-and-adapters:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Install qualified dependencies
-        run: |
-          npm install --prefix "$RUNNER_TEMP/native-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          node "$RUNNER_TEMP/native-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+          install: 'true'
+          install-flags: --no-fund
       - name: Verify contracts, makers and host lifecycle
         run: |
           node --test tests/tooling/native-integrations.checks.mjs
           node node_modules/vitest/vitest.mjs run --config configs/testing/vitest.config.mjs tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.generator.json
-          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit
           python3 scripts/concepts/build-companion.py --check
   generated-starters:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         starter: [custom-file-view, context-menu]
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Install qualified dependencies
-        run: |
-          npm install --prefix "$RUNNER_TEMP/native-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          node "$RUNNER_TEMP/native-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+          install: 'true'
+          install-flags: --no-fund
       - name: Independently install, build, typecheck and test generated plugin
         env:
-          QUALIFIED_NPM: ${{ runner.temp }}/native-npm/node_modules/npm/bin/npm-cli.js
           STARTER: ${{ matrix.starter }}
         run: node scripts/companion-tools/qualify-starter.mjs "$STARTER"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: native-starter-${{ matrix.starter }}

@@ -3,6 +3,7 @@ import { copyFile, lstat, mkdir, readFile, readdir, realpath, rename, rm, unlink
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { mapBounded } from './bounded-map.ts';
 import { sha256 } from './hash.ts';
+import { FILE_PLAN_PROTECTED_ROOTS, isProtectedSegment } from './protected-directories.ts';
 import type {
   ApplyFilePlanOptions,
   ApplyFilePlanReport,
@@ -24,10 +25,6 @@ type PlanShape = { version?: unknown; root?: unknown; changes?: unknown };
 type InspectedFile = { path: string; bytes: Buffer | null };
 type PlanFailure = Error & { report: ApplyFilePlanReport };
 
-const protectedRoots = new Set([
-  '.git', 'node_modules', '.worktrees', '.qualification', '.dev-vault',
-  '.native-runner', '.codex-authoring.lock', '.shell-first-run.lock',
-]);
 const hash = (value: string | Uint8Array): string => sha256(value);
 
 function errorCode(error: unknown): string | undefined {
@@ -53,7 +50,7 @@ function relativePath(path: unknown): string[] {
   if (typeof path !== 'string' || !path || isAbsolute(path) || path.includes('\\')) throw new Error('PLAN_UNSAFE_PATH');
   const parts = path.split('/');
   if (parts.some(part => !part || part === '.' || part === '..' || /[<>:"|?*\u0000-\u001f]/.test(part) || /[ .]$/.test(part) || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))) throw new Error('PLAN_UNSAFE_PATH');
-  if (protectedRoots.has(parts[0]!.toLowerCase())) throw new Error('PLAN_PROTECTED_PATH');
+  if (isProtectedSegment(parts[0]!, FILE_PLAN_PROTECTED_ROOTS)) throw new Error('PLAN_PROTECTED_PATH');
   return parts;
 }
 
@@ -180,8 +177,9 @@ function normalizePlan(plan: unknown): Readonly<PlanShape> {
   return Object.freeze({ version: source?.version, root: source?.root, changes });
 }
 
-function validatePlan(plan: Readonly<PlanShape>): void {
-  if (plan.version !== 1 || !Array.isArray(plan.changes)) throw new Error('PLAN_INVALID');
+/** Proves every field FilePlan promises (version, root, each change's path/content/encoding/hashes/status). */
+function validatePlan(plan: Readonly<PlanShape>): asserts plan is FilePlan {
+  if (plan.version !== 1 || typeof plan.root !== 'string' || !Array.isArray(plan.changes)) throw new Error('PLAN_INVALID');
   const seen = new Set<string>();
   for (const raw of plan.changes) {
     if (!raw || typeof raw !== 'object') throw new Error('PLAN_INVALID');
@@ -204,9 +202,8 @@ function validatePlan(plan: Readonly<PlanShape>): void {
 /** Cooperating tools share one lock. External editors are protected by per-write hash checks,
  * not a claim of a filesystem-wide transaction or compare-and-swap primitive. */
 export async function applyFilePlanRuntime(plan: unknown, options: ApplyFilePlanOptions = {}): Promise<ApplyFilePlanReport> {
-  const normalized = normalizePlan(plan);
-  validatePlan(normalized);
-  const typedPlan = normalized as unknown as FilePlan;
+  const typedPlan = normalizePlan(plan);
+  validatePlan(typedPlan);
   const root = await checkedRoot(typedPlan.root);
   const lock = join(root, '.codex-authoring.lock');
   await mkdir(lock).catch((error: unknown) => {
@@ -226,9 +223,8 @@ export async function applyFilePlanRuntime(plan: unknown, options: ApplyFilePlan
       const original = checked[index]!;
       originals.set(change.path, original.bytes);
       if (original.bytes !== null) await writeFile(join(lock, `before-${index}`), original.bytes, { flag: 'wx' });
-      if (change.content !== null) {
-        await writeFile(join(lock, `after-${index}`), contentBytes(change) as string | Uint8Array, { flag: 'wx' });
-      }
+      const bytes = contentBytes(change);
+      if (bytes !== null) await writeFile(join(lock, `after-${index}`), bytes, { flag: 'wx' });
     }
     for (const [index, change] of typedPlan.changes.entries()) {
       if (change.status === 'unchanged') { report.unchanged.push(change.path); continue; }

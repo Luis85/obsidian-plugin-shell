@@ -50,3 +50,13 @@ export function setupMcpFiles() {
     },
   ];
 }
+
+/**
+ * The one MCP ownership policy for both setup paths (npm setup's journal and bin/app setup's intake receipt).
+ * A file may be created when absent and kept when already identical; replacing or removing existing bytes requires
+ * that they are exactly what setup last recorded in `owned` (a Map of path to sha256). Returns the conflicting paths.
+ */
+export function mcpConflicts(changes, owned) {
+  return changes.filter(change => change.beforeHash !== null && change.beforeHash !== change.afterHash && owned.get(change.path) !== change.beforeHash)
+    .map(change => change.path);
+}

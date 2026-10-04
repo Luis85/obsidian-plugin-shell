@@ -6,6 +6,8 @@ import { join } from 'node:path';
 import { listStarters, readStarterOperation, editStarterPlan, assembleStarterPack, packStarterOperation } from '../../bin/adapters/starters/operations.ts';
 import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
 import { code, fileStarter, request, shipped, workspace } from './starters-fixture.mjs';
+import { extractKit } from './framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 // Starter operations (operations.ts): listing, schema/show/validate/coverage reads, add/edit plans and the standalone pack.
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -33,12 +35,27 @@ test('an empty project lists no starters and names the separate starters ZIP', (
     next: 'No starters installed. Extract the separate Workbench starters ZIP into this project (configs/starters/), or use starters add --input <definition.json>. The shell contains no fallback definitions.' });
 }, []));
 
-test('the schema comes from the checkout, or from the template copy beside a bundled kit CLI', () => workspace(async context => {
+test('the schema comes from the checkout and a stray template copy is never probed without a verified kit', () => workspace(async context => {
   const source = JSON.parse(await readFile(join(context.frameworkRoot, 'scripts/starters/starter.schema.json'), 'utf8'));
   assert.deepEqual((await read(context, 'starters schema')).data, source);
-  const kit = join(context.root, 'kit'); await mkdir(join(kit, 'bin/template/scripts/starters'), { recursive: true });
-  await writeFile(join(kit, 'bin/template/scripts/starters/starter.schema.json'), '{"title":"kit copy"}');
-  assert.deepEqual((await read({ ...context, frameworkRoot: kit }, 'starters schema')).data, { title: 'kit copy' });
+  // Without bin/kit.json a root is a checkout: its own schema wins and a stray bin/template copy is never probed.
+  const checkout = join(context.root, 'checkout'); await mkdir(join(checkout, 'bin/template/scripts/starters'), { recursive: true }); await mkdir(join(checkout, 'scripts/starters'), { recursive: true });
+  await writeFile(join(checkout, 'bin/template/scripts/starters/starter.schema.json'), '{"title":"stray copy"}');
+  await writeFile(join(checkout, 'scripts/starters/starter.schema.json'), '{"title":"checkout"}');
+  assert.deepEqual((await read({ ...context, frameworkRoot: checkout }, 'starters schema')).data, { title: 'checkout' });
+  await writeFile(join(checkout, 'scripts/starters/starter.schema.json'), '{"__proto__":{"polluted":true}}');
+  assert.equal(await code(read({ ...context, frameworkRoot: checkout }, 'starters schema')), 'JSON_DATA_INVALID');
+  await writeFile(join(checkout, 'bin/kit.json'), '{}');
+  assert.match(await code(read({ ...context, frameworkRoot: checkout }, 'starters schema')), /^KIT_/);
+}));
+
+test('an extracted kit reads the starters schema from its verified template copy', { timeout: 300000 }, async t => workspace(async context => {
+  if (await reviewedExamplesRemoved(context.frameworkRoot)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
+  const source = JSON.parse(await readFile(join(context.frameworkRoot, 'scripts/starters/starter.schema.json'), 'utf8'));
+  const kit = join(context.root, 'kit'); await extractKit(context.frameworkRoot, kit);
+  assert.deepEqual((await read({ ...context, frameworkRoot: kit }, 'starters schema')).data, source);
+  await writeFile(join(kit, 'bin/template/scripts/starters/starter.schema.json'), '{"title":"tampered"}');
+  assert.equal(await code(read({ ...context, frameworkRoot: kit }, 'starters schema')), 'KIT_MODIFIED');
 }));
 
 test('show, validate and coverage select installed definitions and refuse unknown or missing IDs', async () => workspace(async context => {

@@ -21,37 +21,34 @@ on:
       - 'scripts/companion/starter-*.mjs'
       - 'bin/compiler/emitters/framework-docs.ts'
       - 'tests/tooling/starter-*.checks.mjs'
+      - '.github/actions/setup-qualified/**'
       - '.github/workflows/starter-distribution.yml'
   workflow_dispatch:
 permissions:
   contents: read
+# A newer push to the same pull request supersedes the read-only asset build;
+# manual dispatches still run to completion.
 concurrency:
   group: starter-distribution-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
       source: ${{ steps.identity.outputs.source }}
       version: ${{ steps.identity.outputs.version }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - name: Install locked dependencies with the .nvmrc Node and qualified npm
+        uses: ./.github/actions/setup-qualified
         with:
-          node-version: 24.21.0
-          package-manager-cache: false
-      - name: Select qualified npm locally
+          install: 'true'
+          install-flags: --strict-allow-scripts
+      - name: Test the independent definition contract
         run: |
-          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
-      - name: Install locked dependencies
-        run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
-      - name: Typecheck and test the independent definition contract
-        run: |
-          node "$QUALIFIED_NPM" run typecheck:framework
           node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/framework-new-project.checks.mjs tests/tooling/framework-distribution.checks.mjs
       - name: Check suite registration and bounded asset contracts
         run: node scripts/testing/suites.mjs --check
@@ -81,7 +78,7 @@ jobs:
           node tests/concepts/feature-showcase.browser.mjs --html reports/feature-showcase/clickdummy.html
       - name: Retain source-bound starter and browser evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: companion-starter-evidence-${{ github.sha }}
           path: |
@@ -89,6 +86,7 @@ jobs:
             reports/companion-mvp/qualification-project.json
             reports/companion-mvp/starter-lifecycle/
             reports/feature-showcase/browser-evidence/
+          retention-days: 14
           if-no-files-found: warn
       - name: Bind assets to exact checked-out source
         id: identity
@@ -121,8 +119,9 @@ jobs:
           await writeFile(root + 'workbench-SHA256SUMS', assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join(''));
           NODE
       - name: Retain separate assets and their manifest
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: workbench-distributions-${{ steps.identity.outputs.source }}
           path: reports/workbench-distributions/
+          retention-days: 14
           if-no-files-found: error

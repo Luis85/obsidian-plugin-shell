@@ -84,7 +84,7 @@ test('generator emits a typed provider seam, canonical-read tests and dependency
   const p=providerProject(original);p.settings={codebaseFolder:'product/code',testsFolder:'product/specs'};
   const files=new Map((await projectFiles(root,projectModel(p))).map(f=>[f.path,f.content]));
   const pkg=JSON.parse(files.get('package.json'));assert.equal(pkg.scripts['testdata:plan'],'node scripts/test-data/cli.mjs plan');
-  assert.match(pkg.scripts['verify:project'],/testdata:check/);
+  assert.match(pkg.scripts['verify:artifacts'],/ && npm run testdata:check$/);assert.match(pkg.scripts['verify:project'],/ && npm run verify:artifacts$/);
   assert.match(files.get('product/code/generated/bootstrap/sources.ts'),/validateSourceOverrides/);
   assert.match(files.get('product/specs/project/fixtures/fixture-api.ts'),/adapter.execute\(.*input, \{signal\}\)/);
   assert.match(files.get('product/specs/project/fixtures/canonical-requirement.test.ts'),/markdownCodec/);

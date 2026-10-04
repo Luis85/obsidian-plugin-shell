@@ -42,7 +42,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -80,9 +80,9 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "quick-capture-plugin",
+        "id": "quick-capture",
         "name": "Quick Capture",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Collect ideas through a focused capture dialog and a reviewable inbox."
       },
@@ -3191,7 +3191,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

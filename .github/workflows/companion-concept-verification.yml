@@ -34,6 +34,7 @@ on:
       - 'configs/quality/fallow.json'
       - 'scripts/quality/maintainability-inventory.mjs'
       - 'tests/tooling/maintainability.checks.mjs'
+      - '.github/actions/setup-qualified/**'
       - '.github/workflows/companion-concept-verification.yml'
   push:
     branches: [main]
@@ -46,16 +47,16 @@ concurrency:
   cancel-in-progress: true
 jobs:
   source:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
+          install: 'true'
+          install-flags: --no-fund --ignore-scripts
       - name: Parse all concept Python sources without executing them or writing bytecode
         shell: bash
         run: |
@@ -74,12 +75,6 @@ jobs:
               records.append({'path': str(path), 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)})
           print(json.dumps({'status': 'passed', 'scope': 'Python syntax only; no execution or JS complexity claim', 'files': records}))
           PYTHON
-      - name: Install exact locked dependencies for the schema 6 contract bundle and kit assembly without lifecycle scripts
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund --ignore-scripts
       - name: Check exact offline concept assembly
         run: python3 scripts/concepts/build-companion.py --check
       - name: Exercise assembly, inventory and tamper rejection
@@ -100,7 +95,7 @@ jobs:
       - name: Exercise full-project JSON and read-only shell handoff
         run: |
           node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-composition-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
-          npm run test:visual
+          node "$QUALIFIED_NPM" run test:visual
       - name: Exercise prototype lifecycle, safe persistence and pinned generation
         run: node --test tests/tooling/companion-prototypes*.checks.mjs tests/tooling/framework-prototypes.checks.mjs
       - name: Validate the published project schema with an independent implementation
@@ -117,7 +112,7 @@ jobs:
           git rev-parse HEAD > "$RUNNER_TEMP/companion-review-source.commit"
           sha256sum "$RUNNER_TEMP/companion-review-source.tar.gz" > "$RUNNER_TEMP/companion-review-source.sha256"
       - name: Preserve reproducible review source
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: companion-review-source
           path: |
@@ -130,19 +125,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Install the exact locked Node tooling for the Node Playwright suites without lifecycle scripts
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund --ignore-scripts
+          install: 'true'
+          install-flags: --no-fund --ignore-scripts
       - name: Provision isolated pinned browser test tooling
         shell: bash
         run: |
@@ -174,7 +163,7 @@ jobs:
           "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --real-storage
       - name: Retain concept evidence even when a check fails
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: companion-browser-evidence
           path: |
@@ -186,18 +175,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Install the locked authoring toolchain
-        run: |
-          npm install --prefix "$RUNNER_TEMP/authoring-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/authoring-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
-          node "$RUNNER_TEMP/authoring-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+          install: 'true'
+          install-flags: --no-fund
       - name: Provision isolated browser tooling
         run: |
           python3 -m venv "$RUNNER_TEMP/authoring-browser"
@@ -211,13 +195,12 @@ jobs:
               with open(os.environ['GITHUB_ENV'], 'a') as env:
                   env.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
           PY
-      - name: Typecheck shared contracts and actual Vue authoring components
+      - name: Typecheck the actual Vue authoring components and run their contracts
         shell: bash
         run: |
           set -o pipefail
           mkdir -p reports/companion-mvp
-          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
+          node "$QUALIFIED_NPM" run typecheck:authoring 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
           node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
       - name: Build the empty companion and explicitly derive golden qualification input
         run: |
@@ -237,7 +220,7 @@ jobs:
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py --clickdummy
       - name: Retain exact authoring artifacts and browser evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: companion-mvp-authoring
           path: reports/companion-mvp/
@@ -249,18 +232,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Select locked tooling and install the framework
-        run: |
-          npm install --prefix "$RUNNER_TEMP/journey-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/journey-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
-          node "$RUNNER_TEMP/journey-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+          install: 'true'
+          install-flags: --no-fund
       - name: Provision the locked export browser and Electron system libraries
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - name: Build the authored definition and independently generate the native consumer
@@ -295,7 +273,7 @@ jobs:
             if test -d "$target/reports/obsidian"; then cp -R "$target/reports/obsidian" reports/journey-native/; fi
             if test -f "$target/design/journey-lens.json"; then cp "$target/design/journey-lens.json" reports/journey-native/; fi
           fi
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: generated-journey-native-evidence
@@ -310,17 +288,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Install the repository-locked TypeScript toolchain without lifecycle scripts
-        run: |
-          npm install --prefix "$RUNNER_TEMP/jev-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          node "$RUNNER_TEMP/jev-npm/node_modules/npm/bin/npm-cli.js" ci --ignore-scripts --no-fund
+          install: 'true'
+          install-flags: --ignore-scripts --no-fund
       - name: Verify retained inventory and compiler-selection negative controls
         run: |
           node docs/concepts/jev-prompt-editor/scripts/manifest.cjs
@@ -349,7 +323,7 @@ jobs:
           "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/schema.test.py
       - name: Retain compiler receipt and exact rebuilt artifact, not native acceptance
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: jev-typescript6-evidence
           path: |

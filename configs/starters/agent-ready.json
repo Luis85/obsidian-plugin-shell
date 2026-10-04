@@ -44,14 +44,14 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
       "label": "Description",
       "type": "string",
       "required": false,
-      "default": "A minimal agent-ready plugin shell with reviewed Airship and Hindsight defaults; installation and data processing remain explicit."
+      "default": "A minimal agent-ready starting point with reviewed Airship and Hindsight defaults. Installation and data processing remain explicit."
     },
     {
       "id": "version",
@@ -82,11 +82,11 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "my-plugin",
-        "name": "My Plugin",
-        "author": "",
+        "id": "agent-ready-tool",
+        "name": "Agent Ready Tool",
+        "author": "Your Name",
         "version": "0.1.0",
-        "description": "A minimal agent-ready plugin shell with reviewed Airship and Hindsight defaults; installation and data processing remain explicit."
+        "description": "A minimal agent-ready starting point with reviewed Airship and Hindsight defaults. Installation and data processing remain explicit."
       },
       "settings": {
         "codebaseFolder": "src",
@@ -524,7 +524,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

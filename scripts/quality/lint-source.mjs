@@ -2,7 +2,10 @@ import { existsSync } from 'node:fs';
 import { readdir, lstat } from 'node:fs/promises';
 import { resolve, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runNodeScript as runNode } from '../shared/process.ts';
+import { runNodeProcess } from '../shared/process.ts';
+
+/** The reviewed rules of the repository that owns this script; a project runs its own copy, so both always match. */
+const config = fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url));
 
 /** Explicit file arguments prevent an ignored archive ancestor from hiding its src tree. `only` (repository-relative
  * paths) narrows the run to those owned inputs, as `check --fast` does for changed files; the default is every input. */
@@ -16,7 +19,9 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
     } else if (stat.isFile() && /\.(?:[cm]?[jt]sx?|vue)$/.test(path)) files.push(relative(root, path));
   }
   await visit(resolve(root, 'src'));
-  if ((await readdir(root)).includes('bin')) await visit(resolve(root, 'bin'));
+  // In an extracted framework kit (or a project generated in place from one), bin/ holds the verified,
+  // bundled framework distribution (bin/kit.json, bin/app.js, bin/template/**), not project-owned source.
+  if ((await readdir(root)).includes('bin') && !existsSync(resolve(root, 'bin/kit.json'))) await visit(resolve(root, 'bin'));
   if ((await readdir(root)).includes('plugins')) await visit(resolve(root, 'plugins'));
   // Companion runtime templates become generated plugin source; a generated project may not carry them.
   if (existsSync(resolve(root, 'templates/companion/runtime'))) await visit(resolve(root, 'templates/companion/runtime'));
@@ -27,11 +32,10 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
     files.splice(0, files.length, ...owned);
     if (!files.length) return { status: 'passed', files: 0, scope: 'none of the requested files is an owned src/bin/plugins/templates/companion/runtime input' };
   }
-  // The project's own rules win; a bare source tree (archive probe) uses this framework's reviewed rules.
-  const config = [join(root, 'configs/lint/oxlintrc.json'), fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url))].find(path => existsSync(path));
-  if (!config) throw new Error('LINT_SOURCE_CONFIG_MISSING');
+  if (!existsSync(config)) throw new Error('LINT_SOURCE_CONFIG_MISSING');
   for (let offset = 0; offset < files.length; offset += 100) {
-    await runNode(tool, ['-c', config, ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
+    await runNodeProcess(tool, ['-c', config, ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'],
+      { spawnOptions: { cwd: root, stdio: 'inherit' }, forwardParentSignals: true });
   }
   return { status: 'passed', files: files.length, scope: only ? 'the requested owned src/bin/plugins/templates/companion/runtime inputs, explicit paths' : 'every owned src/bin/plugins/templates/companion/runtime JS/TS/Vue input, explicit paths' };
 }

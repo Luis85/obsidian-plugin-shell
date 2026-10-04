@@ -1,5 +1,6 @@
 import { defaultVaultConfigDirectory } from './host-paths.ts';
 import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.ts';
+import { isProtectedSegment, RESERVED_FOLDER_NAMES } from '../../scripts/shared/protected-directories.ts';
 import { firstRunDefaults, firstRunPreferenceSchema, readFirstRunPreferences, type FirstRunPreferences } from './first-run.ts';
 import { object, keys, text } from './data.ts';
 import { requireSketch } from './errors.ts';
@@ -55,7 +56,7 @@ function readPaths(input: unknown, baseline: UserSettings['paths'], hostDirector
 }
 function hostConfigName(value: unknown): string {
   const name = text(value, 'vaultConfigDirectory', 100);
-  requireSketch(/^[.a-zA-Z0-9_-]+$/.test(name) && !['.', '..', '.git', '.framework', 'node_modules'].includes(name.toLowerCase()), 'SETTINGS_HOST_DIRECTORY', 'Use the existing vault configuration directory name, not a path or protected project directory.');
+  requireSketch(/^[.a-zA-Z0-9_-]+$/.test(name) && name !== '.' && name !== '..' && !isProtectedSegment(name, RESERVED_FOLDER_NAMES), 'SETTINGS_HOST_DIRECTORY', 'Use the existing vault configuration directory name, not a path or protected project directory.');
   return name;
 }
 function readPreferences(input: unknown, baseline: UserSettings['preferences']): UserSettings['preferences'] {
