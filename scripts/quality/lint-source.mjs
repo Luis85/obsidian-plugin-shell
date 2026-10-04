@@ -19,7 +19,9 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
     } else if (stat.isFile() && /\.(?:[cm]?[jt]sx?|vue)$/.test(path)) files.push(relative(root, path));
   }
   await visit(resolve(root, 'src'));
-  if ((await readdir(root)).includes('bin')) await visit(resolve(root, 'bin'));
+  // In an extracted framework kit (or a project generated in place from one), bin/ holds the verified,
+  // bundled framework distribution (bin/kit.json, bin/app.js, bin/template/**), not project-owned source.
+  if ((await readdir(root)).includes('bin') && !existsSync(resolve(root, 'bin/kit.json'))) await visit(resolve(root, 'bin'));
   if ((await readdir(root)).includes('plugins')) await visit(resolve(root, 'plugins'));
   // Companion runtime templates become generated plugin source; a generated project may not carry them.
   if (existsSync(resolve(root, 'templates/companion/runtime'))) await visit(resolve(root, 'templates/companion/runtime'));
