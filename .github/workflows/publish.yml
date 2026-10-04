@@ -50,9 +50,7 @@ jobs:
         with:
           install: 'true'
           install-flags: --no-fund
-      # The checkout keeps no credentials; git uses GH_TOKEN through gh for this job only.
-      - name: Configure token-backed git transport
-        run: gh auth setup-git
+      # Every remote step goes through the GitHub API with GH_TOKEN; git needs no credentials.
       - name: Merge, tag, release and delete the release branch
         run: |
           mkdir -p reports/publish

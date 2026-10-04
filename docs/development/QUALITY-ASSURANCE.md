@@ -100,13 +100,18 @@ drafts included. The Integration tier is every other pull-request workflow; its
 jobs skip draft pull requests and `release/*` heads, and three-OS matrices run
 Linux only. `release.yml` (pushes to `release/**`, manual) verifies the release
 metadata and calls every pull-request workflow with `tier: release` (every matrix
-leg) plus `candidate-qualification.yml`; "Release result" aggregates them.
+leg) plus `candidate-qualification.yml`; "Release result" aggregates them, and
+its "Dev checks" and "CI result" alias jobs report those required checks on the
+release head, whose pull request is opened with `GITHUB_TOKEN` and so starts no
+pull-request workflow.
 
 Current workflows (read-only unless stated):
 
-- `dev.yml` (every pull-request event): `bin/app check --fast` against the base
-  branch, suite registration, repository policy, changelog structure and the
-  advisory self-review guard.
+- `dev.yml` (every pull-request event): `bin/app check --fast --skip-suites`
+  against the base branch (typecheck, lint, eslint, related Vitest tests and the
+  maker type-check; the node `--test` suites the diff selects are reported as
+  skipped and run in the Integration tier), suite registration, repository
+  policy, changelog structure and the advisory self-review guard.
 - `ci.yml` (ready pull requests, `main`, manual, called by `release.yml`):
   dependency-free `baseline` on Linux/Windows; `showcase` guided setup + `verify`
   (Windows on pull requests, plus Linux served e2e on pushes and releases); three

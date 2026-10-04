@@ -7,9 +7,11 @@ name: Release cut
 # reviewers of the protected "release" environment.
 # Tokens: pushes and pull requests made with GITHUB_TOKEN start no workflows, so
 # the cut dispatches release.yml itself (actions: write). The optional
-# RELEASE_TOKEN secret (a fine-grained token with contents, pull requests and
-# actions write on this repository) is needed only when branch protection or
-# required checks must see those events; GITHUB_TOKEN is the fallback.
+# RELEASE_TOKEN secret (a fine-grained PAT or GitHub App token with contents,
+# pull requests and actions write on this repository) makes the push and the
+# release pull request start the normal push and pull-request workflows too;
+# without it, release.yml reports "Dev checks" and "CI result" on the release
+# head itself. GITHUB_TOKEN is the fallback.
 on:
   workflow_dispatch:
     inputs:
@@ -48,7 +50,8 @@ jobs:
         with:
           install: 'true'
           install-flags: --no-fund
-      # The checkout keeps no credentials; git uses GH_TOKEN through gh for this job only.
+      # The checkout keeps no credentials. cut.mjs fetches, inspects and pushes origin;
+      # gh's credential helper supplies GH_TOKEN for this job only (private repositories).
       - name: Configure the commit identity and token-backed git transport
         run: |
           git config user.name 'github-actions[bot]'

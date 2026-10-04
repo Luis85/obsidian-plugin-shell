@@ -6,7 +6,9 @@ name: Release
 # "Release result" is what Publish requires before it merges, tags and releases;
 # it never runs on ordinary pull requests, so it is not a branch-protection check.
 # Release cut pushes the branch with GITHUB_TOKEN, which starts no push workflow,
-# so it dispatches this workflow on the release branch explicitly.
+# so it dispatches this workflow on the release branch explicitly. With the
+# optional RELEASE_TOKEN secret (a fine-grained PAT or GitHub App token) the cut's
+# push and pull request also start the normal push and pull-request workflows.
 on:
   push:
     branches: ['release/**']
@@ -153,3 +155,32 @@ jobs:
             echo "::error::Release tier jobs did not succeed: $(tr '\n' ' ' <<< "$failed")"
             exit 1
           fi
+
+  # The release pull request is opened with GITHUB_TOKEN, so dev.yml and ci.yml
+  # never report on it, and the required "Dev checks" and "CI result" checks would
+  # block Publish's merge. The release tier is a strict superset of both (it runs
+  # ci.yml in full plus every other workflow), so these aliases report them on the
+  # release head from "Release result". `always()` keeps them from being skipped,
+  # because a skipped required check would count as passing.
+  dev-checks:
+    name: Dev checks
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - &release-alias
+        name: Pass only when Release result succeeded
+        env:
+          RELEASE_RESULT: ${{ needs.release-result.result }}
+        run: |
+          echo "Release result: $RELEASE_RESULT"
+          test "$RELEASE_RESULT" = success
+  ci-result:
+    name: CI result
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - *release-alias

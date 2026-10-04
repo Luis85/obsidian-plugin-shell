@@ -205,7 +205,14 @@ test('the release tier calls every gated pull-request workflow and candidate qua
   }
   const result = release.jobs['release-result'];
   assert.equal(result.name, 'Release result'); assert.equal(result.if, 'always()');
-  assert.deepEqual([...result.needs].sort(), Object.keys(release.jobs).filter(id => id !== 'release-result').sort());
+  const aliases = { 'dev-checks': 'Dev checks', 'ci-result': 'CI result' };
+  assert.deepEqual([...result.needs].sort(), Object.keys(release.jobs).filter(id => id !== 'release-result' && !(id in aliases)).sort());
+  // The release pull request reports the required checks from the release tier, never as a skipped pass.
+  for (const [id, name] of Object.entries(aliases)) {
+    const alias = release.jobs[id];
+    assert.deepEqual([alias.name, alias.if, alias.needs], [name, 'always()', 'release-result'], id);
+    assert.match(alias.steps[0].run, /test "\$RELEASE_RESULT" = success/); assert.equal(alias.steps[0].env.RELEASE_RESULT, '${{ needs.release-result.result }}');
+  }
   assert.match(result.steps[0].run, /select\(\.value\.result != "success"\)[\s\S]*exit 1/);
   assert.match(release.jobs.metadata.steps.map(step => step.run ?? '').join('\n'), /branch\.mjs verify --version "\$VERSION"/);
   assert.ok(!Object.values(release.jobs).some(job => job.permissions), 'the release tier stays read-only');
