@@ -10,7 +10,7 @@ import { parseCommandFile, shellInvocation } from '../../bin/domain/ci-shell.ts'
 import { summarizeWorkflow } from '../../bin/domain/ci-listing.ts';
 import { setupActions } from '../../bin/domain/ci-workflow.ts';
 import { executionBlockers, planJob, skipReason } from '../../bin/domain/ci-plan.ts';
-import { e2eFacts } from '../../scripts/quality/check-repository.mjs';
+import { e2eFacts, syncedProjectWorkflow } from '../../scripts/quality/check-repository.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const parseDocument = await workflowParser();
@@ -179,12 +179,13 @@ test('string search functions settle on two known arguments and stay unknown oth
   for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
 });
 // Dev and the Definition of Ready/Done checks run on every pull request event with their own conditions; they are
-// not Integration workflows, so the release tier reports them through aliases instead of calling them.
+// not Integration workflows, so the release tier reports them through aliases instead of calling them. Synced
+// projects--* copies belong to standalone projects and follow their own CI, never the shell's tiers.
 const ownTier = ['dev', 'definition-of-ready', 'definition-of-done'];
 test('every pull-request workflow runs its jobs only on ready, non-release pull requests unless called with tier release', async () => {
   const workflows = await loadWorkflows(root), parse = await workflowParser();
   const tiered = "inputs.tier == 'release' || (";
-  const gated = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem));
+  const gated = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem) && !syncedProjectWorkflow(item.file));
   assert.ok(gated.length >= 13, 'every integration workflow is listed');
   for (const item of gated) {
     const text = await readFile(join(root, '.github/workflows', item.file), 'utf8'), data = parse(text).toJS();
@@ -210,7 +211,7 @@ test('the release tier calls every gated pull-request workflow and candidate qua
   const workflows = await loadWorkflows(root), parse = await workflowParser();
   const release = parse(await readFile(join(root, '.github/workflows/release.yml'), 'utf8')).toJS();
   const calls = Object.entries(release.jobs).filter(([, job]) => job.uses);
-  const expected = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem)).map(item => item.file).concat('candidate-qualification.yml').sort();
+  const expected = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem) && !syncedProjectWorkflow(item.file)).map(item => item.file).concat('candidate-qualification.yml').sort();
   assert.deepEqual(calls.map(([, job]) => job.uses.replace('./.github/workflows/', '')).sort(), expected);
   for (const [id, job] of calls) {
     assert.deepEqual(job.needs, 'metadata', id); assert.equal(job.secrets, undefined, id);

@@ -5,6 +5,7 @@ name: Site templates
 # rendered site with its own exact lock. The shell itself never installs Astro.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths: &site-template-inputs
       - 'templates/sites/**'
       - 'bin/domain/site-template.ts'
@@ -18,7 +19,20 @@ on:
   push:
     branches: [main]
     paths: *site-template-inputs
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -26,6 +40,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Render and build every site template
     runs-on: ubuntu-24.04
     timeout-minutes: 30

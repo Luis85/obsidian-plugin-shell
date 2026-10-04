@@ -6,6 +6,7 @@ name: Projects boundary
 # their current .base files, so any .base edit re-runs it. See projects/README.md.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths: &boundary-inputs
       - 'projects/**'
       - 'scripts/projects/**'
@@ -24,7 +25,20 @@ on:
   push:
     branches: [main]
     paths: *boundary-inputs
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -32,6 +46,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   boundary:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Projects boundary
     runs-on: ubuntu-24.04
     timeout-minutes: 10
