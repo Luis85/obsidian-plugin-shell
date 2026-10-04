@@ -57,16 +57,19 @@ export const fieldNames: Record<DocType, readonly string[]> = {
   journey: [], route: ['surface_id', 'path'], transition: ['from', 'to', 'kind'],
   layout: [], 'component-revision': [], 'library-component': [], feature: [], prd: ['label_field'],
 };
-export function validateEntity(entity: Entity): void {
-  insist(DOC_TYPES.includes(entity.type), 'DOCS_TYPE', 'Unknown document type.');
-  text(entity.id, 'id'); text(entity.project, 'project'); text(entity.title, 'title');
-  jsonData(entity); docsObject(entity.fields); docsObject(entity.data);
-  insist(Object.keys(entity.fields).every(name => fieldNames[entity.type].includes(name)), 'DOCS_FIELD', 'Unknown managed field.');
-  for (const [name, value] of Object.entries(entity.fields)) {
+const isDocType = (value: unknown): value is DocType => typeof value === 'string' && (DOC_TYPES as readonly string[]).includes(value);
+/** Proves an untrusted value is a managed documentation entity; typed callers get the same checks. */
+export function validateEntity(entity: unknown): asserts entity is Entity {
+  const record = docsObject(entity), type = record.type;
+  insist(isDocType(type), 'DOCS_TYPE', 'Unknown document type.');
+  text(record.id, 'id'); text(record.project, 'project'); text(record.title, 'title');
+  jsonData(record); const fields = docsObject(record.fields); docsObject(record.data);
+  insist(Object.keys(fields).every(name => fieldNames[type].includes(name)), 'DOCS_FIELD', 'Unknown managed field.');
+  for (const [name, value] of Object.entries(fields)) {
     if (name === 'position') insist(Number.isSafeInteger(value) && Number(value) >= 0, 'DOCS_FIELD', 'position must be a nonnegative integer.');
     else text(value, name);
   }
-  if (entity.type === 'interaction') for (const name of ['owner_type', 'owner_id', 'source_node_id', 'event']) text(entity.fields[name], name);
+  if (type === 'interaction') for (const name of ['owner_type', 'owner_id', 'source_node_id', 'event']) text(fields[name], name);
 }
 /** Accepted concise hand-authoring forms normalize before semantic reconciliation. */
 const payloadKeys: Partial<Record<DocType, readonly string[]>> = {

@@ -1,6 +1,6 @@
 import { setupSource } from './setup-source.ts';
 import { prepareHandout } from './handout-workspace.ts';
-import { setupMcpFiles } from '../../../scripts/agent/mcp-config.mjs';
+import { mcpConflicts, setupMcpFiles } from '../../../scripts/agent/mcp-config.mjs';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve } from 'node:path';
@@ -89,7 +89,11 @@ async function ownershipEntries(context: Context, selected: Configuration, track
   const previousReceipt = await exists(join(context.root, receiptPath)) ? object(await readJson(join(context.root, receiptPath))) : {};
   const old = previousReceipt.files === undefined ? {} : object(previousReceipt.files);
   const before = await createFilePlan(context.root, tracked);
-  for (const change of before.changes) requireThat(change.beforeHash === null || change.beforeHash === old[change.path], 'IMPORT_OWNERSHIP', `Preserve edited or foreign design file: ${change.path}. Export/reconcile it before importing.`);
+  // MCP configuration follows the shared setup policy and reports its own conflict; every other tracked file is design data.
+  const mcpPaths = new Set(setupMcpFiles().map(file => file.path));
+  const [mcpConflict] = mcpConflicts(before.changes.filter(change => mcpPaths.has(change.path)), new Map(Object.entries(old)));
+  requireThat(!mcpConflict, 'MCP_CONFIG_CONFLICT', `Preserve edited or foreign MCP configuration: ${mcpConflict}. Reconcile it before setup manages or removes it.`);
+  for (const change of before.changes) if (!mcpPaths.has(change.path)) requireThat(change.beforeHash === null || change.beforeHash === old[change.path], 'IMPORT_OWNERSHIP', `Preserve edited or foreign design file: ${change.path}. Export/reconcile it before importing.`);
   const current = { ...old };
   for (const entry of tracked) {
     if (entry.content === null) delete current[entry.path];

@@ -10,6 +10,7 @@ import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
 import { included, standaloneSource, updateOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { templateRootFiles as templateFiles, templateRoots } from '../../compiler/domain/template-inputs.ts';
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
@@ -76,7 +77,7 @@ export async function packKit(context: Context, output: string) {
   const identity = object(await readJson(join(context.frameworkRoot, 'manifest.json')));
   requireThat(identity.id === 'plugin-shell' && !await exists(join(context.frameworkRoot, '.companion/generation.json')), 'KIT_AUTHORING_ROOT', 'Consumer plugins are not framework distribution sources.');
   const destination = resolve(context.root, output), parts = relative(context.root, destination).split(sep);
-  requireThat(destination.endsWith('.zip') && !parts.some(part => ['.git', 'node_modules', '.framework', '.companion'].includes(part.toLowerCase())), 'KIT_OUTPUT_PATH', 'Choose a ZIP output outside protected project directories.');
+  requireThat(destination.endsWith('.zip') && !parts.some(part => isProtectedSegment(part)), 'KIT_OUTPUT_PATH', 'Choose a ZIP output outside protected project directories.');
   const compiler = await installedCompiler();
   const files = await assembleKit(context, compiler), bytes = zip(files), path = resolve(context.root, output);
   const plan = await createFilePlan(dirname(path), [{ path: basename(path), content: bytes.toString('base64'), encoding: 'base64' }]);

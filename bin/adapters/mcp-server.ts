@@ -1,6 +1,5 @@
 import { spawn } from 'node:child_process';
 import * as timers from 'node:timers';
-import { createInterface } from 'node:readline';
 import { join } from 'node:path';
 import type { Readable, Writable } from 'node:stream';
 import { terminateProcessTree } from './framework/process-tree.ts';
@@ -11,8 +10,9 @@ const MAX_ARG_LENGTH = 4096;
 const MAX_STDIN_LENGTH = 256 * 1024;
 const MAX_REQUEST_BYTES = 512 * 1024;
 const MAX_INFLIGHT = 4;
-const legacyProtocols = new Set(['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']);
-const supportedVersions = ['2026-07-28', ...legacyProtocols];
+/** Protocol versions negotiated through the initialize handshake; 2026-07-28 clients use server/discover instead. */
+const initializeProtocols = new Set(['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']);
+const supportedVersions = ['2026-07-28', ...initializeProtocols];
 const serverInfo = { name: 'workbench-local', title: 'Workbench Local', version: '1.0.0' };
 const capabilities = { tools: { listChanged: false } };
 const instructions = 'Use workbench_capabilities and workbench_help before invoking unfamiliar commands. Prefer Workbench dry-run/plan flows before writes. workbench_execute never grants approval flags or release/process trust; those remain explicit Workbench and client decisions.';
@@ -140,7 +140,7 @@ async function tool(name: string, input: unknown, run: McpRunner, signal?: Abort
 
 function initializeResponse(message: JsonRpc, params: Record<string, unknown>) {
   const requested = params.protocolVersion;
-  const protocolVersion = typeof requested === 'string' && legacyProtocols.has(requested) ? requested : '2025-11-25';
+  const protocolVersion = typeof requested === 'string' && initializeProtocols.has(requested) ? requested : '2025-11-25';
   return result(message.id, { protocolVersion, capabilities, serverInfo, instructions });
 }
 async function operationalResponse(message: JsonRpc, params: Record<string, unknown>, run: McpRunner, signal?: AbortSignal) {
@@ -207,10 +207,48 @@ function requestKey(id: unknown): string | null {
 }
 type Send = (response: Record<string, unknown>) => void;
 type Active = Map<string, { controller: AbortController; promise: Promise<void> }>;
-/** Parses one line; oversized or malformed input is answered here and yields no message. */
-function parseLine(line: string, send: Send): JsonRpc | null {
-  if (Buffer.byteLength(line, 'utf8') > MAX_REQUEST_BYTES) { send(error(null, -32600, 'Request too large.')); return null; }
-  try { return JSON.parse(line) as JsonRpc; }
+const OVERSIZED = Symbol('oversized frame');
+type Frame = string | typeof OVERSIZED;
+const decodeFrame = (parts: readonly Buffer[]): string => Buffer.concat(parts).toString('utf8').replace(/\r$/, '');
+/**
+ * Newline-delimited frames, holding at most MAX_REQUEST_BYTES of any one frame: the bytes of an oversized frame are
+ * dropped as they arrive and the frame is reported once at its newline. UTF-8 split across chunks decodes intact.
+ */
+class FrameBuffer {
+  private parts: Buffer[] = [];
+  private size = 0;
+  private oversized = false;
+  /** Adds bytes of the current frame; once the frame exceeds the bound its bytes are dropped, not held. */
+  add(piece: Buffer): void {
+    if (!this.oversized && this.size + piece.length > MAX_REQUEST_BYTES) { this.oversized = true; this.parts = []; }
+    if (!this.oversized) { this.parts.push(piece); this.size += piece.length; }
+  }
+  /** Completes the current frame and starts the next one. */
+  take(): Frame {
+    const frame = this.oversized ? OVERSIZED : decodeFrame(this.parts);
+    this.parts = []; this.size = 0; this.oversized = false;
+    return frame;
+  }
+  get pending(): boolean { return this.oversized || this.size > 0; }
+}
+function* splitChunk(buffer: FrameBuffer, chunk: Buffer): Generator<Frame> {
+  let data = chunk;
+  for (let newline = data.indexOf(10); newline !== -1; newline = data.indexOf(10)) {
+    buffer.add(data.subarray(0, newline)); yield buffer.take();
+    data = data.subarray(newline + 1);
+  }
+  buffer.add(data);
+}
+async function* frames(input: Readable): AsyncGenerator<Frame> {
+  const buffer = new FrameBuffer();
+  for await (const chunk of input) yield* splitChunk(buffer, Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+  if (buffer.pending) yield buffer.take();
+}
+/** Parses one frame; oversized or malformed input is answered here and yields no message. */
+function parseFrame(frame: Frame, send: Send): JsonRpc | null {
+  if (frame === OVERSIZED) { send(error(null, -32600, 'Request too large.')); return null; }
+  if (!frame.trim()) return null;
+  try { return JSON.parse(frame) as JsonRpc; }
   catch { send(error(null, -32700, 'Parse error.')); return null; }
 }
 /** The reason a request cannot start, or null when it may run concurrently under its own id. */
@@ -232,7 +270,6 @@ async function handledInline(message: JsonRpc, run: McpRunner, active: Active, s
   return true;
 }
 export async function runMcpServer(root: string, io: McpIo, run: McpRunner = (args, timeout, stdin, signal) => runWorkbench(root, args, timeout, stdin, signal)): Promise<number> {
-  const lines = createInterface({ input: io.input, crlfDelay: Infinity });
   const active: Active = new Map();
   const pending = new Set<Promise<void>>();
   const send: Send = response => { io.output.write(JSON.stringify(response) + '\n'); };
@@ -251,8 +288,8 @@ export async function runMcpServer(root: string, io: McpIo, run: McpRunner = (ar
     active.set(key, { controller, promise }); pending.add(promise);
     void promise.finally(() => pending.delete(promise));
   };
-  for await (const line of lines) {
-    const message = line.trim() ? parseLine(line, send) : null;
+  for await (const frame of frames(io.input)) {
+    const message = parseFrame(frame, send);
     if (!message || await handledInline(message, run, active, send)) continue;
     const key = requestKey(message.id), refused = admissionError(message, key, active);
     if (refused) send(refused); else start(message, key!);

@@ -397,7 +397,8 @@
       {
         "name": "project-path-contract",
         "patterns": [
-          "scripts/shared/project-path.ts"
+          "scripts/shared/project-path.ts",
+          "scripts/shared/protected-directories.ts"
         ]
       },
       {
@@ -739,7 +740,8 @@
         "allow": [
           "cli-file-plan-contract",
           "cli-bounded-map-contract",
-          "cli-files-contract"
+          "cli-files-contract",
+          "project-path-contract"
         ]
       },
       {

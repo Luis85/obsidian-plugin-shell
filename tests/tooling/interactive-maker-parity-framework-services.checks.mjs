@@ -194,7 +194,7 @@ test('relocated clickdummy build preserves fixed paths, reviewed execution and r
     assert.equal(built.data.acceptance, 'not-inferred');
     assert.equal(built.data.receipt.status, 'built-not-browser-verified');
     const run = calls.find(call => call[0] === 'run');
-    assert.equal(run[2], '.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs');
+    assert.equal(run[2], 'scripts/clickdummy/lib/build-worker.mjs', 'the shipped worker, even when the prototype skill exists');
     assert.equal(run[4], 1234);
     assert.ok(run[3].includes('--replace'));
     assert.ok(run[3].includes('Workbench demo'));

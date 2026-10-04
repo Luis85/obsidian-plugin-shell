@@ -1,4 +1,3 @@
-import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { starterCoverage } from './coverage.ts';
 import { basename, dirname, join, resolve } from 'node:path';
 import { readdir } from 'node:fs/promises';
@@ -9,6 +8,9 @@ import { result, requireThat, stringOption, type Context, type Request } from '.
 import { STARTER_MAX_BYTES } from './browser.ts';
 import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts';
 import { pluginStarterDefinitions } from '../../../plugins/runtime.ts';
+import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { resolveTemplateRoot } from '../template-root.ts';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 export async function listStarters(context: Context, command = 'starters list') {
   const definitions = await loadDefinitions(context.root), folder = await starterFolder(context.root);
   return result(command, { folder, integrity: 'local-content-sha256; not a signature', starters: definitions.map(({ definition: d, sha256, file }) => ({
@@ -19,11 +21,9 @@ export async function listStarters(context: Context, command = 'starters list') 
 export async function readStarterOperation(request: Request, context: Context) {
   if (request.command === 'starters list') return listStarters(context);
   if (request.command === 'starters schema') {
-    // A release kit keeps the schema as template data beside its bundled CLI; a checkout reads its own source.
-    const schema = 'scripts/starters/starter.schema.json';
-    let root = context.frameworkRoot;
-    if (await exists(join(context.frameworkRoot, 'bin/template', schema))) root = join(context.frameworkRoot, 'bin/template');
-    return result(request.command, JSON.parse((await readBounded(join(root, schema))).toString('utf8')));
+    // A verified release kit keeps the schema as template data beside its bundled CLI; a checkout reads its own source.
+    const schema = join(await resolveTemplateRoot(context.frameworkRoot), 'scripts/starters/starter.schema.json');
+    return result(request.command, parseJsonData(new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(schema))));
   }
   const definitions = await loadDefinitions(context.root);
   const id = request.args[0], selected = definitions.filter(entry => !id || entry.definition.id === id);
@@ -84,7 +84,7 @@ export async function assembleStarterPack(context: Context) {
 export async function packStarterOperation(request: Request, context: Context) {
   const output = stringOption(request.options, 'out'); requireThat(output, 'OUTPUT_REQUIRED', 'Supply --out <starters.zip>.');
   const target = resolve(context.root, output);
-  requireThat(target.endsWith('.zip') && !target.split(/[\\/]/).some(part => ['.git', defaultVaultConfigDirectory, '.framework', 'node_modules'].includes(part.toLowerCase())), 'STARTER_PATH', 'Choose a ZIP outside protected directories.');
+  requireThat(target.endsWith('.zip') && !target.split(/[\\/]/).some(part => isProtectedSegment(part)), 'STARTER_PATH', 'Choose a ZIP outside protected directories.');
   const files = await assembleStarterPack(context), bytes = zip(files);
   const report = { archive: target, sha256: hash(bytes), bytes: bytes.length, starters: files.length, publication: 'not-authorized', definitionFormat: 'configs/starters/$starterName.json' };
   if (!request.options.yes || request.options['dry-run']) return result(request.command, { ...report, requires: '--yes' }, 'planned');

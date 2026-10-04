@@ -168,13 +168,13 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
 function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): Record<string, unknown> {
-    const legacy = args.command === 'new' ? descriptor('new') : undefined;
+    const newCommand = args.command === 'new' ? descriptor('new') : undefined;
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: newCommand ? [{ ...newCommand, options: parameterKinds(newCommand) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
-      ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
+      ...(newCommand ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
 /** A registered plugin root owns its own help and execution; undefined means a built-in command. */

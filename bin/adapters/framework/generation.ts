@@ -1,5 +1,6 @@
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
+import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
 import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
@@ -34,7 +35,7 @@ export async function generateSourcePlan(request: Request, context: Context) {
   const templateRoot = join(context.root, 'bin/template');
   const intakePath = '.framework/intake.json';
   const intakeBytes = await readBounded(join(context.root, intakePath));
-  const intake = object(JSON.parse(intakeBytes.toString('utf8')));
+  const intake = object(parseJsonData(new TextDecoder('utf-8', { fatal: true }).decode(intakeBytes)));
   const inputHash = hash(await readBounded(join(context.root, designFile), 4_000_000));
   requireThat(intake.schemaVersion === 1 && object(intake.files)[designFile] === inputHash, 'IMPORT_OWNERSHIP', 'The imported design changed outside the reviewed intake operation.');
   const bootstrap = [...kit.bootstrap, { path: designFile, hash: inputHash }];
@@ -48,7 +49,7 @@ export async function generateSourcePlan(request: Request, context: Context) {
   const entries = planned.plan.changes.map(({ path, content, encoding }) => {
     if (path !== '.companion/generation.json') return { path, content, ...(encoding ? { encoding } : {}) };
     requireThat(typeof content === 'string' && !encoding, 'GENERATION_RECEIPT_INVALID', 'Expected the generated ownership receipt.');
-    return { path, content: json({ ...object(JSON.parse(content)), inputHash: generatedDesign.afterHash }) };
+    return { path, content: json({ ...object(parseJsonData(content)), inputHash: generatedDesign.afterHash }) };
   });
   entries.push({ path: intakePath, content: json({ ...intake, files: { ...object(intake.files), [designFile]: generatedDesign.afterHash } }) });
   const plan = await createFilePlan(context.root, entries);

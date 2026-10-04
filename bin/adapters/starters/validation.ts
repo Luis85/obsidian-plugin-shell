@@ -1,4 +1,4 @@
-import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { OperationError, requireThat } from '../framework/contracts.ts';
 import { readProjectGenerator } from '../../compiler/domain/project-starter.ts';
 import { assertDesignData } from '../../../scripts/contracts/json-data.ts';
@@ -39,7 +39,7 @@ function unique(ids: string[]): void { requireThat(new Set(ids).size === ids.len
 export function portablePath(value: string, dot = false): boolean {
   if (dot && value === '.') return true;
   return value.length <= 240 && value.split('/').every(part => /^[a-zA-Z0-9_.-][a-zA-Z0-9_. -]*$/.test(part) &&
-    !['.', '..', '.git', defaultVaultConfigDirectory, '.framework', '.companion', '.workbench', '.codex-authoring.lock'].includes(part.toLowerCase()) &&
+    part !== '.' && part !== '..' && !isProtectedSegment(part) &&
     !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 }
 export function inputValue(value: unknown, input: StarterInput): InputValue {

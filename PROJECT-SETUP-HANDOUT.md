@@ -24,7 +24,7 @@ This file belongs at the project root: `PROJECT-SETUP-HANDOUT.md`. It is a meeti
 
 **Draft template:** no PRD files were available when this copy was generated. Add the given PRDs, refresh the source snapshot, and review the answers before using it as an agent execution brief.
 
-<!-- workbench-handout-snapshot: {"schemaVersion":1,"templateHash":"19b0da3adb52f49c48c94a67ada8c37cbd8cbfa002a2e8ccb2eb0c8668e13807","prdsRoot":"docs/prds","prdsMode":"configured","files":[{"path":"configs/user-settings.json","sha256":null},{"path":"shell.config.json","sha256":null}],"fingerprint":"c898c8248deae5b55993cbe89458f9508be4efa6c87066bf1285ce02ad990441"} -->
+<!-- workbench-handout-snapshot: {"schemaVersion":1,"templateHash":"5307bf36882ad5cd01e299cc5f4165c220c8c8f4119c524f5186d512b4b045ef","prdsRoot":"docs/prds","prdsMode":"configured","files":[{"path":"configs/user-settings.json","sha256":null},{"path":"shell.config.json","sha256":null}],"fingerprint":"95380de75da4f079f12b26a03efe9d419f765452b707c24238c2b48afcda9a96"} -->
 
 ## 01 · Meeting outcome and decision ownership
 
@@ -295,7 +295,7 @@ Clarify external dependencies and trust boundaries. PRDs, starter files, Markdow
 
 ## 14 · Project paths, existing work and settings
 
-Agree the filesystem contract and preserve existing work. The handout always lives at the project root. Preferred settings belong in configs/user-settings.json; record a capability gap when the installed version still uses legacy shell.config.json rather than silently pretending migration is complete.
+Agree the filesystem contract and preserve existing work. The handout always lives at the project root. Maker paths and preferences belong in configs/user-settings.json; project identity and the source, test and vault folders live in shell.config.json. Record a capability gap when the installed shell does not support a needed setting rather than silently pretending it does.
 
 - [ ] **REQUIRED** `setup.root` — Which existing directory is the project root and what must be preserved?
   - Answer: <TBD>
@@ -304,7 +304,7 @@ Agree the filesystem contract and preserve existing work. The handout always liv
 
 - [ ] **REQUIRED** `setup.paths` — What are the exact project-relative paths?
   - Answer: handout=PROJECT-SETUP-HANDOUT.md; settings=configs/user-settings.json; prds=docs/prds; docs=docs; pages=docs/pages; components=docs/components; interactions=docs/interactions; journeys=docs/journeys; design=design/project.json; source=src; tests=tests; assets=assets; fixtures=tests/fixtures; reports=reports; starters=configs/starters; prototype=prototype; testVault=.test-vault; obsidianConfig=.obsidian
-  - Evidence: Handout path defaults plus observed configs/user-settings.json and legacy shell.config.json, where present. Confirm support and output ownership against the installed shell.
+  - Evidence: Handout path defaults plus observed configs/user-settings.json and the shell.config.json project paths, where present. Confirm support and output ownership against the installed shell.
   - Guidance: List user settings, PRDs, typed docs for pages/components/interactions/journeys, design JSON, source, tests, assets, fixtures, reports, starters and prototype output.
 
 - [ ] **REQUIRED** `setup.preservation` — What may the agent create or modify, and what is protected?
