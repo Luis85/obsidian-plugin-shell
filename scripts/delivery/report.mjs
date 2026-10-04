@@ -48,7 +48,7 @@ export function humanReport(result) {
     for (const item of result.refinement.questions) for (const question of item.questions) lines.push(`  ${item.rule}: ${question}`);
   }
   for (const path of result.generated?.written ?? []) lines.push(`  wrote ${path}`);
-  for (const path of result.generated?.out ?? []) lines.push(`  generated ${path} (apply locally with --write)`);
+  for (const path of result.generated?.out ?? []) lines.push(`  generated ${path}${result.gate === 'done' ? ' (apply locally with --write)' : ''}`);
   return lines.join('\n');
 }
 

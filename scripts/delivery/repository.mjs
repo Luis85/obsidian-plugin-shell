@@ -4,7 +4,7 @@
  * suites, npm scripts, pull-request environment and the optional `node bin/app check --plan` gates.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { collectChanges } from '../quality/self-review-diff.mjs';
 import { safeRelative } from './paths.mjs';
@@ -22,10 +22,15 @@ function mergeBase(root, ref) {
   }
 }
 
+/** An untracked symlink to a folder (a worktree's linked node_modules) is environment, not a change. */
+function linkedFolder(root, path) {
+  try { return lstatSync(join(root, path)).isSymbolicLink() && statSync(join(root, path)).isDirectory(); } catch { return false; }
+}
+
 /** Tracked and untracked (not ignored) files that exist in the working tree. */
 function repositoryFiles(root) {
   const listed = git(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--deduplicate']).split('\0').filter(Boolean);
-  return [...new Set(listed)].filter(path => existsSync(join(root, path))).sort();
+  return [...new Set(listed)].filter(path => existsSync(join(root, path)) && !linkedFolder(root, path)).sort();
 }
 
 function readText(root, path) {
@@ -55,7 +60,7 @@ export function checkPlanGates(root, baseRef) {
 /** Everything the rules read from this checkout, gathered once. */
 export function repositorySnapshot(root, baseRef, { env = process.env, labelsEnv = 'PR_LABELS' } = {}) {
   const base = mergeBase(root, baseRef);
-  const diff = collectChanges(root, base.sha).map(file => ({ path: file.path, status: file.status, added: file.added }));
+  const diff = collectChanges(root, base.sha).filter(file => !(file.status === 'A' && linkedFolder(root, file.path))).map(file => ({ path: file.path, status: file.status, added: file.added }));
   const suites = readJson(root, 'tests/suites.json')?.suites;
   return { base, diff, files: repositoryFiles(root),
     suites: Array.isArray(suites) ? suites.map(suite => suite.name) : [],

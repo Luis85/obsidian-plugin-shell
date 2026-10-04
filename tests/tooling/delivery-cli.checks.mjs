@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { parseDocument } from 'yaml';
@@ -70,6 +70,11 @@ test('end to end in a real repository: ready, not done with generated docs in --
   assert.match(handoff, /Changed files: 6 \(4 added, 2 modified[\s\S]*\| Outside the affected areas \| 0 \|/, 'the record counts the files the write changed');
   const rerun = repo.run('done.mjs', ['--base', 'main', '--no-plan', '--write']);
   assert.equal(rerun.exit, 0); assert.doesNotMatch(rerun.stdout, /wrote /, 'a second --write is a no-op');
+  if (process.platform !== 'win32') {
+    await mkdir(join(repo.folder, 'deps')); await symlink(join(repo.folder, 'deps'), join(repo.root, 'node_modules'), 'dir');
+    const linked = repo.run('done.mjs', ['--base', 'main', '--no-plan', '--json']);
+    assert.equal(linked.json().rules.find(rule => rule.id === 'DOD-08').status, 'pass', 'an untracked linked dependency folder is environment, not a change');
+  }
   const labelled = repo.run('done.mjs', ['--base', 'main', '--no-plan', '--json'], { PR_LABELS: 'docs,e2e' });
   assert.match(labelled.json().rules.find(rule => rule.id === 'DOD-10').message, /not required/);
 });
