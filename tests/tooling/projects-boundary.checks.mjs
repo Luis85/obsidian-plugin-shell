@@ -9,6 +9,8 @@ import { checkProjects, syncWorkflows } from '../../scripts/projects/projects.mj
 import { frameworkProjectFolder } from '../../bin/compiler/domain/template-inputs.ts';
 import { included } from '../../bin/adapters/framework/distribution.ts';
 import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 
 const repository = resolve(import.meta.dirname, '../..');
 const pin = 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1';
@@ -165,6 +167,21 @@ test('[PROJECTS-12] a site project may list no prototype but needs a known templ
   assert.match((await checkProjects(root)).failures.join('\n'), /PROJECT_MANIFEST_PROTOTYPES: prototypes must be a list/);
   await put('projects/demo/workbench.project.json', JSON.stringify({ schemaVersion: 1, name: 'demo', title: 'Demo', prototypes: [] }));
   assert.match((await checkProjects(root)).failures.join('\n'), /PROJECT_MANIFEST_PROTOTYPES: list at least one prototype/, 'a non-site project still implements a prototype');
+});
+
+test('[PROJECTS-13] a site rendered by site new meets the projects contract, including the synced workflow security floor', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'projects-site-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const put = async (path, text) => { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), text); };
+  const created = await executeOperation({ command: 'site new', args: ['projects/acme'], options: { template: 'project-page', yes: true } }, { root, frameworkRoot: repository });
+  assert.equal(created.status, 'applied');
+  await put('.github/workflows/shell.yml', "name: Shell\non:\n  pull_request:\n    paths-ignore: ['projects/**']\npermissions:\n  contents: read\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo\n");
+  await put('.github/dependabot.yml', 'version: 2\nupdates:\n  - package-ecosystem: npm\n    directory: /projects/acme\n    schedule:\n      interval: weekly\n');
+  assert.deepEqual((await syncWorkflows(root)).written, ['projects--acme--ci.yml']);
+  const checked = await checkProjects(root);
+  assert.equal(checked.status, 'passed', checked.failures.join('\n'));
+  assert.deepEqual(checked.projects, [{ name: 'acme', title: 'Acme', prototypes: [], site: 'project-page', workflows: ['ci.yml'] }]);
+  assert.equal(inspectWorkflow(await readFile(join(root, '.github/workflows/projects--acme--ci.yml'), 'utf8')).jobs, 1);
 });
 
 test('[PROJECTS-09] sync refuses to write anything while one project workflow cannot be scoped', async t => {

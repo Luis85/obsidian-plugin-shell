@@ -45,8 +45,9 @@ test('[SITES-02] targets are only projects/<kebab-name>, and titles default to t
 test('[SITES-03] template paths drop .tmpl and map dot-<name>, and rendering replaces every token or fails', () => {
   assert.equal(outputPath('dot-github/workflows/ci.yml.tmpl'), '.github/workflows/ci.yml');
   assert.equal(outputPath('dot-gitignore.tmpl'), '.gitignore');
-  assert.equal(outputPath('src/pages/reference/[collection].astro.tmpl'), 'src/pages/reference/[collection].astro');
-  for (const path of ['src/index.astro', '.github/ci.yml.tmpl', 'src/.hidden.tmpl']) assert.equal(code(() => outputPath(path)), 'SITE_TEMPLATE_FILE', path);
+  assert.equal(outputPath('src/pages/reference/param-collection.astro.tmpl'), 'src/pages/reference/[collection].astro');
+  assert.equal(outputPath('src/param-a/x-param-b.md.tmpl'), 'src/[a]/x-param-b.md');
+  for (const path of ['src/index.astro', '.github/ci.yml.tmpl', 'src/.hidden.tmpl', 'src/pages/[slug].astro.tmpl', 'a b.tmpl']) assert.equal(code(() => outputPath(path)), 'SITE_TEMPLATE_FILE', path);
   const rendered = renderTemplate('README.md.tmpl', '# __SITE_TITLE__ (__SITE_NAME__, __SITE_TEMPLATE__: __SITE_TEMPLATE_TITLE__)\n__SITE_TEMPLATE_SUMMARY__\n__SITE_TEMPLATE_COLLECTIONS__\n', site);
   assert.equal(rendered, `# Acme Docs (acme-docs, documentation: Documentation)\n${site.template.summary}\n- \`<any>\`: ${site.template.collections[0].use}\n`);
   assert.equal(code(() => renderTemplate('x.tmpl', '__SITE_UNKNOWN__', site)), 'SITE_TEMPLATE_TOKEN');

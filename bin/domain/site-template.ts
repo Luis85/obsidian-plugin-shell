@@ -2,8 +2,9 @@ import { hasControls, requireSketch } from './errors.ts';
 
 /**
  * Opt-in Astro website templates. `templates/sites/` holds a shared `base` and one overlay folder per template; every
- * file there is non-executable `.tmpl` text, so no shell gate treats it as shell source. A path segment `dot-<name>`
- * becomes `.<name>` (`.gitignore`, `.nvmrc`, `.github`) and `__SITE_*__` tokens are replaced at render time.
+ * file there is non-executable `.tmpl` text, so no shell gate treats it as shell source. Template paths stay portable
+ * (they ship in kits and generated projects): a path segment `dot-<name>` becomes `.<name>` (`.gitignore`, `.github`),
+ * `param-<name>` becomes the Astro route parameter `[<name>]`, and `__SITE_*__` tokens are replaced at render time.
  */
 export const SITE_TEMPLATES = 'templates/sites';
 export const SITE_BASE = 'base';
@@ -59,8 +60,10 @@ export function siteTitle(value: string | undefined, name: string): string {
 
 /** Template file path (relative to its template folder) to the rendered project path. */
 export function outputPath(templatePath: string): string {
-  requireSketch(templatePath.endsWith('.tmpl') && !templatePath.split('/').some(part => part.startsWith('.')), 'SITE_TEMPLATE_FILE', `${templatePath}: site template files end in .tmpl and use dot-<name> for dot files.`);
-  return templatePath.slice(0, -'.tmpl'.length).split('/').map(part => part.startsWith('dot-') ? `.${part.slice(4)}` : part).join('/');
+  requireSketch(templatePath.endsWith('.tmpl') && templatePath.split('/').every(part => /^[A-Za-z0-9_-][A-Za-z0-9_.-]*$/.test(part)), 'SITE_TEMPLATE_FILE',
+    `${templatePath}: site template files end in .tmpl and use portable names (dot-<name> for dot files, param-<name> for route parameters).`);
+  return templatePath.slice(0, -'.tmpl'.length).split('/')
+    .map(part => part.startsWith('dot-') ? `.${part.slice(4)}` : part.replace(/^param-([a-z][a-z0-9-]*)/, '[$1]')).join('/');
 }
 function tokens(site: SiteIdentity): Record<string, string> {
   return {

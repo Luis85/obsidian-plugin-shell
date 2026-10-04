@@ -55,7 +55,7 @@ export async function maintainabilityInventory(root) {
     // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings), the Claude Design folder's Markdown
     // templates and the Astro site templates' pages, styles and settings (.astro/.css/.json/.md/.yml) are rendered text, not code.
     const templateData = (path.startsWith('templates/examples/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^templates\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path)
-      || /^templates\/design-folder\/[\w-]+\.md\.tmpl$/.test(path) || /^templates\/sites\/[\w./[\]-]+\.tmpl$/.test(path);
+      || /^templates\/design-folder\/[\w-]+\.md\.tmpl$/.test(path) || /^templates\/sites\/[\w./-]+\.tmpl$/.test(path);
     if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData && !python && !shell) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
     let templateRegion = null;
     if (/\.vue(?:\.txt)?$/.test(path)) {

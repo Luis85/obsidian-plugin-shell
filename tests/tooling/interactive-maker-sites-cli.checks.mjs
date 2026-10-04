@@ -4,7 +4,6 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { checkProjects, syncWorkflows } from '../../scripts/projects/projects.mjs';
 import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 
 const repository = resolve(import.meta.dirname, '../..');
@@ -90,17 +89,6 @@ test('[SITES-CLI-02] every template renders a standalone site: no .tmpl, no toke
   assert.ok((await files(join(root, 'projects/documentation-site'))).includes('src/pages/reference/[collection].astro'));
 }));
 
-test('[SITES-CLI-03] a rendered site meets the projects contract, including the synced workflow security floor', () => withRoot(async ({ root, put, run }) => {
-  assert.equal((await run('site new', ['projects/acme'], { template: 'project-page', yes: true })).status, 'applied');
-  await put('.github/workflows/shell.yml', "name: Shell\non:\n  pull_request:\n    paths-ignore: ['projects/**']\npermissions:\n  contents: read\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo\n");
-  await put('.github/dependabot.yml', 'version: 2\nupdates:\n  - package-ecosystem: npm\n    directory: /projects/acme\n    schedule:\n      interval: weekly\n');
-  assert.deepEqual((await syncWorkflows(root)).written, ['projects--acme--ci.yml']);
-  const checked = await checkProjects(root);
-  assert.equal(checked.status, 'passed', checked.failures.join('\n'));
-  assert.deepEqual(checked.projects, [{ name: 'acme', title: 'Acme', prototypes: [], site: 'project-page', workflows: ['ci.yml'] }]);
-  assert.ok(inspectWorkflow(await readFile(join(root, '.github/workflows/projects--acme--ci.yml'), 'utf8')).jobs === 1);
-}));
-
 const listCollections = async (root, collections) => {
   const path = join(root, 'projects/acme/workbench.project.json');
   const manifest = JSON.parse(await readFile(path, 'utf8'));
@@ -108,7 +96,7 @@ const listCollections = async (root, collections) => {
 };
 const features = { name: 'features', base: 'vault/Site/Features.base', view: 'Cards', vault: 'vault' };
 
-test('[SITES-CLI-04] site collections writes deterministic snapshots of each listed view, in view order, and replaces only its own files', () => withRoot(async ({ root, put, run }) => {
+test('[SITES-CLI-03] site collections writes deterministic snapshots of each listed view, in view order, and replaces only its own files', () => withRoot(async ({ root, put, run }) => {
   assert.equal((await run('site new', ['projects/acme'], { template: 'product-page', yes: true })).status, 'applied');
   const empty = await run('site collections', ['projects/acme'], {});
   assert.deepEqual([empty.status, empty.data.changes, empty.data.summary.collections], ['planned', [], []]);
@@ -136,7 +124,7 @@ test('[SITES-CLI-04] site collections writes deterministic snapshots of each lis
   assert.equal(await readFile(join(root, 'projects/acme/src/data/collections/notes.json'), 'utf8'), '{"mine": true}\n');
 }));
 
-test('[SITES-CLI-05] site collections refuses unknown and unsupported views, a missing .base and invalid or missing site manifests', () => withRoot(async ({ root, put, run }) => {
+test('[SITES-CLI-04] site collections refuses unknown and unsupported views, a missing .base and invalid or missing site manifests', () => withRoot(async ({ root, put, run }) => {
   assert.equal(failure(await run('site collections', ['projects/acme'], {})), 'failed:SITE_PROJECT_MISSING');
   assert.equal((await run('site new', ['projects/acme'], { template: 'documentation', yes: true })).status, 'applied');
   for (const [entry, expected] of [[{ ...features, view: 'Nope' }, 'BASE_VIEW_UNKNOWN'], [{ ...features, view: 'Recent' }, 'BASE_VIEW_UNSUPPORTED'],
@@ -150,7 +138,7 @@ test('[SITES-CLI-05] site collections refuses unknown and unsupported views, a m
   assert.deepEqual(await files(join(root, 'projects/acme/src/data/collections')), ['README.md'], 'a refused plan writes nothing');
 }));
 
-test('[SITES-CLI-06] the templates are read only from plain, bounded .tmpl files of the installed copy', () => withRoot(async ({ root, put, run }) => {
+test('[SITES-CLI-05] the templates are read only from plain, bounded .tmpl files of the installed copy', () => withRoot(async ({ root, put, run }) => {
   const fake = join(root, 'framework');
   assert.equal(failure(await run('site templates', [], {}, fake)), 'failed:SITE_TEMPLATES_MISSING');
   await put('framework/templates/sites/catalog.json', JSON.stringify({ schemaVersion: 1, astro: '7.3.5', templates: [{ id: 'mini', title: 'Mini', summary: 'a test site.', collections: [{ name: 'x', use: 'y' }] }] }));
