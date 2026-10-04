@@ -43,6 +43,7 @@ test('human rich flow orders starter and prototype; applies the identical agent 
   assert.match(review.sections[0].body, /Starter: plugin-vanilla 1\.0\.0/);
   const request = JSON.parse(await readFile(join(root, 'prepared/project-request.json'), 'utf8'));
   assert.equal(request.starter, 'plugin-vanilla');
+  assert.equal(JSON.parse(await readFile(join(root, 'prepared/configs/human-project-config.json'), 'utf8')).starter.id, 'plugin-vanilla');
   const plan = await projectPlan({ root, frameworkRoot, out: 'prepared', input: request });
   assert.ok(plan.plan.changes.every(change => change.status === 'unchanged'));
   assert.equal(request.interview.answers.approved, true);
@@ -51,7 +52,7 @@ test('CLI starter goes directly to the command prototype without a frontend', as
   const f = richUI({ starter: 'cli', apply: false });
   await projectWizard(f.ui, { root, frameworkRoot });
   assert.ok(f.events.some(event => String(event[1]).includes('no frontend framework')));
-  await assert.rejects(() => readFile(join(root, 'prepared/project.config.json')));
+  await assert.rejects(() => readFile(join(root, 'prepared/configs/human-project-config.json')));
   assert.ok(f.events.some(event => event[1] === 'Apply this reviewed plan?'));
 }));
 test('a preselected hybrid starter is the default choice and carries its own targets and framework', async () => scratch(async root => {
@@ -77,7 +78,7 @@ test('Back reopens starter selection; a changed starter discards prior agreement
   await projectWizard(f.ui, { root, frameworkRoot });
   assert.equal(starterCalls, 2); assert.equal(f.agreements(), 2);
   assert.match(f.previews.filter(item => item.label === 'Review your prototype brief').at(-1).sections[0].body, /Frontend: Angular/);
-  await assert.rejects(() => readFile(join(root, 'prepared/project.config.json')));
+  await assert.rejects(() => readFile(join(root, 'prepared/configs/human-project-config.json')));
 }));
 test('plain mode follows the same starters and guide with default-No file approval', async () => scratch(async root => {
   const transcript = []; let choices = 0;
@@ -91,7 +92,7 @@ test('plain mode follows the same starters and guide with default-No file approv
   assert.equal(await projectWizard(ui, { root, frameworkRoot }), undefined);
   assert.ok(transcript.some(value => value.includes('No project files written')));
   assert.ok(transcript.some(value => value.includes('Frontend: No frontend')));
-  await assert.rejects(() => readFile(join(root, 'prepared/project.config.json')));
+  await assert.rejects(() => readFile(join(root, 'prepared/configs/plain-cli-config.json')));
 }));
 test('cancellation at entry, an aborted signal, unknown starters and an empty shell never create files', async () => scratch(async root => {
   const f = richUI(); f.ui.rich.select = async () => { throw new Back(); };

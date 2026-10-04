@@ -25,6 +25,12 @@ generated templates, hash routes, scoped interactions and external-adapter bound
 Advanced settings and typed Markdown share `configs/user-settings.json`; the setup
 guide includes reviewed path migration and configured canonical-project behavior.
 
+## Extend the app with plugins
+
+Drop your own plugin into `bin/plugins/<id>/` with `main.js`, `manifest.json` and `settings.json`, then review and
+enable it with `node bin/app plugins enable <id> --yes`. Its commands run as `node bin/app <id> <command>`, including
+from a compiled kit. The model follows Obsidian community plugins; see [the app plugin developer guide](plugins/DEVELOPER-GUIDE.md).
+
 ## Create a project
 
 Run `node bin/app new` (or `node bin/app` without a saved project) to choose an
@@ -169,7 +175,8 @@ A minimal new-prototype answer envelope is:
 }
 ```
 
-The example above is for an unselected project. When `project.config.json` exists,
+The example above is for an unselected project. When a project configuration
+(`configs/<project-id>-config.json`) exists,
 `prototype guide` and the interactive prototype maker retain that project selection
 and use its guide. Always discover the actual guide ID/version before submitting
 answers; an Angular project does not silently fall back to a plugin clickdummy.
@@ -205,7 +212,7 @@ boundaries, and JSON arrays can contain semicolons unchanged.
 
 Template tokens are literal substitutions, never JavaScript evaluation. Every
 answer can be referenced by field ID. Built-in tokens include `title`, `slug`,
-`brief`, `projectJson`, `answersJson`, `contextJson`, `skillPath`, `integrationJson`
+`brief`, `projectJson`, `answersJson`, `contextJson`, `skillPath`, `configPath`, `integrationJson`
 and `manifestJson`. Keep the core projection fields `title`, `mode`, `pages` and
 `components`, and the handoff artifacts, when expanding this prototype guide.
 Unsafe, duplicate or colliding artifact paths fail in the shared writer.
@@ -239,4 +246,4 @@ include maker checks. The dedicated CI job uses the exact pinned toolchain.
 
 ## Project starters
 
-`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` in the package root beside `bin/`, `generator.kind: "project"`). Projects use the strict `project.config.json` sidecar, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.
+`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` in the package root beside `bin/`, `generator.kind: "project"`). Projects use the strict `configs/<project-id>-config.json` project configuration, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.

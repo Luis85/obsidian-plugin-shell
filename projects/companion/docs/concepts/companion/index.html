@@ -16010,6 +16010,8 @@ Edge: ${id2}`,
 	function requireThat(value, code, message) {
 		if (!value) throw new OperationError(code, message);
 	}
+	/** The portable lowercase ID rule shared by Companion v6 project identities and starter definitions. */
+	var portableIdPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 	//#endregion
 	//#region bin/compiler/domain/project-starter.ts
 	var targetOrder = [
@@ -16018,7 +16020,6 @@ Edge: ${id2}`,
 		"website",
 		"cli"
 	];
-	var frameworkId = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 	var angularPackages = [
 		"@angular/core",
 		"@angular/common",
@@ -16057,7 +16058,7 @@ Edge: ${id2}`,
 	function readSelectionFields(data) {
 		check([...targetOrder, "hybrid"].includes(String(data.projectType)), "Unknown project type.");
 		const projectType = data.projectType;
-		check(typeof data.framework === "string" && data.framework.length <= 64 && frameworkId.test(data.framework), "Invalid frontend framework ID.");
+		check(typeof data.framework === "string" && data.framework.length <= 64 && portableIdPattern.test(data.framework), "Invalid frontend framework ID.");
 		const framework = data.framework, targets = readTargets(projectType, data.targets);
 		check(targets.some((target) => target !== "cli") ? framework !== "none" : framework === "none", "A CLI-only project requires framework none; visual targets require a frontend framework.");
 		check(framework === "angular" === (data.angularPins !== void 0), "Angular projects require angularPins; other frameworks must omit them.");

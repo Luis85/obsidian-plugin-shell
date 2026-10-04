@@ -19,13 +19,13 @@ import { choose, input, titleInput, confirm, reportError, type Prompts } from '.
 import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
 import { browseComponentTemplates } from './template-browser.ts';
 import { offerDesignFolder } from './design-folder.ts';
-export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime }
+export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime; config?: string }
 async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
   const snapshot = await readSnapshot(options.root, options.project);
   return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
 }
 export async function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<string | undefined> {
-  const { guide, selection } = await prototypeContext(options.root, options.guide);
+  const { guide, selection } = await prototypeContext(options.root, options.guide, options.config);
   const configured = await loadSettings(options.root);
   workspace ??= await savedWorkspace(options);
   const answers = await interview(ui, guide, workspace ? { title: workspace.document.project.name, pages: outline(workspace.document).pages.map(item => item.title) } : {});
@@ -38,7 +38,7 @@ export async function prototypeWizard(ui: Prompts, options: StudioOptions, works
   ui.write(completion);
   // The prepared package holds the exact prototype model and brief; the design folder follows them on sync.
   const design = await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: String(answers.title),
-    project: `${out}/companion.project.json`, package: out, signal: options.signal });
+    project: `${out}/companion.project.json`, package: out, signal: options.signal, config: options.config });
   return completion + (design ?? '');
 }
 async function save(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
@@ -58,7 +58,7 @@ async function library(ui: Prompts, workspace: Workspace): Promise<void> {
 }
 async function generate(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const out = await input(ui, 'Boilerplate output folder', options.out ?? `generated/${workspace.document.project.id}`);
-  const selection = await savedProjectSelection(options.root);
+  const selection = await savedProjectSelection(options.root, options.config);
   const kind = await choose(ui, 'Output kind', selection ? [{ id: 'project', label: selection.targets.join(' + ') + ' / ' + selection.framework }] : [
     { id: 'obsidian-plugin', label: 'Obsidian plugin' }, { id: 'clickdummy', label: 'Offline clickdummy source' },
   ], selection ? 'project' : options.kind ?? 'obsidian-plugin');
@@ -90,7 +90,7 @@ export function studioActions(ui: Prompts, options: StudioOptions, workspace: Wo
     save: { label: 'Save Companion project JSON', run: () => save(ui, options, workspace) },
     design: { label: 'Prepare or sync a Claude Design folder for this project', run: async () => {
       if (workspace.dirty) { ui.write('Save the project first; the design folder is prepared from the saved project JSON.\n'); return; }
-      await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: workspace.document.project.name, project: options.project, signal: options.signal });
+      await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: workspace.document.project.name, project: options.project, signal: options.signal, config: options.config });
     } },
     'first-run': { label: 'Install, build and showcase the generated application', run: () => firstRunWizard(ui, options) },
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },

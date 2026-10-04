@@ -105,7 +105,7 @@
     },
     {
       "path": ".gitignore",
-      "hash": "f60a933309f339e9b9661e9155c3180976acf9aae213a99e7dd185985c6f10ef",
+      "hash": "6655f6b7c230590ed2d86de0c8ee6f3280078dd9865223d64891959cc78633f2",
       "ownership": "framework"
     },
     {
@@ -190,17 +190,17 @@
     },
     {
       "path": "bin/PROJECT-SETUP.md",
-      "hash": "5708bfb6284bb2490abbe9bfe747f3fd9514a13dcce8c150dd23db6f9117cd76",
+      "hash": "58479e53fd58544dd80e15bb41b5e12b054a847868a6695e76f24a084513febf",
       "ownership": "framework"
     },
     {
       "path": "bin/PROJECT-STARTERS.md",
-      "hash": "85da1e00a4a3056e070d0e65bf78aacd7dc304fb9144c69e64a1732a00daf330",
+      "hash": "6c5659fbd1b21c7ac14f35c65da9430af790734fe88af50fd7da258da29a71c1",
       "ownership": "framework"
     },
     {
       "path": "bin/README.md",
-      "hash": "2d31af33211a9e75f9ed951d50a3ee2a159d4ade8808f2dba5cdef16209a1c34",
+      "hash": "ffe66a4abaeb885881fd395fb25b50a6af530537df72115a673b6e55cc0d8c9b",
       "ownership": "framework"
     },
     {
@@ -210,12 +210,47 @@
     },
     {
       "path": "bin/adapters/brainstorm.ts",
-      "hash": "f7470d9df5ead944d2fa60c6a4fb08ec779d1e1270d3e1202e5da6afb76bacc7",
+      "hash": "e8e92d245623f9cb816db43e2790e06228eb123864afbc5511cdf214dff44a16",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/commands.ts",
-      "hash": "efbaa6d442750bcd84504973d241e67549a26f6e0cb32fd4252653f5de66a00f",
+      "hash": "f12f20523d18d8c8c37ab42e37317d8ac00d4da4ca1fcb66ee5889dfb624011e",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/community-plugins/app-api.ts",
+      "hash": "c0baf0d493716173a1e749e7d3988f76a26b5fface6dc52f65d8e2e3e6580989",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/community-plugins/app-events.ts",
+      "hash": "35631fd9ddbf88b721df534b8a64c7ec0fad6469d83eb8da72b376bdbd1577ae",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/community-plugins/discovery.ts",
+      "hash": "172c0cf8475a952b6214e845d1019fda803e93bb1ce76e1b07248d904ff8f4d9",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/community-plugins/inventory.ts",
+      "hash": "6b77c57848eecb43b5daab808d4db2447870891face3ff2d44fafa169475b9f2",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/community-plugins/loader.ts",
+      "hash": "e39bb033d951c0db21ff826a6b75bdd97f75cb2841c1d67f8e10c6f409c92eaf",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/community-plugins/operations.ts",
+      "hash": "cf15476987304443a6fb60f475a18fd893914a7e972fd8ca74ad15980588a773",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/community-plugins/plugin.ts",
+      "hash": "9e6fdeceef8209161bbf261128f7bf398075f0684431e8620b17a1a8f1308098",
       "ownership": "framework"
     },
     {
@@ -230,7 +265,7 @@
     },
     {
       "path": "bin/adapters/design-command.ts",
-      "hash": "8bf47db871d621c4ab3dfda622d6fa546387defb6bedf4304d2991d8077e18fc",
+      "hash": "cc02ea6abbed2341d73d15731036fe1775b76a2c339fcb4f00832164d259219c",
       "ownership": "framework"
     },
     {
@@ -240,17 +275,17 @@
     },
     {
       "path": "bin/adapters/design-folder.ts",
-      "hash": "e582d8df356b3a65dfe92fc176754b8b5834fb65483a8b52fc0aea1a7c8940d7",
+      "hash": "6dc300476abad4d3d49d63e1839ab3597c96c90480274f43e50119d3c0387eed",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/design-source.ts",
-      "hash": "726aa87139a39eba2ee345d09384c49c57270164bcc1f23f9fa2d1f99d24679f",
+      "hash": "7ee410bc9237a0e8fe0ef1f61eab2ce3f0f79dcd77421221d82286d6c8eb3016",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/first-run-command.ts",
-      "hash": "88c698b388665faac6fd300e45b6e94fd08fe491eeb05f99934a777bdecf1b71",
+      "hash": "661efd7ccb29f16d7cc95cb8d490a679b14a7634149859cd3df5fdb4579d4a63",
       "ownership": "framework"
     },
     {
@@ -265,7 +300,7 @@
     },
     {
       "path": "bin/adapters/first-run-plan.ts",
-      "hash": "3af47da3e28d72bd8c1aca6b8ddce84e57e648bb405f4701981636a1f5e830e5",
+      "hash": "4b502cfd53a2c4864263516412a8d0dbe805e344f292b0dd81a3731b062d420a",
       "ownership": "framework"
     },
     {
@@ -280,7 +315,7 @@
     },
     {
       "path": "bin/adapters/framework-cli.ts",
-      "hash": "38ad7bf0a04944705bb5427723f6cbcc8612509f20eaf1a2a6bfdbf3b2daa440",
+      "hash": "775697352048b6e0b6005628a1a7f44165490c090d9d997eaaad3c35a4e5efc8",
       "ownership": "framework"
     },
     {
@@ -340,7 +375,7 @@
     },
     {
       "path": "bin/adapters/framework/catalog.ts",
-      "hash": "5f6d562f76b7f92d2554b5f4773c5b302d686cfe5ceab6dafde3eb8433adddb9",
+      "hash": "19932d48ef80bd74419091b28cfe01accf849d20442a4d2966863877871511ed",
       "ownership": "framework"
     },
     {
@@ -490,7 +525,7 @@
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "hash": "018e8d4f5b443b7801210fde947534c5509761b1f5bfbe9741aea78f908f4dd9",
+      "hash": "7eae905ce2afa8db23ab67b4cdbbf9ded21e6e45be96c6ffbc406877b6a3385f",
       "ownership": "framework"
     },
     {
@@ -500,12 +535,12 @@
     },
     {
       "path": "bin/adapters/framework/kit-integrity.ts",
-      "hash": "6eee8c4db88695da2a325d4d95fcee74be71461592eb9df5c0077cc1fcd80b3d",
+      "hash": "a4550e676946247d5830052142893488b76379e4bdc7690de8ea12080ac935c2",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/framework/kit.ts",
-      "hash": "c255cda2d98946fd27fad4010a76515170d8a7ac7748279d196a249dc0fc8492",
+      "hash": "8f743fdf9042e77541da7e05c97a037374dca4e4e98541d6dd23ed721c1854e7",
       "ownership": "framework"
     },
     {
@@ -525,12 +560,12 @@
     },
     {
       "path": "bin/adapters/framework/operations.ts",
-      "hash": "644b0cb5600fb45d7bc928afbc7ed5ded0fcecddf5720512bad8cf7a024a8ba9",
+      "hash": "1adce2a7a9e236f065471950efd1838ea27503063158edaae7a76d29e747ae27",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/framework/planning.ts",
-      "hash": "27515c1013acf9b416e435afe9729908b362249e952254571c4e6e5de99d9073",
+      "hash": "dcdfaf70728ff4c7c0f2c9eb81369e392da44156cf038e78e9fab48dab57ac86",
       "ownership": "framework"
     },
     {
@@ -869,13 +904,18 @@
       "ownership": "framework"
     },
     {
+      "path": "bin/adapters/project-config-migration.ts",
+      "hash": "bba517cfdb45e8cfeccd99154c47d1185fde36dcfbec89858f5101aaee90c5b0",
+      "ownership": "framework"
+    },
+    {
       "path": "bin/adapters/project-selection.ts",
-      "hash": "a35af78cef58e1901b4fe578d7a12a49b0744581c8de9df5625219d27160f7e4",
+      "hash": "b668c7fefb8bf0c09874ef489b57f07f0620f007505a6a25ce68e736ffbad8e4",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/project-setup.ts",
-      "hash": "5d6fa97562e746cc8f21420b611e8f97283370f8cdf8ada5f437cdf694bb0e07",
+      "hash": "8f70d5b9a957e3bf64500ef8e97522c743f40d7794ab7770bf090079f93c92d3",
       "ownership": "framework"
     },
     {
@@ -885,12 +925,12 @@
     },
     {
       "path": "bin/adapters/prototype-context.ts",
-      "hash": "798cf10aa2c277dafbea0b3263b4334faaad669a803c54510f0ec65b7ff95efb",
+      "hash": "1f83bf6237d76001e21f4f6b2dfd1b5c53333c8c54e0274ac842bd1f422a8422",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/prototype.ts",
-      "hash": "818790a4cb0844b11802237bc7a4e007d1bf3cdf9429d037a1508112349147fc",
+      "hash": "3f64a993ec50b7142d7b8ac3f1d98aeed2917411778d5c3e1f2488e32137457d",
       "ownership": "framework"
     },
     {
@@ -905,12 +945,12 @@
     },
     {
       "path": "bin/adapters/settings-documentation.ts",
-      "hash": "d33eb63d1ef8e353ed4b9a58c70c7ed98b118421573df6babed4c0f915568a32",
+      "hash": "de58e3019975b873e55d7aaf37e942b3e23240b8e1acb15190d78a7477900fb2",
       "ownership": "framework"
     },
     {
       "path": "bin/adapters/settings-migration.ts",
-      "hash": "05659d980d05d2e6bbc0b875bcabd576dae425d03a1d8c92f78a928fdfda0ae4",
+      "hash": "05d13d258cf8cf13e64a38c1e72c2d34c80fb438340cd8d1e8cc1f06c69bf1ca",
       "ownership": "framework"
     },
     {
@@ -920,7 +960,7 @@
     },
     {
       "path": "bin/adapters/setup-command.ts",
-      "hash": "75c4d7d8ccf76c206bcd0bf827a63972a4427a706426318f99b77c186f33db18",
+      "hash": "af878d26aa05ecb1c81b410fec1da3d30e2f01d3d0d60b43410638dc951e67ea",
       "ownership": "framework"
     },
     {
@@ -1000,7 +1040,7 @@
     },
     {
       "path": "bin/app.ts",
-      "hash": "675c1ec2d69a16c06fd9e0a78ede9e0e45005194a6065f283f32027280932680",
+      "hash": "e9582b0699ee3a8c3b6f6512b645ccd34a7b275295fdbcc8bd899ae2a41f3576",
       "ownership": "framework"
     },
     {
@@ -1030,7 +1070,7 @@
     },
     {
       "path": "bin/application/design-folder.ts",
-      "hash": "c7c443fabf517e7d770499669e3e34cbe3900d27748b4e15622df3b2b9df4ee1",
+      "hash": "9444b37db77ae6c2b5e8fc93a65d692438b90b6e012219e1fc14cd418121a462",
       "ownership": "framework"
     },
     {
@@ -1125,17 +1165,17 @@
     },
     {
       "path": "bin/compiler/adapters/project/build-source.ts",
-      "hash": "db608552a97884878c4fbe14ae60b5748449d0a3c5e845912b1ac052cbd0bd07",
+      "hash": "1be6cec6a1cea1091ca267074e3412fae57698b48c42e78f19c38da6495975e3",
       "ownership": "framework"
     },
     {
       "path": "bin/compiler/adapters/project/configuration.ts",
-      "hash": "173bdd20a6b0cdf92a843abda2709d7843ca1cf34855f21dd2d7097d957f261e",
+      "hash": "ee39853ce54f47c4b609bf5b86c223aff5b32841ba6b394f1166bc81cc2e654b",
       "ownership": "framework"
     },
     {
       "path": "bin/compiler/adapters/project/emitter.ts",
-      "hash": "c4fb7e6cd34b144f5dff82184008458c0c650988e697acb9275e5e1d16f92963",
+      "hash": "da388d4a86581fb5b04213e275d7247be46eb5eda74d01aaf01f7f2e740847bf",
       "ownership": "framework"
     },
     {
@@ -1155,7 +1195,7 @@
     },
     {
       "path": "bin/compiler/adapters/project/serve-source.ts",
-      "hash": "be90b296af45003aad7d210b8fd50b9f08472c55cbb07d34050af21a37c42220",
+      "hash": "6bc3287a1d2950c240c465b8d5534f922e7561146c0b285435759fbb5e4bcb0f",
       "ownership": "framework"
     },
     {
@@ -1180,7 +1220,7 @@
     },
     {
       "path": "bin/compiler/adapters/template-snapshot.ts",
-      "hash": "e0bb5e7540e49be775fb78983dbc6f1d97a55f24022e885038fb9d7c2e84aa91",
+      "hash": "da1519df13ea9ce4832d2af436a6a99e8005a127af0e82fb511909b2acdc33e0",
       "ownership": "framework"
     },
     {
@@ -1214,8 +1254,13 @@
       "ownership": "framework"
     },
     {
+      "path": "bin/compiler/domain/project-config.ts",
+      "hash": "69df6f4253d16d0da3de6e142f2f8ee80fbb791c0b74ad2938268076af58ebdb",
+      "ownership": "framework"
+    },
+    {
       "path": "bin/compiler/domain/project-starter.ts",
-      "hash": "31ec74489c3a9f198d8322a9a6aef4771189a7f2c07b576376c27622d2889b44",
+      "hash": "398a0627c19e1e9bf550a835cdd14271428e923974f6511ad8bfb571e89fc31f",
       "ownership": "framework"
     },
     {
@@ -1680,7 +1725,12 @@
     },
     {
       "path": "bin/domain/command-options.ts",
-      "hash": "635b9b9e0d4704bdbae7c1ee849f3685df693a0a29c57229334fe4880e7923e7",
+      "hash": "1798b327e9dd7240bfddcc06ebe606931bd500d425e7707b6f6143b28de3f7c2",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/domain/community-plugin.ts",
+      "hash": "babcf7861804e51d36b970afad5d025dbe4fff56e2109352e540ea0cd7ba4349",
       "ownership": "framework"
     },
     {
@@ -1805,7 +1855,7 @@
     },
     {
       "path": "bin/domain/user-settings.ts",
-      "hash": "0eb1766e694c11495de5948a35849ff333be0925505fbcd2977280b5191ebe0a",
+      "hash": "d564caea01ff7458180e0fb4dfc2c497471b45bfeeb762367fe1e9bd3cfe36f6",
       "ownership": "framework"
     },
     {
@@ -1830,12 +1880,17 @@
     },
     {
       "path": "bin/guides/project-prototype.json",
-      "hash": "f4855c278267c779d77005d1b5129423bdbcbb887c672c953e0eb67a4a587f49",
+      "hash": "c76b157eefcb5c755938e09b811f1388e8194556795b5471dfe6f403cd58b00e",
       "ownership": "framework"
     },
     {
       "path": "bin/guides/prototype.json",
       "hash": "69500a93f0b1346b7327bacc4c3668bc2d112a704a29bd5c734b86053554c7c4",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/plugins/DEVELOPER-GUIDE.md",
+      "hash": "a2a30c487679ca9f32102899570fbf423929e199a217518c6ad7ae1663b154b5",
       "ownership": "framework"
     },
     {
@@ -1915,7 +1970,7 @@
     },
     {
       "path": "bin/presentation/studio.ts",
-      "hash": "495b1fd019f64646be7040f2d47f02d6d89b4ce189046e1ae079946b4241bfd3",
+      "hash": "f1ca82664447c0e0e00f2fd3d64108429cd0543346844ffc06b53d10335fdb18",
       "ownership": "framework"
     },
     {
@@ -3360,7 +3415,7 @@
     },
     {
       "path": "docs/concepts/companion/index.html",
-      "hash": "fd6769ed344d9a91a26a153593582f4c4d775cff74807301078d06a4b6b20764",
+      "hash": "76cd44c694b9f229f7454318b417be4b7807a5860b4c4231df0eda154aa05d64",
       "ownership": "framework"
     },
     {
@@ -4365,7 +4420,7 @@
     },
     {
       "path": "docs/framework/development/CLAUDE-DESIGN-HANDOFF.md",
-      "hash": "1ab793eff3c0fe50d7571dfb8106eaf35ae1511f76d1d327e5716d3622f71819",
+      "hash": "dfa2d5020c854f9bde270728bea94de784836ed74fffa749f294922fbb81e3f9",
       "ownership": "framework"
     },
     {
@@ -4575,7 +4630,7 @@
     },
     {
       "path": "docs/framework/development/WORKBENCH-PLUGINS.md",
-      "hash": "7ae9942e86a96a9c5f06b006811fffd0de1ac1ae47c6c87440745a23be862665",
+      "hash": "35dac947666db168270750fe57cf1829050291769fb65c9653cde9b3b0342393",
       "ownership": "framework"
     },
     {
@@ -4695,7 +4750,7 @@
     },
     {
       "path": "docs/framework/user-manual/shell-cli/generated/reference.md",
-      "hash": "1ac04e85b4df34c42f261b5ec050d7be4b710c42d035ea622f9ca0a4f03e0d7d",
+      "hash": "4b9380f49809975684136eebd674ca9fcbfd0d07e660370bcfc1f545b9fd8209",
       "ownership": "framework"
     },
     {
@@ -4840,12 +4895,12 @@
     },
     {
       "path": "docs/user-manual/shell-cli/generated/commands.json",
-      "hash": "c847c595580d8a74eebe350a5e2563b84f614fe5bf21c41ec860abbc54aa64ec",
+      "hash": "aedcbdef563f17b625f595e2ca0b4b4f4152012c0f85b3e2fe4ce8be5273511c",
       "ownership": "framework"
     },
     {
       "path": "docs/user-manual/shell-cli/generated/manifest.json",
-      "hash": "45b2c065226a90a8af1530e09e18e5d6a545702e6070f4fc2115212974634781",
+      "hash": "af284b3505722cecc64add137d94f3d2683bcfc28e2fb8fb85e20d87caeda37d",
       "ownership": "framework"
     },
     {
@@ -5030,7 +5085,7 @@
     },
     {
       "path": "plugins/README.md",
-      "hash": "792d4bb1fed4ef1b20bd2855428b56c1e29b8183f837f4275a21c144db0ba19d",
+      "hash": "a506bfa5af2acda337af81e949fb0b7c52f7c8940f55cfa3024311c08a314b86",
       "ownership": "framework"
     },
     {
@@ -5055,7 +5110,7 @@
     },
     {
       "path": "plugins/example-extension/tests/plugin.test.ts",
-      "hash": "f12cb2db0218cc57bdf93a5f9f6093356ba3cfdd656a527e36fe5b61393da972",
+      "hash": "05795c7ca23df41afc90ed86a44f920cf433508c27bcdb00e1181a20bc3c392e",
       "ownership": "framework"
     },
     {
@@ -5065,7 +5120,7 @@
     },
     {
       "path": "plugins/runtime.ts",
-      "hash": "4b0f1aad7265a56c9f12e94d29f8f167298f393f21666ce72615105f81d0aed5",
+      "hash": "b48b91431ec14245a916b02ecaa227a263f171dd31d83137422fb58776f4549e",
       "ownership": "framework"
     },
     {
@@ -12019,6 +12074,11 @@
       "ownership": "framework"
     },
     {
+      "path": "tests/tooling/app-plugins-fixture.mjs",
+      "hash": "69ad6c2469960f28670244a9fd2c059c4af955900ce419fbb5d6d385feac905a",
+      "ownership": "framework"
+    },
+    {
       "path": "tests/tooling/archive-command-fixture.mjs",
       "hash": "777f4508394c3b6cd093e43295ee706e82b4f619164cf0ecfa5cfd037fd0b752",
       "ownership": "framework"
@@ -12449,6 +12509,16 @@
       "ownership": "framework"
     },
     {
+      "path": "tests/tooling/framework-app-plugin-api.checks.mjs",
+      "hash": "41551764ae09f3a717481126e64c1b3453aea57faa1e5ee2e1c5b63f6f0591cf",
+      "ownership": "framework"
+    },
+    {
+      "path": "tests/tooling/framework-app-plugins.checks.mjs",
+      "hash": "315f83925efc2a3765342d2cf52fdc6437124ba83a9d882034b79e00eada83af",
+      "ownership": "framework"
+    },
+    {
       "path": "tests/tooling/framework-archive-fixture.mjs",
       "hash": "39b932745ce2ea86f0e10a9d3553cebc94a497ed8aa9a606fde942a966f09d88",
       "ownership": "framework"
@@ -12550,7 +12620,7 @@
     },
     {
       "path": "tests/tooling/framework-journey.mjs",
-      "hash": "dd057b9feeaeeb6a333342f7295d2bca943281306b3ce3117aa3d400b72aec26",
+      "hash": "c8386da803b1d58643cd86061496a1c7a35c93196d1945984592fc4af3289460",
       "ownership": "framework"
     },
     {
@@ -12565,7 +12635,7 @@
     },
     {
       "path": "tests/tooling/framework-kit.checks.mjs",
-      "hash": "4a9be5d89306376fffe5c8d644366e619093b6429676483edc05130204cb2504",
+      "hash": "f48205826e7e9cd68b99edfe7542cbb65cec4ae28a71a05896f1ed9c01eab24b",
       "ownership": "framework"
     },
     {
@@ -12860,12 +12930,12 @@
     },
     {
       "path": "tests/tooling/interactive-maker-design-folder-engineering.checks.mjs",
-      "hash": "9a48c63a3bba044bea8874d45adb4b1833839ae4e3d494ba35c5ead4540517c8",
+      "hash": "bed3536d8098780a499d0e896fe3a242c3f970a6830be798c58891d0d0c41e38",
       "ownership": "framework"
     },
     {
       "path": "tests/tooling/interactive-maker-design-folder-journey.checks.mjs",
-      "hash": "d75926a75d635e045b60cde6b9c4cbcb48bd113d86eaab62e2e81d688369038e",
+      "hash": "11c4bd9ad1fb5da592e9d9649535a3f53949d5868a557e818b933f83ed82dd50",
       "ownership": "framework"
     },
     {
@@ -12910,7 +12980,7 @@
     },
     {
       "path": "tests/tooling/interactive-maker-first-run.checks.mjs",
-      "hash": "04234b94de1724de544532a1024ac14c759e6099e7fdbedc29f144ca92488fa9",
+      "hash": "f46b91e883b1e53751a9031372176030cf2254da7d0dd3cd6d0cfc8c91c8b584",
       "ownership": "framework"
     },
     {
@@ -13059,18 +13129,23 @@
       "ownership": "framework"
     },
     {
+      "path": "tests/tooling/interactive-maker-project-config.checks.mjs",
+      "hash": "66b2a6b9accadce30b25418cf2b8ba1599e0f95e9bb584c1d0f28705ce5518d8",
+      "ownership": "framework"
+    },
+    {
       "path": "tests/tooling/interactive-maker-project-runtime.checks.mjs",
-      "hash": "6ada85a3c5c51c8c2e731f2e40d5a8c703ddc243962117b4b9c96236eb2d4655",
+      "hash": "15fa8d366eda5e5b73611cf8849fb2e57c916534010876d8cb9157b30960103f",
       "ownership": "framework"
     },
     {
       "path": "tests/tooling/interactive-maker-project-starters.checks.mjs",
-      "hash": "a297e554bf18eb5cea489085d079d9bc41935b5a32718951153bcea0fef96675",
+      "hash": "5eca986f562bf1d401a5e99e42b73f0b8d96aae27ad48acef55efedefac83dfa",
       "ownership": "framework"
     },
     {
       "path": "tests/tooling/interactive-maker-project-ui.checks.mjs",
-      "hash": "cb54d67d7178c553c443742cf9edd65074d80bac0dd35671e9cf0b79501c727f",
+      "hash": "0190de320f3a5a0118285748e4c2af7016bade63af4cec35955adfa809343703",
       "ownership": "framework"
     },
     {
@@ -13125,7 +13200,7 @@
     },
     {
       "path": "tests/tooling/interactive-maker-setup-storage.checks.mjs",
-      "hash": "eb5e90ba7e739a4c378b6f439cc88d673bfc2953d626b61ee17d11e692599cc5",
+      "hash": "13d18274e0826e076e77904cc027a6b4351ea47ab4a3d087a8f1dddd8dce2e52",
       "ownership": "framework"
     },
     {
@@ -13490,7 +13565,7 @@
     },
     {
       "path": "tests/tooling/project-generator-framework-scope.checks.mjs",
-      "hash": "0696c83ba6bc79fb35de68c9e9d74f96bed1d226ac91a61e20c261a53e1cc1da",
+      "hash": "3e7dffbc09fe9b6350c261b169913e71d9e0e6c966940916d54bf448fa159e12",
       "ownership": "framework"
     },
     {

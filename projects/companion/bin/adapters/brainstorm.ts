@@ -79,7 +79,7 @@ function artifactEntry(out: string, item: CompilerArtifact): Entry {
 async function generatedEntries(request: FeatureBrainstorm, result: ReturnType<typeof featureConcept>,
   options: BrainstormOptions, out: string): Promise<GeneratedPackage> {
   if (request.output === 'definition') return { entries: [], compiler: null, sourceReceiptSha256: null };
-  const selection = await savedProjectSelection(options.root);
+  const selection = await savedProjectSelection(options.root, options.config);
   const kind = request.output === 'prototype' ? 'clickdummy' : selection ? 'project' : 'obsidian-plugin';
   const selected = kind === 'obsidian-plugin' ? undefined : selection;
   const emitted = await compile(result.candidate, options.frameworkRoot, kind, options.signal, selected);
@@ -191,7 +191,7 @@ async function featureCommand(args: Arguments, context: CommandContext, options:
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
 export async function brainstormCommand(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  const allowed = ['root', 'project', 'input', 'out', 'apply', 'json', 'no-interaction', 'help', 'no-color', 'ui'];
+  const allowed = ['root', 'project', 'config', 'input', 'out', 'apply', 'json', 'no-interaction', 'help', 'no-color', 'ui'];
   requireSketch(Object.keys(args.flags).every(key => allowed.includes(key)),
     'BRAINSTORM_OPTION', 'Unsupported brainstorm option.');
   const discovered = discovery(args);
