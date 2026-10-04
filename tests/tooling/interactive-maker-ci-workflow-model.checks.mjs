@@ -170,6 +170,8 @@ test('string search functions settle on two known arguments and stay unknown oth
   const cases = [["startsWith(github.head_ref, 'release/')", true], ["!startsWith(github.head_ref, 'Release/')", false], ["endsWith(github.head_ref, '.0')", true], ["contains(github.head_ref, 'feature')", false],
     ["STARTSWITH(github.head_ref, 'x') || inputs.tier == 'integration'", true], ["startsWith(github.unknown, 'release/')", undefined], ["startsWith(github.unknown, 'x') && false", false],
     ["inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))", false],
+    // An object filter (`labels.*.name`) is a context path: unknown here, so it decides nothing unless another operand does.
+    ["contains(github.event.pull_request.labels.*.name, 'e2e')", undefined], ["inputs.tier == 'integration' || contains(github.event.pull_request.labels.*.name, 'e2e')", true],
     ["startsWith(github.head_ref)", undefined], ["startsWith(github.head_ref, 'a', 'b')", undefined], ["fromJSON(github.head_ref, 'a')", undefined], ["startsWith(github.head_ref, 'a'", undefined], ["startsWith(, 'a')", undefined]];
   for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
 });
