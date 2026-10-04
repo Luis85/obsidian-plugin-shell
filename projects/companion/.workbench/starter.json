@@ -135,7 +135,7 @@
     },
     {
       "path": ".claude/skills/self-review/SKILL.md",
-      "sha256": "30b63f98ed393731bae9cc146ae20c3863752712c7b93bcacdea1f71cc9e6b04"
+      "sha256": "d64227316fe12c54fe7a4baaab616dc20e789353c501ce43d079821a25d28289"
     },
     {
       "path": ".claude/skills/write-obsidian-test/SKILL.md",
@@ -231,7 +231,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "ba5c779812edb6249319fffb1b3be3bfa201230b8dcd6cd35eb24eecfcbf1ba5"
+      "sha256": "2fb575fe7dad44acdb6113ac723063dfaaeacdb0f8568f5e6de70dad995d7eb8"
     },
     {
       "path": "bin/ANGULAR-BRICKS.md",
@@ -399,11 +399,11 @@
     },
     {
       "path": "bin/adapters/framework/ci-workflows.ts",
-      "sha256": "04907a7d06842657baff3b93f7b67062f6e1192e785de632f3951d6f9541c792"
+      "sha256": "3094f1a28f3d7d308f6c74131d93b12b8f7fc25930d61aec8fcebe468ca162a9"
     },
     {
       "path": "bin/adapters/framework/ci.ts",
-      "sha256": "2fe66cf0af8507e0f5da0ed845dbdc612030cd961238df5c7c9ed1161bcdee4a"
+      "sha256": "e7e3b89d27ad3fb007884b619ab32533e0ff430570847ce0c2bbaba3c88e928f"
     },
     {
       "path": "bin/adapters/framework/clickdummy.ts",
@@ -487,7 +487,7 @@
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "sha256": "2680bf55f3fa88e3f8de415c469ddf6d57d9737acc7a06c2477f66f0e78d8911"
+      "sha256": "d83eaac874bc1fc1e7f6dd4861440fd5c48ce8711a11e04cfc4ddca97bacbb00"
     },
     {
       "path": "bin/adapters/framework/inspection.ts",
@@ -499,7 +499,7 @@
     },
     {
       "path": "bin/adapters/framework/kit.ts",
-      "sha256": "9189bf4e5e6992bafaa218f3217d2a9471505c85dfc15eecfe076afaf9276f6b"
+      "sha256": "c255cda2d98946fd27fad4010a76515170d8a7ac7748279d196a249dc0fc8492"
     },
     {
       "path": "bin/adapters/framework/maker-checks.ts",
@@ -515,7 +515,7 @@
     },
     {
       "path": "bin/adapters/framework/operations.ts",
-      "sha256": "b51074d2c0f8dfee225ec93f91e937799bc5a9502f57872f258df752c45ffa61"
+      "sha256": "d7bdede2b450f7eb33dcd9673929b04d9da5d384765f2181c13df3c8d7e0c492"
     },
     {
       "path": "bin/adapters/framework/planning.ts",
@@ -679,7 +679,7 @@
     },
     {
       "path": "bin/adapters/makers/extra-recipes.ts",
-      "sha256": "34bf4e94806ade7d64028a86265ce532cf4428e37351b00fab5a63c0412c0cd8"
+      "sha256": "5cf5bbe63944e5f7a401187c1e2737ecd5353ea397f1210b9a7b49932dcd1769"
     },
     {
       "path": "bin/adapters/makers/format-generated.ts",
@@ -963,7 +963,7 @@
     },
     {
       "path": "bin/compiler/adapters/plugin-emitter.ts",
-      "sha256": "1424fab2b6e438334297f2c33720ca55a1664b5074bfdb38ade070fd8dc950f5"
+      "sha256": "b8ab991c4d64b972639a2b44802d65dbb180ad060e1a0af10a7c26b8b8cc673b"
     },
     {
       "path": "bin/compiler/adapters/project-plan.ts",
@@ -1123,7 +1123,7 @@
     },
     {
       "path": "bin/compiler/emitters/framework-docs.ts",
-      "sha256": "f94eae0d88f47b131760d8d62200a2c1be9b81f564089404ec54230c481d8482"
+      "sha256": "74104fde858b829ea8a6905179c55bc272f597305f119718e53ac9737686cd30"
     },
     {
       "path": "bin/compiler/emitters/framework-scope.ts",
@@ -1398,12 +1398,16 @@
       "sha256": "251696f7e87d809e7e6d2d8ae6a9cc0c5351412a3df73cb2843f5c36390fdf59"
     },
     {
+      "path": "bin/domain/ci-composite.ts",
+      "sha256": "6b9647fcf76365c51edd2b7c0376d3bd5ee796d009c276a184efbdca2687df07"
+    },
+    {
       "path": "bin/domain/ci-expression.ts",
       "sha256": "972251c6862bb82cd4aed169b26d05628e4b1e89926ba32077b94b46885443b8"
     },
     {
       "path": "bin/domain/ci-listing.ts",
-      "sha256": "4e11f1a1f760c515585684829575736faa1cd8589051f560c14d033fc26b7028"
+      "sha256": "dd79deffb0c63062d642cb529532a9cf704df2e75114cf34b0526cbcc030c13b"
     },
     {
       "path": "bin/domain/ci-matrix.ts",
@@ -1411,11 +1415,11 @@
     },
     {
       "path": "bin/domain/ci-plan.ts",
-      "sha256": "8319c09a688e8bd9744218ce8a2ac5c8cccaea3f8cbb35045234ebd2f428a05f"
+      "sha256": "f1d3ac34c6bac836331de8d34cc2f7d3ab2e4ef2ce3cbc99e5024c11aa990b16"
     },
     {
       "path": "bin/domain/ci-safety.ts",
-      "sha256": "a1350164c3e75b2fd3b82e9d6b1622a2f450db4755689434229a80159e17b10c"
+      "sha256": "7101bd5b6031ea4bc997cb4492e7564254747c67472d0148537d144aaefaba59"
     },
     {
       "path": "bin/domain/ci-shell.ts",
@@ -1423,7 +1427,7 @@
     },
     {
       "path": "bin/domain/ci-workflow.ts",
-      "sha256": "74ab3de3bc9329556e2c6cd30469737073c50a43ad40221e3f58de4973363512"
+      "sha256": "f12d03c1e27ed28ce69b4a6b2c80c706faa82d1755cbcc95426e1d969e90b7ec"
     },
     {
       "path": "bin/domain/command-options.ts",
@@ -1623,7 +1627,7 @@
     },
     {
       "path": "bin/presentation/terminal/ci-view.ts",
-      "sha256": "2fe990f3458b1e084b5a45445bd55514f5ba72e126de629f86412f5f5936fd2d"
+      "sha256": "b3722702b53b4a0657731d5329a6f674ba641d29acac0a5c102d1a18fcb6b1d0"
     },
     {
       "path": "bin/presentation/terminal/cli-interactive.ts",
@@ -3555,7 +3559,7 @@
     },
     {
       "path": "docs/framework/development/AUTHORING-TOOLS.md",
-      "sha256": "c27345ad38760e0549851599da6e039fa8aecae3dffd438080bdec7af7cf6b68"
+      "sha256": "10eebf3b1f8689866a9a5f7846506827063429a0bfd03a75aa17b713a95f4737"
     },
     {
       "path": "docs/framework/development/BUILD-A-FEATURE.md",
@@ -3619,7 +3623,7 @@
     },
     {
       "path": "docs/framework/development/EXAMPLE-REMOVAL.md",
-      "sha256": "9aada79e1e5a4f2ab0021afd4edb28f2203afcf6bd7152de4185fcdcca6d9527"
+      "sha256": "209915bc7b85f572f8a560ac77696586cdf163b4a308fc786fae24083e84009f"
     },
     {
       "path": "docs/framework/development/FRAMEWORK-CLI.md",
@@ -3771,7 +3775,7 @@
     },
     {
       "path": "docs/framework/testing/OBSIDIAN-TEST-KIT.md",
-      "sha256": "50f85029e1e73f4f38a54b030db8fab1703cef7121037895a6f7ffe1474d0ce1"
+      "sha256": "a5bfb83d358e09a7f0f637aaa17c690f818cd2a1cd3610071b1a3d47da245e9f"
     },
     {
       "path": "docs/framework/testing/OPTIONAL-STORYBOOK.md",
@@ -3827,7 +3831,7 @@
     },
     {
       "path": "docs/framework/user-manual/shell-cli/generated/reference.md",
-      "sha256": "62cdeb0bf785301562dbd05dd342ad61ed1bf51ab4848b0370b67811a727f36e"
+      "sha256": "63cf619276fe37329580dd6d2a2e713379bf4ed1bdef5e7d905098eaa0dd468d"
     },
     {
       "path": "docs/framework/user-manual/shell-cli/getting-started.md",
@@ -3851,15 +3855,15 @@
     },
     {
       "path": "docs/framework/workflows/airship-compatibility.yml",
-      "sha256": "793dd3b2d406516a55936daa5aa1ec9363f312a0aceddeb3e1f0f76778ed30fc"
+      "sha256": "855fc2ba2b919bcc97f12c80cda88d7211975a2b3f2845a7d8194f2e04537f93"
     },
     {
       "path": "docs/framework/workflows/angular-setup-acceptance.yml",
-      "sha256": "0c72a6eccbae31308ddc810adc287ded7774662964635fe4440574d9b0f83139"
+      "sha256": "c074f5ecf06b407e2bd0dc62eb8cafbd80ec11ebdca7d9e0347543c604690c63"
     },
     {
       "path": "docs/framework/workflows/application-docs.yml",
-      "sha256": "c6eea875bebff4a3d9176b5e3e339f357b073023ba49495b13d19694aba9948b"
+      "sha256": "ac2743675b5fa924a7864dd8b5f04799e65eb93432f13286bb93d8fc41c2eb70"
     },
     {
       "path": "docs/framework/workflows/candidate-qualification.yml",
@@ -3867,11 +3871,11 @@
     },
     {
       "path": "docs/framework/workflows/ci.yml",
-      "sha256": "6c5c79a9cc410db4c9b1f9f6846aa260ecf8d01483b951c81ca0357c48d2493a"
+      "sha256": "228f3abc1376ea5737e15e470b10623734cb36971b17aa2100f3fee02a49e954"
     },
     {
       "path": "docs/framework/workflows/companion-concept-verification.yml",
-      "sha256": "ece0d25659ee1bd443fea75249855d021e49d17122322f4f95f78b53fe75a67a"
+      "sha256": "c0dd27ac2a688eb1664895928d0a282200461f4ed4aedb23dfcb6237176a6463"
     },
     {
       "path": "docs/framework/workflows/compiler-qualification.yml",
@@ -3891,7 +3895,7 @@
     },
     {
       "path": "docs/framework/workflows/native-integration-verification.yml",
-      "sha256": "ad19debf4987905de1a1ea223f7dfd50fc7e8b5018341db1f06daeb3959f0a08"
+      "sha256": "cc7b8f422fb987103dcb1aff00f97e9834830ddc07de498319442b943639f9c1"
     },
     {
       "path": "docs/framework/workflows/offline-qualification-inputs.yml",
@@ -3899,7 +3903,7 @@
     },
     {
       "path": "docs/framework/workflows/optional-storybook.yml",
-      "sha256": "d222a54b4951af82ee5f0b2b7a400679559d8974c44bca84724d68a5bb3787d6"
+      "sha256": "5a4f10abe4f8383b0eceb46e72b3d5845d327722ae9999260b1bdc68cb5f32f1"
     },
     {
       "path": "docs/framework/workflows/project-starter-qualification.yml",
@@ -3943,11 +3947,11 @@
     },
     {
       "path": "docs/user-manual/shell-cli/generated/commands.json",
-      "sha256": "169bcdff8f1777886291d5f3ed437db6d6dc43d9cf9e839cdffe8a3888ee5d65"
+      "sha256": "9df29f7674c0517ab7ef0e1ffef57aca1e38d4d2ef270e2d862d9f42cf59de9b"
     },
     {
       "path": "docs/user-manual/shell-cli/generated/manifest.json",
-      "sha256": "04b0853c0c654b19e38fd548506e58640ac1b6b54d0308bf9f673184800e7190"
+      "sha256": "ac616cab354100af9a9cd1bd514c168388ce5e26b7069d1ac6a64c41786d814f"
     },
     {
       "path": "harness/app/adapters.ts",
@@ -4087,7 +4091,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "403ec976cdfc294c8033d0f32568a145a3b9691d2ae58b078936bf81e06acd17"
+      "sha256": "beb61f1cbe808eb8dde01af1555fe639c8d1de0f3ad51da9c30e658e48fe1156"
     },
     {
       "path": "playwright.config.ts",
@@ -4727,11 +4731,11 @@
     },
     {
       "path": "scripts/examples/ownership.json",
-      "sha256": "15e6d5b73b4bcbb5d71dbb3944408fe691f53f530d0cb6daaf8d88a6cfc69dde"
+      "sha256": "da5615a64390e540039a93b662c5636f60525c69ea911429b2abb9048e789f2f"
     },
     {
       "path": "scripts/examples/plan.mjs",
-      "sha256": "3664f8afb9ace9a930cd5cbe46434e9810f6db1aba59b10206c0002af018e129"
+      "sha256": "7d174ebb03e49079ae1859d2602f6fb4015d16e108ec939cc8398991334c9937"
     },
     {
       "path": "scripts/harness/serve-style-fixture.mjs",
@@ -4863,7 +4867,7 @@
     },
     {
       "path": "scripts/quality/lint-source.mjs",
-      "sha256": "d6e629838fb3ba548ae312b738e5a74d307724ea7b79f3141a5b19a541ba34fa"
+      "sha256": "1a6bede681663ff7f6d4f6e1cf1a23dc02e15eaa7c585c4cc98e217469b45b00"
     },
     {
       "path": "scripts/quality/maintainability-corpus.mjs",
@@ -7707,7 +7711,7 @@
     },
     {
       "path": "templates/companion/devkit/README.md.tmpl",
-      "sha256": "da49494e6a9b4a5c8f6219d8b2294ad7b83de83ccea0c69d11c7617fa91b8aed"
+      "sha256": "e8eae1563073779f20373a4bcf5beaee7626ccf091737fa901408d79b7f0e1bf"
     },
     {
       "path": "templates/companion/devkit/agent-pointer.md.tmpl",
@@ -7751,7 +7755,7 @@
     },
     {
       "path": "templates/companion/devkit/skill-self-review.md.tmpl",
-      "sha256": "30b63f98ed393731bae9cc146ae20c3863752712c7b93bcacdea1f71cc9e6b04"
+      "sha256": "d64227316fe12c54fe7a4baaab616dc20e789353c501ce43d079821a25d28289"
     },
     {
       "path": "templates/companion/devkit/skill-write-obsidian-test.md.tmpl",
@@ -7987,7 +7991,7 @@
     },
     {
       "path": "templates/examples/tests__runtime__native-lifecycle.test.ts.txt",
-      "sha256": "c2c4d21047090894ca5a8735410b129d8eb4037f3107802c9f784f2a74e0b9b3"
+      "sha256": "44a0f7ec1d336b5345de6d84608b2bbd485645a48ee687ca45e20f043e4d4638"
     },
     {
       "path": "templates/examples/tests__runtime__repository-failures.test.ts.txt",
@@ -8299,7 +8303,7 @@
     },
     {
       "path": "tests/fixtures/compiler/starter-golden.json",
-      "sha256": "f3a712d5125a64bb080c439d750ef47512b99edc2e63465c1d0aa8b105844f06"
+      "sha256": "2f1683e47252973e2c4545dde1fff5f026128ce3f0ee0efec06590e8c23c50f4"
     },
     {
       "path": "tests/fixtures/generator-boundaries.mjs",
@@ -9311,7 +9315,7 @@
     },
     {
       "path": "tests/runtime/native-lifecycle.test.ts",
-      "sha256": "2e1df21855efc79117f77471600842c2713010a4ef9ed34a27014b91b15d3be3"
+      "sha256": "c812143668ada72c28628fd435a6fbd181ac1aa9eb390f365b2fad4f8193f092"
     },
     {
       "path": "tests/runtime/note-operation-permits.test.ts",
@@ -9343,7 +9347,7 @@
     },
     {
       "path": "tests/runtime/obsidian-test-kit-shell.test.ts",
-      "sha256": "04878a50847d6d91029074a98ce2a6dc40e9a89cf131ee48468bef8c9a9375e8"
+      "sha256": "02e9bc66273011335f1d9c61f1f31721b905a9deb8426b3ead37eaf998be1d66"
     },
     {
       "path": "tests/runtime/obsidian-test-kit-vault.test.ts",
@@ -9843,7 +9847,7 @@
     },
     {
       "path": "tests/tooling/compiler-template-layout.checks.mjs",
-      "sha256": "346e674ab475dba05e37305379f2f3e088442f3a01c74612231823147094e81a"
+      "sha256": "945a3d1d52abdbdb7d5758f9bf36d65a884d90b2ab3c09557e09e96d4a1e4711"
     },
     {
       "path": "tests/tooling/compiler-template-snapshot.checks.mjs",
@@ -10015,7 +10019,7 @@
     },
     {
       "path": "tests/tooling/framework-kit-bootstrap.checks.mjs",
-      "sha256": "5d87bb7504efaaf173dd4bcaa433444af3a5f321d15f8ac60e305f136d10b0e8"
+      "sha256": "df342de93b2331676c497283d0ac7631a642f405a7f8a4252f4400db293ffb8d"
     },
     {
       "path": "tests/tooling/framework-kit-improvements.checks.mjs",
@@ -10039,11 +10043,11 @@
     },
     {
       "path": "tests/tooling/framework-new-git.checks.mjs",
-      "sha256": "587616acef11a7f05a24b15b81cc42ef9a0b92974c9ddae03d2b995460c19d9f"
+      "sha256": "269dff0e18d7e64fa5b36f585608e4b6ca523b3accc0a96f5017e89afab060eb"
     },
     {
       "path": "tests/tooling/framework-new-project.checks.mjs",
-      "sha256": "7065f21180967a212b174e92a3ba75e4b1e22c811ea354b9d9e53d1cdc26c470"
+      "sha256": "c3b6b0c3edb4dca266d1b70da026ef0b1869bba31cc5a04e6a03de3d364637d1"
     },
     {
       "path": "tests/tooling/framework-process.checks.mjs",
@@ -10168,6 +10172,10 @@
     {
       "path": "tests/tooling/interactive-maker-checkpoint.checks.mjs",
       "sha256": "5ccb0cfb1cc4c24031d99e46ae02049b0212f7159c93ec35e3cc5a07234c294a"
+    },
+    {
+      "path": "tests/tooling/interactive-maker-ci-composite.checks.mjs",
+      "sha256": "aff16965a0c6cb669ff860d6d1f5122d968ec844a75766ed5779ee039e200dce"
     },
     {
       "path": "tests/tooling/interactive-maker-ci-operation.checks.mjs",
@@ -10391,7 +10399,7 @@
     },
     {
       "path": "tests/tooling/interactive-maker-parity-framework-services.checks.mjs",
-      "sha256": "98dacb236f98dc092841afd767504bd4493f46473edb242d14a79493cc6563af"
+      "sha256": "6fe849d5e5bfc12fbdc5076b3e641c13a07603560798b6f08a78da3991635bf1"
     },
     {
       "path": "tests/tooling/interactive-maker-parity-framework-setup.checks.mjs",
@@ -10579,7 +10587,7 @@
     },
     {
       "path": "tests/tooling/lint-source.checks.mjs",
-      "sha256": "617c507507f1cf28a0bfaa6d8409571cd87aa00f82badbc34dd37053b86404c4"
+      "sha256": "7a83352a3d7c84abe3d0cea9c53adaf42468fb81b137ee50b70fe898643df7e6"
     },
     {
       "path": "tests/tooling/local-node-dist-fixture.mjs",
@@ -10599,7 +10607,7 @@
     },
     {
       "path": "tests/tooling/maker-checks.checks.mjs",
-      "sha256": "c29d70f5db2f2125ee04fcfd6debf163fee9374f2bdc976ddca6cd2044027527"
+      "sha256": "473054c2a1d1ee5113362669976d51b80db6110d37719b992bd8b7eac3fdd3c9"
     },
     {
       "path": "tests/tooling/maker-fixture.mjs",
@@ -10739,11 +10747,11 @@
     },
     {
       "path": "tests/tooling/project-generator-devkit.checks.mjs",
-      "sha256": "1a6dd9c0e8e6018da88da184b5d292e07ddd525194bc5292d3904323ce21a122"
+      "sha256": "8c3761fd67e122f1560e86be2a9236e8cf2a40babff6c580637577d63546652a"
     },
     {
       "path": "tests/tooling/project-generator-fixture-parity.checks.mjs",
-      "sha256": "e39ebb9a30a7b64ce9ecd4c011b9eb5f8a9f050c96fcbfead7f44c36bb6b4e54"
+      "sha256": "f51e0e3fd8d322f98a34ae9f34fcce9214fe418062a37581e66d528e0bb6aacd"
     },
     {
       "path": "tests/tooling/project-generator-fixtures.checks.mjs",
@@ -10751,7 +10759,7 @@
     },
     {
       "path": "tests/tooling/project-generator-framework-scope.checks.mjs",
-      "sha256": "3779e9edae0e5af90460d4f37a0fc6a9c8fe82e2941e8a21b3d6601354a27767"
+      "sha256": "0696c83ba6bc79fb35de68c9e9d74f96bed1d226ac91a61e20c261a53e1cc1da"
     },
     {
       "path": "tests/tooling/project-generator-http.checks.mjs",
@@ -10851,7 +10859,7 @@
     },
     {
       "path": "tests/tooling/readme-ownership.checks.mjs",
-      "sha256": "761c420023f085ba1ffe7367c35b9b43291c72ed16580fee93415fa85bd0d8b2"
+      "sha256": "86d458bb4c8cf80882c73d65bfd7abf5f43e0906b164d9b5a91cccb93960a282"
     },
     {
       "path": "tests/tooling/release-cli.checks.mjs",
@@ -11043,7 +11051,7 @@
     },
     {
       "path": ".companion/generation.json",
-      "sha256": "00f2d2c78cea68fdbd12f641357987b7e7bd8ea79d5aab85e22e32f65fc32139"
+      "sha256": "1206290cd0e36b8cda569e896401c8ff9a8290fad52ba551738840f6114926f5"
     },
     {
       "path": "GOLDEN-TEMPLATE.md",

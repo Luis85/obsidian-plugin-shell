@@ -49,7 +49,7 @@ folder are ever opened.
 | `npm run check:fast` | Typecheck plus only the tests related to files changed since the last commit |
 | `npm test` | All product tests once |
 | `npm run test:obsidian` | The built plugin loads, registers and unloads in real Obsidian |
-| `npm run verify:project` | Build, typecheck, product and UI-effect tests (the full local gate) |
+| `npm run verify:project` | `npm run check`, then the release build and UI-effect tests (the full local gate) |
 | `npm run verify:artifacts` | What the full gate adds to `check`: release build, UI-effect tests, test data (CI runs `check`, then this) |
 | `npm run build` | Release bundle in `dist/` (`main.js`, `styles.css`, `manifest.json`) |
 | `npm run check:submission` | Local mirror of the Obsidian community-review rules (manifest, lint, bundle) |

@@ -1,7 +1,8 @@
 /**
  * `ci`: reproduce GitHub Actions jobs locally. `--list` describes workflows and jobs; `--job` prints the exact ordered
  * shell commands (dry run) or, with `--execute`, runs the job's `run:` steps and reports like `check`.
- * Jobs with secrets, publication or deployment are never executed; external actions are skipped with a note.
+ * Local composite actions are expanded into their steps. Jobs with secrets, publication or deployment are never executed;
+ * external actions are skipped with a note.
  */
 import { execFile } from 'node:child_process';
 import { summarizeWorkflow } from '../../domain/ci-listing.ts';
@@ -48,8 +49,8 @@ async function chooseJob(root: string, stem: string, id: string): Promise<{ work
 }
 const plannedStatus = (step: PlannedStep) => step.disposition === 'run' ? { status: 'not-run' } : { status: 'skipped', reason: skipReason(step) };
 function stepView(step: PlannedStep): Record<string, unknown> {
-  const { index, id, name, kind, disposition, uses, shell, command, workingDirectory, env, unresolved, condition, note } = step;
-  return { index, id, name, kind, disposition, ...(uses ? { uses } : {}), ...(shell ? { shell } : {}), ...(command !== undefined ? { command } : {}),
+  const { index, workflowStep, action, id, name, kind, disposition, uses, shell, command, workingDirectory, env, unresolved, condition, note } = step;
+  return { index, ...(action || workflowStep !== index ? { workflowStep } : {}), ...(action ? { action } : {}), id, name, kind, disposition, ...(uses ? { uses } : {}), ...(shell ? { shell } : {}), ...(command !== undefined ? { command } : {}),
     ...(workingDirectory !== undefined ? { workingDirectory } : {}), env, unresolved, ...(condition ? { condition } : {}), ...(note ? { note } : {}) };
 }
 function notes(plan: JobPlan, blockers: string[]): string[] {

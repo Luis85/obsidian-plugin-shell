@@ -35,7 +35,6 @@ jobs:
           install-flags: --no-fund
       - name: Check contracts on the unchanged root toolchain
         run: |
-          node "$QUALIFIED_NPM" run typecheck:compiler
           node --test --test-concurrency=1 tests/tooling/compiler-storybook*.checks.mjs
       - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
         run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
