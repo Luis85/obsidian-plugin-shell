@@ -72,7 +72,8 @@ with sync_playwright() as pw:
         js('modalOriginal=null;closeModal()')
         # The specimen verifies CSS itself, not an invented Nuxt runtime. Live Nuxt tests are separate.
         specimen=browser.new_page(viewport={'width':960,'height':600})
-        specimen.set_content('<style>body{--background-primary:#fefefe;--font-interface:serif;--font-text:serif}button{border-radius:2px}</style><button id="host">Host</button><div id="other" data-plugin-ui="other" class="ps--other"><button>Other</button></div><div id="owned" data-plugin-ui="plugin-companion" class="ps--plugin-companion light"><h1>Title</h1><button>Button</button><span class="plugin-companion-ds-colors-accent">Accent</span><input><div class="plugin-companion-ds-padding-md">Space</div></div><div id="portal" data-plugin-ui="plugin-companion" class="ps--plugin-companion dark"><button>Portal</button></div>')
+        pid=js('project().id')  # owned selectors follow the open project's ID
+        specimen.set_content(('<style>body{--background-primary:#fefefe;--font-interface:serif;--font-text:serif}button{border-radius:2px}</style><button id="host">Host</button><div id="other" data-plugin-ui="other" class="ps--other"><button>Other</button></div><div id="owned" data-plugin-ui="plugin-companion" class="ps--plugin-companion light"><h1>Title</h1><button>Button</button><span class="plugin-companion-ds-colors-accent">Accent</span><input><div class="plugin-companion-ds-padding-md">Space</div></div><div id="portal" data-plugin-ui="plugin-companion" class="ps--plugin-companion dark"><button>Portal</button></div>').replace('plugin-companion',pid))
         sentinel=specimen.locator('#host').evaluate('e=>({color:getComputedStyle(e).color,radius:getComputedStyle(e).borderRadius})')
         other=specimen.locator('#other').evaluate('e=>getComputedStyle(e).backgroundColor')
         specimen.add_style_tag(content=css)
@@ -80,7 +81,7 @@ with sync_playwright() as pw:
         check('Typography helper and heading mapping use exact saved size',specimen.locator('#owned h1').evaluate('e=>getComputedStyle(e).fontSize')=='24px')
         check('Nuxt UI semantic primary is mapped to the authored token',specimen.locator('#owned').evaluate('e=>getComputedStyle(e).getPropertyValue("--ui-primary").trim().toLowerCase()')=='#6550b9')
         check('Control radius and size are applied',specimen.locator('#owned button').evaluate('e=>getComputedStyle(e).borderRadius==="6px"&&getComputedStyle(e).minHeight==="36px"'))
-        check('Spacing helpers consume saved tokens',specimen.locator('.plugin-companion-ds-padding-md').evaluate('e=>getComputedStyle(e).padding')=='16px')
+        check('Spacing helpers consume saved tokens',specimen.locator(f'.{pid}-ds-padding-md').evaluate('e=>getComputedStyle(e).padding')=='16px')
         specimen.locator('#owned').evaluate('e=>{e.classList.remove("light");e.classList.add("dark")}')
         check('Changing the owned mode resolves the dark palette',specimen.locator('#owned').evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(30, 30, 36)')
         check('Owned portal roots receive the same dark tokens',specimen.locator('#portal').evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(30, 30, 36)')
