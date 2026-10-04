@@ -154,6 +154,11 @@ searched. No match means no saved project. Several matches fail with
 and a `--config` path that does not exist fails with `PROJECT_CONFIG_MISSING`. A linked
 `configs/` folder or configuration file is refused. `project-setup` refuses to add a
 second configuration beside another project's (`PROJECT_CONFIG_CONFLICT`).
+`--config` is a maker option of the commands that read the saved project: `sketch`,
+`prototype`, `studio`, `brainstorm` and `design`. Maker commands that never read it refuse
+it with their own option code: `new` (`PROJECT_OPTION`), `project-setup` and `settings`
+(`SETUP_OPTION`) and `first-run` (`FIRST_RUN_OPTION`). Framework commands such as `setup`
+or `check` reject it as an unknown option (`INVALID_OPTION`).
 
 The retired root `project.config.json` is never read. When it exists and `configs/` holds
 no project configuration, commands fail with `PROJECT_CONFIG_RELOCATED`. A project made by
