@@ -10,8 +10,12 @@ export const incrementStatuses = ['New', 'Refining', 'Ready', 'In progress', 'Do
 export type IncrementStatus = typeof incrementStatuses[number];
 export const pullRequestStatuses = ['New', 'Draft', 'Ready', 'Merged', 'Closed'] as const;
 export type PullRequestStatus = typeof pullRequestStatuses[number];
-export const e2eDecisions = ['none', 'optional', 'required'] as const;
-export type E2eDecision = typeof e2eDecisions[number];
+const e2eDecisions = ['none', 'optional', 'required'] as const;
+export const issueStatuses = ['New', 'Ready', 'In progress', 'Done', 'Cancelled'] as const;
+export type IssueStatus = typeof issueStatuses[number];
+/** The kick-off pull request merges the increment branch into the base; change pull requests stack on the increment branch. */
+export const pullRequestKinds = ['kickoff', 'change'] as const;
+export type PullRequestKind = typeof pullRequestKinds[number];
 export const hostingPlatforms = ['github', 'azure-devops'] as const;
 export type HostingPlatform = typeof hostingPlatforms[number];
 /** Frontmatter values in the DoR subset: a scalar string or a `[a, b]` list. */
@@ -19,6 +23,8 @@ export type FrontmatterValue = string | string[];
 export type FrontmatterData = Record<string, FrontmatterValue>;
 
 export interface SizeBudget { maxAcceptanceCriteria: number; maxAffectedAreas: number }
+/** Branch patterns: `{id}` is the increment id, `{increment}` and `{pr}` name a change pull request's branch. */
+export interface BranchConfig { increment: string; pullRequest: string; base: string }
 /** The subset of delivery.json the documents depend on; built-in defaults mirror the committed file. */
 export interface DeliverySchema {
   handoff: {
@@ -28,28 +34,39 @@ export interface DeliverySchema {
   };
   pullRequests: { glob: string; type: string; incrementKey: string };
   sizes: Record<string, SizeBudget>;
+  branches: BranchConfig;
+  /** Where generated acceptance test stubs live: `{increment}` is the increment id, `{ac}` the lower-case criterion id. */
+  acceptance: { pattern: string };
 }
+/** Increment keys the CLI writes beyond the original DoR set; delivery.json must list them in handoff.optionalKeys. */
+export const incrementExtensionKeys = ['branch', 'base', 'issues'] as const;
 export const defaultDeliverySchema: DeliverySchema = Object.freeze({
   handoff: {
     glob: 'docs/increments/*.md', ignore: ['docs/increments/README.md'], template: 'configs/delivery/increment-handoff.template.md',
     slugPattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', maxSlugLength: 64, bodyKey: 'Handoff', type: 'Increment',
     statuses: [...incrementStatuses], e2e: [...e2eDecisions],
-    requiredKeys: ['type', 'id', 'title', 'owner', 'size', 'status', 'e2e'], optionalKeys: ['refs', 'pullRequests'],
+    requiredKeys: ['type', 'id', 'title', 'owner', 'size', 'status', 'e2e'], optionalKeys: ['refs', 'pullRequests', ...incrementExtensionKeys],
     sections: ['Summary', 'Outcome', 'Scope', 'Acceptance criteria', 'Affected areas', 'Test plan', 'Docs impact', 'Changelog', 'Risks and rollback', 'Dependencies', 'Open questions'],
     generatedSection: 'Completion record',
   },
   pullRequests: { glob: 'docs/pull-requests/*.md', type: 'PullRequest', incrementKey: 'increment' },
   sizes: { S: { maxAcceptanceCriteria: 5, maxAffectedAreas: 8 }, M: { maxAcceptanceCriteria: 10, maxAffectedAreas: 20 }, L: { maxAcceptanceCriteria: 20, maxAffectedAreas: 45 } },
+  // Not increment/{increment}/{pr}: a repository cannot hold refs/heads/increment/x and refs/heads/increment/x/y at once.
+  branches: { increment: 'increment/{id}', pullRequest: 'pr/{increment}/{pr}', base: 'main' },
+  acceptance: { pattern: 'tests/acceptance/{increment}/{ac}.checks.mjs' },
 });
 /** Sections of a PullRequest document, in order; Scope holds `### In scope` and `### Out of scope`. */
 export const pullRequestSections = ['Summary', 'Scope', 'Tasks', 'Documents', 'Notes', 'Amendments'] as const;
-export type PullRequestSection = typeof pullRequestSections[number];
 /** Body regions a sync compares as whole texts; tasks and amendments are compared per item. */
 export const pullRequestRegions = ['summary', 'scope', 'documents', 'notes'] as const;
 export type PullRequestRegion = typeof pullRequestRegions[number];
 /** The CLI-owned Increment section and its generated marked region. */
 export const pullRequestsSection = 'Pull requests';
 export const pullRequestsRegion = 'pull-requests';
+export const issuesSection = 'Issues';
+export const issuesRegion = 'issues';
+/** Sections of an Issue document, in order. */
+export const issueSections = ['Summary', 'Acceptance criteria', 'Notes'] as const;
 export const scopeSubsections = { in: 'In scope', out: 'Out of scope' } as const;
 export type ScopeSide = keyof typeof scopeSubsections;
 
@@ -69,11 +86,13 @@ export const bindingKeys = ['platform', 'repository', 'number', 'url', 'publishe
 
 export interface IncrementModel {
   id: string; title: string; owner: string; size: string; status: string; e2e: string;
-  refs: string[]; pullRequests: string[]; frontmatter: FrontmatterData;
+  refs: string[]; pullRequests: string[]; issues: string[]; branch: string | null; base: string | null; frontmatter: FrontmatterData;
   heading: string | null; sections: SectionSummary[]; acceptance: AcceptanceCriterion[]; scope: Scope;
 }
 export interface PullRequestModel {
   id: string; title: string; increment: string; status: string; delivers: string[];
+  /** `change` when the key is absent: documents written before kinds existed stack like change pull requests. */
+  kind: PullRequestKind; issues: string[];
   head: string | null; base: string | null; binding: PullRequestBinding | null; frontmatter: FrontmatterData;
   heading: string | null; sections: SectionSummary[];
   /** Section bodies with LF line endings, as written between the headings. */
@@ -82,6 +101,14 @@ export interface PullRequestModel {
 }
 /** One row of the generated pull-request table in an Increment. */
 export interface PullRequestRow { id: string; title: string; status: string; path: string; number?: number; url?: string }
+/** One row of the generated issue list in an Increment. */
+export interface IssueRow { id: string; title: string; status: string; path: string }
+/** An acceptance criterion of an Issue: `AC-n` refers to the increment's criterion, `IC-n` is the issue's own. */
+export interface IssueCriterion { id: string; checked: boolean; text: string; line: number }
+export interface IssueModel {
+  id: string; title: string; status: string; increment: string; pullRequests: string[]; frontmatter: FrontmatterData;
+  heading: string | null; sections: SectionSummary[]; regions: { summary: string; notes: string }; acceptance: IssueCriterion[];
+}
 
 const isStringList = (value: unknown): value is string[] => Array.isArray(value) && value.every(item => typeof item === 'string' && item.length > 0);
 function sameList(actual: unknown, expected: readonly string[], name: string): string[] {
@@ -110,6 +137,31 @@ function sizes(value: unknown): Record<string, SizeBudget> {
   insistDelivery(entries.length > 0, 'DELIVERY_SCHEMA_UNSUPPORTED', 'delivery.json sizes must name at least one size.');
   return Object.fromEntries(entries);
 }
+/** `refs` and `pullRequests`, then any of the CLI's extension keys; a file without them refuses only when those keys are written. */
+function optionalKeys(value: unknown): string[] {
+  const allowed: readonly string[] = incrementExtensionKeys;
+  insistDelivery(isStringList(value) && value[0] === 'refs' && value[1] === 'pullRequests' && value.slice(2).every(key => allowed.includes(key)),
+    'DELIVERY_SCHEMA_UNSUPPORTED', `delivery.json handoff.optionalKeys must be refs, pullRequests and optionally ${allowed.join(', ')}.`);
+  return [...value];
+}
+/** Branch patterns are optional in delivery.json; the defaults apply when the key is absent. */
+/** The stub pattern: a string or `{ pattern }`; it must name both placeholders so every criterion gets its own file. */
+function acceptanceConfig(value: unknown): { pattern: string } {
+  if (value === undefined) return { ...defaultDeliverySchema.acceptance };
+  const pattern = nonEmpty(typeof value === 'string' ? value : record(value, 'acceptance').pattern, 'acceptance.pattern');
+  insistDelivery(pattern.includes('{increment}') && pattern.includes('{ac}'), 'DELIVERY_SCHEMA_UNSUPPORTED', 'delivery.json acceptance.pattern must contain {increment} and {ac}.');
+  return { pattern };
+}
+/** The acceptance test stub of one criterion, e.g. `tests/acceptance/delivery/ac-1.checks.mjs`; the default `Evidence:` of a new criterion. */
+export function acceptanceStubPath(config: { pattern: string } = defaultDeliverySchema.acceptance, incrementId: string, acceptanceId: string): string {
+  insistDelivery(isDeliverySlug(incrementId) && /^AC-\d+$/.test(acceptanceId), 'INCREMENT_INPUT_INVALID', 'An acceptance stub needs an increment id and an AC-n id.');
+  return config.pattern.replaceAll('{increment}', incrementId).replaceAll('{ac}', acceptanceId.toLowerCase());
+}
+function branchConfig(value: unknown): BranchConfig {
+  if (value === undefined) return { ...defaultDeliverySchema.branches };
+  const raw = record(value, 'branches');
+  return { increment: nonEmpty(raw.increment, 'branches.increment'), pullRequest: nonEmpty(raw.pullRequest, 'branches.pullRequest'), base: nonEmpty(raw.base, 'branches.base') };
+}
 /**
  * The schema from a parsed delivery.json. Folders, template, slug rule and sizes may differ from the defaults;
  * statuses, keys and sections are the vocabulary the commands are built on, so a different value refuses.
@@ -126,20 +178,25 @@ export function deliverySchemaFrom(raw: unknown): DeliverySchema {
       slugPattern: nonEmpty(handoff.slugPattern, 'handoff.slugPattern'), maxSlugLength: maxSlugLength as number, bodyKey: nonEmpty(handoff.bodyKey, 'handoff.bodyKey'),
       type: sameValue(handoff.type, base.type, 'handoff.type'), statuses: sameList(handoff.statuses, base.statuses, 'handoff.statuses'),
       e2e: sameList(handoff.e2e, base.e2e, 'handoff.e2e'), requiredKeys: sameList(handoff.requiredKeys, base.requiredKeys, 'handoff.requiredKeys'),
-      optionalKeys: sameList(handoff.optionalKeys, base.optionalKeys, 'handoff.optionalKeys'), sections: sameList(handoff.sections, base.sections, 'handoff.sections'),
+      optionalKeys: optionalKeys(handoff.optionalKeys), sections: sameList(handoff.sections, base.sections, 'handoff.sections'),
       generatedSection: sameValue(handoff.generatedSection, base.generatedSection, 'handoff.generatedSection'),
     },
     pullRequests: { glob: nonEmpty(pullRequests.glob, 'pullRequests.glob'), type: sameValue(pullRequests.type, 'PullRequest', 'pullRequests.type'),
       incrementKey: sameValue(pullRequests.incrementKey, 'increment', 'pullRequests.incrementKey') },
-    sizes: sizes(data.sizes),
+    sizes: sizes(data.sizes), branches: branchConfig(data.branches), acceptance: acceptanceConfig(data.acceptance),
   };
+}
+/** Refuses writing an Increment key the configured DoR would reject as unknown (DOR-02). */
+export function requireIncrementKey(schema: DeliverySchema, key: string): void {
+  insistDelivery([...schema.handoff.requiredKeys, ...schema.handoff.optionalKeys].includes(key), 'DELIVERY_SCHEMA_UNSUPPORTED',
+    `delivery.json handoff.optionalKeys does not list ${key}; add it before the CLI writes ${key} to an Increment.`, { key });
 }
 /** True when the id is a slug of the configured pattern and length; DOR-02 also requires id === file name. */
 export function isDeliverySlug(value: string, schema: DeliverySchema = defaultDeliverySchema): boolean {
   return value.length <= schema.handoff.maxSlugLength && new RegExp(schema.handoff.slugPattern, 'u').test(value);
 }
 /** The one-level `*.md` glob the DoR scripts use for a configured folder. */
-export const folderGlob = (folder: string): string => `${folder}/*.md`;
+const folderGlob = (folder: string): string => `${folder}/*.md`;
 /** Configured folders whose delivery.json glob points elsewhere; the DoR scripts would read a different folder. */
 export function deliveryPathsDrift(schema: DeliverySchema, folders: { increments: string; pullRequests: string }): Problem[] {
   const pairs = [['handoff.glob', schema.handoff.glob, folders.increments], ['pullRequests.glob', schema.pullRequests.glob, folders.pullRequests]] as const;

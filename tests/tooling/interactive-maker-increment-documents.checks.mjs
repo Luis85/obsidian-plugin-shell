@@ -6,12 +6,10 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { formatScalar, formatValue, lineEnding, parseFrontmatter, setFrontmatterValue, textLines } from '../../bin/domain/increments/frontmatter.ts';
 import { extractWikilinks, formatWikilink, linkProblems, parseWikilink, resolveWikilink } from '../../bin/domain/increments/wikilinks.ts';
 import { appendListItem, findMarkedRegion, findSection, insertSection, outline, prose, replaceMarkedRegion, words } from '../../bin/domain/increments/sections.ts';
-import { defaultDeliverySchema, deliveryPathsDrift, deliverySchemaFrom, retargetDeliveryConfig } from '../../bin/domain/increments/model.ts';
+import { acceptanceStubPath, defaultDeliverySchema, deliveryPathsDrift, deliverySchemaFrom, incrementExtensionKeys, retargetDeliveryConfig } from '../../bin/domain/increments/model.ts';
 import { incrementTemplate } from '../../bin/domain/increments/increment-template.ts';
-import {
-  editIncrement, incrementLinkDrift, malformedCriteria, parseIncrement, pullRequestRow, pullRequestTableIds, readinessProblems, renderIncrement,
-  setPullRequestTable, validateIncrement,
-} from '../../bin/domain/increments/increment-document.ts';
+import { editIncrement, malformedCriteria, parseIncrement, readinessProblems, renderIncrement, validateIncrement } from '../../bin/domain/increments/increment-document.ts';
+import { incrementLinkDrift, issueTableIds, pullRequestRow, pullRequestTableIds, setIssueTable, setPullRequestTable } from '../../bin/domain/increments/generated-lists.ts';
 import { parseInputFragment } from '../../bin/domain/increments/input-fragment.ts';
 
 const root = resolve(import.meta.dirname, '../..');
@@ -134,16 +132,22 @@ test('a new increment renders the built-in template with the DoR substitutions a
 
 test('increment edits add scope, criteria, evidence and refs with stable ids and exact Markdown', () => {
   let text = apply(fresh(), { kind: 'scope', side: 'in', text: 'Planner' }, { kind: 'scope', side: 'out', text: 'Remote sync' },
-    { kind: 'ac-add', text: 'Renders the template' }, { kind: 'ac-add', text: 'Refuses a bad id' });
+    { kind: 'ac-add', text: 'Renders the template' }, { kind: 'ac-add', text: 'Refuses a bad id', evidence: [] });
   assert.match(text, /### In scope\n\n- Planner\n\n### Out of scope\n\n- Remote sync\n\n## Acceptance/);
-  assert.match(text, /\n- \[ \] AC-1: Renders the template\n- \[ \] AC-2: Refuses a bad id\n\n## Affected/);
+  assert.match(text, /\n- \[ \] AC-1: Renders the template\n {2}Evidence: `tests\/acceptance\/delivery-pipeline\/ac-1\.checks\.mjs`\n- \[ \] AC-2: Refuses a bad id\n\n## Affected/);
   const set = editIncrement(text, { kind: 'ac-set', id: 'AC-1', checked: true, evidence: ['tests/a.checks.mjs', 'docs/b.md'] });
   assert.deepEqual(set.edits, [{ section: 'Acceptance criteria', action: 'set', itemId: 'AC-1' }]);
   assert.match(set.text, /\n- \[x\] AC-1: Renders the template\n {2}Evidence: `tests\/a.checks.mjs`, `docs\/b.md`\n- \[ \] AC-2/);
   text = editIncrement(set.text, { kind: 'ac-set', id: 'AC-1', text: 'Renders it' }).text;
   assert.deepEqual(parseIncrement(text).acceptance.map(item => [item.id, item.checked, item.text, item.evidence]),
     [['AC-1', true, 'Renders it', ['tests/a.checks.mjs', 'docs/b.md']], ['AC-2', false, 'Refuses a bad id', []]]);
-  assert.equal(editIncrement(text, { kind: 'ac-add', text: 'Third' }).edits[0].itemId, 'AC-3');
+  const third = editIncrement(text, { kind: 'ac-add', text: 'Third' });
+  assert.deepEqual([third.edits[0].itemId, third.created], ['AC-3', { id: 'AC-3', stub: 'tests/acceptance/delivery-pipeline/ac-3.checks.mjs' }]);
+  assert.deepEqual(parseIncrement(third.text).acceptance.at(-1).evidence, ['tests/acceptance/delivery-pipeline/ac-3.checks.mjs']);
+  const custom = editIncrement(text, { kind: 'ac-add', text: 'Own', evidence: ['docs/proof.md'] }, { schema: { ...defaultDeliverySchema, acceptance: { pattern: 'spec/{increment}-{ac}.md' } } });
+  assert.deepEqual([custom.created.stub, parseIncrement(custom.text).acceptance.at(-1).evidence], ['spec/delivery-pipeline-ac-3.md', ['docs/proof.md']]);
+  assert.equal(acceptanceStubPath(undefined, 'x', 'AC-12'), 'tests/acceptance/x/ac-12.checks.mjs');
+  assert.throws(() => acceptanceStubPath(undefined, 'x', 'T-1'), code('INCREMENT_INPUT_INVALID'));
   assert.throws(() => editIncrement(text, { kind: 'ac-set', id: 'AC-9', checked: true }), code('INCREMENT_AC_NOT_FOUND'));
   assert.throws(() => editIncrement(text, { kind: 'ac-set', id: 'AC-1', evidence: ['a`b'] }), code('INCREMENT_INPUT_INVALID'));
   const files = ['docs/prds/delivery.md'];
@@ -206,6 +210,26 @@ test('the generated pull-request list stays in step with the pullRequests key an
     ['Pull request a-2 names a but is not in its pullRequests list.', 'a lists a-3, which has no document or names another increment.']);
 });
 
+test('increments record their branch, base and generated issue list next to the pull requests', () => {
+  const text = fresh({ branch: 'increment/delivery-pipeline', base: 'main' });
+  assert.match(text, /^pullRequests: \[\]\nbranch: "increment\/delivery-pipeline"\nbase: main\n---$/m);
+  const model = parseIncrement(text);
+  assert.deepEqual([model.branch, model.base, model.issues], ['increment/delivery-pipeline', 'main', []]);
+  assert.throws(() => fresh({ branch: 'bad branch' }), code('BRANCH_NAME_INVALID'));
+  const rows = [{ id: 'delivery-pipeline', title: 'First issue', status: 'New', path: 'docs/issues/delivery-pipeline.md' }];
+  const linked = editIncrement(editIncrement(text, { kind: 'issues', ids: ['delivery-pipeline'], rows }).text, { kind: 'pull-requests', ids: [], rows: [] }).text;
+  assert.match(linked, /^pullRequests: \[\]\nissues: \[delivery-pipeline\]\nbranch:/m);
+  assert.match(linked, /## Open questions\n[\s\S]*\n## Issues\n\n<!-- wb:issues generated by node bin\/app; edits here are replaced -->\n- \[\[docs\/issues\/delivery-pipeline\|First issue\]\] · New\n<!-- \/wb:issues -->\n\n## Pull requests\n/);
+  assert.deepEqual(issueTableIds(linked), ['delivery-pipeline']); assert.deepEqual(validateIncrement(linked, { path }), []);
+  assert.deepEqual(validateIncrement(setIssueTable(linked, []), { path }).map(problem => problem.message), ['The issues key and the generated list differ for delivery-pipeline.']);
+  assert.deepEqual(incrementLinkDrift({ id: 'a', pullRequests: [], issues: ['a'] }, [{ id: 'a-2', increment: 'a' }], 'issues').map(problem => problem.message),
+    ['Issue a-2 names a but is not in its issues list.', 'a lists a, which has no document or names another increment.']);
+  assert.deepEqual(incrementLinkDrift({ id: 'a', pullRequests: [] }, [], 'issues'), []);
+  assert.ok(validateIncrement(text.replace('base: main', 'base: "a..b"').replace('pullRequests: []', 'pullRequests: []\nissues: x'))
+    .some(problem => problem.message === 'base "a..b" is not a branch name.'));
+  assert.ok(validateIncrement(text.replace('pullRequests: []', 'pullRequests: []\nissues: x')).some(problem => problem.message === 'issues must be a [list].'));
+});
+
 test('validation reports DOR-02 frontmatter problems, missing sections, malformed criteria and links', () => {
   const broken = fresh().replace('type: Increment', 'type: Task').replace('size: M', 'size: XL').replace('pullRequests: []', 'pullRequests: x\nextra: 1')
     .replace('## Outcome', '## Outcomes').replace('- [ ] AC-2:', '- [ ] AC-1:').replace('- [ ] AC-1: <observable', '- AC-x <observable');
@@ -236,11 +260,15 @@ test('the structural Ready gate lists placeholders, thin sections, scope and ope
 test('built-in delivery defaults accept a matching configuration, report drift and retarget moved folders', () => {
   const config = { schemaVersion: 1, handoff: { ...defaultDeliverySchema.handoff, glob: 'notes/increments/*.md' }, pullRequests: defaultDeliverySchema.pullRequests, sizes: defaultDeliverySchema.sizes };
   const schema = deliverySchemaFrom(structuredClone(config));
-  assert.equal(schema.handoff.glob, 'notes/increments/*.md');
+  assert.equal(schema.handoff.glob, 'notes/increments/*.md'); assert.deepEqual(schema.branches, defaultDeliverySchema.branches);
+  assert.deepEqual(deliverySchemaFrom({ ...config, handoff: { ...config.handoff, optionalKeys: ['refs', 'pullRequests'] }, branches: { increment: 'inc/{id}', pullRequest: 'inc/{increment}/{pr}', base: 'trunk' } }).branches,
+    { increment: 'inc/{id}', pullRequest: 'inc/{increment}/{pr}', base: 'trunk' });
+  assert.deepEqual([deliverySchemaFrom({ ...config, acceptance: 'a/{increment}/{ac}.md' }).acceptance, deliverySchemaFrom({ ...config, acceptance: { pattern: 'b/{increment}/{ac}.md' } }).acceptance],
+    [{ pattern: 'a/{increment}/{ac}.md' }, { pattern: 'b/{increment}/{ac}.md' }]);
   assert.deepEqual(deliveryPathsDrift(schema, { increments: 'notes/increments', pullRequests: 'docs/pull-requests' }), []);
   assert.deepEqual(deliveryPathsDrift(schema, { increments: 'docs/increments', pullRequests: 'docs/pr' }).map(problem => problem.code), ['DELIVERY_PATHS_DRIFT', 'DELIVERY_PATHS_DRIFT']);
   for (const change of [{ handoff: { ...config.handoff, statuses: ['New'] } }, { handoff: { ...config.handoff, type: 'Story' } }, { sizes: {} }, { sizes: { S: { maxAcceptanceCriteria: 0, maxAffectedAreas: 1 } } },
-    { handoff: { ...config.handoff, maxSlugLength: 0 } }, { handoff: { ...config.handoff, ignore: 'x' } }, { handoff: { ...config.handoff, glob: '' } }, { pullRequests: { ...config.pullRequests, incrementKey: 'inc' } }, { handoff: null }])
+    { handoff: { ...config.handoff, maxSlugLength: 0 } }, { handoff: { ...config.handoff, optionalKeys: ['refs', 'pullRequests', 'tags'] } }, { branches: { increment: '', pullRequest: 'x', base: 'main' } }, { acceptance: 'tests/{ac}.mjs' }, { handoff: { ...config.handoff, ignore: 'x' } }, { handoff: { ...config.handoff, glob: '' } }, { pullRequests: { ...config.pullRequests, incrementKey: 'inc' } }, { handoff: null }])
     assert.throws(() => deliverySchemaFrom({ ...config, ...change }), code('DELIVERY_SCHEMA_UNSUPPORTED'));
   const text = `${JSON.stringify({ handoff: { glob: 'docs/increments/*.md', ignore: ['docs/increments/README.md', 'other/x.md'] }, pullRequests: { glob: 'docs/pull-requests/*.md' } }, null, 2)}\n`;
   const moved = retargetDeliveryConfig(text, { increments: { from: 'docs/increments', to: 'plan/increments' }, pullRequests: { from: 'docs/pull-requests', to: 'plan/prs' } });
@@ -250,10 +278,14 @@ test('built-in delivery defaults accept a matching configuration, report drift a
   assert.throws(() => retargetDeliveryConfig('{', {}), code('DELIVERY_SCHEMA_UNSUPPORTED'));
 });
 
-test('the built-in schema and template equal configs/delivery', { skip: noDelivery }, () => {
-  const raw = JSON.parse(readFileSync(deliveryFile, 'utf8'));
-  assert.deepEqual(deliverySchemaFrom(raw), defaultDeliverySchema);
+test('the built-in schema and template equal configs/delivery, except the extension keys it does not list yet', { skip: noDelivery }, () => {
+  const raw = JSON.parse(readFileSync(deliveryFile, 'utf8')), schema = deliverySchemaFrom(raw);
   assert.equal(readFileSync(resolve(root, raw.handoff.template), 'utf8'), incrementTemplate);
+  assert.deepEqual(schema, { ...defaultDeliverySchema, handoff: { ...defaultDeliverySchema.handoff, optionalKeys: raw.handoff.optionalKeys } });
+  const missing = incrementExtensionKeys.filter(key => !raw.handoff.optionalKeys.includes(key));
+  // Until delivery.json lists branch, base and issues, the CLI refuses to write them instead of producing a DOR-02 failure.
+  for (const key of missing) assert.throws(() => editIncrement(fresh(), key === 'issues' ? { kind: 'issues', ids: [], rows: [] } : { kind: 'field', key, value: 'main' }, { schema }), code('DELIVERY_SCHEMA_UNSUPPORTED'), key);
+  if (!missing.length) assert.deepEqual(schema, defaultDeliverySchema);
 });
 
 test('CLI-written increments parse through the DoR parser and pass DOR-02', { skip: noScripts }, async () => {

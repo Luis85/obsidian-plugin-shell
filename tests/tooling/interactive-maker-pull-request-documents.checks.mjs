@@ -4,11 +4,11 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import {
-  appendAmendment, changePullRequestStatus, editPullRequest, isPublished, nextPullRequestId, parsePullRequest, renderPullRequest, replacePullRequestRegion,
+  appendAmendment, changePullRequestStatus, kickoffPullRequest, editPullRequest, isPublished, nextPullRequestId, parsePullRequest, renderPullRequest, replacePullRequestRegion,
   setPullRequestBinding, setPullRequestField, setPullRequestStatus, validatePullRequest, writeTasks,
 } from '../../bin/domain/increments/pull-request-document.ts';
 import { fragmentBody, fragmentItems, inputText, parseInputFragment, renderInputFragment } from '../../bin/domain/increments/input-fragment.ts';
-import { limits } from '../../bin/domain/increments/model.ts';
+import { limits, pullRequestRegions } from '../../bin/domain/increments/model.ts';
 
 const handoffScript = resolve(import.meta.dirname, '../../scripts/delivery/handoff.mjs');
 const noScripts = existsSync(handoffScript) ? false : 'scripts/delivery is not on this branch yet; the DoR parser is compared once it lands';
@@ -21,20 +21,51 @@ const published = (status = 'Draft') => setPullRequestStatus(setPullRequestBindi
 function apply(text, ...ops) { return ops.reduce((current, op) => editPullRequest(current, op).text, text); }
 
 test('a new pull request is a New plan with every section and a link to its increment', () => {
-  assert.equal(fresh(), ['---', 'type: PullRequest', 'id: delivery-1', 'title: "Hosting set"', 'increment: delivery', 'status: New', '---', '', '# Hosting set', '',
+  assert.equal(fresh(), ['---', 'type: PullRequest', 'id: delivery-1', 'title: "Hosting set"', 'kind: change', 'increment: delivery', 'status: New',
+    'head: "pr/delivery/delivery-1"', 'base: increment/delivery', '---', '', '# Hosting set', '',
     '## Summary', '', '## Scope', '', '### In scope', '', '### Out of scope', '', '## Tasks', '', '## Documents', '', '- [[docs/increments/delivery|Increment: Delivery pipeline]]', '',
     '## Notes', '', '## Amendments', '', '<!-- Appended after publication with node bin/app pr amend; each is synced to the pull request body. -->', ''].join('\n'));
   const text = fresh({ summary: 'Adds the hosting set command.', head: 'feature/hosting-set', base: 'main', delivers: ['AC-1', 'AC-3'] });
   assert.match(text, /^status: New\ndelivers: \[AC-1, AC-3\]\nhead: "feature\/hosting-set"\nbase: main\n---\n/m);
+  assert.equal(parsePullRequest(text).kind, 'change');
   const model = parsePullRequest(text);
   assert.deepEqual([model.id, model.title, model.increment, model.status, model.head, model.base, model.binding, isPublished(model)],
     ['delivery-1', 'Hosting set', 'delivery', 'New', 'feature/hosting-set', 'main', null, false]);
-  assert.deepEqual(model.delivers, ['AC-1', 'AC-3']); assert.equal(model.regions.summary, 'Adds the hosting set command.');
+  assert.deepEqual(Object.keys(model.regions), [...pullRequestRegions]); assert.deepEqual(model.delivers, ['AC-1', 'AC-3']); assert.equal(model.regions.summary, 'Adds the hosting set command.');
   assert.deepEqual(model.sections.map(section => section.name), ['Summary', 'Scope', 'Tasks', 'Documents', 'Notes', 'Amendments']);
   assert.deepEqual(validatePullRequest(text, { path: 'docs/pull-requests/delivery-1.md', increment: { id: 'delivery', acceptance: [{ id: 'AC-1' }, { id: 'AC-3' }] } }), []);
   assert.throws(() => fresh({ id: 'Delivery 1' }), code('PR_ID_INVALID'));
   assert.throws(() => fresh({ increment: { ...increment, id: '' } }), code('PR_INCREMENT_REQUIRED'));
   for (const head of ['has space', 'a..b', '-flag', 'x:y']) assert.throws(() => fresh({ head }), code('PR_DOCUMENT_INVALID'), head);
+});
+
+test('the kick-off merges the increment branch into the base; change pull requests stack on the increment branch', () => {
+  const kickoff = renderPullRequest(kickoffPullRequest(increment));
+  assert.match(kickoff, /^id: delivery-kickoff\ntitle: "Kick-off: Delivery pipeline"\nkind: kickoff\nincrement: delivery\nstatus: New\nhead: "increment\/delivery"\nbase: main\n---$/m);
+  assert.equal(parsePullRequest(kickoff).kind, 'kickoff');
+  const recorded = renderPullRequest(kickoffPullRequest({ ...increment, branch: 'feature/delivery', base: 'develop' }));
+  assert.match(recorded, /^head: "feature\/delivery"\nbase: develop$/m);
+  assert.match(renderPullRequest({ id: 'delivery-2', title: 'Change', increment: { ...increment, branch: 'feature/delivery' } }), /^head: "pr\/delivery\/delivery-2"\nbase: feature\/delivery$/m);
+  const long = { ...increment, id: 'a'.repeat(60), title: 'T'.repeat(120) }, fallback = kickoffPullRequest(long);
+  assert.equal(fallback.id, `${'a'.repeat(60)}-1`); assert.equal(fallback.title.length, 120); assert.ok(fallback.title.endsWith('…'));
+  assert.deepEqual(parsePullRequest(fresh().replace('kind: change\n', '')).kind, 'change');
+});
+
+test('delivered criteria and resolved issues are set while New and validated against the increment', () => {
+  const result = editPullRequest(fresh(), { kind: 'links', delivers: ['AC-2', 'AC-1', 'AC-2'], issues: ['delivery'], acceptance: ['AC-1', 'AC-2'] });
+  assert.deepEqual(result.edits.map(edit => edit.itemId), ['delivers', 'issues']);
+  assert.match(result.text, /^status: New\ndelivers: \[AC-2, AC-1\]\nissues: \[delivery\]\nhead:/m);
+  const model = parsePullRequest(result.text);
+  assert.deepEqual([model.delivers, model.issues], [['AC-2', 'AC-1'], ['delivery']]);
+  assert.doesNotMatch(editPullRequest(result.text, { kind: 'links', delivers: [], issues: [] }).text, /^(?:delivers|issues):/m);
+  assert.throws(() => editPullRequest(fresh(), { kind: 'links', delivers: ['AC-3'], acceptance: ['AC-1'] }), code('PR_DOCUMENT_INVALID'));
+  assert.throws(() => editPullRequest(fresh(), { kind: 'links', delivers: ['T-1'] }), code('PR_DOCUMENT_INVALID'));
+  assert.throws(() => editPullRequest(fresh(), { kind: 'links', issues: ['Bad Id'] }), code('PR_DOCUMENT_INVALID'));
+  assert.throws(() => editPullRequest(published(), { kind: 'links', issues: ['delivery'] }), code('PR_LOCKED'));
+  assert.deepEqual(editPullRequest(fresh(), { kind: 'links' }).edits, []);
+  const broken = fresh().replace('kind: change', 'kind: hotfix').replace('base: increment/delivery', 'base: "a..b"').replace('status: New', 'status: New\nissues: x');
+  const messages = validatePullRequest(broken).map(problem => problem.message);
+  for (const expected of ['kind must be one of kickoff, change.', 'base "a..b" is not a branch name.', 'issues must be a [list].']) assert.ok(messages.includes(expected), expected);
 });
 
 test('pull-request ids count up per increment and refuse ids over the slug length', () => {
@@ -146,9 +177,9 @@ test('validation reports frontmatter, binding, delivers, task, limit and link pr
     'The binding keys (platform, number, …) are incomplete or invalid.', 'delivers names AC-9, which is not an acceptance criterion of delivery.', '## Notes is missing.',
     '"[ ] not a task" is not "[ ] T-n: text".', 'T-1 appears more than once.']) assert.ok(messages.includes(expected), expected);
   assert.deepEqual(validatePullRequest('# none').slice(0, 1), [{ code: 'PR_DOCUMENT_INVALID', message: 'The file does not start with a --- frontmatter block.', line: 1 }]);
-  assert.ok(validatePullRequest(fresh().replace('title: "Hosting set"\nincrement: delivery\n', '')).some(problem => problem.code === 'PR_INCREMENT_REQUIRED'));
+  assert.ok(validatePullRequest(fresh().replace('increment: delivery\n', '')).some(problem => problem.code === 'PR_INCREMENT_REQUIRED'));
   const linked = fresh().replace('## Notes\n', '## Notes\n\n[[missing]]\n');
-  assert.deepEqual(validatePullRequest(linked, { files: ['docs/increments/delivery.md'] }).map(problem => [problem.code, problem.line]), [['WIKILINK_UNRESOLVED', 27]]);
+  assert.deepEqual(validatePullRequest(linked, { files: ['docs/increments/delivery.md'] }).map(problem => [problem.code, problem.line]), [['WIKILINK_UNRESOLVED', 30]]);
   const many = writeTasks(fresh(), Array.from({ length: limits.tasks }, (_, index) => ({ id: `T-${index + 1}`, checked: false, text: 't' })));
   assert.throws(() => editPullRequest(many, { kind: 'task-add', text: 'one more' }), code('PR_LIMIT'));
   assert.throws(() => editPullRequest(fresh(), { kind: 'notes', body: 'x'.repeat(limits.notes + 1) }), code('PR_DOCUMENT_INVALID'));
@@ -162,6 +193,6 @@ test('CLI-written pull requests parse through the DoR frontmatter reader without
   const text = setPullRequestField(setPullRequestBinding(fresh({ head: 'feature/a', base: 'main', delivers: ['AC-1'] }), binding), 'title', 'Quote "x", colon: [y]');
   const parsed = parseHandoff(text).frontmatter;
   assert.deepEqual(parsed.errors, []);
-  assert.deepEqual(parsed.data, { type: 'PullRequest', id: 'delivery-1', title: 'Quote "x", colon: [y]', increment: 'delivery', status: 'New', delivers: ['AC-1'], head: 'feature/a', base: 'main',
+  assert.deepEqual(parsed.data, { type: 'PullRequest', id: 'delivery-1', title: 'Quote "x", colon: [y]', kind: 'change', increment: 'delivery', status: 'New', delivers: ['AC-1'], head: 'feature/a', base: 'main',
     platform: 'github', repository: 'o/r', number: '74', url: 'https://github.com/o/r/pull/74', publishedAt: '2026-10-04T12:00:00Z', lastSyncedAt: '2026-10-05T08:00:00Z' });
 });

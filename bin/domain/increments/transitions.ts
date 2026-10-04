@@ -3,7 +3,7 @@
  * a PullRequest is New until it is published, after which the hosting platform decides its status through sync.
  */
 import { insistDelivery } from './errors.ts';
-import { incrementStatuses, pullRequestStatuses, type IncrementStatus, type PullRequestStatus, type Problem } from './model.ts';
+import { incrementStatuses, issueStatuses, pullRequestStatuses, type IncrementStatus, type IssueStatus, type PullRequestStatus, type Problem } from './model.ts';
 
 export const incrementTransitions: Readonly<Record<IncrementStatus, readonly IncrementStatus[]>> = Object.freeze({
   New: ['Refining', 'Ready', 'Cancelled'],
@@ -59,12 +59,12 @@ export function requireIncrementEditable(status: string): void {
 }
 
 /** Edits a PullRequest document accepts; status changes have their own table. */
-export const pullRequestEdits = ['title', 'head', 'base', 'section', 'scope', 'document', 'notes', 'task-add', 'task-set', 'amend', 'attach'] as const;
+export const pullRequestEdits = ['title', 'head', 'base', 'section', 'scope', 'document', 'notes', 'task-add', 'task-set', 'amend', 'attach', 'link'] as const;
 export type PullRequestEdit = typeof pullRequestEdits[number];
 /** New: a local plan. Open: published and Draft/Ready. Terminal: published and Merged/Closed. Closed: never published. */
 export type PullRequestPhase = 'new' | 'open' | 'terminal' | 'closed';
 export const pullRequestLocks: Readonly<Record<PullRequestPhase, readonly PullRequestEdit[]>> = Object.freeze({
-  new: ['title', 'head', 'base', 'section', 'scope', 'document', 'notes', 'task-add', 'task-set', 'attach'],
+  new: ['title', 'head', 'base', 'section', 'scope', 'document', 'notes', 'task-add', 'task-set', 'attach', 'link'],
   open: ['task-add', 'task-set', 'amend'],
   terminal: [],
   closed: [],
@@ -89,4 +89,26 @@ export function checkPullRequestTransition(fromInput: string, toInput: string, p
   const from = pullRequestStatus(fromInput);
   insistDelivery(from !== to && (from === 'New' || from === 'Closed'), 'PR_STATUS_TRANSITION', `${fromInput} cannot move to ${to}.`);
   return to;
+}
+
+export const issueTransitions: Readonly<Record<IssueStatus, readonly IssueStatus[]>> = Object.freeze({
+  New: ['Ready', 'In progress', 'Cancelled'],
+  Ready: ['New', 'In progress', 'Cancelled'],
+  'In progress': ['Ready', 'Done', 'Cancelled'],
+  Done: ['In progress'],
+  Cancelled: ['New'],
+});
+export const issueStatus = (input: string): IssueStatus | null => named(issueStatuses, input);
+/** Refuses a transition outside the issue table; Done needs every acceptance criterion of the issue checked. */
+export function checkIssueTransition(fromInput: string, toInput: string, criteria: readonly { id: string; checked: boolean }[]): IssueStatus {
+  const from = issueStatus(fromInput), to = issueStatus(toInput);
+  insistDelivery(from && to, 'ISSUE_STATUS_TRANSITION', `Unknown status "${from ? toInput : fromInput}"; use ${issueStatuses.join(', ')}.`);
+  insistDelivery(issueTransitions[from].includes(to), 'ISSUE_STATUS_TRANSITION', `${from} cannot move to ${to}; allowed: ${issueTransitions[from].join(', ')}.`, { from, to, allowed: [...issueTransitions[from]] });
+  const open = criteria.filter(item => !item.checked).map(item => item.id);
+  insistDelivery(to !== 'Done' || !open.length, 'ISSUE_STATUS_TRANSITION', `Done needs every acceptance criterion checked; open: ${open.join(', ')}.`, { open });
+  return to;
+}
+/** Content edits are allowed until the issue is Done or Cancelled; reopening goes through its status. */
+export function requireIssueEditable(status: string): void {
+  insistDelivery(!['Done', 'Cancelled'].includes(status), 'ISSUE_LOCKED', `The issue is ${status}; reopen it (Done → In progress, Cancelled → New) before editing.`);
 }

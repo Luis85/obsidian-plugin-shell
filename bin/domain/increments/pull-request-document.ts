@@ -5,8 +5,8 @@
  */
 import { insistDelivery } from './errors.ts';
 import {
-  bindingKeys, defaultDeliverySchema, hostingPlatforms, isDeliverySlug, limits, pullRequestSections, pullRequestStatuses, requireLine, requireTitle,
-  scopeSubsections, type Amendment, type DeliverySchema, type HostingPlatform, type Problem, type PullRequestBinding, type PullRequestModel,
+  bindingKeys, defaultDeliverySchema, hostingPlatforms, pullRequestKinds, isDeliverySlug, limits, pullRequestSections, pullRequestStatuses, requireLine, requireTitle,
+  scopeSubsections, type Amendment, type BranchConfig, type DeliverySchema, type FrontmatterData, type PullRequestKind, type HostingPlatform, type Problem, type PullRequestBinding, type PullRequestModel,
   type PullRequestRegion, type ScopeSide, type Task,
 } from './model.ts';
 import { lineEnding, listField, parseFrontmatter, quoteScalar, setFrontmatterValue, stringField, type SetOptions } from './frontmatter.ts';
@@ -18,8 +18,10 @@ import { extractWikilinks, formatWikilink, linkProblems, parseWikilink, resolveW
 import { canonicalSection, fragmentItems, inputText, type InputFragment } from './input-fragment.ts';
 import { checkPullRequestTransition, requirePullRequestEdit, type PullRequestEdit } from './transitions.ts';
 import { retitle, type EditSummary } from './increment-document.ts';
+import { isBranchName, pullRequestBranches, requireBranchName, type IncrementBranch } from './branches.ts';
 
-export const pullRequestKeys = ['type', 'id', 'title', 'increment', 'status', 'delivers', 'head', 'base', ...bindingKeys] as const;
+const pullRequestKeys = ['type', 'id', 'title', 'kind', 'increment', 'status', 'delivers', 'issues', 'head', 'base', ...bindingKeys] as const;
+const kinds: readonly string[] = pullRequestKinds;
 const order: readonly string[] = pullRequestSections, keyOrder: readonly string[] = pullRequestKeys;
 const platforms: readonly string[] = hostingPlatforms, statuses: readonly string[] = pullRequestStatuses;
 const isPlatform = (value: string): value is HostingPlatform => platforms.includes(value);
@@ -29,8 +31,18 @@ const set = (text: string, key: string, value: string | string[] | null, quote =
   setFrontmatterValue(text, key, value, { after: keyOrder.slice(0, keyOrder.indexOf(key)), quote, code: 'PR_DOCUMENT_INVALID' } satisfies SetOptions);
 
 export interface NewPullRequest {
-  id: string; title: string; increment: { id: string; title: string; path: string };
-  summary?: string; head?: string; base?: string; delivers?: string[]; fragment?: InputFragment | null;
+  id: string; title: string; increment: IncrementBranch & { title: string; path: string };
+  /** `change` by default; a kick-off merges the increment branch into the base. */
+  kind?: PullRequestKind;
+  /** Explicit branches; otherwise `pullRequestBranches()` derives them from the kind, the increment and `branches`. */
+  head?: string; base?: string; branches?: BranchConfig;
+  summary?: string; delivers?: string[]; issues?: string[]; fragment?: InputFragment | null;
+}
+/** The kick-off pull request `increment new` creates: `<increment>-kickoff` (or `<increment>-1` when that is too long). */
+export function kickoffPullRequest(increment: NewPullRequest['increment'], schema: DeliverySchema = defaultDeliverySchema): NewPullRequest {
+  const id = isDeliverySlug(`${increment.id}-kickoff`, schema) ? `${increment.id}-kickoff` : nextPullRequestId(increment.id, [], schema);
+  const title = `Kick-off: ${increment.title}`;
+  return { id, title: title.length > limits.title ? `${title.slice(0, limits.title - 1)}…` : title, increment, kind: 'kickoff', branches: schema.branches };
 }
 /** The next free `<increment>-<n>` id; refuses when it would exceed the slug length. */
 export function nextPullRequestId(incrementId: string, existing: readonly string[], schema: DeliverySchema = defaultDeliverySchema): string {
@@ -44,20 +56,22 @@ export function renderPullRequest(input: NewPullRequest, schema: DeliverySchema 
   insistDelivery(isDeliverySlug(input.id, schema), 'PR_ID_INVALID', `"${input.id}" must match ${schema.handoff.slugPattern} with at most ${schema.handoff.maxSlugLength} characters.`);
   insistDelivery(isDeliverySlug(input.increment.id, schema), 'PR_INCREMENT_REQUIRED', 'A pull request belongs to an existing increment.');
   const title = requireTitle(input.title, 'PR_DOCUMENT_INVALID');
-  const lines = ['---', 'type: PullRequest', `id: ${input.id}`, `title: ${quoteScalar(title)}`, `increment: ${input.increment.id}`, 'status: New', '---', '', `# ${title}`, '',
+  const lines = ['---', 'type: PullRequest', `id: ${input.id}`, `title: ${quoteScalar(title)}`, ...kindLines(input, schema), '---', '', `# ${title}`, '',
     '## Summary', '', '## Scope', '', '### In scope', '', '### Out of scope', '', '## Tasks', '', '## Documents', '',
     `- ${formatWikilink(input.increment.path, `Increment: ${input.increment.title}`)}`, '', '## Notes', '', '## Amendments', '', amendmentsComment, ''];
-  let text = lines.join('\n');
-  if (input.delivers?.length) text = set(text, 'delivers', input.delivers.map(id => requireLine(id, 'an acceptance criterion id', 'PR_DOCUMENT_INVALID')));
-  for (const key of ['head', 'base'] as const) if (input[key]) text = set(text, key, branch(input[key]!), key === 'head');
-  if (input.summary) text = replaceIn(text, 'Summary', inputText(input.summary));
+  const linked = setLinks(lines.join('\n'), { kind: 'links', delivers: input.delivers, issues: input.issues }).text;
+  const text = input.summary ? replaceIn(linked, 'Summary', inputText(input.summary)) : linked;
   return input.fragment ? applyFragment(text, input.fragment).text : text;
 }
-/** A branch name: one line without spaces, control characters or `..`. */
-function branch(value: string): string {
-  const name = requireLine(value, 'a branch name', 'PR_DOCUMENT_INVALID', 200);
-  insistDelivery(/^[^\s~^:?*[\\]+$/u.test(name) && !name.includes('..') && !name.startsWith('-'), 'PR_DOCUMENT_INVALID', `"${name}" is not a branch name.`);
-  return name;
+/** kind, increment, status and the branches the kind implies unless given explicitly. */
+function kindLines(input: NewPullRequest, schema: DeliverySchema): string[] {
+  const kind = input.kind ?? 'change', branches = pullRequestBranches(kind, input.increment, input.id, input.branches ?? schema.branches);
+  return [`kind: ${kind}`, `increment: ${input.increment.id}`, 'status: New', `head: ${quoteScalar(branch(input.head ?? branches.head))}`, `base: ${branch(input.base ?? branches.base)}`];
+}
+const branch = (value: string) => requireBranchName(value, 'PR_DOCUMENT_INVALID');
+function issueId(value: string): string {
+  insistDelivery(isDeliverySlug(value), 'PR_DOCUMENT_INVALID', `"${value}" is not an issue id.`);
+  return value;
 }
 
 const taskPattern = /^\[( |x|X)\]\s+(T-\d+):\s*(\S.*)$/;
@@ -95,6 +109,7 @@ export function parsePullRequest(text: string): PullRequestModel {
   const documents = section(doc, 'Documents');
   return {
     id: field('id'), title: field('title'), increment: field('increment'), status: field('status'), delivers: listField(data, 'delivers'),
+    kind: field('kind') === 'kickoff' ? 'kickoff' : 'change', issues: listField(data, 'issues'),
     head: field('head') || null, base: field('base') || null, binding: binding(data), frontmatter: data, heading: doc.title?.name ?? null,
     sections: doc.sections.map(found => ({ name: found.name, line: found.line, words: words(sectionBody(text, found)) })), regions, scope: scopeItems(text, doc),
     tasks: taskItems(text, doc).filter(item => item.valid).map(({ id, checked, text: body, line }) => ({ id, checked, text: body, line })),
@@ -114,9 +129,14 @@ export type PullRequestOp =
   | { kind: 'task-set'; id: string; checked?: boolean; text?: string }
   | { kind: 'amend'; body: string; date: string }
   | { kind: 'fragment'; fragment: InputFragment }
-  | { kind: 'increment'; id: string; title: string; path: string; previousPath?: string };
+  | { kind: 'increment'; id: string; title: string; path: string; previousPath?: string }
+  /** Replaces the delivered acceptance criteria and/or the resolved issue ids. */
+  | { kind: 'links'; delivers?: string[]; issues?: string[]; acceptance?: readonly string[] };
 export interface PullRequestEditResult { text: string; edits: EditSummary[] }
-const lockFor = (op: PullRequestOp): PullRequestEdit => op.kind === 'field' ? op.key : op.kind === 'fragment' ? 'section' : op.kind === 'increment' ? 'attach' : op.kind;
+const lockNames: Record<Exclude<PullRequestOp['kind'], 'field'>, PullRequestEdit> = {
+  section: 'section', scope: 'scope', document: 'document', notes: 'notes', 'task-add': 'task-add', 'task-set': 'task-set', amend: 'amend', fragment: 'section', increment: 'attach', links: 'link',
+};
+const lockFor = (op: PullRequestOp): PullRequestEdit => op.kind === 'field' ? op.key : lockNames[op.kind];
 /** Applies one edit after the lock table allows it for the document's status and publication. */
 export function editPullRequest(text: string, op: PullRequestOp, files?: readonly string[]): PullRequestEditResult {
   const model = parsePullRequest(text);
@@ -135,8 +155,21 @@ function planEdit(text: string, op: Exclude<PullRequestOp, { kind: 'task-add' | 
     case 'document': return addDocument(text, op.target, op.label, files);
     case 'notes': return setNotes(text, op.body, op.replace === true);
     case 'fragment': return applyFragment(text, op.fragment);
+    case 'links': return setLinks(text, op);
     default: return attach(text, op);
   }
+}
+/** `delivers` must name the increment's criteria when `acceptance` (its AC ids) is given; empty lists remove the key. */
+function setLinks(text: string, op: Extract<PullRequestOp, { kind: 'links' }>): PullRequestEditResult {
+  let next = text;
+  const edits: EditSummary[] = [];
+  if (op.delivers) {
+    const unknown = op.delivers.filter(id => !/^AC-\d+$/.test(id) || (op.acceptance && !op.acceptance.includes(id)));
+    insistDelivery(!unknown.length, 'PR_DOCUMENT_INVALID', `delivers names ${unknown.join(', ')}, which are not acceptance criteria of the increment.`);
+    next = set(next, 'delivers', op.delivers.length ? [...new Set(op.delivers)] : null); edits.push({ section: 'frontmatter', action: 'set', itemId: 'delivers' });
+  }
+  if (op.issues) { next = set(next, 'issues', op.issues.length ? [...new Set(op.issues.map(issueId))] : null); edits.push({ section: 'frontmatter', action: 'set', itemId: 'issues' }); }
+  return { text: next, edits };
 }
 /** Sets title (and the matching `# heading`), head or base without a lock check (sync uses it). */
 export function setPullRequestField(text: string, key: 'title' | 'head' | 'base', value: string): string {
@@ -258,19 +291,24 @@ export function replacePullRequestRegion(text: string, region: PullRequestRegion
 
 export interface PullRequestValidation { path?: string; files?: readonly string[]; increment?: { id: string; acceptance: readonly { id: string }[] } | null; schema?: DeliverySchema }
 const problem = (message: string, line?: number): Problem => ({ code: 'PR_DOCUMENT_INVALID', message, ...(line ? { line } : {}) });
+const present = (data: FrontmatterData, key: string) => data[key] !== undefined;
+/** Value checks as [failed, message] pairs, so each rule stays one line. */
+function valueChecks(data: FrontmatterData, slug: string | undefined, schema?: DeliverySchema): [boolean, string][] {
+  const field = (key: string) => stringField(data, key), id = field('id');
+  return [[field('type') !== 'PullRequest', 'type must be PullRequest.'], [!isDeliverySlug(id, schema) || (slug !== undefined && id !== slug), `id "${id}" must be a slug equal to the file name.`],
+    [!field('title'), 'title is missing.'], [!statuses.includes(field('status')), `status must be one of ${pullRequestStatuses.join(', ')}.`],
+    [present(data, 'kind') && !kinds.includes(field('kind')), `kind must be one of ${kinds.join(', ')}.`],
+    ...['head', 'base'].map((key): [boolean, string] => [present(data, key) && !isBranchName(field(key)), `${key} "${field(key)}" is not a branch name.`]),
+    ...['delivers', 'issues'].map((key): [boolean, string] => [present(data, key) && !Array.isArray(data[key]), `${key} must be a [list].`]),
+    [bindingKeys.some(key => present(data, key)) && !binding(data), 'The binding keys (platform, number, …) are incomplete or invalid.']];
+}
 function frontmatterProblems(text: string, options: PullRequestValidation): Problem[] {
-  const frontmatter = parseFrontmatter(text), data = frontmatter.data, field = (key: string) => stringField(data, key);
+  const frontmatter = parseFrontmatter(text), data = frontmatter.data, increment = stringField(data, 'increment');
   if (!frontmatter.present) return [problem('The file does not start with a --- frontmatter block.', 1)];
-  const problems = frontmatter.errors.map(error => problem(error.message, error.line)), slug = options.path?.split('/').at(-1)?.replace(/\.md$/, '');
-  if (field('type') !== 'PullRequest') problems.push(problem('type must be PullRequest.'));
-  if (!isDeliverySlug(field('id'), options.schema) || (slug !== undefined && field('id') !== slug)) problems.push(problem(`id "${field('id')}" must be a slug equal to the file name.`));
-  if (!field('title')) problems.push(problem('title is missing.'));
-  if (!statuses.includes(field('status'))) problems.push(problem(`status must be one of ${pullRequestStatuses.join(', ')}.`));
-  if (!field('increment')) problems.push({ code: 'PR_INCREMENT_REQUIRED', message: 'increment names the Increment this pull request delivers.' });
-  if (bindingKeys.some(key => data[key] !== undefined) && !binding(data)) problems.push(problem('The binding keys (platform, number, …) are incomplete or invalid.'));
-  const acceptance = options.increment?.acceptance.map(item => item.id);
-  for (const id of listField(data, 'delivers').filter(value => acceptance && !acceptance.includes(value))) problems.push(problem(`delivers names ${id}, which is not an acceptance criterion of ${field('increment')}.`));
-  return problems;
+  const slug = options.path?.split('/').at(-1)?.replace(/\.md$/, ''), acceptance = options.increment?.acceptance.map(item => item.id) ?? null;
+  return [...frontmatter.errors.map(error => problem(error.message, error.line)), ...valueChecks(data, slug, options.schema).filter(([failed]) => failed).map(([, message]) => problem(message)),
+    ...(increment ? [] : [{ code: 'PR_INCREMENT_REQUIRED', message: 'increment names the Increment this pull request delivers.' }]),
+    ...listField(data, 'delivers').filter(id => acceptance && !acceptance.includes(id)).map(id => problem(`delivers names ${id}, which is not an acceptance criterion of ${increment}.`))];
 }
 /** Structural validation of a PullRequest plus wikilinks when `files` is given. */
 export function validatePullRequest(text: string, options: PullRequestValidation = {}): Problem[] {

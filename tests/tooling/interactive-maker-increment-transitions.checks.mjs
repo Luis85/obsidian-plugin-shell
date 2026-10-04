@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import {
-  allowedIncrementTransitions, checkIncrementTransition, checkPullRequestTransition, incrementEditable, incrementStatus, pullRequestEdits, pullRequestPhase,
+  allowedIncrementTransitions, checkIncrementTransition, incrementTransitions, pullRequestLocks, checkPullRequestTransition, incrementEditable, incrementStatus, pullRequestEdits, pullRequestPhase,
   pullRequestStatus, requireIncrementEditable, requireIncrementStatus, requirePullRequestEdit,
 } from '../../bin/domain/increments/transitions.ts';
 import { incrementStatuses, pullRequestStatuses } from '../../bin/domain/increments/model.ts';
+import { DeliveryDocumentError } from '../../bin/domain/increments/errors.ts';
 
-const code = expected => error => { assert.equal(error.code, expected, error.message); assert.ok(error.message.startsWith(`${expected}: `)); return true; };
+const code = expected => error => { assert.ok(error instanceof DeliveryDocumentError); assert.equal(error.code, expected, error.message); assert.ok(error.message.startsWith(`${expected}: `)); return true; };
 const allowed = {
   New: ['Refining', 'Ready', 'Cancelled'], Refining: ['Ready', 'Cancelled'], Ready: ['Refining', 'In progress', 'Cancelled'],
   'In progress': ['Refining', 'Done', 'Cancelled'], Done: [], Cancelled: ['Refining'],
@@ -15,6 +16,7 @@ const allowed = {
 const clear = { pullRequests: ['Merged', 'Closed'], readiness: [] };
 
 test('every increment status pair is allowed or refused exactly as the lifecycle table says', () => {
+  assert.deepEqual(incrementTransitions, allowed);
   for (const from of incrementStatuses) {
     assert.deepEqual([...allowedIncrementTransitions(from)], allowed[from]);
     for (const to of incrementStatuses) {
@@ -54,6 +56,7 @@ test('content edits lock once an increment is Done or Cancelled', () => {
 
 test('the pull-request lock table allows plan edits while New and only tasks and amendments once published', () => {
   const open = ['task-add', 'task-set', 'amend'];
+  assert.deepEqual(pullRequestLocks, { new: pullRequestEdits.filter(edit => edit !== 'amend'), open, terminal: [], closed: [] });
   const cases = [['New', false, 'new'], ['Closed', false, 'closed'], ['Draft', true, 'open'], ['Ready', true, 'open'], ['Merged', true, 'terminal'], ['Closed', true, 'terminal']];
   for (const [status, published, phase] of cases) {
     assert.equal(pullRequestPhase(status, published), phase);
