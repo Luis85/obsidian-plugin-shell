@@ -1,6 +1,7 @@
 import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
 import { designCommand } from './design-command.ts';
+import { definitionCommand } from './wizard-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -74,6 +75,15 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app design status --json  Claude Design folders under docs/design (configurable paths.design)
   node bin/app design prepare --name my-prototype --json   Prepare docs/design/my-prototype for Claude Design
   node bin/app design sync --name my-prototype --json      Regenerate its context; design work is never touched
+  node bin/app wizard                Choose and run a data-driven guided process (configs/wizards)
+  node bin/app wizard --name settings              Run one wizard by id
+  node bin/app wizard list --json    Wizards and forms with their steps, fields and reference issues
+  node bin/app wizard show --name first-run --json
+  node bin/app wizard check --json   Validate every definition and the code hooks it names
+  node bin/app form --name project-identity --out answers/identity.json   Fill in a form; save through a reviewed plan
+  node bin/app form list --json      Reusable data-driven forms (configs/forms)
+  node bin/app form show --name user-settings --json
+  node bin/app form validate --name project-identity --input identity.json --json
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
@@ -172,7 +182,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -190,6 +200,7 @@ function directCommand(args: Arguments, context: CommandContext): Record<string,
   if (args.command === 'new') return newProjectCommand(args, context);
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
   if (args.command === 'design') return designCommand(args, context);
+  if (args.command === 'wizard' || args.command === 'form') return definitionCommand(args, context);
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
   return undefined;
 }

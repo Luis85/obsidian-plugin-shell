@@ -11,7 +11,7 @@ import { runOperations } from '../application/operations.ts';
 import { compile } from './compiler.ts';
 import { readData } from './storage.ts';
 import { outputBoundary, packagePlan } from './package-plan.ts';
-export async function loadGuide(path: string | URL = new URL('../guides/prototype.json', import.meta.url)): Promise<Guide> {
+export async function loadGuide(path: string | URL = new URL('../../configs/guides/prototype.json', import.meta.url)): Promise<Guide> {
   const selected = path instanceof URL ? (await import('node:url')).fileURLToPath(path) : path;
   return readGuide(await readData(selected));
 }

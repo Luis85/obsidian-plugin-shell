@@ -1,0 +1,21 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "user-settings",
+  "version": 1,
+  "title": "User settings",
+  "description": "Project paths and preferences stored in configs/user-settings.json. The settings domain validates the committed result.",
+  "commit": "settings.read",
+  "fields": [
+    { "id": "prds", "kind": "text", "label": "Typed PRD folder", "bind": "paths.prds" },
+    { "id": "project", "kind": "text", "label": "Companion project JSON", "bind": "paths.project" },
+    { "id": "prototypes", "kind": "text", "label": "Prototype package folder", "bind": "paths.prototypes" },
+    { "id": "app", "kind": "text", "label": "Angular application folder", "bind": "paths.app" },
+    { "id": "brief", "kind": "text", "label": "Project brief Markdown", "bind": "paths.brief" },
+    { "id": "author", "kind": "text", "label": "Author", "bind": "preferences.author" },
+    { "id": "ui", "kind": "select", "label": "Preferred terminal interface", "bind": "preferences.ui", "choices": ["auto", "tui", "plain"] },
+    { "id": "scanRecursive", "kind": "boolean", "label": "Scan PRD subfolders recursively?", "bind": "preferences.scanRecursive",
+      "yes": "Yes, include subfolders", "no": "No, only the selected folder" },
+    { "id": "advanced", "kind": "section", "label": "Advanced paths and first-run preferences", "gate": "Configure advanced paths and first-run preferences?", "form": "user-settings-advanced" }
+  ]
+}

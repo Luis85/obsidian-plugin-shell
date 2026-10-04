@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "user-settings-advanced",
+  "version": 1,
+  "title": "Advanced paths and first-run preferences",
+  "description": "Edits the same user-settings value as user-settings; first-run numbers are validated when the settings are committed.",
+  "fields": [
+    { "id": "firstRunReport", "kind": "text", "label": "First-run report JSON", "bind": "paths.firstRunReport" },
+    { "id": "vaultConfigDirectory", "kind": "text", "label": "Existing vault configuration directory", "bind": "preferences.vaultConfigDirectory" },
+    { "id": "install", "kind": "select", "label": "Dependency installation strategy", "bind": "preferences.firstRun.install", "choices": ["auto", "install", "ci"] },
+    { "id": "openBrowser", "kind": "boolean", "label": "Prefer opening the showcase browser?", "bind": "preferences.firstRun.openBrowser" },
+    { "id": "port", "kind": "number", "label": "Default showcase port", "bind": "preferences.firstRun.port" },
+    { "id": "stepTimeoutMs", "kind": "number", "label": "Per-stage timeout in milliseconds", "bind": "preferences.firstRun.stepTimeoutMs" },
+    { "id": "readyTimeoutMs", "kind": "number", "label": "Readiness timeout in milliseconds", "bind": "preferences.firstRun.readyTimeoutMs" },
+    { "id": "showcaseDurationMs", "kind": "number", "label": "Showcase duration in milliseconds", "bind": "preferences.firstRun.showcaseDurationMs" },
+    { "id": "documentation", "kind": "section", "label": "Markdown documentation", "gate": "Configure Markdown documentation settings?", "form": "documentation-settings",
+      "bind": "documentation", "prepare": "documentation.prepare", "commit": "documentation.commit" }
+  ]
+}

@@ -20,7 +20,7 @@ qualification and release authorization are separate. Milestone background is in
 | `bin/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
 | `templates/` | Templates for generated projects (companion runtime, developer kit, examples). |
 | `scripts/` | Repo tooling: `quality/` gates, `testing/` suites and evidence, `agent/` hooks, `companion/` authoring contracts, makers, styles, release, security, setup. |
-| `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters. |
+| `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters; `configs/wizards/`, `configs/forms/` and `configs/guides/` define every guided CLI process ([wizards and forms](docs/development/WIZARDS-AND-FORMS.md)). |
 | `tests/` | Suites declared in `tests/suites.json` (tooling, runtime, e2e, hindsight, ...). |
 | `plugins/` | Workbench plugin SDK and the example extension. |
 | `harness/` | Browser harness for the served UI; never shipped in the plugin. |

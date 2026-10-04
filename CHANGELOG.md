@@ -12,10 +12,12 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Release cut and publish automation: `release:cut` creates the release branch from `main`, prepares version metadata, commits and opens a draft release pull request; `release:publish` merges the tested release head, creates the bare `X.Y.Z` tag and the GitHub release with the qualified candidate assets, then deletes the release branch. Both default to a dry-run plan and are idempotent on rerun.
 - `release:changelog` validates this changelog and extracts one version's notes; release preparation promotes the Unreleased section into the new version.
 - Archived historical development documents so current guidance stays discoverable.
+- Data-driven wizards and forms: every guided shell process (settings, first-run, project-setup, new project, prototype, brainstorm and the framework `setup` interview and stage approvals) is now a JSON wizard in `configs/wizards`, with reusable forms in `configs/forms`. New `node bin/app wizard` and `node bin/app form` commands run, list, show, check and validate them; a new guided process needs only JSON unless it calls a new service.
 
 ### Changed
 
 - This changelog now follows Keep a Changelog 1.1.0, and release candidates carry only the released version's section as release notes.
+- Prototype guides moved from `bin/guides` to `configs/guides`; their content, ids and versions are unchanged.
 
 ## [0.4.0] - 2026-09-23
 

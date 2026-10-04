@@ -32,6 +32,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Setup: npm install-script policy](development/SETUP-TROUBLESHOOTING.md) | Resolve `EALLOWSCRIPTS` and other setup install-script errors. |
 | [Setup inside an extracted kit](development/EXTRACTED-KIT-SETUP.md) | Run `node bin/app setup` in a locally packed framework kit. |
 | [Local and cloud sessions](development/CLOUD-AND-LOCAL-SESSIONS.md) | Take a project from a local checkout to a ready cloud agent session. |
+| [Data-driven wizards and forms](development/WIZARDS-AND-FORMS.md) | Add or change a guided CLI process or reusable form in `configs/wizards` and `configs/forms`. |
 | [Shell CLI user manual](user-manual/shell-cli/index.md) | Task pages for design-to-project, daily development, automation, maintenance and troubleshooting. |
 
 **Design, prototype and generate**

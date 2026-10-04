@@ -194,7 +194,7 @@ built and verified using the copied skill helpers.
 
 ## Extend the guide using data
 
-Edit `bin/guides/prototype.json` or supply `--guide <file.json>` in either mode.
+Edit `configs/guides/prototype.json` or supply `--guide <file.json>` in either mode.
 Its versioned definition owns steps, text/list/select/confirm fields, defaults,
 required values, choices, earlier-field visibility conditions, readiness constraints
 and literal artifact templates. Increment `version` for changed guide contracts;

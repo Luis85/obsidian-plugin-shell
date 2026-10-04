@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "framework-setup",
+  "version": 1,
+  "title": "Framework setup",
+  "description": "Terminal interview of node bin/app setup: source (starter or project JSON), identity and explicit opt-ins. Only missing answers are asked; headless callers pass explicit options.",
+  "steps": [
+    { "id": "prepare", "kind": "action", "action": "framework-setup.prepare" },
+    { "id": "source", "kind": "form", "when": { "path": "askSource", "equals": true }, "fields": [
+      { "id": "source", "kind": "text", "label": "Starter ID, or json", "default": "blank" },
+      { "id": "input", "kind": "text", "label": "Project JSON path", "bind": "setup.input", "required": true, "when": { "field": "source", "equals": "json" } }
+    ] },
+    { "id": "source-check", "kind": "action", "action": "framework-setup.source", "when": { "path": "askSource", "equals": true } },
+    { "id": "questions", "kind": "action", "action": "framework-setup.questions" },
+    { "id": "suggest-id", "kind": "action", "action": "framework-setup.suggest-id", "when": { "path": "needsIdentity", "equals": true } },
+    { "id": "plugin-id", "kind": "form", "bind": "setup", "when": { "path": "needsIdentity", "equals": true }, "fields": [
+      { "id": "id", "kind": "text", "label": "Plugin ID", "default": "{{suggestedId}}", "when": { "path": "id", "present": false } }
+    ] },
+    { "id": "suggest-name", "kind": "action", "action": "framework-setup.suggest-name", "when": { "path": "needsIdentity", "equals": true } },
+    { "id": "plugin-name", "kind": "form", "bind": "setup", "when": { "path": "needsIdentity", "equals": true }, "fields": [
+      { "id": "name", "kind": "text", "label": "Plugin name", "default": "{{suggestedName}}", "when": { "path": "name", "present": false } },
+      { "id": "author", "kind": "text", "label": "Author", "when": { "path": "author", "present": false } }
+    ] },
+    { "id": "airship", "kind": "form", "bind": "setup", "when": { "path": "askAirship", "equals": true }, "fields": [
+      { "id": "airship", "kind": "confirm", "label": "Enable optional Airship development tooling? No installation or launch is performed.",
+        "transient": true, "effect": "framework-setup.opt-in" }
+    ] },
+    { "id": "mcp", "kind": "form", "bind": "setup", "when": { "path": "askMcp", "equals": true }, "fields": [
+      { "id": "mcp", "kind": "confirm", "label": "Enable the project-local Workbench MCP for Claude Code and Codex? This writes project settings but installs no client.",
+        "transient": true, "effect": "framework-setup.opt-in" }
+    ] },
+    { "id": "github", "kind": "message", "text": "GitHub is optional. Setup stays local and preserves every existing remote. Use your reviewed Git client to connect later." }
+  ]
+}

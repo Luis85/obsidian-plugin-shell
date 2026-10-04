@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "project-setup",
+  "version": 1,
+  "title": "Angular project setup",
+  "description": "Angular setup in an existing Git + Obsidian vault: settings, project identity, PRD intake, optional prototype brief and bricks, then one reviewed plan. Answers can be checkpointed between stages.",
+  "steps": [
+    { "id": "begin", "kind": "action", "action": "setup.begin" },
+    { "id": "intro", "kind": "message", "text": "Angular project setup. Git and the vault are preserved. Application files are written only after the final review. Checkpoint saves have a separate review." },
+    { "id": "load-settings", "kind": "action", "action": "setup.load-settings" },
+    { "id": "settings", "kind": "form", "form": "user-settings", "bind": "draft.settings", "initial": "loadedSettings",
+      "when": { "path": "draft.settings", "present": false } },
+    { "id": "prerequisites", "kind": "action", "action": "setup.prerequisites" },
+    { "id": "project", "kind": "form", "form": "project-identity", "bind": "draft.project", "when": { "path": "draft.project", "present": false } },
+    { "id": "pause-project", "kind": "action", "action": "setup.pause" },
+    { "id": "prds", "kind": "form", "form": "prd-intake", "bind": "draft.prds", "when": { "path": "draft.prds", "present": false } },
+    { "id": "intake", "kind": "action", "action": "setup.intake" },
+    { "id": "pause-prds", "kind": "action", "action": "setup.pause" },
+    { "id": "prototype-context", "kind": "action", "action": "setup.prototype-context" },
+    { "id": "wants-prototype", "kind": "form", "when": { "path": "wantsPrototype", "present": false }, "fields": [
+      { "id": "wantsPrototype", "kind": "confirm", "label": "Prepare a prototype?" }
+    ] },
+    { "id": "prototype", "kind": "guide", "guide": "guide", "initial": "guideInitial", "bind": "prototypeAnswers",
+      "when": { "path": "wantsPrototype", "equals": true } },
+    { "id": "request", "kind": "action", "action": "setup.request" },
+    { "id": "pause-prototype", "kind": "action", "action": "setup.pause" },
+    { "id": "wants-bricks", "kind": "form", "fields": [
+      { "id": "addBricks", "kind": "confirm", "label": "Add application bricks?" }
+    ] },
+    { "id": "bricks", "kind": "action", "action": "setup.bricks", "interactive": true, "when": { "path": "addBricks", "equals": true } },
+    { "id": "pause-bricks", "kind": "action", "action": "setup.pause" },
+    { "id": "boilerplate", "kind": "form", "bind": "request", "fields": [
+      { "id": "boilerplate", "kind": "confirm", "label": "Create the Angular application boilerplate?" }
+    ] },
+    { "id": "review", "kind": "action", "action": "setup.review", "barrier": true },
+    { "id": "finish", "kind": "action", "action": "setup.finish" }
+  ]
+}

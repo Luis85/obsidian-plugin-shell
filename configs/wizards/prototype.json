@@ -1,0 +1,17 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "prototype",
+  "version": 1,
+  "title": "Prepare a prototype",
+  "description": "Data-driven prototype brief (configs/guides), package output folder and one reviewed package plan; an optional Claude Design folder is offered afterwards.",
+  "steps": [
+    { "id": "context", "kind": "action", "action": "prototype.context" },
+    { "id": "brief", "kind": "guide", "guide": "guide", "initial": "initialAnswers", "bind": "answers" },
+    { "id": "output", "kind": "form", "fields": [
+      { "id": "out", "kind": "text", "label": "Package output folder", "required": true }
+    ] },
+    { "id": "review", "kind": "action", "action": "prototype.review" },
+    { "id": "complete", "kind": "action", "action": "prototype.complete", "barrier": true }
+  ]
+}

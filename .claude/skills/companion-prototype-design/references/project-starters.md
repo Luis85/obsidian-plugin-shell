@@ -6,7 +6,7 @@ under `configs/starters/<id>.json` beside `bin/app` whose `generator.kind` is
 exact dependency pins. The flow is starter → data-driven prototype interview →
 agreement → complete plan review → separate default-No apply. Frameworks and targets
 are never overridden at creation; choose (or author) a different starter instead.
-The interview is `bin/guides/project-prototype.json`. Agent and terminal paths share
+The interview is `configs/guides/project-prototype.json`. Agent and terminal paths share
 the installed starters, the interview and the compiler.
 
 A prepared package carries `project.config.json` (the chosen starter's ID, version and
