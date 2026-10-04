@@ -16,6 +16,7 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `prototype` | `node bin/app prototype` | Prototype brief, output folder, reviewed package, optional design folder |
 | `brainstorm` | `node bin/app brainstorm` | Eight capture sections, reviewed request and file plan, optional import and verification |
 | `framework-setup` | `node bin/app setup` (terminal) | Source (starter or project JSON), identity and explicit Airship/MCP opt-ins; only missing answers are asked |
+| `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship and single native-extension options; only missing answers are asked |
 | `framework-setup-stages` | after `setup` applies | Documentation import, then generate/install/verify/preview, each separately approved, then documentation export |
 
 Prompt labels, defaults and order are unchanged from the former hand-written flows (the framework `setup`
@@ -91,7 +92,7 @@ commits through `readSettings`.
 | --- | --- | --- |
 | `text` | Single- or multi-line text | `required`, `maxLength`, `multiline`, `help`, `message` |
 | `title` | One-line title (same rules as `titleInput`) | `maxLength` |
-| `number` | Finite number | `integer`, `min`, `max` |
+| `number` | Finite number | `integer`, `min`, `max`, `required: false` (a blank answer leaves it unset) |
 | `select` | One choice | `choices` (strings or `{id,label}`), or `choicesFrom` (a choice-provider hook) |
 | `multi` | Several choices | `choices`/`choicesFrom`, `required` |
 | `boolean` | Yes/No menu | `yes`, `no` labels |
@@ -145,9 +146,14 @@ Revisited steps are always asked again, even when their `when` condition was mea
 
 ## Outside the wizard engine
 
+The `new <dir>` interview maps each starter's `inputs[]` (`configs/starters/*.json`) to a form at runtime:
+string → text, integer → whole number, boolean → Yes/No, choices → select. An optional choice input without a
+default gets a Skip choice. Supplied `--values`/`--answers`/identity flags are never asked, and every answer still
+passes the starter's own validation. Invalid answers are reported and asked again instead of ending the interview,
+and `:back` at the first question cancels. The remaining flows below are deliberately not wizards.
+
 | Flow | Why it is not a wizard here |
 | --- | --- |
-| `new <dir>` starter questions | Already data: each starter's `inputs[]` in `configs/starters/*.json` (the separately distributed starter schema). |
 | `npm run setup` | Dependency-free Node script that must run before dependencies and TypeScript tooling are installed. Its questions are still data: `configs/forms/setup-identity.json`, read by `scripts/setup/form.mjs`, which supports only `text` and `confirm` fields (`id`, `kind`, `label`, `help`) whose ids equal the setup `--answers` keys, and fails closed on anything else. See [setup identity](SETUP-IDENTITY.md). |
 | Studio editors (pages, bricks, templates) | Open-ended edit menus, not linear guided processes. |
 | Project handout | A Markdown checklist that is filled in and validated, not asked live. |

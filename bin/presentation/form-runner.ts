@@ -33,7 +33,7 @@ function asText(field: FormField, current: unknown, rich: boolean): string {
   return current === undefined || current === null ? '' : String(current);
 }
 function fromText(field: FormField, raw: string, rich: boolean): unknown {
-  if (field.kind === 'number') return raw.trim() === '' ? Number.NaN : Number(raw);
+  if (field.kind === 'number') return raw.trim() === '' ? (field.required === false ? undefined : Number.NaN) : Number(raw);
   if (field.kind !== 'list') return raw;
   return raw.split(rich && field.multiline ? '\n' : separatorOf(field)).map(item => item.trim()).filter(Boolean);
 }

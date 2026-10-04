@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "new-starter",
+  "version": 1,
+  "title": "New project from a starter",
+  "description": "Terminal interview of node bin/app new <dir>: target directory, installed starter, that starter's own inputs[] (asked as a form generated from the starter JSON) and companion opt-ins. Only missing answers are asked; headless callers pass --starter, --values or --answers and flags.",
+  "steps": [
+    { "id": "prepare", "kind": "action", "action": "starter.prepare" },
+    { "id": "target", "kind": "form", "when": { "path": "askTarget", "equals": true }, "fields": [
+      { "id": "target", "kind": "text", "label": "New project directory (e.g. ../my-project)" }
+    ] },
+    { "id": "target-check", "kind": "action", "action": "starter.target" },
+    { "id": "load", "kind": "action", "action": "starter.load" },
+    { "id": "starter", "kind": "form", "when": { "path": "askStarter", "equals": true }, "fields": [
+      { "id": "starter", "kind": "select", "label": "Installed starters:", "choicesFrom": "starter.installed", "default": "{{firstStarter}}" }
+    ] },
+    { "id": "select", "kind": "action", "action": "starter.select" },
+    { "id": "inputs", "kind": "action", "action": "starter.inputs", "interactive": true, "when": { "path": "askInputs", "equals": true } },
+    { "id": "companion", "kind": "action", "action": "starter.companion", "when": { "path": "companion", "equals": true } },
+    { "id": "airship", "kind": "form", "when": { "path": "askAirship", "equals": true }, "fields": [
+      { "id": "airship", "kind": "confirm", "label": "Enable optional Airship tooling? No install or launch" }
+    ] },
+    { "id": "extension", "kind": "form", "when": { "path": "askExtension", "equals": true }, "fields": [
+      { "id": "extension", "kind": "text", "label": "Custom extension", "default": "{{native.extension}}" }
+    ] },
+    { "id": "extensions", "kind": "form", "when": { "path": "askExtensions", "equals": true }, "fields": [
+      { "id": "extensions", "kind": "text", "label": "File extension filters", "default": "{{native.extensions}}" }
+    ] },
+    { "id": "finish", "kind": "action", "action": "starter.finish" }
+  ]
+}
