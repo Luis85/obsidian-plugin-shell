@@ -1,4 +1,5 @@
 import { getCollection, type CollectionKey } from 'astro:content';
+import { checkSnapshot, snapshotName } from './snapshot';
 
 /**
  * Read access to the Bases collection snapshots for pages and components. The field list (with display names and
@@ -12,15 +13,14 @@ export interface CollectionInfo {
   view: { name: string; type: string };
   fields: CollectionField[];
 }
-export interface SiteRecord { order: number; path: string; group?: unknown; values: Record<string, unknown>; properties: Record<string, unknown> }
-interface Snapshot { schemaVersion: number; collection: Omit<CollectionInfo, 'name'> }
+/** A record holds only what pages render: the note path, its group when the view groups, and the view-column values. */
+export interface SiteRecord { order: number; path: string; group?: unknown; values: Record<string, unknown> }
+interface Snapshot { collection: Omit<CollectionInfo, 'name'> }
 
-const SNAPSHOTS = '../data/collections/';
-const snapshots = import.meta.glob<Snapshot>('../data/collections/*.json', { eager: true, import: 'default' });
-const infos = new Map(Object.entries(snapshots).map(([path, snapshot]) => {
-  const name = path.slice(SNAPSHOTS.length, -'.json'.length);
-  if (snapshot.schemaVersion !== 1) throw new Error(`src/data/collections/${name}.json: unsupported snapshot schemaVersion ${snapshot.schemaVersion}.`);
-  const { base, view, fields } = snapshot.collection;
+const snapshots = import.meta.glob<unknown>('../data/collections/*.collection.json', { eager: true, import: 'default' });
+const infos = new Map(Object.entries(snapshots).map(([path, value]) => {
+  const name = snapshotName(path);
+  const { base, view, fields } = checkSnapshot<Snapshot>(name, value).collection;
   return [name, { name, base, view, fields }];
 }));
 

@@ -4,7 +4,9 @@ A static [Astro](https://astro.build) website built from the **Project page** Wo
 template (`project-page`): a project status page with a roadmap table, a backlog table and update cards.
 
 Its content comes from Obsidian Bases collections. The Workbench shell snapshots each collection
-into `src/data/collections/<name>.json`; the site never reads a vault and never imports the shell.
+into `src/data/collections/<name>.collection.json`; the site never reads a vault and never imports
+the shell. A snapshot holds only the view columns of each matching note, not its other
+frontmatter.
 
 ## Develop
 
@@ -47,10 +49,11 @@ Then, from the shell repository root, review and write the snapshots:
 
 ```sh
 node bin/app site collections projects/workbench-site          # preview the plan
-node bin/app site collections projects/workbench-site --yes    # write src/data/collections/*.json
+node bin/app site collections projects/workbench-site --yes    # write src/data/collections/*.collection.json
 ```
 
-Commit the snapshots: the site build reads only them.
+Commit the snapshots: the site build reads only them. Run the command again after you change the
+notes or the `.base` file; the site does not notice note edits on its own.
 
 ## Using collections in pages
 
