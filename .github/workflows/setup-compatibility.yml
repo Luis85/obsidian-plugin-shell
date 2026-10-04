@@ -30,10 +30,11 @@ jobs:
   setup:
     name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
     runs-on: ${{ matrix.os }}
-    # Fresh setup runs every verify gate once. The integrated Windows tooling
-    # suites alone approach 30 minutes and Ubuntu setup plus complete verify was
-    # measured at about 39 minutes; 60 minutes retains time for coverage and npm
-    # controls without shortening any gate.
+    # Fresh setup runs every verify gate once on the Node 24.15.0 / npm 12 legs,
+    # which no other workflow covers. The integrated Windows tooling suites alone
+    # approach 30 minutes and Ubuntu setup plus complete verify was measured at
+    # about 39 minutes; 60 minutes retains time for coverage and npm controls
+    # without shortening any gate.
     # This is a job budget, not a test deadline or product performance threshold.
     timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 60 }}
     strategy:
@@ -43,15 +44,26 @@ jobs:
           - os: ubuntu-24.04
             node: '24.15.0'
             npm: '12.0.2'
+            verify: complete
           - os: windows-latest
             node: '24.15.0'
             npm: '12.0.2'
+            verify: complete
+          # The qualified Node 24.21.0 (.nvmrc) / npm 11.19.1 legs still run the
+          # fresh install under the forwarded configuration and the real policy
+          # fixture, but defer the identical complete verify, which ci.yml runs on
+          # every pull request and main push for the same OS and toolchain:
+          # Ubuntu in "Template authoring / renamed feature" (npm run verify after
+          # setup) and Windows in "Showcase / windows-latest" (fresh setup with
+          # the complete verify).
           - os: ubuntu-24.04
             node: '24.21.0'
             npm: '11.19.1'
+            verify: deferred
           - os: windows-latest
             node: '24.21.0'
             npm: '11.19.1'
+            verify: deferred
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -75,7 +87,11 @@ jobs:
         shell: pwsh
         env:
           npm_config_allow_scripts: unrelated-globally-approved-package
-        run: node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction
+          SETUP_VERIFY: ${{ matrix.verify }}
+        run: |
+          $extra = @()
+          if ($env:SETUP_VERIFY -eq 'deferred') { $extra += '--defer-verify' }
+          node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction @extra
       - name: Reproduce EALLOWSCRIPTS and prove scoped approval using actual npm
         shell: pwsh
         run: node scripts/testing/check-npm-install-policy.mjs --npm-cli "$env:QUALIFIED_NPM_CLI"
