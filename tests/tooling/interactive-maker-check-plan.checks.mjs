@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
 import { checkPlanOperation } from '../../bin/adapters/framework/check-plan.ts';
+import { ruleHits } from '../../bin/adapters/framework/check-selection.ts';
 import { loadToolkit, loadWorkflows, parseDurations, parseGateRules, parseWorkflow, workflowTrigger } from '../../bin/adapters/framework/gate-sources.ts';
 import { withRepo, git, repoRoot, write } from './check-plan-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
@@ -165,4 +166,12 @@ test('the shipped workflows parse, the durations table is read, and the gate rul
   assert.equal(rules.final.at(-1), 'verify');
   for (const bad of [null, { schemaVersion: 2 }, { schemaVersion: 1, gates: {}, suiteSources: {}, docsOnly: { gates: ['missing'] }, docsGlobs: [], final: [] }])
     assert.throws(() => parseGateRules(bad), { code: 'GATE_RULES_INVALID' });
+});
+
+test('CI composite actions join workflow files in the workflows change-type rule and its quality suite', async () => {
+  const rules = parseGateRules(JSON.parse(await readFile(join(repoRoot, 'configs/quality/gate-rules.json'), 'utf8')));
+  const toolkit = await loadToolkit(repoRoot);
+  const paths = ['.github/actions/setup-qualified/action.yml', '.github/workflows/ci.yml', '.github/CODEOWNERS'];
+  const hits = ruleHits(toolkit, rules, paths).filter(hit => hit.rule.id === 'workflows');
+  assert.deepEqual(hits.map(hit => [hit.paths, hit.rule.suites]), [[paths.slice(0, 2), ['quality']]]);
 });

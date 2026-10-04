@@ -91,3 +91,20 @@ test('[SRC-03] hashing includes new and modified files but not clock or mtime', 
   await writeFile(join(dir, 'files/a.css'), 'a { color: red; }\n');
   assert.notEqual((await sourceInputs(dir, ['files'])).digest, second.digest);
 });
+test('[SRC-04] CI composite actions and runner scripts are fingerprinted inputs when present', async (t) => {
+  const project = fileURLToPath(new URL('../../', import.meta.url));
+  const dir = await mkdtemp(join(tmpdir(), 'shell-ci-inputs-')); t.after(() => rm(dir, { recursive: true, force: true }));
+  for (const path of (await sourceInputs(project)).roots.filter(path => !['.github/actions', '.github/scripts'].includes(path))) {
+    if ((await lstat(join(project, path))).isDirectory()) await mkdir(join(dir, path), { recursive: true });
+    else { await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), '{}'); }
+  }
+  const absent = await sourceInputs(dir);
+  assert.ok(!absent.roots.includes('.github/actions') && !absent.roots.includes('.github/scripts'));
+  const action = '.github/actions/setup-qualified/action.yml', script = '.github/scripts/prepare-runner.ps1';
+  for (const path of [action, script]) { await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), 'name: probe\n'); }
+  const present = await sourceInputs(dir);
+  assert.ok(present.roots.includes('.github/actions') && present.roots.includes('.github/scripts'));
+  assert.deepEqual(present.files.map(file => file.path).filter(path => /^\.github\/(?:actions|scripts)\//.test(path)).sort(), [action, script].sort());
+  await writeFile(join(dir, action), 'name: changed\n');
+  assert.notEqual((await sourceInputs(dir)).digest, present.digest);
+});
