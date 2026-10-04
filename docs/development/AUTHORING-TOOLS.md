@@ -189,12 +189,13 @@ reports `missing`, `extra` and `selectable`. Drift fails with
 `LOCALE_DRAFT_DRIFT`. It plans nothing and refuses write options.
 
 Rerunning `make locale <name>` keeps an existing draft: without drift it changes
-nothing, and when base keys were added since the draft it fails with
-`LOCALE_DRAFT_DRIFT`, listing the missing keys. The reviewed refresh path,
-`make locale <name> --refresh --dry-run` and then `--yes`, adds only those keys
-(with their English values to translate) and the updated key count; every existing
-translation and extra key is kept. Remove extra keys by hand. `--refresh` refuses a
-missing or already selectable draft. `node bin/app check` runs every generated
+nothing, and when base keys were added or removed since the draft (for example by
+`examples:remove`) it fails with `LOCALE_DRAFT_DRIFT`, listing the missing keys and
+the obsolete keys. The reviewed refresh path, `make locale <name> --refresh --dry-run`
+and then `--yes`, adds the missing keys (with their English values to translate),
+drops the obsolete keys and updates the key count; every translation of a surviving
+key is kept. `--refresh` refuses a missing or already selectable draft, and a key that
+changed between a message and a group (`LOCALE_DRAFT_SHAPE`) is left for manual review. `node bin/app check` runs every generated
 `tests/tooling/locale-*.checks.mjs` and `custom-*.checks.mjs`.
 
 Local recipe code is trusted developer code, not a sandbox. There is no remote
