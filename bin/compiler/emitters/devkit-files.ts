@@ -9,7 +9,7 @@ import { relativeImport, rewriteTemplate, type Add } from './file-code.ts';
 import { journeySuitePairs } from './authored-journey-code.ts';
 import { clickdummyBuilderFiles } from './clickdummy-builder-files.ts';
 import { briefValues } from './devkit-brief.ts';
-import { hostingProfile, projectHosting, type HostingProfile } from '../../../scripts/companion/hosting-contract.mjs';
+import { hostingProfile, projectHosting, type HostingProfile } from '../../../scripts/companion/schema/hosting.mjs';
 
 /** Product skills; each also gets a Codex entrypoint under `.agents/skills/` pointing at the canonical Claude skill. */
 const productSkills = ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test', 'self-review'] as const;

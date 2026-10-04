@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { inspect } from 'node:util';
 import { azureRemoteDetails, classifyRemote, hostingPlatforms, hostingProfile, hostingSchema, projectHosting, prunedByHosting, validateHosting }
-  from '../../scripts/companion/hosting-contract.mjs';
+  from '../../scripts/companion/schema/hosting.mjs';
 import { toolingSchema, validateTooling } from '../../scripts/companion/tooling-contract.mjs';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { withHostingOption } from '../../scripts/companion/tooling-options.ts';

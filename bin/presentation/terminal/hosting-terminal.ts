@@ -1,6 +1,6 @@
 /** Terminal-only hosting questions shared by `setup` and `new`. Answers become the same flags a headless caller
  * passes (--hosting, --azure-*), so the operation validates them; explicit flags are never asked again. */
-import { azureRemoteDetails, classifyRemote, hostingPlatforms } from '../../../scripts/companion/hosting-contract.mjs';
+import { azureRemoteDetails, classifyRemote, hostingPlatforms } from '../../../scripts/companion/schema/hosting.mjs';
 import { requireThat, type Request } from '../../adapters/framework/contracts.ts';
 type Prompt = (message: string) => Promise<string>;
 type Options = Request['options'];

@@ -1,7 +1,7 @@
 /** CLI flags for the optional hosting platform (`tooling.hosting`), shared by setup, new and `hosting set`.
  * Only non-secret identifiers are accepted; nothing here runs `gh`/`az`, adds a remote or stores a token. */
 import { withHostingOption } from '../../../scripts/companion/tooling-options.ts';
-import { hostingProfile, projectHosting, type ProjectHosting } from '../../../scripts/companion/hosting-contract.mjs';
+import { hostingProfile, projectHosting, type ProjectHosting } from '../../../scripts/companion/schema/hosting.mjs';
 import type { AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import type { Values } from './contracts.ts';
 export const hostingFlags = ['hosting', 'azure-organization', 'azure-project', 'azure-repository'] as const;

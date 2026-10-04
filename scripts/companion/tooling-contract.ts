@@ -1,7 +1,7 @@
 /** Optional development tooling. Neither switch implies the other or authorizes a process. */
 import { assertJson, record, requireSitemap } from './sitemap/safety.ts';
 import { validateTooling, toolingSchema } from './tooling-contract.mjs';
-import type { ProjectHosting } from './hosting-contract.mjs';
+import type { ProjectHosting } from './schema/hosting.mjs';
 // Keep authoring types independent of compiler request DTOs and executable adapters.
 interface StorybookOptions { enabled?: boolean; generateStories?: boolean }
 export interface ProjectTooling {

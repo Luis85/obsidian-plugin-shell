@@ -6,7 +6,7 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
-import { classifyRemote, hostingProfile, projectHosting, type HostingProfile } from '../../../scripts/companion/hosting-contract.mjs';
+import { classifyRemote, hostingProfile, projectHosting, type HostingProfile } from '../../../scripts/companion/schema/hosting.mjs';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { readBounded, readJson, exists, hash } from './files.ts';
 import { object, designFile, configFile } from './configuration.ts';

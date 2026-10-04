@@ -1,5 +1,5 @@
 /** Inert optional development settings. No package, process or host is acquired here. */
-import { hostingSchema, validateHosting } from './hosting-contract.mjs';
+import { hostingSchema, validateHosting } from './schema/hosting.mjs';
 export const AIRSHIP_VERSION = '0.3.0';
 const AIRSHIP_DEFAULTS = Object.freeze({ enabled: false, agent: 'claude', targetPort: 5173, port: 5174 });
 const HINDSIGHT_AGENTS = Object.freeze(['claude-code', 'codex', 'cursor-cli', 'copilot-cli', 'opencode']);

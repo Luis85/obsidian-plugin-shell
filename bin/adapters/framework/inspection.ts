@@ -4,7 +4,7 @@ import { exists, readJson, readConfiguration, readBounded, hash } from './files.
 import { object } from './configuration.ts';
 import { requireThat, result, type Context, type Diagnostic } from './contracts.ts';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
-import { projectHosting } from '../../../scripts/companion/hosting-contract.mjs';
+import { projectHosting } from '../../../scripts/companion/schema/hosting.mjs';
 import { azureDiagnostics, probeAzureCli, type AzureProbe } from './hosting-cli.ts';
 /** A generated project continues with its own npm scripts, not the shell's setup flow. */
 function generatedNext(dependencies: boolean, designStale: boolean | null): string {

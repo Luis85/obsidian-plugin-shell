@@ -7,7 +7,7 @@
 import { execFile, type ExecException } from 'node:child_process';
 import { join } from 'node:path';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
-import { azureRemoteDetails, classifyRemote, projectHosting, validateHosting, type ProjectHosting } from '../../../scripts/companion/hosting-contract.mjs';
+import { azureRemoteDetails, classifyRemote, projectHosting, validateHosting, type ProjectHosting } from '../../../scripts/companion/schema/hosting.mjs';
 import { readOriginUrl } from '../framework/adopt-git.ts';
 import { designFile } from '../framework/configuration.ts';
 import { exists, hash, readBounded } from '../framework/files.ts';

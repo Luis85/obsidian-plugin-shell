@@ -92,7 +92,7 @@ async function setupDryRun(alias, canonical) {
   const source = fileURLToPath(new URL('../../', import.meta.url)); await mkdir(join(canonical, 'scripts'));
   for (const path of ['setup.mjs', 'setup', 'shared']) await cp(join(source, 'scripts', path), join(canonical, 'scripts', path), { recursive: true });
   await cp(join(source, 'scripts/agent/mcp-config.mjs'), join(canonical, 'scripts/agent/mcp-config.mjs'));
-  await cp(join(source, 'scripts/companion/hosting-contract.mjs'), join(canonical, 'scripts/companion/hosting-contract.mjs'));
+  await cp(join(source, 'scripts/companion/schema/hosting.mjs'), join(canonical, 'scripts/companion/schema/hosting.mjs'));
   for (const name of ['manifest.json', 'package.json', 'package-lock.json', 'versions.json']) await cp(join(source, name), join(canonical, name));
   const result = spawnSync(process.execPath, [join(alias, 'scripts/setup.mjs'), '--dry-run', '--json'], { cwd: alias, encoding: 'utf8', timeout: 15000 });
   assert.equal(result.status, 0, result.stdout + result.stderr); assert.equal(JSON.parse(result.stdout).dryRun, true);

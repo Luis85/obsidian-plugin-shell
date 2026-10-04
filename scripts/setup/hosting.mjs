@@ -4,7 +4,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.ts';
-import { azureRemoteDetails, classifyRemote, hostingPlatforms, hostingProfile, validateHosting } from '../companion/hosting-contract.mjs';
+import { azureRemoteDetails, classifyRemote, hostingPlatforms, hostingProfile, validateHosting } from '../companion/schema/hosting.mjs';
 export const hostingKeys = ['hosting', 'azure-organization', 'azure-project', 'azure-repository'];
 const azureFields = [['azure-organization', 'organization'], ['azure-project', 'project'], ['azure-repository', 'repository']];
 /** The explicit choice from setup options, validated by the shared contract; undefined keeps the current platform. */

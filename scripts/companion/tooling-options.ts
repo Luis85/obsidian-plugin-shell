@@ -7,7 +7,7 @@
  *   accepted. Errors start with HOSTING_OPTION_ (option misuse) or COMPANION_TOOLING_INVALID (invalid value). */
 import { validateAuthoringDocument, type AuthoringDocument } from './authoring-contract.ts';
 import { airshipOptions } from './tooling-contract.mjs';
-import { hostingPlatforms, projectHosting, type HostingPlatform, type ProjectHosting } from './hosting-contract.mjs';
+import { hostingPlatforms, projectHosting, type HostingPlatform, type ProjectHosting } from './schema/hosting.mjs';
 /** Explicit creation/setup flags override data; omission preserves the original bytes. */
 export function withAirshipOption(input: unknown, flags: Record<string, string | boolean>): AuthoringDocument {
   const document = validateAuthoringDocument(input);

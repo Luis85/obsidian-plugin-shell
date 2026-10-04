@@ -23,7 +23,7 @@ import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { styleCode } from '../emitters/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../emitters/devkit-files.ts';
 import { maintainerOnly, relocateFrameworkDocuments, scopeExampleOwnership } from '../emitters/framework-docs.ts';
-import { hostingProfile, projectHosting, prunedByHosting } from '../../../scripts/companion/hosting-contract.mjs';
+import { hostingProfile, projectHosting, prunedByHosting } from '../../../scripts/companion/schema/hosting.mjs';
 import { maintainerScript, rewriteDocReferences } from '../emitters/framework-scope.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
 function replacedProducer(previous: string | undefined, producer: string): string | undefined {

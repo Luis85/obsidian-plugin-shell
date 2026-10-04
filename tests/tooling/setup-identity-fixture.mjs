@@ -13,7 +13,7 @@ export async function fixture() {
   await cp(join(source, 'scripts/agent/mcp-config.mjs'), join(root, 'scripts/agent/mcp-config.mjs'));
   // Setup validates --hosting through the shared, import-free hosting contract.
   await mkdir(join(root, 'scripts/companion'), { recursive: true });
-  await cp(join(source, 'scripts/companion/hosting-contract.mjs'), join(root, 'scripts/companion/hosting-contract.mjs'));
+  await cp(join(source, 'scripts/companion/schema/hosting.mjs'), join(root, 'scripts/companion/schema/hosting.mjs'));
   await mkdir(join(root, 'bin'), { recursive: true });
   await cp(join(source, 'bin/app'), join(root, 'bin/app'));
   const manifest = { id: 'original-plugin', name: 'Original Plugin', description: 'Fixture identity', author: 'Author', version: '1.0.0', minAppVersion: '1.13.7', isDesktopOnly: true };

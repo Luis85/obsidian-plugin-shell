@@ -10,7 +10,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { validateHosting } from '../../../scripts/companion/hosting-contract.mjs';
+import { validateHosting } from '../../../scripts/companion/schema/hosting.mjs';
 import { parseAzureVersion } from '../framework/hosting-cli.ts';
 import { hasControls } from '../../domain/errors.ts';
 import { azureRemoteState } from '../../domain/increments/remote-state.ts';

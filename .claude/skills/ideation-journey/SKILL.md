@@ -25,7 +25,7 @@ None are required. Optional: the user's idea or goal, a target project folder (`
 
 ## Preflight (read-only)
 
-Run these and keep the real output. They write nothing; only `status` is pre-allowed in `.claude/settings.json`, the others may prompt for permission.
+Run these and keep the real output. They write nothing; `.claude/settings.json` pre-allows them.
 
 ```sh
 node bin/app status --json
