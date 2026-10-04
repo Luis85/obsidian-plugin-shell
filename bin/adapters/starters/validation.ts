@@ -2,7 +2,7 @@ import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { OperationError, requireThat } from '../framework/contracts.ts';
 import { readProjectGenerator } from '../../compiler/domain/project-starter.ts';
 import { assertDesignData } from '../../../scripts/contracts/json-data.ts';
-import { validateAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
+import { AUTHORING_VERSION, validateAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import type { InputValue, StarterDefinition, StarterInput, StarterProcess, StarterStep, StarterFile, Json } from './types.ts';
 export function record(value: unknown): Record<string, unknown> {
   requireThat(value !== null && typeof value === 'object' && !Array.isArray(value), 'STARTER_INVALID', 'Expected an object.');
@@ -130,7 +130,7 @@ function readGenerator(value: unknown): StarterDefinition['generator'] {
   fields(raw, raw.kind === 'companion' ? ['kind', 'document'] : ['kind']);
   if (raw.kind !== 'companion') { requireThat(raw.kind === 'files', 'STARTER_INVALID', 'Unknown generator primitive.'); return { kind: 'files' }; }
   const document = record(raw.document);
-  requireThat(document.schemaVersion === 6, 'STARTER_VERSION', 'Companion starters require project schema 6; earlier project formats are no longer supported.');
+  requireThat(document.schemaVersion === AUTHORING_VERSION, 'STARTER_VERSION', `Companion starters require project schema ${AUTHORING_VERSION}; earlier project formats are no longer supported.`);
   validateAuthoringDocument(document);
   return { kind: 'companion', document };
 }

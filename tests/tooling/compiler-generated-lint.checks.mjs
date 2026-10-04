@@ -2,14 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, mkdtemp, mkdir, writeFile, rm, symlink, realpath } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, relative, sep } from 'node:path';
+import { dirname, isAbsolute, join, relative, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { parseBrowserStarter } from '../../bin/adapters/starters/browser.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);
-const eslint = join(root, 'node_modules/eslint/bin/eslint.js');
+const eslint = join(root, 'node_modules/eslint/bin/eslint.js'), oxlint = join(root, 'node_modules/oxlint/bin/oxlint');
 
 /** Materialize one shipped starter exactly as the compiler emits it, then reuse this checkout's installed toolchain. */
 async function emitProject(starter, t) {
@@ -39,15 +39,39 @@ function lint(dir, files) {
   return { status: run.status, messages };
 }
 
-for (const starter of ['feature-showcase', 'companion-plugin']) {
-  test(`[GENERATED-LINT] ${starter}: emitted product code, including the Journey editor, passes the generated project's own ESLint with no errors or warnings`, async t => {
+/** The first half of the generated `npm run lint`: oxlint with the project's own config and the flags lint-source.mjs passes. */
+function oxlintRun(dir, files) {
+  const run = spawnSync(process.execPath, [oxlint, '-c', 'configs/lint/oxlintrc.json', '--no-ignore', '--deny-warnings', '--format', 'json', ...files],
+    { cwd: dir, encoding: 'utf8', timeout: 480_000, maxBuffer: 20_000_000 });
+  assert.ok(run.stdout, 'oxlint produced no report: ' + run.stderr);
+  const report = JSON.parse(run.stdout);
+  assert.ok(report.number_of_files > 0, 'oxlint linted no files');
+  const messages = report.diagnostics.map(item => ({ file: (isAbsolute(item.filename) ? relative(dir, item.filename) : item.filename).split(sep).join('/'), rule: item.code, severity: item.severity, text: item.message }));
+  return { status: run.status, messages };
+}
+
+// context-menu has no Journey editor; it covers the emitted native declarations (<sourceRoot>/domain/native).
+for (const [starter, editor] of [['feature-showcase', true], ['companion-plugin', true], ['context-menu', false]]) {
+  test(`[GENERATED-LINT] ${starter}: emitted product code${editor ? ', including the Journey editor,' : ''} passes the generated project's own oxlint and ESLint with no errors or warnings`, async t => {
     const { dir, journey, sourceRoot } = await emitProject(starter, t);
-    assert.ok(journey.some(path => path.endsWith('components/EditorForm.vue')) && journey.some(path => path.endsWith('bootstrap/journey-mount.ts')), 'the editor sources are emitted');
+    if (editor) assert.ok(journey.some(path => path.endsWith('components/EditorForm.vue')) && journey.some(path => path.endsWith('bootstrap/journey-mount.ts')), 'the editor sources are emitted');
     const result = lint(dir, [sourceRoot, 'harness/prototype']);
     assert.deepEqual(result.messages, [], 'emitted product code must satisfy the generated lint rules, including vue/no-mutating-props and no-empty-object-type');
     assert.equal(result.status, 0);
+    const owned = oxlintRun(dir, [sourceRoot, 'harness/prototype']);
+    assert.deepEqual(owned.messages, [], 'emitted product code must satisfy the generated oxlint rules, including unicorn(no-useless-spread)');
+    assert.equal(owned.status, 0);
   });
 }
+
+test('[GENERATED-LINT] a useless object spread injected into emitted source fails the same generated oxlint check', async t => {
+  const { dir, sourceRoot } = await emitProject('context-menu', t);
+  const target = sourceRoot + '/generated-lint-probe.ts';
+  await writeFile(join(dir, target), 'export const probe = { ...{ id: 1 }, run: true };\n');
+  const result = oxlintRun(dir, [target]);
+  assert.notEqual(result.status, 0);
+  assert.deepEqual(result.messages.map(({ file, rule }) => [file, rule]), [[target, 'unicorn(no-useless-spread)']]);
+});
 
 test('[GENERATED-LINT] a prop mutation injected into the emitted editor fails the same generated lint check', async t => {
   const { dir, journey } = await emitProject('feature-showcase', t);

@@ -11,6 +11,10 @@ const codeLiteral = (value: unknown): string =>
     .replace(/</g, '\\u003c')
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
+/** Object members written directly (no spread of a literal); keys that are not identifiers stay quoted. */
+function objectMembers(value: object): string {
+  return Object.entries(value).map(([key, member]) => `${/^[A-Za-z_$][\w$]*$/.test(key) ? key : codeLiteral(key)}: ${codeLiteral(member)}`).join(', ');
+}
 /** The shared native contract decides the declaration's shape; an unknown kind declares nothing and is refused. */
 function declared(kind: NativeKind, definition: NativeDeclaration): Declared {
   const integrations = validateNativeIntegrations({
@@ -36,7 +40,7 @@ export const definition: NativeFileDefinition = ${codeLiteral(value.definition)}
 export function inspectFile(file: NativeFileContext): NativeMenuResult {
   return { title: ${codeLiteral(value.definition.name)}, message: 'File: ' + file.name + '\\nExtension: .' + file.extension + '\\nVault path: ' + file.path };
 }
-export const definition: NativeMenuDefinition = { ...${codeLiteral(value.definition)}, run: inspectFile };
+export const definition: NativeMenuDefinition = { ${objectMembers(value.definition)}, run: inspectFile };
 `;
 }
 function declarationExpectations(value: Declared): string {

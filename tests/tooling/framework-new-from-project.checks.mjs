@@ -114,7 +114,7 @@ test('invalid, malformed, future, unsafe or conflicting sources are refused with
   const future = machine(['fresh', '--from', 'future.json'], cwd).result.diagnostics[0];
   assert.match(future.message, new RegExp(`schema ${AUTHORING_VERSION + 1}; this framework reads only schema ${AUTHORING_VERSION}\\.`)); assert.match(future.next, /Upgrade the framework/);
   const retired = machine(['fresh', '--from', 'retired.json'], cwd).result.diagnostics[0];
-  assert.match(retired.message, /retired companion project schema 5; this framework reads only schema 6 and never migrates earlier formats/); assert.match(retired.next, /Export the project again/);
+  assert.match(retired.message, /retired companion project schema 5; this framework reads only schema 6 and never migrates earlier formats/); assert.match(retired.next, /Start from a current starter or a schema 6 export; earlier formats have no upgrade path/);
 });
 test('discovery advertises --from on new as a value option', async t => {
   const cwd = await scratch(t);
