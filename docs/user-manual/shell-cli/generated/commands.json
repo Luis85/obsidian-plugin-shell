@@ -7477,7 +7477,7 @@
     },
     {
       "id": "site collections",
-      "summary": "Plan the Bases collection snapshots (src/data/collections/<name>.json) a site project lists in workbench.project.json.",
+      "summary": "Plan the Bases collection snapshots (src/data/collections/<name>.collection.json) a site project lists in workbench.project.json.",
       "effect": "plan",
       "maxArgs": 1,
       "group": "sites",

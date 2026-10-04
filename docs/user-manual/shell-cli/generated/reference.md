@@ -144,7 +144,7 @@ The tables list options with documented command semantics. Some common flags are
 
 - [site templates](#site-templates) — List the opt-in Astro website templates (product page, project page, documentation) and the collections each reads; read-only.
 - [site new](#site-new) — Plan a standalone Astro website in projects/&lt;name&gt; from a site template; previews unless --yes. Never installs or builds.
-- [site collections](#site-collections) — Plan the Bases collection snapshots (src/data/collections/&lt;name&gt;.json) a site project lists in workbench.project.json.
+- [site collections](#site-collections) — Plan the Bases collection snapshots (src/data/collections/&lt;name&gt;.collection.json) a site project lists in workbench.project.json.
 
 ## Optional local agent MCP
 
@@ -3982,7 +3982,7 @@ node bin/app site new projects/acme-docs --template documentation --apply <sha25
 
 ## site collections
 
-Plan the Bases collection snapshots (src/data/collections/<name>.json) a site project lists in workbench.project.json.
+Plan the Bases collection snapshots (src/data/collections/<name>.collection.json) a site project lists in workbench.project.json.
 
 ```sh
 node bin/app site collections projects/<name> [--yes | --apply <sha256>] [--json]

@@ -1,5 +1,6 @@
 import { requireSketch } from './errors.ts';
-import type { CollectionResult } from './base-collection.ts';
+import type { BaseRecord, CollectionResult } from './base-collection.ts';
+import type { BaseValue } from './base-expression.ts';
 import { filled, PROJECT_NAME, record } from './site-template.ts';
 
 /**
@@ -8,6 +9,9 @@ import { filled, PROJECT_NAME, record } from './site-template.ts';
  * the named files is checked by the callers.
  */
 export const SNAPSHOT_FOLDER = 'src/data/collections';
+/** The site loads only files with this suffix, so other JSON in the folder never reaches its build. */
+export const SNAPSHOT_SUFFIX = '.collection.json';
+const SNAPSHOT_SCHEMA = 2;
 export const GENERATED_BY = 'node bin/app site collections';
 export interface SiteCollectionEntry { name: string; base: string; view: string; vault: string }
 export interface SiteSection { template: string; collections: SiteCollectionEntry[] }
@@ -58,12 +62,52 @@ export function readSiteSection(value: unknown, templateIds: readonly string[]):
   })) };
 }
 
-export const snapshotPath = (name: string): string => `${SNAPSHOT_FOLDER}/${name}.json`;
+export const snapshotPath = (name: string): string => `${SNAPSHOT_FOLDER}/${name}${SNAPSHOT_SUFFIX}`;
+/** A site record carries only what pages render: never the note's other frontmatter. */
+interface SiteRecord { path: string; group?: BaseValue; values: Record<string, BaseValue> }
+/** SHA-256 hex of UTF-8 text; injected so this module stays framework-free. */
+export type Sha256 = (text: string) => string;
+const siteRecords = (records: readonly BaseRecord[]): SiteRecord[] =>
+  records.map(item => ({ path: item.path, ...(Object.hasOwn(item, 'group') ? { group: item.group } : {}), values: item.values }));
+/** The canonical bytes `recordsSha256` covers: the records array as compact JSON. */
+const recordsJson = (records: unknown): string => JSON.stringify(records);
+
 /** The snapshot a site build reads: deterministic for the same notes and base, without timestamps. */
-export function snapshotText(collected: Pick<CollectionResult, 'collection' | 'records'>): string {
-  return JSON.stringify({ schemaVersion: 1, generatedBy: GENERATED_BY, collection: collected.collection, records: collected.records }, null, 2) + '\n';
+export function snapshotText(collected: Pick<CollectionResult, 'collection' | 'records'>, sha256: Sha256): string {
+  const records = siteRecords(collected.records);
+  return JSON.stringify({ schemaVersion: SNAPSHOT_SCHEMA, generatedBy: GENERATED_BY, recordsSha256: sha256(recordsJson(records)), collection: collected.collection, records }, null, 2) + '\n';
 }
-/** True only for a snapshot this command wrote; any other file is never replaced or removed. */
-export function generatedSnapshot(text: string): boolean {
-  try { const value = record(JSON.parse(text)); return value?.schemaVersion === 1 && value.generatedBy === GENERATED_BY; } catch { return false; }
+/**
+ * `generated`: written by this command and untouched since (its records still match `recordsSha256`). `edited`: written
+ * by it, then changed by hand. `legacy`: the schemaVersion 1 format, which embedded full frontmatter. `foreign`: anything else.
+ */
+export type SnapshotState = 'generated' | 'edited' | 'legacy' | 'foreign';
+export function snapshotState(text: string, sha256: Sha256): SnapshotState {
+  let value: Record<string, unknown> | null;
+  try { value = record(JSON.parse(text)); } catch { return 'foreign'; }
+  if (value?.generatedBy !== GENERATED_BY) return 'foreign';
+  if (value.schemaVersion === 1) return 'legacy';
+  if (value.schemaVersion !== SNAPSHOT_SCHEMA) return 'foreign';
+  return Array.isArray(value.records) && value.recordsSha256 === sha256(recordsJson(value.records)) ? 'generated' : 'edited';
+}
+
+export interface SnapshotFile { path: string; state: SnapshotState }
+export interface SnapshotDecision { remove: string[]; keep: string[]; conflicts: string[] }
+const conflict = (file: SnapshotFile): string => file.state === 'edited'
+  ? `${file.path} was edited by hand: its records no longer match its recordsSha256. It is never replaced or removed; restore it, or move it out of ${SNAPSHOT_FOLDER}, then run site collections again.`
+  : `${file.path} was not written by site collections; it is never replaced or removed. Rename the collection or move the file.`;
+/**
+ * What `site collections` may do with the JSON files already in the snapshot folder, given the snapshot paths it will
+ * write. Only an intact generated snapshot is replaced, or removed when no collection lists it. Old-format snapshots
+ * (`<name>.json`, schemaVersion 1) are removed: the site no longer loads them. Any other `*.collection.json` blocks the
+ * plan, because the site would load it; any other `*.json` is kept, because the site never loads it.
+ */
+export function snapshotDecisions(listed: readonly string[], existing: readonly SnapshotFile[]): SnapshotDecision {
+  const decision: SnapshotDecision = { remove: [], keep: [], conflicts: [] };
+  for (const file of existing) {
+    if (!file.path.endsWith(SNAPSHOT_SUFFIX)) (file.state === 'legacy' ? decision.remove : decision.keep).push(file.path);
+    else if (file.state !== 'generated') decision.conflicts.push(conflict(file));
+    else if (!listed.includes(file.path)) decision.remove.push(file.path);
+  }
+  return decision;
 }

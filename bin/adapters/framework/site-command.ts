@@ -3,11 +3,13 @@ import { join } from 'node:path';
 import { SketchError, requireSketch } from '../../domain/errors.ts';
 import { collectRecords } from '../../domain/base-collection.ts';
 import { selectView } from '../../domain/obsidian-base.ts';
-import { generatedSnapshot, readSiteSection, SNAPSHOT_FOLDER, snapshotPath, snapshotText, type SiteCollectionEntry } from '../../domain/site-collections.ts';
-import { record, renderTemplate, selectTemplate, siteManifest, siteProjectName, siteTitle } from '../../domain/site-template.ts';
+import { readSiteSection, snapshotDecisions, SNAPSHOT_FOLDER, snapshotPath, snapshotState, snapshotText, type SiteCollectionEntry, type SnapshotFile } from '../../domain/site-collections.ts';
+import { record, renderTemplate, selectTemplate, siteManifest, siteNextSteps, siteProjectName, siteTitle } from '../../domain/site-template.ts';
+import type { BaseNote } from '../../domain/base-expression.ts';
+import type { LoadedBase, VaultScan } from '../obsidian-base.ts';
 import { createFilePlan, type FilePlan, type FilePlanEntry } from '../../../scripts/shared/file-plan.ts';
 import { loadSiteTemplates, templateFiles } from '../site-templates.ts';
-import { exists, readBounded, readJson } from './files.ts';
+import { exists, hash, readBounded, readJson } from './files.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 
 /**
@@ -49,9 +51,8 @@ export function siteNewPlan(request: Request, context: Context): Promise<Planned
     entries.sort((a, b) => a.path < b.path ? -1 : 1);
     return { plan: await createFilePlan(context.root, entries), conflicts: [], summary: {
       site: name, title: site.title, template: template.id, astro: templates.catalog.astro, files: entries.map(entry => entry.path),
-      next: [`Add an npm entry for /${target} to .github/dependabot.yml`, 'npm run projects:sync', 'npm run check:projects',
-        `List Bases collections under site.collections in ${target}/workbench.project.json, then node bin/app site collections ${target}`,
-        `cd ${target} && npm ci && npm run check`],
+      // Only the maintainer checkout carries the projects tooling; kits and generated projects wire the site's CI by hand.
+      next: siteNextSteps(target, await exists(join(context.root, 'scripts/projects/projects.mjs'))),
       notPerformed: 'Nothing is installed or built: Astro is a dependency of the generated site only.',
     } };
   });
@@ -65,50 +66,50 @@ async function readSite(context: Context, target: string) {
   const { catalog } = await loadSiteTemplates(context.frameworkRoot);
   return readSiteSection(manifest.site, catalog.templates.map(item => item.id));
 }
-async function snapshot(context: Context, entry: SiteCollectionEntry) {
+interface Scanned { loaded: LoadedBase; notes: BaseNote[]; skipped: VaultScan['skipped'] }
+/** One read of a base and one scan of its vault, shared by every listed view of that base. */
+async function scanBase(context: Context, entry: SiteCollectionEntry, scans: Map<string, Scanned>): Promise<Scanned> {
+  const key = `${entry.vault}\n${entry.base}`, known = scans.get(key);
+  if (known) return known;
   // Loaded on use: the YAML parser is a project dependency, and the CLI must start before `npm ci` in a new project.
   const { loadBase, resolveVault, scanVault } = await import('../obsidian-base.ts');
   const vault = await resolveVault(context.root, entry.vault);
   requireSketch(await exists(join(context.root, entry.base)), 'SITE_COLLECTION_BASE_MISSING', `Collection ${entry.name}: ${entry.base} does not exist.`);
   const loaded = await loadBase(context.root, vault, entry.base);
-  const view = selectView(loaded.definition, entry.view);
   const scan = await scanVault(vault, loaded.definition);
-  const collected = collectRecords(loaded.definition, view, scan.notes, loaded.source);
-  return { text: snapshotText(collected), summary: { name: entry.name, base: entry.base, view: entry.view, vault: entry.vault, records: collected.records.length, matched: collected.matched, skipped: scan.skipped } };
+  const scanned = { loaded, notes: scan.notes, skipped: scan.skipped };
+  scans.set(key, scanned);
+  return scanned;
 }
-/** Snapshot files in the folder that no listed collection produces: generated ones are removed, other files kept. */
-async function staleSnapshots(context: Context, folder: string, listed: readonly string[]): Promise<{ removed: string[]; kept: string[] }> {
-  const removed: string[] = [], kept: string[] = [];
-  if (!await exists(join(context.root, folder))) return { removed, kept };
+async function snapshot(context: Context, entry: SiteCollectionEntry, scans: Map<string, Scanned>) {
+  const { loaded, notes, skipped } = await scanBase(context, entry, scans);
+  const collected = collectRecords(loaded.definition, selectView(loaded.definition, entry.view), notes, loaded.source);
+  return { text: snapshotText(collected, hash), summary: { name: entry.name, base: entry.base, view: entry.view, vault: entry.vault, records: collected.records.length, matched: collected.matched, skipped } };
+}
+/** Every JSON file already in the snapshot folder, with whether this command wrote it and left it untouched. */
+async function existingSnapshots(context: Context, folder: string): Promise<SnapshotFile[]> {
+  if (!await exists(join(context.root, folder))) return [];
+  const files: SnapshotFile[] = [];
   for (const name of (await readdir(join(context.root, folder))).filter(file => file.endsWith('.json')).sort()) {
-    const path = `${folder}/${name}`;
-    if (listed.includes(path)) continue;
-    (generatedSnapshot((await readBounded(join(context.root, path), SNAPSHOT_BYTES)).toString('utf8')) ? removed : kept).push(path);
+    const path = `${folder}/${name}`, file = (await lstat(join(context.root, path))).isFile();
+    files.push({ path, state: file ? snapshotState((await readBounded(join(context.root, path), SNAPSHOT_BYTES)).toString('utf8'), hash) : 'foreign' });
   }
-  return { removed, kept };
-}
-async function replacementConflicts(context: Context, paths: readonly string[]): Promise<string[]> {
-  const conflicts: string[] = [];
-  for (const path of paths) {
-    if (await exists(join(context.root, path)) && !generatedSnapshot((await readBounded(join(context.root, path), SNAPSHOT_BYTES)).toString('utf8')))
-      conflicts.push(`${path} exists and was not written by site collections; it is never replaced. Rename the collection or move the file.`);
-  }
-  return conflicts;
+  return files;
 }
 export function siteCollectionsPlan(request: Request, context: Context): Promise<Planned> {
   return translating(async () => {
     const target = `projects/${siteProjectName(request.args[0])}`, folder = `${target}/${SNAPSHOT_FOLDER}`;
     const site = await readSite(context, target);
-    const entries: FilePlanEntry[] = [], collections: unknown[] = [];
+    const entries: FilePlanEntry[] = [], collections: unknown[] = [], scans = new Map<string, Scanned>();
     for (const entry of site.collections) {
-      const made = await snapshot(context, entry);
+      const made = await snapshot(context, entry, scans);
       entries.push({ path: `${target}/${snapshotPath(entry.name)}`, content: made.text }); collections.push(made.summary);
     }
     const listed = entries.map(entry => entry.path);
-    const stale = await staleSnapshots(context, folder, listed);
-    entries.push(...stale.removed.map(path => ({ path, content: null })));
-    return { plan: await createFilePlan(context.root, entries), conflicts: await replacementConflicts(context, listed), summary: {
-      site: target, template: site.template, collections, removed: stale.removed, kept: stale.kept,
+    const decided = snapshotDecisions(listed, await existingSnapshots(context, folder));
+    entries.push(...decided.remove.map(path => ({ path, content: null })));
+    return { plan: await createFilePlan(context.root, entries), conflicts: decided.conflicts, summary: {
+      site: target, template: site.template, collections, removed: decided.remove, kept: decided.keep,
       next: listed.length ? [`cd ${target} && npm run check`] : [`List Bases collections under site.collections in ${target}/workbench.project.json`],
     } };
   });

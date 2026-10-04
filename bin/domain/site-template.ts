@@ -60,10 +60,13 @@ export function siteTitle(value: string | undefined, name: string): string {
 
 /** Template file path (relative to its template folder) to the rendered project path. */
 export function outputPath(templatePath: string): string {
-  requireSketch(templatePath.endsWith('.tmpl') && templatePath.split('/').every(part => /^[A-Za-z0-9_-][A-Za-z0-9_.-]*$/.test(part)), 'SITE_TEMPLATE_FILE',
+  const parts = templatePath.slice(0, -'.tmpl'.length).split('/');
+  const rendered = parts.map(part => part.startsWith('dot-') ? `.${part.slice(4)}` : part.replace(/^param-([a-z][a-z0-9-]*)/, '[$1]'));
+  // dot-<name> must start a visible name, and no segment may render empty, "." or "..".
+  requireSketch(templatePath.endsWith('.tmpl') && templatePath.split('/').every(part => /^[A-Za-z0-9_-][A-Za-z0-9_.-]*$/.test(part))
+    && parts.every(part => !/^dot-(?![A-Za-z0-9_-])/.test(part)) && rendered.every(part => !['', '.', '..'].includes(part)), 'SITE_TEMPLATE_FILE',
     `${templatePath}: site template files end in .tmpl and use portable names (dot-<name> for dot files, param-<name> for route parameters).`);
-  return templatePath.slice(0, -'.tmpl'.length).split('/')
-    .map(part => part.startsWith('dot-') ? `.${part.slice(4)}` : part.replace(/^param-([a-z][a-z0-9-]*)/, '[$1]')).join('/');
+  return rendered.join('/');
 }
 function tokens(site: SiteIdentity): Record<string, string> {
   return {
@@ -87,4 +90,16 @@ export function siteManifest(site: SiteIdentity): string {
     summary: `${site.template.title} website built with Astro from Obsidian Bases collections.`,
     prototypes: [], site: { template: site.template.id, collections: [] },
   }, null, 2) + '\n';
+}
+
+/**
+ * What finishes a new site. Only a checkout with the projects tooling (the Workbench maintainer checkout) has
+ * projects:sync and check:projects; in a kit or a generated project the site's CI is wired up by hand.
+ */
+export function siteNextSteps(target: string, projectsTooling: boolean): string[] {
+  const workflow = projectsTooling ? ['npm run projects:sync', 'npm run check:projects']
+    : [`GitHub runs only the root .github/workflows: copy ${target}/.github/workflows/ci.yml there and scope its triggers, working directory and paths to ${target}`];
+  return [`Add an npm entry for /${target} to .github/dependabot.yml`, ...workflow,
+    `List Bases collections under site.collections in ${target}/workbench.project.json, then node bin/app site collections ${target}`,
+    `cd ${target} && npm ci && npm run check`];
 }

@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { filled, outputPath, readSiteCatalog, record, renderTemplate, selectTemplate, siteManifest, siteProjectName, siteTitle } from '../../bin/domain/site-template.ts';
-import { generatedSnapshot, readSiteSection, repositoryPath, siteIssues, snapshotPath, snapshotText, GENERATED_BY } from '../../bin/domain/site-collections.ts';
+import { filled, outputPath, readSiteCatalog, record, renderTemplate, selectTemplate, siteManifest, siteNextSteps, siteProjectName, siteTitle } from '../../bin/domain/site-template.ts';
+import { readSiteSection, repositoryPath, siteIssues, snapshotDecisions, snapshotPath, snapshotState, snapshotText, GENERATED_BY } from '../../bin/domain/site-collections.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { descriptor } from '../../bin/adapters/framework/catalog.ts';
 import { commandHelp } from '../../bin/adapters/framework/help-text.ts';
 
 const repository = resolve(import.meta.dirname, '../..');
+const sha256 = text => createHash('sha256').update(text).digest('hex');
 const code = run => { try { run(); return 'ok'; } catch (error) { return error.code; } };
 const shipped = JSON.parse(await readFile(resolve(repository, 'templates/sites/catalog.json'), 'utf8'));
 const catalog = readSiteCatalog(shipped);
@@ -47,7 +49,11 @@ test('[SITES-03] template paths drop .tmpl and map dot-<name>, and rendering rep
   assert.equal(outputPath('dot-gitignore.tmpl'), '.gitignore');
   assert.equal(outputPath('src/pages/reference/param-collection.astro.tmpl'), 'src/pages/reference/[collection].astro');
   assert.equal(outputPath('src/param-a/x-param-b.md.tmpl'), 'src/[a]/x-param-b.md');
-  for (const path of ['src/index.astro', '.github/ci.yml.tmpl', 'src/.hidden.tmpl', 'src/pages/[slug].astro.tmpl', 'a b.tmpl']) assert.equal(code(() => outputPath(path)), 'SITE_TEMPLATE_FILE', path);
+  assert.equal(outputPath('dot-a/dot-_x..y.tmpl'), '.a/._x..y');
+  for (const path of ['src/index.astro', '.github/ci.yml.tmpl', 'src/.hidden.tmpl', 'src/pages/[slug].astro.tmpl', 'a b.tmpl',
+    // dot- must start a visible name: these would render as ".", ".." or an empty segment and escape or collapse the project path.
+    'dot-./x.tmpl', 'dot-.tmpl', 'src/dot-.tmpl', 'dot-..tmpl', 'dot-/x.tmpl', 'a/dot-.b/c.tmpl', 'dot-.x.tmpl'])
+    assert.equal(code(() => outputPath(path)), 'SITE_TEMPLATE_FILE', path);
   const rendered = renderTemplate('README.md.tmpl', '# __SITE_TITLE__ (__SITE_NAME__, __SITE_TEMPLATE__: __SITE_TEMPLATE_TITLE__)\n__SITE_TEMPLATE_SUMMARY__\n__SITE_TEMPLATE_COLLECTIONS__\n', site);
   assert.equal(rendered, `# Acme Docs (acme-docs, documentation: Documentation)\n${site.template.summary}\n- \`<any>\`: ${site.template.collections[0].use}\n`);
   assert.equal(code(() => renderTemplate('x.tmpl', '__SITE_UNKNOWN__', site)), 'SITE_TEMPLATE_TOKEN');
@@ -72,14 +78,45 @@ test('[SITES-04] the site section is validated with every reason, and a valid on
   assert.deepEqual(['.', 'a/b/', 'a//b', './a', '', 7, '/a'].map(repositoryPath), ['.', 'a/b', null, null, null, null, null]);
 });
 
-test('[SITES-05] snapshots are deterministic JSON without timestamps, and only generated ones are recognized', () => {
-  const collected = { collection: { kind: 'file-collection', fields: [] }, records: [{ path: 'a.md', values: {}, properties: {} }] };
-  const text = snapshotText(collected);
-  assert.equal(text, snapshotText(structuredClone(collected)));
-  assert.deepEqual(Object.keys(JSON.parse(text)), ['schemaVersion', 'generatedBy', 'collection', 'records']);
+test('[SITES-05] snapshots carry only what pages render, are deterministic, and record the hash of their own records', () => {
+  const collected = { collection: { kind: 'file-collection', fields: [] }, records: [
+    { path: 'a.md', values: { 'note.rank': 1 }, properties: { secret: 'private note text', rank: 1 } },
+    { path: 'b.md', group: null, values: {}, properties: { secret: 'more' } }] };
+  const text = snapshotText(collected, sha256);
+  assert.equal(text, snapshotText(structuredClone(collected), sha256));
+  const value = JSON.parse(text);
+  assert.deepEqual(Object.keys(value), ['schemaVersion', 'generatedBy', 'recordsSha256', 'collection', 'records']);
+  assert.deepEqual([value.schemaVersion, value.generatedBy, value.recordsSha256], [2, GENERATED_BY, sha256(JSON.stringify(value.records))]);
+  assert.deepEqual(value.records, [{ path: 'a.md', values: { 'note.rank': 1 } }, { path: 'b.md', group: null, values: {} }]);
+  assert.doesNotMatch(text, /secret|private|"properties"/);
   assert.ok(text.endsWith('}\n') && !/\d{4}-\d{2}-\d{2}T/.test(text));
-  assert.equal(snapshotPath('faq'), 'src/data/collections/faq.json');
-  assert.deepEqual([generatedSnapshot(text), generatedSnapshot('{"schemaVersion":1}'), generatedSnapshot('not json'), generatedSnapshot(JSON.stringify({ schemaVersion: 2, generatedBy: GENERATED_BY })), generatedSnapshot('[]')], [true, false, false, false, false]);
+  assert.equal(snapshotPath('faq'), 'src/data/collections/faq.collection.json');
+  const edited = JSON.stringify({ ...value, records: [{ path: 'a.md', values: { 'note.rank': 2 } }, value.records[1]] });
+  const states = [text, edited, JSON.stringify({ ...value, recordsSha256: undefined }), JSON.stringify({ ...value, records: 'x' }),
+    JSON.stringify({ schemaVersion: 1, generatedBy: GENERATED_BY, records: [] }), '{"schemaVersion":2}', 'not json', '[]', JSON.stringify({ ...value, schemaVersion: 3 })];
+  assert.deepEqual(states.map(item => snapshotState(item, sha256)), ['generated', 'edited', 'edited', 'edited', 'legacy', 'foreign', 'foreign', 'foreign', 'foreign']);
+});
+
+test('[SITES-07] only intact generated snapshots are replaced or removed, the old format is migrated, and everything else is a conflict or kept', () => {
+  const at = name => `f/${name}`;
+  const listed = ['a.collection.json', 'b.collection.json', 'c.collection.json', 'new.collection.json'].map(at);
+  const existing = [['a.collection.json', 'generated'], ['b.collection.json', 'edited'], ['c.collection.json', 'foreign'], ['gone.collection.json', 'generated'],
+    ['hand.collection.json', 'edited'], ['mine.collection.json', 'foreign'], ['odd.collection.json', 'legacy'], ['a.json', 'legacy'], ['notes.json', 'foreign'], ['v2.json', 'generated']]
+    .map(([name, state]) => ({ path: at(name), state }));
+  const decided = snapshotDecisions(listed, existing);
+  assert.deepEqual([decided.remove, decided.keep], [[at('gone.collection.json'), at('a.json')], [at('notes.json'), at('v2.json')]]);
+  assert.deepEqual(decided.conflicts.map(conflict => conflict.split(' ')[0]), ['b.collection.json', 'c.collection.json', 'hand.collection.json', 'mine.collection.json', 'odd.collection.json'].map(at));
+  assert.match(decided.conflicts[0], /edited by hand: its records no longer match its recordsSha256.*never replaced or removed/);
+  assert.match(decided.conflicts[1], /was not written by site collections; it is never replaced or removed/);
+  assert.deepEqual(snapshotDecisions([], []), { remove: [], keep: [], conflicts: [] });
+});
+
+test('[SITES-08] next steps name the projects tooling only where the checkout has it', () => {
+  const maintainer = siteNextSteps('projects/acme', true), elsewhere = siteNextSteps('projects/acme', false);
+  assert.deepEqual(maintainer.slice(0, 3), ['Add an npm entry for /projects/acme to .github/dependabot.yml', 'npm run projects:sync', 'npm run check:projects']);
+  assert.ok(elsewhere.every(step => !/projects:sync|check:projects/.test(step)), elsewhere.join('\n'));
+  assert.match(elsewhere[1], /root \.github\/workflows: copy projects\/acme\/\.github\/workflows\/ci\.yml there/);
+  for (const steps of [maintainer, elsewhere]) assert.equal(steps.at(-1), 'cd projects/acme && npm ci && npm run check');
 });
 
 test('[SITES-06] site templates lists the catalog, and help documents every site command with the catalog template ids', async () => {
