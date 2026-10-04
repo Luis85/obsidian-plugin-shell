@@ -41,8 +41,8 @@ function isCollection(name: string): name is CollectionKey {
 /** The records of one collection in the order of its Bases view; an unknown collection has none. */
 export async function collectionRecords(name: string): Promise<SiteRecord[]> {
   if (!isCollection(name)) return [];
-  const entries = await getCollection(name);
-  return entries.map((entry): SiteRecord => entry.data).sort((a, b) => a.order - b.order);
+  const entries: ReadonlyArray<{ data: SiteRecord }> = await getCollection(name);
+  return entries.map(entry => entry.data).sort((a, b) => a.order - b.order);
 }
 
 const WIKILINK = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;

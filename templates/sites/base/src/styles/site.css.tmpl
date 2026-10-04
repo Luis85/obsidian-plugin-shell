@@ -54,7 +54,8 @@ section + section { margin-top: 2.5rem; }
 .collection-card dt { font-size: 0.8125rem; color: var(--site-muted); }
 .collection-card dd { margin: 0; }
 .empty-state { border: 1px dashed var(--site-border); border-radius: var(--site-radius); padding: 1rem; color: var(--site-muted); }
-.docs-layout { display: grid; gap: 2rem; }
+.docs-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+.docs-layout > * { min-width: 0; }
 @media (min-width: 48rem) { .docs-layout { grid-template-columns: 14rem minmax(0, 1fr); } }
 .docs-nav ul { list-style: none; margin: 0; padding: 0; }
 .docs-nav a { display: block; padding: 0.25rem 0; }
