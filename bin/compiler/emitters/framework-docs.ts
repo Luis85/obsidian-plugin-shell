@@ -15,11 +15,11 @@ export function relocatedPath(path: string): string {
   return frameworkDocuments.get(path) ?? referenceDocPath(path) ?? (path.startsWith(maintainerWorkflows) ? 'docs/framework/workflows/' + path.slice(maintainerWorkflows.length) : path);
 }
 /** The maintainer runner script, the policy test for maintainer CI triggers, the project handoff qualification (it generates
- * projects from the framework's starters), the framework's delivery pipeline and the standalone design prototypes (their own
+ * projects from the framework's starters), the framework's delivery pipeline, the framework docs index and the standalone design prototypes (their own
  * apps and retained evidence) are not copied. */
 const maintainerFiles: ReadonlySet<string> = new Set(['.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles,
   'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
-  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs']);
+  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs', 'docs/README.md']);
 const maintainerPrefixes = ['configs/starters/', '.github/scripts/', deliveryPipelineFolder,
   'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/testing/handoff-'];
 export function maintainerOnly(path: string): boolean {

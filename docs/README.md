@@ -162,7 +162,7 @@ documented in [Developer workflow](development/DEVELOPER-WORKFLOW.md),
 [Release rehearsal](development/RELEASE-REHEARSAL.md),
 [Release operation plans](development/RELEASE-OPERATION-PLANS.md) and
 [Release execution](development/RELEASE-EXECUTION.md). Changes are recorded in
-`CHANGELOG.md` at the repository root. A dedicated delivery pipeline guide is being
+[`CHANGELOG.md`](../CHANGELOG.md) at the repository root. A dedicated delivery pipeline guide is being
 added; until then these pages remain the reference.
 
 <!-- pipeline-docs: delivery pipeline links go here -->
@@ -194,15 +194,14 @@ Docs next to the code: [`src/features`](../src/features/README.md),
 ## Skills
 
 Claude Code skills live in [`.claude/skills/`](../.claude/skills/) with thin Codex
-adapters in `.agents/skills/`. Paths are given as text where the skill exists only in
-this framework repository, because this page is also copied into generated projects,
-which carry their own skill set.
+adapters in `.agents/skills/`. This index is framework-only: generated projects do not
+receive it and carry their own skill set.
 
-- Ideation skill chain, `.claude/skills/ideation-journey/references/chain.md`: six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`).
+- [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`).
 - [Self-review](../.claude/skills/self-review/SKILL.md): check a change against AGENTS.md and run the real gates before handover.
-- Adopt an existing project, `.claude/skills/adopt-existing-project/SKILL.md`: write an adoption plan for an existing project.
+- [Adopt an existing project](../.claude/skills/adopt-existing-project/SKILL.md): write an adoption plan for an existing project.
 - [Companion prototype design](../.claude/skills/companion-prototype-design/SKILL.md): design-first discovery and prototype prompts (framework only).
-- Project memory, `.claude/skills/project-memory/SKILL.md`: use optional Hindsight without silent opt-in.
+- [Project memory](../.claude/skills/project-memory/SKILL.md): use optional Hindsight without silent opt-in.
 
 ## Archive
 

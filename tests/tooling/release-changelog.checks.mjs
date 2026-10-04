@@ -40,7 +40,7 @@ const codes = text => validateChangelog(text).diagnostics.map(item => item.code)
 const script = fileURLToPath(new URL('../../scripts/release/changelog.mjs', import.meta.url));
 
 test('the repository changelog and a complete fixture satisfy Keep a Changelog 1.1.0', async () => {
-  const repository = await readFile(fileURLToPath(new URL('../../CHANGELOG.md', import.meta.url)), 'utf8');
+  const repository = await readFile(join(fileURLToPath(new URL('../../', import.meta.url)), 'CHANGELOG.md'), 'utf8');
   assert.deepEqual(validateChangelog(repository).diagnostics, []);
   assert.deepEqual(validateChangelog(valid).diagnostics, []);
   assert.deepEqual(validateChangelog(valid).versions.map(section => section.version), ['1.1.0', '1.0.0']);

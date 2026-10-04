@@ -589,3 +589,16 @@ jobs:
             echo "::error::CI gate jobs did not succeed: $(tr '\n' ' ' <<< "$failed")"
             exit 1
           fi
+      # On a release/* pull request every gate above skips, so this run would report a
+      # green "CI result" before the Release tier finished. Fail instead: the Release
+      # workflow's own "CI result" alias, reported after "Release result" succeeds on
+      # the same head commit, becomes the latest check of that name and unblocks merge.
+      - name: Leave release pull requests to the Release tier
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          case "$HEAD_REF" in
+            release/*)
+              echo "::error::Release pull requests are gated by the Release workflow; wait for its Release result."
+              exit 1;;
+          esac
