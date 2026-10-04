@@ -131,8 +131,12 @@ test('wizard reads custom typed fields from JSON and rejects invalid answers rat
   ];
   await writeFile(context.path, JSON.stringify(context.definition));
   const request = newRequest({ id: 'product', name: 'Product' });
-  for (const answers of [['maybe'], ['yes', ''], ['yes', '1.3']]) {
-    let i = 0; await assert.rejects(guidedStarter(request, context, async () => answers[i++], () => {}), /yes or no|Supply count|whole number/);
+  // Each invalid answer is reported and asked again; only the corrected answer becomes a value.
+  for (const [answers, reported] of [[['maybe', 'no', '3', ''], /Choose one of the displayed options/], [['yes', '', '3', ''], /Count: enter a number/], [['yes', '1.3', '3', ''], /whole number/]]) {
+    let i = 0; const written = [];
+    const corrected = await guidedStarter(request, context, async () => answers[i++], text => { written.push(text); });
+    assert.match(written.join(''), reported); assert.equal(i, answers.length);
+    assert.deepEqual(JSON.parse(corrected.options.answers), { id: 'product', name: 'Product', enabled: answers[0] === 'yes', count: 3, description: 'Typed fixture' });
   }
   const answers = ['no', '3', '']; let i = 0;
   const guided = await guidedStarter(request, context, async () => answers[i++], () => {});

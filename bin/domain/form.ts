@@ -19,7 +19,7 @@ export function assertValidated<T>(value: Record<string, unknown>): asserts valu
 const common = ['id', 'kind', 'label', 'help', 'message', 'bind', 'when', 'transient', 'effect'];
 const kindKeys: Record<FieldKind, string[]> = {
   text: ['default', 'required', 'maxLength', 'multiline'], title: ['default', 'maxLength'],
-  number: ['default', 'integer', 'min', 'max'], select: ['default', 'choices', 'choicesFrom'],
+  number: ['default', 'required', 'integer', 'min', 'max'], select: ['default', 'choices', 'choicesFrom'],
   multi: ['default', 'choices', 'choicesFrom', 'required'], boolean: ['default', 'yes', 'no'], confirm: [],
   list: ['default', 'required', 'separator', 'joiner', 'suffix', 'multiline', 'maxItems', 'maxLength'],
   record: ['maxLength'], section: ['gate', 'form', 'fields', 'prepare', 'commit'],
@@ -104,7 +104,9 @@ function textAnswer(field: FormField, value: unknown, required: boolean): string
   if (required && field.required) return text(value, field.label, limit);
   return value.trim() ? text(value, field.label, limit) : '';
 }
-function numberAnswer(field: FormField, value: unknown): number {
+/** `required: false` lets a blank number stay unset; otherwise a number is always needed. */
+function numberAnswer(field: FormField, value: unknown): number | undefined {
+  if (value === undefined && field.required === false) return undefined;
   requireSketch(typeof value === 'number' && Number.isFinite(value), 'FORM_ANSWER', `${field.label}: enter a number.`);
   requireSketch(!field.integer || Number.isSafeInteger(value), 'FORM_ANSWER', `${field.label}: enter a whole number.`);
   requireSketch((field.min === undefined || value >= field.min) && (field.max === undefined || value <= field.max), 'FORM_ANSWER', `${field.label}: enter a number between ${field.min ?? '-∞'} and ${field.max ?? '∞'}.`);
