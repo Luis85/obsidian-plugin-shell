@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "description": "Shared Definition of Ready / Definition of Done settings: where Increment documents (the developer handoff of one pull request) and PullRequest documents live, their frontmatter and sections, exemptions and size budgets. Read by scripts/delivery/*.mjs; unknown keys fail with DELIVERY_CONFIG_INVALID.",
+  "handoff": {
+    "glob": "docs/increments/*.md",
+    "ignore": ["docs/increments/README.md"],
+    "template": "configs/delivery/increment-handoff.template.md",
+    "slugPattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+    "maxSlugLength": 64,
+    "bodyKey": "Handoff",
+    "type": "Increment",
+    "statuses": ["New", "Refining", "Ready", "In progress", "Done", "Cancelled"],
+    "e2e": ["none", "optional", "required"],
+    "requiredKeys": ["type", "id", "title", "owner", "size", "status", "e2e"],
+    "optionalKeys": ["refs", "pullRequests"],
+    "sections": ["Summary", "Outcome", "Scope", "Acceptance criteria", "Affected areas", "Test plan", "Docs impact", "Changelog", "Risks and rollback", "Dependencies", "Open questions"],
+    "generatedSection": "Completion record"
+  },
+  "pullRequests": {
+    "glob": "docs/pull-requests/*.md",
+    "type": "PullRequest",
+    "incrementKey": "increment"
+  },
+  "exemptions": {
+    "branches": ["release/", "dependabot/"],
+    "actors": ["dependabot[bot]"]
+  },
+  "sizes": {
+    "S": { "maxAcceptanceCriteria": 5, "maxAffectedAreas": 8 },
+    "M": { "maxAcceptanceCriteria": 10, "maxAffectedAreas": 20 },
+    "L": { "maxAcceptanceCriteria": 20, "maxAffectedAreas": 45 }
+  },
+  "refinement": {
+    "skills": ["increment-handoff", "ideation-brainstorm", "ideation-concept"],
+    "newHandoff": "npm run increment:new -- <slug> --write"
+  }
+}

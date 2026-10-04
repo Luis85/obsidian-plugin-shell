@@ -1,4 +1,4 @@
-# Review ownership for quality gates, test inventory, CI, the release pipeline and agent instructions.
+# Review ownership for quality gates, test inventory, CI, the release pipeline, the delivery checks and agent instructions.
 # The last matching pattern wins; every rule here names the same owner on purpose.
 
 /configs/quality/ @Luis85
@@ -9,6 +9,8 @@
 /.github/actions/ @Luis85
 /.github/PULL_REQUEST_TEMPLATE/ @Luis85
 /scripts/release/ @Luis85
+/scripts/delivery/ @Luis85
+/configs/delivery/ @Luis85
 /package.json @Luis85
 /package-lock.json @Luis85
 /AGENTS.md @Luis85
