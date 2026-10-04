@@ -19,7 +19,7 @@ qualification and release authorization are separate. Milestone background is in
 | `projects/<name>/` | Standalone projects built from concepts (first: `companion`). Each has its own lock, `AGENTS.md`, gates and workflows, and a `workbench.project.json` linking its prototypes. Opt-in Astro websites from `templates/sites` render Bases collections (`node bin/app site`; Astro is a site-only dependency). Shell gates and workflows ignore `projects/`. Work inside a project as its own repository, and run `npm run projects:sync` after changing its workflows. See `projects/README.md`. |
 | `bin/` | The `bin/app` CLI: adapters, application, domain, presentation, guides, examples. |
 | `bin/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
-| `templates/` | Templates for generated projects (companion runtime, developer kit, examples). |
+| `templates/` | Templates for generated projects (companion runtime, developer kit, examples) and, in `templates/sites`, the opt-in Astro site templates. |
 | `scripts/` | Repo tooling: `quality/` gates, `testing/` suites and evidence, `agent/` hooks, `companion/` authoring contracts, makers, styles, release, security, setup. |
 | `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters. |
 | `tests/` | Suites declared in `tests/suites.json` (tooling, runtime, e2e, hindsight, ...). |

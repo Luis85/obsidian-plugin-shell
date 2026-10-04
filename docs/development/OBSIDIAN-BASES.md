@@ -49,7 +49,8 @@ A **Collection** data source can name the base and view that configure it:
   - `sort`, `groupBy`, `limit`
 - **`records`:** matching notes in view order. Each carries its `path`, its view-column `values`
   keyed by property id (`file.name`, `note.title`, `formula.stars`), its `group` when the view
-  groups, and its complete frontmatter `properties`.
+  groups, and its complete frontmatter `properties`. Website snapshots written by
+  `node bin/app site collections` leave `properties` out; see [Astro sites](ASTRO-SITES.md).
 - **`summary`** and **`skipped`:** what was scanned and matched. Linked folders are not followed.
   Notes whose frontmatter is invalid are listed and treated as having no properties, as in
   Obsidian.

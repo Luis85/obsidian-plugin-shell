@@ -41,12 +41,17 @@ node bin/app site collections projects/acme-docs --yes            # write them
 - `--title` defaults to the name in title case.
 - Installs and builds nothing.
 
-After it, finish the project as any other project in `projects/`:
+After it, finish the project as any other project in `projects/`. Its `next` steps depend on the
+checkout:
 
-1. Add an npm entry for `/projects/<name>` to `.github/dependabot.yml`.
-2. Run `npm run projects:sync`, which copies the site's CI workflow into the root.
-3. Run `npm run check:projects`.
-4. In the site folder, run `npm ci` and `npm run check`.
+- In the Workbench checkout, which has `scripts/projects/projects.mjs`:
+  1. Add an npm entry for `/projects/<name>` to `.github/dependabot.yml`.
+  2. Run `npm run projects:sync`, which copies the site's CI workflow into the root.
+  3. Run `npm run check:projects`.
+  4. In the site folder, run `npm ci` and `npm run check`.
+- In a kit or a generated project, which has no projects tooling, step 2 and 3 become: copy
+  `projects/<name>/.github/workflows/ci.yml` into the root `.github/workflows` and scope its
+  triggers, working directory and paths to `projects/<name>`. GitHub runs only root workflows.
 
 ## The collections bridge
 
@@ -74,35 +79,50 @@ A site lists its collections in `workbench.project.json`:
 | `view` | One of its views (`node bin/app base views <file.base>` lists them). |
 | `vault` | Optional vault folder, relative to the shell root, that holds the base and its notes. Default `.`. |
 
-`site collections` runs the same ingest as `node bin/app base ingest` for each entry. It then
-plans `src/data/collections/<name>.json` in the site:
+`site collections` runs the same ingest as `node bin/app base ingest` for each entry. Views of
+the same `.base` and vault share one read of the base and one vault scan. It then plans
+`src/data/collections/<name>.collection.json` in the site:
 
 ```json
-{ "schemaVersion": 1, "generatedBy": "node bin/app site collections", "collection": { "...": "..." }, "records": [] }
+{ "schemaVersion": 2, "generatedBy": "node bin/app site collections", "recordsSha256": "…",
+  "collection": { "...": "..." }, "records": [{ "path": "…", "group": "…", "values": {} }] }
 ```
 
 - `collection` is the file-collection configuration: base path, SHA-256 and view, view type,
-  and `fields` with property, display name and inferred type.
-- `records` are the matching notes in view order. See
-  [Obsidian Bases as collection configuration](OBSIDIAN-BASES.md) for both shapes and the
-  supported Bases subset.
+  and `fields` with property, display name and inferred type. See
+  [Obsidian Bases as collection configuration](OBSIDIAN-BASES.md) for its shape and the supported
+  Bases subset.
+- `records` are the matching notes in view order. Each has only what pages render: `path`, the
+  view-column `values` and `group` when the view groups.
+- `recordsSha256` is the SHA-256 of `records` as compact JSON. It shows whether a snapshot was
+  edited by hand.
 - Output is deterministic: the same notes and base give the same bytes, with no timestamps.
-- A snapshot whose collection is no longer listed is removed.
-- A file the command did not write is never replaced or removed. A listed name that collides
-  with such a file blocks the plan.
-- Unknown views, views that use unsupported Bases features, a missing `.base` file and an
-  invalid `site` section are refused before anything is written.
 
-Snapshots carry each matching note's complete frontmatter in `properties`, and they are committed
-with the site. Pages render only the view columns, but review a snapshot before publishing a site
-built from a private vault.
+Snapshots never carry a note's other frontmatter or its body. `node bin/app base ingest` still
+returns full `properties` for fixtures; the site snapshot drops them. Snapshots are committed
+with the site, so review the view columns before you publish a site built from a private vault.
+
+Ownership of the files in `src/data/collections/`:
+
+| Existing file | What `site collections` does |
+| --- | --- |
+| `<name>.collection.json` it wrote, records matching `recordsSha256` | Replaces it, or removes it when no listed collection produces it |
+| `<name>.collection.json` it wrote, then edited by hand | Conflict: never replaced or removed |
+| Any other `*.collection.json` | Conflict: the site would load it |
+| `<name>.json` with `schemaVersion: 1` and its `generatedBy` | Removes it: the old format, which embedded full frontmatter |
+| Any other file | Keeps it: the site never loads it |
+
+A conflict blocks the whole plan. Unknown views, views that use unsupported Bases features, a
+missing `.base` file and an invalid `site` section are refused before anything is written.
 
 ## Inside a site
 
-- `src/content.config.ts` registers every `src/data/collections/*.json` file as an Astro content
-  collection. It uses `file()` from `astro/loaders` with a `parser` that maps each record to an
-  entry whose `id` is the note path and whose `order` is its view position, and a permissive
-  `astro/zod` schema.
+- `src/content.config.ts` registers every `src/data/collections/*.collection.json` file as an
+  Astro content collection; other files in that folder are ignored. It uses `file()` from
+  `astro/loaders` with a `parser` that maps each record to an entry whose `id` is the note path
+  and whose `order` is its view position, and a permissive `astro/zod` schema.
+- `src/lib/snapshot.ts` checks `generatedBy` and `schemaVersion` (`2`) of every snapshot before
+  use. A foreign or outdated `*.collection.json` stops the build with an error naming the file.
 - `src/lib/collections.ts` gives pages:
   - `collectionNames()` and `collectionInfo(name)`, with the fields, display names and types.
   - `collectionRecords(name)`, through `getCollection`, in view order.
@@ -133,7 +153,8 @@ treat it as shell source:
 - The maintainability gate measures the site `.ts.tmpl` and `.mjs.tmpl` files as source in its
   templates view, with the production ceilings. Pages, styles and settings count as rendered text.
 - Paths stay portable, because kits and generated projects carry `templates/`:
-  - `dot-<name>` becomes `.<name>`, for example `dot-github/` and `dot-gitignore.tmpl`.
+  - `dot-<name>` becomes `.<name>`, for example `dot-github/` and `dot-gitignore.tmpl`. The name
+    after `dot-` starts with a letter, digit, `_` or `-`, so no path renders to `.` or `..`.
   - `param-<name>` becomes an Astro route parameter `[<name>]`.
 - Rendering replaces `__SITE_NAME__`, `__SITE_TITLE__`, `__SITE_TEMPLATE__`,
   `__SITE_TEMPLATE_TITLE__`, `__SITE_TEMPLATE_SUMMARY__` and `__SITE_TEMPLATE_COLLECTIONS__`. An
@@ -143,7 +164,7 @@ treat it as shell source:
   1. Change the version in `package.json.tmpl` and `catalog.json`.
   2. Regenerate the lock with `npm install --package-lock-only` in a scratch folder.
   3. Copy it back with the name fields set to `__SITE_NAME__`.
-  4. Rebuild all three templates.
+  4. Rebuild all three templates: `node scripts/testing/qualify-site-templates.mjs`.
 
 ## Limits
 
@@ -153,8 +174,36 @@ treat it as shell source:
   are included.
 - Astro collects anonymous telemetry unless it is disabled. The site CI sets
   `ASTRO_TELEMETRY_DISABLED=1`; locally, run `npx astro telemetry disable` once.
-- The shell does not build or test the sites. Each site's own CI runs its build, and
-  `check:projects` validates its manifest, workflow and Dependabot entry.
+- The shell never installs Astro. Each site's own CI runs its build, and `check:projects`
+  validates its manifest, workflow, Dependabot entry and collection snapshots (below).
+- The maintainer-only `.github/workflows/site-templates.yml` builds the templates themselves. It
+  runs `node scripts/testing/qualify-site-templates.mjs`, which:
+  1. Renders each template with `site new` into a scratch shell root, twice: with zero
+     collections, and with one snapshot of the `tests/fixtures/sites` vault.
+  2. Runs `npm ci` and `npm run build` in each rendered site.
+  3. Requires the built pages to show the fixture's view values and never its other frontmatter.
+
+  `--dry-run` renders without installing. Kits and generated projects carry the templates, not
+  this tooling.
+
+## Snapshot freshness in check:projects
+
+For each `site.collections` entry, `check:projects` reads the current `.base` file:
+
+| Failure | Meaning |
+| --- | --- |
+| `SITE_COLLECTION_BASE_INVALID` | The `.base` file cannot be read as a Bases file. |
+| `SITE_COLLECTION_VIEW_UNKNOWN` | The listed view is not in the `.base` file. |
+| `SITE_COLLECTION_MISSING` | `src/data/collections/<name>.collection.json` is absent, or was not written by `site collections`. |
+| `SITE_COLLECTION_EDITED` | The snapshot's records no longer match its `recordsSha256`. |
+| `SITE_COLLECTION_STALE` | The snapshot was made from another version of the `.base` file (`collection.base.sha256`) or another view. |
+| `SITE_COLLECTION_ORPHAN` | A `*.collection.json` (or an old-format snapshot) belongs to no listed collection. |
+
+The fix is `node bin/app site collections projects/<name> --yes`. The `projects-boundary`
+workflow runs on every `.base` change, so a base edit without a new snapshot fails CI.
+
+Edits to notes alone do not change the `.base` file, so `check:projects` cannot see them.
+Re-run `site collections` after you change the notes a site shows, and commit the new snapshots.
 
 Code:
 
@@ -165,4 +214,5 @@ Code:
 Tests:
 
 - `tests/tooling/interactive-maker-sites*.checks.mjs`
-- `tests/tooling/projects-boundary.checks.mjs` (`PROJECTS-12`, `PROJECTS-13`)
+- `tests/tooling/projects-boundary.checks.mjs` (`PROJECTS-12` to `PROJECTS-15`)
+- `tests/tooling/site-templates-qualification.checks.mjs` (maintainer-only)
