@@ -5,6 +5,7 @@ import { parseDocument } from 'yaml';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { checkDocsLaunchers } from './check-docs-launchers.mjs';
+import { callableWorkflow, checkPermissions, inspectJobPrivileges, inspectWorkflowPrivileges, localWorkflowCall, privilegedWorkflows } from './workflow-policy.mjs';
 
 const untrustedInterpolation = /\$\{\{\s*(?:github\.event\.(?:pull_request|issue|comment)|inputs\.)/;
 const localActionPrefix = './.github/actions/';
@@ -27,17 +28,17 @@ export function inspectCompositeAction(text) {
   }
   return { steps: data.runs.steps.length };
 }
-export function inspectWorkflow(text) {
+/** `file` is the workflow file name; only the scoped allowlist in workflow-policy.mjs may grant job write scopes. */
+export function inspectWorkflow(text, file = '') {
   const document = parseDocument(text, { uniqueKeys: true });
   if (document.errors.length) throw new Error('WORKFLOW_YAML_INVALID');
   const data = document.toJS();
   if (!data || typeof data !== 'object' || !data.name || !data.on || !data.jobs || typeof data.jobs !== 'object' || Array.isArray(data.jobs)) throw new Error('WORKFLOW_SHAPE_INVALID');
-  const permissions = value => {
-    if (!value || typeof value !== 'object' || Array.isArray(value) || Object.values(value).some(item => !['read', 'none'].includes(item))) throw new Error('WORKFLOW_PERMISSIONS_NOT_READ_ONLY');
-  };
-  permissions(data.permissions);
+  const privileged = privilegedWorkflows.includes(file);
+  checkPermissions(data.permissions);
+  inspectWorkflowPrivileges(data, privileged);
   if (data.on === 'pull_request_target' || (Array.isArray(data.on) && data.on.includes('pull_request_target')) || (typeof data.on === 'object' && Object.hasOwn(data.on, 'pull_request_target'))) throw new Error('PRIVILEGED_PR_TRIGGER_FORBIDDEN');
-  const localActions = new Set();
+  const localActions = new Set(), localWorkflows = new Set();
   const pinned = value => {
     // A repository-local composite action is versioned with this commit; checkRepository inspects it and its own pins.
     if (typeof value === 'string' && localAction.test(value)) { localActions.add(value.slice(localActionPrefix.length)); return; }
@@ -47,8 +48,12 @@ export function inspectWorkflow(text) {
   if (!jobs.length) throw new Error('WORKFLOW_NO_JOBS');
   for (const job of jobs) {
     if (!job || typeof job !== 'object') throw new Error('WORKFLOW_JOB_INVALID');
-    if (job.permissions) permissions(job.permissions);
-    if (job.uses) { pinned(job.uses); continue; }
+    inspectJobPrivileges(job, privileged);
+    if (job.uses) {
+      const called = localWorkflowCall(job.uses);
+      if (called) localWorkflows.add(called); else pinned(job.uses);
+      continue;
+    }
     if (!job['runs-on'] || !Array.isArray(job.steps) || !job.steps.length) throw new Error('WORKFLOW_JOB_INVALID');
     for (const step of job.steps) {
       if (!step || typeof step !== 'object' || Boolean(step.uses) === Boolean(step.run)) throw new Error('WORKFLOW_STEP_INVALID');
@@ -59,7 +64,7 @@ export function inspectWorkflow(text) {
       if (step.run && untrustedInterpolation.test(step.run)) throw new Error('WORKFLOW_UNTRUSTED_SHELL_INTERPOLATION');
     }
   }
-  return { jobs: jobs.length, localActions: [...localActions].sort() };
+  return { jobs: jobs.length, localActions: [...localActions].sort(), localWorkflows: [...localWorkflows].sort(), callable: callableWorkflow(data.on) };
 }
 /** Owned styles only. Full compiled containment remains the artifact gate's job. */
 export function inspectOwnedCss(text, name = 'owned.css') {
@@ -116,6 +121,7 @@ export async function checkRepository(root = process.cwd()) {
   try { await walk('.github/actions', /^action\.ya?ml$/); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   for (const name of ['README.md', 'AGENTS.md', 'CHANGELOG.md']) { try { await access(join(root, name)); files.push(name); } catch (error) { if (error.code !== 'ENOENT') throw error; } }
   const counts = { workflows: 0, actions: 0, styles: 0, markdown: 0, localLinks: 0 }; const failures = []; const references = [];
+  const callable = new Map(), calls = [];
   for (const file of files) {
     try {
       const text = await readFile(join(root, file), 'utf8');
@@ -123,7 +129,11 @@ export async function checkRepository(root = process.cwd()) {
       if (parts[0] === '.github' && parts[1] === 'actions') {
         if (parts.length !== 4) throw new Error('ACTION_LAYOUT_INVALID');
         inspectCompositeAction(text); actions.set(parts[2], file); counts.actions++;
-      } else if (/\.ya?ml$/.test(file)) { references.push(...inspectWorkflow(text).localActions.map(name => [file, name])); counts.workflows++; }
+      } else if (/\.ya?ml$/.test(file)) {
+        const inspected = inspectWorkflow(text, parts.at(-1));
+        references.push(...inspected.localActions.map(name => [file, name])); calls.push(...inspected.localWorkflows.map(name => [file, name]));
+        callable.set(parts.at(-1), inspected.callable); counts.workflows++;
+      }
       else if (file.endsWith('.css')) { inspectOwnedCss(text, file); counts.styles++; }
       else {
         for (const link of markdownLinks(text)) {
@@ -138,9 +148,13 @@ export async function checkRepository(root = process.cwd()) {
     } catch (error) { failures.push(`${file}: ${error.message}`); }
   }
   for (const [file, name] of references) if (!actions.has(name)) failures.push(`${file}: WORKFLOW_LOCAL_ACTION_MISSING: ${name}`);
+  for (const [file, name] of calls) {
+    if (!callable.has(name)) failures.push(`${file}: WORKFLOW_LOCAL_WORKFLOW_MISSING: ${name}`);
+    else if (!callable.get(name)) failures.push(`${file}: WORKFLOW_LOCAL_WORKFLOW_NOT_CALLABLE: ${name}`);
+  }
   if (failures.length) throw new Error(failures.join('\n'));
   if (!counts.workflows || !counts.styles || !counts.markdown) throw new Error('REPOSITORY_INPUTS_MISSING');
-  return { status: 'passed', ...counts, scope: 'read-only workflow and local composite action subset, owned CSS syntax/selectors, Markdown fences/local inline file links' };
+  return { status: 'passed', ...counts, scope: 'read-only workflow (scoped release allowlist), local composite action and reusable workflow subset, owned CSS syntax/selectors, Markdown fences/local inline file links' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await checkRepository())); console.log(JSON.stringify(await checkDocsLaunchers())); }
