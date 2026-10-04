@@ -1,0 +1,83 @@
+---
+type: Increment
+id: {{slug}}
+title: "{{title}}"
+owner: "{{owner}}"
+size: M
+status: New
+e2e: optional
+refs: [{{refs}}]
+pullRequests: []
+---
+
+# {{title}}
+
+<!-- Developer handoff for one pull request. `npm run dor` checks it before implementation,
+`npm run dod` after it. Replace every <placeholder>; delete these comments when done. -->
+
+## Summary
+
+<two or three sentences: what changes and why>
+
+## Outcome
+
+<the observable result for a user or maintainer once this is merged>
+
+## Scope
+
+### In scope
+
+- <included work>
+
+### Out of scope
+
+- <explicit non-goal>
+
+## Acceptance criteria
+
+<!-- One `- [ ] AC-n: text` per criterion. At completion tick it and add
+`Evidence: \`path\`` (a test file, doc or report that exists). -->
+
+- [ ] AC-1: <observable behavior that can be tested independently>
+- [ ] AC-2: <a rejection, failure or recovery case>
+
+## Affected areas
+
+<!-- One backticked repository path or glob per line; new files must sit under an allowed root. -->
+
+- `<path/or/glob/**>`: <why it changes>
+
+## Test plan
+
+<!-- Lines: - Suite `name`: …  - Gate `command`: …  - New test `tests/…`: …
+     - No test change — reason   - E2E: reason for the e2e decision in the frontmatter -->
+
+- Suite `<suite name from tests/suites.json>`: <what it proves>
+- Gate `node bin/app check --fast --base origin/main`: <diff-scoped checks>
+- E2E: <why the browser end-to-end tests are none, optional or required>
+
+## Docs impact
+
+<!-- - `docs/path.md` (how-to): what changes   — or —   None — reason -->
+
+- `<docs/path.md>` (<tutorial|how-to|reference|explanation>): <what changes>
+
+## Changelog
+
+<!-- - Added: text  (Added, Changed, Deprecated, Removed, Fixed or Security)  — or —  None — reason -->
+
+- Added: <one user-facing sentence>
+
+## Risks and rollback
+
+<what could go wrong and how to undo it>
+
+## Dependencies
+
+<other pull requests, decisions or prerequisites; "None" when there are none>
+
+## Open questions
+
+<!-- "None" when ready. Each open question blocks the Definition of Ready. -->
+
+- <question that blocks implementation>

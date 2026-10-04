@@ -760,12 +760,13 @@
     },
     {
       "name": "release",
-      "purpose": "Release preparation, promotion plans, remote execution, audit classification, maintenance discovery and qualification triggers.",
+      "purpose": "Release preparation, promotion plans, remote execution, Definition of Ready/Done delivery checks, audit classification, maintenance discovery and qualification triggers.",
       "runner": {
         "type": "node-test"
       },
       "include": [
         "tests/tooling/release*.checks.mjs",
+        "tests/tooling/delivery-*.checks.mjs",
         "tests/tooling/security.checks.mjs",
         "tests/tooling/maintenance.checks.mjs",
         "tests/tooling/qualification-*.checks.mjs"

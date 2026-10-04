@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "description": "Definition of Done: deterministic checks of the increment handoff against the implemented diff (scripts/delivery/done.mjs). Every rule the script knows must be listed with exactly its params; severity error blocks, warning reports.",
+  "rules": {
+    "DOD-01": { "severity": "error", "enabled": true, "params": {} },
+    "DOD-02": { "severity": "error", "enabled": true, "params": { "label": "Evidence:" } },
+    "DOD-03": { "severity": "error", "enabled": true, "params": {
+      "sourceRoots": ["src/**", "bin/**", "scripts/**", "plugins/**", "templates/**", "harness/**"],
+      "testRoots": ["tests/**", "**/*.test.ts", "**/*.checks.mjs", "**/*.spec.ts"],
+      "ignore": ["**/*.md", "**/*.json"],
+      "noTestChange": "^No test change\\s*(?:—|–|--?|:)\\s*\\S"
+    } },
+    "DOD-04": { "severity": "error", "enabled": true, "params": {
+      "file": "CHANGELOG.md",
+      "userFacingRoots": ["src/**", "bin/**", "scripts/**", "plugins/**", "templates/**", "configs/**", ".github/workflows/**", "package.json"]
+    } },
+    "DOD-05": { "severity": "error", "enabled": true, "params": { "marker": "^> Type: (tutorial|how-to|reference|explanation)\\b" } },
+    "DOD-06": { "severity": "error", "enabled": true, "params": {
+      "index": "docs/README.md",
+      "headings": { "tutorial": "Tutorials", "how-to": "How-to guides", "reference": "Reference", "explanation": "Explanation" }
+    } },
+    "DOD-07": { "severity": "error", "enabled": true, "params": { "patterns": [
+      { "id": "todo-marker", "regex": "\\b(?:TODO|FIXME)\\b", "include": ["src/**", "bin/**", "scripts/**", "plugins/**", "templates/**", "harness/**"], "exclude": ["**/*.md", "**/*.tmpl"] },
+      { "id": "console-log", "regex": "\\bconsole\\.log\\(", "include": ["src/**", "plugins/*/src/**", "templates/companion/runtime/**"], "exclude": [] },
+      { "id": "focused-test", "regex": "\\.only\\(", "include": ["tests/**", "**/*.test.ts", "**/*.checks.mjs"], "exclude": ["tests/tooling/delivery-*"] }
+    ] } },
+    "DOD-08": { "severity": "warning", "enabled": true, "params": { "alwaysCovered": ["CHANGELOG.md", "docs/README.md"], "maxListed": 15 } },
+    "DOD-09": { "severity": "error", "enabled": true, "params": { "status": "Done" } },
+    "DOD-10": { "severity": "error", "enabled": true, "params": { "label": "e2e", "env": "PR_LABELS" } },
+    "DOD-11": { "severity": "warning", "enabled": true, "params": {} }
+  }
+}

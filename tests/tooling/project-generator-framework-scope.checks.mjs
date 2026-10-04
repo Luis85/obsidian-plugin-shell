@@ -67,7 +67,7 @@ test('[GENERATOR-SCOPE-04] scope helpers classify records, relocate guides and k
   for (const record of ['docs/tasks/shell/x.md', 'docs/prds/a.md', 'docs/development/FOO-PLAN.md', 'docs/development/FOO-REVIEW-B.md', 'docs/development/ITERATION-TWO.md', 'docs/testing/2026-09-22-verification-record.md',
     'docs/testing/MVP-CLOSURE-STATUS.md', 'docs/testing/iteration-two-plan.json', '.claude/skills/companion-prototype-design/SKILL.md',
     'docs/_archive/development/compiler/IMPLEMENTATION.md', 'docs/_archive/testing/OBSIDIAN-TEST-KIT.md', 'docs/testing/FIRST-RUN.md', 'docs/testing/OPTIONAL-STORYBOOK.md',
-    'docs/development/DELIVERY-PIPELINE.md', 'docs/development/DELIVER-A-CHANGE.md', 'docs/development/CUT-AND-PUBLISH-A-RELEASE.md', 'docs/development/WORKFLOWS.md']) assert.equal(frameworkOnlyPath(record), true, record);
+    'docs/development/DELIVERY-PIPELINE.md', 'docs/development/DELIVER-A-CHANGE.md', 'docs/development/CUT-AND-PUBLISH-A-RELEASE.md', 'docs/development/WORKFLOWS.md', 'docs/increments/delivery-pipeline-and-hosting.md']) assert.equal(frameworkOnlyPath(record), true, record);
   for (const kept of ['docs/development/BUILD-A-FEATURE.md', 'docs/testing/OBSIDIAN-TEST-KIT.md', 'docs/testing/test-plan.json', 'docs/licenses/lucide.txt', 'docs/design/obsidian-tokens.json']) assert.equal(frameworkOnlyPath(kept), false, kept);
   assert.equal(referenceDocPath('docs/development/BUILD-A-FEATURE.md'), 'docs/framework/development/BUILD-A-FEATURE.md');
   assert.equal(referenceDocPath('docs/testing/test-plan.json'), null); assert.equal(referenceDocPath('docs/tasks/a.md'), null); assert.equal(referenceDocPath('docs/_archive/testing/ITERATION-FOUR.md'), null); assert.equal(referenceDocPath('docs/x.md'), null);
@@ -76,7 +76,7 @@ test('[GENERATOR-SCOPE-04] scope helpers classify records, relocate guides and k
   assert.equal(withBanner('---\nid: x\n---\n# T\n'), `---\nid: x\n---\n${frameworkBanner}\n\n# T\n`);
   assert.equal(rewriteDocReferences('See `docs/testing/OBSIDIAN-TEST-KIT.md`, docs/tasks/a.md and docs/testing/test-plan.json.'),
     'See `docs/framework/testing/OBSIDIAN-TEST-KIT.md`, docs/tasks/a.md and docs/testing/test-plan.json.');
-  for (const name of ['release:operate', 'test:compiler', 'qualify:compiler', 'memory', 'prototype:tools', 'companion:generate', 'test:makers']) assert.equal(maintainerScript(name), true, name);
+  for (const name of ['release:operate', 'test:compiler', 'qualify:compiler', 'memory', 'prototype:tools', 'companion:generate', 'test:makers', 'increment:new', 'dor', 'dod']) assert.equal(maintainerScript(name), true, name);
   for (const name of ['check', 'test', 'build', 'verify:project', 'test:framework', 'test:suites', 'doctor', 'make', 'check:submission', 'test:obsidian', 'build:clickdummy']) assert.equal(maintainerScript(name), false, name);
 });
 test('[GENERATOR-SCOPE-05] the generated package.json advertises the product loop, not the framework maintainers\' scripts', () => {
