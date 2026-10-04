@@ -6,10 +6,13 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { CLOSE, checkAdapter, checkFile, checkSkill, citations, loadCatalog, read, resolveCitation, root, skillCorpus } from './agent-skill-fixture.mjs';
 
-/** [skill, the skill its close section must offer next]; the last step hands off to the separately owned delivery skill. */
+/**
+ * [skill, the skill its close section must offer next]; the last step hands off to the separately owned increment-handoff
+ * skill (Definition of Ready), which agent-delivery-skills.checks.mjs covers together with feature-delivery.
+ */
 export const CHAIN = [
   ['ideation-journey', 'ideation-brainstorm'], ['ideation-brainstorm', 'ideation-concept'], ['ideation-concept', 'ideation-design'],
-  ['ideation-design', 'ideation-prototype'], ['ideation-prototype', 'ideation-boilerplate'], ['ideation-boilerplate', 'feature-delivery'],
+  ['ideation-design', 'ideation-prototype'], ['ideation-prototype', 'ideation-boilerplate'], ['ideation-boilerplate', 'increment-handoff'],
 ];
 const REQUIRED_GROUPS = ['brainstorm', 'concept', 'project', 'sketch', 'prototype', 'prototypes', 'new', 'starters', 'design', 'handout',
   'generate', 'plan', 'clickdummy', 'make', 'ui', 'check', 'status', 'doctor', 'memory'];

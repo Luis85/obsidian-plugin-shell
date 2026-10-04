@@ -31,10 +31,11 @@ node bin/app check
 
 ## Delivery tiers (owned by `feature-delivery`)
 
-These are the tiers of the framework repository (`docs/development/DELIVERY-PIPELINE.md`). A generated project follows its own CI; `feature-delivery` reads its workflows or pipelines before promising a tier.
+These are the tiers of the framework repository (`docs/development/DELIVERY-PIPELINE.md`). The handoff and its Definition of Ready and Done exist only in the framework repository today. A generated project follows its own CI; `feature-delivery` reads its workflows or pipelines before promising a tier.
 
 | Trigger | Tier | Purpose |
 | --- | --- | --- |
-| Draft pull request | Dev | "Dev checks": fast diff-scoped check, suite registration, repository policy, changelog structure |
-| Ready for review | Integration | "CI result" and every pull-request workflow (Linux legs), blocking self-review guard |
+| Before the draft | Handoff | a `docs/increments/<slug>.md` handoff that passes the Definition of Ready (the `increment-handoff` skill) |
+| Draft pull request | Dev | "Dev checks": fast diff-scoped check, suite registration, repository policy, changelog structure; "Definition of Ready" on the handoff |
+| Ready for review | Integration | "CI result" and every pull-request workflow (Linux legs), blocking self-review guard; "Definition of Done" on handoff plus diff |
 | `release/X.Y.Z` branch | Release | every workflow on every matrix leg, then owner-dispatched Publish; never started from this chain (the `release` skill owns it) |

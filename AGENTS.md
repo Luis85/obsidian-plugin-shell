@@ -26,8 +26,8 @@ qualification and release authorization are separate. Milestone background is in
 | `harness/` | Browser harness for the served UI; never shipped in the plugin. |
 | `docs/` | Product, development and testing docs; `docs/concepts/companion` is the authoring concept. |
 | `docs/development/ADOPT-EXISTING-PROJECT.md` | Adding Workbench to an existing project: `node bin/app adopt analyze`, `adopt plan` and `adopt skill`, with the `adopt-existing-project` skill. |
-| `.claude/skills/ideation-*` | Ideation chain: `ideation-journey` → `-brainstorm` → `-concept` → `-design` → `-prototype` → `-boilerplate` → `feature-delivery` → `self-review`; overview in `.claude/skills/ideation-journey/references/chain.md`. |
-| `.claude/skills/feature-delivery`, `.claude/skills/release` | Draft pull request to green merge, and release cut to publish (Codex adapters in `.agents/skills/`). |
+| `.claude/skills/ideation-*` | Ideation chain: `ideation-journey` → `-brainstorm` → `-concept` → `-design` → `-prototype` → `-boilerplate` → `increment-handoff` → `feature-delivery` → `self-review`; overview in `.claude/skills/ideation-journey/references/chain.md`. |
+| `.claude/skills/increment-handoff`, `.claude/skills/feature-delivery`, `.claude/skills/release` | Increment handoff until the Definition of Ready passes, draft pull request through the Definition of Done to green merge, and release cut to publish (Codex adapters in `.agents/skills/`). |
 | `docs/design/<prototype>/` | Per-prototype Claude Design folders (`node bin/app design status\|prepare\|sync`); see [Claude Design folders](docs/development/CLAUDE-DESIGN-HANDOFF.md). Generated files there are owned by sync, including `ENGINEERING_HANDOFF_GUIDE.md`, which is built only from facts read from the project's files; `prototypes/`, `assets/`, `notes/` and `handoff/implementation-map.md` are design work. |
 
 **Setup.** Use the qualified Node 24.21.0/npm 11.19.1 (`.nvmrc`) and `npm ci` with
