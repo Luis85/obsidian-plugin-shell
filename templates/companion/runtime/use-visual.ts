@@ -4,7 +4,7 @@ import { compositionStyle, compositionTheme } from '../../../scripts/companion/c
 import { mapDetailPayload } from './detail-actions.ts';
 import { visualSession, visualTransition, visualVisible, visualRead, type Session } from '../../../scripts/companion/visual/visual-session.mjs';
 import type { UiNode, ValueExpression, VisualState, Interaction, VisualAction } from '../../../scripts/companion/visual/visual-ir.mjs';
-import { visualIndex, visualExpressions, visualTextValue, visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, VISUAL_RUNTIME_LOCAL,
+import { visualIndex, visualParents, visualExpressions, visualTextValue, visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, VISUAL_RUNTIME_LOCAL,
   type VisualExternalAdapter, type VisualRequest, type VisualSpec } from './visual-runtime.ts';
 export interface VisualPort {
   sourceId: string; operationId: string; direction: string; requiresInput: boolean;
@@ -27,10 +27,29 @@ const isElement = (value: unknown): value is HTMLElement => typeof HTMLElement !
 /** Reads through the proxy first: Object.hasOwn alone is not tracked, so a key added later would never re-render. */
 const has = (record: Readonly<Record<string, unknown>>, key: string): boolean => { void record[key]; return Object.hasOwn(record, key); };
 const requiredImplementation = (error: unknown) => error instanceof Error && (error.name === 'NotImplementedError' || /^(NOT_IMPLEMENTED|IMPLEMENTATION_REQUIRED)\b/.test(error.message));
+const NATIVE_INPUT_TYPES: readonly string[] = ['number', 'date', 'datetime-local'];
+const succeeded = (outcome: unknown): boolean => outcome !== null && typeof outcome === 'object' && 'ok' in outcome && outcome.ok === true;
+type NuxtNode = Extract<UiNode, { kind: 'component' }> & { ref: { kind: 'nuxt-ui'; entryId: string } };
+const nuxtNode = (node: UiNode | undefined): node is NuxtNode =>
+  node?.kind === 'component' && node.ref.kind === 'nuxt-ui';
+const jsonFileInput = (node: Extract<UiNode, { kind: 'component' }>): boolean => node.ref.kind === 'nuxt-ui' && node.ref.entryId === 'u-input' && node.control?.kind === 'json-file';
+function chosenFiles(event: unknown): { target: HTMLInputElement; files: FileList } | null {
+  const target = event && typeof event === 'object' && 'target' in event ? event.target : null;
+  return target instanceof HTMLInputElement && target.files?.length ? { target, files: target.files } : null;
+}
+/** One UTF-8 file within the byte limit; null when the read went stale before it was decoded. */
+async function boundedJsonText(files: FileList, limit: number, stale: () => boolean): Promise<string | null> {
+  const file = files[0]!;
+  if (files.length !== 1 || file.size > limit) throw new Error('VISUAL_FILE_LIMIT');
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (stale()) return null;
+  if (bytes.length > limit) throw new Error('VISUAL_FILE_LIMIT');
+  return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+}
 /** Each mount owns its drafts and session. Typed conversions and mapping never imply a save. */
 export function useVisual(spec: VisualSpec, props: { designState?: VisualState; designScenario?: string } & Record<string, unknown>,
   emitInteraction: (request: VisualRequest) => void, emitDeclared?: (event: string, payload: unknown) => void) {
-  const context = inject(visualKey, undefined); const index = visualIndex(spec);
+  const context = inject(visualKey, undefined); const index = visualIndex(spec), parents = visualParents(index);
   const scenarioId = () => props.designScenario ?? context?.scenario?.(spec.id);
   const scenarioReadOnly = () => Boolean(scenarioId() || context?.scenarioReadOnly?.());
   const values = shallowReactive<Record<string, DetailData>>({}); const drafts = shallowReactive<Record<string, unknown>>({});
@@ -122,45 +141,61 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     else if (action.kind === 'focus') session.focused = action.nodeId;
     else if (action.kind === 'emit' && spec.kind === 'page') session.emitted = [...session.emitted, { name: action.event, source: nodeId, ...(action.payload.kind === 'value' ? { payload: action.payload.value } : {}) }].slice(-50);
   }
+  function emitEvent(event: string, input: DetailData | undefined): void {
+    if (spec.kind === 'page') return; // pages record emits in the session only
+    if (!emitDeclared) throw new Error('VISUAL_EMITTER_MISSING'); emitDeclared(event, input);
+  }
+  async function runSource(nodeId: string, sourceId: string, operationId: string, input: DetailData | undefined): Promise<void> {
+    if (scenarioReadOnly()) throw new Error('VISUAL_SCENARIO_READ_ONLY');
+    const port = findPort(sourceId, operationId); if (!port) throw new Error('VISUAL_PORT_MISSING: ' + nodeId);
+    const outcome = await port.run(input);
+    if (!succeeded(outcome)) throw new Error('VISUAL_SOURCE_FAILED');
+  }
   async function perform(nodeId: string, action: VisualAction, captured: Record<string, DetailData>, payload: unknown): Promise<void> {
     if (action.kind === 'navigate') { if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); context.navigate(action.surfaceId); return; }
     if (action.kind !== 'emit' && action.kind !== 'source') return;
     const input = mapDetailPayload(visualMapping(action.kind === 'source' ? action.input : action.payload), { values: captured, props, payload, read: sourceData });
-    if (action.kind === 'emit') {
-      if (spec.kind === 'page') return; // pages record emits in the session only
-      if (!emitDeclared) throw new Error('VISUAL_EMITTER_MISSING'); emitDeclared(action.event, input); return;
-    }
-    if (scenarioReadOnly()) throw new Error('VISUAL_SCENARIO_READ_ONLY');
-    const port = findPort(action.sourceId, action.operationId); if (!port) throw new Error('VISUAL_PORT_MISSING: ' + nodeId);
-    const outcome = await port.run(input);
-    if (!outcome || typeof outcome !== 'object' || !('ok' in outcome) || outcome.ok !== true) throw new Error('VISUAL_SOURCE_FAILED');
+    if (action.kind === 'emit') emitEvent(action.event, input);
+    else await runSource(nodeId, action.sourceId, action.operationId, input);
   }
   const isLocal = (interaction: Interaction) => interaction.actions.length > 0 && interaction.actions.every(a => VISUAL_RUNTIME_LOCAL.includes(a.kind));
+  /** Validated values for interactions that leave the runtime; null (with a message) while any visible input is invalid. */
+  function validatedValues(interactions: Interaction[]): Record<string, DetailData> | null {
+    try { return interactions.every(isLocal) ? {} : snapshot(true); } catch { message.value = 'Correct the input errors before continuing.'; return null; }
+  }
+  interface Run { nodeId: string; validated: Record<string, DetailData>; payload: unknown; stale: () => boolean }
+  async function handOff(run: Run, request: VisualRequest): Promise<boolean> {
+    if (scenarioReadOnly()) throw new Error('VISUAL_SCENARIO_READ_ONLY');
+    if (!context) throw new Error('VISUAL_CONTEXT_MISSING');
+    await context.handle(request); return !run.stale();
+  }
+  async function runActions(run: Run, interaction: Interaction): Promise<boolean> {
+    visualTransition(spec, frozen(), run.nodeId, interaction.id); // refuses a disabled source or hidden focus target before any effect
+    for (const action of interaction.actions) {
+      if (!VISUAL_RUNTIME_LOCAL.includes(action.kind)) { await perform(run.nodeId, action, { ...run.validated, ...snapshot(false) }, run.payload); if (run.stale()) return false; }
+      applyLocal(run.nodeId, action);
+      if (action.kind === 'focus') { await nextTick(); if (run.stale()) return false; focus(action.nodeId); }
+    }
+    return true;
+  }
+  async function runInteraction(run: Run, interaction: Interaction): Promise<boolean> {
+    const captured = { ...run.validated, ...snapshot(false) };
+    const request: VisualRequest = { definitionId: spec.id, nodeId: run.nodeId, interactionId: interaction.id, event: interaction.event, values: captured, payload: run.payload };
+    emitInteraction(request);
+    if (run.stale()) return false;
+    return interaction.actions.length ? runActions(run, interaction) : handOff(run, request);
+  }
+  const failureMessage = (error: unknown) => requiredImplementation(error) ? 'Interaction implementation required.' : 'The interaction could not be completed. Your input is retained.';
   /** Runs every interaction declared for one event, and every action of each, in authored order inside one pending span and
    * epoch; the first failure stops the rest. Source and emit mappings read drafts as the earlier actions left them. */
   async function invoke(nodeId: string, interactions: Interaction[], payload: unknown): Promise<void> {
     if (!interactions.length || !enabled(nodeId)) return;
-    let validated: Record<string, DetailData> = {};
-    try { if (!interactions.every(isLocal)) validated = snapshot(true); } catch { message.value = 'Correct the input errors before continuing.'; return; }
-    const requestEpoch = epoch, stale = () => disposed || requestEpoch !== epoch;
+    const validated = validatedValues(interactions); if (!validated) return;
+    const requestEpoch = epoch, run: Run = { nodeId, validated, payload, stale: () => disposed || requestEpoch !== epoch };
     pending.value = true; message.value = '';
-    try {
-      for (const interaction of interactions) {
-        const actions = interaction.actions, captured = { ...validated, ...snapshot(false) };
-        const request: VisualRequest = { definitionId: spec.id, nodeId, interactionId: interaction.id, event: interaction.event, values: captured, payload };
-        emitInteraction(request);
-        if (stale()) return;
-        if (!actions.length) { if (scenarioReadOnly()) throw new Error('VISUAL_SCENARIO_READ_ONLY'); if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); await context.handle(request); if (stale()) return; continue; }
-        visualTransition(spec, frozen(), nodeId, interaction.id); // refuses a disabled source or hidden focus target before any effect
-        for (const action of actions) {
-          if (!VISUAL_RUNTIME_LOCAL.includes(action.kind)) { await perform(nodeId, action, { ...validated, ...snapshot(false) }, payload); if (stale()) return; }
-          applyLocal(nodeId, action);
-          if (action.kind === 'focus') { await nextTick(); if (stale()) return; focus(action.nodeId); }
-        }
-      }
-    } catch (error) {
-      if (!stale()) message.value = requiredImplementation(error) ? 'Interaction implementation required.' : 'The interaction could not be completed. Your input is retained.';
-    } finally { if (!stale()) pending.value = false; }
+    try { for (const interaction of interactions) if (!await runInteraction(run, interaction)) return; }
+    catch (error) { if (!run.stale()) message.value = failureMessage(error); }
+    finally { if (!run.stale()) pending.value = false; }
   }
   function trigger(nodeId: string, event: string, payload: unknown): void {
     const node = index.get(nodeId);
@@ -193,47 +228,68 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
       } };
     });
   }
+  /** A newer read, a state change or disposal makes this read stale. */
+  function beginFileRead(id: string): () => boolean {
+    const token = (fileReads.get(id) ?? 0) + 1, started = epoch; fileReads.set(id, token);
+    return () => disposed || started !== epoch || token !== fileReads.get(id) || !enabled(id);
+  }
+  function acceptJsonText(id: string, node: UiNode, text: string | null): void {
+    if (text === null || !setDraft(id, text)) return;
+    void invoke(id, 'events' in node ? node.events.filter(item => ['update:modelValue', 'change'].includes(item.event)) : [], values[id]);
+  }
   /** Bounded local file intake. A superseded read, state change or disposal cannot overwrite newer input. */
   async function readJsonControl(id: string, event: unknown): Promise<void> {
     const node = control(index.get(id)); if (!node || !enabled(id)) return;
-    const token = (fileReads.get(id) ?? 0) + 1, started = epoch; fileReads.set(id, token);
-    const stale = () => disposed || started !== epoch || token !== fileReads.get(id) || !enabled(id);
-    const target = event && typeof event === 'object' && 'target' in event ? event.target : null;
-    if (!(target instanceof HTMLInputElement) || !target.files?.length) return;
-    try {
-      const limit = node.control?.maxBytes ?? 1_000_000, file = target.files[0]!;
-      if (target.files.length !== 1 || file.size > limit) throw new Error('VISUAL_FILE_LIMIT');
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      if (stale()) return;
-      if (bytes.length > limit) throw new Error('VISUAL_FILE_LIMIT');
-      const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-      if (setDraft(id, text)) void invoke(id, node.events.filter(item => ['update:modelValue', 'change'].includes(item.event)), values[id]);
-    } catch { if (!stale()) errors[id] = 'Select one valid UTF-8 JSON file within the size limit. Your previous valid value is retained.'; }
-    finally { if (!stale()) target.value = ''; }
+    const stale = beginFileRead(id), chosen = chosenFiles(event); if (!chosen) return;
+    try { acceptJsonText(id, node, await boundedJsonText(chosen.files, node.control?.maxBytes ?? 1_000_000, stale)); }
+    catch { if (!stale()) errors[id] = 'Select one valid UTF-8 JSON file within the size limit. Your previous valid value is retained.'; }
+    finally { if (!stale()) chosen.target.value = ''; }
   }
-  /** A field without a visible label or its own aria-label is named after its authored node name, so assistive technology can announce it. */
-  function accessibleName(node: UiNode, result: Record<string, unknown>): void {
-    if (node.name && !Object.hasOwn(result, 'label') && !Object.hasOwn(result, 'aria-label')) result['aria-label'] = node.name;
-  }
-  function nodeProps(id: string): Record<string, unknown> {
-    const node = index.get(id), result = resolved(id);
-    if (node?.kind !== 'component' || node.ref.kind !== 'nuxt-ui') return result;
-    if (control(node)) Object.assign(result, { modelValue: model(id), 'onUpdate:modelValue': (input: unknown) => { if (setDraft(id, input)) trigger(id, 'update:modelValue', values[id]); } });
-    if (node.control?.kind === 'select') result.items = (node.control.options ?? []).map(option => ({ ...option }));
-    if (node.control && ['number', 'date', 'datetime-local'].includes(node.control.kind)) result.type = node.control.kind;
-    if (node.control?.kind === 'json-file' && node.ref.entryId === 'u-input') {
-      delete result.modelValue; delete result['onUpdate:modelValue'];
-      result.type = 'file'; result.accept = '.json,application/json'; result.multiple = false;
-      result.onChange = (event: unknown) => { void readJsonControl(id, event); };
+  /** The label of the nearest enclosing u-form-field; Nuxt UI associates it with the control (label for=id). */
+  function fieldLabel(id: string): string {
+    for (let at = parents.get(id); at !== undefined; at = parents.get(at)) {
+      const node = index.get(at);
+      if (node?.kind !== 'component' || node.ref.kind !== 'nuxt-ui' || node.ref.entryId !== 'u-form-field') continue;
+      const label = value(node.props.label);
+      return typeof label === 'string' ? label.trim() : '';
     }
-    if (control(node)) accessibleName(node, result);
-    if (node.ref.entryId === 'u-dropdown-menu') result.items = menuItems(id, result.items);
+    return '';
+  }
+  /** A field without a visible label, its own aria-label or a labelled form field is named after its authored node name,
+   * so assistive technology can announce it. A form-field label is never overridden by the node name. */
+  function accessibleName(id: string, node: UiNode, result: Record<string, unknown>): void {
+    if (Object.hasOwn(result, 'label') || Object.hasOwn(result, 'aria-label') || fieldLabel(id)) return;
+    if (node.name) result['aria-label'] = node.name;
+  }
+  /** Typed control input: model binding, select items, native input type and the bounded JSON file picker. */
+  function controlProps(id: string, node: NuxtNode, result: Record<string, unknown>): void {
+    const field = control(node), kind = node.control?.kind;
+    if (field) Object.assign(result, { modelValue: model(id), 'onUpdate:modelValue': (input: unknown) => { if (setDraft(id, input)) trigger(id, 'update:modelValue', values[id]); } });
+    if (kind === 'select') result.items = (node.control?.options ?? []).map(option => ({ ...option }));
+    if (kind && NATIVE_INPUT_TYPES.includes(kind)) result.type = kind;
+    if (jsonFileInput(node)) jsonFileProps(id, result);
+    if (field) accessibleName(id, node, result);
+  }
+  function jsonFileProps(id: string, result: Record<string, unknown>): void {
+    delete result.modelValue; delete result['onUpdate:modelValue'];
+    result.type = 'file'; result.accept = '.json,application/json'; result.multiple = false;
+    result.onChange = (event: unknown) => { void readJsonControl(id, event); };
+  }
+  /** Menu adapters, two-way overlay state and the loading/disabled states the runtime owns unless authored. */
+  function stateProps(id: string, node: NuxtNode, result: Record<string, unknown>): void {
+    const entry = node.ref.entryId, authored = (name: string) => Object.hasOwn(node.props, name);
+    if (entry === 'u-dropdown-menu') result.items = menuItems(id, result.items);
     const openTarget = overlayBinding(node);
     if (openTarget) result['onUpdate:open'] = (input: unknown) => {
       if (typeof input === 'boolean' && enabled(id) && setDraft(openTarget, input)) trigger(id, 'update:open', input);
     };
-    if (node.ref.entryId === 'u-table' && !Object.hasOwn(node.props, 'loading')) result.loading = state.value === 'loading';
-    if (VISUAL_RUNTIME_INTERACTIVE.includes(node.ref.entryId) && !Object.hasOwn(node.props, 'disabled')) result.disabled = ['loading', 'disabled'].includes(state.value);
+    if (entry === 'u-table' && !authored('loading')) result.loading = state.value === 'loading';
+    if (VISUAL_RUNTIME_INTERACTIVE.includes(entry) && !authored('disabled')) result.disabled = ['loading', 'disabled'].includes(state.value);
+  }
+  function nodeProps(id: string): Record<string, unknown> {
+    const node = index.get(id), result = resolved(id);
+    if (!nuxtNode(node)) return result;
+    controlProps(id, node, result); stateProps(id, node, result);
     return result;
   }
   function attrs(id: string): Record<string, unknown> {
@@ -241,9 +297,15 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     if (node?.kind === 'element') for (const [name, expr] of Object.entries(node.attrs)) result[name] = value(expr);
     result['data-design-node'] = id; return result;
   }
+  /** Model updates, the JSON file change, overlay open state and menu selection are bound by nodeProps. */
+  function runtimeBound(node: UiNode, event: string): boolean {
+    if (control(node) && (event === 'update:modelValue' || (event === 'change' && nuxtNode(node) && jsonFileInput(node)))) return true;
+    if (overlayBinding(node) && event === 'update:open') return true;
+    return event === 'item:select' && nuxtNode(node) && node.ref.entryId === 'u-dropdown-menu';
+  }
   function on(id: string): Record<string, (payload?: unknown) => void> {
     const node = index.get(id); if (!node || (node.kind !== 'element' && node.kind !== 'component')) return {};
-    const events = node.events.filter(i => !(control(node) && (i.event === 'update:modelValue' || (node.kind === 'component' && node.ref.kind === 'nuxt-ui' && node.ref.entryId === 'u-input' && node.control?.kind === 'json-file' && i.event === 'change'))) && !(overlayBinding(node) && i.event === 'update:open') && !(node.kind === 'component' && node.ref.kind === 'nuxt-ui' && node.ref.entryId === 'u-dropdown-menu' && i.event === 'item:select')).map(i => i.event);
+    const events = node.events.filter(i => !runtimeBound(node, i.event)).map(i => i.event);
     return Object.fromEntries([...new Set(events)].map(event => [event, (payload?: unknown) => { trigger(id, event, payload); }]));
   }
   function style(id: string): Record<string, string | number> {
