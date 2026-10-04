@@ -22,7 +22,7 @@ import { visualDefinitions, visualPackages, visualAdapterPath } from '../emitter
 import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { styleCode } from '../emitters/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../emitters/devkit-files.ts';
-import { relocateFrameworkDocuments } from '../emitters/framework-docs.ts';
+import { relocateFrameworkDocuments, scopeExampleOwnership } from '../emitters/framework-docs.ts';
 import { maintainerScript, rewriteDocReferences } from '../emitters/framework-scope.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
 function replacedProducer(previous: string | undefined, producer: string): string | undefined {
@@ -82,7 +82,7 @@ it('every requirement in design/traceability.json keeps its use case and accepta
 /** Emit the existing plugin project from explicit template data, without host I/O. */
 export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Model): Promise<Entry[]> {
   const entries = new Map(templateRoot.frameworkFiles.map(file => [file.path, { ...file } ]));
-  relocateFrameworkDocuments(entries);
+  relocateFrameworkDocuments(entries); scopeExampleOwnership(entries);
   const collector = artifactCollector([...entries.values()].map(file => ({ ...file, producer: 'framework' })));
   let producer = 'project';
   const add: Add = (path, content, ownership = 'extension') => {

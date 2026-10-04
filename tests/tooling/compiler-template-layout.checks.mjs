@@ -4,6 +4,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
 
 // Generated-project template sources live in templates/: the companion runtime copied into generated projects,
 // the developer-kit text templates, the example-removal templates, the adoption skill the kit installs into existing projects
@@ -28,10 +29,13 @@ test('templates/ holds only the runtime, developer-kit, example-removal, adoptio
   for (const folder of removed) assert.deepEqual(await files(folder), [], `${folder} was removed`);
 });
 
-test('the template snapshot copies every templates/ file and the contracts stay in scripts/companion', async () => {
+test('the template snapshot copies every templates/ file except the framework-entry test template, and the contracts stay in scripts/companion', async () => {
   const snapshot = await loadTemplateSnapshot(root);
   const paths = new Set(snapshot.frameworkFiles.map(file => file.path));
-  for (const path of await files('templates')) assert.ok(paths.has(path), path);
+  const templates = await files('templates');
+  // Only the example-removal template of the framework src/main.ts entry test stays maintainer-only (a generated project replaces that entry).
+  assert.deepEqual(templates.filter(maintainerOnly), ['templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt']);
+  for (const path of templates) assert.equal(paths.has(path), !maintainerOnly(path), path);
   assert.match(snapshot.text('templates/companion/runtime/contract.ts'), /export function matches/);
   for (const contract of ['scripts/companion/composition-contract.mjs', 'scripts/companion/visual/visual-ir.mjs', 'scripts/companion/journey/project-store.ts']) assert.ok(paths.has(contract), contract);
 });

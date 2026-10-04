@@ -4,7 +4,7 @@
 import { posix } from 'node:path';
 import type { Entry } from './file-code.ts';
 import { frameworkOnlyPath, referenceDocPath, rewriteDocReferences, withBanner } from './framework-scope.ts';
-import { requireValue } from './model.ts';
+import { json, requireValue, row } from './model.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
   ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'].map(name => [name, `docs/framework/${name}`]));
@@ -15,10 +15,13 @@ export function relocatedPath(path: string): string {
 }
 /** The maintainer runner script, the policy test for maintainer CI triggers, the project handoff qualification (it generates
  * projects from the framework's starters), the standalone design prototypes (their own apps and retained evidence) and the
- * framework checkout's DEVELOPER_GUIDE.md are not copied. */
+ * framework checkout's DEVELOPER_GUIDE.md are not copied. Neither are the runtime tests of the shell's own src/main.ts entry
+ * (and the example-removal template of one): a generated project replaces src/main.ts with its generated entry, whose
+ * registrations those tests cannot see, while every other shipped framework test still runs there under test:framework. */
 const maintainerFiles: ReadonlySet<string> = new Set(['DEVELOPER_GUIDE.md', '.github/workflows/starter-distribution.yml',
   'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
-  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs']);
+  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs',
+  'tests/runtime/shell-entry-lifecycle.test.ts', 'templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt', 'tests/runtime/obsidian-test-kit-shell-entry.test.ts']);
 const maintainerPrefixes = ['configs/starters/', '.github/scripts/',
   'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/testing/handoff-'];
 export function maintainerOnly(path: string): boolean {
@@ -77,4 +80,15 @@ export function relocateFrameworkDocuments(entries: Map<string, Entry>): void {
     }
     entries.set(to, { ...entry, path: to, content });
   }
+}
+const exampleOwnership = 'scripts/examples/ownership.json';
+/** Example removal plans every file its ownership manifest lists, and a listed file that is absent is an edit conflict.
+ * A generated project's manifest therefore lists only the example files the project received. */
+export function scopeExampleOwnership(entries: Map<string, Entry>): void {
+  const entry = entries.get(exampleOwnership);
+  if (!entry) return;
+  const manifest = row(JSON.parse(entry.content));
+  requireValue(Array.isArray(manifest.files), 'Invalid example-removal ownership manifest: ' + exampleOwnership);
+  const files = manifest.files.filter((file: unknown) => { const path = row(file).path; return typeof path !== 'string' || !maintainerOnly(path); });
+  if (files.length !== manifest.files.length) entries.set(exampleOwnership, { ...entry, content: json({ ...manifest, files }) });
 }

@@ -1,0 +1,23 @@
+// @vitest-environment happy-dom
+// Framework checkout only: asserts the shell's own src/main.ts entry. A generated project replaces src/main.ts with its
+// generated entry, so the generator does not ship this file (bin/compiler/emitters/framework-docs.ts maintainerFiles).
+import { expect, it, vi } from 'vitest';
+vi.mock('obsidian', async () => (await import('./host-fixture')).hostModule);
+import { App, WorkspaceLeaf } from 'obsidian';
+import ShellPlugin from '../../src/main';
+import { ShowcaseView, SHOWCASE_VIEW } from '../../src/infrastructure/obsidian/showcase-view';
+import { hostState } from './host-fixture';
+import { settle } from './component-fixture';
+import manifest from '../../manifest.json';
+it('[HOST-03-02] main lifecycle owns mounted views and removes per-view workspace listeners on unload', async () => {
+  hostState.reset(); const p = new ShellPlugin(new App(), manifest);
+  try {
+    await p.onload(); hostState.ready.forEach(callback => callback()); expect(p.registerEvent).toHaveBeenCalledTimes(8);
+    const create = hostState.views.get(SHOWCASE_VIEW); if (!create) throw new Error('VIEW_NOT_REGISTERED');
+    const view = create(new WorkspaceLeaf()); if (!(view instanceof ShowcaseView)) throw new Error('WRONG_VIEW');
+    await view.onOpen(); await settle(); expect(view.contentEl.querySelector('[data-testid="foundation"]')).not.toBeNull();
+    for (const callback of hostState.listeners.get('file-open') ?? []) callback(null);
+    p.onunload(); p.onunload(); expect(view.contentEl.querySelector('[data-testid="foundation"]')).toBeNull();
+    expect(p.app.workspace.offref).toHaveBeenCalledTimes(6); expect(view.leaf.detach).not.toHaveBeenCalled(); await view.onClose();
+  } finally { document.body.replaceChildren(); vi.restoreAllMocks(); }
+});
