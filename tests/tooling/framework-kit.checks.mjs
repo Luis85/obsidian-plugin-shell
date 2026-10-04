@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { assembleKit, installedCompiler, upgradePlan } from '../../bin/adapters/framework/kit.ts';
-import { extractArchive } from './framework-archive-fixture.mjs';
+import { extractArchive, extractKit } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../bin/adapters/framework/zip.ts';
 import { hash } from '../../bin/adapters/framework/files.ts';
@@ -299,4 +299,22 @@ test('kit verification fails with an explicit code for missing configs, stray co
   await assert.rejects(upgradePlan({ root: legacy, frameworkRoot: legacy }, root), { code: 'KIT_REQUIRED' });
   const status = await executeOperation({ command: 'framework status', args: [], options: {} }, { root: legacy, frameworkRoot: legacy });
   assert.equal(status.diagnostics[0].code, 'KIT_REQUIRED', 'a clear diagnostic, not a raw ENOENT');
+});
+
+test('a bootstrap failure reports the canonical envelope from the one module its layout ships', { timeout: 300000 }, async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
+  const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-bootstrap-'))); t.after(() => rm(dir, { recursive: true, force: true }));
+  const expected = message => ({ protocolVersion: 1, command: 'bootstrap', status: 'failed', data: null, diagnostics: [{ code: 'BOOTSTRAP_FAILED', message }] });
+  const kit = join(dir, 'kit'); await extractKit(root, kit);
+  await writeFile(join(kit, 'bin/app.js'), "throw new Error('kit bundle probe');\n");
+  const packaged = cli(kit, ['capabilities', '--json']);
+  assert.equal(packaged.status, 1); assert.deepEqual(JSON.parse(packaged.stdout), expected('kit bundle probe'));
+  const checkout = join(dir, 'checkout'); await mkdir(join(checkout, 'bin'), { recursive: true }); await mkdir(join(checkout, 'scripts/contracts'), { recursive: true });
+  await writeFile(join(checkout, 'bin/app'), await readFile(join(root, 'bin/app')));
+  await writeFile(join(checkout, 'bin/app.ts'), "throw new Error('checkout probe');\n");
+  await writeFile(join(checkout, 'scripts/contracts/result-runtime.mjs'), await readFile(join(root, 'scripts/contracts/result-runtime.mjs')));
+  const source = cli(checkout, ['capabilities', '--json']);
+  assert.equal(source.status, 1); assert.deepEqual(JSON.parse(source.stdout), expected('checkout probe'));
+  const plain = cli(checkout, ['capabilities']);
+  assert.equal(plain.status, 1); assert.equal(plain.stdout, ''); assert.equal(plain.stderr, 'checkout probe\n');
 });

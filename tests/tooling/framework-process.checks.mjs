@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { runNode, npmEntry } from '../../bin/adapters/framework/process.ts';
-import { runNodeProcess, runNodeScript as typedSharedRunNode } from '../../scripts/shared/process.ts';
+import { NodeProcessFailure, runNodeProcess } from '../../scripts/shared/process.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { failure } from '../../bin/adapters/framework/contracts.ts';
@@ -87,8 +87,10 @@ test('dry-run dominates public execution flags and never launches a release adap
 test('typed shared process runner preserves successful and failed child exits', async t => {
   const ctx = await fixture(t, `process.exitCode = Number(process.argv[2] ?? 0);`);
   const entry = join(ctx.root, 'child.mjs');
-  await typedSharedRunNode(entry, ['0'], { cwd: ctx.root, stdio: 'ignore' });
-  await assert.rejects(typedSharedRunNode(entry, ['7'], { cwd: ctx.root, stdio: 'ignore' }), error => {
+  const options = { spawnOptions: { cwd: ctx.root, stdio: 'ignore' }, forwardParentSignals: true };
+  assert.equal((await runNodeProcess(entry, ['0'], options)).exitCode, 0);
+  await assert.rejects(runNodeProcess(entry, ['7'], options), error => {
+    assert.ok(error instanceof NodeProcessFailure); assert.equal(error.kind, 'exit');
     assert.equal(error.exitCode, 7);
     assert.equal(error.signal, null);
     return true;

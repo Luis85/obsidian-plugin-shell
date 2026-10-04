@@ -11,6 +11,7 @@ import { documentText, newDocument, openDocument } from '../../bin/domain/docume
 import { pluginComponentTemplates } from '../../plugins/template-contributions.ts';
 import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
 import { extractKit } from './framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -131,6 +132,7 @@ test('plugins can contribute inert templates through the shared catalog', async 
 });
 
 test('an extracted kit keeps its packaged baseline beside one project template', { timeout: 300000 }, async t => {
+  if (await reviewedExamplesRemoved(frameworkRoot)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'component-template-kit-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
   await extractKit(frameworkRoot, dir);
