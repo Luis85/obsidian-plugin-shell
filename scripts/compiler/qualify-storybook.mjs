@@ -8,10 +8,14 @@ import { createHash } from 'node:crypto';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), npm = process.env.QUALIFIED_NPM;
+// --no-browser (CI without the e2e opt-in) keeps install, typecheck and static build and skips the browser preview and axe audit.
+const flags = process.argv.slice(2);
+if (flags.some(flag => flag !== '--no-browser')) throw Error('QUALIFICATION_ARGUMENT: only --no-browser is supported.');
+const browser = !flags.includes('--no-browser');
 if (!npm) throw Error('QUALIFIED_NPM_REQUIRED: no implicit global installation.');
 const output = join(root, 'reports/storybook-qualification'); await mkdir(output, { recursive: true });
 const vault = await realpath(await mkdtemp(join(tmpdir(), 'optional-storybook-')));
-const report = { schemaVersion: 1, status: 'failed', scope: 'Generated Storybook typecheck, static build, browser preview and axe accessibility audit of stories in both Obsidian themes; not business/native acceptance', steps: [] };
+const report = { schemaVersion: 1, status: 'failed', scope: 'Generated Storybook typecheck, static build, browser preview and axe accessibility audit of stories in both Obsidian themes; not business/native acceptance', browser: browser ? 'run' : 'not-run: --no-browser', steps: [] };
 async function command(label, args, cwd) {
   const run = spawnSync(process.execPath, args, { cwd, encoding: 'utf8', timeout: 600000, maxBuffer: 30_000_000,
     env: { ...process.env, npm_execpath: resolve(npm), STORYBOOK_DISABLE_TELEMETRY: 'true' } });
@@ -41,7 +45,7 @@ try {
   report.steps.push({ label: 'a11y-addon-matches-storybook', exit: 0 });
   await command('optional-typescript', [shell, 'storybook', 'check', '--json'], target);
   await command('optional-build', [shell, 'storybook', 'build', '--json'], target);
-  await command('optional-browser', [join(root, 'scripts/compiler/verify-storybook.mjs'), target, output], root);
+  if (browser) await command('optional-browser', [join(root, 'scripts/compiler/verify-storybook.mjs'), target, output], root);
   if (await hash('package-lock.json') !== rootLockBefore) throw Error('ROOT_LOCK_CHANGED');
   await writeFile(join(output, 'optional-package-lock.json'), await readFile(join(target, 'storybook/package-lock.json')));
   report.steps.push({ label: 'root-lock-unchanged', exit: 0 });
