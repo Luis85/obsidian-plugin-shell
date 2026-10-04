@@ -63,7 +63,7 @@ function dsSave(){
    if(old&&old.slug!==f.slug.trim())throw Error('Source code names are stable.');
    if(old?.operations.length&&old.kind!==f.kind)throw Error('Keep the source kind while it has operations.');
    const collection=f.kind==='collection';
-   const s={id:f.id||dsNext(m,'source'),slug:f.slug.trim(),name:f.name.trim(),kind:f.kind,status:f.status,description:f.description.trim(),locator:dsVaultKind(f.kind)?'vault://active':f.locator.trim(),auth:dsVaultKind(f.kind)?'none':f.auth,credentialRef:dsVaultKind(f.kind)||f.auth==='none'?'':f.credentialRef.trim(),operations:old?.operations||[],...(collection?{collectionPath:f.collectionPath.trim(),entity:f.entity}:{})};
+   const s={id:f.id||dsNext(m,'source'),slug:f.slug.trim(),name:f.name.trim(),kind:f.kind,status:f.status,description:f.description.trim(),locator:dsVaultKind(f.kind)?'vault://active':f.locator.trim(),auth:dsVaultKind(f.kind)?'none':f.auth,credentialRef:dsVaultKind(f.kind)||f.auth==='none'?'':f.credentialRef.trim(),operations:old?.operations||[],...(collection?{collectionPath:f.collectionPath.trim(),entity:f.entity}:{}),...(collection&&old?.base?{base:old.base}:{})};
    if(!dsLocatorValid(s))throw Error(s.kind==='api'?'Use an HTTPS base URL without credentials, query parameters or fragments.':'Use a logical connection name, not a connection string or password.');
    if(!dsSlug(s.slug)||!s.name)throw Error('Enter a name and a portable, unique code name.');
    if(m.sources.some(x=>x.id!==s.id&&x.slug===s.slug))throw Error('That source code name already exists.');

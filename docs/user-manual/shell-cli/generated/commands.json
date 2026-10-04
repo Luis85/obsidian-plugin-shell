@@ -216,7 +216,9 @@
         "data plan",
         "data apply",
         "data reset-plan",
-        "data reset"
+        "data reset",
+        "base views",
+        "base ingest"
       ]
     },
     {
@@ -7241,6 +7243,107 @@
         }
       ],
       "parserOnlyOptions": [
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "base views",
+      "summary": "List the views of an Obsidian .base file and whether each can be evaluated exactly; read-only.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "vault",
+      "usage": "node bin/app base views <file.base> [--vault <folder>] [--json]",
+      "examples": [
+        "node bin/app base views Collections/Books.base",
+        "node bin/app base views docs/requirements/MVP.base --json"
+      ],
+      "options": [
+        {
+          "name": "vault",
+          "kind": "value",
+          "description": "Vault folder the .base file and its notes belong to; file paths in the base are relative to it.",
+          "default": "--root"
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "base ingest",
+      "summary": "Apply one .base view to the vault's Markdown notes: a file-collection config plus its records for fixtures; read-only.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "vault",
+      "usage": "node bin/app base ingest <file.base> --view <name> [--vault <folder>] [--json]",
+      "examples": [
+        "node bin/app base ingest Collections/Books.base --view \"Reading list\" --json",
+        "node bin/app base ingest Books.base --vault ../my-vault --view Shelf --json"
+      ],
+      "options": [
+        {
+          "name": "vault",
+          "kind": "value",
+          "description": "Vault folder the .base file and its notes belong to; file paths in the base are relative to it.",
+          "default": "--root"
+        },
+        {
+          "name": "view",
+          "kind": "value",
+          "description": "Exact name of the .base view to apply; base views lists them."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
         "dry-run",
         "plan-out",
         "timeout",
