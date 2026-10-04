@@ -34,9 +34,10 @@ export async function maintainabilityInventory(root) {
     const data = await readFile(absolute);
     if (path === vendorArchive) decodeVendor(data);
     let view = 'unsupported';
-    // Generated-project template sources (templates/): the companion runtime copied into generated projects and the
-    // example-removal templates stored as `.ts.txt`/`.vue.txt`, measured as their source language in the templates view.
-    const template = path.startsWith('templates/') && executable.test(path.replace(/\.txt$/, ''));
+    // Generated-project template sources (templates/): the companion runtime copied into generated projects, the
+    // example-removal templates stored as `.ts.txt`/`.vue.txt` and the Astro site sources stored as `.ts.tmpl`/`.mjs.tmpl`,
+    // measured as their source language in the templates view.
+    const template = path.startsWith('templates/') && executable.test(path.replace(/\.(?:txt|tmpl)$/, ''));
     // Reviewed generated-output fixtures (golden SFCs, a retained pre-visual runtime module) are stored as `.vue.txt` /
     // `.ts.txt` so the analyzer and bundlers never resolve their generated-project imports; they stay measured as
     // Vue/TypeScript in the fixtures view.
@@ -51,10 +52,10 @@ export async function maintainabilityInventory(root) {
     const terminalPython = path === 'tests/tooling/interactive-maker-pty.py';
     const shell = shellScripts.has(path);
     const python = conceptPython.test(path) || memoryPython.has(path) || terminalPython;
-    // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings) and the Claude Design folder's
-    // Markdown templates are rendered text, not code.
+    // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings), the Claude Design folder's Markdown
+    // templates and the Astro site templates' pages, styles and settings (.astro/.css/.json/.md/.yml) are rendered text, not code.
     const templateData = (path.startsWith('templates/examples/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^templates\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path)
-      || /^templates\/design-folder\/[\w-]+\.md\.tmpl$/.test(path);
+      || /^templates\/design-folder\/[\w-]+\.md\.tmpl$/.test(path) || /^templates\/sites\/[\w./[\]-]+\.tmpl$/.test(path);
     if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData && !python && !shell) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
     let templateRegion = null;
     if (/\.vue(?:\.txt)?$/.test(path)) {
@@ -71,7 +72,7 @@ export async function maintainabilityInventory(root) {
         : memoryPython.has(path)
         ? 'Python optional memory tooling; stdlib adapter tests and live-provider acceptance are separate from JS/TS/Vue metrics.'
         : 'Python concept tooling; syntax, assembly and browser evidence are separate from JS/TS/Vue metrics.' } : {}),
-      templateRegion, extension: extensionless.get(path) ?? (template || golden ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1)) });
+      templateRegion, extension: extensionless.get(path) ?? (template || golden ? path.replace(/\.(?:txt|tmpl)$/, '').split('.').at(-1) : path.split('.').at(-1)) });
   }
   for (const path of ['src', 'scripts', 'tests', 'harness']) await visit(path);
   if ((await readdir(root)).includes('bin')) await visit('bin');
