@@ -26,6 +26,7 @@
   "nav": {
     "overview": "Overview",
     "documents": "Documents",
+    "forms": "Forms",
     "events": "Events & feedback",
     "settings": "Preferences",
     "section": "Explore the template"
@@ -234,5 +235,34 @@
     "deleted": "Item deleted.",
     "pending": "Waiting for this action to finish…",
     "stale": "Your draft is retained. Reload items and review the current label before saving again."
+  },
+  "forms": {
+    "eyebrow": "Data-driven forms",
+    "title": "Forms from JSON definitions",
+    "subtitle": "The showcase feature ships a JSON form definition. The shared DataForm component renders it, validates the draft and returns typed values.",
+    "result": "Validated value",
+    "empty": "Nothing submitted yet",
+    "emptyText": "Submit the form to see the value the feature receives.",
+    "note": "The form component never saves anything; the feature decides what to do with the value."
+  },
+  "form": {
+    "submit": "Submit",
+    "reset": "Reset",
+    "choose": "Choose…",
+    "invalid": "Check the highlighted fields.",
+    "listHint": "One item per line",
+    "issue": {
+      "required": "This field is required.",
+      "text": "Enter text up to {limit} characters.",
+      "title": "Enter a single-line title up to {limit} characters.",
+      "number": "Enter a number.",
+      "integer": "Enter a whole number.",
+      "range": "Enter a number between {min} and {max}.",
+      "min": "Enter a number of at least {min}.",
+      "max": "Enter a number of at most {max}.",
+      "choice": "Choose one of the offered options.",
+      "items": "Enter at most {limit} items.",
+      "invalid": "This value is not valid."
+    }
   }
 }
