@@ -245,7 +245,9 @@ jobs:
   example-removal:
     name: Template authoring / example removal
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
+    # evidence sessions); 100 minutes is a job budget, not a test deadline.
+    timeout-minutes: 100
     steps:
       - *checkout
       - *setup-node
