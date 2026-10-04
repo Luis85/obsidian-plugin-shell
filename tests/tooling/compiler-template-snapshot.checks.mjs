@@ -65,3 +65,12 @@ test('a missing root file without a relocated home still fails the snapshot', as
   const snapshot = await loadTemplateSnapshot(root);
   assert.ok(!snapshot.frameworkFiles.some(file => file.path.endsWith('TEMPLATE-GUIDE.md')));
 });
+test('a generated project hosted outside GitHub has no .github folder and still snapshots; other roots stay required', async t => {
+  const root = await generatedLayout(t);
+  await rm(join(root, '.github'), { recursive: true });
+  const snapshot = await loadTemplateSnapshot(root);
+  assert.ok(!snapshot.frameworkFiles.some(file => file.path.startsWith('.github/')));
+  assert.ok(snapshot.frameworkFiles.some(file => file.path === 'docs/framework/workflows/ci.yml'));
+  await rm(join(root, 'configs'), { recursive: true });
+  await assert.rejects(loadTemplateSnapshot(root), error => error?.diagnostic?.message === 'Missing template input: configs');
+});
