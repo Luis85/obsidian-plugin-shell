@@ -49,6 +49,19 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.equal(pluginResult.command, 'example');
   assert.deepEqual(pluginResult.data, { plugin: 'example-extension', message: 'Compiled extension' });
   assert.match(output.stderr, /Compiled extension/);
+  // A user's app plugin in bin/plugins is user data beside the bundle: the kit stays valid and the compiled CLI loads it.
+  const appPlugin = join(dir, 'bin/plugins/hello-world');
+  await mkdir(appPlugin, { recursive: true });
+  await writeFile(join(appPlugin, 'manifest.json'), JSON.stringify({ id: 'hello-world', name: 'Hello', version: '1.0.0', minAppVersion: '0.0.1', description: 'Greets.', author: 'Tester' }));
+  await writeFile(join(appPlugin, 'settings.json'), '{"greeting":"Hi"}');
+  await writeFile(join(appPlugin, 'main.js'), "const { Plugin } = require('workbench');\nmodule.exports = class extends Plugin {\n  async onload() { const { greeting } = await this.loadData(); this.addCommand({ id: 'greet', name: 'Greet', execute: () => ({ greeting }) }); }\n};\n");
+  assert.ok((await verifyKit(dir)).files.every(file => !file.path.startsWith('bin/plugins/')), 'installed app plugins are not kit inventory');
+  output = cli(dir, ['plugins', 'enable', 'hello-world', '--yes', '--json']);
+  assert.equal(JSON.parse(output.stdout).status, 'applied', output.stderr + output.stdout);
+  output = cli(dir, ['hello-world', 'greet', '--json']);
+  assert.equal(output.status, 0, output.stderr + output.stdout);
+  assert.deepEqual(JSON.parse(output.stdout).data, { greeting: 'Hi' });
+  await rm(appPlugin, { recursive: true }); await rm(join(dir, 'bin/plugins/community-plugins.json'));
   output = cli(dir, ['help', 'example', '--json']);
   assert.equal(output.status, 0, output.stderr + output.stdout);
   pluginResult = JSON.parse(output.stdout);

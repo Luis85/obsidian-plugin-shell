@@ -25,6 +25,12 @@ generated templates, hash routes, scoped interactions and external-adapter bound
 Advanced settings and typed Markdown share `configs/user-settings.json`; the setup
 guide includes reviewed path migration and configured canonical-project behavior.
 
+## Extend the app with plugins
+
+Drop your own plugin into `bin/plugins/<id>/` with `main.js`, `manifest.json` and `settings.json`, then review and
+enable it with `node bin/app plugins enable <id> --yes`. Its commands run as `node bin/app <id> <command>`, including
+from a compiled kit. The model follows Obsidian community plugins; see [app plugins](../docs/development/APP-PLUGINS.md).
+
 ## Create a project
 
 Run `node bin/app new` (or `node bin/app` without a saved project) to choose an

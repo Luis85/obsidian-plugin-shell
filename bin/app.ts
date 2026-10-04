@@ -23,6 +23,9 @@ import { safe, Back, type Prompts } from './presentation/prompts.ts';
 import { routeArguments } from './adapters/router.ts';
 import { commands as frameworkCommands } from './adapters/framework/catalog.ts';
 import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } from '../plugins/runtime.ts';
+import { pluginRegistry } from '../plugins/registry.ts';
+import { communityInventory, communityRoutes, openCommunityPlugins } from './adapters/community-plugins/inventory.ts';
+import type { CommunityPluginHost } from './adapters/community-plugins/loader.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
@@ -78,6 +81,12 @@ function errorResult(command: string, error: unknown) {
   return { ...operationResult(command, null, issue.code === 'CANCELLED' ? 'cancelled' : 'failed'),
     diagnostics: [{ code: issue.code, message: issue.message }] };
 }
+function failed(command: string, error: unknown, machine: boolean, io: IO): number {
+  const result = errorResult(command, error);
+  if (machine) io.output.write(JSON.stringify(result) + '\n');
+  else io.error.write(result.diagnostics.map(item => `${item.code}: ${safe(item.message)}`).join('\n') + '\n');
+  return result.status === 'cancelled' ? 130 : 1;
+}
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
   if (argv[0] === 'mcp') {
@@ -85,8 +94,12 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
     const { runMcpServer } = await import('./adapters/mcp-server.ts');
     return runMcpServer(frameworkRoot, { input: io.input, output: io.output });
   }
-  const routed = routeArguments(argv, { pluginCommands: new Set(pluginCliCommands().map(entry => entry.id)),
-    frameworkRoots: new Set(frameworkCommands.map(entry => entry.id.split(' ')[0]!)) });
+  // App plugins in bin/plugins are routed by their manifests alone; their code loads only on the maker surface.
+  const community = await communityInventory(frameworkRoot).then(communityRoutes, () => ({ enabled: [], inactive: new Map<string, string>() }));
+  const frameworkRoots = new Set(frameworkCommands.map(entry => entry.id.split(' ')[0]!));
+  const inactive = community.inactive.get(argv[0] ?? '');
+  if (inactive && !frameworkRoots.has(argv[0]!)) return failed(argv[0]!, new SketchError('COMMUNITY_PLUGIN_INACTIVE', inactive), argv.includes('--json'), io);
+  const routed = routeArguments(argv, { pluginCommands: new Set([...pluginCliCommands().map(entry => entry.id), ...community.enabled]), frameworkRoots });
   if (routed.surface === 'framework') {
     const { main: frameworkMain } = await import('./adapters/framework-cli.ts');
     return frameworkMain(routed.args, frameworkRoot);
@@ -100,14 +113,16 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
 /** The maker surface itself, without routing; its help and failures stay on the supplied streams. */
 export async function makerMain(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
   const controller = new AbortController(), stop = () => controller.abort();
-  let plugins: WorkbenchPluginRuntime | undefined;
+  let plugins: WorkbenchPluginRuntime | undefined, community: CommunityPluginHost | undefined;
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
   const machine = argv.includes('--json'); let command = 'maker';
+  const progress = (message: string) => { io.error.write(safe(message)); };
   try {
-    const args = parseArguments(argv, pluginCliCommands()); command = args.command;
+    community = await openCommunityPlugins(frameworkRoot, progress);
+    const registry = [...pluginRegistry, ...community.plugins];
+    const args = parseArguments(argv, pluginCliCommands(registry)); command = args.command;
     const root = resolve(option(args, 'root', process.cwd()));
-    const progress = (message: string) => { io.error.write(safe(message)); };
-    plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress,
+    plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress, registry,
       onError: code => progress(code + '\n') });
     const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
@@ -118,12 +133,10 @@ export async function makerMain(argv: string[], frameworkRoot: string, io: IO = 
     else io.output.write(safe(JSON.stringify(result, null, 2)) + '\n');
     return 0;
   } catch (error) {
-    const result = errorResult(command, error);
-    if (machine) io.output.write(JSON.stringify(result) + '\n');
-    else io.error.write(result.diagnostics.map(item => `${item.code}: ${safe(item.message)}`).join('\n') + '\n');
-    return result.status === 'cancelled' ? 130 : 1;
+    return failed(command, error, machine, io);
   } finally {
     try { plugins?.dispose(); } finally {
+      try { await community?.unload(); } catch (error) { progress(`COMMUNITY_PLUGIN_UNLOAD_FAILED: ${error instanceof Error ? error.message : 'unload failed'}\n`); }
       process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop);
     }
   }

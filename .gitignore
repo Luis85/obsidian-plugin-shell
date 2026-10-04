@@ -11,6 +11,9 @@ dist/
 .dev-vault/
 *.tsbuildinfo
 
+# App plugins installed into this checkout's bin/plugins are user-owned, never framework source.
+/bin/plugins/
+
 dist-harness/
 .qualification/
 node-qualified

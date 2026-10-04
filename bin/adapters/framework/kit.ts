@@ -13,6 +13,7 @@ import { OperationError, requireThat, type Context } from './contracts.ts';
 import { stat } from 'node:fs/promises';
 import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { templateRootFiles as templateFiles, templateRoots } from '../../compiler/domain/template-inputs.ts';
+import { communityPluginsFolder } from '../../domain/community-plugin.ts';
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = await import('typescript');
@@ -36,7 +37,8 @@ async function bootstrapSource(root: string, path: string): Promise<Buffer> {
 export async function assembleKit(context: Context, compiler: Compiler): Promise<ArchiveFile[]> {
   const skill = new Map((await prototypeSkillFiles(context.frameworkRoot)).map(file => [file.path, file.bytes]));
   const paths = [...templateFiles, ...skill.keys()];
-  for (const folder of templateRoots) paths.push(...await listFiles(context.frameworkRoot, folder));
+  // The source checkout's own bin/plugins holds locally installed app plugins: never walked, never shipped.
+  for (const folder of templateRoots) paths.push(...await listFiles(context.frameworkRoot, folder, new Set([communityPluginsFolder])));
   const files: ArchiveFile[] = [], records: KitFile[] = [];
   const add = (path: string, bytes: Buffer) => { files.push({ path, bytes }); records.push({ path, hash: hash(bytes), bytes: bytes.length }); };
   const sourceInventory: Array<{path: string; hash: string}> = [];

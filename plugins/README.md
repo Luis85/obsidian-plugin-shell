@@ -1,6 +1,6 @@
 # Workbench plugins
 
-This folder is the trusted, statically registered extension surface for **Workbench itself**.
+This folder is the trusted, statically registered extension surface for **Workbench itself**. Plugins that users drop into an installed or compiled app live in `bin/plugins/` instead; see [app plugins](../docs/development/APP-PLUGINS.md).
 
 Infrastructure lives at the root:
 

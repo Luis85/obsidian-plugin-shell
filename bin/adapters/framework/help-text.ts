@@ -40,6 +40,7 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'obsidian-cli', title: 'Optional Obsidian CLI', commands: ['obsidian status', 'obsidian files', 'obsidian read', 'obsidian prepare'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
   { id: 'airship', title: 'Optional Airship', commands: ['airship status', 'airship enable', 'airship disable', 'airship install', 'airship start', 'airship doctor'] },
+  { id: 'plugins', title: 'App plugins (bin/plugins)', commands: ['plugins list', 'plugins show', 'plugins enable', 'plugins disable'] },
   { id: 'agent-mcp', title: 'Optional local agent MCP', commands: ['mcp'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
@@ -175,6 +176,9 @@ const usage: Record<string, string> = {
   new: 'node bin/app new <dir> (--starter <id> | --from <project.json>) [options]', help: 'node bin/app help [command] [--all]',
   'plan inspect': 'node bin/app plan inspect <plan-file>', 'plan apply': 'node bin/app plan apply <plan-file> --yes',
   make: 'node bin/app make <recipe> <name> [options] | make list | make describe <recipe>',
+  'plugins show': 'node bin/app plugins show <plugin-id> [--json]',
+  'plugins enable': 'node bin/app plugins enable <plugin-id> [--yes | --apply <sha256>] [--json]',
+  'plugins disable': 'node bin/app plugins disable <plugin-id> [--yes | --apply <sha256>] [--json]',
 };
 const examples: Record<string, string[]> = {
   'adopt analyze': ['node bin/app adopt analyze --target ../legacy-app', 'node bin/app adopt analyze --target ../legacy-app --json --out ../legacy-report.json'],
@@ -234,6 +238,10 @@ const examples: Record<string, string[]> = {
   'handout refresh': ['node bin/app handout refresh --plan-out handout-refresh.plan.json --json'],
   'handout validate': ['node bin/app handout validate --json'],
   'handout inspect': ['node bin/app handout inspect --json'],
+  'plugins list': ['node bin/app plugins list --json'],
+  'plugins show': ['node bin/app plugins show hello-world --json'],
+  'plugins enable': ['node bin/app plugins enable hello-world', 'node bin/app plugins enable hello-world --yes'],
+  'plugins disable': ['node bin/app plugins disable hello-world --yes'],
   'airship status': ['node bin/app airship status --json'],
   'airship enable': ['node bin/app airship enable --agent codex --dry-run', 'node bin/app airship enable --yes'],
   'airship disable': ['node bin/app airship disable --dry-run', 'node bin/app airship disable --yes'],
