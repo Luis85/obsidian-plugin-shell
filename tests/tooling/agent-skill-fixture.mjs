@@ -53,6 +53,9 @@ export function resolveCitation(tokens, catalog) {
   if (command === undefined) return null;
   if (command === 'help') return action === undefined || action.startsWith('<') || action.startsWith('-') ? null : resolveCitation(tokens.slice(1), catalog);
   if (!WORD.test(command)) return `unknown command "${command}"`;
+  // Three-word commands (`increment ac add`, `pr task set`) are only valid as a whole.
+  const third = tokens[2];
+  if (WORD.test(action ?? '') && WORD.test(third ?? '') && catalog.ids.has(`${command} ${action} ${third}`)) return null;
   const actions = action?.includes('|') ? action.split('|') : [action];
   return actions.map(item => resolveOne(command, item, catalog)).find(Boolean) ?? null;
 }

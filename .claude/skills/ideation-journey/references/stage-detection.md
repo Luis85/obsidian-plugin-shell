@@ -4,7 +4,7 @@ Read-only signals and the stage they suggest. Check from the bottom up and stop 
 
 | Stage | Signals (any) | Recommend |
 | --- | --- | --- |
-| 7. Handoff Ready | a `docs/increments/<slug>.md` handoff (`type: increment-handoff`) for the current work, and `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md --json` exits 0 | `feature-delivery` (draft PR with the handoff, then the Definition of Done before ready) |
+| 7. Handoff Ready | a `docs/increments/<slug>.md` handoff (`type: Increment`) for the current work, and `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md --json` (or `node bin/app increment check <slug> --json`) exits 0 | `feature-delivery` (draft PR with the handoff, then the Definition of Done before ready) |
 | 6. Handoff drafted, not Ready | the same handoff, but the check exits 1; its report lists failing rules and a refinement brief | `increment-handoff` (refinement session); its brief may route back to `ideation-brainstorm` or `ideation-concept` |
 | 5. Skeleton exists | `node bin/app status --json` reports a configuration and `generated: true`; `node bin/app ui status --json` succeeds; a `projects/<slug>/source/` package or a separate project folder created by `new` | `increment-handoff` after `self-review`, then `feature-delivery`; `ideation-boilerplate` to add makers or regenerate |
 | 4. Prototype exists | `prototypes/<slug>/prototype-answers.json` with `approved: true`; a managed prototype in `node bin/app prototypes list --json`; a built `clickdummy.html`; a `docs/concepts/<slug>/` prototype save | `ideation-boilerplate` |

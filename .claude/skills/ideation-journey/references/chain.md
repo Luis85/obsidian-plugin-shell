@@ -9,8 +9,8 @@ ideation-journey (router: detect stage, recommend, run step by step)
   3 ideation-design       definition      -> agreed design brief, optional docs/design/<slug>/
   4 ideation-prototype    agreed brief    -> prototypes/<slug>/ package | clickdummy | managed prototype
   5 ideation-boilerplate  prototype       -> project skeleton that passes node bin/app check
-  -> increment-handoff (docs/increments/<slug>.md until the Definition of Ready passes; refinement rounds, split or escalate)
-  -> feature-delivery (draft PR with the handoff: Dev tier + Definition of Ready; Definition of Done before ready: Integration tier; green merge) and self-review
+  -> increment-handoff (node bin/app increment new plans docs/increments/<slug>.md, kick-off pull request and branch increment/<slug>, refined until the Definition of Ready passes; refinement rounds, split or escalate)
+  -> feature-delivery (node bin/app pr new plans change PRs stacked on the increment branch; Dev tier + Definition of Ready; Definition of Done before ready: Integration tier; green merge; the kick-off merges last) and self-review
   -> release (release/X.Y.Z: Release tier; owner-dispatched Publish; exempt from DoR/DoD), only on the user's request
 ```
 

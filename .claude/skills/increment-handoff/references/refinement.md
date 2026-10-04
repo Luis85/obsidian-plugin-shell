@@ -1,12 +1,12 @@
 # Refinement session: question bank
 
-Use this when `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md` exits 1. The report lists each failing rule with a hint and a refinement brief (questions per failed rule and a suggested skill). Start from that brief; the questions below fill gaps and keep rounds concrete. Rule identifiers come from the report, never from this page.
+Use this when `node bin/app increment check <slug>` (or `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md`) exits 1. The report lists each failing rule with a hint and a refinement brief (questions per failed rule and a suggested skill). Start from that brief; the questions below fill gaps and keep rounds concrete. Rule identifiers come from the report, never from this page.
 
 ## How to run a round
 
 1. Group the failures by section and order them: open questions and scope first, then acceptance criteria, then test plan, docs and changelog.
 2. Ask 3–5 related questions per round with the AskUserQuestion tool (or a numbered list), each with two to four concrete options drawn from the source and the repository, plus room for the user's own answer.
-3. Summarize the answers, show the exact section edits, save them on approval and rerun the check. Change only the sections the answers affect.
+3. Summarize the answers, show the exact edits as previews of `increment edit`, `increment scope add`, `increment ac add` or `increment ac set` (see SKILL.md step 4), apply them on approval and rerun the check. Change only the sections the answers affect. When the kick-off pull request is published, reviewers' comments and the tasks they add there are input for the next round.
 4. Record decisions separately from your proposals and assumptions. Never answer a question for the user.
 5. After three rounds without a new passing rule, stop and report what blocks readiness.
 
