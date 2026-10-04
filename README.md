@@ -287,8 +287,8 @@ qualification:
 
 | Stage | Trigger | Checks |
 | --- | --- | --- |
-| Draft pull request | every push | Dev tier: "Dev checks", a fast diff-scoped gate |
-| Ready for review | marking it ready, then every push | Integration tier: "CI result" and every pull-request workflow |
+| Draft pull request | every push | Dev tier: "Dev checks", a fast diff-scoped gate, and "Definition of Ready" |
+| Ready for review | marking it ready, then every push | Integration tier: "CI result", "Definition of Done" and every pull-request workflow |
 | `release/X.Y.Z` branch | owner-dispatched Release cut | Release tier: every workflow on every matrix leg; the owner-dispatched Publish then merges, tags `X.Y.Z` and creates the GitHub release |
 
 Claude Code skills drive each stage: the ideation chain (`ideation-journey` through
@@ -299,6 +299,16 @@ review and `release` for cut and publish. Read the
 [deliver a change](docs/development/DELIVER-A-CHANGE.md),
 [cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md) and the
 [workflow reference](docs/development/WORKFLOWS.md).
+
+Work is planned as **increments**: `node bin/app increment new` writes the
+increment document with its acceptance criteria, a kick-off pull request plan, an
+issue, one pending test stub per criterion and the branch `increment/<id>`. The
+increment is refined in its kick-off pull request until the Definition of Ready
+passes, then delivered by change pull requests stacked on that branch
+(`node bin/app pr new`), each closed by the Definition of Done. `pr publish` and
+`pr sync` turn the plans into draft pull requests on GitHub or Azure DevOps and
+keep tasks and amendments in sync, only through a reviewed preview. Start with
+[your first increment](docs/development/FIRST-INCREMENT.md).
 
 Projects can live on GitHub or Azure DevOps: `setup` and `new` ask for the hosting
 platform (or take `--hosting github|azure-devops|none`), and `node bin/app hosting set`

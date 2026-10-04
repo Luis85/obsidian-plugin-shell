@@ -18,6 +18,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | --- | --- |
 | [Getting started](user-manual/shell-cli/getting-started.md) | Create your first plugin from a starter or an extracted framework kit, then run and check it. |
 | [Build a feature](development/BUILD-A-FEATURE.md) | Add a business feature step by step: entity, document recipe, registration, view and tests. |
+| [Your first increment](development/FIRST-INCREMENT.md) | Plan an increment with `node bin/app increment new`, refine it in a kick-off draft pull request until the Definition of Ready passes, deliver it through a stacked change pull request and close it with the Definition of Done. |
 
 ## How-to guides
 
@@ -61,6 +62,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | Page | Task |
 | --- | --- |
 | [Deliver a change](development/DELIVER-A-CHANGE.md) | Branch, open a draft pull request, pass the Dev and Integration tiers and merge a green pull request. |
+| [Manage increments](development/MANAGE-INCREMENTS.md) | Change statuses, scope and criteria, track issues, change and sync published pull requests, resolve sync conflicts, recover from uncertain writes and use Azure DevOps. |
 | [Cut and publish a release](development/CUT-AND-PUBLISH-A-RELEASE.md) | Cut `release/X.Y.Z`, watch the Release tier, fix forward, publish and recover. |
 | [Developer workflow](development/DEVELOPER-WORKFLOW.md) | The daily loop: setup, a first feature change, feedback, events, styles and verification. |
 | [Maintenance operations](development/MAINTENANCE-OPERATIONS.md) | Run freshness discovery and review dependency updates. |
@@ -140,6 +142,8 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | Page | Facts |
 | --- | --- |
 | [GitHub Actions workflows](development/WORKFLOWS.md) | Every workflow's tier, triggers, jobs, permissions, artifacts, required checks and the repository policy. |
+| [Increments reference](development/INCREMENTS-REFERENCE.md) | Increment, PullRequest and Issue documents, statuses and transitions, edit locks, branches, the sync record, error codes and JSON results of `increment`, `pr` and `issue`. |
+| [Definition of Ready and Done](development/DEFINITION-OF-READY-AND-DONE.md) | Every DOR and DOD rule with its severity, kind-aware gate selection, exemptions, acceptance stubs, configuration and workflows. |
 | [Quality assurance](development/QUALITY-ASSURANCE.md) | Source assurance checks, `npm run verify` steps and reports, and the self-review guard rules. |
 | [Maintenance and release contract](development/MAINTENANCE-AND-RELEASE.md) | Dependency, freshness and release requirements (normative). |
 | [Release operation plans](development/RELEASE-OPERATION-PLANS.md) | The offline draft/promotion plan input and output contract. |
@@ -189,7 +193,10 @@ runs the fast Dev tier, marking it ready runs the Integration tier, and a
 Start with the [delivery pipeline](development/DELIVERY-PIPELINE.md) explanation,
 then [deliver a change](development/DELIVER-A-CHANGE.md) or
 [cut and publish a release](development/CUT-AND-PUBLISH-A-RELEASE.md); the
-[workflow reference](development/WORKFLOWS.md) lists every workflow. Changes are
+[workflow reference](development/WORKFLOWS.md) lists every workflow. Work is
+planned as increments (`node bin/app increment`, `pr`, `issue`): start with
+[your first increment](development/FIRST-INCREMENT.md); the checks are in
+[Definition of Ready and Done](development/DEFINITION-OF-READY-AND-DONE.md). Changes are
 recorded in [`CHANGELOG.md`](../CHANGELOG.md) (Keep a Changelog) at the repository root.
 
 ## Plans and backlog (not Diataxis)
@@ -223,8 +230,8 @@ adapters in `.agents/skills/`. This index is framework-only: generated projects 
 receive it and carry their own skill set.
 
 - [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`), handing off to `increment-handoff` and then `feature-delivery`.
-- [Increment handoff](../.claude/skills/increment-handoff/SKILL.md): write the developer handoff for one increment and refine it in question rounds until the Definition of Ready passes; split or escalate to ideation when it is not just under-specified.
-- [Feature delivery](../.claude/skills/feature-delivery/SKILL.md): branch or stack, open a draft pull request with its Ready handoff, keep it through the Dev tier, pass the Definition of Done, prepare it for the Integration tier and merge it green on request.
+- [Increment handoff](../.claude/skills/increment-handoff/SKILL.md): plan one increment with `node bin/app increment new` and refine it with the user, in its kick-off pull request, until the Definition of Ready passes; split or escalate to ideation when it is not just under-specified.
+- [Feature delivery](../.claude/skills/feature-delivery/SKILL.md): plan change pull requests stacked on the increment branch with `node bin/app pr new`, keep them through the Dev tier, pass the Definition of Done, prepare them for the Integration tier and merge them green on request.
 - [Release](../.claude/skills/release/SKILL.md): choose the version, dispatch the cut, follow the Release tier, publish on explicit request and verify the result.
 - [Self-review](../.claude/skills/self-review/SKILL.md): check a change against AGENTS.md and run the real gates before handover.
 - [Adopt an existing project](../.claude/skills/adopt-existing-project/SKILL.md): write an adoption plan for an existing project.

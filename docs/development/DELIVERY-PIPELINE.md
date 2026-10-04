@@ -30,7 +30,8 @@ tier: a tier selects which gates run, it never relaxes a gate that runs.
  idea ──────────► prototype ──────────► production ──────────────► release
  ideation-* skills   draft PR              ready for review           release/X.Y.Z
  (local, no CI)      Dev tier              Integration tier           Release tier
-                     "Dev checks"          "CI result" + workflows    "Release result"
+ increment new       "Dev checks"          "CI result" + workflows    "Release result"
+                     "Definition of Ready" "Definition of Done"
                                            merge green PR to main     Publish: merge → tag → release → delete
 ```
 
@@ -38,14 +39,51 @@ tier: a tier selects which gates run, it never relaxes a gate that runs.
 
 | Tier | Trigger | What runs | Gate |
 | --- | --- | --- | --- |
-| Dev | Every pull-request event (`opened`, `synchronize`, `reopened`, `ready_for_review`), drafts included | `dev.yml` "Dev checks" on ubuntu-24.04 (about ten minutes): `node bin/app check --fast --skip-suites` against the base branch (typecheck, lint and eslint on changed files, related Vitest tests, the maker type-check), suite registration, repository policy, changelog structure and the self-review guard in `--warn-only` mode | "Dev checks", required by branch protection |
-| Integration | The same events on a pull request that is not a draft and whose head is not `release/*`; pushes to `main` | `ci.yml` and every other pull-request workflow; three-OS matrices run their Linux leg only; `ci.yml` adds the blocking self-review guard and an informational live audit; end-to-end steps only when opted in ([below](#end-to-end-tests-opt-in-mandatory-in-release)) | "CI result", required by branch protection, plus each workflow's own job checks |
+| Dev | Every pull-request event (`opened`, `synchronize`, `reopened`, `ready_for_review`), drafts included | `dev.yml` "Dev checks" on ubuntu-24.04 (about ten minutes): `node bin/app check --fast --skip-suites` against the base branch (typecheck, lint and eslint on changed files, related Vitest tests, the maker type-check), suite registration, repository policy, changelog structure and the self-review guard in `--warn-only` mode; `definition-of-ready.yml` checks the increment documents (seconds, no install) | "Dev checks" and "Definition of Ready", required by branch protection |
+| Integration | The same events on a pull request that is not a draft and whose head is not `release/*`; pushes to `main` | `ci.yml` and every other pull-request workflow; three-OS matrices run their Linux leg only; `ci.yml` adds the blocking self-review guard and an informational live audit; end-to-end steps only when opted in ([below](#end-to-end-tests-opt-in-mandatory-in-release)); `definition-of-done.yml` checks the increment against the diff | "CI result" and "Definition of Done", required by branch protection, plus each workflow's own job checks |
 | Release | Push to `release/**`, or a manual dispatch on that branch | `release.yml`: release metadata, every pull-request workflow called with `tier: release` (all matrix legs, path filters ignored, every end-to-end step), and `candidate-qualification.yml` (fixed-source rehearsal, served browser, three native sessions, the blocking live audit) | "Release result", which Publish requires |
 | Publish | Manual dispatch from `main` by the owner, after the `release` environment's reviewers approve | `release-cut.yml` (cut the release branch) and `publish.yml` (merge, tag, release, delete) | Environment approval |
 
 The `node --test` suites a diff selects are listed as skipped in the Dev tier, not
 silently dropped: they take minutes each and run in the Integration tier through
 `verify` and the path-filtered workflows.
+
+## Increments: Definition of Ready before work, Definition of Done before merge
+
+Tiers decide how much runs; they do not say whether the work itself is
+understood or finished. That is what an **increment** records: a Markdown
+document (`docs/increments/<id>.md`) with the outcome, scope, acceptance criteria,
+affected areas, test plan, docs and changelog impact of one deliverable change.
+Two deterministic, dependency-free checks read it on every pull request: the
+**Definition of Ready** before implementation (drafts included, so refinement gets
+feedback early) and the **Definition of Done** when the pull request is ready for
+review. Both take seconds, need no install and fail with a hint per rule, so a red
+result is a finding about the documents or the diff, never a flake.
+
+The documents are the source of truth and live in the repository, next to the
+code they describe; `node bin/app increment`, `pr` and `issue` edit them through
+reviewed plans. One increment is delivered through a small stack of pull
+requests:
+
+```text
+ main ◄──────────── kick-off pull request (increment/<id>) ◄──── change pull requests (pr/<id>/<id>-n)
+       merged last:   carries the increment documents,          deliver the work, each with its own
+       DoD = whole    refined until the DoR passes              PullRequest document; DoD = its tasks
+       increment                                                and delivered criteria
+```
+
+The kick-off pull request is opened first, as a draft, so the increment can be
+refined in review until the Definition of Ready passes. Change pull requests then
+stack on the increment branch, so each sees the increment's latest state and its
+diff shows only its own work. Their Definition of Done checks only what they
+deliver; the kick-off's checks the whole increment, which is why it merges last.
+Each acceptance criterion starts as a generated pending test stub, which makes
+"is it tested?" a mechanical question. Publishing a planned pull request or
+syncing it with the platform is an explicit, reviewed remote write; the
+description on GitHub or Azure DevOps is a view of the documents in which only
+tasks and amendments flow both ways. The rules are listed in
+[Definition of Ready and Done](DEFINITION-OF-READY-AND-DONE.md); the walk-through
+is [Your first increment](FIRST-INCREMENT.md).
 
 ## How the gating works
 
@@ -245,8 +283,9 @@ remain available for retained-candidate work outside this path.
 | Stage | Where it happens | Tool | Checks |
 | --- | --- | --- | --- |
 | Idea | Local session | `ideation-journey`, `ideation-brainstorm`, `ideation-concept` skills | none in CI |
-| Prototype | Local, then a draft pull request | `ideation-design`, `ideation-prototype`, `ideation-boilerplate`, then `feature-delivery` | Dev tier |
-| Production | Pull request marked ready for review, merged into `main` | `feature-delivery`, `self-review` | Integration tier |
+| Prototype | Local, then a draft pull request | `ideation-design`, `ideation-prototype`, `ideation-boilerplate` | Dev tier |
+| Increment | `node bin/app increment new`, the kick-off draft pull request | `increment-handoff` | Dev tier, "Definition of Ready" |
+| Production | Change pull requests on the increment branch, marked ready for review and merged; the kick-off merges into `main` last | `feature-delivery`, `self-review` | Integration tier, "Definition of Done" |
 | Release | `release/X.Y.Z` branch and its draft release pull request | `release` skill, Release cut and Publish workflows | Release tier, then environment approval |
 
 The skills live in `.claude/skills/` (chain overview:

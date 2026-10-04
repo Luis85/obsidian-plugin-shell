@@ -109,7 +109,7 @@ Dependency-free repository scripts (not `node bin/app` commands) that bridge the
 | `node bin/app check submission` | publication readiness; not part of prototyping |
 | `node bin/app entities catalog` | registered entity definitions in a built project; not needed before a boilerplate exists |
 | `node bin/app hosting show`, `node bin/app hosting set` | GitHub, Azure DevOps or no hosting for an existing project; `new` and `setup` take `--hosting` directly (docs/development/HOSTING-PLATFORMS.md) |
-| `node bin/app increment new`, `node bin/app pr new`, `node bin/app issue new` | increments, their pull-request plans and issues after the chain: owned by the `increment-handoff` and `feature-delivery` skills |
+| `node bin/app increment new`, `node bin/app pr new`, `node bin/app issue new` | increments, their pull-request plans and issues after the chain: `increment-handoff` plans and refines the increment, `feature-delivery` plans, publishes and syncs its pull requests (remote writes only on request); `ideation-boilerplate` hands off to them |
 | `node bin/app release prepare` | never; release is a separate authorization |
 | `node bin/app framework status` | Workbench maintainers |
 | `node bin/app schema --json` | operation request schema for agents; not needed by the chain |

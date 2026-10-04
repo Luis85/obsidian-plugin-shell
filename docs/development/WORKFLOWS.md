@@ -13,8 +13,8 @@ is explained in [Delivery pipeline](DELIVERY-PIPELINE.md); the task guides are
 
 | Tier | Starts on | Workflows | Check that gates it |
 | --- | --- | --- | --- |
-| Dev | every `pull_request` event (`opened`, `synchronize`, `reopened`, `ready_for_review`), drafts included | `dev.yml` | **Dev checks** (required) |
-| Integration | the same events on a non-draft pull request whose head is not `release/*`; pushes to `main` for `ci.yml` and the push-triggered workflows; end-to-end steps only when opted in, and `labeled` (the `e2e` label) starts just those | `ci.yml` and every other pull-request workflow | **CI result** (required); the other workflows report their own job checks; a label run reports **E2E result** (not required) |
+| Dev | every `pull_request` event (`opened`, `synchronize`, `reopened`, `ready_for_review`), drafts included; `definition-of-ready.yml` also on `edited` | `dev.yml`, `definition-of-ready.yml` | **Dev checks** and **Definition of Ready** (required) |
+| Integration | the same events on a non-draft pull request whose head is not `release/*`; pushes to `main` for `ci.yml` and the push-triggered workflows; end-to-end steps only when opted in, and `labeled` (the `e2e` label) starts just those | `ci.yml`, `definition-of-done.yml` and every other pull-request workflow | **CI result** and **Definition of Done** (required); the other workflows report their own job checks; a label run reports **E2E result** (not required) |
 | Release | push to `release/**`, or manual dispatch on a release branch | `release.yml`, which calls every pull-request workflow with `tier: release` plus `candidate-qualification.yml`; every end-to-end step is mandatory | **Release result** (Publish requires it; not a branch-protection check) |
 | Publish | manual dispatch from `main` only, behind the `release` environment | `release-cut.yml`, `publish.yml` | environment reviewers' approval |
 | Scheduled / manual | `schedule` or `workflow_dispatch` | `maintenance-status.yml`, `offline-qualification-inputs.yml`, `release-rehearsal.yml` | none (they gate nothing) |
@@ -30,6 +30,8 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | File (name) | Tier | Triggers | Jobs (gate) | Artifacts (days) |
 | --- | --- | --- | --- | --- |
 | `dev.yml` (Dev) | Dev | `pull_request` | `fast` "Dev checks", ubuntu-24.04, 20 min, no gate | none |
+| `definition-of-ready.yml` (Definition of Ready) | Dev | `pull_request` (`opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`), no branch filter | `ready` "Definition of Ready", ubuntu-24.04, 5 min, no install, full history; skips `release/*` heads; `node scripts/delivery/ready.mjs --base origin/<base>` | `definition-of-ready-<attempt>` (7): the refinement brief |
+| `definition-of-done.yml` (Definition of Done) | Integration | `pull_request` (the same plus `labeled`, `unlabeled`), no branch filter | `done` "Definition of Done", ubuntu-24.04, 5 min, no install, full history; skips drafts and `release/*` heads; `node scripts/delivery/done.mjs --base origin/<base>` | `definition-of-done-<attempt>` (7): the generated Completion record, changelog entries and index rows |
 | `ci.yml` (CI) | Integration | `pull_request` (+ `labeled`), push `main`, `workflow_call` (`tier`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `baseline` (ubuntu-24.04, windows-latest), `showcase` (pull request: windows-latest; otherwise ubuntu-24.04 + windows-latest), `renamed-feature`, `source-archive`, `example-removal`: ready-gate. `framework-cli` (Linux; all three OSes for `tier: release`), `generated-companion`, `starter` (3 groups): ready-gate and not on push. `real-obsidian`: end-to-end, only when opted in (always for `tier: release`). `self-review`, `security-audit` (continue-on-error, informational): pull requests only, not draft, not `release/*`. `ci-result` "CI result" ("E2E result" in a run started by the `e2e` label): `always()`, `checks: read`; on a `release/*` head green only after "Release result" succeeded on that commit | `baseline-<os>-<attempt>`, `showcase-<os>-<attempt>`, `renamed-template-authoring`, `template-authoring-source-archive`, `template-authoring-example-removal`, `framework-cli-<os>`, `real-obsidian-evidence`, `project-generator-evidence`, `starters-<group>-evidence` (7); `ui-review-gallery`, `security-audit` (14) |
 | `airship-compatibility.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `airship-compatibility-<os>` (7) |
 | `angular-setup-acceptance.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-app`: ready-gate; Linux, all three OSes for `tier: release` | `angular-setup-acceptance-<os>` (7) |
@@ -44,7 +46,7 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | `setup-compatibility.yml` (Setup npm policy compatibility) | Integration | `pull_request` and push `main` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `setup`: four legs (Node 24.15.0/npm 12.0.2 and Node 24.21.0/npm 11.19.1 on ubuntu-24.04 and windows-latest), ready-gate | `setup-policy-<os>-npm-<npm>` (7) |
 | `starter-distribution.yml` (Independent Workbench distributions) | Integration | `pull_request` (21 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `package`: ready-gate | `companion-starter-evidence-<sha>`, `workbench-distributions-<source>` (14) |
 | `candidate-qualification.yml` | Integration (post-merge) and Release | push `main` (all paths except narrative docs), `workflow_call` (`tier` default `release`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `candidate`: fixed-source rehearsal, repeated runtime suites, coverage, blocking live audit; served browser and three native sessions only for `tier: release` or `e2e`; no job gate | `candidate-recovery-source`, `retained-build`, `qualified-candidate` (7) |
-| `release.yml` (Release) | Release | push `release/**`, `workflow_dispatch` | `metadata` "Release metadata"; 14 reusable calls (below); `release-result` "Release result"; aliases `dev-checks` "Dev checks" and `ci-result` "CI result" | the called workflows' artifacts, in this run |
+| `release.yml` (Release) | Release | push `release/**`, `workflow_dispatch` | `metadata` "Release metadata"; 14 reusable calls (below); `release-result` "Release result"; aliases `dev-checks` "Dev checks", `ci-result` "CI result", `definition-of-ready` "Definition of Ready" and `definition-of-done` "Definition of Done" | the called workflows' artifacts, in this run |
 | `release-cut.yml` (Release cut) | Publish | `workflow_dispatch` (`version`) | `cut` "Cut release branch", `environment: release` | `release-cut-<version>-<attempt>` (30) |
 | `publish.yml` (Publish) | Publish | `workflow_dispatch` (`version`) | `publish` "Publish release", `environment: release` | `publish-<version>-<attempt>` (30) |
 | `release-rehearsal.yml` | manual | `workflow_dispatch` (`source_commit`, `version`, `draft_snapshot`) | `rehearsal` | `release-rehearsal-<version>-<sha>`, `release-qualification-<version>-<sha>` (repository default) |
@@ -137,14 +139,16 @@ candidate qualification runs the blocking live audit).
 | --- | --- | --- |
 | `metadata` "Release metadata" | Derives `X.Y.Z` from the branch name, runs `node scripts/release/branch.mjs verify --version X.Y.Z`, prints the changelog section to the run summary. | The branch is `release/X.Y.Z` with a stable version and every verify check passes. |
 | `release-result` "Release result" | Aggregates `metadata` and all 14 calls. | Every needed job is `success`; unlike "CI result", a skipped job fails it. |
-| `dev-checks` "Dev checks", `ci-result` "CI result" | Report the required checks on the release head. | "Release result" succeeded. |
+| `dev-checks` "Dev checks", `ci-result` "CI result", `definition-of-ready` "Definition of Ready", `definition-of-done` "Definition of Done" | Report the required checks on the release head (a release pull request carries the release template, not an Increment). | "Release result" succeeded. |
 
 ## Required checks
 
 | Check | Produced by | Where it is required |
 | --- | --- | --- |
 | Dev checks | `dev.yml` › `fast`; on a release head also `release.yml` › `dev-checks` | Branch protection on `main` |
+| Definition of Ready | `definition-of-ready.yml` › `ready`; on a release head `release.yml` › `definition-of-ready` | Branch protection on `main` |
 | CI result | `ci.yml` › `ci-result`; on a release head also `release.yml` › `ci-result` | Branch protection on `main` |
+| Definition of Done | `definition-of-done.yml` › `done` (skips drafts); on a release head `release.yml` › `definition-of-done` | Branch protection on `main` |
 | E2E result | `ci.yml` › `ci-result` in a run started by the `e2e` label | nowhere: it reports the opted-in end-to-end jobs and never stands in for "CI result" |
 | Release result | `release.yml` › `release-result` | `scripts/release/publish.mjs` refuses without a green one on the release head |
 
@@ -153,6 +157,15 @@ condition, so it is green on a draft. On a `release/*` pull request it fails on
 purpose until the Release alias reports (see
 [Delivery pipeline](DELIVERY-PIPELINE.md#release-pull-requests-and-the-alias-checks)).
 The informational `security-audit` job is not part of it.
+
+"Definition of Ready" and "Definition of Done" check the pull request's Increment
+document (and its PullRequest and Issue documents) before and after
+implementation; dependabot and the other configured exemptions pass with a
+notice. Their rules, the kick-off and change selection and the generated outputs
+are in [Definition of Ready and Done](DEFINITION-OF-READY-AND-DONE.md). They have
+no branch filter, so pull requests into an increment branch (`increment/<id>`)
+run them too; setting all four checks as required is the owner's decision in the
+repository settings.
 
 ## Inputs
 

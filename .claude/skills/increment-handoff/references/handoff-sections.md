@@ -4,7 +4,7 @@ The handoff is `docs/increments/<slug>.md`, created from `configs/delivery/incre
 
 ## Frontmatter
 
-`type: increment-handoff`, `id` equal to the slug, `title`, `owner`, `size` (`S`, `M` or `L`), optional `refs` (the PRD, PBI, task or issue the increment comes from) and `status`. `status` is informational; the checks decide readiness. Every `refs` entry must resolve to a real path or id.
+`type: Increment`, `id` equal to the slug, `title`, `owner`, `size` (`S`, `M` or `L`), `status` and `e2e` (`none`, `optional` or `required`) are required; `refs` (the PRD, PBI, task or issue the increment comes from) is optional. `pullRequests`, `issues`, `branch` and `base` are written by `node bin/app increment new` and `pr new`; never edit them by hand, and do not edit the generated `## Issues` and `## Pull requests` lists either. `status` moves through `node bin/app increment status`; the checks decide readiness. Every `refs` entry must resolve to a real path or id. All keys: `docs/development/INCREMENTS-REFERENCE.md`.
 
 ## Sections
 
@@ -27,7 +27,7 @@ Placeholders fail the check: `TBD`, `TODO`, angle-bracket fillers such as `<path
 
 ## Acceptance criteria that can be tested
 
-Each criterion states one observable behavior, its condition and where its evidence will live. The Definition of Done later requires every criterion checked with an evidence reference that exists in the diff.
+Each criterion states one observable behavior, its condition and where its evidence will live. `node bin/app increment ac add` creates a pending acceptance test stub per criterion (`tests/acceptance/<slug>/ac-<n>.checks.mjs`) and sets it as the evidence; the Definition of Ready requires a stub or test evidence per criterion, and the Definition of Done requires the stubs implemented and every criterion checked with evidence that exists.
 
 Good:
 

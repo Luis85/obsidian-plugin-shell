@@ -14,8 +14,8 @@ Use this when someone wants to go from an idea to prototype boilerplate, asks "w
 | 3 | `ideation-design` | a definition | an explicitly agreed design brief (optional `docs/design/<slug>/`) |
 | 4 | `ideation-prototype` | an agreed brief | a prepared prototype package or clickdummy |
 | 5 | `ideation-boilerplate` | a prototype | a real project skeleton that passes `check` |
-| next | `increment-handoff` | a skeleton, PRD, PBI or task | a `docs/increments/<slug>.md` handoff that passes the Definition of Ready |
-| then | `feature-delivery`, `self-review` | a Ready handoff | a draft PR with Dev tier checks and the Definition of Ready, then the Definition of Done |
+| next | `increment-handoff` | a skeleton, PRD, PBI or task | an increment planned with `node bin/app increment new` (`docs/increments/<slug>.md`, kick-off pull request, branch `increment/<slug>`) that passes the Definition of Ready |
+| then | `feature-delivery`, `self-review` | a Ready increment | change PRs stacked on the increment branch, each a draft with Dev tier checks and the Definition of Ready, then the Definition of Done |
 
 The chain overview for documentation is [references/chain.md](references/chain.md). Every app command the chain uses, and which skill owns it, is in [references/tool-map.md](references/tool-map.md).
 

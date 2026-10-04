@@ -112,6 +112,21 @@ test('the Definition of Ready and Done contract the skills cite exists, and the 
   const failures = checkDeliveryContract({ corpus: allSkillTexts(), toolMap: read('.claude/skills/ideation-journey/references/tool-map.md'), contract: DOR_DOD, facts: loadFacts() });
   assert.deepEqual(failures, []);
 });
+/** The increment CLI each delivery skill drives as its primary path (scripts/delivery stay the fallback). */
+const CLI_PATHS = [
+  ['increment-handoff', ['increment new', 'increment check', 'increment edit', 'increment ac add', 'increment status', 'issue new', 'pr publish', 'pr sync']],
+  ['feature-delivery', ['increment check', 'pr new', 'pr task add', 'pr task set', 'pr publish', 'pr sync', 'pr amend', 'increment ac set']],
+];
+test('the delivery skills drive the increment CLI, keep remote writes behind an explicit request and link the increment docs', () => {
+  for (const [name, commands] of CLI_PATHS) {
+    const text = skillCorpus(name).map(file => file.text).join('\n');
+    for (const command of commands) assert.ok(text.includes(`node bin/app ${command}`), `${name} cites node bin/app ${command}`);
+    assert.match(read(`.claude/skills/${name}/SKILL.md`), /`pr publish`, `pr sync`[^.]*explicit request in this conversation/, `${name}: remote writes need an explicit request`);
+    for (const doc of ['docs/development/FIRST-INCREMENT.md', 'docs/development/DEFINITION-OF-READY-AND-DONE.md']) assert.ok(text.includes(doc), `${name} links ${doc}`);
+  }
+  assert.match(read('.claude/skills/increment-handoff/SKILL.md'), /increment status <slug> Ready/);
+  assert.match(read('.claude/skills/feature-delivery/SKILL.md'), /`e2e: required`, add the `e2e` label/);
+});
 test('every delivery skill has a thin Codex adapter pointing at its canonical SKILL.md', () => {
   for (const [name] of SKILLS) assert.deepEqual(checkAdapter(name, read(`.agents/skills/${name}/SKILL.md`)), [], name);
 });
@@ -137,6 +152,8 @@ test('negative: the checkers fail on missing scripts, unknown npm scripts, workf
     /missing docs\/development\/ABSENT\.md/, /unknown CI job publish\/absent/, /missing configs\/absent\/rules\.json/]) assert.match(failures, expected);
   assert.equal(checkCitations(file, facts).length, 6, 'valid citations and the denied pattern pass');
   assert.match(checkFile({ path: file.path, text: '`node bin/app relaese check`' }, catalog()).join('\n'), /unknown command/);
+  assert.deepEqual(checkFile({ path: file.path, text: '`node bin/app increment ac set x AC-1` and `node bin/app pr task add x "t"`' }, catalog()), [], 'three-word commands resolve');
+  assert.match(checkFile({ path: file.path, text: '`node bin/app increment ac drop x`' }, catalog()).join('\n'), /unknown command "increment ac"/);
   const valid = read('.claude/skills/release/SKILL.md');
   assert.match(checkSkill({ name: 'release', next: 'feature-delivery', text: valid.slice(0, valid.indexOf('## Close')) }).join('\n'), /missing the "## Close/);
   assert.doesNotMatch(valid.replace('Loading this skill authorizes nothing', 'Loading this skill is enough'), SKILLS[2][2][0]);
