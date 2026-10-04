@@ -108,34 +108,34 @@ function prdSuggestion(files: SourceFile[], prdsRoot: string): Suggestion | null
     evidence: `Observed local Markdown file inventory under ${prdsRoot}; confirm relevance with the trio.`,
   };
 }
-function identitySuggestion(legacy: Record<string, unknown>): Suggestion | null {
-  const project = record(legacy.project);
+function identitySuggestion(projectConfig: Record<string, unknown>): Suggestion | null {
+  const project = record(projectConfig.project);
   const identity = ['name', 'id', 'author', 'description'].flatMap(key => {
     const value = optionalString(project[key], 'project.' + key);
     return value ? [key + '=' + value] : [];
   });
   return identity.length ? { answer: identity.join('; '), evidence: 'Observed shell.config.json project fields; confirm these identify the product being prototyped.' } : null;
 }
-function legacyPathDefaults(legacyPaths: Record<string, unknown>, prdsRoot: string): Record<string, string> {
+function pathDefaults(projectPaths: Record<string, unknown>, prdsRoot: string): Record<string, string> {
   return {
     prds: prdsRoot, docs: 'docs', pages: 'docs/pages', components: 'docs/components', interactions: 'docs/interactions', journeys: 'docs/journeys',
-    design: 'design/project.json', source: optionalString(legacyPaths.codebaseFolder, 'codebaseFolder') ?? 'src',
-    tests: optionalString(legacyPaths.testsFolder, 'testsFolder') ?? 'tests', assets: 'assets', fixtures: 'tests/fixtures', reports: 'reports',
+    design: 'design/project.json', source: optionalString(projectPaths.codebaseFolder, 'codebaseFolder') ?? 'src',
+    tests: optionalString(projectPaths.testsFolder, 'testsFolder') ?? 'tests', assets: 'assets', fixtures: 'tests/fixtures', reports: 'reports',
     starters: 'configs/starters', prototype: 'prototype',
-    testVault: optionalString(legacyPaths.testVaultFolder, 'testVaultFolder') ?? '.test-vault',
-    obsidianConfig: optionalString(legacyPaths.configDirectory, 'configDirectory') ?? defaultVaultConfigDirectory,
+    testVault: optionalString(projectPaths.testVaultFolder, 'testVaultFolder') ?? '.test-vault',
+    obsidianConfig: optionalString(projectPaths.configDirectory, 'configDirectory') ?? defaultVaultConfigDirectory,
   };
 }
-function pathsSuggestion(configuredPaths: Record<string, unknown>, legacyPaths: Record<string, unknown>, prdsRoot: string): Suggestion {
-  const pathDefaults = legacyPathDefaults(legacyPaths, prdsRoot);
-  for (const key of Object.keys(pathDefaults)) {
+function pathsSuggestion(configuredPaths: Record<string, unknown>, projectPaths: Record<string, unknown>, prdsRoot: string): Suggestion {
+  const paths = pathDefaults(projectPaths, prdsRoot);
+  for (const key of Object.keys(paths)) {
     const value = optionalString(configuredPaths[key], 'paths.' + key);
-    if (value !== undefined) pathDefaults[key] = ['testVault', 'obsidianConfig'].includes(key) ? value : portablePath(value);
+    if (value !== undefined) paths[key] = ['testVault', 'obsidianConfig'].includes(key) ? value : portablePath(value);
   }
-  pathDefaults.prds = prdsRoot;
+  paths.prds = prdsRoot;
   return {
-    answer: 'handout=PROJECT-SETUP-HANDOUT.md; settings=configs/user-settings.json; ' + Object.entries(pathDefaults).map(([key, value]) => key + '=' + value).join('; '),
-    evidence: 'Handout path defaults plus observed configs/user-settings.json and legacy shell.config.json, where present. Confirm support and output ownership against the installed shell.',
+    answer: 'handout=PROJECT-SETUP-HANDOUT.md; settings=configs/user-settings.json; ' + Object.entries(paths).map(([key, value]) => key + '=' + value).join('; '),
+    evidence: 'Handout path defaults plus observed configs/user-settings.json and the shell.config.json project paths, where present. Confirm support and output ownership against the installed shell.',
   };
 }
 function runModeSuggestion(settings: Record<string, unknown>): Suggestion | null {
@@ -148,15 +148,15 @@ export async function loadHandoutWorkspace(root: string, options: WorkspaceOptio
   const local = await localRoot(root), inventory: Inventory = { files: [], totalBytes: 0, visited: 0, prdCount: 0 };
   const configTexts = await readConfigurationFiles(local, options, inventory);
   assertVirtualInputs(options);
-  const settings = object(configTexts['configs/user-settings.json'] ?? null), legacy = object(configTexts['shell.config.json'] ?? null);
-  const configuredPaths = record(settings.paths), legacyPaths = record(legacy.paths);
+  const settings = object(configTexts['configs/user-settings.json'] ?? null), projectConfig = object(configTexts['shell.config.json'] ?? null);
+  const configuredPaths = record(settings.paths), projectPaths = record(projectConfig.paths);
   const prdsRoot = portablePath(options.prds ?? optionalString(configuredPaths.prds, 'paths.prds') ?? 'docs/prds');
   await walkPrds(local, prdsRoot, 0, inventory);
   const suggestions: Record<string, Suggestion> = {};
-  const prds = prdSuggestion(inventory.files, prdsRoot), identity = identitySuggestion(legacy);
+  const prds = prdSuggestion(inventory.files, prdsRoot), identity = identitySuggestion(projectConfig);
   if (prds) suggestions['sources.prds'] = prds;
   if (identity) suggestions['product.identity'] = identity;
-  suggestions['setup.paths'] = pathsSuggestion(configuredPaths, legacyPaths, prdsRoot);
+  suggestions['setup.paths'] = pathsSuggestion(configuredPaths, projectPaths, prdsRoot);
   const runMode = runModeSuggestion(settings);
   if (runMode) suggestions['run.mode'] = runMode;
   return { root: local, snapshot: makeSnapshot(prdsRoot, inventory.files, options.prds !== undefined), suggestions, prdCount: inventory.prdCount };
