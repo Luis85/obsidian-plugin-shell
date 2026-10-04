@@ -243,5 +243,7 @@ Never do any of the following:
   before proposing dependency updates.
 - **Audit advisories.** `npm ci` may report moderate advisories that come
   through the locked `obsidian` API package (for example `moment`). Do not run
-  `npm audit fix --force`; it would downgrade `obsidian`. Use
-  `npm run check:security` for the current result.
+  `npm audit fix --force`; it would downgrade `obsidian`. The open `moment`
+  advisory is recorded in
+  [the moment advisory exception](docs/development/MOMENT-ADVISORY-EXCEPTION.md).
+  Use `npm run check:security` for the current result.
