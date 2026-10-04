@@ -6,10 +6,13 @@ import { resolve } from 'node:path';
 import { setupOptions, resumeOptions, setupHelp } from './setup/options.mjs';
 import { planIdentity } from './setup/identity.mjs';
 import { planLocalMcp } from './setup/mcp.mjs';
+import { askSetupForm, confirmKeys, identityKeys, loadSetupForm } from './setup/form.mjs';
 import { readJournal } from './setup/journal.mjs';
 import { executeSetup, setupStages } from './setup/execute.mjs';
 import { projectInstallEnvironment } from './shared/npm-install.mjs';
 
+// The interview is data: configs/forms/setup-identity.json, located from this module so kits and copies agree.
+const setupFormUrl = new URL('../configs/forms/setup-identity.json', import.meta.url);
 let jsonOutput = process.argv.includes('--json');
 async function setup() {
   let options = await setupOptions(process.argv.slice(2)); jsonOutput = Boolean(options.json);
@@ -26,16 +29,13 @@ async function setup() {
   if (!options.yes && !options['dry-run'] && (!stdin.isTTY || options['no-interaction'])) throw new Error('Noninteractive setup requires --yes after reviewing --dry-run');
   let planned = await planIdentity(root, options, previous);
   if (!options.yes && !options['dry-run'] && !options.resume && stdin.isTTY) {
-    const prompt = createInterface({ input: stdin, output: options.json ? stderr : stdout });
+    const form = await loadSetupForm(setupFormUrl);
+    const output = options.json ? stderr : stdout;
+    const prompt = createInterface({ input: stdin, output });
     try {
-      for (const key of ['id', 'name', 'description', 'author', 'repo', 'version']) {
-        const answer = await prompt.question(`${key} [${planned.identity[key] ?? 'optional owner/repo'}]: `);
-        if (answer.trim()) options[key] = answer.trim();
-      }
-      if (!options.explicitKeys.some(key => key === 'mcp' || key === 'no-mcp')) {
-        options.mcp = /^y(es)?$/i.test((await prompt.question('Enable project-local Workbench MCP for Claude Code and Codex? [y/N] ')).trim());
-      }
-      options.identityRequested = ['id', 'name', 'description', 'author', 'repo', 'version'].some(key => options[key] !== undefined);
+      const skip = options.explicitKeys.some(key => key === 'mcp' || key === 'no-mcp') ? confirmKeys : [];
+      Object.assign(options, await askSetupForm(form, prompt, { defaults: planned.identity, skip, write: text => output.write(text) }));
+      options.identityRequested = identityKeys.some(key => options[key] !== undefined);
       planned = await planIdentity(root, options, previous);
     } finally { prompt.close(); }
   }
