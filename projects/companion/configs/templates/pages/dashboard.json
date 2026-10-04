@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "page.dashboard",
+  "name": "Dashboard",
+  "version": "1.0.0",
+  "templateType": "page-with-bricks",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Overview page with summary, visualization and record regions.",
+  "tags": [
+    "page",
+    "pages",
+    "dashboard"
+  ],
+  "recommendedFor": [
+    "dashboard",
+    "analytics",
+    "webapp"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "dashboard"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.app-header",
+      "slot": "header"
+    },
+    {
+      "template": "molecule.stat-card",
+      "slot": "summary"
+    },
+    {
+      "template": "organism.bar-chart",
+      "slot": "visualization"
+    },
+    {
+      "template": "organism.data-table",
+      "slot": "records"
+    }
+  ],
+  "slots": [
+    {
+      "id": "header",
+      "role": "header",
+      "accepts": [
+        "organism",
+        "molecule"
+      ]
+    },
+    {
+      "id": "summary",
+      "role": "content",
+      "accepts": [
+        "molecule"
+      ]
+    },
+    {
+      "id": "visualization",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "records",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    }
+  ],
+  "design": {
+    "kind": "page",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

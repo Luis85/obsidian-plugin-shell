@@ -1,0 +1,375 @@
+{
+  "schema": 1,
+  "compiler": "companion-design-system/1",
+  "target": "nuxt-ui-vue",
+  "pluginId": "workbench-companion",
+  "scope": "[data-plugin-ui=\"workbench-companion\"].ps--workbench-companion",
+  "colorPolicy": "host",
+  "bindings": {
+    "primary": {
+      "group": "colors",
+      "token": "accent",
+      "origin": "convention"
+    },
+    "secondary": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "success": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "info": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "warning": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "error": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "text": {
+      "group": "colors",
+      "token": "text",
+      "origin": "convention"
+    },
+    "textMuted": {
+      "group": "colors",
+      "token": "muted",
+      "origin": "convention"
+    },
+    "textHighlighted": {
+      "group": "colors",
+      "token": "text",
+      "origin": "convention"
+    },
+    "textInverted": {
+      "group": "colors",
+      "token": "accent-text",
+      "origin": "convention"
+    },
+    "background": {
+      "group": "colors",
+      "token": "background",
+      "origin": "convention"
+    },
+    "backgroundMuted": {
+      "group": "colors",
+      "token": "background",
+      "origin": "convention"
+    },
+    "backgroundElevated": {
+      "group": "colors",
+      "token": "background",
+      "origin": "convention"
+    },
+    "backgroundAccented": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "backgroundInverted": {
+      "group": "colors",
+      "token": "text",
+      "origin": "convention"
+    },
+    "border": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "borderAccented": {
+      "group": "colors",
+      "token": null,
+      "origin": "inherit"
+    },
+    "borderInverted": {
+      "group": "colors",
+      "token": "text",
+      "origin": "convention"
+    },
+    "interfaceFont": {
+      "group": "fonts",
+      "token": "interface",
+      "origin": "convention"
+    },
+    "codeFont": {
+      "group": "fonts",
+      "token": "code",
+      "origin": "convention"
+    },
+    "bodyType": {
+      "group": "typography",
+      "token": "body",
+      "origin": "convention"
+    },
+    "labelType": {
+      "group": "typography",
+      "token": "label",
+      "origin": "convention"
+    },
+    "titleType": {
+      "group": "typography",
+      "token": "page-title",
+      "origin": "convention"
+    },
+    "subtitleType": {
+      "group": "typography",
+      "token": "section-title",
+      "origin": "convention"
+    },
+    "spacingUnit": {
+      "group": "spacing",
+      "token": "xs",
+      "origin": "convention"
+    },
+    "spaceXs": {
+      "group": "spacing",
+      "token": "xs",
+      "origin": "convention"
+    },
+    "spaceSm": {
+      "group": "spacing",
+      "token": "sm",
+      "origin": "convention"
+    },
+    "spaceMd": {
+      "group": "spacing",
+      "token": "md",
+      "origin": "convention"
+    },
+    "spaceLg": {
+      "group": "spacing",
+      "token": "lg",
+      "origin": "convention"
+    },
+    "spaceXl": {
+      "group": "spacing",
+      "token": "xl",
+      "origin": "convention"
+    },
+    "controlRadius": {
+      "group": "radii",
+      "token": "control",
+      "origin": "convention"
+    },
+    "surfaceRadius": {
+      "group": "radii",
+      "token": "surface",
+      "origin": "convention"
+    },
+    "controlHeight": {
+      "group": "sizes",
+      "token": "control",
+      "origin": "convention"
+    },
+    "iconSize": {
+      "group": "sizes",
+      "token": "icon",
+      "origin": "convention"
+    },
+    "inspectorWidth": {
+      "group": "sizes",
+      "token": "inspector",
+      "origin": "convention"
+    }
+  },
+  "tokens": {
+    "fonts": [
+      {
+        "id": "body",
+        "variables": [
+          "--workbench-companion-ds-fonts-body"
+        ],
+        "className": "workbench-companion-ds-fonts-body"
+      },
+      {
+        "id": "code",
+        "variables": [
+          "--workbench-companion-ds-fonts-code"
+        ],
+        "className": "workbench-companion-ds-fonts-code"
+      },
+      {
+        "id": "interface",
+        "variables": [
+          "--workbench-companion-ds-fonts-interface"
+        ],
+        "className": "workbench-companion-ds-fonts-interface"
+      }
+    ],
+    "typography": [
+      {
+        "id": "body",
+        "variables": [
+          "--workbench-companion-ds-typography-body-font",
+          "--workbench-companion-ds-typography-body-size",
+          "--workbench-companion-ds-typography-body-weight",
+          "--workbench-companion-ds-typography-body-line-height",
+          "--workbench-companion-ds-typography-body-tracking"
+        ],
+        "className": "workbench-companion-ds-typography-body"
+      },
+      {
+        "id": "label",
+        "variables": [
+          "--workbench-companion-ds-typography-label-font",
+          "--workbench-companion-ds-typography-label-size",
+          "--workbench-companion-ds-typography-label-weight",
+          "--workbench-companion-ds-typography-label-line-height",
+          "--workbench-companion-ds-typography-label-tracking"
+        ],
+        "className": "workbench-companion-ds-typography-label"
+      },
+      {
+        "id": "page-title",
+        "variables": [
+          "--workbench-companion-ds-typography-page-title-font",
+          "--workbench-companion-ds-typography-page-title-size",
+          "--workbench-companion-ds-typography-page-title-weight",
+          "--workbench-companion-ds-typography-page-title-line-height",
+          "--workbench-companion-ds-typography-page-title-tracking"
+        ],
+        "className": "workbench-companion-ds-typography-page-title"
+      },
+      {
+        "id": "section-title",
+        "variables": [
+          "--workbench-companion-ds-typography-section-title-font",
+          "--workbench-companion-ds-typography-section-title-size",
+          "--workbench-companion-ds-typography-section-title-weight",
+          "--workbench-companion-ds-typography-section-title-line-height",
+          "--workbench-companion-ds-typography-section-title-tracking"
+        ],
+        "className": "workbench-companion-ds-typography-section-title"
+      }
+    ],
+    "spacing": [
+      {
+        "id": "lg",
+        "variables": [
+          "--workbench-companion-ds-spacing-lg"
+        ],
+        "className": "workbench-companion-ds-spacing-lg"
+      },
+      {
+        "id": "md",
+        "variables": [
+          "--workbench-companion-ds-spacing-md"
+        ],
+        "className": "workbench-companion-ds-spacing-md"
+      },
+      {
+        "id": "sm",
+        "variables": [
+          "--workbench-companion-ds-spacing-sm"
+        ],
+        "className": "workbench-companion-ds-spacing-sm"
+      },
+      {
+        "id": "xl",
+        "variables": [
+          "--workbench-companion-ds-spacing-xl"
+        ],
+        "className": "workbench-companion-ds-spacing-xl"
+      },
+      {
+        "id": "xs",
+        "variables": [
+          "--workbench-companion-ds-spacing-xs"
+        ],
+        "className": "workbench-companion-ds-spacing-xs"
+      }
+    ],
+    "sizes": [
+      {
+        "id": "control",
+        "variables": [
+          "--workbench-companion-ds-sizes-control"
+        ],
+        "className": "workbench-companion-ds-sizes-control"
+      },
+      {
+        "id": "icon",
+        "variables": [
+          "--workbench-companion-ds-sizes-icon"
+        ],
+        "className": "workbench-companion-ds-sizes-icon"
+      },
+      {
+        "id": "inspector",
+        "variables": [
+          "--workbench-companion-ds-sizes-inspector"
+        ],
+        "className": "workbench-companion-ds-sizes-inspector"
+      }
+    ],
+    "radii": [
+      {
+        "id": "control",
+        "variables": [
+          "--workbench-companion-ds-radii-control"
+        ],
+        "className": "workbench-companion-ds-radii-control"
+      },
+      {
+        "id": "surface",
+        "variables": [
+          "--workbench-companion-ds-radii-surface"
+        ],
+        "className": "workbench-companion-ds-radii-surface"
+      }
+    ],
+    "colors": [
+      {
+        "id": "accent",
+        "variables": [
+          "--workbench-companion-ds-colors-accent"
+        ],
+        "className": "workbench-companion-ds-colors-accent"
+      },
+      {
+        "id": "accent-text",
+        "variables": [
+          "--workbench-companion-ds-colors-accent-text"
+        ],
+        "className": "workbench-companion-ds-colors-accent-text"
+      },
+      {
+        "id": "background",
+        "variables": [
+          "--workbench-companion-ds-colors-background"
+        ],
+        "className": "workbench-companion-ds-colors-background"
+      },
+      {
+        "id": "muted",
+        "variables": [
+          "--workbench-companion-ds-colors-muted"
+        ],
+        "className": "workbench-companion-ds-colors-muted"
+      },
+      {
+        "id": "text",
+        "variables": [
+          "--workbench-companion-ds-colors-text"
+        ],
+        "className": "workbench-companion-ds-colors-text"
+      }
+    ]
+  },
+  "notes": [
+    "Guidelines remain documentation, not executable styling.",
+    "Fonts reference local/host families only.",
+    "Unbound semantic roles retain framework defaults.",
+    "Nuxt variants retain their interaction behavior and relative radius scale."
+  ]
+}

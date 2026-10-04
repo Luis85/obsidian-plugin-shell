@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "bindings": [
+    {
+      "surface": "node-13",
+      "editor": "journey-lens"
+    }
+  ],
+  "implementation": "shared-journey-lens",
+  "persistence": "reviewed-whole-project-vault-file",
+  "nativeAcceptance": "not-inferred"
+}

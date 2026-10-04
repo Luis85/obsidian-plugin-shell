@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "page.welcome",
+  "name": "Welcome / Getting Started",
+  "version": "1.0.0",
+  "templateType": "page",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "First-run orientation page with a clear next action.",
+  "tags": [
+    "page",
+    "pages",
+    "welcome",
+    "onboarding"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin",
+    "editor"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "onboarding"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "recipe",
+    "recipeId": "recipe-empty-state"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

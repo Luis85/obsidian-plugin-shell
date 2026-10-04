@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": [
+    "../../src/**/*.ts",
+    "../../src/**/*.vue",
+    "../../src/generated/**/*.ts",
+    "../../src/generated/**/*.vue",
+    "../../tests/project/**/*.ts",
+    "../../harness/prototype/**/*.ts",
+    "../../tests/runtime/generated/**/*.ts"
+  ]
+}

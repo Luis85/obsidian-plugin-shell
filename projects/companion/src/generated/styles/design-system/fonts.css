@@ -1,0 +1,9 @@
+/* Generated design system. Edit saved tokens, not this managed file. */
+[data-plugin-ui="workbench-companion"].ps--workbench-companion {
+  --workbench-companion-ds-fonts-body: var(--font-text, sans-serif);
+  --workbench-companion-ds-fonts-code: var(--font-monospace, monospace);
+  --workbench-companion-ds-fonts-interface: var(--font-interface, system-ui);
+}
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-fonts-body { font-family: var(--workbench-companion-ds-fonts-body); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-fonts-code { font-family: var(--workbench-companion-ds-fonts-code); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-fonts-interface { font-family: var(--workbench-companion-ds-fonts-interface); }

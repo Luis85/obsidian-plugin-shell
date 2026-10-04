@@ -1,0 +1,31 @@
+import type { Id, UiNode } from '../shared/ir'
+
+export type LayoutScope = 'page' | 'region'
+export interface LayoutDefinition {
+  id: Id
+  name: string
+  description?: string
+  scope: LayoutScope
+  category: 'application' | 'dashboard' | 'master-detail' | 'form' | 'settings' | 'website' | 'custom'
+  root: UiNode[]
+  slots: { name: string; description?: string; required?: boolean }[]
+  sourcePageId?: Id
+  createdAt: string
+}
+
+export function createLayout(input: Omit<LayoutDefinition,'id'|'createdAt'>): LayoutDefinition {
+  return { ...input, id: `layout-${crypto.randomUUID()}`, createdAt: new Date().toISOString() }
+}
+
+export function instantiateLayout(layout: LayoutDefinition): UiNode[] {
+  const remap = new Map<string,string>()
+  const fresh=(id:string)=>{ if(!remap.has(id)) remap.set(id,`node-${crypto.randomUUID()}`); return remap.get(id)! }
+  const visit=(n:UiNode):UiNode=>{
+    const copy:any={...n,id:fresh(n.id)}
+    if(n.kind==='element'&&n.children) copy.children=n.children.map(visit)
+    if(n.kind==='slot'&&n.fallback) copy.fallback=n.fallback.map(visit)
+    if(n.kind==='component'&&n.slots) copy.slots=Object.fromEntries(Object.entries(n.slots).map(([k,v])=>[k,v.map(visit)]))
+    return copy
+  }
+  return layout.root.map(visit)
+}

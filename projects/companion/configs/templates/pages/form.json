@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "page.form",
+  "name": "Form Page",
+  "version": "1.0.0",
+  "templateType": "page-with-bricks",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Create or edit workflow with grouped fields and actions.",
+  "tags": [
+    "page",
+    "pages",
+    "form",
+    "crud"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "record-edit"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.app-header",
+      "slot": "header"
+    },
+    {
+      "template": "organism.settings-group",
+      "slot": "form"
+    },
+    {
+      "template": "molecule.action-group",
+      "slot": "actions"
+    }
+  ],
+  "slots": [
+    {
+      "id": "header",
+      "role": "header",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "form",
+      "role": "content",
+      "accepts": [
+        "organism",
+        "molecule"
+      ]
+    },
+    {
+      "id": "actions",
+      "role": "content",
+      "accepts": [
+        "molecule"
+      ]
+    }
+  ],
+  "design": {
+    "kind": "page",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

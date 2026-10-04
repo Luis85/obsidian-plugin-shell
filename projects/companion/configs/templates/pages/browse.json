@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "page.browse",
+  "name": "Browse Page",
+  "version": "1.0.0",
+  "templateType": "page-with-bricks",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Search-and-browse surface with filters and a reusable list.",
+  "tags": [
+    "page",
+    "pages",
+    "browse",
+    "search",
+    "list"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "browse",
+    "search"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.app-header",
+      "slot": "header"
+    },
+    {
+      "template": "organism.search-panel",
+      "slot": "search"
+    },
+    {
+      "template": "organism.list",
+      "slot": "results"
+    }
+  ],
+  "slots": [
+    {
+      "id": "header",
+      "role": "header",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "search",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "results",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    }
+  ],
+  "design": {
+    "kind": "page",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

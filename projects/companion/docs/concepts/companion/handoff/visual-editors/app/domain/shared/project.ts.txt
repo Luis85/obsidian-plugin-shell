@@ -1,0 +1,17 @@
+import type { PageDefinition } from '../page/page'
+import type { ComponentDefinition } from '../component/component'
+import { validatePage } from '../page/page'
+import { validateComponent } from '../component/component'
+
+export interface EditorProject {
+ schema:'companion.vue-ir'; version:3
+ target:{framework:'vue';version:3;language:'typescript';format:'sfc'}
+ project:{id:string;name:string}
+ pages:PageDefinition[]; components:ComponentDefinition[]
+}
+export function validateProject(x:EditorProject):string[]{
+ const issues=[...x.pages.flatMap(validatePage),...x.components.flatMap(validateComponent)]
+ const ids=new Set(x.components.map(c=>c.id))
+ const walk=(nodes:any[])=>nodes.forEach(n=>{if(n.kind==='component'&&!ids.has(n.componentId))issues.push(`Unknown component: ${n.componentId}`);if(n.children)walk(n.children);if(n.fallback)walk(n.fallback);if(n.slots)Object.values(n.slots).forEach((v:any)=>walk(v))})
+ x.pages.forEach(p=>walk(p.root));x.components.forEach(c=>walk(c.template));return [...new Set(issues)]
+}

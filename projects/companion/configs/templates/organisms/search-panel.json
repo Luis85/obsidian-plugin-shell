@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.search-panel",
+  "name": "Search Panel",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "organism",
+  "category": "Forms",
+  "description": "Search input with supporting filter and action controls.",
+  "tags": [
+    "organism",
+    "forms",
+    "search",
+    "filter"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "search",
+    "filtering"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "molecule.search-field"
+    },
+    {
+      "template": "molecule.action-group"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "composition",
+    "tag": "section",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

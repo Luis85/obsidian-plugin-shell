@@ -1,0 +1,73 @@
+{
+  "description": "Legacy Angular 15 NgModule application: webpack browser builder, Karma/Jasmine, legacy .eslintrc plus a stray tslint.json, two lockfiles, non-strict TypeScript 4.9, Node 16, no CI.",
+  "files": {
+    "package.json": {
+      "name": "legacy-crm",
+      "version": "0.0.0",
+      "scripts": { "ng": "ng", "start": "ng serve", "build": "ng build", "test": "ng test", "lint": "ng lint" },
+      "private": true,
+      "dependencies": {
+        "@angular/animations": "^15.2.0", "@angular/common": "^15.2.0", "@angular/compiler": "^15.2.0", "@angular/core": "^15.2.10", "@angular/forms": "^15.2.0",
+        "@angular/platform-browser": "^15.2.0", "@angular/platform-browser-dynamic": "^15.2.0", "@angular/router": "^15.2.0", "rxjs": "~7.8.0", "tslib": "^2.3.0", "zone.js": "~0.12.0", "@ngrx/store": "^15.4.0", "bootstrap": "^5.2.3"
+      },
+      "devDependencies": {
+        "@angular-devkit/build-angular": "^15.2.9", "@angular/cli": "~15.2.9", "@angular/compiler-cli": "^15.2.0", "@types/jasmine": "~4.3.0", "jasmine-core": "~4.6.0",
+        "karma": "~6.4.0", "karma-chrome-launcher": "~3.2.0", "karma-jasmine": "~5.1.0", "tslint": "~6.1.0", "typescript": "~4.9.4", "eslint": "^8.40.0", "@angular-eslint/eslint-plugin": "^15.2.1"
+      },
+      "engines": { "node": "^14.20.0 || ^16.13.0 || ^18.10.0" }
+    },
+    "package-lock.json": { "name": "legacy-crm", "lockfileVersion": 2, "requires": true, "packages": {} },
+    "yarn.lock": ["# yarn lockfile v1", ""],
+    ".nvmrc": ["v16.20.2"],
+    ".eslintrc.json": { "root": true, "overrides": [{ "files": ["*.ts"], "extends": ["plugin:@angular-eslint/recommended"] }] },
+    "tslint.json": { "extends": "tslint:recommended", "rules": {} },
+    "karma.conf.js": ["module.exports = function (config) { config.set({ frameworks: ['jasmine'], browsers: ['Chrome'] }); };"],
+    "angular.json": {
+      "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+      "version": 1,
+      "projects": {
+        "legacy-crm": {
+          "projectType": "application",
+          "root": "",
+          "sourceRoot": "src",
+          "prefix": "app",
+          "architect": {
+            "build": { "builder": "@angular-devkit/build-angular:browser", "options": { "outputPath": "dist/legacy-crm", "index": "src/index.html", "main": "src/main.ts", "polyfills": ["zone.js"], "tsConfig": "tsconfig.app.json", "styles": ["src/styles.scss"] } },
+            "serve": { "builder": "@angular-devkit/build-angular:dev-server", "options": {} },
+            "test": { "builder": "@angular-devkit/build-angular:karma", "options": { "tsConfig": "tsconfig.spec.json" } }
+          }
+        }
+      }
+    },
+    "tsconfig.json": [
+      "{",
+      "  // legacy settings",
+      "  \"compileOnSave\": false,",
+      "  \"compilerOptions\": { \"strict\": false, \"target\": \"ES2022\", \"module\": \"ES2022\", \"experimentalDecorators\": true }",
+      "}"
+    ],
+    "tsconfig.app.json": { "extends": "./tsconfig.json", "files": ["src/main.ts"] },
+    "src/index.html": ["<!doctype html>", "<html><body><app-root></app-root></body></html>"],
+    "src/styles.scss": ["@import 'bootstrap/scss/bootstrap';"],
+    "src/main.ts": ["import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';", "import { AppModule } from './app/app.module';", "platformBrowserDynamic().bootstrapModule(AppModule).catch(err => console.error(err));"],
+    "src/app/app.module.ts": ["import { NgModule } from '@angular/core';", "import { BrowserModule } from '@angular/platform-browser';", "import { AppRoutingModule } from './app-routing.module';", "import { AppComponent } from './app.component';", "@NgModule({ declarations: [AppComponent], imports: [BrowserModule, AppRoutingModule], providers: [], bootstrap: [AppComponent] })", "export class AppModule {}"],
+    "src/app/app-routing.module.ts": [
+      "import { NgModule } from '@angular/core';",
+      "import { RouterModule, Routes } from '@angular/router';",
+      "const routes: Routes = [",
+      "  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },",
+      "  { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) },",
+      "  { path: 'customers', loadChildren: () => import('./customers/customers.module').then(m => m.CustomersModule) },",
+      "];",
+      "@NgModule({ imports: [RouterModule.forRoot(routes)], exports: [RouterModule] })",
+      "export class AppRoutingModule {}"
+    ],
+    "src/app/app.component.ts": ["import { Component } from '@angular/core';", "@Component({ selector: 'app-root', templateUrl: './app.component.html' })", "export class AppComponent { title = 'legacy-crm'; }"],
+    "src/app/dashboard/dashboard.module.ts": ["import { NgModule } from '@angular/core';", "import { RouterModule } from '@angular/router';", "import { DashboardComponent } from './dashboard.component';", "@NgModule({ declarations: [DashboardComponent], imports: [RouterModule.forChild([{ path: '', component: DashboardComponent }])] })", "export class DashboardModule {}"],
+    "src/app/dashboard/dashboard.component.ts": ["import { Component, Input } from '@angular/core';", "@Component({ selector: 'app-dashboard', templateUrl: './dashboard.component.html' })", "export class DashboardComponent { @Input() range = '7d'; }"],
+    "src/app/customers/customers.module.ts": ["import { NgModule } from '@angular/core';", "import { RouterModule } from '@angular/router';", "import { CustomerListComponent } from './customer-list.component';", "@NgModule({ declarations: [CustomerListComponent], imports: [RouterModule.forChild([{ path: '', component: CustomerListComponent }, { path: ':id', component: CustomerListComponent }])] })", "export class CustomersModule {}"],
+    "src/app/customers/customer-list.component.ts": ["import { Component, Input } from '@angular/core';", "@Component({ selector: 'app-customer-list', templateUrl: './customer-list.component.html' })", "export class CustomerListComponent { @Input() pageSize = 20; }"],
+    "src/app/customers/customer.service.ts": ["import { Injectable } from '@angular/core';", "@Injectable({ providedIn: 'root' })", "export class CustomerService {}"],
+    "src/app/customers/customer-list.component.spec.ts": ["describe('CustomerListComponent', () => { it('creates', () => expect(true).toBe(true)); });"]
+  }
+}

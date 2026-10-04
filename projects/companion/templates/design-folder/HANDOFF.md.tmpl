@@ -1,0 +1,38 @@
+# Implement {{title}} from its design folder
+
+For Claude Code, or another coding agent, working in the full repository. The repository's root
+`AGENTS.md` decides architecture, quality gates and the definition of done; it wins over anything
+in this folder.
+
+## Before you start
+
+1. Run `{{statusCommand}}`. If the folder is stale, the project model changed after the design was
+   made: review what changed, run `{{syncCommand}}` and check the ready rows still apply.
+2. Read `handoff/implementation-map.md` and pick the rows with status `ready`. Rows with other
+   statuses are not yours to build.
+3. For each row, read its prototype files in `prototypes/`, the screen in `context/screens.md` and
+   the decisions in `notes/decisions.md`.
+4. Read `ENGINEERING_HANDOFF_GUIDE.md`. Its screen-to-code map names the files to change, and its
+   sources list shows which project files it was generated from. If `{{statusCommand}}` reports the
+   guide as changed, sync first so you do not act on outdated facts.
+
+## Implement
+
+- Treat a prototype as a visual and behavioural reference, never as source to paste. Rebuild it with
+  the project's components, composables and stores, and map its colours and spacing to the tokens in
+  `context/design-tokens.md`. No inline styles, copied colour literals or remote assets.
+- Map `data-design-id` attributes to the screen, component and interaction IDs of the project model,
+  and keep those IDs in test selectors where the project's conventions allow it.
+- A prototype that adds a screen, component or interaction changes the project model. Change the
+  model first (for example with `node bin/app sketch`), regenerate, then `{{syncCommand}}`, so the
+  canonical design and this folder stay in step.
+- Business behaviour, persistence and permissions come from the project's requirements, not from
+  prototype sample data.
+
+## Verify and record
+
+1. Run the gates named in the root `AGENTS.md` (at least `node bin/app check`), plus the UI checks
+   for changed screens where the project has them (`node bin/app ui status`, browser tests).
+2. Screenshots or a UI gallery are evidence for human review, never an accepted baseline.
+3. Set the row to `implemented` with the commit or pull request. `verified` is set by a human after
+   review.

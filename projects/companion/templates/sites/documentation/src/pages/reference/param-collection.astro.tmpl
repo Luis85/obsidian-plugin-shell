@@ -1,0 +1,32 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import DocsNav from '../../components/DocsNav.astro';
+import CollectionFields from '../../components/CollectionFields.astro';
+import CollectionTable from '../../components/CollectionTable.astro';
+import { collectionInfo, collectionNames } from '../../lib/collections';
+
+/** One reference page per collection: its source, its fields with display names and types, and every record. */
+export function getStaticPaths() {
+  return collectionNames().map(collection => ({ params: { collection } }));
+}
+const { collection } = Astro.params;
+const info = collectionInfo(collection);
+const title = info?.view.name ?? collection;
+---
+<SiteLayout title={title}>
+  <div class="docs-layout">
+    <DocsNav current={collection} />
+    <article aria-labelledby="page-title">
+      <h1 id="page-title">{title}</h1>
+      <p>From the <code>{info?.view.name}</code> view of <code>{info?.base.path}</code> ({info?.view.type}).</p>
+      <section aria-labelledby="fields">
+        <h2 id="fields">Fields</h2>
+        <CollectionFields name={collection} />
+      </section>
+      <section aria-labelledby="entries">
+        <h2 id="entries">Entries</h2>
+        <CollectionTable name={collection} caption={`Entries of ${title}`} />
+      </section>
+    </article>
+  </div>
+</SiteLayout>

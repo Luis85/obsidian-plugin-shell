@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "atom.avatar",
+  "name": "Avatar",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "atom",
+  "category": "Data display",
+  "description": "Person or entity identity marker.",
+  "tags": [
+    "atom",
+    "data-display",
+    "identity"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "identity"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [
+    {
+      "name": "alt",
+      "type": "string",
+      "required": false,
+      "default": "User",
+      "description": "Accessible alternative."
+    }
+  ],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-avatar"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

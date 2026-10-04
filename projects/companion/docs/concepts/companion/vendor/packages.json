@@ -1,0 +1,869 @@
+[
+  {
+    "id": "vue@3.5.43",
+    "name": "vue",
+    "version": "3.5.43",
+    "size": 673182,
+    "unpackedSize": 2553478,
+    "shasum": "bab91368e7b9aad9b89dd92e866b120081deb094",
+    "integrity": "sha512-o5qZoksdnjIKvW1srZ3ab7pcDNYAerBjRe54D0LBLfRdCYFrSgBHVXokMas35czQc0//lmx4/tuY4ZNQ+Rf2Ng==",
+    "filename": "vue-3.5.43.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1091,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 3759,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/index.browser.js",
+        "size": 46,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/index.browser.mjs",
+        "size": 34,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/index.d.mts",
+        "size": 34,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/index.d.ts",
+        "size": 34,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/index.js",
+        "size": 75,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/index.mjs",
+        "size": 61,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/package.json",
+        "size": 50,
+        "mode": 420
+      },
+      {
+        "path": "compiler-sfc/register-ts.js",
+        "size": 111,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.cjs.js",
+        "size": 2296,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.cjs.prod.js",
+        "size": 1774,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.d.mts",
+        "size": 299,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.d.ts",
+        "size": 299,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.esm-browser.js",
+        "size": 563667,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.esm-browser.prod.js",
+        "size": 173163,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.esm-bundler.js",
+        "size": 2188,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.global.js",
+        "size": 596415,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.global.prod.js",
+        "size": 168331,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.runtime.esm-browser.js",
+        "size": 393190,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.runtime.esm-browser.prod.js",
+        "size": 111433,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.runtime.esm-bundler.js",
+        "size": 580,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.runtime.global.js",
+        "size": 419764,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue.runtime.global.prod.js",
+        "size": 109374,
+        "mode": 420
+      },
+      {
+        "path": "index.js",
+        "size": 171,
+        "mode": 420
+      },
+      {
+        "path": "index.mjs",
+        "size": 27,
+        "mode": 420
+      },
+      {
+        "path": "jsx-runtime/index.d.ts",
+        "size": 848,
+        "mode": 420
+      },
+      {
+        "path": "jsx-runtime/index.js",
+        "size": 303,
+        "mode": 420
+      },
+      {
+        "path": "jsx-runtime/index.mjs",
+        "size": 265,
+        "mode": 420
+      },
+      {
+        "path": "jsx-runtime/package.json",
+        "size": 75,
+        "mode": 420
+      },
+      {
+        "path": "jsx.d.ts",
+        "size": 742,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 2769,
+        "mode": 420
+      },
+      {
+        "path": "server-renderer/index.d.mts",
+        "size": 37,
+        "mode": 420
+      },
+      {
+        "path": "server-renderer/index.d.ts",
+        "size": 37,
+        "mode": 420
+      },
+      {
+        "path": "server-renderer/index.js",
+        "size": 49,
+        "mode": 420
+      },
+      {
+        "path": "server-renderer/index.mjs",
+        "size": 37,
+        "mode": 420
+      },
+      {
+        "path": "server-renderer/package.json",
+        "size": 50,
+        "mode": 420
+      }
+    ],
+    "entryCount": 37,
+    "bundled": []
+  },
+  {
+    "id": "@vue-flow/core@1.48.2",
+    "name": "@vue-flow/core",
+    "version": "1.48.2",
+    "size": 263743,
+    "unpackedSize": 1285046,
+    "shasum": "cef8641b17f6220c257d4208bdb2082cee882225",
+    "integrity": "sha512-raxhgKWE+G/mcEvXJjGFUDYW9rAI3GOtiHR3ZkNpwBWuIaCC1EYiBmKGwJOoNzVFgwO7COgErnK7i08i287AFA==",
+    "filename": "vue-flow-core-1.48.2.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1101,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 5122,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/A11y/A11yDescriptions.vue.d.ts",
+        "size": 367,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Background/Background.vue.d.ts",
+        "size": 2580,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Background/index.d.ts",
+        "size": 81,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Background/patterns.d.ts",
+        "size": 623,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Background/types.d.ts",
+        "size": 1473,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/ConnectionLine/index.d.ts",
+        "size": 552,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Controls/ControlButton.vue.d.ts",
+        "size": 367,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Controls/Controls.vue.d.ts",
+        "size": 2455,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Controls/index.d.ts",
+        "size": 140,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Controls/types.d.ts",
+        "size": 913,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/BaseEdge.vue.d.ts",
+        "size": 2587,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/BezierEdge.d.ts",
+        "size": 436,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/EdgeAnchor.d.ts",
+        "size": 320,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/EdgeLabelRenderer.vue.d.ts",
+        "size": 533,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/EdgeText.vue.d.ts",
+        "size": 2470,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/EdgeWrapper.d.ts",
+        "size": 656,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/index.d.ts",
+        "size": 570,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/SimpleBezierEdge.d.ts",
+        "size": 466,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/SmoothStepEdge.d.ts",
+        "size": 456,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/StepEdge.d.ts",
+        "size": 426,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/StraightEdge.d.ts",
+        "size": 446,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/utils/bezier.d.ts",
+        "size": 1208,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/utils/general.d.ts",
+        "size": 690,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/utils/index.d.ts",
+        "size": 139,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/utils/simple-bezier.d.ts",
+        "size": 1194,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/utils/smoothstep.d.ts",
+        "size": 1324,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Edges/utils/straight.d.ts",
+        "size": 816,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Handle/Handle.vue.d.ts",
+        "size": 2132,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/index.d.ts",
+        "size": 322,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/MiniMap/index.d.ts",
+        "size": 134,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/MiniMap/MiniMap.vue.d.ts",
+        "size": 5039,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/MiniMap/MiniMapNode.vue.d.ts",
+        "size": 2839,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/MiniMap/types.d.ts",
+        "size": 2889,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Nodes/DefaultNode.d.ts",
+        "size": 204,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Nodes/index.d.ts",
+        "size": 214,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Nodes/InputNode.d.ts",
+        "size": 200,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Nodes/NodeWrapper.d.ts",
+        "size": 744,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Nodes/OutputNode.d.ts",
+        "size": 202,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/NodesSelection/NodesSelection.vue.d.ts",
+        "size": 367,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/Panel/Panel.vue.d.ts",
+        "size": 924,
+        "mode": 420
+      },
+      {
+        "path": "dist/components/UserSelection/UserSelection.vue.d.ts",
+        "size": 650,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/index.d.ts",
+        "size": 411,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useConnection.d.ts",
+        "size": 463,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useDrag.d.ts",
+        "size": 813,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useEdge.d.ts",
+        "size": 702,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useEdgeHooks.d.ts",
+        "size": 288,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useEdgesData.d.ts",
+        "size": 1005,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useGetPointerPosition.d.ts",
+        "size": 343,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useHandle.d.ts",
+        "size": 968,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useHandleConnections.d.ts",
+        "size": 1146,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useKeyPress.d.ts",
+        "size": 1043,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useNode.d.ts",
+        "size": 956,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useNodeConnections.d.ts",
+        "size": 1177,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useNodeHooks.d.ts",
+        "size": 288,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useNodeId.d.ts",
+        "size": 284,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useNodesData.d.ts",
+        "size": 998,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useNodesInitialized.d.ts",
+        "size": 626,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useOnInitHandler.d.ts",
+        "size": 136,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useResizeHandler.d.ts",
+        "size": 219,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useStylesLoadedWarning.d.ts",
+        "size": 55,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useUpdateNodePositions.d.ts",
+        "size": 229,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useViewportHelper.d.ts",
+        "size": 671,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useVueFlow.d.ts",
+        "size": 574,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useWatchProps.d.ts",
+        "size": 380,
+        "mode": 420
+      },
+      {
+        "path": "dist/composables/useZoomPanHelper.d.ts",
+        "size": 251,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/EdgeRenderer/EdgeRenderer.vue.d.ts",
+        "size": 367,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/EdgeRenderer/MarkerDefinitions.vue.d.ts",
+        "size": 367,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/EdgeRenderer/MarkerSymbols.vue.d.ts",
+        "size": 1536,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/index.d.ts",
+        "size": 415,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/NodeRenderer/NodeRenderer.vue.d.ts",
+        "size": 367,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/Pane/Pane.vue.d.ts",
+        "size": 986,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/Pane/utils.d.ts",
+        "size": 145,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/Viewport/Transform.vue.d.ts",
+        "size": 533,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/Viewport/Viewport.vue.d.ts",
+        "size": 533,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/VueFlow/VueFlow.vue.d.ts",
+        "size": 57164,
+        "mode": 420
+      },
+      {
+        "path": "dist/container/ZoomPane/ZoomPane.vue.d.ts",
+        "size": 533,
+        "mode": 420
+      },
+      {
+        "path": "dist/context/index.d.ts",
+        "size": 459,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 2957,
+        "mode": 420
+      },
+      {
+        "path": "dist/store/actions.d.ts",
+        "size": 252,
+        "mode": 420
+      },
+      {
+        "path": "dist/store/getters.d.ts",
+        "size": 268,
+        "mode": 420
+      },
+      {
+        "path": "dist/store/hooks.d.ts",
+        "size": 217,
+        "mode": 420
+      },
+      {
+        "path": "dist/store/index.d.ts",
+        "size": 100,
+        "mode": 420
+      },
+      {
+        "path": "dist/store/state.d.ts",
+        "size": 214,
+        "mode": 420
+      },
+      {
+        "path": "dist/style.css",
+        "size": 3930,
+        "mode": 420
+      },
+      {
+        "path": "dist/theme-default.css",
+        "size": 3470,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/changes.d.ts",
+        "size": 1507,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/components.d.ts",
+        "size": 1635,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/connection.d.ts",
+        "size": 2842,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/edge.d.ts",
+        "size": 7084,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/flow.d.ts",
+        "size": 11214,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/handle.d.ts",
+        "size": 2842,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/hooks.d.ts",
+        "size": 6183,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/index.d.ts",
+        "size": 273,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/node.d.ts",
+        "size": 7708,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/panel.d.ts",
+        "size": 491,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/store.d.ts",
+        "size": 14245,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/zoom.d.ts",
+        "size": 2665,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/a11y.d.ts",
+        "size": 350,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/autopan.d.ts",
+        "size": 215,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/changes.d.ts",
+        "size": 1646,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/createExtendedEventHook.d.ts",
+        "size": 840,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/defaultNodesEdges.d.ts",
+        "size": 180,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/drag.d.ts",
+        "size": 1059,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/edge.d.ts",
+        "size": 990,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/errors.d.ts",
+        "size": 2196,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/general.d.ts",
+        "size": 640,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/graph.d.ts",
+        "size": 5380,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/handle.d.ts",
+        "size": 1758,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/index.d.ts",
+        "size": 332,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/log.d.ts",
+        "size": 109,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/node.d.ts",
+        "size": 587,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/storage.d.ts",
+        "size": 607,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/store.d.ts",
+        "size": 8865,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue-flow-core.iife.js",
+        "size": 368324,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue-flow-core.js",
+        "size": 347959,
+        "mode": 420
+      },
+      {
+        "path": "dist/vue-flow-core.mjs",
+        "size": 345358,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 2752,
+        "mode": 420
+      }
+    ],
+    "entryCount": 119,
+    "bundled": []
+  },
+  {
+    "id": "pinia@4.0.3",
+    "name": "pinia",
+    "version": "4.0.3",
+    "size": 52454,
+    "unpackedSize": 187944,
+    "shasum": "9cf9e353b3602e24a96e4ca4425817ecb9993292",
+    "integrity": "sha512-XMQqpvjgG7LMqVhhFUzKLT4KEbsYbfZZ0CZU9PgdFm1O2VKBmIkykL8+SfNhOaT7sR0wT6BEgKT0YNDYWgmVRA==",
+    "filename": "pinia-4.0.3.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1100,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 6702,
+        "mode": 420
+      },
+      {
+        "path": "dist/pinia.d.ts",
+        "size": 36588,
+        "mode": 420
+      },
+      {
+        "path": "dist/pinia.esm-browser.js",
+        "size": 48222,
+        "mode": 420
+      },
+      {
+        "path": "dist/pinia.esm-browser.prod.js",
+        "size": 5226,
+        "mode": 420
+      },
+      {
+        "path": "dist/pinia.iife.js",
+        "size": 32208,
+        "mode": 420
+      },
+      {
+        "path": "dist/pinia.iife.prod.js",
+        "size": 5413,
+        "mode": 420
+      },
+      {
+        "path": "dist/pinia.js",
+        "size": 50675,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 1810,
+        "mode": 420
+      }
+    ],
+    "entryCount": 9,
+    "bundled": []
+  }
+]

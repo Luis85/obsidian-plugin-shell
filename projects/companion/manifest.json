@@ -1,0 +1,9 @@
+{
+  "id": "workbench-companion",
+  "name": "Workbench Companion",
+  "version": "0.1.0",
+  "minAppVersion": "1.13.7",
+  "description": "Developer workbench for declarative UI authoring, project setup, source generation and fixture-backed review.",
+  "author": "Luis Mendez",
+  "isDesktopOnly": true
+}

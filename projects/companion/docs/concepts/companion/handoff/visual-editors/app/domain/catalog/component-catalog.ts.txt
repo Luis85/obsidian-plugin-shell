@@ -1,0 +1,32 @@
+export type PaletteGroup='App shell'|'Navigation'|'Data display'|'Data entry'|'Feedback'|'Overlays'|'Layout'|'Marketing / web'
+export interface CatalogItem { id:string; label:string; group:PaletteGroup; nuxtUi?:string; semanticKind:string; description:string }
+export const componentCatalog:CatalogItem[]=[
+{id:'app-shell',label:'Application shell',group:'App shell',semanticKind:'layout',description:'Sidebar/header/content application frame'},
+{id:'sidebar',label:'Sidebar',group:'App shell',semanticKind:'navigation',description:'Primary product navigation'},
+{id:'header',label:'Header / command bar',group:'App shell',semanticKind:'navigation',description:'Context, search and global actions'},
+{id:'breadcrumb',label:'Breadcrumb',group:'Navigation',nuxtUi:'UBreadcrumb',semanticKind:'navigation',description:'Hierarchical location'},
+{id:'tabs',label:'Tabs',group:'Navigation',nuxtUi:'UTabs',semanticKind:'navigation',description:'Peer views within a surface'},
+{id:'dropdown',label:'Dropdown menu',group:'Navigation',nuxtUi:'UDropdownMenu',semanticKind:'navigation',description:'Compact action menu'},
+{id:'command',label:'Command palette',group:'Navigation',nuxtUi:'UCommandPalette',semanticKind:'navigation',description:'Keyboard-first global actions'},
+{id:'table',label:'Data table',group:'Data display',nuxtUi:'UTable',semanticKind:'data',description:'Dense enterprise record list'},
+{id:'card',label:'Card',group:'Data display',nuxtUi:'UCard',semanticKind:'container',description:'Grouped summary content'},
+{id:'badge',label:'Badge / status',group:'Data display',nuxtUi:'UBadge',semanticKind:'status',description:'Compact semantic state'},
+{id:'avatar',label:'Avatar',group:'Data display',nuxtUi:'UAvatar',semanticKind:'identity',description:'User/entity identity'},
+{id:'form',label:'Form',group:'Data entry',nuxtUi:'UForm',semanticKind:'form',description:'Validated data-entry boundary'},
+{id:'input',label:'Text input',group:'Data entry',nuxtUi:'UInput',semanticKind:'input',description:'Text entry'},
+{id:'textarea',label:'Textarea',group:'Data entry',nuxtUi:'UTextarea',semanticKind:'input',description:'Long-form entry'},
+{id:'select',label:'Select',group:'Data entry',nuxtUi:'USelect',semanticKind:'input',description:'Option selection'},
+{id:'checkbox',label:'Checkbox',group:'Data entry',nuxtUi:'UCheckbox',semanticKind:'input',description:'Boolean input'},
+{id:'switch',label:'Switch',group:'Data entry',nuxtUi:'USwitch',semanticKind:'input',description:'Immediate boolean setting'},
+{id:'button',label:'Button',group:'Data entry',nuxtUi:'UButton',semanticKind:'action',description:'Primary or secondary action'},
+{id:'alert',label:'Alert',group:'Feedback',nuxtUi:'UAlert',semanticKind:'feedback',description:'Persistent contextual feedback'},
+{id:'progress',label:'Progress',group:'Feedback',nuxtUi:'UProgress',semanticKind:'feedback',description:'Task progress'},
+{id:'skeleton',label:'Skeleton',group:'Feedback',nuxtUi:'USkeleton',semanticKind:'feedback',description:'Loading placeholder'},
+{id:'modal',label:'Modal',group:'Overlays',nuxtUi:'UModal',semanticKind:'overlay',description:'Focused blocking task'},
+{id:'drawer',label:'Drawer / slideover',group:'Overlays',nuxtUi:'UDrawer',semanticKind:'overlay',description:'Contextual secondary workflow'},
+{id:'separator',label:'Separator',group:'Layout',nuxtUi:'USeparator',semanticKind:'layout',description:'Section separation'},
+{id:'hero',label:'Hero',group:'Marketing / web',semanticKind:'marketing',description:'Website hero section'},
+{id:'features',label:'Feature grid',group:'Marketing / web',semanticKind:'marketing',description:'Website feature section'},
+{id:'pricing',label:'Pricing',group:'Marketing / web',semanticKind:'marketing',description:'Pricing presentation'},
+{id:'footer',label:'Website footer',group:'Marketing / web',semanticKind:'marketing',description:'Marketing/site footer'}
+]

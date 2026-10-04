@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm ci)",
+      "Bash(npm test)",
+      "Bash(npm test -- *)",
+      "Bash(npm run check)",
+      "Bash(npm run check -- *)",
+      "Bash(npm run check:fast)",
+      "Bash(npm run check:submission)",
+      "Bash(npm run -s check)",
+      "Bash(npm run -s check -- *)",
+      "Bash(node bin/app check)",
+      "Bash(node bin/app check *)",
+      "Bash(node bin/app check --plan*)",
+      "Bash(node bin/app ui status*)",
+      "Bash(npm run test)",
+      "Bash(npm run test -- *)",
+      "Bash(npm run test:watch)",
+      "Bash(npm run test:watch -- *)",
+      "Bash(npm run test:tdd)",
+      "Bash(npm run test:tdd -- *)",
+      "Bash(npm run test:obsidian)",
+      "Bash(npm run test:obsidian -- *)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run typecheck:project)",
+      "Bash(npm run lint)",
+      "Bash(npm run build)",
+      "Bash(npm run verify:project)",
+      "Bash(npm run test:ui-effects)",
+      "Bash(npm run test:e2e)",
+      "Bash(npm run test:ui-quality)",
+      "Bash(npm run ui:gallery)",
+      "Bash(npm run dev:ui)",
+      "Bash(npm run dev:preview)",
+      "Bash(npm run build:clickdummy)",
+      "Bash(npm run testdata:check)",
+      "Bash(npm run doctor)",
+      "Bash(npm run -s dev:obsidian -- --json)",
+      "Bash(npm run dev:obsidian -- --json)",
+      "Bash(npx vitest related *)",
+      "Bash(npx vitest run *)",
+      "Bash(node bin/app help)",
+      "Bash(node bin/app help *)",
+      "Bash(node bin/app status)",
+      "Bash(node bin/app status *)",
+      "Bash(node bin/app doctor)",
+      "Bash(node bin/app doctor *)",
+      "Bash(node bin/app make * --dry-run)",
+      "Bash(node bin/app make * --dry-run *)",
+      "Bash(npm run make -- --list)",
+      "Bash(git status)",
+      "Bash(git status *)"
+    ],
+    "ask": [
+      "Bash(* --plan-out*)",
+      "Bash(* --outputFile*)",
+      "Bash(* --output*)",
+      "Bash(node bin/app * --root*)"
+    ],
+    "deny": [
+      "Bash(*--allow-download*)",
+      "Bash(*OBSIDIAN_ALLOW_DOWNLOAD*)",
+      "Bash(OBSIDIAN_ALLOW_DOWNLOAD=*)",
+      "Bash(npm run test:obsidian -- *--allow-download*)",
+      "Bash(npm run dev:obsidian -- *--allow-download*)",
+      "Bash(npm run -s dev:obsidian -- *--allow-download*)",
+      "Bash(npm publish *)",
+      "Bash(npm run release*)",
+      "Bash(node bin/app release *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f *)",
+      "Bash(npm install -g *)",
+      "Bash(npm i -g *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/session-start.mjs\"",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/post-edit-tests.mjs\"",
+            "timeout": 150
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/stop-check.mjs\"",
+            "timeout": 330
+          }
+        ]
+      }
+    ]
+  }
+}
