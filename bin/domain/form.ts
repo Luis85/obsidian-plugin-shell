@@ -38,24 +38,44 @@ function choices(value: unknown, name: string): FormChoice[] {
 function optionalNumber(item: FormValues, key: string, name: string): void {
   requireSketch(item[key] === undefined || (typeof item[key] === 'number' && Number.isFinite(item[key])), 'FORM_FIELD', `${name}.${key} must be a finite number.`);
 }
-function fieldShape(item: FormValues, kind: FieldKind, name: string, known: Set<string>): void {
-  if (kind === 'select' || kind === 'multi') {
-    requireSketch((item.choices === undefined) !== (item.choicesFrom === undefined), 'FORM_CHOICES', `${name} needs choices or choicesFrom.`);
-    if (item.choices !== undefined) item.choices = choices(item.choices, name + '.choices'); else hookName(item.choicesFrom, name + '.choicesFrom');
-  }
-  if (kind === 'section') {
-    requireSketch((item.form === undefined) !== (item.fields === undefined), 'FORM_SECTION', `${name} needs form or fields.`);
-    if (item.form !== undefined) requireSketch(definitionId.test(text(item.form, name + '.form', 80)), 'FORM_SECTION', `${name}.form must be a form id.`);
-    else item.fields = readFields(item.fields, name + '.fields', known);
-    if (item.gate !== undefined) text(item.gate, name + '.gate', 300);
-    for (const key of ['prepare', 'commit']) if (item[key] !== undefined) hookName(item[key], name + '.' + key);
-    requireSketch(item.bind !== undefined || (item.prepare === undefined && item.commit === undefined), 'FORM_SECTION', `${name} needs bind for prepare/commit.`);
-  }
+type ShapeCheck = (item: FormValues, name: string, known: Set<string>) => void;
+function choiceShape(item: FormValues, name: string): void {
+  requireSketch((item.choices === undefined) !== (item.choicesFrom === undefined), 'FORM_CHOICES', `${name} needs choices or choicesFrom.`);
+  if (item.choices !== undefined) item.choices = choices(item.choices, name + '.choices'); else hookName(item.choicesFrom, name + '.choicesFrom');
+}
+function sectionShape(item: FormValues, name: string, known: Set<string>): void {
+  requireSketch((item.form === undefined) !== (item.fields === undefined), 'FORM_SECTION', `${name} needs form or fields.`);
+  if (item.form !== undefined) requireSketch(definitionId.test(text(item.form, name + '.form', 80)), 'FORM_SECTION', `${name}.form must be a form id.`);
+  else item.fields = readFields(item.fields, name + '.fields', known);
+  if (item.gate !== undefined) text(item.gate, name + '.gate', 300);
+  for (const key of ['prepare', 'commit']) if (item[key] !== undefined) hookName(item[key], name + '.' + key);
+  requireSketch(item.bind !== undefined || (item.prepare === undefined && item.commit === undefined), 'FORM_SECTION', `${name} needs bind for prepare/commit.`);
+}
+/** Kind-specific structure, checked before the options every kind shares. */
+const kindShapes: Partial<Record<FieldKind, ShapeCheck>> = { select: choiceShape, multi: choiceShape, section: sectionShape };
+function optionShape(item: FormValues, name: string): void {
   for (const key of ['min', 'max', 'maxLength', 'maxItems']) optionalNumber(item, key, name);
   for (const key of ['separator', 'joiner', 'suffix', 'yes', 'no']) if (item[key] !== undefined) text(item[key], `${name}.${key}`, 300);
   for (const key of ['required', 'multiline', 'integer', 'transient']) requireSketch(item[key] === undefined || typeof item[key] === 'boolean', 'FORM_FIELD', `${name}.${key} must be boolean.`);
+}
+function fieldShape(item: FormValues, kind: FieldKind, name: string, known: Set<string>): void {
+  kindShapes[kind]?.(item, name, known);
+  optionShape(item, name);
   requireSketch(kind !== 'record' || item.bind !== undefined, 'FORM_FIELD', `${name} needs bind for a record.`);
 }
+function optionalTexts(item: FormValues, name: string): void {
+  if (item.help !== undefined) text(item.help, name + '.help', 2000);
+  if (item.message !== undefined) text(item.message, name + '.message', 300);
+  if (item.bind !== undefined) readPath(item.bind, name + '.bind');
+  if (item.effect !== undefined) hookName(item.effect, name + '.effect');
+}
+function fieldCondition(item: FormValues, name: string, siblings: Set<string>): void {
+  if (item.when === undefined) return;
+  const byPath = object(item.when).path !== undefined;
+  item.when = readCondition(item.when, name + '.when', byPath ? 'path' : 'field');
+  requireSketch(byPath || siblings.has(String((item.when as FormCondition).field)), 'FORM_CONDITION', `${name}.when must reference an earlier field at the same level.`);
+}
+const answerless: readonly FieldKind[] = ['section', 'record', 'confirm'];
 function readField(raw: unknown, name: string, known: Set<string>, siblings: Set<string>): FormField {
   const item = object(raw), kind = item.kind as FieldKind;
   requireSketch(Object.hasOwn(kindKeys, String(kind)), 'FORM_KIND', `${name}.kind is not a supported field kind.`);
@@ -63,20 +83,13 @@ function readField(raw: unknown, name: string, known: Set<string>, siblings: Set
   const id = text(item.id, name + '.id', 60);
   requireSketch(fieldId.test(id) && !known.has(id), 'FORM_FIELD', `${name}.id must be a unique identifier.`);
   text(item.label, name + '.label', 300);
-  if (item.help !== undefined) text(item.help, name + '.help', 2000);
-  if (item.message !== undefined) text(item.message, name + '.message', 300);
-  if (item.bind !== undefined) readPath(item.bind, name + '.bind');
-  if (item.effect !== undefined) hookName(item.effect, name + '.effect');
-  if (item.when !== undefined) {
-    const byPath = object(item.when).path !== undefined;
-    item.when = readCondition(item.when, name + '.when', byPath ? 'path' : 'field');
-    requireSketch(byPath || siblings.has(String((item.when as FormCondition).field)), 'FORM_CONDITION', `${name}.when must reference an earlier field at the same level.`);
-  }
+  optionalTexts(item, name);
+  fieldCondition(item, name, siblings);
   fieldShape(item, kind, name, known);
   known.add(id); siblings.add(id);
   assertValidated<FormField>(item);
   const field = item;
-  if (field.default !== undefined && field.default !== '' && !['section', 'record', 'confirm'].includes(kind)) fieldAnswer(field, field.default, false);
+  if (field.default !== undefined && field.default !== '' && !answerless.includes(kind)) fieldAnswer(field, field.default, false);
   return field;
 }
 function readFields(value: unknown, name: string, known: Set<string>): FormField[] {
@@ -122,27 +135,31 @@ export function fieldAnswer(field: FormField, value: unknown, required = true): 
   try { return typedAnswer(field, value, required); }
   catch (error) { if (field.message && error instanceof SketchError) throw new SketchError(error.code, field.message); throw error; }
 }
+type AnswerCheck = (field: FormField, value: unknown, required: boolean) => unknown;
+function booleanAnswer(field: FormField, value: unknown): boolean {
+  requireSketch(typeof value === 'boolean', 'FORM_ANSWER', `${field.label} needs true or false.`);
+  return value;
+}
+function selectAnswer(field: FormField, value: unknown): string {
+  requireSketch(typeof value === 'string' && (!field.choices || field.choices.some(item => item.id === value)), 'FORM_ANSWER', `${field.label}: choose ${field.choices?.map(item => item.id).join(', ') ?? 'an offered option'}.`);
+  return value;
+}
+function multiAnswer(field: FormField, value: unknown, required: boolean): string[] {
+  const items = listAnswer(field, value, required);
+  requireSketch(!field.choices || items.every(item => field.choices!.some(choice => choice.id === item)), 'FORM_ANSWER', `${field.label}: choose offered options.`);
+  return [...new Set(items)];
+}
+function recordAnswer(field: FormField, value: unknown): FormValues {
+  const record = object(value);
+  for (const [key, item] of Object.entries(record)) text(item, `${field.label}${key}`, field.maxLength ?? 2000);
+  return record;
+}
+const answerChecks: Record<FieldKind, AnswerCheck> = {
+  text: textAnswer, title: textAnswer, number: numberAnswer, boolean: booleanAnswer, confirm: booleanAnswer,
+  select: selectAnswer, multi: multiAnswer, list: listAnswer, record: recordAnswer, section: recordAnswer,
+};
 function typedAnswer(field: FormField, value: unknown, required: boolean): unknown {
-  switch (field.kind) {
-    case 'text': case 'title': return textAnswer(field, value, required);
-    case 'number': return numberAnswer(field, value);
-    case 'boolean': case 'confirm':
-      requireSketch(typeof value === 'boolean', 'FORM_ANSWER', `${field.label} needs true or false.`); return value;
-    case 'select':
-      requireSketch(typeof value === 'string' && (!field.choices || field.choices.some(item => item.id === value)), 'FORM_ANSWER', `${field.label}: choose ${field.choices?.map(item => item.id).join(', ') ?? 'an offered option'}.`);
-      return value;
-    case 'multi': {
-      const items = listAnswer(field, value, required);
-      requireSketch(!field.choices || items.every(item => field.choices!.some(choice => choice.id === item)), 'FORM_ANSWER', `${field.label}: choose offered options.`);
-      return [...new Set(items)];
-    }
-    case 'list': return listAnswer(field, value, required);
-    default: {
-      const record = object(value);
-      for (const [key, item] of Object.entries(record)) text(item, `${field.label}${key}`, field.maxLength ?? 2000);
-      return record;
-    }
-  }
+  return answerChecks[field.kind](field, value, required);
 }
 export const bindingOf = (field: FormField) => field.bind ?? field.id;
 /** Field ids resolve to transient answers first, then to the bound value. */

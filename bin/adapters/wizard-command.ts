@@ -3,9 +3,23 @@ import { option, type Arguments } from '../domain/command-options.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { formValueIssues } from '../domain/form-values.ts';
 import { hookNames } from '../presentation/wizards/registry.ts';
-import { catalogIssues, catalogSummary, loadCatalog } from './wizard-catalog.ts';
+import { catalogIssues, catalogSummary, loadCatalog, type DefinitionCatalog } from './wizard-catalog.ts';
 import { readData } from './storage.ts';
 import type { CommandContext } from './commands.ts';
+function catalogResult(catalog: DefinitionCatalog, issues: string[], full: boolean): Record<string, unknown> {
+  const summary = catalogSummary(catalog);
+  return { ...(full ? summary : { root: summary.root, wizards: summary.wizards.length, forms: summary.forms.length }),
+    issues, status: issues.length ? 'failed' : 'ok' };
+}
+const usage = (kind: string) =>
+  `Use ${kind} list, ${kind} show --name <id>, ${kind} check${kind === 'form' ? ', form validate --name <id> --input <values.json>' : ''}, or run node bin/app ${kind} --name <id> in a terminal.`;
+async function validateForm(args: Arguments, context: CommandContext, catalog: DefinitionCatalog, name: string): Promise<Record<string, unknown>> {
+  requireSketch(args.command === 'form', 'DEFINITION_COMMAND', 'Only forms can be validated against a value.');
+  const input = option(args, 'input');
+  requireSketch(input, 'MAKER_INPUT_REQUIRED', 'Use --input <values.json> with form validate.');
+  const found = formValueIssues(catalog.forms.get(name)!, await readData(resolve(context.root, input)), id => catalog.forms.get(id));
+  return { form: name, valid: !found.length, issues: found, status: found.length ? 'failed' : 'ok' };
+}
 /**
  * `wizard` and `form`: discover, inspect and check the data-driven definitions in configs/wizards and configs/forms.
  * `form validate` checks a complete value without prompting. Running a definition is interactive only.
@@ -13,19 +27,10 @@ import type { CommandContext } from './commands.ts';
 export async function definitionCommand(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   const catalog = await loadCatalog(), issues = catalogIssues(catalog, hookNames()), kind = args.command;
   const table: ReadonlyMap<string, unknown> = kind === 'wizard' ? catalog.wizards : catalog.forms;
-  if (args.action === 'list' || args.action === 'check') {
-    const summary = catalogSummary(catalog);
-    return { ...(args.action === 'list' ? summary : { root: summary.root, wizards: summary.wizards.length, forms: summary.forms.length }),
-      issues, status: issues.length ? 'failed' : 'ok' };
-  }
+  if (args.action === 'list' || args.action === 'check') return catalogResult(catalog, issues, args.action === 'list');
   const name = option(args, 'name');
-  requireSketch(args.action === 'show' || args.action === 'validate', 'DEFINITION_COMMAND',
-    `Use ${kind} list, ${kind} show --name <id>, ${kind} check${kind === 'form' ? ', form validate --name <id> --input <values.json>' : ''}, or run node bin/app ${kind} --name <id> in a terminal.`);
+  requireSketch(args.action === 'show' || args.action === 'validate', 'DEFINITION_COMMAND', usage(kind));
   requireSketch(table.has(name), 'DEFINITION_UNKNOWN', `Unknown ${kind} ${name || '(missing --name)'}; use ${kind} list.`);
   if (args.action === 'show') return { definition: table.get(name), issues };
-  requireSketch(kind === 'form', 'DEFINITION_COMMAND', 'Only forms can be validated against a value.');
-  const input = option(args, 'input');
-  requireSketch(input, 'MAKER_INPUT_REQUIRED', 'Use --input <values.json> with form validate.');
-  const found = formValueIssues(catalog.forms.get(name)!, await readData(resolve(context.root, input)), id => catalog.forms.get(id));
-  return { form: name, valid: !found.length, issues: found, status: found.length ? 'failed' : 'ok' };
+  return validateForm(args, context, catalog, name);
 }

@@ -29,16 +29,21 @@ function formStep(item: Record<string, unknown>, name: string): void {
   if (item.form !== undefined) requireSketch(definitionId.test(text(item.form, name + '.form', 80)), 'WIZARD_STEP', `${name}.form must be a form id.`);
   else item.fields = readForm({ schemaVersion: 1, id: 'inline', version: 1, title: name, fields: item.fields }).fields;
 }
+/** `with` is only accepted on action steps (see kindKeys), so it is checked with the action name. */
+function actionStep(item: Record<string, unknown>, name: string): void {
+  requireSketch(actionName.test(text(item.action, name + '.action', 80)), 'WIZARD_ACTION', `${name}.action must name a registered action such as settings.load.`);
+  if (item.with === undefined) return;
+  for (const [key, entry] of Object.entries(object(item.with))) requireSketch(/^[a-z][a-zA-Z0-9]*$/.test(key) && typeof entry === 'string' && entry.length <= 1000 && !hasControls(entry), 'WIZARD_ACTION', `${name}.with.${key} must be single-line text.`);
+}
+const kindShapes: Record<StepKind, (item: Record<string, unknown>, name: string) => void> = {
+  form: formStep,
+  guide: (item, name) => { readPath(item.guide, name + '.guide'); },
+  action: actionStep,
+  message: (item, name) => { text(item.text, name + '.text', 4000); },
+  end: (item, name) => { if (item.text !== undefined) text(item.text, name + '.text', 4000); },
+};
 function stepShape(item: Record<string, unknown>, kind: StepKind, name: string): void {
-  if (kind === 'form') formStep(item, name);
-  if (kind === 'guide') readPath(item.guide, name + '.guide');
-  if (kind === 'action') requireSketch(actionName.test(text(item.action, name + '.action', 80)), 'WIZARD_ACTION', `${name}.action must name a registered action such as settings.load.`);
-  if (item.with !== undefined) {
-    const parameters = object(item.with);
-    for (const [key, entry] of Object.entries(parameters)) requireSketch(/^[a-z][a-zA-Z0-9]*$/.test(key) && typeof entry === 'string' && entry.length <= 1000 && !hasControls(entry), 'WIZARD_ACTION', `${name}.with.${key} must be single-line text.`);
-  }
-  if (kind === 'message') text(item.text, name + '.text', 4000);
-  if (kind === 'end' && item.text !== undefined) text(item.text, name + '.text', 4000);
+  kindShapes[kind](item, name);
   for (const key of ['bind', 'initial']) if (item[key] !== undefined) readPath(item[key], `${name}.${key}`);
   for (const key of ['barrier', 'interactive', 'agreement']) requireSketch(item[key] === undefined || typeof item[key] === 'boolean', 'WIZARD_STEP', `${name}.${key} must be boolean.`);
 }

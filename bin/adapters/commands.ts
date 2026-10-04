@@ -216,34 +216,44 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
+type CommandResult = Record<string, unknown> | Promise<Record<string, unknown>>;
 /** A registered plugin root owns its own help and execution; undefined means a built-in command. */
-function pluginExecution(args: Arguments, plugins: CommandContext['plugins']): Record<string, unknown> | Promise<Record<string, unknown>> | undefined {
+function pluginExecution(args: Arguments, plugins: CommandContext['plugins']): CommandResult | undefined {
   const extension = plugins?.cliCommands.find(item => item.id === args.command);
   if (!plugins || !extension) return undefined;
   if (args.flags.help) return { help: extension.summary, command: extension.id, options: extension.options ?? {}, interactive: false };
   return extension.execute({ action: args.action, flags: args.flags }, plugins.commandContext);
 }
-/** Commands that never read a saved project's configured arguments; undefined means a saved-project command. */
-function directCommand(args: Arguments, context: CommandContext): Record<string, unknown> | Promise<Record<string, unknown>> | undefined {
+type Executor = (args: Arguments, context: CommandContext) => CommandResult;
+type InputCommand = (args: Arguments, context: CommandContext, input: () => Promise<unknown>) => CommandResult;
+const withInput = (command: InputCommand): Executor => (args, context) => command(args, context, () => inputData(args, context));
+/**
+ * Commands that never read a saved project's configured arguments, one entry per command. `learn` reads only
+ * configs/learning and the learner's progress; every --help stays with the shared maker help.
+ */
+const directCommands: Readonly<Record<string, Executor>> = {
+  new: newProjectCommand,
+  'first-run': withInput(firstRunCommand),
+  design: designCommand,
+  wizard: definitionCommand,
+  form: definitionCommand,
+  'fake-data': withInput(fakeDataCommand),
+  settings: withInput(setupCommand),
+  'project-setup': withInput(setupCommand),
+  learn: learningCommand,
+  process: processCommand,
+};
+/** Undefined means a saved-project command. */
+function directCommand(args: Arguments, context: CommandContext): CommandResult | undefined {
   if (args.flags.help || args.command === 'studio') return helpResult(args, context.plugins?.cliCommands ?? pluginCliCommands());
-  if (args.command === 'new') return newProjectCommand(args, context);
-  if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
-  if (args.command === 'design') return designCommand(args, context);
-  if (args.command === 'wizard' || args.command === 'form') return definitionCommand(args, context);
-  if (args.command === 'fake-data') return fakeDataCommand(args, context, () => inputData(args, context));
-  if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
-  return undefined;
+  return Object.hasOwn(directCommands, args.command) ? directCommands[args.command]!(args, context) : undefined;
 }
 async function savedProjectCommand(input: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   const args = await configuredArguments(input, context.root);
   requireSketch(!args.flags.starter, 'PROJECT_OPTION', 'Starter selection is only available on new; saved projects keep project.config.json.');
   return args.command === 'sketch' ? sketch(args, context) : args.command === 'brainstorm' ? brainstormCommand(args, context) : prototype(args, context);
 }
-/** `learn` reads only configs/learning and the learner's progress; its help stays with the shared maker help. */
-function learnExecution(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> | undefined {
-  return args.command === 'learn' && !args.flags.help ? learningCommand(args, context) : undefined;
-}
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  return pluginExecution(args, context.plugins) ?? learnExecution(args, context) ?? directCommand(args, context) ?? (args.command === 'process' ? processCommand(args, context) : savedProjectCommand(args, context));
+  return pluginExecution(args, context.plugins) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
 }

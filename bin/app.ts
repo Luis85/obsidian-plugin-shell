@@ -32,7 +32,7 @@ import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } f
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
-  if (!['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'wizard', 'form', 'fake-data', 'learn', 'process'].includes(args.command)) return false;
+  if (!studioCommands.includes(args.command) && !Object.hasOwn(launchers, args.command)) return false;
   if (env.CI && env.CI !== 'false') return false;
   const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
   return Boolean(io.input.isTTY && io.error.isTTY && !blocked && (!args.action || interactiveProcess(args)));
@@ -60,18 +60,27 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
 }
 
 interface StudioOptions extends CommandContext { project: string; guide?: string; out?: string; kind?: string }
+interface Launch { args: Arguments; context: CommandContext; ui: Prompts; options: StudioOptions }
+const definitionLauncher = ({ ui, args, options }: Launch) => launchDefinition(ui, args, { ...options });
+/** Each interactive maker command and its terminal launcher; studio, new, sketch and prototype share the studio flow below. */
+const launchers: Readonly<Record<string, (launch: Launch) => Promise<string | undefined>>> = {
+  'first-run': ({ ui, context }) => firstRunWizard(ui, context),
+  brainstorm: ({ ui, options }) => brainstormWizard(ui, { ...options, offerImport: true }),
+  'project-setup': ({ ui, context }) => projectSetupWizard(ui, context),
+  settings: async ({ ui, context }) => { await settingsWizard(ui, context); return undefined; },
+  wizard: definitionLauncher,
+  form: definitionLauncher,
+  'fake-data': ({ ui, args, options }) => startWizard(ui, 'fake-data', { ...options, flags: args.flags }),
+  learn: ({ ui, args, options }) => launchLearning(ui, args, { ...options }),
+  process: ({ ui, args, options }) => launchProcess(ui, args, { ...options }),
+};
+const studioCommands = ['studio', 'new', 'sketch', 'prototype'];
 async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
-  if (args.command === 'first-run') return firstRunWizard(ui, context);
-  if (args.command === 'brainstorm') return brainstormWizard(ui, { ...options, offerImport: true });
-  if (args.command === 'project-setup') return projectSetupWizard(ui, context);
-  if (args.command === 'settings') { await settingsWizard(ui, context); return; }
-  if (args.command === 'wizard' || args.command === 'form') return launchDefinition(ui, args, { ...options });
-  if (args.command === 'fake-data') return startWizard(ui, 'fake-data', { ...options, flags: args.flags });
-  if (args.command === 'learn') return launchLearning(ui, args, { ...options });
-  if (args.command === 'process') return launchProcess(ui, args, { ...options });
+  if (Object.hasOwn(launchers, args.command)) return launchers[args.command]!({ args, context, ui, options });
   if (await shouldCreate(args, context, options)) return createInteractive(args, context, ui, options);
   if (args.command === 'prototype') return await prototypeWizard(ui, options);
-  else await studio(ui, options);
+  await studio(ui, options);
+  return undefined;
 }
 async function shouldCreate(args: Arguments, context: CommandContext, options: StudioOptions): Promise<boolean> {
   if (args.command === 'new') return true;
