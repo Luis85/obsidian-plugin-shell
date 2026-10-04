@@ -68,6 +68,13 @@ export function inspectWorkflow(text, file = '') {
   return { jobs: jobs.length, localActions: [...localActions].sort(), localWorkflows: [...localWorkflows].sort(), callable: callableWorkflow(data.on) };
 }
 /**
+ * A standalone project's workflow copied by `npm run projects:sync` (scripts/projects/workflows.mjs names it
+ * `projects--<project>--<file>.yml`; that module imports this one, so the prefix is matched here). It gets the portable
+ * review above but follows its project's own end-to-end model (the generated-project template), not this repository's
+ * tiered e2e and release-call rules.
+ */
+export const syncedProjectWorkflow = name => /^projects--[a-z][a-z0-9]*(?:-[a-z0-9]+)*--.+\.yml$/.test(name);
+/**
  * This repository's e2e opt-in policy (e2e-policy.mjs), applied by checkRepository only: inspectWorkflow stays the
  * portable subset that also reviews a generated project's workflows, which have no `tier` input.
  * Returns whether a workflow holds e2e work, its call tier default and its reusable calls for the release rule.
@@ -143,7 +150,8 @@ export async function checkRepository(root = process.cwd()) {
       } else if (/\.ya?ml$/.test(file)) {
         const inspected = inspectWorkflow(text, parts.at(-1));
         references.push(...inspected.localActions.map(name => [file, name])); calls.push(...inspected.localWorkflows.map(name => [file, name]));
-        callable.set(parts.at(-1), inspected.callable); counts.workflows++; e2e.push(e2eFacts(text, parts.at(-1)));
+        callable.set(parts.at(-1), inspected.callable); counts.workflows++;
+        if (!syncedProjectWorkflow(parts.at(-1))) e2e.push(e2eFacts(text, parts.at(-1)));
       }
       else if (file.endsWith('.css')) { inspectOwnedCss(text, file); counts.styles++; }
       else {

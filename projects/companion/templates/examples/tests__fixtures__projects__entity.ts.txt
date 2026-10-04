@@ -1,0 +1,8 @@
+// Test-owned schema for reusable foundation qualification. Never registered in the plugin.
+import { defineEntity, fields } from '../../../src/features/api';
+
+export const projectEntity = defineEntity('project', 1, {
+  name: fields.text({ trim: true, min: 1, max: 120 }),
+  budget: fields.defaulted(fields.number({ min: 0 }), 0),
+  archived: fields.defaulted(fields.boolean(), false),
+});

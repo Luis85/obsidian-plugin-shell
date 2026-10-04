@@ -16,6 +16,7 @@ on:
       - 'configs/types/tsconfig.hindsight.json'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/hindsight-tooling.yml'
+      - '!projects/**'
   push:
     branches: [main]
     paths: *memory-inputs

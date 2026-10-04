@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "id": "companion-prototype",
+  "version": 1,
+  "title": "Prepare a prototype",
+  "steps": [
+    {
+      "title": "Product and baseline",
+      "fields": [
+        {
+          "id": "title",
+          "label": "Prototype title",
+          "help": "Prototype title. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "",
+          "required": true
+        },
+        {
+          "id": "mode",
+          "label": "What are you making?",
+          "help": "What are you making?. Press Enter to accept the displayed default.",
+          "kind": "select",
+          "default": "new-plugin",
+          "choices": [
+            "new-plugin",
+            "new-feature",
+            "improvement"
+          ]
+        },
+        {
+          "id": "baselineRevision",
+          "label": "Existing product source revision",
+          "help": "Record the source revision corresponding to the complete --project baseline. No mergeability is inferred.",
+          "kind": "text",
+          "default": "",
+          "required": true,
+          "when": {
+            "field": "mode",
+            "notEquals": "new-plugin"
+          }
+        },
+        {
+          "id": "problem",
+          "label": "Problem to explore",
+          "help": "Problem to explore. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "Explore the sketched experience before committing to implementation."
+        },
+        {
+          "id": "audience",
+          "label": "Who will use it?",
+          "help": "Who will use it?. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "An Obsidian user working in their vault."
+        },
+        {
+          "id": "outcome",
+          "label": "Observable outcome",
+          "help": "Observable outcome. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "Complete the primary journey using local, resettable demonstration data."
+        }
+      ]
+    },
+    {
+      "title": "Scope and behavior",
+      "fields": [
+        {
+          "id": "pages",
+          "label": "Pages to include",
+          "help": "Enter page titles separated by semicolons. Existing pages with matching titles are reused. A blank line accepts the defaults.",
+          "kind": "list",
+          "default": [
+            "Overview"
+          ]
+        },
+        {
+          "id": "components",
+          "label": "Components for the first page",
+          "help": "Enter titles separated by semicolons. Existing definitions are retained; unmatched titles create new components. Leave empty for none.",
+          "kind": "list",
+          "default": []
+        },
+        {
+          "id": "journeys",
+          "label": "Primary journeys",
+          "help": "Primary journeys. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Open the entry page; perform the primary action; inspect the result; return or reset."
+          ]
+        },
+        {
+          "id": "nonGoals",
+          "label": "Explicit non-goals",
+          "help": "Explicit non-goals. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "No production vault or network writes.",
+            "No real accounts, payments or AI-provider calls.",
+            "No additional app shell unless explicitly included in the brief."
+          ]
+        },
+        {
+          "id": "dataRules",
+          "label": "Data and business rules",
+          "help": "Data and business rules. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Synthetic fixtures only; label simulations and unfinished actions honestly."
+          ]
+        },
+        {
+          "id": "edgeStates",
+          "label": "Failure and recovery states",
+          "help": "Failure and recovery states. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Empty data",
+            "Loading",
+            "Invalid input",
+            "Failure with retry",
+            "Cancel without losing a saved draft"
+          ]
+        },
+        {
+          "id": "preserve",
+          "label": "Behaviors and data to preserve",
+          "help": "Behaviors and data to preserve. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [],
+          "when": {
+            "field": "mode",
+            "notEquals": "new-plugin"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Visual exploration and acceptance",
+      "fields": [
+        {
+          "id": "visualDirection",
+          "label": "Visual direction",
+          "help": "Visual direction. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "Obsidian-aligned, calm, readable, with clear contextual actions. Use Vue 3, Pinia and Nuxt UI without the Nuxt framework."
+        },
+        {
+          "id": "conceptBoards",
+          "label": "Concept-board checkpoint",
+          "help": "Choose requested to pause for image-based exploration, selected for a reviewed direction, unavailable for an accepted text fallback, or skipped to continue without images.",
+          "kind": "select",
+          "default": "skipped",
+          "choices": [
+            "skipped",
+            "requested",
+            "selected",
+            "unavailable"
+          ]
+        },
+        {
+          "id": "boardDecisions",
+          "label": "Selected board revisions and translated decisions",
+          "help": "Name the selected boards/revisions and describe their layout, interaction and responsive rules. Images are not generated or attached by this CLI.",
+          "kind": "text",
+          "default": "",
+          "required": true,
+          "when": {
+            "field": "conceptBoards",
+            "equals": "selected"
+          }
+        },
+        {
+          "id": "accessibility",
+          "label": "Accessibility and responsive rules",
+          "help": "Accessibility and responsive rules. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Full keyboard operation and visible focus.",
+            "Readable light/dark themes and reduced motion.",
+            "Wide and narrow layouts; no essential hover-only interaction."
+          ]
+        },
+        {
+          "id": "acceptance",
+          "label": "Observable acceptance cases",
+          "help": "Observable acceptance cases. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Given the starting state, when the user completes the primary journey, then the expected local result is visible.",
+            "When an operation fails or is cancelled, show recovery without fabricated success.",
+            "The final HTML opens offline with no external network requests.",
+            "The embedded complete project JSON can be imported into Companion."
+          ]
+        },
+        {
+          "id": "openQuestions",
+          "label": "Unresolved blocking questions",
+          "help": "List unresolved decisions, or leave empty when there are none. A final execution prompt is blocked until these are resolved.",
+          "kind": "list",
+          "default": []
+        }
+      ]
+    },
+    {
+      "title": "Review and agreement",
+      "fields": [
+        {
+          "id": "approved",
+          "label": "Do you agree to this complete brief, including the displayed defaults?",
+          "help": "This confirms the design only. File writes still require a separate reviewed plan hash; no build, install, native activation or publication is authorized.",
+          "kind": "confirm",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "field": "conceptBoards",
+      "notEquals": "requested",
+      "message": "Complete or explicitly skip concept-board exploration before generating the final execution prompt."
+    },
+    {
+      "field": "openQuestions",
+      "equals": [],
+      "message": "Resolve the listed blocking questions before generating the final execution prompt."
+    },
+    {
+      "field": "approved",
+      "equals": true,
+      "message": "Explicitly agree to the reviewed brief (approved: true). Defaults alone are not approval."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "design-brief.md",
+      "template": "# {{title}} — agreed prototype brief\n\nGuide agreement is explicit in prototype-answers.json. The defaults below are accepted design assumptions, not researched facts. Material changes reopen agreement. File-write approval is separate.\n\n{{brief}}\n"
+    },
+    {
+      "path": "execution-prompt.md",
+      "template": "# Implement the {{title}} prototype\n\nThis is a fresh-session execution handoff for the agreed design below. Work in this package's `source/` workspace. Do not rely on previous conversations. Read `{{skillPath}}` inside source first: it is the canonical skill; the Codex entrypoint references that same skill. Read source/AGENTS.md and the scoped source instructions.\n\n## Authority and baseline\n\nImplement the approved prototype inside this package, not the original framework checkout or a personal vault. Do not commit, push, publish, activate a plugin, access providers or overwrite existing packages without separate authorization. Mode: {{mode}}. For new-feature/improvement work inspect baseline.project.json and the source revision in the brief; preserve all unrelated stable IDs, data, pages, library revisions, scenarios and behavior. A full project export is not automatically a safe feature merge.\n\n## Exact source and contract context\n\n```json\n{{contextJson}}\n```\n\nCompare the prepared template fingerprint and copied package/lock versions with the files in source. Stop and report consequential drift; do not silently substitute latest dependencies or another schema. The source snapshot fingerprint is authoritative for the prepared bytes; a recorded Git revision alone does not assert a clean checkout. Use repository-local TypeScript and the qualified Node/npm toolchain.\n\n## Complete agreed brief\n\n{{brief}}\n\n## Implementation\n\nThe generated source is a starting scaffold, NOT a completed prototype. Inspect source/design/compiler-origins.json, generated visual definitions, acceptance TODOs and compiler-readiness.json. Keep one Companion project format: companion.project.json is the complete v6 import/compiler input; package metadata must never be inserted into its closed envelope. Update source/design/project.json and the package's companion.project.json consistently. Generated page/component instances already have stable IDs. Titles were the only creation fields; defaults and unfinished interactions remain explicit.\n\nUse real TypeScript, Vue 3 SFCs, Pinia and Nuxt UI components. Preserve the shared compiler/runtime seams and repository architecture; no HTML pretending to be Vue, no Nuxt framework, no CDN, runtime remote imports or external fonts. Do not add an app shell to an editor-only brief. Implement every agreed visible action, its failure, cancellation, recovery and focus behavior. Simulations are deterministic, resettable and labeled. Native/business TODOs are not passing acceptance.\n\nUse actual subagents when available for disjoint contracts, UI, integration and independent QA. Otherwise perform those work packages sequentially and report that honestly. Freeze shared contracts and IDs first; keep config, dependency locks and shared styles under one owner.\n\n## Build and delivery\n\nUse the existing skill helpers copied into source, not a replacement build/import/ZIP format. After explicit dependency installation, run Vue/TS checks and the actual offline builder described in README.md. Build ../prototype.html from harness/prototype/main.ts and design/project.json. Bundle libraries, scoped CSS, icons, assets, synthetic fixtures and the exact export JSON; embed license notices and set the ready marker only after real Vue mount. A clean extraction must rebuild the artifact with no absolute links to its creator's checkout.\n\nDeliver prototype.html, companion.project.json, independently buildable source/, design-brief.md, execution-prompt.md, README.md, INTEGRATION.md, integration-map.json, THIRD-PARTY-NOTICES.md and a finalized prototype.manifest.json. Add tests/prototype.journeys.mjs and actual evidence. The prepared manifest's null artifact hash and pending verification must be replaced only by measurements of a real built artifact. Do not claim image files exist unless actual authorized bytes are present. For selected boards, the translated rules in the brief are sufficient to start; disclose missing references.\n\n## Verification\n\nRun clean install, TypeScript/Vue checking, lint, architecture, code-line, maintainability and coverage gates without weakening thresholds. Test real local application actions, normal/empty/invalid/failure data, undo/cancel and baseline preservation. Run exact-artifact browser journeys, keyboard/focus, narrow/wide, light/dark, offline/no-network and denied-storage cases. Run actual Companion import/export and compiler plan/apply in disposable state, then generated-project build/typecheck/tests. Retain 400 source / 450 test code-line limits (excluding comments and blank lines), production coverage 90% lines/statements/functions and 85% branches, domain/application 95%/90%, and the existing analyzer rules.\n\nRecord exact commands, exit status, logs, source/model/artifact hashes and not-run limitations. Do not count TODO, skipped, blocked or failed checks as passed. Return actual artifacts and truthful build/integration instructions in this session; never promise future/background work. Native qualification and public release remain separate.\n"
+    },
+    {
+      "path": "README.md",
+      "template": "# {{title}} — prototype preparation\n\nThis package contains an agreed brief, an executable fresh-session prompt, a complete Companion project JSON and a real compiler-generated Vue/TypeScript clickdummy scaffold. It does not claim a finished or verified prototype.\n\nStart by passing execution-prompt.md to an agent with this package available. Both Claude and Codex read the same canonical skill under source/.claude/skills/companion-prototype-design.\n\nImport companion.project.json in Companion to continue visual authoring. Never import prototype-answers.json as a project.\n\n## Build after implementation\n\nUse the exact Node/npm versions in source/AGENTS.md and .nvmrc. Dependency installation is a separate explicit operation.\n\n```sh\ncd source\nnpm ci\nnpm run typecheck:clickdummy\nnode .claude/skills/companion-prototype-design/scripts/prototype.mjs build --repo . --entry harness/prototype/main.ts --project design/project.json --out ../prototype.html --title Prototype --execute\n```\n\nExisting output is preserved; choose a new filename or review the helper's explicit --replace option. A successful bundle is not browser/native/business acceptance. Follow the prompt's tests before finalizing the manifest or using the existing packaging helper.\n\n## Reopen the guide\n\nprototype-guide.json and prototype-answers.json capture the exact version used. `node bin/app prototype guide --json` discovers the current guide. `prototype validate --input <answers.json> --json` reports readiness without writes. Regenerate with the same current guide and a reviewed plan hash. Edited source files are protected by the maker receipt; resolve conflicts or choose another output folder.\n"
+    },
+    {
+      "path": "INTEGRATION.md",
+      "template": "# Integration\n\nThe Companion envelope is companion.project.json, mirrored in source/design/project.json. All generated pages, reusable component definitions/instances and interactions use the shared visual IR. Source-owned changes belong in the compiler's extension seams. See source/design/compiler-origins.json for actual generated source-to-design provenance and source/design/compiler-readiness.json for pending work.\n\nA title-only action is an implementation TODO, not simulated business success. Do not claim arbitrary authored source can round-trip into JSON. Record unrepresentable source-owned behavior and native implementation work in the integration map.\n\nFor feature/improvement mode, baseline.project.json is the complete locally supplied baseline. Preserve it and the recorded source revision, compare stable IDs and run regression cases. This package is not automatically safe to merge into another repository. Local package creation grants no permission to publish potentially private baseline bytes.\n"
+    },
+    {
+      "path": "companion.project.json",
+      "template": "{{projectJson}}"
+    },
+    {
+      "path": "prototype-answers.json",
+      "template": "{{answersJson}}"
+    },
+    {
+      "path": "prototype.preparation.json",
+      "template": "{{contextJson}}\n"
+    },
+    {
+      "path": "integration-map.json",
+      "template": "{{integrationJson}}\n"
+    },
+    {
+      "path": "prototype.manifest.json",
+      "template": "{{manifestJson}}\n"
+    },
+    {
+      "path": "THIRD-PARTY-NOTICES.md",
+      "template": "# Third-party notices\n\nThe generated source retains the framework LICENSE and its existing notice-generation pipeline. Runtime third-party notices must be generated and retained by the actual offline build before the completed artifact is distributed. No completed build or complete runtime license inventory is claimed at preparation time.\n"
+    }
+  ]
+}

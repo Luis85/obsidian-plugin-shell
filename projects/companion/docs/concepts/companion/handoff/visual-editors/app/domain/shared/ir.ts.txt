@@ -1,0 +1,16 @@
+export type Id = string
+export type Scalar = string | number | boolean | null
+export type ValueExpression =
+  | { kind: 'literal'; value: Scalar }
+  | { kind: 'prop'; name: string }
+
+export type Action =
+  | { kind: 'emit'; event: string; payload?: ValueExpression }
+  | { kind: 'navigate'; pageId: Id }
+  | { kind: 'set-state'; state: string }
+
+export type UiNode =
+  | { id: Id; kind: 'element'; tag: 'div'|'section'|'header'|'main'|'footer'|'button'|'input'|'label'|'p'|'h1'|'h2'|'span'; attrs?: Record<string, ValueExpression>; children?: UiNode[]; events?: Record<string, Action[]> }
+  | { id: Id; kind: 'text'; value: ValueExpression }
+  | { id: Id; kind: 'slot'; name: string; fallback?: UiNode[] }
+  | { id: Id; kind: 'component'; componentId: Id; props?: Record<string, ValueExpression>; slots?: Record<string, UiNode[]>; events?: Record<string, Action[]> }

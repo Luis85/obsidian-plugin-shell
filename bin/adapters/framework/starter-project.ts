@@ -14,6 +14,7 @@ import { definitionProjectPlan } from '../starters/project.ts';
 import { completeDefinition } from '../starters/processes.ts';
 import { companionRelativeFolder } from '../../../scripts/companion/authoring-contract.ts';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
+import { frameworkProjectFolder } from '../../compiler/domain/template-inputs.ts';
 import { exists } from './files.ts';
 import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
 import { resolveTemplateRoot } from '../template-root.ts';
@@ -80,7 +81,8 @@ async function placement(context: Context, dir: string | undefined, insideVault 
   while (!await exists(ancestor)) { missing.unshift(basename(ancestor)); requireThat(dirname(ancestor) !== ancestor, 'TARGET_INVALID', 'No existing ancestor folder.'); ancestor = dirname(ancestor); }
   const vault = await realpath(ancestor), directory = join(vault, ...missing), framework = await realpath(context.frameworkRoot);
   const within = relative(framework, directory);
-  requireThat(within === '..' || within.startsWith('..' + sep) || isAbsolute(within), 'TARGET_INSIDE_FRAMEWORK', `Create the project outside the framework checkout ${framework}, for example ../${missing.at(-1)}.`);
+  const outside = within === '..' || within.startsWith('..' + sep) || isAbsolute(within);
+  requireThat(outside || frameworkProjectFolder(within), 'TARGET_INSIDE_FRAMEWORK', `Create the project outside the framework checkout ${framework}, for example ../${missing.at(-1)}, or as a standalone framework project in projects/<name>.`);
   const vaultRoot = await enclosingVault(directory);
   if (vaultRoot && !insideVault) throw new OperationError('TARGET_INSIDE_VAULT', `${directory} is inside the Obsidian vault ${vaultRoot} (it has a .obsidian folder). A plugin project must not live in a personal vault: create it elsewhere, for example next to this checkout.`, 'Choose a directory outside any vault, or pass --inside-vault if this vault is a disposable test vault you own.');
   const target = missing.join('/');

@@ -1,0 +1,4 @@
+import { BrowserProjectRepository } from '../../infrastructure/persistence/browser-project-repository'
+import { JsonProjectCodec } from '../../infrastructure/persistence/json-codec'
+import { ProjectService } from '../../application/use-cases/project-service'
+export const useProjectService=()=>new ProjectService(new BrowserProjectRepository(),new JsonProjectCodec())

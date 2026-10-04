@@ -37,6 +37,7 @@ on:
       - 'package*.json'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/optional-storybook.yml'
+      - '!projects/**'
 permissions:
   contents: read
 concurrency:

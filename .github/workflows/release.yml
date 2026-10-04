@@ -12,6 +12,8 @@ name: Release
 on:
   push:
     branches: ['release/**']
+    paths-ignore:
+      - 'projects/**'
   workflow_dispatch:
 permissions:
   contents: read

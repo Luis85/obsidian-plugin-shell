@@ -1,0 +1,51 @@
+COMPLETION CHECKS — captured excerpts, not the complete raw logs
+Scope: fresh directory containing the original sixteen source files and both test files.
+Initial state: prototype.html did not exist.
+Toolchain: Node 22.16.0 / npm 10.9.2.
+Working directory for commands: source/.
+
+npm ci --ignore-scripts: EXIT 0
+up to date, audited 1 package in 706ms
+found 0 vulnerabilities
+
+npm run prototype:build: EXIT 0
+ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+Built prototype.html: 54462 bytes; SHA-256 8b4c6da3015c8350a127c7ae5151061e39459cba54aa235a6907e224ae60a8f5
+
+npm run prototype:check: EXIT 0
+Checked prototype.html: 54462 bytes; SHA-256 8b4c6da3015c8350a127c7ae5151061e39459cba54aa235a6907e224ae60a8f5
+
+npm test: EXIT 0
+1..38
+# tests 38
+# suites 0
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 868.634623
+
+npm run test:browser: TERMINATED BY EXECUTION ENVIRONMENT AT 120 SECONDS
+The following lines were emitted before termination. They are not an overall suite pass.
+PASS B01 source-built overview, storage-denial fallback and actual JSON download
+PASS B02 all eight product surfaces render through real navigation
+PASS B03 native dialog initial focus and Escape dismissal
+PASS B04 title-only capture and editing arbitrary work types
+PASS B05 selected backlog items enter active scope with a reason and stable baseline
+PASS B06 removing scope preserves the canonical backlog and original agreement
+PASS B07 daily Done guard and meaningful delivered changelog
+PASS B08 complete daily walks every backlog item including Done
+PASS B09 delivery gauge updates from confirmed completion, not notes
+PASS B10 review records a frozen increment and separates unfinished work
+PASS B11 real Markdown changelog export distinguishes delivery from progress
+PASS B12 retrospective promotes one traceable owned improvement
+PASS B13 next Monday planning reuses unfinished work without rewriting history
+PASS B14 people, iteration capacity and explicit external reference resources
+PASS B15 invalid import rollback, preview cancellation and exact JSON round trip
+PASS B16 arbitrary imported or entered titles render as text, not executable markup
+PASS B17 all eight surfaces fit wide/narrow light/dark without root overflow
+
+B18–B20: unverified in this rerun; no final report was emitted.
+An earlier invocation was terminated at one second before useful test output.
+No thresholds, assertions or timeouts inside the supplied test source were changed.

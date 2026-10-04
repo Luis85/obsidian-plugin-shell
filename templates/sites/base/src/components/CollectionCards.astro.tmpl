@@ -1,0 +1,34 @@
+---
+import EmptyState from './EmptyState.astro';
+import { collectionInfo, collectionRecords, formatValue, recordTitle } from '../lib/collections';
+
+/**
+ * Every record of one collection as a card (layout "grid") or as a stacked list (layout "list"): the first field is the
+ * card heading and the other fields are listed under their display names. Empty values are left out.
+ */
+interface Props { name: string; layout?: 'grid' | 'list'; headingLevel?: 3 | 4 }
+const { name, layout = 'grid', headingLevel = 3 } = Astro.props;
+const info = collectionInfo(name);
+const records = await collectionRecords(name);
+const Heading = `h${headingLevel}`;
+const details = (info?.fields ?? []).slice(1);
+---
+{info && records.length > 0
+  ? (
+    <ul class:list={['collection-cards', `collection-cards--${layout}`]} role="list">
+      {records.map(record => (
+        <li class="collection-card">
+          <Heading class="collection-card__title">{recordTitle(info, record)}</Heading>
+          <dl>
+            {details.filter(field => formatValue(record.values[field.property]) !== '').map(field => (
+              <div class="collection-card__field" data-type={field.type}>
+                <dt>{field.displayName}</dt>
+                <dd>{formatValue(record.values[field.property])}</dd>
+              </div>
+            ))}
+          </dl>
+        </li>
+      ))}
+    </ul>
+  )
+  : <EmptyState name={name} known={info !== null} />}

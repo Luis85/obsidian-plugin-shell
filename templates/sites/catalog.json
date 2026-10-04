@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "astro": "7.3.5",
+  "templates": [
+    {
+      "id": "product-page",
+      "title": "Product page",
+      "summary": "a one-page product site with a hero, a feature grid and an FAQ.",
+      "collections": [
+        { "name": "features", "use": "Feature cards: the first column is the card heading, the other columns its details." },
+        { "name": "faq", "use": "Questions and answers: the first column is the question, the other columns the answer." }
+      ]
+    },
+    {
+      "id": "project-page",
+      "title": "Project page",
+      "summary": "a project status page with a roadmap table, a backlog table and update cards.",
+      "collections": [
+        { "name": "roadmap", "use": "Roadmap milestones as a table, one column per view field." },
+        { "name": "backlog", "use": "Open backlog items as a table, one column per view field." },
+        { "name": "updates", "use": "Project updates as cards." }
+      ]
+    },
+    {
+      "id": "documentation",
+      "title": "Documentation",
+      "summary": "a documentation site with a navigation and one reference page per collection.",
+      "collections": [
+        { "name": "<any>", "use": "Every collection gets a reference page under /reference/<name>/ with its fields, their types and every entry." }
+      ]
+    }
+  ]
+}

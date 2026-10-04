@@ -1,0 +1,13 @@
+<script setup lang="ts">
+const open=defineModel<boolean>({default:false})
+const checks=[
+ {label:'Project schema',status:'pass',detail:'v4 · Vue 3 · TypeScript'},
+ {label:'Nuxt UI catalog',status:'pass',detail:'Catalog v1 pinned'},
+ {label:'Page references',status:'pass',detail:'5 pages · no dangling references'},
+ {label:'Layouts',status:'pass',detail:'6 layouts · fresh-ID instantiation'},
+ {label:'Component contracts',status:'pass',detail:'Props, slots and emits valid'},
+ {label:'Component graph',status:'pass',detail:'No recursive dependencies'},
+ {label:'Scenarios',status:'warn',detail:'1 hover state awaiting review'}
+]
+</script>
+<template><USlideover v-model:open="open" title="Project health" description="Pre-generation validation across pages, layouts and components."><template #body><div class="space-y-2"><div v-for="c in checks" :key="c.label" class="border border-default rounded-lg p-3 flex gap-3"><UIcon :name="c.status==='pass'?'i-lucide-circle-check':'i-lucide-triangle-alert'" :class="c.status==='pass'?'text-success':'text-warning'" class="mt-0.5"/><div><strong class="text-sm">{{c.label}}</strong><p class="text-xs text-muted mt-1">{{c.detail}}</p></div></div></div></template><template #footer><UButton block icon="i-lucide-braces">Inspect project IR</UButton></template></USlideover></template>

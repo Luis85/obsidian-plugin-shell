@@ -170,6 +170,15 @@
       ]
     },
     {
+      "id": "sites",
+      "title": "Optional Astro websites",
+      "commands": [
+        "site templates",
+        "site new",
+        "site collections"
+      ]
+    },
+    {
       "id": "plugins",
       "title": "App plugins (bin/plugins)",
       "commands": [
@@ -277,7 +286,9 @@
         "data plan",
         "data apply",
         "data reset-plan",
-        "data reset"
+        "data reset",
+        "base views",
+        "base ingest"
       ]
     },
     {
@@ -3463,7 +3474,8 @@
         {
           "name": "title",
           "kind": "value",
-          "description": "Single-line title of at most 120 characters."
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
         },
         {
           "name": "owner",
@@ -3689,7 +3701,8 @@
         {
           "name": "title",
           "kind": "value",
-          "description": "Single-line title of at most 120 characters."
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
         },
         {
           "name": "owner",
@@ -4376,7 +4389,8 @@
         {
           "name": "title",
           "kind": "value",
-          "description": "Single-line title of at most 120 characters."
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
         },
         {
           "name": "summary",
@@ -4584,7 +4598,8 @@
         {
           "name": "title",
           "kind": "value",
-          "description": "Single-line title of at most 120 characters."
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
         },
         {
           "name": "summary",
@@ -5405,7 +5420,8 @@
         {
           "name": "title",
           "kind": "value",
-          "description": "Single-line title of at most 120 characters."
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
         },
         {
           "name": "summary",
@@ -5576,7 +5592,8 @@
         {
           "name": "title",
           "kind": "value",
-          "description": "Single-line title of at most 120 characters."
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
         },
         {
           "name": "summary",
@@ -10056,6 +10073,281 @@
         "plan-out",
         "timeout",
         "yes"
+      ]
+    },
+    {
+      "id": "base views",
+      "summary": "List the views of an Obsidian .base file and whether each can be evaluated exactly; read-only.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "vault",
+      "usage": "node bin/app base views <file.base> [--vault <folder>] [--json]",
+      "examples": [
+        "node bin/app base views Collections/Books.base",
+        "node bin/app base views docs/requirements/MVP.base --json"
+      ],
+      "options": [
+        {
+          "name": "vault",
+          "kind": "value",
+          "description": "Vault folder the .base file and its notes belong to; file paths in the base are relative to it.",
+          "default": "--root"
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "base ingest",
+      "summary": "Apply one .base view to the vault's Markdown notes: a file-collection config plus its records for fixtures; read-only.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "vault",
+      "usage": "node bin/app base ingest <file.base> --view <name> [--vault <folder>] [--json]",
+      "examples": [
+        "node bin/app base ingest Collections/Books.base --view \"Reading list\" --json",
+        "node bin/app base ingest Books.base --vault ../my-vault --view Shelf --json"
+      ],
+      "options": [
+        {
+          "name": "vault",
+          "kind": "value",
+          "description": "Vault folder the .base file and its notes belong to; file paths in the base are relative to it.",
+          "default": "--root"
+        },
+        {
+          "name": "view",
+          "kind": "value",
+          "description": "Exact name of the .base view to apply; base views lists them."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "site templates",
+      "summary": "List the opt-in Astro website templates (product page, project page, documentation) and the collections each reads; read-only.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "sites",
+      "usage": "node bin/app site templates [--json]",
+      "examples": [
+        "node bin/app site templates",
+        "node bin/app site templates --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "site new",
+      "summary": "Plan a standalone Astro website in projects/<name> from a site template; previews unless --yes. Never installs or builds.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "sites",
+      "usage": "node bin/app site new projects/<name> --template <id> [--title <title>] [--yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app site new projects/acme-docs --template documentation --title \"Acme Docs\"",
+        "node bin/app site new projects/acme-docs --template documentation --apply <sha256>"
+      ],
+      "options": [
+        {
+          "name": "template",
+          "kind": "value",
+          "description": "Astro site template id; site templates describes each one.",
+          "values": [
+            "product-page",
+            "project-page",
+            "documentation"
+          ]
+        },
+        {
+          "name": "title",
+          "kind": "value",
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "site collections",
+      "summary": "Plan the Bases collection snapshots (src/data/collections/<name>.collection.json) a site project lists in workbench.project.json.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "sites",
+      "usage": "node bin/app site collections projects/<name> [--yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app site collections projects/acme-docs",
+        "node bin/app site collections projects/acme-docs --yes"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
       ]
     },
     {

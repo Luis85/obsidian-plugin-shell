@@ -26,6 +26,7 @@ on:
       - '.nvmrc'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/application-docs.yml'
+      - '!projects/**'
   # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
   workflow_call:
     inputs:

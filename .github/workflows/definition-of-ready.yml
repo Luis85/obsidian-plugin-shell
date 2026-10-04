@@ -10,6 +10,8 @@ name: Definition of Ready
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths-ignore:
+      - 'projects/**'
 permissions:
   contents: read
 concurrency:

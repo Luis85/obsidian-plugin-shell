@@ -1,0 +1,20 @@
+---
+import { collectionInfo, collectionNames, href } from '../lib/collections';
+
+/** The documentation navigation: the overview and one reference page per collection, the current page marked. */
+interface Props { current?: string }
+const { current } = Astro.props;
+const names = collectionNames();
+---
+<nav class="docs-nav" aria-label="Documentation">
+  <ul>
+    <li><a href={href('/')} aria-current={current === undefined ? 'page' : undefined}>Overview</a></li>
+    {names.map(name => (
+      <li>
+        <a href={href(`/reference/${name}/`)} aria-current={current === name ? 'page' : undefined}>
+          {collectionInfo(name)?.view.name ?? name}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

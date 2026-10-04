@@ -1,0 +1,82 @@
+{
+  "id": "ds-source-1",
+  "slug": "authoring-vault",
+  "name": "Companion authoring vault",
+  "kind": "vault",
+  "status": "active",
+  "description": "Proposed native adapter over project authoring notes. The HTML only declares this port.",
+  "locator": "vault://active",
+  "auth": "none",
+  "credentialRef": "",
+  "operations": [
+    {
+      "id": "ds-operation-2",
+      "slug": "list-requirements",
+      "name": "List requirements",
+      "direction": "read",
+      "method": "adapter",
+      "resource": "Companion/Requirement",
+      "description": "Read the declared authoring records through the vault port.",
+      "input": {
+        "mode": "none",
+        "entity": null,
+        "many": false,
+        "fields": [],
+        "schema": null
+      },
+      "output": {
+        "mode": "entity",
+        "entity": "er-entity-7",
+        "many": true,
+        "fields": [],
+        "schema": null
+      }
+    },
+    {
+      "id": "ds-operation-4",
+      "slug": "list-sitemap",
+      "name": "List sitemap",
+      "direction": "read",
+      "method": "adapter",
+      "resource": "Companion/Screen",
+      "description": "Read the declared authoring records through the vault port.",
+      "input": {
+        "mode": "none",
+        "entity": null,
+        "many": false,
+        "fields": [],
+        "schema": null
+      },
+      "output": {
+        "mode": "entity",
+        "entity": "er-entity-12",
+        "many": true,
+        "fields": [],
+        "schema": null
+      }
+    },
+    {
+      "id": "ds-operation-6",
+      "slug": "list-components",
+      "name": "List components",
+      "direction": "read",
+      "method": "adapter",
+      "resource": "Companion/Component",
+      "description": "Read the declared authoring records through the vault port.",
+      "input": {
+        "mode": "none",
+        "entity": null,
+        "many": false,
+        "fields": [],
+        "schema": null
+      },
+      "output": {
+        "mode": "entity",
+        "entity": "er-entity-17",
+        "many": true,
+        "fields": [],
+        "schema": null
+      }
+    }
+  ]
+}

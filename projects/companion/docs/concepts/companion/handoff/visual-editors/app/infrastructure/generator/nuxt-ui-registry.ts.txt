@@ -1,0 +1,13 @@
+import { nuxtUiCatalog, nuxtUiRecipes } from '../../domain/catalog/nuxt-ui-catalog'
+export interface CatalogReference { catalog:'nuxt-ui'; entryId:string; catalogVersion:1 }
+export function resolveNuxtUi(ref:CatalogReference){
+ const entry=[...nuxtUiCatalog,...nuxtUiRecipes].find(x=>x.id===ref.entryId)
+ if(!entry) throw new Error(`Unknown Nuxt UI catalog entry: ${ref.entryId}`)
+ return entry
+}
+export function boilerplateFor(ref:CatalogReference):string{
+ const e=resolveNuxtUi(ref)
+ if(e.kind==='recipe') return `<!-- recipe ${e.id} expands to declarative IR before SFC generation -->`
+ const props=e.props.filter(p=>p.default!==undefined).map(p=>` :${p.name}="${JSON.stringify(p.default)}"`).join('')
+ return `<${e.component}${props}>${e.slots.some(s=>s.name==='default')?'Content':''}</${e.component}>`
+}

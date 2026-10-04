@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "node bin/app site collections",
+  "recordsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "collection": {
+    "kind": "file-collection",
+    "base": {
+      "path": "docs/requirements/MVP.base",
+      "sha256": "36c05407feab2c7e57d76a1f59628c2d18ceb0f4d837b7df734ed16eae1552fc",
+      "view": "Shipped records"
+    },
+    "view": {
+      "name": "Shipped records",
+      "type": "table"
+    },
+    "folder": "docs/requirements",
+    "sort": [],
+    "groupBy": null,
+    "limit": null,
+    "fields": [
+      {
+        "property": "file.name",
+        "displayName": "name",
+        "type": "empty"
+      },
+      {
+        "property": "note.title",
+        "displayName": "Use case",
+        "type": "empty"
+      },
+      {
+        "property": "note.shipped_on",
+        "displayName": "shipped_on",
+        "type": "empty"
+      },
+      {
+        "property": "note.release_ref",
+        "displayName": "release_ref",
+        "type": "empty"
+      },
+      {
+        "property": "note.acceptance_record",
+        "displayName": "acceptance_record",
+        "type": "empty"
+      }
+    ]
+  },
+  "records": []
+}
