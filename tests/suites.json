@@ -223,6 +223,9 @@
           "tests/tooling/interactive-maker-issue-documents.checks.mjs",
           "tests/tooling/interactive-maker-operations-catalog.checks.mjs",
           "tests/tooling/interactive-maker-pull-request-documents.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-remote-body.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-sync-merge.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-sync-record.checks.mjs",
           "tests/tooling/interactive-maker-setup-domain.checks.mjs",
           "tests/tooling/interactive-maker-setup-source.checks.mjs",
           "tests/tooling/interactive-maker-starters-browser.checks.mjs",
@@ -496,9 +499,6 @@
           "tests/tooling/framework-docs-codec.checks.mjs",
           "tests/tooling/framework-docs-model.checks.mjs",
           "tests/tooling/framework-documents.checks.mjs",
-          "tests/tooling/framework-pull-request-remote-body.checks.mjs",
-          "tests/tooling/framework-pull-request-sync-merge.checks.mjs",
-          "tests/tooling/framework-pull-request-sync-record.checks.mjs",
           "tests/tooling/starter-catalog-docs.checks.mjs",
           "tests/tooling/starter-submission-identity.checks.mjs"
         ]

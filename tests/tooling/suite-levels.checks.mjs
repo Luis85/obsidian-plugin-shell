@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { checkSuites } from '../../scripts/testing/suite-manifest.mjs';
-import { declaredLevels, e2ePolicyFailures, pyramidReport, resolveLevels, selectByLevel, suiteCommandText } from '../../scripts/testing/test-levels.mjs';
+import { declaredLevels, e2ePolicyFailures, pyramidReport, removedExampleFiles, resolveLevels, selectByLevel, suiteCommandText } from '../../scripts/testing/test-levels.mjs';
 import { e2eKinds } from '../../scripts/quality/e2e-policy.mjs';
 
 const testLevels = [{ name: 'unit', summary: 'u' }, { name: 'component', summary: 'c' }, { name: 'integration', summary: 'i' },
@@ -109,7 +109,7 @@ test('level selection narrows node --test and Vitest suites to matching files an
 test('the repository labels every test file once, keeps e2e under the opt-in policy and has a usable pyramid', async () => {
   const result = await checkSuites(process.cwd());
   assert.deepEqual(result.failures, []);
-  const resolved = resolveLevels(result.manifest, result.suites);
+  const resolved = resolveLevels(result.manifest, result.suites, { removed: removedExampleFiles(process.cwd()) });
   assert.deepEqual(resolved.failures, []);
   assert.equal(resolved.files.length, result.suites.reduce((sum, item) => sum + item.files.length, 0));
   assert.deepEqual(resolved.levels.map(level => level.name), ['unit', 'component', 'integration', 'e2e', 'acceptance']);

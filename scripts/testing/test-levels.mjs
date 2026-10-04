@@ -4,6 +4,8 @@
  * A level with `paths` owns those paths exclusively. `e2e` is a whole-suite property that must agree with the e2e
  * opt-in policy (scripts/quality/e2e-policy.mjs), which gates every browser and real-host command in the workflows.
  */
+import { accessSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { globToRegExp } from './suite-manifest.mjs';
 
 const manifestPath = 'tests/suites.json';
@@ -65,6 +67,14 @@ function suiteFiles(suite, known, failures, removed) {
   for (const entry of entries) if (suite.files.length && !used.has(entry) && !removed.has(entry.pattern))
     failures.push(`UNUSED_LEVEL_PATTERN: suite "${suite.name}" pattern "${entry.pattern}" (${entry.level}) matches none of its files. ${edit}: remove or fix it.`);
   return files;
+}
+
+/** Example-owned files (scripts/examples/ownership.json) that `examples:remove` deleted from `root`. */
+export function removedExampleFiles(root) {
+  let ownership;
+  try { ownership = JSON.parse(readFileSync(resolve(root, 'scripts/examples/ownership.json'), 'utf8')); } catch { return new Set(); }
+  const paths = Array.isArray(ownership?.files) ? ownership.files.map(file => file?.path).filter(path => typeof path === 'string') : [];
+  return new Set(paths.filter(path => { try { accessSync(resolve(root, path)); return false; } catch { return true; } }));
 }
 
 /** A level with `paths` owns them exclusively, so a reserved level (acceptance, e2e) cannot drift either way. */

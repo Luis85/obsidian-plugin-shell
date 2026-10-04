@@ -1,4 +1,6 @@
-import { test } from 'node:test';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+/** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
+const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 import assert from 'node:assert/strict';
 import { mkdtemp, readdir, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -118,7 +120,7 @@ const inRepository = [...scope, '--project', 'Demo Project', '--repository', 'de
 
 test('Azure create passes title and description through private @files that are removed afterwards', async t => {
   const tempRoot = await mkdtemp(join(tmpdir(), 'azure-remote-'));
-  t.after(() => rm(tempRoot, { recursive: true, force: true }));
+  after(t, () => rm(tempRoot, { recursive: true, force: true }));
   const seen = {};
   const fake = runner(async (command, args) => {
     for (const flag of ['--title', '--description']) {
@@ -144,7 +146,7 @@ test('Azure create passes title and description through private @files that are 
 
 test('Azure on Windows starts az.cmd through a shell with every whitelisted argument quoted, and refuses anything else', async t => {
   const unsafeRoot = await mkdtemp(join(tmpdir(), 'azure&remote-'));
-  t.after(() => rm(unsafeRoot, { recursive: true, force: true }));
+  after(t, () => rm(unsafeRoot, { recursive: true, force: true }));
   const fake = runner(ok(azurePull({ status: 'completed', isDraft: false })));
   const remote = createAzureRemote({ ...coordinates, run: fake.run, windows: true });
   assert.equal((await remote.get(12)).state, 'merged');

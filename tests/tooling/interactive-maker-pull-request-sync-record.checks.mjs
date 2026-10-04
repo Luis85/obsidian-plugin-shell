@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { renderManagedBlock } from '../../bin/domain/increments/remote-body.ts';
 import { createSyncRecord, parseSyncRecord, recordDigest, remoteRevision, serializeSyncRecord, syncRecordPath } from '../../bin/domain/increments/sync-record.ts';

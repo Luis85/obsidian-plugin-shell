@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { bodySize, composeRemoteBody, parseRemoteBody, remoteMarker, renderManagedBlock, requireBodyFits } from '../../bin/domain/increments/remote-body.ts';
 import { blobUrl, canonicalWikilinks, remoteToWikilinks, wikilinksToRemote } from '../../bin/domain/increments/remote-links.ts';
