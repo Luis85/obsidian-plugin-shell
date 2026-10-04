@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   candidate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Job budget sized from measured steps: npm ci (~3 min), release:rehearse
     # with the complete verify (~28 min), three runtime repeats, core and
     # production coverage, browser provisioning and served components, three
@@ -32,10 +32,10 @@ jobs:
     # covers every step; it is not a test deadline or performance threshold.
     timeout-minutes: 70
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
@@ -54,7 +54,7 @@ jobs:
           node "$QUALIFIED_NPM" ls --all --json > reports/candidate-qualification/dependency-tree.json
       - name: Retain exact source for interrupted-session recovery
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: candidate-recovery-source
           path: reports/candidate-qualification/candidate-source.zip
@@ -70,7 +70,7 @@ jobs:
           node "$QUALIFIED_NPM" run release:rehearse -- --commit "$GITHUB_SHA" --version "$VERSION" 2>&1 | tee reports/candidate-qualification/verify.txt
           node scripts/quality/check-artifacts.mjs > reports/candidate-qualification/candidate-assets.json
       - name: Retain the built candidate for independent platform qualification
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: retained-build
           path: |
@@ -129,7 +129,7 @@ jobs:
           cd package && zip -r ../candidate-plugin.zip "$PLUGIN_ID"
       - name: Retain candidate and sanitized, scope-labeled evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: qualified-candidate
           path: |

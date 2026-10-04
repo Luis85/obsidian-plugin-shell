@@ -30,16 +30,16 @@ concurrency:
   cancel-in-progress: false
 jobs:
   package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
       source: ${{ steps.identity.outputs.source }}
       version: ${{ steps.identity.outputs.version }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.21.0
           package-manager-cache: false
@@ -81,7 +81,7 @@ jobs:
           node tests/concepts/feature-showcase.browser.mjs --html reports/feature-showcase/clickdummy.html
       - name: Retain source-bound starter and browser evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: companion-starter-evidence-${{ github.sha }}
           path: |
@@ -89,6 +89,7 @@ jobs:
             reports/companion-mvp/qualification-project.json
             reports/companion-mvp/starter-lifecycle/
             reports/feature-showcase/browser-evidence/
+          retention-days: 14
           if-no-files-found: warn
       - name: Bind assets to exact checked-out source
         id: identity
@@ -121,8 +122,9 @@ jobs:
           await writeFile(root + 'workbench-SHA256SUMS', assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join(''));
           NODE
       - name: Retain separate assets and their manifest
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: workbench-distributions-${{ steps.identity.outputs.source }}
           path: reports/workbench-distributions/
+          retention-days: 14
           if-no-files-found: error

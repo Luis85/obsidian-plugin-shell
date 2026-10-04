@@ -18,6 +18,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # ubuntu-latest stays here only because the shipped `bin/app ci` help and
+        # manual use `ci/baseline --matrix os=ubuntu-latest` as their example; the
+        # dependency-free baseline does not depend on the image's preinstalled tools.
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
@@ -59,7 +62,7 @@ jobs:
         # On pull requests template-authoring's renamed-feature job already runs
         # setup, the complete verify and served e2e on Ubuntu with the same
         # toolchain; Ubuntu showcase runs on pushes and manual dispatch.
-        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-latest", "windows-latest"]') }}
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-24.04", "windows-latest"]') }}
     steps:
       - *checkout
       - &windows-dev-drive
@@ -135,7 +138,7 @@ jobs:
   # runs every gate on its own fresh checkout.
   renamed-feature:
     name: Template authoring / renamed feature
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Measured at 30-37 minutes on #60 and 44 minutes on #68 (identity adoption,
     # maker, extended verify and served components); 60 minutes is a job budget,
     # not a test deadline.
@@ -208,7 +211,7 @@ jobs:
 
   source-archive:
     name: Template authoring / source archive
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - *checkout
@@ -245,7 +248,7 @@ jobs:
 
   example-removal:
     name: Template authoring / example removal
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
     # evidence sessions); 100 minutes is a job budget, not a test deadline.
     timeout-minutes: 100
@@ -318,7 +321,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     defaults:
@@ -365,7 +368,7 @@ jobs:
   real-obsidian:
     name: Real Obsidian E2E
     if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - *checkout
@@ -404,7 +407,7 @@ jobs:
   generated-companion:
     name: Project generator / generated companion
     if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - *checkout
@@ -460,7 +463,7 @@ jobs:
   starter:
     name: Project generator / starters ${{ matrix.ids }}
     if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
