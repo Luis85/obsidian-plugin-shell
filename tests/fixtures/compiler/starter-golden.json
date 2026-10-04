@@ -83,7 +83,7 @@
   {
    "starter": "blank",
    "source": "configs/starters/blank.json",
-   "sourceSha256": "2f9db20b16ac5db0dd65d77701eede31d95250c528ed81a29702fb1673634169",
+   "sourceSha256": "244cfd47486790b844d7f915d322f42a43a82d8324b4c0e34eb236f798854823",
    "files": {
     "PROJECT-IMPLEMENTATION.md": "022a2c558255225afc3ff20c7589f139f038b6700c34a03065cd843a3e23eb99",
     "design/compiler-origins.json": "3795817ef0826ff19ebaed406c0af0e1e681ab19a1d5c2dc1951c63e6c66e287",
