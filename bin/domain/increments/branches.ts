@@ -2,14 +2,13 @@
  * Branch names of an increment: one increment branch from the base, the kick-off pull request merging it back,
  * and change pull requests stacked on the increment branch. Pure naming and checks; Git itself is an adapter.
  */
+import { hasControls } from '../errors.ts';
 import { insistDelivery, type DeliveryErrorCode } from './errors.ts';
 import { defaultDeliverySchema, type BranchConfig, type Problem, type PullRequestKind } from './model.ts';
 
 /** `git check-ref-format --branch` rules, without consulting Git. */
 export function isBranchName(value: string): boolean {
-  // Intentional identity boundary: Git refuses control characters in ref names.
-  // oxlint-disable-next-line no-control-regex
-  if (!value || value.length > 200 || /[\u0000- \u007f~^:?*[\\]/u.test(value)) return false;
+  if (!value || value.length > 200 || hasControls(value) || /[\s~^:?*[\\]/u.test(value)) return false;
   if (/^[-/]|\/$|\.$|\.lock$|\.\.|\/\/|@\{/u.test(value) || value === '@') return false;
   return value.split('/').every(part => part.length > 0 && !part.startsWith('.') && !part.endsWith('.lock'));
 }
