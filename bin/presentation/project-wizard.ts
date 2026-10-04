@@ -7,6 +7,8 @@ import { requireSketch } from '../domain/errors.ts';
 import type { Guide, Answers } from '../domain/guide.ts';
 import { interview } from './guide.ts';
 import { review } from './review.ts';
+import { offerDesignFolder } from './design-folder.ts';
+import { join } from 'node:path';
 import { Back, choose, input, reportError, type Prompts } from './prompts.ts';
 export interface ProjectWizardOptions { root: string; frameworkRoot: string; out?: string; starter?: string; signal?: AbortSignal }
 type Starter = Awaited<ReturnType<typeof projectStarters>>[number];
@@ -41,7 +43,11 @@ async function writeReview(ui: Prompts, options: ProjectWizardOptions, state: Wi
     interview: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: state.answers } } });
   if (!await review(ui, plan, options.signal)) { ui.write('No project files written.\n'); return {}; }
   const completion = `Start with ${state.out}/execution-prompt.md. Starter: ${selection.starter.id}; targets: ${selection.targets.join(', ')}; framework: ${selection.framework}. Source: ${state.out}/source/.\n`;
-  ui.write(completion); return { completion };
+  ui.write(completion);
+  ui.write(`The design folder belongs to the new project in ${state.out}/source/, next to its design/project.json.\n`);
+  const design = await offerDesignFolder(ui, { root: join(options.root, state.out, 'source'), frameworkRoot: options.frameworkRoot,
+    title: String(state.answers.title), briefFrom: join(options.root, state.out, 'design-brief.md'), signal: options.signal });
+  return { completion: completion + (design ?? '') };
 }
 async function advance(ui: Prompts, starters: Starter[], options: ProjectWizardOptions, state: WizardState): Promise<false | { completion?: string }> {
   if (state.stage === 0) { await chooseStarter(ui, starters, state); return false; }

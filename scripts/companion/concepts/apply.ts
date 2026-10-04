@@ -1,4 +1,4 @@
-import { migrateAuthoringDocument, validateAuthoringDocument, type AuthoringDocument } from '../authoring-contract.ts';
+import { validateAuthoringDocument, type AuthoringDocument } from '../authoring-contract.ts';
 import { emptyVisualDesigns } from '../visual/visual-ir.mjs';
 import { assertJson, record } from '../sitemap/safety.ts';
 import { conceptRequire, type Concept, type ConceptCollection, type ConceptChange } from './contract.ts';
@@ -68,11 +68,10 @@ export function applyConcept(concept: Concept, current?: CurrentProject) {
   if (concept.baseSha256 !== null) conceptRequire(current && current.sha256 === concept.baseSha256,
     'CONCEPT_BASE_STALE', 'The saved project differs from the concept base. Reconcile the concept against a new inspected base.');
   if (concept.mode === 'project') {
-    const migrated = migrateAuthoringDocument(concept.project);
-    return { document: structuredClone(migrated.document), migration: migrated.report, changes: [] as ConceptDelta[] };
+    return { document: structuredClone(validateAuthoringDocument(concept.project)), changes: [] as ConceptDelta[] };
   }
   conceptRequire(current?.document.project.id === concept.projectId, 'CONCEPT_IDENTITY', 'The concept belongs to another project.');
-  const migrated = migrateAuthoringDocument(current.document), document = structuredClone(migrated.document);
+  const document = structuredClone(validateAuthoringDocument(current.document));
   for (const reference of concept.references) conceptRequire(collection(document, reference.collection).some(item => item.id === reference.id),
     'CONCEPT_REFERENCE', `Missing reviewed external reference: ${reference.collection}/${reference.id}.`);
   concept.changes.forEach(item => change(document, item));
@@ -82,5 +81,5 @@ export function applyConcept(concept: Concept, current?: CurrentProject) {
   if (record(document.design.dataSources)) advanceCounter(document.design.dataSources, /^ds-[a-z]+-(\d+)$/);
   validateAuthoringDocument(document);
   if (concept.mode === 'feature') featureOwnership(document, concept.changes);
-  return { document, migration: migrated.report, changes: concept.changes.map(({ collection, op, id }) => ({ collection, op, id })) };
+  return { document, changes: concept.changes.map(({ collection, op, id }) => ({ collection, op, id })) };
 }

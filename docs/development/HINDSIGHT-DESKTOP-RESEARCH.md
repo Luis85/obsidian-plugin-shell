@@ -3,7 +3,7 @@
 Reviewed 2026-09-27. Complements [the Git/GitHub operating model](HINDSIGHT-GIT-GITHUB.md).
 
 
-The initial integration required generic LLM environment settings and exposed a separate npm command. The follow-up makes inference selection explicit without requiring an API key, adds the `shell.mjs memory` namespace, and connects the official tools through native desktop configuration. Provider choice is shared non-secret user configuration; project opt-in and Git-backed decision review remain separate boundaries.
+The initial integration required generic LLM environment settings and exposed a separate npm command. The follow-up makes inference selection explicit without requiring an API key, adds the `bin/app memory` namespace, and connects the official tools through native desktop configuration. Provider choice is shared non-secret user configuration; project opt-in and Git-backed decision review remain separate boundaries.
 
 The desktop agent and the memory inference provider are different roles. A desktop MCP connection is not an API adapter for the model serving that chat. Hindsight documents `openai-codex` and `claude-code` account-backed providers and local Ollama/LM Studio providers. It also documents `none` for chunks/search without an LLM. The latter cannot supply generated reflection or synthesized pages. This implementation reports those capability limits rather than hiding an API-key requirement behind a dummy credential. [7][8]
 

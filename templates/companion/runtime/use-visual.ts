@@ -211,6 +211,10 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     } catch { if (!stale()) errors[id] = 'Select one valid UTF-8 JSON file within the size limit. Your previous valid value is retained.'; }
     finally { if (!stale()) target.value = ''; }
   }
+  /** A field without a visible label or its own aria-label is named after its authored node name, so assistive technology can announce it. */
+  function accessibleName(node: UiNode, result: Record<string, unknown>): void {
+    if (node.name && !Object.hasOwn(result, 'label') && !Object.hasOwn(result, 'aria-label')) result['aria-label'] = node.name;
+  }
   function nodeProps(id: string): Record<string, unknown> {
     const node = index.get(id), result = resolved(id);
     if (node?.kind !== 'component' || node.ref.kind !== 'nuxt-ui') return result;
@@ -222,6 +226,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
       result.type = 'file'; result.accept = '.json,application/json'; result.multiple = false;
       result.onChange = (event: unknown) => { void readJsonControl(id, event); };
     }
+    if (control(node)) accessibleName(node, result);
     if (node.ref.entryId === 'u-dropdown-menu') result.items = menuItems(id, result.items);
     const openTarget = overlayBinding(node);
     if (openTarget) result['onUpdate:open'] = (input: unknown) => {

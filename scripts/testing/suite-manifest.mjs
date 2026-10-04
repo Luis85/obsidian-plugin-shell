@@ -85,7 +85,7 @@ export function validateManifest(manifest) {
   return manifest;
 }
 
-async function loadManifest(root, path = manifestPath) {
+export async function loadManifest(root, path = manifestPath) {
   let text;
   try { text = await readFile(join(root, path), 'utf8'); }
   catch (error) { throw new Error(`SUITE_MANIFEST_MISSING: ${path} (${error.code})`); }
@@ -107,7 +107,7 @@ async function walk(root, directory, files) {
   return files;
 }
 
-function matcher(entry) {
+export function matcher(entry) {
   const include = entry.include.map(globToRegExp);
   const exclude = (entry.exclude ?? []).map(globToRegExp);
   return path => include.some(pattern => pattern.test(path)) && !exclude.some(pattern => pattern.test(path));

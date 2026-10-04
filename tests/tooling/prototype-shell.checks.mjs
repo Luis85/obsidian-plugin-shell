@@ -7,7 +7,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../bin/adapters/framework/prototype-skill.ts';
-import { discoverTooling, shellOperation, npmOperation } from '../../.claude/skills/companion-prototype-design/scripts/lib/framework.mjs';
+import { shellOperation, npmOperation } from '../../.claude/skills/companion-prototype-design/scripts/lib/framework.mjs';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = path.join(root, prototypeSkillRoot, 'scripts/prototype.mjs');
 function scratch(t) {
@@ -23,9 +24,9 @@ test('actual CLI discovers the shell registry, maker contracts and matching proj
   assert.deepEqual(found.data.profiles.test, ['unit', 'project', 'browser', 'native', 'obsidian']);
   assert.match(found.data.scripts['test:prototypes'], /suites\.mjs prototypes/);
 });
-test('actual project inspector, styles inspector and maker discovery accept the real blank starter', async () => {
-  for (const args of [['project', 'inspect', '--input', 'docs/concepts/companion/starters/blank.companion.json'],
-    ['styles', 'inspect', '--input', 'docs/concepts/companion/starters/blank.companion.json'], ['make', 'describe', 'feature']]) {
+test('actual project inspector, styles inspector and maker discovery accept the real blank starter', async t => {
+  const input = path.join(scratch(t), 'blank.json'); fs.writeFileSync(input, starterDocumentText('blank'));
+  for (const args of [['project', 'inspect', '--input', input], ['styles', 'inspect', '--input', input], ['make', 'describe', 'feature']]) {
     const outcome = await shellOperation(root, args); assert.equal(outcome.status, 'ok', JSON.stringify(outcome.diagnostics));
   }
   const preview = await npmOperation(root, 'check:source');
@@ -38,7 +39,7 @@ test('actual shell build and install remain nonexecuting plans until separately 
     assert.equal(outcome.status, 'planned', JSON.stringify(outcome));
   }
 });
-test('reviewed starter generation ships a complete extension-owned skill and rejects stale approvals', { timeout: 120000 }, async t => {
+test('reviewed starter generation ships the product kit and only the click-dummy worker of the prototype skill, and rejects stale approvals', { timeout: 120000 }, async t => {
   const temp = scratch(t), target = path.join(temp, 'notes-prototype');
   const args = ['new', target, '--starter', 'blank', '--id', 'notes-prototype', '--name', 'Notes Prototype'];
   const plan = await shellOperation(root, args);
@@ -50,17 +51,19 @@ test('reviewed starter generation ships a complete extension-owned skill and rej
   const applied = await shellOperation(root, [...args, '--apply', plan.data.planHash], { execute: true });
   assert.equal(applied.status, 'applied', JSON.stringify(applied.diagnostics));
   const receipt = JSON.parse(fs.readFileSync(path.join(target, '.companion/generation.json'), 'utf8'));
-  const payload = await prototypeSkillFiles(root);
-  assert.ok(payload.length >= 40);
-  for (const file of payload) {
-    assert.ok(fs.readFileSync(path.join(target, file.path)).equals(file.bytes), file.path);
-    assert.equal(receipt.files.find(record => record.path === file.path)?.ownership, 'extension', file.path);
-  }
-  const generatedDiscovery = await discoverTooling(target); assert.equal(generatedDiscovery.status, 'ok');
-  assert.match(JSON.parse(fs.readFileSync(path.join(target, 'package.json'))).scripts['prototype:build'], /prototype\.mjs build/);
+  // The framework's repository-specific skill, its evidence and its Codex entrypoint are not part of a product.
+  assert.equal(fs.existsSync(path.join(target, prototypeSkillRoot)), false);
+  assert.equal(fs.existsSync(path.join(target, path.dirname(prototypeCodexSkillPath))), false);
+  assert.ok(!receipt.files.some(record => record.path.includes('companion-prototype-design')));
+  const worker = 'scripts/clickdummy/lib/build-worker.mjs';
+  const shipped = (await prototypeSkillFiles(root)).find(file => file.path === prototypeSkillRoot + '/scripts/lib/build-worker.mjs');
+  assert.ok(fs.readFileSync(path.join(target, worker)).equals(shipped.bytes));
+  assert.equal(receipt.files.find(record => record.path === worker)?.ownership, 'extension');
+  const scripts = JSON.parse(fs.readFileSync(path.join(target, 'package.json'))).scripts;
+  assert.equal(scripts['prototype:build'], undefined); assert.equal(scripts['prototype:tools'], undefined); assert.ok(scripts['build:clickdummy']);
   // The generator's native ownership rules, not a new copy operation, preserve edits.
-  const skillFile = path.join(target, prototypeSkillRoot, 'SKILL.md');
-  const adapterFile = path.join(target, prototypeCodexSkillPath);
+  const skillFile = path.join(target, '.claude/skills/implement-requirement/SKILL.md');
+  const adapterFile = path.join(target, '.agents/skills/implement-requirement/SKILL.md');
   const adapterBytes = fs.readFileSync(adapterFile, 'utf8');
   fs.writeFileSync(adapterFile, adapterBytes + '\nUser adapter annotation.\n');
   const original = fs.readFileSync(skillFile, 'utf8'); fs.writeFileSync(skillFile, original + '\nUser customization.\n');

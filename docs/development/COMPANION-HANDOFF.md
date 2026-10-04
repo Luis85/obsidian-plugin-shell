@@ -11,11 +11,11 @@ always preview, apply only a reviewed plan hash.
 The **exported project JSON** is the only thing that moves from the companion to the
 terminal or to a coding agent.
 
-- Format: `kind: "obsidian-companion-project"`, a versioned `schemaVersion` (currently
-  4; the shared contract also accepts 1–3), `executable: false`, `project` identity,
-  `settings` folders, `design`, `notes`. It is defined once in
-  `scripts/companion/project-contract.mjs` and assembled unchanged into the concept,
-  so the browser and the CLI validate with the same code. See
+- Format: `kind: "obsidian-companion-project"`, `schemaVersion` 6 (the only current
+  schema; 1–5 are refused with `COMPANION_VERSION`, never migrated), `executable: false`,
+  `project` identity, `settings` folders, `design`, `notes` and optional `tooling`. It is
+  defined once in `scripts/companion/authoring-contract.ts` and bundled unchanged into
+  the concept, so the browser and the CLI validate with the same code. See
   [Companion project JSON](COMPANION-PROJECT-JSON.md).
 - It is data. It carries no approvals, trust, credentials, machine paths, test
   results or plan hashes, and nothing in it is evaluated, imported or executed.

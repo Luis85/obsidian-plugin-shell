@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import { createApp, effectScope, nextTick, reactive } from 'vue';
 import { Window } from 'happy-dom';
+import { selfProject } from '../support/starter-documents.mjs';
 
 // Resolves through ancestor node_modules so the check also runs inside git worktrees.
 const tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
@@ -219,9 +220,8 @@ test('external adapters mount after render and never mount an element removed be
 });
 
 const { projectModel } = await import('../../bin/compiler/emitters/model.ts');
-const { migrateCompanionDocument } = await import('../../scripts/companion/project-contract.mjs');
-const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../bin/compiler/emitters/visual-model.ts');
-const self = migrateCompanionDocument(JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'))).document;
+const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualContractNames, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../bin/compiler/emitters/visual-model.ts');
+const self = structuredClone(selfProject());
 test('model exposes validated definitions and explicit Nuxt UI imports', () => {
   const m = projectModel(self), store = visualDefinitions(m);
   assert.equal(visualSpecs(m).length, store.pages.length + store.components.length);
@@ -264,7 +264,10 @@ test('Nuxt UI imports are unique, sorted and cover slot content', () => {
 test('component contracts declare typed props, emits and slots', () => {
   const source = visualContractTypes({ props: [{ name: 'title', type: 'string', required: true }, { name: 'count', type: 'number', required: false }], slots: [{ name: 'actions', required: false }, { name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }, { name: 'pick', payloadType: 'unknown' }, { name: 'toggle', payloadType: 'boolean' }], variants: [] });
   assert.equal(source, 'export interface ComponentProps {\n  "title": string;\n  "count"?: number;\n}\nexport interface ComponentEvents {\n  "close": [payload: undefined];\n  "pick": [payload: unknown];\n  "toggle": [payload: boolean];\n}\nexport interface ComponentSlots {\n  "actions"?: () => unknown;\n  "body": () => unknown;\n}\n');
-  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n}\nexport interface ComponentEvents {\n}\nexport interface ComponentSlots {\n}\n');
+  // An empty interface fails the generated no-empty-object-type rule, so only declared members are emitted.
+  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export {};\n');
+  assert.equal(visualContractTypes({ props: [{ name: 'title', type: 'string', required: false }], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n  "title"?: string;\n}\n');
+  assert.deepEqual(visualContractNames({ props: [], slots: [{ name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }] }), ['ComponentEvents', 'ComponentSlots']);
 });
 test('declared component packages merge as exact pins and framework conflicts name both versions', () => {
   const withDeps = dependencies => { const doc = structuredClone(self); doc.design.visualDesigns.components[0].dependencies = dependencies; return projectModel(doc); };
@@ -281,11 +284,12 @@ const { writeFile } = await import('node:fs/promises');
 const { readFileSync } = await import('node:fs');
 const { visualNodes } = await import('../../scripts/companion/visual/visual-ir.mjs');
 const { parse: parseSfc, compileTemplate } = await import('vue/compiler-sfc');
-/** Golden fixture: the reviewed v5 seed plus an editor wrapping a declared package and a placeholder component. */
+/** Golden fixture: the reviewed visual store fixture on the current self-project plus an editor wrapping a declared package and a placeholder component. */
 function goldenFixture() {
-  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-v5.json', 'utf8'));
-  const [page] = design.nodes.filter(n => n.kind === 'page');
-  design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: null, components: [], bricks: [] })));
+  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-store.json', 'utf8'));
+  const [page] = design.nodes.filter(n => n.kind === 'page'), view = design.nodes.find(n => n.kind === 'view');
+  // Internal pages belong to the native view (the v6 sitemap contract).
+  design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: view.id, components: [], bricks: [] })));
   const [library] = design.library;
   design.library.push(...[['library-search', 'SearchField'], ['library-editor', 'RichEditor'], ['library-pending', 'PendingCard']].map(([id, name]) => ({ ...library, id, name })));
   const [source] = design.dataSources.sources, [operation] = source.operations;

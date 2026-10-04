@@ -14,7 +14,7 @@ import { frameworkAdapter } from '../../bin/compiler/adapters/project/framework-
 const artifact = (path, content = 'safe', extra = {}) => ({ path, content, ownership: 'managed', producer: 'fixture', ...extra });
 const template = Object.freeze({ fingerprint: 'fixture', frameworkFiles: [], skillFiles: [], text() { throw new Error('unexpected template read'); } });
 const hash = (value, encoding) => createHash('sha256').update(value, encoding === 'base64' ? 'base64' : 'utf8').digest('hex');
-const ports = overrides => ({ migrate: value => ({ document: value, report: { migrated: false } }), validate: value => value, resolve: () => {},
+const ports = overrides => ({ validate: value => value, resolve: () => {},
   lower: () => [], emit: async () => [artifact('src/main.ts')], dependencies: () => ({ ready: true, diagnostics: [] }), hash, ...overrides });
 const codes = values => values.map(value => value.code);
 const pointers = values => values.map(value => value.source?.jsonPointer);
@@ -28,7 +28,8 @@ test('the pipeline runs every phase, sorts artifacts and fingerprints encoded co
     dependencies: () => ({ ready: false, diagnostics: [pending] }) }), { onEvent: event => events.push(event) });
   assert.equal(result.status, 'ok'); assert.equal(result.outputKind, 'project'); assert.equal(result.compilerVersion, compilerVersion);
   assert.deepEqual(result.artifacts.map(file => file.path), ['a.bin', 'b.txt']);
-  assert.deepEqual(result.migration, { migrated: false }); assert.deepEqual(result.model, { a: 1 });
+  assert.equal('migration' in result, false); assert.deepEqual(result.model, { a: 1 });
+  assert.ok(!compilerPhases.includes('migrate'), 'schema 6 input is validated directly; no migrate phase exists');
   assert.equal(result.readiness.generation, 'completed'); assert.equal(result.readiness.dependencies, 'resolution-required');
   assert.deepEqual(codes(result.diagnostics).sort(), ['COMPILER_ADAPTER_REQUIRED', 'COMPILER_DEPENDENCY_RESOLUTION_REQUIRED']);
   assert.match(result.fingerprint, /^[a-f0-9]{64}$/);
@@ -50,10 +51,10 @@ test('parse failures, unknown kinds and oversized inputs are stable errors with 
   assert.deepEqual(codes((await runCompiler({ source: ' '.repeat(4_000_001) }, ports())).diagnostics), ['COMPILER_INPUT_LIMIT']);
 });
 
-test('reference errors fail before migration and report the failed resolve event', async () => {
+test('reference errors fail before validation and report the failed resolve event', async () => {
   const events = [];
   const source = JSON.stringify({ design: { nodes: [{ id: 'a', parent: 'missing' }] } });
-  const result = await runCompiler({ source, template }, ports({ migrate: () => { throw new Error('must not migrate'); } }), { onEvent: event => events.push(event) });
+  const result = await runCompiler({ source, template }, ports({ validate: () => { throw new Error('must not validate'); } }), { onEvent: event => events.push(event) });
   assert.equal(result.status, 'failed'); assert.equal(result.readiness.generation, 'failed');
   assert.deepEqual(events.at(-1), { phase: 'resolve', event: 'failed' });
   assert.equal(result.diagnostics[0].source.file, 'project.json');

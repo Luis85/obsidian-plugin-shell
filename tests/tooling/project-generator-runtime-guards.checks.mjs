@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { noteOperations } from '../../templates/companion/runtime/note-operations.ts';
 import { matches } from '../../templates/companion/runtime/contract.ts';
 import { validateSourceOverrides } from '../../templates/companion/runtime/source-overrides.ts';
+import { selfProject } from '../support/starter-documents.mjs';
 const repository=()=>{const calls=[];return {calls,list:async()=>({ok:true,value:[]}),create:async(...args)=>{calls.push(args);return {ok:false,error:{code:'refused'}};},update:async()=>{throw Error('MUST_NOT_WRITE');},delete:async()=>{throw Error('MUST_NOT_WRITE');}};};
 test('native note input with hidden accessors or symbols is rejected before parsing or repository calls',async()=>{
  let accessed=0;const hidden={requestId:'request'};Object.defineProperty(hidden,'values',{get(){accessed++;return {title:'Hidden'};}});
@@ -32,7 +33,7 @@ test('explicit undefined or null source providers are refused rather than fallin
 test('duplicate relationship ids stop generation instead of producing ambiguous write guards',async()=>{
  const { readFile }=await import('node:fs/promises');const { projectModel }=await import('../../bin/compiler/emitters/model.ts');
  const { relationshipDefinitions }=await import('../../bin/compiler/emitters/relationship-model.ts');
- const seed=JSON.parse(await readFile('docs/concepts/companion/companion-project.json','utf8'));const relations=seed.design.semantic.relationships;
+ const seed=selfProject();const relations=seed.design.semantic.relationships;
  assert.ok(relations.length>0);assert.equal(relationshipDefinitions(projectModel(seed)).length,relations.length);
  relations.push({...structuredClone(relations[0]),key:'duplicate_identity_ref'});assert.throws(()=>relationshipDefinitions(projectModel(seed)),/Duplicate relationship id/);
 });

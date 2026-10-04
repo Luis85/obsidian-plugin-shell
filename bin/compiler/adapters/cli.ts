@@ -38,7 +38,7 @@ type Compiled = Awaited<ReturnType<typeof compileProject>>;
 function inspection(request: Request, stage: string, compiled: Compiled) {
   if (request.command !== 'compiler inspect') return {};
   if (stage === 'artifacts') return { inventory: compiled.artifacts.map(({ path, ownership, producer }) => ({ path, ownership, producer })) };
-  return compiled.model ? { ir: compiled.model, migration: compiled.migration } : {};
+  return compiled.model ? { ir: compiled.model } : {};
 }
 /** Shared shell command adapter. Ordinary checking is read-only; report writes require an explicit path. */
 export async function compilerOperation(request: Request, context: Context): Promise<Result> {

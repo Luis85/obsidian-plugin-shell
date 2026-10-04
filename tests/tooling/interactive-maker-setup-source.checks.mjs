@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { setupSource as relocated } from '../../bin/adapters/framework/setup-source.ts';
-import { starterCatalog } from '../../bin/adapters/framework/starter-project.ts';
+import { companionStarterSet } from '../../bin/adapters/framework/starter-project.ts';
 import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
@@ -22,9 +22,9 @@ test('relocated setup source refuses conflicting starts and native options witho
 });
 
 test('relocated setup source converts a verified starter into stdin authoring input', async () => {
-  const { catalog } = await starterCatalog(context);
-  assert.ok(catalog.starters.length > 0);
-  const starter = catalog.starters[0];
+  const { starters } = await companionStarterSet(context);
+  assert.ok(starters.length > 0);
+  const { definition, sha256 } = starters[0], starter = { id: definition.id, version: definition.version, sha256 };
   const config = defaults(identity({ id: 'starter-test', name: 'Starter Test', author: 'Test', version: '0.1.0', description: '' }));
   const result = await relocated({ command: 'setup', args: [], options: { starter: starter.id } }, context, config);
   assert.equal(result.input, '-');
@@ -34,4 +34,5 @@ test('relocated setup source converts a verified starter into stdin authoring in
   assert.equal(typeof result.context.inputText, 'string');
   const document = JSON.parse(result.context.inputText);
   assert.equal(document.project.id, 'starter-test');
+  assert.equal(document.schemaVersion, 6);
 });

@@ -32,8 +32,13 @@ test('browser and CLI accept identical starter bytes and independent identity co
   copy.design.nodes[0].label = 'Edited'; assert.notEqual(copy.design.nodes[0].label, golden.generator.document.design.nodes[0].label);
   assert.deepEqual(copy.design.sitemap, golden.generator.document.design.sitemap); assert.equal(copy.executable, false);
 });
-test('v5 starters remain valid and retain their original model version', () => {
-  assert.equal(configureBrowserStarter(blank, 'a'.repeat(64), { id: 'blank-copy', name: 'Blank Copy' }).schemaVersion, 5);
+test('converted example starters configure as project v6 documents', () => {
+  const copy = configureBrowserStarter(blank, 'a'.repeat(64), { id: 'blank-copy', name: 'Blank Copy' });
+  assert.equal(copy.schemaVersion, 6); assert.equal(copy.design.schema, 6); assert.equal(copy.project.id, 'blank-copy');
+});
+test('a starter embedding a retired v5 document is refused before configuration', () => {
+  const retired = structuredClone(blank); retired.generator.document.schemaVersion = 5; retired.generator.document.design.schema = 5;
+  assert.throws(() => configureBrowserStarter(retired, 'a'.repeat(64), {}), /STARTER_VERSION|project schema 6/);
 });
 test('future project versions and invalid v6 references fail before configuration', () => {
   const future = structuredClone(golden); future.generator.document.schemaVersion = 7; assert.throws(() => validateDefinition(future));

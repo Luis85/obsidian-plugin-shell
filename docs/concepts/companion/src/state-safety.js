@@ -44,5 +44,3 @@ function exportRetainedBrowserData(){
   showModal('copy',{title:'Retained browser data — may belong to another window or use an unsupported schema. Keep private; no import or execution is performed.',text:raw,filename:'shell-workbench-retained-browser-data.json'});
  }catch{notify('Browser storage cannot be read. Export this session instead; no retained data was changed.');}
 }
-// Startup restore: legacy detail designs in the saved project are upgraded once (spec 11.9) before the first render.
-veRestoreSaved();

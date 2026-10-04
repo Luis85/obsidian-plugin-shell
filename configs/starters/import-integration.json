@@ -80,7 +80,7 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
         "id": "import-integration-plugin",
@@ -94,7 +94,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Use for CSV/JSON intake or a future external-service adapter.",
         "platform": "desktop",

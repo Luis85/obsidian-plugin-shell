@@ -3,7 +3,8 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { parseConcept, conceptSchema } from '../../scripts/companion/concepts/contract.ts';
 import { applyConcept } from '../../scripts/companion/concepts/apply.ts';
-const fixture = JSON.parse(await readFile(new URL('../../docs/concepts/companion/starters/blank.companion.json', import.meta.url), 'utf8'));
+import { starterDocument } from '../support/starter-documents.mjs';
+const fixture = starterDocument('blank');
 const baseHash = 'a'.repeat(64);
 function feature() {
   const node = { ...structuredClone(fixture.design.nodes[0]), id: 'node-30', slug: 'capture', label: 'Capture', kind: 'page', parent: fixture.design.nodes[0].id, entry: false, command: false, ribbon: false };
@@ -21,8 +22,12 @@ test('full ordinary project JSON is accepted as a reviewed whole-project concept
   assert.equal(concept.mode, 'project');
   const result = applyConcept(concept);
   assert.equal(result.document.schemaVersion, 6);
-  assert.equal(result.migration.fromVersion, 5);
+  assert.deepEqual(result.document, fixture); assert.ok(!('migration' in result));
   assert.deepEqual(fixture, before);
+});
+test('a retired project version is refused as a concept, never migrated', () => {
+  const retired = structuredClone(fixture); retired.schemaVersion = 5; retired.design.schema = 5;
+  assert.throws(() => applyConcept(parsed(retired)), /only schema 6 is supported/);
 });
 test('a project manifest declares replacement explicitly and validates matching target identity', () => {
   const p = { kind: 'obsidian-companion-concept', schemaVersion: 1, id: 'complete', mode: 'project', projectId: fixture.project.id, baseSha256: null, project: fixture };

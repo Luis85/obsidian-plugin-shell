@@ -90,7 +90,8 @@ const dialogs = createDialogHost({ document, owner,
 function openModal(id: string, scenarioReadOnly = false) {
   dialogs.open(id, (target, surface) => mountFrame(target, surface, scenarioReadOnly));
 }
-document.body.classList.add('theme-dark');
+// The host token scope is .obsidian-harness; without it the theme class would not restyle anything.
+document.body.classList.add('obsidian-harness', 'theme-dark');
 function fail() { error.value = 'This surface contains an unimplemented capability. It is not accepted functionality.'; }
 function exportProject() {
   const data = JSON.parse(document.getElementById('prototype-project-data')?.textContent ?? '{}');

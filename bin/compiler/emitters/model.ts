@@ -1,8 +1,7 @@
 import { PRD_LIMITS } from '../../../scripts/companion/prd-limits.mjs';
 import { matches, type Schema } from '../../../templates/companion/runtime/contract.ts';
 import { createHash } from 'node:crypto';
-import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
-import { RELATIONSHIP_CARDINALITIES, validateAuthoringDocument as validateCompanionDocument } from '../../../scripts/companion/authoring-contract.ts';
+import { companionRelativeFolder, RELATIONSHIP_CARDINALITIES, validateAuthoringDocument as validateCompanionDocument } from '../../../scripts/companion/authoring-contract.ts';
 export type Row = Record<string, unknown>;
 export interface Entity { id: string; slug: string; name: string; folder: string; schema: Schema }
 export interface Operation { id: string; slug: string; name: string; direction: string; input: Schema | null; output: Schema | null; contract: Row }

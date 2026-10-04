@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { Readable } from 'node:stream';
 import { execute, parseArguments } from '../../../bin/adapters/commands.ts';
+import { makerBooleanOptions, makerCommandIds, makerValueOptions } from '../../../bin/domain/command-options.ts';
 import { studioActions } from '../../../bin/presentation/studio.ts';
 import { Workspace } from '../../../bin/application/workspace.ts';
 import { newDocument, documentText } from '../../../bin/domain/document.ts';
@@ -12,7 +13,7 @@ import { defineFrameworkAdapter } from '../../../bin/compiler/adapters/project/f
 import { renderStarterProject } from '../../../bin/compiler/adapters/project/emitter.ts';
 import { projectSelection } from '../../../bin/compiler/domain/project-starter.ts';
 import { loadDefinitions } from '../../../bin/adapters/starters/repository.ts';
-import { definePluginEvent, type WorkbenchPluginObject } from '../../api.ts';
+import { definePluginEvent, type PluginCliCommand, type WorkbenchPluginObject } from '../../api.ts';
 import { createPluginRuntime, pluginFrameworkAdapters, pluginStarterDefinitions } from '../../runtime.ts';
 import { PluginObject, exampleNotice, reactAdapter, reactStarter } from '../src/index.ts';
 
@@ -180,6 +181,20 @@ void test('plugin command parsing rejects reserved Workbench command roots', asy
   await assert.rejects(() => createPluginRuntime({
     root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [optionCollision],
   }), /WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID/);
+});
+
+void test('every built-in maker command and option is reserved for plugins, including design, --name and --package', async () => {
+  const runtimeFor = (cli: PluginCliCommand[]) => createPluginRuntime({ root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [{ ...enabled, cli }] });
+  const commands = new Set([...makerCommandIds, 'design']), options = new Set([...makerBooleanOptions, ...makerValueOptions, 'name', 'package']);
+  for (const id of commands) {
+    assert.doesNotThrow(() => parseArguments([id, '--help'], []), id);
+    await assert.rejects(() => runtimeFor([{ id, summary: 'shadow', execute: () => ({}) }]), new RegExp(`WORKBENCH_PLUGIN_CLI_RESERVED:${id}$`), id);
+  }
+  for (const option of options) {
+    const kind = makerBooleanOptions.includes(option) ? 'booleans' : 'values';
+    assert.doesNotThrow(() => parseArguments(['design', `--${option}`, ...(kind === 'values' ? ['plain'] : [])], []), option);
+    await assert.rejects(() => runtimeFor([{ id: 'safe-command', summary: 'bad option', options: { [kind]: [option] }, execute: () => ({}) }]), /WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID/, option);
+  }
 });
 
 void test('plugin events must stay in the owning manifest namespace', async () => {

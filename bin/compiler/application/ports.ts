@@ -3,7 +3,6 @@ import type { Artifact, CompilerDiagnostic, OutputKind, StorybookOptions, Templa
 
 /** Host mechanisms are supplied by composition. The compiler cannot discover files or run tools. */
 export interface CompilerPorts<Model> {
-  migrate(value: unknown): { document: unknown; report: unknown };
   validate(document: unknown): Model;
   resolve(model: Model): void;
   lower(model: Model, template: TemplateSnapshot, kind: OutputKind): CompilerDiagnostic[];

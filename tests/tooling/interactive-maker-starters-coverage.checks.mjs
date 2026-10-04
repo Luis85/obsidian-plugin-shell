@@ -31,14 +31,14 @@ test('file and project starters report their scope without inventing a visual mo
 test('a Companion starter without visual designs or a sitemap reports every catalog entry missing', async () => {
   const unused = Object.fromEntries(Object.entries(catalog).map(([key, expected]) => [key, { expected, used: [], missing: expected }]));
   assert.deepEqual(starterCoverage(await shipped('blank')), { starter: 'blank', scope: 'declarative-model-inventory',
-    modeled: { categories: unused, complete: false, pages: 0, components: 0, revisions: 0, layouts: 0, surfaces: 2, routes: 0, journeys: 0 },
+    modeled: { categories: unused, complete: false, pages: 0, components: 0, revisions: 0, layouts: 0, surfaces: 2, surfacesWithUxAcceptance: 0, routes: 0, journeys: 0 },
     unboundInteractions: [], limitations: [], shippedEditors: ['journey-lens'], declaredEditorBindings: [], ...notRun, note });
 });
 
 test('the feature showcase covers the complete catalog across pages, components, layouts and revisions', async () => {
   const report = starterCoverage(await shipped('feature-showcase'));
   const { categories, ...counts } = report.modeled;
-  assert.deepEqual(counts, { complete: true, pages: 10, components: 1, revisions: 1, layouts: 1, surfaces: 10, routes: 9, journeys: 1 });
+  assert.deepEqual(counts, { complete: true, pages: 10, components: 1, revisions: 1, layouts: 1, surfaces: 10, surfacesWithUxAcceptance: 2, routes: 9, journeys: 1 });
   for (const [key, expected] of Object.entries(catalog)) assert.deepEqual(categories[key], { expected, used: [...expected].sort(), missing: [] });
   assert.deepEqual([report.unboundInteractions, report.limitations, report.declaredEditorBindings], [[], [], [{ surface: 'node-9', editor: 'journey-lens' }]]);
 });

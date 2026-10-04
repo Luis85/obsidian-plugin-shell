@@ -46,8 +46,10 @@ File-extension generation supplies a dedicated integration scaffold; it does not
 | `test --profile native` | Native qualification tooling | A completed end-user acceptance session by itself |
 | `test --profile obsidian` | Real-Obsidian test workflow in contained vaults | Authorization to use a personal vault |
 | `check` | Daily typecheck, lint and test gate with a combined result | The complete `verify` scope |
-| `check --fast` | Faster changed-file-oriented feedback | A clean full regression run |
+| `check --fast` | Faster feedback on the diff from `--base <ref>` (default: `origin/main` merge-base, else `HEAD`): changed-file lint, related tests, matching suites | A clean full regression run |
+| `check --plan` | The gates a diff requires, with commands, reasons, estimates and CI coverage; runs nothing | Proof that any gate passed |
 | `check submission` | Local review-rule checks using trusted project ESLint configuration | Acceptance by the Obsidian community review process |
+| `ci --list` / `ci --job <workflow>/<job>` | Workflows and jobs from `.github/workflows`; a dry run prints the job's exact shell commands, `--execute` runs its `run:` steps locally | That the hosted CI job passes; secrets, publication and other-OS jobs are refused |
 | `verify --profile project` | Generated-project verification | Framework release approval |
 | `verify` | Full framework verification | Permission to publish |
 

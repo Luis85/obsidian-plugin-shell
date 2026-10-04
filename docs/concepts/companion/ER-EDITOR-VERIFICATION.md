@@ -54,7 +54,7 @@ Reproduction:
 ```sh
 python3 -B scripts/concepts/build-companion.py --check
 python3 -B tests/concepts/companion-assembly.test.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
 Raw output is retained by CI under `reports/concepts/`, with named new checks and screenshots under `er-polish/`. Ordinary source, browser and root-template workflows are not replaced by a custom success status.

@@ -11,14 +11,14 @@ import { renderProjectFiles } from '../../bin/compiler/adapters/plugin-emitter.t
 import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
 import { compileProject, analyzeProject } from '../../bin/compiler/index.ts';
 import { projectModel, digest } from '../../bin/compiler/emitters/model.ts';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 // Drives workspace planning, project planning, scoped selection and the plugin emitter (bin/compiler) under the maker floors.
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const blankText = await readFile(join(root, 'docs/concepts/companion/starters/blank.companion.json'), 'utf8');
-const quickText = await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8');
-const blank = projectModel(migrateAuthoringDocument(JSON.parse(blankText)).document);
+const blankText = starterDocumentText('blank');
+const quickText = starterDocumentText('quick-capture');
+const blank = projectModel(JSON.parse(blankText));
 const template = await loadTemplateSnapshot(root);
 const vault = async t => {
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'compiler-plan-')));
@@ -99,12 +99,13 @@ test('bootstrap ownership, receipts and the target location are validated before
   await assert.rejects(planArtifacts(options(), input(folder), blank, output()), /Duplicate receipt paths/);
 });
 
-test('reviews report legacy interaction IDs only when a migration supplied them', async t => {
+test('reviews of schema 6 input carry no legacy interaction mapping, even when a caller passes a retired migration report', async t => {
   const folder = await vault(t);
-  const plain = await planArtifacts(options(), input(folder), blank, output());
-  assert.equal(reviewProject(plain).legacyInteractionIds, undefined);
-  const migrated = await planArtifacts(options(), { ...input(folder), migration: { interactionIds: { edge: 'interaction' } } }, blank, output());
-  assert.deepEqual(reviewProject(migrated).legacyInteractionIds, { edge: 'interaction' });
+  const plain = reviewProject(await planArtifacts(options(), input(folder), blank, output()));
+  assert.equal(Object.hasOwn(plain, 'legacyInteractionIds'), false);
+  const retired = reviewProject(await planArtifacts(options(), { ...input(folder), migration: { interactionIds: { edge: 'interaction' } } }, blank, output()));
+  assert.equal(Object.hasOwn(retired, 'legacyInteractionIds'), false);
+  assert.equal(retired.planHash, plain.planHash);
 });
 
 test('project planning compiles, scopes and refuses invalid scope combinations and failed compilations', async t => {
@@ -120,7 +121,7 @@ test('project planning compiles, scopes and refuses invalid scope combinations a
   await assert.rejects(planProject({ input: join(folder, 'quick.json'), target: 'plugin', vault: folder, templateRoot: root, scope: 'bogus' }), /GENERATION_SCOPE_INVALID/);
   await assert.rejects(planProject({ input: join(folder, 'quick.json'), target: 'plugin', vault: folder, templateRoot: root, scope: 'page:x', output: [] }), /GENERATION_SCOPE_OVERRIDE/);
   await assert.rejects(planProject({ input: join(folder, 'broken.json'), target: 'plugin', vault: folder, templateRoot: root }), /./);
-  const quick = projectModel(migrateAuthoringDocument(JSON.parse(quickText)).document);
+  const quick = projectModel(JSON.parse(quickText));
   const files = await renderProjectFiles(template, quick);
   const page = quick.document.design.visualDesigns.pages[0];
   const scoped = generationSelection(quick, files, 'page:' + page.id);

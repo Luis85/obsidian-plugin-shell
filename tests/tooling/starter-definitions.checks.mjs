@@ -31,9 +31,19 @@ test('all twenty-six standalone definitions validate and carry their metadata, s
     if (definition.generator.kind === 'project') assert.deepEqual([definition.inputs, definition.files, definition.processes, definition.firstRun], [[], [], [], []]);
     else assert.ok(definition.processes.length);
   }
-  const old = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/catalog.json')));
-  for (const item of old.starters) assert.deepEqual(entries.find(entry => entry.definition.id === item.id).definition.generator.document,
-    JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters', item.file))), item.id + ' loses no authored design');
+  // Every embedded Companion design is the current project v6 format; there is no historical catalog to mirror.
+  const companion = entries.filter(entry => entry.definition.generator.kind === 'companion');
+  assert.equal(companion.length, 14);
+  for (const { definition } of companion) {
+    assert.equal(definition.generator.document.schemaVersion, 6, definition.id); assert.equal(definition.generator.document.design.schema, 6, definition.id);
+  }
+});
+test('a definition embedding a retired project version is rejected, never migrated', async () => {
+  const bytes = await readFile(join(root, 'configs/starters/quick-capture.json'), 'utf8');
+  for (const version of [1, 2, 3, 4, 5]) {
+    const definition = JSON.parse(bytes); definition.generator.document.schemaVersion = version; definition.generator.document.design.schema = version;
+    assert.throws(() => validateDefinition(definition), error => error.code === 'STARTER_VERSION' && /project schema 6/.test(error.message), 'version ' + version);
+  }
 });
 test('missing and empty folders mean no installed starters, without creating anything', async t => {
   const dir = await workspace(t); assert.deepEqual(await loadFileDefinitions(dir), []); assert.deepEqual(await readdir(dir), []);

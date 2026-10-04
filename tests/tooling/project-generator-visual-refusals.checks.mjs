@@ -3,7 +3,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { visualSpecs, visualContractTypes, visualDefinitions } from '../../bin/compiler/emitters/visual-model.ts';
 import { visualSfc } from '../../bin/compiler/emitters/visual-code.ts';
 import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
@@ -11,7 +10,7 @@ import { detailValue } from '../../templates/companion/runtime/detail-actions.ts
 import { visualTextValue, visualIndex } from '../../templates/companion/runtime/visual-runtime.ts';
 import { visualSession, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
 import { visualNodes } from '../../scripts/companion/visual/visual-ir.mjs';
-const fixture = migrateCompanionDocument(JSON.parse(await readFile(new URL('../fixtures/companion/detail-v3.json', import.meta.url), 'utf8'))).document;
+const fixture = JSON.parse(await readFile(new URL('../fixtures/companion/visual-project.json', import.meta.url), 'utf8'));
 const clone = () => structuredClone(fixture);
 const compile = d => { const m = projectModel(d), specs = visualSpecs(m); visualSources(m, specs); return specs; };
 const lit = value => ({ kind: 'literal', value });
@@ -58,7 +57,8 @@ for (const [name, change, expected] of [
   ['missing owner', d => { store(d).pages[0].ownerId = 'missing'; }, /owner surface is missing/],
   ['owner that cannot host a page', d => { d.design.nodes.find(n => n.id === 'node-48').kind = 'action'; }, /owner surface is missing/],
   ['missing navigation target', d => { navigate(d).surfaceId = 'missing'; }, /navigation target is missing/],
-  ['navigation to a group', d => { d.design.nodes.find(n => n.id === 'node-17').kind = 'group'; }, /navigation target is missing/],
+  // Its sitemap transitions are removed too, so the visual navigation check (not the sitemap contract) is what refuses it.
+  ['navigation to a group', d => { d.design.nodes.find(n => n.id === 'node-17').kind = 'group'; d.design.links = d.design.links.filter(l => l.from !== 'node-17' && l.to !== 'node-17'); }, /navigation target is missing/],
   ['unknown bound field', d => { bound(d).value.field = '0.missing'; }, /field "0\.missing" is not in the output/],
   ['inherited bound property', d => { bound(d).value.field = '0.constructor'; }, /is not in the output/],
   ['evaluated bound expression', d => { bound(d).value.field = '0.title.toUpperCase()'; }, /is not in the output/],

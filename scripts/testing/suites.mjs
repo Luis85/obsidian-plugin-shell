@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { checkSuites, globToRegExp, selectSuites } from './suite-manifest.mjs';
 import { projectConfigPath, projectConfigs } from '../shared/project-configs.mjs';
+import { resolveBrowserExecutable } from './browser-executable.mjs';
 
 const usage = `Usage: node scripts/testing/suites.mjs <suite...|tooling> [--dry-run] [--json] [-- extra runner args]
        node scripts/testing/suites.mjs --list [--json]
@@ -63,6 +64,11 @@ function suiteCommands(root, suite, extra = []) {
   }
 }
 
+/** The browser prerequisite is judged by the shared resolver so a Chromium revision mismatch is reported explicitly. */
+function browserProblem(root) {
+  const result = resolveBrowserExecutable({ root });
+  return ['pinned', 'override'].includes(result.status) ? null : { reason: result.reason, hint: result.hint };
+}
 function probe(root, definition) {
   if (definition.env) return Boolean(process.env[definition.env]);
   if (definition.file) { try { accessSync(resolve(root, definition.file)); return true; } catch { return false; } }
@@ -71,8 +77,17 @@ function probe(root, definition) {
   return !result.error && result.status === 0;
 }
 function missingPrerequisites(root, manifest, suite) {
-  return (suite.prerequisites ?? []).filter(name => !probe(root, manifest.prerequisites[name]))
-    .map(name => ({ name, hint: manifest.prerequisites[name].hint }));
+  return (suite.prerequisites ?? []).flatMap(name => {
+    const definition = manifest.prerequisites[name];
+    if (definition.browser) { const problem = browserProblem(root); return problem ? [{ name, ...problem }] : []; }
+    return probe(root, definition) ? [] : [{ name, hint: definition.hint }];
+  });
+}
+/** A browser revision mismatch keeps its own reason code and the exact override hint; other gaps list the prerequisites. */
+function notRunOutcome(suite, missing) {
+  const mismatch = missing.find(item => item.reason === 'browser-revision-mismatch');
+  if (mismatch) return { name: suite.name, status: 'not-run', reason: mismatch.reason, hint: mismatch.hint, durationMs: 0 };
+  return { name: suite.name, status: 'not-run', reason: `missing prerequisites: ${missing.map(item => item.name).join(', ')}`, durationMs: 0 };
 }
 function unavailable(root, suite) {
   if (suite.runner.type === 'manual') return `manual suite without an automated runner; follow ${suite.runner.instructions}`;
@@ -91,8 +106,7 @@ function runSuite(root, manifest, suite, options) {
   if (reason) { console.error(`✗ suite ${label}: not run — ${reason}`); return { name: suite.name, status: 'not-run', reason, durationMs: 0 }; }
   const missing = missingPrerequisites(root, manifest, suite);
   for (const item of missing) console.error(`${options.dryRun ? '!' : '✗'} suite ${label}: missing prerequisite "${item.name}". ${item.hint}`);
-  if (missing.length && !options.dryRun)
-    return { name: suite.name, status: 'not-run', reason: `missing prerequisites: ${missing.map(item => item.name).join(', ')}`, durationMs: 0 };
+  if (missing.length && !options.dryRun) return notRunOutcome(suite, missing);
   const commands = suiteCommands(root, suite, options.extra);
   // With --json, stdout carries only the final JSON document; progress and child output go to stderr.
   const log = options.json ? console.error : console.log;
@@ -155,7 +169,7 @@ async function main(argv, root = process.cwd()) {
   if (options.json) console.log(JSON.stringify({ schemaVersion: 1, dryRun: options.dryRun, outcomes }, null, 2));
   else {
     console.log('\nSuite summary:');
-    for (const outcome of outcomes) console.log(`  ${outcome.status.padEnd(8)} ${outcome.name.padEnd(24)} ${(outcome.durationMs / 1000).toFixed(1)}s${outcome.reason ? `  (${outcome.reason})` : ''}`);
+    for (const outcome of outcomes) console.log(`  ${outcome.status.padEnd(8)} ${outcome.name.padEnd(24)} ${(outcome.durationMs / 1000).toFixed(1)}s${outcome.reason ? `  (${outcome.reason}${outcome.hint ? `: ${outcome.hint}` : ''})` : ''}`);
   }
   return outcomes.every(outcome => ['passed', 'planned'].includes(outcome.status)) ? 0 : 1;
 }

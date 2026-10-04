@@ -20,10 +20,11 @@ Keep three choices separate: where Workbench authoring runs, what runtime the us
 | --- | --- |
 | Understand Workbench and its direction | [Product vision](docs/product/PRODUCT-VISION.md); intended outcomes, not completed-feature claims |
 | Develop using the existing Obsidian foundation | [Root README](README.md), [framework guide](docs/development/FRAMEWORK-GUIDE.md), [feature guide](docs/development/BUILD-A-FEATURE.md) |
+| Add Workbench to an existing project (for example a legacy Angular webapp) | [Adopt an existing project](docs/development/ADOPT-EXISTING-PROJECT.md); `node bin/app adopt analyze` is read-only and `adopt plan` writes one reviewed Markdown plan, not an integration |
 | Create an independent consumer or inspect CLI capabilities | [CLI guide](docs/development/FRAMEWORK-CLI.md); use the documented plans and supported options |
 | Inspect or compile a declarative design | [Dedicated compiler](docs/development/compiler/README.md); generation is separate from dependency installation and acceptance |
 | Use the current authoring build | [Authoring guide](docs/concepts/companion/README.md); `npm run companion:build` emits the integrated v6 HTML/JSON under `reports/companion-mvp` |
-| Inspect the retained compatibility concept | [Checked-in HTML](docs/concepts/companion/index.html) and adjacent JSON remain the v5 compatibility pair, not the current v6 build |
+| Understand the authoring build base | [Checked-in HTML](docs/concepts/companion/index.html) and adjacent JSON are only the v5 build base of the current v6 build; the current project format is schema 6 only |
 | Build a generated offline preview | [Clickdummy guide](docs/development/COMPANION-CLICKDUMMY.md); generated Vue source, synthetic reads and explicit unavailable business writes |
 | Integrate an approved concept | [Data-only concept intake](docs/development/CONCEPT-INTAKE.md); intake and selected-output compilation are different operations |
 | Add a custom extension/view or file menu | [Native integration guide](docs/development/native-file-integrations.md); host integration still needs relevant native acceptance |
@@ -44,7 +45,7 @@ The target for `new` must be a new or empty independent directory. Review the re
 
 For the existing template itself, `npm run setup` uses reviewed setup and the exact dependencies. The optional `--profile native` installs assets only into the contained development vault. Open it separately and deliberately enable the plugin. Do not use a personal vault; setup does not authorize activation or change Restricted Mode. The [setup guide](docs/development/SETUP-IDENTITY.md) retains identity, protected-data and resume behavior.
 
-The product name is Workbench, but the entry point is `bin/app` (`bin/app.ts` in source, bundled `bin/app.js` in a kit; run it as `node bin/app`) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
+The product name is Workbench, but the entry point is `bin/app` (`bin/app.ts` in source, bundled `bin/app.js` in a kit; run it as `node bin/app`; no root launcher or compatibility shim remains) and current package/manifest/schema identities and `companion` paths remain unchanged. Do not substitute a fictional `workbench` command or rename a storage namespace as part of a documentation update.
 
 ## Intended connected workflow
 
@@ -58,7 +59,7 @@ This is the product direction, not a claim that every step is complete in every 
 
 The [compiler implementation](bin/compiler/index.ts) emits readiness states with bundle, typecheck and tests initially `not-run`, and product acceptance `not-inferred`. Its project-starter path describes a navigable starting scaffold that still needs visual component and business-action implementation. Compilation success does not establish a complete product.
 
-The [authoring guide](docs/concepts/companion/README.md) distinguishes the current browser concept, the retained v5 fixtures and the independently generated clickdummy. None is a substitute for full native Workbench acceptance. Preserve separate evidence for authored definitions, generated source, built previews, behavior tests, native operation and user acceptance.
+The [authoring guide](docs/concepts/companion/README.md) distinguishes the current browser concept, its v5 build base and the independently generated clickdummy. None is a substitute for full native Workbench acceptance. Preserve separate evidence for authored definitions, generated source, built previews, behavior tests, native operation and user acceptance.
 
 The [2026-09-27 integrated review](docs/product/PR5-PRODUCT-REVIEW.md), [improvement plan](docs/product/PR5-IMPROVEMENT-PLAN.md) and [evidence record](docs/testing/PR5-REVIEW-EVIDENCE.md) retain their historical scope. Their test counts, pending requirements, release observations and CI failure are not current-head claims. Recheck the exact candidate before closing a gate; neither old success nor an old blocker should be repeated as live status without that check.
 

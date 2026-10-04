@@ -1,14 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, mkdtemp, realpath, rm, readdir } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sampleSummary, measureOperation } from '../../bin/adapters/framework/measurement.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const source=await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8');
+const source=starterDocumentText('quick-capture');
 const request=(...args)=>parseCliArguments(args);
 
 test('measurements keep cold, warmup and all slow samples with nearest-rank statistics',async()=>{

@@ -1,4 +1,4 @@
-import { migrateAuthoringDocument, parseAuthoringDocument, validateAuthoringDocument, type AuthoringDocument } from '../authoring-contract.ts';
+import { parseAuthoringDocument, validateAuthoringDocument, type AuthoringDocument } from '../authoring-contract.ts';
 import type { SitemapDesign } from '../sitemap/model.ts';
 import type { SitemapHost, SitemapSaveResult, SitemapSnapshot } from '../sitemap/session.ts';
 import { canonicalKey, requireSitemap, utf8Length } from '../sitemap/safety.ts';
@@ -20,7 +20,7 @@ export function projectFilePath(input: string): string {
   return input;
 }
 export function importJourneyProject(text: string): AuthoringDocument {
-  return structuredClone(migrateAuthoringDocument(parseAuthoringDocument(text)).document);
+  return structuredClone(parseAuthoringDocument(text));
 }
 function serialize(document: AuthoringDocument): string {
   validateAuthoringDocument(document);

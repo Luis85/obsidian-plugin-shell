@@ -1,5 +1,6 @@
 import { assert, realpath, mkdtemp, readFile, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, runCheckSteps, checkOperation, outputTail, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedBundledNoticeFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, relocatedStarterDerivedId, relocatedStarterDerivedName, relocatedInvocationDirectory, test, frameworkRoot, scripted, contents } from '../support/interactive-maker-parity-support.mjs';
 import { resolve } from 'node:path';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 test('complete interactive and agent sessions produce byte-identical sketch and prototype packages', { timeout: 180000 }, async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-parity-'));
@@ -20,7 +21,8 @@ test('complete interactive and agent sessions produce byte-identical sketch and 
     assert.equal(await readFile(join(human, 'design/project.json'), 'utf8'), await readFile(join(agent, 'design/project.json'), 'utf8'));
     const guide = await loadGuide();
     const answers = guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => field.kind === 'confirm' ? 'y' : '');
-    const wizard = scripted([...answers, 'prepared', 'y']);
+    // The trailing 'n' declines the optional Claude Design folder; the prepared package stays byte-identical.
+    const wizard = scripted([...answers, 'prepared', 'y', 'n']);
     await prototypeWizard(wizard, { root: human, frameworkRoot, project: 'design/project.json' }); wizard.done();
     const answerText = await readFile(join(human, 'prepared/prototype-answers.json'), 'utf8');
     const proto = parseArguments(['prototype', '--input', '-', '--out', 'prepared', '--json']);
@@ -233,7 +235,7 @@ test('relocated framework CLI composition root preserves machine success and par
 test('relocated reviewed file-operation adapter plans and applies setup through the framework CLI', async () => {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-file-operation-')));
   try {
-    await writeFile(join(root, 'project.json'), await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await writeFile(join(root, 'project.json'), starterDocumentText('companion-plugin'));
     const capture = () => {
       let text = '';
       return {

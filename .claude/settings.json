@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm ci)",
+      "Bash(npm ci --ignore-scripts)",
+      "Bash(npm run check)",
+      "Bash(npm run check *)",
+      "Bash(npm run check:*)",
+      "Bash(npm run verify)",
+      "Bash(npm run verify *)",
+      "Bash(npm run -s check)",
+      "Bash(npm run -s check *)",
+      "Bash(node bin/app check)",
+      "Bash(node bin/app check *)",
+      "Bash(node bin/app help)",
+      "Bash(node bin/app help *)",
+      "Bash(node bin/app doctor)",
+      "Bash(node bin/app doctor *)",
+      "Bash(node bin/app status)",
+      "Bash(node bin/app status *)",
+      "Bash(node bin/app ci --list)",
+      "Bash(node bin/app ci --list *)",
+      "Bash(node bin/app ci --job *)",
+      "Bash(node bin/app ui status)",
+      "Bash(node bin/app ui status *)",
+      "Bash(node scripts/testing/suites.mjs *)",
+      "Bash(node scripts/testing/browser-executable.mjs)",
+      "Bash(node scripts/testing/browser-executable.mjs *)",
+      "Bash(npx vitest run *)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log)",
+      "Bash(git log *)"
+    ],
+    "ask": [
+      "Bash(node bin/app ci * --execute*)"
+    ],
+    "deny": [
+      "Bash(*--allow-download*)",
+      "Bash(*OBSIDIAN_ALLOW_DOWNLOAD*)",
+      "Bash(npm publish)",
+      "Bash(npm publish *)",
+      "Bash(npm run release*)",
+      "Bash(node bin/app release *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f *)",
+      "Bash(npm install -g *)",
+      "Bash(npm i -g *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/session-start.mjs\"",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/stop-check.mjs\"",
+            "timeout": 330
+          }
+        ]
+      }
+    ]
+  }
+}

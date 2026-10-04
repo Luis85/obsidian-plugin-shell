@@ -31,7 +31,7 @@ Makers reuse the existing file planner and AST-aware registration editor. Duplic
 
 ## Portable JSON contract
 
-The optional `design.nativeIntegrations` namespace is additive to companion project schema v5; it has its own `schemaVersion: 1`:
+The optional `design.nativeIntegrations` namespace is part of companion project schema 6; it has its own `schemaVersion: 1`:
 
 ```json
 {

@@ -43,11 +43,13 @@ async function defaultRoots(root) {
   const roots = [...inputRoots];
   // Optional installed capabilities and their actual reference input must travel
   // with source-only archives and invalidate receipts when their bytes change.
-  for (const extra of ['docs/concepts/companion/companion-project.json', '.agents/skills/companion-prototype-design/SKILL.md']) {
+  for (const extra of ['.agents/skills/companion-prototype-design/SKILL.md']) {
     if (await optionalInput(root, extra)) roots.push(extra);
   }
-  for (const directory of ['configs/starters', 'bin', 'templates', 'plugins', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', 'docs/concepts/companion/starters', '.claude/skills/companion-prototype-design']) {
-    if (await optionalInput(root, directory, true)) roots.push(directory);
+  // Each optional folder must be a real directory; one already inside a root (configs/starters under configs) is not listed twice.
+  const covered = path => roots.some(entry => path.startsWith(entry + '/'));
+  for (const directory of ['configs/starters', 'bin', 'templates', 'plugins', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', '.claude/skills/companion-prototype-design']) {
+    if (await optionalInput(root, directory, true) && !covered(directory)) roots.push(directory);
   }
   return roots;
 }

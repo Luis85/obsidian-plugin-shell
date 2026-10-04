@@ -178,6 +178,7 @@ def cancel(node, repo, target, evidence, mode):
 
 
 def new_project(node, repo, target, agent, evidence):
+    folder_name = "projects/prepared-project"
     terminal = Terminal(node, repo, target, "new")
     try:
         terminal.expect("Which project starter do you want to run?")
@@ -195,8 +196,10 @@ def new_project(node, repo, target, agent, evidence):
         terminal.send("\x1b[B\r", "Project package output folder")
         terminal.send("\r", "Review before writing")
         terminal.send("\r", "Apply this reviewed plan?")
-        terminal.send("\x1b[B\r")
+        terminal.send("\x1b[B\r", "Create a Claude Design folder")
+        terminal.send("\r")  # No is the default: the package stays identical to the agent's.
         result = terminal.finish(0)
+        assert not (target / folder_name / "source/docs/design").exists(), "Declining the design folder wrote files"
         request = {"schemaVersion": 2, "starter": "cli",
                    "interview": {"schemaVersion": 1, "guideId": "project-prototype", "guideVersion": 1,
                                         "answers": {"title": "PTY project", "approved": True}}}
@@ -208,7 +211,7 @@ def new_project(node, repo, target, agent, evidence):
         applied = subprocess.run(command + ["--apply", plan["data"]["planHash"]], input=json.dumps(request),
                                  text=True, capture_output=True, timeout=30, cwd=repo)
         assert applied.returncode == 0, applied.stderr + applied.stdout
-        folder = Path("projects/prepared-project")
+        folder = Path(folder_name)
         files = lambda root: {str(path.relative_to(root / folder)): path.read_bytes()
                               for path in (root / folder).rglob("*") if path.is_file()}
         assert files(target) == files(agent), "Interactive and agent project packages differ"

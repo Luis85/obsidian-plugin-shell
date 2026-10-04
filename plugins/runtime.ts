@@ -4,6 +4,7 @@ import type { StarterDefinition } from '../bin/adapters/starters/types.ts';
 import { loadComponentTemplates } from '../bin/adapters/component-template-repository.ts';
 import { pluginComponentTemplates } from './template-contributions.ts';
 import { commands as frameworkCommands } from '../bin/adapters/framework/catalog.ts';
+import { makerBooleanOptions, makerCommandIds, makerValueOptions } from '../bin/domain/command-options.ts';
 import type {
   ComponentTemplateCatalogApi,
   PluginCliCommand,
@@ -28,11 +29,9 @@ const identifier = (value: unknown): value is string =>
   typeof value === 'string' && value.length <= 64 && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value);
 const optionName = (value: unknown): value is string =>
   typeof value === 'string' && value.length <= 64 && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value);
-const reservedCliIds = new Set([
-  'studio', 'sketch', 'prototype', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm',
-  ...frameworkCommands.map(command => command.id.split(' ')[0]!),
-]);
-const reservedCliOptions = new Set(['json', 'no-interaction', 'help', 'no-color', 'root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter']);
+// Derived from the maker parser's own registry and the framework catalog, so a new built-in is reserved without a second list.
+const reservedCliIds = new Set([...makerCommandIds, ...frameworkCommands.map(command => command.id.split(' ')[0]!)]);
+const reservedCliOptions = new Set([...makerBooleanOptions, ...makerValueOptions]);
 function freeze(value: unknown): void {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return;
   Object.freeze(value);

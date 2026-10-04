@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, writeFile, mkdtemp, realpath, cp, rm } from 'node:fs/promises';
+import { writeFile, mkdtemp, realpath, cp, rm } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -12,17 +12,13 @@ import { projectFiles } from '../support/project-render.mjs';
 import { visualSpecs } from '../../bin/compiler/emitters/visual-model.ts';
 import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
 import { noteEntity } from '../../bin/compiler/emitters/persistence-code.ts';
-import { validateDetailDesigns } from '../../scripts/companion/detail-contract.mjs';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
 import { visualSession, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
 import { visualLocate } from '../../scripts/companion/visual/visual-ir.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-// The boundary fixture is authored as legacy detail data, so it extends the last v4 self-project retained as a fixture.
-const original=JSON.parse(await readFile(new URL('../fixtures/companion/detail-v4.json',import.meta.url),'utf8'));
-const legacyProject=JSON.parse(await readFile(new URL('../fixtures/companion/detail-v3.json',import.meta.url),'utf8'));
+// The boundary fixture extends the current (project v6) self-project starter.
+const original=selfProject();
 const fixture=()=>boundaryProject(original);
-// The boundary design is authored as legacy detail data and generated after the v5 migration, exactly like a read project.
-const migrated=()=>migrateCompanionDocument(fixture()).document;
 const boundaryPage=p=>p.design.visualDesigns.pages.find(page=>page.ownerId==='node-900');
 const compile=p=>{const m=projectModel(p);visualSources(m,visualSpecs(m));return m;};
 for(const [kind,raw,value] of [['number','0',0],['number','-2.5',-2.5],['number','',null],['checkbox',false,false],['checkbox',true,true],['json-editor','{"active":false,"count":0}',{active:false,count:0}],['json-file','[1,2]',[1,2]],['date','2024-02-29','2024-02-29'],['markdown-editor','# Test\n<script>inert</script>','# Test\n<script>inert</script>']]) test('typed control '+kind+' preserves '+JSON.stringify(raw),()=>assert.deepEqual(parseDetailControl(raw,{kind}),value));
@@ -46,18 +42,13 @@ test('payload maps typed draft, source, prop and event values without coercion',
  assert.notEqual(mapped.event,context.payload); assert.throws(()=>mapDetailPayload({kind:'draft',nodeId:'absent'},context),/MISSING/);
  assert.throws(()=>mapDetailPayload({kind:'event'},{...context,payload:new Date()}),/INVALID/);
 });
-test('legacy schema remains identical; executable metadata explicitly requires schema 2',()=>{
- const legacy=structuredClone(legacyProject.design.detailDesigns);assert.equal(validateDetailDesigns(legacy),legacy);
- legacy.documents[1].nodes[1].control={kind:'number'};assert.throws(()=>validateDetailDesigns(legacy),/Unsupported element fields|schema 2/);
- assert.equal(validateDetailDesigns(fixture().design.detailDesigns).schema,2);
-});
 test('slot assignments render once and follow host visibility, rejecting cycles, duplicate owners and undeclared slots',()=>{
- const project=migrated(),page=boundaryPage(project),host=visualLocate(page.root,'vn-1006').node,content=host.slots.content[0].children[0].id;
+ const project=fixture(),page=boundaryPage(project),host=visualLocate(page.root,'vn-6006').node,content=host.slots.content[0].children[0].id;
  assert.ok(['default','error'].every(state=>visualVisible(page,{...visualSession(),state},content)));
  host.visibleIn=['default'];
  assert.equal(visualVisible(page,{...visualSession(),state:'error'},content),false);
  for(const variant of ['cycle','duplicate','undeclared']) {
-  const p=migrated(),d=boundaryPage(p),n=visualLocate(d.root,'vn-1006').node,store=p.design.visualDesigns,review=store.components.find(c=>c.id==='vc-107');
+  const p=fixture(),d=boundaryPage(p),n=visualLocate(d.root,'vn-6006').node,store=p.design.visualDesigns,review=store.components.find(c=>c.id==='vc-107');
   if(variant==='cycle')review.template.push({id:'vn-'+store.nextId++,kind:'component',ref:{kind:'project',componentId:'vc-107'},props:{},slots:{},events:[]});
   if(variant==='duplicate')n.slots.content.push(structuredClone(n.slots.content[0]));
   if(variant==='undeclared')n.slots.extra=[];
@@ -66,7 +57,7 @@ test('slot assignments render once and follow host visibility, rejecting cycles,
 });
 test('mapped references, literal contracts and native output contracts fail before writes',()=>{
  for(const variant of ['missing-draft','missing-source','wrong-output','wrong-direction','wrong-folder','unknown-implementation']) {
-  const p=migrated(),save=visualLocate(boundaryPage(p).root,'vn-1004').node.events[0].actions[0],s=p.design.dataSources.sources.at(-1);
+  const p=fixture(),save=visualLocate(boundaryPage(p).root,'vn-6004').node.events[0].actions[0],s=p.design.dataSources.sources.at(-1);
   if(variant==='missing-draft')save.input.fields.values.fields.amount.nodeId='absent';
   if(variant==='missing-source')save.sourceId='absent';
   if(variant==='wrong-output')s.operations[1].output.schema={type:'string'};
@@ -77,19 +68,18 @@ test('mapped references, literal contracts and native output contracts fail befo
  }
 });
 test('native adapters, typed controls, slot content and mapped handlers are generated with custom roots',async()=>{
- const p=migrated();p.settings={codebaseFolder:'product/code',testsFolder:'product/specs'};
+ const p=fixture();p.settings={codebaseFolder:'product/code',testsFolder:'product/specs'};
  const id=boundaryPage(p).id,files=new Map((await projectFiles(root,projectModel(p))).map(e=>[e.path,e.content]));
  const code=files.get(`product/code/generated/presentation/components/details/${id}.vue`),spec=files.get(`product/code/generated/domain/visual/${id}.ts`);
- for(const part of ['<UCheckbox data-design-node="vn-996"','<UInput data-design-node="vn-995"','<USelect data-design-node="vn-997"','<UTextarea data-design-node="vn-1001"','<template #content>'])assert.ok(code.includes(part),part);
+ for(const part of ['<UCheckbox data-design-node="vn-5996"','<UInput data-design-node="vn-5995"','<USelect data-design-node="vn-5997"','<UTextarea data-design-node="vn-6001"','<template #content>'])assert.ok(code.includes(part),part);
  for(const kind of ['number','checkbox','select','date','datetime-local','json-editor','json-file','markdown-editor','textarea'])assert.ok(spec.includes(`"control":{"kind":"${kind}"`),kind);
- assert.equal((code.match(/data-design-node="vn-1007"/g)||[]).length,1);
+ assert.equal((code.match(/data-design-node="vn-6007"/g)||[]).length,1);
  assert.match([...files].filter(([path]) => /^product\/specs\/project\/visual\/definitions(?:-\d+)?\.test\.ts$/.test(path)).map(([, text]) => text).join("\n"),/toHaveBeenCalledWith\(\{"requestId":"boundary-request-1","values":\{"title":"Boundary note","amount":0,"enabled":true,"category":"first","due":"2026-01-01","body":"fixture"\}\}\)/);
  assert.match(files.get('src/bootstrap/features.ts'),/GBoundaryRecord: register\(GBoundaryRecord\)/);
  assert.match(files.get('product/code/generated/infrastructure/sources/boundary-records.ts'),/noteOperations/);
  assert.ok(!files.get('product/code/generated/infrastructure/sources/boundary-records.ts').includes('NotImplementedError'));
- assert.ok(![...files.keys()].some(path=>path.startsWith('product/code/generated/application/interactions/')&&files.get(path).includes('"nodeId":"vn-1004"')));
+ assert.ok(![...files.keys()].some(path=>path.startsWith('product/code/generated/application/interactions/')&&files.get(path).includes('"nodeId":"vn-6004"')));
  assert.ok(files.has('product/specs/project/persistence/boundary-record.test.ts'));
- assert.deepEqual(legacyProject.design.detailDesigns.schema,1);
 });
 // Exact src/bootstrap/features.ts that examples:remove writes; fixed so the check holds in every consumer state.
 const removedRegistry="import { createNoteFeatures } from '../application/note-feature';\n\n\n\nimport type { PreferenceService } from '../application/preference-service';\n\n/** Add one explicit registration per feature. Ports are provided once by runtime bootstrap. */\nexport function createFeatures(services: Parameters<typeof createNoteFeatures>[0], preferences: PreferenceService) {\n  void preferences;\n  return createNoteFeatures(services, () => ({\n    \n    \n    \n  }));\n}\n";

@@ -2,16 +2,18 @@
 import UButton from '@nuxt/ui/components/Button.vue';
 import UInput from '@nuxt/ui/components/Input.vue';
 import type { EditorStore } from '../composables/use-editor.ts';
-defineProps<{store:EditorStore}>();
+import { useEditorModel } from '../composables/use-editor-model.ts';
+const props=defineProps<{store:EditorStore}>();
+const { tab, inspectorOpen, draftName, dirty } = useEditorModel(props.store);
 </script>
 <template>
   <aside class="jm-inspector" aria-label="Selected surface" v-if="store.selected">
-    <header class="jm-panel-heading"><h2>Surface details</h2><UButton variant="ghost" color="neutral" :disabled="store.dirty||store.busy||!!store.panel" @click="store.inspectorOpen=false" aria-label="Close surface details">Close</UButton></header>
+    <header class="jm-panel-heading"><h2>Surface details</h2><UButton variant="ghost" color="neutral" :disabled="dirty||store.busy||!!store.panel" @click="inspectorOpen=false" aria-label="Close surface details">Close</UButton></header>
     <div class="jm-panel-content">
-      <div class="jm-tabs" aria-label="Inspector sections"><button :aria-pressed="store.tab==='details'" @click="store.tab='details'">Details</button><button :aria-pressed="store.tab==='related'" @click="store.tab='related'">Related</button></div>
-      <template v-if="store.tab==='details'">
-        <label :for="store.domId('jm-name')">Name</label><UInput :disabled="store.busy" :readonly="!store.available" :id="store.domId('jm-name')" v-model="store.draftName" @update:model-value="store.dirty=true" @keydown.enter="store.saveName" />
-        <div class="jm-actions" v-if="store.dirty"><UButton size="sm" :disabled="store.busy||!store.available" @click="store.saveName">Save name</UButton><UButton size="sm" variant="ghost" color="neutral" :disabled="store.busy" @click="store.cancel">Cancel</UButton></div>
+      <div class="jm-tabs" aria-label="Inspector sections"><button :aria-pressed="tab==='details'" @click="tab='details'">Details</button><button :aria-pressed="tab==='related'" @click="tab='related'">Related</button></div>
+      <template v-if="tab==='details'">
+        <label :for="store.domId('jm-name')">Name</label><UInput :disabled="store.busy" :readonly="!store.available" :id="store.domId('jm-name')" v-model="draftName" @update:model-value="dirty=true" @keydown.enter="store.saveName" />
+        <div class="jm-actions" v-if="dirty"><UButton size="sm" :disabled="store.busy||!store.available" @click="store.saveName">Save name</UButton><UButton size="sm" variant="ghost" color="neutral" :disabled="store.busy" @click="store.cancel">Cancel</UButton></div>
         <dl><dt>Surface</dt><dd>{{ store.selected.kind }}</dd><dt>Code name</dt><dd><code>{{ store.selected.slug }}</code></dd><dt>Route</dt><dd><code>{{ store.route?.path??'No route declared' }}</code></dd></dl>
         <UButton v-if="['page','view'].includes(store.selected.kind)" variant="outline" color="neutral" size="sm" @click="store.open('route')">Edit route</UButton>
         <UButton v-if="store.route" variant="ghost" color="error" size="sm" @click="store.reviewRecord('route',store.route.id)">Remove route</UButton>

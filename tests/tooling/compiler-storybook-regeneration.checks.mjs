@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { starterDocument } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 /** Source-only fixture, not a compiled distribution. Works with showcase and example-removed templates. */
@@ -50,7 +51,7 @@ test('reviewed in-place opt-ins update both receipts together and the first ordi
   const context = { root: dir, frameworkRoot: root };
   const run = (command, options = {}) => executeOperation({ command, args: [], options }, context);
   const read = path => readFile(join(dir, path), 'utf8');
-  const input = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
+  const input = starterDocument('quick-capture');
   input.project.author = 'Example';
   await writeFile(join(dir, 'input.json'), JSON.stringify(input));
   const setup = await run('setup', { input: 'input.json', yes: true });

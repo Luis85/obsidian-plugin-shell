@@ -38,10 +38,6 @@
       "optional": true
     },
     {
-      "path": "docs/concepts/native-file-integration-handoff/tests",
-      "optional": true
-    },
-    {
       "path": "plugins"
     }
   ],
@@ -57,14 +53,6 @@
     "showcase-current-build": {
       "file": "reports/feature-showcase/clickdummy.html",
       "hint": "Generate the feature-showcase starter outside this checkout, install/build it, and copy its clickdummy.html here; see COMPANION-STARTERS.md."
-    },
-    "handoff-python": {
-      "probe": [
-        "{python}",
-        "-c",
-        "import sys; assert sys.version_info >= (3, 12)"
-      ],
-      "hint": "Use Python 3.12+ or set PYTHON; native-handoff is an explicit maintainer-only suite."
     },
     "python3": {
       "probe": [
@@ -90,12 +78,8 @@
       "hint": "Create a scratch venv, pip install playwright==1.57.0, run `python -m playwright install chromium`, then set PYTHON to that venv interpreter (see companion-concept-verification.yml)."
     },
     "chromium": {
-      "probe": [
-        "{node}",
-        "-e",
-        "const {chromium}=require('playwright-core');const p=process.env.SHELL_CHROMIUM||chromium.executablePath();require('fs').accessSync(p)"
-      ],
-      "hint": "Provision Chromium explicitly: `node node_modules/@playwright/test/cli.js install chromium` (optionally with PLAYWRIGHT_BROWSERS_PATH in a scratch directory) or set SHELL_CHROMIUM."
+      "browser": true,
+      "hint": "Provision Chromium explicitly: `node node_modules/@playwright/test/cli.js install chromium` (optionally with PLAYWRIGHT_BROWSERS_PATH in a scratch directory) or set SHELL_CHROMIUM. A mismatched installed revision is reported as browser-revision-mismatch with the exact SHELL_CHROMIUM value to opt in."
     },
     "harness-build": {
       "file": "dist-harness/harness/app/index.html",
@@ -117,9 +101,9 @@
       "probe": [
         "{python}",
         "-c",
-        "import os; assert os.path.isfile(os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'))"
+        "import os; assert os.path.isfile(os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'))"
       ],
-      "hint": "Set CHROMIUM_EXECUTABLE to the Chromium binary the Python Playwright install provides (default /usr/bin/chromium)."
+      "hint": "Set SHELL_CHROMIUM to the Chromium binary the Python Playwright install provides (default /usr/bin/chromium)."
     }
   },
   "suites": [
@@ -180,36 +164,6 @@
       "workflows": [
         "ci",
         "interactive-maker"
-      ]
-    },
-    {
-      "name": "native-handoff",
-      "purpose": "Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics.",
-      "runner": {
-        "type": "command",
-        "commands": [
-          [
-            "{python}",
-            "-B",
-            "-m",
-            "unittest",
-            "discover",
-            "-s",
-            "docs/concepts/native-file-integration-handoff/tests",
-            "-v"
-          ]
-        ]
-      },
-      "include": [
-        "docs/concepts/native-file-integration-handoff/tests/test_*.py"
-      ],
-      "prerequisites": [
-        "handoff-python"
-      ],
-      "optional": true,
-      "verify": "opt-in",
-      "workflows": [
-        "native-source-handoff"
       ]
     },
     {
@@ -420,7 +374,7 @@
     },
     {
       "name": "visual",
-      "purpose": "Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, migration, session and generated model tests.",
+      "purpose": "Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, session and generated model tests.",
       "runner": {
         "type": "node-test"
       },
@@ -436,7 +390,7 @@
     },
     {
       "name": "companion",
-      "purpose": "Companion concept contracts: project JSON, storymaps, legacy detail and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
+      "purpose": "Companion concept contracts: schema 6 project JSON, storymaps and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
       "runner": {
         "type": "node-test"
       },
@@ -827,7 +781,7 @@
       "name": "quality",
       "purpose": "Repository gates: analyzer, lint, coverage inventory, maintainability, tighten-only thresholds, presentation, repository and test-quality policies, evidence producers and this suite manifest.",
       "runner": {"type": "node-test"},
-      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs"],
+      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/docs-launchers.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/style-literals*.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs", "tests/tooling/verify-*.checks.mjs"],
       "prerequisites": ["build"],
       "verify": "tooling",
       "npmScript": "test:quality",
@@ -954,12 +908,6 @@
     "tooling": "Every suite that verify runs in its serialized node --test tooling step."
   },
   "helpers": [
-    {
-      "purpose": "Native handoff isolated source and Git test fixtures",
-      "include": [
-        "docs/concepts/native-file-integration-handoff/tests/fixtures.py"
-      ]
-    },
     {
       "purpose": "Synthetic vault copied for each real-Obsidian case",
       "include": [

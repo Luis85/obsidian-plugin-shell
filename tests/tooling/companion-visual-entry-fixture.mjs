@@ -4,10 +4,8 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
-const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['native-contract.mjs', 'composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'project-contract.mjs'];
-const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
-  .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
+import { conceptShared, visualModules } from '../support/concept-realm.mjs';
+const shared = await conceptShared(['native-contract.mjs', 'composition-contract.mjs', ...visualModules]);
 const base = (await readFile('docs/concepts/companion/src/base.html', 'utf8')).split('\n');
 const helpers = ['function esc(', 'function icon(', 'function button(', 'function badge(', 'function modalHeader(', 'function dialogBody('].map(prefix => {
   const lines = base.filter(line => line.startsWith(prefix));
@@ -63,7 +61,7 @@ export function load() {
   const search = { id: 'vc-1', libraryId: 'search-field', exportName: 'SearchField', description: 'Search input', props: [{ name: 'query', type: 'string', required: false }], slots: [{ name: 'actions', required: false }], emits: [{ name: 'search', payloadType: 'string' }], variants: [], scenarios: [],
     dependencies: [{ package: 'tiptap', version: '2.11.5', purpose: 'Rich text' }], template: [text, go, external] };
   const toolbar = { id: 'vc-3', libraryId: 'toolbar', exportName: 'Toolbar', description: 'Customer toolbar', props: [], slots: [], emits: [], variants: [], scenarios: [], template: [ctx.visualElement('vn-4', 'div', { name: 'Bar', children: [ctx.visualProject('vn-5', 'vc-1', { name: 'Search' })] })] };
-  host.design = ctx.realm({ schema: 5, nodes: surfaces, library, dataSources: { sources: [] }, revision: 1, history: [], future: [], visualDesigns: { ...ctx.emptyVisualDesigns(), nextId: 30, pages: [page], components: [search, toolbar] } });
+  host.design = ctx.realm({ schema: 6, nodes: surfaces, library, dataSources: { sources: [] }, revision: 1, history: [], future: [], visualDesigns: { ...ctx.emptyVisualDesigns(), nextId: 30, pages: [page], components: [search, toolbar] } });
   ctx.validateVisualDesigns(host.design.visualDesigns, ctx.veContext(host.design));
   Object.assign(ctx.ui(), { owner: 'surface-a' });
   return ctx;

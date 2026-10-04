@@ -78,7 +78,7 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
         "id": "tasks-projects-plugin",
@@ -92,7 +92,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Use for a personal planner, delivery backlog or project tracker.",
         "platform": "desktop",

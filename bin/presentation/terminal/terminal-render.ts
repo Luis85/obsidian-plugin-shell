@@ -4,6 +4,11 @@
  */
 import type { Diagnostic, Result } from '../../adapters/framework/contracts.ts';
 import { helpText, type HelpData } from './terminal-help.ts';
+import { adoptAnalyzeView, adoptPlanView } from './adopt-view.ts';
+import { checkPlanView } from './check-plan-view.ts';
+import { ciJobView, ciListView } from './ci-view.ts';
+import { uiStatusView } from './ui-status-view.ts';
+import type { UiStatusReport } from '../../domain/ui-status.ts';
 import { bold, duration, marker, nextLine, rows, runnable, type Mark, type Style } from './terminal-style.ts';
 export interface Rendered { text: string; diagnosticsShown: boolean }
 type Data = Record<string, unknown>;
@@ -147,14 +152,19 @@ type View = (style: Style, value: Result, data: Data) => string | undefined;
 const views: Array<[View, boolean]> = [
   [(style, value) => value.command === 'status' || value.command === 'doctor' ? statusView(style, value) : undefined, true],
   [(style, value, data) => value.command === 'make' && Array.isArray(data.makers) ? makersView(style, data.makers as Data[]) : undefined, false],
-  [(style, value) => value.command === 'check' ? checkView(style, value) : undefined, true],
+  [(style, value, data) => value.command === 'check' ? (data.mode === 'plan' ? checkPlanView(style, value) : checkView(style, value)) : undefined, true],
   [(style, value) => value.command === 'check submission' ? submissionView(style, value) : undefined, true],
+  [(style, value, data) => value.command === 'ci' && data.gate === 'ci' ? ciJobView(style, value) : undefined, true],
+  [(style, value, data) => value.command === 'ci' && Array.isArray(data.workflows) ? ciListView(style, value) : undefined, true],
+  [(style, value) => value.command === 'ui status' ? uiStatusView(style, value.data as UiStatusReport) : undefined, false],
+  [(style, value) => value.command === 'adopt analyze' ? adoptAnalyzeView(style, value) : undefined, false],
+  [(style, value, data) => value.command === 'adopt plan' && typeof data.planHash === 'string' ? adoptPlanView(style, value) : undefined, false],
   [(style, value, data) => typeof data.planHash === 'string' && Array.isArray(data.changes) ? planView(style, value) : undefined, false],
 ];
 const isHelp = (value: Result, data: Data) => Array.isArray(data.commands) && (value.command === 'help' || value.command === 'capabilities' || Boolean(data.scope));
 export function renderHuman(value: Result, style: Style): Rendered {
   const header = `${value.command}: ${value.status}\n`, data = record(value.data);
-  if (value.status === 'failed' && value.command !== 'check') return { text: header + (Object.keys(data).every(key => key === 'suggestions') ? '' : generic(value.data)), diagnosticsShown: false };
+  if (value.status === 'failed' && value.command !== 'check' && !(value.command === 'ci' && data.gate === 'ci')) return { text: header + (Object.keys(data).every(key => key === 'suggestions') ? '' : generic(value.data)), diagnosticsShown: false };
   if (isHelp(value, data)) return { text: helpText(style, value.data as HelpData), diagnosticsShown: false };
   for (const [view, diagnosticsShown] of views) {
     const text = view(style, value, data);

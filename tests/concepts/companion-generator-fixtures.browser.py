@@ -10,6 +10,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
+GOLDEN = ROOT / 'configs/starters/companion-plugin.json'
 OUT = ROOT / 'reports/concepts/generator-fixtures'
 OUT.mkdir(parents=True, exist_ok=True)
 checks, errors, requests = [], [], []
@@ -31,7 +32,7 @@ def command(args, cwd=ROOT):
 
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width': 1440, 'height': 1000}, accept_downloads=True)
     page.set_default_timeout(8000)
     page.on('pageerror', lambda error: errors.append(str(error)))
@@ -39,7 +40,10 @@ with sync_playwright() as pw:
     page.on('request', lambda request: requests.append(request.url))
     try:
         page.set_content(STORAGE + HTML.read_text())
-        page.locator('[data-action="project-example"]').click()
+        # The self-project is the external golden starter's schema 6 document, reviewed through the real import dialog.
+        page.evaluate('openCompanionImport()')
+        page.locator('#project-import-text').fill(json.dumps(json.loads(GOLDEN.read_text())['generator']['document']))
+        page.locator('#modal [data-action="project-import-review"]').click()
         page.locator('#project-import-confirm').check()
         page.locator('[data-action="project-import-apply"]').click()
         page.locator('#content [data-action="project-export"]').first.click()
@@ -48,6 +52,7 @@ with sync_playwright() as pw:
         exported = OUT / 'project.companion.json'
         download.value.save_as(str(exported))
         check('Actual download retains the authored source recipes', json.loads(exported.read_text())['design']['dataSources']['testing']['recipes'])
+        check('The concept exports project schema 6 directly', json.loads(exported.read_text())['schemaVersion'] == 6)
         page.locator('#modal [data-action="close"]').first.click()
         page.locator('#sidebar [data-action="nav"][data-value="testdata"]').click()
         page.locator('[data-action="td-preview"]').click()

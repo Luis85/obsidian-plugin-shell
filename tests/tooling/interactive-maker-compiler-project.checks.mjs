@@ -1,19 +1,19 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+
 import { fileURLToPath } from 'node:url';
 import { defineFrameworkAdapter } from '../../bin/compiler/adapters/project/framework-adapter.ts';
 import { frameworkAdapter, requireFrameworkAdapter } from '../../bin/compiler/adapters/project/framework-registry.ts';
 import { packageFiles, typecheckFiles } from '../../bin/compiler/adapters/project/configuration.ts';
 import { renderStarterProject } from '../../bin/compiler/adapters/project/emitter.ts';
 import { companionFrontend } from '../../bin/compiler/adapters/frontend.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 
 // Drives the project-starter host adapters (bin/compiler/adapters/project/*) through their refusal paths.
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const source = await readFile(join(root, 'docs/concepts/companion/starters/blank.companion.json'), 'utf8');
+const source = starterDocumentText('blank');
 const frontend = companionFrontend('blank.json');
-const model = frontend.validate(frontend.migrate(JSON.parse(source)).document);
+const model = frontend.validate(JSON.parse(source));
 const pins = { typescript: '6.0.3', '@types/node': '24.0.0', obsidian: '1.13.0', vite: '7.0.0', vue: '3.5.0', pinia: '3.0.0', '@nuxt/ui': '4.0.0',
   '@vitejs/plugin-vue': '6.0.0', '@iconify-json/lucide': '1.2.0', postcss: '8.5.0', 'postcss-selector-parser': '7.1.0', tailwindcss: '4.1.0', 'vue-tsc': '3.0.0' };
 const template = (pkg = { devDependencies: pins }) => Object.freeze({ fingerprint: 'fixture', frameworkFiles: [], skillFiles: [],

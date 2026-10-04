@@ -1,4 +1,4 @@
-import { migrateAuthoringDocument, validateAuthoringDocument, type AuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument, type AuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { emptyVisualDesigns, type VisualDesigns } from '../../scripts/companion/visual/visual-ir.mjs';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { record } from '../../scripts/companion/sitemap/safety.ts';
@@ -19,7 +19,7 @@ function assertDocument(value: AuthoringDocument): asserts value is SketchDocume
 }
 /** The Companion v6 envelope is the only saved model; no private CLI format or executable expressions. */
 export function openDocument(input: unknown): SketchDocument {
-  const { document } = migrateAuthoringDocument(structuredClone(input));
+  const document = validateAuthoringDocument(structuredClone(input));
   if (document.design.visualDesigns === undefined) document.design.visualDesigns = emptyVisualDesigns();
   validateAuthoringDocument(document); assertDocument(document);
   return document;

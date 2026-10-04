@@ -1,6 +1,6 @@
 import { relative, resolve, sep, extname } from 'node:path';
 import { parseConcept, conceptRequire, type Concept } from '../../../scripts/companion/concepts/contract.ts';
-import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
+import { companionRelativeFolder } from '../../../scripts/companion/authoring-contract.ts';
 import { hash, readBounded } from './files.ts';
 import { record } from '../../../scripts/companion/sitemap/safety.ts';
 import type { Context } from './contracts.ts';

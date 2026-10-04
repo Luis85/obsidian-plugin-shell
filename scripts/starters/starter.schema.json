@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Workbench starter definition",
-  "description": "Workbench starter definition v1. Companion generators support fully validated project v5 and v6 documents; project generators select a compiler project target and frontend. No execution trust is imported.",
+  "description": "Workbench starter definition v1. Companion generators embed a fully validated project v6 document (earlier project formats are rejected, never migrated); project generators select a compiler project target and frontend. No execution trust is imported.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -116,7 +116,15 @@
             },
             "document": {
               "type": "object",
-              "description": "Validated by the existing current Companion project semantic validator."
+              "description": "Validated by the current Companion project v6 semantic validator.",
+              "properties": {
+                "schemaVersion": {
+                  "const": 6
+                }
+              },
+              "required": [
+                "schemaVersion"
+              ]
             }
           },
           "required": [

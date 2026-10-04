@@ -5,11 +5,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
+import { conceptShared, visualModules } from '../support/concept-realm.mjs';
 
-const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['native-contract.mjs', 'composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'project-contract.mjs'];
-const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
-  .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
+const shared = await conceptShared(['native-contract.mjs', 'composition-contract.mjs', ...visualModules]);
 const base = await readFile('docs/concepts/companion/src/base.html', 'utf8');
 const escStart = base.indexOf('function esc(v){'), escSource = base.slice(escStart, base.indexOf('[c]));}', escStart) + 7);
 assert.match(escSource, /^function esc\(v\)\{.*\}$/, 'the page escape helper is extracted whole');

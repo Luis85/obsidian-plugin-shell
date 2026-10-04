@@ -9,14 +9,15 @@ import { generationSelection } from '../../bin/compiler/adapters/selection.ts';
 import { planArtifacts, applyProject } from '../../bin/compiler/adapters/workspace-plan.ts';
 import { planProject } from '../../bin/compiler/adapters/project-plan.ts';
 import { projectModel, digest } from '../../bin/compiler/emitters/model.ts';
-import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { projectFiles } from '../support/project-render.mjs';
 import { descriptor } from '../../bin/adapters/framework/catalog.ts';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const starter = migrateAuthoringDocument(JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'))).document;
+const starter = structuredClone(starterDocument('quick-capture'));
 const model = projectModel(starter);
-const blank = migrateAuthoringDocument(JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/blank.companion.json'), 'utf8'))).document;
+const blank = structuredClone(starterDocument('blank'));
 const graph = [{ key: 'page:one', dependencies: ['component:b', 'component:a'] },
   { key: 'component:a', dependencies: ['source:data'] }, { key: 'component:b', dependencies: ['source:data'] },
   { key: 'source:data', dependencies: [] }, { key: 'page:unrelated', dependencies: [] }];

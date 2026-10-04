@@ -31,9 +31,11 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'templates', title: 'Component template library', commands: ['templates list', 'templates search', 'templates show', 'templates tree', 'templates validate', 'templates schema', 'templates coverage', 'templates docs', 'templates instantiate'] },
   { id: 'prototypes', title: 'Prototype versions and variants', commands: prototypeCommands.map(command => command.id) },
   { id: 'starters', title: 'External project starters', commands: ['starters list', 'starters show', 'starters validate', 'starters schema', 'starters add', 'starters edit', 'starters run', 'starters pack', 'starters coverage'] },
+  { id: 'ui', title: 'Generated UI progress and evidence', commands: ['ui status', 'ui gallery'] },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
-  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'adopt', title: 'Adopt an existing project', commands: ['adopt analyze', 'adopt plan', 'adopt skill'] },
+  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'ci', 'make', 'styles inspect', 'styles export'] },
   { id: 'documentation', title: 'Application documentation', commands: ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover'] },
   { id: 'obsidian-cli', title: 'Optional Obsidian CLI', commands: ['obsidian status', 'obsidian files', 'obsidian read', 'obsidian prepare'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
@@ -122,7 +124,9 @@ const specific: Record<string, OptionHelp> = {
   recover: { description: 'After inspecting an interrupted attempt, explicitly acknowledge uncertain previous effects. No automatic retry.' },
   'resume-hash': { description: 'Exact current input/progress digest returned by setup status or setup resume preview.' },
   'inside-vault': { description: `Allow a target inside a folder that contains ${defaultVaultConfigDirectory}/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder.` },
+  'no-git': { description: 'Do not run git init and the initial commit in a new project folder (skipped automatically inside an existing git work tree or without git).' },
   target: { description: 'Output folder relative to the project root.' },
+  report: { description: 'Adoption report JSON (workbench-adoption-report/v1) to render instead of analyzing the target again.' },
   extension: { description: 'Custom file suffix without a dot (lowercase, 1–16 letters/digits). Core Obsidian extensions are refused.' },
   extensions: { description: 'Comma-separated lowercase, dotless file-menu filters, for example md,txt.' },
   feature: { description: 'Existing feature that receives the generated piece.' },
@@ -144,10 +148,17 @@ const specific: Record<string, OptionHelp> = {
   execute: { description: 'Request candidate writes (still requires --authorize).' },
   all: { description: 'List every command with its summary, grouped.' },
   replace: { description: 'Replace the previous local clickdummy only after successful build and static offline validation.' },
-  fast: { description: 'Typecheck plus tests related to changed files (git); for agent Stop hooks.' },
+  fast: { description: 'Typecheck plus tests related to changed files (git), with eslint/lint on those files and the node --test suites they select; for agent Stop hooks.' },
+  base: { description: 'With --fast or --plan: diff merge-base(<ref>, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD.' },
+  plan: { description: 'List, without running anything, the gates the diff requires: exact commands, why each applies, estimated duration, prerequisites and CI coverage; ends with npm run verify.' },
+  job: { description: 'Job to reproduce, as <workflow-file-stem>/<job-id> (for example ci/baseline); see ci --list.' },
+  matrix: { description: 'Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-latest); required when an expression computes the matrix.' },
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when configs/testing/vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
+  'adopt analyze': 'node bin/app adopt analyze [--target <dir>] [--out <report.json>] [--replace] [--json]',
+  'adopt plan': 'node bin/app adopt plan [--target <dir>] [--report <report.json>] [--out <plan.md>] [--replace] [--yes | --apply <sha256>] [--json]',
+  'adopt skill': 'node bin/app adopt skill [--target <dir>] [--yes | --apply <sha256>] [--json]',
   'prototypes compare': 'node bin/app prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]',
   'prototypes prototype-details': 'node bin/app prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]',
   'prototypes version-details': 'node bin/app prototypes version-details <prototype> --version <version> --label <label> [options]',
@@ -155,6 +166,7 @@ const usage: Record<string, string> = {
   'docs import': 'node bin/app docs import [file-or-folder ...] [options]',
   'docs export': 'node bin/app docs export [--out <documentation-root>] [options]',
   'docs validate': 'node bin/app docs validate [file-or-folder ...] [--json]',
+  ci: 'node bin/app ci (--list | --job <workflow-file-stem>/<job-id> [--matrix key=value,...] [--execute]) [--json]',
   'obsidian status': 'node bin/app obsidian status --obsidian-vault <name-or-id> [--json]',
   'obsidian files': 'node bin/app obsidian files --obsidian-vault <name-or-id> [--obsidian-folder <folder>] [--json]',
   'obsidian read': 'node bin/app obsidian read --obsidian-vault <name-or-id> --obsidian-path <note.md> [--json]',
@@ -164,6 +176,9 @@ const usage: Record<string, string> = {
   make: 'node bin/app make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'adopt analyze': ['node bin/app adopt analyze --target ../legacy-app', 'node bin/app adopt analyze --target ../legacy-app --json --out ../legacy-report.json'],
+  'adopt plan': ['node bin/app adopt plan --target ../legacy-app', 'node bin/app adopt plan --target ../legacy-app --apply <sha256>', 'node bin/app adopt plan --report ../legacy-report.json --target ../legacy-app --dry-run'],
+  'adopt skill': ['node bin/app adopt skill --target ../legacy-app --dry-run', 'node bin/app adopt skill --target ../legacy-app --yes'],
   'templates list': ['node bin/app templates list --atomic-level organism --json', 'node bin/app templates list --for editor --json'],
   'templates search': ['node bin/app templates search table --json'],
   'templates show': ['node bin/app templates show organism.data-table --json'],
@@ -174,6 +189,8 @@ const examples: Record<string, string[]> = {
   'templates docs': ['node bin/app templates docs --dry-run --json', 'node bin/app templates docs --yes'],
   'templates instantiate': ['node bin/app templates instantiate organism.data-table --project design/project.json --dry-run'],
   'starters coverage': ['node bin/app starters coverage feature-showcase --json', 'node bin/app starters coverage feature-showcase --require-model-coverage --json'],
+  'ui gallery': ['node bin/app ui gallery', 'node bin/app ui gallery --target clickdummy --json', 'node bin/app ui gallery --out reports/ui-gallery'],
+  'ui status': ['node bin/app ui status', 'node bin/app ui status --json', 'node bin/app ui status --root ../my-app --json'],
   'starters list': ['node bin/app starters list --json'],
   'starters show': ['node bin/app starters show webapp --json'],
   'starters validate': ['node bin/app starters validate --json'],
@@ -260,8 +277,9 @@ const examples: Record<string, string[]> = {
   mcp: ['node bin/app mcp'],
   'clickdummy build': ['node bin/app clickdummy build', 'node bin/app clickdummy build --replace'],
   test: ['node bin/app test', 'node bin/app test --profile obsidian', 'node bin/app test --profile browser'],
-  check: ['node bin/app check', 'node bin/app check --fast --json'],
+  check: ['node bin/app check', 'node bin/app check --fast --json', 'node bin/app check --fast --base origin/main', 'node bin/app check --plan --json'],
   'check submission': ['node bin/app check submission', 'node bin/app check submission --json'],
+  ci: ['node bin/app ci --list --json', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-latest', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-latest --execute --json'],
   verify: ['node bin/app verify --profile project'], dev: ['node bin/app dev --profile obsidian', 'node bin/app dev', 'node bin/app dev --profile ui'],
   'vault prepare': ['node bin/app vault prepare --yes'], 'plugin install': ['node bin/app plugin install --dry-run'],
   'data plan': ['node bin/app data plan --input test-data-manifest.json'], 'data apply': ['node bin/app data apply --input test-data-manifest.json --apply <approval-hash>'],
@@ -286,8 +304,10 @@ const describe = (description: string) => (doc: OptionHelp) => { doc.description
 /** Command-specific option documentation, applied in order over the shared descriptions. */
 const optionOverrides: OptionOverride[] = [
   [(id, name) => name === 'profile' && Boolean(profiles[id]), (doc, id) => { doc.values = profiles[id]; doc.default = profileDefaults[id]; }],
+  [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility.')],
+  [option('ci', 'execute'), describe('Run the job\'s run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed.')],
   [option('setup resume', 'stage'), doc => { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }],
-  [option('project schema', 'version'), doc => { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }],
+  [option('project schema', 'version'), doc => { doc.description = 'Published project schema version; only the current schema 6 exists.'; doc.values = ['6']; doc.default = '6'; }],
   [option('release prepare', 'version'), describe('Release version x.y.z.')],
   [option('make', 'format'), doc => { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }],
   [option('docs export', 'out'), doc => { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }],
@@ -297,6 +317,13 @@ const optionOverrides: OptionOverride[] = [
   [option('prototypes version', 'from'), describe('Source version slug to copy into the new version.')],
   [prototypeOption('name'), describe('Prototype or variant display name; its folder slug stays unchanged.')],
   [option('prototypes prototype-details', 'description'), describe('Prototype description; changing it does not change folder slugs or saved designs.')],
+  [option('ui gallery', 'target'), doc => { doc.description = 'What to capture: the served harness (this framework) or the built clickdummy.html (generated project).'; doc.values = ['harness', 'clickdummy']; doc.default = 'harness'; }],
+  [option('ui gallery', 'out'), doc => { doc.description = 'Gallery folder relative to the project root; previous captures there are replaced.'; doc.default = 'reports/ui-gallery'; }],
+  [option('ui gallery', 'input'), doc => { doc.description = 'Built clickdummy file relative to the project root (--target clickdummy only).'; doc.default = 'clickdummy.html'; }],
+  [(id, name) => id.startsWith('adopt ') && name === 'target', describe('Folder to analyze or adopt into. Defaults to --root, then the current directory; no shell.config.json is needed.')],
+  [option('adopt analyze', 'out'), describe('Write the report JSON here: outside the project, or inside it only as docs/workbench/*.json. A different existing file is refused without --replace.')],
+  [option('adopt plan', 'out'), doc => { doc.description = 'Markdown file for the plan, relative to the target; only an earlier adoption plan can be replaced.'; doc.default = 'docs/workbench/ADOPTION-PLAN.md'; }],
+  [(id, name) => id.startsWith('adopt ') && name === 'replace', describe('Replace an earlier report or adoption plan; never replaces an unrelated file.')],
   [option('new', 'from'), describe('Project JSON exported by the companion (instead of --starter).')],
   [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown, outside framework/source roots (bin, src, scripts, configs, templates, plugins, tests, configured code/test/vault folders).'; doc.default = 'docs/generated/component-library'; }],
   [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
@@ -309,7 +336,7 @@ function optionDoc(entry: Command, name: string): OptionHelp {
 }
 function timeoutDefault(entry: Command): Partial<OptionHelp> {
   if (['dev', 'storybook dev'].includes(entry.id)) return { default: '3600000' };
-  return entry.id === 'check' ? { default: '600000 per step' } : {};
+  return ['check', 'ci'].includes(entry.id) ? { default: '600000 per step' } : {};
 }
 /** A fresh copy on every call: callers can never mutate shared help or execution policy. */
 export function commandHelp(entry: Command): CommandHelp {

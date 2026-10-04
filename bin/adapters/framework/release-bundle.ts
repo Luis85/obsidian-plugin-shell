@@ -99,6 +99,9 @@ export async function bundleReleaseCli(frameworkRoot: string): Promise<{ bytes: 
     outfile: resolve(root, 'bin/app.js'),
     bundle: true, write: false, platform: 'node', format: 'esm', target: 'node22',
     packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent', metafile: true,
+    // Whitespace only: identifiers, syntax and inline legal notices are unchanged. It keeps the single bundled file
+    // well inside the 8 MB per-file limit that every kit reader enforces.
+    minifyWhitespace: true,
     // Bundled CommonJS dependencies (yaml's node build) require Node built-ins; ESM output needs a real require.
     banner: { js: "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);" },
     // Installed devDependencies loaded on first use (makers, packing). Regular pre-install kit commands never load them.

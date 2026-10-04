@@ -8,6 +8,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { build } from 'vite';
 import { chromium } from '@playwright/test';
+import { chromiumLaunchOptions } from '../testing/browser-executable.mjs';
 import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { projectConfigs } from '../shared/project-configs.mjs';
@@ -18,7 +19,7 @@ assert.ok(npm, 'QUALIFIED_NPM must select the qualified npm CLI.');
 await mkdir(out, { recursive: true });
 // Fixed scratch directory under reports only. A prior retained run is never mistaken for this run.
 await rm(project, { recursive: true, force: true });
-const doc = withAirshipOption(JSON.parse(await readFile('docs/concepts/companion/starters/quick-capture.companion.json', 'utf8')), { airship: true });
+const doc = withAirshipOption(JSON.parse(await readFile('configs/starters/quick-capture.json', 'utf8')).generator.document, { airship: true });
 doc.tooling.airship = { enabled: true, agent: 'codex', targetPort: 5741, port: 5742 };
 const compiled = await compileProject({ source: JSON.stringify(doc), template: await loadTemplateSnapshot(root) });
 assert.equal(compiled.status, 'ok', JSON.stringify(compiled.diagnostics));
@@ -63,7 +64,7 @@ const evidence = { source: spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, 
 try {
   start(['node_modules/vite/bin/vite.js', '--config', projectConfigs.preview.path]);
   await ready('http://127.0.0.1:5741/');
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('http://127.0.0.1:5741/', { waitUntil: 'networkidle' });

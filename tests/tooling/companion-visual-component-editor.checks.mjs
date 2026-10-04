@@ -5,11 +5,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
+import { conceptShared, visualModules } from '../support/concept-realm.mjs';
 
-const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['native-contract.mjs', 'composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'project-contract.mjs'];
-const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
-  .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
+const shared = await conceptShared(['native-contract.mjs', 'composition-contract.mjs', ...visualModules]);
 const base = (await readFile('docs/concepts/companion/src/base.html', 'utf8')).split('\n');
 const helpers = ['function esc(', 'function icon(', 'function button(', 'function badge(', 'function modalHeader(', 'function dialogBody('].map(prefix => {
   const lines = base.filter(line => line.startsWith(prefix));
@@ -48,7 +46,7 @@ function load() {
   const toolbar = { id: 'vc-3', libraryId: 'toolbar', exportName: 'Toolbar', description: 'Customer toolbar', props: [{ name: 'filter', type: 'string', required: false }], slots: [], emits: [{ name: 'filtered', payloadType: 'string' }], variants: [], scenarios: [],
     template: [ctx.visualElement('vn-4', 'div', { name: 'Bar', children: [child] })] };
   const page = { id: 'vp-6', ownerId: 'surface-a', name: 'Customers', root: [ctx.visualProject('vn-7', 'vc-3', { name: 'Toolbar', props: { filter: lit('open') }, events: [{ id: 'vi-8', event: 'filtered', label: 'Filter changed', actions: [], notes: '', acceptance: '' }] })], scenarios: [], notes: '' };
-  host.design = ctx.realm({ schema: 5, nodes: surfaces, library, dataSources: { sources: [] }, revision: 1, history: [], future: [], visualDesigns: { ...ctx.emptyVisualDesigns(), nextId: 9, pages: [page], components: [search, toolbar] } });
+  host.design = ctx.realm({ schema: 6, nodes: surfaces, library, dataSources: { sources: [] }, revision: 1, history: [], future: [], visualDesigns: { ...ctx.emptyVisualDesigns(), nextId: 9, pages: [page], components: [search, toolbar] } });
   ctx.validateVisualDesigns(host.design.visualDesigns, ctx.veContext(host.design));
   Object.assign(ctx.ui(), { library: 'toolbar' });
   return ctx;

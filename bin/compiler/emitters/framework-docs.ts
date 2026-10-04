@@ -3,6 +3,7 @@
  * so the product README/AGENTS.md/CI own the root without breaking the framework docs' local links. */
 import { posix } from 'node:path';
 import type { Entry } from './file-code.ts';
+import { frameworkOnlyPath, referenceDocPath, rewriteDocReferences, withBanner } from './framework-scope.ts';
 import { requireValue } from './model.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
@@ -10,17 +11,17 @@ const frameworkDocuments: ReadonlyMap<string, string> = new Map(
 const maintainerWorkflows = '.github/workflows/';
 /** Where a copied framework file lives in a generated project. Maintainer workflows never run there. */
 export function relocatedPath(path: string): string {
-  return frameworkDocuments.get(path) ?? (path.startsWith(maintainerWorkflows) ? 'docs/framework/workflows/' + path.slice(maintainerWorkflows.length) : path);
+  return frameworkDocuments.get(path) ?? referenceDocPath(path) ?? (path.startsWith(maintainerWorkflows) ? 'docs/framework/workflows/' + path.slice(maintainerWorkflows.length) : path);
 }
-/** The maintainer runner script, the policy test for maintainer CI triggers and the standalone
- * standalone design prototypes (their own apps and retained evidence) are not copied. */
-const maintainerFiles: ReadonlySet<string> = new Set(['docs/concepts/companion/companion-project.json', '.github/workflows/starter-distribution.yml',
-  'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/native-file-integration-handoff', '.github/workflows/native-source-handoff.yml',
-  'tests/tooling/project-generator-native-handoff.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs']);
-const maintainerFolders = ['docs/concepts/companion/seeds/', 'configs/starters/', 'docs/concepts/companion/starters/', '.github/scripts/',
-  'docs/concepts/sitemap-editor/', 'docs/concepts/native-file-integration-handoff/', 'docs/concepts/jev-prompt-editor/'];
+/** The maintainer runner script, the policy test for maintainer CI triggers, the project handoff qualification (it generates
+ * projects from the framework's starters) and the standalone design prototypes (their own apps and retained evidence) are not copied. */
+const maintainerFiles: ReadonlySet<string> = new Set(['.github/workflows/starter-distribution.yml',
+  'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
+  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs']);
+const maintainerPrefixes = ['configs/starters/', '.github/scripts/',
+  'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/testing/handoff-'];
 export function maintainerOnly(path: string): boolean {
-  return maintainerFiles.has(path) || maintainerFolders.some(folder => path.startsWith(folder));
+  return frameworkOnlyPath(path) || maintainerFiles.has(path) || maintainerPrefixes.some(prefix => path.startsWith(prefix));
 }
 const external = /^(?:[a-z][a-z\d+.-]*:|#|\/\/|\/)/i;
 function relink(value: string, from: string, to: string): string {
@@ -55,13 +56,18 @@ export function rebaseMarkdown(text: string, from: string, to: string): string {
     });
   }).join('\n');
 }
+/** Every Markdown file under docs/framework/ is reference material: it names the real instructions and mentions
+ * other kept framework docs by their relocated path. */
+function referenceBanner(text: string, to: string): string {
+  return to.startsWith('docs/framework/') ? withBanner(rewriteDocReferences(text)) : text;
+}
 /** Move the root framework documents and maintainer workflows; rebase links in copied Markdown. */
 export function relocateFrameworkDocuments(entries: Map<string, Entry>): void {
   // Iterate a snapshot: relocated entries are re-inserted under their new paths.
   for (const [path, entry] of Array.from(entries)) {
     if (entry.ownership !== 'framework') continue;
     const to = relocatedPath(path);
-    const content = !entry.encoding && path.endsWith('.md') ? rebaseMarkdown(entry.content, path, to) : entry.content;
+    const content = !entry.encoding && path.endsWith('.md') ? referenceBanner(rebaseMarkdown(entry.content, path, to), to) : entry.content;
     if (to === path && content === entry.content) continue;
     if (to !== path) {
       // Never let a relocated root document silently replace another file at its new home.

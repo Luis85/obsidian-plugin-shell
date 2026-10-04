@@ -4,7 +4,7 @@ import { readFile, mkdtemp, mkdir, writeFile, rm, realpath } from 'node:fs/promi
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument, parseAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { airshipOptions, airshipConfig, toolingSchema } from '../../scripts/companion/tooling-contract.mjs';
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
 import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
@@ -13,8 +13,9 @@ import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
 import { airshipEnvironment } from '../../bin/adapters/framework/airship.ts';
+import { exampleStarterIds, starterDocument } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const source = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
+const source = starterDocument('quick-capture');
 const enabled = () => withAirshipOption(structuredClone(source), { airship: true });
 const template = await loadTemplateSnapshot(root);
 const request = (command, options = {}) => ({ command, args: [], options });
@@ -50,16 +51,15 @@ test('bad settings fail closed with schema diagnostics; no artifact is emitted',
     assert.equal(compiled.diagnostics[0].code, 'COMPILER_SCHEMA_INVALID');
     assert.deepEqual(compiled.artifacts, []);
   }
-  const legacy = structuredClone(source); legacy.tooling = { airship: { enabled: true } };
-  assert.equal(validateAuthoringDocument(legacy).tooling.airship.enabled, true);
-  assert.equal(migrateAuthoringDocument(legacy).document.tooling.airship.enabled, true);
+  const opted = structuredClone(source); opted.tooling = { airship: { enabled: true } };
+  assert.equal(validateAuthoringDocument(opted).tooling.airship.enabled, true);
+  // A retired project version cannot carry the opt-in into the current contract.
+  const retired = structuredClone(opted); retired.schemaVersion = 5; retired.design.schema = 5;
+  assert.throws(() => validateAuthoringDocument(retired), /only schema 6 is supported/);
 });
 test('all starters emit source previews without optional dependencies; Airship is data-only opt-in for both targets', async () => {
-  const catalog = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/catalog.json'), 'utf8'));
-  for (const starter of catalog.starters) {
-    const file = starter.file ?? starter.path;
-    assert.ok(file, JSON.stringify(starter));
-    const document = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters', file), 'utf8'));
+  for (const id of exampleStarterIds()) {
+    const document = starterDocument(id);
     for (const outputKind of ['obsidian-plugin', 'clickdummy']) {
       // Explicitly opted out, so a starter whose defaults enable Airship (agent-ready) is compared like the rest.
       const plain = await compileProject({ source: JSON.stringify(withAirshipOption(document, { 'no-airship': true })), template, outputKind });

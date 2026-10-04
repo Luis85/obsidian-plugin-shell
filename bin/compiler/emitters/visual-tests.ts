@@ -60,6 +60,10 @@ export const visualFixtureProps = (spec: VisualSpec | ComponentDefinition): Reco
 const vtExpectValue = (value: unknown) => (value === undefined ? 'undefined' : literal(value));
 
 const vtLocalKinds = ['set-state', 'toggle', 'set-value', 'focus'];
+// Test titles are shared with the traceability ids below, so a renamed case cannot silently orphan its id.
+const vtGroupTitle = (ids: string[], event: string): string => '[' + ids.join(', ') + '] dispatches the designed ' + event + ' interaction';
+const vtStateTitle = (state: VisualState): string => 'renders declared ' + state + ' visibility including hidden ancestors';
+const vtDescribe = (spec: VisualSpec): string => spec.id + ' ' + (spec.kind === 'page' ? spec.name : spec.exportName);
 /** One designed (node, event) group in the state where its node is visible. */
 interface VtCase { m: Model; spec: VisualSpec; rendered: Rendered[]; node: UiNode; group: Interaction[]; state: VisualState; ports: string[] }
 /** Fixture input for every visible runtime control, unless the group only runs local effects. */
@@ -127,7 +131,7 @@ function vtEffectLines(c: VtCase): string[] {
 function vtGroup(c: VtCase, event: string): string {
   const props = visualFixtureProps(c.spec), ids = c.group.map(i => i.id), { values, fills } = vtFills(c);
   const lines = [...vtDispatchLines(c.group), ...vtActionLines(c, values, props), ...vtEffectLines(c)];
-  return `it(${literal('[' + ids.join(', ') + '] dispatches the designed ' + event + ' interaction')}, async () => {
+  return `it(${literal(vtGroupTitle(ids, event))}, async () => {
   const f = fixture(); const wrapper = mount(Subject, { attachTo: document.body, props: { ...${literal(props)}, designState: ${literal(c.state)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try {
     ${fills.map(line => line + '\n    ').join('')}${fills.length ? 'f.reset();\n    ' : ''}await wrapper.get(${literal(`[data-design-node="${c.node.id}"]`)}).trigger(${literal(event)}); await flushPromises();
@@ -144,7 +148,7 @@ function vtDisabled(spec: VisualSpec, rendered: Rendered[], state: VisualState):
 }
 function vtStateCase(spec: VisualSpec, rendered: Rendered[], props: Record<string, unknown>, state: VisualState): string {
   const disabled = vtDisabled(spec, rendered, state);
-  return `it(${literal('renders declared ' + state + ' visibility including hidden ancestors')}, () => {
+  return `it(${literal(vtStateTitle(state))}, () => {
   const f = fixture(); const wrapper = mount(Subject, { props: { ...${literal(props)}, designState: ${literal(state)} }, global: { provide: { [visualKey as symbol]: f.context } } });
   try { expectVisible(wrapper.element, ${literal(vtVisibility(spec, rendered, vtSession(state)))});${disabled.length ? `\n    for (const id of ${literal(disabled)}) expect(disabledWithin(marked(wrapper.element, id)), id).toBe(true);` : ''}
   } finally { wrapper.unmount(); }
@@ -163,14 +167,28 @@ function vtDispatchable(node: UiNode, marked: boolean): Interaction[] {
   if (node.kind === 'element') return node.events.filter(i => vtDom.has(i.event));
   return node.kind === 'component' && native ? node.events.filter(i => vtDom.has(i.event) && native.includes(i.event)) : [];
 }
-/** One case per dispatchable (node, event), run in the first enabled state that shows the node. */
-function vtInteractionCases(m: Model, spec: VisualSpec, rendered: Rendered[], ports: string[]): string[] {
+interface VtDispatchGroup { node: UiNode; event: string; group: Interaction[]; state: VisualState }
+/** Every dispatchable (node, event), in generation order, with the first enabled state that shows the node. */
+function vtDispatchGroups(spec: VisualSpec, rendered: Rendered[]): VtDispatchGroup[] {
   return rendered.flatMap(({ node, marked }) => {
     const events = vtDispatchable(node, marked);
     const state = events.length ? (['default', 'empty', 'error'] as const).find(s => visualVisible(spec, vtSession(s), node.id)) : undefined;
     if (!state) return [];
-    return [...new Set(events.map(i => i.event))].map(event => vtGroup({ m, spec, rendered, node, group: events.filter(i => i.event === event), state, ports }, event));
+    return [...new Set(events.map(i => i.event))].map(event => ({ node, event, group: events.filter(i => i.event === event), state }));
   });
+}
+/** One case per dispatchable (node, event). */
+function vtInteractionCases(m: Model, spec: VisualSpec, rendered: Rendered[], ports: string[]): string[] {
+  return vtDispatchGroups(spec, rendered).map(({ node, event, group, state }) => vtGroup({ m, spec, rendered, node, group, state, ports }, event));
+}
+/** Deterministic ids ("describe > title") of the generated state-visibility tests of a definition. */
+export const visualStateTestIds = (spec: VisualSpec): string[] => vtStates.map(state => vtDescribe(spec) + ' > ' + vtStateTitle(state));
+/** Deterministic ids of the generated dispatch tests of a definition, keyed by the interaction ids each one covers. */
+export function visualDispatchTestIds(spec: VisualSpec): Map<string, string> {
+  const ids = new Map<string, string>();
+  for (const { event, group } of vtDispatchGroups(spec, visualRendered(spec.kind === 'page' ? spec.root : spec.template)))
+    for (const interaction of group) ids.set(interaction.id, vtDescribe(spec) + ' > ' + vtGroupTitle(group.map(i => i.id), event));
+  return ids;
 }
 /** One describe block per definition: per-state visibility and disabled controls, scenarios and natively dispatched interactions. */
 function vtDefinition(m: Model, spec: VisualSpec, subject: string): string[] {
@@ -178,8 +196,7 @@ function vtDefinition(m: Model, spec: VisualSpec, subject: string): string[] {
   const states = vtStates.map(state => vtStateCase(spec, rendered, props, state));
   const scenarios = roots.length ? spec.scenarios.map(scenario => vtScenarioCase(spec, rendered, props, scenario)) : [];
   const groups = vtInteractionCases(m, spec, rendered, vtPorts(m).map(p => p.key));
-  const name = spec.kind === 'page' ? spec.name : spec.exportName;
-  return [...states, ...scenarios, ...groups].map(test => `describe(${literal(spec.id + ' ' + name)}, () => {\nconst Subject = ${subject};\n${test}\n});`);
+  return [...states, ...scenarios, ...groups].map(test => `describe(${literal(vtDescribe(spec))}, () => {\nconst Subject = ${subject};\n${test}\n});`);
 }
 
 /** Bounded generated UI suites retain every case; source size does not grow with the catalog. */

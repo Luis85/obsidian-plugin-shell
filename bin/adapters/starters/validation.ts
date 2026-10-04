@@ -129,8 +129,9 @@ function readGenerator(value: unknown): StarterDefinition['generator'] {
   }
   fields(raw, raw.kind === 'companion' ? ['kind', 'document'] : ['kind']);
   if (raw.kind !== 'companion') { requireThat(raw.kind === 'files', 'STARTER_INVALID', 'Unknown generator primitive.'); return { kind: 'files' }; }
-  const document = record(raw.document); validateAuthoringDocument(document);
-  requireThat([5, 6].includes(Number(document.schemaVersion)), 'STARTER_VERSION', 'Companion starters require project v5 or v6.');
+  const document = record(raw.document);
+  requireThat(document.schemaVersion === 6, 'STARTER_VERSION', 'Companion starters require project schema 6; earlier project formats are no longer supported.');
+  validateAuthoringDocument(document);
   return { kind: 'companion', document };
 }
 export function validateDefinition(value: unknown): StarterDefinition {

@@ -32,21 +32,21 @@ or split after that run.
 | Suite | Purpose | Files | Command | Runner | Prerequisites | In `verify` | Measured (2026-09-26) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `maker:pty` | Real Linux/macOS pseudo-terminal authoring, agent parity, safe review and OS terminal restoration; standard-library Python only. | 1 | `npm run test:maker:pty` | Python command | `python3` | opt-in | not measured |
-| `maker` | Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages. | 102 | `npm run test:maker` | `node --test` | none | tooling | not measured |
+| `maker` | Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages. | 116 | `npm run test:maker` | `node --test` | none | tooling | not measured |
 | `workbench-plugins` | Trusted Workbench plugin SDK: plugin-local contracts, event bus, CLI/TUI contributions, framework adapters and custom starter contributions. | 1 | `npm run test:plugins` | `node --test` | none | own step | not measured |
 | `native-handoff` | Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics. | 2 | `node scripts/testing/suites.mjs native-handoff` | Python command | `handoff-python` | opt-in | not measured |
 | `airship` | Default-off project tooling, source preview mapping, safe explicit processes and regeneration preservation. | 2 | `npm run test:airship` | `node --test` | none | tooling | not measured |
-| `compiler` | Dedicated compiler core, diagnostics, byte-compatibility, architecture, reporting and distribution contracts. | 19 | `npm run test:compiler` | `node --test` | none | tooling | not measured |
+| `compiler` | Dedicated compiler core, diagnostics, byte-compatibility, architecture, reporting and distribution contracts. | 22 | `npm run test:compiler` | `node --test` | none | tooling | not measured |
 | `compiler:properties` | Seeded fast-check compiler invariants; requires installed development dependencies. | 1 | `npm run test:compiler:properties` | `node --test` | none | tooling | not measured |
 | `prototypes` | Design-first prototype helpers, real shell delegation, shared generation/distribution and single-file build boundaries. | 6 | `npm run test:prototypes` | `node --test` | none | tooling | not measured |
 | `prototypes:python` | Portable prototype package safety and static skill contract tests. | 0 | `npm run test:prototypes:python` | Python command | `python3` | opt-in | not measured |
 | `companion:mvp` | Compiled Vue/Nuxt UI/Vue Flow sitemap, prototype versions/variants and complete v6 authoring round trips. | 2 | `node scripts/testing/suites.mjs companion:mvp` | Node + Python command | `python-playwright`, `concept-chromium` | opt-in | not measured |
 | `runtime` | Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit. | 75 | `npm run test:runtime` | Vitest `configs/testing/vitest.config.mjs` | none | own step | 48 s |
-| `cli` | Central bin/app CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery. | 38 | `npm run test:cli` | `node --test` | none | tooling | 91 s |
+| `cli` | Central bin/app CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery. | 43 | `npm run test:cli` | `node --test` | none | tooling | 91 s |
 | `cli:journey` | Packs the framework ZIP, extracts it and builds independent generated consumers with a qualified npm (slow, writes reports/framework-cli). | 1 | `npm run test:cli:journey` | Node command | `qualified-npm` | opt-in | 190 s |
-| `generator` | Project compiler: companion JSON to generated project files, runtime guards, starters and the shared safe file-plan engine. | 24 | `npm run test:generator` | `node --test` | none | tooling | 187 s |
-| `visual` | Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, migration, session and generated model tests. | 7 | `npm run test:visual` | `node --test` | none | tooling | not measured |
-| `companion` | Companion concept contracts: project JSON, storymaps, legacy detail and composition contracts, visual editor harnesses, concept isolation zone and concept metrics. | 36 | `npm run test:companion` | `node --test` | none | tooling | 13 s |
+| `generator` | Project compiler: companion JSON to generated project files, runtime guards, starters and the shared safe file-plan engine. | 28 | `npm run test:generator` | `node --test` | none | tooling | 187 s |
+| `visual` | Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, session and generated model tests. | 6 | `npm run test:visual` | `node --test` | none | tooling | not measured |
+| `companion` | Companion concept contracts: schema 6 project JSON, storymaps and composition contracts, visual editor harnesses, concept isolation zone and concept metrics. | 37 | `npm run test:companion` | `node --test` | none | tooling | 13 s |
 | `companion:schema` | Independent Draft 2020-12 structural validation and semantic-only negative controls over the shared current project corpus. | 1 | `node scripts/testing/suites.mjs companion:schema` | Python command | `python3`, `python-jsonschema` | opt-in | not measured |
 | `companion:assembly` | Offline companion assembly check, Python assembly/tamper test and syntax check of every authored concept module. | 1 | `npm run test:companion` | Node + Python command | `python3` | opt-in | 5 s |
 | `companion:browser` | Aggregated companion concept browser suites on one exact assembled artifact (Python Playwright suites plus the Node Playwright suites listed under companion:visual-browser, Chromium). | 23 | `npm run test:companion:browser` | Python command | `python-playwright`, `concept-chromium`, `chromium` | opt-in | 411 s |
@@ -61,7 +61,7 @@ or split after that run.
 | `native:host` | Real Obsidian smoke in an isolated scratch vault (downloads the host; never a personal vault). | 0 | `npm run test:native` | Node command | `native-runner` | opt-in | not run here |
 | `setup` | Guided setup identity, npm install policy, staged build/local install, CSS identity scoping and harness preview. | 6 | `npm run test:setup` | `node --test` | none | tooling | 6 s |
 | `release` | Release preparation, promotion plans, remote execution, audit classification, maintenance discovery and qualification triggers. | 8 | `npm run test:release` | `node --test` | none | tooling | 3 s |
-| `quality` | Repository gates: analyzer, lint, coverage inventory, maintainability, tighten-only thresholds, presentation, repository and test-quality policies, evidence producers and this suite manifest. | 18 | `npm run test:quality` | `node --test` | `build` | tooling | 89 s |
+| `quality` | Repository gates: analyzer, lint, coverage inventory, maintainability, tighten-only thresholds, presentation, repository and test-quality policies, evidence producers and this suite manifest. | 30 | `npm run test:quality` | `node --test` | `build` | tooling | 89 s |
 | `baseline` | Dependency-free verification baseline: fault ledger, policy, runner, report, source, token and HTTP style-specimen checks, repeated three times. | 8 | `npm run test:baseline` | Node command | none | own step | 20 s |
 | `browser-specimen` | Host-style specimen assertions in a real browser (served mode). | 1 | `node scripts/testing/suites.mjs browser-specimen` | Node command | `chromium` | opt-in | 11 s |
 | `e2e` | Served harness in Chromium via Playwright: showcase, modals, persistence lifecycle, accessibility and design system. | 11 | `npm run test:e2e` | Playwright `configs/testing/playwright.config.ts` | `chromium`, `harness-build` | opt-in | 78 s |
@@ -122,7 +122,10 @@ its browser runner) are `optional`: their absence is valid, but a runner present
 without its tests (or the reverse) still fails. Prerequisites are probed before a
 suite starts; a missing browser, Python package, environment variable or build
 output reports the suite as `not-run` with a provisioning hint and a nonzero exit,
-never as passed. Manual suites also exit nonzero.
+never as passed. A Chromium revision that differs from the one Playwright pins is
+reported as `not-run` with the reason `browser-revision-mismatch` and the exact
+`SHELL_CHROMIUM=<path>` opt-in (see the cloud and agent sessions section of the
+developer workflow). Manual suites also exit nonzero.
 
 ## How `verify` uses the manifest
 
@@ -173,7 +176,7 @@ npm 11.19.1) while other workloads ran, so times are indicative only:
   `companion:assembly` 5 s (15 Python tests plus the concept syntax check).
 - Opt-in, provisioned in scratch directories: `browser-specimen` 11 s and `e2e`
   78 s (50 tests) with `PLAYWRIGHT_BROWSERS_PATH`; `companion:browser` 411 s (26
-  suites) with a scratch Python venv and `CHROMIUM_EXECUTABLE`; `cli:journey`
+  suites) with a scratch Python venv and `SHELL_CHROMIUM`; `cli:journey`
   190 s (packed ZIP, two extracted kits, independent generated consumers) with `QUALIFIED_NPM` and `RUNNER_TEMP` in a scratch directory.
 - `native:host` was not run: its isolated native runner was not provisioned, and
   the runner reported it as `not-run` with exit code 1. `project` and
@@ -184,14 +187,3 @@ npm 11.19.1) while other workloads ran, so times are indicative only:
 ## Optional Airship contracts
 
 `npm run test:airship` uses the `airship` suite for data validation, generator opt-in, source-location metadata, approved launch behavior and ownership preservation. The `Airship generated-project compatibility` workflow adds independent generated-project install/build and live upstream proxy/browser qualification. It does not submit AI-provider prompts. See [Airship integration](../tooling/AIRSHIP.md).
-
-## Native source handoff
-
-`node scripts/testing/suites.mjs native-handoff` explicitly runs the Python 3.12+
-recovery contracts under `docs/concepts/native-file-integration-handoff/tests`.
-This optional, maintainer-only suite is separate from active native runtime tests
-and default consumer setup. It reports not-run when its excluded source is absent.
-The `native-source-handoff` workflow adds historical-baseline reconstruction and
-readback on Linux, Windows and macOS; the generator suite owns the companion Node
-distribution/template-loader regression. See the handoff's `README.md` and
-`REVIEW.md` for commands and exact-source evidence boundaries.

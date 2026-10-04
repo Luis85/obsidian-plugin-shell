@@ -81,7 +81,8 @@ async function collect(folder, inventory, source) {
 }
 async function browserCheck(path, report) {
   const { chromium, expect } = await import('@playwright/test');
-  const browser = await chromium.launch({ headless: true });
+  const { chromiumLaunchOptions } = await import('../testing/browser-executable.mjs');
+  const browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() });
   const errors = [], network = [];
   report.browser = { status: 'running', source: 'exact Vite-built prototype.html', errors, network };
   try {

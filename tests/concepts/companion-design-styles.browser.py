@@ -23,15 +23,25 @@ def act(action, value=None, scope='#content'):
     suffix = '' if value is None else '[data-value=' + json.dumps(value) + ']'
     page.locator(f'{scope} [data-action="{action}"]{suffix}').first.click()
 
+GOLDEN = ROOT / 'configs/starters/companion-plugin.json'
+
+
+def open_golden():
+    """Review the self-project, the external golden starter's schema 6 document, through the real import dialog."""
+    js('openCompanionImport()')
+    page.locator('#project-import-text').fill(json.dumps(json.loads(GOLDEN.read_text())['generator']['document']))
+    page.locator('#modal [data-action="project-import-review"]').click()
+
+
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
     page = browser.new_page(viewport={'width':1480,'height':1000},accept_downloads=True)
     page.set_default_timeout(8000)
     page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('request',lambda r:requests.append(r.url))
     try:
         page.set_content(STORAGE+HTML.read_text())
-        act('project-example');page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
+        open_golden();page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
         act('nav','designsystem','#sidebar');act('sg-section','frontend')
         check('Styling is reachable inside the existing Design System',page.get_by_role('heading',name='Nuxt UI styling',exact=True).is_visible())
         check('Saved mappings and inherited roles are visible','Framework default' in page.locator('.sg-content').inner_text())

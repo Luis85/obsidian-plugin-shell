@@ -1,0 +1,92 @@
+{
+  "description": "Angular 21 standalone application: signals, Angular Material, Jest, ESLint flat config, Prettier, GitHub Actions. One major behind the Workbench Angular target. Files are an object (serialized as JSON) or an array of text lines.",
+  "files": {
+    "package.json": {
+      "name": "orders-portal",
+      "version": "3.4.0",
+      "private": true,
+      "scripts": { "ng": "ng", "start": "ng serve", "build": "ng build", "test": "jest", "lint": "eslint .", "e2e": "echo no-e2e" },
+      "dependencies": {
+        "@angular/animations": "^21.0.1", "@angular/cdk": "^21.0.0", "@angular/common": "^21.0.1", "@angular/compiler": "^21.0.1", "@angular/core": "^21.0.1",
+        "@angular/forms": "^21.0.1", "@angular/material": "^21.0.0", "@angular/platform-browser": "^21.0.1", "@angular/router": "^21.0.1", "rxjs": "~7.8.0", "tslib": "^2.6.0", "zone.js": "~0.15.0"
+      },
+      "devDependencies": {
+        "@angular/build": "^21.0.1", "@angular/cli": "^21.0.1", "@angular/compiler-cli": "^21.0.1", "@types/jest": "^29.5.12", "angular-eslint": "^21.0.0", "eslint": "^9.14.0",
+        "jest": "^29.7.0", "jest-preset-angular": "^14.4.0", "prettier": "^3.3.3", "sass": "^1.80.0", "typescript": "~5.9.2", "typescript-eslint": "^8.15.0"
+      },
+      "engines": { "node": "^20.19.0 || ^22.12.0" }
+    },
+    "package-lock.json": { "name": "orders-portal", "version": "3.4.0", "lockfileVersion": 3, "requires": true, "packages": {} },
+    ".nvmrc": ["22.12.0"],
+    ".editorconfig": ["root = true", "[*]", "indent_style = space", "indent_size = 2"],
+    ".prettierrc": { "singleQuote": true, "printWidth": 120 },
+    "eslint.config.js": ["import angular from 'angular-eslint';", "export default [];"],
+    "jest.config.ts": ["export default { preset: 'jest-preset-angular', setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'] };"],
+    "angular.json": {
+      "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+      "version": 1,
+      "newProjectRoot": "projects",
+      "projects": {
+        "orders-portal": {
+          "projectType": "application",
+          "root": "",
+          "sourceRoot": "src",
+          "prefix": "app",
+          "architect": {
+            "build": { "builder": "@angular/build:application", "options": { "outputPath": "dist/orders-portal", "browser": "src/main.ts", "tsConfig": "tsconfig.app.json", "inlineStyleLanguage": "scss", "styles": ["src/styles.scss"] } },
+            "serve": { "builder": "@angular/build:dev-server", "options": {} },
+            "test": { "builder": "@angular-builders/jest:run", "options": {} }
+          }
+        }
+      }
+    },
+    "tsconfig.json": [
+      "/* To learn more about Typescript configuration file: https://angular.dev/reference/configs/workspace-config. */",
+      "{",
+      "  \"compileOnSave\": false,",
+      "  \"compilerOptions\": { \"strict\": true, \"target\": \"ES2022\", \"module\": \"preserve\", \"experimentalDecorators\": true },",
+      "  \"angularCompilerOptions\": { \"strictTemplates\": true, },",
+      "}"
+    ],
+    "tsconfig.app.json": { "extends": "./tsconfig.json", "include": ["src/**/*.ts"], "exclude": ["src/**/*.spec.ts"] },
+    "tsconfig.spec.json": { "extends": "./tsconfig.json", "include": ["src/**/*.spec.ts"] },
+    "src/index.html": ["<!doctype html>", "<html lang=\"en\"><body><app-root></app-root></body></html>"],
+    "src/styles.scss": ["@use './theme/theme';", "html, body { margin: 0; }"],
+    "src/theme/_theme.scss": ["@use '@angular/material' as mat;", "$primary: #1a4fa0;", "html { @include mat.theme((color: mat.$azure-palette)); }"],
+    "src/main.ts": ["import { bootstrapApplication } from '@angular/platform-browser';", "import { appConfig } from './app/app.config';", "import { AppComponent } from './app/app.component';", "bootstrapApplication(AppComponent, appConfig).catch(error => console.error(error));"],
+    "src/app/app.config.ts": ["import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';", "import { provideRouter } from '@angular/router';", "import { routes } from './app.routes';", "export const appConfig: ApplicationConfig = { providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes)] };"],
+    "src/app/app.routes.ts": [
+      "import { Routes } from '@angular/router';",
+      "export const routes: Routes = [",
+      "  { path: '', pathMatch: 'full', redirectTo: 'orders' },",
+      "  { path: 'orders', loadComponent: () => import('./orders/orders.component').then(m => m.OrdersComponent) },",
+      "  { path: 'orders/:id', loadComponent: () => import('./orders/order-detail.component').then(m => m.OrderDetailComponent) },",
+      "  { path: 'customers', loadChildren: () => import('./customers/customers.routes').then(m => m.customerRoutes) },",
+      "  { path: 'settings/profile', loadComponent: () => import('./settings/profile.component').then(m => m.ProfileComponent) },",
+      "  { path: '**', redirectTo: 'orders' },",
+      "];"
+    ],
+    "src/app/app.component.ts": ["import { Component } from '@angular/core';", "import { RouterOutlet } from '@angular/router';", "@Component({ selector: 'app-root', imports: [RouterOutlet], template: '<router-outlet />' })", "export class AppComponent {}"],
+    "src/app/orders/orders.component.ts": [
+      "import { Component, computed, inject, input, signal } from '@angular/core';",
+      "import { MatTableModule } from '@angular/material/table';",
+      "import { OrderService } from './order.service';",
+      "@Component({ selector: 'app-orders', standalone: true, imports: [MatTableModule], template: '<table mat-table></table>' })",
+      "export class OrdersComponent {",
+      "  private readonly orders = inject(OrderService);",
+      "  readonly filter = signal('');",
+      "  readonly pageSize = input(25);",
+      "  readonly visible = computed(() => this.orders.items().filter(item => item.includes(this.filter())));",
+      "}"
+    ],
+    "src/app/orders/order-detail.component.ts": ["import { Component, input } from '@angular/core';", "@Component({ selector: 'app-order-detail', standalone: true, template: '<h2>{{ id() }}</h2>' })", "export class OrderDetailComponent { readonly id = input.required<string>(); }"],
+    "src/app/orders/order.service.ts": ["import { Injectable, signal } from '@angular/core';", "@Injectable({ providedIn: 'root' })", "export class OrderService { readonly items = signal<string[]>([]); }"],
+    "src/app/orders/orders.component.spec.ts": ["import { OrdersComponent } from './orders.component';", "describe('OrdersComponent', () => { it('exists', () => expect(OrdersComponent).toBeDefined()); });"],
+    "src/app/customers/customers.routes.ts": ["import { Routes } from '@angular/router';", "export const customerRoutes: Routes = [", "  { path: '', loadComponent: () => import('./customer-list.component').then(m => m.CustomerListComponent) },", "  { path: 'new', loadComponent: () => import('./customer-form.component').then(m => m.CustomerFormComponent) },", "];"],
+    "src/app/customers/customer-list.component.ts": ["import { Component } from '@angular/core';", "@Component({ selector: 'app-customer-list', standalone: true, template: '<p>customers</p>' })", "export class CustomerListComponent {}"],
+    "src/app/customers/customer-form.component.ts": ["import { Component } from '@angular/core';", "@Component({ selector: 'app-customer-form', standalone: true, template: '<form></form>' })", "export class CustomerFormComponent {}"],
+    "src/app/settings/profile.component.ts": ["import { Component } from '@angular/core';", "@Component({ selector: 'app-profile', standalone: true, template: '<p>profile</p>' })", "export class ProfileComponent {}"],
+    "src/app/shared/status.pipe.ts": ["import { Pipe, PipeTransform } from '@angular/core';", "@Pipe({ name: 'status', standalone: true })", "export class StatusPipe implements PipeTransform { transform(value: string): string { return value.toUpperCase(); } }"],
+    ".github/workflows/ci.yml": ["name: ci", "on: [push, pull_request]", "jobs:", "  verify:", "    runs-on: ubuntu-latest", "    steps:", "      - uses: actions/checkout@v4", "      - uses: actions/setup-node@v4", "        with: { node-version-file: .nvmrc }", "      - run: npm ci", "      - run: npm run lint && npm test && npm run build"]
+  }
+}

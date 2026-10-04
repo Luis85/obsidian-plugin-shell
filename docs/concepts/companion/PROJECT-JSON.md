@@ -1,7 +1,7 @@
 # Full-project JSON, self-project and folder settings
 
-> Current page and component editors: [Visual Page and Component editors](VISUAL-EDITORS.md). [Verification scope](VISUAL-EDITORS-VERIFICATION.md). This guide describes the current v5 transfer; older verification receipts retain their original scope.
-**Current format: v5 · Offline authoring plus separate read-only inspection and reviewed generation.**
+> Current page and component editors: [Visual Page and Component editors](VISUAL-EDITORS.md). [Verification scope](VISUAL-EDITORS-VERIFICATION.md). Older verification receipts retain their original scope.
+**Current format: project schema 6 only · Offline authoring plus separate read-only inspection and reviewed generation.** The checked-in `index.html` below is the v5 build base of the current authoring build; its own v5 exports are not a supported import format for the shell.
 
 The HTML prototype contains a loadable **Plugin Companion** project. It uses the same editors, persistence, import review and JSON contract as a user-authored project; it is not a separate hardcoded presentation or a second active project. The existing simpler example and blank-project entry remain available.
 
@@ -24,7 +24,7 @@ Open `index.html` and choose **Load companion project**. Review the proposed pro
 
 This is an authored concept model, **not an exhaustive reverse-engineering of every implementation function**. Requirements are design-mapped, not marked implemented. Source ports describe proposed native behavior; no live vault access occurs. The model does not fabricate passed builds, test execution, publication, trust or installation.
 
-The standalone [companion-project.json](companion-project.json) is generated from this same seed. Browser tests assert full-document equality so the built-in project and example file cannot drift unnoticed.
+The self-project is the golden starter `configs/starters/companion-plugin.json` (project schema 6). The concept embeds no copy of it: load it through **Project starters**, where the shell and the page validate it with the same contract.
 
 ## Export and import
 
@@ -34,19 +34,19 @@ The standalone [companion-project.json](companion-project.json) is generated fro
 
 Import/export is a semantic round trip: object formatting may be normalized on browser export, but saved authored fields retain their values. In contrast, the shell's v1 stdout is an exact byte return of its input file, including whitespace. Nothing executes inside the JSON.
 
-## Format compatibility
+## Format
 
-New exports use `schemaVersion: 5` and `design.schema: 5`. Storymaps retain subsystem schema 1.
+Current exports use `schemaVersion: 6` and `design.schema: 6` (`npm run companion:build`). Storymaps retain subsystem schema 1.
 
-### v5: visual designs
+### Visual designs
 
-`design.visualDesigns` (subsystem schema 3) replaces `design.detailDesigns`; a v5 document must not contain `detailDesigns`. It holds `nextId` (deterministic `vn-`/`vp-`/`vc-`/`vl-`/`vr-`/`vi-` IDs), the pinned catalog `{ "id": "nuxt-ui", "version": 1 }` (generated projects use `@nuxt/ui` 4.11.2), `pages` (owned by sitemap page/modal/settings surfaces), `components` (owned by library entries; typed props/slots/emits, variants, optional `dependencies` and `implementation`), saved `layouts` and published `revisions`. Pages and templates are declarative UI trees of `element`, `text`, `slot`, `component` and (component templates only) `external` nodes with typed value expressions, interactions and scenarios. The full field list and rules are in [VISUAL-EDITORS.md](VISUAL-EDITORS.md#data-contract-summary) and the [design spec](../../superpowers/specs/2026-09-26-visual-editors-design.md) §2, §11 and §13.
+`design.visualDesigns` (subsystem schema 3) holds every page and component design; a document must not contain the retired `detailDesigns`. It holds `nextId` (deterministic `vn-`/`vp-`/`vc-`/`vl-`/`vr-`/`vi-` IDs), the pinned catalog `{ "id": "nuxt-ui", "version": 1 }` (generated projects use `@nuxt/ui` 4.11.2), `pages` (owned by sitemap page/modal/settings surfaces), `components` (owned by library entries; typed props/slots/emits, variants, optional `dependencies` and `implementation`), saved `layouts` and published `revisions`. Pages and templates are declarative UI trees of `element`, `text`, `slot`, `component` and (component templates only) `external` nodes with typed value expressions, interactions and scenarios. The full field list and rules are in [VISUAL-EDITORS.md](VISUAL-EDITORS.md#data-contract-summary) and the [design spec](../../superpowers/specs/2026-09-26-visual-editors-design.md) §2, §11 and §13.
 
-Validation gates import, export, save and generation: references (owners, library, components, revisions, sources, surfaces, action/scenario targets), contracts, catalog props and types, acyclic composition and limits (120 elements per definition, 200 definitions, depth 12, composition depth 16). Layout/token references, slot content, scenarios, notes, dependencies and revision pins survive export/import losslessly (v5 → v5). Selection, viewport, open panes, inspector tab, drafts and live preview values (`veUi`) do not.
+Validation gates import, export, save and generation: references (owners, library, components, revisions, sources, surfaces, action/scenario targets), contracts, catalog props and types, acyclic composition and limits (120 elements per definition, 200 definitions, depth 12, composition depth 16). Layout/token references, slot content, scenarios, notes, dependencies and revision pins survive export/import losslessly. Selection, viewport, open panes, inspector tab, drafts and live preview values (`veUi`) do not.
 
-### Older formats
+### Earlier formats
 
-V1–v4 documents remain importable without inventing previously unauthored details. V1 cannot contain Storymaps; v1/v2 cannot contain details; v3 cannot conceal the richer composition subsystem. V3/v4 detail designs are migrated to v5 visual designs on import and when an export is read; import review shows the migration report before explicit replacement. The only designed loss is canvas geometry (`position`, `size`, outline `sourceBrickId`), which the report counts; see [migration](VISUAL-EDITORS.md#migration-from-v1v4-and-what-is-dropped). Unsupported versions and invalid internal references fail before replacement. See the [canonical contract](../../development/COMPANION-PROJECT-JSON.md).
+Schema 1–5 documents are rejected with a `COMPANION_VERSION` diagnostic before any replacement or write; they are never migrated. The retired formats' history lives in Git. Unsupported versions and invalid internal references fail before replacement. See the [canonical contract](../../development/COMPANION-PROJECT-JSON.md).
 
 ## Settings and shell handoff
 

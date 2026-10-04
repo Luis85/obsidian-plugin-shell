@@ -19,7 +19,8 @@ npm run companion:build
 ```
 
 Open **`reports/companion-mvp/companion-journey-lens.html`** in a desktop browser.
-Use **Load companion project**, confirm, then **Design → Sitemap & views**.
+Choose **Project starters**, select `configs/starters/companion-plugin.json` (the golden
+self-project), review and confirm, then **Design → Sitemap & views**.
 The matching full-project export is **`reports/companion-mvp/companion-project-v6.json`**.
 Both are included in the `companion-mvp-authoring` artifact of the existing
 **Companion concept source verification** workflow for the chosen commit.
@@ -56,16 +57,23 @@ output compiled from generated Vue source, not a wrapper around this authoring
 HTML. Browser authoring, generated-source verification and native acceptance are
 separate milestones.
 
-## Compatibility fixtures and historical records
+## Project format and the build base
 
-The checked-in `index.html` and `companion-project.json` in **this directory** are
-retained v5 compatibility fixtures for exact assembly and migration checks.
-**They are not the current Journey Lens review entry.** Do not replace them with
-hand-edited generated output; build the current authoring artifact as above.
+The current project format is **Companion project schema 6 only**. Schema 1–5
+documents are rejected with a `COMPANION_VERSION` diagnostic; they are never
+migrated. The history of the retired formats lives in Git.
 
-The complete previous README is retained without rewriting its dated evidence in
-[Legacy concept guide](LEGACY-CONCEPT-GUIDE.md). Earlier increment reviews and
-verification reports keep their original artifact/version boundaries. The
+The checked-in `index.html` in **this directory** is the schema 6 **build base** that
+`npm run companion:build` mounts the Journey Lens and prototype editors into. It is
+assembled by `scripts/concepts/build-companion.py` from `src/`, the pinned `vendor/`
+and `test-kit/` inputs, and the one project contract (`scripts/concepts/concept-contract.ts`,
+bundled as `CompanionContract`), so the page and the shell validate with the same code.
+It embeds no project or starter data: the golden self-project and every example are the
+external definitions in `configs/starters`. Do not hand-edit it; rebuild it with
+`python3 scripts/concepts/build-companion.py` and verify with `--check`.
+
+Earlier increment reviews and verification reports keep their original
+artifact/version boundaries as dated records. The
 [2026-09-27 PR #5 review](../../product/PR5-PRODUCT-REVIEW.md) and
 [improvement plan](../../product/PR5-IMPROVEMENT-PLAN.md) explain the wider roadmap;
 the [2026-09-29 vision review](../../product/PR5-VISION-REVIEW.md) aligns product

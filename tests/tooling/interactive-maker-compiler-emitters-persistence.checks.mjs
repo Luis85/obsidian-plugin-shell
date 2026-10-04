@@ -6,7 +6,8 @@ import { relationshipDefinitions, relationshipScope } from '../../bin/compiler/e
 import { httpCode } from '../../bin/compiler/emitters/http-code.ts';
 import { fixtureNoteTests } from '../../bin/compiler/emitters/fixture-notes-code.ts';
 import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
-import { dataDocument, starterDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 // Native persistence, relationship integrity, HTTPS providers, fixture-note and native-integration emission.
 const withFeatures = text => ({ ...template, text: path => path === 'src/bootstrap/features.ts' ? text : template.text(path) });

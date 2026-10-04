@@ -1,4 +1,4 @@
-import { readCompanionProject, companionReader } from '../../bin/adapters/framework/read-project.ts';
+import { readCompanionProject } from '../../bin/adapters/framework/read-project.ts';
 
 const help = `Companion project handoff — v1 is READ ONLY
 Usage: node scripts/companion-tools/generate.mjs --input <project.json> --target <vault-relative-path> [--vault <vault-root>]
@@ -29,9 +29,11 @@ function options(args) {
 try {
   const value = options(process.argv.slice(2));
   if (value === null) process.stdout.write(help);
-  else process.stdout.write((await readCompanionProject(value, companionReader)).content);
+  else process.stdout.write((await readCompanionProject(value)).content);
 } catch (error) {
-  const message = error instanceof Error && (error.message.startsWith('COMPANION_') || error.message.startsWith('DETAIL_INVALID:')) ? error.message :
+  // Shared JSON-safety errors carry their code as a field; contract errors already prefix it.
+  const code = error instanceof Error && typeof error.code === 'string' && /^(?:COMPANION|SITEMAP)_[A-Z_]+$/.test(error.code) && !error.message.startsWith(error.code) ? error.code : null;
+  const message = code ? code + ': ' + error.message : error instanceof Error && error.message.startsWith('COMPANION_') ? error.message :
     'COMPANION_READ: Could not safely read the input or validate the vault target. No files were written.';
   process.stderr.write(message + '\n');
   process.exitCode = 1;

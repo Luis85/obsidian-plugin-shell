@@ -94,6 +94,22 @@ jobs:
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
+      - name: Capture the UI review gallery (evidence for human review, not acceptance)
+        if: always() && runner.os == 'Linux'
+        run: node "$QUALIFIED_NPM" run ui:gallery
+      - name: Retain the UI review gallery
+        id: ui-gallery
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-review-gallery
+          path: reports/ui-gallery/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Link the UI review gallery in the job summary
+        if: always() && runner.os == 'Linux' && steps.ui-gallery.outputs.artifact-url != ''
+        run: |
+          echo "UI review gallery for reviewers (open gallery.html): ${{ steps.ui-gallery.outputs.artifact-url }} - evidence for human review, not acceptance, not a baseline." >> "$GITHUB_STEP_SUMMARY"
       - name: Archive tracked source only
         if: always()
         run: git archive --format=zip --output=candidate-source.zip HEAD
@@ -120,9 +136,10 @@ jobs:
   renamed-feature:
     name: Template authoring / renamed feature
     runs-on: ubuntu-latest
-    # Measured at 30-37 minutes (identity adoption, maker, extended verify and
-    # served components); 55 minutes is a job budget, not a test deadline.
-    timeout-minutes: 55
+    # Measured at 30-37 minutes on #60 and 44 minutes on #68 (identity adoption,
+    # maker, extended verify and served components); 60 minutes is a job budget,
+    # not a test deadline.
+    timeout-minutes: 60
     steps:
       - *checkout
       - *setup-node
@@ -154,7 +171,7 @@ jobs:
       - name: Verify the complete renamed and extended template
         run: |
           set -o pipefail
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/verify.txt
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/verify-summary 2>&1 | tee reports/template-authoring/verify.txt
           node scripts/quality/check-artifacts.mjs > reports/template-authoring/assets.json
       - *playwright-version
       - *playwright-cache
@@ -229,7 +246,9 @@ jobs:
   example-removal:
     name: Template authoring / example removal
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
+    # evidence sessions); 100 minutes is a job budget, not a test deadline.
+    timeout-minutes: 100
     steps:
       - *checkout
       - *setup-node
@@ -249,13 +268,13 @@ jobs:
           node "$QUALIFIED_NPM" run examples:remove -- --dry-run --json > reports/template-authoring/removal-plan.json
           node "$QUALIFIED_NPM" run examples:remove -- --yes --no-interaction --json > reports/template-authoring/removal.json
           sha256sum --check reports/template-authoring/consumer-before.sha256
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/foundation-verify.txt
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/foundation-verify-summary 2>&1 | tee reports/template-authoring/foundation-verify.txt
           node "$QUALIFIED_NPM" run test:e2e
       - name: Generate and qualify another working feature after removal
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run make -- feature reading --entity reading-item --yes --no-interaction
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/extended-foundation-verify-summary 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
           node scripts/testing/evidence-cli.mjs run runtime
           node scripts/testing/evidence-cli.mjs run coverage
           node scripts/testing/evidence-cli.mjs run artifact
@@ -400,7 +419,7 @@ jobs:
           node scripts/quality/check-repository.mjs
           node scripts/quality/check-source.mjs
           node --test --test-name-pattern=ANALYZER-ARCHIVE tests/tooling/gates.checks.mjs
-      - name: Type-check the compiler and test ownership, contracts and legacy handoff
+      - name: Type-check the compiler and test ownership, contracts and the read-only handoff
         run: |
           node "$QUALIFIED_NPM" run typecheck:generator
           node --test tests/tooling/project-generator*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs

@@ -10,14 +10,16 @@ import { planProject, applyProject } from '../../bin/compiler/adapters/project-p
 import { renderTemplate } from '../../bin/compiler/emitters/devkit-files.ts';
 import { rebaseMarkdown, relocatedPath } from '../../bin/compiler/emitters/framework-docs.ts';
 import { inspectWorkflow, markdownLinks } from '../../scripts/quality/check-repository.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const starter = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8'));
+const starter = starterDocument('quick-capture');
 const document = structuredClone(starter.document ?? starter);
 const entries = await projectFiles(root, projectModel(document));
 const files = new Map(entries.map(entry => [entry.path, entry]));
 const text = path => { const entry = files.get(path); assert.ok(entry, `missing ${path}`); return entry.content; };
 const identity = projectModel(document).project;
+const productSkills = ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test', 'self-review'];
 
 test('[GENERATOR-DEVKIT-01] the product owns the root docs; framework docs and maintainer CI move to inert reference', async () => {
   const readme = text('README.md');
@@ -25,10 +27,11 @@ test('[GENERATOR-DEVKIT-01] the product owns the root docs; framework docs and m
   // The framework README differs per checkout (examples:remove rewrites it), so compare against the actual one.
   const frameworkHeading = (await readFile(join(root, 'README.md'), 'utf8')).split('\n')[0];
   assert.match(frameworkHeading, /^# /); assert.notEqual(readme.split('\n')[0], frameworkHeading);
-  assert.equal(text('docs/framework/README.md').split('\n')[0], frameworkHeading);
+  // The first line is the framework-reference banner; the framework's own heading follows it unchanged.
+  assert.equal(text('docs/framework/README.md').split('\n').find(line => line.startsWith('# ')), frameworkHeading);
   for (const name of ['TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md']) { assert.ok(!files.has(name)); assert.ok(files.has(`docs/framework/${name}`)); }
   const agents = text('AGENTS.md').split('\n');
-  assert.ok(agents.length >= 60 && agents.length <= 120, `AGENTS.md has ${agents.length} lines`);
+  assert.ok(agents.length >= 60 && agents.length <= 160, `AGENTS.md has ${agents.length} lines`);
   assert.match(text('AGENTS.md'), /npm run check/); assert.match(text('AGENTS.md'), /design\/traceability\.json/); assert.match(text('AGENTS.md'), /test:tdd/);
   assert.match(text('docs/framework/AGENTS.md'), /# Repository instructions/);
   assert.match(text('CLAUDE.md'), /^@AGENTS\.md\n/);
@@ -49,18 +52,21 @@ test('[GENERATOR-DEVKIT-02] every local Markdown link in the generated project r
       checked++;
     }
   }
-  assert.ok(checked > 500);
+  // Links into the framework's own backlog, plans and records are not generated, so far fewer remain than in the framework.
+  assert.ok(checked > 300);
 });
 test('[GENERATOR-DEVKIT-03] Claude Code, VS Code and agent files are valid, wired to real scripts and user-editable', () => {
   const settings = JSON.parse(text('.claude/settings.json'));
-  const [post] = settings.hooks.PostToolUse; const [stop] = settings.hooks.Stop;
+  const [post] = settings.hooks.PostToolUse; const [stop] = settings.hooks.Stop; const [start] = settings.hooks.SessionStart;
   assert.equal(post.matcher, 'Edit|Write|MultiEdit');
-  for (const hook of [post.hooks[0], stop.hooks[0]]) {
-    assert.equal(hook.type, 'command'); assert.equal(hook.command, 'node');
-    const script = hook.args[0].replace('${CLAUDE_PROJECT_DIR}/', ''); assert.ok(files.has(script), script);
+  for (const [hook, script] of [[post.hooks[0], 'post-edit-tests'], [stop.hooks[0], 'stop-check'], [start.hooks[0], 'session-start']]) {
+    // One command string: an `args` array is not part of Claude Code's hook schema and would be ignored silently.
+    assert.equal(hook.type, 'command'); assert.equal(typeof hook.command, 'string'); assert.ok(!('args' in hook), `${script} must not use args`);
+    assert.equal(hook.command, `node "$CLAUDE_PROJECT_DIR/scripts/agent/${script}.mjs"`);
+    assert.ok(files.has(`scripts/agent/${script}.mjs`), script);
   }
   for (const denied of ['Bash(npm publish *)', 'Bash(npm run release*)', 'Bash(git push --force*)']) assert.ok(settings.permissions.deny.includes(denied), denied);
-  for (const skill of ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test']) {
+  for (const skill of productSkills) {
     const body = text(`.claude/skills/${skill}/SKILL.md`);
     assert.match(body, new RegExp(`^---\\nname: ${skill}\\ndescription: .{40,}\\n`)); assert.ok(body.split('\n').length < 80);
   }
@@ -90,6 +96,8 @@ function permission(settings, command) {
 test('[GENERATOR-DEVKIT-08] pre-approved agent commands are exact safe forms; downloads are denied and path-writing flags ask', () => {
   const settings = JSON.parse(text('.claude/settings.json'));
   for (const command of ['npm test', 'npm run check', 'npm run check -- --fast', 'npm run -s check -- --fast', 'npm run check:submission', 'node bin/app check submission',
+    'npm ci', 'npm run dev:ui', 'npm run dev:preview', 'npm run build:clickdummy', 'npm run test:e2e', 'npm run test:ui-quality', 'npm run ui:gallery',
+    'node bin/app ui status', 'node bin/app ui status --json', 'node bin/app check --plan --json',
     'npm run test:obsidian', 'npm run test:obsidian -- plugin-load', 'npm run -s dev:obsidian -- --json', 'npx vitest related src/a.ts --run', 'node bin/app make feature notes --dry-run', 'git status'])
     assert.equal(permission(settings, command), 'allow', command);
   for (const command of ['npm run test:obsidian -- --allow-download', 'npm run test:obsidian --allow-download', 'npm run dev:obsidian -- --json --allow-download',
@@ -101,6 +109,26 @@ test('[GENERATOR-DEVKIT-08] pre-approved agent commands are exact safe forms; do
   for (const command of ['git diff HEAD', 'npm run check:security', 'npm run check:dependencies', 'npm run release:operate', 'npm run typecheck && curl example.com'])
     assert.notEqual(permission(settings, command), 'allow', command);
   assert.match(text('CLAUDE.md'), /Obsidian downloads \(`--allow-download`,\n {2}`OBSIDIAN_ALLOW_DOWNLOAD`\) are denied/);
+});
+test('[GENERATOR-DEVKIT-10] the agent kit has a brief, PR template, task template, self-review skill and Codex parity', () => {
+  const brief = text('BRIEF.md');
+  assert.match(brief, new RegExp(`^# Product brief: ${identity.name}\\n`)); assert.match(brief, /TODO\(owner\)/); assert.ok(brief.includes(identity.description));
+  for (const screen of projectModel(document).screens) assert.ok(brief.includes(screen.label), screen.label);
+  assert.match(text('AGENTS.md'), /\[BRIEF\.md\]\(BRIEF\.md\)/); assert.match(text('AGENTS.md'), /docs\/project-tasks\/TEMPLATE\.md/);
+  assert.ok(files.has('docs/project-tasks/TEMPLATE.md')); assert.match(text('.claude/skills/implement-requirement/SKILL.md'), /docs\/project-tasks\/TEMPLATE\.md/);
+  const pr = text('.github/pull_request_template.md');
+  for (const heading of ['Summary', 'Requirements and traceability', 'Commands run', 'UI evidence', 'Obsidian evidence', 'Untested scope']) assert.ok(pr.includes(`## ${heading}`), heading);
+  assert.match(pr, /test:ui-quality/); assert.match(pr, /ui:gallery/);
+  assert.match(text('.claude/skills/self-review/SKILL.md'), /check --plan/); assert.match(text('.claude/skills/self-review/SKILL.md'), /pull_request_template/);
+  for (const skill of productSkills) {
+    const adapter = text(`.agents/skills/${skill}/SKILL.md`);
+    assert.match(adapter, new RegExp(`^---\\nname: ${skill}\\ndescription: .{40,}\\n`)); assert.ok(adapter.includes(`../../../.claude/skills/${skill}/SKILL.md`));
+    assert.equal(posix.normalize(posix.join(`.agents/skills/${skill}`, '../../../.claude/skills', skill, 'SKILL.md')), `.claude/skills/${skill}/SKILL.md`);
+  }
+  // One install instruction: npm ci, never the shell's install command, in every agent-facing document.
+  for (const path of ['AGENTS.md', 'README.md']) { assert.match(text(path), /`npm ci`/, path); assert.doesNotMatch(text(path), /bin\/app install/, path); }
+  const todo = text('AGENTS.md');
+  for (const needle of ['vi-*', 'NotImplementedError', 'design/visual-traceability.json', 'test:ui-quality', 'ui:gallery', 'dev:preview', 'build:clickdummy', 'pull_request_template']) assert.ok(todo.includes(needle), needle);
 });
 test('[GENERATOR-DEVKIT-04] product tests use the Obsidian test kit and the project keeps the real-Obsidian loop', () => {
   const config = text('configs/testing/vitest.project.config.mjs');
@@ -156,4 +184,15 @@ test('[GENERATOR-DEVKIT-06] regeneration keeps an edited README and AGENTS.md; a
     assert.ok(changed.conflicts.some(conflict => conflict.startsWith('README.md:')));
     await assert.rejects(applyProject(changed, changed.hash), /conflicts/); assert.equal(await readFile(readme, 'utf8'), custom);
   } finally { await rm(vault, { recursive: true, force: true }); }
+});
+test('[GENERATOR-DEVKIT-10] a generated project carries the cloud-session kit and leaves the maintainer handoff tooling behind', () => {
+  for (const path of ['scripts/agent/cloud-setup.sh', 'scripts/agent/session-start.mjs', 'scripts/agent/session-node.mjs', 'scripts/agent/session-node-io.mjs', 'scripts/agent/session-toolchain.mjs',
+    'scripts/agent/session-version.mjs', 'scripts/agent/session-switch.mjs', 'scripts/agent/session-install.mjs', 'scripts/agent/session-browser.mjs', 'scripts/agent/process-group.mjs'])
+    assert.ok(files.has(path), `${path} is imported by a hook or is the setup script`);
+  for (const path of ['scripts/testing/qualify-project-handoff.mjs', 'scripts/testing/handoff-run.mjs', 'scripts/testing/handoff-steps.mjs', 'tests/tooling/agent-project-handoff.checks.mjs'])
+    assert.ok(!files.has(path), `${path} generates projects from framework starters, so it stays in the framework`);
+  assert.match(text('AGENTS.md'), /## Working in a cloud session[\s\S]*docs\/framework\/development\/CLOUD-AND-LOCAL-SESSIONS\.md/);
+  assert.ok(files.has('docs/framework/development/CLOUD-AND-LOCAL-SESSIONS.md'));
+  assert.equal(JSON.parse(text('.claude/settings.json')).hooks.SessionStart[0].hooks[0].timeout, 600, 'the hook may download Node and run npm ci');
+  assert.ok(text('.gitignore').split('\n').includes('/clickdummy.html'), 'the e2e web server rebuilds the click-dummy; it must not dirty the tree');
 });

@@ -45,8 +45,18 @@ def shot(name):
     page.screenshot(path=str(OUT / name))
 
 
+GOLDEN = ROOT / 'configs/starters/companion-plugin.json'
+
+
+def open_golden():
+    """Review the self-project, the external golden starter's schema 6 document, through the real import dialog."""
+    js('openCompanionImport()')
+    page.locator('#project-import-text').fill(json.dumps(json.loads(GOLDEN.read_text())['generator']['document']))
+    page.locator('#modal [data-action="project-import-review"]').click()
+
+
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+    browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
     page.set_default_timeout(8000)
     page.on('pageerror', lambda e: errors.append(str(e)))
@@ -54,7 +64,7 @@ with sync_playwright() as pw:
     page.on('request', lambda r: requests.append(r.url))
     try:
         page.set_content(STORAGE + HTML.read_text())
-        act('project-example'); page.locator('#project-import-confirm').check(); act('project-import-apply', scope='#modal')
+        open_golden(); page.locator('#project-import-confirm').check(); act('project-import-apply', scope='#modal')
         nav('storymaps'); original = js('smStore().maps[0].id'); act('sm-open', original)
         page.wait_for_selector('#sm-flow .sm-card')
         check('Initial map prioritizes the canvas rather than an empty inspector', page.locator('.sm-editor').get_attribute('data-details') == 'closed')

@@ -151,7 +151,7 @@ test('relocated setup terminal preserves interview and separately approved conti
   const writes = [];
   const dependencies = {
     readConfiguration: async () => null,
-    starterCatalog: async () => ({ catalog: { starters: [{ id: 'blank', name: 'Blank', level: 'basic' }] } }),
+    companionStarterSet: async () => ({ template: frameworkRoot, starters: [{ definition: { id: 'blank', name: 'Blank', level: 'basic' } }] }),
     derivedId: () => 'derived-id',
     derivedName: id => id === 'derived-id' ? 'Derived Id' : 'Unexpected',
     setupDocumentation: async (_mode, value) => value,

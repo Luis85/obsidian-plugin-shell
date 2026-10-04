@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { projectEntities, applyEntities } from '../../bin/documentation/adapters/model.ts';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { companionStarterIds, selfProject, starterDocument } from '../support/starter-documents.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 import { newDocument } from '../../bin/domain/document.ts';
 import { mergeEntity } from '../../bin/documentation/domain/merge.ts';
 import { keyOf, normalizePayload } from '../../bin/documentation/domain/contracts.ts';
@@ -18,10 +18,12 @@ test('real pages, component, owner-bound event, route, transition and journey ro
   assert.deepEqual(applyEntities(newDocument('Documentation Demo'), entities), project, 'full docs reconstruct the original from a blank project with matching identity');
   assert.deepEqual(applyEntities(project, [...entities].reverse()), project, 'document discovery order is immaterial');
 });
-for (const path of ['detail-v3.json', 'detail-v4.json']) test('complete retained ' + path + ' survives the projection', async () => {
-  const original = JSON.parse(await readFile(new URL('../fixtures/companion/' + path, import.meta.url), 'utf8'));
-  const project = migrateAuthoringDocument(original).document;
+for (const id of companionStarterIds()) test('complete current starter ' + id + ' survives the projection', () => {
+  const project = starterDocument(id);
   assert.deepEqual(applyEntities(project, projectEntities(project)), project);
+});
+for (const version of [3, 4, 5]) test('a retired v' + version + ' project is refused by the projection, never migrated', () => {
+  assert.throws(() => projectEntities(retiredProject(version)), /only schema 6 is supported/);
 });
 test('page title updates both related objects without changing identity', () => {
   const { project, overview } = projectFixture(), entities = projectEntities(project);
@@ -105,14 +107,13 @@ test('seeded permutations and varied authored values preserve the complete graph
   }
 });
 test('retained published component revisions cannot be overwritten',async()=>{
-  const project=migrateAuthoringDocument(JSON.parse(await readFile(new URL('../fixtures/companion/detail-v4.json',import.meta.url),'utf8'))).document;
+  const project=selfProject();
   const entities=projectEntities(project), revision=entities.find(entity=>entity.type==='component-revision');assert.ok(revision);revision.data.notes='Attempted revision rewrite';
   assert.throws(()=>applyEntities(project,entities),/DOCS_REVISION_IMMUTABLE/);
 });
 
-test('the complete retained companion self-project round-trips every managed element and context field', async () => {
-  const input = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json', import.meta.url), 'utf8'));
-  const project = migrateAuthoringDocument(input).document, entities = projectEntities(project);
+test('the complete current companion self-project round-trips every managed element and context field', async () => {
+  const project = selfProject(), entities = projectEntities(project);
   assert.ok(entities.length > 100, 'Exercise the real multi-subsystem self-project, not the minimal fixture.');
   assert.deepEqual(applyEntities(project, entities), project);
 });

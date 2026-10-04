@@ -1,17 +1,18 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { storybookFlags } from './storybook-options.ts';
 /** One-command project creation from a reviewed local JSON starter. It composes the
- * existing catalog loader, identity-only customization and project compiler/plan
+ * definition loader, identity-only customization and project compiler/plan
  * engine; it never has its own template, hashing or file-writing rules. */
-import type { NativeProjectIntegrations } from '../../../scripts/companion/native-contract.mjs';
+
 import { mkdtemp, writeFile, rm, lstat, readdir, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { loadStarterCatalog } from '../starters/catalog.ts';
+import { companionStarters, loadDefinitions } from '../starters/repository.ts';
+import type { CompanionStarter } from '../starters/types.ts';
 import { listStarters } from '../starters/operations.ts';
 import { definitionProjectPlan } from '../starters/project.ts';
 import { completeDefinition } from '../starters/processes.ts';
-import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
+import { companionRelativeFolder } from '../../../scripts/companion/authoring-contract.ts';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
 import { exists } from './files.ts';
 import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
@@ -20,14 +21,14 @@ import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
 import { exportedProject } from './project-from.ts';
+import { restoreExecutableBits } from './executable-bits.ts';
+import { initializeRepository, type GitReport } from './git-init.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
-interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
-interface StarterCatalog { starters: StarterEntry[] }
 interface StarterSummary { directory: string; nextSteps?: string[] }
-export async function starterCatalog(context: Context): Promise<{ template: string; catalog: StarterCatalog }> {
+/** Companion starters from the invocation project's starter folder, with the (verified kit or source) template that generates them. */
+export async function companionStarterSet(context: Context): Promise<{ template: string; starters: CompanionStarter[] }> {
   const template = await resolveTemplateRoot(context.frameworkRoot);
-  const catalog: StarterCatalog = await loadStarterCatalog(context.root);
-  return { template, catalog };
+  return { template, starters: companionStarters(await loadDefinitions(context.root)) };
 }
 export async function starterListing(context: Context): Promise<Result> {
   return listStarters(context, 'new');
@@ -137,14 +138,25 @@ async function installAndVerify(request: Request, context: Context, directory: s
   }
   return executions;
 }
+/** The initial git commit of a newly written project, unless --no-git; the project itself is already written either way. */
+async function versionControl(request: Request, context: Context, directory: string): Promise<GitReport> {
+  await restoreExecutableBits(directory);
+  if (request.options['no-git'] === true) return { status: 'skipped', reason: '--no-git was passed' };
+  const report = await initializeRepository(directory, stringOption(request.options, 'starter') ?? 'an exported project');
+  context.progress?.(`git: ${report.status}${report.reason ? ` (${report.reason})` : ''}\n`);
+  return report;
+}
 /** Adds guidance, and only after a written project runs the explicitly requested install/verify. */
 export async function completeStarterProject(outcome: Result, request: Request, context: Context): Promise<Result> {
   if (!['planned', 'applied', 'blocked'].includes(outcome.status)) return outcome;
-  const data = outcome.data as { summary: StarterSummary & { recipe?: unknown } };
-  if (data.summary.recipe) return completeDefinition(outcome, request, context);
+  const planned = outcome.data as { summary: StarterSummary & { recipe?: unknown } };
+  const written = outcome.status === 'applied';
+  const git = written ? await versionControl(request, context, planned.summary.directory) : undefined;
+  const data = git ? { ...planned, git } : planned;
+  if (data.summary.recipe) return completeDefinition({ ...outcome, data }, request, context);
   const directory = data.summary.directory, steps = nextSteps(directory);
   const guide = { readme: join(directory, 'README.md'), implementation: join(directory, 'PROJECT-IMPLEMENTATION.md') };
-  if (outcome.status !== 'applied') return { ...outcome, data: { ...data, written: false, next: 'Nothing has been written. To create the project, confirm when asked or re-run with --yes (or --apply <planHash>).' } };
+  if (!written) return { ...outcome, data: { ...data, written: false, next: 'Nothing has been written. To create the project, confirm when asked or re-run with --yes (or --apply <planHash>).' } };
   if (!request.options.install) return { ...outcome, data: { ...data, written: true, nextSteps: steps, guide } };
   const executions = await installAndVerify(request, context, directory);
   return { ...outcome, data: { ...data, written: true, install: executions, nextSteps: steps.filter(step => step !== 'npm ci'), guide } };

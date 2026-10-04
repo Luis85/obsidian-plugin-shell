@@ -1,12 +1,12 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { compileProject } from '../../bin/compiler/index.ts';
 import { devkitFiles, renderTemplate, makerTests } from '../../bin/compiler/emitters/devkit-files.ts';
 import { componentFile, relativeImport, rewriteTemplate, copiedTemplateTest, copiedTemplateMarker } from '../../bin/compiler/emitters/file-code.ts';
 import { relocatedPath, maintainerOnly, rebaseMarkdown, relocateFrameworkDocuments } from '../../bin/compiler/emitters/framework-docs.ts';
 import { projectModel, schema, symbol, literal, text, rows } from '../../bin/compiler/emitters/model.ts';
-import { starterDocument, dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 
 // Developer kit (devkit-files.ts), file helpers (file-code.ts), framework document relocation (framework-docs.ts) and model validation (model.ts).
 const invalid = message => ({ message: 'GENERATOR_INVALID: ' + message });
@@ -14,16 +14,21 @@ const invalid = message => ({ message: 'GENERATOR_INVALID: ' + message });
 test('the developer kit renders every template, follows custom roots and owns its files as extensions', async () => {
   const document = await starterDocument('blank'); document.settings = { codebaseFolder: 'app', testsFolder: 'checks' }; document.project.description = '  Multi\n line  ';
   const out = recorder(); await devkitFiles(template, model(document), out.add);
-  const rendered = ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', ...['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test'].map(skill => `.claude/skills/${skill}/SKILL.md`),
+  const skills = ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test', 'self-review'];
+  const rendered = ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', ...skills.map(skill => `.claude/skills/${skill}/SKILL.md`),
+    'BRIEF.md', 'docs/project-tasks/TEMPLATE.md', '.github/pull_request_template.md',
     '.github/copilot-instructions.md', '.cursor/rules/project.mdc', '.vscode/extensions.json', '.vscode/settings.json', '.vscode/launch.json', '.vscode/tasks.json', '.editorconfig',
-    '.github/workflows/ci.yml', '.github/workflows/obsidian.yml'];
-  assert.deepEqual([...out.files.keys()], [...rendered, ...template.skillFiles.map(file => file.path), 'configs/testing/vitest.project.config.mjs', 'checks/project/ui-bootstrap.mjs',
+    '.github/workflows/ci.yml', '.github/workflows/obsidian.yml', ...skills.map(skill => `.agents/skills/${skill}/SKILL.md`)];
+  // Only the prototype skill's offline click-dummy worker ships (under scripts/clickdummy/), never the maintainer skill itself.
+  const clickdummyBuilder = ['build-single-file.mjs', 'lib/build-output.mjs', 'lib/build-worker.mjs', 'lib/io.mjs', 'lib/offline.mjs', 'lib/worker-output.mjs'].map(file => `scripts/clickdummy/${file}`);
+  assert.deepEqual([...out.files.keys()], [...rendered, ...clickdummyBuilder, 'configs/testing/vitest.project.config.mjs', 'checks/project/ui-bootstrap.mjs',
     'tests/suites.json', 'checks/project/plugin-host.test.ts']);
+  assert.ok(![...out.files.keys()].some(path => path.includes('companion-prototype-design')));
   assert.deepEqual([...out.files].filter(([, entry]) => entry.ownership !== 'extension').map(([path, entry]) => [path, entry.ownership]), [['checks/project/ui-bootstrap.mjs', 'managed'], ['tests/suites.json', 'framework']]);
   assert.ok(out.text('README.md').startsWith('# My Plugin\n\nMulti line\n'));
   assert.ok(!/\{\{[A-Za-z]+\}\}/.test(rendered.map(path => out.text(path)).join('\n')));
   const config = out.text('configs/testing/vitest.project.config.mjs');
-  assert.ok(config.includes(`  include: ["checks/project/**/*.test.{ts,mjs}", "${makerTests}/**/*.test.ts"], environment: 'node', fileParallelism: false,\n  setupFiles: ["checks/project/ui-bootstrap.mjs"],\n`));
+  assert.ok(config.includes(`  include: ["checks/project/**/*.test.{ts,mjs}", "${makerTests}/**/*.test.ts"], environment: 'node', fileParallelism: false,\n  // Playwright specs (npm run test:e2e) run in a browser, never in Vitest.\n  exclude: [...configDefaults.exclude, 'tests/e2e/**'],\n  setupFiles: ["checks/project/ui-bootstrap.mjs"],\n`));
   assert.equal(out.text('checks/project/ui-bootstrap.mjs'), "// Install the actual locally bundled icons, not a mock or a remote provider.\nimport { addIcon } from '@iconify/vue';\nimport { init } from 'virtual:nuxt-ui-icons';\ninit(addIcon);\n");
   assert.equal(out.text('tests/suites.json'), (await template.text('tests/suites.json')).replaceAll('"tests/project', '"checks/project'));
   const host = out.text('checks/project/plugin-host.test.ts');
@@ -54,14 +59,16 @@ test('file helpers name components, relativize imports and rewrite copied templa
 test('framework documents and maintainer workflows move under docs/framework with rebased links', () => {
   assert.deepEqual(['README.md', 'AGENTS.md', '.github/workflows/ci.yml', 'docs/a.md', 'README.txt'].map(relocatedPath),
     ['docs/framework/README.md', 'docs/framework/AGENTS.md', 'docs/framework/workflows/ci.yml', 'docs/a.md', 'README.txt']);
-  for (const path of ['docs/concepts/companion/companion-project.json', 'docs/concepts/companion/seeds/a.json', 'configs/starters/blank.json', 'docs/concepts/companion/starters/x.json',
+  for (const path of ['configs/starters/blank.json',
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
-    'docs/concepts/native-file-integration-handoff', '.github/workflows/native-source-handoff.yml', 'docs/concepts/native-file-integration-handoff/a.md',
-    'tests/tooling/project-generator-native-handoff.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs'])
+    'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs'])
     assert.equal(maintainerOnly(path), true, path);
+  // The retired schema 5 concept data and the removed native source handoff are no longer special-cased.
+  for (const path of ['docs/concepts/companion/companion-project.json', 'docs/concepts/companion/starters/x.json', 'docs/concepts/native-file-integration-handoff/a.md'])
+    assert.equal(maintainerOnly(path), false, path);
   assert.equal(maintainerOnly('docs/concepts/companion/editor/main.ts'), false);
   const markdown = ['See [agents](AGENTS.md#rules), [guide](docs/guide.md?x=1), <[angled](<docs/a b.md>)>.', '```md', '[inside](AGENTS.md)', '````',
-    '[web](https://example.invalid) [anchor](#top) [root](/abs.md) [bad](%E0%A4%A.md) ![seed](docs/concepts/companion/seeds/a.png) [empty](?q)', '~~~', '[tilde](README.md)', '~~~', '[ci](.github/workflows/ci.yml)'].join('\n');
+    '[web](https://example.invalid) [anchor](#top) [root](/abs.md) [bad](%E0%A4%A.md) ![seed](docs/concepts/sitemap-editor/a.png) [empty](?q)', '~~~', '[tilde](README.md)', '~~~', '[ci](.github/workflows/ci.yml)'].join('\n');
   assert.equal(rebaseMarkdown(markdown, 'README.md', 'docs/framework/README.md'), ['See [agents](AGENTS.md#rules), [guide](../guide.md?x=1), <[angled](<../a%20b.md>)>.', '```md', '[inside](AGENTS.md)', '````',
     '[web](https://example.invalid) [anchor](#top) [root](/abs.md) [bad](%E0%A4%A.md) seed (maintainer-only asset, not included) [empty](?q)', '~~~', '[tilde](README.md)', '~~~', '[ci](workflows/ci.yml)'].join('\n'));
   assert.equal(rebaseMarkdown('[readme](../README.md) [same](other.md)', 'docs/x.md', 'docs/x.md'), '[readme](framework/README.md) [same](other.md)');
@@ -70,7 +77,8 @@ test('framework documents and maintainer workflows move under docs/framework wit
     ['.github/workflows/ci.yml', { path: '.github/workflows/ci.yml', content: 'on: push', ownership: 'framework' }], ['AGENTS.md', { path: 'AGENTS.md', content: 'own', ownership: 'extension' }]]);
   relocateFrameworkDocuments(entries);
   assert.deepEqual([...entries].map(([path, entry]) => [path, entry.path, entry.content]), [['docs/x.md', 'docs/x.md', 'plain'], ['docs/y.md', 'docs/y.md', '[r](framework/README.md)'], ['logo.png.md', 'logo.png.md', 'AA'], ['AGENTS.md', 'AGENTS.md', 'own'],
-    ['docs/framework/README.md', 'docs/framework/README.md', '[a](AGENTS.md)'], ['docs/framework/workflows/ci.yml', 'docs/framework/workflows/ci.yml', 'on: push']]);
+    ['docs/framework/README.md', 'docs/framework/README.md', "> **Framework reference — not this project's backlog or instructions; follow ./AGENTS.md**\n\n[a](AGENTS.md)"],
+    ['docs/framework/workflows/ci.yml', 'docs/framework/workflows/ci.yml', 'on: push']]);
 });
 
 test('model schemas keep supported JSON Schema and refuse silent weakening', () => {
@@ -118,15 +126,15 @@ test('project models refuse unsafe roots, identities and dangling references', a
 });
 
 test('a one-or-more relationship compiles to a required reference array and a malformed cardinality is refused', async () => {
-  const fixture = JSON.parse(await readFile(new URL('../fixtures/companion/detail-v4.json', import.meta.url), 'utf8'));
+  const fixture = starterDocument('companion-plugin');
   const relationship = fixture.design.semantic.relationships.find(item => item.key === 'screen_refs');
   relationship.targetCard = '1..*';
-  const compiled = await compileProject({ source: JSON.stringify(fixture), sourceName: 'detail-v4.json' });
+  const compiled = await compileProject({ source: JSON.stringify(fixture), sourceName: 'companion-plugin.json' });
   assert.equal(compiled.status, 'ok', JSON.stringify(compiled.diagnostics));
   const requirement = compiled.model.entities.find(entity => entity.slug === 'requirement').schema;
   assert.deepEqual(requirement.properties.screen_refs, { type: 'array', items: { type: 'string' } });
   assert.ok(requirement.required.includes('screen_refs'));
   relationship.targetCard = '1..+';
-  const refused = await compileProject({ source: JSON.stringify(fixture), sourceName: 'detail-v4.json' });
+  const refused = await compileProject({ source: JSON.stringify(fixture), sourceName: 'companion-plugin.json' });
   assert.equal(refused.status, 'failed'); assert.ok(!refused.model);
 });

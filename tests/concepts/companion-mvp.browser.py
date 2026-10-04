@@ -362,7 +362,7 @@ def run_clickdummy(page):
 OUT.mkdir(parents=True, exist_ok=True)
 try:
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), args=['--no-sandbox'])
+        browser = pw.chromium.launch(executable_path=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'), args=['--no-sandbox'])
         page = browser.new_page(viewport={'width': 1600, 'height': 1000})
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)

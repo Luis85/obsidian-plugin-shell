@@ -11,6 +11,9 @@ interface ClickdummyDependencies {
 }
 
 const defaults: ClickdummyDependencies = { exists, inspectDesign, runNode };
+/** The shipped worker: a framework checkout keeps it inside the prototype skill; a generated project carries only the worker under scripts/clickdummy/. */
+const skillWorker = '.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs';
+const projectWorker = 'scripts/clickdummy/lib/build-worker.mjs';
 
 /** Fixed generated entry, shipped prototype worker and one local artifact; no alternate compiler or shell parsing. */
 export async function buildClickdummy(
@@ -34,7 +37,8 @@ export async function buildClickdummy(
 
   const input = 'design/project.json';
   const { model } = await dependencies.inspectDesign(context, input);
-  const execution = await dependencies.runNode(context, '.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs', [
+  const worker = await dependencies.exists(join(context.root, skillWorker)) ? skillWorker : projectWorker;
+  const execution = await dependencies.runNode(context, worker, [
     '--entry', join(context.root, 'harness/prototype/clickdummy.ts'),
     '--project', join(context.root, input),
     '--out', join(context.root, 'clickdummy.html'),

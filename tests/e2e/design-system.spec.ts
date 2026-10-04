@@ -7,8 +7,8 @@ const scope = `[data-plugin-ui="${identity.id}"].ps--${identity.id}`;
 // Invoke the actual shared compiler, not a hand-maintained CSS facsimile.
 function stylesheet(policy: 'host' | 'declared'): string {
   const source = `import {existsSync,readFileSync} from 'node:fs';import {compileDesignSystem} from './scripts/companion/design-system-css.mjs';
-// A generated workspace carries its own design; the maintainer checkout uses the retained companion fixture.
-const d=JSON.parse(readFileSync(existsSync('design/project.json')?'design/project.json':'docs/concepts/companion/companion-project.json','utf8'));const id=JSON.parse(readFileSync('manifest.json','utf8')).id;
+// A generated workspace carries its own design; the maintainer checkout uses the current self-project starter.
+const d=existsSync('design/project.json')?JSON.parse(readFileSync('design/project.json','utf8')):JSON.parse(readFileSync('configs/starters/companion-plugin.json','utf8')).generator.document;const id=JSON.parse(readFileSync('manifest.json','utf8')).id;
 d.design.designSystem.frontend={schema:1,target:'nuxt-ui',colorPolicy:process.argv[1],bindings:{}};
 process.stdout.write(compileDesignSystem(d.design.designSystem,id).css);`;
   const run = spawnSync(process.execPath,['--input-type=module','-e',source,policy],{encoding:'utf8',timeout:10000});

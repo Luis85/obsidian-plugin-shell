@@ -5,16 +5,16 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { loadStarterCatalog } from '../../bin/adapters/starters/catalog.ts';
-import { customizeStarter } from '../companion/starter-contract.mjs';
+import { companionStarters, loadDefinitions } from '../../bin/adapters/starters/repository.ts';
+import { customizeStarter } from '../../bin/adapters/starters/customize.ts';
 import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),id=process.argv[2];
-const catalog=await loadStarterCatalog(root),entry=catalog.starters.find(s=>s.id===id);
+const entry=companionStarters(await loadDefinitions(root)).find(s=>s.definition.id===id);
 if(!entry)throw Error('Supply a built-in starter ID.');
 const out=join(root,'reports/project-starters',id);await mkdir(out,{recursive:true});
 // Canonical path: Windows 8.3 temp aliases break test-module resolution in the generated workspace.
 const vault=await realpath(await mkdtemp(join(tmpdir(),'qualified-starter-'))),input=join(vault,'project.json');
-const document=customizeStarter(catalog,id,{}),report={id,sourceSha256:entry.sha256,scope:'Independent generated dependency installation, build, typecheck and scaffold tests; not native Obsidian or completed business acceptance.',steps:[],status:'failed'};
+const document=customizeStarter(entry,{}),report={id,sourceSha256:entry.sha256,scope:'Independent generated dependency installation, build, typecheck and scaffold tests; not native Obsidian or completed business acceptance.',steps:[],status:'failed'};
 function run(label,args,cwd){
  const npm=process.env.QUALIFIED_NPM;
  if(!npm)throw Error('QUALIFIED_NPM must identify the explicitly installed qualified npm CLI.');

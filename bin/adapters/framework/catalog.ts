@@ -1,3 +1,4 @@
+import { adoptCommands } from './adopt-catalog.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
 import { assertJsonData } from '../../../scripts/contracts/json-data.ts';
@@ -27,6 +28,8 @@ export const commands: readonly Command[] = [
   { id: 'starters edit', summary: 'Plan replacing one definition from validated JSON.', options: values('input'), maxArgs: 1, effect: 'plan' },
   { id: 'starters pack', summary: 'Create the standalone starter-definition ZIP, separate from the shell.', options: values('out'), maxArgs: 0, effect: 'process' },
   { id: 'starters run', summary: 'Review/explicitly execute processes from a generated project receipt.', options: { ...values('project', 'process'), 'trust-processes': 'flag' }, maxArgs: 0, effect: 'process' },
+  { id: 'ui gallery', summary: 'Capture a screenshot gallery (surface x state x scenario x theme x width) with index.json and gallery.html for human review; never acceptance or a baseline.', options: values('target', 'out', 'input'), maxArgs: 0, effect: 'process' },
+  { id: 'ui status', summary: 'Report UI implementation progress per surface, interaction and journey from generated files; static analysis only, never an acceptance claim.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'docs import', summary: 'Review typed Markdown files/folders into actual project elements without deleting absent data.', options: values('resolutions'), maxArgs: 32, effect: 'plan' },
   { id: 'docs export', summary: 'Generate complete, lossless application Markdown documentation with conflict protection.', options: values('out'), maxArgs: 0, effect: 'plan' },
   { id: 'docs validate', summary: 'Validate typed documentation and native model references without writing.', options: {}, maxArgs: 32, effect: 'read' },
@@ -38,6 +41,7 @@ export const commands: readonly Command[] = [
   { id: 'obsidian read', summary: 'Read one non-hidden Markdown file from the explicitly selected vault.', options: values('obsidian-vault', 'obsidian-path'), maxArgs: 0, effect: 'read' },
   { id: 'obsidian prepare', summary: 'Scan configured documentation paths through the official CLI and propose existing reviewed docs-import commands.', options: values('obsidian-vault'), maxArgs: 0, effect: 'read' },
   ...prototypeCommands,
+  ...adoptCommands,
   { id: 'handout generate', summary: 'Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout refresh', summary: 'Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout validate', summary: 'Validate required handout decisions and source freshness without writes or execution authorization.', options: values('prds'), maxArgs: 0, effect: 'read' },
@@ -45,7 +49,7 @@ export const commands: readonly Command[] = [
   { id: 'support report', summary: 'Collect an opt-in, allowlisted local support report without identities, paths, content or network calls.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'project measure', summary: 'Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.', options: values('input', 'samples'), maxArgs: 0, effect: 'read' },
   { id: 'project schema', summary: 'Discover the versioned project-v6 transport schema and semantic validation boundary.', options: values('version'), maxArgs: 0, effect: 'read' },
-  { id: 'project validate', summary: 'Validate/migrate complete project JSON without generation or writes; no authored content in reports.', options: values('input'), maxArgs: 0, effect: 'read' },
+  { id: 'project validate', summary: 'Validate complete project v6 JSON without generation or writes; no authored content in reports.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'airship status', summary: 'Read optional Airship configuration and local install state.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'airship enable', summary: 'Review enabling local safe Airship tooling; never installs or launches.', options: values('agent', 'target-port', 'port'), maxArgs: 0, effect: 'plan' },
   { id: 'airship disable', summary: 'Review disabling future Airship launches; preserve installed tooling and edits.', options: {}, maxArgs: 0, effect: 'plan' },
@@ -76,7 +80,7 @@ export const commands: readonly Command[] = [
   { id: 'concept import', summary: 'Plan reviewed project, new-feature or base-bound improvement intake. Never executes HTML/source.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
   { id: 'project inspect', summary: 'Validate a companion export and report compiler obligations.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'project import', summary: 'Review configuration conflicts and accept a design snapshot.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
-  { id: 'new', summary: 'Create a new project in <dir> from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without <dir>: new --starter <id>.', options: { ...values('storybook', 'storybook-stories', 'starter', 'from', 'id', 'name', 'author', 'extension', 'extensions', 'values', 'answers', 'run'), 'trust-processes': 'flag', list: 'flag', install: 'flag', 'inside-vault': 'flag', airship: 'flag', 'no-airship': 'flag' }, maxArgs: 1, effect: 'plan' },
+  { id: 'new', summary: 'Create a new project in <dir> from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without <dir>: new --starter <id>.', options: { ...values('storybook', 'storybook-stories', 'starter', 'from', 'id', 'name', 'author', 'extension', 'extensions', 'values', 'answers', 'run'), 'trust-processes': 'flag', list: 'flag', install: 'flag', 'inside-vault': 'flag', 'no-git': 'flag', airship: 'flag', 'no-airship': 'flag' }, maxArgs: 1, effect: 'plan' },
   { id: 'generate', summary: 'Plan generation for the configured project in place.', options: values('storybook', 'storybook-stories', 'input', 'output-kind', 'scope'), maxArgs: 0, effect: 'plan' },
   { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions'), document: 'flag', list: 'flag', 'trust-custom': 'flag', check: 'flag' }, maxArgs: 2, effect: 'plan' },
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
@@ -90,7 +94,8 @@ export const commands: readonly Command[] = [
   { id: 'clickdummy build', summary: 'Build the generated Vue project as offline HTML with synthetic read data. No native/business writes.', options: { replace: 'flag' }, maxArgs: 0, effect: 'process' },
   { id: 'build', summary: 'Run the existing production bundler.', options: {}, maxArgs: 0, effect: 'process' },
   { id: 'test', summary: 'Run unit/project, browser, native qualification or real-Obsidian tests.', options: values('profile'), maxArgs: 0, effect: 'process' },
-  { id: 'check', summary: 'Fast daily/agent gate: typecheck, lint and tests; runs every step and summarizes failures. Not verify.', options: { fast: 'flag' }, maxArgs: 0, effect: 'process' },
+  { id: 'check', summary: 'Fast daily/agent gate: typecheck, lint and tests; runs every step and summarizes failures. --fast narrows it to a diff (--base <ref>); --plan lists the gates a diff requires. Not verify.', options: { fast: 'flag', plan: 'flag', ...values('base') }, maxArgs: 0, effect: 'process' },
+  { id: 'ci', summary: 'Reproduce GitHub Actions jobs locally: list workflows/jobs, print a job\'s exact shell commands (dry run) or run its run: steps with --execute.', options: { ...values('job', 'matrix'), list: 'flag', execute: 'flag' }, maxArgs: 0, effect: 'process' },
   { id: 'check submission', summary: 'Local mirror of documented Obsidian community review rules; runs the project ESLint configuration (trusted project code) and writes nothing.', options: {}, maxArgs: 0, effect: 'process' },
   { id: 'verify', summary: 'Run existing full verification; project scope is explicitly separate.', options: values('profile'), maxArgs: 0, effect: 'process' },
   { id: 'dev', summary: 'Run development watch, UI harness or the real-Obsidian sandbox; cancel with Ctrl-C.', options: values('profile'), maxArgs: 0, effect: 'process' },

@@ -60,6 +60,14 @@
       ]
     },
     {
+      "id": "ui",
+      "title": "Generated UI progress and evidence",
+      "commands": [
+        "ui status",
+        "ui gallery"
+      ]
+    },
+    {
       "id": "handout",
       "title": "Product-trio handout",
       "commands": [
@@ -89,6 +97,15 @@
       ]
     },
     {
+      "id": "adopt",
+      "title": "Adopt an existing project",
+      "commands": [
+        "adopt analyze",
+        "adopt plan",
+        "adopt skill"
+      ]
+    },
+    {
       "id": "develop",
       "title": "Develop and check",
       "commands": [
@@ -99,6 +116,7 @@
         "test",
         "check",
         "check submission",
+        "ci",
         "make",
         "styles inspect",
         "styles export"
@@ -1186,6 +1204,123 @@
       ],
       "parserOnlyOptions": [
         "plan-out"
+      ]
+    },
+    {
+      "id": "ui gallery",
+      "summary": "Capture a screenshot gallery (surface x state x scenario x theme x width) with index.json and gallery.html for human review; never acceptance or a baseline.",
+      "effect": "process",
+      "maxArgs": 0,
+      "group": "ui",
+      "usage": "node bin/app ui gallery [options]",
+      "examples": [
+        "node bin/app ui gallery",
+        "node bin/app ui gallery --target clickdummy --json",
+        "node bin/app ui gallery --out reports/ui-gallery"
+      ],
+      "options": [
+        {
+          "name": "target",
+          "kind": "value",
+          "description": "What to capture: the served harness (this framework) or the built clickdummy.html (generated project).",
+          "values": [
+            "harness",
+            "clickdummy"
+          ],
+          "default": "harness"
+        },
+        {
+          "name": "out",
+          "kind": "value",
+          "description": "Gallery folder relative to the project root; previous captures there are replaced.",
+          "default": "reports/ui-gallery"
+        },
+        {
+          "name": "input",
+          "kind": "value",
+          "description": "Built clickdummy file relative to the project root (--target clickdummy only).",
+          "default": "clickdummy.html"
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "timeout",
+          "kind": "value",
+          "description": "Child-process timeout in milliseconds (1..3600000).",
+          "default": "600000"
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "plan-out",
+        "yes"
+      ]
+    },
+    {
+      "id": "ui status",
+      "summary": "Report UI implementation progress per surface, interaction and journey from generated files; static analysis only, never an acceptance claim.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "ui",
+      "usage": "node bin/app ui status",
+      "examples": [
+        "node bin/app ui status",
+        "node bin/app ui status --json",
+        "node bin/app ui status --root ../my-app --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
       ]
     },
     {
@@ -3051,6 +3186,206 @@
       ]
     },
     {
+      "id": "adopt analyze",
+      "summary": "Analyze an existing project read-only (bounded, no code executed) and report its stack, tooling and Workbench compatibility findings.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "adopt",
+      "usage": "node bin/app adopt analyze [--target <dir>] [--out <report.json>] [--replace] [--json]",
+      "examples": [
+        "node bin/app adopt analyze --target ../legacy-app",
+        "node bin/app adopt analyze --target ../legacy-app --json --out ../legacy-report.json"
+      ],
+      "options": [
+        {
+          "name": "target",
+          "kind": "value",
+          "description": "Folder to analyze or adopt into. Defaults to --root, then the current directory; no shell.config.json is needed."
+        },
+        {
+          "name": "out",
+          "kind": "value",
+          "description": "Write the report JSON here: outside the project, or inside it only as docs/workbench/*.json. A different existing file is refused without --replace."
+        },
+        {
+          "name": "replace",
+          "kind": "flag",
+          "description": "Replace an earlier report or adoption plan; never replaces an unrelated file."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "adopt plan",
+      "summary": "Render the analysis as a Markdown integration plan; previews with its SHA-256 and writes one file only after --yes or --apply.",
+      "effect": "plan",
+      "maxArgs": 0,
+      "group": "adopt",
+      "usage": "node bin/app adopt plan [--target <dir>] [--report <report.json>] [--out <plan.md>] [--replace] [--yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app adopt plan --target ../legacy-app",
+        "node bin/app adopt plan --target ../legacy-app --apply <sha256>",
+        "node bin/app adopt plan --report ../legacy-report.json --target ../legacy-app --dry-run"
+      ],
+      "options": [
+        {
+          "name": "target",
+          "kind": "value",
+          "description": "Folder to analyze or adopt into. Defaults to --root, then the current directory; no shell.config.json is needed."
+        },
+        {
+          "name": "report",
+          "kind": "value",
+          "description": "Adoption report JSON (workbench-adoption-report/v1) to render instead of analyzing the target again."
+        },
+        {
+          "name": "out",
+          "kind": "value",
+          "description": "Markdown file for the plan, relative to the target; only an earlier adoption plan can be replaced.",
+          "default": "docs/workbench/ADOPTION-PLAN.md"
+        },
+        {
+          "name": "replace",
+          "kind": "flag",
+          "description": "Replace an earlier report or adoption plan; never replaces an unrelated file."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "adopt skill",
+      "summary": "Install the adopt-existing-project agent skill (Claude and Codex copies) into the target; never overwrites a different file.",
+      "effect": "plan",
+      "maxArgs": 0,
+      "group": "adopt",
+      "usage": "node bin/app adopt skill [--target <dir>] [--yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app adopt skill --target ../legacy-app --dry-run",
+        "node bin/app adopt skill --target ../legacy-app --yes"
+      ],
+      "options": [
+        {
+          "name": "target",
+          "kind": "value",
+          "description": "Folder to analyze or adopt into. Defaults to --root, then the current directory; no shell.config.json is needed."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
       "id": "handout generate",
       "summary": "Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.",
       "effect": "plan",
@@ -3382,7 +3717,7 @@
         {
           "name": "version",
           "kind": "value",
-          "description": "Published project schema version. Legacy documents use project validate.",
+          "description": "Published project schema version; only the current schema 6 exists.",
           "values": [
             "6"
           ],
@@ -3420,7 +3755,7 @@
     },
     {
       "id": "project validate",
-      "summary": "Validate/migrate complete project JSON without generation or writes; no authored content in reports.",
+      "summary": "Validate complete project v6 JSON without generation or writes; no authored content in reports.",
       "effect": "read",
       "maxArgs": 0,
       "group": "start",
@@ -5312,6 +5647,11 @@
           "description": "Allow a target inside a folder that contains .obsidian/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder."
         },
         {
+          "name": "no-git",
+          "kind": "flag",
+          "description": "Do not run git init and the initial commit in a new project folder (skipped automatically inside an existing git work tree or without git)."
+        },
+        {
           "name": "airship",
           "kind": "flag",
           "description": "Opt into Airship tooling in a generated project; no automatic installation or launch."
@@ -6189,20 +6529,104 @@
     },
     {
       "id": "check",
-      "summary": "Fast daily/agent gate: typecheck, lint and tests; runs every step and summarizes failures. Not verify.",
+      "summary": "Fast daily/agent gate: typecheck, lint and tests; runs every step and summarizes failures. --fast narrows it to a diff (--base <ref>); --plan lists the gates a diff requires. Not verify.",
       "effect": "process",
       "maxArgs": 0,
       "group": "develop",
       "usage": "node bin/app check [options]",
       "examples": [
         "node bin/app check",
-        "node bin/app check --fast --json"
+        "node bin/app check --fast --json",
+        "node bin/app check --fast --base origin/main",
+        "node bin/app check --plan --json"
       ],
       "options": [
         {
           "name": "fast",
           "kind": "flag",
-          "description": "Typecheck plus tests related to changed files (git); for agent Stop hooks."
+          "description": "Typecheck plus tests related to changed files (git), with eslint/lint on those files and the node --test suites they select; for agent Stop hooks."
+        },
+        {
+          "name": "plan",
+          "kind": "flag",
+          "description": "List, without running anything, the gates the diff requires: exact commands, why each applies, estimated duration, prerequisites and CI coverage; ends with npm run verify."
+        },
+        {
+          "name": "base",
+          "kind": "value",
+          "description": "With --fast or --plan: diff merge-base(<ref>, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "timeout",
+          "kind": "value",
+          "description": "Child-process timeout in milliseconds (1..3600000).",
+          "default": "600000 per step"
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "plan-out",
+        "yes"
+      ]
+    },
+    {
+      "id": "ci",
+      "summary": "Reproduce GitHub Actions jobs locally: list workflows/jobs, print a job's exact shell commands (dry run) or run its run: steps with --execute.",
+      "effect": "process",
+      "maxArgs": 0,
+      "group": "develop",
+      "usage": "node bin/app ci (--list | --job <workflow-file-stem>/<job-id> [--matrix key=value,...] [--execute]) [--json]",
+      "examples": [
+        "node bin/app ci --list --json",
+        "node bin/app ci --job ci/baseline --matrix os=ubuntu-latest",
+        "node bin/app ci --job ci/baseline --matrix os=ubuntu-latest --execute --json"
+      ],
+      "options": [
+        {
+          "name": "job",
+          "kind": "value",
+          "description": "Job to reproduce, as <workflow-file-stem>/<job-id> (for example ci/baseline); see ci --list."
+        },
+        {
+          "name": "matrix",
+          "kind": "value",
+          "description": "Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-latest); required when an expression computes the matrix."
+        },
+        {
+          "name": "list",
+          "kind": "flag",
+          "description": "List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility."
+        },
+        {
+          "name": "execute",
+          "kind": "flag",
+          "description": "Run the job's run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed."
         },
         {
           "name": "dry-run",

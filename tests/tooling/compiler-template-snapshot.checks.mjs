@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { relocateFrameworkDocuments } from '../../bin/compiler/emitters/framework-docs.ts';
+import { frameworkBanner } from '../../bin/compiler/emitters/framework-scope.ts';
 import { templateRootFiles, templateRoots as roots } from '../../bin/compiler/domain/template-inputs.ts';
 
 // README.md and AGENTS.md exist at both homes in a generated project: the product's at the root, the framework's under docs/framework/.
@@ -35,11 +36,11 @@ test('a generated project snapshots relocated framework documents from docs/fram
   }
   assert.ok(paths.includes('package.json'));
   assert.ok(!paths.includes('.github/workflows/ci.yml'), 'the product CI is not framework input');
-  // Relocation keeps the framework copies; the product README/AGENTS.md never replace them.
+  // Relocation keeps the framework copies (marked as framework reference); the product README/AGENTS.md never replace them.
   const entries = new Map(snapshot.frameworkFiles.map(file => [file.path, { ...file }]));
   relocateFrameworkDocuments(entries);
-  assert.equal(entries.get('docs/framework/README.md').content, '# README.md\n');
-  assert.equal(entries.get('docs/framework/AGENTS.md').content, '# AGENTS.md\n');
+  assert.equal(entries.get('docs/framework/README.md').content, frameworkBanner + '\n\n# README.md\n');
+  assert.equal(entries.get('docs/framework/AGENTS.md').content, frameworkBanner + '\n\n# AGENTS.md\n');
   assert.equal(entries.get('docs/framework/workflows/ci.yml').content, 'framework ci\n');
   assert.ok(!entries.has('README.md') && !entries.has('AGENTS.md'));
 });
