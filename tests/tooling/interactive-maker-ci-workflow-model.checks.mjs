@@ -46,6 +46,15 @@ test('ci.yml exposes its known jobs, triggers and resolved YAML anchors', async 
   const summary = summarizeWorkflow(ci).jobs.find(entry => entry.id === 'showcase');
   assert.equal(summary.reference, 'ci/showcase'); assert.equal(summary.matrix.computed, true);
 });
+test('the CI result job aggregates every ci.yml gate job and nothing informational', async () => {
+  const ci = (await loadWorkflows(root)).find(item => item.stem === 'ci');
+  const result = ci.jobs.find(entry => entry.id === 'ci-result');
+  assert.equal(result.name, 'CI result'); assert.equal(result.condition, 'always()');
+  const gates = ci.jobs.map(entry => entry.id).filter(id => !['ci-result', 'security-audit'].includes(id));
+  assert.deepEqual([...result.needs].sort(), gates.sort(), 'a new ci.yml job must join the required CI result check');
+  assert.ok(!result.needs.includes('security-audit'), 'the informational audit never blocks the required check');
+  assert.match(result.steps.map(step => step.run ?? '').join('\n'), /select\(\.value\.result != "success" and \.value\.result != "skipped"\)[\s\S]*exit 1/);
+});
 test('application-docs owns the folded command-handbook checks and site build', async () => {
   const docs = (await loadWorkflows(root)).find(item => item.stem === 'application-docs');
   assert.deepEqual(docs.jobs.map(entry => entry.id), ['qualify', 'site']);
