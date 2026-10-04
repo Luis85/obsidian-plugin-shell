@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { parse } from 'yaml';
@@ -157,7 +158,10 @@ test('[PROJECTS-09] sync refuses to write anything while one project workflow ca
 test('[PROJECTS-10] this checkout: every project is standalone, linked to its prototypes and synced, and every shell workflow is isolated', async () => {
   const result = await checkProjects(repository);
   assert.equal(result.status, 'passed', result.failures.join('\n'));
-  assert.ok(result.projects.some(project => project.name === 'companion' && project.prototypes.includes('docs/concepts/companion')));
+  // Source archives export-ignore projects/ (.gitattributes); there the shell must still pass with no projects at all.
+  const archived = !existsSync(join(repository, 'projects', 'companion'));
+  assert.equal(archived || result.projects.some(project => project.name === 'companion' && project.prototypes.includes('docs/concepts/companion')), true);
+  if (archived) assert.deepEqual([result.projects, result.syncedWorkflows], [[], []]);
 });
 
 test('[PROJECTS-11] the projects tooling, boundary workflow and synced copies never reach a framework kit or a generated project', () => {
