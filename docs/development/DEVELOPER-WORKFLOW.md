@@ -1,7 +1,7 @@
 # Developer workflow
 
 **Current applicability:** Read the [capability matrix](../product/PRD.md#current-capabilities)
-and [iteration 03 plan](ITERATION-THREE-PLAN.md). The repository now has a real
+and [iteration 03 plan](../_archive/development/ITERATION-THREE-PLAN.md). The repository now has a real
 Vue/Obsidian plugin, application services and pinned toolchain. Reviewed setup,
 identity/resume, contained settings migration and note-feature/entity makers are
 implemented. Broader maker recipes and release automation remain planned.
@@ -18,7 +18,7 @@ node scripts/harness/serve-style-fixture.mjs --port 4174
 node --test tests/harness-styles/server.test.mjs
 ```
 
-Inspect light/dark controls, settings, notices and a modal in the printed loopback URL. These are isolated appearance/interaction specimens; they create no notes and do not run Vue or native Obsidian. See [host-style documentation](../testing/HARNESS-STYLES.md) and the [review evidence](../reviews/2026-09-22-product-review.md).
+Inspect light/dark controls, settings, notices and a modal in the printed loopback URL. These are isolated appearance/interaction specimens; they create no notes and do not run Vue or native Obsidian. See [host-style documentation](../testing/HARNESS-STYLES.md) and the [review evidence](../_archive/reviews/2026-09-22-product-review.md).
 
 ## 2. First setup and generated note feature
 

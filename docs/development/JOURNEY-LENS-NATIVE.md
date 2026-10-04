@@ -3,7 +3,7 @@
 This implementation connects the maintained Vue 3 / Nuxt UI / Vue Flow editor to
 a generated plugin. It does not wrap the prototype HTML or infer an editor engine
 from a static page design. Native-host acceptance remains a separate executable
-check; see [implementation and evidence](../testing/JOURNEY-LENS-NATIVE-IMPLEMENTATION.md).
+check; see [implementation and evidence](../_archive/testing/JOURNEY-LENS-NATIVE-IMPLEMENTATION.md).
 
 ## Declare the editor
 

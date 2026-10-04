@@ -127,7 +127,7 @@ but is not cross-process compare-and-delete. Plugin-data transactions serialize
 inside one runtime, not across processes. Automatic schema migrations, general
 query/index platforms and broad mobile support are outside this increment.
 
-Use the [readiness ledger](TEMPLATE-READINESS-LEDGER.md) and current execution record
+Use the [readiness ledger](../_archive/development/TEMPLATE-READINESS-LEDGER.md) and current execution record
 to distinguish available abstractions, verified assertions and remaining production
 qualification. The release profile stays blocked until its actual requirements
 and separate owner authorization are satisfied.

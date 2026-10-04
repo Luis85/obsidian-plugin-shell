@@ -1,6 +1,6 @@
 # Framework CLI and developer-kit workflow
 
-Implementation on PR #18, 2026-09-25. This is a developer-facing TypeScript CLI and assembled ZIP workflow, not a published framework release or native companion conversion. The [framework-first plan](FRAMEWORK-CLI-GENERATOR-PLAN.md) remains broader than the implemented and qualified scope below.
+Implementation on PR #18, 2026-09-25. This is a developer-facing TypeScript CLI and assembled ZIP workflow, not a published framework release or native companion conversion. The [framework-first plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) remains broader than the implemented and qualified scope below.
 
 ## Start a new plugin from a starter
 
@@ -335,4 +335,4 @@ Fixture commands reuse the real exported fixture engine, validators and ownershi
 
 Existing MJS makers, file plans, fixture and release services are reused unchanged or selectively reconciled; their full TypeScript migration, unified legacy/current metadata, arbitrary source migrations and broader native/runtime adapters remain follow-on scope. Do not describe the 57-task backlog as complete because the central workflow runs.
 
-The [continuation record](../testing/PR18-CLI-CONTINUATION.md) records the latest reconciliation and regression evidence; the [earlier execution record](../testing/FRAMEWORK-CLI-IMPLEMENTATION.md) distinguishes local tests, actual ZIP extraction, generated-consumer CI, native qualification and publication. SH-022/SH-034 and companion conversion/publication gates remain blocked until their actual evidence and separate authorizations exist.
+The [continuation record](../_archive/testing/PR18-CLI-CONTINUATION.md) records the latest reconciliation and regression evidence; the [earlier execution record](../_archive/testing/FRAMEWORK-CLI-IMPLEMENTATION.md) distinguishes local tests, actual ZIP extraction, generated-consumer CI, native qualification and publication. SH-022/SH-034 and companion conversion/publication gates remain blocked until their actual evidence and separate authorizations exist.

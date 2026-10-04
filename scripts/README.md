@@ -4,7 +4,7 @@ The developer CLI starts at `bin/app` (run `node bin/app <command>`) and its who
 This folder holds real scripts plus three justified non-tooling holdings: the typed contract zones in
 `contracts/` and `shared/`, the starter schema data in `starters/` and the companion contract library in
 `companion/` (its tooling entries are in `companion-tools/`). Each remaining item and its reason is listed in
-[scripts consolidation](../docs/development/SCRIPTS-CONSOLIDATION.md).
+[scripts consolidation](../docs/_archive/development/SCRIPTS-CONSOLIDATION.md).
 
 ## Implemented now
 
@@ -21,7 +21,7 @@ node scripts/testing/verify-baseline.mjs --profile release --json
 The first can pass for this retained baseline. The second intentionally reports
 blocked with exit 2: its legacy acceptance inventory is separate from current
 `npm run verify`, native evidence and candidate operations. See the
-[readiness ledger](../docs/development/TEMPLATE-READINESS-LEDGER.md).
+[readiness ledger](../docs/_archive/development/TEMPLATE-READINESS-LEDGER.md).
 
 Reports go to unique ignored folders under reports/. No cached report is treated as a test execution. Errors/unknown schema/empty or skipped tests fail. Node test workers use synthetic isolated temporary directories, not user vaults.
 

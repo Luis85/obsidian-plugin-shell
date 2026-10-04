@@ -2,7 +2,7 @@
 
 > **Status:** Full implementation contract. Iteration 04 implements [maintenance discovery/configuration](MAINTENANCE-OPERATIONS.md), safe version preparation and [fixed-commit retained-asset rehearsal](RELEASE-REHEARSAL.md). The subsequent [opt-in local executor](RELEASE-EXECUTION.md) implements authenticated draft/upload/promotion operations; the privileged Actions interface and real first/subsequent public-release qualification remain open. No publication or permissions change is authorized by this document.
 
-This guide implements the workflow intent of [PRD sections 5, 15, and 17](../product/PRD.md). [Research references R01–R35](../research/2026-09-22-template-research.md) identify the primary sources. Policy values below are chosen defaults, not vendor guarantees.
+This guide implements the workflow intent of [PRD sections 5, 15, and 17](../product/PRD.md). [Research references R01–R35](../_archive/research/2026-09-22-template-research.md) identify the primary sources. Policy values below are chosen defaults, not vendor guarantees.
 
 ## 1. The maintenance principle
 

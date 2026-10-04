@@ -5,7 +5,7 @@ when stdin/stderr are terminals with raw-input support. Run `node bin/app`,
 `node bin/app sketch`, `node bin/app brainstorm` or `node bin/app prototype`. The same TypeScript code
 ships in the pre-install compiled kit; no additional package or runtime is needed.
 The library comparison and design rationale are in
-[CLI TUI research](../docs/research/CLI-TUI-RESEARCH.md).
+[CLI TUI research](../docs/_archive/research/CLI-TUI-RESEARCH.md).
 
 ```sh
 node bin/app studio --ui tui

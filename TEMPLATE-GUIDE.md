@@ -4,12 +4,12 @@
 
 Executable qualification now adds input-bound framework evidence, case-specific
 acceptance reports, measured production maintainability, and explicit native
-performance/resource protocols. See the [plan](docs/development/EXECUTABLE-QUALIFICATION-PLAN.md)
-and [execution record](docs/testing/EXECUTABLE-QUALIFICATION.md) for actual results
+performance/resource protocols. See the [plan](docs/_archive/development/EXECUTABLE-QUALIFICATION-PLAN.md)
+and [execution record](docs/_archive/testing/EXECUTABLE-QUALIFICATION.md) for actual results
 and remaining scope. This does not establish complete template release readiness.
 
 The integration baseline includes [opt-in release execution](docs/development/RELEASE-EXECUTION.md)
-from a retained candidate. [Readiness ledger](docs/development/TEMPLATE-READINESS-LEDGER.md)
+from a retained candidate. [Readiness ledger](docs/_archive/development/TEMPLATE-READINESS-LEDGER.md)
 tracks remaining requirements; real publication and the privileged Actions interface
 remain unqualified. No release has been published by this implementation task.
 
@@ -38,8 +38,8 @@ the shared services own persistence, native integration, feedback and cleanup.
 | Maintenance and packaging | [Freshness reporting](docs/development/MAINTENANCE-OPERATIONS.md) and [fixed-candidate rehearsal](docs/development/RELEASE-REHEARSAL.md) |
 | Release operations | [Authenticated planning, explicit execution and recovery](docs/development/RELEASE-EXECUTION.md) |
 
-**Qualification:** See the [runtime-authoring record](docs/testing/RUNTIME-AUTHORING.md)
-and historical [iteration 04 verification record](docs/testing/ITERATION-FOUR.md)
+**Qualification:** See the [runtime-authoring record](docs/_archive/testing/RUNTIME-AUTHORING.md)
+and historical [iteration 04 verification record](docs/_archive/testing/ITERATION-FOUR.md)
 for actual execution scope. Whole-production coverage is a blocking gate,
 with an independent stricter domain/application/features gate. The official Obsidian lint
 integration still installs nested ESLint 9.39.5; zero audit findings do not close
@@ -125,8 +125,8 @@ repositories/events are runtime-scoped.
 Start building in [src/features](src/features/README.md): define business fields,
 an optional document recipe, and add one typed registration entry. The template
 wires repositories and lifecycle for you. See [Build a feature](docs/development/BUILD-A-FEATURE.md),
-the [API/compatibility guide](docs/development/ITERATION-THREE.md)
-and [implementation plan](docs/development/ITERATION-THREE-PLAN.md). No generic service
+the [API/compatibility guide](docs/_archive/development/ITERATION-THREE.md)
+and [implementation plan](docs/_archive/development/ITERATION-THREE-PLAN.md). No generic service
 needs a Task-specific branch.
 
 ## Verify
@@ -144,7 +144,7 @@ The current `verify` runs the build, strict runtime/Vue/harness/test types, both
 linters, source/locale/architecture/presentation checks, the zero-finding analyzer,
 Vitest and coverage gates, token/artifact checks, the retained repeated Node
 baseline, and harness build. Served E2E is explicit and separate. This is not the
-complete PRD release gate. See the [current test record](docs/testing/ITERATION-FOUR.md)
+complete PRD release gate. See the [test record](docs/_archive/testing/ITERATION-FOUR.md)
 for actual execution results and coverage scope.
 
 `npm run help` lists commands. Setup dry-run works without project dependencies and
@@ -196,19 +196,19 @@ release promotion require separate evidence and authorization.
 
 | Document | Purpose |
 | --- | --- |
-| [Iteration-four plan](docs/development/ITERATION-FOUR-PLAN.md) | Baseline gaps, coordinated ownership and acceptance order. |
-| [Iteration-four review](docs/development/ITERATION-FOUR-REVIEW.md) | Independent findings, fixes and remaining limitations. |
-| [Iteration-three guide](docs/development/ITERATION-THREE.md) | Executable entity/repository API, compatibility, safety and remaining scope. |
-| [Iteration-three review](docs/development/ITERATION-THREE-REVIEW.md) | Independent findings, regression fixes and improvement pass. |
-| [Iteration-two guide](docs/development/ITERATION-TWO.md) | Historical layout/header operation, build/install and dependency decisions. |
-| [Iteration-two review](docs/development/ITERATION-TWO-REVIEW.md) | Evidence, fixes, regressions and remaining risks. |
-| [Iteration-one guide](docs/development/ITERATION-ONE.md) | Historical installation and architecture context; the iteration-three guide supplies current capabilities. |
-| [Current test record](docs/testing/ITERATION-FOUR.md) | Actual tests, coverage denominators, native/served evidence and remaining gaps. |
+| [Iteration-four plan](docs/_archive/development/ITERATION-FOUR-PLAN.md) | Baseline gaps, coordinated ownership and acceptance order. |
+| [Iteration-four review](docs/_archive/development/ITERATION-FOUR-REVIEW.md) | Independent findings, fixes and remaining limitations. |
+| [Iteration-three guide](docs/_archive/development/ITERATION-THREE.md) | Executable entity/repository API, compatibility, safety and remaining scope. |
+| [Iteration-three review](docs/_archive/development/ITERATION-THREE-REVIEW.md) | Independent findings, regression fixes and improvement pass. |
+| [Iteration-two guide](docs/_archive/development/ITERATION-TWO.md) | Historical layout/header operation, build/install and dependency decisions. |
+| [Iteration-two review](docs/_archive/development/ITERATION-TWO-REVIEW.md) | Evidence, fixes, regressions and remaining risks. |
+| [Iteration-one guide](docs/_archive/development/ITERATION-ONE.md) | Historical installation and architecture context; the iteration-three guide supplies current capabilities. |
+| [Test record](docs/_archive/testing/ITERATION-FOUR.md) | Actual tests, coverage denominators, native/served evidence and remaining gaps. |
 | [PRD](docs/product/PRD.md) | Complete product requirements and retained baseline. |
-| [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
+| [Nuxt UI implementation plan](docs/_archive/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
 | [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Required evidence model and verification architecture. |
-| [TypeScript quality-tool research](docs/research/2026-09-23-typescript-quality-tools.md) | Repository-specific assessment, compatibility caveats and primary sources. |
-| [Quality-tool adoption plan](docs/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) | Proposed additional tools, negative controls and CI placement; not blanket implementation claims. |
+| [TypeScript quality-tool research](docs/_archive/research/2026-09-23-typescript-quality-tools.md) | Repository-specific assessment, compatibility caveats and primary sources. |
+| [Quality-tool adoption plan](docs/_archive/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) | Proposed additional tools, negative controls and CI placement; not blanket implementation claims. |
 | [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Retained full contract; the authoring guide states executable recipes and limitations. |
 | [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Full entity-to-Markdown contract. |
 | [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Canonical outcomes, recovery and notification roadmap. |

@@ -272,4 +272,4 @@ remain active alongside detailed component styles.
 
 ## Local-review reconciliation
 
-The previously unpushed fixture/relationship patch is integrated with the current providers and composition code. See [the reconciliation and fixture workflow](GENERATOR-FIXTURES-AND-RELATIONSHIPS.md). The existing `testdata:*` commands and strict whole-graph relationship policy remain canonical.
+The previously unpushed fixture/relationship patch is integrated with the current providers and composition code. See [the reconciliation and fixture workflow](../_archive/development/GENERATOR-FIXTURES-AND-RELATIONSHIPS.md). The existing `testdata:*` commands and strict whole-graph relationship policy remain canonical.

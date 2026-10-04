@@ -54,7 +54,7 @@ The supplied plan is revised in [COMPANION-IMPROVEMENT-PLAN.md](../product/COMPA
 
 ## Retained authorities
 
-The [parent PRD](../product/PRD.md), its baseline/specification companions, the [full companion requirements baseline](../product/COMPANION-REQUIREMENTS-0.3.md), [readiness ledger](../development/TEMPLATE-READINESS-LEDGER.md) and historical evidence records are retained. This crosswalk adds delivery tasks; it does not replace their requirement IDs, waive unexecuted acceptance cases or promote old results.
+The [parent PRD](../product/PRD.md), its baseline/specification companions, the [full companion requirements baseline](../_archive/product/COMPANION-REQUIREMENTS-0.3.md), [readiness ledger](../_archive/development/TEMPLATE-READINESS-LEDGER.md) and historical evidence records are retained. This crosswalk adds delivery tasks; it does not replace their requirement IDs, waive unexecuted acceptance cases or promote old results.
 
 ## CLI and release-archive brainstorm crosswalk — 2026-09-24
 
@@ -73,7 +73,7 @@ The [parent PRD](../product/PRD.md), its baseline/specification companions, the 
 | Ship shell/generator/CLI before native companion | SH-022 → SH-034 → CP-001; CX-007 remains required. |
 | Framework-side discover/plan/apply/results/recovery integration | SH-033 before shipment; CP-004/CP-008 provide later native UI. |
 
-All original E01–E12 and 18-section scope remains accounted for. New IDs extend rather than renumber the backlog. The [detailed plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) defines the journey and the [bounded PR review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md) distinguishes available evidence from remaining gaps.
+All original E01–E12 and 18-section scope remains accounted for. New IDs extend rather than renumber the backlog. The [detailed plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) defines the journey and the [bounded PR review](../_archive/development/PR5-FRAMEWORK-READINESS-REVIEW.md) distinguishes available evidence from remaining gaps.
 
 ## PR #20 generator integration — 2026-09-25
 

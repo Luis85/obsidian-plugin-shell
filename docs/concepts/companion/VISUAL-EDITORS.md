@@ -2,7 +2,7 @@
 
 > Current page and component editors of the companion concept (2026-09-26). They replace the Vue Flow detail editors
 > described in [DETAIL-EDITORS.md](DETAIL-EDITORS.md) and [COMPOSITION.md](COMPOSITION.md), which are now historical.
-> Binding design: [visual editors spec](../../superpowers/specs/2026-09-26-visual-editors-design.md) (including its
+> Binding design: [visual editors spec](../../_archive/superpowers/specs/2026-09-26-visual-editors-design.md) (including its
 > §11 refinements and §13 component library dependencies). Executed evidence and untested scope:
 > [VISUAL-EDITORS-VERIFICATION.md](VISUAL-EDITORS-VERIFICATION.md).
 

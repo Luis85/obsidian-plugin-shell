@@ -177,7 +177,7 @@ Updating an existing Task is a separate capability. It must respect edited bodie
 
 A Meeting can define subject, meeting date/time, attendees, and a Notes/Decisions body. A Project can define name, status, a numeric budget, and a boolean archived field. Each has its own validation and document mapping, but uses the same service, renderer, and host writer.
 
-Do not silently give a shared property name different host types in each entity. In Obsidian, an assigned property type applies by name across the vault. Local entity metadata does not register a host type; use consistent names or deliberate namespacing and test actual Properties UI behavior. [Research D01](../research/2026-09-22-entity-documents.md)
+Do not silently give a shared property name different host types in each entity. In Obsidian, an assigned property type applies by name across the vault. Local entity metadata does not register a host type; use consistent names or deliberate namespacing and test actual Properties UI behavior. [Research D01](../_archive/research/2026-09-22-entity-documents.md)
 
 A domain entity without a Markdown representation remains possible: leave off the document recipe. Document-backed entities do not imply that all runtime state must become notes.
 

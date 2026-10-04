@@ -79,7 +79,7 @@ The adapter passes the original local ID to public `Plugin.removeCommand`, since
 that method adds the plugin prefix. `addCommand` returns an already-prefixed ID;
 passing it back would prefix it twice. This behavior was inspected in the installed
 Obsidian 1.13.7 application code and is also exercised by the isolated native
-qualification probe before plugin unload. The [verification record](../testing/ITERATION-THREE.md)
+qualification probe before plugin unload. The [verification record](../_archive/testing/ITERATION-THREE.md)
 records its successful execution in three fresh native runs. Synthetic tests deliberately model the
 prefixed return value instead of hiding this distinction.
 

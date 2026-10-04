@@ -19,11 +19,11 @@ The shell, CLI, compiler and visual authoring are complementary Workbench capabi
 
 The repository delivers a proper reusable **shell foundation first**. The authoring product is a demanding consumer of that foundation, not a shortcut around unfinished shell capabilities. After SH-022 technical readiness, SH-034 separately authorized framework shipment and reviewed CX-007 conversion scope, integrate the concept into a real Obsidian plugin using the same maintained shell runtime, feature APIs, styles and tooling. Qualify that plugin before publication.
 
-The [delivery strategy](DELIVERY-STRATEGY.md) and [improvement plan](COMPANION-IMPROVEMENT-PLAN.md) supersede the earlier milestone ordering. They do not withdraw the retained requirements, safety rules or scope distinctions. The full previous PRD is preserved byte-for-byte as [requirements baseline 0.3](COMPANION-REQUIREMENTS-0.3.md); its FR identifiers and detailed contracts remain references. Where its historical milestone order or priority labels conflict with the current strategy, the current strategy governs scheduling. A former P0 companion requirement does not outrank shell prerequisites.
+The [delivery strategy](DELIVERY-STRATEGY.md) and [improvement plan](COMPANION-IMPROVEMENT-PLAN.md) supersede the earlier milestone ordering. They do not withdraw the retained requirements, safety rules or scope distinctions. The full previous PRD is preserved byte-for-byte as [requirements baseline 0.3](../_archive/product/COMPANION-REQUIREMENTS-0.3.md); its FR identifiers and detailed contracts remain references. Where its historical milestone order or priority labels conflict with the current strategy, the current strategy governs scheduling. A former P0 companion requirement does not outrank shell prerequisites.
 
 ## Two sequences, deliberately different
 
-**Repository delivery:** qualify and ship the standalone shell + TypeScript CLI + JSON generator developer kit → native Workbench authoring on that shipped framework with a reviewed conversion scope → native qualification → authorized publication. Concept refinement remains secondary/parallel. See the [CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
+**Repository delivery:** qualify and ship the standalone shell + TypeScript CLI + JSON generator developer kit → native Workbench authoring on that shipped framework with a reviewed conversion scope → native qualification → authorized publication. Concept refinement remains secondary/parallel. See the [CLI/generator plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
 
 **Eventual developer journey, native authoring path:** install Workbench → define/design one project → optionally add the reusable shell → review generated source → build/test in an isolated vault → keep developing with or without Workbench authoring. This is the retained Obsidian workflow, not the complete cross-target journey defined by the vision.
 
@@ -39,7 +39,7 @@ The [concept tasks](../tasks/README.md#concept-development-p1) maintain an expli
 
 The shell must provide reusable composition/lifecycle, Markdown and plugin-data persistence, settings/path configuration, events/errors/feedback/localization, scoped styles and token export, source-operation contracts, deterministic fixtures, shared operation plans and recovery, standalone template export, additive preparation, generation primitives and input-bound verification.
 
-Design-to-code compilation belongs to shared tooling over the existing maker/planner implementation. A data-only compatibility/capability contract drives UI forms; the companion must not maintain another installer, persistence writer or generator. Not every existing capability needs rewriting: inspect the [current authoring tools](../development/AUTHORING-TOOLS.md) and [readiness ledger](../development/TEMPLATE-READINESS-LEDGER.md).
+Design-to-code compilation belongs to shared tooling over the existing maker/planner implementation. A data-only compatibility/capability contract drives UI forms; the companion must not maintain another installer, persistence writer or generator. Not every existing capability needs rewriting: inspect the [current authoring tools](../development/AUTHORING-TOOLS.md) and [readiness ledger](../_archive/development/TEMPLATE-READINESS-LEDGER.md).
 
 ## Native conversion acceptance
 

@@ -11,9 +11,9 @@ The runtime-authoring milestone extends iteration 04 with narrow event contracts
 source-derived catalogs and an optional plugin-data Items workflow. Read
 [README](../../README.md), [authoring](AUTHORING-TOOLS.md),
 [plugin-data semantics](PLUGIN-DATA-ENTITIES.md), the
-[milestone plan](RUNTIME-AUTHORING-PLAN.md), the current
-[execution record](../testing/RUNTIME-AUTHORING.md) and the historical
-[iteration-four test record](../testing/ITERATION-FOUR.md) first. The
+[milestone plan](../_archive/development/RUNTIME-AUTHORING-PLAN.md), the current
+[execution record](../_archive/testing/RUNTIME-AUTHORING.md) and the historical
+[iteration-four test record](../_archive/testing/ITERATION-FOUR.md) first. The
 [PRD](../product/PRD.md) and retained normative companions remain the complete
 target; qualification and release authorization are separate.
 
@@ -22,10 +22,10 @@ target; qualification and release authorization are separate.
 The executable qualification extension adds trusted evidence producers, an
 additive acceptance crosswalk, full production maintainability gates and explicit
 native resource/performance protocols. Read its
-[plan](EXECUTABLE-QUALIFICATION-PLAN.md),
+[plan](../_archive/development/EXECUTABLE-QUALIFICATION-PLAN.md),
 [evidence guide](../testing/EXECUTABLE-EVIDENCE.md),
 [metric scope](MAINTAINABILITY.md) and
-[execution record](../testing/EXECUTABLE-QUALIFICATION.md) for current scope.
+[execution record](../_archive/testing/EXECUTABLE-QUALIFICATION.md) for current scope.
 Every legacy acceptance row/mode and the blocked release profile are kept.
 Read-only report validation is not proof of honest execution or release
 authorization.
@@ -50,4 +50,4 @@ relevant tests.
 The code-line counting policy (400 handwritten runtime/CSS/script lines, 450 for
 tests/helpers, 100 for `main.ts`, counted as nonblank lines containing code) is the
 owner-requested iteration 03 policy. It supersedes the older physical-line rule;
-see [iteration three](ITERATION-THREE.md).
+see [iteration three](../_archive/development/ITERATION-THREE.md).

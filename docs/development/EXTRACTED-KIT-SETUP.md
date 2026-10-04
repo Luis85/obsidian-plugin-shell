@@ -45,5 +45,5 @@ Build output, reports and installed dependencies are deliberately outside this
 source fingerprint: installing dependencies or writing evidence must not make
 its own input stale. This is bounded local input tracking, not whole-repository
 attestation, installed-package integrity or authenticated acceptance evidence.
-Read the [custom-folder recovery record](../testing/SETUP-CUSTOM-ROOTS.md) for the
+Read the [custom-folder recovery record](../_archive/testing/SETUP-CUSTOM-ROOTS.md) for the
 reproduced defect and exact verification scope.

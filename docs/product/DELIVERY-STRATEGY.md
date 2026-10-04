@@ -2,7 +2,7 @@
 
 Repository overview: [shell-first delivery](../../SHELL-FIRST-OVERVIEW.md). The [root README](../../README.md) remains the current template operational guide.
 
-**Decision date:** 2026-09-24. **Status:** Owner-directed delivery order; implementation, qualification and publication approval remain outstanding. Read with the [parent PRD](PRD.md), [companion PRD](COMPANION-PLUGIN-PRD.md), [improvement plan](COMPANION-IMPROVEMENT-PLAN.md), [CLI/generator implementation plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [task index](../tasks/README.md).
+**Decision date:** 2026-09-24. **Status:** Owner-directed delivery order; implementation, qualification and publication approval remain outstanding. Read with the [parent PRD](PRD.md), [companion PRD](COMPANION-PLUGIN-PRD.md), [improvement plan](COMPANION-IMPROVEMENT-PLAN.md), [CLI/generator implementation plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [task index](../tasks/README.md).
 
 ## Decision and precedence
 
@@ -25,7 +25,7 @@ Existing requirements, safety boundaries, quality thresholds and evidence invent
 
 Implementation increments are baseline/Windows-CI reconciliation (SH-023), shared TypeScript core (SH-024), CLI (SH-025), runnable archive (SH-026), setup/import (SH-027), complete project generation (SH-028), lifecycle (SH-029), maintenance (SH-030), generated-plugin release tooling (SH-031), exact-archive qualification (SH-032) and framework-side companion contract proof (SH-033). Existing SH-001–SH-021 remain prerequisites, not replaced tasks. Follow task dependencies; the increment list is not permission to ignore parallel prerequisites.
 
-Use the [PR #5 review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md) to reconcile PR #17's missing discovery work and observed Windows failures before porting/rebuilding capabilities. P1 work must not delay P0 prerequisites. Headless companion protocol tests belong to framework delivery; native companion screens/persistence do not.
+Use the [PR #5 review](../_archive/development/PR5-FRAMEWORK-READINESS-REVIEW.md) to reconcile PR #17's missing discovery work and observed Windows failures before porting/rebuilding capabilities. P1 work must not delay P0 prerequisites. Headless companion protocol tests belong to framework delivery; native companion screens/persistence do not.
 
 ## Gate G1: framework technically ready — SH-022
 

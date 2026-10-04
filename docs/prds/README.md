@@ -2,7 +2,7 @@
 
 ## Current PR #5 status
 
-The [integrated product review](../product/PR5-PRODUCT-REVIEW.md) inspects PR #5 at `ec70e2cee7d8aed6e794a15252b2b9cc48b05dcf` on 2026-09-27. The [improvement and polishing plan](../product/PR5-IMPROVEMENT-PLAN.md) reconciles all ten original work packages and A01–A20 against implemented source and remaining acceptance. The [evidence record](../testing/PR5-REVIEW-EVIDENCE.md) separates hosted artifacts, local reproduction and unexecuted modes.
+The [integrated product review](../_archive/product/PR5-PRODUCT-REVIEW.md) inspects PR #5 at `ec70e2cee7d8aed6e794a15252b2b9cc48b05dcf` on 2026-09-27. The [improvement and polishing plan](../_archive/product/PR5-IMPROVEMENT-PLAN.md) reconciles all ten original work packages and A01–A20 against implemented source and remaining acceptance. The [evidence record](../_archive/testing/PR5-REVIEW-EVIDENCE.md) separates hosted artifacts, local reproduction and unexecuted modes.
 
 The real integrated v6 authoring editor, dedicated compiler, independent generated clickdummy, concept intake, 11 starters and optional tooling now exist. They are not the complete native companion or an authorized published release. Historical plans and execution records must not be interpreted as current blanket completion or blanket absence of implementation.
 

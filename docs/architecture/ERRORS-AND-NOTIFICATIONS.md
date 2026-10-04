@@ -5,7 +5,7 @@
 > executable owned timing/queue/action policies; see
 > [runtime services](../development/RUNTIME-SERVICES.md) for exact behavior and
 > remaining qualification. The historical stylesheet specimen is separate.
-> **Sources:** [Review research](../research/2026-09-22-reliability-harness-review.md), P01–P12.
+> **Sources:** [Review research](../_archive/research/2026-09-22-reliability-harness-review.md), P01–P12.
 
 ## 1. One outcome, one feedback owner
 

@@ -5,7 +5,7 @@
 > [maker catalog](AUTHORING-TOOLS.md). Recipe details and bounds in that current guide
 > supersede historical pending descriptions; examples below are not blanket executable claims.
 > **Requirements:** TOOL-01–06, SETUP-01–12, MAKE-01–12, extended by DOC-19 for entities.  
-> **Related:** [PRD](../product/PRD.md), [entity documents](ENTITY-DOCUMENTS.md), [DocumentCreationService](../architecture/DOCUMENT-CREATION.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
+> **Related:** [PRD](../product/PRD.md), [entity documents](ENTITY-DOCUMENTS.md), [DocumentCreationService](../architecture/DOCUMENT-CREATION.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
 
 ## 1. Fresh-checkout setup
 

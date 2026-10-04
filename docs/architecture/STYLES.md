@@ -2,7 +2,7 @@
 
 > **Contract:** PRD 0.3 extension; requirements CSS-01–12.  
 > **Status:** Required build/authoring behavior, not an implemented stylesheet pipeline.  
-> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
+> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
 
 ## 1. The intended result
 

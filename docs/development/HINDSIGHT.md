@@ -142,4 +142,4 @@ Durable shared knowledge remains reviewed Markdown under `docs/memory/decisions/
 
 `policy.ts`/`provider.ts` define consent and non-secret contracts; `install.ts` coordinates injected ports; `io.ts`/`sources.ts` handle bounded local/Git access; `desktop.ts`/`launcher.ts` plan native configuration and reviewed snapshots; `mcp.ts` delegates the official transport; `embedded.py` adapts the public Python SDK. The source launcher provides a central memory namespace, not a new typed framework-protocol operation. Full release-archive/native qualification remains separate.
 
-[Git/GitHub rationale](HINDSIGHT-GIT-GITHUB.md) · [Keyless desktop research](HINDSIGHT-DESKTOP-RESEARCH.md) · [Actual tests and live acceptance gaps](HINDSIGHT-VERIFICATION.md).
+[Git/GitHub rationale](HINDSIGHT-GIT-GITHUB.md) · [Keyless desktop research](../_archive/development/HINDSIGHT-DESKTOP-RESEARCH.md) · [Actual tests and live acceptance gaps](../_archive/development/HINDSIGHT-VERIFICATION.md).

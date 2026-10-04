@@ -64,7 +64,7 @@ Each acceptance record distinguishes contract, filesystem, generated consumer, b
 
 ## CLI and companion adapter refinement — 2026-09-24
 
-The [framework CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) controls the first shipment. Author CLI and shared tooling in TypeScript; distribute a compiled bootstrap runnable before dependency installation. CLI, setup wizard, individual makers, JSON compiler and companion adapter call shared operations rather than parse human output or fork behavior. Keep Node/process dependencies outside the native runtime bundle.
+The [framework CLI/generator plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) controls the first shipment. Author CLI and shared tooling in TypeScript; distribute a compiled bootstrap runnable before dependency installation. CLI, setup wizard, individual makers, JSON compiler and companion adapter call shared operations rather than parse human output or fork behavior. Keep Node/process dependencies outside the native runtime bundle.
 
 SH-033 qualifies a headless consumer of discovery, request/plan/apply/progress/result/recovery contracts before native conversion. It covers capabilities, protocol compatibility, source-bound receipts, denied execution, cancellation and fallback to a user-run CLI. Direct host execution is not assumed to be policy-approved or universally available. CP-004/CP-008 implement native presentation only after SH-022, SH-034 and CX-007.
 

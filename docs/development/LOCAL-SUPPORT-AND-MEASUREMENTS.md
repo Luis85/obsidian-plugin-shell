@@ -38,4 +38,4 @@ Use both representative complex projects and bounded size fixtures. A sixty-surf
 | Uncertain durable write | Preserve the current evidence and resolve ownership/storage before reload or another write. Do not retry blindly. |
 | Unsupported/future/corrupt data | Keep the original file and recovery copy. A support failure must not reset it. |
 
-See the [threat model](../security/COMPANION-THREAT-MODEL.md), [authoring guide](AUTHORING-EXPERIENCE.md) and [execution record](../testing/PR5-IMPROVEMENT-EXECUTION.md).
+See the [threat model](../security/COMPANION-THREAT-MODEL.md), [authoring guide](AUTHORING-EXPERIENCE.md) and [execution record](../_archive/testing/PR5-IMPROVEMENT-EXECUTION.md).

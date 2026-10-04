@@ -4,7 +4,7 @@
 
 Workbench is a developer-focused tool to create and manage declarative user interfaces for **webapps and Obsidian plugins**. Its three product promises are time savings without quality loss, documentation along the way, and developer experience. Read the [product vision](docs/product/PRODUCT-VISION.md), [principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md).
 
-**Documentation update:** 2026-09-29. The [vision review](docs/product/PR5-VISION-REVIEW.md) examined PR #5 at `15f74eaec78b5555bed94e4310472db841e371f7`. It is a product/documentation review, not a new runtime qualification. This filename is retained so existing links keep working.
+**Documentation update:** 2026-09-29. The [vision review](docs/_archive/product/PR5-VISION-REVIEW.md) examined PR #5 at `15f74eaec78b5555bed94e4310472db841e371f7`. It is a product/documentation review, not a new runtime qualification. This filename is retained so existing links keep working.
 
 ## One product, complementary capabilities
 
@@ -61,7 +61,7 @@ The [compiler implementation](bin/compiler/index.ts) emits readiness states with
 
 The [authoring guide](docs/concepts/companion/README.md) distinguishes the current browser concept, its v5 build base and the independently generated clickdummy. None is a substitute for full native Workbench acceptance. Preserve separate evidence for authored definitions, generated source, built previews, behavior tests, native operation and user acceptance.
 
-The [2026-09-27 integrated review](docs/product/PR5-PRODUCT-REVIEW.md), [improvement plan](docs/product/PR5-IMPROVEMENT-PLAN.md) and [evidence record](docs/testing/PR5-REVIEW-EVIDENCE.md) retain their historical scope. Their test counts, pending requirements, release observations and CI failure are not current-head claims. Recheck the exact candidate before closing a gate; neither old success nor an old blocker should be repeated as live status without that check.
+The [2026-09-27 integrated review](docs/_archive/product/PR5-PRODUCT-REVIEW.md), [improvement plan](docs/_archive/product/PR5-IMPROVEMENT-PLAN.md) and [evidence record](docs/_archive/testing/PR5-REVIEW-EVIDENCE.md) retain their historical scope. Their test counts, pending requirements, release observations and CI failure are not current-head claims. Recheck the exact candidate before closing a gate; neither old success nor an old blocker should be repeated as live status without that check.
 
 ## Delivery order remains explicit
 

@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
@@ -18,12 +19,16 @@ const paths = [...files.keys()];
 const scripts = JSON.parse(text('package.json')).scripts;
 
 test('[GENERATOR-SCOPE-01] the framework backlog, PRDs, reviews, research, milestone plans and records are not copied', () => {
-  const folders = ['docs/tasks', 'docs/prds', 'docs/reviews', 'docs/research', 'docs/superpowers', 'docs/product', 'docs/requirements', 'docs/memory', 'docs/testing/evidence'];
+  const folders = ['docs/_archive', 'docs/tasks', 'docs/prds', 'docs/reviews', 'docs/research', 'docs/superpowers', 'docs/product', 'docs/requirements', 'docs/memory', 'docs/testing/evidence'];
   for (const folder of folders) assert.deepEqual(paths.filter(path => path.startsWith(folder + '/')), [], folder);
-  for (const record of ['docs/development/RUNTIME-AUTHORING-PLAN.md', 'docs/development/ITERATION-FOUR-REVIEW.md', 'docs/development/ACCEPTANCE-CLOSURE-LEDGER.md',
-    'docs/testing/ITERATION-FOUR.md', 'docs/testing/RUNTIME-AUTHORING.md', 'docs/testing/runtime-authoring-plan.json']) {
-    for (const path of [record, record.replace(/^docs\//, 'docs/framework/')]) assert.ok(!files.has(path), path);
+  // Archived records exist in the source tree, so their absence below is the scope policy, not a missing input.
+  const archived = ['docs/_archive/development/RUNTIME-AUTHORING-PLAN.md', 'docs/_archive/development/ITERATION-FOUR-REVIEW.md', 'docs/_archive/development/ACCEPTANCE-CLOSURE-LEDGER.md',
+    'docs/_archive/testing/ITERATION-FOUR.md', 'docs/_archive/testing/RUNTIME-AUTHORING.md', 'docs/_archive/testing/runtime-authoring-plan.json', 'docs/_archive/testing/FIRST-RUN.md'];
+  for (const record of archived) {
+    assert.ok(existsSync(join(root, record)), `source ${record}`);
+    for (const path of [record, record.replace(/^docs\/_archive\//, 'docs/'), record.replace(/^docs\/_archive\//, 'docs/framework/')]) assert.ok(!files.has(path), path);
   }
+  assert.deepEqual(paths.filter(path => /(?:^|\/)_archive(?:\/|$)/.test(path)), [], 'nothing under docs/_archive ships, relocated or not');
   assert.ok(paths.every(path => !/(?:^|\/)(?:ITERATION|PR\d+)-/.test(path) || !path.startsWith('docs/')), 'no iteration or pull-request record under docs/');
   // The one planning surface left is the product's own.
   assert.ok(files.has('docs/project-tasks/TEMPLATE.md')); assert.ok(files.has('BRIEF.md'));
@@ -60,10 +65,11 @@ test('[GENERATOR-SCOPE-03] kept framework reference docs live under docs/framewo
 });
 test('[GENERATOR-SCOPE-04] scope helpers classify records, relocate guides and keep front matter first', () => {
   for (const record of ['docs/tasks/shell/x.md', 'docs/prds/a.md', 'docs/development/FOO-PLAN.md', 'docs/development/FOO-REVIEW-B.md', 'docs/development/ITERATION-TWO.md', 'docs/testing/2026-09-22-verification-record.md',
-    'docs/testing/MVP-CLOSURE-STATUS.md', 'docs/testing/iteration-two-plan.json', '.claude/skills/companion-prototype-design/SKILL.md']) assert.equal(frameworkOnlyPath(record), true, record);
+    'docs/testing/MVP-CLOSURE-STATUS.md', 'docs/testing/iteration-two-plan.json', '.claude/skills/companion-prototype-design/SKILL.md',
+    'docs/_archive/development/compiler/IMPLEMENTATION.md', 'docs/_archive/testing/OBSIDIAN-TEST-KIT.md', 'docs/testing/FIRST-RUN.md', 'docs/testing/OPTIONAL-STORYBOOK.md']) assert.equal(frameworkOnlyPath(record), true, record);
   for (const kept of ['docs/development/BUILD-A-FEATURE.md', 'docs/testing/OBSIDIAN-TEST-KIT.md', 'docs/testing/test-plan.json', 'docs/licenses/lucide.txt', 'docs/design/obsidian-tokens.json']) assert.equal(frameworkOnlyPath(kept), false, kept);
   assert.equal(referenceDocPath('docs/development/BUILD-A-FEATURE.md'), 'docs/framework/development/BUILD-A-FEATURE.md');
-  assert.equal(referenceDocPath('docs/testing/test-plan.json'), null); assert.equal(referenceDocPath('docs/tasks/a.md'), null); assert.equal(referenceDocPath('docs/x.md'), null);
+  assert.equal(referenceDocPath('docs/testing/test-plan.json'), null); assert.equal(referenceDocPath('docs/tasks/a.md'), null); assert.equal(referenceDocPath('docs/_archive/testing/ITERATION-FOUR.md'), null); assert.equal(referenceDocPath('docs/x.md'), null);
   assert.equal(withBanner('# T\n'), `${frameworkBanner}\n\n# T\n`);
   assert.equal(withBanner(withBanner('# T\n')), `${frameworkBanner}\n\n# T\n`);
   assert.equal(withBanner('---\nid: x\n---\n# T\n'), `---\nid: x\n---\n${frameworkBanner}\n\n# T\n`);

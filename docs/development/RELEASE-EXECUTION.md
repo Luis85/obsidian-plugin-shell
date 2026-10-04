@@ -85,6 +85,6 @@ This milestone supplies the local opt-in interface. All committed Actions jobs
 remain read-only; there is no privileged publication job or permission change.
 The standard Actions publication interface, automatic tag creation, real first/
 subsequent public-release qualification and directory submission remain open
-requirements in the [readiness ledger](TEMPLATE-READINESS-LEDGER.md). Synthetic
+requirements in the [readiness ledger](../_archive/development/TEMPLATE-READINESS-LEDGER.md). Synthetic
 remote tests qualify operation decisions and transport requests, not GitHub token
 permissions, successful public publication or real host acceptance.

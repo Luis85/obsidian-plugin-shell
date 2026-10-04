@@ -98,4 +98,4 @@ Product work still includes visual Vue Flow editors, any components without auth
 
 These references guide integration. Repository tests, not documentation links, establish the implemented behavior above.
 
-See [the local-review reconciliation](GENERATOR-FIXTURES-AND-RELATIONSHIPS.md) for shared translation, read-only checks, audits and queue disposal.
+See [the local-review reconciliation](../_archive/development/GENERATOR-FIXTURES-AND-RELATIONSHIPS.md) for shared translation, read-only checks, audits and queue disposal.

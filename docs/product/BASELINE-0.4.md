@@ -51,7 +51,7 @@ This revision retains AC-01–49 and adds AC-50–62. The following companion re
 
 The setup/maker/event/style decisions introduced in v0.3 remain. V0.4 adds note creation on an explicit requested action, not unsolicited note seeding. The original data.json-backed example and the note-backed Task recipe illustrate different persistence categories; they do not store the same Task twice. The entity maker extends the existing catalog rather than creating a separate generator system.
 
-Start with the [developer workflow](../development/DEVELOPER-WORKFLOW.md), [entity recipe](../development/ENTITY-DOCUMENTS.md), and [maintenance/release guide](../development/MAINTENANCE-AND-RELEASE.md). R01–R35 reference the [baseline research](../research/2026-09-22-template-research.md), S01–S14 the [tooling/events/styles supplement](../research/2026-09-22-setup-makers-events-styles.md), and D01–D05 the [document-creation research](../research/2026-09-22-entity-documents.md).
+Start with the [developer workflow](../development/DEVELOPER-WORKFLOW.md), [entity recipe](../development/ENTITY-DOCUMENTS.md), and [maintenance/release guide](../development/MAINTENANCE-AND-RELEASE.md). R01–R35 reference the [baseline research](../_archive/research/2026-09-22-template-research.md), S01–S14 the [tooling/events/styles supplement](../_archive/research/2026-09-22-setup-makers-events-styles.md), and D01–D05 the [document-creation research](../_archive/research/2026-09-22-entity-documents.md).
 
 ## 2. Users, outcomes, and developer experience
 

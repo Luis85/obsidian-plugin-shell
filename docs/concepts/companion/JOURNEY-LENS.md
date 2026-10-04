@@ -97,4 +97,4 @@ Apply updates the same saved journey and preserves surviving step IDs. Cancel
 or Escape discards only the draft. Undo/Redo restore exact committed states.
 Unsaved edits block Reload as well as navigation; cancel the draft deliberately
 before reloading a newer project. Failed saves never become successful writes.
-See the [execution and verification boundaries](../../testing/MVP-JOURNEY-MAINTENANCE.md).
+See the [execution and verification boundaries](../../_archive/testing/MVP-JOURNEY-MAINTENANCE.md).

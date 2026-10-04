@@ -88,6 +88,6 @@ Supporting measures are successful first-use completion, manual rework after gen
 
 ## Decision authority and related documents
 
-This document is the canonical source for **the Workbench name, positioning and product promises**. [Product principles](PRODUCT-PRINCIPLES.md) translate the vision into design and backlog decisions. The [PR #5 vision review](PR5-VISION-REVIEW.md) separates inspected implementation from intended direction.
+This document is the canonical source for **the Workbench name, positioning and product promises**. [Product principles](PRODUCT-PRINCIPLES.md) translate the vision into design and backlog decisions. The [PR #5 vision review](../_archive/product/PR5-VISION-REVIEW.md) separates inspected implementation from intended direction.
 
 The [documentation map](README.md) links the existing framework, authoring and MVP requirements. Their requirement IDs, detailed acceptance obligations and [delivery gates](DELIVERY-STRATEGY.md) remain in force. Resolving the product name does not rename the repository, executable, package, manifest ID, storage namespace, schema or generated consumer identity; it does not mark a task done or authorize a release.

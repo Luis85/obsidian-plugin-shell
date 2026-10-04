@@ -125,7 +125,7 @@ prove malformed workflow, unpinned action, write permission, missing await, focu
 test, invalid CSS, broad selector, incomplete fence and missing local target are
 detected alongside valid controls.
 
-See the [quality adoption plan](TYPESCRIPT-QUALITY-TOOLS-PLAN.md) for the full
+See the [quality adoption plan](../_archive/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) for the full
 remaining work, including external security/dependency-review scanners and broader
 style/documentation tooling. These local checks do not activate external services,
 alter permissions or certify those unprovisioned scanners.

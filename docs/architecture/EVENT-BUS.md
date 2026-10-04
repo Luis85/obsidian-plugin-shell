@@ -2,7 +2,7 @@
 
 > **Contract:** PRD 0.3 extension; requirements EVT-01–16.  
 > **Status:** Runtime bus, scoped authoring ports, registered descriptors, catalog/checker and makers implemented. This document retains the complete target; qualification records state the executed scope.
-> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
+> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
 
 ## 1. Purpose and boundary
 

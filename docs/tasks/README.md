@@ -6,7 +6,7 @@ There are **58 individual task files**: 35 shell/framework, eight concept, ten n
 
 ## Working rules
 
-Priorities express delivery order: P0 framework including its separately approved shipment; P1 secondary concept refinement; P2 native companion; P3 companion publication. They do not downgrade safety or quality. SH-022, SH-034 and CX-007 are hard prerequisites of CP-001. CP-010 is a hard prerequisite of PUB tasks, not of the first framework release. Read the [CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [PR #5 readiness review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md).
+Priorities express delivery order: P0 framework including its separately approved shipment; P1 secondary concept refinement; P2 native companion; P3 companion publication. They do not downgrade safety or quality. SH-022, SH-034 and CX-007 are hard prerequisites of CP-001. CP-010 is a hard prerequisite of PUB tasks, not of the first framework release. Read the [CLI/generator plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [PR #5 readiness review](../_archive/development/PR5-FRAMEWORK-READINESS-REVIEW.md).
 
 Inspect current source and actual evidence before implementing. A task may extend or qualify existing behavior; do not recreate working makers/services because older prose calls them pending. Record covered criteria and implement only the remaining gap. Preserve parent requirements, exact dependency pins, existing thresholds, protected data and unrelated edits.
 

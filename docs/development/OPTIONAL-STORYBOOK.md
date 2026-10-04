@@ -90,7 +90,7 @@ Authoritative format/config references (checked 2026-09-28):
 - https://storybook.js.org/docs/configure/telemetry
 - https://github.com/storybookjs/storybook/releases/tag/v10.6.0
 
-Execution status and limitations are recorded in [the verification record](../testing/OPTIONAL-STORYBOOK.md).
+Execution status and limitations are recorded in [the verification record](../_archive/testing/OPTIONAL-STORYBOOK.md).
 
 ## PR41 / PR42 consolidation
 

@@ -16,4 +16,4 @@ node bin/app memory tools --agent codex --live
 
 These inspect the local service and MCP tool discovery, not inference quality or account entitlement. Restart your desktop client after setup and approve its normal trust/tool permissions. Use a **local** project session; cloud sessions cannot reach your workstation's service.
 
-[Setup, providers, desktop connections and recovery](docs/development/HINDSIGHT.md) · [Git/GitHub research](docs/development/HINDSIGHT-GIT-GITHUB.md) · [Executed tests and remaining acceptance](docs/development/HINDSIGHT-VERIFICATION.md).
+[Setup, providers, desktop connections and recovery](docs/development/HINDSIGHT.md) · [Git/GitHub research](docs/development/HINDSIGHT-GIT-GITHUB.md) · [Executed tests and remaining acceptance](docs/_archive/development/HINDSIGHT-VERIFICATION.md).

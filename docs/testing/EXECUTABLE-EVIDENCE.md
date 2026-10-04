@@ -82,7 +82,7 @@ entries/subscriber failures and matching resource acquisition/release metadata
 across immutable checkpoint prefixes. The real recovery example supplies delayed
 progress and pending availability; public CDP retains its actual Notice listener
 for invocation after closure. Protocol/parser fixtures alone cannot establish
-native execution. See [the native ownership protocol](FRAMEWORK-LIFECYCLE-NATIVE.md).
+native execution. See [the native ownership protocol](../_archive/testing/FRAMEWORK-LIFECYCLE-NATIVE.md).
 
 ## Packet and session integrity
 
@@ -109,8 +109,8 @@ version 1 packet. Version 2 requires the exact new raw inventory and cannot sile
 fall back to version 1. Changed policy/source identities still invalidate old
 packets for current-candidate qualification; preserving a historical parser is not
 promoting old evidence. The legacy acceptance plan/crosswalk versions are unchanged.
-See the [transport regression record](EVIDENCE-TRANSPORT-REGRESSION.md) and the
-[PR5 CI repair record](PR5-CI-REPAIR.md) for their separately executed scopes.
+See the [transport regression record](../_archive/testing/EVIDENCE-TRANSPORT-REGRESSION.md) and the
+[PR5 CI repair record](../_archive/testing/PR5-CI-REPAIR.md) for their separately executed scopes.
 
 Session directories use the complete input digest, including crosswalk/native
 policy bytes. A run is appended to `runs.jsonl` **before** starting the child.

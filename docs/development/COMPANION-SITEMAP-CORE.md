@@ -1,6 +1,6 @@
 # Companion sitemap authoring core
 
-**Status: implemented core and read-only CLI integration; not the completed Journey Lens port or JSON-to-clickdummy MVP.** See the [execution record](../testing/MVP-SITEMAP-CORE.md) and [MVP plan](../prds/MVP-IMPLEMENTATION-PLAN.md).
+**Status: implemented core and read-only CLI integration; not the completed Journey Lens port or JSON-to-clickdummy MVP.** See the [execution record](../_archive/testing/MVP-SITEMAP-CORE.md) and [MVP plan](../prds/MVP-IMPLEMENTATION-PLAN.md).
 
 ## Current integration
 

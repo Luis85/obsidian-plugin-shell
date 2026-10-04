@@ -2,7 +2,7 @@
 
 > **Normative contract:** PRD 0.5, HSS-01–12; supplements HAR-01–10, E2E-01–07 and CSS-01–12.  
 > **Concrete delivery:** An original CSS fixture, a standalone specimen page, a loopback server, and focused Node tests. No Vue/plugin/native-adapter runtime is implemented by these files.  
-> **Related:** [Styles](../architecture/STYLES.md), [errors and notifications](../architecture/ERRORS-AND-NOTIFICATIONS.md), [review](../reviews/2026-09-22-product-review.md).
+> **Related:** [Styles](../architecture/STYLES.md), [errors and notifications](../architecture/ERRORS-AND-NOTIFICATIONS.md), [review](../_archive/reviews/2026-09-22-product-review.md).
 
 ## 1. Why the host stylesheet is separate
 

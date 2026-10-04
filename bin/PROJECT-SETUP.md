@@ -293,8 +293,8 @@ production maker coverage, analyzer/architecture/maintainability gates and gener
 Angular install/typecheck/test/build/browser checks with the qualified dependencies.
 The new tests are discovered by the existing `interactive-maker-*.checks.mjs` suite;
 no quality threshold is reduced. The implementation evidence is recorded separately
-under `docs/testing/ANGULAR-PROJECT-SETUP.md` and
-[the Angular rendering verification record](../docs/testing/ANGULAR-BRICKS.md).
+under `docs/_archive/testing/ANGULAR-PROJECT-SETUP.md` and
+[the Angular rendering verification record](../docs/_archive/testing/ANGULAR-BRICKS.md).
 Earlier records retain their original candidate and environment; passing predecessor
 checks are not assigned to a later commit. Setup status records preparation, not
 continuous observation of external npm commands or browser acceptance.

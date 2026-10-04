@@ -8,7 +8,7 @@
 | Inspected baseline | `6178b1025336941ad6fb10eae4e26930622363f9` |
 | Product contract | [MVP PRD](MVP-JSON-TO-CLICKDUMMY.md) |
 
-> **Current status (2026-09-27):** Read the [integrated review](../product/PR5-PRODUCT-REVIEW.md), [work-package and A01–A20 reconciliation](../product/PR5-IMPROVEMENT-PLAN.md) and [evidence](../testing/PR5-REVIEW-EVIDENCE.md). The original plan below is preserved as the acceptance contract. Later source implements the integrated v6 editor, dedicated compiler, generated clickdummy and concept intake; native companion and complete release-journey acceptance remain open. “Proposed” in the original command table is historical, not proof that the command is still absent.
+> **Current status (2026-09-27):** Read the [integrated review](../_archive/product/PR5-PRODUCT-REVIEW.md), [work-package and A01–A20 reconciliation](../_archive/product/PR5-IMPROVEMENT-PLAN.md) and [evidence](../_archive/testing/PR5-REVIEW-EVIDENCE.md). The original plan below is preserved as the acceptance contract. Later source implements the integrated v6 editor, dedicated compiler, generated clickdummy and concept intake; native companion and complete release-journey acceptance remain open. “Proposed” in the original command table is historical, not proof that the command is still absent.
 
 ## 1. Delivery sequence
 

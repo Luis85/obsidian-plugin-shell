@@ -4,7 +4,7 @@
 runtime code describe the retained pre-implementation baseline. The repository
 now contains real Vue/application/native code; iteration 03 applies the retained
 production thresholds to it without changing baseline acceptance status. See the
-[iteration plan](../development/ITERATION-THREE-PLAN.md) and separate executed
+[iteration plan](../_archive/development/ITERATION-THREE-PLAN.md) and separate executed
 iteration records for actual evidence.
 
 **Version:** 1.0 · **Date:** 2026-09-22 · **Owner:** template maintainer  
@@ -150,4 +150,4 @@ Primary documentation consulted 2026-09-22; library capabilities must be qualifi
 - **T10:** [Node test runner](https://nodejs.org/api/test.html): events/custom reporters and isolation.
 - **T11:** [Playwright web server](https://playwright.dev/docs/test-webserver).
 
-The strategy supplies intended practice; the [execution record](2026-09-22-verification-record.md) distinguishes what this iteration actually exercised.
+The strategy supplies intended practice; the [execution record](../_archive/testing/2026-09-22-verification-record.md) distinguishes what this iteration actually exercised.
