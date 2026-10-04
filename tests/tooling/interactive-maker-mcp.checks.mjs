@@ -218,6 +218,11 @@ test('the real runner delegates to bin/app and modern setup owns Claude/Codex pr
     assert.deepEqual(claude.ask, ['mcp__workbench__workbench_execute']);
     await writeFile(join(root, '.mcp.json'), '{"edited":true}\n');
     const replay = await executeOperation(request, context);
-    assert.equal(replay.status, 'failed'); assert.equal(replay.diagnostics[0].code, 'IMPORT_OWNERSHIP');
+    assert.equal(replay.status, 'failed'); assert.equal(replay.diagnostics[0].code, 'MCP_CONFIG_CONFLICT');
+    assert.equal(replay.diagnostics[0].message, 'Preserve edited or foreign MCP configuration: .mcp.json. Reconcile it before setup manages or removes it.');
+    assert.equal(await readFile(join(root, '.mcp.json'), 'utf8'), '{"edited":true}\n');
+    const { mcp: _enable, ...kept } = request.options;
+    const disable = await executeOperation({ ...request, options: { ...kept, 'no-mcp': true } }, context);
+    assert.equal(disable.status, 'failed'); assert.equal(disable.diagnostics[0].code, 'MCP_CONFIG_CONFLICT');
   } finally { await rm(root, { recursive: true, force: true }); }
 });
