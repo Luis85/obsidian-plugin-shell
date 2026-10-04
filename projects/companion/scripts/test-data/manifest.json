@@ -1,0 +1,680 @@
+{
+  "schema": 1,
+  "engine": "shell-fixtures/1",
+  "target": ".test-vault",
+  "noteMetadata": {
+    "schema_version": 1,
+    "created_at": "2026-01-01T00:00:00.000Z"
+  },
+  "seed": 42,
+  "count": 5,
+  "locale": "en",
+  "referenceDate": "2026-01-01T00:00:00.000Z",
+  "entities": [
+    {
+      "id": "er-entity-1",
+      "slug": "plugin-project",
+      "folder": "Companion/PluginProject",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "plugin-project"
+          },
+          "plugin_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "codebase_folder": {
+            "type": "string"
+          },
+          "tests_folder": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": []
+    },
+    {
+      "id": "er-entity-7",
+      "slug": "requirement",
+      "folder": "Companion/Requirement",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "requirement"
+          },
+          "title": {
+            "type": "string"
+          },
+          "acceptance": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "project_ref": {
+            "type": "string"
+          },
+          "screen_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": [
+        {
+          "key": "project_ref",
+          "target": "er-entity-1",
+          "many": false
+        },
+        {
+          "key": "screen_refs",
+          "target": "er-entity-12",
+          "many": true
+        }
+      ]
+    },
+    {
+      "id": "er-entity-12",
+      "slug": "screen",
+      "folder": "Companion/Screen",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "screen"
+          },
+          "title": {
+            "type": "string"
+          },
+          "code_name": {
+            "type": "string"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "surface_kind": {
+            "type": "string"
+          },
+          "project_ref": {
+            "type": "string"
+          },
+          "component_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": [
+        {
+          "key": "project_ref",
+          "target": "er-entity-1",
+          "many": false
+        },
+        {
+          "key": "component_refs",
+          "target": "er-entity-17",
+          "many": true
+        }
+      ]
+    },
+    {
+      "id": "er-entity-17",
+      "slug": "component",
+      "folder": "Companion/Component",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "component"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "accessibility": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": []
+    },
+    {
+      "id": "er-entity-22",
+      "slug": "entity-definition",
+      "folder": "Companion/EntityDefinition",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "entity-definition"
+          },
+          "title": {
+            "type": "string"
+          },
+          "code_name": {
+            "type": "string"
+          },
+          "note_folder": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": []
+    },
+    {
+      "id": "er-entity-27",
+      "slug": "data-source",
+      "folder": "Companion/DataSource",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "data-source"
+          },
+          "title": {
+            "type": "string"
+          },
+          "source_kind": {
+            "type": "string"
+          },
+          "locator": {
+            "type": "string"
+          },
+          "credential_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": []
+    },
+    {
+      "id": "er-entity-32",
+      "slug": "source-operation",
+      "folder": "Companion/SourceOperation",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "source-operation"
+          },
+          "title": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "input_shape": {
+            "type": "string"
+          },
+          "output_shape": {
+            "type": "string"
+          },
+          "source_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": [
+        {
+          "key": "source_ref",
+          "target": "er-entity-27",
+          "many": false
+        }
+      ]
+    },
+    {
+      "id": "er-entity-37",
+      "slug": "test-recipe",
+      "folder": "Companion/TestRecipe",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "test-recipe"
+          },
+          "title": {
+            "type": "string"
+          },
+          "scenario": {
+            "type": "string"
+          },
+          "dataset": {
+            "type": "string"
+          },
+          "operation_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": [
+        {
+          "key": "operation_ref",
+          "target": "er-entity-32",
+          "many": false
+        }
+      ]
+    },
+    {
+      "id": "er-entity-41",
+      "slug": "storymap",
+      "folder": "Companion/Storymap",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "storymap"
+          },
+          "title": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "audience": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": []
+    },
+    {
+      "id": "er-entity-46",
+      "slug": "storymap-item",
+      "folder": "Companion/StorymapItem",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "storymap-item"
+          },
+          "title": {
+            "type": "string"
+          },
+          "item_kind": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "acceptance": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": []
+    },
+    {
+      "id": "er-entity-51",
+      "slug": "design-token",
+      "folder": "Companion/DesignToken",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "const": "design-token"
+          },
+          "title": {
+            "type": "string"
+          },
+          "token_group": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          },
+          "project_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": [
+        {
+          "key": "project_ref",
+          "target": "er-entity-1",
+          "many": false
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "id": "ds-operation-2",
+      "source": "authoring-vault",
+      "slug": "list-requirements",
+      "kind": "vault",
+      "direction": "read",
+      "method": "adapter",
+      "resource": "Companion/Requirement",
+      "input": {
+        "none": true
+      },
+      "output": {
+        "entity": "er-entity-7",
+        "many": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "type": {
+                "type": "string",
+                "const": "requirement"
+              },
+              "title": {
+                "type": "string"
+              },
+              "acceptance": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "project_ref": {
+                "type": "string"
+              },
+              "screen_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "title"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "behavior": "list",
+      "dataset": "requirement",
+      "keyField": "id",
+      "scenario": "populated",
+      "latencyMs": 0,
+      "errorStatus": 503,
+      "rules": []
+    },
+    {
+      "id": "ds-operation-4",
+      "source": "authoring-vault",
+      "slug": "list-sitemap",
+      "kind": "vault",
+      "direction": "read",
+      "method": "adapter",
+      "resource": "Companion/Screen",
+      "input": {
+        "none": true
+      },
+      "output": {
+        "entity": "er-entity-12",
+        "many": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "type": {
+                "type": "string",
+                "const": "screen"
+              },
+              "title": {
+                "type": "string"
+              },
+              "code_name": {
+                "type": "string"
+              },
+              "layout": {
+                "type": "string"
+              },
+              "surface_kind": {
+                "type": "string"
+              },
+              "project_ref": {
+                "type": "string"
+              },
+              "component_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "title"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "behavior": "list",
+      "dataset": "screen",
+      "keyField": "id",
+      "scenario": "populated",
+      "latencyMs": 0,
+      "errorStatus": 503,
+      "rules": []
+    },
+    {
+      "id": "ds-operation-6",
+      "source": "authoring-vault",
+      "slug": "list-components",
+      "kind": "vault",
+      "direction": "read",
+      "method": "adapter",
+      "resource": "Companion/Component",
+      "input": {
+        "none": true
+      },
+      "output": {
+        "entity": "er-entity-17",
+        "many": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "type": {
+                "type": "string",
+                "const": "component"
+              },
+              "title": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "accessibility": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "title"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "behavior": "list",
+      "dataset": "component",
+      "keyField": "id",
+      "scenario": "populated",
+      "latencyMs": 0,
+      "errorStatus": 503,
+      "rules": []
+    }
+  ]
+}

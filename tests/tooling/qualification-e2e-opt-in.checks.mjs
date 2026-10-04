@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseDocument } from 'yaml';
-import { checkRepository, e2eFacts } from '../../scripts/quality/check-repository.mjs';
+import { checkRepository, e2eFacts, syncedProjectWorkflow } from '../../scripts/quality/check-repository.mjs';
 import { checkName, e2eKinds, e2eOptIn, e2eScenarios, gateValue } from '../../scripts/quality/e2e-policy.mjs';
 import { ciOperation } from '../../bin/adapters/framework/ci.ts';
 
@@ -64,7 +64,8 @@ test('the classification names browser and real-host commands, and a no-browser 
 
 test('every shipped e2e step is opt-in and mandatory in the release tier, and release.yml reaches each such workflow with tier release', async () => {
   const files = (await readdir(join(root, '.github/workflows'))).filter(file => file.endsWith('.yml')).sort(), e2e = [];
-  for (const file of files) if (facts(await workflowText(file)).e2e) e2e.push(file);
+  // Synced projects--* copies follow their standalone project's own e2e model (check-repository leaves them out).
+  for (const file of files.filter(name => !syncedProjectWorkflow(name))) if (facts(await workflowText(file)).e2e) e2e.push(file);
   assert.deepEqual(e2e, ['airship-compatibility.yml', 'angular-setup-acceptance.yml', 'candidate-qualification.yml', 'ci.yml', 'companion-concept-verification.yml',
     'compiler-qualification.yml', 'interactive-maker.yml', 'optional-storybook.yml', 'project-starter-qualification.yml', 'starter-distribution.yml']);
   for (const file of ['dev.yml', 'setup-compatibility.yml', 'application-docs.yml']) assert.equal(facts(await workflowText(file)).e2e, false, `${file} holds no e2e work`);

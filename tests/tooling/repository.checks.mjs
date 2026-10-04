@@ -165,3 +165,18 @@ test('repository checker requires each called workflow to exist and declare work
   await writeFile(join(root, '.github/workflows/starter-distribution.yml'), dispatched);
   await assert.rejects(checkRepository(root), /starter-distribution\.yml: WORKFLOW_PERMISSIONS_NOT_READ_ONLY/);
 });
+
+test('a synced project workflow keeps the portable review but follows its project, not the framework e2e tiers', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'repository-synced-')); t.after(() => rm(root, { recursive: true, force: true }));
+  for (const path of ['.github/workflows', 'src/styles']) await mkdir(join(root, path), { recursive: true });
+  await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
+  await writeFile(join(root, 'README.md'), '# Readme\n');
+  const browser = workflow.replace(/run: .*/, 'run: npm run test:e2e');
+  await writeFile(join(root, '.github/workflows/browser.yml'), browser);
+  await assert.rejects(checkRepository(root), /browser\.yml: WORKFLOW_E2E_/);
+  await rm(join(root, '.github/workflows/browser.yml'));
+  await writeFile(join(root, '.github/workflows/projects--demo--ci.yml'), browser);
+  assert.equal((await checkRepository(root)).workflows, 1);
+  await writeFile(join(root, '.github/workflows/projects--demo--ci.yml'), browser.replace('contents: read', 'contents: write'));
+  await assert.rejects(checkRepository(root), /projects--demo--ci\.yml: WORKFLOW_PERMISSIONS_NOT_READ_ONLY/);
+});

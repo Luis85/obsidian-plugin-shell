@@ -4,6 +4,8 @@ import { prototypesPlan } from './prototypes.ts';
 import { adoptPlanPlan, adoptSkillPlan } from './adopt-plan.ts';
 import { airshipPlan } from './airship-plan.ts';
 import { hostingPlan } from './hosting-plan.ts';
+import { siteCollectionsPlan, siteNewPlan } from './site-command.ts';
+import { communityPluginPlan } from '../community-plugins/operations.ts';
 import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
@@ -78,10 +80,12 @@ async function frameworkUpgradePlan(request: Request, context: Context): Promise
 /** Each command's reviewed planner; prototype subcommands share one planner. */
 const planners: Record<string, Planner> = {
   'adopt plan': adoptPlanPlan, 'adopt skill': adoptSkillPlan,
+  'site new': siteNewPlan, 'site collections': siteCollectionsPlan,
   'docs import': docsPlan, 'docs export': docsPlan,
   'handout generate': handoutPlan, 'handout refresh': handoutPlan,
   'airship enable': airshipPlan, 'airship disable': airshipPlan,
   'hosting set': hostingPlan,
+  'plugins enable': communityPluginPlan, 'plugins disable': communityPluginPlan,
   setup: configurationPlan, 'config set': configurationPlan, 'project import': configurationPlan,
   generate: generationPlan,
   'concept import': conceptImportPlan,

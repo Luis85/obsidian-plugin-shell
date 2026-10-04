@@ -45,12 +45,15 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | `project-starter-qualification.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-project` (4 groups), `project-handoff`: ready-gate | `project-starters-<group>`, `project-handoff-<starter>` (7) |
 | `setup-compatibility.yml` (Setup npm policy compatibility) | Integration | `pull_request` and push `main` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `setup`: four legs (Node 24.15.0/npm 12.0.2 and Node 24.21.0/npm 11.19.1 on ubuntu-24.04 and windows-latest), ready-gate | `setup-policy-<os>-npm-<npm>` (7) |
 | `starter-distribution.yml` (Independent Workbench distributions) | Integration | `pull_request` (21 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `package`: ready-gate | `companion-starter-evidence-<sha>`, `workbench-distributions-<source>` (14) |
+| `projects-boundary.yml` (Projects boundary) | Integration | `pull_request` and push `main` (14 path filters; the only shell workflow that watches `projects/**`), `workflow_call`, `workflow_dispatch` (`tier`) | `boundary` "Projects boundary": ready-gate; `node scripts/projects/projects.mjs check` and `check-repository.mjs` | none |
+| `site-templates.yml` (Site templates) | Integration | `pull_request` and push `main` (9 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `build` "Render and build every site template": ready-gate | `site-templates` (7) |
 | `candidate-qualification.yml` | Integration (post-merge) and Release | push `main` (all paths except narrative docs), `workflow_call` (`tier` default `release`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `candidate`: fixed-source rehearsal, repeated runtime suites, coverage, blocking live audit; served browser and three native sessions only for `tier: release` or `e2e`; no job gate | `candidate-recovery-source`, `retained-build`, `qualified-candidate` (7) |
-| `release.yml` (Release) | Release | push `release/**`, `workflow_dispatch` | `metadata` "Release metadata"; 14 reusable calls (below); `release-result` "Release result"; aliases `dev-checks` "Dev checks", `ci-result` "CI result", `definition-of-ready` "Definition of Ready" and `definition-of-done` "Definition of Done" | the called workflows' artifacts, in this run |
+| `release.yml` (Release) | Release | push `release/**`, `workflow_dispatch` | `metadata` "Release metadata"; 16 reusable calls (below); `release-result` "Release result"; aliases `dev-checks` "Dev checks", `ci-result` "CI result", `definition-of-ready` "Definition of Ready" and `definition-of-done` "Definition of Done" | the called workflows' artifacts, in this run |
 | `release-cut.yml` (Release cut) | Publish | `workflow_dispatch` (`version`) | `cut` "Cut release branch", `environment: release` | `release-cut-<version>-<attempt>` (30) |
 | `publish.yml` (Publish) | Publish | `workflow_dispatch` (`version`) | `publish` "Publish release", `environment: release` | `publish-<version>-<attempt>` (30) |
 | `release-rehearsal.yml` | manual | `workflow_dispatch` (`source_commit`, `version`, `draft_snapshot`) | `rehearsal` | `release-rehearsal-<version>-<sha>`, `release-qualification-<version>-<sha>` (repository default) |
 | `maintenance-status.yml` | scheduled | `schedule` (Mondays 07:17 UTC), `workflow_dispatch` | `discover` | `maintenance-status` (14) |
+| `projects--<project>--<file>.yml` | the project's own | as written in `projects/<project>/.github/workflows/<file>`, scoped to `projects/<project>/**` | copies made by `npm run projects:sync`, never edited here ([projects](../../projects/README.md)); outside the shell's tiers: `check-repository` applies the portable review (pins, permissions, credentials) but not the tier and e2e rules, and `release.yml` does not call them | the project's own |
 | `offline-qualification-inputs.yml` | scheduled | `schedule` (Mondays 06:41 UTC), `workflow_dispatch` | `inputs`, `angular-inputs` | `linux-qualification-inputs`, `angular-offline-inputs` (3) |
 
 In the ten workflows that hold end-to-end steps the ready-gate also checks the
@@ -130,7 +133,8 @@ secrets: `ci`, `airship-compatibility`, `angular-setup-acceptance`,
 `application-docs`, `companion-concept-verification`, `compiler-qualification`,
 `hindsight-tooling`, `interactive-maker`, `native-integration-verification`,
 `optional-storybook`, `project-starter-qualification`, `setup-compatibility`,
-`starter-distribution`, plus `candidate-qualification` (no input). A called
+`starter-distribution`, `projects-boundary`, `site-templates`, plus
+`candidate-qualification` (no input). A called
 workflow ignores its path filters, so every job runs, every end-to-end step
 included. In `ci.yml` the push-skipped jobs run, and `self-review` and `security-audit` skip (they are pull-request only;
 candidate qualification runs the blocking live audit).
@@ -138,7 +142,7 @@ candidate qualification runs the blocking live audit).
 | Job | Does | Passes when |
 | --- | --- | --- |
 | `metadata` "Release metadata" | Derives `X.Y.Z` from the branch name, runs `node scripts/release/branch.mjs verify --version X.Y.Z`, prints the changelog section to the run summary. | The branch is `release/X.Y.Z` with a stable version and every verify check passes. |
-| `release-result` "Release result" | Aggregates `metadata` and all 14 calls. | Every needed job is `success`; unlike "CI result", a skipped job fails it. |
+| `release-result` "Release result" | Aggregates `metadata` and all 16 calls. | Every needed job is `success`; unlike "CI result", a skipped job fails it. |
 | `dev-checks` "Dev checks", `ci-result` "CI result", `definition-of-ready` "Definition of Ready", `definition-of-done` "Definition of Done" | Report the required checks on the release head (a release pull request carries the release template, not an Increment). | "Release result" succeeded. |
 
 ## Required checks
@@ -233,7 +237,7 @@ It is a focused policy, not the GitHub Actions schema or actionlint.
 | `node bin/app ci --list` | Every workflow and job with triggers, path filters, runner/matrix and whether it is reproducible. |
 | `node bin/app ci --job <file-stem>/<job-id>` | Dry run: the job's ordered shell commands, with unresolved `${{ }}` expressions flagged. |
 | `node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04` | Selects one matrix combination; a computed matrix (`fromJSON(...)`) needs `--matrix`. |
-| `node bin/app ci --job <file-stem>/<job-id> --execute` | Runs the `run:` steps through bash, stopping at the first failure (asks for approval in `.claude/settings.json`). |
+| `node bin/app ci --job <file-stem>/<job-id> --execute` | Runs the `run:` steps through bash, stopping at the first failure (pre-allowed in `.claude/settings.json` for CI triage). |
 
 - **Dry run** (default) prints each step in order with its shell, `working-directory`, the job/workflow/step `env`
   and the `run:` text. `${{ matrix.* }}` and `${{ runner.os }}` are resolved (the runner is this machine); any other

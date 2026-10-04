@@ -1,0 +1,23 @@
+{
+  "name": "Companion Visual Editors",
+  "status": "implementation-handoff-baseline",
+  "projectSchema": 4,
+  "target": {
+    "framework": "Vue",
+    "version": 3,
+    "metaFramework": "Nuxt",
+    "ui": "Nuxt UI",
+    "catalogVersion": 1
+  },
+  "counts": {
+    "vueComponents": 18,
+    "typescriptModules": 19
+  },
+  "entryDocs": [
+    "HANDOFF.md",
+    "IMPLEMENTATION-READINESS-REVIEW.md",
+    "NUXT-UI-CATALOG.md",
+    "COMPONENT-COMPOSITION.md",
+    "PAGE-EDITOR-POLISH.md"
+  ]
+}

@@ -227,6 +227,9 @@
           "tests/tooling/interactive-maker-issue-documents.checks.mjs",
           "tests/tooling/interactive-maker-operations-catalog.checks.mjs",
           "tests/tooling/interactive-maker-pull-request-documents.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-remote-body.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-sync-merge.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-sync-record.checks.mjs",
           "tests/tooling/interactive-maker-setup-domain.checks.mjs",
           "tests/tooling/interactive-maker-setup-source.checks.mjs",
           "tests/tooling/interactive-maker-starters-browser.checks.mjs",
@@ -500,9 +503,6 @@
           "tests/tooling/framework-docs-codec.checks.mjs",
           "tests/tooling/framework-docs-model.checks.mjs",
           "tests/tooling/framework-documents.checks.mjs",
-          "tests/tooling/framework-pull-request-remote-body.checks.mjs",
-          "tests/tooling/framework-pull-request-sync-merge.checks.mjs",
-          "tests/tooling/framework-pull-request-sync-record.checks.mjs",
           "tests/tooling/starter-catalog-docs.checks.mjs",
           "tests/tooling/starter-submission-identity.checks.mjs"
         ]
@@ -1098,7 +1098,7 @@
         ]
       },
       "runner": {"type": "node-test"},
-      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/docs-launchers.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/style-literals*.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs", "tests/tooling/verify-*.checks.mjs"],
+      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/projects-boundary.checks.mjs", "tests/tooling/site-templates-qualification.checks.mjs", "tests/tooling/docs-launchers.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/style-literals*.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs", "tests/tooling/verify-*.checks.mjs"],
       "prerequisites": ["build"],
       "verify": "tooling",
       "npmScript": "test:quality",

@@ -1,0 +1,30 @@
+.jl-workspace { min-width:0; display:grid; gap:12px; color:var(--text-normal); }
+.jl-filebar { display:flex; flex-wrap:wrap; gap:8px; align-items:end; }
+.jl-filebar label { display:grid; gap:4px; flex:1 1 230px; min-width:0; }
+.jl-workspace input:not([type=checkbox]),.jl-workspace textarea,.jl-workspace select { box-sizing:border-box; width:100%; min-width:0; padding:8px; border:1px solid var(--background-modifier-border); color:var(--text-normal); background:var(--background-primary); border-radius:5px; font:inherit; }
+.jl-workspace button,.jl-workspace input:not([type=checkbox]),.jl-workspace select { min-height:36px; }
+.jl-workspace :focus-visible { outline:2px solid var(--interactive-accent); outline-offset:2px; }
+.jl-file-context { display:grid; gap:4px; }
+.jl-active-file,.jl-file-status { margin:0; overflow-wrap:anywhere; }
+.jl-file-status { font-size:var(--font-ui-small,12px); color:var(--text-muted); }
+.jl-active-file { font-size:var(--font-ui-small,12px); }
+.jl-active-file span { color:var(--text-muted); }
+.jl-review { min-width:0; padding:16px; border:1px solid var(--background-modifier-border); border-radius:8px; display:grid; gap:12px; background:var(--background-secondary); }
+.jl-review label { display:grid; gap:6px; min-width:0; }
+.jl-review .jl-confirm { display:flex; align-items:start; gap:8px; }
+.jl-confirm input { flex:none; margin:3px 0 0; accent-color:var(--interactive-accent); }
+.jl-review p,.jl-review h3 { margin:0; overflow-wrap:anywhere; }
+.jl-review h3 { font-size:var(--font-ui-medium,16px); }
+.jl-review > p { max-width:75ch; }
+.jl-review > button { justify-self:start; }
+.jl-review textarea { resize:vertical; min-height:8rem; }
+.jl-editor-host { min-width:0; min-height:0; }
+.jl-editor-host .jm-root { height:650px; max-height:calc(100dvh - 220px); min-height:420px; }
+.jl-editor-host[inert] { opacity:.6; }
+.jl-workspace .jm-actions { flex-wrap:wrap; }
+@media (max-width:560px) {
+  .jl-filebar > label { flex-basis:100%; }
+  .jl-filebar > button { flex:1 1 150px; white-space:normal; }
+  .jl-review { padding:12px; }
+  .jl-review .jm-actions > button { flex:1 1 150px; }
+}

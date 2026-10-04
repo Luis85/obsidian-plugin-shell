@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { checkSuites, globToRegExp, selectSuites } from './suite-manifest.mjs';
-import { e2ePolicyFailures, pyramidReport, resolveLevels, selectByLevel } from './test-levels.mjs';
+import { e2ePolicyFailures, pyramidReport, removedExampleFiles, resolveLevels, selectByLevel } from './test-levels.mjs';
 import { projectConfigPath, projectConfigs } from '../shared/project-configs.mjs';
 import { resolveBrowserExecutable } from './browser-executable.mjs';
 
@@ -209,7 +209,7 @@ async function main(argv, root = process.cwd()) {
   if (options.help) { console.log(usage); return 0; }
   const result = await checkSuites(root, options.check ? { evidenceInventory: await evidenceInventory(root) } : {});
   if (result.failures.length) return failed(options, result.failures);
-  const levels = resolveLevels(result.manifest, result.suites);
+  const levels = resolveLevels(result.manifest, result.suites, { removed: removedExampleFiles(root) });
   if (options.check || options.pyramid || options.levels.length) {
     const failures = [...levels.failures, ...(options.check ? e2ePolicyFailures(result.manifest, await e2eKinds()) : [])];
     if (failures.length) return failed(options, failures);

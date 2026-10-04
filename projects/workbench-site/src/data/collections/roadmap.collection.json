@@ -1,0 +1,791 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "node bin/app site collections",
+  "recordsSha256": "902ceaf1d97dce6637d84e0373e03384230de6b9aff4fc7784855dbbefd0694a",
+  "collection": {
+    "kind": "file-collection",
+    "base": {
+      "path": "docs/requirements/MVP.base",
+      "sha256": "36c05407feab2c7e57d76a1f59628c2d18ceb0f4d837b7df734ed16eae1552fc",
+      "view": "By milestone"
+    },
+    "view": {
+      "name": "By milestone",
+      "type": "table"
+    },
+    "folder": "docs/requirements",
+    "sort": [],
+    "groupBy": {
+      "property": "note.milestone",
+      "direction": "ASC"
+    },
+    "limit": null,
+    "fields": [
+      {
+        "property": "file.name",
+        "displayName": "name",
+        "type": "text"
+      },
+      {
+        "property": "note.title",
+        "displayName": "Use case",
+        "type": "text"
+      },
+      {
+        "property": "note.status",
+        "displayName": "status",
+        "type": "text"
+      },
+      {
+        "property": "note.epic",
+        "displayName": "epic",
+        "type": "text"
+      },
+      {
+        "property": "note.feature",
+        "displayName": "feature",
+        "type": "text"
+      },
+      {
+        "property": "note.owner",
+        "displayName": "owner",
+        "type": "empty"
+      },
+      {
+        "property": "formula.accepted_status_claim",
+        "displayName": "Accepted status claim - not evidence verified",
+        "type": "boolean"
+      }
+    ]
+  },
+  "records": [
+    {
+      "path": "docs/requirements/templates/PBI.template.md",
+      "group": "I0",
+      "values": {
+        "file.name": "PBI.template.md",
+        "note.title": "Describe one observable use case",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F01",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-001.md",
+      "group": "I0",
+      "values": {
+        "file.name": "WB-PBI-001.md",
+        "note.title": "Inspect candidate capabilities and readiness",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F01",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-002.md",
+      "group": "I0",
+      "values": {
+        "file.name": "WB-PBI-002.md",
+        "note.title": "Validate and migrate a declarative project",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F01",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-024.md",
+      "group": "I0",
+      "values": {
+        "file.name": "WB-PBI-024.md",
+        "note.title": "Declare interaction contracts and fixture dependencies",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F13",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-003.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-003.md",
+        "note.title": "Configure project paths and preferences",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F02",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-004.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-004.md",
+        "note.title": "Migrate legacy settings without losing data",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F02",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-005.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-005.md",
+        "note.title": "Install and inspect a separate starter pack",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F03",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-006.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-006.md",
+        "note.title": "Author an external starter definition",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F03",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-007.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-007.md",
+        "note.title": "Initialize a project from a starter or blank",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F04",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-008.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-008.md",
+        "note.title": "Initialize a project from an existing JSON design",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F04",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-009.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-009.md",
+        "note.title": "Set up an existing Angular project vault with PRDs",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F04",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-010.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-010.md",
+        "note.title": "Associate an existing GitHub repository",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F04",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-013.md",
+      "group": "I1",
+      "values": {
+        "file.name": "WB-PBI-013.md",
+        "note.title": "Import typed Markdown requirements and UI elements",
+        "note.status": "new",
+        "note.epic": "WB-E02",
+        "note.feature": "WB-F06",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-011.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-011.md",
+        "note.title": "Build and showcase the generated demo on first run",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F05",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-012.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-012.md",
+        "note.title": "Resume interrupted project setup",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F05",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-014.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-014.md",
+        "note.title": "Resolve competing Markdown and model edits",
+        "note.status": "new",
+        "note.epic": "WB-E02",
+        "note.feature": "WB-F06",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-015.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-015.md",
+        "note.title": "Capture product intent while designing an interface",
+        "note.status": "new",
+        "note.epic": "WB-E02",
+        "note.feature": "WB-F07",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-016.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-016.md",
+        "note.title": "Generate and refresh connected project documentation",
+        "note.status": "new",
+        "note.epic": "WB-E02",
+        "note.feature": "WB-F07",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-017.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-017.md",
+        "note.title": "Integrate a project, feature or improvement concept",
+        "note.status": "new",
+        "note.epic": "WB-E02",
+        "note.feature": "WB-F08",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-018.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-018.md",
+        "note.title": "Start and continue a design-only project",
+        "note.status": "new",
+        "note.epic": "WB-E03",
+        "note.feature": "WB-F09",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-019.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-019.md",
+        "note.title": "Compose a page and its interactive states",
+        "note.status": "new",
+        "note.epic": "WB-E03",
+        "note.feature": "WB-F10",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-020.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-020.md",
+        "note.title": "Define and reuse a typed component",
+        "note.status": "new",
+        "note.epic": "WB-E03",
+        "note.feature": "WB-F10",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-021.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-021.md",
+        "note.title": "Revise a component and migrate selected usages",
+        "note.status": "new",
+        "note.epic": "WB-E03",
+        "note.feature": "WB-F11",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-022.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-022.md",
+        "note.title": "Organize surfaces without changing routes implicitly",
+        "note.status": "new",
+        "note.epic": "WB-E03",
+        "note.feature": "WB-F12",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-023.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-023.md",
+        "note.title": "Define and inspect a branching user journey",
+        "note.status": "new",
+        "note.epic": "WB-E03",
+        "note.feature": "WB-F12",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-025.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-025.md",
+        "note.title": "Maintain and export a project design system",
+        "note.status": "new",
+        "note.epic": "WB-E03",
+        "note.feature": "WB-F10",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-026.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-026.md",
+        "note.title": "Generate an operational webapp for the selected design",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F14",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-027.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-027.md",
+        "note.title": "Generate an operational Obsidian plugin",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F14",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-029.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-029.md",
+        "note.title": "Create coherent deterministic fixture scenarios",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F16",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-030.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-030.md",
+        "note.title": "Experiment with stateful mock interactions",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F16",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-031.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-031.md",
+        "note.title": "Switch and reset demonstration scenarios",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F16",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-032.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-032.md",
+        "note.title": "Present the generated application offline",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F17",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-034.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-034.md",
+        "note.title": "Generate and validate language-neutral service contracts",
+        "note.status": "new",
+        "note.epic": "WB-E05",
+        "note.feature": "WB-F18",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-035.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-035.md",
+        "note.title": "Switch safely from mock to service adapters",
+        "note.status": "new",
+        "note.epic": "WB-E05",
+        "note.feature": "WB-F18",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-054.md",
+      "group": "I2",
+      "values": {
+        "file.name": "WB-PBI-054.md",
+        "note.title": "Install built plugin assets into an isolated test vault",
+        "note.status": "new",
+        "note.epic": "WB-E01",
+        "note.feature": "WB-F05",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-028.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-028.md",
+        "note.title": "Regenerate a selected use-case scope safely",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F15",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-033.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-033.md",
+        "note.title": "Inspect complete interaction coverage before acceptance",
+        "note.status": "new",
+        "note.epic": "WB-E04",
+        "note.feature": "WB-F17",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-036.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-036.md",
+        "note.title": "Connect the generated UI to a C# reference service",
+        "note.status": "new",
+        "note.epic": "WB-E05",
+        "note.feature": "WB-F19",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-037.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-037.md",
+        "note.title": "Connect the same UI build to a Java reference service",
+        "note.status": "new",
+        "note.epic": "WB-E05",
+        "note.feature": "WB-F19",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-038.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-038.md",
+        "note.title": "Serve the web UI within an existing application",
+        "note.status": "new",
+        "note.epic": "WB-E05",
+        "note.feature": "WB-F20",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-039.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-039.md",
+        "note.title": "Extend an adapter and preserve it during regeneration",
+        "note.status": "new",
+        "note.epic": "WB-E05",
+        "note.feature": "WB-F20",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-040.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-040.md",
+        "note.title": "Operate generated workflows accessibly",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F21",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-041.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-041.md",
+        "note.title": "Assess responsiveness and resource lifecycle",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F21",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-042.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-042.md",
+        "note.title": "Verify unsafe inputs and execution are contained",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F22",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-043.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-043.md",
+        "note.title": "Qualify the exact extracted-kit user journey",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F23",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-044.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-044.md",
+        "note.title": "Prepare and rehearse a fixed release candidate",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F24",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-051.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-051.md",
+        "note.title": "Continue development from the generated handover",
+        "note.status": "new",
+        "note.epic": "WB-E08",
+        "note.feature": "WB-F28",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-052.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-052.md",
+        "note.title": "Evaluate first-change and second-change product value",
+        "note.status": "new",
+        "note.epic": "WB-E08",
+        "note.feature": "WB-F28",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-053.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-053.md",
+        "note.title": "Upgrade a generated consumer without losing extensions",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F23",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-055.md",
+      "group": "I3",
+      "values": {
+        "file.name": "WB-PBI-055.md",
+        "note.title": "Pin every dependency exactly before publishing any version",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F24",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-045.md",
+      "group": "I4",
+      "values": {
+        "file.name": "WB-PBI-045.md",
+        "note.title": "Publish and verify an approved framework release",
+        "note.status": "new",
+        "note.epic": "WB-E06",
+        "note.feature": "WB-F24",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-046.md",
+      "group": "I5",
+      "values": {
+        "file.name": "WB-PBI-046.md",
+        "note.title": "Generate native Workbench from its self-project",
+        "note.status": "new",
+        "note.epic": "WB-E07",
+        "note.feature": "WB-F25",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-047.md",
+      "group": "I5",
+      "values": {
+        "file.name": "WB-PBI-047.md",
+        "note.title": "Persist and reopen native authoring work safely",
+        "note.status": "new",
+        "note.epic": "WB-E07",
+        "note.feature": "WB-F25",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-048.md",
+      "group": "I5",
+      "values": {
+        "file.name": "WB-PBI-048.md",
+        "note.title": "Use shared project operations from native Workbench",
+        "note.status": "new",
+        "note.epic": "WB-E07",
+        "note.feature": "WB-F26",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-049.md",
+      "group": "I5",
+      "values": {
+        "file.name": "WB-PBI-049.md",
+        "note.title": "Accept the complete generated native Workbench",
+        "note.status": "new",
+        "note.epic": "WB-E07",
+        "note.feature": "WB-F26",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    },
+    {
+      "path": "docs/requirements/WB-PBI-050.md",
+      "group": "I6",
+      "values": {
+        "file.name": "WB-PBI-050.md",
+        "note.title": "Publish and support the accepted native product",
+        "note.status": "new",
+        "note.epic": "WB-E07",
+        "note.feature": "WB-F27",
+        "note.owner": null,
+        "formula.accepted_status_claim": false
+      }
+    }
+  ]
+}

@@ -14,7 +14,7 @@ export interface Context {
   signal?: AbortSignal;
   inputText?: string;
   progress?: (message: string) => void;
-  /** Test seams of the increment and pull-request commands (version control runner, hosting remote, clock). */
+  /** Test seams of the increment and pull-request commands (version control runner, hosting remote, clock). @internal */
   increments?: IncrementServices;
 }
 /** An OperationError keeps its code; another Error may lead with an `UPPER_CASE:` code. */

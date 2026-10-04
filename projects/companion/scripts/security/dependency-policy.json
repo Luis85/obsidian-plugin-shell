@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "eslint": "10.11.0",
+    "typescript": "6.0.3",
+    "@nuxt/ui": "4.11.2",
+    "esbuild": "0.28.2",
+    "fontless": "0.2.1"
+  },
+  "reviewedSources": {
+    "node_modules/esbuild/install.js": "612294e278914443bdcf81cb17f54afec34dbdd2ebd999a6ee187912320cc315",
+    "node_modules/fontless/dist/index.mjs": "a8b76dac345747b697d79bf48a696ee202e64043286dbb482aa6f324fef9ab20"
+  },
+  "reason": "fontless@0.2.1 only calls transform(loader:css); supported parent remains on esbuild ^0.27.0. Narrow patched 0.28.2 override, reviewed installer, real transform regression and all-category audit. No global hook approval."
+}

@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { checkSuites } from '../../scripts/testing/suite-manifest.mjs';
-import { declaredLevels, e2ePolicyFailures, pyramidReport, resolveLevels, selectByLevel, suiteCommandText } from '../../scripts/testing/test-levels.mjs';
+import { declaredLevels, e2ePolicyFailures, pyramidReport, removedExampleFiles, resolveLevels, selectByLevel, suiteCommandText } from '../../scripts/testing/test-levels.mjs';
 import { e2eKinds } from '../../scripts/quality/e2e-policy.mjs';
 
 const testLevels = [{ name: 'unit', summary: 'u' }, { name: 'component', summary: 'c' }, { name: 'integration', summary: 'i' },
@@ -40,6 +40,14 @@ test('missing, unknown, ambiguous, unused and self-referencing levels are report
     assert.ok(codes(failures).includes(code), `${JSON.stringify(extra)}: ${failures.join('\n')}`);
     assert.ok(failures.every(failure => /tests\/suites\.json|Known:|drop that entry/.test(failure)), failures.join('\n'));
   }
+});
+
+test('an override naming a removed example file may match nothing; any other unmatched override still fails', () => {
+  const stale = { ...tooling, levels: { integration: ['tests/tooling/removed-example.checks.mjs', 'tests/tooling/gone.checks.mjs'] } };
+  const { failures } = resolveLevels(manifest([stale]), [stale], { removed: new Set(['tests/tooling/removed-example.checks.mjs']) });
+  assert.deepEqual(codes(failures), ['UNUSED_LEVEL_PATTERN']);
+  assert.match(failures[0], /gone\.checks\.mjs/);
+  assert.deepEqual(codes(resolveLevels(manifest([stale]), [stale]).failures), ['UNUSED_LEVEL_PATTERN', 'UNUSED_LEVEL_PATTERN'], 'without the removal record both fail');
 });
 
 test('level declarations must exist, be unique, named, summarized and carry valid paths', () => {
@@ -101,7 +109,7 @@ test('level selection narrows node --test and Vitest suites to matching files an
 test('the repository labels every test file once, keeps e2e under the opt-in policy and has a usable pyramid', async () => {
   const result = await checkSuites(process.cwd());
   assert.deepEqual(result.failures, []);
-  const resolved = resolveLevels(result.manifest, result.suites);
+  const resolved = resolveLevels(result.manifest, result.suites, { removed: removedExampleFiles(process.cwd()) });
   assert.deepEqual(resolved.failures, []);
   assert.equal(resolved.files.length, result.suites.reduce((sum, item) => sum + item.files.length, 0));
   assert.deepEqual(resolved.levels.map(level => level.name), ['unit', 'component', 'integration', 'e2e', 'acceptance']);

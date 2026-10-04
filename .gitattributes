@@ -20,3 +20,11 @@ docs/_archive/project-setup/evidence/** -text
 *.otf binary
 *.zip binary
 *.tgz binary
+
+# Standalone projects (projects/README.md) and their synced workflows are not part of
+# the shell's source archives; each project ships from its own folder.
+projects/** export-ignore
+# Byte-exact like the project's own repository (generation receipts hash these bytes);
+# a project may add its own .gitattributes, which takes precedence inside its folder.
+projects/** -text
+.github/workflows/projects--* export-ignore

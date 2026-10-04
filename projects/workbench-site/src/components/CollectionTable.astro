@@ -1,0 +1,35 @@
+---
+import EmptyState from './EmptyState.astro';
+import { collectionInfo, collectionRecords, formatValue } from '../lib/collections';
+
+/** Every record of one collection as a table: one column per field of its Bases view, headed by its display name. */
+interface Props { name: string; caption?: string }
+const { name, caption } = Astro.props;
+const info = collectionInfo(name);
+const records = await collectionRecords(name);
+const label = caption ?? info?.view.name ?? name;
+const captionId = `table-${name}`;
+---
+{info && records.length > 0
+  ? (
+    <div class="table-scroll" role="region" aria-labelledby={captionId} tabindex="0">
+      <table class="collection-table">
+        <caption id={captionId}>{label}</caption>
+        <thead>
+          <tr>
+            {info.fields.map(field => <th scope="col" data-type={field.type}>{field.displayName}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {records.map(record => (
+            <tr>
+              {info.fields.map((field, index) => index === 0
+                ? <th scope="row">{formatValue(record.values[field.property])}</th>
+                : <td data-type={field.type}>{formatValue(record.values[field.property])}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+  : <EmptyState name={name} known={info !== null} />}

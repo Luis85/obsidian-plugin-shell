@@ -183,6 +183,12 @@ test('[GENERATOR-DEVKIT-10] a generated project carries the cloud-session kit an
     assert.ok(files.has(path), `${path} is imported by a hook or is the setup script`);
   for (const path of ['scripts/testing/qualify-project-handoff.mjs', 'scripts/testing/handoff-run.mjs', 'scripts/testing/handoff-steps.mjs', 'tests/tooling/agent-project-handoff.checks.mjs'])
     assert.ok(!files.has(path), `${path} generates projects from framework starters, so it stays in the framework`);
+  for (const path of ['scripts/projects/projects.mjs', 'scripts/projects/workflows.mjs', 'tests/tooling/projects-boundary.checks.mjs', 'docs/framework/workflows/projects-boundary.yml'])
+    assert.ok(!files.has(path), `${path} manages the framework checkout's projects/ folder, so it stays in the framework`);
+  for (const path of ['scripts/testing/qualify-site-templates.mjs', 'tests/tooling/site-templates-qualification.checks.mjs', 'docs/framework/workflows/site-templates.yml', 'tests/fixtures/sites/vault/Site/Features.base'])
+    assert.ok(!files.has(path), `${path} qualifies the framework's own site templates, so it stays in the framework`);
+  assert.ok(files.has('templates/sites/catalog.json'), 'the site templates ship with the bundled site commands');
+  assert.ok(![...files.keys()].some(path => path.includes('projects--')), 'workflows synced from projects/<name> never reach a generated project');
   assert.match(text('AGENTS.md'), /## Working in a cloud session[\s\S]*docs\/framework\/development\/CLOUD-AND-LOCAL-SESSIONS\.md/);
   assert.ok(files.has('docs/framework/development/CLOUD-AND-LOCAL-SESSIONS.md'));
   assert.equal(JSON.parse(text('.claude/settings.json')).hooks.SessionStart[0].hooks[0].timeout, 600, 'the hook may download Node and run npm ci');

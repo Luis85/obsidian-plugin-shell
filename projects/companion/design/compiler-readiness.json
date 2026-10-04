@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "generation": "completed",
+  "dependencies": "locked",
+  "bundle": "not-run",
+  "typecheck": "not-run",
+  "tests": "not-run",
+  "productAcceptance": "not-inferred",
+  "diagnostics": []
+}

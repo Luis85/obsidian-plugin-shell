@@ -1,0 +1,69 @@
+name: Set up the qualified toolchain
+description: >-
+  Selects the .nvmrc Node, provisions the qualified npm 11.19.1 in runner scratch
+  (never globally) and exports QUALIFIED_NPM. Optionally installs the committed
+  lock and the locked Playwright Chromium. Checkout stays a separate step so each
+  job keeps its own checkout options.
+inputs:
+  install:
+    description: "'true' runs a clean install of the committed lock with the qualified npm."
+    required: false
+    default: 'false'
+  install-flags:
+    description: Space-separated flags for the clean install, for example --no-fund --ignore-scripts.
+    required: false
+    default: '--no-fund'
+  playwright:
+    description: "Provision the Chromium pinned by the locked @playwright/test: '' (no), 'with-deps' (browser and system libraries) or 'browser' (browser only). Needs install."
+    required: false
+    default: ''
+outputs:
+  npm-cli:
+    description: Path of the qualified npm CLI (also exported as QUALIFIED_NPM).
+    value: ${{ steps.npm.outputs.cli }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version-file: .nvmrc
+        package-manager-cache: false
+    - name: Select the qualified npm in runner scratch, not globally
+      id: npm
+      shell: bash
+      run: |
+        npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+        cli="$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js"
+        echo "QUALIFIED_NPM=$cli" >> "$GITHUB_ENV"
+        echo "cli=$cli" >> "$GITHUB_OUTPUT"
+    - name: Install the committed lock with the qualified npm
+      if: inputs.install == 'true'
+      shell: bash
+      env:
+        INSTALL_FLAGS: ${{ inputs.install-flags }}
+      run: |
+        read -r -a flags <<< "$INSTALL_FLAGS"
+        node "$QUALIFIED_NPM" ci "${flags[@]}"
+    - name: Resolve the pinned Playwright version
+      id: playwright
+      if: inputs.playwright != ''
+      shell: bash
+      run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+    # Same key as ci.yml's Linux jobs, so every workflow shares one browser download.
+    - name: Restore the pinned Chromium download
+      if: inputs.playwright != '' && runner.os == 'Linux'
+      uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+    - name: Provision the pinned Chromium
+      if: inputs.playwright != ''
+      shell: bash
+      env:
+        PLAYWRIGHT_MODE: ${{ inputs.playwright }}
+      run: |
+        case "$PLAYWRIGHT_MODE" in
+          with-deps) node node_modules/@playwright/test/cli.js install --with-deps chromium ;;
+          browser) node node_modules/@playwright/test/cli.js install chromium ;;
+          *) echo "::error::Unknown playwright input: $PLAYWRIGHT_MODE"; exit 1 ;;
+        esac

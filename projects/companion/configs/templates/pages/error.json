@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "page.error",
+  "name": "Error Page",
+  "version": "1.0.0",
+  "templateType": "page",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Recoverable error surface with persistent feedback.",
+  "tags": [
+    "page",
+    "pages",
+    "error",
+    "recovery"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "error-state",
+    "recovery"
+  ],
+  "states": [
+    "error",
+    "default"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "molecule.alert"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "page",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

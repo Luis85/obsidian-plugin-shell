@@ -13,6 +13,8 @@ import { compilerOperation } from '../../compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
 import { obsidianRead } from './obsidian-cli.ts';
 import { fixtureOperation } from './fixtures.ts';
+import { baseOperation } from './base-command.ts';
+import { siteTemplatesOperation } from './site-command.ts';
 import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
 import { setupProgress } from './setup-progress.ts';
@@ -30,6 +32,7 @@ import { readComponentTemplateOperation } from './component-templates.ts';
 import { isUiCommand, uiOperation } from './ui-operation.ts';
 import { incrementRead, isIncrementRead } from '../increments/read-operation.ts';
 import { remoteOperation } from '../increments/remote-operation.ts';
+import { pluginsRead } from '../community-plugins/operations.ts';
 
 /** One command page, a group of subcommands sharing a root word, every command, or the golden path. */
 function helpSelection(request: Request) {
@@ -141,6 +144,8 @@ const routes: Route[] = [
   [prefixed('obsidian '), (request, context) => obsidianRead(request, context)],
   [(request, effect) => request.command.startsWith('docs ') && effect !== 'plan', docsRead],
   [(_request, effect) => effect === 'fixtures', (request, context) => fixtureOperation(request, context)],
+  [prefixed('base '), baseOperation],
+  [named('site templates'), siteTemplatesOperation],
   [isMakerDiscovery, makerDiscovery],
   [isMakerCheck, makerCheck],
   [prefixed('entities '), entityCatalog],
@@ -155,6 +160,7 @@ const routes: Route[] = [
   [named('check'), (request, context) => request.options.plan === true ? checkPlanOperation(request, context) : checkOperation(request, context)],
   [named('ci'), (request, context) => ciOperation(request, context)],
   [named('check submission'), (request, context) => submissionCheck(context, request.options['dry-run'] === true)],
+  [(request, effect) => request.command.startsWith('plugins ') && effect === 'read', pluginsRead],
   [(request, effect) => request.command.startsWith('airship ') && effect !== 'plan', (request, context) => airshipOperation(request, context)],
   [(request, effect) => request.command === 'plan inspect' || effect === 'plan', fileOperation],
   [(_request, effect) => effect === 'remote', remoteOperation],

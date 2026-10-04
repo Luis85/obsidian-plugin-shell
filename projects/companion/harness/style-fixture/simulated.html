@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Obsidian host stylesheet — validation fixture</title>
+  <link rel="stylesheet" href="../styles/simulated.css">
+  <link rel="stylesheet" href="../../src/styles/index.css">
+  <link rel="stylesheet" href="fixture.css">
+  <script src="fixture.js" defer></script>
+</head>
+<body data-host-style="simulated" class="obsidian-harness plugin-shell theme-dark" data-density="comfortable" data-narrow="false">
+  <main class="fixture-page">
+    <header class="fixture-intro">
+      <p class="fixture-eyebrow">OBSIDIAN PLUGIN SHELL / HOST STYLE FIXTURE 0.1</p>
+      <h1>Host styles, without a vault</h1>
+      <p>Original CSS simulation for frontend testing. Not Obsidian’s stylesheet, a running plugin, or proof of native compatibility.</p>
+      <p class="fixture-caption">The controls below exercise this specimen only. No notes are created, no preferences are stored, and no production notification service is running.</p>
+    </header>
+    <section class="fixture-toolbar" aria-label="Fixture controls">
+      <label for="theme">Theme<select id="theme" class="dropdown"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+      <label for="language">Message language<select id="language" class="dropdown"><option value="en">English</option><option value="de">Deutsch (messages only)</option></select></label>
+      <label for="density">Control density<select id="density" class="dropdown"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
+      <label for="width">Pane width<select id="width" class="dropdown"><option value="wide">Wide</option><option value="narrow">Narrow</option></select></label>
+    </section>
+    <div class="fixture-layout workspace-split">
+      <section class="workspace-leaf" aria-labelledby="task-heading">
+        <div class="view-header"><h2 class="view-header-title" id="task-heading">Task creation surface</h2></div>
+        <div class="view-content">
+          <div class="fixture-field"><label for="task-title">Title</label><input id="task-title" type="text" placeholder="Prepare the release checklist" aria-describedby="title-help title-error"><span id="title-help" class="fixture-caption">Validation is displayed in context, not only in a notice.</span><span id="title-error" class="fixture-field-error" role="alert"></span></div>
+          <div class="fixture-field"><label for="due">Due date</label><input id="due" type="date" value="2026-09-30"></div>
+          <div class="fixture-field"><label for="task-notes">Notes</label><textarea id="task-notes" placeholder="Plain text or Markdown"></textarea></div>
+          <div class="fixture-actions"><button id="validate" type="button" class="mod-cta">Show validation</button><button id="show-notice" type="button">Show success notice</button><button id="open-modal" type="button">Open modal specimen</button></div>
+          <div class="fixture-feedback" aria-labelledby="uncertain-heading"><strong id="uncertain-heading">Creation outcome is uncertain</strong><p>Check the destination before creating another note. This message stays available; dismissing a notice does not resolve the operation.</p><p class="fixture-caption">Static recovery-state specimen, not a live failure.</p></div>
+          <div class="fixture-field"><label for="fixture-progress">Progress specimen</label><progress id="fixture-progress" max="100" value="65">65%</progress></div>
+          <details><summary>Markdown preview specimen</summary><pre><code>---
+type: task
+status: todo
+due: "2026-09-30"
+---
+# Prepare the release checklist</code></pre></details>
+        </div>
+      </section>
+      <div class="fixture-stack">
+        <section class="workspace-leaf" aria-labelledby="settings-heading"><div class="view-header"><h2 class="view-header-title" id="settings-heading">Native-style settings</h2></div><div class="view-content">
+          <div class="setting-item"><div class="setting-item-info"><label class="setting-item-name" for="folder">Task folder</label><div class="setting-item-description" id="folder-help">Long translated descriptions wrap instead of truncating recovery instructions.</div></div><div class="setting-item-control"><input id="folder" type="text" value="Tasks" aria-describedby="folder-help"></div></div>
+          <div class="setting-item"><div class="setting-item-info"><label class="setting-item-name" for="success-enabled">Routine success notices</label><div class="setting-item-description">Critical recovery remains visible in the owning view.</div></div><div class="setting-item-control checkbox-container"><input id="success-enabled" type="checkbox" checked></div></div>
+          <div class="setting-item"><div class="setting-item-info"><label class="setting-item-name" for="disabled">Unavailable control</label></div><div class="setting-item-control"><input id="disabled" type="text" value="Unavailable" disabled></div></div>
+        </div></section>
+        <section class="workspace-leaf" aria-labelledby="feedback-heading"><div class="view-header"><h2 class="view-header-title" id="feedback-heading">Feedback specimens</h2></div><div class="view-content">
+          <div class="notice fixture-static-notice"><strong>Created, but could not open</strong><div class="notice-message">The document exists. Retry opening, not creation.</div></div>
+          <ul class="fixture-list"><li>Validation: field-level guidance.</li><li>Progress: one updating state.</li><li>Failure: persistent recovery where work happened.</li><li>Cancellation: no error alert before writing starts.</li></ul>
+          <p class="fixture-caption">Static specimens have no live-region role. Dynamic messages announce only when triggered.</p>
+        </div></section>
+      </div>
+    </div>
+    <section class="fixture-token-proof" aria-labelledby="tokens-heading"><h2 id="tokens-heading">Plugin token inheritance</h2><div id="token-surface" class="token-surface">Surface and text</div><button id="token-accent" class="token-accent" type="button">Accent alias</button></section>
+    <footer><p class="fixture-caption">Original modular host CSS → later plugin CSS → scenario-only controls. Production plugin CSS is intentionally absent in this standalone fixture.</p></footer>
+  </main>
+  <div class="notice-container" id="notice-root"></div>
+  <dialog class="modal" id="modal" aria-labelledby="modal-heading" aria-describedby="modal-copy">
+    <h2 class="modal-title" id="modal-heading">Modal appearance specimen</h2>
+    <div class="modal-content"><p id="modal-copy">This uses a browser dialog and fixture-only focus handling to inspect layout. It is not an Obsidian Modal adapter test.</p><div class="fixture-field"><label for="modal-value">Example field</label><input id="modal-value" type="text" value="Preserve this draft"></div></div>
+    <div class="modal-button-container"><button id="close-modal" type="button">Close</button></div>
+  </dialog>
+</body>
+</html>

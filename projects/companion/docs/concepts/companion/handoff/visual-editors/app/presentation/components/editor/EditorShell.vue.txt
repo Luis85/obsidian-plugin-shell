@@ -1,0 +1,18 @@
+<script setup lang="ts">
+const store=useEditorStore()
+</script>
+<template>
+  <div class="h-screen flex flex-col bg-default">
+    <header class="h-14 border-b border-default flex items-center gap-3 px-4">
+      <strong>Companion</strong>
+      <UButtonGroup><UButton :variant="store.mode==='page'?'solid':'ghost'" @click="store.mode='page'">Pages</UButton><UButton :variant="store.mode==='component'?'solid':'ghost'" @click="store.mode='component'">Components</UButton></UButtonGroup>
+      <div class="flex-1"/>
+      <UButton variant="outline">Import JSON</UButton><UButton variant="outline">Export JSON</UButton><UButton>Save</UButton>
+    </header>
+    <main class="grid grid-cols-[260px_minmax(0,1fr)_320px] min-h-0 flex-1">
+      <aside class="border-r border-default overflow-auto"><slot name="navigator"/></aside>
+      <section class="overflow-auto bg-elevated"><slot/></section>
+      <aside class="border-l border-default overflow-auto"><slot name="inspector"/></aside>
+    </main>
+  </div>
+</template>

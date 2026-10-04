@@ -17,8 +17,12 @@ name: CI
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths-ignore:
+      - 'projects/**'
   push:
     branches: [main]
+    paths-ignore:
+      - 'projects/**'
   workflow_call:
     inputs:
       tier:

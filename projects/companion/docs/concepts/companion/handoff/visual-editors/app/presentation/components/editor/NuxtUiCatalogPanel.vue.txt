@@ -1,0 +1,17 @@
+<script setup lang="ts">
+import { nuxtUiCatalog, nuxtUiRecipes } from '../../../domain/catalog/nuxt-ui-catalog'
+const query=ref('')
+const tab=ref('patterns')
+const emit=defineEmits<{insert:[id:string],createComponent:[id:string]}>()
+const entries=computed(()=>tab.value==='patterns'?nuxtUiRecipes:nuxtUiCatalog)
+const filtered=computed(()=>entries.value.filter(x=>(x.label+x.category+x.description+(x.component??'')).toLowerCase().includes(query.value.toLowerCase())))
+const groups=computed(()=>[...new Set(filtered.value.map(x=>x.category))])
+</script>
+<template><div class="p-3">
+<UInput v-model="query" icon="i-lucide-search" placeholder="Search Nuxt UI…" size="sm"/>
+<UTabs v-model="tab" :items="[{label:'Patterns',value:'patterns'},{label:'Components',value:'components'}]" class="mt-2"/>
+<div v-for="g in groups" :key="g"><p class="text-[10px] uppercase tracking-wide font-semibold text-muted mt-4 mb-2">{{g}}</p>
+<div class="space-y-1"><div v-for="item in filtered.filter(x=>x.category===g)" :key="item.id" class="group border border-transparent hover:border-default hover:bg-elevated rounded-lg p-2">
+<div class="flex items-start gap-2"><div class="size-8 rounded bg-elevated grid place-items-center"><UIcon :name="item.kind==='recipe'?'i-lucide-blocks':'i-lucide-component'"/></div><div class="min-w-0 flex-1"><div class="flex items-center"><strong class="text-xs">{{item.label}}</strong><code v-if="item.component" class="text-[10px] text-primary ml-2">{{item.component}}</code></div><p class="text-[11px] text-muted mt-1">{{item.description}}</p></div><UButton icon="i-lucide-plus" variant="ghost" size="xs" class="opacity-0 group-hover:opacity-100" @click="emit('insert',item.id)"/></div>
+<div class="hidden group-hover:flex gap-2 mt-2 pl-10"><UButton size="xs" variant="soft" @click="emit('insert',item.id)">Insert</UButton><UButton v-if="item.kind==='primitive'" size="xs" variant="ghost" @click="emit('createComponent',item.id)">Customize as component</UButton></div>
+</div></div></div></div></template>

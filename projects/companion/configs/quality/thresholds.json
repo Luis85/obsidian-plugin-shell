@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "coverage": {
+    "selectedCore": { "lines": 95, "statements": 90, "functions": 90, "branches": 90 },
+    "production": { "lines": 90, "statements": 90, "functions": 90, "branches": 85 },
+    "productionCore": { "lines": 95, "statements": 95, "functions": 95, "branches": 90 },
+    "maker": { "lines": 90, "statements": 90, "functions": 90, "branches": 85 },
+    "makerCore": { "lines": 95, "statements": 95, "functions": 95, "branches": 90 },
+    "compiler": { "lines": 95, "functions": 90, "branches": 90 }
+  },
+  "codeLines": { "source": 400, "tests": 450, "mainTs": 100 },
+  "maintainability": { "cyclomatic": 10, "cognitive": 15, "duplicationPercent": 3, "duplicationMinTokens": 50, "duplicationMinLines": 5 },
+  "performance": { "warmInitializationMs": 200, "itemsReadinessMs": 500, "mainJsBytes": 1048576, "stylesCssBytes": 163840 }
+}

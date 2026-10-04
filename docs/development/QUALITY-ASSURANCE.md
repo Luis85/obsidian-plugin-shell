@@ -185,12 +185,12 @@ files) with the merge-base of `HEAD` and `origin/main`, falling back to `main` a
 `origin/HEAD`, or with `--base`. It parses the unified diff and inspects only added
 lines (plus removed lines where a deletion loosens a gate). Findings print as
 `[RULE] file:line message` and exit 1; `--warn-only` reports without failing, `--json`
-emits `{status, base, files, violations[]}`, and an unresolvable base or bad usage
+emits `{status, base, files, violations[], approved[]}`, and an unresolvable base or bad usage
 exits 2. Rules:
 
 | Rule | Flags |
 | --- | --- |
-| `SR-QUALITY-CONFIG` | any change to `configs/quality/**`, the threshold floors or a Fallow rc file |
+| `SR-QUALITY-CONFIG` | any change to `configs/quality/**` (except the approval record below), the threshold floors or a Fallow rc file |
 | `SR-COVERAGE-THRESHOLD` | threshold literals or exclusions added to, or wiring removed from, a Vitest config |
 | `SR-LINT-CONFIG` | lint rules turned off, downgraded or ignored, or severities removed, in `configs/lint/**` |
 | `SR-LINT-DISABLE`, `SR-TS-SUPPRESSION`, `SR-COVERAGE-IGNORE`, `SR-ANALYZER-IGNORE` | suppression comments added |
@@ -204,6 +204,17 @@ exits 2. Rules:
 The guard is a diff heuristic with stated scope: it neither replaces the full gates
 nor proves a change correct. A flagged line that is genuinely justified needs an
 owner-approved note in the pull request; the guard has no inline waiver, so
-loosening is never silent. Fixtures in `tests/tooling/agent-self-review*.checks.mjs`
+loosening is never silent.
+
+The only recorded approval path is `configs/quality/self-review-approvals.json`,
+for `SR-QUALITY-CONFIG`. Each entry names the `rule`, `file`, `approvedBy`
+(`@owner`), a `reason` and the exact `added` and `removed` line texts. A finding
+is accepted only when every added and removed line of that file in the diff is
+listed for it. One extra or edited line flags the file again. Accepted findings
+still print as `approved [RULE] file:line by @owner` and appear under
+`approved[]` in `--json`. A malformed record fails the guard; it never approves
+anything. CODEOWNERS assigns the record to the owner, and `.claude/settings.json`
+denies agents any edit to it, so agents cannot approve their own changes. Remove
+entries once their change has merged. Fixtures in `tests/tooling/agent-self-review*.checks.mjs`
 run each rule against real temporary Git repositories, including a clean change, and
 prove that removed and context lines never trigger findings.

@@ -1,0 +1,12 @@
+/* Generated design system. Edit saved tokens, not this managed file. */
+[data-plugin-ui="workbench-companion"].ps--workbench-companion {
+  --workbench-companion-ds-sizes-control: 36px;
+  --workbench-companion-ds-sizes-icon: 18px;
+  --workbench-companion-ds-sizes-inspector: 320px;
+}
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-sizes-control { width: var(--workbench-companion-ds-sizes-control); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-height-control { height: var(--workbench-companion-ds-sizes-control); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-sizes-icon { width: var(--workbench-companion-ds-sizes-icon); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-height-icon { height: var(--workbench-companion-ds-sizes-icon); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-sizes-inspector { width: var(--workbench-companion-ds-sizes-inspector); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-height-inspector { height: var(--workbench-companion-ds-sizes-inspector); }

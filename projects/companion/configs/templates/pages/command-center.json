@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "page.command-center",
+  "name": "Command Center",
+  "version": "1.0.0",
+  "templateType": "page-with-bricks",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Keyboard-first operations surface with command discovery and recent activity.",
+  "tags": [
+    "page",
+    "pages",
+    "command",
+    "operations"
+  ],
+  "recommendedFor": [
+    "editor",
+    "obsidian-plugin",
+    "knowledge-tool"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "command-center"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.app-header",
+      "slot": "header"
+    },
+    {
+      "template": "organism.command-palette",
+      "slot": "commands"
+    },
+    {
+      "template": "organism.activity-feed",
+      "slot": "activity"
+    }
+  ],
+  "slots": [
+    {
+      "id": "header",
+      "role": "header",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "commands",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "activity",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    }
+  ],
+  "design": {
+    "kind": "page",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

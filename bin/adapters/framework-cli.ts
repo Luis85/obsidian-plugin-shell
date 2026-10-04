@@ -50,6 +50,8 @@ async function resolveInvocation(argv: string[], frameworkRoot: string): Promise
   // Discovery is decided on the parsed request, as before starter resolution.
   if (isDiscovery(parsed)) return { request, root: resolve(selected) };
   if (isAdoptCommand(parsed.command)) return adoptInvocation(parsed);
+  // App plugins belong to this app installation (bin/plugins beside bin/app), not to a selected project.
+  if (parsed.command.startsWith('plugins ')) return { request, root: await projectRoot(frameworkRoot, true) };
   if (starters) return { request, root: starters.root };
   return { request, root: await projectRoot(selected, typeof request.options.root === 'string') };
 }

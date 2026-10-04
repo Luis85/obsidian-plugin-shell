@@ -1,0 +1,89 @@
+/* Semantic design uses host-derived colors and a contained Vue Flow island. */
+.er-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.er-workspace{display:grid;grid-template-columns:210px minmax(300px,1fr) 250px;min-height:600px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.er-sidebar,.er-inspector{padding:16px;min-width:0;overflow:auto;max-height:780px}.er-sidebar{border-right:1px solid var(--line)}.er-inspector{border-left:1px solid var(--line)}
+.er-inspector h2{font-size:19px;overflow-wrap:anywhere}.er-inspector h3{font-size:13px;margin-top:24px}.er-inspector code{overflow-wrap:anywhere}.er-inspector>.btn{margin:6px 4px 0 0}
+.er-catalog-group{margin-top:20px}.er-catalog-group>.row>strong{font-size:11px;text-transform:uppercase;color:var(--muted);overflow-wrap:anywhere}
+.er-catalog-item{display:block;text-align:left;width:100%;border:1px solid transparent;background:transparent;color:var(--text);padding:12px 8px;border-radius:6px}.er-catalog-item:hover,.er-catalog-item:focus-visible{background:var(--hover);border-color:var(--accent)}.er-catalog-item small{display:block;color:var(--muted);margin-top:5px}
+.er-canvas-panel{min-width:0;display:flex;flex-direction:column;background:var(--bg)}.er-canvas-caption{display:flex;gap:12px;align-items:center;flex-wrap:wrap;min-height:48px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:11px}.er-canvas-caption>strong{color:var(--muted);letter-spacing:.12em}.er-canvas-caption>label{margin-left:auto;display:flex;gap:5px;align-items:center}
+.er-flow{height:650px;min-height:500px;background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:20px 20px;position:relative}.er-flow .vue-flow__edges svg{overflow:visible}.er-flow .vue-flow__edge.selected path{stroke-width:3}.er-flow .vue-flow__node-erSection{pointer-events:none}.er-flow .vue-flow__node-erSection button{pointer-events:auto}
+.er-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 5px 18px #0002;position:relative;color:var(--text);box-sizing:border-box;overflow:visible}.er-card.selected{outline:2px solid var(--accent);outline-offset:1px}
+.er-card-heading{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:5px}.er-card-heading>small{font-size:9px;letter-spacing:.15em;color:var(--muted)}.er-card-heading>button{border:0;background:transparent;color:var(--text);text-align:left;font-size:16px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0}.er-card-heading>code{font-size:10px;color:var(--muted)}
+.er-card-properties{padding:8px 16px}.er-card-properties>div,.er-properties>div{display:flex;justify-content:space-between;gap:8px;align-items:center;min-height:25px;font-size:11px}.er-card-properties code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}.er-card-properties small,.er-properties span{color:var(--muted);font-size:10px}.er-card>footer{padding:6px 16px;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.er-handle{height:12px!important;width:12px!important;border:2px solid var(--surface)!important;background:var(--accent)!important}
+.er-section-frame{height:100%;width:100%;border:1px dashed var(--accent);background:color-mix(in srgb,var(--accent) 5%,transparent);border-radius:12px;box-sizing:border-box}.er-section-frame>button{position:absolute;left:16px;top:10px;color:var(--text);background:transparent;border:0;font-size:12px;font-weight:650}
+.er-legend{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;color:var(--muted);font-size:10px;border-top:1px solid var(--line)}.er-empty{margin:auto;max-width:470px;padding:60px 30px;text-align:center}.er-empty>svg{height:40px;width:40px;color:var(--accent)}.er-list-view{padding:20px;overflow:auto;max-height:650px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.er-list-view .btn{margin-right:6px}
+.er-property-row{display:flex;align-items:end;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px}.er-property-row>label{flex:1 1 150px;font-size:11px;min-width:0}.er-property-row>.check-label{flex:0 0 auto;margin-bottom:9px}.er-property-row>.er-default{flex:1 1 100%}.er-property-row input,.er-property-row select{margin-top:6px}.er-property-row>.btn{margin-bottom:2px}
+#modal.semantic-modal{width:min(900px,calc(100vw - 32px))}#er-form-error{margin-top:12px}#er-form-error:empty{display:none}
+@media(max-width:1250px){.er-workspace{grid-template-columns:170px minmax(260px,1fr)}.er-inspector{grid-column:1/-1;max-height:none;border-left:0;border-top:1px solid var(--line)}.er-flow{height:560px}.er-inspector .er-properties{max-width:540px}}
+@media(max-width:700px){.er-workspace{display:flex;flex-direction:column}.er-sidebar{max-height:220px;border-right:0;border-bottom:1px solid var(--line)}.er-flow{height:470px;min-height:360px}.er-toolbar>.grow{display:none}.er-inspector{max-height:none}.er-property-row>label{flex-basis:100%}}
+
+.er-card-heading{height:100px;box-sizing:border-box}.er-card>footer{height:26px;box-sizing:border-box}.er-card-properties>small{display:block;height:28px}.er-card-properties>div{height:25px;min-height:25px;box-sizing:border-box}
+
+/* Edge group stroke must never thicken SVG caption glyphs. */
+#er-flow .vue-flow__edge-text{stroke:none;stroke-width:0;font-weight:500}
+
+/* The actual edge SVG owns clipping, not a descendant svg. Keep the outer view clipped. */
+#er-flow{overflow:hidden;isolation:isolate}
+#er-flow svg.vue-flow__edges,#er-flow svg.vue-flow__connectionline{overflow:visible}
+#er-flow .vue-flow__edge{stroke:var(--accent);cursor:pointer}
+#er-flow .vue-flow__edge .vue-flow__edge-path{stroke:var(--accent);stroke-width:2;fill:none;vector-effect:non-scaling-stroke}
+#er-flow .vue-flow__edge:hover .vue-flow__edge-path,#er-flow .vue-flow__edge.er-edge-hover .vue-flow__edge-path{stroke:var(--text);stroke-width:3}
+#er-flow .vue-flow__edge.selected .vue-flow__edge-path,#er-flow .vue-flow__edge:focus-visible .vue-flow__edge-path{stroke:var(--accent);stroke-width:3.5}
+#er-flow .vue-flow__edge .vue-flow__edge-interaction{stroke:transparent!important;fill:none;stroke-width:24;vector-effect:non-scaling-stroke;pointer-events:stroke}
+#er-flow .vue-flow__edge-textwrapper{pointer-events:all;cursor:pointer}
+#er-flow .vue-flow__edge-textbg{stroke:var(--line);stroke-width:1}
+#er-flow .vue-flow__edge:hover .vue-flow__edge-textbg,#er-flow .vue-flow__edge.selected .vue-flow__edge-textbg,#er-flow .vue-flow__edge:focus-visible .vue-flow__edge-textbg{stroke:var(--accent);stroke-width:2}
+#er-flow .er-cardinality{stroke:var(--accent);stroke-width:1.6;fill:none;pointer-events:none}
+#er-flow .er-card:hover{border-color:var(--muted);background:var(--hover)}
+#er-flow .er-card.selected{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+#er-flow .er-card.er-related{border-color:var(--accent)}
+#er-flow .er-owned-field{background:var(--accent-soft);border-radius:3px;color:var(--text)}
+#er-flow .vue-flow__node-erEntity:focus-visible{outline:2px dashed var(--text);outline-offset:6px;border-radius:8px}
+#er-flow .er-card-heading button{min-height:26px;border-radius:3px;line-height:1.3}
+#er-flow .er-card-heading button:hover:not(:disabled){color:var(--accent)}
+#er-flow .er-card-heading button:active:not(:disabled){background:var(--accent-soft)}
+#er-flow .er-card-heading button:focus-visible,#er-flow .er-section-frame button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#er-flow .er-handle{height:20px!important;width:20px!important;border:2px solid var(--surface)!important;background:var(--accent)!important;border-radius:5px;box-sizing:border-box;z-index:4;transition:background-color .12s,border-color .12s}
+#er-flow .er-port-target{border-radius:50%;background:var(--surface)!important;border-color:var(--accent)!important}
+#er-flow .er-secondary-port{opacity:0}
+#er-flow .er-card:hover .er-handle,#er-flow .er-card.selected .er-handle,#er-flow .vue-flow__node-erEntity:focus-within .er-handle,#er-flow.er-connecting .er-port-target{opacity:1}
+#er-flow .er-handle:hover,#er-flow .er-handle:focus-visible,#er-flow .er-handle.connecting{background:var(--text)!important;border-color:var(--accent)!important;outline:2px solid var(--accent);outline-offset:2px}
+#er-flow .er-port-target.valid{background:var(--green)!important;border-color:var(--surface)!important;outline:3px solid var(--green);outline-offset:2px}
+#er-flow.er-connecting .er-port-source{opacity:.25;cursor:not-allowed}
+#er-flow .er-section-frame{pointer-events:none}
+#er-flow .er-section-frame button{pointer-events:auto;min-height:28px;padding:3px 8px;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:4px}
+#er-flow .er-section-frame button:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}
+#er-flow .er-section-frame button:active:not(:disabled){background:var(--hover)}
+#er-guides{position:absolute;inset:0;width:100%;height:100%;z-index:8;pointer-events:none;overflow:hidden}
+#er-guides line{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
+.er-toolbar button,.er-canvas-caption label,.er-quick-properties .btn{min-height:32px}
+.er-toolbar .segmented [aria-pressed=true]{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.er-toolbar button:hover:not(:disabled),.er-quick-properties button:hover:not(:disabled){border-color:var(--accent)}
+.er-toolbar button:active:not(:disabled),.er-catalog-item:active,.er-relationship-item:active{box-shadow:inset 0 0 0 1px var(--accent);filter:brightness(.90)}
+.er-toolbar button:focus-visible,.er-catalog-item:focus-visible,.er-relationship-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.er-catalog-item[aria-pressed=true],.er-relationship-item[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+.er-catalog-item strong,.er-catalog-item small{overflow-wrap:anywhere}
+.er-canvas-options{display:flex;align-items:center;gap:12px;margin-left:auto;flex-wrap:wrap}
+.er-canvas-options label{display:flex;align-items:center;gap:6px;cursor:pointer}.er-canvas-options input{accent-color:var(--accent);width:16px;height:16px}
+#er-zoom-level{font-variant-numeric:tabular-nums;min-width:38px;text-align:right;color:var(--muted)}
+.er-canvas-caption{gap:8px;min-height:48px}.er-canvas-caption>label{margin-left:0}
+.er-legend{font-size:11px;line-height:1.6}
+.er-relationship-list{padding:20px;overflow:auto;max-height:650px}.er-relationship-list>article{padding:12px 0;border-bottom:1px solid var(--line)}
+.er-relationship-item{display:flex;flex-direction:column;gap:8px;background:transparent;border:1px solid transparent;color:var(--text);width:100%;padding:12px;text-align:left;border-radius:6px;cursor:pointer;overflow-wrap:anywhere}
+.er-relationship-item strong{font-size:15px}.er-relationship-item small{color:var(--muted);line-height:1.6}.er-relationship-item:hover{border-color:var(--accent);background:var(--hover)}
+.er-relationship-list>article>.btn{margin:8px 12px}
+.er-inspector .er-meaning,.er-meaning{line-height:1.65}.er-properties code{overflow-wrap:anywhere;min-width:0}.er-properties span{flex-shrink:0}
+.er-quick-properties{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 20px}.er-quick-properties>span{font-size:12px;color:var(--muted)}
+.er-default small{display:block;color:var(--muted);margin-top:6px;line-height:1.5}.er-reference-example{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;padding:12px;background:var(--bg);border-radius:4px}
+.er-align-controls{margin:16px 0}.er-readonly .er-handle{pointer-events:none;opacity:.25}
+.er-toolbar button:disabled,.er-readonly button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+@media(prefers-reduced-motion:reduce){#er-flow .er-handle{transition:none}}
+@media(max-width:700px){.er-canvas-caption{align-items:flex-start}.er-canvas-options{margin-left:0}.er-toolbar button{min-height:36px}.er-legend{font-size:11px}.er-quick-properties .btn{flex:0 1 auto}.er-inspector{padding:20px}.er-properties{max-width:100%}}
+
+/* Press feedback is scoped to this editor and its protected form. */
+.er-workspace .btn:active:not(:disabled),.er-toolbar .btn:active:not(:disabled),#modal.semantic-modal .btn:active:not(:disabled){box-shadow:inset 0 0 0 1px var(--accent);filter:brightness(.92)}
+
+/* Connected ports remain visible: idle relationships must not terminate in empty space. */
+#er-flow .er-secondary-port.er-connected-port{opacity:1}
+
+.er-relationship-item[aria-pressed=true]:hover{background:var(--accent-soft)}

@@ -5,7 +5,7 @@
   "suiteSources": {
     "maker": ["bin/adapters/makers/**", "scripts/makers/**", "bin/adapters/framework/check*.ts", "bin/adapters/framework/gate-*.ts", "bin/adapters/framework/adopt-*.ts", "bin/domain/adoption/**", "bin/application/adoption/**", "bin/presentation/terminal/adopt-view.ts", "configs/quality/gate-rules.json"],
     "makers": ["bin/adapters/makers/**", "scripts/makers/**", "scripts/events/**", "scripts/examples/**"],
-    "cli": ["bin/app", "bin/app.ts", "bin/adapters/framework/**", "bin/adapters/framework-cli.ts", "bin/presentation/terminal/**", "scripts/framework/**", "scripts/operations/**", "scripts/contracts/**", "configs/quality/gate-rules.json"],
+    "cli": ["bin/app", "bin/app.ts", "bin/adapters/framework/**", "bin/adapters/framework-cli.ts", "bin/presentation/terminal/**", "scripts/framework/**", "scripts/operations/**", "scripts/contracts/**", "bin/adapters/community-plugins/**", "bin/domain/community-plugin.ts", "plugins/**", "configs/quality/gate-rules.json"],
     "generator": ["templates/**", "configs/templates/**", "bin/compiler/**", "scripts/compiler/**", "scripts/starters/**", "bin/adapters/starters/**", "configs/starters/**", "scripts/shared/file-plan*"],
     "compiler": ["bin/compiler/**", "scripts/compiler/**"],
     "companion": ["scripts/companion/**", "scripts/concepts/**", "templates/**"],

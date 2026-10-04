@@ -12,6 +12,8 @@ name: Release
 on:
   push:
     branches: ['release/**']
+    paths-ignore:
+      - 'projects/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -131,6 +133,18 @@ jobs:
     uses: ./.github/workflows/starter-distribution.yml
     with:
       tier: release
+  projects-boundary:
+    name: Projects boundary
+    needs: metadata
+    uses: ./.github/workflows/projects-boundary.yml
+    with:
+      tier: release
+  site-templates:
+    name: Site templates
+    needs: metadata
+    uses: ./.github/workflows/site-templates.yml
+    with:
+      tier: release
   candidate-qualification:
     name: Candidate qualification
     needs: metadata
@@ -141,7 +155,7 @@ jobs:
   release-result:
     name: Release result
     if: always()
-    needs: [metadata, ci, airship-compatibility, angular-setup-acceptance, application-docs, companion-concept-verification, compiler-qualification, hindsight-tooling, interactive-maker, native-integration-verification, optional-storybook, project-starter-qualification, setup-compatibility, starter-distribution, candidate-qualification]
+    needs: [metadata, ci, airship-compatibility, angular-setup-acceptance, application-docs, companion-concept-verification, compiler-qualification, hindsight-tooling, interactive-maker, native-integration-verification, optional-storybook, project-starter-qualification, setup-compatibility, starter-distribution, projects-boundary, site-templates, candidate-qualification]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

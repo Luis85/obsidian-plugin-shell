@@ -1,0 +1,586 @@
+{
+ "schema": 3,
+ "nextId": 25,
+ "catalog": {
+  "id": "nuxt-ui",
+  "version": 1
+ },
+ "pages": [
+  {
+   "id": "vp-2",
+   "ownerId": "node-customers",
+   "name": "Customers",
+   "notes": "",
+   "root": [
+    {
+     "id": "vn-18",
+     "kind": "element",
+     "tag": "main",
+     "attrs": {},
+     "children": [
+      {
+       "id": "vn-14",
+       "kind": "text",
+       "role": "h1",
+       "value": {
+        "kind": "literal",
+        "value": "Customers"
+       },
+       "name": "Title"
+      },
+      {
+       "id": "vn-10",
+       "kind": "component",
+       "ref": {
+        "kind": "project",
+        "componentId": "vc-1"
+       },
+       "props": {
+        "query": {
+         "kind": "literal",
+         "value": ""
+        }
+       },
+       "slots": {
+        "actions": [
+         {
+          "id": "vn-11",
+          "kind": "component",
+          "ref": {
+           "kind": "nuxt-ui",
+           "entryId": "u-button"
+          },
+          "props": {
+           "label": {
+            "kind": "literal",
+            "value": "Reset"
+           }
+          },
+          "slots": {},
+          "events": [
+           {
+            "id": "vi-12",
+            "event": "click",
+            "label": "Reset view",
+            "notes": "",
+            "acceptance": "",
+            "actions": [
+             {
+              "kind": "set-state",
+              "state": "default"
+             },
+             {
+              "kind": "toggle",
+              "nodeId": "vn-9"
+             }
+            ]
+           }
+          ],
+          "name": "Reset"
+         }
+        ]
+       },
+       "events": [
+        {
+         "id": "vi-13",
+         "event": "search",
+         "label": "Run search",
+         "notes": "",
+         "acceptance": "",
+         "actions": [
+          {
+           "kind": "source",
+           "sourceId": "customers",
+           "operationId": "list",
+           "input": {
+            "kind": "event"
+           }
+          }
+         ]
+        }
+       ],
+       "name": "Customer search"
+      },
+      {
+       "id": "vn-8",
+       "kind": "component",
+       "ref": {
+        "kind": "nuxt-ui",
+        "entryId": "u-table"
+       },
+       "props": {
+        "data": {
+         "kind": "source",
+         "sourceId": "customers",
+         "operationId": "list",
+         "field": "items"
+        },
+        "columns": {
+         "kind": "literal",
+         "value": [
+          {
+           "accessorKey": "name",
+           "header": "Name"
+          }
+         ]
+        }
+       },
+       "slots": {},
+       "events": [],
+       "name": "Customer table",
+       "visibleIn": [
+        "default",
+        "loading",
+        "error",
+        "disabled"
+       ]
+      },
+      {
+       "id": "vn-9",
+       "kind": "component",
+       "ref": {
+        "kind": "nuxt-ui",
+        "entryId": "u-alert"
+       },
+       "props": {
+        "title": {
+         "kind": "literal",
+         "value": "No customers"
+        }
+       },
+       "slots": {},
+       "events": [],
+       "name": "Empty",
+       "visibleIn": [
+        "empty"
+       ]
+      },
+      {
+       "id": "vn-15",
+       "kind": "component",
+       "ref": {
+        "kind": "nuxt-ui",
+        "entryId": "u-button"
+       },
+       "props": {
+        "label": {
+         "kind": "literal",
+         "value": "Open settings"
+        }
+       },
+       "slots": {},
+       "events": [
+        {
+         "id": "vi-16",
+         "event": "click",
+         "label": "Open settings",
+         "notes": "",
+         "acceptance": "Opens settings",
+         "actions": [
+          {
+           "kind": "navigate",
+           "surfaceId": "node-settings"
+          }
+         ]
+        },
+        {
+         "id": "vi-17",
+         "event": "focus",
+         "label": "Unimplemented",
+         "notes": "Business rule pending",
+         "acceptance": "Pending product rule",
+         "actions": []
+        }
+       ],
+       "name": "Settings link"
+      }
+     ],
+     "events": [],
+     "name": "Content",
+     "layout": {
+      "mode": "stack",
+      "ui": {
+       "gap": 12,
+       "padding": 16,
+       "columns": 2,
+       "align": "stretch",
+       "justify": "start",
+       "wrap": true,
+       "overflow": "visible",
+       "widthMode": "fill",
+       "width": 320,
+       "minWidth": 0,
+       "maxWidth": 1600,
+       "narrow": {
+        "layout": "stack",
+        "columns": 1,
+        "hidden": false
+       },
+       "tokens": {
+        "gap": "",
+        "padding": "",
+        "color": "",
+        "background": "",
+        "radius": "",
+        "typography": ""
+       }
+      }
+     }
+    }
+   ],
+   "scenarios": [
+    {
+     "id": "empty",
+     "name": "Empty list",
+     "state": "empty",
+     "width": "wide",
+     "values": {},
+     "bindings": [
+      {
+       "sourceId": "customers",
+       "operationId": "list",
+       "value": {
+        "items": []
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "components": [
+  {
+   "id": "vc-1",
+   "libraryId": "library-search",
+   "exportName": "SearchField",
+   "description": "Search input with submit",
+   "props": [
+    {
+     "name": "query",
+     "type": "string",
+     "required": false,
+     "default": ""
+    }
+   ],
+   "slots": [
+    {
+     "name": "actions",
+     "required": false
+    }
+   ],
+   "emits": [
+    {
+     "name": "search",
+     "payloadType": "string"
+    }
+   ],
+   "variants": [
+    {
+     "id": "compact",
+     "name": "Compact",
+     "values": {
+      "query": ""
+     }
+    }
+   ],
+   "template": [
+    {
+     "id": "vn-6",
+     "kind": "element",
+     "tag": "div",
+     "attrs": {},
+     "children": [
+      {
+       "id": "vn-3",
+       "kind": "component",
+       "ref": {
+        "kind": "nuxt-ui",
+        "entryId": "u-input"
+       },
+       "props": {
+        "modelValue": {
+         "kind": "prop",
+         "name": "query"
+        },
+        "placeholder": {
+         "kind": "literal",
+         "value": "Search…"
+        }
+       },
+       "slots": {},
+       "events": [],
+       "name": "Search input"
+      },
+      {
+       "id": "vn-4",
+       "kind": "component",
+       "ref": {
+        "kind": "nuxt-ui",
+        "entryId": "u-button"
+       },
+       "props": {
+        "label": {
+         "kind": "literal",
+         "value": "Search"
+        }
+       },
+       "slots": {},
+       "events": [
+        {
+         "id": "vi-5",
+         "event": "click",
+         "label": "Submit search",
+         "notes": "",
+         "acceptance": "Given a query, when submitted, then search is emitted",
+         "actions": [
+          {
+           "kind": "emit",
+           "event": "search",
+           "payload": {
+            "kind": "draft",
+            "nodeId": "vn-3"
+           }
+          }
+         ]
+        }
+       ],
+       "name": "Submit"
+      },
+      {
+       "id": "vn-7",
+       "kind": "slot",
+       "name": "actions",
+       "fallback": []
+      }
+     ],
+     "events": [],
+     "name": "Root",
+     "layout": {
+      "mode": "row",
+      "ui": {
+       "gap": 12,
+       "padding": 16,
+       "columns": 2,
+       "align": "stretch",
+       "justify": "start",
+       "wrap": true,
+       "overflow": "visible",
+       "widthMode": "fill",
+       "width": 320,
+       "minWidth": 0,
+       "maxWidth": 1600,
+       "narrow": {
+        "layout": "stack",
+        "columns": 1,
+        "hidden": false
+       },
+       "tokens": {
+        "gap": "",
+        "padding": "",
+        "color": "",
+        "background": "",
+        "radius": "",
+        "typography": ""
+       }
+      }
+     }
+    }
+   ],
+   "scenarios": []
+  }
+ ],
+ "layouts": [
+  {
+   "id": "vl-19",
+   "name": "Two regions",
+   "description": "Header and body",
+   "scope": "region",
+   "category": "custom",
+   "slots": [
+    {
+     "name": "body",
+     "required": true
+    }
+   ],
+   "root": [
+    {
+     "id": "vn-20",
+     "kind": "element",
+     "tag": "section",
+     "attrs": {},
+     "children": [
+      {
+       "id": "vn-21",
+       "kind": "text",
+       "role": "h2",
+       "value": {
+        "kind": "literal",
+        "value": "Header"
+       }
+      },
+      {
+       "id": "vn-22",
+       "kind": "slot",
+       "name": "body",
+       "fallback": [
+        {
+         "id": "vn-23",
+         "kind": "text",
+         "role": "p",
+         "value": {
+          "kind": "literal",
+          "value": "Body"
+         }
+        }
+       ]
+      }
+     ],
+     "events": [],
+     "name": "Frame"
+    }
+   ],
+   "sourcePageId": "vp-2"
+  }
+ ],
+ "revisions": [
+  {
+   "id": "vr-24",
+   "componentId": "vc-1",
+   "version": "1.0.0",
+   "contract": {
+    "props": [
+     {
+      "name": "query",
+      "type": "string",
+      "required": false,
+      "default": ""
+     }
+    ],
+    "slots": [
+     {
+      "name": "actions",
+      "required": false
+     }
+    ],
+    "emits": [
+     {
+      "name": "search",
+      "payloadType": "string"
+     }
+    ],
+    "variants": [
+     {
+      "id": "compact",
+      "name": "Compact",
+      "values": {
+       "query": ""
+      }
+     }
+    ]
+   },
+   "template": [
+    {
+     "id": "vn-6",
+     "kind": "element",
+     "tag": "div",
+     "attrs": {},
+     "children": [
+      {
+       "id": "vn-3",
+       "kind": "component",
+       "ref": {
+        "kind": "nuxt-ui",
+        "entryId": "u-input"
+       },
+       "props": {
+        "modelValue": {
+         "kind": "prop",
+         "name": "query"
+        },
+        "placeholder": {
+         "kind": "literal",
+         "value": "Search…"
+        }
+       },
+       "slots": {},
+       "events": [],
+       "name": "Search input"
+      },
+      {
+       "id": "vn-4",
+       "kind": "component",
+       "ref": {
+        "kind": "nuxt-ui",
+        "entryId": "u-button"
+       },
+       "props": {
+        "label": {
+         "kind": "literal",
+         "value": "Search"
+        }
+       },
+       "slots": {},
+       "events": [
+        {
+         "id": "vi-5",
+         "event": "click",
+         "label": "Submit search",
+         "notes": "",
+         "acceptance": "Given a query, when submitted, then search is emitted",
+         "actions": [
+          {
+           "kind": "emit",
+           "event": "search",
+           "payload": {
+            "kind": "draft",
+            "nodeId": "vn-3"
+           }
+          }
+         ]
+        }
+       ],
+       "name": "Submit"
+      },
+      {
+       "id": "vn-7",
+       "kind": "slot",
+       "name": "actions",
+       "fallback": []
+      }
+     ],
+     "events": [],
+     "name": "Root",
+     "layout": {
+      "mode": "row",
+      "ui": {
+       "gap": 12,
+       "padding": 16,
+       "columns": 2,
+       "align": "stretch",
+       "justify": "start",
+       "wrap": true,
+       "overflow": "visible",
+       "widthMode": "fill",
+       "width": 320,
+       "minWidth": 0,
+       "maxWidth": 1600,
+       "narrow": {
+        "layout": "stack",
+        "columns": 1,
+        "hidden": false
+       },
+       "tokens": {
+        "gap": "",
+        "padding": "",
+        "color": "",
+        "background": "",
+        "radius": "",
+        "typography": ""
+       }
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

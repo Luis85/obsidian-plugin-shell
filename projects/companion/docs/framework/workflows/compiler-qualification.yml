@@ -1,0 +1,49 @@
+name: Dedicated compiler qualification
+on:
+  pull_request:
+    paths-ignore:
+      - 'projects/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compiler-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+          playwright: ${{ runner.os == 'Linux' && 'with-deps' || '' }}
+      - name: Check compiler contracts
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:compiler
+          node "$QUALIFIED_NPM" run check:compiler-architecture
+          node "$QUALIFIED_NPM" run test:compiler
+          node "$QUALIFIED_NPM" run test:compiler:properties
+          node "$QUALIFIED_NPM" run test:compiler:coverage
+      - name: Browser and independent generated outputs
+        if: runner.os == 'Linux'
+        run: node "$QUALIFIED_NPM" run qualify:compiler
+      - name: Retain compiler qualification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: compiler-qualification-${{ matrix.os }}
+          path: reports/compiler-qualification
+          if-no-files-found: ignore
+          retention-days: 7
