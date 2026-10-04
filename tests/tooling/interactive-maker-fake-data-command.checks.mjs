@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { fakeDataCommand } from '../../bin/adapters/fake-data-command.ts';
@@ -139,7 +139,7 @@ test('custom entities validate, save, generate by id or file, and project entiti
 
 test('inside the framework checkout the built-in folder is the project folder and is read once', async () => {
   const catalog = await loadFakeCatalog(repository);
-  assert.equal(catalog.shared, true); assert.equal(builtinFakeData, join(repository, 'configs/fake-data') + '/');
+  assert.equal(catalog.shared, true); assert.equal(builtinFakeData, join(repository, 'configs', 'fake-data') + sep);
   assert.ok([...catalog.entities.values()].every(entry => entry.source === 'builtin'));
   assert.deepEqual(Object.keys(await fakeDataCommand({ command: 'fake-data', action: 'entities', flags: {} }, { root: repository, frameworkRoot: repository }, async () => ({}))), ['entities']);
 });

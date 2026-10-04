@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { catalogIssues, catalogSummary, checkedCatalog, definitionsRoot, loadCatalog } from '../../bin/adapters/wizard-catalog.ts';
 import { definitionCommand } from '../../bin/adapters/wizard-command.ts';
@@ -28,7 +28,7 @@ const form = (id, fields, extra = {}) => ({ schemaVersion: 1, id, version: 1, ti
 const wizard = (id, steps, extra = {}) => ({ schemaVersion: 1, id, version: 1, title: id, steps, ...extra });
 
 test('shipped wizards and forms live in configs, load, and reference only registered hooks', async () => {
-  assert.equal(definitionsRoot, join(repository, 'configs') + '/');
+  assert.equal(definitionsRoot, join(repository, 'configs') + sep);
   const catalog = await loadCatalog();
   assert.deepEqual([...catalog.wizards.keys()].sort(), shippedWizards);
   assert.deepEqual([...catalog.forms.keys()].sort(), shippedForms);
