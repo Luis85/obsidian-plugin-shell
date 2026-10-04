@@ -15,13 +15,17 @@ Prefer the GitHub MCP tools when the session has them; the `gh` CLI is the fallb
 | Retarget a stacked pull request | `mcp__github__update_pull_request` with `base: main` | `gh pr edit <number> --base main` |
 | Merge (merge commit) | `mcp__github__merge_pull_request` with `merge_method: merge` and `expectedHeadSha` | `gh pr merge <number> --merge --delete-branch` |
 
+Required checks to read before each transition: "Dev checks" and "Definition of Ready" on a draft; "CI result" and "Definition of Done" (plus the triggered workflows) before merging. The DoR and DoD job summaries carry the report and, when red, the refinement brief or the generated documentation.
+
 `mcp__github__merge_pull_request` with `expectedHeadSha` refuses when someone pushed after the checks you read; use it.
 
 ## Local gates per tier
 
 | Tier | Commands |
 | --- | --- |
-| Dev (draft) | `node bin/app check --fast --skip-suites --base origin/main`, `node scripts/testing/suites.mjs --check`, `npm run check:repository`, `node scripts/release/changelog.mjs check`, `npm run check:self-review -- --base origin/main --warn-only` |
+| Before the draft (handoff) | `node scripts/delivery/increment.mjs new <slug> --from <source>` (preview; `--write` after approval, owned by the `increment-handoff` skill), `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md` |
+| Dev (draft) | `node bin/app check --fast --skip-suites --base origin/main`, `node scripts/testing/suites.mjs --check`, `npm run check:repository`, `node scripts/release/changelog.mjs check`, `npm run check:self-review -- --base origin/main --warn-only`, `node scripts/delivery/ready.mjs --base origin/main` |
+| Before ready (Definition of Done) | `node scripts/delivery/done.mjs --base origin/main`; `--write` generates the completion record, the Unreleased entry and docs index rows for review |
 | Integration (ready) | `node bin/app check --plan --base origin/main`, `node bin/app check`, `npm run verify -- --json --keep-going`, `npm run check:self-review -- --base origin/main`, `node scripts/testing/suites.mjs <suite>`, `npm run test:e2e` (served UI, provisioned Chromium) |
 | Reproduce one CI job | `node bin/app ci --list`, `node bin/app ci --job <workflow>/<job>` (dry run), `--matrix os=ubuntu-24.04` for computed matrices |
 

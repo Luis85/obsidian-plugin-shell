@@ -18,6 +18,10 @@ A red check is information about the change until proven otherwise.
 
 A runner outage, an upstream registry error in the informational live audit, or a provisioning failure is outside the change. Say so with the output and ask the user before rerunning (`mcp__github__actions_run_trigger` with `rerun_failed_jobs`, or `gh run rerun <run-id> --failed`). The informational "Security audit" job does not fail "CI result".
 
+## Definition of Ready or Done
+
+These checks are deterministic and dependency-free: a red result is a finding about the handoff or the diff, never a flake. Reproduce it with `node scripts/delivery/ready.mjs --base origin/<base>` or `node scripts/delivery/done.mjs --base origin/<base>` and follow [ready-and-done.md](ready-and-done.md). Never edit `configs/delivery/**` to get green.
+
 ## Release pull requests
 
-A `release/*` pull request shows a failing "CI result" until "Release result" succeeded on its head commit. That is not a failure to fix here; it belongs to the `release` skill.
+A `release/*` pull request shows a failing "CI result" until "Release result" succeeded on its head commit; it is exempt from the Definition of Ready and Done, whose names `release.yml` reports as aliases after "Release result". That is not a failure to fix here; it belongs to the `release` skill.
