@@ -6,8 +6,9 @@
  * comments, so a body written in one style is still recognised after a switch. Text outside `wb:pr … /wb:pr` is
  * never imported and is preserved byte-for-byte by composeRemoteBody.
  */
-import { insistRemote, isAmendmentId, isTaskId, limits, normalizeText } from './remote-model.ts';
-import type { HostingPlatform, LinkResolver, LinkTarget, RemoteDocumentLink, RemotePullRequestView } from './remote-model.ts';
+import { insistRemote, isAmendmentId, isTaskId, viewLimits as limits, normalizeText } from './remote-model.ts';
+import type { HostingPlatform } from './model.ts';
+import type { LinkResolver, LinkTarget, RemoteDocumentLink, RemotePullRequestView } from './remote-model.ts';
 import { blobUrl, remoteToWikilinks, wikilinksToRemote } from './remote-links.ts';
 import { hasControls } from '../errors.ts';
 

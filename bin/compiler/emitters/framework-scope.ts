@@ -46,7 +46,7 @@ const maintainerScripts = [/^release:/, /^test:release$/, /^evidence$/, /^qualif
   /^memory$/, /^test:memory/, /^typecheck:memory$/, /^test:mutation$/, /^test:baseline$/, /^check:repository$/, /^check:test-quality$/,
   /^typecheck:(?:compiler|generator|authoring|framework)$/, /^check:compiler-architecture$/, /^debug:compiler$/, /^test:compiler/,
   /^test:(?:generator|visual|runtime|tooling|cli|cli:journey|companion|companion:browser|test-data|makers|native-tooling|setup|quality|airship|prototypes|prototypes:python|framework-cli|setup-policy)$/,
-  /^companion:/, /^prototype:/, /^framework:/, /^test:maker/, /^test:coverage:maker$/, /^increment:new$/, /^do[rd]$/];
+  /^companion:/, /^prototype:/, /^framework:/, /^test:maker/, /^test:coverage:maker$/, /^increment:new$/, /^do[rd]$/, /^acceptance:stubs$/];
 /** True for a framework-maintainer script that a generated project does not receive. */
 export function maintainerScript(name: string): boolean {
   return maintainerScripts.some(pattern => pattern.test(name));

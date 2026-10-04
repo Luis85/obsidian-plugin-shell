@@ -28,6 +28,8 @@ import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';
 import { readComponentTemplateOperation } from './component-templates.ts';
 import { isUiCommand, uiOperation } from './ui-operation.ts';
+import { incrementRead, isIncrementRead } from '../increments/read-operation.ts';
+import { remoteOperation } from '../increments/remote-operation.ts';
 
 /** One command page, a group of subcommands sharing a root word, every command, or the golden path. */
 function helpSelection(request: Request) {
@@ -144,6 +146,7 @@ const routes: Route[] = [
   [prefixed('entities '), entityCatalog],
   [named('adopt analyze'), adoptAnalyze],
   [named('hosting show'), hostingShow],
+  [isIncrementRead, incrementRead],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],
   [prefixed('storybook '), (request, context) => storybookOperation(request, context)],
@@ -154,6 +157,7 @@ const routes: Route[] = [
   [named('check submission'), (request, context) => submissionCheck(context, request.options['dry-run'] === true)],
   [(request, effect) => request.command.startsWith('airship ') && effect !== 'plan', (request, context) => airshipOperation(request, context)],
   [(request, effect) => request.command === 'plan inspect' || effect === 'plan', fileOperation],
+  [(_request, effect) => effect === 'remote', remoteOperation],
   [(_request, effect) => effect === 'process', (request, context) => processOperation(request, context)],
   [named('release operate'), releaseOperate],
 ];

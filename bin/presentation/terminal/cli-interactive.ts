@@ -32,7 +32,7 @@ export async function interactiveRun(
   const render = dependencies.render ?? (value => renderCliResult(value, false));
 
   let outcome = await execute(request, context);
-  if (outcome.status === 'planned' && commandEffect(request.command) === 'plan' && !request.options['dry-run']) {
+  if (outcome.status === 'planned' && ['plan', 'remote'].includes(commandEffect(request.command)) && !request.options['dry-run']) {
     render(outcome);
     if (!await confirm('Apply this reviewed plan?', context.signal)) return { ...outcome, status: 'cancelled' };
     const planHash = (outcome.data as { planHash?: string }).planHash;

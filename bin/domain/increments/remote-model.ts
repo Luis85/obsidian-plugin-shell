@@ -15,9 +15,8 @@
  * - `acceptance` is derived from the increment: its `AC-n` criteria (filtered by `delivers` when set).
  * The local status (`New|Draft|Ready|Merged|Closed`) and the binding keys stay outside the view.
  */
-export type HostingPlatform = 'github' | 'azure-devops';
-export type PullRequestStatus = 'New' | 'Draft' | 'Ready' | 'Merged' | 'Closed';
-export type PullRequestKind = 'kickoff' | 'change';
+import { limits } from './model.ts';
+import type { HostingPlatform, PullRequestKind } from './model.ts';
 /** Platform-neutral state of a hosted pull request; Azure `abandoned` maps to `closed`. */
 export type RemoteState = 'draft' | 'open' | 'merged' | 'closed';
 export interface RemoteTask { id: string; text: string; done: boolean }
@@ -60,7 +59,8 @@ export type LinkResolver = (target: string) => string | null;
 /** sha256 (or another stable digest) of UTF-8 text, injected so the domain stays free of node:crypto. */
 export type TextHash = (text: string) => string;
 
-export const limits = Object.freeze({ tasks: 200, amendments: 100, documents: 100, notes: 20_000, amendment: 10_000, title: 120, parse: 262_144 });
+/** The document limits of model.ts plus the largest remote body that is parsed. */
+export const viewLimits = Object.freeze({ tasks: limits.tasks, amendments: limits.amendments, documents: limits.documents, notes: limits.notes, amendment: limits.amendment, title: limits.title, parse: 262_144 });
 
 /** Domain failure whose message leads with its code, so CLI adapters keep the code (the DocsError convention). */
 class RemoteSyncError extends Error {

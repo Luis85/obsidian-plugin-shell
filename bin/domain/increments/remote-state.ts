@@ -5,7 +5,8 @@
  * publish steps from read-only remote facts.
  */
 import { insistRemote } from './remote-model.ts';
-import type { PullRequestStatus, RemoteState } from './remote-model.ts';
+import type { RemoteState } from './remote-model.ts';
+import type { PullRequestStatus } from './model.ts';
 
 const statusOf: Readonly<Record<RemoteState, PullRequestStatus>> = Object.freeze({ draft: 'Draft', open: 'Ready', merged: 'Merged', closed: 'Closed' });
 

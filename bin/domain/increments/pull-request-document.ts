@@ -5,7 +5,7 @@
  */
 import { insistDelivery } from './errors.ts';
 import {
-  bindingKeys, defaultDeliverySchema, hostingPlatforms, pullRequestKinds, isDeliverySlug, limits, pullRequestSections, pullRequestStatuses, requireLine, requireTitle,
+  bindingKeys, defaultDeliverySchema, publishingPlatforms, pullRequestKinds, isDeliverySlug, limits, pullRequestSections, pullRequestStatuses, requireLine, requireTitle,
   scopeSubsections, type Amendment, type BranchConfig, type DeliverySchema, type FrontmatterData, type PullRequestKind, type HostingPlatform, type Problem, type PullRequestBinding, type PullRequestModel,
   type PullRequestRegion, type ScopeSide, type Task,
 } from './model.ts';
@@ -22,8 +22,9 @@ import { isBranchName, pullRequestBranches, requireBranchName, type IncrementBra
 
 const pullRequestKeys = ['type', 'id', 'title', 'kind', 'increment', 'status', 'delivers', 'issues', 'head', 'base', ...bindingKeys] as const;
 const kinds: readonly string[] = pullRequestKinds;
-const order: readonly string[] = pullRequestSections, keyOrder: readonly string[] = pullRequestKeys;
-const platforms: readonly string[] = hostingPlatforms, statuses: readonly string[] = pullRequestStatuses;
+/** Section placement; `## Completion record` is written last by the Definition of Done on change pull requests. */
+const order: readonly string[] = [...pullRequestSections, 'Completion record'], keyOrder: readonly string[] = pullRequestKeys;
+const platforms: readonly string[] = publishingPlatforms, statuses: readonly string[] = pullRequestStatuses;
 const isPlatform = (value: string): value is HostingPlatform => platforms.includes(value);
 const scopeNames: readonly string[] = [scopeSubsections.in, scopeSubsections.out];
 const amendmentsComment = '<!-- Appended after publication with node bin/app pr amend; each is synced to the pull request body. -->';
@@ -313,7 +314,7 @@ function frontmatterProblems(text: string, options: PullRequestValidation): Prob
 /** Structural validation of a PullRequest plus wikilinks when `files` is given. */
 export function validatePullRequest(text: string, options: PullRequestValidation = {}): Problem[] {
   const doc = outline(text), problems = frontmatterProblems(text, options), items = taskItems(text, doc), ids = items.filter(item => item.valid).map(item => item.id);
-  for (const name of order.filter(name => !section(doc, name))) problems.push(problem(`## ${name} is missing.`));
+  for (const name of pullRequestSections.filter(name => !section(doc, name))) problems.push(problem(`## ${name} is missing.`));
   for (const item of items.filter(entry => !entry.valid && !hasPlaceholder(entry.text))) problems.push(problem(`"${item.text}" is not "[ ] T-n: text".`, item.line));
   for (const id of ids.filter((value, index) => ids.indexOf(value) !== index)) problems.push(problem(`${id} appears more than once.`));
   const model = parsePullRequest(text), sizes = [[model.tasks.length, limits.tasks], [model.amendments.length, limits.amendments], [model.documents.length, limits.documents], [model.regions.notes.length, limits.notes]];
