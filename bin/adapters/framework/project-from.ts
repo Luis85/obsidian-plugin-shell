@@ -35,7 +35,7 @@ export async function exportedProject(request: Request, context: Context, idProb
   }
   const value = parsed(bytes, path), other = versionProblem(value);
   if (other !== null && other > COMPANION_VERSION) throw new OperationError('PROJECT_VERSION_UNSUPPORTED', `${path} uses companion project schema ${other}; this framework reads only schema ${COMPANION_VERSION}.`, 'Upgrade the framework, or export from a companion that matches this framework version.');
-  if (other !== null) throw new OperationError('PROJECT_VERSION_UNSUPPORTED', `${path} uses the retired companion project schema ${other}; this framework reads only schema ${COMPANION_VERSION} and never migrates earlier formats.`, 'Export the project again from a current Companion.');
+  if (other !== null) throw new OperationError('PROJECT_VERSION_UNSUPPORTED', `${path} uses the retired companion project schema ${other}; this framework reads only schema ${COMPANION_VERSION} and never migrates earlier formats.`, `Start from a current starter or a schema ${COMPANION_VERSION} export; earlier formats have no upgrade path.`);
   let document: CompanionDocument;
   try { document = validateCompanionDocument(value); }
   catch (error) { throw new OperationError('PROJECT_INVALID', `${path} is not a complete companion project export: ${contractMessage(error)}`, reexport); }

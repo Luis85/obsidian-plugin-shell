@@ -59,8 +59,8 @@ node bin/app new <dir> --from <project.companion.json> [--id <plugin-id>] [--nam
 ```
 
 `--from` accepts any complete project JSON exported by the companion, not only a
-built-in starter (the shared contract accepts schemas 1–4; the tests exercise
-schema 4 exports). It has the same placement, preview, plan-hash,
+built-in starter (the shared contract accepts only project schema 6; schema 1–5
+exports fail with `PROJECT_VERSION_UNSUPPORTED`, never migrated). It has the same placement, preview, plan-hash,
 `--yes`/`--apply`/`--dry-run`, stale-hash and `--install` semantics as `--starter`;
 the two options are mutually exclusive (`SOURCE_CONFLICT`). The path is relative to
 the invoking shell. The file is read as data only: a regular, non-linked file of at

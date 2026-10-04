@@ -42,14 +42,14 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
       "label": "Description",
       "type": "string",
       "required": false,
-      "default": "Add a focused, extension-filtered action to Obsidian’s file context menu."
+      "default": "Add a focused, extension-filtered action to the file context menu."
     },
     {
       "id": "version",
@@ -87,11 +87,11 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "context-menu-plugin",
+        "id": "file-context-menu",
         "name": "File Context Menu",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
-        "description": "Add a focused, extension-filtered action to Obsidian’s file context menu."
+        "description": "Add a focused, extension-filtered action to the file context menu."
       },
       "settings": {
         "codebaseFolder": "src",
@@ -1163,7 +1163,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

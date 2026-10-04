@@ -45,7 +45,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -85,7 +85,7 @@
       "project": {
         "id": "feature-showcase",
         "name": "Workbench Feature Showcase",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Interactive UI capability examples with deterministic fixtures. Native authoring parity is reported separately."
       },
@@ -5131,7 +5131,8 @@
     "build-preview"
   ],
   "nextSteps": [
-    "npm run verify:project",
+    "npm ci",
+    "npm run check",
     "npm run build:clickdummy",
     "npm run dev:preview"
   ]

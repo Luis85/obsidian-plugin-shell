@@ -73,6 +73,15 @@ test('a11y returns author accessibility notes and undefined when absent or empty
   assert.equal(model.a11y('vn-1'), 'Totals for the current filter');
   assert.equal(model.a11y('vn-2'), undefined); assert.equal(model.a11y('vn-3'), undefined); assert.equal(model.a11y('vn-404'), undefined);
 });
+test('controls in a labelled form field keep the field label as their accessible name; others fall back to the node name', () => {
+  const field = (id, label, child) => nuxt(id, 'u-form-field', label === undefined ? {} : { label: lit(label) }, { slots: { default: [child] } });
+  const input = (id, name, props = {}) => nuxt(id, 'u-input', props, { name, control: { kind: 'text' } });
+  const { model } = mountVisual(page([field('vn-1', 'Email address', nuxt('vn-2', 'u-card', {}, { slots: { default: [input('vn-3', 'Input')] } })),
+    field('vn-4', '  ', input('vn-5', 'Blank field')), field('vn-6', undefined, input('vn-7', 'Unlabelled field')), input('vn-8', 'Search'), input('vn-9', 'Input', { 'aria-label': lit('Own name') })]));
+  assert.equal(Object.hasOwn(model.props('vn-3'), 'aria-label'), false, 'a nested control inherits the form-field label, not its catalog name');
+  assert.equal(model.props('vn-5')['aria-label'], 'Blank field'); assert.equal(model.props('vn-7')['aria-label'], 'Unlabelled field');
+  assert.equal(model.props('vn-8')['aria-label'], 'Search'); assert.equal(model.props('vn-9')['aria-label'], 'Own name');
+});
 test('source actions run the matching port with the mapped payload and report failures', async () => {
   const save = port('orders', 'save', null, async input => (input.title === 'bad' ? { ok: false } : { ok: true }));
   const list = port('orders', 'list', { total: 3 });

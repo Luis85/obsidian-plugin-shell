@@ -20,11 +20,11 @@ The frozen legacy library, requirement, semantic and source namespaces intention
 
 JSON Schema alone cannot prove reference integrity, distinct IDs across collections, ownership, source-field compatibility, revision pins, graph cycles, equivalent parameterized-route collisions, total nested-item limits, exact UTF-8 bytes or JavaScript UTF-16 length rules. Complete runtime validation remains mandatory. The schema's `x-validation` describes those additional checks. A structural pass is never a substitute for `project validate` or compiler analysis.
 
-The checked-in companion HTML/JSON is only the v5 build base of the current authoring build. `npm run companion:build` emits the v6 authoring pair under `reports/companion-mvp`; the build base is not a supported import format.
+The checked-in companion HTML is the schema 6 concept that `npm run companion:build` composes into the empty authoring workspace under `reports/companion-mvp`; it embeds no project and emits no project export.
 
 ## Surface UX acceptance (optional)
 
-Any surface in `design.nodes` may carry an optional `acceptance` block that names its UX obligations. It is additive within v6: documents without it validate and generate exactly as before, and the frozen v1–v5 contract embedded in the concept is untouched, so the concept build hash does not change for them.
+Any surface in `design.nodes` may carry an optional `acceptance` block that names its UX obligations. It is additive within v6: documents without it validate and generate exactly as before.
 
 ```json
 {
@@ -55,7 +55,7 @@ The compiler writes `tests/project/ux-acceptance/<slug>.test.ts` for a surface t
 
 ## Regression evidence
 
-The shared corpus is every Companion starter in `configs/starters/` (the self-project, the showcase and the eleven examples), all project v6. Node tests exercise the actual read-only CLI, retired-version rejection, safe diagnostics, copy isolation, hostile inputs and semantic rejection. The independent Python test uses `jsonschema==4.26.0` and distinguishes structural negatives from documents which pass JSON Schema but deliberately fail the authoritative reference checks:
+The shared corpus is every Companion starter in `configs/starters/` (the self-project, the showcase and the twelve focused examples: fourteen definitions), all project v6. Node tests exercise the actual read-only CLI, retired-version rejection, safe diagnostics, copy isolation, hostile inputs and semantic rejection. The independent Python test uses `jsonschema==4.26.0` and distinguishes structural negatives from documents which pass JSON Schema but deliberately fail the authoritative reference checks:
 
 ```sh
 node --test tests/tooling/companion-schema.checks.mjs tests/tooling/companion-surface-acceptance.checks.mjs

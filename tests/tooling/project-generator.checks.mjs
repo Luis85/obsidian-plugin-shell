@@ -93,7 +93,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.ok(trace.warnings.some(w=>w.includes('visual designs compile')));
   const visual=JSON.parse(await readFile(join(target,'design/visual-traceability.json'),'utf8')); assert.equal(visual.definitions.length,81); assert.equal(visual.businessAcceptance,'not-implemented');
   for (const r of trace.requirements) assert.match(await readFile(join(target,r.test),'utf8'),/it.todo/);
-  const pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8')); assert.equal(pkg.name,'plugin-companion'); assert.equal(pkg.scripts.verify,JSON.parse(await readFile(join(root,'package.json'),'utf8')).scripts.verify);
+  const pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8')); assert.equal(pkg.name,'workbench-companion'); assert.equal(pkg.scripts.verify,JSON.parse(await readFile(join(root,'package.json'),'utf8')).scripts.verify);
   assert.equal(JSON.parse(await readFile(join(target,'package-lock.json'),'utf8')).packages[''].name,pkg.name);
   const replay=await planProject(options); assert.deepEqual(replay.conflicts,[]); assert.ok(replay.plan.changes.every(c=>c.status==='unchanged'));
   assert.deepEqual((await applyProject(replay,replay.hash)).written,[]);

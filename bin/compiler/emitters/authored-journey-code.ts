@@ -146,10 +146,19 @@ function journeyContext(m: Model, design: SitemapDesign): Context {
   };
 }
 
+function stepJourneys(m: Model): SitemapJourney[] {
+  return ((m.document.design as SitemapDesign).sitemap?.journeys ?? []).filter(journey => journey.steps.length > 0);
+}
+/** The copied suite manifest classifies the emitted journey specs (Playwright, under tests/e2e) and their helper module. */
+export function journeySuitePairs(m: Model): ReadonlyArray<readonly [string, string]> {
+  if (stepJourneys(m).length === 0) return [];
+  return [['"tests/e2e/*.spec.ts"', `"tests/e2e/*.spec.ts",\n        "${journeySpecRoot}/*.spec.ts"`],
+    ['"tests/e2e/control-metrics.ts"', `"tests/e2e/control-metrics.ts",\n        "${supportFile}"`]];
+}
 /** Emits one spec per authored journey that has steps, plus shared helpers. A project without journeys gets nothing. */
 export function authoredJourneyCode(m: Model, add: Add): void {
   const design = m.document.design as SitemapDesign;
-  const journeys = (design.sitemap?.journeys ?? []).filter(journey => journey.steps.length > 0);
+  const journeys = stepJourneys(m);
   if (journeys.length === 0) return;
   const context = journeyContext(m, design), names = uniqueFileNames(journeys);
   add(supportFile, supportSource, 'managed');
