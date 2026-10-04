@@ -30,7 +30,7 @@
       "label": "Project ID",
       "type": "string",
       "required": true,
-      "default": "plugin-companion"
+      "default": "workbench-companion"
     },
     {
       "id": "name",
@@ -44,7 +44,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": "Luis Mendez"
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -82,9 +82,9 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "plugin-companion",
+        "id": "workbench-companion",
         "name": "Workbench",
-        "author": "Luis Mendez",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Developer workbench for declarative UI authoring, project setup, source generation and fixture-backed review."
       },
@@ -101,7 +101,7 @@
           {
             "id": "node-1",
             "slug": "workbench",
-            "label": "Companion workbench",
+            "label": "Workbench",
             "kind": "view",
             "layout": "sidebar-left",
             "placement": "tab",
@@ -137,7 +137,7 @@
                 "schema": 1,
                 "id": "brick-2",
                 "kind": "heading",
-                "title": "Companion workbench",
+                "title": "Workbench",
                 "purpose": "Open the one-vault workspace and retain the selected design context.",
                 "content": "Open the one-vault workspace and retain the selected design context.",
                 "region": "content",
@@ -66653,7 +66653,8 @@
     "build-preview"
   ],
   "nextSteps": [
-    "npm run verify:project",
+    "npm ci",
+    "npm run check",
     "npm run build:clickdummy",
     "npm run dev:preview"
   ]
