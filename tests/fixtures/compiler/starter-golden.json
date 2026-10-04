@@ -21,7 +21,7 @@
   "src/generated/presentation/components/ProjectWorkbench.vue": "01ff849dec30f814c00e242f58debcf3225751207fe628c83cecb84b61096ccd",
   "src/generated/presentation/composables/operation.ts": "93ae0ff0550c3dcc2fa50328e10c9ecf3c1fe3966679d357ff6310026dce0623",
   "src/generated/presentation/composables/use-screen.ts": "3ad255e8859cc5f59beb09f57e61404c96aab6f9158d4ca58a4ff9edbb8c4a9f",
-  "src/generated/presentation/composables/use-visual.ts": "c863881b9c48ff2c9cd78e6452326ca289db24d758e77738e8b65cc3b820eeb3",
+  "src/generated/presentation/composables/use-visual.ts": "c10e6b1c2f26d91218ee5b45207e26f16676f472e21d5a796c9ced09f978c7fe",
   "src/generated/presentation/composables/use-workbench.ts": "750d55cb071c51da0ac507fc91356784b68478339c0d10c4ba0d468866e123c9",
   "src/generated/presentation/context/project.ts": "efad0e118c261bc18c5b0d5e1962dcfc516b1e359944fbd6cd2e4064d25ec0d0",
   "src/generated/presentation/detail-layout.css": "b1bd6d3fefaa4a39b464a04ed02f05ad7131551aff93f07e5ca6b9d804e45df7",
