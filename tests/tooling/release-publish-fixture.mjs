@@ -6,7 +6,7 @@ import { sha256 } from '../../scripts/release/candidate.mjs';
 
 export const repository = 'Example/plugin';
 export const version = '0.5.0';
-export const head = 'a'.repeat(40); export const base = 'b'.repeat(40); export const other = 'c'.repeat(40);
+export const head = 'a'.repeat(40); const base = 'b'.repeat(40); export const other = 'c'.repeat(40);
 export const notes = '### Added\n\n- Release automation.';
 export const changelog = `# Changelog\n\n## [Unreleased]\n\n## [0.5.0] - 2026-10-01\n\n${notes}\n\n## [0.4.0] - 2026-09-23\n\nPrevious.\n\n` +
   '[Unreleased]: https://github.com/Example/plugin/compare/0.5.0...HEAD\n[0.5.0]: https://github.com/Example/plugin/releases/tag/0.5.0\n[0.4.0]: https://github.com/Example/plugin/releases/tag/0.4.0\n';

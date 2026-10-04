@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRunner } from '../../scripts/release/commands.mjs';
 
-export const repositoryBase = 'https://github.com/Example/different-plugin';
-export const template = '## Release {{version}}\n\nBranch `{{release_branch}}` from `{{base}}` at {{base_sha}} ({{date}}).\n\n{{changelog}}\n\n- [ ] Release result is green\n';
+const repositoryBase = 'https://github.com/Example/different-plugin';
+const template = '## Release {{version}}\n\nBranch `{{release_branch}}` from `{{base}}` at {{base_sha}} ({{date}}).\n\n{{changelog}}\n\n- [ ] Release result is green\n';
 export function changelogText(unreleased = '### Added\n\n- Pending capability.\n\n') {
   return `# Changelog\n\n## [Unreleased]\n\n${unreleased}## [0.3.0] - 2026-09-01\n\nExisting notes.\n\n` +
     `[Unreleased]: ${repositoryBase}/compare/0.3.0...HEAD\n[0.3.0]: ${repositoryBase}/releases/tag/0.3.0\n`;

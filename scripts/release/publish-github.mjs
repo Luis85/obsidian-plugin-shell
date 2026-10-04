@@ -7,7 +7,7 @@ const repositoryPattern = /^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9][A-Za-z0-9_.-]*
 const repoRoute = '[A-Za-z0-9][A-Za-z0-9-]*\\/[A-Za-z0-9][A-Za-z0-9_.-]*';
 const safeRoute = new RegExp(`^(?:repos\\/${repoRoute}(?:\\/[A-Za-z0-9%_.?=&/:,+-]*)?|https:\\/\\/uploads\\.github\\.com\\/repos\\/${repoRoute}\\/releases\\/\\d+\\/assets\\?name=[A-Za-z0-9.-]+)$`);
 
-export class GitHubError extends Error {
+class GitHubError extends Error {
   constructor(code, status) { super(code); this.code = code; this.status = status; }
 }
 function failure(result) {

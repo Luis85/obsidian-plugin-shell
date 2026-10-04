@@ -7,8 +7,8 @@ import { join } from 'node:path';
 import { assetNames, sha256, validateRetained } from './candidate.mjs';
 import { extractNotes } from './changelog.mjs';
 
-export const candidateArtifacts = Object.freeze(['qualified-candidate', 'retained-build']);
-export const releaseCheckName = 'Release result';
+const candidateArtifacts = Object.freeze(['qualified-candidate', 'retained-build']);
+const releaseCheckName = 'Release result';
 const commitPattern = /^[a-f0-9]{40}$/;
 const coded = (code, message) => Object.assign(new Error(message ? `${code}: ${message}` : code), { code });
 const newest = (items, field = 'id') => [...items].sort((a, b) => (a[field] > b[field] ? -1 : 1))[0];
