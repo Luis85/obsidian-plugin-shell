@@ -116,7 +116,8 @@ test('brick editor uses real operations and preserves a replayable transaction f
   assert.equal(actions.length, 0);
 });
 test('plain setup supports a fully skipped optional flow and default-No review', async () => scratch(async root => {
-  await vault(root); const answers = ['', '', '', '', '', 'Alice', 'plain', 'no', 'Plain product', 'Project description', 'Product outcome', 'scan', 'n', 'n', 'n', ''];
+  // Five paths, the risk register folder (default docs/risks), then preferences.
+  await vault(root); const answers = ['', '', '', '', '', '', 'Alice', 'plain', 'no', 'Plain product', 'Project description', 'Product outcome', 'scan', 'n', 'n', 'n', ''];
   const ui = { write: () => {}, ask: async label => { if (label.startsWith('Save setup progress') || label.startsWith('Configure advanced paths')) return 'n'; assert.ok(answers.length, label); return answers.shift(); } };
   assert.equal(await projectSetupWizard(ui, { root, frameworkRoot }), undefined);
   assert.equal(answers.length, 0); await assert.rejects(() => readFile(join(root, 'configs/user-settings.json')));

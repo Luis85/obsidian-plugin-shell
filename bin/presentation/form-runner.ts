@@ -8,7 +8,8 @@ import { Back, choose, confirm, input, reportError, selectMany, titleInput, type
  * process that owns the data; definitions never carry executable code.
  */
 export interface FormHooks {
-  choices: Record<string, (data: unknown) => FormChoice[] | Promise<FormChoice[]>>;
+  /** Providers receive the template data and the asking field, so one provider can serve several fields. */
+  choices: Record<string, (data: unknown, field: FormField) => FormChoice[] | Promise<FormChoice[]>>;
   effects: Record<string, (value: FormValues, answer: unknown, field: FormField) => void>;
   prepare: Record<string, (parent: FormValues) => FormValues>;
   commit: Record<string, (value: FormValues, parent: FormValues) => unknown>;
@@ -24,7 +25,7 @@ export function formDefinition(env: FormEnvironment, id: string): FormDefinition
   return form;
 }
 async function choicesOf(field: FormField, env: FormEnvironment): Promise<FormChoice[]> {
-  const items = field.choices ?? await hook(env.hooks.choices, field.choicesFrom!, 'choice provider')(env.data);
+  const items = field.choices ?? await hook(env.hooks.choices, field.choicesFrom!, 'choice provider')(env.data, field);
   return items.map(item => ({ id: item.id, label: renderText(item.label, env.data) }));
 }
 const separatorOf = (field: FormField) => field.separator ?? ';';

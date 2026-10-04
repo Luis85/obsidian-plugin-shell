@@ -22,8 +22,8 @@ async function definitions(root, forms = {}, wizards = {}) {
   }
 }
 /** The exact shipped definitions; a new guided process or form adds its id here. */
-const shippedWizards = ['brainstorm', 'fake-data', 'first-run', 'framework-setup', 'framework-setup-stages', 'new-project', 'new-starter', 'process-authoring', 'process-run', 'project-setup', 'prototype', 'settings'];
-const shippedForms = ['documentation-settings', 'fake-data-entity', 'fake-data-property', 'fake-data-run', 'prd-intake', 'process-details', 'process-role', 'process-rule', 'process-step', 'project-identity', 'setup-identity', 'user-settings', 'user-settings-advanced'];
+const shippedWizards = ['brainstorm', 'fake-data', 'first-run', 'framework-setup', 'framework-setup-stages', 'new-project', 'new-starter', 'process-authoring', 'process-run', 'project-setup', 'prototype', 'risk-edit', 'risk-new', 'risk-review', 'settings'];
+const shippedForms = ['documentation-settings', 'fake-data-entity', 'fake-data-property', 'fake-data-run', 'prd-intake', 'process-details', 'process-role', 'process-rule', 'process-step', 'project-identity', 'risk', 'risk-review', 'setup-identity', 'user-settings', 'user-settings-advanced'];
 const form = (id, fields, extra = {}) => ({ schemaVersion: 1, id, version: 1, title: id, fields, ...extra });
 const wizard = (id, steps, extra = {}) => ({ schemaVersion: 1, id, version: 1, title: id, steps, ...extra });
 

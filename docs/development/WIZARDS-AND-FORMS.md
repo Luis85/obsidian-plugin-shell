@@ -19,6 +19,9 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `fake-data` | `node bin/app fake-data` | Entity, `fake-data-run` form (or a new entity via `fake-data-entity`/`fake-data-property`), sample note, reviewed write, optional saved generation config |
 | `process-authoring` | `node bin/app process new` / `process edit --name <id>` | `process-details`, roles, owner, `process-step` and `process-rule` editors, reviewed save of `configs/processes/<id>.json` |
 | `process-run` | `node bin/app process run --name <id>` | Walks a business process with rule checks, then optionally saves the audit trail through `wizard.save-json` |
+| `risk-new` | `node bin/app risk new` | `risk` form, note preview, reviewed write with the next free id |
+| `risk-edit` | `node bin/app risk edit [--id <id>]` | Pick a risk, pre-filled `risk` form (allowed transitions only), reviewed in-place update |
+| `risk-review` | `node bin/app risk review` | Walk open high/critical or overdue risks with `risk-review`, one reviewed write each |
 | `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship and single native-extension options; only missing answers are asked |
 | `framework-setup-stages` | after `setup` applies | Documentation import, then generate/install/verify/preview, each separately approved, then documentation export |
 
@@ -113,6 +116,8 @@ Every field may also use these keys:
 - `transient`: ask without storing the answer in the value.
 - `effect`: a hook run after the answer.
 - `message`: replaces the generic validation text.
+
+Choice providers receive the asking field as a second argument, so the generic `collection.choices` provider serves any select bound to a collection field.
 
 Labels, choice labels and gates can contain `{{path}}` or `{{path|fallback}}` templates. These are literal
 substitutions from the wizard state, never evaluated code.
