@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "name": "workbench-site",
+  "title": "Workbench",
+  "summary": "Project page website built with Astro from Obsidian Bases collections.",
+  "prototypes": [],
+  "site": {
+    "template": "project-page",
+    "collections": [
+      {
+        "name": "roadmap",
+        "base": "docs/requirements/MVP.base",
+        "view": "By milestone"
+      },
+      {
+        "name": "backlog",
+        "base": "docs/requirements/MVP.base",
+        "view": "Backlog"
+      },
+      {
+        "name": "updates",
+        "base": "docs/requirements/MVP.base",
+        "view": "Shipped records"
+      }
+    ]
+  }
+}
