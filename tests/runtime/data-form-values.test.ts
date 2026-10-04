@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { defineForm, readDataFormValue } from '../../src/features/api';
-import { featureBriefForm } from '../../src/features/showcase/feature-brief';
+import featureBrief from '../fixtures/forms/feature-brief.json';
 import { allDataFormNodes, visibleDataFormNodes, type DataFormNode } from '../../src/domain/forms/values';
 import { assignAt, valueAt, type DataFormValues } from '../../src/domain/forms/model';
 
+/** Test-owned definition, independent of the removable showcase example. */
+const featureBriefForm = defineForm(featureBrief);
 const probe = (fields: unknown[]) => defineForm({ schemaVersion: 1, id: 'probe', version: 1, title: 'Probe', fields });
 const paths = (nodes: readonly DataFormNode[]): string[] => nodes.flatMap(node => [node.path, ...paths(node.children ?? [])]);
 function issues(form: ReturnType<typeof probe>, value: unknown) {

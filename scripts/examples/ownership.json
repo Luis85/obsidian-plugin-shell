@@ -47,7 +47,7 @@
     },
     {
       "path": "src/presentation/components/ShowcaseApp.vue",
-      "sha256": "24ceb57c00e7d8f77a3c34b93e8d5257b7f1244002935b2932edf173e64106f6"
+      "sha256": "60656b03d5d95867729b83cf753dc2135e86e04491aae14cd65c44062822263f"
     },
     {
       "path": "src/presentation/components/panels/OverviewPanel.vue",
@@ -67,7 +67,7 @@
     },
     {
       "path": "src/presentation/stores/showcase.ts",
-      "sha256": "a39922c6b5816763d215b205318fde58f532a04ca16c63ce67a38164eb4db764"
+      "sha256": "295b6c1020526114f1fc3ac4729fc0ba511c409fd73bbbe56f72befdd6e8c35b"
     },
     {
       "path": "src/presentation/composables/use-document-form.ts",
@@ -79,7 +79,7 @@
     },
     {
       "path": "src/presentation/composables/use-showcase-shell.ts",
-      "sha256": "1913829604e8e01c753dfca45fb253d6b4f85a09240e7665e9d8acc30cfa7763"
+      "sha256": "9666cd10910881f7a29d2b2b8d4ba62ad18684313e767f9056518126756e03d4"
     },
     {
       "path": "src/presentation/composables/use-task-repository.ts",
@@ -257,12 +257,12 @@
     },
     {
       "path": "src/locales/en.json",
-      "sha256": "04db82c0fc96b839fae977f617615d2d1d4b7cd151f6f7385d126028330db5b3",
+      "sha256": "2777760124b42de553baf3fb9590bdea0ae1ba9330de0865c3aed0e0b07c4940",
       "template": "src__locales__en.json.txt"
     },
     {
       "path": "src/locales/de.json",
-      "sha256": "2d930ee4d89a0e0b164c7eaacd69a328b12da5e79d81e0de991792910032e109",
+      "sha256": "c79ade78d49a33657fe5b13ea821e553762f6cde46429d868be0f184bde16b70",
       "template": "src__locales__de.json.txt"
     },
     {
@@ -444,6 +444,34 @@
     {
       "path": "tests/runtime/obsidian-test-kit-shell.test.ts",
       "sha256": "04878a50847d6d91029074a98ce2a6dc40e9a89cf131ee48468bef8c9a9375e8"
+    },
+    {
+      "path": "src/features/showcase/feature-brief.ts",
+      "sha256": "fa2682e9680bdc106b4218b6ecd7f7952e29793c2181ba4e7cced6ca4437b432"
+    },
+    {
+      "path": "src/features/showcase/forms/feature-brief.json",
+      "sha256": "c32d7e0c516db95259e2f26b968e434d65b5b4fd31b3fd7f9e590ab302383c9a"
+    },
+    {
+      "path": "src/presentation/components/panels/FormsPanel.vue",
+      "sha256": "583888934d0428e3902633a0c6200b27794ed48393b577df6ff650d5a8560fb7"
+    },
+    {
+      "path": "src/presentation/composables/use-forms-page.ts",
+      "sha256": "304c2152e6ea7230a45851e4a22ccac4d6ebed364bff1c42c5937d87ea6c8bae"
+    },
+    {
+      "path": "src/presentation/stores/forms-showcase.ts",
+      "sha256": "cdb49538f77f0553a5be181527a83d78892a05f76327cc085b7c3d16b8aa4bfa"
+    },
+    {
+      "path": "tests/runtime/data-form-components.test.ts",
+      "sha256": "79d49a8c8a3cfbf2415b948764726e87fcee247d69d08787747633924e45415e"
+    },
+    {
+      "path": "tests/tooling/example-removal-rehearsal.checks.mjs",
+      "sha256": "9014e5dc5d080aa9db2cfd20f28d35c6124b889308ebced14d6a7b3639e540e6"
     }
   ]
 }
