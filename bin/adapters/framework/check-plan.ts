@@ -16,6 +16,8 @@ interface PlanCi { workflow: string; runs: boolean; event: string; via: TriggerR
 interface PlanGate {
   id: string; label: string; command: string; kind: 'check' | 'suite' | 'script' | 'verify'; required: boolean; viaCheck: boolean;
   why: Why[]; estimateSeconds: number | null; prerequisites: string[]; needs: string[]; ci: PlanCi[]; steps?: unknown[];
+  /** Suite gates: the test-pyramid levels of the suite's files (its `level`, then any override levels). */
+  levels?: string[];
 }
 interface Sources { rules: GateRules; toolkit: Toolkit; manifest: SuiteManifest | null; workflows: Workflow[]; durations: Record<string, number>; scripts: Set<string> }
 const sample = 5;
@@ -59,7 +61,8 @@ function suiteGate(sources: Sources, suite: SuiteDef, reasons: Reason[], paths: 
   const direct = reasons.some(reason => reason.kind !== 'workflow-paths');
   const prerequisites = suite.prerequisites ?? [];
   const covered = direct && (fastRunnable(suite) || suite.runner.type === 'vitest');
-  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node scripts/testing/suites.mjs ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered,
+  const levels = [...new Set([suite.level, ...Object.keys(suite.levels ?? {})].filter((level): level is string => typeof level === 'string'))];
+  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node scripts/testing/suites.mjs ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered, levels,
     why: reasons.map(reason => ({ kind: reason.kind, detail: reason.detail, paths: reason.paths, count: reason.count })),
     estimateSeconds: sources.durations[suite.name] ?? null, prerequisites, needs: needsOf(prerequisites), ci: ciFor(sources, suite.workflows ?? [], paths) };
 }

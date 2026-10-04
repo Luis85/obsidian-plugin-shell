@@ -124,6 +124,8 @@
     "typecheck:framework": "node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json",
     "test:framework-cli": "node scripts/testing/suites.mjs cli",
     "test:suites": "node scripts/testing/suites.mjs",
+    "test:unit": "node scripts/testing/suites.mjs --level unit",
+    "test:integration": "node scripts/testing/suites.mjs --level integration",
     "test:runtime": "node scripts/testing/suites.mjs runtime",
     "test:tooling": "node scripts/testing/suites.mjs tooling",
     "test:cli": "node scripts/testing/suites.mjs cli",

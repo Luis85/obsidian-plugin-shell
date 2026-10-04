@@ -10,6 +10,8 @@ import { OperationError } from './contracts.ts';
 export interface SuiteDef {
   name: string; include: string[]; exclude?: string[]; workflows?: string[]; npmScript?: string; verify: string;
   runner: { type: string }; prerequisites?: string[]; optional?: boolean;
+  /** Test-pyramid level and per-level file-pattern overrides (scripts/testing/test-levels.mjs validates them). */
+  level?: string; levels?: Record<string, string[]>;
 }
 export interface SuiteManifest { suites: SuiteDef[]; prerequisites?: Record<string, { hint?: string }> }
 export interface GateDef { label: string; command: string[]; kind: 'check' | 'script' | 'verify'; requiresScript?: string; prerequisites: string[]; workflows: string[] }
