@@ -12,7 +12,7 @@ import { guardedText, jsonText, loadSettings } from './user-settings.ts';
 import { migrationFiles, type MigrationFile } from './migration-files.ts';
 import { retargetDeliveryConfig, type FolderMove } from '../domain/increments/model.ts';
 import { preparedDesignFolders } from './design-folder.ts';
-const folderPaths = new Set(['prds', 'app', 'prototypes', 'design', 'increments', 'pullRequests']);
+const folderPaths = new Set(['prds', 'app', 'prototypes', 'design', 'increments', 'pullRequests', 'issues']);
 const deliveryConfig = 'configs/delivery/delivery.json';
 interface Move { key: string; from: string; to: string; folder: boolean }
 /** The optional design root compares by its effective value, so configuring it for the first time relocates the default root. */

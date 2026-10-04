@@ -1,5 +1,5 @@
 import { documentationSettings } from '../adapters/settings-documentation.ts';
-import { incrementsRoot, pullRequestsRoot, type UserSettings } from '../domain/user-settings.ts';
+import { incrementsRoot, issuesRoot, pullRequestsRoot, type UserSettings } from '../domain/user-settings.ts';
 import { input, choose, confirm, type Prompts } from './prompts.ts';
 async function booleanPreference(ui: Prompts, label: string, current: boolean): Promise<boolean> {
   return await choose(ui, label, [{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }], current ? 'yes' : 'no') === 'yes';
@@ -19,7 +19,8 @@ export async function advancedSettingsForm(ui: Prompts, settings: UserSettings):
 }
 /** The optional folders are written only when configured or changed, so accepting the defaults keeps the saved path set. */
 async function documentFolders(ui: Prompts, settings: UserSettings): Promise<void> {
-  const folders = [['increments', 'Increment documents folder', incrementsRoot], ['pullRequests', 'Pull-request documents folder', pullRequestsRoot]] as const;
+  const folders = [['increments', 'Increment documents folder', incrementsRoot], ['pullRequests', 'Pull-request documents folder', pullRequestsRoot],
+    ['issues', 'Issue documents folder', issuesRoot]] as const;
   for (const [key, label, resolve] of folders) {
     const current = resolve(settings.paths), value = await input(ui, label, current);
     if (settings.paths[key] !== undefined || value !== current) settings.paths[key] = value;

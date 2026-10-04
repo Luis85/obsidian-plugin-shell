@@ -11,8 +11,8 @@ export interface UserSettings {
   schemaVersion: 1;
   /** The documentation feature owns semantic validation of this shared namespace. */
   documentation?: Record<string, unknown>;
-  /** design, increments and pullRequests are optional so existing settings and saved setup state keep their exact path set; effectivePaths resolves them. */
-  paths: { prds: string; project: string; prototypes: string; app: string; brief: string; firstRunReport: string; design?: string; increments?: string; pullRequests?: string };
+  /** design, increments, pullRequests and issues are optional so existing settings and saved setup state keep their exact path set; effectivePaths resolves them. */
+  paths: { prds: string; project: string; prototypes: string; app: string; brief: string; firstRunReport: string; design?: string; increments?: string; pullRequests?: string; issues?: string };
   preferences: { author: string; ui: 'auto' | 'tui' | 'plain'; vaultConfigDirectory: string; scanRecursive: boolean; firstRun: FirstRunPreferences };
 }
 export const defaultSettings: UserSettings = {
@@ -23,16 +23,19 @@ export const defaultSettings: UserSettings = {
 /** Optional path keys and their defaults; they appear in a settings file only once configured. */
 export const defaultIncrementsRoot = 'docs/increments';
 export const defaultPullRequestsRoot = 'docs/pull-requests';
-const optionalPaths = ['design', 'increments', 'pullRequests'] as const;
+export const defaultIssuesRoot = 'docs/issues';
+const optionalPaths = ['design', 'increments', 'pullRequests', 'issues'] as const;
 /** The folder that holds one Claude Design folder per prototype. */
 export function designRoot(paths: UserSettings['paths']): string { return paths.design ?? defaultDesignRoot; }
 /** The folder of Increment documents (the Definition of Ready handoffs). */
 export function incrementsRoot(paths: UserSettings['paths']): string { return paths.increments ?? defaultIncrementsRoot; }
 /** The folder of PullRequest documents (the planned pull requests of an increment). */
 export function pullRequestsRoot(paths: UserSettings['paths']): string { return paths.pullRequests ?? defaultPullRequestsRoot; }
+/** The folder of Issue documents (the units an increment is broken down into). */
+export function issuesRoot(paths: UserSettings['paths']): string { return paths.issues ?? defaultIssuesRoot; }
 /** Every configured location with the optional roots resolved, so checks see the folders the tools actually use. */
 export function effectivePaths(paths: UserSettings['paths']): Required<UserSettings['paths']> {
-  return { ...paths, design: designRoot(paths), increments: incrementsRoot(paths), pullRequests: pullRequestsRoot(paths) };
+  return { ...paths, design: designRoot(paths), increments: incrementsRoot(paths), pullRequests: pullRequestsRoot(paths), issues: issuesRoot(paths) };
 }
 /** The one overlap rule for settings, design and migration checks: equal or nested, ignoring case. */
 export function pathsOverlap(a: string, b: string): boolean {
@@ -50,7 +53,7 @@ export function projectPath(value: unknown): string {
 function validateLocations(paths: UserSettings['paths'], hostDirectory: string): void {
   const locations = [...Object.values(effectivePaths(paths)), settingsPath, setupStatePath, 'configs/project-setup-draft.json', 'project.config.json', hostDirectory];
   for (let i = 0; i < locations.length; i++) for (const other of locations.slice(i + 1))
-    requireSketch(!pathsOverlap(locations[i]!, other), 'SETTINGS_OVERLAP', `Input, output and configuration paths must not overlap; paths.design defaults to ${defaultDesignRoot}, paths.increments to ${defaultIncrementsRoot} and paths.pullRequests to ${defaultPullRequestsRoot}.`);
+    requireSketch(!pathsOverlap(locations[i]!, other), 'SETTINGS_OVERLAP', `Input, output and configuration paths must not overlap; paths.design defaults to ${defaultDesignRoot}, paths.increments to ${defaultIncrementsRoot}, paths.pullRequests to ${defaultPullRequestsRoot} and paths.issues to ${defaultIssuesRoot}.`);
 }
 function readPaths(input: unknown, baseline: UserSettings['paths'], hostDirectory: string): UserSettings['paths'] {
   const raw = object(input); keys(raw, [...Object.keys(defaultSettings.paths), ...optionalPaths]);
@@ -58,10 +61,10 @@ function readPaths(input: unknown, baseline: UserSettings['paths'], hostDirector
   const paths = Object.fromEntries(Object.entries(merged).map(([key, value]) => [key, projectPath(value)])) as UserSettings['paths'];
   for (const [key, extension] of [['project', '.json'], ['brief', '.md'], ['firstRunReport', '.json']] as const)
     requireSketch(paths[key].endsWith(extension), 'SETTINGS_PATH', `${key} must end in ${extension}.`);
-  for (const key of ['increments', 'pullRequests'] as const) if (paths[key] !== undefined) documentFolder(key, paths[key]);
+  for (const key of ['increments', 'pullRequests', 'issues'] as const) if (paths[key] !== undefined) documentFolder(key, paths[key]);
   validateLocations(paths, hostDirectory); return paths;
 }
-/** Increment and pull-request folders hold Markdown files one level deep, outside hidden directories. */
+/** Increment, pull-request and issue folders hold Markdown files one level deep, outside hidden directories. */
 function documentFolder(key: string, path: string): void {
   requireSketch(!/\.md$/i.test(path) && !path.split('/').some(part => part.startsWith('.')), 'SETTINGS_PATH', `${key} must be a visible folder, not a Markdown file or hidden directory.`);
 }

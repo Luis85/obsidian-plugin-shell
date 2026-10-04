@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import {
-  defaultIncrementsRoot, defaultPullRequestsRoot, defaultSettings, effectivePaths, incrementsRoot, pullRequestsRoot, readSettings, settingsSchema,
+  defaultIncrementsRoot, defaultIssuesRoot, defaultPullRequestsRoot, defaultSettings, effectivePaths, incrementsRoot, issuesRoot, pullRequestsRoot, readSettings, settingsSchema,
 } from '../../bin/domain/user-settings.ts';
 import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
@@ -33,23 +33,26 @@ test('the increment and pull-request folders are optional settings that resolve 
   assert.deepEqual(Object.keys(settings.paths), Object.keys(defaultSettings.paths));
   assert.equal(JSON.stringify(settings.paths), JSON.stringify(defaultSettings.paths));
   assert.deepEqual([incrementsRoot(settings.paths), pullRequestsRoot(settings.paths)], ['docs/increments', 'docs/pull-requests']);
-  assert.deepEqual([defaultIncrementsRoot, defaultPullRequestsRoot], ['docs/increments', 'docs/pull-requests']);
+  assert.deepEqual([defaultIncrementsRoot, defaultPullRequestsRoot, defaultIssuesRoot, issuesRoot(settings.paths)], ['docs/increments', 'docs/pull-requests', 'docs/issues', 'docs/issues']);
   const effective = effectivePaths(settings.paths);
-  assert.equal(effective.increments, 'docs/increments'); assert.equal(effective.pullRequests, 'docs/pull-requests'); assert.equal(effective.design, 'docs/design');
+  assert.equal(effective.issues, 'docs/issues'); assert.equal(effective.increments, 'docs/increments'); assert.equal(effective.pullRequests, 'docs/pull-requests'); assert.equal(effective.design, 'docs/design');
   const configured = readSettings({ schemaVersion: 1, paths: { increments: 'plan/increments', pullRequests: 'plan/prs' } });
   assert.deepEqual([incrementsRoot(configured.paths), pullRequestsRoot(configured.paths)], ['plan/increments', 'plan/prs']);
-  for (const key of ['increments', 'pullRequests']) assert.deepEqual(settingsSchema.properties.paths.properties[key], { type: 'string', minLength: 1, maxLength: 240 });
+  assert.equal(issuesRoot(readSettings({ schemaVersion: 1, paths: { issues: 'plan/issues' } }).paths), 'plan/issues');
+  for (const key of ['increments', 'pullRequests', 'issues']) assert.deepEqual(settingsSchema.properties.paths.properties[key], { type: 'string', minLength: 1, maxLength: 240 });
 });
 
 test('folder settings refuse Markdown files, hidden and protected directories and overlapping locations', () => {
   const refuse = (paths, pattern) => assert.throws(() => readSettings({ schemaVersion: 1, paths }), pattern, JSON.stringify(paths));
   refuse({ increments: 'docs/increments.md' }, /visible folder/);
+  refuse({ issues: 'docs/issues.MD' }, /visible folder/);
+  refuse({ issues: 'docs/pull-requests/issues' }, /must not overlap/);
   refuse({ pullRequests: 'docs/.hidden/prs' }, /visible folder|dot segments/);
   refuse({ increments: 'node_modules/increments' }, /protected/);
   refuse({ increments: ' docs/x' }, /whitespace/);
   refuse({ increments: 'docs/prds/increments' }, /must not overlap/);
   refuse({ increments: 'plan', pullRequests: 'plan/prs' }, /must not overlap/);
-  refuse({ prds: 'docs/pull-requests/prds' }, /paths\.pullRequests to docs\/pull-requests/);
+  refuse({ prds: 'docs/pull-requests/prds' }, /paths\.pullRequests to docs\/pull-requests and paths\.issues to docs\/issues/);
   refuse({ unknown: 'x' }, /Unknown fields/);
 });
 
@@ -73,7 +76,9 @@ test('migrating the folders moves their files and retargets delivery.json in one
 }));
 
 test('a migration without delivery.json moves only the folders', () => scratch(async root => {
-  await project(root, false);
+  await project(root, false); await put(root, 'docs/issues/delivery.md', '---\ntype: Issue\nid: delivery\n---\n');
+  const issues = await settingsMigrationPlan(root, { schemaVersion: 1, paths: { issues: 'plan/issues' } }); await applyPrepared(issues, issues.planHash);
+  assert.match(await read(root, 'plan/issues/delivery.md'), /^type: Issue$/m); assert.equal((await loadSettings(root)).settings.paths.issues, 'plan/issues');
   const plan = await settingsMigrationPlan(root, { schemaVersion: 1, paths: { pullRequests: 'plan/pull-requests' } });
   assert.doesNotMatch(plan.data.next, /delivery\.json/);
   assert.ok(!plan.plan.changes.some(change => change.path.startsWith('configs/delivery')));
@@ -103,10 +108,10 @@ test('the advanced settings form offers both folders and writes them only when c
   } };
   const unchanged = await settingsForm(ui, structuredClone(defaultSettings));
   assert.deepEqual(Object.keys(unchanged.paths), Object.keys(defaultSettings.paths));
-  answers['Pull-request documents folder'] = 'plan/pull-requests';
+  answers['Pull-request documents folder'] = 'plan/pull-requests'; answers['Issue documents folder'] = 'plan/issues';
   const changed = await settingsForm(ui, structuredClone(defaultSettings));
-  assert.equal(changed.paths.pullRequests, 'plan/pull-requests'); assert.equal(changed.paths.increments, undefined);
-  delete answers['Pull-request documents folder'];
+  assert.equal(changed.paths.pullRequests, 'plan/pull-requests'); assert.equal(changed.paths.issues, 'plan/issues'); assert.equal(changed.paths.increments, undefined);
+  delete answers['Pull-request documents folder']; delete answers['Issue documents folder'];
   const kept = await settingsForm(ui, readSettings({ schemaVersion: 1, paths: { increments: 'docs/increments' } }));
   assert.equal(kept.paths.increments, 'docs/increments');
 });
