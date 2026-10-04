@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +10,7 @@ import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { documentText, newDocument, openDocument } from '../../bin/domain/document.ts';
 import { pluginComponentTemplates } from '../../plugins/template-contributions.ts';
 import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
+import { extractKit } from './framework-archive-fixture.mjs';
 
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -127,4 +128,21 @@ test('plugins can contribute inert templates through the shared catalog', async 
   }]);
   const entries = await loadComponentTemplates(frameworkRoot, frameworkRoot, contributed);
   assert.equal(entries.find(entry => entry.template.id === 'atom.plugin-chip')?.origin, 'plugin');
+});
+
+test('an extracted kit keeps its packaged baseline beside one project template', { timeout: 300000 }, async t => {
+  const dir = await realpath(await mkdtemp(join(tmpdir(), 'component-template-kit-')));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  await extractKit(frameworkRoot, dir);
+  const baseline = await loadComponentTemplates(frameworkRoot, frameworkRoot);
+  const source = JSON.parse(await readFile(join(frameworkRoot, 'configs/templates/atoms/button.json'), 'utf8'));
+  await mkdir(join(dir, 'configs/templates/atoms'), { recursive: true });
+  await writeFile(join(dir, 'configs/templates/atoms/kit-probe.json'), JSON.stringify({ ...source, id: 'atom.kit-probe', name: 'Kit Probe' }));
+  const entries = await loadComponentTemplates(dir, dir);
+  assert.equal(entries.length, baseline.length + 1);
+  assert.deepEqual(entries.filter(entry => entry.origin === 'project').map(entry => entry.template.id), ['atom.kit-probe']);
+  assert.equal(entries.filter(entry => entry.origin === 'baseline').length, baseline.length);
+  // A packaged baseline that no longer matches its kit fingerprint is refused, never silently replaced.
+  await writeFile(join(dir, 'bin/template/configs/templates/atoms/button.json'), JSON.stringify({ ...source, name: 'Tampered' }));
+  await assert.rejects(loadComponentTemplates(dir, dir), /Kit fingerprint mismatch/);
 });
