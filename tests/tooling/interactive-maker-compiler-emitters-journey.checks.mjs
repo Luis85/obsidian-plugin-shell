@@ -86,8 +86,8 @@ test('native and preview composition roots share one editor and keep disjoint st
   assert.deepEqual(JSON.parse(JSON.parse(seed.slice(prefixText.length, -2))), m.document);
   const workspace = out.text(base + 'bootstrap/journey-workspace.ts').split('\n');
   assert.equal(workspace[2], 'import type { JourneyProjectStore } from "../../../../scripts/companion/journey/project-store.ts";');
-  assert.equal(workspace[12], "  const navigation=useNavigation(pinia),id=\"quick-capture-plugin\"+'-journey-'+(++runtime.serial);");
-  assert.equal(workspace[14], '    store:runtime.store,seed,mode:runtime.mode,ownerId:"quick-capture-plugin",initialPath:runtime.path,');
+  assert.equal(workspace[12], "  const navigation=useNavigation(pinia),id=\"quick-capture\"+'-journey-'+(++runtime.serial);");
+  assert.equal(workspace[14], '    store:runtime.store,seed,mode:runtime.mode,ownerId:"quick-capture",initialPath:runtime.path,');
   const native = out.text(base + 'bootstrap/journey-native.ts').split('\n');
   assert.deepEqual(native.slice(1, 3), ['import { JourneyProjectStore } from "../../../../scripts/companion/journey/project-store.ts";',
     'import { journeyVaultFiles } from "../../../../templates/companion/runtime/journey-vault.ts";']);

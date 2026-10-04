@@ -550,15 +550,23 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    continue-on-error: true
     steps:
       - *checkout
       - *setup-node
       - *select-npm
       - name: Install the committed lock without lifecycle scripts
         run: node "$QUALIFIED_NPM" ci --no-fund --no-audit --ignore-scripts
+      # The audit result is reported, not enforced: a finding becomes a warning
+      # annotation and job summary entry while the check itself stays green.
       - name: Live audit, all installed dependency categories
+        id: audit
+        continue-on-error: true
         run: node "$QUALIFIED_NPM" run check:security
+      - name: Report audit findings
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::warning title=Security audit::check:security reported findings; see docs/development/MOMENT-ADVISORY-EXCEPTION.md and the security-audit artifact."
+          echo "### Security audit: findings reported (informational)" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:

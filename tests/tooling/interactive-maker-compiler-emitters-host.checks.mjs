@@ -89,7 +89,7 @@ test('navigation tests follow navigable edges and leave business interactions as
     'it.todo("[edge-92] From group requires b']);
   assert.ok(cases[4].includes('expect(result).toEqual({kind:"modal",target:"node-3"}); expect(nav.current).toBe("node-2");'));
   const store = out.text('src/generated/presentation/stores/navigation.ts');
-  assert.ok(store.startsWith("import { defineStore } from 'pinia';\nimport { screens, interactions } from '../../domain/screens.ts';\nexport const useNavigation = defineStore(\"quick-capture-plugin:navigation\", {"));
+  assert.ok(store.startsWith("import { defineStore } from 'pinia';\nimport { screens, interactions } from '../../domain/screens.ts';\nexport const useNavigation = defineStore(\"quick-capture:navigation\", {"));
   assert.ok(store.includes(', leaveGuard: null as (() => boolean) | null }),') && store.includes('    back() { if (this.leaveGuard && !this.leaveGuard()) return; const id'));
   const blank = run(navigationCode, await plain()).text('src/generated/presentation/stores/navigation.ts');
   assert.ok(!blank.includes('leaveGuard') && blank.includes('    back() { const id = this.history.pop(); if (id) this.current = id; },'));
@@ -134,7 +134,7 @@ test('source preview and Airship configuration follow the canonical tooling opti
   assert.deepEqual([...out.files.keys()], ['harness/prototype/index.html', 'configs/bundling/vite.preview.config.mjs', 'AIRSHIP.md']);
   assert.equal(out.text('harness/prototype/index.html'), `<!doctype html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Source preview</title></head>
-<body class="theme-dark"><main id="prototype-app" class="ps--my-plugin" data-plugin-ui="my-plugin"></main>
+<body class="theme-dark"><main id="prototype-app" class="ps--my-vault-tool" data-plugin-ui="my-vault-tool"></main>
 <script type="module" src="/harness/prototype/clickdummy.ts"></script></body></html>
 `);
   assert.equal(out.text('configs/bundling/vite.preview.config.mjs'), "import { previewConfig } from '../../scripts/airship/preview-config.mjs';\nexport default previewConfig(\"src/generated\");\n");

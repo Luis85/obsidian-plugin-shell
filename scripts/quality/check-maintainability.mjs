@@ -14,6 +14,7 @@ const limits = loadThresholds().maintainability;
 const policy = { version: 2, cyclomatic: limits.cyclomatic, cognitive: limits.cognitive, duplication: limits.duplicationPercent,
   minTokens: limits.duplicationMinTokens, minLines: limits.duplicationMinLines,
   mode: 'mild', ignoreImports: true, production: 'every src and bin JS/TS/Vue file, including generated consumers',
+  gated: ['production', 'templates'],
   severities: { 'complexity-cyclomatic': 'error', 'complexity-cognitive': 'error', 'complexity-crap': 'warn' } };
 const stageConfig = { failOnParseError: true, duplicates: { ignoreDefaults: false },
   rules: { 'boundary-violation': 'off', 'policy-violation': 'off', ...policy.severities } };
@@ -29,12 +30,19 @@ async function execute(tool, stage, args, output) {
   try { report = JSON.parse(run.stdout); } catch { throw new Error('METRIC_REPORT_JSON'); }
   return { report, exit: run.status, command, rawHash: sha256(run.stdout) };
 }
+function viewFailures(name, view) {
+  const failures = view.health.findings.map(finding => `${finding.path}:${finding.line} ${finding.name} ${finding.cyclomatic}/${finding.cognitive}`);
+  if (view.duplication.duplication_percentage > policy.duplication) failures.push(`${name.toUpperCase()}_DUPLICATION_ABOVE_${policy.duplication}_PERCENT`);
+  return failures;
+}
 function failureList(views) {
   const production = views.production;
   if (!production.health.functions) throw new Error('METRIC_EMPTY_PRODUCTION_MEASUREMENT');
-  const failures = production.health.findings.map(finding => `${finding.path}:${finding.line} ${finding.name} ${finding.cyclomatic}/${finding.cognitive}`);
-  if (production.duplication.duplication_percentage > policy.duplication) failures.push(`PRODUCTION_DUPLICATION_ABOVE_${policy.duplication}_PERCENT`);
-  return failures;
+  // The templates view is copied verbatim into generated projects as their production source, so it meets the same ceilings.
+  // A checkout without generated-project templates has an empty view and nothing to gate.
+  const templates = views.templates;
+  if (templates.status !== 'empty' && !templates.health.functions) throw new Error('METRIC_EMPTY_TEMPLATES_MEASUREMENT');
+  return [...viewFailures('production', production), ...(templates.status === 'empty' ? [] : viewFailures('templates', templates))];
 }
 async function toolIdentity(tool) {
   const packageRoot = dirname(dirname(tool));
@@ -105,7 +113,7 @@ export async function measureMaintainability(root = process.cwd(), options = {})
   const failures = failureList(views);
   const report = { schema: 'plugin-maintainability/v1', status: failures.length ? 'failed' : 'passed', policy,
     tool: toolVersion, inventory: before, views, failures,
-    scope: 'Production thresholds block. Tooling, fixtures and generated-project templates are separate measured diagnostic views; CSS/markup/data and Python concept tooling are inventoried without JS/TS/Vue function/clone qualification.' };
+    scope: 'Production and generated-project template thresholds block. Tooling and fixtures are separate measured diagnostic views; CSS/markup/data and Python concept tooling are inventoried without JS/TS/Vue function/clone qualification.' };
   await writeFile(join(output, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
   return { report, output };
 }
@@ -113,7 +121,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     const args = process.argv.slice(2);
     if (args[0] === '--help' && args.length === 1) {
-      console.log('Measure full production 10/15 complexity and 3% duplication (50 tokens/5 lines), plus diagnostic tooling/fixture/template views.\nUsage: node scripts/quality/check-maintainability.mjs [--check REPORT_DIRECTORY]\nReports are data only; --check validates current inputs and never executes report commands.');
+      console.log('Measure full production and generated-project template 10/15 complexity and 3% duplication (50 tokens/5 lines), plus diagnostic tooling/fixture views.\nUsage: node scripts/quality/check-maintainability.mjs [--check REPORT_DIRECTORY]\nReports are data only; --check validates current inputs and never executes report commands.');
     } else {
     if (args.length && !(args.length === 2 && args[0] === '--check')) throw new Error('Usage: check-maintainability.mjs [--check REPORT_DIRECTORY]');
     const { report, output } = args.length ? await checkMaintainability(process.cwd(), resolve(args[1])) : await measureMaintainability();

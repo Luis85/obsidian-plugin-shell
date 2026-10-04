@@ -1,5 +1,6 @@
 /** Companion is an input adapter, not a second schema or visual-model implementation. */
 import { SitemapError } from '../../../scripts/companion/sitemap/safety.ts';
+import { CompanionFieldError } from '../../../scripts/companion/authoring-contract.ts';
 import { projectModel, type Model } from '../emitters/model.ts';
 import { visualDefinitions } from '../emitters/visual-model.ts';
 import { visualSources } from '../emitters/visual-ports.ts';
@@ -12,7 +13,7 @@ export function contractCall<T>(phase: Phase, sourceName: string, work: () => T)
     if (error instanceof CompilerError) throw error;
     if (error instanceof Error && (error instanceof SitemapError || /^(?:COMPANION_TOOLING_INVALID|COMPANION_INVALID|GENERATOR_INVALID|VISUAL_INVALID|DESIGN_SYSTEM_INVALID|COMPOSITION_INVALID|STORYMAP_INVALID):/.test(error.message))) {
       throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID',phase,error.message.slice(0,2000),
-        {file:sourceName,jsonPointer:'',document:'input'}),{cause:error});
+        {file:sourceName,jsonPointer:error instanceof CompanionFieldError ? error.jsonPointer : '',document:'input'}),{cause:error});
     }
     throw error;
   }

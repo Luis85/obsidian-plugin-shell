@@ -1,6 +1,6 @@
 import { access } from 'node:fs/promises';
 import { join } from 'node:path';
-import { setupMcpFiles } from '../agent/mcp-config.mjs';
+import { mcpConflicts, setupMcpFiles } from '../agent/mcp-config.mjs';
 import { createFilePlan } from '../shared/file-plan.ts';
 
 function previousHashes(previous) {
@@ -25,20 +25,14 @@ export async function planLocalMcp(root, request, previous = null) {
   }
   if (action === 'disable') {
     const plan = await createFilePlan(root, setupMcpFiles().map(file => ({ path: file.path, content: null })));
-    for (const change of plan.changes) {
-      if (change.beforeHash !== null && owned.get(change.path) !== change.beforeHash) {
-        throw new Error(`MCP_CONFIG_CONFLICT: ${change.path} is edited or not setup-owned; preserve/reconcile it before disabling MCP.`);
-      }
-    }
+    const [conflict] = mcpConflicts(plan.changes, owned);
+    if (conflict) throw new Error(`MCP_CONFIG_CONFLICT: ${conflict} is edited or not setup-owned; preserve/reconcile it before disabling MCP.`);
     return { version: 1, action, enabled: false, server: 'workbench', transport: 'stdio', clients: [], plan, files: receipt(plan) };
   }
   await access(join(root, 'bin/app'));
   const plan = await createFilePlan(root, setupMcpFiles());
-  for (const change of plan.changes) {
-    if (change.status === 'update' && owned.get(change.path) !== change.beforeHash) {
-      throw new Error(`MCP_CONFIG_CONFLICT: ${change.path} has user or external changes; preserve/reconcile it before setup manages this file.`);
-    }
-  }
+  const [conflict] = mcpConflicts(plan.changes, owned);
+  if (conflict) throw new Error(`MCP_CONFIG_CONFLICT: ${conflict} has user or external changes; preserve/reconcile it before setup manages this file.`);
   return { version: 1, action, enabled: true, server: 'workbench', transport: 'stdio',
     clients: ['claude-code', 'codex'], plan, files: receipt(plan) };
 }

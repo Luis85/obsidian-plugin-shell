@@ -130,7 +130,7 @@ test('interaction verification is derived from the authored action kinds', () =>
 test('runtime, fixture-source, binding and adapter suites are generated per definition', async () => {
   const { out } = await emit();
   const runtime = out.text('tests/project/visual-runtime.test.ts').split('\n');
-  assert.deepEqual(runtime.slice(4, 7), ['import { useVisual, provideVisualContext, type VisualContext, type VisualPort } from "../../src/generated/presentation/composables/use-visual.ts";',
+  assert.deepEqual(runtime.slice(6, 9), ['import { useVisual, provideVisualContext, type VisualContext, type VisualPort } from "../../src/generated/presentation/composables/use-visual.ts";',
     'import type { VisualPageSpec, VisualRequest } from "../../src/generated/domain/visual-runtime.ts";', 'import type { UiNode, VisualAction, Scenario } from "../../src/generated/domain/visual/visual-ir.mjs";']);
   assert.equal(out.text('tests/project/fixtures/visual-sources.ts'), `import { createGAuthoringVaultService } from "../../../src/generated/application/authoring-vault/service.ts";
 import { createGRecordWriterService } from "../../../src/generated/application/record-writer/service.ts";

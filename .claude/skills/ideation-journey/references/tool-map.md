@@ -97,6 +97,7 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 | --- | --- |
 | `node bin/app ci --list` | `feature-delivery` reproduces CI jobs |
 | `node bin/app check submission` | publication readiness; not part of prototyping |
+| `node bin/app entities catalog` | registered entity definitions in a built project; not needed before a boilerplate exists |
 | `node bin/app release prepare` | never; release is a separate authorization |
 | `node bin/app framework status` | Workbench maintainers |
 | `node bin/app schema --json` | operation request schema for agents; not needed by the chain |

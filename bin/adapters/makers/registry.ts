@@ -3,7 +3,8 @@ import { resolve } from 'node:path';
 import type TS from 'typescript';
 import { hasSyntaxErrors, loadTypescript, namedImports, parseTypescript, type NamedImport, type Typescript } from './syntax.ts';
 
-const featureImport = /^\.\.\/features\/[a-z0-9-]+\/[a-zA-Z0-9.-]+$/;
+// Hand-written features live under ../features/<owner>/; the project compiler registers its documents from ../generated/.
+const featureImport = /^\.\.\/(?:features\/[a-z0-9-]+|generated(?:\/[a-z0-9-]+)+)\/[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 interface FeatureImport { readonly local: string; readonly exported: string; readonly from: string }
 interface Registration extends FeatureImport { readonly key: string; readonly override: boolean }
 export interface FeatureRegistry {

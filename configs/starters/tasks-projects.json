@@ -43,7 +43,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -81,9 +81,9 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "tasks-projects-plugin",
+        "id": "tasks-projects",
         "name": "Tasks & Projects",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Build a note-backed task workspace linked to project records."
       },
@@ -3270,7 +3270,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

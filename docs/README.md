@@ -21,6 +21,12 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 
 ## How-to guides
 
+**Work on this framework checkout**
+
+| Page | Task |
+| --- | --- |
+| [Developer guide](../DEVELOPER_GUIDE.md) | Check the requirements, set up the checkout, then run the everyday workflows for improving or extending the plugin, CLI and generator. |
+
 **Develop a plugin on the shell**
 
 | Page | Task |
@@ -171,6 +177,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Harness styles](testing/HARNESS-STYLES.md) | Why the host stylesheet is separate and what frontend evidence means. |
 | [Milestone context](development/MILESTONE-CONTEXT.md) | How the recent milestones relate; links into historical records. |
 | [Upstream lint dependency exception](development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion (normative). |
+| [Moment advisory exception](development/MOMENT-ADVISORY-EXCEPTION.md) | The open `moment` advisory through the Obsidian API package and why `check:security` still fails. |
 | [Hindsight and Git/GitHub](development/HINDSIGHT-GIT-GITHUB.md) | Research and decisions behind the optional memory integration. |
 
 ## Delivery and CI

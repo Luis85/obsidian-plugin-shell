@@ -35,6 +35,15 @@ const RESERVED_NAME = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 function requireValid(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error('COMPANION_INVALID: ' + message);
 }
+/** A violation of one named field; `jsonPointer` is its RFC 6901 location in the project document. */
+export class CompanionFieldError extends Error {
+  readonly jsonPointer: string;
+  constructor(message: string, jsonPointer: string) { super(message); this.name = 'CompanionFieldError'; this.jsonPointer = jsonPointer; }
+}
+function requireField(condition: unknown, jsonPointer: string, message: string): asserts condition {
+  const field = jsonPointer.slice(jsonPointer.lastIndexOf('/') + 1);
+  if (!condition) throw new CompanionFieldError(`COMPANION_INVALID: ${message} Field "${field}" at ${jsonPointer}.`, jsonPointer);
+}
 /** Coded for adapters and prefixed for message-based reporters (CLI, reader, browser). */
 function requireVersion(condition: unknown, message: string): asserts condition {
   requireSitemap(condition, 'COMPANION_VERSION', 'COMPANION_VERSION: ' + message);
@@ -62,12 +71,13 @@ export function validateCompanionFolders(value: unknown): AuthoringDocument['set
   return { codebaseFolder, testsFolder };
 }
 function validateIdentity(value: unknown): string {
-  requireValid(shape(value, ['id', 'name', 'author', 'version', 'description']), 'Unsupported project identity.');
-  requireValid(text(value.id, 60) && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value.id) && companionRelativeFolder(value.id),
-    'Use a portable lowercase plugin ID.');
-  requireValid(text(value.name, 80, true) && !/[\r\n]/.test(value.name), 'Use a single-line project name.');
-  requireValid(text(value.author, 80) && text(value.description, 400), 'Project description or author exceeds its limit.');
-  requireValid(text(value.version, 40) && /^\d+\.\d+\.\d+$/.test(value.version), 'Expected an x.y.z project version.');
+  requireField(shape(value, ['id', 'name', 'author', 'version', 'description']), '/project', 'Unsupported project identity.');
+  requireField(text(value.id, 60) && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value.id) && companionRelativeFolder(value.id),
+    '/project/id', 'Use a portable lowercase plugin ID.');
+  requireField(text(value.name, 80, true) && !/[\r\n]/.test(value.name), '/project/name', 'Use a single-line project name.');
+  requireField(text(value.author, 80), '/project/author', 'Project author exceeds its limit of 80 characters.');
+  requireField(text(value.description, 400), '/project/description', 'Project description exceeds its limit of 400 characters.');
+  requireField(text(value.version, 40) && /^\d+\.\d+\.\d+$/.test(value.version), '/project/version', 'Expected an x.y.z project version.');
   return value.id;
 }
 function validateCollections(design: Record<string, unknown>): void {
@@ -85,8 +95,9 @@ function validateDesign(value: unknown, pluginId: string): void {
   validateDesignSystem(value.designSystem, pluginId);
   if (value.storymaps !== undefined) validateStorymaps(value.storymaps);
   requireValid(shape(value, DESIGN_KEYS, REQUIRED_DESIGN_KEYS), 'Unsupported design envelope.');
-  requireValid(text(value.blueprint, 80, true) && text(value.goal, 1000) && ['desktop', 'mobile-ready'].includes(String(value.platform)),
-    'Unsupported design blueprint, goal or platform.');
+  requireField(text(value.blueprint, 80, true), '/design/blueprint', 'Unsupported design blueprint.');
+  requireField(text(value.goal, 1000), '/design/goal', 'Design goal exceeds its limit of 1000 characters.');
+  requireField(['desktop', 'mobile-ready'].includes(String(value.platform)), '/design/platform', 'Expected platform desktop or mobile-ready.');
   requireValid(Number.isSafeInteger(value.nextId) && Number(value.nextId) > 0 && Number(value.nextId) < Number.MAX_SAFE_INTEGER - 100000,
     'Invalid design counter.');
   validateCollections(value);

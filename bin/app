@@ -9,15 +9,15 @@ const binRoot = dirname(fileURLToPath(import.meta.url));
 const frameworkRoot = resolve(binRoot, '..');
 const bundle = resolve(binRoot, 'app.js');
 const args = process.argv.slice(2);
-let runtime = null;
+// One layout decision: a kit runs its bundle and keeps the bootstrap-safe envelope under bin/template; a checkout runs app.ts.
+const packaged = existsSync(bundle);
+const envelopeModule = packaged ? './template/scripts/contracts/result-runtime.mjs' : '../scripts/contracts/result-runtime.mjs';
 
 try {
-  if (existsSync(bundle)) {
-    runtime = await import(pathToFileURL(bundle).href);
-    process.exitCode = await runtime.main(args, frameworkRoot);
+  if (packaged) {
+    process.exitCode = await (await import(pathToFileURL(bundle).href)).main(args, frameworkRoot);
   } else if (process.features.typescript || process.execArgv.includes('--experimental-strip-types')) {
-    runtime = await import('./app.ts');
-    process.exitCode = await runtime.main(args, frameworkRoot);
+    process.exitCode = await (await import('./app.ts')).main(args, frameworkRoot);
   } else {
     const child = spawnSync(process.execPath, ['--experimental-strip-types', fileURLToPath(import.meta.url), ...args], { stdio: 'inherit' });
     if (child.error) throw child.error;
@@ -26,12 +26,8 @@ try {
 } catch (error) {
   const message = error instanceof Error ? error.message : 'Unable to start the Workbench CLI.';
   if (args.includes('--json')) {
-    const sourceEnvelope = await import('../scripts/contracts/result-runtime.mjs').catch(() => null);
-    const packagedEnvelope = await import('./template/scripts/contracts/result-runtime.mjs').catch(() => null);
-    const resultEnvelope = runtime?.resultEnvelope ?? sourceEnvelope?.resultEnvelope ?? packagedEnvelope?.resultEnvelope;
-    const diagnostics = [{ code: 'BOOTSTRAP_FAILED', message }];
-    process.stdout.write(JSON.stringify(resultEnvelope ? resultEnvelope('bootstrap', null, 'failed', diagnostics)
-      : { protocolVersion: 1, command: 'bootstrap', status: 'failed', data: null, diagnostics }) + '\n');
+    const { resultEnvelope } = await import(envelopeModule);
+    process.stdout.write(JSON.stringify(resultEnvelope('bootstrap', null, 'failed', [{ code: 'BOOTSTRAP_FAILED', message }])) + '\n');
   } else process.stderr.write(message + '\n');
   process.exitCode = 1;
 }

@@ -48,7 +48,8 @@ async function defaultRoots(root) {
   }
   // Each optional folder must be a real directory; one already inside a root (configs/starters under configs) is not listed twice.
   const covered = path => roots.some(entry => path.startsWith(entry + '/'));
-  for (const directory of ['configs/starters', 'bin', 'templates', 'plugins', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', '.claude/skills/companion-prototype-design']) {
+  // CI composite actions and runner scripts are executable CI inputs beside .github/workflows when present.
+  for (const directory of ['.github/actions', '.github/scripts', 'configs/starters', 'bin', 'templates', 'plugins', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', '.claude/skills/companion-prototype-design']) {
     if (await optionalInput(root, directory, true) && !covered(directory)) roots.push(directory);
   }
   return roots;

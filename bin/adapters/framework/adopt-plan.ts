@@ -9,6 +9,7 @@ import { createFilePlan, type FilePlan, type FilePlanEntry } from '../../../scri
 import { analyzeTarget, translating } from './adopt-operation.ts';
 import { exists, hash, readBounded } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
+import { resolveTemplateRoot } from '../template-root.ts';
 
 interface Planned { plan: FilePlan; summary: unknown; conflicts: string[] }
 const planMarker = '# Workbench adoption plan:';
@@ -48,11 +49,8 @@ export async function adoptPlanPlan(request: Request, context: Context): Promise
   });
 }
 const skillTemplates: ReadonlyArray<[string, string]> = skillRoots.map((root, index) => [`${root}/${skillName}/SKILL.md`, `templates/adoption/${index === 0 ? 'claude' : 'agents'}-skill/SKILL.md`]);
-async function templateBase(context: Context): Promise<string> {
-  return await exists(join(context.frameworkRoot, 'bin/kit.json')) ? join(context.frameworkRoot, 'bin/template') : context.frameworkRoot;
-}
 export async function adoptSkillPlan(_request: Request, context: Context): Promise<Planned> {
-  const base = await templateBase(context);
+  const base = await resolveTemplateRoot(context.frameworkRoot);
   const entries: FilePlanEntry[] = [];
   for (const [target, template] of skillTemplates) {
     requireThat(await exists(join(base, template)), 'ADOPT_TEMPLATE_MISSING', `The kit does not contain ${template}.`);

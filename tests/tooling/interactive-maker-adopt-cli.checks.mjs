@@ -175,14 +175,17 @@ test('adopt skill previews both agent copies, installs them byte-identical to th
     assert.equal((await readdir(project, { recursive: true })).some(path => path.includes('.claude')), false, 'no partial install');
   });
 });
-test('a kit without the skill templates fails closed and a kit layout reads its templates under bin/template', async () => {
+test('missing skill templates fail closed, a stray bin/template is never probed and an unverified kit marker is refused', async () => {
   await withProject('react-vite', async (project, root) => {
     const empty = join(root, 'framework'); await mkdir(empty);
     const missing = await executeOperation({ command: 'adopt skill', args: [], options: { 'dry-run': true } }, { root: project, frameworkRoot: empty }); assert.equal(missing.status, 'failed'); assert.equal(missing.diagnostics[0].code, 'ADOPT_TEMPLATE_MISSING');
     for (const [name, text] of [['claude-skill', 'kit claude\n'], ['agents-skill', 'kit agents\n']]) { await mkdir(join(empty, 'bin/template/templates/adoption', name), { recursive: true }); await writeFile(join(empty, 'bin/template/templates/adoption', name, 'SKILL.md'), text); }
+    const stray = await executeOperation({ command: 'adopt skill', args: [], options: {} }, { root: project, frameworkRoot: empty });
+    assert.equal(stray.status, 'failed'); assert.equal(stray.diagnostics[0].code, 'ADOPT_TEMPLATE_MISSING', 'without bin/kit.json the root is a checkout');
     await writeFile(join(empty, 'bin/kit.json'), '{}');
-    const planned = await executeOperation({ command: 'adopt skill', args: [], options: {} }, { root: project, frameworkRoot: empty }); assert.equal(planned.status, 'planned');
-    assert.deepEqual(planned.data.changes.map(change => change.status), ['create', 'create']);
+    const unverified = await executeOperation({ command: 'adopt skill', args: [], options: {} }, { root: project, frameworkRoot: empty });
+    assert.equal(unverified.status, 'failed'); assert.equal(unverified.diagnostics[0].code, 'KIT_VERSION');
+    assert.equal((await readdir(project, { recursive: true })).some(path => path.includes('.claude')), false);
   });
 });
 test('help, capabilities and argument validation describe the adopt commands', async () => {

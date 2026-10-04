@@ -25,7 +25,7 @@ test('the developer kit renders every template, follows custom roots and owns it
     'tests/suites.json', 'checks/project/plugin-host.test.ts']);
   assert.ok(![...out.files.keys()].some(path => path.includes('companion-prototype-design')));
   assert.deepEqual([...out.files].filter(([, entry]) => entry.ownership !== 'extension').map(([path, entry]) => [path, entry.ownership]), [['checks/project/ui-bootstrap.mjs', 'managed'], ['tests/suites.json', 'framework']]);
-  assert.ok(out.text('README.md').startsWith('# My Plugin\n\nMulti line\n'));
+  assert.ok(out.text('README.md').startsWith('# My Vault Tool\n\nMulti line\n'));
   assert.ok(!/\{\{[A-Za-z]+\}\}/.test(rendered.map(path => out.text(path)).join('\n')));
   const config = out.text('configs/testing/vitest.project.config.mjs');
   assert.ok(config.includes(`  include: ["checks/project/**/*.test.{ts,mjs}", "${makerTests}/**/*.test.ts"], environment: 'node', fileParallelism: false,\n  // Playwright specs (npm run test:e2e) run in a browser, never in Vitest.\n  exclude: [...configDefaults.exclude, 'tests/e2e/**'],\n  setupFiles: ["checks/project/ui-bootstrap.mjs"],\n`));
@@ -36,8 +36,18 @@ test('the developer kit renders every template, follows custom roots and owns it
   assert.ok(host.includes('  const files = loadVaultFixtures(join(import.meta.dirname, "../../tests/obsidian/vault"));\n'));
   const fallback = model(await starterDocument('blank')); fallback.project.name = ' '; delete fallback.project.description;
   const defaults = recorder(); await devkitFiles(template, fallback, defaults.add);
-  assert.ok(defaults.text('README.md').startsWith('# my-plugin\n\nAn Obsidian plugin.\n'));
+  assert.ok(defaults.text('README.md').startsWith('# my-vault-tool\n\nAn Obsidian plugin.\n'));
   assert.ok(!defaults.files.has('tests/suites.json'));
+});
+
+test('the copied suite manifest classifies emitted journey specs and their helper, and nothing else changes', async () => {
+  const out = recorder(); await devkitFiles(template, model(await starterDocument('feature-showcase')), out.add);
+  const original = await template.text('tests/suites.json');
+  assert.equal(out.text('tests/suites.json'), original.replace('"tests/e2e/*.spec.ts"', '"tests/e2e/*.spec.ts",\n        "tests/e2e/journeys/*.spec.ts"')
+    .replace('"tests/e2e/control-metrics.ts"', '"tests/e2e/control-metrics.ts",\n        "tests/e2e/journeys/journey-support.ts"'));
+  const suites = JSON.parse(out.text('tests/suites.json'));
+  assert.ok(suites.suites.find(suite => suite.name === 'e2e').include.includes('tests/e2e/journeys/*.spec.ts'));
+  assert.ok(suites.helpers.some(helper => helper.include.includes('tests/e2e/journeys/journey-support.ts')));
 });
 
 test('templates substitute known placeholders once and refuse unknown ones', () => {
@@ -59,7 +69,7 @@ test('file helpers name components, relativize imports and rewrite copied templa
 test('framework documents and maintainer workflows move under docs/framework with rebased links', () => {
   assert.deepEqual(['README.md', 'AGENTS.md', '.github/workflows/ci.yml', 'docs/a.md', 'README.txt'].map(relocatedPath),
     ['docs/framework/README.md', 'docs/framework/AGENTS.md', 'docs/framework/workflows/ci.yml', 'docs/a.md', 'README.txt']);
-  for (const path of ['configs/starters/blank.json',
+  for (const path of ['configs/starters/blank.json', 'DEVELOPER_GUIDE.md',
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
     'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs',
     '.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/PULL_REQUEST_TEMPLATE/release.md'])

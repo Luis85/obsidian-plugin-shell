@@ -1,4 +1,4 @@
-import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { docsPlan } from './docs.ts';
 import { prototypesPlan } from './prototypes.ts';
 import { adoptPlanPlan, adoptSkillPlan } from './adopt-plan.ts';
@@ -19,18 +19,29 @@ import { styleExportPlan } from './styles.ts';
 import { upgradePlan } from './kit.ts';
 import { configFile, object } from './configuration.ts';
 import { readConfiguration, readJson, readBounded, hash, exists } from './files.ts';
-import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
-interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string }
+import { OperationError, requireThat, stringOption, type Context, type Request } from './contracts.ts';
+import { customRecipeNames } from '../makers/custom-registry.ts';
+import { pendingChecks } from './maker-checks.ts';
+import { didYouMean, suggestions } from './suggest.ts';
+import type { MakerCheck } from '../makers/plan.ts';
+interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[] }
+/** Built-in and registered custom recipes are resolved before trust: only a real custom recipe needs --trust-custom. */
+async function resolveRecipe(request: Request, context: Context, recipe: string): Promise<void> {
+  if (builtinRecipes.includes(recipe)) return;
+  const custom = await customRecipeNames(context.root);
+  if (!custom.includes(recipe)) throw new OperationError('MAKER_UNKNOWN', `Unknown recipe: ${recipe}.${didYouMean(suggestions(recipe, [...builtinRecipes, ...custom]), value => `"${value}"`)}`, 'node bin/app make list');
+  requireThat(request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', `${recipe} is a local custom recipe that executes trusted project code; review scripts/makers/custom/${recipe}.mjs, then pass --trust-custom.`);
+}
 async function makerPlan(request: Request, context: Context): Promise<Planned> {
   const [recipe, name] = request.args;
   requireThat(recipe && name, 'MAKER_INPUT_REQUIRED', 'Supply a recipe and name; use make list for discovery.');
-  requireThat(builtinRecipes.includes(recipe) || request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', 'A custom maker executes local code; pass --trust-custom after review.');
+  await resolveRecipe(request, context, recipe);
   const args = [recipe, name];
   const fields = descriptor('make').options;
   for (const [key, value] of Object.entries(request.options)) if (Object.hasOwn(fields, key) && !['list', 'trust-custom'].includes(key)) { args.push('--' + key); if (typeof value === 'string') args.push(value); }
   const { planMaker } = await import('../makers/plan.ts');
   const planned = await planMaker(context.root, makerArguments(args));
-  return { plan: planned.plan, summary: { maker: planned.maker, checks: planned.checks.map(check => ({ ...check, status: 'not-run' })) }, conflicts: [] };
+  return { plan: planned.plan, checks: planned.checks, summary: { maker: planned.maker, checks: pendingChecks(planned.checks), next: planned.next }, conflicts: [] };
 }
 async function pluginPlan(context: Context): Promise<Planned> {
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup first.');
@@ -114,7 +125,7 @@ export async function saveOperationPlan(context: Context, planned: Awaited<Retur
   requireThat(planned.request.options['trust-custom'] !== true, 'CUSTOM_PLAN_NOT_PORTABLE', 'Custom maker trust cannot be serialized as approval.');
   const path = resolve(context.root, output);
   const local = relative(context.root, path);
-  requireThat(local && !isAbsolute(local) && !local.split(sep).some(part => ['..', '.framework', '.companion', '.test-vault', defaultVaultConfigDirectory].includes(part.toLowerCase())), 'PLAN_OUTPUT_PROTECTED', 'Store plans inside the project, outside framework and ownership directories.');
+  requireThat(local && !isAbsolute(local) && !local.split(sep).some(part => part === '..' || isProtectedSegment(part)), 'PLAN_OUTPUT_PROTECTED', 'Store plans inside the project, outside framework and ownership directories.');
   requireThat(!planned.plan.changes.some(change => change.path.toLowerCase() === local.split(sep).join('/').toLowerCase()), 'PLAN_OUTPUT_COLLISION', 'A saved plan cannot occupy one of its output paths.');
   const config = await readConfiguration(context.root);
   requireThat(!config || !local.split(sep).some(part => part.toLowerCase() === config.paths.testVaultFolder.toLowerCase()), 'PLAN_OUTPUT_PROTECTED', 'Saved plans must remain outside the configured test vault.');

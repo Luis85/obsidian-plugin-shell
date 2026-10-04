@@ -80,6 +80,7 @@ conversation. Add user-facing changes under `## [Unreleased]` in `CHANGELOG.md`.
 [cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md).
 
 Read first when relevant: [README](README.md),
+[developer guide](DEVELOPER_GUIDE.md) (requirements and setup),
 [authoring](docs/development/AUTHORING-TOOLS.md),
 [plugin-data semantics](docs/development/PLUGIN-DATA-ENTITIES.md),
 [metric scope](docs/development/MAINTAINABILITY.md),

@@ -3,9 +3,9 @@
  * set (merge-base(<base>, HEAD) .. working tree) to gates through the suites manifest, the workflows' `paths:`
  * filters and configs/quality/gate-rules.json, and always ends with the pre-PR `npm run verify`.
  */
-import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { readJson } from './files.ts';
 import { checkSteps, type CheckSelection } from './check.ts';
 import { runGit, type BaseInfo, type Git } from './check-changes.ts';
 import { fastRunnable, ruleHits, selectSuiteReasons, type Reason } from './check-selection.ts';
@@ -96,7 +96,7 @@ function codeGates(sources: Sources, selection: CheckSelection, hits: ReturnType
 }
 async function readScripts(root: string): Promise<Set<string>> {
   try {
-    const parsed: unknown = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+    const parsed = await readJson(join(root, 'package.json'));
     const scripts = typeof parsed === 'object' && parsed !== null && 'scripts' in parsed ? parsed.scripts : null;
     return new Set(typeof scripts === 'object' && scripts !== null ? Object.keys(scripts) : []);
   } catch { return new Set(); }

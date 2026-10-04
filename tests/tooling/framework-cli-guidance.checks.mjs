@@ -81,7 +81,7 @@ test('make list and describe render readable tables instead of raw JSON', () => 
 });
 test('mistyped commands suggest the closest catalog entries, including multi-word commands', () => {
   const human = cli(['statu']);
-  assert.equal(human.status, 1); assert.equal(human.stdout, 'unknown: failed\n');
+  assert.equal(human.status, 1); assert.equal(human.stdout, 'Workbench CLI (no command ran): failed\n');
   assert.match(human.stderr, /^UNKNOWN_COMMAND: Unknown command: statu\. Did you mean "status"\? Use help\.$/m);
   assert.match(human.stderr, /^Next: node bin\/app help status$/m);
   const status = machine(['statu']);
@@ -106,6 +106,25 @@ test('mistyped options and maker recipes suggest corrections with exit 1', () =>
   assert.equal(unsupported.result.diagnostics[0].next, 'node bin/app help build');
   const recipe = machine(['make', 'describe', 'fature']);
   assert.equal(recipe.result.diagnostics[0].code, 'MAKER_UNKNOWN'); assert.match(recipe.result.diagnostics[0].message, /Did you mean "feature"\?/);
+  // A mistyped recipe is unknown, not an untrusted custom recipe.
+  const made = machine(['make', 'featur', 'x', '--dry-run']);
+  assert.equal(made.exit, 1); assert.equal(made.result.diagnostics[0].code, 'MAKER_UNKNOWN');
+  assert.match(made.result.diagnostics[0].message, /^Unknown recipe: featur\. Did you mean "feature"\?$/);
+});
+test('a shared root word lists its group: help <group> and the bare root', () => {
+  for (const group of ['framework', 'starters', 'release', 'compiler']) {
+    const listed = machine(['help', group]);
+    assert.equal(listed.exit, 0, JSON.stringify(listed.result.diagnostics));
+    assert.equal(listed.result.data.scope, 'group'); assert.equal(listed.result.data.group, group);
+    assert.deepEqual(listed.result.data.commands.map(entry => entry.id), commands.map(entry => entry.id).filter(id => id.startsWith(group + ' ')));
+    const human = cli(['help', group]);
+    assert.equal(human.status, 0, human.stderr);
+    assert.match(human.stdout, new RegExp(`^${group} commands$`, 'm'));
+    for (const entry of listed.result.data.commands) assert.match(human.stdout, new RegExp(`^ {2}${entry.id} +\\S`, 'm'));
+  }
+  const bare = cli(['compiler']);
+  assert.equal(bare.status, 0, bare.stderr); assert.match(bare.stdout, /^compiler commands$/m); assert.match(bare.stdout, /^ {2}compiler check +/m);
+  assert.equal(machine(['compiler', 'chek']).result.diagnostics[0].code, 'UNKNOWN_COMMAND');
 });
 test('help starts with the golden path and --all lists every command by group', () => {
   const short = cli(['help']);

@@ -67,7 +67,7 @@ with sync_playwright() as pw:
         act('project-import', '#content'); page.locator('#project-import-file').set_input_files(str(SEED)); page.locator('#project-import-summary').wait_for()
         shot('01-companion-import-review.png')
         page.locator('#project-import-confirm').check(); act('project-import-apply')
-        check('Confirmed example loads exactly one project', js('project().id==="plugin-companion" && !Object.hasOwn(state,"projects")'))
+        check('Confirmed example loads exactly one project', js('project().id==="workbench-companion" && !Object.hasOwn(state,"projects")'))
         check('Example loading does not prepare or trust a plugin', js('project().phase==="planning" && !project().trusted && !project().enabled && !state.wizard'))
         check('Source and test folder defaults are src and tests', js('JSON.stringify(companionFolders())===JSON.stringify(COMPANION_DEFAULT_FOLDERS)'))
         check('Imported state meets existing persistence validators', js('validState(state)'))
@@ -80,7 +80,7 @@ with sync_playwright() as pw:
         with page.expect_download() as event:
             act('download-text', '#modal')
         download = event.value; download.save_as(str(OUT / 'project.companion.json'))
-        check('Actual JSON download has the project filename', download.suggested_filename == 'plugin-companion.companion.json')
+        check('Actual JSON download has the project filename', download.suggested_filename == 'workbench-companion.companion.json')
         check('Actual download contains the complete document', (OUT / 'project.companion.json').read_text() == original)
         with tempfile.TemporaryDirectory(prefix='companion-browser-cli-') as tmp:
             vault = Path(tmp) / 'vault'; vault.mkdir(); (vault / 'keep.md').write_text('preserve')
@@ -120,7 +120,7 @@ with sync_playwright() as pw:
         check('Customized export survives paste-import-export with full fidelity', json.loads(js('companionJson()')) == json.loads(custom))
         act('project-import', '#content')
         page.locator('#project-import-file').set_input_files(str(SEED)); page.locator('#project-import-summary').wait_for()
-        check('Actual file input is parsed and reviewed', js('projectTransferUi.candidate.id==="plugin-companion"') and 'companion-project.json' in page.locator('#modal').inner_text())
+        check('Actual file input is parsed and reviewed', js('projectTransferUi.candidate.id==="workbench-companion"') and 'companion-project.json' in page.locator('#modal').inner_text())
         check('Reviewing a file does not replace current folders', js('companionFolders().codebaseFolder==="app/src"'))
         page.locator('#project-import-confirm').check(); act('project-import-apply')
         check('Confirmed file import restores its own settings', js('companionFolders().codebaseFolder==="src"'))
@@ -131,7 +131,7 @@ with sync_playwright() as pw:
         js('void readCompanionImportFile({name:"slow.json",size:20,arrayBuffer:()=>new Promise(resolve=>{window.finishOldFile=resolve})})')
         act('close', '#modal'); act('settings')
         js('(text)=>{finishOldFile(new TextEncoder().encode(text).buffer)}', SEED.read_text())
-        check('Late file completion cannot replace a closed import or reopen it', js('modalType==="settings" && projectTransferUi.candidate===null && project().id==="plugin-companion"'))
+        check('Late file completion cannot replace a closed import or reopen it', js('modalType==="settings" && projectTransferUi.candidate===null && project().id==="workbench-companion"'))
         act('project-import', '#modal')
         for label, value in [('Malformed JSON', '{'), ('Recovery snapshot', json.dumps({'schema': 2, 'project': {}})),
                              ('Future format', json.dumps({**json.loads(SEED.read_text()), 'schemaVersion': 99})),

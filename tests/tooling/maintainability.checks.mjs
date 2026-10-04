@@ -48,6 +48,19 @@ test('maintainability CLI measures valid composition and rejects actual excess c
   });
 });
 
+test('maintainability CLI gates the generated-project templates view at the production ceilings', async () => {
+  await fixture(async root => {
+    await mkdir(join(root, 'templates/companion/runtime'), { recursive: true });
+    await writeFile(join(root, 'templates/companion/runtime/present.ts'), composition);
+    const good = run(root); assert.equal(good.status, 0, good.stderr);
+    assert.equal(run(root, ['--check', packet(good).output]).status, 0);
+    const decisions = Array.from({ length: 11 }, (_, index) => `  if (value === ${index}) return ${index};`).join('\n');
+    await writeFile(join(root, 'templates/companion/runtime/present.ts'), `export function excessive(value: number) {\n${decisions}\n  return -1;\n}\n`);
+    const bad = run(root); assert.equal(bad.status, 1, bad.stderr);
+    assert.deepEqual(packet(bad).failures, ['templates/companion/runtime/present.ts:1 excessive 12/11']);
+  });
+});
+
 test('maintainability CLI rejects meaningful production clones with a measured production denominator', async () => {
   await fixture(async root => {
     const block = `export function evaluate(values: number[]) {\n  const total = values.reduce((sum, value) => sum + value, 0);\n  const minimum = Math.min(...values);\n  const maximum = Math.max(...values);\n  const count = values.length;\n  const average = total / count;\n  return { total, minimum, maximum, count, average };\n}\n`;

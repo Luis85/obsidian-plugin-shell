@@ -22,11 +22,11 @@ installs definitions. This includes Blank; there is no hidden fallback starter.
 The canonical installed definitions live under `configs/starters/`. Every
 Companion definition embeds a **project schema 6** document; a definition that
 embeds schema 1–5 fails with `STARTER_VERSION` and is never migrated. The retired
-v5 `.companion.json` copies that lived under `docs/concepts/companion/starters/`
-were removed; the schema 6 authoring build base embeds no starter data, and only
-`configs/starters/` is a discovery input. Eleven definitions carry the focused Companion examples; `webapp.json` provides a
-complete dependency-free browser example using the file-generation primitive, and
-further Companion/file definitions cover the Workbench showcases. Eleven **project
+v5 `.companion.json` copies were removed with the v5 build base; the checked-in
+concept is schema 6 and embeds no starter. Twelve definitions carry the focused
+Companion examples (with `agent-ready`), two more the golden Companion and the
+visual-feature showcase; `webapp.json` provides a
+complete dependency-free browser example using the file-generation primitive. Eleven **project
 starters** (`generator.kind: "project"`) replace the former eight-preset maker
 catalog: `plugin-nuxtui`, `plugin-vanilla`, `plugin-angular`, `webapp-nuxtui`,
 `webapp-vanilla`, `webapp-angular` (also used by `project-setup`), `website`, `cli`,
@@ -293,7 +293,7 @@ was performed to implement this feature.
 `tests/tooling/starter-*.checks.mjs` covers data contracts, dynamic discovery,
 editing, generation, explicit process execution, stale plans, path/symlink defenses,
 empty installations and extraction of independently packaged archives. Existing
-starter/native-generator tests continue checking all eleven authored models.
+starter/native-generator tests continue checking every authored Companion starter model.
 Source-qualification inventories include canonical definitions as well as historical
 fixtures; those source archives are not the end-user shell release.
 

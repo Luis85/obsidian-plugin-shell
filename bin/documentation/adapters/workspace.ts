@@ -1,7 +1,7 @@
 import { join, resolve } from 'node:path';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { configuration } from '../../adapters/framework/configuration.ts';
-import { keyOf, docsObject as object, insist, validateEntity, jsonData, type DocsIndex, type Entity, type Resolutions } from '../domain/contracts.ts';
+import { keyOf, docsObject as object, insist, validateEntity, jsonData, type DocsIndex, type Resolutions } from '../domain/contracts.ts';
 import { readDocumentationSettings, validateSettings, type DocsSettings } from './settings.ts';
 import { readBytes, decode, discover, localPath, portable, type DocumentationSource as Source } from './filesystem.ts';
 import { parseMarkdown, type MarkdownDocument } from './markdown.ts';
@@ -16,7 +16,7 @@ function readNavigation(value: unknown): Record<string, string> {
   return navigation;
 }
 function readBinding(index: DocsIndex, key: string, input: unknown, boundPaths: Set<string>, config: Configuration | null): void {
-  const item = object(input), baseline = object(item.baseline) as unknown as Entity; validateEntity(baseline);
+  const item = object(input), baseline = item.baseline; validateEntity(baseline);
   insist(keyOf(baseline) === key && baseline.project === index.project && typeof item.path === 'string', 'DOCS_INDEX', 'Invalid documentation binding.');
   portable(item.path);
   insist(!boundPaths.has(item.path.toLowerCase()), 'DOCS_INDEX', 'Multiple identities are bound to the same documentation path.');

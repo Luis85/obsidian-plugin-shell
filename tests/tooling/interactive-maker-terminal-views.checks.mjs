@@ -69,14 +69,26 @@ test('plan view counts changes, lists at most 25 and points to the exact approva
   for (const text of ['1 unchanged, 29 create', 'Conflicts   edited file', 'Saved plan  setup.plan.json', 'create     file-1.md', '… more changes in --json', `--apply ${'a'.repeat(64)}`]) assert.ok(planned.text.includes(text), text);
   assert.ok(!planned.text.includes('file-0.md'));
   const applied = view({ command: 'setup', status: 'applied', data: { planHash: 'b', changes: [], applied: { written: ['x', 'y'] } } });
-  assert.ok(applied.text.includes('Changes    none') && applied.text.includes('Written    2 files') && !applied.text.includes('Next:'));
+  assert.ok(applied.text.includes('Changes    none') && applied.text.includes('Written    2 files'));
+  assert.match(applied.text, /^Next: node bin\/app setup status \(lists the remaining generate, install and verify stages/m);
+  const other = view({ command: 'generate', status: 'applied', data: { planHash: 'b', changes: [], applied: { written: ['x'] } } });
+  assert.ok(!other.text.includes('Next:'));
   assert.ok(view({ command: 'setup', status: 'applied', data: { planHash: 'b', changes: [], applied: {} } }).text.includes('0 files'));
 });
 
 test('generic and failed results stay bounded, never print raw JSON, and help routes to the help renderer', () => {
   const long = 'x'.repeat(120), data = { text: long, multi: 'a\nb', list: [1, 2], empty: [], many: [1, 2, 3, 4, 5, 6, 7], objects: [{}], nested: { a: { b: { c: 1 } } }, nothing: null };
   const generic = view({ command: 'version', status: 'ok', data }).text;
-  for (const text of ['(120 chars; see --json)', '(3 chars; see --json)', 'list', '1, 2', 'none', '7 items', '1 items', 'nested.a  1 fields', 'nothing', 'Full result: add --json.']) assert.ok(generic.includes(text), text);
+  for (const text of ['(120 chars; see --json)', '(3 chars; see --json)', 'list', '1, 2', 'none', '1, 2, 3, 4, 5, 6, … 1 more', 'nested.a  1 fields', 'nothing', 'Full result: add --json.']) assert.ok(generic.includes(text), text);
+  assert.match(generic, /^ {2}objects +1 \(listed below\)$/m);
+  // Records become rows; next hints and output paths are never shortened.
+  const starters = Array.from({ length: 26 }, (_, index) => ({ id: `starter-${index}`, title: `Starter ${index}`, category: 'Foundations', inputs: [{ id: 'id' }] }));
+  const listed = view({ command: 'starters list', status: 'ok', data: { folder: 'configs/starters', starters } }).text;
+  assert.ok(listed.includes('starters  26 (listed below)') && !listed.includes('26 items'));
+  assert.match(listed, /^ {4}starter-25 +title: Starter 25; category: Foundations$/m);
+  const archive = '/very/long/' + 'nested/'.repeat(20) + 'workbench-kit.zip', next = 'node bin/app ' + 'step '.repeat(30) + 'done';
+  const packed = view({ command: 'framework pack', status: 'ok', data: { archive, next, note: 'n'.repeat(120) } }).text;
+  assert.ok(packed.includes(archive) && packed.includes(next) && packed.includes('(120 chars; see --json)'));
   const many = view({ command: 'version', status: 'ok', data: Object.fromEntries(Array.from({ length: 35 }, (_, index) => ['k' + index, index])) }).text;
   assert.ok(many.includes('… 5 more fields'));
   assert.equal(view({ command: 'version', status: 'ok', data: null }).text, 'version: ok\n');

@@ -4,6 +4,7 @@
  * Every rule cites its source. The Community directory scan also runs policy, vulnerability and
  * malware checks that are not reproduced here, so a pass is not a review outcome.
  */
+import { lstat } from 'node:fs/promises';
 import { isAbsolute, join, relative, sep } from 'node:path';
 import { exists, readBounded } from './files.ts';
 import { runNode } from './process.ts';
@@ -159,9 +160,14 @@ async function builtIdentityProblem(root: string, manifestText: string | null): 
     return !source || built.id !== source.id || built.version !== source.version ? 'dist/manifest.json id/version differ from manifest.json.' : null;
   } catch { return 'dist/manifest.json is not valid JSON.'; }
 }
+/** A release asset is present when it is a non-empty regular file; its bytes are never read (bundles can exceed the text input bound). */
+async function releaseAsset(path: string): Promise<boolean> {
+  const stats = await lstat(path).catch(() => null);
+  return stats !== null && stats.isFile() && stats.size > 0;
+}
 async function buildRule(root: string, manifestText: string | null): Promise<RuleResult[]> {
   const missing = [];
-  for (const name of ['main.js', 'manifest.json']) if (!(await text(join(root, 'dist', name)))) missing.push(`dist/${name}`);
+  for (const name of ['main.js', 'manifest.json']) if (!(await releaseAsset(join(root, 'dist', name)))) missing.push(`dist/${name}`);
   const problem = missing.length ? `Missing release assets: ${missing.join(', ')}.` : await builtIdentityProblem(root, manifestText);
   const styles = await exists(join(root, 'dist/styles.css'));
   return [rule('build-artifacts', 'build', sources.submit, problem, 'dist/main.js and dist/manifest.json exist and match manifest.json.', 'Build the release assets: node bin/app build'),
