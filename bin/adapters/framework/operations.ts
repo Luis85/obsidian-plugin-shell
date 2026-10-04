@@ -27,6 +27,7 @@ import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';
 import { readComponentTemplateOperation } from './component-templates.ts';
 import { isUiCommand, uiOperation } from './ui-operation.ts';
+import { pluginsRead } from '../community-plugins/operations.ts';
 
 /** One command page, a group of subcommands sharing a root word, every command, or the golden path. */
 function helpSelection(request: Request) {
@@ -150,6 +151,7 @@ const routes: Route[] = [
   [named('check'), (request, context) => request.options.plan === true ? checkPlanOperation(request, context) : checkOperation(request, context)],
   [named('ci'), (request, context) => ciOperation(request, context)],
   [named('check submission'), (request, context) => submissionCheck(context, request.options['dry-run'] === true)],
+  [(request, effect) => request.command.startsWith('plugins ') && effect === 'read', pluginsRead],
   [(request, effect) => request.command.startsWith('airship ') && effect !== 'plan', (request, context) => airshipOperation(request, context)],
   [(request, effect) => request.command === 'plan inspect' || effect === 'plan', fileOperation],
   [(_request, effect) => effect === 'process', (request, context) => processOperation(request, context)],
