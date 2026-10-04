@@ -37,6 +37,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Native file extensions and context menus](development/native-file-integrations.md) | Generate a custom file view or file context-menu plugin. |
 | [Setup: npm install-script policy](development/SETUP-TROUBLESHOOTING.md) | Resolve `EALLOWSCRIPTS` and other setup install-script errors. |
 | [Setup inside an extracted kit](development/EXTRACTED-KIT-SETUP.md) | Run `node bin/app setup` in a locally packed framework kit. |
+| [Choose GitHub, Azure DevOps or no hosting platform](development/HOSTING-PLATFORMS.md) | `--hosting` for `new`, `setup` and `npm run setup`, `hosting show\|set`, and the read-only `doctor` check of `az`. |
 | [Local and cloud sessions](development/CLOUD-AND-LOCAL-SESSIONS.md) | Take a project from a local checkout to a ready cloud agent session. |
 | [Shell CLI user manual](user-manual/shell-cli/index.md) | Task pages for design-to-project, daily development, automation, maintenance and troubleshooting. |
 

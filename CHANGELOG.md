@@ -15,6 +15,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Delivery documentation: the delivery pipeline explanation, how-to guides to deliver a change and to cut and publish a release, and a reference of every GitHub Actions workflow, its triggers, jobs, permissions and required checks.
 - Chained ideation skills for Claude Code (`ideation-journey`, `ideation-brainstorm`, `ideation-concept`, `ideation-design`, `ideation-prototype`, `ideation-boilerplate`) that take an idea to a checked prototype skeleton, with Codex adapters.
 - `feature-delivery` and `release` skills that drive a draft pull request through the Dev and Integration tiers to a green merge, and a release from cut to publish, without acting on remote state unless the user explicitly asks.
+- Setup and creation ask which hosting platform a project uses (GitHub, Azure DevOps or none): `--hosting` with `--azure-organization`, `--azure-project` and `--azure-repository` for `node bin/app setup`, `node bin/app new <dir>` and `npm run setup`. Generated projects get the matching pipeline (`azure-pipelines.yml` or GitHub Actions), pull-request template and `gh`/`az` hints; `node bin/app hosting show|set` switches an existing project through a reviewed plan that deletes nothing; `doctor` checks `az` and its azure-devops extension read-only. Nothing runs `gh` or `az`, adds a remote or stores a token.
 
 ### Changed
 

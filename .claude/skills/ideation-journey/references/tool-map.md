@@ -98,6 +98,7 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 | `node bin/app ci --list` | `feature-delivery` reproduces CI jobs |
 | `node bin/app check submission` | publication readiness; not part of prototyping |
 | `node bin/app entities catalog` | registered entity definitions in a built project; not needed before a boilerplate exists |
+| `node bin/app hosting show`, `node bin/app hosting set` | GitHub, Azure DevOps or no hosting for an existing project; `new` and `setup` take `--hosting` directly (docs/development/HOSTING-PLATFORMS.md) |
 | `node bin/app release prepare` | never; release is a separate authorization |
 | `node bin/app framework status` | Workbench maintainers |
 | `node bin/app schema --json` | operation request schema for agents; not needed by the chain |

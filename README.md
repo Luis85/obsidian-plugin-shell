@@ -300,6 +300,11 @@ review and `release` for cut and publish. Read the
 [cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md) and the
 [workflow reference](docs/development/WORKFLOWS.md).
 
+Projects can live on GitHub or Azure DevOps: `setup` and `new` ask for the hosting
+platform (or take `--hosting github|azure-devops|none`), and `node bin/app hosting set`
+switches later. Generated projects get the matching pipeline, pull-request template and
+`gh`/`az` hints; see [hosting platforms](docs/development/HOSTING-PLATFORMS.md).
+
 ## Documentation
 
 The [docs index](docs/README.md) lists every current document by type (tutorials,
