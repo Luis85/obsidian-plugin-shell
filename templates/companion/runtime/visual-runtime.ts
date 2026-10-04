@@ -36,6 +36,12 @@ export function visualIndex(spec: VisualSpec): Map<string, UiNode> {
   visit('root' in spec ? spec.root : spec.template, 0);
   return index;
 }
+/** The enclosing node ID of every nested node in an index built by visualIndex; top-level nodes have none. */
+export function visualParents(index: ReadonlyMap<string, UiNode>): Map<string, string> {
+  const parents = new Map<string, string>();
+  for (const node of index.values()) for (const children of visualChildren(node)) for (const child of children) parents.set(child.id, node.id);
+  return parents;
+}
 /** The value expressions a node renders: text value, element attributes or component/external props. */
 export function visualExpressions(node: UiNode): ValueExpression[] {
   if (node.kind === 'text') return [node.value];

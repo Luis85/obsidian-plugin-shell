@@ -11,7 +11,11 @@ and to every project generated with `node bin/app new`.
 1. **Create locally.** `node bin/app new <dir> --starter <id> --yes` writes the project and makes one
    initial git commit. `bin/app` and `scripts/agent/cloud-setup.sh` are committed executable.
    `npm ci` then `npm run check` work on the qualified toolchain (`.nvmrc`, `packageManager`).
-2. **Push.** Add a remote and push. Everything a session needs is committed: the exact
+2. **Push.** Add a remote and push: `new` prints the matching `gh repo create` or `az repos create`
+   and `git remote add` commands for the chosen `--hosting` platform but never runs them
+   ([hosting platforms](HOSTING-PLATFORMS.md)). The cloud sessions described here start from a
+   GitHub repository; an Azure Repos project keeps the same local loop and uses `az` for pull
+   requests and pipelines. Everything a session needs is committed: the exact
    `package-lock.json`, `.claude/settings.json` (hooks, allowlist) and the `scripts/agent/*` hooks.
    Personal overrides live in the ignored `.claude/settings.local.json`. `clickdummy.html` is a
    build artifact and is ignored: `npm run test:e2e` and `npm run build:clickdummy` rebuild it.

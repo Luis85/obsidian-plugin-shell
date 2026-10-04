@@ -1,19 +1,27 @@
 {
   "schemaVersion": 1,
   "frameworkVersion": "0.4.0",
-  "commandCount": 123,
+  "commandCount": 164,
   "sources": [
     {
       "path": "package.json",
-      "sha256": "6e10502b2f92688ef3e7ad76fe38e794b0d3abba61dbf8f76190e1bc8c7aa105"
+      "sha256": "01f7f3db78a86363f0cc4037e7edfe5b856047a6708b2c123c88684f9b8d2a88"
     },
     {
       "path": "bin/adapters/framework/catalog.ts",
-      "sha256": "2306f0fd113ddb8e5bef548b6f4917bad615149314494226073454d982c1e519"
+      "sha256": "758c2e53ef50ce60c5bd37c1ced0df51f70ad1ee70d2c421d2b1cafdd65032cc"
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "sha256": "c5c0a6fb76a3afde0cf848cd48e97a4ba3a57c38eefca689a1936e60c3235792"
+      "sha256": "3530013a77e960b7f5f0101e2edaf0e441836f02753ef8085c6adbf4d86fee9e"
+    },
+    {
+      "path": "bin/adapters/framework/increment-catalog.ts",
+      "sha256": "155c674d71f58aeed5bce9ac4c7f7166838f03b7dbd9fef72f2983cbb6203ffd"
+    },
+    {
+      "path": "bin/adapters/framework/increment-help.ts",
+      "sha256": "4482f64b12eefff667822a6fe13cc0f6c0a524cb424b4f722456121ac22063a0"
     },
     {
       "path": "bin/compiler/domain/diagnostics.ts",
@@ -21,17 +29,17 @@
     },
     {
       "path": "scripts/documentation/render.mjs",
-      "sha256": "cb43bf33da7cd5423f8a538e3e135bf4127dec346e473c5ad64b7c33ad04bff8"
+      "sha256": "0be40ac240d9f023f8da14e9999a6d27a80563511e293517030ff9243ddaa417"
     },
     {
       "path": "scripts/documentation/manual.mjs",
-      "sha256": "8b3487f625f2ba7507c2a9f45fd0d09fa34ea59000322c0c30e7409022ec18e2"
+      "sha256": "1935b2e601e6a233718c68243edd42cca165abcdc32f4e3e95f5d1196af438cb"
     }
   ],
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "468ec3851d306e5e80bf4287cdc2e0df710046902c0817ae4d4629a616f6486b"
+      "sha256": "a76bc09810f24c01ba48db288798095680b3b4ac93090b30fb81454ab089c11d"
     },
     {
       "path": "diagnostics.md",
@@ -39,7 +47,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "fd996f82ff0a9382dd518b809943f0cd277ba39747f3d1f25ad9761a375bc1d9"
+      "sha256": "c31b7017ec4908aa36ec513fdcc04600d3d1e1fb04b46a45e67c542908490f22"
     }
   ]
 }

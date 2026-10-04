@@ -2,6 +2,9 @@
 // the subset npm run setup asks before dependencies or TypeScript tooling exist. Anything else fails closed.
 import { readFile } from 'node:fs/promises';
 export const identityKeys = Object.freeze(['id', 'name', 'description', 'author', 'repo', 'version']);
+/** The platform question; its conditional Azure DevOps details are asked by scripts/setup/hosting.mjs (this subset has no conditions). */
+export const hostingFieldKeys = Object.freeze(['hosting']);
+const textKeys = Object.freeze([...identityKeys, ...hostingFieldKeys]);
 export const confirmKeys = Object.freeze(['mcp']);
 const formKeys = new Set(['$schema', 'schemaVersion', 'id', 'version', 'title', 'description', 'fields']);
 const fieldKeys = { text: new Set(['id', 'kind', 'label', 'help']), confirm: new Set(['id', 'kind', 'label', 'help']) };
@@ -27,7 +30,7 @@ function readField(item, index, seen) {
     ...(item.help === undefined ? {} : { help: line(item.help, `${name}.help`, 2000, true) }) });
 }
 function sameKeys(actual, expected) { return actual.length === expected.length && expected.every(key => actual.includes(key)); }
-/** Validates the supported subset and the --answers contract: text fields are exactly the identity keys, confirm fields exactly mcp. */
+/** Validates the supported subset and the --answers contract: text fields are exactly the identity keys plus hosting, confirm fields exactly mcp. */
 export function readSetupForm(value) {
   if (!plain(value)) fail('definition must be a JSON object');
   unknown(value, formKeys, 'form');
@@ -38,7 +41,7 @@ export function readSetupForm(value) {
   if (!Array.isArray(value.fields) || !value.fields.length) fail('fields must be a non-empty array');
   const seen = new Set(), fields = value.fields.map((item, index) => readField(item, index, seen));
   const ids = kind => fields.filter(field => field.kind === kind).map(field => field.id);
-  if (!sameKeys(ids('text'), identityKeys)) fail(`text field ids must be exactly the answers keys ${identityKeys.join(', ')}`);
+  if (!sameKeys(ids('text'), textKeys)) fail(`text field ids must be exactly the answers keys ${textKeys.join(', ')}`);
   if (!sameKeys(ids('confirm'), confirmKeys)) fail(`confirm field ids must be exactly ${confirmKeys.join(', ')}`);
   return Object.freeze({ id: value.id, version: value.version, title: value.title, fields: Object.freeze(fields) });
 }

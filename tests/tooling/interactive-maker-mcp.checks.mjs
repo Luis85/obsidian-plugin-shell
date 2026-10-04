@@ -149,6 +149,24 @@ test('stdio and app entrypoint serve MCP without a second executable', async () 
   assert.equal(await appMain(['mcp', 'extra'], frameworkRoot, { ...usage.io, error: usage.error }), 1);
   assert.match(usage.readError(), /MCP_USAGE/);
 });
+test('stdio MCP frames are bounded while they stream, split UTF-8 intact and a final unterminated frame is served', async () => {
+  const value = streams();
+  const running = runMcpServer(frameworkRoot, value.io, ok);
+  // An oversized frame arrives in many chunks; the reader drops its bytes instead of buffering the whole line.
+  for (let index = 0; index < 9; index++) value.input.write(Buffer.alloc(64 * 1024, 'x'));
+  value.input.write('\r\n');
+  const request = Buffer.from(JSON.stringify({ jsonrpc: '2.0', id: 'ü-1', method: 'ping', params: {} }) + '\r\n');
+  const split = request.indexOf(0xc3) + 1;
+  value.input.write(request.subarray(0, split)); value.input.write(request.subarray(split));
+  value.input.write('\n   \n{not json}\n');
+  // EOF cancels in-flight work, so the unterminated final frame is a handshake that is answered inline.
+  value.input.end(JSON.stringify({ jsonrpc: '2.0', id: 'last', method: 'initialize', params: { protocolVersion: '2025-06-18' } }));
+  assert.equal(await running, 0);
+  const responses = value.read().split('\n').map(line => JSON.parse(line));
+  assert.deepEqual(responses.map(item => [item.id, item.error?.message ?? 'ok']), [
+    [null, 'Request too large.'], ['ü-1', 'ok'], [null, 'Parse error.'], ['last', 'ok'],
+  ]);
+});
 function streams() {
   const input = new PassThrough(), output = new PassThrough(), error = new PassThrough();
   let text = '', err = ''; output.setEncoding('utf8'); error.setEncoding('utf8');
@@ -218,6 +236,11 @@ test('the real runner delegates to bin/app and modern setup owns Claude/Codex pr
     assert.deepEqual(claude.ask, ['mcp__workbench__workbench_execute']);
     await writeFile(join(root, '.mcp.json'), '{"edited":true}\n');
     const replay = await executeOperation(request, context);
-    assert.equal(replay.status, 'failed'); assert.equal(replay.diagnostics[0].code, 'IMPORT_OWNERSHIP');
+    assert.equal(replay.status, 'failed'); assert.equal(replay.diagnostics[0].code, 'MCP_CONFIG_CONFLICT');
+    assert.equal(replay.diagnostics[0].message, 'Preserve edited or foreign MCP configuration: .mcp.json. Reconcile it before setup manages or removes it.');
+    assert.equal(await readFile(join(root, '.mcp.json'), 'utf8'), '{"edited":true}\n');
+    const { mcp: _enable, ...kept } = request.options;
+    const disable = await executeOperation({ ...request, options: { ...kept, 'no-mcp': true } }, context);
+    assert.equal(disable.status, 'failed'); assert.equal(disable.diagnostics[0].code, 'MCP_CONFIG_CONFLICT');
   } finally { await rm(root, { recursive: true, force: true }); }
 });

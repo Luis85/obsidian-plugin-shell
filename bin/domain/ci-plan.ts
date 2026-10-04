@@ -6,7 +6,9 @@ import type { CiJob, CiStep, CiWorkflow, StepKind } from './ci-workflow.ts';
 export type Disposition = 'run' | 'skip-condition' | 'condition-unknown' | 'setup' | 'external';
 export interface ConditionReport { expression: string; result: 'true' | 'false' | 'unknown' }
 export interface PlannedStep {
-  index: number; id: string; name: string; kind: StepKind; disposition: Disposition; uses?: string; shell?: string; shellExplicit?: boolean;
+  index: number; workflowStep: number; id: string; name: string; kind: StepKind; disposition: Disposition; uses?: string; shell?: string; shellExplicit?: boolean;
+  /** Set for a step expanded from a local composite action: the action and the step's position inside it. */
+  action?: { uses: string; step: number };
   command?: string; workingDirectory?: string; env: Record<string, string>; unresolved: string[]; condition?: ConditionReport; note?: string;
 }
 export interface JobPlan {
@@ -37,32 +39,61 @@ function disposition(step: CiStep, condition: ConditionReport | undefined): Disp
   if (condition?.result === 'false') return 'skip-condition';
   return condition?.result === 'unknown' ? 'condition-unknown' : 'run';
 }
-function resolveEnv(workflow: CiWorkflow, job: CiJob, step: CiStep, lookup: Lookup): { env: Record<string, string>; unresolved: string[] } {
+/**
+ * Inside a composite action `inputs.<name>` is the effective input, resolved in the caller's context; an input whose
+ * value cannot be settled stays unresolved. Only env values and conditions see inputs (the action's env pattern):
+ * `${{ inputs.* }}` written into `run:` text is never substituted.
+ */
+function actionLookup(step: CiStep, lookup: Lookup): Lookup {
+  const inputs = step.composite?.inputs;
+  if (!inputs) return lookup;
+  return path => {
+    if (!path.startsWith('inputs.')) return lookup(path);
+    const name = path.slice('inputs.'.length);
+    if (!Object.hasOwn(inputs, name)) return undefined;
+    const value = substitute(inputs[name]!, lookup);
+    return value.unresolved.length ? undefined : value.text;
+  };
+}
+function resolveEnv(workflow: CiWorkflow, job: CiJob, step: CiStep, lookup: Lookup, scoped: Lookup): { env: Record<string, string>; unresolved: string[] } {
   const env: Record<string, string> = {}, unresolved: string[] = [];
-  for (const [key, value] of Object.entries({ ...workflow.env, ...job.env, ...step.env })) {
-    const resolved = substitute(value, lookup);
+  const caller = Object.entries({ ...workflow.env, ...job.env, ...step.composite?.callerEnv }).map(([key, value]) => [key, value, lookup] as const);
+  for (const [key, value, context] of [...caller, ...Object.entries(step.env).map(([key, value]) => [key, value, scoped] as const)]) {
+    const resolved = substitute(value, context);
     env[key] = resolved.text; unresolved.push(...resolved.unresolved);
   }
   return { env, unresolved };
 }
+/** A composite step runs when the calling step's condition and its own both hold; job run defaults do not apply to it. */
+function stepCondition(step: CiStep, lookup: Lookup, scoped: Lookup): ConditionReport | undefined {
+  const parts = [[step.composite?.callerCondition, lookup], [step.condition, scoped]] as const;
+  const present = parts.filter((part): part is readonly [string, Lookup] => part[0] !== undefined);
+  if (!present.length) return undefined;
+  const values = present.map(([expression, context]) => evaluateCondition(expression, { lookup: context, success: true }));
+  const value = values.includes(false) ? false : values.includes(undefined) ? undefined : true;
+  return report(present.length === 1 ? present[0]![0] : present.map(([expression]) => `(${expression})`).join(' && '), value);
+}
 function planRunDetails(job: CiJob, step: CiStep, lookup: Lookup): Pick<PlannedStep, 'command' | 'workingDirectory' | 'shell' | 'shellExplicit'> & { unresolved: string[] } {
-  const command = substitute(step.run ?? '', lookup), directory = substitute(step.workingDirectory ?? job.workingDirectory ?? '.', lookup);
-  const shell = step.shell ?? job.shell;
+  const defaults: Pick<CiJob, 'shell' | 'workingDirectory'> = step.composite ? {} : job;
+  const command = substitute(step.run ?? '', lookup), directory = substitute(step.workingDirectory ?? defaults.workingDirectory ?? '.', lookup);
+  const shell = step.shell ?? defaults.shell;
   return { command: command.text, workingDirectory: directory.text, shell: shell ?? 'bash', shellExplicit: shell !== undefined, unresolved: [...command.unresolved, ...directory.unresolved] };
 }
 function planStep(workflow: CiWorkflow, job: CiJob, step: CiStep, lookup: Lookup): PlannedStep {
-  const condition = report(step.condition, step.condition === undefined ? undefined : evaluateCondition(step.condition, { lookup, success: true }));
-  const { env, unresolved } = resolveEnv(workflow, job, step, lookup);
-  const planned: PlannedStep = { index: step.index, id: step.id ?? `step-${step.index}`, name: stepName(step), kind: step.kind,
-    disposition: disposition(step, condition), env, unresolved, ...(step.uses ? { uses: step.uses } : {}), ...(condition ? { condition } : {}) };
+  const scoped = actionLookup(step, lookup), condition = stepCondition(step, lookup, scoped);
+  const { env, unresolved } = resolveEnv(workflow, job, step, lookup, scoped);
+  const planned: PlannedStep = { index: step.index, workflowStep: step.workflowStep, id: step.id ?? `step-${step.index}`, name: stepName(step), kind: step.kind,
+    disposition: disposition(step, condition), env, unresolved, ...(step.uses ? { uses: step.uses } : {}), ...(condition ? { condition } : {}),
+    ...(step.composite ? { action: { uses: step.composite.uses, step: step.composite.actionStep } } : {}) };
   if (step.kind === 'setup') return { ...planned, note: setupNote };
-  if (step.kind === 'external') return { ...planned, note: externalNote };
+  if (step.kind === 'external') return { ...planned, note: step.note ?? externalNote };
   const details = planRunDetails(job, step, lookup);
   return { ...planned, ...details, unresolved: unique([...unresolved, ...details.unresolved]) };
 }
-/** A local run stands for a ready (non-draft) pull request from a non-release branch on the Integration tier;
- * every other event field stays unknown. Runtime values from the environment win. */
-const localPullRequest: ReadonlyMap<string, string> = new Map([['inputs.tier', 'integration'], ['github.event.pull_request.draft', 'false'], ['github.head_ref', '']]);
+/** A local run stands for an update (synchronize) of a ready (non-draft) pull request from a non-release branch on the
+ * Integration tier; every other event field stays unknown, so the e2e opt-in (`inputs.e2e`, the `e2e` label) is never
+ * guessed and an opt-in end-to-end step is reported as condition-unknown. Runtime values from the environment win. */
+const localPullRequest: ReadonlyMap<string, string> = new Map([['inputs.tier', 'integration'], ['github.event.pull_request.draft', 'false'], ['github.head_ref', ''], ['github.event.action', 'synchronize']]);
 function lookupFor(combination: Combination, os: RunnerOs, environment: Lookup | undefined): Lookup {
   return path => {
     if (path.startsWith('matrix.')) return combination[path.slice(7)];

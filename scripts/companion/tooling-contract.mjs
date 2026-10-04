@@ -1,4 +1,5 @@
 /** Inert optional development settings. No package, process or host is acquired here. */
+import { hostingSchema, validateHosting } from './schema/hosting.mjs';
 export const AIRSHIP_VERSION = '0.3.0';
 const AIRSHIP_DEFAULTS = Object.freeze({ enabled: false, agent: 'claude', targetPort: 5173, port: 5174 });
 const HINDSIGHT_AGENTS = Object.freeze(['claude-code', 'codex', 'cursor-cli', 'copilot-cli', 'opencode']);
@@ -16,7 +17,8 @@ function fields(value, allowed) {
 }
 export function validateTooling(value) {
   if (value === undefined) return;
-  fields(value, ['airship', 'storybook', 'hindsight']);
+  fields(value, ['airship', 'storybook', 'hindsight', 'hosting']);
+  if (Object.hasOwn(value, 'hosting')) validateHosting(value.hosting);
   if (Object.hasOwn(value, 'storybook')) {
     fields(value.storybook, ['enabled', 'generateStories']);
     requireTooling(Object.values(value.storybook).every(item => typeof item === 'boolean'),
@@ -78,5 +80,5 @@ export function toolingSchema() {
       git: { enum: ['none', 'message', 'full'], default: 'message' },
       sessions: { type: 'boolean', default: false },
     }, description: 'Project defaults only. Installation, provider choice, data processing and MCP connections remain separately approved.',
-  } } };
+  }, hosting: hostingSchema() } };
 }

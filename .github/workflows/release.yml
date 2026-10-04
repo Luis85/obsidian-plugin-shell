@@ -161,7 +161,9 @@ jobs:
   # block Publish's merge. The release tier is a strict superset of both (it runs
   # ci.yml in full plus every other workflow), so these aliases report them on the
   # release head from "Release result". `always()` keeps them from being skipped,
-  # because a skipped required check would count as passing.
+  # because a skipped required check would count as passing. "Definition of Ready"
+  # and "Definition of Done" skip release heads (a release pull request carries the
+  # release template, not an increment handoff), so they are reported the same way.
   dev-checks:
     name: Dev checks
     if: always()
@@ -178,6 +180,22 @@ jobs:
           test "$RELEASE_RESULT" = success
   ci-result:
     name: CI result
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - *release-alias
+  definition-of-ready:
+    name: Definition of Ready
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - *release-alias
+  definition-of-done:
+    name: Definition of Done
     if: always()
     needs: release-result
     runs-on: ubuntu-24.04

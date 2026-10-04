@@ -6,7 +6,7 @@ A **note collection** is a folder of Markdown notes of one `type`, each with a s
 typed frontmatter, that the `node bin/app` shell lists, checks, creates, updates, reviews and reports on. The engine
 is generic; a collection is described by one JSON definition in `configs/collections/<id>.json`. The
 [risk register](RISK-MANAGEMENT.md) (`risk`) is the first collection; [learnings](LEARNINGS.md) (`learning`) and
-[release increments](RELEASE-CANDIDATES.md) (`increment`) were added with the steps under [Add a collection](#add-a-collection).
+[release items](RELEASE-CANDIDATES.md) (`release-item`) were added with the steps under [Add a collection](#add-a-collection).
 
 Code is added only for what data cannot express: a pure **collection hook** (for example the risk score and level),
 named by the definition the same way wizards name actions.
@@ -67,7 +67,7 @@ completion. `readCollectionDefinition` is authoritative.
 Field kinds are `text` (single-line unless `multiline`), `date` (`YYYY-MM-DD`), `integer`, `choice` and `list`.
 Sources are `input` (answered), `derived` (computed by the hook; never input; stored values must match), `stamp`
 (dated by the engine) and `managed` (optional frontmatter that is never input; only another module's reviewed plan
-writes it through `collectionManagedUpdate`, for example the increment's `candidate`). `frontmatter: false` marks body-only input text. `default: "today"` fills a date. `idPrefix`
+writes it through `collectionManagedUpdate`, for example the release item's `candidate`). `frontmatter: false` marks body-only input text. `default: "today"` fills a date. `idPrefix`
 (for example `"RISK-"`) makes a frontmatter text or list field (without a vocabulary) hold references: every value must be
 an id with that prefix and 3–9 digits, such as `RISK-0001`. Only the format is checked; whether the referenced note exists
 is not (hooks are pure and never read other folders). `accepts` generalizes this for frontmatter text and list fields
@@ -89,7 +89,7 @@ path outside protected roots such as `.git`, `.obsidian` and `node_modules`), `r
 - People never enter a `managed` status or write a `managed` field: `new`/`update` input and the generic forms refuse
   or omit them. `collectionManagedUpdate(definition, hook, record, { status?, set? }, asOf)` is the one way in: it skips
   people's transitions but applies stamps, derived values and completeness, and its result is patched like any update.
-  Release candidates use it to move increments to `included`, `shipped` or back to `ready` in the candidate's own plan.
+  Release candidates use it to move release items to `included`, `shipped` or back to `ready` in the candidate's own plan.
 
 ## Add a collection
 

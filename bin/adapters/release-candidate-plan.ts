@@ -26,7 +26,7 @@ export async function candidateTarget(context: CandidateContext, version: string
   requireSketch(note.record.version === version, 'CANDIDATE_INVALID', `${path} holds version ${note.record.version}; a candidate folder is named after its version.`);
   return { world, path, note: { ...note, record: note.record } };
 }
-/** One increment move made by the candidate plan, through the engine's managed change of that note. */
+/** One release item move made by the candidate plan, through the engine's managed change of that note. */
 interface IncrementMove { item: CandidateIncrementItem; change: CollectionChange }
 function move(world: CandidateWorld, item: CandidateIncrementItem, change: CollectionManagedChange): IncrementMove {
   const { definition, hook } = world.context.increments.loaded;
@@ -34,20 +34,20 @@ function move(world: CandidateWorld, item: CandidateIncrementItem, change: Colle
 }
 function candidateIncrement(world: CandidateWorld, id: string): CandidateIncrementItem {
   const matches = world.items.filter(item => item.id.toLowerCase() === id.toLowerCase());
-  requireSketch(matches.length, 'CANDIDATE_INCREMENT_NOT_FOUND', `No Increment note with id ${id} in ${world.context.increments.folder}.`);
+  requireSketch(matches.length, 'CANDIDATE_INCREMENT_NOT_FOUND', `No release item note with id ${id} in ${world.context.increments.folder}.`);
   requireSketch(matches.length === 1, 'COLLECTION_DUPLICATE_ID', `${id} is used by ${matches.map(item => item.path).join(' and ')}; give one note another id first.`);
   const item = matches[0]!, errors = item.note.issues.filter(issue => issue.severity === 'error');
   requireSketch(item.valid, 'COLLECTION_NOTE_INVALID', `${item.path} cannot be changed until it is valid: ${errors.map(issue => issue.message).join(' ')}`);
   return item;
 }
-/** A ready increment that no candidate holds moves to included in this version. */
+/** A ready release item that no candidate holds moves to included in this version. */
 function candidateInclude(world: CandidateWorld, id: string, version: string): IncrementMove {
   const item = candidateIncrement(world, id);
   requireSketch(item.status === 'ready' && item.values.candidate === undefined, 'CANDIDATE_INCREMENT_NOT_READY',
-    `${item.id} is ${item.status}${typeof item.values.candidate === 'string' ? ` in candidate ${item.values.candidate}` : ''}; only ready increments that no candidate holds can be added.`);
+    `${item.id} is ${item.status}${typeof item.values.candidate === 'string' ? ` in candidate ${item.values.candidate}` : ''}; only ready release items that no candidate holds can be added.`);
   return move(world, item, { status: 'included', set: { candidate: version } });
 }
-/** An increment this version included returns to ready without a candidate. */
+/** A release item this version included returns to ready without a candidate. */
 function candidateRelease(world: CandidateWorld, item: CandidateIncrementItem): IncrementMove {
   return move(world, item, { status: 'ready', set: { candidate: null } });
 }
@@ -80,10 +80,10 @@ function guard(context: CandidateContext, candidates: string, increments: string
     requireSketch(now.inventory === candidates && notes.inventory === increments, 'MAKER_STALE', `${context.folder} or ${context.increments.folder} changed after review; plan again.`);
   };
 }
-/** A reviewed candidate plan with the increment moves it makes, for previews. */
+/** A reviewed candidate plan with the release item moves it makes, for previews. */
 export interface CandidatePlan extends Prepared { moved: Array<{ id: string; path: string; status: string }> }
 interface Change { kind: string; record: CandidateRecord; moves: IncrementMove[]; goal?: string }
-/** One reviewed plan: the README and every moved increment note, applied together or not at all. */
+/** One reviewed plan: the README and every moved release item note, applied together or not at all. */
 async function candidatePlan(target: Target, spec: Change): Promise<CandidatePlan> {
   const { world } = target, { context } = world, moves = new Map(spec.moves.map(entry => [entry.item.id.toLowerCase(), entry]));
   const items = world.items.map(item => { const entry = moves.get(item.id.toLowerCase()); return entry ? changed(item, entry.change) : item; });
@@ -96,38 +96,38 @@ async function candidatePlan(target: Target, spec: Change): Promise<CandidatePla
   const entries: Entry[] = [{ path: target.path, content: readme }, ...spec.moves.map(entry => ({ path: entry.item.path, content: patchCollectionNote(entry.item.note.content!, entry.change.values, entry.change.removed) }))];
   const plan = await createFilePlan(context.root, entries);
   const expected = [target.note?.beforeHash ?? null, ...spec.moves.map(entry => entry.item.note.beforeHash)];
-  requireSketch(plan.changes.every((item, index) => item.beforeHash === expected[index]), 'MAKER_STALE', 'A candidate or increment note changed while planning; nothing was overwritten.');
+  requireSketch(plan.changes.every((item, index) => item.beforeHash === expected[index]), 'MAKER_STALE', 'A candidate or release item note changed while planning; nothing was overwritten.');
   const identity = { kind: spec.kind, version: spec.record.version, asOf: context.asOf, candidates: world.snapshot.inventory, increments: world.increments.inventory };
   const moved = spec.moves.map(entry => ({ id: entry.item.id, path: entry.item.path, status: entry.change.status }));
-  const data = { version: spec.record.version, path: target.path, candidateStatus: spec.record.status, increments: spec.record.increments, moved, content: readme };
+  const data = { version: spec.record.version, path: target.path, candidateStatus: spec.record.status, items: spec.record.items, moved, content: readme };
   return { ...prepared(plan, data, identity), validate: guard(context, world.snapshot.inventory, world.increments.inventory), moved };
 }
 export async function candidateCreatePlan(context: CandidateContext, input: CandidateInput & { version: string }): Promise<CandidatePlan> {
   const target = await candidateTarget(context, input.version, false), record = candidateCreate(input, context.asOf);
-  return candidatePlan(target, { kind: 'candidate-create', record, moves: input.increments.map(id => candidateInclude(target.world, id, input.version)), ...(input.goal ? { goal: input.goal } : {}) });
+  return candidatePlan(target, { kind: 'candidate-create', record, moves: input.items.map(id => candidateInclude(target.world, id, input.version)), ...(input.goal ? { goal: input.goal } : {}) });
 }
 export async function candidateAddPlan(context: CandidateContext, version: string, id: string): Promise<Prepared> {
   const target = await candidateTarget(context, version), record = target.note!.record;
   candidateEditable(record);
-  requireSketch(!record.increments.some(item => item.toLowerCase() === id.toLowerCase()), 'CANDIDATE_INCREMENT_LISTED', `${id} is already in ${version}.`);
+  requireSketch(!record.items.some(item => item.toLowerCase() === id.toLowerCase()), 'CANDIDATE_INCREMENT_LISTED', `${id} is already in ${version}.`);
   const entry = candidateInclude(target.world, id, version);
-  return candidatePlan(target, { kind: 'candidate-add', record: { ...record, updated: context.asOf, increments: [...record.increments, entry.item.id] }, moves: [entry] });
+  return candidatePlan(target, { kind: 'candidate-add', record: { ...record, updated: context.asOf, items: [...record.items, entry.item.id] }, moves: [entry] });
 }
 export async function candidateRemovePlan(context: CandidateContext, version: string, id: string): Promise<Prepared> {
   const target = await candidateTarget(context, version), record = target.note!.record;
   candidateEditable(record);
-  const listed = record.increments.find(item => item.toLowerCase() === id.toLowerCase());
-  requireSketch(listed, 'CANDIDATE_INCREMENT_NOT_LISTED', `${id} is not in ${version}; it lists ${record.increments.join(', ') || 'no increments'}.`);
+  const listed = record.items.find(item => item.toLowerCase() === id.toLowerCase());
+  requireSketch(listed, 'CANDIDATE_INCREMENT_NOT_LISTED', `${id} is not in ${version}; it lists ${record.items.join(', ') || 'no release items'}.`);
   const exists = target.world.items.some(item => item.id.toLowerCase() === id.toLowerCase());
   const item = exists ? candidateIncrement(target.world, id) : undefined;
   const moves = item && item.values.candidate === version ? [candidateRelease(target.world, item)] : [];
-  return candidatePlan(target, { kind: 'candidate-remove', record: { ...record, updated: context.asOf, increments: record.increments.filter(entry => entry !== listed) }, moves });
+  return candidatePlan(target, { kind: 'candidate-remove', record: { ...record, updated: context.asOf, items: record.items.filter(entry => entry !== listed) }, moves });
 }
-/** Increments follow a released (shipped) or abandoned (back to ready) candidate in the same plan. */
+/** Release items follow a released (shipped) or abandoned (back to ready) candidate in the same plan. */
 function followers(world: CandidateWorld, record: CandidateRecord, to: string): IncrementMove[] {
-  const effect = candidateStatus(to)?.increments;
+  const effect = candidateStatus(to)?.items;
   if (!effect) return [];
-  const linked = record.increments.map(id => world.items.find(item => item.valid && item.id.toLowerCase() === id.toLowerCase())).filter(item => item !== undefined && item.values.candidate === record.version);
+  const linked = record.items.map(id => world.items.find(item => item.valid && item.id.toLowerCase() === id.toLowerCase())).filter(item => item !== undefined && item.values.candidate === record.version);
   return linked.map(item => effect === 'shipped' ? move(world, item!, { status: 'shipped' }) : candidateRelease(world, item!));
 }
 export async function candidateStatusPlan(context: CandidateContext, version: string, to: string): Promise<Prepared> {

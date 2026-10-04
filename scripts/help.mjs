@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 const openCommand = JSON.parse(readFileSync(new URL('../src/locales/en.json', import.meta.url), 'utf8')).command.open;
-console.log(`Obsidian plugin template — available commands
+console.log(`Workbench CLI — npm script shortcuts (every command: node bin/app help)
 npm run setup             Review identity/profile, install exact dependencies and verify
 npm run setup -- --help   Identity flags, explicit native migration, dry-run and resume
 npm run companion:generate -- --help  Read a companion JSON export; v1 prints data and writes nothing
@@ -37,6 +37,10 @@ npm run release:operate -- --help  Discover remote state; execution needs explic
 npm run release:changelog -- check  Validate CHANGELOG.md (Keep a Changelog 1.1.0); \`notes --version X.Y.Z\` prints one section
 npm run release:cut -- --version X.Y.Z  Plan a release/X.Y.Z cut; --execute commits it, --remote pushes and opens a draft PR
 npm run release:publish -- --version X.Y.Z --repository owner/repo  Plan publishing a green release PR; --execute merges, tags and releases
+npm run increment:new -- <slug>  Print an increment handoff from the template; --write creates docs/increments/<slug>.md
+npm run dor -- --base origin/main  Definition of Ready: check the increment handoff before implementation
+npm run dod -- --base origin/main  Definition of Done: check the handoff against the diff; --write generates its docs
+npm run acceptance:stubs -- --increment <id>  List one pending test stub per acceptance criterion; --write creates them (never overwrites)
 
 Browser provisioning: node node_modules/@playwright/test/cli.js install chromium
 Open .dev-vault in Obsidian, deliberately enable the plugin, then run ${openCommand}.

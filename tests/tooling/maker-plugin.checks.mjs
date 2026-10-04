@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
@@ -53,6 +53,9 @@ test('[MAKER-PLUGIN] make plugin creates one self-contained registered extension
   ]) assert.ok(paths.includes(path), path);
   assert.ok(planned.checks.some(check => check.args.includes('scripts/quality/check-workbench-plugins.mjs')));
   assert.ok(planned.checks.some(check => check.args.includes('workbench-plugins')));
+  const types = planned.checks.find(check => check.id === 'plugin-types');
+  assert.deepEqual(types.args, ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'configs/types/tsconfig.maker.json']);
+  assert.ok(await stat(join(makerSourceRoot, types.args.at(-1))), 'the planned maker tsconfig exists');
   await applyFilePlan(planned.plan);
   const registry = await readFile(join(root, 'plugins/registry.ts'), 'utf8');
   assert.match(registry, /PluginObject as MetricsPlugin/);

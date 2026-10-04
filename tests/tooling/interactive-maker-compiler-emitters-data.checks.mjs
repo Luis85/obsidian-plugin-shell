@@ -37,7 +37,7 @@ it("starter-task validates its declared fields", () => { expect(isGStarterTask({
 import { operation } from '../composables/operation.ts';
 import type { GStatusApiService } from '../../application/status-api/service.ts';
 export function defineGStatusApiStore(service: GStatusApiService) {
-  return defineStore("tasks-projects-plugin:source:status-api", () => ({
+  return defineStore("tasks-projects:source:status-api", () => ({
     "status": operation(service["status"],"read"),
     "ping": operation(service["ping"],"write"),
   }));

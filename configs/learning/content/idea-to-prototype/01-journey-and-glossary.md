@@ -13,7 +13,7 @@ real prototype of your own; every step checks the files you produce.
    `ENGINEERING_HANDOFF_GUIDE.md` describe.
 6. **Save the design into `docs/design/<slug>`** and keep the folder current with `design sync`.
 7. **Implement** the `ready` screens in the prototype with Claude Code.
-8. **Ship it in the next release candidate**: record an increment and add it to the candidate.
+8. **Ship it in the next release candidate**: record a release item and add it to the candidate.
 
 The tools prepare files only. They never call Claude Design, upload anything, commit or publish; importing
 into Claude Design and exporting from it are your actions. Every write is shown as a plan first and needs
@@ -28,8 +28,8 @@ your approval (see [[docs/user-manual/shell-cli/automation-and-safety#The repeat
 | Design folder | `docs/design/<slug>/`: a self-contained workspace you import into Claude Design on its own. Generated context (brief, screens, components, tokens, agent instructions) plus design work (`prototypes/`, `assets/`, `notes/`, the implementation map). |
 | Handoff guide | Two generated files tell both agents what to deliver: `ENGINEERING_HANDOFF_GUIDE.md` (the target codebase read from its own files, with the checklist "Prepare the design for handoff") and `handoff/HANDOFF.md` (how Claude Code implements a ready prototype). `AGENTS.md` in the folder is the design agent's instruction file. |
 | Implementation map | `docs/design/<slug>/handoff/implementation-map.md`: one row per screen with status `todo`, `designing`, `ready`, `implemented` or `verified`, its prototype files and acceptance notes. Designers and Claude Code edit it; sync never does. |
-| Increment | A typed note (`type: Increment`, id like `INC-0001`) in `docs/releases/increments/` that records one shippable change and its `sources`, for example `prototypes/<slug>` and `docs/design/<slug>`. *Release-candidate feature.* |
-| Release candidate | `docs/releases/candidates/<version>/README.md` (`type: ReleaseCandidate`): the increments planned for the next version. It is a planning record, not the plugin publication flow of [[docs/development/MAINTENANCE-AND-RELEASE|the maintenance and release guide]]. *Release-candidate feature.* |
+| Release item | A typed note (`type: ReleaseItem`, id like `ITEM-0001`) in `docs/releases/items/` that records one shippable change and its `sources`, for example `prototypes/<slug>` and `docs/design/<slug>`. *Release-candidate feature.* |
+| Release candidate | `docs/releases/candidates/<version>/README.md` (`type: ReleaseCandidate`): the release items planned for the next version. It is a planning record, not the plugin publication flow of [[docs/development/MAINTENANCE-AND-RELEASE|the maintenance and release guide]]. *Release-candidate feature.* |
 
 ## Where to find what
 
@@ -55,7 +55,7 @@ your approval (see [[docs/user-manual/shell-cli/automation-and-safety#The repeat
 | `docs/design/<slug>/design.manifest.json` | Source, brief and the hash of every generated file | `design prepare`, `design sync` |
 | `.claude/skills/ideation-journey/SKILL.md` | Router of the ideation skill chain (brainstorm, concept, design, prototype, boilerplate) | Repository skill |
 | `.claude/skills/companion-prototype-design/SKILL.md` | Design interview, concept boards and prototype execution | Repository skill |
-| `docs/releases/increments/` | Increment notes | `node bin/app increment new` |
+| `docs/releases/items/` | Release item notes | `node bin/app release-item new` |
 | `docs/releases/candidates/<version>/README.md` | The release candidate | `node bin/app candidate new` and `candidate add` |
 
 The repository skills live under `.claude/skills/`; learning paths can only link pages under `docs/`, `bin/`

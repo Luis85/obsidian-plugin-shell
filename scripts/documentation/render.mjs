@@ -5,6 +5,7 @@ const effects = Object.freeze({
   process: 'Runs trusted project code and may write outputs/caches or access the network. Review --dry-run before execution.',
   fixtures: 'Owned test-data operation. Mutation/reset uses its own reviewed approval; not a general project write.',
   release: 'Release workflow. Publication requires separate candidate authorization; --yes does not grant it.',
+  remote: 'Reviewed hosting-platform write: the preview reads GitHub or Azure DevOps; --apply <planHash> or --yes writes the remote first, then the local record. Never replayable with --plan-out or plan apply.',
 });
 const text = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('|', '&#124;').replaceAll('\r', '').replaceAll('\n', '<br>');
 const slug = id => id.replaceAll(' ', '-');

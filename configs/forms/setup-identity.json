@@ -4,7 +4,7 @@
   "id": "setup-identity",
   "version": 1,
   "title": "Plugin identity setup",
-  "description": "Questions npm run setup asks in a terminal. Field ids are the --answers keys and option names; scripts/setup/form.mjs reads only text and confirm fields. Enter keeps the current value, which setup validates and reviews before writing.",
+  "description": "Questions npm run setup asks in a terminal. Field ids are the --answers keys and option names; scripts/setup/form.mjs reads only text and confirm fields. Enter keeps the current value, which setup validates and reviews before writing. An azure-devops hosting answer is followed by the Azure DevOps details from scripts/setup/hosting.mjs.",
   "fields": [
     { "id": "id", "kind": "text", "label": "Plugin ID", "help": "Portable plugin id: a lowercase letter, then lowercase letters, digits and single hyphens (at most 64 characters)." },
     { "id": "name", "kind": "text", "label": "Plugin name", "help": "Display name shown in the host, at most 80 characters." },
@@ -13,6 +13,8 @@
     { "id": "repo", "kind": "text", "label": "GitHub repository", "help": "Optional owner/name, without a URL, .git suffix or credentials." },
     { "id": "version", "kind": "text", "label": "Version", "help": "Explicit stable x.y.z version." },
     { "id": "mcp", "kind": "confirm", "label": "Enable project-local Workbench MCP for Claude Code and Codex?",
-      "help": "Writes repository-local client settings only; installs no client. Not asked when --mcp, --no-mcp or an mcp answer was supplied." }
+      "help": "Writes repository-local client settings only; installs no client. Not asked when --mcp, --no-mcp or an mcp answer was supplied." },
+    { "id": "hosting", "kind": "text", "label": "Hosting platform: github, azure-devops or none",
+      "help": "Where pull requests and CI live. Enter keeps the current platform (GitHub when none was recorded); azure-devops then asks for the organization, project and repository, suggested from an Azure DevOps origin remote. Setup prepares files and package metadata only: it never runs gh or az, adds a remote or stores a token. Not asked when --hosting, an --azure-* option or a hosting answer was supplied." }
   ]
 }

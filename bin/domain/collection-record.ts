@@ -105,7 +105,7 @@ function fieldValues(definition: CollectionDefinition, properties: Record<string
   return values;
 }
 interface Parsed { status?: string; values: Record<string, CollectionValue | null> }
-/** A status people may choose; managed statuses (for example an increment included in a release candidate) are refused. */
+/** A status people may choose; managed statuses (for example a release item included in a release candidate) are refused. */
 function inputStatus(definition: CollectionDefinition, raw: unknown): string {
   const people = definition.statuses.filter(item => !item.managed);
   const status = typeof raw === 'string' ? collectionStatus(definition, raw) : undefined;
@@ -205,7 +205,7 @@ export function collectionUpdate(definition: CollectionDefinition, hook: Collect
 export interface CollectionManagedChange { status?: string; set?: Readonly<Record<string, CollectionValue | null>> }
 /**
  * The complete next frontmatter of a valid note changed by another module's reviewed plan, for example a release
- * candidate that includes an increment. Stamps, derived values and completeness apply as for any change.
+ * candidate that includes a release item. Stamps, derived values and completeness apply as for any change.
  */
 export function collectionManagedUpdate(definition: CollectionDefinition, hook: CollectionHook | undefined, record: CollectionRecord, change: CollectionManagedChange, asOf: string): CollectionChange {
   const values: CollectionValues = { ...record.values };

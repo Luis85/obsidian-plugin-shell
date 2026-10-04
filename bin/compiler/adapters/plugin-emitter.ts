@@ -22,7 +22,8 @@ import { visualDefinitions, visualPackages, visualAdapterPath } from '../emitter
 import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { styleCode } from '../emitters/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../emitters/devkit-files.ts';
-import { relocateFrameworkDocuments } from '../emitters/framework-docs.ts';
+import { maintainerOnly, relocateFrameworkDocuments, scopeExampleOwnership } from '../emitters/framework-docs.ts';
+import { hostingProfile, projectHosting, prunedByHosting } from '../../../scripts/companion/schema/hosting.mjs';
 import { maintainerScript, rewriteDocReferences } from '../emitters/framework-scope.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
 function replacedProducer(previous: string | undefined, producer: string): string | undefined {
@@ -31,35 +32,61 @@ function replacedProducer(previous: string | undefined, producer: string): strin
   return producer === 'journey' && (previous === 'ui' || previous === 'visual') ? previous : undefined;
 }
 type Scripts = Record<string, string>;
+/** Without visual definitions no UI-effect check is generated: the script says so and passes explicitly. With them,
+ * the suite runner requires a non-empty suite, so deleted checks fail instead of reporting "tests 0". */
+const noUiEffects = 'node -e "console.log(\'test:ui-effects skipped: this project declares no visual definitions, so no UI-effect checks were generated.\')"';
 /** The project test/verification scripts; full framework coverage/native/release gates stay and are NOT relabelled green. */
 function projectScripts(scripts: Scripts, m: Model): void {
-  const frameworkTests = scripts.test;
+  const frameworkTests = scripts.test, definitions = visualDefinitions(m), effects = definitions.pages.length + definitions.components.length > 0;
   if (frameworkTests !== undefined) scripts['test:framework'] = frameworkTests;
   scripts['test'] = 'vitest run --config configs/testing/vitest.project.config.mjs';
   scripts['test:watch'] = 'vitest --config configs/testing/vitest.project.config.mjs';
   scripts['test:tdd'] = `vitest --config configs/testing/vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
   scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json';
-  scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
+  // The root tsconfig is the framework's; generated sources import with .ts extensions that only the project config allows.
+  scripts['typecheck'] = scripts['typecheck:project'];
+  scripts['test:ui-effects'] = effects ? 'node scripts/testing/suites.mjs project:ui-effects' : noUiEffects;
   scripts['build:clickdummy'] = 'node bin/app clickdummy build';
   scripts['ui:gallery'] = 'node scripts/ui/review-gallery.mjs --target clickdummy';
   scripts['doctor'] = 'node bin/app doctor';
   Object.assign(scripts, previewScripts());
   uiQualityScripts(scripts);
-  scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
-  scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
-  // What the full gate adds to `check` (which already runs typecheck, lint and the product tests): CI runs
-  // `check` then this, so no gate runs twice.
+  scripts['test:project'] = effects ? 'node scripts/testing/suites.mjs project project:ui-effects' : 'node scripts/testing/suites.mjs project && npm run test:ui-effects';
+  // What the full gate adds to `check` (which already runs typecheck, both linters, the product tests and the maker
+  // tooling tests): CI runs `check` then this, so no gate runs twice.
   scripts['verify:artifacts'] = 'npm run build && npm run test:ui-effects';
+  // The full local gate is `check` plus that addition, so it is a superset of `check` by construction.
+  scripts['verify:project'] = 'npm run check && npm run verify:artifacts';
   for (const name of Object.keys(scripts)) if (maintainerScript(name)) delete scripts[name];
 }
 function fixtureScripts(scripts: Scripts): void {
-  scripts['testdata:check']='node scripts/test-data/verify.mjs'; for (const name of ['verify:project', 'verify:artifacts']) scripts[name] += ' && npm run testdata:check';
+  scripts['testdata:check']='node scripts/test-data/verify.mjs'; scripts['verify:artifacts'] += ' && npm run testdata:check';
   for(const command of ['plan','apply','reset-plan','reset','serve']) scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
+}
+/** Always present, so `npm run test:tdd` has a real acceptance check before the first requirement exists. */
+function acceptanceSmoke(m: Model, add: Add): void {
+  const test = `${m.testRoot}/acceptance/traceability.test.ts`, root = relativeImport(test, 'package.json').replace(/package\.json$/, '');
+  add(test, `import { it, expect } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
+interface Row { id: string; implementation: string; test: string }
+const root = new URL(${literal(root)}, import.meta.url);
+const trace: { requirements: Row[] } = JSON.parse(readFileSync(new URL('design/traceability.json', root), 'utf8'));
+it('every requirement in design/traceability.json keeps its use case and acceptance test', () => {
+  expect(new Set(trace.requirements.map(row => row.id)).size).toBe(trace.requirements.length);
+  for (const row of trace.requirements) {
+    expect(existsSync(new URL(row.implementation, root)), row.implementation).toBe(true);
+    expect(existsSync(new URL(row.test, root)), row.test).toBe(true);
+  }
+});
+`);
 }
 /** Emit the existing plugin project from explicit template data, without host I/O. */
 export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Model): Promise<Entry[]> {
-  const entries = new Map(templateRoot.frameworkFiles.map(file => [file.path, { ...file } ]));
-  relocateFrameworkDocuments(entries);
+  // A project hosted outside GitHub receives none of the framework's GitHub files (CODEOWNERS, Dependabot, actions,
+  // maintainer workflows); links to them in copied docs become plain text.
+  const hosting = hostingProfile(projectHosting(m.document));
+  const entries = new Map(templateRoot.frameworkFiles.filter(file => !prunedByHosting(hosting, file.path)).map(file => [file.path, { ...file } ]));
+  relocateFrameworkDocuments(entries, path => maintainerOnly(path) || prunedByHosting(hosting, path)); scopeExampleOwnership(entries);
   const collector = artifactCollector([...entries.values()].map(file => ({ ...file, producer: 'framework' })));
   let producer = 'project';
   const add: Add = (path, content, ownership = 'extension') => {
@@ -105,6 +132,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   await emit('journey-specs', () => authoredJourneyCode(m,add));
   await emit('preview', () => previewCode(m,add));
   await emit('ui-quality', () => uiQualityCode(m,add));
+  acceptanceSmoke(m,add);
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;
   add(opTest,`import { it, expect } from 'vitest';\nimport { effectScope } from 'vue';\nimport { operation } from ${literal(relativeImport(opTest,`${m.sourceRoot}/presentation/composables/operation.ts`))};
 it('latest read wins and disposal prevents late projection updates', async () => {

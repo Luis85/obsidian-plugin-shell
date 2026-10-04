@@ -49,7 +49,7 @@ folder are ever opened.
 | `npm run check:fast` | Typecheck plus only the tests related to files changed since the last commit |
 | `npm test` | All product tests once |
 | `npm run test:obsidian` | The built plugin loads, registers and unloads in real Obsidian |
-| `npm run verify:project` | Build, typecheck, product and UI-effect tests (the full local gate) |
+| `npm run verify:project` | `npm run check`, then the release build and UI-effect tests (the full local gate) |
 | `npm run verify:artifacts` | What the full gate adds to `check`: release build, UI-effect tests, test data (CI runs `check`, then this) |
 | `npm run build` | Release bundle in `dist/` (`main.js`, `styles.css`, `manifest.json`) |
 | `npm run check:submission` | Local mirror of the Obsidian community-review rules (manifest, lint, bundle) |
@@ -127,8 +127,9 @@ SessionStart hook that prints the project state, a permission allowlist for the 
 commands, and skills (`implement-requirement`, `debug-in-obsidian`, `add-feature`,
 `write-obsidian-test`, `self-review`) in `.claude/skills/` (mirrored for Codex in
 `.agents/skills/`). Start with [BRIEF.md](BRIEF.md), the product brief the owner fills in;
-pull requests use `.github/pull_request_template.md`.
+pull requests use `{{prTemplatePath}}`.
 
+{{hostingCli}}
 ## What is and is not done
 
 - Generated: typed sources, stores, screens, navigation, browser composition and

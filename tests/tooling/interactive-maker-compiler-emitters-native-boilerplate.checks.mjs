@@ -28,7 +28,7 @@ test('a context-menu declaration gets a side-effect-free inspect action and a ma
 export function inspectFile(file: NativeFileContext): NativeMenuResult {
   return { title: "Inspect file", message: 'File: ' + file.name + '\\nExtension: .' + file.extension + '\\nVault path: ' + file.path };
 }
-export const definition: NativeMenuDefinition = { ...{"id":"inspect-file","name":"Inspect file","extensions":["md","board"]}, run: inspectFile };
+export const definition: NativeMenuDefinition = { id: "inspect-file", name: "Inspect file", extensions: ["md","board"], run: inspectFile };
 `);
   assert.equal(nativeDeclarationTest('context-menu', menu, './inspect-file.context-menu'), `import { expect, it } from 'vitest';
 import { definition } from "./inspect-file.context-menu";

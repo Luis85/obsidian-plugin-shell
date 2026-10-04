@@ -222,15 +222,15 @@ test('the real repository lists every workflow and plans a real job as a dry run
   assert.equal(listed.data.workflows.length, files.length); assert.ok(listed.data.summary.jobs >= files.length);
   const ci = listed.data.workflows.find(item => item.stem === 'ci');
   assert.ok(ci.jobs.some(item => item.id === 'baseline' && item.reference === 'ci/baseline' && item.reproducible));
-  const plan = await ciOperation(request({ job: 'ci/baseline', matrix: 'os=ubuntu-latest' }), { root, frameworkRoot: root });
-  assert.equal(plan.status, 'planned'); assert.equal(plan.data.execution, 'not-run'); assert.equal(plan.data.runsOn, 'ubuntu-latest');
+  const plan = await ciOperation(request({ job: 'ci/baseline', matrix: 'os=ubuntu-24.04' }), { root, frameworkRoot: root });
+  assert.equal(plan.status, 'planned'); assert.equal(plan.data.execution, 'not-run'); assert.equal(plan.data.runsOn, 'ubuntu-24.04');
   assert.ok(plan.data.steps.some(step => step.disposition === 'run' && step.command.includes('verify-baseline.mjs')));
 });
 test('the command is catalogued with its options and routed through the shared operation entry point', async () => {
-  const parsed = parseCliArguments(['ci', '--job', 'ci/baseline', '--matrix', 'os=ubuntu-latest', '--execute']);
-  assert.deepEqual([parsed.command, parsed.options.job, parsed.options.matrix, parsed.options.execute], ['ci', 'ci/baseline', 'os=ubuntu-latest', true]);
+  const parsed = parseCliArguments(['ci', '--job', 'ci/baseline', '--matrix', 'os=ubuntu-24.04', '--execute']);
+  assert.deepEqual([parsed.command, parsed.options.job, parsed.options.matrix, parsed.options.execute], ['ci', 'ci/baseline', 'os=ubuntu-24.04', true]);
   assert.throws(() => parseCliArguments(['ci', '--jobs', 'x']), error => error.code === 'INVALID_OPTION');
-  const outcome = await executeOperation(request({ job: 'ci/baseline', matrix: 'os=ubuntu-latest', 'dry-run': true }), { root, frameworkRoot: root });
+  const outcome = await executeOperation(request({ job: 'ci/baseline', matrix: 'os=ubuntu-24.04', 'dry-run': true }), { root, frameworkRoot: root });
   assert.equal(outcome.status, 'planned');
   const help = await executeOperation({ command: 'help', args: ['ci'], options: {} }, { root, frameworkRoot: root });
   assert.match(help.data.commands[0].usage, /--job <workflow-file-stem>\/<job-id>/); assert.match(help.data.commands[0].optionHelp.job.description, /ci --list/);

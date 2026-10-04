@@ -15,7 +15,7 @@
     "native": ["scripts/testing/native-*", "scripts/testing/obsidian-*", "scripts/dev/**"],
     "setup": ["scripts/setup.mjs", "scripts/setup/**", "scripts/shared/npm-install.mjs", "scripts/bundling/**"],
     "release": ["scripts/release/**", "scripts/security/**", "scripts/maintenance/**"],
-    "quality": ["scripts/quality/**", "configs/quality/**", "configs/lint/**", "scripts/testing/suite-manifest.mjs", "scripts/testing/evidence-*"],
+    "quality": ["scripts/quality/**", "configs/quality/**", "configs/lint/**", "scripts/testing/suite-manifest.mjs", "scripts/testing/test-levels.mjs", "scripts/testing/evidence-*"],
     "test-data": ["scripts/companion/test-data-manifest.mjs"]
   },
   "gates": {
@@ -39,7 +39,7 @@
       "gates": ["check"], "suites": ["generator", "compiler"],
       "notes": ["Generated output may change: golden snapshots, the template snapshot and kit integrity (bin/kit.json) can drift. A generator/compiler suite failure that names a golden or integrity lock needs a reviewed regeneration; do not edit those files by hand."]
     },
-    { "id": "workflows", "label": "CI workflows", "paths": [".github/workflows/**"], "notes": ["CI workflow changed: it cannot run locally. Review trigger paths and pinned actions; `node bin/app ci --list` shows the jobs once available, and tests/tooling/repository.checks.mjs validates workflow shape."], "suites": ["quality"] },
+    { "id": "workflows", "label": "CI workflows", "paths": [".github/workflows/**", ".github/actions/**"], "notes": ["CI workflow changed: it cannot run locally. Review trigger paths and pinned actions; `node bin/app ci --list` shows the jobs once available, and tests/tooling/repository.checks.mjs validates workflow shape."], "suites": ["quality"] },
     { "id": "dependency-manifests", "label": "Dependency manifests", "paths": ["package.json", "package-lock.json"], "gates": ["check"], "notes": ["Dependency manifest changed: `check --fast` falls back to the full check; installs, lockfile and security checks run only in `npm run verify` and CI."] },
     { "id": "threshold-change", "label": "Quality thresholds", "paths": ["configs/quality/**", "scripts/quality/thresholds.mjs", "tests/tooling/quality-thresholds.checks.mjs"], "suites": ["quality"], "flags": [{ "code": "THRESHOLD_CHANGE", "message": "threshold change: requires owner review" }] }
   ],

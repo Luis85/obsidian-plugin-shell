@@ -1,5 +1,6 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { OperationError, requireThat } from './contracts.ts';
+import { PROTECTED_PROJECT_SEGMENTS, isProtectedSegment, RESERVED_FOLDER_NAMES } from '../../../scripts/shared/protected-directories.ts';
 import { companionRelativeFolder, type AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 export interface Identity { id: string; name: string; author: string; version: string; description: string }
 export interface Configuration {
@@ -37,9 +38,9 @@ export function configuration(value: unknown): Configuration {
   const source = paths.codebaseFolder, tests = paths.testsFolder, vault = paths.testVaultFolder, directory = paths.configDirectory;
   requireThat(companionRelativeFolder(source) && companionRelativeFolder(tests), 'CONFIG_PATH', 'Use portable project-relative source and test folders.');
   requireThat(typeof source === 'string' && typeof tests === 'string' && typeof vault === 'string' && typeof directory === 'string', 'CONFIG_PATH', 'Paths must be strings.');
-  requireThat(/^\.[a-zA-Z0-9_-]+$/.test(vault) && !['.git', '.framework', '.companion', '.qualification', '.native-runner'].includes(vault.toLowerCase()), 'CONFIG_PATH', 'Use a dedicated hidden test-vault folder.');
-  requireThat(/^\.[a-zA-Z0-9_-]+$/.test(directory) && !['.git', '.framework'].includes(directory.toLowerCase()), 'CONFIG_PATH', 'Invalid Obsidian configuration directory.');
-  const reserved = ['.framework', '.companion', 'design', 'dist', 'docs', 'scripts', 'templates', 'harness', 'node_modules', '.git'];
+  requireThat(/^\.[a-zA-Z0-9_-]+$/.test(vault) && !isProtectedSegment(vault, RESERVED_FOLDER_NAMES), 'CONFIG_PATH', 'Use a dedicated hidden test-vault folder.');
+  requireThat(/^\.[a-zA-Z0-9_-]+$/.test(directory) && !isProtectedSegment(directory, RESERVED_FOLDER_NAMES), 'CONFIG_PATH', 'Invalid Obsidian configuration directory.');
+  const reserved = [...PROTECTED_PROJECT_SEGMENTS, 'design', 'dist', 'docs', 'scripts', 'templates', 'harness'];
   const values = [source, tests, vault].map(path => path.toLowerCase());
   const overlaps = (a: string, b: string) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
   requireThat(!values.some((a, i) => values.some((b, j) => i !== j && overlaps(a, b))), 'CONFIG_OVERLAP', 'Source, tests and test vault must not overlap.');

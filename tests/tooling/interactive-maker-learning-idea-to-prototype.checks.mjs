@@ -16,7 +16,7 @@ const repository = resolve(import.meta.dirname, '../..');
 const id = 'idea-to-prototype-with-claude-design';
 const now = '2026-10-04T10:00:00.000Z';
 const steps = ['understand-the-journey', 'name-your-prototype', 'brainstorm-the-idea', 'write-the-design-brief', 'prepare-the-design-folder',
-  'design-in-claude-design', 'request-the-handover', 'save-and-sync', 'implement-in-the-prototype', 'record-an-increment', 'add-to-the-release-candidate'];
+  'design-in-claude-design', 'request-the-handover', 'save-and-sync', 'implement-in-the-prototype', 'record-a-release-item', 'add-to-the-release-candidate'];
 const course = async () => (await loadLearningCatalog()).paths.get(id);
 
 async function cli(root, ...argv) {
@@ -58,7 +58,7 @@ test('the course teaches the journey in order and passes learn check', async () 
   assert.deepEqual(wizards, ['brainstorm', 'prototype']);
   assert.ok(wizards.every(wizard => definitions.wizards.has(wizard)));
   const glossary = learningStepMarkdown(catalog, path.steps[0]);
-  for (const term of ['Brief (design brief)', 'Prototype package', 'Design folder', 'Handoff guide', 'Implementation map', 'Increment', 'Release candidate', '## Where to find what'])
+  for (const term of ['Brief (design brief)', 'Prototype package', 'Design folder', 'Handoff guide', 'Implementation map', 'Release item', 'Release candidate', '## Where to find what'])
     assert.ok(glossary.includes(term), term);
 });
 
@@ -82,7 +82,7 @@ test('win conditions follow the real prototype package and design folder, then t
   const path = await course(), context = { root, definitions: await loadCatalog() };
   let progress = { ...newLearningProgress(path, now), answers: {
     plan: { title: 'Reading log', slug: 'reading-log', version: '0.5.0' }, idea: { route: 'prd', record: 'docs/prds/reading-log.md' },
-    handover: { prototypeFile: 'node-1--compact.html' }, release: { incrementId: 'INC-0001', incrementFile: 'INC-0001-reading-log.md' } } };
+    handover: { prototypeFile: 'node-1--compact.html' }, release: { itemId: 'ITEM-0001', itemFile: 'ITEM-0001-reading-log.md' } } };
   progress.checklists = Object.fromEntries(path.steps.filter(item => item.checklist).map(item => [item.id, item.checklist.map(entry => entry.id)]));
   const unmet = async index => (await evaluateLearningStep(context, path.steps[index], progress)).filter(check => !check.met).map(check => `${check.label}: ${check.detail}`);
   const complete = async index => { assert.deepEqual(await unmet(index), [], path.steps[index].id); progress = completeLearningStep(path, progress, path.steps[index].id, now); };
@@ -109,14 +109,14 @@ test('win conditions follow the real prototype package and design folder, then t
   assert.deepEqual(await unmet(8), ['At least one implementation-map row is implemented: docs/design/reading-log/handoff/implementation-map.md does not contain "| implemented |" yet.']);
   await put(root, 'docs/design/reading-log/handoff/implementation-map.md', (await readFile(map, 'utf8')).replace('| ready |', '| implemented |'));
   await complete(8);
-  assert.equal((await unmet(9)).length, 4, 'no increment note yet');
-  await put(root, 'docs/releases/increments/INC-0001-reading-log.md', '---\ntype: Increment\nid: INC-0001\nsources:\n  - prototypes/reading-log\n---\n# Reading log\n');
-  assert.deepEqual(await unmet(9), ['Its sources list docs/design/reading-log: docs/releases/increments/INC-0001-reading-log.md does not contain "docs/design/reading-log" yet.']);
-  await put(root, 'docs/releases/increments/INC-0001-reading-log.md', '---\ntype: Increment\nid: INC-0001\nsources:\n  - prototypes/reading-log\n  - docs/design/reading-log\n---\n# Reading log\n');
+  assert.equal((await unmet(9)).length, 4, 'no release item note yet');
+  await put(root, 'docs/releases/items/ITEM-0001-reading-log.md', '---\ntype: ReleaseItem\nid: ITEM-0001\nsources:\n  - prototypes/reading-log\n---\n# Reading log\n');
+  assert.deepEqual(await unmet(9), ['Its sources list docs/design/reading-log: docs/releases/items/ITEM-0001-reading-log.md does not contain "docs/design/reading-log" yet.']);
+  await put(root, 'docs/releases/items/ITEM-0001-reading-log.md', '---\ntype: ReleaseItem\nid: ITEM-0001\nsources:\n  - prototypes/reading-log\n  - docs/design/reading-log\n---\n# Reading log\n');
   await complete(9);
-  await put(root, 'docs/releases/candidates/0.5.0/README.md', '---\ntype: ReleaseCandidate\nversion: 0.5.0\nincrements: []\n---\n');
-  assert.deepEqual(await unmet(10), ['The candidate lists INC-0001: docs/releases/candidates/0.5.0/README.md does not contain "INC-0001" yet.']);
-  await put(root, 'docs/releases/candidates/0.5.0/README.md', '---\ntype: ReleaseCandidate\nversion: 0.5.0\nincrements:\n  - INC-0001\n---\n');
+  await put(root, 'docs/releases/candidates/0.5.0/README.md', '---\ntype: ReleaseCandidate\nversion: 0.5.0\nitems: []\n---\n');
+  assert.deepEqual(await unmet(10), ['The candidate lists ITEM-0001: docs/releases/candidates/0.5.0/README.md does not contain "ITEM-0001" yet.']);
+  await put(root, 'docs/releases/candidates/0.5.0/README.md', '---\ntype: ReleaseCandidate\nversion: 0.5.0\nitems:\n  - ITEM-0001\n---\n');
   await complete(10);
   assert.deepEqual([Object.keys(progress.completed), progress.currentStep], [steps, 'add-to-the-release-candidate']);
 }));

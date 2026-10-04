@@ -4,7 +4,7 @@
   "id": "framework-setup",
   "version": 1,
   "title": "Framework setup",
-  "description": "Terminal interview of node bin/app setup: source (starter or project JSON), identity and explicit opt-ins. Only missing answers are asked; headless callers pass explicit options.",
+  "description": "Terminal interview of node bin/app setup: source (starter or project JSON), identity, explicit opt-ins and, for a new design, the hosting platform (GitHub, Azure DevOps or none). Only missing answers are asked; headless callers pass explicit options.",
   "steps": [
     { "id": "prepare", "kind": "action", "action": "framework-setup.prepare" },
     { "id": "source", "kind": "form", "when": { "path": "askSource", "equals": true }, "fields": [
@@ -30,6 +30,26 @@
       { "id": "mcp", "kind": "confirm", "label": "Enable the project-local Workbench MCP for Claude Code and Codex? This writes project settings but installs no client.",
         "transient": true, "effect": "framework-setup.opt-in" }
     ] },
-    { "id": "github", "kind": "message", "text": "GitHub is optional. Setup stays local and preserves every existing remote. Use your reviewed Git client to connect later." }
+    { "id": "hosting-prepare", "kind": "action", "action": "framework-setup.hosting" },
+    { "id": "hosting", "kind": "form", "bind": "hosting", "when": { "path": "hosting.ask", "equals": true }, "fields": [
+      { "id": "answer", "kind": "text", "label": "Hosting platform for pull requests and CI: github, azure-devops or none? Prepares files and CLI hints only; nothing signs in. [{{hosting.fallback}}]" }
+    ] },
+    { "id": "hosting-platform", "kind": "action", "action": "hosting.platform", "when": { "path": "hosting.ask", "equals": true } },
+    { "id": "azure-organization", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askOrganization", "equals": true }, "fields": [
+      { "id": "organization", "kind": "text", "label": "Azure DevOps organization URL (https://dev.azure.com/<organization>)", "default": "{{hosting.details.organization}}",
+        "when": { "path": "details", "present": true } },
+      { "id": "organizationLater", "kind": "text", "label": "Azure DevOps organization URL (https://dev.azure.com/<organization>), blank to add later", "bind": "organization",
+        "when": { "path": "details", "present": false } }
+    ] },
+    { "id": "hosting-organization", "kind": "action", "action": "hosting.organization", "when": { "path": "hosting.askOrganization", "equals": true } },
+    { "id": "azure-project", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askProject", "equals": true }, "fields": [
+      { "id": "project", "kind": "text", "label": "Azure DevOps project", "default": "{{hosting.details.project}}", "required": true }
+    ] },
+    { "id": "hosting-project", "kind": "action", "action": "hosting.project", "when": { "path": "hosting.azure", "equals": true } },
+    { "id": "azure-repository", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askRepository", "equals": true }, "fields": [
+      { "id": "repository", "kind": "text", "label": "Azure DevOps repository", "default": "{{hosting.repositoryDefault}}" }
+    ] },
+    { "id": "hosting-apply", "kind": "action", "action": "hosting.apply", "with": { "into": "setup" } },
+    { "id": "hosting-note", "kind": "action", "action": "framework-setup.hosting-note" }
   ]
 }

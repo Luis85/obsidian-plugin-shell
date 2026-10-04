@@ -15,7 +15,7 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `new-project` | `node bin/app new` | Project starter, prototype brief (configs/guides), output folder, reviewed package |
 | `prototype` | `node bin/app prototype` | Prototype brief, output folder, reviewed package, optional design folder |
 | `brainstorm` | `node bin/app brainstorm` | Eight capture sections, reviewed request and file plan, optional import and verification |
-| `framework-setup` | `node bin/app setup` (terminal) | Source (starter or project JSON), identity and explicit Airship/MCP opt-ins; only missing answers are asked |
+| `framework-setup` | `node bin/app setup` (terminal) | Source (starter or project JSON), identity, explicit Airship/MCP opt-ins and, for a new design, the hosting platform (GitHub, Azure DevOps or none, with Azure DevOps details defaulted from an Azure origin remote); only missing answers are asked |
 | `fake-data` | `node bin/app fake-data` | Entity, `fake-data-run` form (or a new entity via `fake-data-entity`/`fake-data-property`), sample note, reviewed write, optional saved generation config |
 | `process-authoring` | `node bin/app process new` / `process edit --name <id>` | `process-details`, roles, owner, `process-step` and `process-rule` editors, reviewed save of `configs/processes/<id>.json` |
 | `process-run` | `node bin/app process run --name <id>` | Walks a business process with rule checks, then optionally saves the audit trail through `wizard.save-json` |
@@ -25,12 +25,12 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `learning-new` | `node bin/app learning new` | Capture one learning with the `learning` form; one reviewed write |
 | `learning-edit` | `node bin/app learning edit [--id LRN-0001]` | Edit a learning pre-filled from its note; allowed transitions only |
 | `learning-review` | `node bin/app learning review` | Walk validated high-impact or overdue learnings with `learning-review`, one reviewed write each |
-| `increment-new` | `node bin/app increment new` | Capture one increment with the `increment` form; one reviewed write |
-| `increment-edit` | `node bin/app increment edit [--id INC-0001]` | Edit an increment pre-filled from its note; allowed transitions only (included/shipped belong to candidates) |
-| `increment-review` | `node bin/app increment review` | Walk ready/included high-priority or overdue increments, one reviewed write each |
-| `candidate-new` | `node bin/app candidate new [--version 1.0.0]` | `candidate` form (version, target date, owner, ready increments, goal); one reviewed plan writes the README and includes the increments |
+| `release-item-new` | `node bin/app release-item new` | Capture one release item with the `release-item` form; one reviewed write |
+| `release-item-edit` | `node bin/app release-item edit [--id ITEM-0001]` | Edit a release item pre-filled from its note; allowed transitions only (included/shipped belong to candidates) |
+| `release-item-review` | `node bin/app release-item review` | Walk ready/included high-priority or overdue release items, one reviewed write each |
+| `candidate-new` | `node bin/app candidate new [--version 1.0.0]` | `candidate` form (version, target date, owner, ready release items, goal); one reviewed plan writes the README and includes the release items |
 | `workflow-authoring` | `node bin/app workflow new` / `workflow edit --name <id>` | `workflow-details`, `workflow-target`, `workflow-data` and `workflow-step` forms; reviewed save of the JSON and its docs note |
-| `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship and single native-extension options; only missing answers are asked |
+| `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship, the hosting platform (default GitHub) and single native-extension options; only missing answers are asked |
 | `framework-setup-stages` | after `setup` applies | Documentation import, then generate/install/verify/preview, each separately approved, then documentation export |
 
 Prompt labels, defaults and order are unchanged from the former hand-written flows (the framework `setup`
@@ -173,7 +173,7 @@ and `:back` at the first question cancels. The remaining flows below are deliber
 
 | Flow | Why it is not a wizard here |
 | --- | --- |
-| `npm run setup` | Dependency-free Node script that must run before dependencies and TypeScript tooling are installed. Its questions are still data: `configs/forms/setup-identity.json`, read by `scripts/setup/form.mjs`, which supports only `text` and `confirm` fields (`id`, `kind`, `label`, `help`) whose ids equal the setup `--answers` keys, and fails closed on anything else. See [setup identity](SETUP-IDENTITY.md). |
+| `npm run setup` | Dependency-free Node script that must run before dependencies and TypeScript tooling are installed. Its questions are still data: `configs/forms/setup-identity.json`, read by `scripts/setup/form.mjs`, which supports only `text` and `confirm` fields (`id`, `kind`, `label`, `help`) whose ids equal the setup `--answers` keys (the identity keys, `hosting` and `mcp`), and fails closed on anything else. An `azure-devops` hosting answer is followed by the conditional Azure DevOps details from `scripts/setup/hosting.mjs`, because the dependency-free subset has no conditions. See [setup identity](SETUP-IDENTITY.md). |
 | Studio editors (pages, bricks, templates) | Open-ended edit menus, not linear guided processes. |
 | Project handout | A Markdown checklist that is filled in and validated, not asked live. |
 

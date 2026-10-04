@@ -1,7 +1,7 @@
 name: Interactive maker qualification
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
   workflow_call:
     inputs:
@@ -9,6 +9,10 @@ on:
         description: integration (ready pull requests and main) or release (every matrix leg)
         type: string
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tier:
@@ -16,14 +20,18 @@ on:
         type: choice
         options: [integration, release]
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: interactive-maker-${{ github.ref }}
+  group: interactive-maker-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   maker:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     strategy:
       fail-fast: false
       matrix:
@@ -55,19 +63,28 @@ jobs:
           set -o pipefail
           node "$QUALIFIED_NPM" run test:maker 2>&1 | tee reports/maker/tests.log
           node "$QUALIFIED_NPM" run test:plugins 2>&1 | tee reports/maker/plugins.log
-      - name: Qualify plugin-provided React starter
+      - name: Enable the example extension for the plugin-provided starter
+        id: extension
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: |
           cp plugins/example-extension/config.json "$RUNNER_TEMP/example-extension-config.json"
-          trap 'cp "$RUNNER_TEMP/example-extension-config.json" plugins/example-extension/config.json' EXIT
           node --input-type=module - <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
           const path = 'plugins/example-extension/config.json';
           const config = JSON.parse(await readFile(path, 'utf8'));
           await writeFile(path, JSON.stringify({ ...config, enabled: true }, null, 2) + '\n');
           NODE
+      - name: Qualify plugin-provided React starter without the browser smoke
+        if: ${{ !cancelled() && runner.os == 'Linux' && !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
+        run: node scripts/compiler/qualify-project-starters.mjs --starter webapp-react --execute --no-browser
+      - name: Qualify plugin-provided React starter
+        if: ${{ !cancelled() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
+        run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node scripts/compiler/qualify-project-starters.mjs --starter webapp-react --execute
+      - name: Restore the example extension configuration
+        if: ${{ always() && steps.extension.outcome != 'skipped' }}
+        run: cp "$RUNNER_TEMP/example-extension-config.json" plugins/example-extension/config.json
       - name: Actual pseudo-terminal authoring and restoration
         if: ${{ !cancelled() && runner.os != 'Windows' }}
         run: node "$QUALIFIED_NPM" run test:maker:pty

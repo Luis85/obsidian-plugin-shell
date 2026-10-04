@@ -8,6 +8,7 @@ export interface RouteExtensions { pluginCommands: ReadonlySet<string>; framewor
 const directoryNewFlags = new Set([
   '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions',
   '--install', '--inside-vault', '--no-git', '--storybook', '--storybook-stories', '--airship', '--no-airship',
+  '--hosting', '--azure-organization', '--azure-project', '--azure-repository',
   '--yes', '--dry-run', '--plan-out', '--timeout', '--values', '--answers', '--run', '--trust-processes',
 ]);
 const makerCommands = new Set([

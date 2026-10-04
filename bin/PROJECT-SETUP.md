@@ -115,7 +115,7 @@ not by schema discovery, scans or previews. See [the full example](examples/user
 | `paths.firstRunReport` | `reports/first-run.json` | Last recorded managed execution |
 | `paths.risks` | `docs/risks` (optional) | Risk register notes; see [risk management](../docs/development/RISK-MANAGEMENT.md) |
 | `paths.learnings` | `docs/learnings` (optional) | Lessons-learned notes; see [learnings](../docs/development/LEARNINGS.md) |
-| `paths.increments` | `docs/releases/increments` (optional) | Product increment notes; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
+| `paths.releaseItems` | `docs/releases/items` (optional) | Release item notes; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
 | `paths.releaseCandidates` | `docs/releases/candidates` (optional) | One folder per release candidate version; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
 | `preferences.author` | `Your name` | Default author on a new project |
 | `preferences.ui` | `auto` | `auto`, `tui` or `plain` presentation |

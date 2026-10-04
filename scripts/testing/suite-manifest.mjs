@@ -188,7 +188,9 @@ export async function toolingGroups(root) {
   const manifest = await loadManifest(root);
   const result = await classify(root, manifest);
   if (result.failures.length) throw new Error(result.failures.join('\n'));
-  return result.suites.filter(suite => suite.verify === 'tooling').map(suite => ({ name: suite.name, files: suite.files }));
+  // An optional suite without files (no increment has acceptance stubs yet) is left out: `node --test` with no
+  // file arguments would discover the whole repository instead. A non-optional empty suite already failed above.
+  return result.suites.filter(suite => suite.verify === 'tooling' && suite.files.length).map(suite => ({ name: suite.name, files: suite.files }));
 }
 
 function scriptFailures(manifest, scripts) {

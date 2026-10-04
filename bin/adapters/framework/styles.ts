@@ -1,4 +1,4 @@
-import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
+import { PROTECTED_PROJECT_SEGMENTS } from '../../../scripts/shared/protected-directories.ts';
 import { relative, resolve, isAbsolute, sep } from 'node:path';
 import { parseAuthoringDocument as parseCompanionDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
@@ -24,7 +24,7 @@ export async function styleExportPlan(request: Request, context: Context) {
   const config = await readConfiguration(context.root);
   const target = stringOption(request.options, 'out') ?? `exports/design-system.${output.extension}`;
   const path = relative(context.root, resolve(context.root, target)).split(sep).join('/');
-  const protectedFolders = ['..', '.framework', '.companion', '.git', 'node_modules', '.test-vault', defaultVaultConfigDirectory, config?.paths.testVaultFolder, config?.paths.configDirectory].filter((part): part is string => typeof part === 'string').map(part => part.toLowerCase());
+  const protectedFolders = ['..', ...PROTECTED_PROJECT_SEGMENTS, config?.paths.testVaultFolder, config?.paths.configDirectory].filter((part): part is string => typeof part === 'string').map(part => part.toLowerCase());
   requireThat(path && !isAbsolute(path) && !path.split('/').some(part => protectedFolders.includes(part.toLowerCase())), 'STYLE_OUTPUT_PATH', 'Export into a project file outside protected and test-vault folders.');
   requireThat(path.endsWith('.' + output.extension), 'STYLE_OUTPUT_FORMAT', `Use a .${output.extension} output filename.`);
   // Reuse the same reviewed writer. Existing different bytes require a new target,

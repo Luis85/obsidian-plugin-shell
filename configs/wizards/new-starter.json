@@ -4,7 +4,7 @@
   "id": "new-starter",
   "version": 1,
   "title": "New project from a starter",
-  "description": "Terminal interview of node bin/app new <dir>: target directory, installed starter, that starter's own inputs[] (asked as a form generated from the starter JSON) and companion opt-ins. Only missing answers are asked; headless callers pass --starter, --values or --answers and flags.",
+  "description": "Terminal interview of node bin/app new <dir>: target directory, installed starter, that starter's own inputs[] (asked as a form generated from the starter JSON) and companion opt-ins: Airship, the hosting platform (a new folder has no remote, so the default is GitHub) and single native-extension options. Only missing answers are asked; headless callers pass --starter, --values or --answers and flags.",
   "steps": [
     { "id": "prepare", "kind": "action", "action": "starter.prepare" },
     { "id": "target", "kind": "form", "when": { "path": "askTarget", "equals": true }, "fields": [
@@ -21,12 +21,32 @@
     { "id": "airship", "kind": "form", "when": { "path": "askAirship", "equals": true }, "fields": [
       { "id": "airship", "kind": "confirm", "label": "Enable optional Airship tooling? No install or launch" }
     ] },
+    { "id": "hosting-prepare", "kind": "action", "action": "starter.hosting", "when": { "path": "companion", "equals": true } },
+    { "id": "hosting", "kind": "form", "bind": "hosting", "when": { "path": "hosting.ask", "equals": true }, "fields": [
+      { "id": "answer", "kind": "text", "label": "Hosting platform for pull requests and CI: github, azure-devops or none? Prepares files and CLI hints only; nothing signs in. [{{hosting.fallback}}]" }
+    ] },
+    { "id": "hosting-platform", "kind": "action", "action": "hosting.platform", "when": { "path": "hosting.ask", "equals": true } },
+    { "id": "azure-organization", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askOrganization", "equals": true }, "fields": [
+      { "id": "organization", "kind": "text", "label": "Azure DevOps organization URL (https://dev.azure.com/<organization>)", "default": "{{hosting.details.organization}}",
+        "when": { "path": "details", "present": true } },
+      { "id": "organizationLater", "kind": "text", "label": "Azure DevOps organization URL (https://dev.azure.com/<organization>), blank to add later", "bind": "organization",
+        "when": { "path": "details", "present": false } }
+    ] },
+    { "id": "hosting-organization", "kind": "action", "action": "hosting.organization", "when": { "path": "hosting.askOrganization", "equals": true } },
+    { "id": "azure-project", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askProject", "equals": true }, "fields": [
+      { "id": "project", "kind": "text", "label": "Azure DevOps project", "default": "{{hosting.details.project}}", "required": true }
+    ] },
+    { "id": "hosting-project", "kind": "action", "action": "hosting.project", "when": { "path": "hosting.azure", "equals": true } },
+    { "id": "azure-repository", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askRepository", "equals": true }, "fields": [
+      { "id": "repository", "kind": "text", "label": "Azure DevOps repository", "default": "{{hosting.repositoryDefault}}" }
+    ] },
     { "id": "extension", "kind": "form", "when": { "path": "askExtension", "equals": true }, "fields": [
       { "id": "extension", "kind": "text", "label": "Custom extension", "default": "{{native.extension}}" }
     ] },
     { "id": "extensions", "kind": "form", "when": { "path": "askExtensions", "equals": true }, "fields": [
       { "id": "extensions", "kind": "text", "label": "File extension filters", "default": "{{native.extensions}}" }
     ] },
-    { "id": "finish", "kind": "action", "action": "starter.finish" }
+    { "id": "finish", "kind": "action", "action": "starter.finish" },
+    { "id": "hosting-apply", "kind": "action", "action": "hosting.apply", "with": { "into": "result.options" }, "when": { "path": "hosting.ask", "equals": true } }
   ]
 }

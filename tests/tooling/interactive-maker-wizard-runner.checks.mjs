@@ -79,8 +79,8 @@ test('rich forms validate in place, use custom messages and revisit the previous
 
 test('documentation settings reset folders only for a changed root and commit through the owner validator', async () => {
   const { defaultSettings } = await import('../../bin/domain/user-settings.ts');
-  // Five paths, the risk register, learnings, increments and release candidates folders and the author keep their defaults.
-  const f = plain(['', '', '', '', '', '', '', '', '', '', 'auto', 'yes', 'y', '', '', '', '', '', '', '', '', 'y', 'manual', 'y', '', '', '', '', '', 'n']);
+  // Five paths, the risk register, learnings, release items and release candidates folders and the author keep their defaults.
+  const f = plain(['', '', '', '', '', '', '', '', '', '', 'auto', 'yes', 'y', '', '', '', '', '', '', '', '', '', '', '', 'y', 'manual', 'y', '', '', '', '', '', 'n']);
   const result = await startForm(f.ui, 'user-settings', structuredClone(defaultSettings));
   const documentation = result.documentation;
   assert.equal(documentation.root, 'manual'); assert.ok(Object.values(documentation.paths).every(path => path.startsWith('manual/')));

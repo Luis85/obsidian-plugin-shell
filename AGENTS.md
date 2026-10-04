@@ -5,7 +5,7 @@
 **What this repo is.** Workbench is a reusable Obsidian plugin shell with three
 parts: the plugin runtime in `src/` (Vue, Pinia, Nuxt UI), the `node bin/app` CLI
 that sets up, checks and extends projects (`new`, `setup`, `make`, `generate`,
-`check`, `ci`, `ui`, `memory`, `adopt`, `design`), and the authoring path from the browser companion
+`check`, `ci`, `ui`, `memory`, `adopt`, `design`, `increment`, `pr`, `issue`), and the authoring path from the browser companion
 concept through the dedicated compiler to independent generated projects (project
 starters, `node bin/app new`). Generated projects carry their own short
 `AGENTS.md` and the same `check` gate. `node bin/app` is the only CLI entry; there
@@ -26,6 +26,8 @@ qualification and release authorization are separate. Milestone background is in
 | `harness/` | Browser harness for the served UI; never shipped in the plugin. |
 | `docs/` | Product, development and testing docs; `docs/concepts/companion` is the authoring concept. |
 | `docs/development/ADOPT-EXISTING-PROJECT.md` | Adding Workbench to an existing project: `node bin/app adopt analyze`, `adopt plan` and `adopt skill`, with the `adopt-existing-project` skill. |
+| `.claude/skills/ideation-*` | Ideation chain: `ideation-journey` → `-brainstorm` → `-concept` → `-design` → `-prototype` → `-boilerplate` → `increment-handoff` → `feature-delivery` → `self-review`; overview in `.claude/skills/ideation-journey/references/chain.md`. |
+| `.claude/skills/increment-handoff`, `.claude/skills/feature-delivery`, `.claude/skills/release` | Increment handoff until the Definition of Ready passes, draft pull request through the Definition of Done to green merge, and release cut to publish (Codex adapters in `.agents/skills/`). |
 | `docs/design/<prototype>/` | Per-prototype Claude Design folders (`node bin/app design status\|prepare\|sync`); see [Claude Design folders](docs/development/CLAUDE-DESIGN-HANDOFF.md). Generated files there are owned by sync, including `ENGINEERING_HANDOFF_GUIDE.md`, which is built only from facts read from the project's files; `prototypes/`, `assets/`, `notes/` and `handoff/implementation-map.md` are design work. |
 
 **Setup.** Use the qualified Node 24.21.0/npm 11.19.1 (`.nvmrc`) and `npm ci` with
@@ -41,6 +43,7 @@ qualified Node themselves and an environment setup script exists: see
 | Need | Command |
 | --- | --- |
 | Fast gate on changed files | `node bin/app check --fast --base origin/main` |
+| Dev tier (draft pull request) | `node bin/app check --fast --skip-suites --base origin/main`, `node scripts/testing/suites.mjs --check`, `node scripts/release/changelog.mjs check` |
 | What do I need to run? | `node bin/app check --plan --base origin/main` |
 | Agent gate (types, lint, tests) | `node bin/app check` |
 | Full pre-PR | `npm run verify -- --json --keep-going` |
@@ -63,7 +66,38 @@ template: retain all existing product requirements and qualify each extension wi
 its relevant tests. Locale output is a pending translation draft, not a newly
 reviewed selectable language.
 
+**Delivery process.** Branch from `main` (or stack on another pull request's
+branch) and keep a **draft** pull request: only the fast Dev tier ("Dev checks")
+runs. Marking it ready for review starts the Integration tier ("CI result" and every
+pull-request workflow); merge a green pull request with a merge commit. A
+`release/X.Y.Z` branch runs the Release tier, and the owner-dispatched Publish
+workflow merges its pull request, tags `X.Y.Z` and creates the GitHub release; never
+merge a release pull request manually. Agents never dispatch Release cut or Publish,
+tag, merge or push to a release branch without the user's explicit request in this
+conversation. Add user-facing changes under `## [Unreleased]` in `CHANGELOG.md`. See
+[delivery pipeline](docs/development/DELIVERY-PIPELINE.md),
+[deliver a change](docs/development/DELIVER-A-CHANGE.md) and
+[cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md).
+
+**Increments.** Plan work as an increment with `node bin/app increment`, `pr` and
+`issue`. The Increment, PullRequest and Issue documents (`docs/increments/`,
+`docs/pull-requests/`, `docs/issues/`) are the source of truth; change them
+through the CLI's reviewed plans (preview, then `--apply <planHash>` or `--yes`),
+never by hand-editing generated lists or bindings. Implement only after the
+Definition of Ready passes (`node bin/app increment check <id>`), refined in the
+kick-off pull request (`increment/<id>` into `main`); deliver in change pull
+requests stacked on the increment branch, and pass the Definition of Done
+(`node scripts/delivery/done.mjs --base origin/<base>`) before marking a pull
+request ready or merging it. Never run `pr publish`, `pr sync` or a push without
+the user's explicit request in this conversation, and never retry an uncertain
+remote write (exit 2) blindly. `e2e: required` means the `e2e` label. Every new
+test file has a test-pyramid level in `tests/suites.json`
+(`node scripts/testing/suites.mjs --check`). Rules:
+[Definition of Ready and Done](docs/development/DEFINITION-OF-READY-AND-DONE.md);
+guide: [your first increment](docs/development/FIRST-INCREMENT.md).
+
 Read first when relevant: [README](README.md),
+[developer guide](DEVELOPER_GUIDE.md) (requirements and setup),
 [authoring](docs/development/AUTHORING-TOOLS.md),
 [plugin-data semantics](docs/development/PLUGIN-DATA-ENTITIES.md),
 [metric scope](docs/development/MAINTAINABILITY.md),
@@ -81,11 +115,13 @@ Historical evidence records retain their actual compiler versions. Use the npm
 typecheck scripts; they select workspace compiler entrypoints, never PATH tools.
 `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. Setup supports reviewed identity changes, browser/native profiles, verified resume and explicit disabled-plugin data migration inside the contained vault. Makers implement the explicit catalog described by their help, composed from primitives and the shared safe-plan engine. No install/prepare lifecycle hook may recurse into setup.
 
-`npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. `check:docs-launchers` fails on references to retired launchers in live docs, skills, templates and source. Use actual tool output, not assumed success.
+`npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. End-to-end tests (served UI, browser suites, real Obsidian) are opt-in in workflows and processes (pull request label `e2e` or the `e2e` input) and mandatory in the Release tier; `check:repository` enforces both, see docs/development/WORKFLOWS.md. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. `check:docs-launchers` fails on references to retired launchers in live docs, skills, templates and source. Use actual tool output, not assumed success.
+
+Hosting is a project choice (`tooling.hosting`: `github` default, `azure-devops`, `none`). Prepare it with `--hosting` or `node bin/app hosting set`; never run `gh`/`az` (including through `node bin/app pr publish|sync`), add remotes or store tokens on the user's behalf without their explicit request, and never delete `.github` or retired platform files unless asked.
 
 Typed-note collections (configs/collections, e.g. risk) are data; code adds only named collection hooks. Read docs/development/NOTE-COLLECTIONS.md before adding one. Lessons learned (`learning` root, `paths.learnings`) are a data-only note collection, separate from the `learn` course runner.
 
-Release candidates (`node bin/app candidate`) document product increments only; they never run release:cut/publish, tag, push or edit CHANGELOG.md.
+Release candidates (`node bin/app candidate`) document release items (`node bin/app release-item`) only; they never run release:cut/publish, tag, push or edit CHANGELOG.md.
 
 `node bin/app fake-data` generates seeded sample notes only through reviewed, hash-approved plans; it never overwrites notes, writes only relative non-hidden folders inside the root, and calls only the allowlisted Faker methods in bin/domain/fake-data-generators.ts.
 

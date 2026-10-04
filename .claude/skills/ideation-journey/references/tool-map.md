@@ -91,12 +91,25 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 
 `npm run prototype:tools -- discover --repo <checkout>` (the `companion-prototype-design` helper) is used by `ideation-prototype`.
 
+## Increment handoff and delivery checks
+
+Dependency-free repository scripts (not `node bin/app` commands) that bridge the chain to delivery. They exist in the framework repository only. `tests/tooling/agent-delivery-skills.checks.mjs` fails when a row's script is missing or a listed skill stops citing it. Exit codes: 0 pass, 1 not ready or not done, 2 usage or configuration error.
+
+| Command | Skills | Effect | Purpose |
+| --- | --- | --- | --- |
+| `node scripts/delivery/increment.mjs new <slug> --from <source>` | `increment-handoff` | plan | preview a `docs/increments/<slug>.md` handoff from the template; `--write` creates it, never overwrites |
+| `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md` | `increment-handoff`, `feature-delivery`, `ideation-journey` | read | Definition of Ready report and refinement brief; `--write` only adds missing section scaffolds |
+| `node scripts/delivery/done.mjs --base origin/main` | `feature-delivery` | read | Definition of Done report; `--write` generates the completion record, Unreleased entry and docs index rows |
+
 ## Outside the chain
 
 | Command | Owner or reason |
 | --- | --- |
 | `node bin/app ci --list` | `feature-delivery` reproduces CI jobs |
 | `node bin/app check submission` | publication readiness; not part of prototyping |
+| `node bin/app entities catalog` | registered entity definitions in a built project; not needed before a boilerplate exists |
+| `node bin/app hosting show`, `node bin/app hosting set` | GitHub, Azure DevOps or no hosting for an existing project; `new` and `setup` take `--hosting` directly (docs/development/HOSTING-PLATFORMS.md) |
+| `node bin/app increment new`, `node bin/app pr new`, `node bin/app issue new` | increments, their pull-request plans and issues after the chain: `increment-handoff` plans and refines the increment, `feature-delivery` plans, publishes and syncs its pull requests (remote writes only on request); `ideation-boilerplate` hands off to them |
 | `node bin/app release prepare` | never; release is a separate authorization |
 | `node bin/app framework status` | Workbench maintainers |
 | `node bin/app schema --json` | operation request schema for agents; not needed by the chain |
@@ -117,7 +130,7 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 | `node bin/app process list --json` | business processes, their rules and docs; owned by process authors |
 | `node bin/app risk list --json` | risk register notes; record risks the brainstorm or design surfaces, on request |
 | `node bin/app learning list --json` | lessons-learned notes; recorded after delivery, not during prototyping |
-| `node bin/app increment list --json` | product increments; recorded after a prototype is implemented |
-| `node bin/app candidate list --json` | release candidates assemble increments; release itself stays a separate authorization |
+| `node bin/app release-item list --json` | release items; recorded after a prototype is implemented |
+| `node bin/app candidate list --json` | release candidates assemble release items; release itself stays a separate authorization |
 | `node bin/app help` | discovery for every skill |
 | `node bin/app workflow list --json` | Playwright test workflows for projects and prototypes; run on request after implementation |

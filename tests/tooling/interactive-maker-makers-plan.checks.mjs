@@ -68,7 +68,8 @@ test('planned recipes report metadata, targeted checks and idempotent reruns', (
   const feature = await apply(root, 'feature', 'bookmarks', '--entity', 'bookmark', '--preset', 'task', '--folder', 'Work/Bookmarks');
   assert.deepEqual({ maker: feature.maker, owner: feature.owner, entity: feature.entity, preset: feature.preset, backend: feature.backend, folder: feature.folder, templateVersion: feature.templateVersion },
     { maker: 'feature', owner: 'bookmarks', entity: 'bookmark', preset: 'task', backend: 'markdown', folder: 'Work/Bookmarks', templateVersion: 2 });
-  assert.deepEqual(feature.checks.map(check => check.args[0]), ['node_modules/vue-tsc/bin/vue-tsc.js', 'node_modules/vitest/vitest.mjs', 'scripts/events/catalog.mjs', 'scripts/makers/entities.mjs', 'run']);
+  assert.deepEqual(feature.checks.map(check => [check.id, check.command, check.args[0]]), [['typecheck', 'node', 'node_modules/vue-tsc/bin/vue-tsc.js'], ['generated-tests', 'node', 'node_modules/vitest/vitest.mjs'], ['events-check', 'node', 'scripts/events/catalog.mjs'], ['entities-check', 'node', 'scripts/makers/entities.mjs']]);
+  assert.equal(feature.next, 'npm run verify');
   assert.ok(feature.checks[1].args.some(path => path.endsWith('bookmarks-bookmark.test.ts')));
   assert.ok(statuses(await plan(root, 'feature', 'bookmarks', '--entity', 'bookmark', '--preset', 'task', '--folder', 'Work/Bookmarks')).every(status => status === 'unchanged'));
   await assert.rejects(plan(root, 'feature', 'bookmarks', '--entity', 'other'), { message: 'MAKER_CONFLICT: edited or unrelated file tests/runtime/generated/bookmarks-workspace-actions.test.ts' });
@@ -86,7 +87,8 @@ test('planned recipes report metadata, targeted checks and idempotent reruns', (
   assert.deepEqual([preference.backend, preference.preference, preference.entity], ['plugin-data', 'notifySuccess', undefined]);
   const command = await apply(root, 'command', 'help', '--feature', 'bookmarks');
   assert.equal(command.entity, undefined); assert.equal(command.backend, undefined);
-  assert.ok(command.checks.some(check => check.args.includes('run') && check.command === 'npm'));
+  // The full gate is a printed next step, never a planned check that could be reported as passed.
+  assert.ok(command.checks.every(check => check.command === 'node')); assert.equal(command.next, 'npm run verify');
   const before = (await loadCatalog(root)).entities.map(entry => [entry.entity, entry.backend]);
   assert.deepEqual(before.sort(), [['bookmark', 'markdown'], ['bookmarks-compact-setting', 'plugin-data'], ['fixture-project', 'markdown'], ['fixture-task', 'markdown'], ['note', 'markdown'], ['rating', 'plugin-data'], ['reference', 'domain']]);
   const catalog = await loadCatalog(root);

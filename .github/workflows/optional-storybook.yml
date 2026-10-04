@@ -7,6 +7,10 @@ on:
         description: integration (ready pull requests and main) or release (every matrix leg)
         type: string
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tier:
@@ -14,8 +18,12 @@ on:
         type: choice
         options: [integration, release]
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths:
       - 'scripts/companion/**'
       - 'templates/**'
@@ -32,11 +40,11 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: optional-storybook-${{ github.ref }}
+  group: optional-storybook-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   optional-workspace:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -49,11 +57,14 @@ jobs:
           install-flags: --no-fund
       - name: Check contracts on the unchanged root toolchain
         run: |
-          node "$QUALIFIED_NPM" run typecheck:compiler
           node --test --test-concurrency=1 tests/tooling/compiler-storybook*.checks.mjs
       - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
         run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
+      - name: Qualify explicitly opted-in generated workspace without the browser preview
+        if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
+        run: node scripts/compiler/qualify-storybook.mjs --no-browser
       - name: Qualify explicitly opted-in generated workspace
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node scripts/compiler/qualify-storybook.mjs

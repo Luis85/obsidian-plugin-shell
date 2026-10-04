@@ -2,19 +2,21 @@ import { setupDocumentation } from '../terminal/docs-setup.ts';
 import { setupObsidian } from '../terminal/obsidian-setup.ts';
 import { companionStarterSet, derivedId, derivedName } from '../../adapters/framework/starter-project.ts';
 import { readConfiguration } from '../../adapters/framework/files.ts';
+import { readOriginUrl } from '../../adapters/framework/adopt-git.ts';
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
 import type { FormValues } from '../../domain/form-model.ts';
 import { confirm } from '../prompts.ts';
 import type { ActionContext, WizardOptions } from '../wizard-runner.ts';
 import type { WizardModule } from './module.ts';
+import { hostingNote, prepareHosting } from './hosting.ts';
 type Prompt = (message: string) => Promise<string>;
 type Execute = (request: Request, context: Context) => Promise<Result>;
 type Render = (value: Result) => void;
 export interface SetupTerminalDependencies {
   setupDocumentation: typeof setupDocumentation; setupObsidian: typeof setupObsidian; companionStarterSet: typeof companionStarterSet;
-  derivedId: typeof derivedId; derivedName: typeof derivedName; readConfiguration: typeof readConfiguration;
+  derivedId: typeof derivedId; derivedName: typeof derivedName; readConfiguration: typeof readConfiguration; readOriginUrl: typeof readOriginUrl;
 }
-export const setupDefaults: SetupTerminalDependencies = { setupDocumentation, setupObsidian, companionStarterSet, derivedId, derivedName, readConfiguration };
+export const setupDefaults: SetupTerminalDependencies = { setupDocumentation, setupObsidian, companionStarterSet, derivedId, derivedName, readConfiguration, readOriginUrl };
 /** The terminal callbacks that setup passes into both setup wizards as options; the interview has no execute/render. */
 interface SetupOptions extends WizardOptions { dependencies: SetupTerminalDependencies; execute: Execute; prompt: Prompt; render: Render }
 function isSetupOptions(value: WizardOptions): value is SetupOptions {
@@ -78,6 +80,13 @@ export const frameworkSetupModule: WizardModule = {
       const setup = setupOf(context.state);
       context.state.suggestedId = setupOptions(context).dependencies.derivedId(context.options.root, String(setup.starter ?? 'project'));
     },
+    /** A new design (starter, blank or JSON) asks for its hosting platform; an Azure DevOps origin remote only suggests defaults. */
+    'framework-setup.hosting': async context => {
+      const setup = setupOf(context.state), designed = Boolean(setup.input || setup.starter || setup.blank);
+      context.state.designed = designed;
+      prepareHosting(context.state, setup, designed ? await setupOptions(context).dependencies.readOriginUrl(context.options.root) : null, designed);
+    },
+    'framework-setup.hosting-note': ({ ui, state }) => { ui.write(hostingNote(setupOf(state), state.designed === true)); },
     'framework-setup.suggest-name': context => { context.state.suggestedName = setupOptions(context).dependencies.derivedName(String(setupOf(context.state).id)); },
     /** Typed notes found in an opted-in Obsidian vault replace the generic import question; each batch is its own reviewed plan. */
     'framework-setup.import-documentation': async context => {

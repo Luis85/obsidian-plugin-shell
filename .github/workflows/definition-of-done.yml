@@ -1,0 +1,53 @@
+name: Definition of Done
+# After implementation: checks the increment handoff against the implemented diff with
+# configs/delivery/definition-of-done.json (criteria ticked with existing evidence, tests,
+# changelog, typed and indexed docs, forbidden additions, the e2e label) on pull requests
+# marked ready for review. Read-only: the generated Completion record, CHANGELOG entries
+# and docs index rows go to the job summary and an artifact; apply them locally with
+# `npm run dod -- --write`. No install: it stays dependency-free (about twenty seconds),
+# so `check --plan` gates are recorded locally, not here. Drafts and release heads skip
+# (release.yml reports the check for release pull requests). `labeled`/`unlabeled`
+# re-evaluate the e2e label rule. DELIVERY_BASE_REF/DELIVERY_HEAD_REF pick the gate: a pull
+# request into an increment branch (increment/<id>) completes its PullRequest document, the
+# kick-off (increment branch into main) completes the Increment. No branch filter: pull
+# requests into increment branches run it too.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review, labeled, unlabeled]
+permissions:
+  contents: read
+concurrency:
+  group: definition-of-done-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  done:
+    name: Definition of Done
+    if: github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      DELIVERY_BASE_REF: ${{ github.base_ref }}
+      DELIVERY_HEAD_REF: ${{ github.head_ref }}
+      DELIVERY_ACTOR: ${{ github.event.pull_request.user.login }}
+      DELIVERY_PR_BODY: ${{ github.event.pull_request.body }}
+      PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+    steps:
+      # Full history: the rules read the diff against the merge base.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Check the implemented increment against the Definition of Done
+        run: node scripts/delivery/done.mjs --base "origin/$DELIVERY_BASE_REF" --summary "$GITHUB_STEP_SUMMARY" --out "$RUNNER_TEMP/definition-of-done"
+      - name: Upload the generated documentation
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: definition-of-done-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/definition-of-done/
+          retention-days: 7
+          if-no-files-found: ignore

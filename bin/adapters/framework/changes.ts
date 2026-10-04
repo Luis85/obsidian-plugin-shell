@@ -1,7 +1,8 @@
 import { setupSource } from './setup-source.ts';
 import { prepareHandout } from './handout-workspace.ts';
-import { setupMcpFiles } from '../../../scripts/agent/mcp-config.mjs';
+import { mcpConflicts, setupMcpFiles } from '../../../scripts/agent/mcp-config.mjs';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
+import { hostingRequested, hostingSummary, withHostingFlags } from './hosting-options.ts';
 import { serializeJson as json } from '../../../scripts/contracts/serialization.ts';
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
@@ -59,13 +60,14 @@ function blankDesign(selected: Configuration | null): string {
 }
 type Intake = Awaited<ReturnType<typeof setupSource>> | { input: string | undefined; context: Context; origin: null };
 /** Imports the supplied or blank design and returns the resolved configuration with the design entries. */
-async function designImport(options: Options, intake: Intake, context: Context, selected: Configuration | null): Promise<{ selected: Configuration; entries: Entry[] }> {
+async function designImport(options: Options, intake: Intake, context: Context, selected: Configuration | null) {
   const input = intake.input;
   requireThat(input || selected, 'IDENTITY_REQUIRED', 'Configure identity before creating a blank design.');
   const { source } = await inspectDesign(input ? intake.context : {...context, inputText: blankDesign(selected)}, input ?? '-');
   const resolved = resolveImport(selected, source.document, stringOption(options, 'resolve'));
-  return { selected: resolved.config, entries: [
-    { path: designFile, content: json(withAirshipOption(resolved.document, options)) },
+  const document = withHostingFlags(withAirshipOption(resolved.document, options), options);
+  return { selected: resolved.config, hosting: hostingSummary(document), entries: [
+    { path: designFile, content: json(document) },
     // Original data remains available for review; it carries no execution authority.
     { path: '.framework/imported-project.json', content: source.content.toString('utf8') },
   ] };
@@ -89,7 +91,11 @@ async function ownershipEntries(context: Context, selected: Configuration, track
   const previousReceipt = await exists(join(context.root, receiptPath)) ? object(await readJson(join(context.root, receiptPath))) : {};
   const old = previousReceipt.files === undefined ? {} : object(previousReceipt.files);
   const before = await createFilePlan(context.root, tracked);
-  for (const change of before.changes) requireThat(change.beforeHash === null || change.beforeHash === old[change.path], 'IMPORT_OWNERSHIP', `Preserve edited or foreign design file: ${change.path}. Export/reconcile it before importing.`);
+  // MCP configuration follows the shared setup policy and reports its own conflict; every other tracked file is design data.
+  const mcpPaths = new Set(setupMcpFiles().map(file => file.path));
+  const [mcpConflict] = mcpConflicts(before.changes.filter(change => mcpPaths.has(change.path)), new Map(Object.entries(old)));
+  requireThat(!mcpConflict, 'MCP_CONFIG_CONFLICT', `Preserve edited or foreign MCP configuration: ${mcpConflict}. Reconcile it before setup manages or removes it.`);
+  for (const change of before.changes) if (!mcpPaths.has(change.path)) requireThat(change.beforeHash === null || change.beforeHash === old[change.path], 'IMPORT_OWNERSHIP', `Preserve edited or foreign design file: ${change.path}. Export/reconcile it before importing.`);
   const current = { ...old };
   for (const entry of tracked) {
     if (entry.content === null) delete current[entry.path];
@@ -124,6 +130,7 @@ function agentMcpSummary(options: Options, priorMcp: boolean) {
 }
 function checkStartOptions(options: Options, input: string | undefined): void {
   requireThat(!(options.airship || options['no-airship']) || input || options.blank, 'AIRSHIP_DESIGN_REQUIRED', 'Use --input/--starter/--blank, or airship enable/disable on an existing design.');
+  requireThat(!hostingRequested(options) || input || options.blank, 'HOSTING_DESIGN_REQUIRED', 'Use --input/--starter/--blank, or hosting set on an existing design.');
   requireThat(!(input && options.blank), 'SETUP_START_CONFLICT', 'Choose --input or --blank, not both.');
 }
 export async function configurationPlan(request: Request, context: Context) {
@@ -131,12 +138,13 @@ export async function configurationPlan(request: Request, context: Context) {
   requireThat(!(options.mcp && options['no-mcp']), 'MCP_OPTION_CONFLICT', 'Choose --mcp or --no-mcp, not both.');
   let selected = await requestedConfiguration(request, context, previous);
   const entries: Entry[] = [];
+  let hosting: ReturnType<typeof hostingSummary> | null = null;
   const intake: Intake = request.command === 'setup' ? await setupSource(request, context, selected) : { input: stringOption(options, 'input'), context, origin: null };
   const input = intake.input;
   checkStartOptions(options, input);
   if ((input || options.blank) && request.command !== 'config set') {
     const design = await designImport(options, intake, context, selected);
-    selected = design.selected; entries.push(...design.entries);
+    selected = design.selected; hosting = design.hosting; entries.push(...design.entries);
   }
   requireThat(selected, 'IDENTITY_REQUIRED', 'Supply --id, --name and --author, or --input <project.json>.');
   if (request.command === 'project import') requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
@@ -149,7 +157,7 @@ export async function configurationPlan(request: Request, context: Context) {
   if (request.command === 'setup') entries.push(...(await prepareHandout(context.root, { virtualFiles: { [configFile]: json(selected) } })).entries);
   const plan = await createFilePlan(context.root, entries);
   return { plan, summary: { configuration: selected, imported: Boolean(input) && intake.origin === null, starter: intake.origin, blank: options.blank === true,
-    agentMcp: agentMcpSummary(options, priorMcp), next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
+    agentMcp: agentMcpSummary(options, priorMcp), hosting, next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
 }
 export async function vaultPlan(context: Context) {
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup first.');

@@ -43,7 +43,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -81,9 +81,9 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "daily-journal-plugin",
+        "id": "daily-journal",
         "name": "Daily Journal",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Create a dated-entry workspace with a writing surface and review history."
       },
@@ -3205,7 +3205,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

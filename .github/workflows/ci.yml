@@ -9,9 +9,14 @@ name: CI
 # release/* head (release.yml qualifies that head instead), so "CI result" then
 # passes with every gate skipped. Drafts cannot merge, marking one ready for review
 # (ready_for_review) runs every gate, and Publish requires "Release result" first.
+# End-to-end steps (served UI in Chromium, the UI review gallery, real Obsidian;
+# scripts/quality/e2e-policy.mjs lists them) are opt-in: they run with tier
+# release (always), the e2e dispatch/call input or the pull request label e2e.
+# Adding the label starts a run of only the jobs that hold e2e steps; its
+# aggregator reports as "E2E result", never as the required "CI result".
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   push:
     branches: [main]
   workflow_call:
@@ -20,6 +25,10 @@ on:
         description: integration (ready pull requests and main) or release (every matrix leg and push-skipped job)
         type: string
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tier:
@@ -27,22 +36,25 @@ on:
         type: choice
         options: [integration, release]
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   baseline:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Baseline / ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        # ubuntu-latest stays here only because the shipped `bin/app ci` help and
-        # manual use `ci/baseline --matrix os=ubuntu-latest` as their example; the
-        # dependency-free baseline does not depend on the image's preinstalled tools.
-        os: [ubuntu-latest, windows-latest]
+        # The shipped `bin/app ci` help and manual use `ci/baseline --matrix
+        # os=ubuntu-24.04` as their example, so the pinned image name stays here.
+        os: [ubuntu-24.04, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -67,7 +79,7 @@ jobs:
           if-no-files-found: error
 
   showcase:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Showcase / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # Guided setup runs the complete verify gates once before the served showcase.
@@ -105,26 +117,26 @@ jobs:
       - &playwright-version
         name: Resolve the pinned Playwright version
         id: playwright
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - &playwright-cache
         name: Restore the pinned Chromium download
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Exercise the actual served showcase
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
       - name: Capture the UI review gallery (evidence for human review, not acceptance)
-        if: always() && runner.os == 'Linux'
+        if: always() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         run: node "$QUALIFIED_NPM" run ui:gallery
       - name: Retain the UI review gallery
         id: ui-gallery
-        if: always() && runner.os == 'Linux'
+        if: always() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ui-review-gallery
@@ -159,7 +171,7 @@ jobs:
   # Three independent template-authoring journeys run in parallel. Each still
   # runs every gate on its own fresh checkout.
   renamed-feature:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / renamed feature
     runs-on: ubuntu-24.04
     # Measured at 30-37 minutes on #60 and 44 minutes on #68 (identity adoption,
@@ -202,6 +214,7 @@ jobs:
       - *playwright-version
       - *playwright-cache
       - name: Provision pinned Chromium and exercise served components
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
@@ -233,7 +246,7 @@ jobs:
           if-no-files-found: error
 
   source-archive:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / source archive
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -271,7 +284,7 @@ jobs:
           if-no-files-found: error
 
   example-removal:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / example removal
     runs-on: ubuntu-24.04
     # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
@@ -288,6 +301,7 @@ jobs:
       - *playwright-version
       - *playwright-cache
       - name: Provision pinned Chromium
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - name: Remove reviewed examples while preserving the consumer feature
         run: |
@@ -297,7 +311,9 @@ jobs:
           node "$QUALIFIED_NPM" run examples:remove -- --yes --no-interaction --json > reports/template-authoring/removal.json
           sha256sum --check reports/template-authoring/consumer-before.sha256
           node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/foundation-verify-summary 2>&1 | tee reports/template-authoring/foundation-verify.txt
-          node "$QUALIFIED_NPM" run test:e2e
+      - name: Exercise served components after removal
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: node "$QUALIFIED_NPM" run test:e2e
       - name: Generate and qualify another working feature after removal
         run: |
           set -o pipefail
@@ -306,7 +322,11 @@ jobs:
           node scripts/testing/evidence-cli.mjs run runtime
           node scripts/testing/evidence-cli.mjs run coverage
           node scripts/testing/evidence-cli.mjs run artifact
-          node scripts/testing/evidence-cli.mjs run browser
+      - name: Capture served browser evidence of the requalified consumer
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: node scripts/testing/evidence-cli.mjs run browser
+      - name: Report every evidence session of the requalified consumer
+        run: |
           for session in reports/evidence/*; do
             node scripts/testing/evidence-cli.mjs report "$session" > "reports/template-authoring/consumer-acceptance-$(basename "$session").json"
           done
@@ -338,11 +358,12 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
-  # Framework CLI, real Obsidian and generator jobs run on pull requests and
-  # manual dispatch only, as before consolidation, and always in the release tier.
+  # Framework CLI and generator jobs run on pull requests and manual dispatch
+  # only, as before consolidation, and always in the release tier. Real Obsidian
+  # is e2e: opt-in, and always in the release tier.
   framework-cli:
     name: Framework CLI / ${{ matrix.os }}
-    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     strategy:
       fail-fast: false
       matrix:
@@ -367,14 +388,14 @@ jobs:
           node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
+          node "$QUALIFIED_NPM" run typecheck:framework
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.sitemap.json
+          node "$QUALIFIED_NPM" run typecheck:sitemap
           node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
@@ -393,7 +414,8 @@ jobs:
 
   real-obsidian:
     name: Real Obsidian E2E
-    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    # Pure e2e: only when opted in (pushes to main never are), always in the release tier.
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && (inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -432,7 +454,7 @@ jobs:
 
   generated-companion:
     name: Project generator / generated companion
-    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -461,6 +483,7 @@ jobs:
       - *playwright-version
       - *playwright-cache
       - name: Exercise generated stylesheet against real Nuxt UI components
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node scripts/companion-tools/qualify-styles.mjs
@@ -488,7 +511,7 @@ jobs:
   # disposable workspace; three per job avoids nine runner slots of setup.
   starter:
     name: Project generator / starters ${{ matrix.ids }}
-    if: inputs.tier == 'release' || (github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -528,7 +551,7 @@ jobs:
   # diff-based self-review guard against the pull request's base branch.
   self-review:
     name: Self-review guard
-    if: github.event_name == 'pull_request' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -547,18 +570,26 @@ jobs:
   # is candidate-qualification.yml's live security gate on main and release/*.
   security-audit:
     name: Security audit (informational)
-    if: github.event_name == 'pull_request' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    continue-on-error: true
     steps:
       - *checkout
       - *setup-node
       - *select-npm
       - name: Install the committed lock without lifecycle scripts
         run: node "$QUALIFIED_NPM" ci --no-fund --no-audit --ignore-scripts
+      # The audit result is reported, not enforced: a finding becomes a warning
+      # annotation and job summary entry while the check itself stays green.
       - name: Live audit, all installed dependency categories
+        id: audit
+        continue-on-error: true
         run: node "$QUALIFIED_NPM" run check:security
+      - name: Report audit findings
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::warning title=Security audit::check:security reported findings; see docs/development/MOMENT-ADVISORY-EXCEPTION.md and the security-audit artifact."
+          echo "### Security audit: findings reported (informational)" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
@@ -568,14 +599,20 @@ jobs:
           if-no-files-found: warn
 
   # One required check for branch protection. A job skipped by its own condition
-  # (framework-cli, real-obsidian and the generators on push, self-review outside
-  # pull requests, every gate on a draft or release/* pull request) counts as
-  # passing; any failure or cancellation fails this check. The informational
-  # security-audit job is deliberately not listed.
+  # (framework-cli, real-obsidian and the generators on push, real-obsidian without
+  # the e2e opt-in, self-review outside pull requests, every gate on a draft or
+  # release/* pull request) counts as passing; any failure or cancellation fails
+  # this check. The informational security-audit job is deliberately not listed.
+  # A run started by adding the e2e label skips every job without e2e steps, so it
+  # reports as "E2E result" and can never stand in for a full "CI result" on that
+  # head; another label starts no job at all.
   ci-result:
-    name: CI result
-    if: always()
+    name: ${{ github.event.action == 'labeled' && 'E2E result' || 'CI result' }}
+    if: always() && (github.event.action != 'labeled' || github.event.label.name == 'e2e')
     needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter, self-review]
+    permissions:
+      contents: read
+      checks: read
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -590,15 +627,25 @@ jobs:
             exit 1
           fi
       # On a release/* pull request every gate above skips, so this run would report a
-      # green "CI result" before the Release tier finished. Fail instead: the Release
-      # workflow's own "CI result" alias, reported after "Release result" succeeds on
-      # the same head commit, becomes the latest check of that name and unblocks merge.
-      - name: Leave release pull requests to the Release tier
+      # green "CI result" before the Release tier finished. It passes only when the
+      # Release workflow already reported a successful "Release result" on the same
+      # head commit; otherwise it fails, and the Release workflow's own "CI result"
+      # alias, reported after "Release result" succeeds, becomes the latest check of
+      # that name. Marking the release PR ready after Release finished stays green.
+      - name: Hold release pull requests until the Release tier passed on this head
         env:
           HEAD_REF: ${{ github.head_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           case "$HEAD_REF" in
-            release/*)
-              echo "::error::Release pull requests are gated by the Release workflow; wait for its Release result."
-              exit 1;;
+            release/*) ;;
+            *) exit 0;;
           esac
+          conclusion=$(gh api "repos/$REPOSITORY/commits/$HEAD_SHA/check-runs?check_name=Release%20result" \
+            --jq '[.check_runs[] | select(.status == "completed")] | sort_by(.completed_at) | last | .conclusion // "missing"')
+          if [ "$conclusion" != success ]; then
+            echo "::error::Release pull requests are gated by the Release workflow; Release result on $HEAD_SHA is $conclusion."
+            exit 1
+          fi

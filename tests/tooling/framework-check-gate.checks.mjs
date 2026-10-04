@@ -78,6 +78,24 @@ test('scope detection selects project-suite steps in a generated project', async
   assert.deepEqual(result.data.steps.map(step => step.status), ['not-run', 'not-run', 'not-run']);
   assert.deepEqual((await readdir(dir)).sort(), ['.companion', 'configs']);
 });
+test('a generated project runs oxlint like npm run lint and every generated locale/custom tooling test', async t => {
+  const dir = await scratch(t);
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');
+  await mkdir(join(dir, 'scripts/quality'), { recursive: true }); await writeFile(join(dir, 'scripts/quality/lint-source.mjs'), '');
+  await mkdir(join(dir, 'tests/tooling'), { recursive: true });
+  for (const name of ['locale-fr.checks.mjs', 'custom-reminder.checks.mjs', 'unrelated.checks.mjs', 'locale-fr.mjs']) await writeFile(join(dir, 'tests/tooling', name), '');
+  const full = await checkSteps(dir, false);
+  assert.deepEqual(full.steps.map(step => [step.id, step.entry]), [
+    ['typecheck', 'node_modules/vue-tsc/bin/vue-tsc.js'], ['lint', 'scripts/quality/lint-source.mjs'], ['eslint', 'node_modules/eslint/bin/eslint.js'],
+    ['test', 'node_modules/vitest/vitest.mjs'], ['tooling:custom-reminder', 'tests/tooling/custom-reminder.checks.mjs'], ['tooling:locale-fr', 'tests/tooling/locale-fr.checks.mjs']]);
+  // A generated test failing for real makes check fail, without hiding the other steps.
+  await writeFile(join(dir, 'tests/tooling/locale-fr.checks.mjs'), "import { test } from 'node:test';\ntest('drift', () => { throw new Error('LOCALE_DRAFT_DRIFT'); });\n");
+  const [outcome] = await runCheckSteps(full.steps.filter(step => step.id === 'tooling:locale-fr'), { root: dir, frameworkRoot: root });
+  assert.equal(outcome.status, 'failed'); assert.match(outcome.outputTail, /LOCALE_DRAFT_DRIFT/);
+  const fast = await checkSteps(dir, true, async () => null);
+  assert.ok(fast.steps.some(step => step.id === 'tooling:locale-fr') && fast.steps.some(step => step.id === 'lint'));
+});
 test('fast mode runs tests related to changed and untracked source files only', async t => {
   const dir = await scratch(t);
   await mkdir(join(dir, 'src')); await writeFile(join(dir, 'src/a.ts'), 'export const a = 1;\n'); await writeFile(join(dir, 'src/Ünïcode note.ts'), 'x');

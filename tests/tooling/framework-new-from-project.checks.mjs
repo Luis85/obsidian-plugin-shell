@@ -26,11 +26,13 @@ function machine(args, cwd) {
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 test('a downloaded companion export previews with its own identity and writes nothing', async t => {
   const cwd = await scratch(t);
-  await writeFile(join(cwd, 'plugin-companion.companion.json'), starterDocumentText('companion-plugin'));
+  // An export whose own ID breaks the submission rules; the shipped starter itself uses a compliant ID.
+  const legacy = JSON.parse(starterDocumentText('companion-plugin')); legacy.project.id = 'plugin-companion';
+  await writeFile(join(cwd, 'plugin-companion.companion.json'), JSON.stringify(legacy));
   const { exit, result } = machine(['nested/plugin-companion', '--from', 'plugin-companion.companion.json'], cwd);
   assert.equal(exit, 0, JSON.stringify(result.diagnostics)); assert.equal(result.status, 'planned'); assert.equal(result.data.written, false);
   const source = selfProject();
-  assert.deepEqual(result.data.summary.identity, source.project, 'identity comes from the JSON, not the folder name');
+  assert.deepEqual(result.data.summary.identity, { ...source.project, id: 'plugin-companion' }, 'identity comes from the JSON, not the folder name');
   // The export's own ID is kept, but its submission problem is reported with a usable --id.
   assert.ok(result.data.summary.warnings.some(text => /"plugin-companion" will fail check submission: id must not contain "plugin" \(validate-manifest\)\. Pass --id companion/.test(text)), JSON.stringify(result.data.summary.warnings));
   const reserved = machine(['nested/plugin-companion', '--from', 'plugin-companion.companion.json', '--id', 'my-plugin'], cwd);
@@ -44,6 +46,10 @@ test('a downloaded companion export previews with its own identity and writes no
   assert.equal(human.status, 0, human.stderr); assert.match(human.stdout, /From +plugin-companion\.companion\.json \(companion project schema 6/);
   assert.match(human.stdout, /Nothing has been written/); assert.match(human.stdout, new RegExp(result.data.planHash));
   assert.deepEqual(await readdir(cwd), ['plugin-companion.companion.json']); assert.ok(!existsSync(join(cwd, 'nested')));
+  await writeFile(join(cwd, 'shipped.companion.json'), starterDocumentText('companion-plugin'));
+  const shipped = machine(['nested/shipped', '--from', 'shipped.companion.json'], cwd);
+  assert.equal(shipped.result.data.summary.identity.id, source.project.id);
+  assert.ok(!shipped.result.data.summary.warnings.some(text => /check submission/.test(text)), JSON.stringify(shipped.result.data.summary.warnings));
 });
 test('--apply creates the reviewed project from a starter export with overridden identity; changed input is stale', async t => {
   const cwd = await scratch(t), target = join(cwd, 'inbox'), exported = join(cwd, 'quick-capture-plugin.companion.json');
@@ -114,7 +120,7 @@ test('invalid, malformed, future, unsafe or conflicting sources are refused with
   const future = machine(['fresh', '--from', 'future.json'], cwd).result.diagnostics[0];
   assert.match(future.message, new RegExp(`schema ${AUTHORING_VERSION + 1}; this framework reads only schema ${AUTHORING_VERSION}\\.`)); assert.match(future.next, /Upgrade the framework/);
   const retired = machine(['fresh', '--from', 'retired.json'], cwd).result.diagnostics[0];
-  assert.match(retired.message, /retired companion project schema 5; this framework reads only schema 6 and never migrates earlier formats/); assert.match(retired.next, /Export the project again/);
+  assert.match(retired.message, /retired companion project schema 5; this framework reads only schema 6 and never migrates earlier formats/); assert.match(retired.next, /Start from a current starter or a schema 6 export; earlier formats have no upgrade path/);
 });
 test('discovery advertises --from on new as a value option', async t => {
   const cwd = await scratch(t);

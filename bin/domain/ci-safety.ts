@@ -17,7 +17,9 @@ const publishing: ReadonlyArray<[RegExp, string]> = [
 const publishWords = /(?:^|[^a-z])(?:release|publish|deploy)(?:$|[^a-z])/i;
 const publishingActions = /release|publish|deploy/i;
 function stepTexts(step: CiStep): string[] {
-  return [step.run ?? '', step.uses ?? '', ...Object.values(step.env), ...Object.values(step.inputs)];
+  // A composite step also carries the effective action inputs (caller values and declared defaults) and the caller's env.
+  const composite = step.composite ? [step.composite.uses, ...Object.values(step.composite.inputs), ...Object.values(step.composite.callerEnv)] : [];
+  return [step.run ?? '', step.uses ?? '', ...Object.values(step.env), ...Object.values(step.inputs), ...composite];
 }
 function secretReasons(workflow: CiWorkflow, job: CiJob): string[] {
   const reasons: string[] = [];
@@ -28,6 +30,7 @@ function secretReasons(workflow: CiWorkflow, job: CiJob): string[] {
 function stepPublishReasons(step: CiStep): string[] {
   const reasons = publishing.filter(([pattern]) => step.run !== undefined && pattern.test(step.run)).map(([, label]) => `step ${step.index} runs ${label}`);
   if (step.kind === 'external' && step.uses !== undefined && publishingActions.test(step.uses)) reasons.push(`step ${step.index} uses the publishing action ${step.uses}`);
+  if (step.composite && publishingActions.test(step.composite.uses)) reasons.push(`step ${step.index} comes from the publishing action ${step.composite.uses}`);
   return reasons;
 }
 function publishReasons(job: CiJob): string[] {

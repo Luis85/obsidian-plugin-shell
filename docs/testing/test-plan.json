@@ -63,7 +63,8 @@
       "testIds": [
         "SRC-01",
         "SRC-02",
-        "SRC-03"
+        "SRC-03",
+        "SRC-04"
       ],
       "scope": "Input hashing and dependency-free lexical code-line gates (comments/blanks excluded); physical lines retained as diagnostics, not AST architecture checks."
     },

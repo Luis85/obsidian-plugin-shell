@@ -1,5 +1,6 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
+import { incrementExamples, incrementGroup, incrementOptionHelp, incrementOptionOverrides, incrementUsage } from './increment-help.ts';
 /**
  * Explanatory help metadata for the command catalog: groups, the golden path, examples and
  * option documentation. Data only; execution policy stays in catalog.ts and the handlers.
@@ -35,12 +36,14 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'adopt', title: 'Adopt an existing project', commands: ['adopt analyze', 'adopt plan', 'adopt skill'] },
-  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'ci', 'make', 'styles inspect', 'styles export'] },
+  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'ci', 'make', 'entities check', 'entities catalog', 'styles inspect', 'styles export'] },
   { id: 'documentation', title: 'Application documentation', commands: ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover'] },
   { id: 'obsidian-cli', title: 'Optional Obsidian CLI', commands: ['obsidian status', 'obsidian files', 'obsidian read', 'obsidian prepare'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
   { id: 'airship', title: 'Optional Airship', commands: ['airship status', 'airship enable', 'airship disable', 'airship install', 'airship start', 'airship doctor'] },
   { id: 'agent-mcp', title: 'Optional local agent MCP', commands: ['mcp'] },
+  { id: 'hosting', title: 'Hosting platform (GitHub, Azure DevOps or none)', commands: ['hosting show', 'hosting set'] },
+  incrementGroup,
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'support report', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
@@ -60,6 +63,7 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  ...incrementOptionHelp,
   type: { description: 'Component-template type filter.', values: ['component', 'component-with-children', 'page', 'page-with-bricks'] },
   'atomic-level': { description: 'Atomic Design level filter.', values: ['atom', 'molecule', 'organism', 'template', 'page'] },
   category: { description: 'Exact component-template category filter.' },
@@ -96,6 +100,10 @@ const specific: Record<string, OptionHelp> = {
   'no-airship': { description: 'Explicitly disable Airship in an imported or new project.' },
   mcp: { description: 'Enable the project-local Workbench MCP for Claude Code and Codex (setup-owned config; client trust and tool approval stay external).' },
   'no-mcp': { description: 'Remove unchanged setup-owned MCP configuration; edited files are preserved and refused. Without either flag setup preserves the current state.' },
+  hosting: { description: 'Where pull requests and CI live; generate emits that platform\'s pipeline, pull-request template and CLI hints. Prepares files only: nothing signs in, stores a token or contacts a host.', values: ['github', 'azure-devops', 'none'], default: 'the stored tooling.hosting, otherwise github' },
+  'azure-organization': { description: 'Azure DevOps organization URL: https://dev.azure.com/<organization> or https://<organization>.visualstudio.com. Needs the azure-devops platform and --azure-project; never a token.' },
+  'azure-project': { description: 'Azure DevOps project name (letters, digits, spaces, dots, underscores, hyphens).' },
+  'azure-repository': { description: 'Azure Repos repository name.', default: 'the project name' },
   agent: { description: 'Airship agent backend.', values: ['claude', 'codex', 'opencode'], default: 'claude' },
   'target-port': { description: 'Local source preview TCP port (1024..65535).', default: '5173' },
   port: { description: 'Distinct local Airship proxy TCP port (1024..65535).', default: '5174' },
@@ -138,8 +146,9 @@ const specific: Record<string, OptionHelp> = {
   view: { description: 'View name for view/component makers.' },
   preference: { description: 'Preference key for setting makers.' },
   document: { description: 'Note-backed entity (requires the markdown backend).' },
-  'trust-custom': { description: 'Allow a reviewed custom maker to execute local code.' },
   check: { description: 'Read-only: compare the pending locale draft (make locale <name> --check) with the current base keys; plans and writes nothing.' },
+  refresh: { description: 'make locale <name> --refresh: add the base keys a pending draft lacks and drop keys the base no longer has, keeping every surviving translation; review with --dry-run first.' },
+  'trust-custom': { description: 'Run a registered local custom recipe (scripts/makers/custom/<name>.mjs); it executes trusted project code, so review it first. Built-in recipes never need it.' },
   profile: { description: 'Execution profile.' },
   from: { description: 'Extracted replacement kit folder.' },
   'notes-file': { description: 'Release-notes Markdown file.' },
@@ -153,10 +162,11 @@ const specific: Record<string, OptionHelp> = {
   base: { description: 'With --fast or --plan: diff merge-base(<ref>, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD.' },
   plan: { description: 'List, without running anything, the gates the diff requires: exact commands, why each applies, estimated duration, prerequisites and CI coverage; ends with npm run verify.' },
   job: { description: 'Job to reproduce, as <workflow-file-stem>/<job-id> (for example ci/baseline); see ci --list.' },
-  matrix: { description: 'Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-latest); required when an expression computes the matrix.' },
+  matrix: { description: 'Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-24.04); required when an expression computes the matrix.' },
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when configs/testing/vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
+  ...incrementUsage,
   'adopt analyze': 'node bin/app adopt analyze [--target <dir>] [--out <report.json>] [--replace] [--json]',
   'adopt plan': 'node bin/app adopt plan [--target <dir>] [--report <report.json>] [--out <plan.md>] [--replace] [--yes | --apply <sha256>] [--json]',
   'adopt skill': 'node bin/app adopt skill [--target <dir>] [--yes | --apply <sha256>] [--json]',
@@ -172,11 +182,13 @@ const usage: Record<string, string> = {
   'obsidian files': 'node bin/app obsidian files --obsidian-vault <name-or-id> [--obsidian-folder <folder>] [--json]',
   'obsidian read': 'node bin/app obsidian read --obsidian-vault <name-or-id> --obsidian-path <note.md> [--json]',
   'obsidian prepare': 'node bin/app obsidian prepare --obsidian-vault <name-or-id> [--json]',
+  'hosting set': 'node bin/app hosting set <github|azure-devops|none> [--azure-organization <url> --azure-project <name> [--azure-repository <name>]]',
   new: 'node bin/app new <dir> (--starter <id> | --from <project.json>) [options]', help: 'node bin/app help [command] [--all]',
   'plan inspect': 'node bin/app plan inspect <plan-file>', 'plan apply': 'node bin/app plan apply <plan-file> --yes',
   make: 'node bin/app make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  ...incrementExamples,
   'adopt analyze': ['node bin/app adopt analyze --target ../legacy-app', 'node bin/app adopt analyze --target ../legacy-app --json --out ../legacy-report.json'],
   'adopt plan': ['node bin/app adopt plan --target ../legacy-app', 'node bin/app adopt plan --target ../legacy-app --apply <sha256>', 'node bin/app adopt plan --report ../legacy-report.json --target ../legacy-app --dry-run'],
   'adopt skill': ['node bin/app adopt skill --target ../legacy-app --dry-run', 'node bin/app adopt skill --target ../legacy-app --yes'],
@@ -235,6 +247,8 @@ const examples: Record<string, string[]> = {
   'handout validate': ['node bin/app handout validate --json'],
   'handout inspect': ['node bin/app handout inspect --json'],
   'airship status': ['node bin/app airship status --json'],
+  'hosting show': ['node bin/app hosting show --json'],
+  'hosting set': ['node bin/app hosting set azure-devops --azure-organization https://dev.azure.com/contoso --azure-project Demo --dry-run', 'node bin/app hosting set github --yes'],
   'airship enable': ['node bin/app airship enable --agent codex --dry-run', 'node bin/app airship enable --yes'],
   'airship disable': ['node bin/app airship disable --dry-run', 'node bin/app airship disable --yes'],
   'airship install': ['node bin/app airship install --dry-run', 'node bin/app airship install --yes'],
@@ -262,7 +276,7 @@ const examples: Record<string, string[]> = {
   'config validate': ['node bin/app config validate'], 'config set': ['node bin/app config set --input config.json --dry-run'],
   'setup status': ['node bin/app setup status --json'],
   'setup resume': ['node bin/app setup resume --stage verify --dry-run --json', 'node bin/app setup resume --stage verify --resume-hash <digest> --yes'],
-  setup: ['node bin/app setup --starter quick-capture --id capture --name Capture --author Me --dry-run', 'node bin/app setup --id folio-tools --name "Folio Tools" --author "Me" --blank --yes', 'node bin/app setup --input ./my-project.json --dry-run --json'],
+  setup: ['node bin/app setup --starter quick-capture --id capture --name Capture --author Me --dry-run', 'node bin/app setup --id folio-tools --name "Folio Tools" --author "Me" --blank --yes', 'node bin/app setup --input ./my-project.json --dry-run --json', 'node bin/app setup --starter quick-capture --hosting azure-devops --azure-organization https://dev.azure.com/contoso --azure-project Demo --dry-run'],
   'concept schema': ['node bin/app concept schema --json'],
   'concept inspect': ['node bin/app concept inspect --json', 'node bin/app concept inspect --input docs/concepts/capture/concept.json'],
   'concept import': ['node bin/app concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json', 'node bin/app plan apply concept.plan.json --yes'],
@@ -270,7 +284,7 @@ const examples: Record<string, string[]> = {
   'project validate': ['node bin/app project validate --input project.json --json'],
   'project inspect': ['node bin/app project inspect --input project.json'],
   'project import': ['node bin/app project import --input project.json --resolve project --dry-run'],
-  new: ['node bin/app new --list', 'node bin/app new ../folio-tools --starter custom-file-view --extension folio', 'node bin/app new ../quick-capture --starter quick-capture --yes', 'node bin/app new ../folio-tools --from folio-tools.companion.json', 'node bin/app new ../folio-tools --starter blank --storybook on --storybook-stories on'],
+  new: ['node bin/app new --list', 'node bin/app new ../folio-tools --starter custom-file-view --extension folio', 'node bin/app new ../quick-capture --starter quick-capture --yes', 'node bin/app new ../folio-tools --from folio-tools.companion.json', 'node bin/app new ../folio-tools --starter blank --storybook on --storybook-stories on', 'node bin/app new ../az-demo --starter quick-capture --hosting azure-devops --azure-organization https://dev.azure.com/contoso --azure-project Demo --dry-run'],
   generate: ['node bin/app generate --scope feature:workspace --plan-out generation.plan.json', 'node bin/app generate --yes'],
   make: ['node bin/app make list', 'node bin/app make file-extension board --feature documents --extension board', 'node bin/app make context-menu inspect --feature documents --extensions md,board', 'node bin/app make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node bin/app plan inspect generation.plan.json'], 'plan apply': ['node bin/app plan apply generation.plan.json --yes'],
@@ -280,7 +294,8 @@ const examples: Record<string, string[]> = {
   test: ['node bin/app test', 'node bin/app test --profile obsidian', 'node bin/app test --profile browser'],
   check: ['node bin/app check', 'node bin/app check --fast --json', 'node bin/app check --fast --base origin/main', 'node bin/app check --plan --json'],
   'check submission': ['node bin/app check submission', 'node bin/app check submission --json'],
-  ci: ['node bin/app ci --list --json', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-latest', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-latest --execute --json'],
+  'entities check': ['node bin/app entities check', 'npm run entities:check'], 'entities catalog': ['node bin/app entities catalog --json', 'npm run entities:catalog'],
+  ci: ['node bin/app ci --list --json', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04 --execute --json'],
   verify: ['node bin/app verify --profile project'], dev: ['node bin/app dev --profile obsidian', 'node bin/app dev', 'node bin/app dev --profile ui'],
   'vault prepare': ['node bin/app vault prepare --yes'], 'plugin install': ['node bin/app plugin install --dry-run'],
   'data plan': ['node bin/app data plan --input test-data-manifest.json'], 'data apply': ['node bin/app data apply --input test-data-manifest.json --apply <approval-hash>'],
@@ -293,6 +308,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
+  if (entry.effect === 'remote') return ['dry-run', 'yes', 'apply', ...shared];
   if (entry.effect === 'process') return ['dry-run', ...(['setup resume', 'starters run', 'docs recover'].includes(entry.id) ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'starters pack', 'starters run', 'setup resume', 'docs recover'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release' || entry.id === 'project measure') return ['dry-run', ...shared];
@@ -305,7 +321,7 @@ const describe = (description: string) => (doc: OptionHelp) => { doc.description
 /** Command-specific option documentation, applied in order over the shared descriptions. */
 const optionOverrides: OptionOverride[] = [
   [(id, name) => name === 'profile' && Boolean(profiles[id]), (doc, id) => { doc.values = profiles[id]; doc.default = profileDefaults[id]; }],
-  [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility.')],
+  [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. Steps of local composite actions (.github/actions/<name>/action.yml) count as the job\'s own steps.')],
   [option('ci', 'execute'), describe('Run the job\'s run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed.')],
   [option('setup resume', 'stage'), doc => { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }],
   [option('project schema', 'version'), doc => { doc.description = 'Published project schema version; only the current schema 6 exists.'; doc.values = ['6']; doc.default = '6'; }],
@@ -329,6 +345,7 @@ const optionOverrides: OptionOverride[] = [
   [option('templates docs', 'out'), doc => { doc.description = 'Folder for generated component-library Markdown, outside framework/source roots (bin, src, scripts, configs, templates, plugins, tests, configured code/test/vault folders).'; doc.default = 'docs/generated/component-library'; }],
   [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
   [option('templates instantiate', 'name'), describe('Optional instance/component/page title override; the template name is the default.')],
+  ...incrementOptionOverrides,
 ];
 function optionDoc(entry: Command, name: string): OptionHelp {
   const doc = { ...(specific[name] ?? { description: '' }) };

@@ -103,15 +103,23 @@ test('a required input without a default must be answered', () => withStarters(a
   assert.equal(JSON.parse(guided.options.answers).title, 'Strict title');
 }));
 
-test('companion starters offer Airship and fill single native integration defaults', async () => {
+test('companion starters offer Airship and hosting and fill single native integration defaults', async () => {
   const context = { root: frameworkRoot, frameworkRoot };
-  const custom = scripted(['', '', '', '', '', 'y', '']);
+  const custom = scripted(['', '', '', '', '', 'y', '', '']);
   const view = await guidedStarter(request(['target'], { starter: 'custom-file-view', id: 'folio-app', name: 'Folio App', author: 'Team' }), context, custom.prompt, custom.write);
   assert.equal(view.options.airship, true); assert.equal(view.options.extension, 'folio');
-  const menu = scripted(['', '', '', '', '', 'md,txt']);
+  // A new folder has no remote: the hosting default is GitHub and accepting it leaves the starter document unchanged.
+  assert.match(custom.asked[6], /^Hosting platform .*\[github\]: $/); assert.equal(view.options.hosting, undefined);
+  const menu = scripted(['', '', '', '', '', 'azure-devops', 'https://dev.azure.com/contoso', 'Menus', 'menu-repo', 'md,txt']);
   const filtered = await guidedStarter(request(['target'], { starter: 'context-menu', id: 'menu-app', name: 'Menu App', author: 'Team', 'no-airship': true }), context, menu.prompt, menu.write);
   assert.equal(filtered.options.airship, undefined); assert.equal(filtered.options.extensions, 'md,txt');
-  const plain = scripted(['', '', '', '']);
+  assert.deepEqual([filtered.options.hosting, filtered.options['azure-organization'], filtered.options['azure-project'], filtered.options['azure-repository']],
+    ['azure-devops', 'https://dev.azure.com/contoso', 'Menus', 'menu-repo']);
+  const plain = scripted(['', '', '', '', 'none']);
   const blank = await guidedStarter(request(['target'], { starter: 'blank', id: 'plain-app', name: 'Plain App', author: 'Team', airship: false }), context, plain.prompt, plain.write);
-  assert.equal(blank.options.extension, undefined); assert.equal(blank.options.extensions, undefined);
+  assert.equal(blank.options.extension, undefined); assert.equal(blank.options.extensions, undefined); assert.equal(blank.options.hosting, 'none');
+  const explicit = scripted([]);
+  const flagged = await guidedStarter(request(['target'], { starter: 'blank', id: 'plain-app', name: 'Plain App', author: 'Team', airship: false, hosting: 'github', answers: '{}' }), context, explicit.prompt, explicit.write);
+  assert.equal(flagged.options.hosting, 'github'); assert.ok(explicit.asked.every(question => !/Hosting|Azure/.test(question)));
+  assert.equal(await code(guidedStarter(request(['target'], { starter: 'blank', id: 'plain-app', name: 'Plain App', author: 'Team', airship: false }), context, scripted(['', '', '', '', 'gitlab']).prompt, () => {})), 'HOSTING_OPTION_PLATFORM');
 });

@@ -3,11 +3,12 @@ import { packStarterOperation, readStarterOperation } from '../starters/operatio
 import { starterProcessOperation } from '../starters/processes.ts';
 import { adoptAnalyze } from './adopt-operation.ts';
 import { airshipOperation } from './airship.ts';
+import { hostingShow } from './hosting-plan.ts';
 import { buildClickdummy } from './clickdummy.ts';
 import { checkOperation } from './check.ts';
 import { checkPlanOperation } from './check-plan.ts';
 import { ciOperation } from './ci.ts';
-import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
+import { commandGroup, commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
 import { obsidianRead } from './obsidian-cli.ts';
@@ -27,15 +28,25 @@ import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';
 import { readComponentTemplateOperation } from './component-templates.ts';
 import { isUiCommand, uiOperation } from './ui-operation.ts';
+import { incrementRead, isIncrementRead } from '../increments/read-operation.ts';
+import { remoteOperation } from '../increments/remote-operation.ts';
 
-function helpOperation(request: Request): Result {
+/** One command page, a group of subcommands sharing a root word, every command, or the golden path. */
+function helpSelection(request: Request) {
   const command = request.command;
   const selected = command === 'help' ? request.args.join(' ') : request.options.help ? command : '';
-  const entries = selected ? [descriptor(selected)] : commands;
-  const scope = selected ? 'command' : command === 'capabilities' || request.options.all ? 'all' : 'golden-path';
+  const group = selected && !commands.some(item => item.id === selected) ? commandGroup(selected) : [];
+  if (group.length) return { selected, group, entries: group.map(descriptor), scope: 'group' };
+  if (selected) return { selected, group, entries: [descriptor(selected)], scope: 'command' };
+  return { selected, group, entries: commands, scope: command === 'capabilities' || request.options.all ? 'all' : 'golden-path' };
+}
+function helpOperation(request: Request): Result {
+  const command = request.command;
+  const { selected, group, entries, scope } = helpSelection(request);
   return result(command, {
     protocolVersion: 1,
     scope,
+    ...(group.length ? { group: selected } : {}),
     ...helpIndex(),
     commands: entries.map(entry => ({
       ...entry,
@@ -75,9 +86,14 @@ async function makerCheck(request: Request, context: Context): Promise<Result> {
   const { checkPendingLocale } = await import('../makers/pending-locale.ts');
   const check = await checkPendingLocale(createMakerContext(context.root).read, slug(name, 'locale name'));
   if (!check.missing.length && !check.extra.length && check.selectable === false) return result(request.command, check);
-  const drift = new OperationError('LOCALE_DRAFT_DRIFT', `Pending locale ${check.locale} differs from the base keys or is selectable.`, 'Restore missing keys, remove extra keys and keep the draft unselectable until its translation review.');
+  const drift = new OperationError('LOCALE_DRAFT_DRIFT', `Pending locale ${check.locale} differs from the base keys or is selectable.`, `Review make locale ${check.locale} --refresh --dry-run, which restores missing keys and removes extra keys, and keep the draft unselectable until its translation review.`);
   drift.details = check;
   throw drift;
+}
+/** The registered entity catalog, bundled from checked-in definitions; the same handler serves source checkouts and kits. */
+async function entityCatalog(request: Request, context: Context): Promise<Result> {
+  const { loadCatalog } = await import('../makers/load-catalog.ts');
+  return result(request.command, await loadCatalog(context.root));
 }
 async function newProject(request: Request, context: Context): Promise<Result> {
   if (request.options.list) return starterListing(context);
@@ -127,7 +143,10 @@ const routes: Route[] = [
   [(_request, effect) => effect === 'fixtures', (request, context) => fixtureOperation(request, context)],
   [isMakerDiscovery, makerDiscovery],
   [isMakerCheck, makerCheck],
+  [prefixed('entities '), entityCatalog],
   [named('adopt analyze'), adoptAnalyze],
+  [named('hosting show'), hostingShow],
+  [isIncrementRead, incrementRead],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],
   [prefixed('storybook '), (request, context) => storybookOperation(request, context)],
@@ -138,6 +157,7 @@ const routes: Route[] = [
   [named('check submission'), (request, context) => submissionCheck(context, request.options['dry-run'] === true)],
   [(request, effect) => request.command.startsWith('airship ') && effect !== 'plan', (request, context) => airshipOperation(request, context)],
   [(request, effect) => request.command === 'plan inspect' || effect === 'plan', fileOperation],
+  [(_request, effect) => effect === 'remote', remoteOperation],
   [(_request, effect) => effect === 'process', (request, context) => processOperation(request, context)],
   [named('release operate'), releaseOperate],
 ];

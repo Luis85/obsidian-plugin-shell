@@ -61,8 +61,8 @@ node bin/app new <dir> --from <project.companion.json> [--id <plugin-id>] [--nam
 ```
 
 `--from` accepts any complete project JSON exported by the companion, not only a
-built-in starter (the shared contract accepts schemas 1–4; the tests exercise
-schema 4 exports). It has the same placement, preview, plan-hash,
+built-in starter (the shared contract accepts only project schema 6; schema 1–5
+exports fail with `PROJECT_VERSION_UNSUPPORTED`, never migrated). It has the same placement, preview, plan-hash,
 `--yes`/`--apply`/`--dry-run`, stale-hash and `--install` semantics as `--starter`;
 the two options are mutually exclusive (`SOURCE_CONFLICT`). The path is relative to
 the invoking shell. The file is read as data only: a regular, non-linked file of at
@@ -78,6 +78,31 @@ will fail, with a suggested `--id`; an explicit `--id` must follow the creation 
 Editing the file after review makes its plan hash stale. See
 [Companion handoff](COMPANION-HANDOFF.md).
 
+### Hosting platform: GitHub, Azure DevOps or none
+
+```sh
+node bin/app new <dir> --starter <id> --hosting azure-devops [--azure-organization https://dev.azure.com/<org> --azure-project <name> [--azure-repository <name>]]
+node bin/app setup --input ./my-project.json --hosting none --dry-run
+node bin/app hosting show
+node bin/app hosting set <github|azure-devops|none> [--azure-*] [--dry-run | --apply <planHash> | --yes]
+```
+
+`--hosting` writes `tooling.hosting` into the design that `new` (Companion starters and
+`--from`) and `setup` (`--starter`, `--input`, `--blank`) compile; omitting it keeps the
+document's own value, and absent means GitHub. Azure details need the `azure-devops`
+platform and both an organization and a project (`HOSTING_OPTION_CONFLICT`,
+`HOSTING_OPTION_INCOMPLETE`); invalid values fail with `COMPANION_TOOLING_INVALID`.
+File starters refuse the flags (`STARTER_OPTION`); setup without a design source refuses
+them (`HOSTING_DESIGN_REQUIRED`). The interviews of `new` and `setup` ask for the platform
+unless `--hosting` is given; setup suggests the platform of the folder's `origin` remote.
+`new` prints the `gh repo create` or `az repos create` and `git remote add` commands after
+writing; it never runs them and `git init` never adds a remote. `hosting set` is a reviewed
+plan bound to the design and its receipts; it creates the new platform's pipeline and
+pull-request template when absent, deletes nothing and lists the previous platform's
+files as `retired`. `doctor` reports the platform and, for Azure DevOps, whether `az` and
+its `azure-devops` extension are available, using one read-only `az version` call. See
+[hosting platforms](HOSTING-PLATFORMS.md).
+
 ## Adopt an existing project
 
 `node bin/app adopt analyze|plan|skill` adds Workbench to a project that already exists. `analyze` is a bounded, read-only scan that never executes project code and reports stack, tooling and compatibility findings (`workbench-adoption-report/v1`). `plan` renders that report as one Markdown integration plan, previews it with its SHA-256 and writes only that file after `--yes` or `--apply <hash>`. `skill` installs the `adopt-existing-project` agent skill. These commands work on any folder (`--target`), without `shell.config.json`. See [Adopt an existing project](ADOPT-EXISTING-PROJECT.md).
@@ -88,7 +113,10 @@ Editing the file after review makes its plan hash stale. See
 → `check` → `make`), each with a runnable example, then lists the remaining
 commands by group. `help --all` lists every command with its summary, and
 `help <command>` (or `<command> --help`) shows usage, options with allowed values
-and defaults, common options for that command's effect, and examples. The help and
+and defaults, common options for that command's effect, and examples. A root word
+shared by several commands is a group: `help framework`, `help starters`,
+`help release`, `help compiler` and the bare `node bin/app compiler` list that
+group's subcommands (`scope: "group"` in JSON). The help and
 `capabilities` JSON carry the same data additively (`scope`, `goldenPath`, `groups`
 and per-command `group`, `usage`, `examples`, `optionHelp`) under protocol version 1;
 existing fields are unchanged. `--profile` values come from the same list that the
@@ -96,7 +124,11 @@ handlers validate.
 
 Human mode never prints raw JSON: `status`/`doctor`, `make list`/`describe`, plans,
 `check` and `check submission` have readable views, and other results are shown as
-aligned key/value rows. Views end with a `Next:` command where one exists. Markers
+aligned key/value rows; a list of records (for example `starters list`) is shown
+as one row per entry. `Next:` hints and output paths are never shortened. Views
+end with a `Next:` command where one exists; an applied `setup` points at
+`setup status` for its separately approved later stages. A request rejected before
+any command is recognized is labelled `Workbench CLI (no command ran)`. Markers
 and colour (`✓ ✗ !`) appear only on a TTY without `NO_COLOR` and with a non-`dumb`
 `TERM`; otherwise output is plain ASCII (`[ok] [FAIL] [warn]`). `--json` output keeps
 the same single versioned envelope.
@@ -268,9 +300,9 @@ node bin/app verify --profile project --json
 
 A configured blank start uses `setup --id my-plugin --name "My Plugin" --author "Author" --blank --yes`. It creates an inert minimal design through the same intake validator, not a competing template generator. Supplying identity without `--blank` or `--input` only configures the project. Import can follow later.
 
-`npm run --silent shell -- <command> --json` returns the same structured result without npm's script banner. In a generated kit, `npm run make -- feature bookmarks --dry-run` reaches the same maker planner. Optional package `bin` metadata exposes `obs-shell` when explicitly linked/installed onto PATH; global installation is never required or performed automatically.
+`npm run --silent app -- <command> --json` returns the same structured result without npm's script banner. A freshly extracted kit ships a reduced `package.json` whose scripts (`app`, `help`, `setup`, `new`, `make`, `generate`, `status`, `doctor`, `framework:status`) all run the bundled `node bin/app`; generation replaces it with the project's own scripts. Its root `README.md` links the shipped documents under `bin/template/`. In a generated kit, `npm run make -- feature bookmarks --dry-run` reaches the same maker planner. Optional package `bin` metadata exposes `obs-shell` when explicitly linked/installed onto PATH; global installation is never required or performed automatically.
 
-`help`, `capabilities`, `make list`, `make describe <recipe>` and `schema` are data-only discovery. They do not load executable project configuration or custom makers. The legacy `npm run capabilities` catalog remains a separate compatibility contract; the central CLI catalog describes its current handlers. Custom-maker execution requires `--trust-custom`; metadata declarations are not a sandbox.
+`help`, `capabilities`, `make list`, `make describe <recipe>` and `schema` are data-only discovery. They do not load executable project configuration or custom makers. The legacy `npm run capabilities` catalog remains a separate compatibility contract; the central CLI catalog describes its current handlers. A recipe name is resolved against the built-in catalog and the statically read custom registry before any trust decision: an unknown name fails with `MAKER_UNKNOWN` and a did-you-mean suggestion, and only a registered local custom recipe requires `--trust-custom`; metadata declarations are not a sandbox.
 
 `--json` emits one versioned result on stdout, including parser errors. Logs/progress use bounded stderr. `--no-interaction`, JSON mode and non-TTY input never prompt. Results distinguish planned, blocked, applied, unchanged, cancelled and failed states. Nonzero exit does not imply rollback; bounded recovery and process outcomes remain available. POSIX subprocess groups are terminated on timeout/cancellation; Windows currently guarantees direct-child termination, not a general descendant-tree transaction.
 
@@ -325,7 +357,7 @@ Fixture commands reuse the real exported fixture engine, validators and ownershi
 
 `build`, `test`, `verify`, `dev` and release commands call existing tools with argument arrays and bounded output. Installation uses the selected npm's `ci`, not uncontrolled latest dependency resolution. Missing tools are errors, not skipped passing checks. `verify --profile project` proves generated scaffold build/types/tests; `verify` retains the full framework quality gate. Native evidence is separate.
 
-`framework status` verifies the pinned kit. `framework upgrade --from <extracted-kit>` produces an ownership-aware replacement plan, refuses reused versions/downgrades and edited launchers, and leaves dependency and product-source changes separate. Kit files the new version no longer ships are deleted in the same plan, but only after both kits verify and only while each file still matches its recorded fingerprint; a concurrent edit makes the plan stale instead of losing data. Runtime plugin configs are preserved: an unedited config follows the new shipped default, an edited one is kept when the default did not change, and an edit whose default also changed (or whose plugin was retired) is reported as a plan conflict that blocks apply. A project without `bin/kit.json` (including the retired schema-1 `.framework/` layout, which is never probed) fails with `KIT_REQUIRED`; there is no automatic layout migration, so extract a current kit and reapply project changes in review. Upgrade and source/data migration are not interchangeable.
+`framework status` verifies the pinned kit. `framework upgrade --from <extracted-kit>` produces an ownership-aware replacement plan, refuses reused versions/downgrades and edited launchers, and leaves dependency and product-source changes separate. Kit files the new version no longer ships are deleted in the same plan, but only after both kits verify and only while each file still matches its recorded fingerprint; a concurrent edit makes the plan stale instead of losing data. Runtime plugin configs are preserved: an unedited config follows the new shipped default, an edited one is kept when the default did not change, and an edit whose default also changed (or whose plugin was retired) is reported as a plan conflict that blocks apply. `--from` must name an extracted kit folder: a ZIP or other file fails with `KIT_ARCHIVE_NOT_EXTRACTED` and the extraction step, a missing path with `KIT_SOURCE_MISSING`. A project without `bin/kit.json` (including the retired schema-1 `.framework/` layout, which is never probed) fails with `KIT_REQUIRED` and a next step (run inside an extracted kit, or `framework pack` from a framework checkout); there is no automatic layout migration, so extract a current kit and reapply project changes in review. Upgrade and source/data migration are not interchangeable.
 
 `release prepare --version X.Y.Z --notes-file ...` plans the existing source-version operation and updates local configured version. It creates no tag, commit or public asset. Reimport/regeneration after a version change may require manual resolution of metadata histories; no blanket overwrite is supported.
 

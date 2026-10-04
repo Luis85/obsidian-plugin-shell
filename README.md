@@ -8,6 +8,8 @@ The three promises are **saving time without sacrificing quality**, **documentin
 
 Start with the [product vision](docs/product/PRODUCT-VISION.md), [product principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md). The [product and delivery overview](SHELL-FIRST-OVERVIEW.md) connects the available entry points; the [2026-09-29 vision review](docs/_archive/product/PR5-VISION-REVIEW.md) distinguishes inspected implementation from intended direction.
 
+**Developers:** the [developer guide](DEVELOPER_GUIDE.md) lists every requirement first, then setup and everyday workflows for improving or extending the project.
+
 **Implementation boundary:** Workbench builds on the reusable shell, CLI, compiler and authoring concept in PR #5. A generated scaffold is not a finished application, and the browser authoring concept is not the fully accepted native product. The supported CLI entry is `node bin/app`; package/manifest IDs, schema names and `companion` paths remain unchanged. Generated projects retain the user's chosen identity.
 
 ## Companion and UI-feature starters
@@ -52,8 +54,12 @@ The new project has its own README and short `AGENTS.md`, Claude Code hooks, ski
 and permissions, VS Code debugging, product CI and an in-memory Obsidian example test
 ([what it contains](docs/development/COMPANION-GENERATOR.md#what-the-generated-project-contains)).
 
-`node bin/app help` shows the golden path (new, install, dev, test, check, make).
-`npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`
+`node bin/app help` (the Workbench CLI; package `bin` name `obs-shell`) shows the
+golden path (new, install, dev, test, check, make); `help <group>`, for example
+`help framework`, lists a command group. `make` applies a reviewed plan and then
+runs its planned type, generated-test, event and entity checks, reporting each
+actual result. `npm run check` is the fast daily and agent gate (types, both
+linters, tests and generated authoring tests; `check:fast`
 covers changed files only), and `npm run check:submission` mirrors documented
 Obsidian review rules locally. Neither replaces `npm run verify`. See
 [the check gate](docs/development/FRAMEWORK-CLI.md#golden-path-help-and-the-check-gate).
@@ -85,8 +91,9 @@ and remaining scope. This does not establish complete template release readiness
 
 The integration baseline includes [opt-in release execution](docs/development/RELEASE-EXECUTION.md)
 from a retained candidate. [Readiness ledger](docs/_archive/development/TEMPLATE-READINESS-LEDGER.md)
-tracks remaining requirements; real publication and the privileged Actions interface
-remain unqualified. No release has been published by this implementation task.
+tracks remaining requirements. The owner-dispatched Release cut and Publish workflows
+exist (see [How work flows](#how-work-flows)) but have not been exercised on GitHub;
+real publication remains unqualified. No release has been published by this implementation task.
 
 A TypeScript/Vue/Pinia plugin with typed entity definitions, separate document
 recipes, Markdown CRUD and explicit plugin-data entities. Task is an optional example;
@@ -273,6 +280,41 @@ and `release:rehearse`. They report discovery failures and retained asset identi
 they do not publish. Expanded native/device, manual accessibility and public
 release promotion require separate evidence and authorization.
 
+## How work flows
+
+Checks tighten as a change matures, so early iteration is not slowed by the full
+qualification:
+
+| Stage | Trigger | Checks |
+| --- | --- | --- |
+| Draft pull request | every push | Dev tier: "Dev checks", a fast diff-scoped gate, and "Definition of Ready" |
+| Ready for review | marking it ready, then every push | Integration tier: "CI result", "Definition of Done" and every pull-request workflow |
+| `release/X.Y.Z` branch | owner-dispatched Release cut | Release tier: every workflow on every matrix leg; the owner-dispatched Publish then merges, tags `X.Y.Z` and creates the GitHub release |
+
+Claude Code skills drive each stage: the ideation chain (`ideation-journey` through
+`ideation-boilerplate`) from an idea to a checked prototype skeleton,
+`feature-delivery` from a draft pull request to a green merge, `self-review` before
+review and `release` for cut and publish. Read the
+[delivery pipeline](docs/development/DELIVERY-PIPELINE.md),
+[deliver a change](docs/development/DELIVER-A-CHANGE.md),
+[cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md) and the
+[workflow reference](docs/development/WORKFLOWS.md).
+
+Work is planned as **increments**: `node bin/app increment new` writes the
+increment document with its acceptance criteria, a kick-off pull request plan, an
+issue, one pending test stub per criterion and the branch `increment/<id>`. The
+increment is refined in its kick-off pull request until the Definition of Ready
+passes, then delivered by change pull requests stacked on that branch
+(`node bin/app pr new`), each closed by the Definition of Done. `pr publish` and
+`pr sync` turn the plans into draft pull requests on GitHub or Azure DevOps and
+keep tasks and amendments in sync, only through a reviewed preview. Start with
+[your first increment](docs/development/FIRST-INCREMENT.md).
+
+Projects can live on GitHub or Azure DevOps: `setup` and `new` ask for the hosting
+platform (or take `--hosting github|azure-devops|none`), and `node bin/app hosting set`
+switches later. Generated projects get the matching pipeline, pull-request template and
+`gh`/`az` hints; see [hosting platforms](docs/development/HOSTING-PLATFORMS.md).
+
 ## Documentation
 
 The [docs index](docs/README.md) lists every current document by type (tutorials,
@@ -287,6 +329,7 @@ how-to guides, reference and explanation), together with plans, workspaces and t
 | [Test suites](docs/testing/TEST-SUITES.md) | Every suite, its command and prerequisites, and how to add a test. |
 | [Test strategy](docs/testing/TEST-STRATEGY.md) | The testing approach and the normative TST rules. |
 | [Quality assurance](docs/development/QUALITY-ASSURANCE.md) | What `npm run verify` runs, partial runs and reports. |
+| [Deliver a change](docs/development/DELIVER-A-CHANGE.md) | Draft pull request, Dev and Integration tiers, green merge. |
 | [Framework PRD](docs/product/PRD.md) | Reusable Obsidian foundation requirements; Workbench direction is in the [product vision](docs/product/PRODUCT-VISION.md). |
 | [Upstream lint dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion. |
 

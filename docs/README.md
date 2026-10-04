@@ -18,8 +18,15 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | --- | --- |
 | [Getting started](user-manual/shell-cli/getting-started.md) | Create your first plugin from a starter or an extracted framework kit, then run and check it. |
 | [Build a feature](development/BUILD-A-FEATURE.md) | Add a business feature step by step: entity, document recipe, registration, view and tests. |
+| [Your first increment](development/FIRST-INCREMENT.md) | Plan an increment with `node bin/app increment new`, refine it in a kick-off draft pull request until the Definition of Ready passes, deliver it through a stacked change pull request and close it with the Definition of Done. |
 
 ## How-to guides
+
+**Work on this framework checkout**
+
+| Page | Task |
+| --- | --- |
+| [Developer guide](../DEVELOPER_GUIDE.md) | Check the requirements, set up the checkout, then run the everyday workflows for improving or extending the plugin, CLI and generator. |
 
 **Develop a plugin on the shell**
 
@@ -31,6 +38,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Native file extensions and context menus](development/native-file-integrations.md) | Generate a custom file view or file context-menu plugin. |
 | [Setup: npm install-script policy](development/SETUP-TROUBLESHOOTING.md) | Resolve `EALLOWSCRIPTS` and other setup install-script errors. |
 | [Setup inside an extracted kit](development/EXTRACTED-KIT-SETUP.md) | Run `node bin/app setup` in a locally packed framework kit. |
+| [Choose GitHub, Azure DevOps or no hosting platform](development/HOSTING-PLATFORMS.md) | `--hosting` for `new`, `setup` and `npm run setup`, `hosting show\|set`, and the read-only `doctor` check of `az`. |
 | [Local and cloud sessions](development/CLOUD-AND-LOCAL-SESSIONS.md) | Take a project from a local checkout to a ready cloud agent session. |
 | [Data-driven wizards and forms](development/WIZARDS-AND-FORMS.md) | Add or change a guided CLI process or reusable form in `configs/wizards` and `configs/forms`. |
 | [Data-driven business processes](development/BUSINESS-PROCESSES.md) | Manage processes, their steps, business rules and docs; check, document, run and simulate them. |
@@ -38,7 +46,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Manage risks](development/RISK-MANAGEMENT.md) | Keep a risk register as typed Markdown notes with `node bin/app risk`: model, note format, checks and the generated register. |
 | [Manage learnings](development/LEARNINGS.md) | Keep lessons learned as typed Markdown notes with `node bin/app learning`: lifecycle, note format, checks, review and the generated register. |
 | [Browser test workflows](development/TEST-WORKFLOWS.md) | Define Playwright journeys for projects and prototypes as JSON, run them headless, keep generated docs notes and export specs with `node bin/app workflow`. |
-| [Increments and release candidates](development/RELEASE-CANDIDATES.md) | Product increments, candidate folders per version, freezing, docs regeneration and the path to release approval. |
+| [Release items and release candidates](development/RELEASE-CANDIDATES.md) | Release items, candidate folders per version, freezing, docs regeneration and the path to release approval. |
 | [Typed-note collections](development/NOTE-COLLECTIONS.md) | Engine API and the steps to add a collection (a JSON definition, a settings path, forms/wizards and a command root). |
 | [Generate fake data](development/FAKE-DATA.md) | Generate seeded sample notes, Bases tables and reusable generation configs with `node bin/app fake-data`. |
 | [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | Render a JSON form inside the plugin from `src/features/<feature>/forms` and receive validated values. |
@@ -58,6 +66,18 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Optional Storybook](development/OPTIONAL-STORYBOOK.md) | Switch on the isolated Storybook workspace and generated stories. |
 | [UI review gallery](development/UI-REVIEW-GALLERY.md) | Capture and index browser screenshots for human review. |
 | [Project setup handout](project-setup/HANDOUT.md) | Run the product-trio meeting that turns PRDs into a prototype brief. |
+
+**Deliver and release**
+
+| Page | Task |
+| --- | --- |
+| [Deliver a change](development/DELIVER-A-CHANGE.md) | Branch, open a draft pull request, pass the Dev and Integration tiers and merge a green pull request. |
+| [Manage increments](development/MANAGE-INCREMENTS.md) | Change statuses, scope and criteria, track issues, change and sync published pull requests, resolve sync conflicts, recover from uncertain writes and use Azure DevOps. |
+| [Cut and publish a release](development/CUT-AND-PUBLISH-A-RELEASE.md) | Cut `release/X.Y.Z`, watch the Release tier, fix forward, publish and recover. |
+| [Developer workflow](development/DEVELOPER-WORKFLOW.md) | The daily loop: setup, a first feature change, feedback, events, styles and verification. |
+| [Maintenance operations](development/MAINTENANCE-OPERATIONS.md) | Run freshness discovery and review dependency updates. |
+| [Release rehearsal](development/RELEASE-REHEARSAL.md) | Rehearse a fixed candidate offline (manual tool). |
+| [Release execution](development/RELEASE-EXECUTION.md) | Operate a retained candidate packet with explicit authorization (manual tool). |
 
 **Test and qualify**
 
@@ -128,6 +148,17 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Executable evidence](testing/EXECUTABLE-EVIDENCE.md) | Evidence adapters and the [acceptance crosswalk](testing/acceptance-crosswalk.json). |
 | [Legacy test plan and baseline](testing/TEST-CONCEPT.md) | The [`test-plan.json`](testing/test-plan.json) contract, `verify-baseline` command and evidence identity. |
 
+**Delivery and CI**
+
+| Page | Facts |
+| --- | --- |
+| [GitHub Actions workflows](development/WORKFLOWS.md) | Every workflow's tier, triggers, jobs, permissions, artifacts, required checks and the repository policy. |
+| [Increments reference](development/INCREMENTS-REFERENCE.md) | Increment, PullRequest and Issue documents, statuses and transitions, edit locks, branches, the sync record, error codes and JSON results of `increment`, `pr` and `issue`. |
+| [Definition of Ready and Done](development/DEFINITION-OF-READY-AND-DONE.md) | Every DOR and DOD rule with its severity, kind-aware gate selection, exemptions, acceptance stubs, configuration and workflows. |
+| [Quality assurance](development/QUALITY-ASSURANCE.md) | Source assurance checks, `npm run verify` steps and reports, and the self-review guard rules. |
+| [Maintenance and release contract](development/MAINTENANCE-AND-RELEASE.md) | Dependency, freshness and release requirements (normative). |
+| [Release operation plans](development/RELEASE-OPERATION-PLANS.md) | The offline draft/promotion plan input and output contract. |
+
 **Product requirements**
 
 | Page | Facts |
@@ -148,6 +179,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Delivery strategy](product/DELIVERY-STRATEGY.md) | Why the framework ships before the companion conversion. |
 | [Product and delivery overview](../SHELL-FIRST-OVERVIEW.md) | How the authoring experience, CLI, compiler and shell fit together. |
 | [Framework guide](development/FRAMEWORK-GUIDE.md) | The reusable developer API and the path from feature to qualification. |
+| [Delivery pipeline](development/DELIVERY-PIPELINE.md) | Why checks tighten from draft to ready to release, how the tiers gate, and why publish merges before it tags. |
 | [Repository layout](development/REPOSITORY-LAYOUT.md) | What each top-level folder owns and the dependency direction between them. |
 | [Presentation concerns](development/PRESENTATION-STRUCTURE.md) | Why Vue markup, composables, stores and context are separated. |
 | [Entity-backed Markdown documents](development/ENTITY-DOCUMENTS.md) | The full entity-to-Markdown contract and its design. |
@@ -161,22 +193,22 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Harness styles](testing/HARNESS-STYLES.md) | Why the host stylesheet is separate and what frontend evidence means. |
 | [Milestone context](development/MILESTONE-CONTEXT.md) | How the recent milestones relate; links into historical records. |
 | [Upstream lint dependency exception](development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion (normative). |
+| [Moment advisory exception](development/MOMENT-ADVISORY-EXCEPTION.md) | The open `moment` advisory through the Obsidian API package and why `check:security` still fails. |
 | [Hindsight and Git/GitHub](development/HINDSIGHT-GIT-GITHUB.md) | Research and decisions behind the optional memory integration. |
 
 ## Delivery and CI
 
-The development workflow, quality gates, maintenance and release operations are
-documented in [Developer workflow](development/DEVELOPER-WORKFLOW.md),
-[Quality assurance](development/QUALITY-ASSURANCE.md),
-[Maintenance and release](development/MAINTENANCE-AND-RELEASE.md),
-[Maintenance operations](development/MAINTENANCE-OPERATIONS.md),
-[Release rehearsal](development/RELEASE-REHEARSAL.md),
-[Release operation plans](development/RELEASE-OPERATION-PLANS.md) and
-[Release execution](development/RELEASE-EXECUTION.md). Changes are recorded in
-[`CHANGELOG.md`](../CHANGELOG.md) at the repository root. A dedicated delivery pipeline guide is being
-added; until then these pages remain the reference.
-
-<!-- pipeline-docs: delivery pipeline links go here -->
+Work moves from idea to release through progressive tiers: a draft pull request
+runs the fast Dev tier, marking it ready runs the Integration tier, and a
+`release/X.Y.Z` branch runs the Release tier before an owner-dispatched Publish.
+Start with the [delivery pipeline](development/DELIVERY-PIPELINE.md) explanation,
+then [deliver a change](development/DELIVER-A-CHANGE.md) or
+[cut and publish a release](development/CUT-AND-PUBLISH-A-RELEASE.md); the
+[workflow reference](development/WORKFLOWS.md) lists every workflow. Work is
+planned as increments (`node bin/app increment`, `pr`, `issue`): start with
+[your first increment](development/FIRST-INCREMENT.md); the checks are in
+[Definition of Ready and Done](development/DEFINITION-OF-READY-AND-DONE.md). Changes are
+recorded in [`CHANGELOG.md`](../CHANGELOG.md) (Keep a Changelog) at the repository root.
 
 ## Plans and backlog (not Diataxis)
 
@@ -208,7 +240,10 @@ Claude Code skills live in [`.claude/skills/`](../.claude/skills/) with thin Cod
 adapters in `.agents/skills/`. This index is framework-only: generated projects do not
 receive it and carry their own skill set.
 
-- [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`).
+- [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`), handing off to `increment-handoff` and then `feature-delivery`.
+- [Increment handoff](../.claude/skills/increment-handoff/SKILL.md): plan one increment with `node bin/app increment new` and refine it with the user, in its kick-off pull request, until the Definition of Ready passes; split or escalate to ideation when it is not just under-specified.
+- [Feature delivery](../.claude/skills/feature-delivery/SKILL.md): plan change pull requests stacked on the increment branch with `node bin/app pr new`, keep them through the Dev tier, pass the Definition of Done, prepare them for the Integration tier and merge them green on request.
+- [Release](../.claude/skills/release/SKILL.md): choose the version, dispatch the cut, follow the Release tier, publish on explicit request and verify the result.
 - [Self-review](../.claude/skills/self-review/SKILL.md): check a change against AGENTS.md and run the real gates before handover.
 - [Adopt an existing project](../.claude/skills/adopt-existing-project/SKILL.md): write an adoption plan for an existing project.
 - [Companion prototype design](../.claude/skills/companion-prototype-design/SKILL.md): design-first discovery and prototype prompts (framework only).

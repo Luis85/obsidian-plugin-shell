@@ -124,11 +124,15 @@ test('the Workbench targets come from the installed starter, kit template files 
   assert.deepEqual(real.angular, { version: '22.0.0', major: 22, source: 'configs/starters/webapp-angular.json' }); assert.equal(real.node.major, 24); assert.equal(real.node.source, '.nvmrc'); assert.deepEqual([real.typescript.version, real.typescript.source], ['6.0.3', 'package.json']);
   await withProject(null, async root => {
     assert.deepEqual(await readTargets(root), { angular: { version: null, major: null, source: null }, node: { version: null, major: null, source: null }, typescript: { version: null, major: null, source: null } });
-    await put(root, 'configs/starters/hybrid-angular.json', JSON.stringify({ generator: { angularPins: { '@angular/core': '23.1.0' } } })); await put(root, 'bin/template/.nvmrc', 'v26\n'); await put(root, 'bin/template/package.json', JSON.stringify({ devDependencies: { typescript: '^7.0.1' } }));
-    const kit = await readTargets(root);
-    assert.deepEqual(kit.angular, { version: '23.1.0', major: 23, source: 'configs/starters/hybrid-angular.json' }); assert.deepEqual(kit.node, { version: '26', major: 26, source: 'bin/template/.nvmrc' }); assert.deepEqual([kit.typescript.version, kit.typescript.source], ['7.0.1', 'bin/template/package.json']);
+    await put(root, 'configs/starters/hybrid-angular.json', JSON.stringify({ generator: { angularPins: { '@angular/core': '23.1.0' } } })); await put(root, '.nvmrc', 'v26\n'); await put(root, 'package.json', JSON.stringify({ devDependencies: { typescript: '^7.0.1' } }));
+    // Without bin/kit.json the checkout is its own template: a stray bin/template copy is never consulted.
+    await put(root, 'bin/template/.nvmrc', 'v30\n'); await put(root, 'bin/template/package.json', JSON.stringify({ devDependencies: { typescript: '^9.0.0' } }));
+    const source = await readTargets(root);
+    assert.deepEqual(source.angular, { version: '23.1.0', major: 23, source: 'configs/starters/hybrid-angular.json' }); assert.deepEqual(source.node, { version: '26', major: 26, source: '.nvmrc' }); assert.deepEqual([source.typescript.version, source.typescript.source], ['7.0.1', 'package.json']);
     await put(root, 'configs/starters/webapp-angular.json', '{ broken'); await put(root, '.nvmrc', 'lts/*\n');
-    const broken = await readTargets(root); assert.equal(broken.angular.version, '23.1.0'); assert.equal(broken.node.version, '26');
+    const broken = await readTargets(root); assert.equal(broken.angular.version, '23.1.0'); assert.equal(broken.node.version, null, 'an unusable pin is unknown, never replaced by another layout');
     await put(root, 'configs/starters/webapp-angular.json', JSON.stringify({ generator: { angularPins: {} } })); assert.equal((await readTargets(root)).angular.version, null);
+    await put(root, 'bin/kit.json', '{}');
+    await assert.rejects(readTargets(root), /kit manifest|KIT_/i, 'a kit marker without a verified kit is refused');
   });
 });

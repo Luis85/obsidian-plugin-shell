@@ -3,9 +3,9 @@
  * set (merge-base(<base>, HEAD) .. working tree) to gates through the suites manifest, the workflows' `paths:`
  * filters and configs/quality/gate-rules.json, and always ends with the pre-PR `npm run verify`.
  */
-import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { readJson } from './files.ts';
 import { checkSteps, type CheckSelection } from './check.ts';
 import { runGit, type BaseInfo, type Git } from './check-changes.ts';
 import { fastRunnable, ruleHits, selectSuiteReasons, type Reason } from './check-selection.ts';
@@ -16,6 +16,8 @@ interface PlanCi { workflow: string; runs: boolean; event: string; via: TriggerR
 interface PlanGate {
   id: string; label: string; command: string; kind: 'check' | 'suite' | 'script' | 'verify'; required: boolean; viaCheck: boolean;
   why: Why[]; estimateSeconds: number | null; prerequisites: string[]; needs: string[]; ci: PlanCi[]; steps?: unknown[];
+  /** Suite gates: the test-pyramid levels of the suite's files (its `level`, then any override levels). */
+  levels?: string[];
 }
 interface Sources { rules: GateRules; toolkit: Toolkit; manifest: SuiteManifest | null; workflows: Workflow[]; durations: Record<string, number>; scripts: Set<string> }
 const sample = 5;
@@ -59,7 +61,8 @@ function suiteGate(sources: Sources, suite: SuiteDef, reasons: Reason[], paths: 
   const direct = reasons.some(reason => reason.kind !== 'workflow-paths');
   const prerequisites = suite.prerequisites ?? [];
   const covered = direct && (fastRunnable(suite) || suite.runner.type === 'vitest');
-  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node scripts/testing/suites.mjs ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered,
+  const levels = [...new Set([suite.level, ...Object.keys(suite.levels ?? {})].filter((level): level is string => typeof level === 'string'))];
+  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node scripts/testing/suites.mjs ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered, levels,
     why: reasons.map(reason => ({ kind: reason.kind, detail: reason.detail, paths: reason.paths, count: reason.count })),
     estimateSeconds: sources.durations[suite.name] ?? null, prerequisites, needs: needsOf(prerequisites), ci: ciFor(sources, suite.workflows ?? [], paths) };
 }
@@ -96,7 +99,7 @@ function codeGates(sources: Sources, selection: CheckSelection, hits: ReturnType
 }
 async function readScripts(root: string): Promise<Set<string>> {
   try {
-    const parsed: unknown = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+    const parsed = await readJson(join(root, 'package.json'));
     const scripts = typeof parsed === 'object' && parsed !== null && 'scripts' in parsed ? parsed.scripts : null;
     return new Set(typeof scripts === 'object' && scripts !== null ? Object.keys(scripts) : []);
   } catch { return new Set(); }

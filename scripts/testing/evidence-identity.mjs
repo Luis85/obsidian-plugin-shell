@@ -94,6 +94,10 @@ export async function evidenceIdentity(root, producer) {
 export async function suiteInventory(root, producer) {
   if (['runtime', 'coverage'].includes(producer)) return filesUnder(root, 'tests/runtime', /\.test\.ts$/);
   if (producer === 'browser') return filesUnder(root, 'tests/e2e', /\.spec\.ts$/);
-  if (producer === 'tooling') return filesUnder(root, 'tests/tooling', /\.(checks|test)\.mjs$/);
+  // Acceptance criterion tests (tests/acceptance, configs/delivery/delivery.json `acceptance`) run with the tooling suites; the folder is absent until an increment generates stubs.
+  if (producer === 'tooling') {
+    const acceptance = await lstat(join(root, 'tests/acceptance')).then(() => filesUnder(root, 'tests/acceptance', /\.checks\.mjs$/), () => []);
+    return [...await filesUnder(root, 'tests/tooling', /\.(checks|test)\.mjs$/), ...acceptance].sort();
+  }
   return [producer === 'native' ? 'scripts/testing/check-native.mjs' : 'scripts/quality/check-artifacts.mjs'];
 }

@@ -184,43 +184,43 @@
       ]
     },
     {
-      "id": "record-an-increment",
-      "title": "Record an increment",
-      "goal": "Record the implemented prototype as an increment whose sources point at the prototype package and the design folder.",
-      "markdown": { "file": "idea-to-prototype/10-increment.md" },
+      "id": "record-a-release-item",
+      "title": "Record a release item",
+      "goal": "Record the implemented prototype as a release item whose sources point at the prototype package and the design folder.",
+      "markdown": { "file": "idea-to-prototype/10-release-item.md" },
       "fields": [
-        { "id": "incrementId", "kind": "text", "label": "Increment id (e.g. INC-0001)", "required": true, "maxLength": 20 },
-        { "id": "incrementFile", "kind": "text", "label": "Increment note file in docs/releases/increments (e.g. INC-0001-reading-log.md)", "required": true, "maxLength": 120 }
+        { "id": "itemId", "kind": "text", "label": "Release item id (e.g. ITEM-0001)", "required": true, "maxLength": 20 },
+        { "id": "itemFile", "kind": "text", "label": "Release item note file in docs/releases/items (e.g. ITEM-0001-reading-log.md)", "required": true, "maxLength": 120 }
       ],
       "bind": "release",
       "actions": [
-        { "id": "new", "kind": "command", "label": "Record a new increment", "command": "node bin/app increment new" },
-        { "id": "list", "kind": "command", "label": "Find its id and file", "command": "node bin/app increment list --json" },
-        { "id": "check", "kind": "command", "label": "Validate every increment", "command": "node bin/app increment check --json" }
+        { "id": "new", "kind": "command", "label": "Record a new release item", "command": "node bin/app release-item new" },
+        { "id": "list", "kind": "command", "label": "Find its id and file", "command": "node bin/app release-item list --json" },
+        { "id": "check", "kind": "command", "label": "Validate every release item", "command": "node bin/app release-item check --json" }
       ],
       "winConditions": [
         { "kind": "form-valid" },
-        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "type: Increment", "label": "Your increment note has type: Increment" },
-        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "{{release.incrementId}}", "label": "Your increment note has the id {{release.incrementId}}" },
-        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "prototypes/{{plan.slug}}", "label": "Its sources list prototypes/{{plan.slug}}" },
-        { "kind": "file-contains", "file": "docs/releases/increments/{{release.incrementFile}}", "text": "docs/design/{{plan.slug}}", "label": "Its sources list docs/design/{{plan.slug}}" }
+        { "kind": "file-contains", "file": "docs/releases/items/{{release.itemFile}}", "text": "type: ReleaseItem", "label": "Your release item note has type: ReleaseItem" },
+        { "kind": "file-contains", "file": "docs/releases/items/{{release.itemFile}}", "text": "{{release.itemId}}", "label": "Your release item note has the id {{release.itemId}}" },
+        { "kind": "file-contains", "file": "docs/releases/items/{{release.itemFile}}", "text": "prototypes/{{plan.slug}}", "label": "Its sources list prototypes/{{plan.slug}}" },
+        { "kind": "file-contains", "file": "docs/releases/items/{{release.itemFile}}", "text": "docs/design/{{plan.slug}}", "label": "Its sources list docs/design/{{plan.slug}}" }
       ]
     },
     {
       "id": "add-to-the-release-candidate",
       "title": "Add it to the next release candidate",
-      "goal": "Plan the increment into the release candidate for the version you chose.",
+      "goal": "Plan the release item into the release candidate for the version you chose.",
       "markdown": { "file": "idea-to-prototype/11-release-candidate.md" },
       "actions": [
         { "id": "new", "kind": "command", "label": "Create the candidate once", "command": "node bin/app candidate new --version <x.y.z>" },
-        { "id": "add", "kind": "command", "label": "Add your increment", "command": "node bin/app candidate add --version <x.y.z> --increment <INC-0001>" },
+        { "id": "add", "kind": "command", "label": "Add your release item", "command": "node bin/app candidate add --version <x.y.z> --item <ITEM-0001>" },
         { "id": "show", "kind": "command", "label": "Show the candidate", "command": "node bin/app candidate show --version <x.y.z> --json" },
         { "id": "check", "kind": "command", "label": "Validate the candidates", "command": "node bin/app candidate check --json" }
       ],
       "winConditions": [
         { "kind": "file-exists", "file": "docs/releases/candidates/{{plan.version}}/README.md" },
         { "kind": "file-contains", "file": "docs/releases/candidates/{{plan.version}}/README.md", "text": "type: ReleaseCandidate", "label": "The candidate has type: ReleaseCandidate" },
-        { "kind": "file-contains", "file": "docs/releases/candidates/{{plan.version}}/README.md", "text": "{{release.incrementId}}", "label": "The candidate lists {{release.incrementId}}" }
+        { "kind": "file-contains", "file": "docs/releases/candidates/{{plan.version}}/README.md", "text": "{{release.itemId}}", "label": "The candidate lists {{release.itemId}}" }
       ]
     }
   ]

@@ -15212,7 +15212,73 @@ Edge: ${id2}`,
 		return render(value);
 	}
 	//#endregion
+	//#region scripts/companion/schema/hosting.mjs
+	/** Optional hosting-platform setting (`tooling.hosting`) of a project schema 6 document, and the pure profile the
+	* compiler emits from it. Absent means GitHub, the behaviour every project had before this field existed.
+	* Only non-secret identifiers are stored: personal access tokens are never part of a project document (sign in with
+	* `az login` or a session-only AZURE_DEVOPS_EXT_PAT). Nothing here reads files, runs a CLI or contacts a host. */
+	var hostingPlatforms = Object.freeze([
+		"github",
+		"azure-devops",
+		"none"
+	]);
+	var ORGANIZATION = /^https:\/\/(?:dev\.azure\.com\/([A-Za-z0-9](?:[A-Za-z0-9-]{0,48}[A-Za-z0-9])?)|([a-z0-9](?:[a-z0-9-]{0,48}[a-z0-9])?)\.visualstudio\.com)$/;
+	/** A conservative subset of Azure DevOps project and repository names: safe in Markdown, YAML and a quoted shell word. */
+	var NAME = /^[A-Za-z0-9](?:[A-Za-z0-9 ._-]{0,62}[A-Za-z0-9_-])?$/;
+	function requireHosting(condition, message) {
+		if (!condition) throw new Error("COMPANION_TOOLING_INVALID: " + message);
+	}
+	/** Descriptors are inspected before any value is read, so an accessor can never run. */
+	function dataRecord(value, allowed, label) {
+		requireHosting(value !== null && typeof value === "object" && !Array.isArray(value) && [Object.prototype, null].includes(Object.getPrototypeOf(value)), label + " must be a plain object.");
+		const descriptors = Object.getOwnPropertyDescriptors(value);
+		for (const key of Reflect.ownKeys(descriptors)) {
+			requireHosting(typeof key === "string" && allowed.includes(key), "Unknown " + label + " field.");
+			requireHosting(Object.hasOwn(descriptors[key], "value") && descriptors[key].enumerable, label + " must contain only enumerable data fields.");
+		}
+	}
+	/** Throws COMPANION_TOOLING_INVALID; undefined means the default platform (GitHub). */
+	function validateHosting(value) {
+		if (value === void 0) return;
+		dataRecord(value, ["platform", "azureDevOps"], "tooling.hosting");
+		requireHosting(hostingPlatforms.includes(value.platform), "tooling.hosting.platform must be one of " + hostingPlatforms.join(", ") + ".");
+		if (!Object.hasOwn(value, "azureDevOps")) return;
+		requireHosting(value.platform === "azure-devops", "tooling.hosting.azureDevOps is allowed only with the azure-devops platform.");
+		const azure = value.azureDevOps;
+		dataRecord(azure, [
+			"organization",
+			"project",
+			"repository"
+		], "tooling.hosting.azureDevOps");
+		requireHosting(typeof azure.organization === "string" && azure.organization.length <= 120 && ORGANIZATION.test(azure.organization), "Azure DevOps organization must be https://dev.azure.com/<organization> or https://<organization>.visualstudio.com.");
+		for (const key of ["project", "repository"]) requireHosting(key === "repository" && azure[key] === void 0 || typeof azure[key] === "string" && NAME.test(azure[key]), "Azure DevOps " + key + " must be 1-64 letters, digits, spaces, dots, underscores or hyphens.");
+	}
+	Object.freeze({
+		allow: [
+			"Bash(az repos pr list)",
+			"Bash(az repos pr list *)",
+			"Bash(az repos pr show *)",
+			"Bash(az pipelines runs list)",
+			"Bash(az pipelines runs list *)",
+			"Bash(az pipelines runs show *)",
+			"Bash(az boards work-item show *)"
+		],
+		ask: [
+			"Bash(az repos pr create *)",
+			"Bash(az repos pr update *)",
+			"Bash(az pipelines run *)",
+			"Bash(az repos ref create *)"
+		],
+		deny: ["Bash(az devops login*)", "Bash(*AZURE_DEVOPS_EXT_PAT=*)"]
+	});
+	Object.freeze({
+		allow: [],
+		ask: [],
+		deny: []
+	});
+	//#endregion
 	//#region scripts/companion/tooling-contract.mjs
+	/** Inert optional development settings. No package, process or host is acquired here. */
 	var AIRSHIP_DEFAULTS = Object.freeze({
 		enabled: false,
 		agent: "claude",
@@ -15246,8 +15312,10 @@ Edge: ${id2}`,
 		fields$1(value, [
 			"airship",
 			"storybook",
-			"hindsight"
+			"hindsight",
+			"hosting"
 		]);
+		if (Object.hasOwn(value, "hosting")) validateHosting(value.hosting);
 		if (Object.hasOwn(value, "storybook")) {
 			fields$1(value.storybook, ["enabled", "generateStories"]);
 			requireTooling(Object.values(value.storybook).every((item) => typeof item === "boolean"), "tooling.storybook accepts only boolean enabled and generateStories switches. Both default to false.");
@@ -15661,6 +15729,19 @@ Edge: ${id2}`,
 	function requireValid(condition, message) {
 		if (!condition) throw new Error("COMPANION_INVALID: " + message);
 	}
+	/** A violation of one named field; `jsonPointer` is its RFC 6901 location in the project document. */
+	var CompanionFieldError = class extends Error {
+		jsonPointer;
+		constructor(message, jsonPointer) {
+			super(message);
+			this.name = "CompanionFieldError";
+			this.jsonPointer = jsonPointer;
+		}
+	};
+	function requireField(condition, jsonPointer, message) {
+		const field = jsonPointer.slice(jsonPointer.lastIndexOf("/") + 1);
+		if (!condition) throw new CompanionFieldError(`COMPANION_INVALID: ${message} Field "${field}" at ${jsonPointer}.`, jsonPointer);
+	}
 	/** Coded for adapters and prefixed for message-based reporters (CLI, reader, browser). */
 	function requireVersion(condition, message) {
 		requireSitemap(condition, "COMPANION_VERSION", "COMPANION_VERSION: " + message);
@@ -15688,17 +15769,18 @@ Edge: ${id2}`,
 		};
 	}
 	function validateIdentity(value) {
-		requireValid(shape(value, [
+		requireField(shape(value, [
 			"id",
 			"name",
 			"author",
 			"version",
 			"description"
-		]), "Unsupported project identity.");
-		requireValid(text$1(value.id, 60) && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value.id) && companionRelativeFolder(value.id), "Use a portable lowercase plugin ID.");
-		requireValid(text$1(value.name, 80, true) && !/[\r\n]/.test(value.name), "Use a single-line project name.");
-		requireValid(text$1(value.author, 80) && text$1(value.description, 400), "Project description or author exceeds its limit.");
-		requireValid(text$1(value.version, 40) && /^\d+\.\d+\.\d+$/.test(value.version), "Expected an x.y.z project version.");
+		]), "/project", "Unsupported project identity.");
+		requireField(text$1(value.id, 60) && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value.id) && companionRelativeFolder(value.id), "/project/id", "Use a portable lowercase plugin ID.");
+		requireField(text$1(value.name, 80, true) && !/[\r\n]/.test(value.name), "/project/name", "Use a single-line project name.");
+		requireField(text$1(value.author, 80), "/project/author", "Project author exceeds its limit of 80 characters.");
+		requireField(text$1(value.description, 400), "/project/description", "Project description exceeds its limit of 400 characters.");
+		requireField(text$1(value.version, 40) && /^\d+\.\d+\.\d+$/.test(value.version), "/project/version", "Expected an x.y.z project version.");
 		return value.id;
 	}
 	function validateCollections(design) {
@@ -15720,7 +15802,9 @@ Edge: ${id2}`,
 		validateDesignSystem(value.designSystem, pluginId);
 		if (value.storymaps !== void 0) validateStorymaps(value.storymaps);
 		requireValid(shape(value, DESIGN_KEYS, REQUIRED_DESIGN_KEYS), "Unsupported design envelope.");
-		requireValid(text$1(value.blueprint, 80, true) && text$1(value.goal, 1e3) && ["desktop", "mobile-ready"].includes(String(value.platform)), "Unsupported design blueprint, goal or platform.");
+		requireField(text$1(value.blueprint, 80, true), "/design/blueprint", "Unsupported design blueprint.");
+		requireField(text$1(value.goal, 1e3), "/design/goal", "Design goal exceeds its limit of 1000 characters.");
+		requireField(["desktop", "mobile-ready"].includes(String(value.platform)), "/design/platform", "Expected platform desktop or mobile-ready.");
 		requireValid(Number.isSafeInteger(value.nextId) && Number(value.nextId) > 0 && Number(value.nextId) < Number.MAX_SAFE_INTEGER - 1e5, "Invalid design counter.");
 		validateCollections(value);
 		if (value.visualDesigns !== void 0) {
@@ -15890,6 +15974,57 @@ Edge: ${id2}`,
 		return checkData(value, designLimits);
 	}
 	//#endregion
+	//#region scripts/shared/protected-directories.ts
+	/**
+	* The one framework-free source of protected project directory names. Every set is lower-case; callers compare a
+	* case-folded path segment, so `.GIT` or `Node_Modules` on case-insensitive volumes are refused as well.
+	* Purpose-specific sets are named compositions of the same base groups, never independent copies.
+	*/
+	var folded = (names) => Object.freeze([...new Set(names.map((name) => name.toLowerCase()))]);
+	/** Version control, installed dependencies and the CLI's own cross-process lock files. */
+	var repositoryInternals = folded([
+		".git",
+		"node_modules",
+		".codex-authoring.lock",
+		".shell-first-run.lock"
+	]);
+	/** Framework, companion-generation and starter ownership records. */
+	var ownershipDirectories = folded([
+		".framework",
+		".companion",
+		".workbench"
+	]);
+	/** Native and qualification scratch areas created by gates and runners. */
+	var qualificationDirectories = folded([
+		".worktrees",
+		".qualification",
+		".native-runner"
+	]);
+	/** The conventional host configuration folder (a configurable default, not a running vault's configDir). */
+	var hostConfigDirectory = ".obsidian";
+	var testVaultDirectory = ".test-vault";
+	var developmentVaultDirectory = ".dev-vault";
+	/** Segments that CLI-authored project paths, saved plans, exports and archives never enter. */
+	var PROTECTED_PROJECT_SEGMENTS = folded([
+		...folded([
+			...repositoryInternals,
+			...ownershipDirectories,
+			...qualificationDirectories
+		]),
+		hostConfigDirectory,
+		testVaultDirectory,
+		developmentVaultDirectory
+	]);
+	folded([
+		...repositoryInternals,
+		...qualificationDirectories,
+		developmentVaultDirectory
+	]);
+	/** True when a single path segment names a member of `names` (default: every protected project segment). */
+	function isProtectedSegment(segment, names = PROTECTED_PROJECT_SEGMENTS) {
+		return names.includes(segment.toLowerCase());
+	}
+	//#endregion
 	//#region bin/compiler/domain/diagnostics.ts
 	/** Codes are public API. Catalog changes require documentation and protocol tests. */
 	var diagnosticCatalog = Object.freeze({
@@ -16054,16 +16189,7 @@ Edge: ${id2}`,
 	}
 	function portablePath(value, dot = false) {
 		if (dot && value === ".") return true;
-		return value.length <= 240 && value.split("/").every((part) => /^[a-zA-Z0-9_.-][a-zA-Z0-9_. -]*$/.test(part) && ![
-			".",
-			"..",
-			".git",
-			".obsidian",
-			".framework",
-			".companion",
-			".workbench",
-			".codex-authoring.lock"
-		].includes(part.toLowerCase()) && !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
+		return value.length <= 240 && value.split("/").every((part) => /^[a-zA-Z0-9_.-][a-zA-Z0-9_. -]*$/.test(part) && part !== "." && part !== ".." && !isProtectedSegment(part) && !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 	}
 	function inputValue(value, input) {
 		requireThat((input.type === "string" ? typeof value === "string" && value.length <= 4e3 && !hasControl(value) : input.type === "boolean" ? typeof value === "boolean" : typeof value === "number" && Number.isSafeInteger(value)) && (!input.required || value !== ""), "STARTER_INPUT", `Invalid input ${input.id}.`);
@@ -16209,7 +16335,7 @@ Edge: ${id2}`,
 			return { kind: "files" };
 		}
 		const document = record(raw.document);
-		requireThat(document.schemaVersion === 6, "STARTER_VERSION", "Companion starters require project schema 6; earlier project formats are no longer supported.");
+		requireThat(document.schemaVersion === 6, "STARTER_VERSION", `Companion starters require project schema 6; earlier project formats are no longer supported.`);
 		validateAuthoringDocument(document);
 		return {
 			kind: "companion",

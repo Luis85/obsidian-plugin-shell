@@ -4,9 +4,12 @@
   "id": "user-settings-advanced",
   "version": 1,
   "title": "Advanced paths and first-run preferences",
-  "description": "Edits the same user-settings value as user-settings; first-run numbers are validated when the settings are committed.",
+  "description": "Edits the same user-settings value as user-settings; the Increment, pull-request and Issue document folders are written only when configured or changed, and first-run numbers are validated when the settings are committed.",
   "fields": [
     { "id": "firstRunReport", "kind": "text", "label": "First-run report JSON", "bind": "paths.firstRunReport" },
+    { "id": "increments", "kind": "text", "label": "Increment documents folder", "bind": "paths.increments", "default": "docs/increments" },
+    { "id": "pullRequests", "kind": "text", "label": "Pull-request documents folder", "bind": "paths.pullRequests", "default": "docs/pull-requests" },
+    { "id": "issues", "kind": "text", "label": "Issue documents folder", "bind": "paths.issues", "default": "docs/issues" },
     { "id": "vaultConfigDirectory", "kind": "text", "label": "Existing vault configuration directory", "bind": "preferences.vaultConfigDirectory" },
     { "id": "install", "kind": "select", "label": "Dependency installation strategy", "bind": "preferences.firstRun.install", "choices": ["auto", "install", "ci"] },
     { "id": "openBrowser", "kind": "boolean", "label": "Prefer opening the showcase browser?", "bind": "preferences.firstRun.openBrowser" },

@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "release-item",
+  "version": 1,
+  "title": "Release item",
+  "description": "One release item note in the configured paths.releaseItems folder. Choices come from configs/collections/release-item.json; included and shipped are set by release candidates (node bin/app candidate), and the collection engine validates the result before a reviewed plan is shown.",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Release item title", "maxLength": 160 },
+    { "id": "summary", "kind": "text", "label": "Summary: what changes for users (one line; details go in the note body)", "required": true, "maxLength": 1000 },
+    { "id": "kind", "kind": "select", "label": "Kind", "choicesFrom": "collection.choices" },
+    { "id": "priority", "kind": "select", "label": "Priority", "choicesFrom": "collection.choices" },
+    { "id": "status", "kind": "select", "label": "Status", "choicesFrom": "collection.statuses" },
+    { "id": "sources", "kind": "list", "label": "Sources (comma-separated project paths such as prototypes/<slug>, docs/design/<prototype>, brainstorms/<slug>/feature.definition.json or a PRD, or RISK-/LRN- ids; optional)", "separator": ",", "joiner": ", ", "maxItems": 60, "maxLength": 200 },
+    { "id": "acceptance", "kind": "list", "label": "Acceptance criteria (separated by ;, required once ready)", "separator": ";", "joiner": "; ", "maxItems": 60, "maxLength": 300 },
+    { "id": "risks", "kind": "list", "label": "Risk ids (comma-separated, such as RISK-0001; optional)", "separator": ",", "joiner": ", ", "maxItems": 60, "maxLength": 20 },
+    { "id": "owner", "kind": "text", "label": "Owner (optional)", "maxLength": 120 },
+    { "id": "target", "kind": "text", "label": "Target date (YYYY-MM-DD, optional)", "maxLength": 10 },
+    { "id": "proposed", "kind": "text", "label": "Proposed on (YYYY-MM-DD, empty for today)", "maxLength": 10, "when": { "path": "id", "present": false } },
+    { "id": "notes", "kind": "text", "label": "Notes (optional, written to the note body)", "maxLength": 4000, "when": { "path": "id", "present": false } }
+  ]
+}

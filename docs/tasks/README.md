@@ -12,7 +12,7 @@ Inspect current source and actual evidence before implementing. A task may exten
 
 Use `planned`, `in-progress`, `blocked`, `in-review`, `done`, or `superseded`. A blocked task records reason and next action. A superseded task links its replacement. A done task records commit/artifact, actual commands/results and unexecuted scope. A gate cannot pass just because dependent files say done; review their evidence and any added scope. No gate grants publication authority.
 
-Use the [task template](TASK-TEMPLATE.md). Add new stable IDs when accepted concept work exposes another shell requirement. Do not renumber tasks. All links and dependencies must remain valid and acyclic. For implementation, follow the root [AGENTS.md](../../AGENTS.md).
+A task is delivered through one or more increments (`node bin/app increment new <slug> --from <task path>`), whose deterministic checks are in [Definition of Ready and Done](../development/DEFINITION-OF-READY-AND-DONE.md). Use the [task template](TASK-TEMPLATE.md). Add new stable IDs when accepted concept work exposes another shell requirement. Do not renumber tasks. All links and dependencies must remain valid and acyclic. For implementation, follow the root [AGENTS.md](../../AGENTS.md).
 
 ## Shell foundation P0
 

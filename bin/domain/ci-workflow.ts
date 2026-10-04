@@ -9,9 +9,18 @@ export class CiError extends Error {
 /** `setup` actions have no local equivalent that matters; `external` actions cannot be reproduced. */
 export type StepKind = 'run' | 'setup' | 'external';
 type Strings = Readonly<Record<string, string>>;
+/** Where an expanded composite-action step came from, and the caller context it runs with. */
+export interface CompositeOrigin {
+  uses: string; actionStep: number;
+  /** Effective action inputs: the caller's `with:` over the action's declared defaults, still unresolved. */
+  inputs: Strings; callerEnv: Strings; callerCondition?: string;
+}
 export interface CiStep {
-  index: number; id?: string; name?: string; kind: StepKind; uses?: string; run?: string; shell?: string;
-  workingDirectory?: string; env: Strings; condition?: string; inputs: Strings;
+  /** Position in the job after local composite actions are expanded; `workflowStep` is the position in the file. */
+  index: number; workflowStep: number; id?: string; name?: string; kind: StepKind; uses?: string; run?: string; shell?: string;
+  workingDirectory?: string; env: Strings; condition?: string; inputs: Strings; composite?: CompositeOrigin;
+  /** Why an action step stays external although it looks local (missing, invalid or non-composite action). */
+  note?: string;
 }
 export interface CiJob {
   id: string; name?: string; runsOn: string; matrix: unknown; condition?: string; needs: string[]; env: Strings;
@@ -25,7 +34,7 @@ export interface CiWorkflow {
 export const setupActions: readonly string[] = ['actions/checkout', 'actions/setup-node', 'actions/cache', 'actions/upload-artifact'];
 type Data = Record<string, unknown>;
 const isData = (value: unknown): value is Data => typeof value === 'object' && value !== null && !Array.isArray(value);
-function record(value: unknown, where: string): Data {
+export function record(value: unknown, where: string): Data {
   if (value === undefined) return {};
   if (!isData(value)) throw new CiError('CI_UNSUPPORTED', `${where} must be a mapping.`);
   return value;
@@ -35,7 +44,7 @@ function text(value: unknown, where: string): string {
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   throw new CiError('CI_UNSUPPORTED', `${where} must be a string, number or boolean.`);
 }
-function optionalText(value: unknown, where: string): string | undefined {
+export function optionalText(value: unknown, where: string): string | undefined {
   return value === undefined ? undefined : text(value, where);
 }
 function textMap(value: unknown, where: string): Strings {
@@ -72,10 +81,10 @@ function stepKind(uses: string | undefined): StepKind {
   if (uses === undefined) return 'run';
   return setupActions.includes(uses.split('@')[0]!) ? 'setup' : 'external';
 }
-function parseStep(raw: unknown, index: number, where: string): CiStep {
+export function parseStep(raw: unknown, index: number, where: string): CiStep {
   const step = record(raw, where), uses = optionalText(step.uses, `${where}.uses`), run = optionalText(step.run, `${where}.run`);
   if ((uses === undefined) === (run === undefined)) throw new CiError('CI_UNSUPPORTED', `${where} needs exactly one of run or uses.`);
-  const base: CiStep = { index, kind: stepKind(uses), env: textMap(step.env, `${where}.env`), inputs: textMap(step.with, `${where}.with`) };
+  const base: CiStep = { index, workflowStep: index, kind: stepKind(uses), env: textMap(step.env, `${where}.env`), inputs: textMap(step.with, `${where}.with`) };
   const optional: Partial<CiStep> = { id: optionalText(step.id, `${where}.id`), name: optionalText(step.name, `${where}.name`), uses, run,
     shell: optionalText(step.shell, `${where}.shell`), workingDirectory: optionalText(step['working-directory'], `${where}.working-directory`),
     condition: optionalText(step.if, `${where}.if`) };

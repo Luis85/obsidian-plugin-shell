@@ -4,6 +4,7 @@ import { OperationError, requireThat } from '../../../scripts/contracts/errors.t
 export { result } from '../../../scripts/contracts/result.ts';
 export type { Diagnostic, Result, ResultStatus } from '../../../scripts/contracts/result.ts';
 export { OperationError, requireThat } from '../../../scripts/contracts/errors.ts';
+import type { IncrementServices } from '../increments/repository.ts';
 /** Public host-independent operation contract. Requests never grant execution authority. */
 export type Values = Record<string, string | boolean>;
 export interface Request { command: string; args: string[]; options: Values }
@@ -13,6 +14,8 @@ export interface Context {
   signal?: AbortSignal;
   inputText?: string;
   progress?: (message: string) => void;
+  /** Test seams of the increment and pull-request commands (version control runner, hosting remote, clock). */
+  increments?: IncrementServices;
 }
 /** An OperationError keeps its code; another Error may lead with an `UPPER_CASE:` code. */
 function failureCode(error: unknown): string {
@@ -24,7 +27,8 @@ export function failure(command: string, error: unknown): Result {
   if (error instanceof CompilerError) return { ...result(command, null, error.diagnostic.code === 'COMPILER_CANCELLED' ? 'cancelled' : 'failed'),
     diagnostics: error instanceof CompilationFailure ? error.diagnostics : [error.diagnostic] };
   const code = failureCode(error);
-  const message = error instanceof Error ? error.message : 'Operation failed.';
+  // A plain Error that leads with its code reports it once: the diagnostic already carries the code.
+  const message = error instanceof Error ? (error instanceof OperationError ? error.message : error.message.replace(new RegExp(`^${code}:\\s*`), '') || error.message) : 'Operation failed.';
   return { ...result(command, recoveryDetails(error), code === 'CANCELLED' ? 'cancelled' : 'failed'),
     diagnostics: [{ code, message, ...(error instanceof OperationError && error.next ? { next: error.next } : {}) }] };
 }

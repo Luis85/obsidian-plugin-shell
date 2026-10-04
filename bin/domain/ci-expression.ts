@@ -21,7 +21,8 @@ export const hasExpression = (input: string): boolean => new RegExp(marker.sourc
 /** `null` marks an unknown value; comparisons and boolean operators propagate it only when it decides the outcome. */
 type Value = string | boolean | null;
 export interface ConditionOptions { lookup: Lookup; success: boolean }
-const tokenPattern = /\s*(?:(&&|\|\||==|!=|[()!,])|'((?:[^']|'')*)'|(-?\d+(?:\.\d+)?)|([A-Za-z_][\w-]*(?:\.[\w-]+)*(?:\(\))?))/y;
+// A context path may hold `*` object filters (`github.event.pull_request.labels.*.name`); its lookup decides the value.
+const tokenPattern = /\s*(?:(&&|\|\||==|!=|[()!,])|'((?:[^']|'')*)'|(-?\d+(?:\.\d+)?)|([A-Za-z_][\w-]*(?:\.(?:[\w-]+|\*))*(?:\(\))?))/y;
 type Token = { kind: 'op' | 'text' | 'word'; value: string };
 function tokenize(source: string): Token[] | null {
   const tokens: Token[] = [];

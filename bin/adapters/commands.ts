@@ -31,7 +31,7 @@ import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { collectionCommandRoots, makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
-const makerHelp = `Shell maker — make first, generate when ready
+const makerHelp = `Workbench CLI — maker commands: make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
   node bin/app first-run schema --json
   node bin/app first-run --input first-run.json --json
@@ -139,28 +139,29 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app learning check --json  Schema, vocabularies, risk id format, duplicate ids, overdue follow-ups, validated without follow-up
   node bin/app learning report [--base] --json   Regenerate <learnings>/learnings.md (and learnings.base) through review
   node bin/app learning model --json  The effective collection definition (configs/collections/learning.json)
-  node bin/app increment new|edit --id INC-0001|review   Product increments: guided capture, edit and review (terminal; folder: paths.increments)
-  node bin/app increment list [--status <id>] [--kind <id>] [--priority <id>] [--overdue] --json
-  node bin/app increment show --id INC-0001 --json
-  node bin/app increment new --input increment.json --json   Plan a new increment note (next free id); then --apply <planHash>
-  node bin/app increment update --id INC-0001 --input changes.json --json   Changed fields and proposed → ready transitions
-  node bin/app increment check --json   Schema, kinds, source paths and ids, risk ids, duplicate ids, ready without acceptance
-  node bin/app increment report [--base] --json   Regenerate <increments>/increments.md (and increments.base) through review
-  node bin/app increment model --json   The effective collection definition (configs/collections/increment.json)
-  node bin/app candidate new [--version 1.0.0]   Release candidate: version, target date, owner and ready increments (terminal)
-  node bin/app candidate new --version 1.0.0 [--input candidate.json] --json   Plan <releaseCandidates>/1.0.0/README.md (and the increments it includes)
+  node bin/app release-item new|edit --id ITEM-0001|review   Release items: guided capture, edit and review (terminal; folder: paths.releaseItems)
+  node bin/app release-item list [--status <id>] [--kind <id>] [--priority <id>] [--overdue] --json
+  node bin/app release-item show --id ITEM-0001 --json
+  node bin/app release-item new --input release-item.json --json   Plan a new release item note (next free id); then --apply <planHash>
+  node bin/app release-item update --id ITEM-0001 --input changes.json --json   Changed fields and proposed → ready transitions
+  node bin/app release-item check --json   Schema, kinds, source paths and ids, risk ids, duplicate ids, ready without acceptance
+  node bin/app release-item report [--base] --json   Regenerate <releaseItems>/release-items.md (and release-items.base) through review
+  node bin/app release-item model --json   The effective collection definition (configs/collections/release-item.json)
+  node bin/app candidate new [--version 1.0.0]   Release candidate: version, target date, owner and ready release items (terminal)
+  node bin/app candidate new --version 1.0.0 [--input candidate.json] --json   Plan <releaseCandidates>/1.0.0/README.md (and the release items it includes)
   node bin/app candidate list --json | candidate show --version 1.0.0 --json | candidate check --json
-  node bin/app candidate add|remove --version 1.0.0 --increment INC-0001 --json   Include a ready increment or return it to ready (draft only)
-  node bin/app candidate status --version 1.0.0 --to <draft|frozen|qualified|released|abandoned> --json   Checked transitions; frozen locks the increments
+  node bin/app candidate add|remove --version 1.0.0 --item ITEM-0001 --json   Include a ready release item or return it to ready (draft only)
+  node bin/app candidate status --version 1.0.0 --to <draft|frozen|qualified|released|abandoned> --json   Checked transitions; frozen locks the release items
   node bin/app candidate docs --version 1.0.0 --json   Regenerate the generated README blocks; authored sections are kept
-Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
+These maker commands apply only with --apply <planHash> on the same command after reviewing its plan; they have no --yes shortcut.
+Framework commands (setup, make <recipe>, generate, new <dir>, ...) accept --yes or --apply <planHash>: node bin/app help.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
 --starter <project-starter-id> (new, new guide), --step <step-id> (learn complete-step), --name <prototype-slug> and --package <prepared folder> (design),
 --entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --config <id> and --base (fake-data),
 --id <id>, --as-of <YYYY-MM-DD>, --status/--dimension/--category/--level <id>, --overdue and --base (risk),
 --status/--category/--impact <id> with the same --id, --as-of, --overdue and --base (learning; learn is the separate course runner),
---status/--kind/--priority <id> with the same options (increment), --version <x.y.z[-rc.N]>, --increment <id>, --to <status> and --as-of (candidate),
+--status/--kind/--priority <id> with the same options (release-item), --version <x.y.z[-rc.N]>, --item <id>, --to <status> and --as-of (candidate),
 --target <loopback-url|static-folder|prototypes/<slug>> (workflow run),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
@@ -252,13 +253,13 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
 function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): Record<string, unknown> {
-    const legacy = args.command === 'new' ? descriptor('new') : undefined;
+    const newCommand = args.command === 'new' ? descriptor('new') : undefined;
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', 'workflow', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: newCommand ? [{ ...newCommand, options: parameterKinds(newCommand) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', 'workflow', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
-      ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
+      ...(newCommand ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
 type CommandResult = Record<string, unknown> | Promise<Record<string, unknown>>;

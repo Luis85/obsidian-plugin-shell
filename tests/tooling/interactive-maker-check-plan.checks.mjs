@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
 import { checkPlanOperation } from '../../bin/adapters/framework/check-plan.ts';
+import { ruleHits } from '../../bin/adapters/framework/check-selection.ts';
 import { loadToolkit, loadWorkflows, parseDurations, parseGateRules, parseWorkflow, workflowTrigger } from '../../bin/adapters/framework/gate-sources.ts';
 import { withRepo, git, repoRoot, write } from './check-plan-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
@@ -46,6 +47,7 @@ test('suites join test includes, rule sources and path-filtered workflows, with 
   assert.equal(gateOf(data, 'suite:quality').estimateSeconds, null, 'unmeasured suites report null');
   const e2e = gateOf(data, 'suite:e2e');
   assert.deepEqual([e2e.prerequisites, e2e.needs, e2e.viaCheck, e2e.required], [['chromium'], ['browser'], false, true]);
+  assert.deepEqual([generator.levels, e2e.levels, gateOf(data, 'suite:quality').levels], [['integration', 'unit'], ['e2e'], []], 'test-pyramid levels from the manifest');
   assert.ok(data.notes.some(note => /golden snapshots.*kit integrity/.test(note)), 'generator inputs note the snapshot regeneration');
   assert.deepEqual(data.workflows.filter(item => item.via === 'paths').map(item => item.workflow), ['starter-flow']);
   assert.equal(data.estimate.seconds, 187); assert.equal(data.estimate.complete, false);
@@ -169,4 +171,12 @@ test('the shipped workflows parse, the durations table is read, and the gate rul
   assert.equal(rules.final.at(-1), 'verify');
   for (const bad of [null, { schemaVersion: 2 }, { schemaVersion: 1, gates: {}, suiteSources: {}, docsOnly: { gates: ['missing'] }, docsGlobs: [], final: [] }])
     assert.throws(() => parseGateRules(bad), { code: 'GATE_RULES_INVALID' });
+});
+
+test('CI composite actions join workflow files in the workflows change-type rule and its quality suite', async () => {
+  const rules = parseGateRules(JSON.parse(await readFile(join(repoRoot, 'configs/quality/gate-rules.json'), 'utf8')));
+  const toolkit = await loadToolkit(repoRoot);
+  const paths = ['.github/actions/setup-qualified/action.yml', '.github/workflows/ci.yml', '.github/CODEOWNERS'];
+  const hits = ruleHits(toolkit, rules, paths).filter(hit => hit.rule.id === 'workflows');
+  assert.deepEqual(hits.map(hit => [hit.paths, hit.rule.suites]), [[paths.slice(0, 2), ['quality']]]);
 });

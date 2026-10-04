@@ -79,7 +79,7 @@ test('targets stay relative, inside the root and outside framework template inpu
 
 test('saved generation configs list, show, re-run byte-identically, accept overrides and save through reviewed plans', async () => scratch(async root => {
   const listed = await cli(root, 'configs', '--json');
-  assert.deepEqual(listed.configs.map(item => [item.id, item.source]), [['contacts-demo', 'builtin'], ['increments-demo', 'builtin'], ['learnings-demo', 'builtin'], ['risks-demo', 'builtin'], ['tasks-board', 'builtin']]);
+  assert.deepEqual(listed.configs.map(item => [item.id, item.source]), [['contacts-demo', 'builtin'], ['learnings-demo', 'builtin'], ['release-items-demo', 'builtin'], ['risks-demo', 'builtin'], ['tasks-board', 'builtin']]);
   assert.equal((await cli(root, 'show-config', '--name', 'contacts-demo')).config.seed, 42);
   const generation = { schemaVersion: 1, id: 'team', title: 'Team', entity: 'contact', count: 4, out: 'People/Team', seed: 11, base: false };
   await writeFile(join(root, 'generation.json'), JSON.stringify(generation));

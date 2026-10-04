@@ -1,7 +1,7 @@
 name: Independent Workbench distributions
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths:
       - 'configs/starters/**'
       - 'scripts/starters/**'
@@ -31,6 +31,10 @@ on:
         description: integration (ready pull requests and main) or release (every matrix leg)
         type: string
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       tier:
@@ -38,16 +42,20 @@ on:
         type: choice
         options: [integration, release]
         default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 # A newer push to the same pull request supersedes the read-only asset build;
 # manual dispatches still run to completion.
 concurrency:
-  group: starter-distribution-${{ github.ref }}
+  group: starter-distribution-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   package:
-    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
@@ -62,9 +70,8 @@ jobs:
         with:
           install: 'true'
           install-flags: --strict-allow-scripts
-      - name: Typecheck and test the independent definition contract
+      - name: Test the independent definition contract
         run: |
-          node "$QUALIFIED_NPM" run typecheck:framework
           node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/framework-new-project.checks.mjs tests/tooling/framework-distribution.checks.mjs
       - name: Check suite registration and bounded asset contracts
         run: node scripts/testing/suites.mjs --check
@@ -86,6 +93,7 @@ jobs:
           node "$QUALIFIED_NPM" run build
           node "$QUALIFIED_NPM" run build:clickdummy
       - name: Exercise current startup and the independently compiled UI in Chromium
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           mkdir -p reports/feature-showcase

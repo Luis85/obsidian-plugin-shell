@@ -14,9 +14,9 @@ they reuse the same forms, form runner, conditions and inert `{{path}}` template
 | `author-a-learning-path` | Write and validate a learning path | `author-a-wizard` |
 | `idea-to-prototype-with-claude-design` | Brainstorm an idea, write its design brief in a new prototype folder, prepare a [Claude Design folder](CLAUDE-DESIGN-HANDOFF.md), get the handover files from Claude Design, save and sync them, implement the ready screens in the prototype and plan the result into the next [release candidate](RELEASE-CANDIDATES.md) | — |
 
-The last two steps of `idea-to-prototype-with-claude-design` use the increment and release-candidate commands
-(`node bin/app increment`, `node bin/app candidate`) and link their guide; the course's checks follow the files those
-commands write (`docs/releases/increments/`, `docs/releases/candidates/<version>/README.md`).
+The last two steps of `idea-to-prototype-with-claude-design` use the release item and release-candidate commands
+(`node bin/app release-item`, `node bin/app candidate`) and link their guide; the course's checks follow the files those
+commands write (`docs/releases/items/`, `docs/releases/candidates/<version>/README.md`).
 
 ## Follow a learning path
 

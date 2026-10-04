@@ -12,6 +12,7 @@ import { getPath, type FormValues } from '../../domain/form-model.ts';
 import { runForm } from '../form-runner.ts';
 import type { WizardModule } from './module.ts';
 import { starterInputForm } from './starter-inputs.ts';
+import { prepareHosting } from './hosting.ts';
 type Options = Request['options'];
 /** The `new` request the interview starts from (`state.request`, never edited) and the one it returns (`state.result`). */
 export interface StarterRequest { args: string[]; options: Options }
@@ -95,7 +96,7 @@ export const starterModule: WizardModule = {
     /** A different starter forgets the previous starter's answers; --values/--answers are read after the choice. */
     'starter.select': async ({ state, options }) => {
       const request = starterRequest(state), id = state.askStarter === true ? state.starter : request.options.starter;
-      if (state.starterId !== id) for (const key of ['inputs', 'airship', 'extension', 'extensions']) delete state[key];
+      if (state.starterId !== id) for (const key of ['inputs', 'airship', 'extension', 'extensions', 'hosting']) delete state[key];
       state.starterId = id;
       const definition = selected(state);
       Object.assign(state, { supplied: await suppliedValues(request.options, options.root), companion: definition.generator.kind === 'companion', ...companionQuestions });
@@ -114,6 +115,8 @@ export const starterModule: WizardModule = {
       const document = starters.find(entry => entry.definition.id === state.starterId)?.document;
       Object.assign(state, companionQuestionsFor(request, nativeTargets(document?.design.nativeIntegrations)));
     },
+    /** A new folder has no remote, so the hosting default is GitHub; an explicit --hosting is never asked again. */
+    'starter.hosting': ({ state }) => { prepareHosting(state, starterRequest(state).options, null, true); },
     /** Answers stay data (`--answers` JSON); no editor or third-party process is launched by the interview. */
     'starter.finish': ({ state }) => {
       const { args, options } = starterRequest(state), result: Options = { ...options };

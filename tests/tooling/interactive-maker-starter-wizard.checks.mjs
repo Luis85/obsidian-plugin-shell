@@ -106,11 +106,12 @@ test('back returns to the starter choice, a different starter forgets earlier an
 
 test('companion questions can be revisited without losing input answers or keeping a stale opt-in', async () => {
   const context = { root: frameworkRoot, frameworkRoot };
-  // Back from the extension returns to the Airship question, and back again to the starter inputs.
-  const ui = scripted(['Own description', '', '', '', '', 'y', ':back', ':back', '', '', '', '', '', 'n', 'note']);
+  // Back from the extension returns to the hosting question, then the Airship question, and back again to the starter inputs.
+  const ui = scripted(['Own description', '', '', '', '', 'y', '', ':back', ':back', ':back', '', '', '', '', '', 'n', '', 'note']);
   const result = await guidedStarter(request(['target'], { starter: 'custom-file-view', id: 'folio-app', name: 'Folio App', author: 'Team' }), context, ui.prompt, ui.write);
   assert.ok(ui.asked.includes('Description [Own description]: '), 'the revisited form shows the previous answer');
   assert.equal(result.options.airship, undefined); assert.equal(result.options.extension, 'note');
   assert.equal(JSON.parse(result.options.answers).description, 'Own description');
   assert.equal(ui.asked.filter(question => question.startsWith('Enable optional Airship tooling? No install or launch (y/N)')).length, 3);
+  assert.equal(ui.asked.filter(question => question.startsWith('Hosting platform for pull requests and CI')).length, 3); assert.equal(result.options.hosting, undefined);
 });

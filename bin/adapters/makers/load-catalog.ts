@@ -38,7 +38,7 @@ const domainEntry = (entity: Data): CatalogEntry => ({ registration: String(enti
 async function catalogEntry(root: string, directory: string): Promise<string> {
   const registry = await readRegistry(root);
   const specifier = (path: string) => JSON.stringify(resolve(root, path).replaceAll('\\', '/'));
-  const imports = registry.registrations.map((registration, index) => `import { ${registration.exported} as feature${index} } from ${specifier(`src/bootstrap/${registration.from}.ts`)};`);
+  const imports = registry.registrations.map((registration, index) => `import { ${registration.exported} as feature${index} } from ${specifier(`src/bootstrap/${registration.from.endsWith('.ts') ? registration.from : `${registration.from}.ts`}`)};`);
   const definitions = registry.registrations.map((registration, index) => `{ key: ${JSON.stringify(registration.key)}, override: ${registration.override}, feature: feature${index} }`);
   let domains = 'export const domains = [];';
   try { await access(resolve(root, 'src/bootstrap/authoring-domains.ts')); domains = `export { authoringDomains as domains } from ${specifier('src/bootstrap/authoring-domains.ts')};`; }

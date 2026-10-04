@@ -31,8 +31,11 @@ node bin/app check
 
 ## Delivery tiers (owned by `feature-delivery`)
 
+These are the tiers of the framework repository (`docs/development/DELIVERY-PIPELINE.md`). The increment CLI (`node bin/app increment new`, `node bin/app pr new`) and the Definition of Ready and Done scripts also ship to generated projects, but their workflows do not: a generated project runs the checks locally and follows its own CI; `feature-delivery` reads its workflows or pipelines before promising a tier.
+
 | Trigger | Tier | Purpose |
 | --- | --- | --- |
-| Draft pull request | Dev | fast checks on changed areas |
-| Ready for review | Integration | full integration gates |
-| Release branch | Release | release qualification; never started from this chain |
+| Before the draft | Increment | `node bin/app increment new` plans `docs/increments/<slug>.md`, its kick-off pull request and branch `increment/<slug>`; refined until the Definition of Ready passes (the `increment-handoff` skill) |
+| Draft pull request | Dev | the kick-off and each change pull request stacked on `increment/<slug>`; "Dev checks": fast diff-scoped check, suite registration, repository policy, changelog structure; "Definition of Ready" on the increment |
+| Ready for review | Integration | "CI result" and every pull-request workflow (Linux legs), blocking self-review guard; "Definition of Done" on handoff plus diff |
+| `release/X.Y.Z` branch | Release | every workflow on every matrix leg, then owner-dispatched Publish; never started from this chain (the `release` skill owns it) |

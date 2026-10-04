@@ -61,15 +61,15 @@ test('process selection follows --run or --install and requires explicit trust b
   assert.equal(await code(plan(context, { starter: 'note-pack', run: 'hello', yes: true })), 'STARTER_TRUST');
   assert.equal(await code(plan(context, { starter: 'note-pack', install: true, apply: 'hash' })), 'STARTER_TRUST');
   assert.equal(await code(plan(context, { starter: 'idle', install: true })), 'STARTER_PROCESS');
-  for (const key of ['extension', 'extensions', 'airship', 'no-airship', 'storybook', 'storybook-stories']) {
-    assert.equal(await code(plan(context, { starter: 'note-pack', [key]: key === 'extension' ? 'md' : true })), 'STARTER_OPTION');
+  for (const key of ['extension', 'extensions', 'airship', 'no-airship', 'storybook', 'storybook-stories', 'hosting', 'azure-organization', 'azure-project', 'azure-repository']) {
+    assert.equal(await code(plan(context, { starter: 'note-pack', [key]: key === 'extension' ? 'md' : key === 'hosting' ? 'azure-devops' : key.startsWith('azure-') ? 'Demo' : true })), 'STARTER_OPTION');
   }
 }, [fileStarter(), fileStarter({ id: 'idle', firstRun: [] })]));
 
 test('a Companion starter compiles the customized document and binds the compiler hash', async () => workspace(async context => {
   const planned = await plan(context, { starter: 'blank', author: 'Ada', id: 'field-notes' });
   const receipt = JSON.parse(content(planned, receiptFile));
-  assert.deepEqual(receipt.values, { id: 'field-notes', name: 'Field Notes', author: 'Ada', description: 'A minimal runnable plugin shell with no example domain or product requirements.',
+  assert.deepEqual(receipt.values, { id: 'field-notes', name: 'Field Notes', author: 'Ada', description: 'A minimal starting point with an empty workspace and no product requirements.',
     version: '0.1.0', codebaseFolder: 'src', testsFolder: 'tests' });
   assert.equal(JSON.parse(content(planned, 'manifest.json')).id, 'field-notes');
   assert.equal(JSON.parse(content(planned, 'manifest.json')).author, 'Ada');
@@ -84,6 +84,6 @@ test('a Companion starter compiles the customized document and binds the compile
 
 test('a Companion starter without an explicit ID derives one from its target directory', async () => workspace(async context => {
   const derived = await definitionProjectPlan(request('new', ['x'], { starter: 'blank' }), context, { directory: join(context.root, 'x'), vault: context.root, target: 'x' }, context.frameworkRoot);
-  // The Companion fallback is the document's own ID (my-plugin); neither x-my-plugin nor my-plugin passes the ID rule.
-  assert.deepEqual(derived.summary.identity, { id: 'x-project', name: 'X Project', author: '' });
+  // A short directory name is combined with the document's own submission-compliant ID (my-vault-tool).
+  assert.deepEqual(derived.summary.identity, { id: 'x-my-vault-tool', name: 'X My Vault Tool', author: 'Your Name' });
 }, [await shipped('blank')]));

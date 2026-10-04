@@ -10,6 +10,7 @@ import { parseCommandFile, shellInvocation } from '../../bin/domain/ci-shell.ts'
 import { summarizeWorkflow } from '../../bin/domain/ci-listing.ts';
 import { setupActions } from '../../bin/domain/ci-workflow.ts';
 import { executionBlockers, planJob, skipReason } from '../../bin/domain/ci-plan.ts';
+import { e2eFacts } from '../../scripts/quality/check-repository.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const parseDocument = await workflowParser();
@@ -51,13 +52,15 @@ test('ci.yml exposes its known jobs, triggers and resolved YAML anchors', async 
 test('the CI result job aggregates every ci.yml gate job and nothing informational', async () => {
   const ci = (await loadWorkflows(root)).find(item => item.stem === 'ci');
   const result = ci.jobs.find(entry => entry.id === 'ci-result');
-  assert.equal(result.name, 'CI result'); assert.equal(result.condition, 'always()');
+  // A run started by adding the e2e label reports as "E2E result", never as the required check (qualification-e2e-opt-in).
+  assert.equal(result.name, "${{ github.event.action == 'labeled' && 'E2E result' || 'CI result' }}");
+  assert.equal(result.condition, "always() && (github.event.action != 'labeled' || github.event.label.name == 'e2e')");
   const gates = ci.jobs.map(entry => entry.id).filter(id => !['ci-result', 'security-audit'].includes(id));
   assert.deepEqual([...result.needs].sort(), gates.sort(), 'a new ci.yml job must join the required CI result check');
   assert.ok(!result.needs.includes('security-audit'), 'the informational audit never blocks the required check');
   assert.match(result.steps.map(step => step.run ?? '').join('\n'), /select\(\.value\.result != "success" and \.value\.result != "skipped"\)[\s\S]*exit 1/);
   const hold = result.steps.find(step => step.env?.HEAD_REF === '${{ github.head_ref }}');
-  assert.match(hold?.run ?? '', /release\/\*\)[\s\S]*exit 1/, 'a release pull request never gets an early green CI result');
+  assert.match(hold?.run ?? '', /release\/\*\)[\s\S]*check_name=Release%20result[\s\S]*!= success[\s\S]*exit 1/, 'a release pull request is green only after its Release result succeeded');
 });
 test('application-docs owns the folded command-handbook checks and site build', async () => {
   const docs = (await loadWorkflows(root)).find(item => item.stem === 'application-docs');
@@ -170,23 +173,31 @@ test('string search functions settle on two known arguments and stay unknown oth
   const cases = [["startsWith(github.head_ref, 'release/')", true], ["!startsWith(github.head_ref, 'Release/')", false], ["endsWith(github.head_ref, '.0')", true], ["contains(github.head_ref, 'feature')", false],
     ["STARTSWITH(github.head_ref, 'x') || inputs.tier == 'integration'", true], ["startsWith(github.unknown, 'release/')", undefined], ["startsWith(github.unknown, 'x') && false", false],
     ["inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))", false],
+    // An object filter (`labels.*.name`) is a context path: unknown here, so it decides nothing unless another operand does.
+    ["contains(github.event.pull_request.labels.*.name, 'e2e')", undefined], ["inputs.tier == 'integration' || contains(github.event.pull_request.labels.*.name, 'e2e')", true],
     ["startsWith(github.head_ref)", undefined], ["startsWith(github.head_ref, 'a', 'b')", undefined], ["fromJSON(github.head_ref, 'a')", undefined], ["startsWith(github.head_ref, 'a'", undefined], ["startsWith(, 'a')", undefined]];
   for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
 });
+// Dev and the Definition of Ready/Done checks run on every pull request event with their own conditions; they are
+// not Integration workflows, so the release tier reports them through aliases instead of calling them.
+const ownTier = ['dev', 'definition-of-ready', 'definition-of-done'];
 test('every pull-request workflow runs its jobs only on ready, non-release pull requests unless called with tier release', async () => {
   const workflows = await loadWorkflows(root), parse = await workflowParser();
-  const ready = "inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))";
-  const gated = workflows.filter(item => item.triggers.includes('pull_request') && item.stem !== 'dev');
+  const tiered = "inputs.tier == 'release' || (";
+  const gated = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem));
   assert.ok(gated.length >= 13, 'every integration workflow is listed');
   for (const item of gated) {
-    const data = parse((await readFile(join(root, '.github/workflows', item.file), 'utf8'))).toJS();
-    assert.deepEqual(data.on.pull_request.types, ['opened', 'synchronize', 'reopened', 'ready_for_review'], item.file);
+    const text = await readFile(join(root, '.github/workflows', item.file), 'utf8'), data = parse(text).toJS();
+    // Only a workflow holding opt-in e2e steps listens to `labeled`, so adding the e2e label starts its e2e run.
+    const e2e = e2eFacts(text, item.file).e2e;
+    assert.deepEqual(data.on.pull_request.types, ['opened', 'synchronize', 'reopened', 'ready_for_review', ...(e2e ? ['labeled'] : [])], item.file);
     assert.equal(data.on.workflow_call.inputs.tier.default, 'integration', item.file);
     assert.deepEqual(data.on.workflow_dispatch.inputs.tier.options, ['integration', 'release'], item.file);
     for (const job of item.jobs.filter(entry => entry.id !== 'ci-result')) {
       assert.ok(job.condition, `${item.file}/${job.id} is gated`);
       const local = planJob(item, job, { localOs: 'Linux', selector: typeof job.matrix?.os === 'string' ? { os: 'ubuntu-24.04' } : {} });
-      if (job.condition === ready) assert.equal(local.jobCondition.result, 'true', `${item.file}/${job.id} runs for a local ready pull request`);
+      // A local run is a ready pull-request update without a known e2e opt-in: gates run, pure e2e jobs stay undecided.
+      if (job.condition.startsWith(tiered) && !/github\.event_name/.test(job.condition)) assert.equal(local.jobCondition.result, /inputs\.e2e == true/.test(job.condition) ? 'unknown' : 'true', `${item.file}/${job.id} for a local ready pull request`);
       const release = evaluateCondition(job.condition, { lookup: path => ({ 'inputs.tier': 'release', 'github.event_name': 'push', 'github.head_ref': '' })[path], success: true });
       const draft = evaluateCondition(job.condition, { lookup: path => ({ 'inputs.tier': '', 'github.event_name': 'pull_request', 'github.event.pull_request.draft': 'true', 'github.head_ref': 'feature' })[path], success: true });
       const releasePullRequest = evaluateCondition(job.condition, { lookup: path => ({ 'inputs.tier': '', 'github.event_name': 'pull_request', 'github.event.pull_request.draft': 'false', 'github.head_ref': 'release/1.2.0' })[path], success: true });
@@ -199,7 +210,7 @@ test('the release tier calls every gated pull-request workflow and candidate qua
   const workflows = await loadWorkflows(root), parse = await workflowParser();
   const release = parse(await readFile(join(root, '.github/workflows/release.yml'), 'utf8')).toJS();
   const calls = Object.entries(release.jobs).filter(([, job]) => job.uses);
-  const expected = workflows.filter(item => item.triggers.includes('pull_request') && item.stem !== 'dev').map(item => item.file).concat('candidate-qualification.yml').sort();
+  const expected = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem)).map(item => item.file).concat('candidate-qualification.yml').sort();
   assert.deepEqual(calls.map(([, job]) => job.uses.replace('./.github/workflows/', '')).sort(), expected);
   for (const [id, job] of calls) {
     assert.deepEqual(job.needs, 'metadata', id); assert.equal(job.secrets, undefined, id);
@@ -207,7 +218,7 @@ test('the release tier calls every gated pull-request workflow and candidate qua
   }
   const result = release.jobs['release-result'];
   assert.equal(result.name, 'Release result'); assert.equal(result.if, 'always()');
-  const aliases = { 'dev-checks': 'Dev checks', 'ci-result': 'CI result' };
+  const aliases = { 'dev-checks': 'Dev checks', 'ci-result': 'CI result', 'definition-of-ready': 'Definition of Ready', 'definition-of-done': 'Definition of Done' };
   assert.deepEqual([...result.needs].sort(), Object.keys(release.jobs).filter(id => id !== 'release-result' && !(id in aliases)).sort());
   // The release pull request reports the required checks from the release tier, never as a skipped pass.
   for (const [id, name] of Object.entries(aliases)) {

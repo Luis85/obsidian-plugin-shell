@@ -11,8 +11,9 @@ function matrixLabel(matrix: Data): string {
 }
 function jobLine(job: Data, width: number): string {
   const steps = record(job.steps), local = job.reproducible ? 'reproducible' : `not fully reproducible (${words(job.reasons).length} reason(s))`;
-  const run = job.executable ? 'executable' : 'execute refused';
-  return `    ${String(job.reference).padEnd(width)}  ${String(job.runsOn)}; ${matrixLabel(record(job.matrix))}; ${String(steps.run)} run steps; ${local}; ${run}\n`;
+  const run = job.executable ? 'executable' : 'execute refused', actions = words(job.actions);
+  const via = actions.length ? `; expands ${actions.join(', ')}` : '';
+  return `    ${String(job.reference).padEnd(width)}  ${String(job.runsOn)}; ${matrixLabel(record(job.matrix))}; ${String(steps.run)} run steps${via}; ${local}; ${run}\n`;
 }
 function filterLabel(filter: Data): string {
   const parts = [words(filter.branches).length ? `branches ${words(filter.branches).join(',')}` : '', words(filter.paths).length ? `${words(filter.paths).length} path filters` : '',
