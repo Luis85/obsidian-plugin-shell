@@ -42,6 +42,14 @@ test('missing, unknown, ambiguous, unused and self-referencing levels are report
   }
 });
 
+test('an override naming a removed example file may match nothing; any other unmatched override still fails', () => {
+  const stale = { ...tooling, levels: { integration: ['tests/tooling/removed-example.checks.mjs', 'tests/tooling/gone.checks.mjs'] } };
+  const { failures } = resolveLevels(manifest([stale]), [stale], { removed: new Set(['tests/tooling/removed-example.checks.mjs']) });
+  assert.deepEqual(codes(failures), ['UNUSED_LEVEL_PATTERN']);
+  assert.match(failures[0], /gone\.checks\.mjs/);
+  assert.deepEqual(codes(resolveLevels(manifest([stale]), [stale]).failures), ['UNUSED_LEVEL_PATTERN', 'UNUSED_LEVEL_PATTERN'], 'without the removal record both fail');
+});
+
 test('level declarations must exist, be unique, named, summarized and carry valid paths', () => {
   assert.deepEqual(codes(declaredLevels({}).failures), ['TEST_LEVELS_UNDECLARED']);
   for (const levels of [[{ name: 'Unit', summary: 'u' }], [{ name: 'unit', summary: 'u' }, { name: 'unit', summary: 'v' }], [{ name: 'unit' }], [{ name: 'unit', summary: 'u', paths: [] }]])

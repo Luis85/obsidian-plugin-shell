@@ -204,12 +204,20 @@ function runLevels(root, result, levels, options) {
   return runOutcomes(root, { ...result, suites }, selected.map(item => item.suite.name), options);
 }
 
+/** Example-owned files that `examples:remove` deleted; their level overrides may stay in tests/suites.json. */
+function removedExamples(root) {
+  let ownership;
+  try { ownership = JSON.parse(readFileSync(resolve(root, 'scripts/examples/ownership.json'), 'utf8')); } catch { return new Set(); }
+  const paths = Array.isArray(ownership?.files) ? ownership.files.map(file => file?.path).filter(path => typeof path === 'string') : [];
+  return new Set(paths.filter(path => { try { accessSync(resolve(root, path)); return false; } catch { return true; } }));
+}
+
 async function main(argv, root = process.cwd()) {
   const options = parseArguments(argv);
   if (options.help) { console.log(usage); return 0; }
   const result = await checkSuites(root, options.check ? { evidenceInventory: await evidenceInventory(root) } : {});
   if (result.failures.length) return failed(options, result.failures);
-  const levels = resolveLevels(result.manifest, result.suites);
+  const levels = resolveLevels(result.manifest, result.suites, { removed: removedExamples(root) });
   if (options.check || options.pyramid || options.levels.length) {
     const failures = [...levels.failures, ...(options.check ? e2ePolicyFailures(result.manifest, await e2eKinds()) : [])];
     if (failures.length) return failed(options, failures);

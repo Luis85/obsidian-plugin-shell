@@ -52,7 +52,7 @@ function overrides(suite, known, failures) {
   return entries;
 }
 
-function suiteFiles(suite, known, failures) {
+function suiteFiles(suite, known, failures, removed) {
   if (typeof suite.level !== 'string') { failures.push(`SUITE_LEVEL_MISSING: suite "${suite.name}" has no "level". ${edit}: add "level": one of ${[...known].join(', ')}.`); return []; }
   if (!known.has(suite.level)) { failures.push(`SUITE_LEVEL_UNKNOWN: suite "${suite.name}" has level "${suite.level}". Known: ${[...known].join(', ')}.`); return []; }
   const entries = overrides(suite, known, failures), used = new Set(), files = [];
@@ -62,7 +62,7 @@ function suiteFiles(suite, known, failures) {
     if (hits[0]) used.add(hits[0]);
     files.push({ path, suite: suite.name, level: hits[0]?.level ?? suite.level });
   }
-  for (const entry of entries) if (suite.files.length && !used.has(entry))
+  for (const entry of entries) if (suite.files.length && !used.has(entry) && !removed.has(entry.pattern))
     failures.push(`UNUSED_LEVEL_PATTERN: suite "${suite.name}" pattern "${entry.pattern}" (${entry.level}) matches none of its files. ${edit}: remove or fix it.`);
   return files;
 }
@@ -80,12 +80,16 @@ function pathFailures(levels, files) {
   return failures;
 }
 
-/** Resolves every classified file of `suites` (suite-manifest's classification) to its level. */
-export function resolveLevels(manifest, suites) {
+/**
+ * Resolves every classified file of `suites` (suite-manifest's classification) to its level. `removed` holds example
+ * files that `examples:remove` deleted (scripts/examples/ownership.json paths missing on disk): an override naming
+ * exactly one of them may match nothing, every other unmatched override still fails.
+ */
+export function resolveLevels(manifest, suites, { removed = new Set() } = {}) {
   const declared = declaredLevels(manifest);
   if (declared.failures.length) return { levels: [], files: [], failures: declared.failures };
   const known = new Set(declared.levels.map(level => level.name)), failures = [];
-  const files = suites.flatMap(suite => suiteFiles(suite, known, failures));
+  const files = suites.flatMap(suite => suiteFiles(suite, known, failures, removed));
   failures.push(...pathFailures(declared.levels, files));
   return { levels: declared.levels, files, failures };
 }
