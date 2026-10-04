@@ -64,7 +64,7 @@ test('the increment collection uses the generic accepts option, a managed candid
   const accepts = ['path', 'RISK-', 'LRN-'];
   for (const value of ['prototypes/checkout', 'docs/design/checkout', 'brainstorms/search/feature.definition.json', 'docs/prds/payments.md', 'RISK-0001', 'LRN-000123'])
     assert.ok(collectionReferenceOk(accepts, value), value);
-  for (const value of ['../secrets', '/etc/passwd', '.git/config', 'node_modules/x', 'C:/x', 'RSK-0001', 'RISK-1', 'docs\\x', 'docs//x'])
+  for (const value of ['../outside', '/etc/hosts', '.git/config', 'node_modules/x', 'C:/x', 'RSK-0001', 'RISK-1', 'docs\\x', 'docs//x'])
     assert.ok(!collectionReferenceOk(accepts, value), value);
   assert.ok(collectionReferenceOk(['release-version'], '1.0.0') && !collectionReferenceOk(['release-version'], 'docs/x'));
   for (const [change, pattern] of [
