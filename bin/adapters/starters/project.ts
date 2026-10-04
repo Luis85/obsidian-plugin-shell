@@ -6,6 +6,7 @@ import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
 import { customizeStarter } from './customize.ts';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
+import { hostingFlags, hostingSummary, withHostingFlags } from '../framework/hosting-options.ts';
 import { hash, readJson } from '../framework/files.ts';
 import { derivedPluginId, pluginIdProblem } from '../framework/plugin-id.ts';
 import { storybookFlags } from '../framework/storybook-options.ts';
@@ -57,24 +58,24 @@ function selectedRun(request: Request, d: StarterDefinition, processes: StarterP
 }
 type Change = FilePlan['changes'][number];
 const planned = (change: Change) => ({ path: change.path, content: change.content, ...(change.encoding ? { encoding: change.encoding } : {}) });
-interface GeneratedPlan { plan: FilePlan; conflicts: string[]; acceptanceTodos: number; warnings: string[]; compilerHash: string }
+interface GeneratedPlan { plan: FilePlan; conflicts: string[]; acceptanceTodos: number; warnings: string[]; compilerHash: string; hosting?: ReturnType<typeof hostingSummary> }
 /** Compiles the identity-customized Companion document through the project compiler, then adds the starter's extra files. */
 async function companionPlan(request: Request, context: Context, place: Placement, template: string, selected: LoadedStarter, values: Record<string, InputValue>, extra: { path: string; content: string }[]): Promise<GeneratedPlan> {
   const customization: Record<string, string> = {};
   for (const key of ['id', 'name', 'author', 'version', 'description', 'codebaseFolder', 'testsFolder', 'extension', 'extensions']) if (values[key] !== undefined) customization[key] = String(values[key]);
   for (const key of ['extension', 'extensions']) if (request.options[key] !== undefined) customization[key] = stringOption(request.options, key)!;
-  const document = withAirshipOption(customizeStarter(selected, customization), request.options);
+  const document = withHostingFlags(withAirshipOption(customizeStarter(selected, customization), request.options), request.options);
   const scratch = await mkdtemp(join(tmpdir(), 'workbench-starter-'));
   try {
     const input = join(scratch, 'project.json'); await writeFile(input, JSON.stringify(document) + '\n', { flag: 'wx' });
     const generated = await planProject({ input, vault: place.vault, target: place.target, templateRoot: template, storybook: storybookFlags(request.options), signal: context.signal });
     const plan = await createFilePlan(place.vault, [...generated.plan.changes.map(planned), ...extra]);
-    return { plan, conflicts: generated.conflicts, acceptanceTodos: generated.summary.acceptanceTodos, warnings: generated.summary.warnings, compilerHash: generated.hash };
+    return { plan, conflicts: generated.conflicts, acceptanceTodos: generated.summary.acceptanceTodos, warnings: generated.summary.warnings, compilerHash: generated.hash, hosting: hostingSummary(document) };
   } finally { await rm(scratch, { recursive: true, force: true }); }
 }
 /** A file starter plans only its rendered files; Companion-only options are refused. */
 function filesPlan(request: Request, plan: FilePlan): GeneratedPlan {
-  requireThat(['extension', 'extensions', 'airship', 'no-airship', 'storybook', 'storybook-stories'].every(key => request.options[key] === undefined), 'STARTER_OPTION', 'Companion-only options do not apply to this file starter.');
+  requireThat(['extension', 'extensions', 'airship', 'no-airship', 'storybook', 'storybook-stories', ...hostingFlags].every(key => request.options[key] === undefined), 'STARTER_OPTION', 'Companion-only options do not apply to this file starter.');
   return { plan, conflicts: [], acceptanceTodos: 0, warnings: [], compilerHash: '' };
 }
 export async function definitionProjectPlan(request: Request, context: Context, place: Placement, template: string) {
@@ -87,7 +88,7 @@ export async function definitionProjectPlan(request: Request, context: Context, 
   const extra = renderFiles(d, values).map(file => ({ ...file, path: place.target + '/' + file.path }));
   // The rendered files are planned (and so validated) before any compilation, for both generators.
   const rendered = await createFilePlan(place.vault, extra);
-  const { plan: files, conflicts, acceptanceTodos, warnings, compilerHash } = d.generator.kind === 'companion'
+  const { plan: files, conflicts, acceptanceTodos, warnings, compilerHash, hosting } = d.generator.kind === 'companion'
     ? await companionPlan(request, context, place, template, selected, values, extra) : filesPlan(request, rendered);
   const receipt: StarterReceipt = { schemaVersion: 1, starter, values, processes, firstRun: d.firstRun,
     nextSteps: d.nextSteps.map(step => interpolate(step, values)),
@@ -96,6 +97,6 @@ export async function definitionProjectPlan(request: Request, context: Context, 
   const plan = await createFilePlan(place.vault, [...files.changes.map(planned), { path: place.target + '/' + receiptFile, content }]);
   return { plan, conflicts, hash: hash(JSON.stringify({ source: selected.sha256, values, compilerHash })),
     summary: { starter: { ...starter, title: d.name }, identity: { id: String(values.id), name: String(values.name), author: String(values.author ?? '') },
-      directory: place.directory, vault: place.vault, target: place.target, files: plan.changes.length, acceptanceTodos, warnings,
+      directory: place.directory, vault: place.vault, target: place.target, files: plan.changes.length, acceptanceTodos, warnings, ...(hosting ? { hosting } : {}),
       recipe: { source: selected.file, sha256: selected.sha256, receiptSha256: hash(content), generator: d.generator.kind, processes, run, nextSteps: receipt.nextSteps } } };
 }

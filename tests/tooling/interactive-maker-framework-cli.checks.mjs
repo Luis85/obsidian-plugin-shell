@@ -87,9 +87,9 @@ test('interactive sessions run reads directly and cancel unapproved plans', asyn
     await writeFile(join(root, 'project.json'), starterDocumentText('companion-plugin'));
     const dry = await run(['setup', '--input', 'project.json', '--root', root, '--dry-run', '--no-airship', '--no-mcp'], { answers: [] });
     assert.equal(dry.code, 0, dry.stderr); assert.match(dry.stdout, /setup: planned/);
-    const declined = await run(['setup', '--input', 'project.json', '--root', root, '--no-airship', '--no-mcp'], { answers: ['n'] });
+    const declined = await run(['setup', '--input', 'project.json', '--root', root, '--no-airship', '--no-mcp'], { answers: ['', 'n'] });
     assert.equal(declined.code, 130, declined.stdout + declined.stderr);
-    const created = await run(['new', join(root, 'made'), '--starter', 'blank', '--id', 'made-app', '--name', 'Made', '--author', 'Team', '--no-airship'], { answers: ['', '', '', '', 'n'] });
+    const created = await run(['new', join(root, 'made'), '--starter', 'blank', '--id', 'made-app', '--name', 'Made', '--author', 'Team', '--no-airship'], { answers: ['', '', '', '', '', 'n'] });
     assert.equal(created.code, 130, created.stdout + created.stderr);
   });
 });

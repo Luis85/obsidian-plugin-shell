@@ -3,6 +3,7 @@ import { packStarterOperation, readStarterOperation } from '../starters/operatio
 import { starterProcessOperation } from '../starters/processes.ts';
 import { adoptAnalyze } from './adopt-operation.ts';
 import { airshipOperation } from './airship.ts';
+import { hostingShow } from './hosting-plan.ts';
 import { buildClickdummy } from './clickdummy.ts';
 import { checkOperation } from './check.ts';
 import { checkPlanOperation } from './check-plan.ts';
@@ -142,6 +143,7 @@ const routes: Route[] = [
   [isMakerCheck, makerCheck],
   [prefixed('entities '), entityCatalog],
   [named('adopt analyze'), adoptAnalyze],
+  [named('hosting show'), hostingShow],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],
   [prefixed('storybook '), (request, context) => storybookOperation(request, context)],

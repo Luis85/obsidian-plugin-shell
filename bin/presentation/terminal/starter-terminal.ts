@@ -9,6 +9,7 @@ import { companionStarterSet, derivedId, derivedName, invocationDirectory } from
 import { validateNativeIntegrations, type NativeProjectIntegrations } from '../../../scripts/companion/native-contract.mjs';
 import type { AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
+import { askHosting } from './hosting-terminal.ts';
 type Prompt = (query: string) => Promise<string>;
 type Write = (text: string) => void;
 type Options = Request['options'];
@@ -64,9 +65,11 @@ async function askInputs(d: Definition, target: string, values: Record<string, u
     values[input.id] = inputValue(answerValue(input, answer, fallback), input);
   }
 }
-/** Companion starters may opt into Airship and fill a single native file type or context-menu filter. */
+/** Companion starters may opt into Airship, choose a hosting platform (a new folder has no remote, so the default
+ * is GitHub) and fill a single native file type or context-menu filter. */
 async function companionOptions(options: Options, context: Context, prompt: Prompt): Promise<void> {
   if (options.airship === undefined && options['no-airship'] === undefined && parseConfirmation(await prompt('Enable optional Airship tooling? No install or launch [y/N]: ')) === true) options.airship = true;
+  await askHosting(options, prompt, null);
   const { starters } = await companionStarterSet(context);
   const native = nativeIntegrations(starters.find(entry => entry.definition.id === options.starter)?.document);
   if (native) await nativeOptions(native, options, prompt);
@@ -97,7 +100,7 @@ export async function guidedStarter(request: Request, context: Context, prompt: 
   if (d.generator.kind === 'companion') await companionOptions(options, context, prompt);
   return { ...request, args, options };
 }
-interface Summary { starter?: { id: string; title: string; version: string; sha256: string }; source?: { file: string; sha256: string; schemaVersion: number }; identity: { id: string; name: string; author: string }; directory: string; vault: string; files: number; acceptanceTodos: number; warnings: string[] }
+interface Summary { starter?: { id: string; title: string; version: string; sha256: string }; source?: { file: string; sha256: string; schemaVersion: number }; identity: { id: string; name: string; author: string }; directory: string; vault: string; files: number; acceptanceTodos: number; warnings: string[]; hosting?: { platform: string; connect: string[] } }
 interface Listing { starters: Array<{ id: string; title: string; category: string; difficulty: string; description: string }> }
 interface Review { planHash: string; summary: Summary; conflicts: string[]; next?: string; nextSteps?: string[]; guide?: { readme: string; implementation: string }; install?: Record<string, { exitCode: number }> }
 function listingText(starters: Listing['starters']): string {
@@ -113,6 +116,8 @@ function followUpLines(data: Review): string[] {
   if (data.next) lines.push('', data.next);
   if (data.install) lines.push('', ...Object.entries(data.install).map(([label, run]) => `${label}: exit ${run.exitCode}`));
   if (data.nextSteps) lines.push('', 'Next steps:', ...data.nextSteps.map(step => '  ' + step));
+  const hosting = data.summary?.hosting;
+  if (data.nextSteps && hosting) lines.push('', `Hosting ${hosting.platform} (commands are printed, never run):`, ...hosting.connect.map(step => '  ' + step));
   if (data.guide) lines.push('', `Read ${data.guide.readme} and ${data.guide.implementation}.`);
   return lines;
 }
@@ -127,6 +132,7 @@ export function starterText(value: Result): string | null {
     `  Directory  ${s.directory}`, `  Files      ${s.files} generated, including provenance`,
     `  Plan hash  ${data.planHash}`, `  PRD TODOs  ${s.acceptanceTodos} acceptance obligations remain TODO`,
     `  Warnings   ${s.warnings.length ? s.warnings.length + ' scaffold boundaries (listed in --json and design/traceability.json)' : 'none'}`,
+    ...(s.hosting ? [`  Hosting    ${s.hosting.platform}`] : []),
     `  Conflicts  ${data.conflicts.length ? data.conflicts.join('; ') : 'none'}`, ...followUpLines(data)];
   return lines.join('\n') + '\n';
 }
