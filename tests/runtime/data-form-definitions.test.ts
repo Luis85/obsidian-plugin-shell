@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { defineForm, readDataForm } from '../../src/features/api';
-import { featureBriefForm } from '../../src/features/showcase/feature-brief';
-import featureBrief from '../../src/features/showcase/forms/feature-brief.json';
+import featureBrief from '../fixtures/forms/feature-brief.json';
 
+/** Test-owned definition, independent of the removable showcase example. */
+const featureBriefForm = defineForm(featureBrief);
 const form = (fields: unknown[], extra: Record<string, unknown> = {}) => ({ schemaVersion: 1, id: 'probe', version: 1, title: 'Probe', fields, ...extra });
 const text = (id: string, extra: Record<string, unknown> = {}) => ({ id, kind: 'text', label: id, ...extra });
 function rejected(value: unknown) {
@@ -13,7 +14,7 @@ function rejected(value: unknown) {
 }
 
 describe('runtime form definitions', () => {
-  it('[FORMS-01] reads the shipped example into a frozen definition with resolved conditions', () => {
+  it('[FORMS-01] reads a feature-owned JSON definition into a frozen definition with resolved conditions', () => {
     expect(featureBriefForm).toBe(featureBriefForm);
     expect(readDataForm(featureBrief)).toEqual({ ok: true, value: featureBriefForm });
     expect(Object.isFrozen(featureBriefForm) && Object.isFrozen(featureBriefForm.fields) && Object.isFrozen(featureBriefForm.fields[0])).toBe(true);

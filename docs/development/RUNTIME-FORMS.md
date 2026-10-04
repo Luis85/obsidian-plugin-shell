@@ -10,6 +10,9 @@ what happens with the value.
 
 The showcase **Forms** page is the working example. The definition is
 `src/features/showcase/forms/feature-brief.json`, and `src/features/showcase/feature-brief.ts` declares it.
+The Forms page is an optional example: `npm run examples:remove` deletes it together with the other
+showcase pages ([remove optional examples](EXAMPLE-REMOVAL.md)). `DataForm`, the `form.*` messages and
+`src/styles/forms.css` are shared and stay.
 
 ## Add a form to a feature
 
@@ -47,14 +50,17 @@ The showcase **Forms** page is the working example. The definition is
    ```
 
 4. Test it with real services. Use the example tests as a template:
-   - `tests/runtime/data-form-components.test.ts` mounts the real showcase.
+   - `tests/runtime/data-form-components.test.ts` mounts the real showcase. It is example-owned and
+     removed with the showcase.
    - `tests/runtime/data-form-standalone.test.ts` mounts `DataForm` with a feature-owned definition.
+   - The domain tests read the test-owned copy `tests/fixtures/forms/feature-brief.json`, so they keep
+     running after example removal.
 
    Run `node scripts/testing/suites.mjs --check` after adding a test file.
 
 5. Run `node --test tests/tooling/interactive-maker-runtime-form-format.checks.mjs`. It reads every
    `src/features/*/forms/*.json` with the CLI's authoritative reader, so a runtime form stays valid in the
-   shared format.
+   shared format. It proves discovery and the CLI value check on the test-owned fixture.
 
 To persist the value, handle `submit` in a feature action, for example a repository from
 `definePluginDataFeature` or `defineNoteFeature`. Do not write from the component.
@@ -157,7 +163,7 @@ Import these from `src/features/api.ts`:
   - Invalid controls carry `aria-invalid="true"`.
   - A summary is announced with `role="alert"`.
 - **Controls** follow the existing panels: Nuxt UI `UInput`, `UTextarea` and `UButton`, plus native
-  `select` and checkbox controls styled with shell tokens in `src/styles/panels.css`. Measured on this
+  `select` and checkbox controls styled with shell tokens in `src/styles/forms.css`. Measured on this
   branch, `USelect` would add about 89 kB to `main.js`, and `UCheckbox` with `USwitch` about 76 kB more.
   The chosen set adds about 31 kB, and `styles.css` grows by about 1 kB. No global styles or Preflight
   are added. All selectors are scoped by the shared pipeline.

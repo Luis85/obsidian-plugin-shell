@@ -100,6 +100,26 @@
     "popout": "Ansicht in neues Fenster verschieben",
     "close": "Diese Ansicht schließen"
   },
+  "form": {
+    "submit": "Absenden",
+    "reset": "Zurücksetzen",
+    "choose": "Auswählen…",
+    "invalid": "Prüfe die markierten Felder.",
+    "listHint": "Ein Eintrag pro Zeile",
+    "issue": {
+      "required": "Dieses Feld ist erforderlich.",
+      "text": "Gib Text mit höchstens {limit} Zeichen ein.",
+      "title": "Gib einen einzeiligen Titel mit höchstens {limit} Zeichen ein.",
+      "number": "Gib eine Zahl ein.",
+      "integer": "Gib eine ganze Zahl ein.",
+      "range": "Gib eine Zahl zwischen {min} und {max} ein.",
+      "min": "Gib eine Zahl von mindestens {min} ein.",
+      "max": "Gib eine Zahl von höchstens {max} ein.",
+      "choice": "Wähle eine der angebotenen Optionen.",
+      "items": "Gib höchstens {limit} Einträge ein.",
+      "invalid": "Dieser Wert ist ungültig."
+    }
+  },
   "foundation": {
     "title": "Dein Plugin",
     "help": "Registrierte Funktionen erscheinen hier. Einstellungen und Laufzeitdienste sind bereit."
