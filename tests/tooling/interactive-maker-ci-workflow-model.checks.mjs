@@ -180,8 +180,9 @@ test('string search functions settle on two known arguments and stay unknown oth
 });
 // Dev and the Definition of Ready/Done checks run on every pull request event with their own conditions; they are
 // not Integration workflows, so the release tier reports them through aliases instead of calling them. Synced
-// projects--* copies belong to standalone projects and follow their own CI, never the shell's tiers.
-const ownTier = ['dev', 'definition-of-ready', 'definition-of-done'];
+// projects--* copies belong to standalone projects and follow their own CI, never the shell's tiers; the projects-only
+// required checks report those same checks for a pull request that changes only projects/**.
+const ownTier = ['dev', 'definition-of-ready', 'definition-of-done', 'projects-required-checks'];
 test('every pull-request workflow runs its jobs only on ready, non-release pull requests unless called with tier release', async () => {
   const workflows = await loadWorkflows(root), parse = await workflowParser();
   const tiered = "inputs.tier == 'release' || (";

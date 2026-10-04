@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -248,7 +249,8 @@ test('[PROJECTS-10] this checkout: every project is standalone, linked to its pr
 });
 
 test('[PROJECTS-11] the projects tooling, boundary workflow and synced copies never reach a framework kit or a generated project', () => {
-  for (const path of ['scripts/projects/projects.mjs', 'scripts/projects/workflows.mjs', 'tests/tooling/projects-boundary.checks.mjs', '.github/workflows/projects-boundary.yml', '.github/workflows/projects--companion--ci.yml',
+  for (const path of ['scripts/projects/projects.mjs', 'scripts/projects/workflows.mjs', 'tests/tooling/projects-boundary.checks.mjs', '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml',
+    '.github/workflows/projects--companion--ci.yml',
     '.github/workflows/site-templates.yml', 'scripts/testing/qualify-site-templates.mjs', 'tests/tooling/site-templates-qualification.checks.mjs', 'tests/fixtures/sites/vault/Site/Features.base']) {
     assert.equal(included(path), false, `kit: ${path}`);
     assert.equal(maintainerOnly(path), true, `generated project: ${path}`);
@@ -260,4 +262,30 @@ test('[PROJECTS-11] the projects tooling, boundary workflow and synced copies ne
 test('[PROJECTS-15] a .base edit re-runs the boundary check, so a stale site snapshot fails in CI', async () => {
   const on = parse(await readFile(join(repository, '.github/workflows/projects-boundary.yml'), 'utf8')).on;
   for (const event of ['pull_request', 'push']) assert.ok(on[event].paths.includes('**/*.base'), event);
+});
+
+test('[PROJECTS-REQUIRED-01] a projects-only pull request reports the required checks; a mixed one only under another name', async t => {
+  const text = await readFile(join(repository, '.github/workflows/projects-required-checks.yml'), 'utf8'), data = parse(text);
+  inspectWorkflow(text, 'projects-required-checks.yml');
+  assert.deepEqual(data.on.pull_request.paths, ['projects/**']);
+  const release = parse(await readFile(join(repository, '.github/workflows/release.yml'), 'utf8'));
+  const required = ['dev-checks', 'definition-of-ready', 'ci-result', 'definition-of-done'].map(id => release.jobs[id].name);
+  assert.deepEqual(data.jobs.report.strategy.matrix.check, required, 'the same four checks main requires');
+  assert.equal(data.jobs.report.name, "${{ needs.scope.outputs.projects-only == 'true' && matrix.check || format('{0} (shell changes)', matrix.check) }}");
+  const script = data.jobs.scope.steps.find(step => step.id === 'scope').run;
+  const root = await mkdtemp(join(tmpdir(), 'projects-required-')); t.after(() => rm(root, { recursive: true, force: true }));
+  const git = (...args) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.invalid', ...args], { cwd: root, encoding: 'utf8' }).trim();
+  const put = async (path, body) => { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), body); };
+  git('init', '--quiet', '--initial-branch=main'); await put('src/a.ts', 'a\n'); await put('projects/demo/a.ts', 'a\n'); git('add', '-A'); git('commit', '--quiet', '-m', 'base');
+  const base = git('rev-parse', 'HEAD');
+  const scope = head => {
+    const output = join(root, `out-${head}`);
+    execFileSync('bash', ['-e', '-o', 'pipefail', '-c', script], { cwd: root, env: { ...process.env, BASE_SHA: base, HEAD_SHA: head, GITHUB_OUTPUT: output } });
+    return execFileSync('cat', [output], { encoding: 'utf8' }).trim();
+  };
+  await put('projects/demo/a.ts', 'b\n'); git('commit', '--quiet', '-am', 'project only');
+  assert.equal(scope(git('rev-parse', 'HEAD')), 'projects-only=true');
+  await put('src/a.ts', 'b\n'); git('commit', '--quiet', '-am', 'shell too');
+  assert.equal(scope(git('rev-parse', 'HEAD')), 'projects-only=false');
+  assert.equal(scope(base), 'projects-only=false', 'an empty diff is not projects-only');
 });

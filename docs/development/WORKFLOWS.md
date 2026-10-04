@@ -53,6 +53,7 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | `publish.yml` (Publish) | Publish | `workflow_dispatch` (`version`) | `publish` "Publish release", `environment: release` | `publish-<version>-<attempt>` (30) |
 | `release-rehearsal.yml` | manual | `workflow_dispatch` (`source_commit`, `version`, `draft_snapshot`) | `rehearsal` | `release-rehearsal-<version>-<sha>`, `release-qualification-<version>-<sha>` (repository default) |
 | `maintenance-status.yml` | scheduled | `schedule` (Mondays 07:17 UTC), `workflow_dispatch` | `discover` | `maintenance-status` (14) |
+| `projects-required-checks.yml` (Projects-only required checks) | outside the tiers | `pull_request` (`opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`) on `projects/**` | `scope` "Projects-only scope" (full history; is every changed path under `projects/`?), then `report` ×4: "Dev checks", "Definition of Ready", "CI result", "Definition of Done" for a projects-only pull request, "<check> (shell changes)" otherwise | none |
 | `projects--<project>--<file>.yml` | the project's own | as written in `projects/<project>/.github/workflows/<file>`, scoped to `projects/<project>/**` | copies made by `npm run projects:sync`, never edited here ([projects](../../projects/README.md)); outside the shell's tiers: `check-repository` applies the portable review (pins, permissions, credentials) but not the tier and e2e rules, and `release.yml` does not call them | the project's own |
 | `offline-qualification-inputs.yml` | scheduled | `schedule` (Mondays 06:41 UTC), `workflow_dispatch` | `inputs`, `angular-inputs` | `linux-qualification-inputs`, `angular-offline-inputs` (3) |
 
@@ -153,6 +154,7 @@ candidate qualification runs the blocking live audit).
 | Definition of Ready | `definition-of-ready.yml` › `ready`; on a release head `release.yml` › `definition-of-ready` | Branch protection on `main` |
 | CI result | `ci.yml` › `ci-result`; on a release head also `release.yml` › `ci-result` | Branch protection on `main` |
 | Definition of Done | `definition-of-done.yml` › `done` (skips drafts); on a release head `release.yml` › `definition-of-done` | Branch protection on `main` |
+| all four above, projects-only | `projects-required-checks.yml` › `report`, only when a pull request changes nothing outside `projects/**` (every shell workflow ignores `projects/`); otherwise it reports "<check> (shell changes)", which nothing requires | Branch protection on `main` (the same four names) |
 | E2E result | `ci.yml` › `ci-result` in a run started by the `e2e` label | nowhere: it reports the opted-in end-to-end jobs and never stands in for "CI result" |
 | Release result | `release.yml` › `release-result` | `scripts/release/publish.mjs` refuses without a green one on the release head |
 

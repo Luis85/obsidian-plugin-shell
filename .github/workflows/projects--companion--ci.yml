@@ -2,6 +2,9 @@
 # Edit the project's own workflow and re-run the sync; never edit this copy.
 
 name: "companion: CI"
+# The `ui` job (browser journeys, UI review gallery) is end-to-end: it always runs on `main`, this project's Release
+# tier, and on a pull request or manual run only when opted in (the `e2e` label, or the `e2e` input of a manual run).
+# Adding the label starts it at once and it runs again on each later push while the label stays; `check` always runs.
 on:
   push:
     branches: [ main ]
@@ -9,14 +12,20 @@ on:
       - projects/companion/**
       - .github/workflows/projects--companion--ci.yml
   pull_request:
+    types: [ opened, synchronize, reopened, labeled ]
     paths:
       - projects/companion/**
       - .github/workflows/projects--companion--ci.yml
   workflow_dispatch:
+    inputs:
+      e2e:
+        description: Also run the end-to-end browser journeys and the UI review gallery
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: projects-companion-ci-${{ github.ref }}
+  group: projects-companion-ci-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   check:
@@ -46,10 +55,10 @@ jobs:
       - name: Community-review rules (manifest, lint, bundle; advisory)
         continue-on-error: true
         run: node "$PINNED_NPM" run check:submission
-  # Browser journeys and the UI review gallery. Evidence for human review on every pull request; the gallery
-  # is never acceptance. A step is skipped, with a warning, when its npm script does not exist.
+  # Browser journeys and the UI review gallery: end-to-end, so opt-in except on `main`. The gallery is evidence for
+  # human review, never acceptance. A step is skipped, with a warning, when its npm script does not exist.
   ui:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || inputs.e2e == true || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && contains(github.event.pull_request.labels.*.name, 'e2e'))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

@@ -25,7 +25,7 @@ const maintainerFiles: ReadonlySet<string> = new Set(['DEVELOPER_GUIDE.md', '.gi
   'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
   'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs', 'docs/README.md',
   'tests/runtime/shell-entry-lifecycle.test.ts', 'templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt', 'tests/runtime/obsidian-test-kit-shell-entry.test.ts',
-  '.github/workflows/projects-boundary.yml', 'tests/tooling/projects-boundary.checks.mjs',
+  '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tests/tooling/projects-boundary.checks.mjs',
   // Site template qualification builds the framework's own templates/sites from a maintainer fixture vault.
   '.github/workflows/site-templates.yml', 'scripts/testing/qualify-site-templates.mjs', 'tests/tooling/site-templates-qualification.checks.mjs']);
 const maintainerPrefixes = ['configs/starters/', '.github/scripts/', deliveryPipelineFolder, '.github/workflows/projects--', 'scripts/projects/',
