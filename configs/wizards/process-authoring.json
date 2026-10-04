@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "process-authoring",
+  "version": 1,
+  "title": "Business process authoring",
+  "description": "Create or edit a data-driven business process: details, roles, steps, business rules and docs, saved through a reviewed plan.",
+  "context": { "title": "Business process {{process.title|(new)}}", "details": ["Nothing is written before the reviewed plan."] },
+  "cancelMessage": "Process authoring cancelled. Nothing was written.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "process.load" },
+    { "id": "details", "kind": "form", "form": "process-details", "bind": "process", "title": "Details" },
+    { "id": "roles", "kind": "action", "action": "process.edit-roles", "interactive": true, "title": "Roles" },
+    { "id": "owner", "kind": "form", "bind": "process", "title": "Owner", "fields": [
+      { "id": "owner", "kind": "select", "label": "Which role owns the process?", "choicesFrom": "process.role-choices" }
+    ] },
+    { "id": "steps", "kind": "action", "action": "process.edit-steps", "interactive": true, "title": "Steps" },
+    { "id": "rules", "kind": "action", "action": "process.edit-rules", "interactive": true, "title": "Business rules" },
+    { "id": "save", "kind": "action", "action": "process.save", "retry": "steps", "barrier": true },
+    { "id": "done", "kind": "end", "text": "Process {{saved.process}} saved to {{saved.path}}. Next: node bin/app process check, then node bin/app process docs --name {{saved.process}}." }
+  ]
+}

@@ -7,6 +7,8 @@ import { projectSetupWizard } from './presentation/project-setup-wizard.ts';
 import { settingsWizard } from './presentation/settings.ts';
 import { projectWizard } from './presentation/project-wizard.ts';
 import { launchDefinition } from './presentation/wizards/launch.ts';
+import { launchProcess } from './presentation/wizards/process-launch.ts';
+import { interactiveProcess } from './adapters/process-command.ts';
 import { readSnapshot } from './adapters/storage.ts';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -28,10 +30,10 @@ import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } f
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
-  if (!['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'wizard', 'form'].includes(args.command)) return false;
+  if (!['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'wizard', 'form', 'process'].includes(args.command)) return false;
   if (env.CI && env.CI !== 'false') return false;
   const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
-  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && !args.action);
+  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && (!args.action || interactiveProcess(args)));
 }
 async function interactive(args: Arguments, context: CommandContext, io: IO, controller: AbortController): Promise<void> {
   const env = io.env ?? process.env;
@@ -62,6 +64,7 @@ async function runInteractiveCommand(args: Arguments, context: CommandContext, u
   if (args.command === 'project-setup') return projectSetupWizard(ui, context);
   if (args.command === 'settings') { await settingsWizard(ui, context); return; }
   if (args.command === 'wizard' || args.command === 'form') return launchDefinition(ui, args, { ...options });
+  if (args.command === 'process') return launchProcess(ui, args, { ...options });
   if (await shouldCreate(args, context, options)) return createInteractive(args, context, ui, options);
   if (args.command === 'prototype') return await prototypeWizard(ui, options);
   else await studio(ui, options);

@@ -1,0 +1,12 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "process-role",
+  "version": 1,
+  "title": "Business process role",
+  "description": "A role that owns a process or performs its steps. Its id is derived from the title and kept on later edits.",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Role title", "maxLength": 120 },
+    { "id": "description", "kind": "text", "label": "Responsibilities (optional)", "multiline": true, "maxLength": 2000 }
+  ]
+}

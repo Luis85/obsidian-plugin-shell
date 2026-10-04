@@ -2,6 +2,7 @@ import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
 import { designCommand } from './design-command.ts';
 import { definitionCommand } from './wizard-command.ts';
+import { processCommand } from './process-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -84,6 +85,15 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app form list --json      Reusable data-driven forms (configs/forms)
   node bin/app form show --name user-settings --json
   node bin/app form validate --name project-identity --input identity.json --json
+  node bin/app process               Run, create or edit a data-driven business process (configs/processes)
+  node bin/app process run --name release-approval   Walk an instance: inputs, business rules, transitions, audit trail
+  node bin/app process new | process edit --name release-approval   Author steps, rules and docs; reviewed save
+  node bin/app process list --json   Processes with steps, rules and findings
+  node bin/app process show --name release-approval --json
+  node bin/app process check --json  Validate structure, references, graph health and doc links
+  node bin/app process save --input process.json --json   Reviewed plan for configs/processes/<id>.json
+  node bin/app process docs --name release-approval --out docs/processes --json   Regenerate Markdown docs; authored text kept
+  node bin/app process simulate --name release-approval --input data.json --json   Agent walk with rule outcomes
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
@@ -182,7 +192,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'process', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -211,5 +221,5 @@ async function savedProjectCommand(input: Arguments, context: CommandContext): P
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  return pluginExecution(args, context.plugins) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
+  return pluginExecution(args, context.plugins) ?? directCommand(args, context) ?? (args.command === 'process' ? processCommand(args, context) : savedProjectCommand(args, context));
 }

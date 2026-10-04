@@ -13,11 +13,12 @@ import { newProjectModule } from './new-project.ts';
 import { prototypeModule } from './prototype.ts';
 import { brainstormModule } from './brainstorm.ts';
 import { frameworkSetupModule } from './framework-setup.ts';
+import { processModule } from './process.ts';
 /**
  * The explicit list of code hooks the JSON definitions in configs/forms and configs/wizards may name.
  * A new guided process adds definitions there, and only adds a module here when it needs new actions.
  */
-export const wizardModules: readonly WizardModule[] = [builtinModule, settingsModule, firstRunModule, projectSetupModule, newProjectModule, prototypeModule, brainstormModule, frameworkSetupModule];
+export const wizardModules: readonly WizardModule[] = [builtinModule, settingsModule, firstRunModule, projectSetupModule, newProjectModule, prototypeModule, brainstormModule, frameworkSetupModule, processModule];
 function merge<T>(target: Record<string, T>, source: Record<string, T> | undefined, kind: string): void {
   for (const [name, value] of Object.entries(source ?? {})) {
     requireSketch(!Object.hasOwn(target, name), 'WIZARD_REGISTRY', `Duplicate ${kind} ${name}.`);

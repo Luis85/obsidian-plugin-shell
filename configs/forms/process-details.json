@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "process-details",
+  "version": 1,
+  "title": "Business process details",
+  "description": "Title, purpose, status, version and overview notes of a data-driven business process (configs/processes).",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Process title", "maxLength": 120 },
+    { "id": "purpose", "kind": "text", "label": "Purpose: why does this process exist?", "required": true, "multiline": true, "maxLength": 4000 },
+    { "id": "status", "kind": "select", "label": "Status", "choices": [
+      { "id": "draft", "label": "Draft — being designed" },
+      { "id": "active", "label": "Active — followed today" },
+      { "id": "retired", "label": "Retired — kept for reference" }
+    ], "default": "draft" },
+    { "id": "version", "kind": "number", "label": "Version", "integer": true, "min": 1, "default": 1 },
+    { "id": "overview", "kind": "text", "label": "Overview notes in Markdown (optional)", "bind": "doc.text", "multiline": true, "maxLength": 20000,
+      "help": "Shown in the generated documentation. Link repository docs with [[docs/development/BUSINESS-PROCESSES]]; process check verifies every link." }
+  ]
+}
