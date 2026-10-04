@@ -46,23 +46,26 @@ const isVersion = (value: unknown): value is string => typeof value === 'string'
 
 const issue = (code: string, message: string): CommunityPluginIssue => ({ code, message });
 type Fields = { manifest: Record<string, unknown>; issues: CommunityPluginIssue[] };
+const uniqueTags = (value: unknown): boolean =>
+  Array.isArray(value) && value.length <= 10 && value.every(isCommunityPluginId) && new Set(value).size === value.length;
+const optional = (value: unknown, valid: (present: unknown) => boolean): boolean => value === undefined || valid(value);
+/** One rule per declared field after id: when `valid` fails, the message names the expected shape. */
+const fieldRules: ReadonlyArray<readonly [string, (value: unknown) => boolean, string]> = [
+  ['name', value => text(value, 100), 'name must be a non-empty string of at most 100 characters.'],
+  ['description', value => text(value, 500), 'description must be a non-empty string of at most 500 characters.'],
+  ['author', value => text(value, 100), 'author must be a non-empty string of at most 100 characters.'],
+  ['version', isVersion, 'version must be an x.y.z version.'],
+  ['minAppVersion', isVersion, 'minAppVersion must be an x.y.z version.'],
+  ['apiVersion', value => Number.isSafeInteger(value) && (value as number) >= 1, 'apiVersion must be a positive integer plugin API version.'],
+  ['category', value => communityPluginCategories.includes(value as CommunityPluginCategory), `category must be one of ${communityPluginCategories.join(', ')}.`],
+  ['tags', uniqueTags, 'tags must be a list of at most 10 unique kebab-case tags.'],
+  ['license', value => optional(value, present => text(present, 100)), 'license must be a non-empty string such as an SPDX identifier when present.'],
+  ['authorUrl', value => optional(value, present => text(present, 500) && present.startsWith('https://')), 'authorUrl must be an https URL when present.'],
+];
 function requiredFields({ manifest, issues }: Fields, folder: string): void {
   if (!isCommunityPluginId(manifest.id)) issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'id must be a lowercase kebab-case identifier of at most 64 characters.'));
   else if (manifest.id !== folder) issues.push(issue('COMMUNITY_PLUGIN_ID_MISMATCH', `manifest id ${manifest.id} differs from its folder ${folder}.`));
-  for (const [key, limit] of [['name', 100], ['description', 500], ['author', 100]] as const)
-    if (!text(manifest[key], limit)) issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', `${key} must be a non-empty string of at most ${limit} characters.`));
-  for (const key of ['version', 'minAppVersion'])
-    if (!isVersion(manifest[key])) issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', `${key} must be an x.y.z version.`));
-  if (!Number.isSafeInteger(manifest.apiVersion) || (manifest.apiVersion as number) < 1)
-    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'apiVersion must be a positive integer plugin API version.'));
-  if (!communityPluginCategories.includes(manifest.category as CommunityPluginCategory))
-    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', `category must be one of ${communityPluginCategories.join(', ')}.`));
-  if (!Array.isArray(manifest.tags) || manifest.tags.length > 10 || !manifest.tags.every(isCommunityPluginId) || new Set(manifest.tags).size !== manifest.tags.length)
-    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'tags must be a list of at most 10 unique kebab-case tags.'));
-  if (manifest.license !== undefined && !(text(manifest.license, 100)))
-    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'license must be a non-empty string such as an SPDX identifier when present.'));
-  if (manifest.authorUrl !== undefined && !(text(manifest.authorUrl, 500) && manifest.authorUrl.startsWith('https://')))
-    issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', 'authorUrl must be an https URL when present.'));
+  for (const [key, valid, message] of fieldRules) if (!valid(manifest[key])) issues.push(issue('COMMUNITY_PLUGIN_MANIFEST_INVALID', message));
 }
 /**
  * Validates manifest.json against its folder, the running app version and the provided plugin API. Unknown Obsidian
