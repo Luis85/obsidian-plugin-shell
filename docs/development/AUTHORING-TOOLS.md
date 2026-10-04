@@ -43,7 +43,10 @@ All child recipes take `<name> --feature <existing-owner>` unless stated otherwi
 | `listener` | Requires `--event <existing-name>` in the same feature. Subscribes to that typed event through the shared runtime bus, displays localized feedback and unsubscribes on disposal. |
 | `style` | Requires `--view <existing-generated-view>`. Adds an owned CSS module and an actual SFC stylesheet import. No unused CSS output or global host reset. |
 | `locale` | Takes only a locale name. Copies every base and explicitly registered feature key into a pending translation skeleton, with nonselectable status metadata and a completeness test. Review and translate before deliberately enabling a language. Later added keys make the test fail until the draft is updated. |
-| `maker` | Takes only a recipe name. Creates a trusted local recipe in `scripts/makers/custom`, explicitly registers it and generates a composition test. The default custom recipe composes a real localized command. |
+| `maker` | Takes only a recipe name. Creates a trusted local recipe in `scripts/makers/custom`, explicitly registers it and generates a composition test. The default custom recipe composes a real localized command. Running the new recipe needs `--trust-custom`. |
+| `plugin` | Takes only a plugin name. Creates and registers a self-contained Workbench TypeScript plugin under `plugins/<name>` with manifest, config, source, tests and event/CLI/TUI examples. Its checks add the plugin registry check, the maker type check (`configs/types/tsconfig.maker.json`) and the `workbench-plugins` suite. |
+| `file-extension` | Requires `--extension <ext>` (optional `--format json\|text`). Registers a custom text/JSON file extension with a dedicated native editor, a create command and file/folder menu entries, owned by the feature and tested. |
+| `context-menu` | Requires `--extensions <a,b>`. Registers a file-explorer action filtered by those extensions, with an editable domain handler and tests. |
 
 ```sh
 npm run make -- entity reference --feature bookmarks
@@ -55,8 +58,12 @@ npm run make -- event refreshed --feature bookmarks
 npm run make -- listener refresh-feedback --feature bookmarks --event refreshed
 npm run make -- style outline --feature bookmarks --view dashboard
 npm run make -- maker reminder
-npm run make -- reminder review --feature bookmarks
+npm run make -- reminder review --feature bookmarks --trust-custom
 npm run make -- locale fr
+npm run make -- locale fr --refresh --dry-run
+npm run make -- plugin audit-log
+npm run make -- file-extension board --feature bookmarks --extension board
+npm run make -- context-menu inspect --feature bookmarks --extensions md,board
 ```
 
 The title preset has a required nonblank title whose spelling is preserved. Task adds status/tags/optional due;
@@ -128,10 +135,19 @@ It writes no locks, directories, reports or generated source. The planner binds
 both edited files and read-only prerequisites to their reviewed hashes.
 
 Apply formats only planned source bytes with the pinned Prettier configuration,
-then runs types, the selected generated runtime/tooling tests and the entity
-catalog check. Exact Markdown fixtures remain untouched. Output records actual
-check outcomes. Full `npm run verify` remains a printed next step and is never
-reported as passed without execution. A failed check retains source for inspection.
+then runs the planned checks in order: the type check (the generated project's
+`configs/types/tsconfig.project.json` when present), the selected generated
+runtime tests, each generated tooling test, `events:check` and `entities:check`
+(plugin recipes add their registry, maker-type and plugin-suite checks). Every
+check runs even after a failure, through argument arrays without a shell. Exact
+Markdown fixtures remain untouched. `summary.checks` records each actual outcome
+(`passed`, `failed` with its exit code and output tail, or `skipped` when an
+identical rerun changed nothing). Any failed check makes the result `failed`
+(exit 1) with `MAKER_CHECKS_FAILED` and a next step (`npm ci` when the tools are
+not installed); the written source is kept for inspection, never rolled back.
+The full gate (`npm run verify`, or `npm run verify:project` in a generated
+project) remains a printed next step and is never reported as passed without
+execution. `--dry-run` lists the same checks as `not-run` and runs nothing.
 
 Identical registered reruns are source no-ops. Edited source or owned registrations,
 case collisions, reserved names, unsafe paths, symlinks and stale inputs fail before
@@ -146,6 +162,13 @@ the lock and recovery material for inspection. This is not a filesystem-wide
 transaction. Failed operations can leave newly created empty parent directories.
 
 ## Local custom recipes
+
+Run a registered local recipe with `--trust-custom`, for example
+`npm run make -- reminder review --feature bookmarks --trust-custom`. The CLI first
+resolves the name against the built-in catalog and the custom registry, read
+statically without executing it (a recipe registered from `./<name>.mjs`). An
+unknown name fails with `MAKER_UNKNOWN` and a did-you-mean suggestion; built-in
+recipes never need the flag. Saved plans never carry this trust.
 
 The explicit `customMakers` registry contains metadata (`name`, `version`,
 `description`) and an async `plan(context, request)` method. The runner validates
@@ -164,6 +187,15 @@ framework's own recipe tests prove the composed command and its registrations.
 read-only. It compares the pending draft keys with the current base keys and
 reports `missing`, `extra` and `selectable`. Drift fails with
 `LOCALE_DRAFT_DRIFT`. It plans nothing and refuses write options.
+
+Rerunning `make locale <name>` keeps an existing draft: without drift it changes
+nothing, and when base keys were added since the draft it fails with
+`LOCALE_DRAFT_DRIFT`, listing the missing keys. The reviewed refresh path,
+`make locale <name> --refresh --dry-run` and then `--yes`, adds only those keys
+(with their English values to translate) and the updated key count; every existing
+translation and extra key is kept. Remove extra keys by hand. `--refresh` refuses a
+missing or already selectable draft. `node bin/app check` runs every generated
+`tests/tooling/locale-*.checks.mjs` and `custom-*.checks.mjs`.
 
 Local recipe code is trusted developer code, not a sandbox. There is no remote
 loader, JSON command hook or automatic package installation. Recipes must return
