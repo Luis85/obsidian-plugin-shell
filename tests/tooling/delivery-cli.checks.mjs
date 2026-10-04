@@ -56,7 +56,8 @@ test('end to end in a real repository: ready, not done with generated docs in --
   const pending = repo.run('done.mjs', ['--base', 'main', '--no-plan', '--out', out]);
   assert.equal(pending.exit, 1);
   assert.match(pending.stdout, /Definition of Done: NOT-DONE[\s\S]*FAIL {2}DOD-02[\s\S]*fix: Tick each criterion[\s\S]*FAIL {2}DOD-04/);
-  assert.deepEqual((await readdir(out, { recursive: true })).filter(name => name.endsWith('.md')).sort(), ['CHANGELOG.md', 'docs/README.md', 'docs/increments/sample-increment.md']);
+  // readdir reports platform separators; compare repository-style paths.
+  assert.deepEqual((await readdir(out, { recursive: true })).filter(name => name.endsWith('.md')).map(name => name.replaceAll('\\', '/')).sort(), ['CHANGELOG.md', 'docs/README.md', 'docs/increments/sample-increment.md']);
   assert.equal(await repo.read('CHANGELOG.md'), changelog.replace('- A greeting command in the palette.\n', '- Older entry.\n'), '--out never touches the checkout');
   await repo.write(handoffPath, readyHandoff({ checked: true })); repo.git('commit', '--quiet', '-am', 'Evidence');
   const written = repo.run('done.mjs', ['--base', 'main', '--no-plan', '--write', '--json']);
