@@ -114,8 +114,7 @@ const scripts = stage => steps(stage).filter(step => typeof step.script === 'str
 /** The structural contract of the emitted pipeline; mutated copies below prove each rule can fail. */
 function assertPipeline(pipeline) {
   assert.deepEqual(pipeline.trigger, { branches: { include: ['main'] } }); assert.ok(!('pr' in pipeline), 'Azure Repos ignores pr:; branch policy runs it');
-  const [parameter, ...extra] = pipeline.parameters;
-  assert.deepEqual([parameter.name, parameter.type, parameter.default, extra.length], ['runObsidian', 'boolean', false, 0]);
+  assert.deepEqual(pipeline.parameters.map(item => [item.name, item.type, item.default]), [['runE2E', 'boolean', false], ['runObsidian', 'boolean', false]]);
   assert.deepEqual(pipeline.stages.map(stage => stage.stage), ['Check', 'UI', 'Obsidian']);
   for (const stage of pipeline.stages) {
     assert.deepEqual(stage.dependsOn, [], stage.stage); assert.equal(stage.jobs.length, 1, stage.stage);
@@ -130,7 +129,9 @@ function assertPipeline(pipeline) {
   assert.equal([...scripts(check).matchAll(/ run check$/gm)].length, 1); assert.match(scripts(check), / run verify:artifacts$/m);
   assert.doesNotMatch(scripts(check), /test:e2e|test:obsidian|verify:project/);
   assert.equal(steps(check).find(step => /check:submission/.test(step.script ?? '')).continueOnError, true);
-  assert.equal(ui.condition, "or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))");
+  // End-to-end stages: always on main (the project's Release tier), otherwise only when a run sets runE2E.
+  const main = "and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))";
+  assert.equal(ui.condition, `or(eq('\${{ parameters.runE2E }}', 'true'), ${main})`);
   const body = scripts(ui);
   assert.ok(body.indexOf('install --with-deps chromium') < body.indexOf('run test:e2e'));
   for (const script of ['test:e2e', 'ui:gallery']) assert.match(body, new RegExp(`scripts\\?\\.\\['${script}'\\][\\s\\S]*task\\.logissue type=warning\\]package\\.json has no ${script} script`));
@@ -138,7 +139,7 @@ function assertPipeline(pipeline) {
   const uploads = steps(ui).filter(step => step.task === 'PublishPipelineArtifact@1');
   assert.deepEqual(uploads.map(step => [step.inputs.artifact, step.inputs.targetPath]), [['ui-review-gallery', 'reports/ui-gallery'], ['ui-e2e-reports', 'reports/e2e']]);
   for (const step of uploads) assert.deepEqual([step.condition, step.continueOnError], ['always()', true]);
-  assert.equal(obsidian.condition, "or(eq('${{ parameters.runObsidian }}', 'true'), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main')))");
+  assert.equal(obsidian.condition, `or(eq('\${{ parameters.runE2E }}', 'true'), eq('\${{ parameters.runObsidian }}', 'true'), ${main})`);
   const downloads = steps(obsidian).filter(step => step.env?.OBSIDIAN_ALLOW_DOWNLOAD !== undefined);
   assert.deepEqual(downloads.map(step => step.env.OBSIDIAN_ALLOW_DOWNLOAD), ['1', '1']); assert.match(scripts(obsidian), / run test:obsidian$/m);
   assert.ok(steps(obsidian).some(step => step.task === 'Cache@2' && step.inputs.path === '.native-cache'));
@@ -159,6 +160,8 @@ test('[GENERATOR-HOSTING-06] azure-pipelines.yml is strict YAML that mirrors the
     item => { item.stages[0].jobs[0].steps.push({ script: 'node "$(PINNED_NPM)" run check' }); },
     item => { item.stages[2].jobs[0].variables = { OBSIDIAN_ALLOW_DOWNLOAD: '1' }; },
     item => { item.stages[2].condition = "eq(variables['System.PullRequest.IsDraft'], 'false')"; },
+    item => { item.stages[1].condition = "or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))"; },
+    item => { item.parameters = item.parameters.filter(parameter => parameter.name !== 'runE2E'); },
     item => { item.stages[1].jobs[0].steps.push({ script: 'echo $(System.AccessToken)' }); },
     item => { item.stages[0].jobs[0].steps[0].persistCredentials = true; },
     item => { item.pr = { branches: { include: ['main'] } }; },

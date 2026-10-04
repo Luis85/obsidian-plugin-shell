@@ -59,7 +59,9 @@ function azureRemote(azure) {
 const githubHints = prTemplatePath => `## Hosting and pull requests
 
 This project is prepared for GitHub. \`.github/workflows/ci.yml\` runs the gates on every pull request and push to
-\`main\`; \`.github/workflows/obsidian.yml\` runs real Obsidian on \`main\` and on a pull request labelled \`run-obsidian\`.
+\`main\`. End-to-end checks are opt-in and always run on \`main\`, this project's Release tier: the \`ui\` job (browser
+journeys, UI review gallery) on a pull request labelled \`e2e\`, and \`.github/workflows/obsidian.yml\` (real Obsidian)
+on a pull request labelled \`e2e\` or \`run-obsidian\`.
 Pull requests use \`${prTemplatePath}\`. With the GitHub CLI (sign in once with \`gh auth login\`):
 
 - \`gh pr create --draft --fill\`: open a draft pull request, then fill the template with real output.
@@ -78,10 +80,10 @@ function azureHints(prTemplatePath, azure) {
   return `## Hosting and pull requests
 
 This project is prepared for Azure DevOps (Azure Repos and Azure Pipelines). \`azure-pipelines.yml\` has a \`Check\`
-stage (typecheck, lint, product tests, release build, advisory community-review rules), a \`UI\` stage (browser
-journeys and the UI review gallery as pipeline artifacts on pull requests and manual runs) and an \`Obsidian\` stage
-that runs real Obsidian on \`main\` and when a run sets the \`runObsidian\` parameter (Azure Repos has no pull-request
-labels). Pull requests use \`${prTemplatePath}\`.
+stage (typecheck, lint, product tests, release build, advisory community-review rules) and two end-to-end stages that
+always run on \`main\` and otherwise only when a run sets the \`runE2E\` parameter (Azure Repos has no pull-request
+labels): \`UI\` (browser journeys and the UI review gallery as pipeline artifacts) and \`Obsidian\` (real Obsidian; the
+\`runObsidian\` parameter selects it alone). Pull requests use \`${prTemplatePath}\`.
 
 Set up once; no token is stored in this repository:
 
@@ -92,13 +94,14 @@ Daily loop:
 - \`az repos pr create --draft true --repository "${repository}" --source-branch <branch> --target-branch main --title "<title>"\`: open a draft pull request, then fill the template with real output.
 - \`az repos pr update --id <pr-id> --draft false\`: publish the draft for review after the checks pass.
 - \`az pipelines runs list --branch <branch> --top 5\` and \`az pipelines runs show --id <run-id>\`: pipeline results.
-- \`az pipelines run --name <pipeline> --branch <branch> --parameters runObsidian=true\`: real-Obsidian evidence on demand.
+- \`az pipelines run --name <pipeline> --branch <branch> --parameters runE2E=true\`: end-to-end evidence (browser journeys,
+  UI review gallery, real Obsidian) on demand; \`runObsidian=true\` runs real Obsidian alone.
 - \`az boards work-item show --id <work-item-id>\`: read the work item a requirement traces to.
 
 Tiers: Dev is the local loop (\`npm run check:fast\`, a draft pull request); Integration is the build-validation run
-of \`Check\` and \`UI\` on every pull-request update, plus a \`runObsidian\` run when host behaviour changed; Release is
-a push to \`main\`, which also runs \`Obsidian\`. Draft detection is unreliable on Azure Repos, so nothing depends on
-\`System.PullRequest.IsDraft\`.
+of \`Check\` on every pull-request update, plus a \`runE2E\` run when UI or host behaviour changed (end-to-end is
+opt-in); Release is a push to \`main\`, which always runs \`UI\` and \`Obsidian\`. Draft detection is unreliable on Azure
+Repos, so nothing depends on \`System.PullRequest.IsDraft\`.
 Dependabot is GitHub-only and is not emitted: review \`npm outdated\` and update dependencies through a pull request.
 `;
 }
