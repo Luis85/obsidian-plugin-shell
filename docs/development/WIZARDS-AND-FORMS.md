@@ -38,6 +38,9 @@ node bin/app form --name project-identity --out answers/identity.json
 node bin/app form validate --name project-identity --input identity.json --json
 ```
 
+Learning paths reuse these forms, conditions and templates and run registered wizards from a step; see
+[learning paths](LEARNING-PATHS.md).
+
 Running a wizard or form is interactive only (a TTY, no `CI`, `--json` or `--input`). Agents use
 `form validate` and each process's existing machine commands (`settings --input`, `new --input`, and so on).
 `form --out` reviews the answers and saves them through the same default-No reviewed file plan as every

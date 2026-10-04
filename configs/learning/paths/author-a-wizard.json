@@ -1,0 +1,97 @@
+{
+  "$schema": "../../schemas/learning-path.schema.json",
+  "schemaVersion": 1,
+  "id": "author-a-wizard",
+  "version": 1,
+  "title": "Author a data-driven wizard",
+  "summary": "Write your own guided process for node bin/app without TypeScript: plan it, define a reusable form and a wizard in JSON, validate both with wizard check and run the result.",
+  "skill": "Data-driven wizards and forms",
+  "audience": "Contributors who know JSON and want to add a guided CLI process to this repository",
+  "prerequisites": [],
+  "estimatedMinutes": 30,
+  "steps": [
+    {
+      "id": "read-the-guide",
+      "title": "Read the wizard guide",
+      "goal": "Know what a wizard and a form are, which files they live in and which commands inspect and check them.",
+      "markdown": { "file": "author-a-wizard/01-read-the-guide.md" },
+      "docs": ["docs/development/WIZARDS-AND-FORMS", "docs/development/LEARNING-PATHS"],
+      "checklist": [
+        { "id": "commands", "label": "I read \"Run, inspect and check\"" },
+        { "id": "add", "label": "I read \"Add a guided process\"" },
+        { "id": "safety", "label": "I read \"Validation and safety\"", "required": false }
+      ],
+      "actions": [
+        { "id": "list", "kind": "command", "label": "List the shipped wizards and forms", "command": "node bin/app wizard list --json" }
+      ],
+      "winConditions": [{ "kind": "checklist-complete" }]
+    },
+    {
+      "id": "plan-your-wizard",
+      "title": "Plan your wizard",
+      "goal": "Decide the ids and the purpose of the form and the wizard you will write.",
+      "markdown": "Pick two lowercase kebab-case ids, for example `contact` for the form and `onboarding` for the wizard. They become the file names `configs/forms/<form id>.json` and `configs/wizards/<wizard id>.json`, so choose ids that are not used yet (see `node bin/app wizard list --json`). The next steps check your files under exactly these names.",
+      "fields": [
+        { "id": "purpose", "kind": "text", "label": "What should your wizard help someone do?", "required": true, "maxLength": 300 },
+        { "id": "formId", "kind": "text", "label": "Form id (lowercase kebab-case, e.g. contact)", "required": true, "maxLength": 60 },
+        { "id": "wizardId", "kind": "text", "label": "Wizard id (lowercase kebab-case, e.g. onboarding)", "required": true, "maxLength": 60 }
+      ],
+      "bind": "plan",
+      "winConditions": [
+        { "kind": "form-valid" },
+        { "kind": "answer", "path": "plan.wizardId", "present": true, "label": "You chose a wizard id" }
+      ]
+    },
+    {
+      "id": "define-a-form",
+      "title": "Define the form",
+      "goal": "Write a reusable form definition in configs/forms.",
+      "markdown": { "file": "author-a-wizard/03-define-a-form.md" },
+      "actions": [
+        { "id": "example", "kind": "command", "label": "Inspect a shipped form", "command": "node bin/app form show --name project-identity --json" }
+      ],
+      "winConditions": [
+        { "kind": "file-exists", "file": "configs/forms/{{plan.formId}}.json" },
+        { "kind": "file-contains", "file": "configs/forms/{{plan.formId}}.json", "text": "\"fields\"", "label": "Your form defines fields" }
+      ]
+    },
+    {
+      "id": "define-the-wizard",
+      "title": "Define the wizard",
+      "goal": "Write a wizard definition that asks your form, reviews the answers and ends with a message.",
+      "markdown": { "file": "author-a-wizard/04-define-the-wizard.md" },
+      "actions": [
+        { "id": "example", "kind": "command", "label": "Inspect a shipped wizard", "command": "node bin/app wizard show --name settings --json" }
+      ],
+      "winConditions": [
+        { "kind": "file-exists", "file": "configs/wizards/{{plan.wizardId}}.json" },
+        { "kind": "file-contains", "file": "configs/wizards/{{plan.wizardId}}.json", "text": "{{plan.formId}}", "label": "Your wizard references your form" }
+      ]
+    },
+    {
+      "id": "check-the-catalog",
+      "title": "Validate with wizard check",
+      "goal": "Prove that every definition, including yours, is valid and references only registered forms, actions and hooks.",
+      "markdown": "`wizard check` reads every file in `configs/forms` and `configs/wizards` and reports unknown keys, unsafe paths, duplicate ids, unknown forms, actions and hooks, and recursive form includes. Fix what it reports and check again. This step checks the same thing for you. More in [[docs/development/WIZARDS-AND-FORMS#Validation and safety]].",
+      "actions": [
+        { "id": "check", "kind": "command", "label": "Validate every wizard and form", "command": "node bin/app wizard check --json" }
+      ],
+      "winConditions": [
+        { "kind": "wizard-check", "wizard": "{{plan.wizardId}}" }
+      ]
+    },
+    {
+      "id": "run-your-wizard",
+      "title": "Run your wizard",
+      "goal": "Experience your guided process the way its users will, from the first question to its end.",
+      "markdown": "Run your wizard from here so this path can see that it reached its end. Answer every question; leaving early or declining a review does not count. Afterwards anyone can run it with `node bin/app wizard --name <your wizard id>`.",
+      "actions": [
+        { "id": "run", "kind": "wizard", "label": "Run your wizard", "wizard": "{{plan.wizardId}}" },
+        { "id": "later", "kind": "command", "label": "Run it later yourself", "command": "node bin/app wizard --name <your-wizard-id>" }
+      ],
+      "winConditions": [
+        { "kind": "wizard-completed", "wizard": "{{plan.wizardId}}" }
+      ]
+    }
+  ]
+}
