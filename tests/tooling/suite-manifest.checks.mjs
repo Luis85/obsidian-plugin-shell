@@ -16,10 +16,11 @@ function run(cwd, args, env = {}) {
   assert.ifError(result.error);
   return result;
 }
-const suite = (name, include, extra = {}) => ({ name, purpose: `${name} purpose`, runner: { type: 'node-test' }, include, verify: 'tooling', ...extra });
+const suite = (name, include, extra = {}) => ({ name, purpose: `${name} purpose`, level: 'unit', runner: { type: 'node-test' }, include, verify: 'tooling', ...extra });
 function manifest(overrides = {}) {
   return {
     schemaVersion: 1,
+    testLevels: [{ name: 'unit', summary: 'in-process' }, { name: 'integration', summary: 'processes' }, { name: 'e2e', summary: 'browser' }],
     roots: [{ path: 'tests/tooling' }, { path: 'tests/concepts', optional: true }],
     helperRoots: ['tests/support'],
     prerequisites: { secret: { env: 'SUITE_FIXTURE_UNSET_VARIABLE', hint: 'Set the fixture variable.' } },
@@ -106,13 +107,13 @@ test('--list --json reports each suite with its runner, verify mode, prerequisit
   const listing = JSON.parse(result.stdout);
   assert.equal(listing.schemaVersion, 1);
   assert.deepEqual(listing.helpers, ['tests/tooling/shared-fixture.mjs']);
-  assert.deepEqual(listing.suites.map(item => Object.keys(item).sort()), Array(2).fill(['fileCount', 'files', 'name', 'npmScript', 'optional', 'prerequisites', 'purpose', 'runner', 'verify', 'workflows']));
-  assert.deepEqual(listing.suites[0], { name: 'alpha', purpose: 'alpha purpose', runner: 'node-test', verify: 'tooling', prerequisites: [], npmScript: 'test:alpha',
+  assert.deepEqual(listing.suites.map(item => Object.keys(item).sort()), Array(2).fill(['fileCount', 'fileLevels', 'files', 'level', 'name', 'npmScript', 'optional', 'prerequisites', 'purpose', 'runner', 'verify', 'workflows']));
+  assert.deepEqual(listing.suites[0], { name: 'alpha', purpose: 'alpha purpose', level: 'unit', fileLevels: { 'tests/tooling/alpha-one.checks.mjs': 'unit' }, runner: 'node-test', verify: 'tooling', prerequisites: [], npmScript: 'test:alpha',
     workflows: [], optional: false, fileCount: 1, files: ['tests/tooling/alpha-one.checks.mjs'] });
   const table = run(root, ['--list']);
   assert.equal(table.status, 0, table.stderr);
-  assert.match(table.stdout, /^suite\s+files\s+runner\s+verify\s+prerequisites\s+command$/m);
-  assert.match(table.stdout, /^alpha\s+1\s+node-test\s+tooling\s+-\s+npm run test:alpha$/m);
+  assert.match(table.stdout, /^suite\s+level\s+files\s+runner\s+verify\s+prerequisites\s+command$/m);
+  assert.match(table.stdout, /^alpha\s+unit\s+1\s+node-test\s+tooling\s+-\s+npm run test:alpha$/m);
 });
 
 test('an unclassified test file fails closed and names the manifest to edit', async t => {
@@ -175,7 +176,7 @@ test('every suite needs a row in the declared suite guide, which must exist', as
 });
 
 test('runner-declared inventories must equal the suite files in both directions', async t => {
-  const browser = { name: 'browser', purpose: 'browser', runner: { type: 'command', commands: [['{python}', 'runner.py']] }, include: ['tests/concepts/*.browser.py'],
+  const browser = { name: 'browser', purpose: 'browser', level: 'e2e', runner: { type: 'command', commands: [['{python}', 'runner.py']] }, include: ['tests/concepts/*.browser.py'],
     inventory: { source: 'runner.py', pattern: "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json'\\)", file: 'tests/concepts/companion-$1.browser.py' }, verify: 'opt-in', optional: true };
   const data = manifest({ suites: [...manifest().suites, browser] });
   const root = await fixture(t, { 'runner.py': "SUITES = [('declared', 'declared/checks.json')]\n", 'tests/concepts/companion-extra.browser.py': '' }, data);

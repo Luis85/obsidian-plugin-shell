@@ -2,7 +2,7 @@
 
 > Type: explanation · Part of the [docs index](../README.md)
 
-**Version:** 1.1 · **Date:** 2026-10-04 (first issued 2026-09-22) · **Owner:** template maintainer  
+**Version:** 1.2 · **Date:** 2026-10-04 (first issued 2026-09-22) · **Owner:** template maintainer  
 **Normative for:** PRD 0.6, TST-01–16 and AC-83–90; previous acceptance requirements remain.  
 **Suites and commands:** [Test suites](TEST-SUITES.md) · **Legacy plan and baseline:** [reference](TEST-CONCEPT.md) and [test-plan.json](test-plan.json)
 
@@ -49,6 +49,50 @@ Prioritize loss, corruption, unsafe mutation and false-success failures over scr
 Vitest supports separate test projects and coverage configuration. Its default coverage scope does not automatically include every untested file, so configure the intended production source explicitly. Pinia's test helper stubs actions by default; tests claiming application execution must opt into real actions. [T1, T2, T3]
 
 **TST-03 — Test public behavior.** Assert outputs, persisted content, effects and ownership—not incidental private method calls alone. Mocks verify a deliberate boundary, not an entire system fabricated to return success. Snapshots complement assertions; they do not replace validation of fields, transitions or writes.
+
+### The test pyramid
+
+The table above says what each concern needs. The pyramid says how much of the
+system a test runs, and therefore how fast, how isolated and how often it can
+run. Every test file carries one of five labels, bottom to top:
+
+- **unit**: one module in-process, with in-memory or checked-in inputs (domain
+  rules, a parser, a renderer, a repository-rule check reading checked-in files).
+- **component**: a composed part in-process with its real collaborators (a Vue
+  view with its Pinia store, the plugin on the in-memory Obsidian test kit, a
+  terminal command or editor session driven through its presentation layer).
+- **integration**: real process, filesystem or network boundaries without a
+  browser or host (the CLI as a child process, temp repositories, generated
+  projects on disk, loopback servers, a checker run against negative fixtures).
+- **e2e**: a real browser or a real Obsidian host.
+- **acceptance**: the acceptance criteria of one increment, traced to its
+  handoff.
+
+A file takes the level of the widest boundary any of its cases crosses, because
+the file, not the case, is what suites schedule and what a reviewer moves. The
+labels describe scope, not purpose: schema, policy and inventory checks are not
+a separate "contract" layer, they are unit tests when they read checked-in files
+in-process and integration tests when they run a checker as a process. Keeping
+five conventional labels keeps the pyramid comparable across projects generated
+from this template.
+
+The bottom layers should be the widest: they are cheap, deterministic and
+pinpoint a defect. Today the tooling side is integration-heavy because most CLI,
+generator and release behavior is proven through real processes and temporary
+repositories; `npm run test:suites -- --pyramid` reports the counts and warns
+when a layer outgrows the one below it. The warning is a prompt to add unit
+tests for new pure logic, not a gate, and never a reason to delete honest
+integration tests.
+
+End-to-end tests are expensive and need provisioning, so their place in the
+pyramid is enforced. Only whole suites are e2e; each must be opt-in for
+`verify` and run commands the [e2e opt-in policy](../development/WORKFLOWS.md#end-to-end-opt-in)
+recognizes. Workflows run those steps on a pull request only when it carries the
+`e2e` label or a run sets the `e2e` input, and always in the Release tier, where
+they are mandatory. `npm run test:suites -- --check` fails when an e2e suite
+escapes that policy or when a suite the policy calls end-to-end is labeled
+lower. [Test suites](TEST-SUITES.md#test-pyramid-levels) lists the levels,
+examples and how to label a new test.
 
 ## 4. Required scenario families
 
