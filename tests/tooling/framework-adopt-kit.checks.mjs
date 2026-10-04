@@ -32,7 +32,7 @@ test('an extracted compiled kit analyzes a project, plans, installs the skill an
   const analyzed = cli('adopt', 'analyze'); assert.equal(analyzed.json.status, 'ok');
   const report = analyzed.json.data.report;
   assert.equal(report.workbench.kitPath, 'tools/shell-cli'); assert.equal(report.workbench.present, false); assert.ok(report.findings.some(item => item.id === 'WORKBENCH_KIT_PRESENT'));
-  assert.match(report.targets.node.source, /\.nvmrc$/); assert.equal(report.targets.node.major, 24); assert.match(report.targets.typescript.source, /package\.json$/); assert.equal(report.targets.typescript.major, 6); assert.equal(report.targets.angular.version, null, 'a kit without the starters ZIP cannot name the Angular target');
+  assert.equal(report.targets.node.source, 'bin/template/.nvmrc'); assert.equal(report.targets.node.major, 24); assert.equal(report.targets.typescript.source, 'bin/template/package.json'); assert.equal(report.targets.typescript.major, 6); assert.equal(report.targets.angular.version, null, 'a kit without the starters ZIP cannot name the Angular target');
   assert.ok(report.findings.some(item => item.id === 'ANGULAR_TARGET_UNKNOWN'));
   assert.ok(!report.scan.skipped.directories.every(path => !path.includes('CLI kit')), 'the kit folder is recorded and not scanned');
   const preview = cli('adopt', 'plan'); assert.equal(preview.json.status, 'planned');
@@ -42,4 +42,8 @@ test('an extracted compiled kit analyzes a project, plans, installs the skill an
   assert.deepEqual(await readFile(join(project, '.claude/skills/adopt-existing-project/SKILL.md')), await readFile(join(root, '.claude/skills/adopt-existing-project/SKILL.md')));
   assert.deepEqual(await readFile(join(project, '.agents/skills/adopt-existing-project/SKILL.md')), await readFile(join(root, '.agents/skills/adopt-existing-project/SKILL.md')));
   assert.equal(cli('adopt', 'skill', '--yes').json.status, 'unchanged');
+  // The skill source is the verified kit template; a modified packaged copy is refused instead of being used or bypassed.
+  await writeFile(kit('bin/template/' + templates[0]), 'tampered\n');
+  await rm(join(project, '.claude/skills/adopt-existing-project/SKILL.md'));
+  const tampered = cli('adopt', 'skill', '--yes'); assert.equal(tampered.code, 1); assert.equal(tampered.json.diagnostics[0].code, 'KIT_MODIFIED');
 });
