@@ -5,7 +5,7 @@ import type { Failure } from '../../domain/outcome';
 import type { TaskInput } from '../../features/tasks/form';
 import type { PreparedDocument, DocumentReceipt } from '../../application/document-service';
 import { useViewPreferences } from '../composables/use-view-preferences';
-export const pages = ['overview', 'documents', 'events', 'settings'] as const;
+export const pages = ['overview', 'documents', 'forms', 'events', 'settings'] as const;
 type Page = typeof pages[number];
 export const useShowcase = defineStore('showcase', () => {
   const services = useServices();

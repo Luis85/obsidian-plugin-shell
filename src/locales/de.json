@@ -26,6 +26,7 @@
   "nav": {
     "overview": "Übersicht",
     "documents": "Dokumente",
+    "forms": "Formulare",
     "events": "Ereignisse & Feedback",
     "settings": "Einstellungen",
     "section": "Vorlage erkunden"
@@ -234,5 +235,34 @@
     "deleted": "Element gelöscht.",
     "pending": "Diese Aktion wird noch ausgeführt…",
     "stale": "Dein Entwurf bleibt erhalten. Lade die Elemente neu und prüfe die aktuelle Bezeichnung vor dem erneuten Speichern."
+  },
+  "forms": {
+    "eyebrow": "Datengetriebene Formulare",
+    "title": "Formulare aus JSON-Definitionen",
+    "subtitle": "Das Showcase-Feature liefert eine JSON-Formulardefinition. Die gemeinsame DataForm-Komponente stellt sie dar, prüft den Entwurf und gibt typisierte Werte zurück.",
+    "result": "Geprüfter Wert",
+    "empty": "Noch nichts abgeschickt",
+    "emptyText": "Schicke das Formular ab, um den Wert zu sehen, den das Feature erhält.",
+    "note": "Die Formular-Komponente speichert nichts; das Feature entscheidet, was mit dem Wert geschieht."
+  },
+  "form": {
+    "submit": "Absenden",
+    "reset": "Zurücksetzen",
+    "choose": "Auswählen…",
+    "invalid": "Prüfe die markierten Felder.",
+    "listHint": "Ein Eintrag pro Zeile",
+    "issue": {
+      "required": "Dieses Feld ist erforderlich.",
+      "text": "Gib Text mit höchstens {limit} Zeichen ein.",
+      "title": "Gib einen einzeiligen Titel mit höchstens {limit} Zeichen ein.",
+      "number": "Gib eine Zahl ein.",
+      "integer": "Gib eine ganze Zahl ein.",
+      "range": "Gib eine Zahl zwischen {min} und {max} ein.",
+      "min": "Gib eine Zahl von mindestens {min} ein.",
+      "max": "Gib eine Zahl von höchstens {max} ein.",
+      "choice": "Wähle eine der angebotenen Optionen.",
+      "items": "Gib höchstens {limit} Einträge ein.",
+      "invalid": "Dieser Wert ist ungültig."
+    }
   }
 }
