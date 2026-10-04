@@ -17,6 +17,8 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 | `brainstorm` | `node bin/app brainstorm` | Eight capture sections, reviewed request and file plan, optional import and verification |
 | `framework-setup` | `node bin/app setup` (terminal) | Source (starter or project JSON), identity and explicit Airship/MCP opt-ins; only missing answers are asked |
 | `fake-data` | `node bin/app fake-data` | Entity, `fake-data-run` form (or a new entity via `fake-data-entity`/`fake-data-property`), sample note, reviewed write, optional saved generation config |
+| `process-authoring` | `node bin/app process new` / `process edit --name <id>` | `process-details`, roles, owner, `process-step` and `process-rule` editors, reviewed save of `configs/processes/<id>.json` |
+| `process-run` | `node bin/app process run --name <id>` | Walks a business process with rule checks, then optionally saves the audit trail through `wizard.save-json` |
 | `new-starter` | `node bin/app new <dir>` (terminal) | Target directory, installed starter, that starter's own `inputs[]` as a generated form, then Airship and single native-extension options; only missing answers are asked |
 | `framework-setup-stages` | after `setup` applies | Documentation import, then generate/install/verify/preview, each separately approved, then documentation export |
 
@@ -39,7 +41,7 @@ node bin/app form validate --name project-identity --input identity.json --json
 ```
 
 Learning paths reuse these forms, conditions and templates and run registered wizards from a step; see
-[learning paths](LEARNING-PATHS.md).
+[learning paths](LEARNING-PATHS.md). Business processes reuse forms for step inputs; see [business processes](BUSINESS-PROCESSES.md).
 
 Running a wizard or form is interactive only (a TTY, no `CI`, `--json` or `--input`). Agents use
 `form validate` and each process's existing machine commands (`settings --input`, `new --input`, and so on).

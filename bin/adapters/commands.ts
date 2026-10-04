@@ -4,6 +4,7 @@ import { designCommand } from './design-command.ts';
 import { definitionCommand } from './wizard-command.ts';
 import { fakeDataCommand } from './fake-data-command.ts';
 import { learningCommand } from './learning-command.ts';
+import { processCommand } from './process-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -102,6 +103,15 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app learn status --name author-a-wizard --json             Progress and win conditions per step
   node bin/app learn complete-step --name <id> --step <step> --input step.json --json   Plan a step completion
   node bin/app learn restart --name <id> --json                       Plan removing saved progress
+  node bin/app process               Run, create or edit a data-driven business process (configs/processes)
+  node bin/app process run --name release-approval   Walk an instance: inputs, business rules, transitions, audit trail
+  node bin/app process new | process edit --name release-approval   Author steps, rules and docs; reviewed save
+  node bin/app process list --json   Processes with steps, rules and findings
+  node bin/app process show --name release-approval --json
+  node bin/app process check --json  Validate structure, references, graph health and doc links
+  node bin/app process save --input process.json --json   Reviewed plan for configs/processes/<id>.json
+  node bin/app process docs --name release-approval --out docs/processes --json   Regenerate Markdown docs; authored text kept
+  node bin/app process simulate --name release-approval --input data.json --json   Agent walk with rule outcomes
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
@@ -201,7 +211,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -235,5 +245,5 @@ function learnExecution(args: Arguments, context: CommandContext): Promise<Recor
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  return pluginExecution(args, context.plugins) ?? learnExecution(args, context) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
+  return pluginExecution(args, context.plugins) ?? learnExecution(args, context) ?? directCommand(args, context) ?? (args.command === 'process' ? processCommand(args, context) : savedProjectCommand(args, context));
 }
