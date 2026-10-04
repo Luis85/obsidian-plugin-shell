@@ -45,6 +45,32 @@ strings. The shared file-plan engine checks paths, case collisions, symlinks and
 original hashes, stages complete edits, and restores only bytes still owned by the
 failed operation. This is not a filesystem-wide atomic transaction.
 
+## Hosting platform
+
+`--hosting github|azure-devops|none` records where pull requests and CI live; it is an
+identity change, so the files above are planned with it. Without the flag the current
+platform is kept (GitHub when none was recorded); interactive setup asks after the MCP
+question, a blank answer keeps the platform, and an Azure DevOps `origin` remote is only
+used to suggest defaults. `azure-devops` takes `--azure-organization
+https://dev.azure.com/<organization>`, `--azure-project` and optional
+`--azure-repository`; values are validated by the shared hosting contract and are
+never tokens. `--repo owner/name` remains the GitHub shorthand and is refused with
+`azure-devops`.
+
+- `package.json` `repository` becomes the Azure Repos URL
+  `https://dev.azure.com/<organization>/<project>/_git/<repository>` when the details are known.
+- `PROJECT-IDENTITY.md` gains one `Hosting:` line for a non-default platform; GitHub adds
+  none, so earlier setups stay byte-identical. A changed line, or an Azure line that no
+  longer matches `package.json`, is treated as a user edit.
+- The plan's `hosting` block lists create-only `azure-pipelines.yml` (baseline plus
+  `npm run verify` on Linux) and `.azuredevops/pull_request_template.md` (a copy of the
+  GitHub template). An existing file is listed under `preserved` and never replaced.
+- `.github` is never deleted, and setup never runs `gh` or `az`, adds a remote or signs in.
+
+The journal saves the hosting options for `--resume`, and its input fingerprint includes
+`.azuredevops` and `azure-pipelines.yml` only when they exist. See
+[hosting platforms](HOSTING-PLATFORMS.md) for generated projects.
+
 ## Profiles and machine-readable answers
 
 The browser profile installs dependencies and runs `verify`, including build,
