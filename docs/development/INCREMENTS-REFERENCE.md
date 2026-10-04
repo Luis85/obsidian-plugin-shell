@@ -145,7 +145,7 @@ Statuses accept the exact name or a slug (`in-progress`).
 | New | Refining, Ready, Cancelled | Ready: the Definition of Ready without DOR-01 and DOR-15 (`INCREMENT_NOT_READY`) |
 | Refining | Ready, Cancelled | as above |
 | Ready | Refining, In progress, Cancelled | `pr publish` moves a Ready increment to In progress in the same plan |
-| In progress | Refining, Done, Cancelled | Done: every pull request of the increment Merged or Closed and at least one Merged (`INCREMENT_OPEN_PULL_REQUESTS`) |
+| In progress | Refining, Done, Cancelled | Done: every change pull request Merged or Closed, at least one Merged unless the kick-off carries the increment alone, and the kick-off not Closed (`INCREMENT_OPEN_PULL_REQUESTS`) |
 | Done | none | terminal |
 | Cancelled | Refining | Cancelled needs no Draft or Ready pull request |
 

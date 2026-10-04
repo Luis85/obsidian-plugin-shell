@@ -17,8 +17,10 @@ const generatedByPlan = ['DOD-04', 'DOD-06', 'DOD-09', 'DOD-11'];
 async function completePlan(request: Request, context: Context): Promise<SessionPlan> {
   const session: Session = await Session.open(context), doc = await session.get('increment', request.args[0]);
   const report = await requireGate(session.ws, doc.path, 'done', option(request, 'base'));
-  const pulls = (await session.all('pullRequest')).filter(pull => pull.model.increment === doc.id).map(pull => pull.model.status);
-  const to = checkIncrementTransition(doc.model.status, 'Done', { pullRequests: pulls });
+  const pulls = (await session.all('pullRequest')).filter(pull => pull.model.increment === doc.id);
+  const kickoff = pulls.find(pull => pull.model.kind === 'kickoff')?.model.status;
+  const changes = pulls.filter(pull => pull.model.kind !== 'kickoff').map(pull => pull.model.status);
+  const to = checkIncrementTransition(doc.model.status, 'Done', { pullRequests: changes, ...(kickoff === undefined ? {} : { kickoff }) });
   const files = report.generated.files ?? {};
   for (const [path, text] of Object.entries(files)) session.write(path, text);
   session.write(doc.path, setFrontmatterValue(files[doc.path] ?? doc.text, 'status', to, { after: session.ws.schema.handoff.requiredKeys }));

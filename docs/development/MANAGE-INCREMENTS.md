@@ -37,9 +37,9 @@ node bin/app increment status export-notes Ready --yes
 - **Cancelled** needs no Draft or Ready pull request (`INCREMENT_OPEN_PULL_REQUESTS`);
   reopen a cancelled increment with `Refining`.
 - **Done** comes from the Definition of Done: `increment complete export-notes`
-  plans the generated outputs and the status once every pull request of the
-  increment is Merged or Closed. On the kick-off branch, while the kick-off is
-  still open, run `node scripts/delivery/done.mjs --base origin/main --write`.
+  plans the generated outputs and the status once every change pull request is
+  Merged or Closed. The kick-off may still be open (it merges the increment branch
+  afterwards) but must not be Closed.
 
 Done and Cancelled increments refuse content edits (`INCREMENT_LOCKED`).
 

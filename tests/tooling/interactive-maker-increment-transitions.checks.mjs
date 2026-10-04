@@ -44,6 +44,16 @@ test('Ready needs a clean readiness report; Cancelled and Done check the pull re
   for (const pullRequests of [['Merged', 'New'], ['Merged', 'Draft'], ['Merged', 'Ready'], ['Closed'], []])
     assert.throws(() => checkIncrementTransition('In progress', 'Done', { pullRequests }), code('INCREMENT_OPEN_PULL_REQUESTS'), pullRequests.join());
   assert.equal(checkIncrementTransition('In progress', 'Done', { pullRequests: ['Merged', 'Closed'] }), 'Done');
+  // The kick-off merges the increment branch after Done: an open kick-off never blocks Done, a closed one abandons it.
+  for (const kickoff of ['New', 'Draft', 'Ready', 'Merged']) {
+    assert.equal(checkIncrementTransition('In progress', 'Done', { pullRequests: ['Merged'], kickoff }), 'Done', kickoff);
+    assert.equal(checkIncrementTransition('In progress', 'Done', { pullRequests: [], kickoff }), 'Done', `${kickoff} alone`);
+  }
+  assert.throws(() => checkIncrementTransition('In progress', 'Done', { pullRequests: ['Merged'], kickoff: 'Closed' }), code('INCREMENT_OPEN_PULL_REQUESTS'));
+  assert.throws(() => checkIncrementTransition('In progress', 'Done', { pullRequests: ['Merged', 'Draft'], kickoff: 'Draft' }), code('INCREMENT_OPEN_PULL_REQUESTS'));
+  assert.throws(() => checkIncrementTransition('In progress', 'Done', { pullRequests: ['Closed'], kickoff: 'Draft' }), code('INCREMENT_OPEN_PULL_REQUESTS'));
+  for (const kickoff of ['Draft', 'Ready'])
+    assert.throws(() => checkIncrementTransition('In progress', 'Cancelled', { pullRequests: [], kickoff }), code('INCREMENT_OPEN_PULL_REQUESTS'), kickoff);
 });
 
 test('content edits lock once an increment is Done or Cancelled', () => {

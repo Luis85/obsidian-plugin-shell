@@ -207,8 +207,7 @@ evidence, every other pull request merged or closed, every issue done or
 cancelled. `--write` generates the Completion record, the `## [Unreleased]`
 entries from the Changelog section, the docs index rows of new pages, and sets
 `status: Done`. (`node bin/app increment complete export-notes --dry-run` plans the
-same outputs, but it refuses while a pull request of the increment, the kick-off
-included, is still open.) Review the diff, commit, push, mark the kick-off ready
+same outputs as a reviewed plan; the still-open kick-off does not block it.) Review the diff, commit, push, mark the kick-off ready
 for review and merge it into `main` when "Dev checks", "Definition of Ready",
 "CI result" and "Definition of Done" are green. Finish with
 `node bin/app pr sync export-notes-kickoff --yes`.

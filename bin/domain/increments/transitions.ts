@@ -29,27 +29,37 @@ export const allowedIncrementTransitions = (from: IncrementStatus): readonly Inc
 
 /** What a transition guard needs to know besides the two statuses. */
 export interface IncrementTransitionContext {
-  /** Statuses of the pull requests the increment lists. */
+  /** Statuses of the increment's change pull requests (every listed pull request except the kick-off). */
   pullRequests: readonly string[];
+  /** Status of the kick-off pull request, when the increment has one. It merges the increment branch after Done. */
+  kickoff?: string;
   /** Readiness problems (DoR report or structural validation); only consulted for Ready. */
   readiness?: readonly Problem[];
 }
 const open = (statuses: readonly string[], names: readonly string[]) => statuses.filter(status => names.includes(status));
+const withKickoff = (context: IncrementTransitionContext): readonly string[] =>
+  context.kickoff === undefined ? context.pullRequests : [...context.pullRequests, context.kickoff];
+function guardCancelled(context: IncrementTransitionContext): void {
+  const active = open(withKickoff(context), ['Draft', 'Ready']);
+  insistDelivery(!active.length, 'INCREMENT_OPEN_PULL_REQUESTS', `${active.length} pull request(s) are still open on the hosting platform; close them first.`);
+}
+/** The kick-off pull request merges the increment branch into the base only after Done, so it may still be open;
+ * when it is the only pull request it carries the whole increment, and a closed kick-off abandons the increment. */
+function guardDone(context: IncrementTransitionContext): void {
+  const unfinished = open(context.pullRequests, ['New', 'Draft', 'Ready']);
+  const delivered = context.pullRequests.includes('Merged') || (!context.pullRequests.length && context.kickoff !== undefined);
+  insistDelivery(!unfinished.length && delivered && context.kickoff !== 'Closed', 'INCREMENT_OPEN_PULL_REQUESTS',
+    'Done needs every change pull request merged or closed (at least one merged unless the kick-off carries the increment alone) and a kick-off that is not closed.',
+    { unfinished: unfinished.length, kickoff: context.kickoff ?? null });
+}
 /** Refuses a transition the table does not allow or a guard rejects; returns the status to write. */
 export function checkIncrementTransition(fromInput: string, toInput: string, context: IncrementTransitionContext): IncrementStatus {
   const from = requireIncrementStatus(fromInput), to = requireIncrementStatus(toInput);
   insistDelivery(incrementTransitions[from].includes(to), 'INCREMENT_STATUS_TRANSITION',
     `${from} cannot move to ${to}; allowed: ${incrementTransitions[from].join(', ') || 'none (terminal)'}.`, { from, to, allowed: [...incrementTransitions[from]] });
   if (to === 'Ready') insistDelivery(!context.readiness?.length, 'INCREMENT_NOT_READY', `The increment is not ready: ${context.readiness?.map(problem => problem.message).slice(0, 3).join(' ')}`, { problems: context.readiness });
-  if (to === 'Cancelled') {
-    const active = open(context.pullRequests, ['Draft', 'Ready']);
-    insistDelivery(!active.length, 'INCREMENT_OPEN_PULL_REQUESTS', `${active.length} pull request(s) are still open on the hosting platform; close them first.`);
-  }
-  if (to === 'Done') {
-    const unfinished = open(context.pullRequests, ['New', 'Draft', 'Ready']);
-    insistDelivery(!unfinished.length && context.pullRequests.includes('Merged'), 'INCREMENT_OPEN_PULL_REQUESTS',
-      'Done needs every pull request merged or closed and at least one merged.', { unfinished: unfinished.length });
-  }
+  if (to === 'Cancelled') guardCancelled(context);
+  if (to === 'Done') guardDone(context);
   return to;
 }
 /** Content edits are allowed until the increment is Done or Cancelled. */

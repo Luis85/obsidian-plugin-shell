@@ -115,8 +115,11 @@ test('increment complete plans the Definition of Done outputs and blocks while r
   await planThenApply(ws, 'increment new', ['delivery'], { owner: 'Luis', input: 'handoff.md', 'no-branch': true });
   await planThenApply(ws, 'increment status', ['delivery', 'Ready']);
   await planThenApply(ws, 'increment status', ['delivery', 'In progress']);
+  // An unmerged change pull request blocks completion; the still-open kick-off does not (it merges the increment after Done).
+  await planThenApply(ws, 'pr new', ['delivery'], { title: 'Change', 'no-branch': true });
   fails(await ws.run('increment complete', ['delivery']), 'INCREMENT_OPEN_PULL_REQUESTS');
-  ws.write('docs/pull-requests/delivery-kickoff.md', ws.read('docs/pull-requests/delivery-kickoff.md').replace('status: New', 'status: Merged'));
+  ws.write('docs/pull-requests/delivery-1.md', ws.read('docs/pull-requests/delivery-1.md').replace('status: New', 'status: Merged'));
+  assert.match(ws.read('docs/pull-requests/delivery-kickoff.md'), /^status: New$/m);
   const blocked = await ws.run('increment complete', ['delivery']);
   assert.equal(blocked.status, 'blocked', JSON.stringify(blocked.diagnostics));
   assert.ok(blocked.data.conflicts.some(conflict => conflict.startsWith('DOD-02')), blocked.data.conflicts.join('\n'));

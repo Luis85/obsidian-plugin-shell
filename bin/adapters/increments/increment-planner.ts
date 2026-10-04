@@ -97,9 +97,12 @@ const refAddPlan: Planner = (request, context) => editPlan(request, context, asy
 
 async function statusPlan(request: Request, context: Context): Promise<SessionPlan> {
   const session: Session = await Session.open(context), doc = await session.get('increment', request.args[0]);
-  const pulls = (await session.all('pullRequest')).filter(pull => pull.model.increment === doc.id).map(pull => pull.model.status);
+  const pulls = (await session.all('pullRequest')).filter(pull => pull.model.increment === doc.id);
+  const kickoff = pulls.find(pull => pull.model.kind === 'kickoff')?.model.status;
+  const changes = pulls.filter(pull => pull.model.kind !== 'kickoff').map(pull => pull.model.status);
   const target = text(request), ready = /^ready$/i.test(target.trim()) ? await readiness(session.ws, doc.path, doc.text) : null;
-  const to = checkIncrementTransition(doc.model.status, target, { pullRequests: pulls, ...(ready ? { readiness: ready.problems } : {}) });
+  const to = checkIncrementTransition(doc.model.status, target,
+    { pullRequests: changes, ...(kickoff === undefined ? {} : { kickoff }), ...(ready ? { readiness: ready.problems } : {}) });
   session.write(doc.path, setFrontmatterValue(doc.text, 'status', to, { after: session.ws.schema.handoff.requiredKeys }));
   return session.plan({ document: document(session, doc.id), statusBefore: doc.model.status, statusAfter: to, edits: [{ section: 'frontmatter', action: 'set', itemId: 'status' }],
     ...(ready ? { readiness: ready.source } : {}) });

@@ -189,10 +189,9 @@ Without `--write` both scripts are read-only.
   increment kind, `status: Done`.
 - `node bin/app increment complete <id>` plans the same outputs through a reviewed
   file plan and refuses while a rule other than the generated ones fails. It also
-  refuses while any pull request of the increment, the kick-off included, is New,
-  Draft or Ready (`INCREMENT_OPEN_PULL_REQUESTS`). On the kick-off branch, generate
-  the outputs with `node scripts/delivery/done.mjs --base origin/main --write`
-  instead.
+  refuses while a change pull request is New, Draft or Ready, or when the kick-off
+  is Closed (`INCREMENT_OPEN_PULL_REQUESTS`). The kick-off itself may still be open:
+  it merges the increment branch into the base after the increment is Done.
 
 In CI both checks are read-only: the generated files go to the job summary and an
 artifact, to be applied locally with `--write`.
