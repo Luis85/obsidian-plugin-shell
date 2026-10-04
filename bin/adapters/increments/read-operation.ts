@@ -66,6 +66,8 @@ function validationResult(command: string, documents: { kind: string; id: string
   const outcome = result(command, { documents, drift, problems: failing.reduce((sum, doc) => sum + doc.problems.length, 0) + drift.length }, failing.length || drift.length ? 'blocked' : 'ok');
   return { ...outcome, diagnostics: [...drift, ...failing.flatMap(doc => doc.problems.slice(0, 5).map(problem => ({ ...problem, message: `${doc.path}${problem.line ? `:${problem.line}` : ''}: ${problem.message}` })))].slice(0, 50) };
 }
+/** Generated file texts stay out of the result; their paths are listed. */
+const withoutTexts = (generated: Record<string, unknown>) => Object.fromEntries(Object.entries(generated).filter(([key]) => key !== 'files' && key !== 'handoffText'));
 /** The Definition of Ready or Done for one Increment; blocked with the refinement brief when it does not pass. */
 const incrementCheck: Read = async (request, ws) => {
   const doc = await ws.increment(request.args[0]), raw = option(request, 'gate') ?? 'ready';
@@ -75,7 +77,7 @@ const incrementCheck: Read = async (request, ws) => {
   if (!report) return structuralCheck(request.command, doc, ws, await ws.files());
   const failed = blocking(report), passed = failed.length === 0;
   const generated = Object.keys(report.generated.files ?? {});
-  const outcome = result(request.command, { ...report, source: 'definition-of-' + gate, generated: { ...report.generated, files: undefined, handoffText: undefined, paths: generated } }, passed ? 'ok' : 'blocked');
+  const outcome = result(request.command, { ...report, source: 'definition-of-' + gate, generated: { ...withoutTexts(report.generated), paths: generated } }, passed ? 'ok' : 'blocked');
   return { ...outcome, diagnostics: failed.map(rule => ({ code: gate === 'ready' ? 'INCREMENT_NOT_READY' : 'INCREMENT_NOT_DONE', message: `${rule.id} ${rule.title}: ${rule.message}`, ...(rule.hint ? { next: rule.hint } : {}) })) };
 };
 function structuralCheck(command: string, doc: StoredDocument<IncrementModel>, ws: DeliveryWorkspace, files: string[]): Result {
