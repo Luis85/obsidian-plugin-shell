@@ -12,7 +12,8 @@ import { starterDocument } from '../support/starter-documents.mjs';
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-new-project-')));
-  t.after(() => rm(dir, { recursive: true, force: true }));
+  // git's detached auto-maintenance can still be writing .git/objects after `new` returns (seen on macOS).
+  t.after(() => rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }));
   await cp(join(root, 'configs'), join(dir, 'configs'), { recursive: true });
   return dir;
 }
