@@ -1,0 +1,48 @@
+{
+  "description": "Nx workspace with an Angular 20 application (shop), an Angular library (ui), pnpm, NgRx Signals and Cypress. Two majors behind the Workbench Angular target.",
+  "files": {
+    "package.json": {
+      "name": "@acme/source",
+      "version": "0.0.0",
+      "license": "MIT",
+      "scripts": { "build": "nx build shop", "test": "nx test shop", "lint": "nx lint shop" },
+      "private": true,
+      "packageManager": "pnpm@9.15.0",
+      "dependencies": {
+        "@angular/common": "~20.3.0", "@angular/compiler": "~20.3.0", "@angular/core": "~20.3.0", "@angular/platform-browser": "~20.3.0", "@angular/router": "~20.3.0", "@ngrx/signals": "^20.0.0", "rxjs": "~7.8.0", "zone.js": "~0.15.0"
+      },
+      "devDependencies": {
+        "@nx/angular": "21.5.0", "@nx/cypress": "21.5.0", "@nx/jest": "21.5.0", "@nx/workspace": "21.5.0", "cypress": "^14.0.0", "jest": "^30.0.0", "jest-preset-angular": "~15.0.0", "nx": "21.5.0", "typescript": "~5.9.2"
+      }
+    },
+    "pnpm-lock.yaml": ["lockfileVersion: '9.0'", ""],
+    "pnpm-workspace.yaml": ["packages:", "  - apps/*", "  - libs/*"],
+    ".nvmrc": ["22"],
+    "nx.json": { "$schema": "./node_modules/nx/schemas/nx-schema.json", "namedInputs": { "default": ["{projectRoot}/**/*"] }, "defaultBase": "main" },
+    "tsconfig.base.json": { "compileOnSave": false, "compilerOptions": { "strict": true, "paths": { "@acme/ui": ["libs/ui/src/index.ts"] } } },
+    "apps/shop/project.json": {
+      "name": "shop",
+      "projectType": "application",
+      "sourceRoot": "apps/shop/src",
+      "targets": {
+        "build": { "executor": "@angular-devkit/build-angular:application", "options": { "outputPath": "dist/apps/shop", "browser": "apps/shop/src/main.ts" } },
+        "serve": { "executor": "@angular-devkit/build-angular:dev-server" },
+        "test": { "executor": "@nx/jest:jest", "options": { "jestConfig": "apps/shop/jest.config.ts" } }
+      }
+    },
+    "apps/shop/jest.config.ts": ["export default { displayName: 'shop', preset: '../../jest.preset.js' };"],
+    "apps/shop/src/main.ts": ["import { bootstrapApplication } from '@angular/platform-browser';", "import { appConfig } from './app/app.config';", "import { App } from './app/app';", "bootstrapApplication(App, appConfig);"],
+    "apps/shop/src/app/app.config.ts": ["import { provideRouter } from '@angular/router';", "import { appRoutes } from './app.routes';", "export const appConfig = { providers: [provideRouter(appRoutes)] };"],
+    "apps/shop/src/app/app.routes.ts": ["import { Route } from '@angular/router';", "export const appRoutes: Route[] = [", "  { path: 'products', loadComponent: () => import('./products/products').then(m => m.Products) },", "  { path: 'cart', loadComponent: () => import('./cart/cart').then(m => m.Cart) },", "  { path: 'checkout', loadComponent: () => import('./checkout/checkout').then(m => m.Checkout) },", "];"],
+    "apps/shop/src/app/app.ts": ["import { Component } from '@angular/core';", "@Component({ selector: 'app-root', template: '<router-outlet />' })", "export class App {}"],
+    "apps/shop/src/app/products/products.ts": ["import { Component, inject } from '@angular/core';", "import { signalStore, withState } from '@ngrx/signals';", "export const ProductStore = signalStore({ providedIn: 'root' }, withState({ items: [] as string[] }));", "@Component({ selector: 'app-products', template: '<p>products</p>' })", "export class Products { readonly store = inject(ProductStore); }"],
+    "apps/shop/src/app/cart/cart.ts": ["import { Component } from '@angular/core';", "@Component({ selector: 'app-cart', template: '<p>cart</p>' })", "export class Cart {}"],
+    "apps/shop/src/app/checkout/checkout.ts": ["import { Component } from '@angular/core';", "@Component({ selector: 'app-checkout', template: '<p>checkout</p>' })", "export class Checkout {}"],
+    "apps/shop/src/app/products/products.spec.ts": ["describe('Products', () => { it('works', () => expect(1).toBe(1)); });"],
+    "libs/ui/project.json": { "name": "ui", "projectType": "library", "sourceRoot": "libs/ui/src", "targets": { "build": { "executor": "@nx/angular:package", "options": { "project": "libs/ui/ng-package.json" } }, "test": { "executor": "@nx/jest:jest" } } },
+    "libs/ui/src/index.ts": ["export * from './lib/button';"],
+    "libs/ui/src/lib/button.ts": ["import { Component, input } from '@angular/core';", "@Component({ selector: 'acme-button', template: '<button><ng-content /></button>' })", "export class Button { readonly kind = input('primary'); }"],
+    "apps/shop-e2e/cypress.config.ts": ["export default {};"],
+    ".github/workflows/main.yml": ["name: main", "on: { push: { branches: [main] } }", "jobs:", "  main:", "    runs-on: ubuntu-latest", "    steps:", "      - uses: actions/checkout@v4", "      - run: pnpm install --frozen-lockfile", "      - run: pnpm nx affected -t lint test build"]
+  }
+}

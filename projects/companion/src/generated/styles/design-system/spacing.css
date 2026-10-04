@@ -1,0 +1,18 @@
+/* Generated design system. Edit saved tokens, not this managed file. */
+[data-plugin-ui="workbench-companion"].ps--workbench-companion {
+  --workbench-companion-ds-spacing-lg: 24px;
+  --workbench-companion-ds-spacing-md: 16px;
+  --workbench-companion-ds-spacing-sm: 8px;
+  --workbench-companion-ds-spacing-xl: 32px;
+  --workbench-companion-ds-spacing-xs: 4px;
+}
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-spacing-lg { gap: var(--workbench-companion-ds-spacing-lg); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-padding-lg { padding: var(--workbench-companion-ds-spacing-lg); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-spacing-md { gap: var(--workbench-companion-ds-spacing-md); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-padding-md { padding: var(--workbench-companion-ds-spacing-md); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-spacing-sm { gap: var(--workbench-companion-ds-spacing-sm); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-padding-sm { padding: var(--workbench-companion-ds-spacing-sm); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-spacing-xl { gap: var(--workbench-companion-ds-spacing-xl); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-padding-xl { padding: var(--workbench-companion-ds-spacing-xl); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-spacing-xs { gap: var(--workbench-companion-ds-spacing-xs); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-padding-xs { padding: var(--workbench-companion-ds-spacing-xs); }

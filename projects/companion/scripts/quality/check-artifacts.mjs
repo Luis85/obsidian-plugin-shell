@@ -1,0 +1,26 @@
+import { readFile, readdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import postcss from 'postcss';
+import selectorParser from 'postcss-selector-parser';
+import { assertCssOwnership } from '../bundling/css-identity.mjs';
+const expected = ['main.js', 'manifest.json', 'styles.css'];
+const files = (await readdir('dist')).sort();
+if (JSON.stringify(files) !== JSON.stringify(expected)) throw new Error(`UNEXPECTED_ARTIFACT_SET: ${files}`);
+const js = await readFile('dist/main.js', 'utf8');
+if (!js.includes('Plugin Shell — bundled dependency notices') || !js.includes('Copyright (c) 2023 Nuxt')) throw new Error('MISSING_DEPENDENCY_NOTICES');
+const css = await readFile('dist/styles.css', 'utf8');
+const manifest = JSON.parse(await readFile('dist/manifest.json', 'utf8'));
+const pkg = JSON.parse(await readFile('package.json', 'utf8'));
+if (manifest.version !== pkg.version || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(manifest.id)) throw new Error('MANIFEST_IDENTITY');
+if (!/module\.exports/.test(js) || !/require\(["']obsidian["']\)/.test(js)) throw new Error('CJS_HOST_ENTRY');
+for (const marker of ['__SHELL_TEST__', 'harness-native-notice', 'original-host-style-simulation', 'CSS.startRuleUsageTracking']) if (js.includes(marker) || css.includes(marker)) throw new Error(`DEVELOPMENT_LEAK:${marker}`);
+// Owner-reviewed 2026-09-27: CSS 160 KiB (was 100 KiB). Nuxt UI component detection scans the whole repository, so
+// catalog, test and docs mentions of components add their themes (NFR-04 deviation; see QUALITY-ASSURANCE.md).
+if (Buffer.byteLength(js) > 1024 * 1024 || Buffer.byteLength(css) > 160 * 1024) throw new Error('ARTIFACT_SIZE_BUDGET');
+const root = postcss.parse(css);
+const cssPrefix = manifest.id === 'plugin-shell' ? 'ps' : manifest.id;
+root.walkAtRules(rule => { if (['import', 'font-face'].includes(rule.name)) throw new Error(`UNSHIPPED_CSS_RESOURCE:${rule.name}`); if (rule.name === 'property' && !rule.params.startsWith(`--${cssPrefix}-`)) throw new Error(`GLOBAL_PROPERTY:${rule.params}`); });
+assertCssOwnership(root, manifest.id, selectorParser);
+const report = [];
+for (const file of expected) { const bytes = await readFile(`dist/${file}`); report.push({ file, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }); }
+console.log(JSON.stringify({ mode: 'artifact-static', nativeHostTested: false, assets: report }, null, 2));

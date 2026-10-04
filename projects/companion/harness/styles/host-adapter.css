@@ -1,0 +1,64 @@
+/* Harness-only DOM accommodations for a REDUCED host extraction.
+ * No base color/spacing/typography overrides. Not copied native behavior.
+ * Missing notices/select/layout rules are modeled, and remain listed in the manifest.
+ */
+body[data-host-style="extracted"] {
+  overflow: auto;
+  contain: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+body[data-host-style="extracted"] .fixture-page { min-block-size: 100%; }
+body[data-host-style="extracted"] .workspace-leaf {
+  min-inline-size: 0;
+  background: var(--background-primary);
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+}
+body[data-host-style="extracted"] .view-header { padding: var(--size-4-3) var(--size-4-4); border-block-end: var(--border-width) solid var(--background-modifier-border); }
+body[data-host-style="extracted"] .view-content { padding: var(--size-4-4); min-inline-size: 0; }
+body[data-host-style="extracted"] .setting-item { min-inline-size: 0; flex-wrap: wrap; }
+body[data-host-style="extracted"] .setting-item-info { flex: 1 1 10rem; min-inline-size: 0; }
+body[data-host-style="extracted"] .setting-item-control { display: flex; flex: 1 1 8rem; min-inline-size: 0; }
+body[data-host-style="extracted"] .setting-item-description { overflow: visible; text-overflow: clip; }
+body[data-host-style="extracted"] :is(input, textarea, select) { max-inline-size: 100%; min-inline-size: 0; }
+body[data-host-style="extracted"] :is(input[type="text"], textarea, select) { inline-size: 100%; }
+body[data-host-style="extracted"] textarea { min-block-size: calc(var(--input-height) * 2); resize: vertical; }
+body[data-host-style="extracted"] select {
+  background: var(--dropdown-background);
+  color: var(--text-normal);
+  border: var(--input-border-width) solid var(--background-modifier-border);
+  border-radius: var(--input-radius);
+  padding: var(--input-padding);
+  font: inherit;
+  min-block-size: var(--input-height);
+}
+body[data-host-style="extracted"] :is(input[type="checkbox"], progress) { accent-color: var(--interactive-accent); }
+body[data-host-style="extracted"] :is(pre, code) { font-family: var(--font-monospace); }
+body[data-host-style="extracted"] pre { overflow: auto; background: var(--code-background); padding: var(--size-4-3); border-radius: var(--radius-s); }
+body[data-host-style="extracted"] dialog.modal:not([open]) { display: none; }
+body[data-host-style="extracted"] dialog.modal { color: var(--text-normal); margin: auto; }
+body[data-host-style="extracted"] dialog.modal::backdrop { background: var(--background-modifier-cover); }
+body[data-host-style="extracted"] .modal-content { min-inline-size: 0; overflow-wrap: anywhere; }
+body[data-host-style="extracted"] .modal-button-container { display: flex; justify-content: flex-end; gap: var(--size-4-2); margin-block-start: var(--size-4-4); }
+body[data-host-style="extracted"] .notice-container {
+  position: fixed; inset-block-start: var(--size-4-4); inset-inline-end: var(--size-4-4);
+  z-index: var(--layer-notice); display: grid; gap: var(--size-4-2);
+  inline-size: min(24rem, calc(100vw - var(--size-4-8))); pointer-events: none;
+}
+body[data-host-style="extracted"] .notice {
+  pointer-events: auto; padding: var(--size-4-3) var(--size-4-4);
+  background: var(--background-secondary); color: var(--text-normal);
+  border: var(--border-width) solid var(--background-modifier-border); border-radius: var(--radius-m);
+  box-shadow: var(--shadow-s); overflow-wrap: anywhere;
+}
+body[data-host-style="extracted"] .notice-message { white-space: pre-wrap; }
+body[data-host-style="extracted"] :is(a, select, summary, input[type="checkbox"]):focus-visible { outline: 2px solid var(--background-modifier-border-focus); outline-offset: 2px; }
+body[data-host-style="extracted"] input[aria-invalid="true"] { border-color: var(--text-error); }
+@media (prefers-reduced-motion: reduce) {
+  body[data-host-style="extracted"] *, body[data-host-style="extracted"] *::before, body[data-host-style="extracted"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (forced-colors: active) {
+  body[data-host-style="extracted"] :is(.notice, .workspace-leaf, dialog) { border: 1px solid CanvasText; }
+}

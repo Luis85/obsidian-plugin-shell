@@ -1,0 +1,1188 @@
+{
+  "date": "2026-09-23",
+  "baseline_commit": "c8f4972b16a5aeaea4d17d0f941b552c27794da5",
+  "scope": "Offline browser concept; exact HTML injection into Chromium",
+  "artifact": {
+    "path": "docs/concepts/companion/index.html",
+    "bytes": 1112611,
+    "sha256": "5fd906301223be5c7cdf4fe98b91b15190c3a713f9d1467ed79d00e1c406046a"
+  },
+  "total_passed": 223,
+  "suites": [
+    {
+      "name": "containers/checks.json",
+      "scope": "Offline concept; Chromium exact HTML injection",
+      "html_sha256": "5fd906301223be5c7cdf4fe98b91b15190c3a713f9d1467ed79d00e1c406046a",
+      "checks": [
+        {
+          "name": "Sample retains canonical content and has no validation errors",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Unsuffixed code until collision, then increasing indices",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Repeated visible labels retain distinct stable identities",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Editing visible label preserves existing stable code",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Duplicate gets the next code without timestamps",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Explicit duplicate is rejected rather than silently renamed",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Allocation normalizes case and accents",
+          "result": "passed",
+          "scope": "model fixture"
+        },
+        {
+          "name": "structure: native view renders host layout, not content stack",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "structure: group is organizational, without fake content",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "structure: rendered rectangles match canonical geometry",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "structure: interiors fit without unintended clipping",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "structure: selected layout has a visible name",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "labels: native view renders host layout, not content stack",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "labels: group is organizational, without fake content",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "labels: rendered rectangles match canonical geometry",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "labels: interiors fit without unintended clipping",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "labels: selected layout has a visible name",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "wireframes: native view renders host layout, not content stack",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "wireframes: group is organizational, without fake content",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "wireframes: rendered rectangles match canonical geometry",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "wireframes: interiors fit without unintended clipping",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "wireframes: selected layout has a visible name",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Group editor has no irrelevant layout controls",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Child creation inherits the selected view owner",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Earlier native-view content remains retained and accessible",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "lanes: section rectangles remain disjoint",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "lanes: section bounds retain top, side and bottom padding",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "grid: section rectangles remain disjoint",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "grid: section bounds retain top, side and bottom padding",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "vertical: section rectangles remain disjoint",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "vertical: section bounds retain top, side and bottom padding",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "horizontal: section rectangles remain disjoint",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "horizontal: section bounds retain top, side and bottom padding",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "sections: section rectangles remain disjoint",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "sections: section bounds retain top, side and bottom padding",
+          "result": "passed",
+          "scope": "model geometry + rendered arrangement"
+        },
+        {
+          "name": "Arrangements keep group membership and semantic design unchanged",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Typed label editing preserves connection identity",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Connection modal offers separately confirmed deletion",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Delete changes only the chosen flow connection",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Undo restores exact labelled connection",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Structural caption is editable without changing containment",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Blank structural label rejected with data retained",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Concurrent visual-label change rejects stale save",
+          "result": "passed",
+          "scope": "controlled concurrent-change fixture"
+        },
+        {
+          "name": "Removing containment explains required replacement ownership",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Old containment removed without deleting the screen",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Undo restores the previous owner",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Selected edge exposes two updater controls",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Actual target drag proposes update without committing",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Cancel leaves original connection unchanged",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Save updates same edge without duplication",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Undo restores complete previous edge",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Actual origin drag independently changes its proposed anchor",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Escape leaves no ghost gesture, modal or changed edge",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Actual structural endpoint drag reviews same child at new anchor",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Structural anchor save keeps ownership intact",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Actual structural source drag proposes another parent for review",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Inner edge SVG allows graph-coordinate overflow",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Far-origin line remains hit-testable in visible viewport",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Clicking the unclipped SVG opens the line editor",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "Card movement still preserves chosen anchors",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "1600px light: no horizontal document overflow",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "390px dark: no horizontal document overflow",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "No page or console errors in tested paths",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        },
+        {
+          "name": "No runtime network requests in tested paths",
+          "result": "passed",
+          "scope": "browser interaction / rendered observation"
+        }
+      ],
+      "passed": 64,
+      "failed": 0,
+      "fatal": null,
+      "errors": [],
+      "requests": []
+    },
+    {
+      "name": "reference/checks.json",
+      "scope": "Browser concept only; no native/CLI/production qualification",
+      "html_sha256": "5fd906301223be5c7cdf4fe98b91b15190c3a713f9d1467ed79d00e1c406046a",
+      "checks": [
+        {
+          "name": "Actual Vue Flow runtime renders all five sample surfaces",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "All fifteen instances remain, with view-owned legacy content retained separately",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Canvas-first controls replace detached per-card toolbars",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Fresh canvas has a plain background and structure panel",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Selecting a title exposes the contextual toolbar",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Selection toolbar stays inside the viewport",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Blank canvas clears selection and toolbar",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Structure search filters to the matching screen",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No-results state is explicit and source is untouched",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Structure selection reveals and focuses the selected screen",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Connector click opens the retained creation menu",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Content editing opens a full-page draft with three blocks",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Draft title synchronizes into the miniature page",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Typing has not changed canonical content",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Miniature selection focuses the corresponding editor",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Formatting inserts Markdown without HTML execution",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Draft reorder changes preview order without changing saved order",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Save commits content and order exactly once",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Library definitions and versions are unchanged by local writing",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "One global Undo restores the complete previous screen",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Redo restores the edited title and order",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Unsaved content uses Keep editing / Discard protection",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Keep editing preserves the pending text",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Discard leaves saved content intact",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "The editor reuses the managed component library",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Component picker search is local and scoped",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "New component is draft-only until saving",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Content-editor dragging reorders visible blocks only in its pending draft",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Saved new component has stable ID and library reference",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Untrusted editor text is rendered inert",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Concurrent source revision prevents draft overwrite",
+          "result": "passed",
+          "scope": "controlled concurrent-revision fixture"
+        },
+        {
+          "name": "A visual section creates two content-aware drop zones",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Visual sections do not change structure, revision or source fingerprint",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Section names remain editable without renaming views",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Removing a section preserves every screen and component",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Structure panel can close without changing selection or source",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Detailed inspector is available on demand",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Intent and goals remain available through the inspector",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Layout preview retains an explicit route back",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Returning from preview remounts real Vue Flow",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "PRD workspace is preserved",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Unified component library is preserved",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Dark theme keeps the canvas within the host theme",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Narrow canvas has no document overflow",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Narrow primary toolbar stays inside the screen",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Narrow zoom controls stay inside the screen",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Narrow content editor fits the viewport",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Narrow content editor preserves three blocks and preview",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No observed page or console errors",
+          "result": "passed",
+          "scope": "observed runtime output"
+        },
+        {
+          "name": "No observed runtime network requests",
+          "result": "passed",
+          "scope": "observed network output"
+        }
+      ],
+      "passed": 50,
+      "failed": 0,
+      "errors": [],
+      "requests": [],
+      "fatal": null
+    },
+    {
+      "name": "reference/graph-checks.json",
+      "scope": "Retained graph browser checks; no native/CLI evidence",
+      "html_sha256": "5fd906301223be5c7cdf4fe98b91b15190c3a713f9d1467ed79d00e1c406046a",
+      "checks": [
+        {
+          "name": "Real handle drag opens a reviewed connection without committing",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Confirming drawn connection creates exactly one typed relationship",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "SVG line editing keeps connection identity and updates its label",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Actual card dragging changes visual positions only",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Actual on-card content grip reorders library-backed instances",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Canvas settings preserve source-plan identity",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No page or console errors in retained graph flow",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No network requests in retained graph flow",
+          "result": "passed",
+          "scope": "browser interaction"
+        }
+      ],
+      "passed": 8,
+      "failed": 0,
+      "fatal": null,
+      "errors": [],
+      "requests": []
+    },
+    {
+      "name": "reconciliation/checks.json",
+      "scope": "Browser concept; model and synthetic events are labeled separately",
+      "html_sha256": "5fd906301223be5c7cdf4fe98b91b15190c3a713f9d1467ed79d00e1c406046a",
+      "checks": [
+        {
+          "name": "Reconciled concept preserves five example surfaces",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Malformed canvas state is rejected without throwing",
+          "result": "passed",
+          "scope": "model validation fixture"
+        },
+        {
+          "name": "Closing a dirty draft opens explicit protection",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Control Enter cannot save underneath discard confirmation",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Command Enter cannot save underneath discard confirmation",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Keeping edits restores the same draft text",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Blank name validation focuses the exact field",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Validation failure retains every draft and saved value",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Correcting invalid input removes obsolete field error",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Content count updates while typing",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No editor controls become invisible through opacity",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Removal advertises local Undo and leaves saved screen alone",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Undo removal survives the library-preview transition",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Undo remove restores exact instance identity, text and order",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Removing final block exposes useful empty state",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Last removed block is recoverable in an empty draft",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Concurrent revision refuses save and focuses recovery",
+          "result": "passed",
+          "scope": "controlled concurrent-revision fixture"
+        },
+        {
+          "name": "Explicit draft export retains unsaved wording and stable surface",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Draft export has no process, vault or host-path payload",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Formatting over the limit explains failure without dropping text",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Dirty content requests browser unload protection",
+          "result": "passed",
+          "scope": "synthetic beforeunload event"
+        },
+        {
+          "name": "Closed clean editor does not block unload",
+          "result": "passed",
+          "scope": "synthetic beforeunload event"
+        },
+        {
+          "name": "Escape closes Arrange without losing selected screen",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Pointer outside closes Arrange without consuming navigation",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Dropping already preceding block before target is a no-op",
+          "result": "passed",
+          "scope": "model insertion fixture"
+        },
+        {
+          "name": "Dropping after target produces expected reading order",
+          "result": "passed",
+          "scope": "model insertion fixture"
+        },
+        {
+          "name": "Content footer fits 1600px light viewport",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No document overflow at 1600px light",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Content footer fits 1024px dark viewport",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No document overflow at 1024px dark",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Content footer fits 390px dark viewport",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No document overflow at 390px dark",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "No observed page or console errors",
+          "result": "passed",
+          "scope": "browser observation"
+        },
+        {
+          "name": "No observed network requests",
+          "result": "passed",
+          "scope": "browser observation"
+        }
+      ],
+      "passed": 34,
+      "failed": 0,
+      "fatal": null,
+      "errors": [],
+      "requests": []
+    },
+    {
+      "name": "unified/checks.json",
+      "scope": "Browser concept only; model/event fixtures labeled. No native/CLI evidence.",
+      "html_sha256": "5fd906301223be5c7cdf4fe98b91b15190c3a713f9d1467ed79d00e1c406046a",
+      "checks": [
+        {
+          "name": "Every library definition has the same content-instance contract",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Expanded sample has no design-validation errors",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Library has one creation route, no family switch",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Website tag filters the whole shared inventory",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Multiple tags use an explicit intersection",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Less common tags are available through the tag picker",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Sorting groups categories deterministically",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Tag sorting orders the shared inventory by primary tag",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Most-used sorting puts referenced definitions first",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Search has a genuine zero-result state",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Previously separate UI component uses the same wireframe preview",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Old UI contract now opens the standard component-instance editor",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "UI component becomes an ordered card item, not a second binding",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Tags normalize, deduplicate and persist on definition save",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Idle handles are transparent but keep their bounds",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Hover reveals card handles",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Selected card retains its handles off hover",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Blank pane clears the active card",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Actual handle drag opens a reviewed link without saving",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Cancelled drawing leaves no preview connection or pending handle",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Second draw after cancellation creates exactly one connection",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Card movement preserves both structural and action endpoints",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Movement leaves semantic generation inputs unchanged",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Undo preserves endpoint identities",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Redo preserves endpoint identities",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Applying another arrangement cannot repin existing connectors",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Only an explicit line edit changes its chosen anchors",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Endpoint-only editing remains outside generation fingerprint",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "A handle click opens its menu independently of drawing",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Closing handle menu leaves the renderer in idle state",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Drawing holds target handles visible during the gesture",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Escape fully resets a mid-draw gesture",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Loss-of-focus cancellation clears drawing state",
+          "result": "passed",
+          "scope": "synthetic window-focus lifecycle fixture"
+        },
+        {
+          "name": "Dragging near a peer displays real alignment guides",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Guide snapping aligns the card top in diagram coordinates",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Alignment guides clear after release without source changes",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "One undo restores the pre-alignment position",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Alt suspends alignment guidance and magnetic snapping",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Alt movement does not snap to the peer top",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Guide visibility and snapping are independent preferences",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Empty section provides a visible card drop target",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Dragging a card into a section gives drop feedback",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Dropping assigns only the visual membership",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Section bounds contain the entire card plus padding",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "One undo restores drop position and membership together",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Redo restores section assignment",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Section grows when its card content grows",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Rendered card dimensions agree with spatial measurements",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Card contents have consistent nonzero inner padding",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Section assignment has a non-drag alternative",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Legacy migration: contract",
+          "result": "passed",
+          "scope": "legacy-model fixture"
+        },
+        {
+          "name": "Legacy migration: preserved",
+          "result": "passed",
+          "scope": "legacy-model fixture"
+        },
+        {
+          "name": "Legacy migration: converted",
+          "result": "passed",
+          "scope": "legacy-model fixture"
+        },
+        {
+          "name": "Legacy migration: idempotent",
+          "result": "passed",
+          "scope": "legacy-model fixture"
+        },
+        {
+          "name": "Library migration adopts schema 3 explicitly",
+          "result": "passed",
+          "scope": "legacy-model fixture"
+        },
+        {
+          "name": "Invalid/future canvas and malformed tags are rejected",
+          "result": "passed",
+          "scope": "validation-model fixture"
+        },
+        {
+          "name": "Deleted definitions are not reseeded on ordinary reads",
+          "result": "passed",
+          "scope": "deletion-model fixture"
+        },
+        {
+          "name": "Guideline tolerance is stable in screen pixels",
+          "result": "passed",
+          "scope": "geometry-model fixture"
+        },
+        {
+          "name": "Source plan uses ordered component instances",
+          "result": "passed",
+          "scope": "source-plan model fixture"
+        },
+        {
+          "name": "Visual endpoint ownership is part of portable canvas metadata",
+          "result": "passed",
+          "scope": "serialization-model fixture"
+        },
+        {
+          "name": "Overlapping imported section memberships are rejected",
+          "result": "passed",
+          "scope": "section-validation model fixture"
+        },
+        {
+          "name": "Missing legacy definitions remain visibly preserved",
+          "result": "passed",
+          "scope": "legacy-model fixture"
+        },
+        {
+          "name": "Repeated view switches leave one current renderer",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Narrow canvas has no horizontal document overflow",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Narrow unified library has no horizontal document overflow",
+          "result": "passed",
+          "scope": "browser interaction"
+        },
+        {
+          "name": "Zero observed page/console errors",
+          "result": "passed",
+          "scope": "observed runtime output"
+        },
+        {
+          "name": "Zero observed network requests",
+          "result": "passed",
+          "scope": "observed network output"
+        }
+      ],
+      "passed": 67,
+      "failed": 0,
+      "fatal": null,
+      "errors": [],
+      "requests": []
+    }
+  ]
+}

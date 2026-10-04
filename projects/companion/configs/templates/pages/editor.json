@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "page.editor",
+  "name": "Editor Page",
+  "version": "1.0.0",
+  "templateType": "page-with-bricks",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Editor workspace with toolbar, canvas or content region and inspector.",
+  "tags": [
+    "page",
+    "pages",
+    "editor"
+  ],
+  "recommendedFor": [
+    "editor",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "editing-workspace"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.toolbar",
+      "slot": "toolbar"
+    },
+    {
+      "template": "template.editor-shell",
+      "slot": "workspace"
+    },
+    {
+      "template": "organism.detail-panel",
+      "slot": "inspector"
+    }
+  ],
+  "slots": [
+    {
+      "id": "toolbar",
+      "role": "header",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "workspace",
+      "role": "content",
+      "accepts": [
+        "organism",
+        "template"
+      ]
+    },
+    {
+      "id": "inspector",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    }
+  ],
+  "design": {
+    "kind": "page",
+    "layout": "grid"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

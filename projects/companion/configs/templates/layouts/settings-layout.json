@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "template.settings-layout",
+  "name": "Settings Layout",
+  "version": "1.0.0",
+  "templateType": "component-with-children",
+  "atomicLevel": "template",
+  "category": "Layout",
+  "description": "Settings navigation and grouped form layout.",
+  "tags": [
+    "template",
+    "layout",
+    "settings"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "settings-layout"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.sidebar"
+    },
+    {
+      "template": "organism.settings-group"
+    }
+  ],
+  "slots": [],
+  "design": {
+    "kind": "recipe",
+    "recipeId": "recipe-settings"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

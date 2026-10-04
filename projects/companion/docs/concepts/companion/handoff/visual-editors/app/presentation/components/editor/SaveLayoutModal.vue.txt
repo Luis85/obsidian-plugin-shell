@@ -1,0 +1,10 @@
+<script setup lang="ts">
+const open=defineModel<boolean>({default:false})
+const emit=defineEmits<{save:[value:{name:string;description:string;category:string;scope:string}]}>()
+const form=reactive({name:'Customer operations',description:'Sidebar, command bar, KPI row and data workspace',category:'application',scope:'page'})
+function submit(){emit('save',{...form});open.value=false}
+</script>
+<template><UModal v-model:open="open" title="Save as reusable layout" description="Save structure and component references without page-specific runtime data.">
+ <template #body><div class="space-y-4"><UFormField label="Layout name" required><UInput v-model="form.name"/></UFormField><UFormField label="Description"><UTextarea v-model="form.description"/></UFormField><div class="grid grid-cols-2 gap-3"><UFormField label="Category"><USelect v-model="form.category" :items="['application','dashboard','master-detail','form','settings','website','custom']"/></UFormField><UFormField label="Save"><USelect v-model="form.scope" :items="[{label:'Entire page',value:'page'},{label:'Selected region',value:'region'}]"/></UFormField></div><UAlert color="primary" variant="subtle" title="Portable layout" description="Structure, layout rules, component references and named slots are retained. Page identity, route and transient preview data are not."/></div></template>
+ <template #footer><div class="flex justify-end gap-2 w-full"><UButton variant="ghost" @click="open=false">Cancel</UButton><UButton icon="i-lucide-bookmark-plus" @click="submit">Save layout</UButton></div></template>
+</UModal></template>

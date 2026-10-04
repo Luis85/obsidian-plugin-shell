@@ -1,0 +1,45 @@
+name: Angular setup end-to-end acceptance
+on:
+  pull_request:
+    paths-ignore:
+      - 'projects/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: angular-setup-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  generated-app:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+          playwright: browser
+      - name: Type-check the CLI
+        run: node "$QUALIFIED_NPM" run typecheck:maker
+      - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
+        run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
+      - name: Run compiled kit, first run, edit, regeneration and real browser acceptance
+        run: node scripts/testing/qualify-angular-setup.mjs
+      - name: Retain candidate-specific results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: angular-setup-acceptance-${{ matrix.os }}
+          path: reports/angular-setup-acceptance/
+          retention-days: 7
+          if-no-files-found: error

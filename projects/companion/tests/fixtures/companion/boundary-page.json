@@ -1,0 +1,380 @@
+{
+  "id": "vp-5993",
+  "ownerId": "node-900",
+  "name": "Boundary validation",
+  "root": [
+    {
+      "id": "vn-5994",
+      "kind": "element",
+      "tag": "div",
+      "attrs": {},
+      "children": [
+        {
+          "id": "vn-5995",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-input"
+          },
+          "props": {
+            "type": {
+              "kind": "literal",
+              "value": "number"
+            }
+          },
+          "slots": {},
+          "events": [],
+          "name": "Amount",
+          "a11y": "Enter Amount",
+          "control": {
+            "kind": "number"
+          }
+        },
+        {
+          "id": "vn-5996",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-checkbox"
+          },
+          "props": {
+            "label": {
+              "kind": "literal",
+              "value": "Enabled"
+            }
+          },
+          "slots": {},
+          "events": [],
+          "name": "Enabled",
+          "a11y": "Enter Enabled",
+          "control": {
+            "kind": "checkbox"
+          }
+        },
+        {
+          "id": "vn-5997",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-select"
+          },
+          "props": {
+            "items": {
+              "kind": "literal",
+              "value": [
+                "First",
+                "Second"
+              ]
+            }
+          },
+          "slots": {},
+          "events": [],
+          "name": "Category",
+          "a11y": "Enter Category",
+          "control": {
+            "kind": "select",
+            "options": [
+              {
+                "value": "first",
+                "label": "First"
+              },
+              {
+                "value": "second",
+                "label": "Second"
+              }
+            ]
+          }
+        },
+        {
+          "id": "vn-5998",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-input"
+          },
+          "props": {
+            "type": {
+              "kind": "literal",
+              "value": "date"
+            }
+          },
+          "slots": {},
+          "events": [],
+          "name": "Due",
+          "a11y": "Enter Due",
+          "control": {
+            "kind": "date"
+          }
+        },
+        {
+          "id": "vn-5999",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-textarea"
+          },
+          "props": {},
+          "slots": {},
+          "events": [],
+          "name": "Configuration",
+          "a11y": "Enter Configuration",
+          "control": {
+            "kind": "json-editor"
+          }
+        },
+        {
+          "id": "vn-6000",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-textarea"
+          },
+          "props": {},
+          "slots": {},
+          "events": [],
+          "name": "Body",
+          "a11y": "Enter Body",
+          "control": {
+            "kind": "markdown-editor"
+          }
+        },
+        {
+          "id": "vn-6001",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-textarea"
+          },
+          "props": {},
+          "slots": {},
+          "events": [],
+          "name": "Import JSON",
+          "a11y": "Enter Import JSON",
+          "control": {
+            "kind": "json-file"
+          }
+        },
+        {
+          "id": "vn-6002",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-input"
+          },
+          "props": {
+            "type": {
+              "kind": "literal",
+              "value": "datetime-local"
+            }
+          },
+          "slots": {},
+          "events": [],
+          "name": "Appointment",
+          "a11y": "Enter Appointment",
+          "control": {
+            "kind": "datetime-local"
+          }
+        },
+        {
+          "id": "vn-6003",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-textarea"
+          },
+          "props": {},
+          "slots": {},
+          "events": [],
+          "name": "Description",
+          "a11y": "Enter Description",
+          "control": {
+            "kind": "textarea"
+          }
+        },
+        {
+          "id": "vn-6004",
+          "kind": "component",
+          "ref": {
+            "kind": "nuxt-ui",
+            "entryId": "u-button"
+          },
+          "props": {
+            "label": {
+              "kind": "literal",
+              "value": "Save"
+            }
+          },
+          "slots": {},
+          "events": [
+            {
+              "id": "vi-6009",
+              "event": "click",
+              "label": "Save mapped record",
+              "notes": "Explicit mapping; no prose inference",
+              "acceptance": "The native adapter persists the entered values",
+              "actions": [
+                {
+                  "kind": "source",
+                  "sourceId": "ds-source-900",
+                  "operationId": "ds-operation-902",
+                  "input": {
+                    "kind": "object",
+                    "fields": {
+                      "requestId": {
+                        "kind": "value",
+                        "value": "boundary-request-1"
+                      },
+                      "values": {
+                        "kind": "object",
+                        "fields": {
+                          "title": {
+                            "kind": "value",
+                            "value": "Boundary note"
+                          },
+                          "amount": {
+                            "kind": "draft",
+                            "nodeId": "vn-5995"
+                          },
+                          "enabled": {
+                            "kind": "draft",
+                            "nodeId": "vn-5996"
+                          },
+                          "category": {
+                            "kind": "draft",
+                            "nodeId": "vn-5997"
+                          },
+                          "due": {
+                            "kind": "draft",
+                            "nodeId": "vn-5998"
+                          },
+                          "body": {
+                            "kind": "draft",
+                            "nodeId": "vn-6000"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "name": "Save",
+          "a11y": "Enter Save"
+        },
+        {
+          "id": "vn-6005",
+          "kind": "text",
+          "role": "p",
+          "value": {
+            "kind": "literal",
+            "value": "Saved records"
+          },
+          "name": "Saved records",
+          "a11y": "Enter Saved records"
+        },
+        {
+          "id": "vn-6006",
+          "kind": "component",
+          "ref": {
+            "kind": "project",
+            "componentId": "vc-107"
+          },
+          "props": {},
+          "slots": {
+            "content": [
+              {
+                "id": "vn-6007",
+                "kind": "element",
+                "tag": "div",
+                "attrs": {},
+                "children": [
+                  {
+                    "id": "vn-6008",
+                    "kind": "text",
+                    "role": "p",
+                    "value": {
+                      "kind": "literal",
+                      "value": "This content must render once in the reusable slot."
+                    },
+                    "name": "Slot content",
+                    "a11y": "Enter Slot content"
+                  }
+                ],
+                "events": [],
+                "name": "Assigned slot",
+                "a11y": "Enter Assigned slot",
+                "layout": {
+                  "mode": "stack",
+                  "ui": {
+                    "gap": 12,
+                    "padding": 16,
+                    "columns": 2,
+                    "align": "stretch",
+                    "justify": "start",
+                    "wrap": true,
+                    "overflow": "visible",
+                    "widthMode": "fill",
+                    "width": 320,
+                    "minWidth": 0,
+                    "maxWidth": 1600,
+                    "narrow": {
+                      "layout": "stack",
+                      "columns": 1,
+                      "hidden": false
+                    },
+                    "tokens": {
+                      "gap": "",
+                      "padding": "",
+                      "color": "",
+                      "background": "",
+                      "radius": "",
+                      "typography": ""
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "events": [],
+          "name": "Review",
+          "a11y": "Enter Review"
+        }
+      ],
+      "events": [],
+      "name": "Form",
+      "a11y": "Enter Form",
+      "layout": {
+        "mode": "stack",
+        "ui": {
+          "gap": 12,
+          "padding": 16,
+          "columns": 2,
+          "align": "stretch",
+          "justify": "start",
+          "wrap": true,
+          "overflow": "visible",
+          "widthMode": "fill",
+          "width": 320,
+          "minWidth": 0,
+          "maxWidth": 1600,
+          "narrow": {
+            "layout": "stack",
+            "columns": 1,
+            "hidden": false
+          },
+          "tokens": {
+            "gap": "",
+            "padding": "",
+            "color": "",
+            "background": "",
+            "radius": "",
+            "typography": ""
+          }
+        }
+      }
+    }
+  ],
+  "scenarios": [],
+  "notes": "Boundary verification only"
+}

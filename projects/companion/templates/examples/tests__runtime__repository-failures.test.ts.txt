@@ -1,0 +1,104 @@
+import { describe, it, expect, vi } from 'vitest';
+import { success, failure } from '../../src/domain/outcome';
+import { repositoryFixture, unwrap } from './repository-helpers';
+import { deferred } from './helpers';
+import { defineDocument } from '../../src/application/document-definition';
+import { projectEntity } from '../fixtures/projects/entity';
+import { NoteRepository } from '../../src/application/note-repository';
+import { markdownCodec } from '../../src/infrastructure/markdown';
+
+describe('Repository asynchronous boundaries', () => {
+  it('[REPO-03-12] revalidates a queued create after preferences change', async () => {
+    const f = repositoryFixture(); const prior = unwrap(await f.tasks.create({ title: 'First' }, 'first'));
+    const started = deferred(); const release = deferred();
+    const replace = f.storage.replace.getMockImplementation();
+    f.storage.replace.mockImplementation(async (...args) => { started.resolve(); await release.promise; return replace ? replace(...args) : failure('storage', 'error.write'); });
+    const update = f.tasks.update(prior, { title: 'Updated' }); await started.promise;
+    const queued = f.tasks.create({ title: 'Queued' }, 'queued'); f.folder('Other'); release.resolve();
+    expect((await update).ok).toBe(true);
+    expect(await queued).toMatchObject({ ok: false, error: { code: 'stale' } });
+    expect(f.storage.create).toHaveBeenCalledTimes(1); expect([...f.files.keys()]).toEqual([prior.path]);
+  });
+  it('[REPO-03-13] disposal during create preflight prevents starting the host write', async () => {
+    const f = repositoryFixture(); const started = deferred(); const release = deferred();
+    f.storage.list.mockImplementationOnce(async () => { started.resolve(); await release.promise; return success([]); });
+    const create = f.tasks.create({ title: 'Task' }, 'request'); await started.promise;
+    f.tasks.dispose(); release.resolve();
+    expect(await create).toMatchObject({ ok: false, error: { code: 'disposed' } });
+    expect(f.storage.create).not.toHaveBeenCalled(); expect(f.files.size).toBe(0);
+  });
+  it('[REPO-03-14] disposal during mutation preflight prevents update and trash', async () => {
+    for (const operation of ['update', 'delete']) {
+      const f = repositoryFixture(); const snapshot = unwrap(await f.tasks.create({ title: 'Task' }, 'r'));
+      const started = deferred(); const release = deferred();
+      f.storage.list.mockImplementationOnce(async () => { started.resolve(); await release.promise; return success([snapshot.path]); });
+      const mutation = operation === 'update' ? f.tasks.update(snapshot, { title: 'Changed' }) : f.tasks.delete(snapshot);
+      await started.promise; f.tasks.dispose(); release.resolve();
+      expect(await mutation).toMatchObject({ ok: false, error: { code: 'disposed' } });
+      expect(f.storage.replace).not.toHaveBeenCalled(); expect(f.storage.trash).not.toHaveBeenCalled();
+    }
+  });
+  it('[REPO-03-15] a started host write keeps its actual successful outcome after disposal', async () => {
+    const f = repositoryFixture(); const started = deferred(); const release = deferred();
+    const create = f.storage.create.getMockImplementation();
+    f.storage.create.mockImplementation(async (...args) => { started.resolve(); await release.promise; return create ? create(...args) : failure('storage', 'error.write'); });
+    const work = f.tasks.create({ title: 'Task' }, 'request'); await started.promise;
+    f.tasks.dispose(); release.resolve();
+    expect((await work).ok).toBe(true); expect(f.files.size).toBe(1);
+  });
+  it('[REPO-03-16] failed storage preconditions, invalid values, and missing records emit no mutation fact', async () => {
+    const f = repositoryFixture(); const updated = vi.fn(); f.events.on('documents.updated', updated);
+    const snapshot = unwrap(await f.tasks.create({ title: 'Task' }, 'r'));
+    expect((await f.tasks.update(snapshot, { title: '' })).ok).toBe(false);
+    f.storage.replace.mockResolvedValueOnce(failure('stale', 'error.stale'));
+    expect((await f.tasks.update(snapshot, { title: 'Next' })).ok).toBe(false);
+    const fresh = unwrap(await f.tasks.get(snapshot.path)); f.files.delete(snapshot.path);
+    expect((await f.tasks.delete(fresh)).ok).toBe(false); expect(updated).not.toHaveBeenCalled();
+    expect(f.storage.trash).not.toHaveBeenCalled();
+  });
+  it('[REPO-03-17] scopes captured while reading and propagated storage failures remain actionable', async () => {
+    const f = repositoryFixture(); const snapshot = unwrap(await f.tasks.create({ title: 'Task' }, 'r'));
+    f.storage.read.mockImplementationOnce(async () => { f.folder('Other'); return success(f.files.get(snapshot.path) ?? ''); });
+    expect(await f.tasks.list()).toMatchObject({ ok: false, error: { code: 'stale' } });
+    f.folder('Tasks'); f.storage.list.mockResolvedValueOnce(failure('storage', 'error.read'));
+    expect((await f.tasks.list()).ok).toBe(false);
+    f.storage.read.mockResolvedValueOnce(failure('storage', 'error.read'));
+    expect((await f.tasks.list()).ok).toBe(false);
+  });
+  it('[REPO-03-18] invalid managed identity and creation timestamp never become mutable records', async () => {
+    const f = repositoryFixture(); const snapshot = unwrap(await f.tasks.create({ title: 'Task' }, 'r'));
+    const markdown = f.files.get(snapshot.path) ?? '';
+    for (const changed of [markdown.replace('id: "entity-1"', 'id: 1'), markdown.replace('id: "entity-1"', 'id: "../unsafe"'), markdown.replace(/^created_at:.*\n/m, ''), markdown.replace(/^created_at:.*$/m, 'created_at: 12'), markdown.replace(/^created_at:.*$/m, 'created_at: "not a timestamp"'), markdown.replace(/^created_at:.*$/m, 'created_at: "2026-02-30T00:00:00Z"')]) {
+      f.files.set(snapshot.path, changed); expect((await f.tasks.list()).ok).toBe(false); expect(f.files.get(snapshot.path)).toBe(changed);
+    }
+  });
+  it('[REPO-03-19] throwing publication preserves successful create/update/delete and is observed', async () => {
+    const f = repositoryFixture(); vi.spyOn(f.events, 'publish').mockImplementation(() => { throw new Error('private'); });
+    const snapshot = unwrap(await f.tasks.create({ title: 'Task' }, 'r'));
+    const changed = unwrap(await f.tasks.update(snapshot, { title: 'Changed' }));
+    expect((await f.tasks.delete(changed)).ok).toBe(true);
+    expect(f.errors.report.mock.calls).toEqual([['event.publish', 'document.publish'], ['event.publish', 'repository.publish'], ['event.publish', 'repository.publish']]);
+  });
+  it('[REPO-03-20] valid maximum-length folders remain readable after creation', async () => {
+    const f = repositoryFixture(); f.folder('a'.repeat(160));
+    const snapshot = unwrap(await f.tasks.create({ title: 'Task' }, 'r'));
+    expect(unwrap(await f.tasks.get(snapshot.path)).id).toBe(snapshot.id);
+    expect((await f.tasks.delete(snapshot)).ok).toBe(true);
+  });
+  it('[REPO-03-21] lossy persistence mappings are rejected before repository creation', () => {
+    const f = repositoryFixture();
+    const partial = defineDocument(projectEntity, { mappings: [{ field: 'name', property: 'name' }], title: value => value.name, body: () => '' });
+    expect(() => new NoteRepository(partial, f.storage, markdownCodec, f.events, () => 'Projects', () => 'id', () => '2026-09-22T00:00:00Z', f.errors)).toThrow('Repository document mappings must persist every entity field');
+    expect(() => defineDocument(projectEntity, { mappings: [{ field: 'name', property: 'name' }, { field: 'name', property: 'alias' }], title: value => value.name, body: () => '' })).toThrow('Invalid document mapping');
+    expect(f.storage.create).not.toHaveBeenCalled();
+  });
+  it('[REPO-03-22] oversized proposed bytes fail before replacing any existing note', async () => {
+    const f = repositoryFixture(); const created = unwrap(await f.tasks.create({ title: 'x' }, 'r'));
+    const original = f.files.get(created.path) ?? '';
+    const large = original + 'x'.repeat(999_990 - original.length); f.files.set(created.path, large);
+    const snapshot = unwrap(await f.tasks.get(created.path));
+    expect(await f.tasks.update(snapshot, { title: 'x'.repeat(120) })).toMatchObject({ ok: false, error: { effect: 'none' } });
+    expect(f.storage.replace).not.toHaveBeenCalled(); expect(f.files.get(created.path)).toBe(large);
+    expect((await f.tasks.get(created.path)).ok).toBe(true);
+  });
+});

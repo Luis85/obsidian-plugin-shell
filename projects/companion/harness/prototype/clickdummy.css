@@ -1,0 +1,13 @@
+/* Original standalone browser host simulation; never imported by the native plugin. */
+@import '../styles/simulated.css';
+body { margin:0; font-family:var(--font-interface,system-ui,sans-serif); background:var(--background-primary); color:var(--text-normal); }
+.clickdummy-toolbar { display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:16px; border-bottom:1px solid var(--background-modifier-border); }
+.clickdummy-toolbar h1 { margin:0; font-size:1.15rem; overflow-wrap:anywhere; }
+.clickdummy-toolbar div { flex:1 1 250px; } .clickdummy-toolbar p { margin:4px 0; } .clickdummy-toolbar .clickdummy-control { flex:0 1 250px; display:grid; gap:4px; }
+.clickdummy-toolbar select { width:100%; max-width:250px; min-width:0; }
+.clickdummy-toolbar button,.clickdummy-toolbar select,.clickdummy-dialog > button { min-height:36px; padding:6px 10px; font:inherit; }
+.clickdummy-toolbar :focus-visible,.clickdummy-dialog > button:focus-visible { outline:2px solid var(--interactive-accent); outline-offset:3px; }
+.clickdummy-toolbar > div { min-width:0; } .clickdummy-route,.clickdummy-error { padding-inline:16px; overflow-wrap:anywhere; }
+.clickdummy-dialog { color:var(--text-normal); background:var(--background-primary); max-width:min(960px,90vw); max-height:90vh; overflow:auto; border:1px solid var(--background-modifier-border); border-radius:12px; }
+.clickdummy-dialog::backdrop { background:rgba(0,0,0,.55); }
+@media (max-width:480px) { .clickdummy-toolbar { gap:12px; padding:12px; } .clickdummy-toolbar .clickdummy-control { flex-basis:100%; } .clickdummy-toolbar select { max-width:none; } .clickdummy-dialog { box-sizing:border-box; width:calc(100vw - 24px); max-width:none; padding:12px; } }

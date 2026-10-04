@@ -1,0 +1,18 @@
+<script setup lang="ts">
+const active=ref('Pages')
+const healthOpen=ref(false)
+const saved=ref(true)
+</script>
+<template><div class="h-screen flex flex-col overflow-hidden bg-default">
+<header class="h-14 border-b border-default flex items-center gap-3 px-4 shrink-0">
+ <div class="font-bold flex items-center gap-2"><div class="size-7 rounded-md bg-primary text-white grid place-items-center">C</div>Companion</div>
+ <UButtonGroup><UButton v-for="x in ['Pages','Components']" :key="x" :variant="active===x?'solid':'ghost'" @click="active=x">{{x}}</UButton></UButtonGroup>
+ <div class="flex-1"/>
+ <UButton variant="ghost" icon="i-lucide-circle-check" @click="healthOpen=true">Project health</UButton>
+ <span class="text-xs text-muted">{{saved?'Saved':'Unsaved changes'}}</span>
+ <UButton variant="outline" icon="i-lucide-file-input">Import</UButton>
+ <UDropdownMenu :items="[[{label:'Export project JSON',icon:'i-lucide-file-json'},{label:'Generate Vue project',icon:'i-lucide-code-xml'}]]"><UButton icon="i-lucide-file-output">Export</UButton></UDropdownMenu>
+</header>
+<main class="flex-1 min-h-0"><PageEditor v-if="active==='Pages'"/><ComponentEditor v-else/></main>
+<ProjectHealth v-model="healthOpen"/>
+</div></template>

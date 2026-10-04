@@ -1,0 +1,560 @@
+name: CI
+# Every always-on pull-request gate in one place. Path-filtered checks stay in
+# setup-compatibility.yml and companion-concept-verification.yml; heavy native
+# qualification of main is candidate-qualification.yml; releases are manual.
+# "CI result" aggregates every gate job below, so branch protection can require
+# that single check instead of each matrix leg.
+on:
+  pull_request:
+    paths-ignore:
+      - 'projects/**'
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'projects/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  baseline:
+    name: Baseline / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # ubuntu-latest stays here only because the shipped `bin/app ci` help and
+        # manual use `ci/baseline --matrix os=ubuntu-latest` as their example; the
+        # dependency-free baseline does not depend on the image's preinstalled tools.
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - &checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - &setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Verify the dependency-free executable baseline three times
+        run: node scripts/testing/verify-baseline.mjs --repeat 3 --json
+      - name: Retain scope-labeled verification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: baseline-${{ matrix.os }}-${{ github.run_attempt }}
+          path: reports/verification/
+          retention-days: 7
+          if-no-files-found: error
+
+  showcase:
+    name: Showcase / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    # Guided setup runs the complete verify gates once before the served showcase.
+    # The integrated Windows suites exceed 30 minutes before coverage finishes.
+    # Match setup-compatibility's job budget (75 minutes on Windows), which runs
+    # the same setup and complete verify; keep every test and threshold intact.
+    # Ubuntu guided setup was measured at 35-39 minutes, so non-Windows runners
+    # get 55 minutes of headroom instead of the earlier 30-minute budget.
+    # This is a job budget, not a test deadline or product performance threshold.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 55 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # On pull requests template-authoring's renamed-feature job already runs
+        # setup, the complete verify and served e2e on Ubuntu with the same
+        # toolchain; Ubuntu showcase runs on pushes and manual dispatch.
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-24.04", "windows-latest"]') }}
+    steps:
+      - *checkout
+      - &windows-dev-drive
+        name: Put temporary files on a Dev Drive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./.github/scripts/prepare-windows-runner.ps1
+      - *setup-node
+      - &select-npm
+        name: Select exact npm in runner scratch, not globally
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Guided setup and complete verification from a clean checkout without node_modules
+        shell: pwsh
+        run: node "$env:QUALIFIED_NPM" run setup -- --yes --no-interaction
+      - &playwright-version
+        name: Resolve the pinned Playwright version
+        id: playwright
+        if: runner.os == 'Linux'
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - &playwright-cache
+        name: Restore the pinned Chromium download
+        if: runner.os == 'Linux'
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - name: Exercise the actual served showcase
+        if: runner.os == 'Linux'
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node "$QUALIFIED_NPM" run test:e2e
+      - name: Capture the UI review gallery (evidence for human review, not acceptance)
+        if: always() && runner.os == 'Linux'
+        run: node "$QUALIFIED_NPM" run ui:gallery
+      - name: Retain the UI review gallery
+        id: ui-gallery
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-review-gallery
+          path: reports/ui-gallery/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Link the UI review gallery in the job summary
+        if: always() && runner.os == 'Linux' && steps.ui-gallery.outputs.artifact-url != ''
+        run: |
+          echo "UI review gallery for reviewers (open gallery.html): ${{ steps.ui-gallery.outputs.artifact-url }} - evidence for human review, not acceptance, not a baseline." >> "$GITHUB_STEP_SUMMARY"
+      - name: Archive tracked source only
+        if: always()
+        run: git archive --format=zip --output=candidate-source.zip HEAD
+      - name: Retain candidate and scope-labeled evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: showcase-${{ matrix.os }}-${{ github.run_attempt }}
+          path: |
+            reports/
+            !reports/e2e/html/**
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+            dist/
+            package-lock.json
+            candidate-source.zip
+          retention-days: 7
+          if-no-files-found: error
+
+  # Three independent template-authoring journeys run in parallel. Each still
+  # runs every gate on its own fresh checkout.
+  renamed-feature:
+    name: Template authoring / renamed feature
+    runs-on: ubuntu-24.04
+    # Measured at 30-37 minutes on #60 and 44 minutes on #68 (identity adoption,
+    # maker, extended verify and served components); 60 minutes is a job budget,
+    # not a test deadline.
+    timeout-minutes: 60
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      # Both jobs using this step run the complete verify later on a superset of
+      # this tree, so setup defers its own identical verify stage.
+      - &adopt-identity
+        name: Adopt a distinct identity from a fresh checkout, deferring verify to the extended template
+        run: |
+          mkdir -p reports/template-authoring
+          set -o pipefail
+          node "$QUALIFIED_NPM" run setup -- --id atlas-notes --name "Atlas Notes" --author "Template Qualification" --repo example/atlas-notes --version 1.0.0 --profile browser --defer-verify --yes --no-interaction 2>&1 | tee reports/template-authoring/setup.txt
+      - &make-feature
+        name: Generate a new business feature through the public maker
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run make -- feature bookmarks --entity bookmark --yes --no-interaction 2>&1 | tee reports/template-authoring/make.txt
+          node "$QUALIFIED_NPM" run entities:check
+      - &extend-consumer
+        name: Extend consumer source and exercise local event and plugin-data authoring
+        run: |
+          node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
+          node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- reminder review --feature bookmarks --trust-custom --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- entity rating --feature bookmarks --backend plugin-data --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- event refreshed --feature bookmarks --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- listener observe --feature bookmarks --event refreshed --yes --no-interaction
+          node "$QUALIFIED_NPM" run events:check
+      - name: Verify the complete renamed and extended template
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/verify-summary 2>&1 | tee reports/template-authoring/verify.txt
+          node scripts/quality/check-artifacts.mjs > reports/template-authoring/assets.json
+      - *playwright-version
+      - *playwright-cache
+      - name: Provision pinned Chromium and exercise served components
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node "$QUALIFIED_NPM" run test:e2e
+      - name: Retain authoring evidence and the generated source
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: renamed-template-authoring
+          path: |
+            reports/
+            !reports/e2e/html/**
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+            src/features/bookmarks/
+            src/bootstrap/events.ts
+            src/bootstrap/event-catalog.ts
+            src/bootstrap/authoring.ts
+            src/bootstrap/features.ts
+            scripts/makers/custom/
+            tests/runtime/generated/
+            tests/fixtures/entities/bookmarks-bookmark.md
+            PROJECT-IDENTITY.md
+            .template-state/setup.json
+            dist/
+          retention-days: 7
+          include-hidden-files: true
+          if-no-files-found: error
+
+  source-archive:
+    name: Template authoring / source archive
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      - name: Exercise literal source archive without ancestor Git discovery
+        run: |
+          mkdir -p reports/template-authoring
+          ARCHIVE_ROOT="$RUNNER_TEMP/executable-qualification-archive"
+          mkdir -p "$ARCHIVE_ROOT"
+          git archive --format=tar HEAD | tar -x -C "$ARCHIVE_ROOT"
+          export GIT_CEILING_DIRECTORIES="$RUNNER_TEMP"
+          cd "$ARCHIVE_ROOT"
+          if git rev-parse --show-toplevel; then exit 1; fi
+          node scripts/setup.mjs --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --dry-run --json > "$GITHUB_WORKSPACE/reports/template-authoring/archive-dry-run.json"
+          set -o pipefail
+          node "$QUALIFIED_NPM" run setup -- --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee "$GITHUB_WORKSPACE/reports/template-authoring/archive-setup.txt"
+          node scripts/testing/evidence-cli.mjs run runtime
+          node scripts/testing/evidence-cli.mjs run artifact
+          cp -R reports "$GITHUB_WORKSPACE/reports/template-authoring/archive-reports"
+      - name: Retain source-archive evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: template-authoring-source-archive
+          path: |
+            reports/
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+          retention-days: 7
+          if-no-files-found: error
+
+  example-removal:
+    name: Template authoring / example removal
+    runs-on: ubuntu-24.04
+    # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
+    # evidence sessions); 100 minutes is a job budget, not a test deadline.
+    timeout-minutes: 100
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      # Reproduces the renamed-feature consumer state; that job verifies it before removal.
+      - *adopt-identity
+      - *make-feature
+      - *extend-consumer
+      - *playwright-version
+      - *playwright-cache
+      - name: Provision pinned Chromium
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - name: Remove reviewed examples while preserving the consumer feature
+        run: |
+          set -o pipefail
+          sha256sum src/features/bookmarks/bookmark.entity.ts > reports/template-authoring/consumer-before.sha256
+          node "$QUALIFIED_NPM" run examples:remove -- --dry-run --json > reports/template-authoring/removal-plan.json
+          node "$QUALIFIED_NPM" run examples:remove -- --yes --no-interaction --json > reports/template-authoring/removal.json
+          sha256sum --check reports/template-authoring/consumer-before.sha256
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/foundation-verify-summary 2>&1 | tee reports/template-authoring/foundation-verify.txt
+          node "$QUALIFIED_NPM" run test:e2e
+      - name: Generate and qualify another working feature after removal
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run make -- feature reading --entity reading-item --yes --no-interaction
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/extended-foundation-verify-summary 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
+          node scripts/testing/evidence-cli.mjs run runtime
+          node scripts/testing/evidence-cli.mjs run coverage
+          node scripts/testing/evidence-cli.mjs run artifact
+          node scripts/testing/evidence-cli.mjs run browser
+          for session in reports/evidence/*; do
+            node scripts/testing/evidence-cli.mjs report "$session" > "reports/template-authoring/consumer-acceptance-$(basename "$session").json"
+          done
+      - name: Retain removal evidence and the generated source
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: template-authoring-example-removal
+          path: |
+            reports/
+            !reports/e2e/html/**
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+            src/features/bookmarks/
+            src/features/reading/
+            src/bootstrap/events.ts
+            src/bootstrap/event-catalog.ts
+            src/bootstrap/authoring.ts
+            src/bootstrap/features.ts
+            scripts/makers/custom/
+            tests/runtime/generated/
+            tests/fixtures/entities/bookmarks-bookmark.md
+            PROJECT-IDENTITY.md
+            .template-state/setup.json
+            dist/
+          retention-days: 7
+          include-hidden-files: true
+          if-no-files-found: error
+
+  # Framework CLI, real Obsidian and generator jobs run on pull requests and
+  # manual dispatch only, as before consolidation.
+  framework-cli:
+    name: Framework CLI / ${{ matrix.os }}
+    if: github.event_name != 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - *checkout
+      - *windows-dev-drive
+      - *setup-node
+      - *select-npm
+      - name: Install locked build dependencies
+        run: node "$QUALIFIED_NPM" ci --no-fund
+      - name: Verify real framework reporters and candidate-bound evidence transport
+        run: |
+          mkdir -p reports/framework-cli
+          set -o pipefail
+          node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
+      - name: Typecheck and exercise actual CLI, plans, data and archive contracts
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json
+          node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
+          node scripts/testing/suites.mjs prototypes prototypes:python
+          node scripts/quality/check-source.mjs
+      - name: Typecheck and verify canonical sitemap authoring and project intake
+        shell: bash
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.sitemap.json
+          node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
+      - name: Extract the actual ZIP and build independent generated consumers
+        run: node tests/tooling/framework-journey.mjs
+      - name: Record exact source revision
+        if: always()
+        run: |
+          mkdir -p reports/framework-cli
+          git rev-parse HEAD > reports/framework-cli/source-commit.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: framework-cli-${{ matrix.os }}
+          path: reports/framework-cli/
+          retention-days: 7
+          if-no-files-found: error
+
+  real-obsidian:
+    name: Real Obsidian E2E
+    if: github.event_name != 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      - name: Install exact dependencies
+        run: node "$QUALIFIED_NPM" ci --no-fund
+      - name: Install Electron system libraries (no browser download)
+        run: node node_modules/@playwright/test/cli.js install-deps chromium
+      - name: Restore the pinned Obsidian host download
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: .native-cache
+          key: obsidian-host-${{ runner.os }}-app-1.13.7-launcher-3.2.1
+      - name: Real-Obsidian Vitest suite (private Xvfb display, no retries)
+        env:
+          OBSIDIAN_ALLOW_DOWNLOAD: '1'
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: node "$QUALIFIED_NPM" run test:obsidian
+      - name: Agent loop smoke (build, launch, reload once, JSON summary)
+        if: always()
+        run: |
+          mkdir -p reports/obsidian
+          node scripts/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
+      - name: Retain real-Obsidian evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: real-obsidian-evidence
+          path: |
+            reports/obsidian/
+            .obsidian-sandbox/logs/
+          retention-days: 7
+          if-no-files-found: warn
+
+  generated-companion:
+    name: Project generator / generated companion
+    if: github.event_name != 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      - name: Install the framework
+        run: node "$QUALIFIED_NPM" ci --no-fund
+      - name: Verify generator integration with unchanged repository gates
+        run: |
+          node scripts/bundling/build.mjs
+          node scripts/quality/check-analyzer.mjs
+          node scripts/quality/check-repository.mjs
+          node scripts/quality/check-source.mjs
+          node --test --test-name-pattern=ANALYZER-ARCHIVE tests/tooling/gates.checks.mjs
+      - name: Type-check the compiler and test ownership, contracts and the read-only handoff
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:generator
+          node --test tests/tooling/project-generator*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
+          node "$QUALIFIED_NPM" run test:visual
+      - name: Generate, independently install, build and test the companion project
+        run: |
+          node scripts/companion-tools/qualify-project.mjs
+          node scripts/companion-tools/qualify-project.mjs --boundary-fixture
+          node scripts/companion-tools/qualify-project.mjs --provider-fixture
+      - *playwright-version
+      - *playwright-cache
+      - name: Exercise generated stylesheet against real Nuxt UI components
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node scripts/companion-tools/qualify-styles.mjs
+      - name: Retain exact source and generated project without dependencies or machine state
+        if: always()
+        run: |
+          mkdir -p reports/project-generator
+          git archive --format=tar.gz HEAD -o reports/project-generator/framework-source.tar.gz
+          git rev-parse HEAD > reports/project-generator/commit.txt
+          for pair in .:generated-companion boundaries:generated-boundaries providers:generated-providers; do
+            DIR="reports/project-generator/${pair%%:*}"
+            if test -f "$DIR/target.txt"; then
+              tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$DIR/${pair#*:}.tar.gz" -C "$(cat "$DIR/target.txt")" .
+            fi
+          done
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: project-generator-evidence
+          path: reports/project-generator/
+          retention-days: 7
+          if-no-files-found: error
+
+  # Each starter still generates, installs, builds and tests in its own
+  # disposable workspace; three per job avoids nine runner slots of setup.
+  starter:
+    name: Project generator / starters ${{ matrix.ids }}
+    if: github.event_name != 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: 1
+            ids: blank command-utility quick-capture
+          - group: 2
+            ids: tasks-projects knowledge-collection daily-journal
+          - group: 3
+            ids: vault-dashboard note-inspector import-integration
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      - name: Generate and independently install, build, typecheck and test each starter
+        env:
+          STARTER_IDS: ${{ matrix.ids }}
+        run: |
+          failed=""
+          for id in $STARTER_IDS; do
+            echo "::group::Starter $id"
+            node scripts/companion-tools/qualify-starter.mjs "$id" || failed="$failed $id"
+            echo "::endgroup::"
+          done
+          if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: starters-${{ matrix.group }}-evidence
+          path: reports/project-starters/
+          retention-days: 7
+          if-no-files-found: error
+
+  # Informational, not a gate: a live audit regression shows as a failed job on
+  # the pull request without failing the workflow. The unchanged blocking gate
+  # is candidate-qualification.yml's live security gate on main.
+  security-audit:
+    name: Security audit (informational)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      - name: Install the committed lock without lifecycle scripts
+        run: node "$QUALIFIED_NPM" ci --no-fund --no-audit --ignore-scripts
+      # The audit result is reported, not enforced: a finding becomes a warning
+      # annotation and job summary entry while the check itself stays green.
+      - name: Live audit, all installed dependency categories
+        id: audit
+        continue-on-error: true
+        run: node "$QUALIFIED_NPM" run check:security
+      - name: Report audit findings
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::warning title=Security audit::check:security reported findings; see docs/development/MOMENT-ADVISORY-EXCEPTION.md and the security-audit artifact."
+          echo "### Security audit: findings reported (informational)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: security-audit
+          path: reports/security/
+          retention-days: 14
+          if-no-files-found: warn
+
+  # One required check for branch protection. A job skipped by its own event
+  # condition (framework-cli, real-obsidian and the generators on push) counts
+  # as passing; any failure or cancellation fails this check. The informational
+  # security-audit job is deliberately not listed.
+  ci-result:
+    name: CI result
+    if: always()
+    needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every gate job succeeded or was skipped by its own condition
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | "\(.key)=\(.value.result)"' <<< "$NEEDS")
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<< "$NEEDS"
+          if [ -n "$failed" ]; then
+            echo "::error::CI gate jobs did not succeed: $(tr '\n' ' ' <<< "$failed")"
+            exit 1
+          fi

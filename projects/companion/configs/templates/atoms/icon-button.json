@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "atom.icon-button",
+  "name": "Icon Button",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "atom",
+  "category": "Actions",
+  "description": "Compact action represented by an icon and accessible label.",
+  "tags": [
+    "atom",
+    "actions",
+    "icon",
+    "button"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "compact-action",
+    "icon"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [
+    {
+      "name": "icon",
+      "type": "string",
+      "required": false,
+      "default": "i-lucide-circle",
+      "description": "Icon identifier."
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "required": false,
+      "default": "Action",
+      "description": "Accessible label."
+    }
+  ],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-button"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "atom.textarea",
+  "name": "Textarea",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "atom",
+  "category": "Forms",
+  "description": "Multi-line text input for notes, descriptions and longer content.",
+  "tags": [
+    "atom",
+    "forms",
+    "textarea",
+    "input"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "multi-line-entry"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false,
+      "default": "Enter details",
+      "description": "Input hint."
+    },
+    {
+      "name": "rows",
+      "type": "number",
+      "required": false,
+      "default": 4,
+      "description": "Visible row count."
+    }
+  ],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-textarea"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

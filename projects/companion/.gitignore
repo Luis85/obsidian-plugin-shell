@@ -1,0 +1,45 @@
+.obsidian
+
+node_modules/
+reports/
+coverage/
+test-results/
+playwright-report/
+dist/
+# Generated projects rebuild the click-dummy (npm run build:clickdummy; the e2e web server does it too); it is a build artifact.
+/clickdummy.html
+.dev-vault/
+*.tsbuildinfo
+
+dist-harness/
+.qualification/
+node-qualified
+.fallow/
+.native-runner/
+.native-cache/
+.nq/
+.obsidian-sandbox*/
+# Personal Claude Code overrides; the shared .claude/settings.json is committed.
+.claude/settings.local.json
+# Claude Code agent worktrees are separate checkouts of this repository.
+.claude/worktrees/
+
+.shell-build-lock/
+.shell-build-*/
+.template-state/
+.template-setup.lock/
+.codex-authoring.lock/
+
+# Isolated generated-plugin test data and local mock sessions
+/.test-vault/
+
+# Optional developer memory is private, never part of Git or plugin artifacts.
+.hindsight/
+.pg0/
+.venv-hindsight/
+.env.hindsight
+__pycache__/
+
+# Optional source-preview/agent tooling; never part of production assets.
+.airship-tooling/
+.airship/
