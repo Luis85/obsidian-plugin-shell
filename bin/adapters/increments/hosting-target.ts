@@ -4,7 +4,7 @@
  * guards and the coded failures of the HostingRemote port. Resolution order: --platform, the document binding,
  * `tooling.hosting` in design/project.json, then the origin remote. The origin URL is never printed.
  */
-import { execFile, type ExecFileException } from 'node:child_process';
+import { execFile, type ExecException } from 'node:child_process';
 import { join } from 'node:path';
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { azureRemoteDetails, classifyRemote, projectHosting, validateHosting, type ProjectHosting } from '../../../scripts/companion/hosting-contract.mjs';
@@ -22,7 +22,7 @@ export interface CommandOptions { input?: string; timeoutMs: number; maxBytes: n
 export type CommandRunner = (command: string, args: readonly string[], options: CommandOptions) => Promise<CommandResult>;
 export const remoteLimits = Object.freeze({ timeoutMs: 60_000, maxBytes: 4 * 1024 * 1024 });
 
-function commandResult(error: ExecFileException | null, stdout: string, stderr: string): CommandResult {
+function commandResult(error: ExecException | null, stdout: string, stderr: string): CommandResult {
   if (!error) return { status: 0, stdout, stderr, timedOut: false, overflow: false };
   const code: unknown = error.code, overflow = code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER';
   return { status: typeof code === 'number' ? code : null, stdout, stderr, ...(typeof code === 'string' ? { error: code } : {}),
