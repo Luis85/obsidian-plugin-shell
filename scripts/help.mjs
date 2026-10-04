@@ -37,6 +37,9 @@ npm run release:operate -- --help  Discover remote state; execution needs explic
 npm run release:changelog -- check  Validate CHANGELOG.md (Keep a Changelog 1.1.0); \`notes --version X.Y.Z\` prints one section
 npm run release:cut -- --version X.Y.Z  Plan a release/X.Y.Z cut; --execute commits it, --remote pushes and opens a draft PR
 npm run release:publish -- --version X.Y.Z --repository owner/repo  Plan publishing a green release PR; --execute merges, tags and releases
+npm run increment:new -- <slug>  Print an increment handoff from the template; --write creates docs/increments/<slug>.md
+npm run dor -- --base origin/main  Definition of Ready: check the increment handoff before implementation
+npm run dod -- --base origin/main  Definition of Done: check the handoff against the diff; --write generates its docs
 
 Browser provisioning: node node_modules/@playwright/test/cli.js install chromium
 Open .dev-vault in Obsidian, deliberately enable the plugin, then run ${openCommand}.

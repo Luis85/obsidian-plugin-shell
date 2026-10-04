@@ -44,6 +44,14 @@ tested head `X.Y.Z`, publishes the candidate assets with the changelog section a
 deletes the branch). Each script's header comment documents its flags, refusals and
 exit codes (2 means an uncertain remote write: rerun to resume). None of them
 promotes the blocked legacy release profile.
+`delivery/` holds the dependency-free Definition of Ready and Definition of Done
+checks over an increment handoff (`docs/increments/<slug>.md`): `increment.mjs`
+(`increment:new`), `ready.mjs` (`dor`) and `done.mjs` (`dod`; `--write` generates the
+Completion record, CHANGELOG entries, docs index rows and `status: done`). Rules,
+severities and exemptions live in `configs/delivery/`. The modules are the handoff
+parser, path globs, the strict config loader, pure rule sets, generators, reports,
+the repository adapter and the shared CLI. Exit codes: 0 ready/done/exempt, 1 not,
+2 usage, configuration or base error.
 Entity catalog/check commands (`entities:catalog`, `entities:check`) and event
 catalog/check commands (`events:catalog`, `events:check`) exist. Keep root
 configuration thin and shared policy here.

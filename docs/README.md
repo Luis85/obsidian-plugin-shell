@@ -222,8 +222,9 @@ Claude Code skills live in [`.claude/skills/`](../.claude/skills/) with thin Cod
 adapters in `.agents/skills/`. This index is framework-only: generated projects do not
 receive it and carry their own skill set.
 
-- [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`), handing off to `feature-delivery`.
-- [Feature delivery](../.claude/skills/feature-delivery/SKILL.md): branch or stack, keep a draft pull request through the Dev tier, prepare it for the Integration tier and merge it green on request.
+- [Ideation skill chain](../.claude/skills/ideation-journey/references/chain.md): six chained skills from a brainstorm to a prototype boilerplate (`ideation-journey`, `-brainstorm`, `-concept`, `-design`, `-prototype`, `-boilerplate`), handing off to `increment-handoff` and then `feature-delivery`.
+- [Increment handoff](../.claude/skills/increment-handoff/SKILL.md): write the developer handoff for one increment and refine it in question rounds until the Definition of Ready passes; split or escalate to ideation when it is not just under-specified.
+- [Feature delivery](../.claude/skills/feature-delivery/SKILL.md): branch or stack, open a draft pull request with its Ready handoff, keep it through the Dev tier, pass the Definition of Done, prepare it for the Integration tier and merge it green on request.
 - [Release](../.claude/skills/release/SKILL.md): choose the version, dispatch the cut, follow the Release tier, publish on explicit request and verify the result.
 - [Self-review](../.claude/skills/self-review/SKILL.md): check a change against AGENTS.md and run the real gates before handover.
 - [Adopt an existing project](../.claude/skills/adopt-existing-project/SKILL.md): write an adoption plan for an existing project.
