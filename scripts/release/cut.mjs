@@ -3,7 +3,7 @@
  *
  *   node scripts/release/cut.mjs --version X.Y.Z [--date YYYY-MM-DD] [--base main] [--repository owner/repo] [--execute] [--remote] [--json]
  *
- * --execute: requires a clean tree on <base> matching origin/<base> (when fetched), no release/X.Y.Z branch
+ * A dry run lists every blocker (exit 1) next to the plan. --execute: requires a clean tree on <base> matching origin/<base> (when fetched), no release/X.Y.Z branch
  * and no X.Y.Z tag; creates release/X.Y.Z, runs release preparation in-process (Unreleased -> X.Y.Z) and
  * commits "release: X.Y.Z". Rerunning on that branch resumes after the commit.
  * --remote (with --execute): pushes the branch (GH_TOKEN through the gh credential helper for that one command,
@@ -44,25 +44,29 @@ function localState(run, version, branch) {
   return { current, clean, resumed: current === branch && clean && subject === `release: ${version}` };
 }
 
-async function preflight({ run, root, version, base, branch, execute, remote, date, steps, warnings }) {
+/** --execute refuses at the first blocker; a dry run lists every blocker and still shows the plan. */
+async function preflight({ run, root, version, base, branch, execute, remote, date, steps, warnings, blockers }) {
   const state = localState(run, version, branch);
   if (state.resumed) {
     for (const id of ['create-branch', 'prepare', 'commit']) steps.push({ id, status: 'skipped', detail: `Already on ${branch} with "release: ${version}".` });
     return null;
   }
-  if (!state.clean) throw refusal('CUT_TREE_NOT_CLEAN', 'Commit or stash local changes first.');
-  if (state.current !== base) throw refusal('CUT_NOT_ON_BASE', `Check out ${base} (currently ${state.current}).`);
+  const block = (code, message) => { if (execute) throw refusal(code, message); blockers.push(`${code}: ${message}`); };
+  if (!state.clean) block('CUT_TREE_NOT_CLEAN', 'Commit or stash local changes first.');
+  if (state.current !== base) block('CUT_NOT_ON_BASE', `Check out ${base} (currently ${state.current}).`);
   if (execute && remote) { gitText(run, ['fetch', '--quiet', 'origin', base], 'REMOTE_UNREACHABLE'); steps.push({ id: 'fetch-base', status: 'done', detail: `Fetched origin/${base}.` }); }
   const tracking = run('git', ['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${base}^{commit}`]);
   if (tracking.status !== 0) warnings.push(`origin/${base} is not fetched; cannot prove ${base} is up to date.`);
-  else if (tracking.stdout.trim() !== gitText(run, ['rev-parse', 'HEAD'])) throw refusal('CUT_BASE_NOT_CURRENT', `Local ${base} differs from origin/${base}; pull first.`);
-  if (gitSucceeds(run, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`])) throw refusal('CUT_BRANCH_EXISTS', `Local branch ${branch} exists.`);
-  if (gitText(run, ['tag', '-l', version])) throw refusal('CUT_TAG_EXISTS', `Local tag ${version} exists.`);
+  else if (state.current === base && tracking.stdout.trim() !== gitText(run, ['rev-parse', 'HEAD'])) block('CUT_BASE_NOT_CURRENT', `Local ${base} differs from origin/${base}; pull first.`);
+  if (gitSucceeds(run, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`])) block('CUT_BRANCH_EXISTS', `Local branch ${branch} exists.`);
+  if (gitText(run, ['tag', '-l', version])) block('CUT_TAG_EXISTS', `Local tag ${version} exists.`);
   if (execute && remote) {
     if (remoteSha(run, 'branch', branch)) throw refusal('CUT_BRANCH_EXISTS', `origin has ${branch}; check it out and rerun to resume.`);
     if (remoteSha(run, 'tag', version)) throw refusal('CUT_TAG_EXISTS', `origin has tag ${version}.`);
   }
-  const prepared = await prepareVersion(root, version, '', { date });
+  let prepared;
+  try { prepared = await prepareVersion(root, version, '', { date }); }
+  catch (error) { if (execute) throw error; blockers.push(error.message); return null; }
   steps.push({ id: 'create-branch', status: 'planned', detail: `git switch -c ${branch}` },
     { id: 'prepare', status: 'planned', detail: `Update ${prepared.plan.changes.map(change => change.path).join(', ')}.` },
     { id: 'commit', status: 'planned', detail: `git commit -m "release: ${version}"` });
@@ -113,13 +117,13 @@ export async function cutRelease({ root = process.cwd(), version, date, base = '
   env = process.env, run = createRunner({ cwd: root }) }) {
   stableVersion(version); root = resolve(root); date ??= today();
   if (!validDate(date)) throw refusal('RELEASE_DATE_INVALID', date);
-  const branch = `release/${version}`; const steps = []; const warnings = [];
+  const branch = `release/${version}`; const steps = []; const warnings = []; const blockers = [];
   const result = { schemaVersion: 1, mode: execute ? 'execute' : 'dry-run', version, date, base, branch, steps, warnings };
-  const prepared = await preflight({ run, root, version, base, branch, execute, remote, date, steps, warnings });
+  const prepared = await preflight({ run, root, version, base, branch, execute, remote, date, steps, warnings, blockers });
   const remoteIds = remote ? ['push', 'pull-request', 'dispatch-release'] : [];
   if (!execute) {
     for (const id of remoteIds) steps.push({ id, status: 'planned', detail: 'Runs with --execute --remote; checks remote state first.' });
-    return { ...result, status: 'planned', changelog: prepared?.changelog.section ?? null };
+    return { ...result, status: blockers.length ? 'blocked' : 'planned', blockers, changelog: prepared?.changelog.section ?? null };
   }
   if (prepared) {
     gitText(run, ['switch', '--quiet', '-c', branch]); steps.find(item => item.id === 'create-branch').status = 'done';
@@ -177,9 +181,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       else {
         for (const item of result.steps) console.log(`${item.status.toUpperCase().padEnd(8)} ${item.id}: ${item.detail}`);
         for (const warning of result.warnings) console.log(`WARNING  ${warning}`);
+        for (const blocker of result.blockers ?? []) console.log(`BLOCKED  ${blocker}`);
+        if (result.changelog) console.log(`\n## [${result.version}] - ${result.date}\n\n${result.changelog}\n`);
         console.log(`Release cut ${result.status}: ${result.branch}${result.recovery ? `\n${result.error}\n${result.recovery}` : ''}`);
       }
       if (result.status === 'uncertain') process.exitCode = 2;
+      else if (result.status === 'blocked') process.exitCode = 1;
     }
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }

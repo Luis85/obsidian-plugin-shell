@@ -79,6 +79,12 @@ test('cut refuses a dirty tree, another branch, a stale base, existing branch or
   const attempt = extra => cutRelease({ ...options(fixture), execute: true, ...extra });
   await writeFile(join(fixture.root, 'scratch.txt'), 'local');
   await assert.rejects(attempt(), /CUT_TREE_NOT_CLEAN/);
+  fixture.git('switch', '--quiet', '-c', 'elsewhere'); fixture.git('tag', '0.4.0');
+  const blocked = await cutRelease({ ...options(fixture), remote: true });
+  assert.equal(blocked.status, 'blocked');
+  assert.deepEqual(blocked.blockers.map(item => item.split(':')[0]), ['CUT_TREE_NOT_CLEAN', 'CUT_NOT_ON_BASE', 'CUT_TAG_EXISTS']);
+  assert.deepEqual(blocked.steps.map(step => step.status), ['planned', 'planned', 'planned', 'planned', 'planned', 'planned']);
+  fixture.git('switch', '--quiet', 'main'); fixture.git('tag', '-d', '0.4.0'); fixture.git('branch', '-D', 'elsewhere');
   fixture.git('add', 'scratch.txt'); fixture.git('commit', '--quiet', '-m', 'Local only');
   await assert.rejects(attempt(), /CUT_BASE_NOT_CURRENT/);
   fixture.git('reset', '--quiet', '--hard', 'origin/main');
@@ -95,6 +101,8 @@ test('cut refuses a dirty tree, another branch, a stale base, existing branch or
   fixture.git('push', '--quiet', 'origin', ':refs/heads/release/0.4.0');
   await writeFile(join(fixture.root, 'CHANGELOG.md'), changelogText('')); fixture.git('commit', '--quiet', '-am', 'Empty Unreleased'); fixture.git('push', '--quiet', 'origin', 'main'); fixture.git('fetch', '--quiet', 'origin');
   await assert.rejects(attempt(), /RELEASE_NOTES_EMPTY/);
+  const empty = await cutRelease(options(fixture));
+  assert.equal(empty.status, 'blocked'); assert.match(empty.blockers[0], /^RELEASE_NOTES_EMPTY/); assert.deepEqual(empty.steps, []);
   assert.equal(fixture.git('rev-parse', '--abbrev-ref', 'HEAD'), 'main'); assert.equal(fixture.git('branch', '--list', 'release/*'), '');
 });
 
