@@ -2,6 +2,7 @@ import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
 import { designCommand } from './design-command.ts';
 import { definitionCommand } from './wizard-command.ts';
+import { fakeDataCommand } from './fake-data-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -84,10 +85,21 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app form list --json      Reusable data-driven forms (configs/forms)
   node bin/app form show --name user-settings --json
   node bin/app form validate --name project-identity --input identity.json --json
+  node bin/app fake-data             Generate seeded fake notes (frontmatter + Markdown), an optional .base and a reusable config
+  node bin/app fake-data entities --json      Built-in, project (configs/fake-data/entities) and saved-project entities
+  node bin/app fake-data show --name contact --json
+  node bin/app fake-data validate --input entity.json --json
+  node bin/app fake-data save-entity --input entity.json --json
+  node bin/app fake-data --entity contact --count 25 --out "Fake Data/Contacts" --seed 7 --base --json
+  node bin/app fake-data configs --json       Saved generation configs (configs/fake-data/generations)
+  node bin/app fake-data show-config --name contacts-demo --json
+  node bin/app fake-data --config contacts-demo [--count 50] [--out <folder>] [--seed 9] --json
+  node bin/app fake-data save-config --input generation.json --json
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
 --starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),
+--entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --config <id> and --base (fake-data),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -182,7 +194,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -201,6 +213,7 @@ function directCommand(args: Arguments, context: CommandContext): Record<string,
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
   if (args.command === 'design') return designCommand(args, context);
   if (args.command === 'wizard' || args.command === 'form') return definitionCommand(args, context);
+  if (args.command === 'fake-data') return fakeDataCommand(args, context, () => inputData(args, context));
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
   return undefined;
 }

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/fake-data-generation.schema.json",
+  "schemaVersion": 1,
+  "id": "tasks-board",
+  "title": "Tasks board",
+  "description": "Forty tasks in the plugin's default Tasks folder, readable by the Task example collection, plus a Bases table.",
+  "entity": "task",
+  "count": 40,
+  "out": "Tasks",
+  "seed": 7,
+  "base": true,
+  "referenceDate": "2026-01-01"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "task",
+  "title": "Task",
+  "description": "Note-backed tasks with the identity properties of the plugin's Task example (type, id, schema_version, created_at), so they also load into its Tasks collection.",
+  "folder": "Tasks",
+  "titleProperty": "title",
+  "properties": [
+    { "key": "title", "label": "Title", "type": "text", "generator": { "faker": "company.buzzPhrase" }, "unique": true },
+    { "key": "status", "label": "Status", "type": "text", "generator": { "choices": ["todo", "doing", "done"] } },
+    { "key": "due", "label": "Due", "type": "date", "generator": { "faker": "date.soon", "args": { "days": 60 } }, "required": false },
+    { "key": "tags", "type": "tags", "generator": { "choices": ["home", "work", "errand", "focus", "waiting"] }, "items": { "min": 0, "max": 2 } },
+    { "key": "type", "type": "text", "generator": { "value": "task" } },
+    { "key": "id", "type": "text", "generator": { "faker": "string.uuid" }, "unique": true },
+    { "key": "schema_version", "type": "number", "generator": { "value": 1 } },
+    { "key": "created_at", "type": "text", "generator": { "faker": "date.recent", "args": { "days": 90 } } },
+    { "key": "details", "type": "text", "generator": { "faker": "lorem.sentence", "args": { "min": 6, "max": 14 } }, "frontmatter": false }
+  ],
+  "body": "{{details}}\n"
+}

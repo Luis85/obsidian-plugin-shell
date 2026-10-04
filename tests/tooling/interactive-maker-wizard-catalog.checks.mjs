@@ -27,8 +27,8 @@ const wizard = (id, steps, extra = {}) => ({ schemaVersion: 1, id, version: 1, t
 test('shipped wizards and forms live in configs, load, and reference only registered hooks', async () => {
   assert.equal(definitionsRoot, join(repository, 'configs') + '/');
   const catalog = await loadCatalog();
-  assert.deepEqual([...catalog.wizards.keys()].sort(), ['brainstorm', 'first-run', 'framework-setup', 'framework-setup-stages', 'new-project', 'project-setup', 'prototype', 'settings']);
-  assert.deepEqual([...catalog.forms.keys()].sort(), ['documentation-settings', 'prd-intake', 'project-identity', 'user-settings', 'user-settings-advanced']);
+  assert.deepEqual([...catalog.wizards.keys()].sort(), ['brainstorm', 'fake-data', 'first-run', 'framework-setup', 'framework-setup-stages', 'new-project', 'project-setup', 'prototype', 'settings']);
+  assert.deepEqual([...catalog.forms.keys()].sort(), ['documentation-settings', 'fake-data-entity', 'fake-data-property', 'fake-data-run', 'prd-intake', 'project-identity', 'user-settings', 'user-settings-advanced']);
   assert.deepEqual(catalogIssues(catalog, hookNames()), []);
   for (const folder of ['forms', 'wizards']) for (const name of await readdir(join(repository, 'configs', folder))) {
     const raw = JSON.parse(await readFile(join(repository, 'configs', folder, name), 'utf8'));
@@ -117,7 +117,7 @@ test('wizard and form commands list, show, check and validate definitions for ag
   const context = { root, frameworkRoot: repository };
   const listed = await definitionCommand({ command: 'wizard', action: 'list', flags: {} }, context);
   assert.equal(listed.status, 'ok'); assert.ok(listed.wizards.some(item => item.id === 'first-run'));
-  assert.deepEqual(await definitionCommand({ command: 'form', action: 'check', flags: {} }, context), { root: definitionsRoot, wizards: 8, forms: 5, issues: [], status: 'ok' });
+  assert.deepEqual(await definitionCommand({ command: 'form', action: 'check', flags: {} }, context), { root: definitionsRoot, wizards: 9, forms: 8, issues: [], status: 'ok' });
   const shown = await definitionCommand({ command: 'wizard', action: 'show', flags: { name: 'settings' } }, context);
   assert.deepEqual(shown.definition.steps.map(step => step.id), ['load', 'edit', 'review']);
   await writeFile(join(root, 'identity.json'), JSON.stringify({ name: 'Demo', description: '', product: 'Ship' }));
