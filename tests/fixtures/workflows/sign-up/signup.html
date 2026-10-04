@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign up · Demo shop</title>
+</head>
+<body>
+  <main>
+    <h1>Create your account</h1>
+    <form aria-label="Sign up" action="welcome.html" method="get">
+      <label for="name">Full name</label>
+      <input id="name" name="name" autocomplete="name" required>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required>
+      <label for="plan">Plan</label>
+      <select id="plan" name="plan">
+        <option>Free</option>
+        <option>Pro</option>
+        <option>Team</option>
+      </select>
+      <label><input name="terms" type="checkbox" required> I accept the terms</label>
+      <button type="submit">Create account</button>
+    </form>
+  </main>
+</body>
+</html>

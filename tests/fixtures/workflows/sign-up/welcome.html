@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome · Demo shop</title>
+</head>
+<body>
+  <main>
+    <h1 data-testid="greeting">Welcome!</h1>
+    <p>Your plan: <strong data-testid="plan">Free</strong></p>
+    <h2 id="next">Next steps</h2>
+    <ul aria-labelledby="next">
+      <li>Confirm your email address</li>
+      <li>Add a payment method</li>
+      <li>Invite your team</li>
+    </ul>
+  </main>
+  <script>
+    // Shows the submitted name and plan as plain text (never as HTML).
+    const answers = new URLSearchParams(window.location.search);
+    document.querySelector('[data-testid="greeting"]').textContent = `Welcome, ${answers.get('name') || 'guest'}!`;
+    document.querySelector('[data-testid="plan"]').textContent = answers.get('plan') || 'Free';
+  </script>
+</body>
+</html>

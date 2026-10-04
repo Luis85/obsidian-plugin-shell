@@ -111,3 +111,4 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 | `node bin/app data plan` | test-vault data; out of scope |
 | `node bin/app project-setup guide --json` | Angular setup inside an existing Git and Obsidian vault; separate guide |
 | `node bin/app help` | discovery for every skill |
+| `node bin/app workflow list --json` | Playwright test workflows for projects and prototypes; run on request after implementation |

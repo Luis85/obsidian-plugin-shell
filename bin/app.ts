@@ -11,6 +11,8 @@ import { startWizard } from './presentation/wizards/registry.ts';
 import { launchLearning } from './presentation/learning-runner.ts';
 import { launchProcess } from './presentation/wizards/process-launch.ts';
 import { interactiveProcess } from './adapters/process-command.ts';
+import { interactiveTestWorkflow } from './adapters/test-workflow-command.ts';
+import { launchTestWorkflow } from './presentation/wizards/test-workflow-launch.ts';
 import { collectionWizard } from './presentation/collection.ts';
 import { collectionCommandRoots } from './domain/command-options.ts';
 import { collectionInteractiveActions } from './adapters/collection-command.ts';
@@ -37,7 +39,7 @@ interface IO { env?: Record<string, string | undefined>; input: Readable & { isT
 function interactiveCommand(args: Arguments): boolean {
   if (Object.hasOwn(collectionCommandRoots, args.command)) return collectionInteractiveActions.includes(args.action);
   if (!studioCommands.includes(args.command) && !Object.hasOwn(launchers, args.command)) return false;
-  return !args.action || interactiveProcess(args);
+  return !args.action || interactiveProcess(args) || interactiveTestWorkflow(args);
 }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
@@ -83,6 +85,7 @@ const launchers: Readonly<Record<string, (launch: Launch) => Promise<string | un
   'fake-data': ({ ui, args, options }) => startWizard(ui, 'fake-data', { ...options, flags: args.flags }),
   learn: ({ ui, args, options }) => launchLearning(ui, args, { ...options }),
   process: ({ ui, args, options }) => launchProcess(ui, args, { ...options }),
+  workflow: ({ ui, args, options }) => launchTestWorkflow(ui, args, { ...options }),
 };
 const studioCommands = ['studio', 'new', 'sketch', 'prototype'];
 async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {

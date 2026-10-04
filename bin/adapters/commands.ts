@@ -5,6 +5,7 @@ import { definitionCommand } from './wizard-command.ts';
 import { fakeDataCommand } from './fake-data-command.ts';
 import { learningCommand } from './learning-command.ts';
 import { processCommand } from './process-command.ts';
+import { testWorkflowCommand } from './test-workflow-command.ts';
 import { collectionCommand } from './collection-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
@@ -113,6 +114,14 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app process save --input process.json --json   Reviewed plan for configs/processes/<id>.json
   node bin/app process docs --name release-approval --out docs/processes --json   Regenerate Markdown docs; authored text kept
   node bin/app process simulate --name release-approval --input data.json --json   Agent walk with rule outcomes
+  node bin/app workflow new | workflow edit --name sign-up   Author a browser test workflow (configs/tests/workflows); reviewed save
+  node bin/app workflow list --json  Workflows with target, steps, assertions and findings; workflow show --name sign-up --json
+  node bin/app workflow check --json Definitions, targets, fake data, templates and up-to-date notes in docs/tests/workflows
+  node bin/app workflow save --input workflow.json --json   Reviewed plan for the definition and its documentation note
+  node bin/app workflow docs [--name sign-up] --json        Regenerate documentation notes; hand-written text kept
+  node bin/app workflow run --name sign-up [--target <loopback-url|folder>] --json   Headless Chromium run; report in reports/workflows
+  node bin/app workflow record --name sign-up --json        Plan recording the latest run result in the note
+  node bin/app workflow export --name sign-up --out tests/e2e/workflows --json   Plan an equivalent @playwright/test spec
   node bin/app risk new|edit --id RISK-0001|review   Guided risk capture, edit and review (terminal; folder: paths.risks)
   node bin/app risk list [--status <id>] [--dimension <id>] [--category <id>] [--level <id>] [--overdue] --json
   node bin/app risk show --id RISK-0001 --json
@@ -136,6 +145,7 @@ Options: --root <folder>, --project <relative.json> (design/project.json), --inp
 --entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --config <id> and --base (fake-data),
 --id <id>, --as-of <YYYY-MM-DD>, --status/--dimension/--category/--level <id>, --overdue and --base (risk),
 --status/--category/--impact <id> with the same --id, --as-of, --overdue and --base (learning; learn is the separate course runner),
+--target <loopback-url|static-folder|prototypes/<slug>> (workflow run),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -230,7 +240,7 @@ function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): R
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', 'workflow', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -266,6 +276,7 @@ const directCommands: Readonly<Record<string, Executor>> = {
   'project-setup': withInput(setupCommand),
   learn: learningCommand,
   process: processCommand,
+  workflow: testWorkflowCommand,
 };
 /** Undefined means a saved-project command. */
 function directCommand(args: Arguments, context: CommandContext): CommandResult | undefined {

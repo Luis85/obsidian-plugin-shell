@@ -815,6 +815,29 @@
       ]
     },
     {
+      "name": "workflows:browser",
+      "purpose": "Browser test workflows (configs/tests/workflows) run in real headless Chromium: the shipped sign-up example with review screenshots, failing locators, blocked remote requests, masked captures, loopback URL and prototype targets, and the exported @playwright/test spec in the Playwright runner.",
+      "runner": {
+        "type": "command",
+        "commands": [
+          [
+            "{node}",
+            "--test",
+            "--test-concurrency=1",
+            "tests/tooling/workflow-run.browser.mjs"
+          ]
+        ]
+      },
+      "include": [
+        "tests/tooling/workflow-run.browser.mjs"
+      ],
+      "prerequisites": [
+        "chromium"
+      ],
+      "verify": "opt-in",
+      "workflows": []
+    },
+    {
       "name": "browser-specimen",
       "purpose": "Host-style specimen assertions in a real browser (served mode).",
       "runner": {
