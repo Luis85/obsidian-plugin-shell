@@ -1,11 +1,12 @@
 import { adoptCommands } from './adopt-catalog.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
+import { incrementCommands } from './increment-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
 import { assertJsonData } from '../../../scripts/contracts/json-data.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 export interface Command {
   id: string; summary: string; options: Record<string, 'value' | 'flag'>;
-  maxArgs: number; effect: 'read' | 'plan' | 'process' | 'release' | 'fixtures';
+  maxArgs: number; effect: 'read' | 'plan' | 'process' | 'release' | 'fixtures' | 'remote';
 }
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const hosting = ['hosting', 'azure-organization', 'azure-project', 'azure-repository'];
@@ -43,6 +44,7 @@ export const commands: readonly Command[] = [
   { id: 'obsidian prepare', summary: 'Scan configured documentation paths through the official CLI and propose existing reviewed docs-import commands.', options: values('obsidian-vault'), maxArgs: 0, effect: 'read' },
   ...prototypeCommands,
   ...adoptCommands,
+  ...incrementCommands,
   { id: 'handout generate', summary: 'Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout refresh', summary: 'Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout validate', summary: 'Validate required handout decisions and source freshness without writes or execution authorization.', options: values('prds'), maxArgs: 0, effect: 'read' },
