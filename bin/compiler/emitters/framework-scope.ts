@@ -11,7 +11,7 @@ const maintainerFolders = ['docs/_archive', 'docs/tasks', 'docs/prds', 'docs/rev
   'docs/requirements', 'docs/memory', 'docs/testing/evidence', 'docs/project-setup/evidence', 'docs/development/compiler',
   '.claude/skills/companion-prototype-design', '.agents/skills/companion-prototype-design'];
 /** Dated records, milestone plans, reviews, ledgers, release/maintenance and Hindsight (project memory tool) notes. */
-const developmentRecord = /^docs\/development\/(?:ITERATION-|ACCEPTANCE-CLOSURE-|HINDSIGHT|MAINTENANCE-|RELEASE-|MILESTONE-|PR\d+-|PUBLISHED-DISTRIBUTION-|SCRIPTS-CONSOLIDATION|TEMPLATE-READINESS-|SHELL-CAPABILITY-INVENTORY|LOCAL-MCP|EXTRACTED-KIT-SETUP|[A-Z0-9-]+-(?:PLAN|REVIEW(?:-[A-Z])?|CHECKPOINT|RESEARCH|EXCEPTION)\.md$)/;
+const developmentRecord = /^docs\/development\/(?:ITERATION-|ACCEPTANCE-CLOSURE-|HINDSIGHT|MAINTENANCE-|RELEASE-|MILESTONE-|PR\d+-|PUBLISHED-DISTRIBUTION-|SCRIPTS-CONSOLIDATION|TEMPLATE-READINESS-|SHELL-CAPABILITY-INVENTORY|LOCAL-MCP|EXTRACTED-KIT-SETUP|DELIVERY-PIPELINE|DELIVER-A-CHANGE|CUT-AND-PUBLISH-A-RELEASE|WORKFLOWS\.md$|[A-Z0-9-]+-(?:PLAN|REVIEW(?:-[A-Z])?|CHECKPOINT|RESEARCH|EXCEPTION)\.md$)/;
 /** docs/testing keeps only how-to guides for the product test loop; everything else is a qualification record. */
 const testingGuides = new Set(['OBSIDIAN-TEST-KIT', 'OBSIDIAN-DEV-LOOP', 'TEST-STRATEGY', 'TEST-CONCEPT', 'TEST-SUITES', 'HARNESS-STYLES']);
 const testingRecord = (path: string) => /^docs\/testing\/[^/]+\.md$/.test(path) && !testingGuides.has(posix.basename(path, '.md'));

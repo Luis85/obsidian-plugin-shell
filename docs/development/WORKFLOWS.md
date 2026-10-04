@@ -145,7 +145,7 @@ It is a focused policy, not the GitHub Actions schema or actionlint.
 | --- | --- |
 | `node bin/app ci --list` | Every workflow and job with triggers, path filters, runner/matrix and whether it is reproducible. |
 | `node bin/app ci --job <file-stem>/<job-id>` | Dry run: the job's ordered shell commands, with unresolved `${{ }}` expressions flagged. |
-| `node bin/app ci --job ci/baseline --matrix os=ubuntu-latest` | Selects one matrix combination; a computed matrix (`fromJSON(...)`) needs `--matrix`. |
+| `node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04` | Selects one matrix combination; a computed matrix (`fromJSON(...)`) needs `--matrix`. |
 | `node bin/app ci --job <file-stem>/<job-id> --execute` | Runs the `run:` steps through bash, stopping at the first failure (asks for approval in `.claude/settings.json`). |
 
 - **Dry run** (default) prints each step in order with its shell, `working-directory`, the job/workflow/step `env`

@@ -39,10 +39,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # ubuntu-latest stays here only because the shipped `bin/app ci` help and
-        # manual use `ci/baseline --matrix os=ubuntu-latest` as their example; the
-        # dependency-free baseline does not depend on the image's preinstalled tools.
-        os: [ubuntu-latest, windows-latest]
+        # The shipped `bin/app ci` help and manual use `ci/baseline --matrix
+        # os=ubuntu-24.04` as their example, so the pinned image name stays here.
+        os: [ubuntu-24.04, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
