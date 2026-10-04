@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { inspectWorkflow, inspectCompositeAction, inspectOwnedCss, markdownLinks, checkRepository } from '../../scripts/quality/check-repository.mjs';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
 
 const workflow = `name: Check
 on: pull_request
@@ -118,6 +121,17 @@ test('only the allowlisted dispatch-only release workflows may grant write scope
     assert.throws(() => inspectWorkflow(dispatched.replace('on:\n', `on:\n${trigger}`), 'publish.yml'), /PRIVILEGED_WORKFLOW_TRIGGER_FORBIDDEN/, trigger);
   const caller = 'name: Call\non: workflow_dispatch\npermissions:\n  contents: read\njobs:\n  call:\n    environment: release\n    permissions:\n      contents: write\n    uses: ./.github/workflows/ci.yml\n';
   assert.throws(() => inspectWorkflow(caller, 'publish.yml'), /PRIVILEGED_WORKFLOW_CALL_FORBIDDEN/);
+});
+test('the shipped release cut and publish workflows pass only under their allowlisted names', async () => {
+  for (const file of ['release-cut.yml', 'publish.yml']) {
+    const text = await readFile(join(repositoryRoot, '.github/workflows', file), 'utf8');
+    assert.equal(inspectWorkflow(text, file).jobs, 1, file);
+    assert.throws(() => inspectWorkflow(text, 'release.yml'), /WORKFLOW_PERMISSIONS_NOT_READ_ONLY/, file);
+    assert.match(text, /VERSION: \$\{\{ inputs\.version \}\}/); assert.match(text, /GH_TOKEN: \$\{\{ secrets\.RELEASE_TOKEN \|\| github\.token \}\}/);
+  }
+  const dev = await readFile(join(repositoryRoot, '.github/workflows/dev.yml'), 'utf8');
+  assert.equal(inspectWorkflow(dev, 'dev.yml').jobs, 1);
+  assert.match(dev, /name: Dev checks/); assert.match(dev, /types: \[opened, synchronize, reopened, ready_for_review\]/); assert.doesNotMatch(dev, /\n {4}if:/);
 });
 const reusable = workflow.replace('on: pull_request', 'on:\n  pull_request:\n  workflow_call:\n    inputs:\n      tier:\n        type: string\n        default: integration');
 const callerOf = (target, extra = '') => `name: Release\non:\n  push:\n    branches: ['release/**']\npermissions:\n  contents: read\njobs:\n  call:\n    uses: ${target}\n    with:\n      tier: release\n${extra}`;
