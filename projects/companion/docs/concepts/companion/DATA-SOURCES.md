@@ -60,6 +60,8 @@ A **Collection** turns one declared ER entity and one vault-relative path into a
 
 Saving a Collection provisions four managed operations: **List**, **Create**, **Update**, and **Delete**. Their contracts use revision-bearing note snapshots so generated updates and deletes can reject stale writes. The selected entity defines frontmatter fields and the collection path is also that entity's canonical note folder; an existing different folder is never moved silently.
 
+A Collection can also name an **Obsidian base** that configures it: `base: { "path": "Collections/Books.base", "view": "Shelf" }`, a visible vault-relative `.base` file and one of its view names. The concept validates and keeps this pair but never reads it; `node bin/app base ingest <file.base> --view <name>` reads the vault's notes and returns the file-collection configuration and records for fixtures. See [Obsidian Bases as collection configuration](../../framework/development/OBSIDIAN-BASES.md).
+
 Collection operations participate in the same source references as every other source. Read operations can feed Page/Component editor **Source** bindings, while create/update/delete operations can be selected by component interaction actions. The browser concept only authors these contracts. The shell/compiler turns the managed declarations into the existing Markdown note repository/runtime and tests; the browser itself never reads or mutates vault files.
 
 ### Obsidian vault

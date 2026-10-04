@@ -107,6 +107,8 @@ export const commands: readonly Command[] = [
   { id: 'data apply', summary: 'Shared owned test-data apply; never touches production sources.', options: values('input'), maxArgs: 0, effect: 'fixtures' },
   { id: 'data reset-plan', summary: 'Shared owned test-data reset-plan; never touches production sources.', options: values('input'), maxArgs: 0, effect: 'fixtures' },
   { id: 'data reset', summary: 'Shared owned test-data reset; never touches production sources.', options: values('input'), maxArgs: 0, effect: 'fixtures' },
+  { id: 'base views', summary: 'List the views of an Obsidian .base file and whether each can be evaluated exactly; read-only.', options: values('vault'), maxArgs: 1, effect: 'read' },
+  { id: 'base ingest', summary: 'Apply one .base view to the vault\'s Markdown notes: a file-collection config plus its records for fixtures; read-only.', options: values('vault', 'view'), maxArgs: 1, effect: 'read' },
   { id: 'framework status', summary: 'Inspect the pinned kit and its integrity.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'framework pack', summary: 'Build a deterministic compiled developer-kit ZIP locally.', options: values('out'), maxArgs: 0, effect: 'process' },
   { id: 'framework upgrade', summary: 'Plan an explicit kit replacement; deletes only verified retired kit files and keeps edited plugin configs or reports a conflict.', options: values('from'), maxArgs: 0, effect: 'plan' },

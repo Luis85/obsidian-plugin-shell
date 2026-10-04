@@ -334,8 +334,13 @@
       "ownership": "framework"
     },
     {
+      "path": "bin/adapters/framework/base-command.ts",
+      "hash": "0fd2fcff4b20d88028644eeb9dc701fc6a01ef18da3203831bcfdfdaf75a3bf9",
+      "ownership": "framework"
+    },
+    {
       "path": "bin/adapters/framework/catalog.ts",
-      "hash": "e05829da44291abad0084d549b6e14a99abaa289b0edc3abe5eb7fa9282c09f7",
+      "hash": "ff2676474c59f821738bb982f05ad5670a6b98b74b36f891434c486afe0c2473",
       "ownership": "framework"
     },
     {
@@ -485,7 +490,7 @@
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "hash": "886bc12c5d283edc5d76047536db3824479cd98eee6ee676fafd03d4d834e2e5",
+      "hash": "2680bf55f3fa88e3f8de415c469ddf6d57d9737acc7a06c2477f66f0e78d8911",
       "ownership": "framework"
     },
     {
@@ -520,7 +525,7 @@
     },
     {
       "path": "bin/adapters/framework/operations.ts",
-      "hash": "a9946634681c1bfdbb36190b068f386f0d34e8dfe03dc46e7c99b73740d18a0f",
+      "hash": "b51074d2c0f8dfee225ec93f91e937799bc5a9502f57872f258df752c45ffa61",
       "ownership": "framework"
     },
     {
@@ -816,6 +821,11 @@
     {
       "path": "bin/adapters/migration-files.ts",
       "hash": "de75e49648072440b68a4865309d1132af581e899f8d0486c83dc41a7bdfe502",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/adapters/obsidian-base.ts",
+      "hash": "912460103810a336eb459efd7968ddcd161db0dff79e437e802bbafa77401b86",
       "ownership": "framework"
     },
     {
@@ -1310,7 +1320,7 @@
     },
     {
       "path": "bin/compiler/emitters/model.ts",
-      "hash": "1198dbc5fe7bd57d1aac5e125474fa51f90ea91194a85ac6fd7cb9075e825a37",
+      "hash": "1a41b69ce23622c61d414b5f066971a3f38954b7a1452a3e54a4ddc1531db1d0",
       "ownership": "framework"
     },
     {
@@ -1594,6 +1604,21 @@
       "ownership": "framework"
     },
     {
+      "path": "bin/domain/base-collection.ts",
+      "hash": "216db221129d0a64c1bb94e845d890e58da0b89aaa66961144f53f7cb47c5e56",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/domain/base-expression-parse.ts",
+      "hash": "3211506148e2925b63f464e438bb778f2e33a4d7a599f68f05714cb4ad3408d7",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/domain/base-expression.ts",
+      "hash": "213e602d1f17d15e13abb177108a02b3d6b5b961e9900a2f09225d33fce6bfe9",
+      "ownership": "framework"
+    },
+    {
       "path": "bin/domain/brainstorm.ts",
       "hash": "601e2933a2b0652db61e9f967bdeae98dbe431c20975e3d5f072c9d62ef2269b",
       "ownership": "framework"
@@ -1706,6 +1731,11 @@
     {
       "path": "bin/domain/interactions.ts",
       "hash": "dba6e2fabd6cdeb6cae5300c1de199acf160734114530325b90ca5d2529ae195",
+      "ownership": "framework"
+    },
+    {
+      "path": "bin/domain/obsidian-base.ts",
+      "hash": "df8cded4cee8766f278de3d936616293e2ec667131bc748fbfb0995f84fcaf71",
       "ownership": "framework"
     },
     {
@@ -2695,7 +2725,7 @@
     },
     {
       "path": "docs/concepts/companion/DATA-SOURCES.md",
-      "hash": "2a79f7076b8e30e33b8478c8b8ce62b3d79caa58bede42421be4f28a286ac092",
+      "hash": "c71e813b00e21ba7b03c51752b650241041d0c52037145d0d2f5dac1a2d6c051",
       "ownership": "framework"
     },
     {
@@ -3305,7 +3335,7 @@
     },
     {
       "path": "docs/concepts/companion/index.html",
-      "hash": "830c0bf9d94688cf9e40df8d1b778c58282375e8beb8502a3ad8b9917299e7fa",
+      "hash": "fd6769ed344d9a91a26a153593582f4c4d775cff74807301078d06a4b6b20764",
       "ownership": "framework"
     },
     {
@@ -3425,7 +3455,7 @@
     },
     {
       "path": "docs/concepts/companion/src/data-source-actions.js",
-      "hash": "cee58a537e467848b201e6bbad8c8b21969b3f7f73a6c38381aa38a9d9f9b417",
+      "hash": "b997a2e62750850f5f091b086a36fdb8833c659f9109ccc304e9799c3b88784a",
       "ownership": "framework"
     },
     {
@@ -3440,7 +3470,7 @@
     },
     {
       "path": "docs/concepts/companion/src/data-source-model.js",
-      "hash": "a81150f57e8f979acdab78f4fc94071016313123a9fbd242502e6e6876dcc3c6",
+      "hash": "46fd3ba782369319f4fdf930c6d178c1e30dfe643898a2bfe7ea1c2b6934df29",
       "ownership": "framework"
     },
     {
@@ -4444,6 +4474,11 @@
       "ownership": "framework"
     },
     {
+      "path": "docs/framework/development/OBSIDIAN-BASES.md",
+      "hash": "be82c80631126e375a2fbd776f8264409509f16b62469c29a0b089cbea70506b",
+      "ownership": "framework"
+    },
+    {
       "path": "docs/framework/development/OPERATION-PROTOCOL.md",
       "hash": "98d7a0de938aa4928a67b04563c9a347d0a3cd6c2f8ade53b2d2fe4e4790e378",
       "ownership": "framework"
@@ -4630,7 +4665,7 @@
     },
     {
       "path": "docs/framework/user-manual/shell-cli/generated/reference.md",
-      "hash": "e7af0eac7db9bfb93801ec71f4cb68cb2ef1cb8c22050dcef365fa9241e65bac",
+      "hash": "62cdeb0bf785301562dbd05dd342ad61ed1bf51ab4848b0370b67811a727f36e",
       "ownership": "framework"
     },
     {
@@ -4775,12 +4810,12 @@
     },
     {
       "path": "docs/user-manual/shell-cli/generated/commands.json",
-      "hash": "da66c5db1824a08dfb0ed5f92c3bbaeca700ef28fad3cf16ebca0d68f5949484",
+      "hash": "169bcdff8f1777886291d5f3ed437db6d6dc43d9cf9e839cdffe8a3888ee5d65",
       "ownership": "framework"
     },
     {
       "path": "docs/user-manual/shell-cli/generated/manifest.json",
-      "hash": "c137713607f2410a6be51420df898dcaf7995a4cbf32571093f8a01b5403254c",
+      "hash": "04b0853c0c654b19e38fd548506e58640ac1b6b54d0308bf9f673184800e7190",
       "ownership": "framework"
     },
     {
@@ -8920,7 +8955,7 @@
     },
     {
       "path": "src/generated/presentation/composables/use-visual.ts",
-      "hash": "c863881b9c48ff2c9cd78e6452326ca289db24d758e77738e8b65cc3b820eeb3",
+      "hash": "c10e6b1c2f26d91218ee5b45207e26f16676f472e21d5a796c9ced09f978c7fe",
       "ownership": "extension"
     },
     {
@@ -9630,7 +9665,7 @@
     },
     {
       "path": "templates/companion/runtime/use-visual.ts",
-      "hash": "c7c7476ae8e267feb9bc4053aa9c4c1f635fbfc67d2e0691b48790ffeb856e37",
+      "hash": "8d42fca280923853fb890f2c6ec02abcdab3c31e553361996ca56750d285e161",
       "ownership": "framework"
     },
     {
@@ -12799,6 +12834,16 @@
       "ownership": "framework"
     },
     {
+      "path": "tests/tooling/interactive-maker-obsidian-bases-ingest.checks.mjs",
+      "hash": "8f663fff95ed88ddee907100bccaf1bd42479a76699055198e2f4a46a3cb0142",
+      "ownership": "framework"
+    },
+    {
+      "path": "tests/tooling/interactive-maker-obsidian-bases.checks.mjs",
+      "hash": "cc6455aee6216285eb2d9a5f5b05aff83e9650b3f1d2f60da78a2e73b775163b",
+      "ownership": "framework"
+    },
+    {
       "path": "tests/tooling/interactive-maker-obsidian-cli.checks.mjs",
       "hash": "578fe92bcb2ed62bd60a98bcc3d3bd697301b6824003f03cdc705887cb4cf9e5",
       "ownership": "framework"
@@ -13260,7 +13305,7 @@
     },
     {
       "path": "tests/tooling/project-generator-devkit.checks.mjs",
-      "hash": "cad08cb4e9365f83e39ea4f1a110031c2604dd47567e6aefb1b88d5af36059bd",
+      "hash": "1a6dd9c0e8e6018da88da184b5d292e07ddd525194bc5292d3904323ce21a122",
       "ownership": "framework"
     },
     {

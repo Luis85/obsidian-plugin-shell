@@ -18,6 +18,13 @@ export function row(value: unknown): Row { requireValue(value && typeof value ==
 export function text(value: unknown, max = 1000): string { requireValue(typeof value === 'string' && value.length <= max, 'Expected bounded text.'); return value; }
 export function rows(value: unknown, max = 200): Row[] { requireValue(Array.isArray(value) && value.length <= max, 'Expected bounded collection.'); return value.map(row); }
 function slug(value: unknown): string { const name = text(value, 60); requireValue(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) && !['constructor','prototype'].includes(name) && companionRelativeFolder(name), 'Unsafe or missing slug: ' + name); return name; }
+/** Optional Obsidian Bases configuration of a Collection: a vault-relative .base file and one view name (see `node bin/app base`). */
+function collectionBase(base: Row): void {
+  requireValue(Object.keys(base).every(key => key === 'path' || key === 'view'), 'Collection base accepts only path and view.');
+  const path = text(base.path,240), view = text(base.view,200);
+  requireValue(/\.base$/i.test(path) && companionRelativeFolder(path) && !path.split('/').some(part => part.startsWith('.')), 'Collection base.path must be a visible vault-relative .base file.');
+  requireValue(view.trim() !== '' && view === view.trim(), 'Collection base.view must name one view of that file.');
+}
 function unique<T>(items: T[], key: (item: T) => string): void { const seen = new Set<string>(); for (const item of items) { const id = key(item).toLowerCase(); requireValue(!seen.has(id), 'Duplicate identity: ' + id); seen.add(id); } }
 function names(value: unknown): string[] { requireValue(Array.isArray(value), 'Expected references.'); return value.map(v => text(v, 120)); }
 function fieldName(value: unknown): string { const key = text(value, 60); requireValue(/^[A-Za-z][A-Za-z0-9_-]*$/.test(key) && !['constructor', 'prototype', '__proto__'].includes(key), 'Unsafe property name.'); return key; }
@@ -118,7 +125,8 @@ export function projectModel(input: unknown): Model {
       const collectionPath=text(s.collectionPath,120),entity=entityModels.find(e=>e.id===s.entity);
       requireValue(entity&&collectionPath!==''&&companionRelativeFolder(collectionPath)&&entity.folder===collectionPath,'Collection needs one safe vault-relative path matching its declared entity folder.');
       requireValue(operations.length===4&&['list','create','update','delete'].every(kind=>operations.some(o=>{const i=o.contract.implementation as Row|undefined;return o.slug===kind&&i?.kind==='note'&&i.entity===entity.id&&i.operation===kind;})),'Collection requires managed List/Create/Update/Delete note operations for its entity.');
-    }
+      if(s.base!==undefined)collectionBase(row(s.base));
+    } else requireValue(s.base===undefined,'Only a Collection can be configured by an Obsidian .base file.');
     return { id:text(s.id,120), slug:slug(s.slug), name:text(s.name,80), kind:String(s.kind), operations, contract:s };
   });
   unique(sources,s => s.slug); unique(sources,s=>symbol(s.slug)); unique(sources,s => s.id); const flows = rows(ds.flows ?? [],120).map(f=>({...f,source:text(f.source,120),operation:text(f.operation,120),id:text(f.id,120),card:text(f.card,120),label:text(f.label ?? '',500),trigger:text(f.trigger,80),direction:text(f.direction,10)})); unique(flows,f=>f.id);

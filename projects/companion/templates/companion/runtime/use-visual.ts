@@ -275,10 +275,17 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     result.type = 'file'; result.accept = '.json,application/json'; result.multiple = false;
     result.onChange = (event: unknown) => { void readJsonControl(id, event); };
   }
+  /** Nuxt UI names a tab trigger from its item's label; authored plain-text tabs become labelled items, so every
+   * trigger has an accessible name. Object items are kept as authored. */
+  function tabItems(items: unknown): unknown {
+    if (!Array.isArray(items)) return items;
+    return items.map(item => typeof item === 'string' || typeof item === 'number' ? { label: String(item), value: String(item) } : item);
+  }
   /** Menu adapters, two-way overlay state and the loading/disabled states the runtime owns unless authored. */
   function stateProps(id: string, node: NuxtNode, result: Record<string, unknown>): void {
     const entry = node.ref.entryId, authored = (name: string) => Object.hasOwn(node.props, name);
     if (entry === 'u-dropdown-menu') result.items = menuItems(id, result.items);
+    if (entry === 'u-tabs') result.items = tabItems(result.items);
     const openTarget = overlayBinding(node);
     if (openTarget) result['onUpdate:open'] = (input: unknown) => {
       if (typeof input === 'boolean' && enabled(id) && setDraft(openTarget, input)) trigger(id, 'update:open', input);
@@ -310,7 +317,11 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   }
   function style(id: string): Record<string, string | number> {
     const node = index.get(id);
-    return node?.layout ? compositionStyle({ kind: 'region', layout: node.layout.mode, ui: node.layout.ui }, spec.designSystem, narrow.value) : {};
+    if (!node?.layout) return {};
+    const result = compositionStyle({ kind: 'region', layout: node.layout.mode, ui: node.layout.ui }, spec.designSystem, narrow.value);
+    // A table's root is its own scroll container: the default visible overflow would widen the page instead (360px reflow).
+    if (nuxtNode(node) && node.ref.entryId === 'u-table' && result.overflow === 'visible') result.overflow = 'auto';
+    return result;
   }
   const theme = computed(() => compositionTheme(spec.designSystem, dark.value));
   function teardown(mount: ExternalMount): void {

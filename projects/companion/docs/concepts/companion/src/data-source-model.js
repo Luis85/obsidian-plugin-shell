@@ -5,6 +5,8 @@ const DS_TYPES = ['string','number','integer','boolean','object','array','null']
 const DS_LIMITS = Object.freeze({sources:24,operations:12,flows:120,fields:40,schemaBytes:12000});
 function dsVaultKind(kind){return kind==='vault'||kind==='collection';}
 function dsCollectionPathValid(path){return dsText(path,120)&&path.length>0&&validVaultRelativePath(path)&&!path.split('/').some(p=>p.startsWith('.'));}
+// Optional Obsidian Bases configuration of a Collection: a vault-relative .base file and one of its view names. `node bin/app base ingest` reads the notes; the browser never does.
+function dsBaseValid(base){return dsKeys(base,['path','view'])&&dsText(base.path,240)&&/\.base$/i.test(base.path)&&validVaultRelativePath(base.path)&&!base.path.split('/').some(p=>p.startsWith('.'))&&dsText(base.view,200)&&base.view.trim().length>0&&base.view===base.view.trim();}
 function emptyDataSources(){return {schema:1,nextId:1,sources:[],flows:[],positions:{}};}
 function dataSources(d=design()){if(!d.dataSources)d.dataSources=emptyDataSources();return d.dataSources;}
 function dsPlain(v){return v!==null&&typeof v==='object'&&!Array.isArray(v);}
@@ -60,11 +62,11 @@ function dataSourcesShape(m){
  if(!dsKeys(m,['schema','nextId','sources','flows','positions','testing'])||m.schema!==1||!Number.isSafeInteger(m.nextId)||m.nextId<1||m.nextId>=Number.MAX_SAFE_INTEGER-10000||!Array.isArray(m.sources)||m.sources.length>DS_LIMITS.sources||!Array.isArray(m.flows)||m.flows.length>DS_LIMITS.flows||!dsPlain(m.positions))return false;
  const ids=[];
  for(const s of m.sources){
-  if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations','collectionPath','entity'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
+  if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations','collectionPath','entity','base'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
   if(s.kind==='collection'){
-   if(!dsCollectionPathValid(s.collectionPath)||!/^er-entity-[1-9][0-9]*$/.test(s.entity)||s.operations.length!==4||
+   if(!dsCollectionPathValid(s.collectionPath)||!/^er-entity-[1-9][0-9]*$/.test(s.entity)||s.operations.length!==4||s.base!==undefined&&!dsBaseValid(s.base)||
      ['list','create','update','delete'].some(slug=>!s.operations.some(o=>o.slug===slug)))return false;
-  }else if(s.collectionPath!==undefined||s.entity!==undefined)return false;
+  }else if(s.collectionPath!==undefined||s.entity!==undefined||s.base!==undefined)return false;
   ids.push(s.id);
   for(const o of s.operations){
    if(o.implementation!==undefined&&(!dsKeys(o.implementation,['kind','entity','operation'])||!dsVaultKind(s.kind)||o.implementation.kind!=='note'||!/^er-entity-[1-9][0-9]*$/.test(o.implementation.entity)||!['list','create','update','delete'].includes(o.implementation.operation)))return false;
