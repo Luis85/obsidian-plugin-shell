@@ -157,8 +157,9 @@ It is a focused policy, not the GitHub Actions schema or actionlint.
   exist. `--matrix key=value,...` selects one combination by exact values (`group=1`); no match or more than one
   match is an error that lists the available combinations.
 - **Reproducible** means every step is a `run:` step or a known setup action (`actions/checkout`,
-  `actions/setup-node`, `actions/cache`, `actions/upload-artifact`: nothing to run locally). Any other `uses:` step,
-  including the local `./.github/actions/setup-qualified`, is marked `external`, skipped and noted.
+  `actions/setup-node`, `actions/cache`, `actions/upload-artifact`: nothing to run locally). A local composite
+  action such as `./.github/actions/setup-qualified` is expanded into its own steps. Any other `uses:` step is
+  marked `external`, skipped and noted. Jobs behind `environment: release` (cut, publish) are never reproducible.
 - **`--execute`** runs the `run:` steps sequentially through bash (default `bash -e`, explicit `shell: bash` adds
   `pipefail`; `pwsh` only when installed), in the project root with the job's literal env, `CI=true`, a scratch
   `RUNNER_TEMP` and emulated `GITHUB_ENV`, `GITHUB_OUTPUT`, `GITHUB_PATH` and `GITHUB_STEP_SUMMARY` files. It stops at
