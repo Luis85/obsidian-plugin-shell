@@ -7,7 +7,7 @@ import { setFrontmatterValue } from '../../domain/increments/frontmatter.ts';
 import { syncRecordPath } from '../../domain/increments/sync-record.ts';
 import { applyPublish, previewPublish, type PublishPreview } from '../../application/increments/publish.ts';
 import { withRemoteLock } from './remote-lock.ts';
-import { linkResolver, pullRequestStatus, writeStatus } from './remote-view.ts';
+import { linkResolver, knownStatus, writeStatus } from './remote-view.ts';
 import { flag } from './inputs.ts';
 import { applying, load, localBefore, planHash, recordLocally, requireFresh, syncRecord, uncertain, type Loaded } from './remote-support.ts';
 
@@ -30,7 +30,7 @@ function publishData(loaded: Loaded, preview: PublishPreview, hashValue: string,
 async function publishPlan(request: Request, context: Context) {
   const loaded = await load(request, context);
   requireLinks(loaded);
-  const preview = await previewPublish(loaded.remote, { view: loaded.view, status: pullRequestStatus(loaded.pull.model.status), push: !flag(request, 'no-push'), resolve: linkResolver(loaded.files) });
+  const preview = await previewPublish(loaded.remote, { view: loaded.view, status: knownStatus(loaded.pull.model.status), push: !flag(request, 'no-push'), resolve: linkResolver(loaded.files) });
   const before = await localBefore(loaded);
   const hashValue = planHash(context, request, { localBefore: before, remote: { platform: loaded.target.platform, repository: loaded.target.repository,
     adopt: preview.existing?.number ?? null, revision: preview.existing?.revision ?? null, headExists: preview.headExists }, rendered: { title: preview.title, body: hash(preview.body) } });

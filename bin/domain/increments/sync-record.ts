@@ -6,7 +6,8 @@
  * wikilinks), so local wikilinks and remote blob links compare equal once converted back.
  */
 import { insistRemote, isAmendmentId, isTaskId, normalizeText } from './remote-model.ts';
-import type { HostingPlatform, LinkTarget, PullRequestStatus, RemotePullRequestView, RemoteState, TextHash } from './remote-model.ts';
+import type { LinkTarget, RemotePullRequestView, RemoteState, TextHash } from './remote-model.ts';
+import type { HostingPlatform, PullRequestStatus } from './model.ts';
 import { parseRemoteBody } from './remote-body.ts';
 
 export type FrozenRegion = 'summary' | 'scope' | 'documents' | 'notes';

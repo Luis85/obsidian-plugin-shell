@@ -16,12 +16,13 @@ test('increment new previews without writing, then creates the increment, kick-o
   assert.equal(preview.status, 'planned', JSON.stringify(preview.diagnostics));
   assert.equal(ws.exists('docs'), false); assert.deepEqual(ws.branches(), ['main']);
   assert.deepEqual(preview.data.changes.map(change => [change.path, change.status]), [
-    ['docs/increments/delivery.md', 'create'], ['docs/pull-requests/delivery-kickoff.md', 'create'], ['docs/issues/delivery.md', 'create']]);
+    ['docs/increments/delivery.md', 'create'], ['docs/pull-requests/delivery-kickoff.md', 'create'], ['docs/issues/delivery.md', 'create'],
+    ['tests/acceptance/delivery/ac-1.checks.mjs', 'create'], ['tests/acceptance/delivery/ac-2.checks.mjs', 'create']]);
   assert.deepEqual(preview.data.steps, [{ kind: 'git-branch', name: 'increment/delivery', start: 'main', commit: ws.git('rev-parse', 'main'), switch: false, fetch: null }]);
-  assert.deepEqual(preview.data.summary.created, { increment: 'docs/increments/delivery.md', pullRequest: 'docs/pull-requests/delivery-kickoff.md', issue: 'docs/issues/delivery.md', stubs: [] });
+  assert.deepEqual(preview.data.summary.created, { increment: 'docs/increments/delivery.md', pullRequest: 'docs/pull-requests/delivery-kickoff.md', issue: 'docs/issues/delivery.md', stubs: ['tests/acceptance/delivery/ac-1.checks.mjs', 'tests/acceptance/delivery/ac-2.checks.mjs'] });
   assert.equal((await ws.run('increment new', ['delivery'], options)).data.planHash, preview.data.planHash, 'the same inputs plan the same hash');
   const applied = await ws.run('increment new', ['delivery'], { ...options, apply: preview.data.planHash });
-  assert.equal(applied.status, 'applied'); assert.equal(applied.data.applied.written.length, 3);
+  assert.equal(applied.status, 'applied'); assert.equal(applied.data.applied.written.length, 5);
   assert.deepEqual(applied.data.applied.steps, { name: 'increment/delivery', status: 'created', start: 'main' });
   assert.deepEqual(ws.branches(), ['increment/delivery', 'main']); assert.equal(ws.git('rev-parse', '--abbrev-ref', 'HEAD'), 'main');
   const increment = ws.read('docs/increments/delivery.md');
@@ -76,7 +77,7 @@ test('criteria from --input get pending acceptance stubs and default evidence in
   assert.match(stub, /test\.todo\('delivery AC-1: Given a planned pull request When it is published Then a draft exists'\)/);
   assert.match(stub, /\[\[docs\/increments\/delivery\]\]/); assert.match(stub, /\/\/ Then a draft exists/);
   assert.equal(ws.read('tests/acceptance/delivery/ac-2.checks.mjs'), '// already written\n', 'an existing stub is never overwritten');
-  assert.match(ws.read('docs/increments/delivery.md'), /- \[ \] AC-1: Given a planned pull request When it is published Then a draft exists\n {2}Evidence: `tests\/acceptance\/delivery\/ac-1\.checks\.mjs`\n/);
+  assert.match(ws.read('docs/increments/delivery.md'), /- \[ \] AC-1: Given a planned pull request When it is published Then a draft exists Evidence: `tests\/acceptance\/delivery\/ac-1\.checks\.mjs`\n- \[ \] AC-2: A missing head branch is refused without a push Evidence: `tests\/acceptance\/delivery\/ac-2\.checks\.mjs`\n/);
 }));
 
 test('increment edit, scope, ac add, ac set and ref add plan exact span edits; a new criterion brings its stub', () => inWorkspace({ delivery: true }, async ws => {
@@ -94,7 +95,8 @@ test('increment edit, scope, ac add, ac set and ref add plan exact span edits; a
   const scope = ws.read('docs/increments/delivery.md');
   assert.match(scope, /### In scope\n\n- The publish command\n\n### Out of scope\n\n- Merging\n/, 'a new item replaces the template placeholder');
   const added = await planThenApply(ws, 'increment ac add', ['delivery', 'Publishing twice adopts the existing draft']);
-  assert.equal(added.status, 'applied'); assert.deepEqual(added.data.summary.stubs.created, ['tests/acceptance/delivery/ac-1.checks.mjs']);
+  assert.equal(added.status, 'applied', 'the criterion replaces the template placeholders and keeps the stub of its id');
+  assert.deepEqual(added.data.summary.stubs, { created: [], existing: ['tests/acceptance/delivery/ac-1.checks.mjs'], orphans: ['tests/acceptance/delivery/ac-2.checks.mjs'], evidence: [] });
   assert.ok(ws.exists('tests/acceptance/delivery/ac-1.checks.mjs'));
   await planThenApply(ws, 'increment ac set', ['delivery', 'AC-1'], { status: 'done', evidence: 'README.md' });
   assert.match(ws.read('docs/increments/delivery.md'), /- \[x\] AC-1: Publishing twice adopts the existing draft\n {2}Evidence: `README\.md`\n/);

@@ -5,7 +5,8 @@
  * outcome is unknown is reported as uncertain and never retried. Local records are the caller's next step.
  */
 import { insistRemote, normalizeText } from '../../domain/increments/remote-model.ts';
-import type { LinkResolver, PullRequestStatus, RemotePullRequestView } from '../../domain/increments/remote-model.ts';
+import type { LinkResolver, RemotePullRequestView } from '../../domain/increments/remote-model.ts';
+import type { PullRequestStatus } from '../../domain/increments/model.ts';
 import { bodySize, composeRemoteBody, parseRemoteBody, remoteMarker, renderManagedBlock, requireBodyFits } from '../../domain/increments/remote-body.ts';
 import { planPublish, type PublishPlan } from '../../domain/increments/remote-state.ts';
 import type { HostingRemote, RemotePullRequest, RemoteReadiness } from './remote-port.ts';
@@ -39,7 +40,7 @@ export async function previewPublish(remote: HostingRemote, request: PublishRequ
   return { readiness, plan, existing, headExists, title: view.title, body, size: bodySize(body, remote.platform) };
 }
 /** True when the platform holds exactly the rendered title and body (line endings and trailing blanks ignored). */
-export const matches = (pull: RemotePullRequest, title: string, body: string): boolean => pull.title === title && normalizeText(pull.body) === normalizeText(body);
+const matches = (pull: RemotePullRequest, title: string, body: string): boolean => pull.title === title && normalizeText(pull.body) === normalizeText(body);
 /** Reads a written pull request back; a failed or different read is uncertain, never retried. */
 export async function readBack(remote: HostingRemote, number: number, title: string, body: string): Promise<{ status: 'ok'; pull: RemotePullRequest } | UncertainOutcome> {
   let pull: RemotePullRequest;

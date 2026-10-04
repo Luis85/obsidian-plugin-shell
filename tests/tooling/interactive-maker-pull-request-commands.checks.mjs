@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { createWorkspace, planThenApply, readyFragment } from '../support/increment-workspace.mjs';
+import { editPullRequest, parsePullRequest, renderPullRequest, validatePullRequest } from '../../bin/domain/increments/pull-request-document.ts';
 
 const fails = (outcome, code) => { assert.equal(outcome.status, 'failed', JSON.stringify(outcome)); assert.equal(outcome.diagnostics[0].code, code, outcome.diagnostics[0].message); };
 async function withIncrement(options, body) {
@@ -62,6 +63,15 @@ test('a New pull request takes plan edits: title, summary, scope, tasks, documen
   fails(await ws.run('pr edit', ['delivery-1'], {}), 'PR_DOCUMENT_INVALID');
   fails(await ws.run('pr show', ['missing']), 'PR_NOT_FOUND');
 }));
+
+test('a pull request with a Definition of Done Completion record keeps validating and editing in place', () => {
+  const rendered = renderPullRequest({ id: 'x-1', title: 'X', increment: { id: 'x', title: 'X', path: 'docs/increments/x.md' } });
+  const text = rendered.replace('## Notes\n\n', '').trimEnd() + '\n\n## Completion record\n\n- Recorded by the Definition of Done.\n';
+  assert.deepEqual(validatePullRequest(text).map(problem => problem.message), ['## Notes is missing.']);
+  const edited = editPullRequest(editPullRequest(text, { kind: 'notes', body: 'Reviewed.' }).text, { kind: 'task-add', text: 'Ship it' }).text;
+  assert.match(edited, /## Tasks\n\n- \[ \] T-1: Ship it\n\n## Documents\n\n.*\n\n## Notes\n\nReviewed\.\n\n## Amendments\n\n.*\n\n## Completion record\n\n- Recorded by the Definition of Done\.\n$/s);
+  assert.deepEqual(validatePullRequest(edited), []); assert.equal(parsePullRequest(edited).regions.notes, 'Reviewed.');
+});
 
 test('pr status closes and reopens an unpublished pull request; Closed locks edits; the increment list shows the status', () => withIncrement({}, async ws => {
   await planThenApply(ws, 'pr new', ['delivery'], { title: 'Hosting set', 'no-branch': true });

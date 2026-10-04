@@ -9,7 +9,8 @@
  *   with `uncertain: true`. Callers must never retry it blindly: re-read the remote first (findMarked by the
  *   marker, then get) and resume from what is actually there. The CLI exits 2 for this outcome.
  */
-import type { HostingPlatform, LinkTarget, RemoteState } from '../../domain/increments/remote-model.ts';
+import type { LinkTarget, RemoteState } from '../../domain/increments/remote-model.ts';
+import type { HostingPlatform } from '../../domain/increments/model.ts';
 
 export interface RemotePullRequest {
   number: number;

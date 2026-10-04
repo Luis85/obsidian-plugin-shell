@@ -124,3 +124,14 @@ test('increment complete plans the Definition of Done outputs and blocks while r
   fails(await ws.run('increment complete', ['delivery'], { yes: true }), 'PLAN_CONFLICT');
   assert.match(ws.read('docs/increments/delivery.md'), /^status: In progress$/m);
 }));
+
+test('a fresh increment, kick-off pull request, issue and stubs pass every document rule of the Definition of Ready; only the content to refine fails', () => inWorkspace({ delivery: true }, async ws => {
+  assert.equal((await planThenApply(ws, 'increment new', ['delivery'], { title: 'Delivery pipeline', owner: 'Luis' })).status, 'applied');
+  const check = await ws.run('increment check', ['delivery']);
+  assert.equal(check.data.source, 'definition-of-ready');
+  const failing = check.data.rules.filter(rule => rule.status === 'fail').map(rule => rule.id);
+  assert.deepEqual(failing, ['DOR-04', 'DOR-07', 'DOR-08', 'DOR-09', 'DOR-10'], 'placeholders, open questions, affected areas, test plan and docs impact are left to refine');
+  const documentRules = check.data.rules.filter(rule => Number(rule.id.slice(4)) >= 16);
+  assert.ok(documentRules.length >= 10);
+  assert.ok(documentRules.every(rule => rule.status === 'pass'), JSON.stringify(documentRules.filter(rule => rule.status !== 'pass')));
+}));

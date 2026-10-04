@@ -19,7 +19,7 @@ export interface Readiness { source: 'definition-of-ready' | 'structural'; probl
 const transitionIgnored = ['DOR-01', 'DOR-15'];
 
 /** The base to diff against: --base, else origin/main, main, then HEAD; null without any commit. */
-export async function gateBase(ws: DeliveryWorkspace, explicit?: string): Promise<string | null> {
+async function gateBase(ws: DeliveryWorkspace, explicit?: string): Promise<string | null> {
   if (explicit) return explicit;
   const base = ws.schema.branches.base;
   for (const ref of [`origin/${base}`, base, 'HEAD']) if (await ws.git.resolve(ref)) return ref;

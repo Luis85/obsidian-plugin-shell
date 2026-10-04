@@ -13,7 +13,8 @@ import { designFile } from '../framework/configuration.ts';
 import { exists, hash, readBounded } from '../framework/files.ts';
 import { OperationError } from '../framework/contracts.ts';
 import { remoteRevision } from '../../domain/increments/sync-record.ts';
-import type { HostingPlatform, RemoteBinding, RemoteState } from '../../domain/increments/remote-model.ts';
+import type { RemoteBinding, RemoteState } from '../../domain/increments/remote-model.ts';
+import type { HostingPlatform } from '../../domain/increments/model.ts';
 import type { RemoteDiagnostic, RemoteFailure, RemotePullRequest, RemoteReadiness } from '../../application/increments/remote-port.ts';
 
 export interface CommandResult { status: number | null; stdout: string; stderr: string; error?: string; timedOut: boolean; overflow: boolean }

@@ -11,7 +11,8 @@ import { canonicalRequest } from '../framework/catalog.ts';
 import { hash } from '../framework/files.ts';
 import { OperationError, requireThat, type Context, type Request } from '../framework/contracts.ts';
 import { createSyncRecord, serializeSyncRecord, syncRecordPath } from '../../domain/increments/sync-record.ts';
-import type { PullRequestStatus, RemotePullRequestView } from '../../domain/increments/remote-model.ts';
+import type { RemotePullRequestView } from '../../domain/increments/remote-model.ts';
+import type { PullRequestStatus } from '../../domain/increments/model.ts';
 import { recordHashing } from '../../application/increments/sync.ts';
 import type { HostingRemote, RemotePullRequest } from '../../application/increments/remote-port.ts';
 import { readTargetSources, resolveHostingTarget, type HostingTarget } from './hosting-target.ts';
@@ -36,7 +37,7 @@ function remoteFor(session: Session, target: HostingTarget): HostingRemote {
 }
 export interface Loaded { session: Session; pull: StoredDocument<PullRequestModel>; increment: StoredDocument<IncrementModel>; view: RemotePullRequestView; target: HostingTarget; remote: HostingRemote; files: string[] }
 export async function load(request: Request, context: Context): Promise<Loaded> {
-  const session = await Session.open(context), pull = await session.get('pullRequest', request.args[0]);
+  const session: Session = await Session.open(context), pull = await session.get('pullRequest', request.args[0]);
   const increment = await session.get('increment', pull.model.increment), files = await session.ws.files();
   const binding = pull.model.binding ? { binding: { platform: pull.model.binding.platform, repository: pull.model.binding.repository } } : {};
   const platform = option(request, 'platform');

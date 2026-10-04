@@ -7,7 +7,7 @@ import { parseSyncRecord, syncRecordPath } from '../../domain/increments/sync-re
 import type { Side } from '../../domain/increments/sync-merge.ts';
 import { applySync, previewSync, type SyncPreview } from '../../application/increments/sync.ts';
 import { withRemoteLock } from './remote-lock.ts';
-import { linkResolver, pullRequestStatus, writeStatus, writeView } from './remote-view.ts';
+import { linkResolver, knownStatus, writeStatus, writeView } from './remote-view.ts';
 import { inputRaw, option } from './inputs.ts';
 import { applying, load, localBefore, planHash, recordLocally, requireFresh, syncRecord, uncertain, type Loaded } from './remote-support.ts';
 
@@ -32,7 +32,7 @@ async function syncPlan(request: Request, context: Context): Promise<Planned> {
   const recordText = await loaded.session.ws.read(syncRecordPath(loaded.pull.id));
   if (recordText === null) throw new OperationError('PR_SYNC_RECORD_INVALID', `${syncRecordPath(loaded.pull.id)} is missing; it is written by pr publish and committed with the document.`);
   const prefer = option(request, 'prefer'), chosen = await resolutions(request, context);
-  const preview = await previewSync(loaded.remote, { view: loaded.view, localStatus: pullRequestStatus(loaded.pull.model.status), record: parseSyncRecord(recordText),
+  const preview = await previewSync(loaded.remote, { view: loaded.view, localStatus: knownStatus(loaded.pull.model.status), record: parseSyncRecord(recordText),
     number: binding.number, resolve: linkResolver(loaded.files), hash, today: loaded.session.ws.now().toISOString().slice(0, 10),
     ...(prefer ? { prefer: side(prefer, '--prefer') } : {}), ...(chosen ? { resolutions: chosen } : {}) });
   const before = await localBefore(loaded), outcome = preview.outcome, patch = outcome.remotePatch;

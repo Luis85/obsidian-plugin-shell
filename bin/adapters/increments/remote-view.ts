@@ -5,12 +5,12 @@
 import { appendAmendment, replacePullRequestRegion, setPullRequestField, setPullRequestStatus, writeTasks } from '../../domain/increments/pull-request-document.ts';
 import { parseWikilink, resolveWikilink } from '../../domain/increments/wikilinks.ts';
 import { OperationError } from '../framework/contracts.ts';
-import type { IncrementModel, PullRequestModel } from '../../domain/increments/model.ts';
-import type { LinkResolver, PullRequestStatus, RemoteDocumentLink, RemotePullRequestView } from '../../domain/increments/remote-model.ts';
+import type { IncrementModel, PullRequestModel, PullRequestStatus } from '../../domain/increments/model.ts';
+import type { LinkResolver, RemoteDocumentLink, RemotePullRequestView } from '../../domain/increments/remote-model.ts';
 import type { StoredDocument } from './repository.ts';
 
 const statuses: readonly PullRequestStatus[] = ['New', 'Draft', 'Ready', 'Merged', 'Closed'];
-export function pullRequestStatus(value: string): PullRequestStatus {
+export function knownStatus(value: string): PullRequestStatus {
   const status = statuses.find(item => item === value);
   if (!status) throw new OperationError('PR_DOCUMENT_INVALID', `Unknown pull-request status "${value}".`);
   return status;

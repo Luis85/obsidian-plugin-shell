@@ -15,7 +15,7 @@ type Planner = (request: Request, context: Context) => Promise<SessionPlan>;
 const document = (session: Session, id: string) => ({ kind: 'issue' as const, id, path: session.ws.path('issue', id) });
 
 async function newIssue(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), ws = session.ws, increment = await session.get('increment', request.args[0]);
+  const session: Session = await Session.open(context), ws = session.ws, increment = await session.get('increment', request.args[0]);
   requireIncrementEditable(increment.model.status);
   const id = option(request, 'id') ?? nextIssueId(increment.id, (await session.all('issue')).map(doc => doc.id), ws.schema);
   if (await session.exists('issue', id)) throw new OperationError('ISSUE_EXISTS', `${ws.path('issue', id)} already exists.`, `node bin/app issue show ${id}`);
@@ -26,7 +26,7 @@ async function newIssue(request: Request, context: Context): Promise<SessionPlan
   return session.plan({ document: document(session, id), statusBefore: null, statusAfter: 'New', edits: [{ section: 'document', action: 'add' }], increment: increment.id });
 }
 async function editPlan(request: Request, context: Context, ops: (session: Session, acceptance: readonly string[] | undefined) => Promise<IssueOp[]>): Promise<SessionPlan> {
-  const session = await Session.open(context), doc = await session.get('issue', request.args[0]);
+  const session: Session = await Session.open(context), doc = await session.get('issue', request.args[0]);
   const increment = doc.model.increment && await session.exists('increment', doc.model.increment) ? (await session.get('increment', doc.model.increment)).model.acceptance : null;
   let text = doc.text;
   const edits: EditSummary[] = [];
@@ -52,7 +52,7 @@ const editIssuePlan: Planner = (request, context) => editPlan(request, context, 
 });
 /** Status changes go through the issue table; Done and Cancelled are reopened by their status, never edited. */
 async function statusPlan(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), doc = await session.get('issue', request.args[0]);
+  const session: Session = await Session.open(context), doc = await session.get('issue', request.args[0]);
   const text = changeIssueStatus(doc.text, second(request));
   session.write(doc.path, text); session.touch(doc.model.increment);
   return session.plan({ document: document(session, doc.id), statusBefore: doc.model.status, statusAfter: parseIssue(text).status, edits: [{ section: 'frontmatter', action: 'set', itemId: 'status' }] });

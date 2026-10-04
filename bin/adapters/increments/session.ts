@@ -30,7 +30,7 @@ export class Session {
   readonly ws: DeliveryWorkspace;
   private constructor(ws: DeliveryWorkspace) { this.ws = ws; }
   static async open(context: Context, write = true): Promise<Session> {
-    const ws = await DeliveryWorkspace.open(context);
+    const ws: DeliveryWorkspace = await DeliveryWorkspace.open(context);
     if (write) ws.requireNoDrift();
     return new Session(ws);
   }

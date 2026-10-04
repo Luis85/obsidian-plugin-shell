@@ -5,8 +5,9 @@
  */
 import { OperationError, type Context, type Request } from '../framework/contracts.ts';
 import { editIncrement, renderIncrement, type IncrementEdit } from '../../domain/increments/increment-document.ts';
-import { kickoffPullRequest, editPullRequest, renderPullRequest } from '../../domain/increments/pull-request-document.ts';
-import { nextIssueId, renderIssue } from '../../domain/increments/issue-document.ts';
+import { kickoffPullRequest, editPullRequest } from '../../domain/increments/pull-request-document.ts';
+import { issueDocument, kickoffDocument } from './kickoff.ts';
+import { nextIssueId } from '../../domain/increments/issue-document.ts';
 import { branchNames } from '../../domain/increments/branches.ts';
 import { checkIncrementTransition, requireIncrementEditable } from '../../domain/increments/transitions.ts';
 import { setFrontmatterValue } from '../../domain/increments/frontmatter.ts';
@@ -14,47 +15,53 @@ import { insistDelivery } from '../../domain/increments/errors.ts';
 import { isDeliverySlug } from '../../domain/increments/model.ts';
 import { planBranch, runBranch } from '../../application/increments/git-port.ts';
 import { Session, type SessionPlan } from './session.ts';
-import { planStubs } from './stubs.ts';
+import { planAcceptanceStubs } from './stubs.ts';
 import { readiness } from './delivery-gates.ts';
-import { branchRequest, branchStep, checkedOption, commaList, flag, fragmentInput, inputRaw, option } from './inputs.ts';
+import { branchRequest, branchStep, checkedOption, commaList, flag, fragmentInput, inputRaw, option, requireBranchPlan } from './inputs.ts';
+import type { InputFragment } from '../../domain/increments/input-fragment.ts';
 
 type Planner = (request: Request, context: Context) => Promise<SessionPlan>;
 const document = (session: Session, id: string) => ({ kind: 'increment' as const, id, path: session.ws.path('increment', id) });
 
-/** Fails an explicit --branch the plan cannot honour; otherwise the branch status is reported in the summary. */
-function requireBranch(request: Request, plan: { status: string; reason?: string }): void {
-  if (flag(request, 'branch') && !['planned', 'exists'].includes(plan.status)) throw new OperationError('GIT_UNAVAILABLE', `--branch was requested but ${plan.reason ?? 'git cannot create it'}`);
+type Names = ReturnType<typeof branchNames>;
+/** The Increment text from the template, the options and the --input fragment; branch keys only when delivery.json allows them. */
+function incrementDocument(session: Session, request: Request, input: { id: string; title: string; fragment: InputFragment | null; names: Names }): string {
+  const ws = session.ws, keys = ws.allows('branch') && ws.allows('base') ? { branch: input.names.increment, base: input.names.base } : {};
+  if (!keys.branch) session.warn('DELIVERY_SCHEMA_UNSUPPORTED', 'delivery.json handoff.optionalKeys does not list branch and base; the branch names come from the configured patterns.');
+  const given = Object.fromEntries((['owner', 'size', 'e2e'] as const).flatMap(key => { const value = option(request, key); return value === undefined ? [] : [[key, value]]; }));
+  const from = option(request, 'from');
+  return renderIncrement({ id: input.id, title: input.title, ...given, refs: from ? [from] : [], fragment: input.fragment, ...keys }, { schema: ws.schema, ...(ws.template ? { template: ws.template } : {}) });
+}
+/** The kick-off pull request and (unless --no-issue) the corresponding issue; returns their paths. */
+async function companions(session: Session, request: Request, input: { id: string; title: string; path: string; names: Names }): Promise<{ pullRequest: string; issue: string | null }> {
+  const ws = session.ws, schema = ws.schema;
+  const kickoff = kickoffPullRequest({ id: input.id, title: input.title, path: input.path, branch: input.names.increment, base: input.names.base }, schema);
+  if (await session.exists('pullRequest', kickoff.id)) throw new OperationError('PR_EXISTS', `${ws.path('pullRequest', kickoff.id)} already exists.`);
+  session.write(ws.path('pullRequest', kickoff.id), kickoffDocument(kickoff, schema, input.names));
+  const issue = flag(request, 'no-issue') ? null : nextIssueId(input.id, (await session.all('issue')).map(doc => doc.id), schema);
+  if (issue) session.write(ws.path('issue', issue), issueDocument({ id: issue, title: input.title, increment: input.id, path: input.path }, schema));
+  return { pullRequest: ws.path('pullRequest', kickoff.id), issue: issue ? ws.path('issue', issue) : null };
 }
 async function newIncrement(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), ws = session.ws, id = request.args[0] ?? '', schema = ws.schema;
+  const session: Session = await Session.open(context), ws = session.ws, id = request.args[0] ?? '', schema = ws.schema;
   insistDelivery(isDeliverySlug(id, schema), 'INCREMENT_ID_INVALID', `"${id}" must match ${schema.handoff.slugPattern} with at most ${schema.handoff.maxSlugLength} characters.`);
   if (await session.exists('increment', id)) throw new OperationError('INCREMENT_EXISTS', `${ws.path('increment', id)} already exists.`, `node bin/app increment show ${id}`);
   const fragment = await fragmentInput(request, context, schema.handoff.sections, 'INCREMENT_INPUT_INVALID');
   const title = option(request, 'title') ?? fragment?.title;
   insistDelivery(title, 'INCREMENT_INPUT_INVALID', 'Supply --title (or a # title in --input).');
   const names = branchNames(schema.branches, id), path = ws.path('increment', id);
-  const keys = ws.allows('branch') && ws.allows('base') ? { branch: names.increment, base: names.base } : {};
-  if (!keys.branch) session.warn('DELIVERY_SCHEMA_UNSUPPORTED', 'delivery.json handoff.optionalKeys does not list branch and base; the branch names come from the configured patterns.');
-  const from = option(request, 'from'), owner = option(request, 'owner'), size = option(request, 'size'), e2e = option(request, 'e2e');
-  const text = renderIncrement({ id, title, ...(owner ? { owner } : {}), ...(size ? { size } : {}), ...(e2e ? { e2e } : {}), refs: from ? [from] : [], fragment, ...keys }, { schema, ...(ws.template ? { template: ws.template } : {}) });
-  session.write(path, text);
-  const kickoff = kickoffPullRequest({ id, title, path, branch: names.increment, base: names.base }, schema);
-  if (await session.exists('pullRequest', kickoff.id)) throw new OperationError('PR_EXISTS', `${ws.path('pullRequest', kickoff.id)} already exists.`);
-  session.write(ws.path('pullRequest', kickoff.id), renderPullRequest(kickoff, schema));
-  const issue = flag(request, 'no-issue') ? null : nextIssueId(id, (await session.all('issue')).map(doc => doc.id), schema);
-  if (issue) session.write(ws.path('issue', issue), renderIssue({ id: issue, title, increment: id }, schema));
+  session.write(path, incrementDocument(session, request, { id, title, fragment, names }));
+  const linked = await companions(session, request, { id, title, path, names });
   session.touch(id);
-  const stubs = await planStubs(session, id);
-  const branch = await planBranch(ws.git, branchRequest(request, names.increment, [`origin/${names.base}`, names.base]));
-  requireBranch(request, branch);
+  const stubs = await planAcceptanceStubs(session, id);
+  const branch = requireBranchPlan(request, await planBranch(ws.git, branchRequest(request, names.increment, [`origin/${names.base}`, names.base])));
   return session.plan({ document: document(session, id), statusBefore: null, statusAfter: 'New', edits: [{ section: 'document', action: 'add' }],
-    created: { increment: path, pullRequest: ws.path('pullRequest', kickoff.id), issue: issue ? ws.path('issue', issue) : null, stubs: stubs.created },
-    stubs, branch }, branchStep(branch, plan => runBranch(ws.git, plan)));
+    created: { increment: path, ...linked, stubs: stubs.created }, stubs, branch }, branchStep(branch, plan => runBranch(ws.git, plan)));
 }
 
 /** Applies Increment edits and plans stubs when criteria may have changed. */
 async function editPlan(request: Request, context: Context, edits: (session: Session) => Promise<IncrementEdit[]>, stubs = false): Promise<SessionPlan> {
-  const session = await Session.open(context), doc = await session.get('increment', request.args[0]);
+  const session: Session = await Session.open(context), doc = await session.get('increment', request.args[0]);
   let text = doc.text;
   const summary = [];
   for (const edit of await edits(session)) {
@@ -62,7 +69,7 @@ async function editPlan(request: Request, context: Context, edits: (session: Ses
     text = result.text; summary.push(...result.edits);
   }
   session.write(doc.path, text);
-  const report = stubs ? await planStubs(session, doc.id) : undefined;
+  const report = stubs ? await planAcceptanceStubs(session, doc.id) : undefined;
   return session.plan({ document: document(session, doc.id), statusBefore: doc.model.status, statusAfter: doc.model.status, edits: summary, ...(report ? { stubs: report } : {}) });
 }
 const fields = ['title', 'owner', 'size', 'e2e'] as const;
@@ -89,7 +96,7 @@ const acSetPlan: Planner = (request, context) => editPlan(request, context, asyn
 const refAddPlan: Planner = (request, context) => editPlan(request, context, async () => [{ kind: 'ref-add', ref: text(request) }]);
 
 async function statusPlan(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), doc = await session.get('increment', request.args[0]);
+  const session: Session = await Session.open(context), doc = await session.get('increment', request.args[0]);
   const pulls = (await session.all('pullRequest')).filter(pull => pull.model.increment === doc.id).map(pull => pull.model.status);
   const target = text(request), ready = /^ready$/i.test(target.trim()) ? await readiness(session.ws, doc.path, doc.text) : null;
   const to = checkIncrementTransition(doc.model.status, target, { pullRequests: pulls, ...(ready ? { readiness: ready.problems } : {}) });
@@ -99,7 +106,7 @@ async function statusPlan(request: Request, context: Context): Promise<SessionPl
 }
 /** Moves a New pull request to another Increment; both Increments' lists are recomputed. */
 async function attachPlan(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), target = await session.get('increment', request.args[0]), pull = await session.get('pullRequest', request.args[1]);
+  const session: Session = await Session.open(context), target = await session.get('increment', request.args[0]), pull = await session.get('pullRequest', request.args[1]);
   requireIncrementEditable(target.model.status);
   const previous = pull.model.increment;
   if (previous === target.id) throw new OperationError('INCREMENT_UNCHANGED', `${pull.id} already belongs to ${target.id}.`);

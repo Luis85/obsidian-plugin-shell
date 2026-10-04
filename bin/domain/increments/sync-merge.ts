@@ -7,7 +7,8 @@
  * local change). The remote is authoritative for status, head and base. Syncing the result again is a no-op.
  */
 import { idNumber, normalizeText } from './remote-model.ts';
-import type { HostingPlatform, PullRequestStatus, RemoteAmendment, RemotePullRequestView, RemoteState, RemoteTask } from './remote-model.ts';
+import type { RemoteAmendment, RemotePullRequestView, RemoteState, RemoteTask } from './remote-model.ts';
+import type { HostingPlatform, PullRequestStatus } from './model.ts';
 import { composeRemoteBody, parseRemoteBody, renderManagedBlock, requireBodyFits } from './remote-body.ts';
 import type { BodyOptions, ParsedAmendment, ParsedRemoteBody, ParsedTask } from './remote-body.ts';
 import { isTerminalState, statusFromRemote } from './remote-state.ts';

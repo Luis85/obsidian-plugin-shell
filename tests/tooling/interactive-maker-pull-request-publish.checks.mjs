@@ -105,26 +105,26 @@ test('without a hosting platform or origin publish refuses before contacting any
 }, { origin: false }));
 
 test('pr sync pulls remote ticks and new tasks, pushes local ones, blocks on conflicts and is a no-op the second time', () => published(async (ws, fake) => {
-  assert.equal((await planThenApply(ws, 'pr task add', ['delivery-kickoff', 'Review the handoff'])).status, 'applied');
   assert.equal((await ws.run('pr publish', ['delivery-kickoff'], { yes: true })).status, 'applied');
   assert.equal((await ws.run('pr sync', ['delivery-kickoff'])).status, 'unchanged');
-  fake.editBody(1, body => body.replace('- [ ] T-1: Review the handoff', '- [x] T-1: Review the handoff\n- [ ] Added on the platform'));
+  const refine = 'T-1: Refine the increment until the Definition of Ready passes.';
+  fake.editBody(1, body => body.replace(`- [ ] ${refine}`, `- [x] ${refine}\n- [ ] Added on the platform`));
   await planThenApply(ws, 'pr task add', ['delivery-kickoff', 'Local follow-up']);
   const preview = await ws.run('pr sync', ['delivery-kickoff']);
   assert.equal(preview.status, 'planned'); assert.equal(fake.writes(), 1);
-  assert.deepEqual(preview.data.merge.tasks.imported, ['T-3']); assert.deepEqual(preview.data.remoteWrite, { title: false, body: true });
+  assert.deepEqual(preview.data.merge.tasks.imported, ['T-4']); assert.deepEqual(preview.data.remoteWrite, { title: false, body: true });
   const applied = await ws.run('pr sync', ['delivery-kickoff'], { apply: preview.data.planHash });
   assert.equal(applied.status, 'applied', JSON.stringify(applied.diagnostics));
-  assert.match(ws.read(kickoff), /- \[x\] T-1: Review the handoff\n- \[ \] T-2: Local follow-up\n- \[ \] T-3: Added on the platform\n/);
-  assert.match(fake.pulls.get(1).body, /- \[ \] T-3: Added on the platform/);
+  assert.match(ws.read(kickoff), /- \[x\] T-1: Refine the increment until the Definition of Ready passes\.\n- \[ \] T-2: .*\n- \[ \] T-3: Local follow-up\n- \[ \] T-4: Added on the platform\n/);
+  assert.match(fake.pulls.get(1).body, /- \[ \] T-4: Added on the platform/);
   assert.equal((await ws.run('pr sync', ['delivery-kickoff'])).status, 'unchanged', 'a second sync is a no-op');
-  fake.editBody(1, body => body.replace('T-2: Local follow-up', 'T-2: Remote wording'));
-  await planThenApply(ws, 'pr task set', ['delivery-kickoff', 'T-2'], { text: 'Local wording' });
+  fake.editBody(1, body => body.replace('T-3: Local follow-up', 'T-3: Remote wording'));
+  await planThenApply(ws, 'pr task set', ['delivery-kickoff', 'T-3'], { text: 'Local wording' });
   const conflict = await ws.run('pr sync', ['delivery-kickoff'], { yes: true });
   assert.equal(conflict.status, 'blocked'); assert.equal(conflict.diagnostics[0].code, 'PR_SYNC_CONFLICT'); assert.equal(exitCode(conflict), 1);
-  assert.deepEqual(conflict.data.conflicts.map(item => item.key), ['task:T-2:text']);
-  const resolved = await ws.run('pr sync', ['delivery-kickoff'], { resolutions: '{"task:T-2:text":"remote"}', yes: true });
-  assert.equal(resolved.status, 'applied', JSON.stringify(resolved.diagnostics)); assert.match(ws.read(kickoff), /T-2: Remote wording/);
+  assert.deepEqual(conflict.data.conflicts.map(item => item.key), ['task:T-3:text']);
+  const resolved = await ws.run('pr sync', ['delivery-kickoff'], { resolutions: '{"task:T-3:text":"remote"}', yes: true });
+  assert.equal(resolved.status, 'applied', JSON.stringify(resolved.diagnostics)); assert.match(ws.read(kickoff), /T-3: Remote wording/);
   fake.setState(1, 'merged');
   assert.equal((await ws.run('pr sync', ['delivery-kickoff'], { prefer: 'remote', yes: true })).status, 'applied');
   assert.match(ws.read(kickoff), /^status: Merged$/m); assert.match(ws.read('docs/increments/delivery.md'), /· Merged · \[#1\]/);

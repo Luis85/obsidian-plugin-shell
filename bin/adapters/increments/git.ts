@@ -14,7 +14,7 @@ function environment(): NodeJS.ProcessEnv {
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !scrubbed.includes(key)));
   return { ...env, GIT_TERMINAL_PROMPT: '0', GIT_OPTIONAL_LOCKS: '0', GIT_PAGER: 'cat' };
 }
-export const gitRunner: GitRunner = (cwd, args, timeoutMs) => new Promise(accept => {
+const gitRunner: GitRunner = (cwd, args, timeoutMs) => new Promise(accept => {
   execFile('git', [...args], { cwd, env: environment(), shell: false, windowsHide: true, timeout: timeoutMs, maxBuffer: 64 * 1024 * 1024, encoding: 'utf8' },
     (error, stdout) => accept({ code: error ? (typeof error.code === 'number' ? error.code : null) : 0, stdout: String(stdout) }));
 });

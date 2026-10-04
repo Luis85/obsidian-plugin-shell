@@ -6,7 +6,8 @@
 import { canonicalWikilinks } from '../../domain/increments/remote-links.ts';
 import { syncPullRequest, type Side, type SyncOutcome } from '../../domain/increments/sync-merge.ts';
 import type { Hashing, SyncRecord } from '../../domain/increments/sync-record.ts';
-import type { LinkResolver, LinkTarget, PullRequestStatus, RemotePullRequestView, TextHash } from '../../domain/increments/remote-model.ts';
+import type { LinkResolver, LinkTarget, RemotePullRequestView, TextHash } from '../../domain/increments/remote-model.ts';
+import type { PullRequestStatus } from '../../domain/increments/model.ts';
 import type { HostingRemote, RemotePullRequest } from './remote-port.ts';
 import { readBack, requireReady, type UncertainOutcome } from './publish.ts';
 

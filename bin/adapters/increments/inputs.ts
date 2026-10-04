@@ -41,6 +41,11 @@ export function branchRequest(request: Request, name: string, starts: string[]) 
   if (flag(request, 'switch') && flag(request, 'no-branch')) throw new OperationError('INVALID_OPTION', '--switch needs the branch; drop --no-branch.');
   return { name, starts, create: !flag(request, 'no-branch'), switch: flag(request, 'switch'), fetch: flag(request, 'fetch') };
 }
+/** Fails an explicit --branch the plan cannot honour; otherwise the branch status is reported in the summary. */
+export function requireBranchPlan(request: Request, plan: BranchPlan): BranchPlan {
+  if (flag(request, 'branch') && plan.status !== 'planned' && plan.status !== 'exists') throw new OperationError('GIT_UNAVAILABLE', `--branch was requested but ${plan.reason}`);
+  return plan;
+}
 /** Plan extras of a branch step: bound into the plan hash and run right before the files are written. */
 export function branchStep(plan: BranchPlan, run: (plan: BranchPlan) => Promise<unknown>): { steps?: unknown[]; prepare?: () => Promise<unknown> } {
   if (plan.status !== 'planned') return {};

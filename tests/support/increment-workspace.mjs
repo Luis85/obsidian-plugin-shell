@@ -10,9 +10,9 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 
-export const frameworkRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const frameworkRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const identity = ['-c', 'user.name=Workbench Test', '-c', 'user.email=test@workbench.invalid', '-c', 'commit.gpgsign=false'];
-export const git = (cwd, ...args) => execFileSync('git', [...identity, ...args], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+const git = (cwd, ...args) => execFileSync('git', [...identity, ...args], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 
 /**
  * A scratch project. `delivery` copies configs/delivery from this checkout (optionalKeys widened with the CLI's
@@ -24,7 +24,7 @@ export function createWorkspace({ delivery = false, narrow = false, git: withGit
   if (delivery) {
     cpSync(join(frameworkRoot, 'configs/delivery'), join(root, 'configs/delivery'), { recursive: true });
     const path = join(root, 'configs/delivery/delivery.json'), config = JSON.parse(readFileSync(path, 'utf8'));
-    if (!narrow) config.handoff.optionalKeys = ['refs', 'pullRequests', 'branch', 'base', 'issues'];
+    config.handoff.optionalKeys = narrow ? ['refs', 'pullRequests'] : ['refs', 'pullRequests', 'branch', 'base', 'issues'];
     writeFileSync(path, JSON.stringify(config, null, 2) + '\n');
     writeFileSync(join(root, 'CHANGELOG.md'), '# Changelog\n\n## [Unreleased]\n\n[Unreleased]: https://github.com/octo/demo/commits/HEAD\n');
   }

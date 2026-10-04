@@ -16,8 +16,8 @@ export type IssueStatus = typeof issueStatuses[number];
 /** The kick-off pull request merges the increment branch into the base; change pull requests stack on the increment branch. */
 export const pullRequestKinds = ['kickoff', 'change'] as const;
 export type PullRequestKind = typeof pullRequestKinds[number];
-export const hostingPlatforms = ['github', 'azure-devops'] as const;
-export type HostingPlatform = typeof hostingPlatforms[number];
+export const publishingPlatforms = ['github', 'azure-devops'] as const;
+export type HostingPlatform = typeof publishingPlatforms[number];
 /** Frontmatter values in the DoR subset: a scalar string or a `[a, b]` list. */
 export type FrontmatterValue = string | string[];
 export type FrontmatterData = Record<string, FrontmatterValue>;

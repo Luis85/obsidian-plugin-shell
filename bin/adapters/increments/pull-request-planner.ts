@@ -13,33 +13,40 @@ import { insistDelivery } from '../../domain/increments/errors.ts';
 import type { EditSummary } from '../../domain/increments/increment-document.ts';
 import { planBranch, runBranch } from '../../application/increments/git-port.ts';
 import { Session, type SessionPlan } from './session.ts';
-import { branchRequest, branchStep, checkedOption, commaList, flag, fragmentInput, inputRaw, option } from './inputs.ts';
+import { branchRequest, branchStep, checkedOption, commaList, flag, fragmentInput, inputRaw, option, requireBranchPlan } from './inputs.ts';
 
 type Planner = (request: Request, context: Context) => Promise<SessionPlan>;
 const editable = pullRequestSections.filter(name => name !== 'Amendments');
 const document = (session: Session, id: string) => ({ kind: 'pullRequest' as const, id, path: session.ws.path('pullRequest', id) });
 
+/** `--delivers` must name criteria of the increment. */
+function delivered(request: Request, acceptance: readonly { id: string }[], incrementId: string): string[] {
+  const delivers = commaList(option(request, 'delivers')), unknown = delivers.filter(item => !acceptance.some(criterion => criterion.id === item));
+  insistDelivery(!unknown.length, 'PR_DOCUMENT_INVALID', `delivers names ${unknown.join(', ')}, which are not acceptance criteria of ${incrementId}.`);
+  return delivers;
+}
+/** Head and base: explicit options or the change defaults; an explicit other base is a warning. */
+function branchesOf(session: Session, request: Request, owner: { id: string; branch: string | null; base: string | null }, id: string): { head: string; base: string } {
+  const schema = session.ws.schema, defaults = pullRequestBranches('change', owner, id, schema.branches), explicitBase = option(request, 'base');
+  const base = explicitBase ?? defaults.base;
+  for (const warning of checkPullRequestBase('change', base, owner, explicitBase !== undefined, schema.branches)) session.warn(warning.code, warning.message);
+  return { head: option(request, 'head') ?? defaults.head, base };
+}
 async function newPullRequest(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), ws = session.ws, schema = ws.schema, increment = await session.get('increment', request.args[0]);
+  const session: Session = await Session.open(context), ws = session.ws, schema = ws.schema, increment = await session.get('increment', request.args[0]);
   requireIncrementEditable(increment.model.status);
   const id = option(request, 'id') ?? nextPullRequestId(increment.id, (await session.all('pullRequest')).map(doc => doc.id), schema);
   if (await session.exists('pullRequest', id)) throw new OperationError('PR_EXISTS', `${ws.path('pullRequest', id)} already exists.`, `node bin/app pr show ${id}`);
   const fragment = await fragmentInput(request, context, editable, 'PR_DOCUMENT_INVALID'), title = option(request, 'title') ?? fragment?.title;
   insistDelivery(title, 'PR_DOCUMENT_INVALID', 'Supply --title (or a # title in --input).');
   const owner = { id: increment.id, branch: increment.model.branch, base: increment.model.base };
-  const defaults = pullRequestBranches('change', owner, id, schema.branches), explicitBase = option(request, 'base');
-  const base = explicitBase ?? defaults.base, head = option(request, 'head') ?? defaults.head;
-  for (const warning of checkPullRequestBase('change', base, owner, explicitBase !== undefined, schema.branches)) session.warn(warning.code, warning.message);
-  const delivers = commaList(option(request, 'delivers')), known = increment.model.acceptance.map(item => item.id);
-  const unknown = delivers.filter(item => !known.includes(item));
-  insistDelivery(!unknown.length, 'PR_DOCUMENT_INVALID', `delivers names ${unknown.join(', ')}, which are not acceptance criteria of ${increment.id}.`);
+  const { head, base } = branchesOf(session, request, owner, id), delivers = delivered(request, increment.model.acceptance, increment.id);
   const summary = option(request, 'summary');
   session.write(ws.path('pullRequest', id), renderPullRequest({ id, title, increment: { ...owner, title: increment.model.title, path: increment.path }, kind: 'change', head, base,
     branches: schema.branches, delivers, ...(summary ? { summary } : {}), fragment }, schema));
   session.touch(increment.id);
   const start = owner.branch ?? branchNames(schema.branches, increment.id).increment;
-  const branch = await planBranch(ws.git, branchRequest(request, head, [start, `origin/${start}`]));
-  if (flag(request, 'branch') && !['planned', 'exists'].includes(branch.status)) throw new OperationError('GIT_UNAVAILABLE', `--branch was requested but ${'reason' in branch ? branch.reason : ''}`);
+  const branch = requireBranchPlan(request, await planBranch(ws.git, branchRequest(request, head, [start, `origin/${start}`])));
   return session.plan({ document: document(session, id), statusBefore: null, statusAfter: 'New', edits: [{ section: 'document', action: 'add' }],
     kind: 'change', head, base, delivers, acceptance: delivers.map(ac => acceptanceStubPath(schema.acceptance, increment.id, ac)), branch },
   branchStep(branch, plan => runBranch(ws.git, plan)));
@@ -47,7 +54,7 @@ async function newPullRequest(request: Request, context: Context): Promise<Sessi
 
 /** Applies pull-request ops in order and refreshes the owning Increment's list. */
 async function editPlan(request: Request, context: Context, ops: (session: Session) => Promise<PullRequestOp[]>): Promise<SessionPlan> {
-  const session = await Session.open(context), doc = await session.get('pullRequest', request.args[0]);
+  const session: Session = await Session.open(context), doc = await session.get('pullRequest', request.args[0]);
   let text = doc.text;
   const edits: EditSummary[] = [];
   for (const op of await ops(session)) { const result = editPullRequest(text, op, await session.ws.files()); text = result.text; edits.push(...result.edits); }
@@ -93,14 +100,14 @@ const amendPlan: Planner = (request, context) => editPlan(request, context, asyn
   return [{ kind: 'amend', body, date: session.ws.now().toISOString().slice(0, 10) }];
 });
 async function statusPlan(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), doc = await session.get('pullRequest', request.args[0]);
+  const session: Session = await Session.open(context), doc = await session.get('pullRequest', request.args[0]);
   const text = changePullRequestStatus(doc.text, second(request));
   session.write(doc.path, text); session.touch(doc.model.increment);
   return session.plan({ document: document(session, doc.id), statusBefore: doc.model.status, statusAfter: parsePullRequest(text).status, edits: [{ section: 'frontmatter', action: 'set', itemId: 'status' }] });
 }
 /** Links an issue the pull request resolves: `issues` on the pull request and `pullRequests` on the issue. */
 async function issueAddPlan(request: Request, context: Context): Promise<SessionPlan> {
-  const session = await Session.open(context), pull = await session.get('pullRequest', request.args[0]), issue = await session.get('issue', request.args[1]);
+  const session: Session = await Session.open(context), pull = await session.get('pullRequest', request.args[0]), issue = await session.get('issue', request.args[1]);
   if (issue.model.increment !== pull.model.increment) session.warn('ISSUE_INCREMENT_MISMATCH', `${issue.id} belongs to ${issue.model.increment}, ${pull.id} to ${pull.model.increment}.`);
   const linked = editPullRequest(pull.text, { kind: 'links', issues: [...new Set([...pull.model.issues, issue.id])] });
   session.write(pull.path, linked.text);
