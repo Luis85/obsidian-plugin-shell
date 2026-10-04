@@ -5,6 +5,7 @@ import { join, resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { stableVersion } from './prepare.mjs';
 import { checkDependencyPins } from '../security/dependency-pins.mjs';
+import { extractNotes } from './changelog.mjs';
 
 export const assetNames = Object.freeze(['main.js', 'manifest.json', 'styles.css']);
 export function git(root, args) { return execFileSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true }).trim(); }
@@ -45,8 +46,11 @@ export async function retainCandidate({ root, input, output, commit, version, qu
   const { bytes, manifest, dependencyPins } = await collectAssets(root, input, version);
   const hashes = Object.fromEntries(assetNames.map(name => [name, sha256(bytes[name])]));
   if (JSON.stringify(qualification.assetHashes) !== JSON.stringify(hashes)) throw new Error('QUALIFICATION_HASH_MISMATCH');
-  const notes = await regularBytes(join(root, 'CHANGELOG.md'));
-  if (!notes.toString().includes(`## ${version}\n`)) throw new Error('VERSION_NOTES_REQUIRED');
+  // release-notes.md is only this version's Keep a Changelog section body, the exact text a release publishes.
+  let section;
+  try { section = extractNotes((await regularBytes(join(root, 'CHANGELOG.md'))).toString('utf8'), version); }
+  catch (error) { throw new Error(`VERSION_NOTES_REQUIRED: ${error.message}`); }
+  const notes = Buffer.from(section + '\n');
   const record = { schemaVersion: 1, kind: 'release-rehearsal', sourceCommit: commit, version,
     identity: manifest.id, minAppVersion: manifest.minAppVersion, isDesktopOnly: manifest.isDesktopOnly,
     assetHashes: hashes, notesHash: sha256(notes), lockHash: dependencyPins.lockfile.hash, dependencyPins,
