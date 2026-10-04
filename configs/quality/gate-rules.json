@@ -15,7 +15,7 @@
     "native": ["scripts/testing/native-*", "scripts/testing/obsidian-*", "scripts/dev/**"],
     "setup": ["scripts/setup.mjs", "scripts/setup/**", "scripts/shared/npm-install.mjs", "scripts/bundling/**"],
     "release": ["scripts/release/**", "scripts/security/**", "scripts/maintenance/**"],
-    "quality": ["scripts/quality/**", "configs/quality/**", "configs/lint/**", "scripts/testing/suite-manifest.mjs", "scripts/testing/evidence-*"],
+    "quality": ["scripts/quality/**", "configs/quality/**", "configs/lint/**", "scripts/testing/suite-manifest.mjs", "scripts/testing/test-levels.mjs", "scripts/testing/evidence-*"],
     "test-data": ["scripts/companion/test-data-manifest.mjs"]
   },
   "gates": {
