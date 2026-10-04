@@ -148,7 +148,7 @@ Revisited steps are always asked again, even when their `when` condition was mea
 | Flow | Why it is not a wizard here |
 | --- | --- |
 | `new <dir>` starter questions | Already data: each starter's `inputs[]` in `configs/starters/*.json` (the separately distributed starter schema). |
-| `npm run setup` | Dependency-free Node script that must run before dependencies and TypeScript tooling are installed. |
+| `npm run setup` | Dependency-free Node script that must run before dependencies and TypeScript tooling are installed. Its questions are still data: `configs/forms/setup-identity.json`, read by `scripts/setup/form.mjs`, which supports only `text` and `confirm` fields (`id`, `kind`, `label`, `help`) whose ids equal the setup `--answers` keys, and fails closed on anything else. See [setup identity](SETUP-IDENTITY.md). |
 | Studio editors (pages, bricks, templates) | Open-ended edit menus, not linear guided processes. |
 | Project handout | A Markdown checklist that is filled in and validated, not asked live. |
 
@@ -167,5 +167,5 @@ Revisited steps are always asked again, even when their `when` condition was mea
   reference stops the run before anything is asked.
 - Every write still goes through a reviewed, hash-approved file plan, and process execution keeps its
   separate approval. Definitions cannot add approvals, run commands or write without a review.
-- The plugin runtime (`src/`) does not render these forms. The schema is framework-free so a later renderer
-  can reuse it, but none ships yet.
+- The plugin runtime renders the same format with its own reader (`src/domain/forms`) and the `DataForm` component,
+  limited to forms without CLI hooks; definitions live in `src/features/<feature>/forms/`. See [runtime forms](RUNTIME-FORMS.md).

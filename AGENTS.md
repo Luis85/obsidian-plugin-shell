@@ -104,7 +104,9 @@ authoring API through `src/features/api.ts`. One explicit registration in bootst
 constructs typed repositories and owns disposal. Features may depend only on
 feature/application/domain contracts, never concrete host/framework adapters.
 New business features should not require editing generic persistence services or
-main.ts; prove the extension path with a distinct test feature.
+main.ts; prove the extension path with a distinct test feature. Runtime forms are JSON in
+`src/features/<feature>/forms/`, declared with `defineForm` and rendered by `DataForm`; they never import
+`configs/forms` (see docs/development/RUNTIME-FORMS.md).
 
 Native modal/notice behavior belongs behind `services.modals` and `services.notices`;
 features must not construct host UI classes. Command/ribbon factories belong to

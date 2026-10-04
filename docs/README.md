@@ -33,6 +33,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Setup inside an extracted kit](development/EXTRACTED-KIT-SETUP.md) | Run `node bin/app setup` in a locally packed framework kit. |
 | [Local and cloud sessions](development/CLOUD-AND-LOCAL-SESSIONS.md) | Take a project from a local checkout to a ready cloud agent session. |
 | [Data-driven wizards and forms](development/WIZARDS-AND-FORMS.md) | Add or change a guided CLI process or reusable form in `configs/wizards` and `configs/forms`. |
+| [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | Render a JSON form inside the plugin from `src/features/<feature>/forms` and receive validated values. |
 | [Shell CLI user manual](user-manual/shell-cli/index.md) | Task pages for design-to-project, daily development, automation, maintenance and troubleshooting. |
 
 **Design, prototype and generate**
@@ -78,6 +79,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | --- | --- |
 | [Authoring tools](development/AUTHORING-TOOLS.md) | Maker catalog, recipes, bounds and `entities:catalog`. |
 | [Plugin-data entities](development/PLUGIN-DATA-ENTITIES.md) | `definePluginDataFeature`, the shared `PluginDataStore` and its write semantics. |
+| [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | `defineForm`, the `DataForm` component, supported kinds, rejected CLI-only constructs and value semantics. |
 | [Modal and notice services](development/MODALS-AND-NOTICES.md) | `services.modals` and `services.notices` APIs. |
 | [Runtime events and owned notifications](development/RUNTIME-SERVICES.md) | Native observations, notification timing, queues and recovery actions. |
 | [Setup and identity](development/SETUP-IDENTITY.md) | `npm run setup` profiles, identity flags, resume and data migration. |

@@ -13,11 +13,13 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - `release:changelog` validates this changelog and extracts one version's notes; release preparation promotes the Unreleased section into the new version.
 - Archived historical development documents so current guidance stays discoverable.
 - Data-driven wizards and forms: every guided shell process (settings, first-run, project-setup, new project, prototype, brainstorm and the framework `setup` interview and stage approvals) is now a JSON wizard in `configs/wizards`, with reusable forms in `configs/forms`. New `node bin/app wizard` and `node bin/app form` commands run, list, show, check and validate them; a new guided process needs only JSON unless it calls a new service.
+- Data-driven forms in the plugin runtime: a feature ships a JSON form in `src/features/<feature>/forms/`, declares it with `defineForm` from the feature API and renders it with the shared `DataForm` component, which validates the draft and returns typed values without persisting anything. The runtime reads the same format as `configs/forms` but rejects CLI-only hooks and kinds; the showcase gains a Forms page.
 
 ### Changed
 
 - This changelog now follows Keep a Changelog 1.1.0, and release candidates carry only the released version's section as release notes.
 - Prototype guides moved from `bin/guides` to `configs/guides`; their content, ids and versions are unchanged.
+- `npm run setup` asks its identity and MCP questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
 
 ## [0.4.0] - 2026-09-23
 
