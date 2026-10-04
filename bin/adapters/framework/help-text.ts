@@ -140,7 +140,7 @@ const specific: Record<string, OptionHelp> = {
   preference: { description: 'Preference key for setting makers.' },
   document: { description: 'Note-backed entity (requires the markdown backend).' },
   check: { description: 'Read-only: compare the pending locale draft (make locale <name> --check) with the current base keys; plans and writes nothing.' },
-  refresh: { description: 'make locale <name> --refresh: add only the base keys a pending draft lacks, keeping every existing translation; review with --dry-run first.' },
+  refresh: { description: 'make locale <name> --refresh: add the base keys a pending draft lacks and drop keys the base no longer has, keeping every surviving translation; review with --dry-run first.' },
   'trust-custom': { description: 'Run a registered local custom recipe (scripts/makers/custom/<name>.mjs); it executes trusted project code, so review it first. Built-in recipes never need it.' },
   profile: { description: 'Execution profile.' },
   from: { description: 'Extracted replacement kit folder.' },
@@ -314,7 +314,7 @@ const describe = (description: string) => (doc: OptionHelp) => { doc.description
 /** Command-specific option documentation, applied in order over the shared descriptions. */
 const optionOverrides: OptionOverride[] = [
   [(id, name) => name === 'profile' && Boolean(profiles[id]), (doc, id) => { doc.values = profiles[id]; doc.default = profileDefaults[id]; }],
-  [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility.')],
+  [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. Steps of local composite actions (.github/actions/<name>/action.yml) count as the job\'s own steps.')],
   [option('ci', 'execute'), describe('Run the job\'s run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed.')],
   [option('setup resume', 'stage'), doc => { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }],
   [option('project schema', 'version'), doc => { doc.description = 'Published project schema version; only the current schema 6 exists.'; doc.values = ['6']; doc.default = '6'; }],

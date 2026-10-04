@@ -9,7 +9,7 @@ Do not skip a step because the change looks small. Report what actually ran.
 
 1. See which gates this diff needs: `node bin/app check --plan --json`. If the command
    is unknown in this checkout, continue with step 2.
-2. Run `npm run check`, then `npm run verify:project`. Run `npm run test:ui-quality` and
+2. Run `npm run verify:project` (it runs `npm run check` first). Run `npm run test:ui-quality` and
    `npm run ui:gallery` for any UI change, and `npm run -s dev:obsidian -- --json` when
    the host is involved and Obsidian is already provisioned (never download it yourself).
    A failing or skipped step goes in the pull request as it is.

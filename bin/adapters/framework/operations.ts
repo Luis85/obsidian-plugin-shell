@@ -84,7 +84,7 @@ async function makerCheck(request: Request, context: Context): Promise<Result> {
   const { checkPendingLocale } = await import('../makers/pending-locale.ts');
   const check = await checkPendingLocale(createMakerContext(context.root).read, slug(name, 'locale name'));
   if (!check.missing.length && !check.extra.length && check.selectable === false) return result(request.command, check);
-  const drift = new OperationError('LOCALE_DRAFT_DRIFT', `Pending locale ${check.locale} differs from the base keys or is selectable.`, 'Restore missing keys, remove extra keys and keep the draft unselectable until its translation review.');
+  const drift = new OperationError('LOCALE_DRAFT_DRIFT', `Pending locale ${check.locale} differs from the base keys or is selectable.`, `Review make locale ${check.locale} --refresh --dry-run, which restores missing keys and removes extra keys, and keep the draft unselectable until its translation review.`);
   drift.details = check;
   throw drift;
 }

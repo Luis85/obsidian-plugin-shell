@@ -5,7 +5,7 @@
   "name": "Start Blank",
   "category": "Foundations",
   "level": "Foundation",
-  "summary": "A minimal runnable shell with an empty generated workspace and no product requirements; the framework's Task, Project and Items examples stay registered.",
+  "summary": "A minimal runnable shell with an empty generated workspace and no product requirements; the framework's Task, Project and Items examples stay registered until you run npm run examples:remove.",
   "outcome": "Best when your idea does not fit an existing pattern.",
   "tags": [
     "blank",
@@ -16,7 +16,7 @@
   "includes": [
     "Command and ribbon entry to an empty workspace",
     "Native settings surface and host-friendly design tokens",
-    "No generated entities, source recipes or PRDs (the framework's example features stay registered)"
+    "No generated entities, source recipes or PRDs (the framework's example features stay registered; npm run examples:remove removes them)"
   ],
   "implementation": [
     "Your domain model, pages and business behavior",

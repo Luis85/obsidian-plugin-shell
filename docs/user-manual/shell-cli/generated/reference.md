@@ -3289,7 +3289,7 @@ node bin/app make <recipe> <name> [options] | make list | make describe <recipe>
 | --list | flag | List the available entries instead of creating one. | See command semantics |
 | --trust-custom | flag | Run a registered local custom recipe (scripts/makers/custom/&lt;name&gt;.mjs); it executes trusted project code, so review it first. Built-in recipes never need it. | See command semantics |
 | --check | flag | Read-only: compare the pending locale draft (make locale &lt;name&gt; --check) with the current base keys; plans and writes nothing. | See command semantics |
-| --refresh | flag | make locale &lt;name&gt; --refresh: add only the base keys a pending draft lacks, keeping every existing translation; review with --dry-run first. | See command semantics |
+| --refresh | flag | make locale &lt;name&gt; --refresh: add the base keys a pending draft lacks and drop keys the base no longer has, keeping every surviving translation; review with --dry-run first. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |
@@ -3686,7 +3686,7 @@ node bin/app ci (--list | --job <workflow-file-stem>/<job-id> [--matrix key=valu
 | --- | --- | --- | --- |
 | --job | value | Job to reproduce, as &lt;workflow-file-stem&gt;/&lt;job-id&gt; (for example ci/baseline); see ci --list. | See command semantics |
 | --matrix | value | Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-24.04); required when an expression computes the matrix. | See command semantics |
-| --list | flag | List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. | See command semantics |
+| --list | flag | List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. Steps of local composite actions (.github/actions/&lt;name&gt;/action.yml) count as the job's own steps. | See command semantics |
 | --execute | flag | Run the job's run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 per step |

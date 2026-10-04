@@ -22,7 +22,7 @@ import { visualDefinitions, visualPackages, visualAdapterPath } from '../emitter
 import { visualNodes } from '../../../scripts/companion/visual/visual-ir.mjs';
 import { styleCode } from '../emitters/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../emitters/devkit-files.ts';
-import { relocateFrameworkDocuments } from '../emitters/framework-docs.ts';
+import { relocateFrameworkDocuments, scopeExampleOwnership } from '../emitters/framework-docs.ts';
 import { maintainerScript, rewriteDocReferences } from '../emitters/framework-scope.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
 function replacedProducer(previous: string | undefined, producer: string): string | undefined {
@@ -51,14 +51,15 @@ function projectScripts(scripts: Scripts, m: Model): void {
   Object.assign(scripts, previewScripts());
   uiQualityScripts(scripts);
   scripts['test:project'] = effects ? 'node scripts/testing/suites.mjs project project:ui-effects' : 'node scripts/testing/suites.mjs project && npm run test:ui-effects';
-  scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
-  // What the full gate adds to `check` (which already runs typecheck, lint and the product tests): CI runs
-  // `check` then this, so no gate runs twice.
+  // What the full gate adds to `check` (which already runs typecheck, both linters, the product tests and the maker
+  // tooling tests): CI runs `check` then this, so no gate runs twice.
   scripts['verify:artifacts'] = 'npm run build && npm run test:ui-effects';
+  // The full local gate is `check` plus that addition, so it is a superset of `check` by construction.
+  scripts['verify:project'] = 'npm run check && npm run verify:artifacts';
   for (const name of Object.keys(scripts)) if (maintainerScript(name)) delete scripts[name];
 }
 function fixtureScripts(scripts: Scripts): void {
-  scripts['testdata:check']='node scripts/test-data/verify.mjs'; for (const name of ['verify:project', 'verify:artifacts']) scripts[name] += ' && npm run testdata:check';
+  scripts['testdata:check']='node scripts/test-data/verify.mjs'; scripts['verify:artifacts'] += ' && npm run testdata:check';
   for(const command of ['plan','apply','reset-plan','reset','serve']) scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
 }
 /** Always present, so `npm run test:tdd` has a real acceptance check before the first requirement exists. */
@@ -81,7 +82,7 @@ it('every requirement in design/traceability.json keeps its use case and accepta
 /** Emit the existing plugin project from explicit template data, without host I/O. */
 export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Model): Promise<Entry[]> {
   const entries = new Map(templateRoot.frameworkFiles.map(file => [file.path, { ...file } ]));
-  relocateFrameworkDocuments(entries);
+  relocateFrameworkDocuments(entries); scopeExampleOwnership(entries);
   const collector = artifactCollector([...entries.values()].map(file => ({ ...file, producer: 'framework' })));
   let producer = 'project';
   const add: Add = (path, content, ownership = 'extension') => {

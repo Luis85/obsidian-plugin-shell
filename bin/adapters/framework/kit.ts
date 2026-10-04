@@ -91,11 +91,12 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   return files;
 }
 export async function packKit(context: Context, output: string) {
+  // The requested output is validated before the source is inspected, so a bad path fails the same way everywhere.
+  const destination = resolve(context.root, output), parts = relative(context.root, destination).split(sep);
+  requireThat(destination.endsWith('.zip') && !parts.some(part => isProtectedSegment(part)), 'KIT_OUTPUT_PATH', 'Choose a ZIP output outside protected project directories.');
   requireThat(!await exists(join(context.frameworkRoot, 'shell.config.json')), 'KIT_AUTHORING_ROOT', 'Build framework distributions from a clean framework source, not a configured consumer project.');
   const identity = object(await readJson(join(context.frameworkRoot, 'manifest.json')));
   requireThat(identity.id === 'plugin-shell' && !await exists(join(context.frameworkRoot, '.companion/generation.json')), 'KIT_AUTHORING_ROOT', 'Consumer plugins are not framework distribution sources.');
-  const destination = resolve(context.root, output), parts = relative(context.root, destination).split(sep);
-  requireThat(destination.endsWith('.zip') && !parts.some(part => isProtectedSegment(part)), 'KIT_OUTPUT_PATH', 'Choose a ZIP output outside protected project directories.');
   const compiler = await installedCompiler();
   const files = await assembleKit(context, compiler), bytes = zip(files), path = resolve(context.root, output);
   const plan = await createFilePlan(dirname(path), [{ path: basename(path), content: bytes.toString('base64'), encoding: 'base64' }]);

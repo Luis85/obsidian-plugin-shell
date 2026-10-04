@@ -13,7 +13,7 @@
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "sha256": "f52bf9b1d0f04bdcc005625437b0c0a4750a35e5b801bd37650e29f2eb26b3cf"
+      "sha256": "bf8d930b8a886130739bb666ea35be582f7058fc44cae756599ab4d3198c0e7a"
     },
     {
       "path": "bin/compiler/domain/diagnostics.ts",
@@ -31,7 +31,7 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "e42a69f0be25e55a78fcd0881441b8fde0cef92aaf4a58c125b3bc7f62689084"
+      "sha256": "6a0a013704e96142cdc132493554bfdd37ffd6ddcf1d0037b2972b13aea0fecc"
     },
     {
       "path": "diagnostics.md",
@@ -39,7 +39,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "0920b17c23295d2a226a4ec320498c63b131dc75d5ef7b15964c79e7211bb897"
+      "sha256": "4f930b9d4a9fb581b5c34e0b4557172f6708829d408ced33ce75fdc6f0a1f7f5"
     }
   ]
 }

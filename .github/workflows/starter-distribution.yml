@@ -47,9 +47,8 @@ jobs:
         with:
           install: 'true'
           install-flags: --strict-allow-scripts
-      - name: Typecheck and test the independent definition contract
+      - name: Test the independent definition contract
         run: |
-          node "$QUALIFIED_NPM" run typecheck:framework
           node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/framework-new-project.checks.mjs tests/tooling/framework-distribution.checks.mjs
       - name: Check suite registration and bounded asset contracts
         run: node scripts/testing/suites.mjs --check

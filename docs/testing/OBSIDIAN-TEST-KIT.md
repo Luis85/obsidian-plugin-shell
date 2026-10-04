@@ -105,9 +105,13 @@ expect(leaf.view.containerEl.querySelector('[data-testid="my-panel"]')).not.toBe
 
 Leaves really construct registered views, run `onOpen`/`onClose`, and keep their leaf
 (with a placeholder view) when the plugin unloads. The shell itself is proven against
-the kit in `tests/runtime/obsidian-test-kit-shell.test.ts`: it loads `src/main.ts`,
-opens the Vue showcase, toggles a native setting and writes, updates and trashes task
-notes through `src/infrastructure/obsidian` with exact Markdown assertions.
+the kit in `tests/runtime/obsidian-test-kit-shell-entry.test.ts`, which loads `src/main.ts`,
+opens the Vue showcase and toggles a native setting, and in
+`tests/runtime/obsidian-test-kit-shell.test.ts`, which writes, updates and trashes task
+notes through `src/infrastructure/obsidian` with exact Markdown assertions. A generated
+project replaces `src/main.ts` with its own entry, so it does not receive the entry test
+(nor `tests/runtime/shell-entry-lifecycle.test.ts`); its `test:framework` runs every other
+framework runtime test.
 
 ## What the kit does not prove
 
