@@ -71,19 +71,30 @@ async function askRecord(ui: Prompts, field: FormField, value: FormValues, env: 
     (record as FormValues)[key] = await askValue(ui, entry, (record as FormValues)[key], env);
   }
 }
+const commitHook = (env: FormEnvironment, name: string) => hook(env.hooks.commit, name, 'commit hook');
+/** A prepare hook builds the section value; otherwise a bound section edits a copy and an unbound one edits its parent. */
+function sectionValue(field: FormField, parent: FormValues, env: FormEnvironment): FormValues {
+  if (field.prepare) return hook(env.hooks.prepare, field.prepare, 'prepare hook')(parent);
+  return field.bind ? structuredClone((getPath(parent, field.bind) ?? {}) as FormValues) : parent;
+}
+function commitSection(field: FormField, form: FormDefinition | undefined, value: FormValues, parent: FormValues, env: FormEnvironment): void {
+  const formCommitted = form?.commit ? commitHook(env, form.commit)(value, parent) : value;
+  setPath(parent, field.bind!, field.commit ? commitHook(env, field.commit)(formCommitted as FormValues, parent) : formCommitted);
+}
+/** One pass through the section; false means Back left a gated section, whose gate is asked again. */
+async function sectionPass(ui: Prompts, field: FormField, parent: FormValues, env: FormEnvironment, gated: boolean): Promise<boolean> {
+  const value = sectionValue(field, parent, env);
+  const form = field.form ? formDefinition(env, field.form) : undefined;
+  try { await runFields(ui, form?.fields ?? field.fields!, value, env); }
+  catch (error) { if (error instanceof Back && gated) return false; throw error; }
+  if (field.bind) commitSection(field, form, value, parent, env);
+  return true;
+}
 async function askSection(ui: Prompts, field: FormField, parent: FormValues, env: FormEnvironment): Promise<void> {
   const gate = field.gate ? renderText(field.gate, env.data) : undefined;
   while (true) {
     if (gate && !await confirm(ui, gate)) return;
-    const bound = field.bind ? getPath(parent, field.bind) : parent;
-    const value = field.prepare ? hook(env.hooks.prepare, field.prepare, 'prepare hook')(parent) : field.bind ? structuredClone((bound ?? {}) as FormValues) : parent;
-    const form = field.form ? formDefinition(env, field.form) : undefined;
-    try { await runFields(ui, form?.fields ?? field.fields!, value, env); }
-    catch (error) { if (error instanceof Back && gate) continue; throw error; }
-    if (!field.bind) return;
-    const formCommitted = form?.commit ? hook(env.hooks.commit, form.commit, 'commit hook')(value, parent) : value;
-    setPath(parent, field.bind, field.commit ? hook(env.hooks.commit, field.commit, 'commit hook')(formCommitted as FormValues, parent) : formCommitted);
-    return;
+    if (await sectionPass(ui, field, parent, env, Boolean(gate))) return;
   }
 }
 async function askField(ui: Prompts, field: FormField, value: FormValues, answers: FormValues, env: FormEnvironment): Promise<void> {
@@ -114,5 +125,5 @@ export async function runFields(ui: Prompts, fields: readonly FormField[], value
 /** Ask every visible field of a form against `value` (edited in place) and return its committed result. */
 export async function runForm(ui: Prompts, form: FormDefinition, value: FormValues, env: FormEnvironment): Promise<unknown> {
   await runFields(ui, form.fields, value, env);
-  return form.commit ? hook(env.hooks.commit, form.commit, 'commit hook')(value, value) : value;
+  return form.commit ? commitHook(env, form.commit)(value, value) : value;
 }

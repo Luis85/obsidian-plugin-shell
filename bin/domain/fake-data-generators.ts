@@ -73,17 +73,22 @@ function argument(kind: ArgKind, value: unknown, name: string): number | string 
   requireSketch(Number.isSafeInteger(value) && value >= min && value <= max, 'FAKE_DATA_ARGS', `${name} must be a whole number from ${min} to ${max}.`);
   return value;
 }
-/** Validate a generator method, its JSON-only arguments and its fit with the property type. */
-export function fakerCall(method: unknown, raw: unknown, type: FakePropertyType, name: string): { faker: string; args: FakeArgs } {
-  requireSketch(typeof method === 'string' && Object.hasOwn(fakerMethods, method), 'FAKE_DATA_GENERATOR', `${name}.faker must be an allowlisted generator such as person.fullName; see fake-data generators.`);
-  const spec = fakerMethods[method]!;
-  requireSketch(compatible[spec.output].includes(type), 'FAKE_DATA_GENERATOR', `${name}.faker ${method} cannot fill a ${type} property.`);
+/** Defaults overlaid with the given JSON arguments; unknown keys and missing required ones fail closed. */
+function fakerArgs(method: string, spec: MethodSpec, raw: unknown, name: string): Record<string, number | string> {
   const given = raw === undefined ? {} : object(raw), allowed = spec.args ?? {};
   const unknown = Object.keys(given).filter(key => !Object.hasOwn(allowed, key));
   requireSketch(!unknown.length, 'FAKE_DATA_ARGS', `${name}.args has unsupported keys: ${unknown.join(', ')}.`);
   const args: Record<string, number | string> = { ...spec.defaults };
   for (const [key, value] of Object.entries(given)) args[key] = argument(allowed[key]!, value, `${name}.args.${key}`);
   for (const key of spec.required ?? []) requireSketch(Object.hasOwn(args, key), 'FAKE_DATA_ARGS', `${name}.args.${key} is required for ${method}.`);
+  return args;
+}
+/** Validate a generator method, its JSON-only arguments and its fit with the property type. */
+export function fakerCall(method: unknown, raw: unknown, type: FakePropertyType, name: string): { faker: string; args: FakeArgs } {
+  requireSketch(typeof method === 'string' && Object.hasOwn(fakerMethods, method), 'FAKE_DATA_GENERATOR', `${name}.faker must be an allowlisted generator such as person.fullName; see fake-data generators.`);
+  const spec = fakerMethods[method]!;
+  requireSketch(compatible[spec.output].includes(type), 'FAKE_DATA_GENERATOR', `${name}.faker ${method} cannot fill a ${type} property.`);
+  const args = fakerArgs(method, spec, raw, name);
   const low = args.min ?? args.from, high = args.max ?? args.to;
   requireSketch(low === undefined || high === undefined || low <= high, 'FAKE_DATA_ARGS', `${name}.args needs a lower bound that does not exceed the upper bound.`);
   return { faker: method, args: Object.freeze(args) };

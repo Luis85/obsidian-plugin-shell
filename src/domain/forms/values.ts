@@ -42,21 +42,21 @@ export const visibleDataFormNodes = (definition: DataFormDefinition, value: unkn
 function issue(node: DataFormNode, code: DataFormIssueCode, params?: Readonly<Record<string, number>>): DataFormIssue {
   return Object.freeze({ path: node.path, code, ...(node.field.message ? { message: node.field.message } : {}), ...(params ? { params } : {}) });
 }
+function checkLeaf(node: DataFormNode, source: unknown, output: DataFormValues, issues: DataFormIssue[]): void {
+  const answer = valueAt(source, node.path) ?? node.field.default;
+  if (answer === undefined) {
+    if (node.field.required === true || node.field.kind === 'title') issues.push(issue(node, 'required'));
+    return;
+  }
+  const result = answerFor(node.field, answer, true);
+  if (result.ok) assignAt(output, node.path, result.value);
+  else issues.push(issue(node, result.code, result.params));
+}
 function check(nodes: readonly DataFormNode[], source: unknown, output: DataFormValues, issues: DataFormIssue[]): void {
   for (const node of nodes) {
-    if (node.children) {
-      if (node.field.bind !== undefined) assignAt(output, node.path, {});
-      check(node.children, source, output, issues);
-      continue;
-    }
-    const answer = valueAt(source, node.path) ?? node.field.default;
-    if (answer === undefined) {
-      if (node.field.required === true || node.field.kind === 'title') issues.push(issue(node, 'required'));
-      continue;
-    }
-    const result = answerFor(node.field, answer, true);
-    if (result.ok) assignAt(output, node.path, result.value);
-    else issues.push(issue(node, result.code, result.params));
+    if (!node.children) { checkLeaf(node, source, output, issues); continue; }
+    if (node.field.bind !== undefined) assignAt(output, node.path, {});
+    check(node.children, source, output, issues);
   }
 }
 /**

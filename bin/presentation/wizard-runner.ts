@@ -64,30 +64,41 @@ async function runStep(session: Session, step: WizardStep, state: FormValues): P
     run: (id, nested = Object.create(null)) => runWizardById(session, id, nested) });
 }
 const cancelled = (error: unknown) => error instanceof Error && 'code' in error && error.code === 'CANCELLED';
+/** Where a walk stands: the next step, whether it is revisited regardless of `when`, and the interactive steps Back can reach. */
+interface Cursor { index: number; revisit: boolean; history: number[] }
+const whenValue = (step: WizardStep, state: FormValues) => step.when?.path ? getPath(state, step.when.path) : undefined;
+const skipped = (cursor: Cursor, step: WizardStep, state: FormValues) => !cursor.revisit && !matches(step.when, whenValue(step, state));
+/** A failed step either moves Back, retries (reporting the error) or propagates. */
+function recover(session: Session, wizard: WizardDefinition, step: WizardStep, cursor: Cursor, error: unknown): void {
+  const { history } = cursor;
+  // A retried or revisited step may already be recorded; Back always targets an earlier step.
+  while (history.length && history.at(-1)! >= cursor.index) history.pop();
+  if (error instanceof Back && history.length) { cursor.index = history.pop()!; cursor.revisit = true; return; }
+  if (error instanceof Back || !step.retry || cancelled(error)) throw error;
+  reportError(session.ui, error);
+  cursor.index = step.retry === true ? cursor.index : wizard.steps.findIndex(item => item.id === step.retry); cursor.revisit = true;
+}
+async function visit(session: Session, wizard: WizardDefinition, step: WizardStep, state: FormValues, cursor: Cursor): Promise<ActionOutcome> {
+  cursor.revisit = false;
+  if (step.barrier) cursor.history.length = 0;
+  showContext(session, wizard, step, state);
+  try {
+    const outcome = await runStep(session, step, state);
+    if (outcome?.end) return outcome;
+    if (interactive(step)) cursor.history.push(cursor.index);
+    cursor.index++;
+  } catch (error) { recover(session, wizard, step, cursor, error); }
+  return undefined;
+}
 /** Steps run in order; Back returns to the previous interactive step, and a barrier step forgets everything before it. */
 async function walk(session: Session, wizard: WizardDefinition, state: FormValues): Promise<string | undefined> {
-  const history: number[] = [];
-  let index = 0, revisit = false;
-  while (index < wizard.steps.length) {
+  const cursor: Cursor = { index: 0, revisit: false, history: [] };
+  while (cursor.index < wizard.steps.length) {
     requireSketch(!session.options.signal?.aborted, 'CANCELLED', `${wizard.title} cancelled.`);
-    const step = wizard.steps[index]!;
-    if (!revisit && !matches(step.when, step.when?.path ? getPath(state, step.when.path) : undefined)) { index++; continue; }
-    revisit = false;
-    if (step.barrier) history.length = 0;
-    showContext(session, wizard, step, state);
-    try {
-      const outcome = await runStep(session, step, state);
-      if (outcome?.end) return outcome.completion;
-      if (interactive(step)) history.push(index);
-      index++;
-    } catch (error) {
-      // A retried or revisited step may already be recorded; Back always targets an earlier step.
-      while (history.length && history.at(-1)! >= index) history.pop();
-      if (error instanceof Back && history.length) { index = history.pop()!; revisit = true; continue; }
-      if (error instanceof Back || !step.retry || cancelled(error)) throw error;
-      reportError(session.ui, error);
-      index = step.retry === true ? index : wizard.steps.findIndex(item => item.id === step.retry); revisit = true;
-    }
+    const step = wizard.steps[cursor.index]!;
+    if (skipped(cursor, step, state)) { cursor.index++; continue; }
+    const outcome = await visit(session, wizard, step, state, cursor);
+    if (outcome?.end) return outcome.completion;
   }
   return undefined;
 }

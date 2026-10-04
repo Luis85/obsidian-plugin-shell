@@ -51,6 +51,19 @@ const inputForm = (state: FormValues) => starterInputForm(selected(state), Strin
 /** Template data whose suggestedName follows the live id answer, as the former interview did. */
 const suggestion = (value: FormValues): FormValues => ({ get suggestedName() { return derivedName(String(value.id ?? 'my-project')); } });
 const companionQuestions = { askAirship: false, askExtension: false, askExtensions: false };
+type NativeIntegrations = ReturnType<typeof validateNativeIntegrations>;
+interface NativeTargets { fileType?: NativeIntegrations['fileTypes'][number]; menu?: NativeIntegrations['contextMenus'][number] }
+/** A companion's single file type and single context menu are the only native targets the interview offers. */
+function nativeTargets(integrations: unknown): NativeTargets {
+  if (integrations === undefined) return {};
+  const native = validateNativeIntegrations(integrations);
+  return { ...(native.fileTypes.length === 1 ? { fileType: native.fileTypes[0] } : {}), ...(native.contextMenus.length === 1 ? { menu: native.contextMenus[0] } : {}) };
+}
+function companionQuestionsFor(request: Options, { fileType, menu }: NativeTargets): FormValues {
+  return { askAirship: request.airship === undefined && request['no-airship'] === undefined,
+    askExtension: Boolean(fileType) && request.extension === undefined, askExtensions: Boolean(menu) && request.extensions === undefined,
+    native: { extension: fileType?.extension ?? '', extensions: menu?.extensions.join(',') ?? '' } };
+}
 /** Actions behind configs/wizards/new-starter.json. Only missing answers are asked; the operation still validates everything. */
 export const starterModule: WizardModule = {
   hooks: {
@@ -99,11 +112,7 @@ export const starterModule: WizardModule = {
     'starter.companion': async ({ state, options }) => {
       const request = starterRequest(state).options, { starters } = await companionStarterSet(options);
       const document = starters.find(entry => entry.definition.id === state.starterId)?.document;
-      const native = document?.design.nativeIntegrations === undefined ? undefined : validateNativeIntegrations(document.design.nativeIntegrations);
-      const fileType = native?.fileTypes.length === 1 ? native.fileTypes[0] : undefined, menu = native?.contextMenus.length === 1 ? native.contextMenus[0] : undefined;
-      Object.assign(state, { askAirship: request.airship === undefined && request['no-airship'] === undefined,
-        askExtension: Boolean(fileType) && request.extension === undefined, askExtensions: Boolean(menu) && request.extensions === undefined,
-        native: { extension: fileType?.extension ?? '', extensions: menu?.extensions.join(',') ?? '' } });
+      Object.assign(state, companionQuestionsFor(request, nativeTargets(document?.design.nativeIntegrations)));
     },
     /** Answers stay data (`--answers` JSON); no editor or third-party process is launched by the interview. */
     'starter.finish': ({ state }) => {
