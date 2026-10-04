@@ -306,7 +306,7 @@ const describe = (description: string) => (doc: OptionHelp) => { doc.description
 /** Command-specific option documentation, applied in order over the shared descriptions. */
 const optionOverrides: OptionOverride[] = [
   [(id, name) => name === 'profile' && Boolean(profiles[id]), (doc, id) => { doc.values = profiles[id]; doc.default = profileDefaults[id]; }],
-  [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility.')],
+  [option('ci', 'list'), describe('List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. Steps of local composite actions (.github/actions/<name>/action.yml) count as the job\'s own steps.')],
   [option('ci', 'execute'), describe('Run the job\'s run: steps locally through bash, stopping at the first failure. Refused for secrets, publication or deployment. Without it the job is only printed.')],
   [option('setup resume', 'stage'), doc => { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }],
   [option('project schema', 'version'), doc => { doc.description = 'Published project schema version; only the current schema 6 exists.'; doc.values = ['6']; doc.default = '6'; }],
