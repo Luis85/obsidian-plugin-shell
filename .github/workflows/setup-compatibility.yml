@@ -19,8 +19,22 @@ on:
   # showcase and template-authoring jobs (qualified toolchain). This matrix proves the npm
   # install policy and toolchain rows, so it runs when those inputs change.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths: *setup-inputs
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -29,6 +43,7 @@ concurrency:
 jobs:
   setup:
     name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ${{ matrix.os }}
     # Fresh setup runs every verify gate once on the Node 24.15.0 / npm 12 legs,
     # which no other workflow covers. The integrated Windows tooling suites alone

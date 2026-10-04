@@ -1,6 +1,7 @@
 name: Independent Workbench distributions
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'configs/starters/**'
       - 'scripts/starters/**'
@@ -23,7 +24,20 @@ on:
       - 'tests/tooling/starter-*.checks.mjs'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/starter-distribution.yml'
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 # A newer push to the same pull request supersedes the read-only asset build;
@@ -33,6 +47,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   package:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:

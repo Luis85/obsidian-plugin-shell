@@ -3468,6 +3468,7 @@ node bin/app check [options]
 | --- | --- | --- | --- |
 | --fast | flag | Typecheck plus tests related to changed files (git), with eslint/lint on those files and the node --test suites they select; for agent Stop hooks. | See command semantics |
 | --plan | flag | List, without running anything, the gates the diff requires: exact commands, why each applies, estimated duration, prerequisites and CI coverage; ends with npm run verify. | See command semantics |
+| --skip-suites | flag | With --fast: report the node --test suites the diff selects as skipped and leave them to CI; keeps the Dev tier quick and predictable. | See command semantics |
 | --base | value | With --fast or --plan: diff merge-base(&lt;ref&gt;, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 per step |

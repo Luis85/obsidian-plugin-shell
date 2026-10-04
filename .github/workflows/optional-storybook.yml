@@ -1,7 +1,21 @@
 name: Optional Storybook qualification
 on:
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'scripts/companion/**'
       - 'templates/**'
@@ -22,6 +36,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   optional-workspace:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:

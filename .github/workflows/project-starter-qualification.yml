@@ -1,7 +1,21 @@
 name: Project starter qualification
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -14,6 +28,7 @@ jobs:
   # per job (as ci.yml's starter job does) avoids eight runner slots of setup.
   generated-project:
     name: generated-project (${{ matrix.ids }})
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -58,6 +73,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
   project-handoff:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     # A pushed project, cloned fresh, in a cloud-like session: Node 22 is the only Node, the SessionStart hook provisions the
     # qualified Node and the dependencies, then the commands an agent starts with run (check, doctor, ui status, e2e).
     runs-on: ubuntu-24.04

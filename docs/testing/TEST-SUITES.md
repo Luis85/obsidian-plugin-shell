@@ -160,6 +160,9 @@ remain dedicated `verify` steps (production coverage and `verify-baseline`).
 | `companion-concept-verification` | `companion:assembly`, `test-data`, `visual`, the concept `companion` files, `companion:visual-browser` (its own step first), then `companion:browser` |
 | `candidate-qualification` | `runtime`, `e2e`, `native:host` through evidence producers; `release` via rehearsal |
 | `release-rehearsal` | `release` path via `release:rehearse` |
+| `dev` › `fast` (Dev checks) | no node `--test` suite (`check --fast --skip-suites` reports the ones the diff selects as skipped; `verify` runs them in `ci`): typecheck, lint, eslint and related Vitest tests on the diff, `suites.mjs --check`, `check:repository`, changelog structure and the advisory self-review guard |
+| `ci` › `self-review` | none: the blocking diff-based self-review guard |
+| `release` | every row above through the workflows it calls with `tier: release` (every matrix leg), plus `candidate-qualification` |
 
 Workflows keep their existing explicit commands; the manifest records which suite
 each covers.

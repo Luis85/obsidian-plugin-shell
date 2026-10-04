@@ -85,7 +85,7 @@ export async function fastSuites(root: string, project: boolean, changes: Change
 interface FastContext {
   project: boolean; changes: Changes; typecheck: CheckStep; fullTest: CheckStep; vitestConfig: string[];
   full: () => CheckStep[]; fullLint: CheckStep | null; eslintRoots: string[]; fullEslint: CheckStep; makerTypes: CheckStep[];
-  suites: Array<{ name: string; reasons: Reason[] }>;
+  suites: Array<{ name: string; reasons: Reason[] }>; skipSuites?: boolean;
 }
 const preview = (files: string[]) => files.length > 3 ? `${files.slice(0, 3).join(' ')} … (${files.length} files)` : files.join(' ');
 function skipped(step: CheckStep, reason: string, display: string): CheckStep { return { ...step, display, skip: reason }; }
@@ -125,6 +125,7 @@ function suiteStep(ctx: FastContext): CheckStep[] {
   const names = ctx.suites.map(suite => suite.name);
   const base: CheckStep = { id: 'suites', display: 'node scripts/testing/suites.mjs', entry: 'scripts/testing/suites.mjs', args: names };
   if (!names.length) return [{ ...base, display: 'node scripts/testing/suites.mjs (no matching suites)', skip: 'No changed path selects a node --test suite.' }];
+  if (ctx.skipSuites) return [{ ...base, display: `${base.display} ${names.join(' ')} (left to CI)`, skip: `--skip-suites: ${names.join(', ')} run in CI's Integration tier, not here.` }];
   return [{ ...base, display: `${base.display} ${names.join(' ')}` }];
 }
 /** The narrowed gate: typecheck as before, lint/eslint on changed files, related vitest, matching node suites. */

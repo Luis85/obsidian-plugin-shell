@@ -85,18 +85,44 @@ Its YAML parser rejects malformed or duplicate mappings. The repository policy
 requires job/step structure, full action SHA pins, explicit read-only permissions,
 checkout without persisted credentials and environment-based handling of untrusted
 inputs instead of direct shell interpolation. This is a focused repository policy,
-not a substitute for the complete GitHub Actions schema or actionlint. Privileged
-publication workflows are not allowed by this iteration's checker; introducing
-them requires a separate authorized design and scoped policy change.
+not a substitute for the complete GitHub Actions schema or actionlint. A job may
+call a repository-local reusable workflow (`uses: ./.github/workflows/<name>.yml`)
+only when that file exists and declares `on.workflow_call`, and never with
+`secrets: inherit`. The owner-requested, scoped release allowance
+(`scripts/quality/workflow-policy.mjs`) lets only `release-cut.yml` and
+`publish.yml` grant job write scopes: both must be `workflow_dispatch`-only, keep
+read-only top-level permissions, and every write job must target the protected
+`release` environment. Every other workflow, including `starter-distribution.yml`,
+stays read-only.
 
-Current workflows, all read-only:
+Delivery tiers: `dev.yml` ("Dev checks") runs on every pull-request event,
+drafts included. The Integration tier is every other pull-request workflow; its
+jobs skip draft pull requests and `release/*` heads, and three-OS matrices run
+Linux only. `release.yml` (pushes to `release/**`, manual) verifies the release
+metadata and calls every pull-request workflow with `tier: release` (every matrix
+leg) plus `candidate-qualification.yml`; "Release result" aggregates them, and
+its "Dev checks" and "CI result" alias jobs report those required checks on the
+release head, whose pull request is opened with `GITHUB_TOKEN` and so starts no
+pull-request workflow.
 
-- `ci.yml` (pull requests, `main`, manual): dependency-free `baseline` on
-  Linux/Windows; `showcase` guided setup + `verify` (Windows on pull requests,
-  plus Linux served e2e on pushes); three parallel template-authoring journeys
-  (`renamed-feature`, `source-archive`, `example-removal`). On pull requests and
-  manual runs only: `framework-cli` on Linux/Windows/macOS, `real-obsidian`,
-  `generated-companion` and three grouped `starter` jobs.
+Current workflows (read-only unless stated):
+
+- `dev.yml` (every pull-request event): `bin/app check --fast --skip-suites`
+  against the base branch (typecheck, lint, eslint, related Vitest tests and the
+  maker type-check; the node `--test` suites the diff selects are reported as
+  skipped and run in the Integration tier), suite registration, repository
+  policy, changelog structure and the advisory self-review guard.
+- `ci.yml` (ready pull requests, `main`, manual, called by `release.yml`):
+  dependency-free `baseline` on Linux/Windows; `showcase` guided setup + `verify`
+  (Windows on pull requests, plus Linux served e2e on pushes and releases); three
+  parallel template-authoring journeys (`renamed-feature`, `source-archive`,
+  `example-removal`); the blocking `self-review` guard on pull requests. On pull
+  requests, manual runs and releases only: `framework-cli` (Linux; every OS in the
+  release tier), `real-obsidian`, `generated-companion` and three grouped
+  `starter` jobs. "CI result" aggregates every gate job.
+- `release.yml`, `release-cut.yml` and `publish.yml`: the release tier, the
+  owner-dispatched cut of `release/X.Y.Z` from `main`, and the owner-dispatched
+  publication behind the `release` environment (the only write-scoped jobs).
 - `setup-compatibility.yml` (setup/toolchain input changes): Node 24.15.0 +
   npm 12.0.2 and Node 24.21.0 + npm 11.19.1 on Linux/Windows with the real npm
   install-policy fixture.

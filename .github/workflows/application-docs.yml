@@ -4,6 +4,7 @@ name: Typed Markdown documentation
 # install and its HTML site builds in the site job below.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'bin/app'
       - 'bin/documentation/**'
@@ -25,7 +26,20 @@ on:
       - '.nvmrc'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/application-docs.yml'
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -33,6 +47,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   qualify:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
@@ -103,6 +118,7 @@ jobs:
           if-no-files-found: warn
   site:
     name: Command handbook site
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     needs: qualify
     runs-on: ubuntu-24.04
     timeout-minutes: 15
