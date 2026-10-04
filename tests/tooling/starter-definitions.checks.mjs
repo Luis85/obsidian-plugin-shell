@@ -194,8 +194,11 @@ test('validation placeholder syntax matches rendering exactly, so a valid defini
 test('CI qualifies exactly the shipped project starters and reads Angular pins from the setup starter', async () => {
   const ids = (await loadFileDefinitions(root)).filter(entry => entry.definition.generator.kind === 'project').map(entry => entry.definition.id);
   const workflow = await readFile(join(root, '.github/workflows/project-starter-qualification.yml'), 'utf8');
-  assert.deepEqual(workflow.match(/^\s+starter: \[([^\]]+)\]$/m)[1].split(',').map(id => id.trim()).sort(), ids);
-  assert.match(workflow, /qualify-project-starters\.mjs --starter '\$\{\{ matrix\.starter \}\}' --execute/);
+  const grouped = [...workflow.matchAll(/^\s+ids: (.+)$/gm)].flatMap(match => match[1].trim().split(/\s+/));
+  assert.equal(new Set(grouped).size, grouped.length, 'each starter is qualified in exactly one group');
+  assert.deepEqual(grouped.sort(), ids);
+  assert.match(workflow, /for id in \$STARTER_IDS; do[\s\S]*qualify-project-starters\.mjs --starter "\$id" --execute \|\| failed=/);
+  assert.match(workflow, /if \[ -n "\$failed" \]; then [^\n]*exit 1; fi/);
   const offline = await readFile(join(root, '.github/workflows/offline-qualification-inputs.yml'), 'utf8');
   assert.match(offline, /configs\/starters\/webapp-angular\.json/); assert.doesNotMatch(offline, /project-presets/);
 });
