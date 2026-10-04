@@ -1,13 +1,11 @@
 name: Offline qualification inputs
+# Produces downloadable offline inputs (Node, npm, dependency and Angular
+# caches); it gates nothing, so it runs on demand and weekly instead of on every
+# pull request that touches bin/**.
 on:
-  pull_request:
-    paths:
-      - 'bin/**'
-      - 'scripts/compiler/**'
-      - 'templates/**'
-      - 'configs/starters/**'
-      - '.github/workflows/offline-qualification-inputs.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '41 6 * * 1'
 permissions:
   contents: read
 concurrency:
@@ -41,7 +39,7 @@ jobs:
           tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' --exclude='.npmrc' --exclude='.env' --exclude='.env.*' --exclude='credentials' -czf "$out/dependencies.tar.gz" node_modules
           git archive --format=tar HEAD | gzip > "$out/source.tar.gz"
           node -e 'console.log(JSON.stringify({schemaVersion:1,commit:process.env.GITHUB_SHA,node:process.versions.node,typescript:require("./node_modules/typescript/package.json").version,npm:"11.19.1",platform:process.platform,arch:process.arch,scope:"offline qualification inputs, not a product release"},null,2))' > "$out/provenance.json"
-          (cd "$out" && sha256sum node *.tar.gz > SHA256SUMS)
+          (cd "$out" && sha256sum -- node *.tar.gz > SHA256SUMS)
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: linux-qualification-inputs
@@ -79,7 +77,8 @@ jobs:
           writeFileSync(join(process.env.ANGULAR_INPUT_ROOT, 'package.json'), JSON.stringify({ name: 'angular-qualification-inputs', version: '0.1.0', private: true, type: 'module', dependencies, devDependencies }, null, 2));
           NODE
           npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          export npm_config_before="$(node -e 'console.log(new Date(Date.now() - 864e5).toISOString())')"
+          npm_config_before="$(node -e 'console.log(new Date(Date.now() - 864e5).toISOString())')"
+          export npm_config_before
           node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" install --prefix "$ANGULAR_INPUT_ROOT" --cache "$RUNNER_TEMP/angular-npm-cache" --ignore-scripts --no-audit --no-fund
           node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --prefix "$ANGULAR_INPUT_ROOT" --cache "$RUNNER_TEMP/angular-npm-cache" --offline --ignore-scripts --no-audit --no-fund
       - name: Retain input hashes without credentials, logs or font binaries
@@ -92,7 +91,7 @@ jobs:
           tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$out/dependencies.tar.gz" -C "$RUNNER_TEMP/angular-project-inputs" node_modules
           tar -czf "$out/npm-cache.tar.gz" -C "$RUNNER_TEMP/angular-npm-cache" _cacache
           node -e 'console.log(JSON.stringify({schemaVersion:1,commit:process.env.GITHUB_SHA,node:process.versions.node,npm:"11.19.1",platform:process.platform,arch:process.arch,scope:"Angular input provisioning; not application acceptance"},null,2))' > "$out/provenance.json"
-          (cd "$out" && sha256sum *.json *.tar.gz > SHA256SUMS)
+          (cd "$out" && sha256sum -- *.json *.tar.gz > SHA256SUMS)
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: angular-offline-inputs
