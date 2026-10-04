@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { exactKeys, object } from './configuration.ts';
 import { exists, hash, readBounded, readJson } from './files.ts';
 import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
-import { requireThat } from './contracts.ts';
+import { OperationError, requireThat } from './contracts.ts';
 
 export interface KitFile { path: string; hash: string; bytes: number }
 /** The packaged CLI has one launcher. Runtime, data and templates are owned below bin/. */
@@ -89,7 +89,8 @@ export async function readPluginConfig(root: string, path: string): Promise<Buff
 }
 
 export async function verifyKit(root: string): Promise<Kit> {
-  requireThat(await kitPresent(root), 'KIT_REQUIRED', 'No extracted framework kit (bin/kit.json) was found.');
+  if (!await kitPresent(root)) throw new OperationError('KIT_REQUIRED', 'No extracted framework kit (bin/kit.json) was found here.',
+    'Run this inside an extracted kit folder; from a framework checkout, build one with: node bin/app framework pack --out ../workbench-kit.zip --yes');
   const kit = kitManifest(await readJson(join(root, 'bin/kit.json')));
   const configs = pluginConfigFiles(kit), configPaths = new Set(configs.map(file => file.path));
   const actual = (await listFiles(root, 'bin')).filter(path => path !== 'bin/app' && path !== 'bin/kit.json' && !configPaths.has(path)).sort();
