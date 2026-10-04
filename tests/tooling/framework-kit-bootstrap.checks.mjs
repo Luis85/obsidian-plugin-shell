@@ -9,6 +9,7 @@ import { assembleKit, installedCompiler, kitScripts } from '../../bin/adapters/f
 import { kitRootReadme } from '../../bin/adapters/framework/distribution.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { zip } from '../../bin/adapters/framework/zip.ts';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const exists = path => stat(path).then(() => true, () => false);
@@ -34,6 +35,7 @@ test('kit root README rebases only relative links onto the shipped bin/template 
 });
 
 test('a freshly extracted kit resolves every README link and every package script before generation', { timeout: 300000 }, async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Kit packing requires the reviewed framework sources, not an example-removed consumer.'); return; }
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'kit-bootstrap-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
   await extractArchive(zip(await assembleKit({ root, frameworkRoot: root }, await installedCompiler())), dir);
