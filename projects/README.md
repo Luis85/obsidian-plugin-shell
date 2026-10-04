@@ -76,7 +76,12 @@ requires a known template id and valid collections:
 
 - a unique kebab `name`
 - a normalized repository path in `base` to an existing `.base` file, inside the optional `vault`
-- a non-empty `view`
+- a `view` the current `.base` file declares
+- a committed `src/data/collections/<name>.collection.json` written by `site collections` from
+  exactly that `.base` file and view, and not edited since; no orphaned snapshots
+
+Re-run `node bin/app site collections projects/<name> --yes` after you change the `.base` file
+or the notes it shows. `check:projects` catches a changed `.base` file, but not changed notes.
 
 The site needs the same Dependabot entry and workflow sync as any other project. See
 [Astro website projects](../docs/development/ASTRO-SITES.md).

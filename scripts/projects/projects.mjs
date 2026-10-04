@@ -1,10 +1,13 @@
-import { lstat, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { lstat, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseDocument } from 'yaml';
 import { excludesProjects, parseSyncedName, scopeWorkflow, syncedName, SYNCED_PREFIX } from './workflows.mjs';
 import { readSiteCatalog } from '../../bin/domain/site-template.ts';
-import { repositoryPath, siteIssues } from '../../bin/domain/site-collections.ts';
+import { repositoryPath, siteIssues, SNAPSHOT_FOLDER, snapshotPath, snapshotState, SNAPSHOT_SUFFIX } from '../../bin/domain/site-collections.ts';
+import { selectView } from '../../bin/domain/obsidian-base.ts';
+import { loadBase, resolveVault } from '../../bin/adapters/obsidian-base.ts';
+import { sha256 } from '../shared/hash.ts';
 
 /**
  * projects/<name>/ holds standalone projects built from concepts. Each one installs, builds and tests inside its own
@@ -22,6 +25,7 @@ const OUTSIDE_SPEC = /^(?:file|link|workspace|portal):/;
 export const BOUNDARY_WORKFLOW = 'projects-boundary.yml';
 
 const exists = async path => { try { await lstat(path); return true; } catch (error) { if (error.code === 'ENOENT') return false; throw error; } };
+const isFile = async path => { try { return (await lstat(path)).isFile(); } catch (error) { if (error.code === 'ENOENT') return false; throw error; } };
 const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
 // Site template ids belong to this tooling's own templates/sites, not to the checkout being validated.
 const SITE_CATALOG = fileURLToPath(new URL('../../templates/sites/catalog.json', import.meta.url));
@@ -31,11 +35,55 @@ async function siteTemplates() {
   return siteTemplateIds;
 }
 /** A site project (opt-in Astro website) names a known template and valid Bases collections whose .base files exist. */
-async function siteFailures(root, site) {
+async function siteFailures(root, name, site) {
   const failures = siteIssues(site, await siteTemplates());
-  for (const entry of Array.isArray(site?.collections) ? site.collections : []) {
-    const base = repositoryPath(entry?.base);
-    if (base?.endsWith('.base') && !await exists(resolve(root, base))) failures.push(`SITE_COLLECTION_BASE_MISSING: ${base}`);
+  if (failures.length) {
+    for (const entry of Array.isArray(site?.collections) ? site.collections : []) {
+      const base = repositoryPath(entry?.base);
+      if (base?.endsWith('.base') && !await exists(resolve(root, base))) failures.push(`SITE_COLLECTION_BASE_MISSING: ${base}`);
+    }
+    return failures;
+  }
+  const listed = new Set();
+  for (const entry of site.collections) {
+    const path = `${PROJECTS}/${name}/${snapshotPath(entry.name)}`;
+    listed.add(path);
+    failures.push(...await collectionFailures(root, name, entry, path));
+  }
+  return [...failures, ...await orphanSnapshots(root, name, listed)];
+}
+const resnapshot = name => `run node bin/app site collections ${PROJECTS}/${name} --yes`;
+/**
+ * The listed view exists in the current .base, and the committed snapshot is untouched and was made from exactly that
+ * .base file and view. Edited notes do not change the .base: re-run site collections after editing them.
+ */
+async function collectionFailures(root, name, entry, path) {
+  const base = repositoryPath(entry.base), at = `collection ${entry.name} (${base})`;
+  if (!await exists(resolve(root, base))) return [`SITE_COLLECTION_BASE_MISSING: ${base}`];
+  let source;
+  try {
+    const real = await realpath(root), loaded = await loadBase(real, await resolveVault(real, repositoryPath(entry.vault ?? '.')), base);
+    selectView(loaded.definition, entry.view);
+    source = loaded.source;
+  } catch (error) { return [`${error.code === 'BASE_VIEW_UNKNOWN' ? 'SITE_COLLECTION_VIEW_UNKNOWN' : 'SITE_COLLECTION_BASE_INVALID'}: ${at}: ${error.message}`]; }
+  if (!await isFile(resolve(root, path))) return [`SITE_COLLECTION_MISSING: ${path} does not exist; ${resnapshot(name)}`];
+  const text = await readFile(resolve(root, path), 'utf8'), state = snapshotState(text, sha256);
+  if (state === 'edited') return [`SITE_COLLECTION_EDITED: ${path} was edited by hand (its records no longer match recordsSha256); restore it or move it away, then ${resnapshot(name)}`];
+  if (state !== 'generated') return [`SITE_COLLECTION_MISSING: ${path} was not written by node bin/app site collections; move it out of ${PROJECTS}/${name}/${SNAPSHOT_FOLDER}, then ${resnapshot(name)}`];
+  const made = JSON.parse(text).collection?.base;
+  return made?.sha256 === source.sha256 && made?.path === source.path && made?.view === entry.view ? []
+    : [`SITE_COLLECTION_STALE: ${path} was made from another version of ${base} or another view; ${resnapshot(name)}`];
+}
+/** A snapshot the site would load (or an old-format one this command wrote) that no listed collection produces. */
+async function orphanSnapshots(root, name, listed) {
+  const folder = `${PROJECTS}/${name}/${SNAPSHOT_FOLDER}`, failures = [];
+  if (!await exists(resolve(root, folder))) return failures;
+  for (const entry of (await readdir(resolve(root, folder), { withFileTypes: true })).filter(item => item.name.endsWith('.json')).sort((a, b) => a.name.localeCompare(b.name))) {
+    const path = `${folder}/${entry.name}`;
+    if (listed.has(path)) continue;
+    const state = entry.isFile() ? snapshotState(await readFile(resolve(root, path), 'utf8'), sha256) : 'foreign';
+    if (!entry.name.endsWith(SNAPSHOT_SUFFIX) && state !== 'legacy') continue;
+    failures.push(`SITE_COLLECTION_ORPHAN: ${path} belongs to no listed collection; ${state === 'generated' || state === 'legacy' ? resnapshot(name) : `move it out of ${folder}`}`);
   }
   return failures;
 }
@@ -68,7 +116,7 @@ export async function validateManifest(root, name) {
   // A site starts from a template, so it may list no prototype; every other project implements at least one.
   if (site === undefined && (!Array.isArray(prototypes) || !prototypes.length)) failures.push('PROJECT_MANIFEST_PROTOTYPES: list at least one prototype');
   if (site !== undefined && prototypes !== undefined && !Array.isArray(prototypes)) failures.push('PROJECT_MANIFEST_PROTOTYPES: prototypes must be a list');
-  if (site !== undefined) failures.push(...await siteFailures(root, site));
+  if (site !== undefined) failures.push(...await siteFailures(root, name, site));
   for (const [index, prototype] of (Array.isArray(prototypes) ? prototypes : []).entries()) {
     const target = relativeRepositoryPath(prototype?.path);
     if (!target || !PROTOTYPE_ROOTS.some(prefix => `${target}/`.startsWith(prefix))) failures.push(`PROJECT_PROTOTYPE_PATH: prototypes[${index}].path must be a normalized path under ${PROTOTYPE_ROOTS.join(' or ')}`);
