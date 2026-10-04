@@ -35,7 +35,7 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'adopt', title: 'Adopt an existing project', commands: ['adopt analyze', 'adopt plan', 'adopt skill'] },
-  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'ci', 'make', 'styles inspect', 'styles export'] },
+  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'ci', 'make', 'entities check', 'entities catalog', 'styles inspect', 'styles export'] },
   { id: 'documentation', title: 'Application documentation', commands: ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover'] },
   { id: 'obsidian-cli', title: 'Optional Obsidian CLI', commands: ['obsidian status', 'obsidian files', 'obsidian read', 'obsidian prepare'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
@@ -138,8 +138,9 @@ const specific: Record<string, OptionHelp> = {
   view: { description: 'View name for view/component makers.' },
   preference: { description: 'Preference key for setting makers.' },
   document: { description: 'Note-backed entity (requires the markdown backend).' },
-  'trust-custom': { description: 'Allow a reviewed custom maker to execute local code.' },
   check: { description: 'Read-only: compare the pending locale draft (make locale <name> --check) with the current base keys; plans and writes nothing.' },
+  refresh: { description: 'make locale <name> --refresh: add only the base keys a pending draft lacks, keeping every existing translation; review with --dry-run first.' },
+  'trust-custom': { description: 'Run a registered local custom recipe (scripts/makers/custom/<name>.mjs); it executes trusted project code, so review it first. Built-in recipes never need it.' },
   profile: { description: 'Execution profile.' },
   from: { description: 'Extracted replacement kit folder.' },
   'notes-file': { description: 'Release-notes Markdown file.' },
@@ -152,7 +153,7 @@ const specific: Record<string, OptionHelp> = {
   base: { description: 'With --fast or --plan: diff merge-base(<ref>, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD.' },
   plan: { description: 'List, without running anything, the gates the diff requires: exact commands, why each applies, estimated duration, prerequisites and CI coverage; ends with npm run verify.' },
   job: { description: 'Job to reproduce, as <workflow-file-stem>/<job-id> (for example ci/baseline); see ci --list.' },
-  matrix: { description: 'Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-latest); required when an expression computes the matrix.' },
+  matrix: { description: 'Matrix combination to reproduce as comma-separated key=value pairs (for example os=ubuntu-24.04); required when an expression computes the matrix.' },
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when configs/testing/vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
@@ -279,7 +280,8 @@ const examples: Record<string, string[]> = {
   test: ['node bin/app test', 'node bin/app test --profile obsidian', 'node bin/app test --profile browser'],
   check: ['node bin/app check', 'node bin/app check --fast --json', 'node bin/app check --fast --base origin/main', 'node bin/app check --plan --json'],
   'check submission': ['node bin/app check submission', 'node bin/app check submission --json'],
-  ci: ['node bin/app ci --list --json', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-latest', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-latest --execute --json'],
+  'entities check': ['node bin/app entities check', 'npm run entities:check'], 'entities catalog': ['node bin/app entities catalog --json', 'npm run entities:catalog'],
+  ci: ['node bin/app ci --list --json', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04', 'node bin/app ci --job ci/baseline --matrix os=ubuntu-24.04 --execute --json'],
   verify: ['node bin/app verify --profile project'], dev: ['node bin/app dev --profile obsidian', 'node bin/app dev', 'node bin/app dev --profile ui'],
   'vault prepare': ['node bin/app vault prepare --yes'], 'plugin install': ['node bin/app plugin install --dry-run'],
   'data plan': ['node bin/app data plan --input test-data-manifest.json'], 'data apply': ['node bin/app data apply --input test-data-manifest.json --apply <approval-hash>'],

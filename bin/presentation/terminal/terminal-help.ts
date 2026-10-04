@@ -3,7 +3,7 @@ import type { CommandHelp, OptionHelp } from '../../adapters/framework/help-text
 import { bold, type Style } from './terminal-style.ts';
 interface HelpCommand extends CommandHelp { id: string; summary: string; effect: string; options: Record<string, 'value' | 'flag'> }
 export interface HelpData {
-  scope: 'golden-path' | 'all' | 'command'; commands: HelpCommand[];
+  scope: 'golden-path' | 'all' | 'command' | 'group'; commands: HelpCommand[]; group?: string;
   goldenPath: Array<{ command: string; example: string; purpose: string }>;
   groups: Array<{ id: string; title: string; commands: string[] }>;
 }
@@ -27,7 +27,7 @@ function commandPage(style: Style, entry: HelpCommand): string {
 }
 function goldenPath(style: Style, data: HelpData): string {
   const width = Math.max(...data.goldenPath.map(item => item.command.length));
-  let text = `Plugin Shell CLI: create, develop and check Obsidian plugins. Changes preview until --yes.\n\n${bold(style, 'Golden path')}\n`;
+  let text = `Workbench CLI: create, develop and check Obsidian plugins. File changes preview until --yes or --apply <planHash>.\n\n${bold(style, 'Golden path')}\n`;
   data.goldenPath.forEach((item, index) => { text += `  ${index + 1}. ${item.command.padEnd(width)}  ${item.purpose}\n     ${' '.repeat(width)}  $ ${item.example}\n`; });
   text += `\n${bold(style, 'More commands')}\n`;
   const titleWidth = Math.max(...data.groups.map(group => group.title.length));
@@ -42,9 +42,15 @@ function everything(style: Style, data: HelpData): string {
     for (const id of group.commands) { const entry = data.commands.find(item => item.id === id); if (entry) text += `  ${entry.id.padEnd(width)}  ${entry.summary}\n`; }
     text += '\n';
   }
-  return text + 'Details: node bin/app help <command>. Add --json for one machine-readable result; changes preview until --yes.\n';
+  return text + 'Details: node bin/app help <command>. Add --json for one machine-readable result; file changes preview until --yes or --apply <planHash>.\n';
+}
+function groupPage(style: Style, data: HelpData): string {
+  const width = Math.max(...data.commands.map(entry => entry.id.length));
+  const lines = data.commands.map(entry => `  ${entry.id.padEnd(width)}  ${entry.summary}\n`).join('');
+  return `${bold(style, `${data.group ?? ''} commands`)}\n${lines}\nDetails: node bin/app help <command>, for example node bin/app help ${data.commands[0]!.id}   Everything: node bin/app help --all\n`;
 }
 export function helpText(style: Style, data: HelpData): string {
+  if (data.scope === 'group') return groupPage(style, data);
   if (data.scope === 'command' && data.commands.length === 1) return commandPage(style, data.commands[0]!);
   return data.scope === 'golden-path' ? goldenPath(style, data) : everything(style, data);
 }

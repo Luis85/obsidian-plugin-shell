@@ -1,14 +1,18 @@
 import { lstat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type { FilePlan } from '../../../scripts/shared/file-plan.ts';
+import { projectConfigPath } from '../../../scripts/shared/project-configs.mjs';
 import { slug, title, recipeOptions } from './arguments.ts';
 import { createMakerContext } from './engine.ts';
 import { dispatchMaker } from './dispatch.ts';
 import type { Backend, MakerArguments, MakerInput, MakerOptions, Preset } from './contracts.ts';
 
-interface MakerCheck { readonly command: string; readonly args: readonly string[] }
+/** One planned project check: a Node entry point and its arguments, run after a successful apply. */
+export interface MakerCheck { readonly id: string; readonly command: 'node'; readonly args: readonly string[] }
 export interface PlannedMaker {
   readonly maker: string; readonly templateVersion: 2; readonly owner: string | undefined; readonly plan: FilePlan; readonly checks: readonly MakerCheck[];
+  /** The full gate is a printed next step; makers never run or report it. */
+  readonly next: string;
   readonly entity?: string | undefined; readonly preset?: Preset; readonly backend?: Backend; readonly folder?: string; readonly preference?: string;
 }
 const backends: readonly string[] = ['domain', 'markdown', 'plugin-data'];
@@ -91,24 +95,36 @@ function planMetadata({ maker, name, options, owner, entity, preset, backend, fo
   return { backend: 'plugin-data', ...(preference ? { preference } : { entity: `${owner}-${name}-setting` }) };
 }
 const pluginChecks: readonly MakerCheck[] = [
-  { command: 'node', args: ['scripts/quality/check-workbench-plugins.mjs'] },
-  { command: 'node', args: ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'tsconfig.maker.json'] },
-  { command: 'node', args: ['scripts/testing/suites.mjs', 'workbench-plugins'] },
+  { id: 'plugin-registry', command: 'node', args: ['scripts/quality/check-workbench-plugins.mjs'] },
+  { id: 'plugin-types', command: 'node', args: ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'configs/types/tsconfig.maker.json'] },
+  { id: 'plugin-tests', command: 'node', args: ['scripts/testing/suites.mjs', 'workbench-plugins'] },
 ];
-function planChecks(maker: string, tests: ReadonlySet<string>): MakerCheck[] {
+/** A generated project checks its own project-scoped TypeScript and Vitest configuration, the same ones `check` uses. */
+function planChecks(root: string, maker: string, tests: ReadonlySet<string>): MakerCheck[] {
   const runtimeTests = [...tests].filter((path) => path.endsWith('.test.ts'));
   const toolingTests = [...tests].filter((path) => path.endsWith('.checks.mjs'));
+  const tsconfig = projectConfigPath(root, 'typescript');
+  const vitestConfig = projectConfigPath(root, 'vitest') ?? 'configs/testing/vitest.config.mjs';
   return [
     ...(maker === 'plugin' ? pluginChecks : []),
-    { command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'] },
+    { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit', ...(tsconfig ? ['--project', tsconfig] : [])] },
     ...(runtimeTests.length
-      ? [{ command: 'node', args: ['node_modules/vitest/vitest.mjs', 'run', '--config', 'configs/testing/vitest.config.mjs', ...runtimeTests] }]
+      ? [{ id: 'generated-tests', command: 'node' as const, args: ['node_modules/vitest/vitest.mjs', 'run', '--config', vitestConfig, ...runtimeTests] }]
       : []),
-    ...(toolingTests.length ? [{ command: 'node', args: ['--test', ...toolingTests] }] : []),
-    { command: 'node', args: ['scripts/events/catalog.mjs', '--check'] },
-    { command: 'node', args: ['scripts/makers/entities.mjs', '--check'] },
-    { command: 'npm', args: ['run', 'verify'] },
+    // A node:test file runs its own tests when executed directly and exits non-zero on failure.
+    ...toolingTests.map((path) => ({ id: `tooling-test:${path.slice(path.lastIndexOf('/') + 1, -'.checks.mjs'.length)}`, command: 'node' as const, args: [path] })),
+    { id: 'events-check', command: 'node', args: ['scripts/events/catalog.mjs', '--check'] },
+    { id: 'entities-check', command: 'node', args: ['scripts/makers/entities.mjs', '--check'] },
   ];
+}
+async function fullGate(root: string): Promise<string> {
+  try {
+    await lstat(resolve(root, '.companion/generation.json'));
+    return 'npm run verify:project';
+  } catch (error) {
+    if (!isMissing(error)) throw error;
+    return 'npm run verify';
+  }
 }
 /** Validation order is part of the contract: earlier problems are reported first. */
 function resolveRequest(request: MakerArguments): MakerInput {
@@ -137,6 +153,7 @@ export async function planMaker(root: string, request: MakerArguments, { beforeF
     owner,
     ...planMetadata(input),
     plan,
-    checks: planChecks(maker, context.tests),
+    checks: planChecks(root, maker, context.tests),
+    next: await fullGate(root),
   };
 }

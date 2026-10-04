@@ -1,4 +1,5 @@
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { makerApplied } from './maker-checks.ts';
 import { applyOperation, loadPlan, planOperation, saveOperationPlan } from './planning.ts';
 
 type Planned = Awaited<ReturnType<typeof planOperation>>;
@@ -36,9 +37,10 @@ export async function fileOperation(request: Request, context: Context): Promise
     diagnostics,
   };
   const expected = stringOption(request.options, 'apply') ?? planned.planHash;
-  const applied = await applyOperation(planned, context, expected);
-  return {
-    ...result(request.command, { ...planned.review, applied }, applied.written.length ? 'applied' : 'unchanged'),
-    diagnostics,
-  };
+  return appliedResult(request.command, planned, await applyOperation(planned, context, expected), context, diagnostics);
+}
+/** A maker plan runs its planned project checks after the write; every other plan reports the write alone. */
+function appliedResult(command: string, planned: Planned, applied: Awaited<ReturnType<typeof applyOperation>>, context: Context, diagnostics: Result['diagnostics']): Promise<Result> | Result {
+  if (planned.checks) return makerApplied(command, planned.review, applied, planned.checks, context);
+  return { ...result(command, { ...planned.review, applied }, applied.written.length ? 'applied' : 'unchanged'), diagnostics };
 }

@@ -24,7 +24,8 @@ export function failure(command: string, error: unknown): Result {
   if (error instanceof CompilerError) return { ...result(command, null, error.diagnostic.code === 'COMPILER_CANCELLED' ? 'cancelled' : 'failed'),
     diagnostics: error instanceof CompilationFailure ? error.diagnostics : [error.diagnostic] };
   const code = failureCode(error);
-  const message = error instanceof Error ? error.message : 'Operation failed.';
+  // A plain Error that leads with its code reports it once: the diagnostic already carries the code.
+  const message = error instanceof Error ? (error instanceof OperationError ? error.message : error.message.replace(new RegExp(`^${code}:\\s*`), '') || error.message) : 'Operation failed.';
   return { ...result(command, recoveryDetails(error), code === 'CANCELLED' ? 'cancelled' : 'failed'),
     diagnostics: [{ code, message, ...(error instanceof OperationError && error.next ? { next: error.next } : {}) }] };
 }

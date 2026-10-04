@@ -104,8 +104,8 @@ export async function bundleReleaseCli(frameworkRoot: string): Promise<{ bytes: 
     minifyWhitespace: true,
     // Bundled CommonJS dependencies (yaml's node build) require Node built-ins; ESM output needs a real require.
     banner: { js: "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);" },
-    // Installed devDependencies loaded on first use (makers, packing). Regular pre-install kit commands never load them.
-    external: ['node:*', 'typescript', 'esbuild', 'prettier'],
+    // Installed devDependencies loaded on first use (makers, packing, the entity catalog). Regular pre-install kit commands never load them.
+    external: ['node:*', 'typescript', 'esbuild', 'prettier', 'vite'],
     plugins: [templateLocations(ts, root)],
   });
   const [output, ...rest] = result.outputFiles ?? [];

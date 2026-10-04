@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "frameworkVersion": "0.4.0",
-  "commandCount": 123,
+  "commandCount": 125,
   "sources": [
     {
       "path": "package.json",
@@ -9,11 +9,11 @@
     },
     {
       "path": "bin/adapters/framework/catalog.ts",
-      "sha256": "ea65423772a5bc0e645133254843fc7cceb25afacdabdefb53b05b83ae83e65e"
+      "sha256": "e05829da44291abad0084d549b6e14a99abaa289b0edc3abe5eb7fa9282c09f7"
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "sha256": "b8a63fb74e6c615dff2df3f4624e361fc9889cbaae0eef4584c344f58fe0f73a"
+      "sha256": "886bc12c5d283edc5d76047536db3824479cd98eee6ee676fafd03d4d834e2e5"
     },
     {
       "path": "bin/compiler/domain/diagnostics.ts",
@@ -31,7 +31,7 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "f660248e95eed2fb27be48f90371318bbc650962c110bd0e90ab733e298017e3"
+      "sha256": "ac9b5ad731d222ebea7f8551224bb317b3ff73dc30a4e71a89040394c5029fe6"
     },
     {
       "path": "diagnostics.md",
@@ -39,7 +39,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "cf4d2f670af41952bc50e85a7b023dae5ec25fb1128887e7167a846ae06ea7e1"
+      "sha256": "da66c5db1824a08dfb0ed5f92c3bbaeca700ef28fad3cf16ebca0d68f5949484"
     }
   ]
 }

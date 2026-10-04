@@ -1,7 +1,7 @@
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { makerSymbol as symbol, title, builtinRecipes } from './arguments.ts';
-import { localeSkeleton } from './pending-locale.ts';
+import { checkPendingLocale, localeSkeleton } from './pending-locale.ts';
 import { defineLocalMaker, localRecipeContext } from './custom-contract.ts';
 import type { MakerContext, MakerInput } from './contracts.ts';
 
@@ -36,14 +36,57 @@ export async function styleRecipe(context: MakerContext, owner: string, name: st
   const link = `<style src="../../../styles/generated/${owner}-${name}.css"></style>`;
   await context.edit(component, original => original.includes(link) ? original : original.trimEnd() + `\n\n${link}\n`);
 }
-export async function localeRecipe(context: MakerContext, name: string): Promise<void> {
+/** Reads an existing pending draft, or undefined when this is the first run. */
+async function existingDraft(context: MakerContext, path: string): Promise<string | undefined> {
+  try { return await context.read(path); }
+  catch (error) { if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return undefined; throw error; }
+}
+export async function localeRecipe(context: MakerContext, name: string, refresh = false): Promise<void> {
   const base = await localeSkeleton(context.read);
-  // Complete base skeleton remains nonselectable until a developer reviews translations.
-  await context.add(`src/locales/pending/${name}.json`, JSON.stringify(base, null, 2) + '\n');
-  await context.add(`src/locales/pending/${name}.status.json`, JSON.stringify({ locale: name, status: 'pending-translation-review', fallback: 'en', selectable: false, keys: countKeys(base) }, null, 2) + '\n');
+  const draftPath = `src/locales/pending/${name}.json`, statusPath = `src/locales/pending/${name}.status.json`;
+  const draft = await existingDraft(context, draftPath);
+  if (refresh && draft === undefined) throw new Error(`LOCALE_DRAFT_MISSING: --refresh updates an existing pending draft; create it first with make locale ${name}`);
+  if (draft === undefined) {
+    // Complete base skeleton remains nonselectable until a developer reviews translations.
+    await context.add(draftPath, JSON.stringify(base, null, 2) + '\n');
+    await context.add(statusPath, JSON.stringify({ locale: name, status: 'pending-translation-review', fallback: 'en', selectable: false, keys: countKeys(base) }, null, 2) + '\n');
+  } else await refreshDraft(context, name, base, refresh);
   const path = `tests/tooling/locale-${name}.checks.mjs`;
   // The consumer test asks the project's own CLI (source launcher or extracted kit bundle) for a read-only key comparison.
   await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { spawnSync } from 'node:child_process';\nimport { fileURLToPath } from 'node:url';\n\nconst root = fileURLToPath(new URL('../../', import.meta.url));\ntest('${name} pending translation preserves every checked base key and is not selectable', () => {\n  const run = spawnSync(process.execPath, ['bin/app', 'make', 'locale', '${name}', '--check', '--json'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });\n  assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);\n  const { status, data } = JSON.parse(run.stdout);\n  assert.equal(status, 'ok'); assert.deepEqual([data.missing, data.extra, data.selectable], [[], [], false]);\n});\n`);
   context.tests.add(path);
+}
+/**
+ * An existing draft keeps every translation. Without drift a rerun changes nothing; with missing base keys a plain
+ * rerun explains the drift, and the reviewed --refresh plan adds only those keys (English values to translate).
+ */
+async function refreshDraft(context: MakerContext, name: string, base: Record<string, unknown>, refresh: boolean): Promise<void> {
+  const draftPath = `src/locales/pending/${name}.json`, statusPath = `src/locales/pending/${name}.status.json`;
+  const check = await checkPendingLocale(context.read, name);
+  if (check.selectable !== false) throw new Error(`LOCALE_DRAFT_SELECTABLE: ${name} is no longer a pending draft; edit enabled translations directly`);
+  if (!check.missing.length) return;
+  const listed = check.missing.slice(0, 10).join(', ') + (check.missing.length > 10 ? `, … ${check.missing.length - 10} more` : '');
+  if (!refresh) throw new Error(`LOCALE_DRAFT_DRIFT: pending locale ${name} lacks ${check.missing.length} current base key(s): ${listed}. Review with make locale ${name} --refresh --dry-run, then apply it with --yes to add only these keys and keep existing translations.`);
+  const merged = fillMissing(parseObject(await context.read(draftPath), draftPath), base);
+  await context.edit(draftPath, () => JSON.stringify(merged, null, 2) + '\n');
+  await context.edit(statusPath, source => JSON.stringify({ ...parseObject(source, statusPath), keys: countKeys(merged) }, null, 2) + '\n');
+}
+type Json = Record<string, unknown>;
+const isObject = (value: unknown): value is Json => typeof value === 'object' && value !== null && !Array.isArray(value);
+function parseObject(source: string, path: string): Json {
+  const value: unknown = JSON.parse(source);
+  if (!isObject(value)) throw new Error(`LOCALE_DRAFT_INVALID: ${path} must contain a JSON object`);
+  return value;
+}
+/** Adds base keys the draft lacks, in place after its own keys; existing values (translations) are never replaced. */
+function fillMissing(draft: Json, base: Json): Json {
+  const merged: Json = { ...draft };
+  for (const [key, value] of Object.entries(base)) {
+    const current = merged[key];
+    if (!Object.hasOwn(merged, key)) merged[key] = value;
+    else if (isObject(value) && isObject(current)) merged[key] = fillMissing(current, value);
+    else if (isObject(value) !== isObject(current)) throw new Error(`LOCALE_DRAFT_SHAPE: ${key} changed between a message and a group; resolve it manually`);
+  }
+  return merged;
 }
 function countKeys(value: object): number { return Object.values(value).reduce((count: number, child: unknown) => count + (child && typeof child === 'object' ? countKeys(child) : 1), 0); }

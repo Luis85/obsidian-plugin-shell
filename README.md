@@ -54,8 +54,12 @@ The new project has its own README and short `AGENTS.md`, Claude Code hooks, ski
 and permissions, VS Code debugging, product CI and an in-memory Obsidian example test
 ([what it contains](docs/development/COMPANION-GENERATOR.md#what-the-generated-project-contains)).
 
-`node bin/app help` shows the golden path (new, install, dev, test, check, make).
-`npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`
+`node bin/app help` (the Workbench CLI; package `bin` name `obs-shell`) shows the
+golden path (new, install, dev, test, check, make); `help <group>`, for example
+`help framework`, lists a command group. `make` applies a reviewed plan and then
+runs its planned type, generated-test, event and entity checks, reporting each
+actual result. `npm run check` is the fast daily and agent gate (types, both
+linters, tests and generated authoring tests; `check:fast`
 covers changed files only), and `npm run check:submission` mirrors documented
 Obsidian review rules locally. Neither replaces `npm run verify`. See
 [the check gate](docs/development/FRAMEWORK-CLI.md#golden-path-help-and-the-check-gate).
