@@ -21,6 +21,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 ### Changed
 
 - This changelog now follows Keep a Changelog 1.1.0, and release candidates carry only the released version's section as release notes.
+- End-to-end tests (served UI in Chromium, browser suites, real Obsidian, browser and native candidate evidence) are opt-in in workflows and processes and mandatory in the Release tier: a pull request opts in with the `e2e` label (adding it runs only the end-to-end jobs, reported as "E2E result"), a manual run with the `e2e` input. Pushes to `main` no longer run them. `npm run check:repository` rejects an end-to-end step that runs without the opt-in or that the Release tier could skip. Generated projects follow the same rule with `main` as their Release tier: the GitHub `ui` job runs on `main` or with the `e2e` label or input, real Obsidian also accepts the `e2e` label, and Azure Pipelines gains a `runE2E` parameter.
 
 ## [0.4.0] - 2026-09-23
 

@@ -39,8 +39,8 @@ tier: a tier selects which gates run, it never relaxes a gate that runs.
 | Tier | Trigger | What runs | Gate |
 | --- | --- | --- | --- |
 | Dev | Every pull-request event (`opened`, `synchronize`, `reopened`, `ready_for_review`), drafts included | `dev.yml` "Dev checks" on ubuntu-24.04 (about ten minutes): `node bin/app check --fast --skip-suites` against the base branch (typecheck, lint and eslint on changed files, related Vitest tests, the maker type-check), suite registration, repository policy, changelog structure and the self-review guard in `--warn-only` mode | "Dev checks", required by branch protection |
-| Integration | The same events on a pull request that is not a draft and whose head is not `release/*`; pushes to `main` | `ci.yml` and every other pull-request workflow; three-OS matrices run their Linux leg only; `ci.yml` adds the blocking self-review guard and an informational live audit | "CI result", required by branch protection, plus each workflow's own job checks |
-| Release | Push to `release/**`, or a manual dispatch on that branch | `release.yml`: release metadata, every pull-request workflow called with `tier: release` (all matrix legs, path filters ignored), and `candidate-qualification.yml` (fixed-source rehearsal, served browser, three native sessions, the blocking live audit) | "Release result", which Publish requires |
+| Integration | The same events on a pull request that is not a draft and whose head is not `release/*`; pushes to `main` | `ci.yml` and every other pull-request workflow; three-OS matrices run their Linux leg only; `ci.yml` adds the blocking self-review guard and an informational live audit; end-to-end steps only when opted in ([below](#end-to-end-tests-opt-in-mandatory-in-release)) | "CI result", required by branch protection, plus each workflow's own job checks |
+| Release | Push to `release/**`, or a manual dispatch on that branch | `release.yml`: release metadata, every pull-request workflow called with `tier: release` (all matrix legs, path filters ignored, every end-to-end step), and `candidate-qualification.yml` (fixed-source rehearsal, served browser, three native sessions, the blocking live audit) | "Release result", which Publish requires |
 | Publish | Manual dispatch from `main` by the owner, after the `release` environment's reviewers approve | `release-cut.yml` (cut the release branch) and `publish.yml` (merge, tag, release, delete) | Environment approval |
 
 The `node --test` suites a diff selects are listed as skipped in the Dev tier, not
@@ -50,7 +50,8 @@ silently dropped: they take minutes each and run in the Integration tier through
 ## How the gating works
 
 Every Integration workflow keeps its `pull_request` trigger with the four event
-types, so it starts on drafts too, but each job carries the condition:
+types (plus `labeled` where it holds end-to-end steps), so it starts on drafts too,
+but each job carries the condition:
 
 ```yaml
 if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
@@ -60,7 +61,8 @@ On a draft the jobs skip; "CI result" counts a job skipped by its own condition 
 passing, so a draft shows green Integration checks with nothing run. A draft
 cannot be merged, and marking it ready fires `ready_for_review`, which runs every
 gate on the current head. On a push to `main` there is no pull request, so the
-condition is true and the push-triggered jobs run as before.
+condition is true and the push-triggered jobs run as before, without their
+end-to-end steps.
 
 The same files declare `on.workflow_call` with a `tier` input (default
 `integration`), and `workflow_dispatch` with a `tier` choice. `release.yml` calls
@@ -69,6 +71,56 @@ condition and widens the matrices, for example
 `fromJSON(inputs.tier == 'release' && '["ubuntu-24.04", "windows-latest", "macos-latest"]' || '["ubuntu-24.04"]')`.
 A called workflow runs no path filter, so a release always runs the whole set.
 Reusable calls receive no secrets and keep read-only permissions.
+
+## End-to-end tests: opt-in, mandatory in Release
+
+End-to-end tests drive a real browser or a real Obsidian host: the served UI in
+Chromium (`npm run test:e2e`), the UI review gallery, the browser suites of the
+companion, starters and generated outputs, the real-Obsidian suites and the
+candidate's browser and native evidence (the
+[classification](WORKFLOWS.md#end-to-end-opt-in) lists them). They are the
+slowest and most host-sensitive checks, so, at the owner's request, they are
+opt-in during development and mandatory in the Release tier. This changes when
+they run, never what they assert.
+
+| Where | End-to-end steps run | How to opt in |
+| --- | --- | --- |
+| Local loop and Dev tier | never by themselves: `node bin/app check` and `npm run verify` exclude them | `npm run test:e2e` (or the suite) with provisioned Chromium |
+| Integration (ready pull request) | only when opted in | add the `e2e` label: the e2e jobs start at once, and every later push runs them while the label stays |
+| Push to `main` | no | dispatch the workflow with the `e2e` input (or `tier: release`) |
+| Release | always | nothing: `tier: release` makes every e2e step mandatory |
+
+Every e2e step, or a job that holds only e2e work, carries the same signal:
+
+```yaml
+if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+```
+
+A job that also does non-e2e work keeps its setup, `verify`, generation and builds
+unconditional and gates only its e2e steps; qualifiers that build and then smoke
+a browser run with `--no-browser` (the cloud-session handoff with `--skip-e2e`)
+when not opted in. Playwright browser installs and native-host provisioning
+follow the same signal, so a run without the opt-in downloads no browser.
+
+Adding the label fires a `labeled` event, which only the workflows holding e2e
+steps listen to. On that event every job without e2e steps skips (and every job
+skips when another label is added), so a label run never repeats the
+Integration gates, and its concurrency group includes the label name, so it never
+cancels the full run in progress. In `ci.yml` the label run's aggregator reports
+as "E2E result", never as "CI result": a run with the gates skipped must never
+become the latest required check on that head. "E2E result" is not a
+branch-protection check; once the label is set, every later full run includes the
+e2e steps in its "CI result". When a task handoff says `e2e: required`, the
+`feature-delivery` skill adds the label before the pull request is marked ready.
+
+`npm run check:repository` enforces this with `scripts/quality/e2e-policy.mjs`:
+each e2e step must be false for a ready pull request, a push to `main` and a
+dispatch without `e2e`, true for the `e2e` label or input, and true for
+`tier: release`, evaluated with the same three-valued evaluator as
+`node bin/app ci`, so an undecidable gate fails too. `release.yml` must call every
+workflow that holds e2e work with an effective tier of release (Candidate
+qualification is called without inputs, so its call tier defaults to release).
+Negative fixtures are in `tests/tooling/qualification-e2e-opt-in.checks.mjs`.
 
 ## Release pull requests and the alias checks
 
