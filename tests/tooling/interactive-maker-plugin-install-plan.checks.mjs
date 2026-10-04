@@ -61,7 +61,11 @@ test('plugin install, maker planning and unknown commands fail before any write'
     const context = { root, frameworkRoot };
     assert.equal(await code(install(context)), 'CONFIG_REQUIRED');
     assert.equal(await code(planOperation({ command: 'make', args: ['feature'], options: {} }, context)), 'MAKER_INPUT_REQUIRED');
-    assert.equal(await code(planOperation({ command: 'make', args: ['./custom.mjs', 'thing'], options: {} }, context)), 'CUSTOM_TRUST_REQUIRED');
+    // An unregistered name is unknown before any trust decision; only a registered custom recipe asks for trust.
+    assert.equal(await code(planOperation({ command: 'make', args: ['./custom.mjs', 'thing'], options: {} }, context)), 'MAKER_UNKNOWN');
+    await mkdir(join(root, 'scripts/makers/custom'), { recursive: true });
+    await writeFile(join(root, 'scripts/makers/custom/registry.mjs'), "import { thingMaker } from './thing.mjs';\nexport const customMakers = [thingMaker];\n");
+    assert.equal(await code(planOperation({ command: 'make', args: ['thing', 'item'], options: {} }, context)), 'CUSTOM_TRUST_REQUIRED');
     assert.equal(await code(planOperation({ command: 'status', args: [], options: {} }, context)), 'Operation has no file plan.');
   } finally { await rm(root, { recursive: true, force: true }); }
 });

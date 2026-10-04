@@ -1,6 +1,6 @@
 # Project Starters
 
-> **Retired built-in catalog.** This page describes the embedded `starters/` catalog of the checked-in v5 concept, which is kept only as an input of the current authoring build until that build is v6-native. Current starters are the external project v6 definitions in `configs/starters/`; see [Companion starters](../../development/COMPANION-STARTERS.md) and [JSON starters](../../development/JSON-STARTERS.md). The shell rejects the retired v5 starter documents; they are never migrated.
+> **Retired built-in catalog.** The embedded `starters/` catalog of the former v5 concept was removed; the checked-in concept is schema 6 and embeds no starter. Current starters are the external project v6 definitions in `configs/starters/`, listed in the catalog below; see [Companion starters](../../development/COMPANION-STARTERS.md) and [JSON starters](../../development/JSON-STARTERS.md). The shell rejects retired v5 starter documents; they are never migrated.
 
 Project Starters is an offline, curated way to create an **independent full companion project** from ordinary project JSON. It builds on the existing one-vault/one-project workflow. It is not a remote marketplace, plugin installer, alternate generator or finished collection of native plugins.
 
@@ -8,7 +8,7 @@ Project Starters is an offline, curated way to create an **independent full comp
 
 Open **Project Starters** in navigation or **Choose a starter** on the empty welcome page. Search by use case and optionally filter by category. Preview a starter to see its actual surfaces, included scope, remaining implementation and synthetic-data boundary. Configure identity and the generated source/test folders, then choose **Review project**. Nothing replaces the current project until the confirmation checkbox and final action are used.
 
-Start Blank supplies only a minimal runnable workspace entry, settings surface and design tokens. It contains no example entity, source recipe, product requirement or detailed product composition. The generator requires a navigable surface; an entirely empty sitemap is therefore not advertised as a runnable plugin.
+Start Blank supplies only a minimal runnable workspace entry, settings surface and design tokens. Its project defines no example entity, source recipe, product requirement or detailed product composition; the copied framework still registers its own Task, Project and Items example features. The generator requires a navigable surface; an entirely empty sitemap is therefore not advertised as a runnable plugin.
 
 After confirmation, use the existing PRD, sitemap, Page, Component, entity, source, test-data and Design System editors. The JSON is an independent copy, not a live link to the catalog. The built-in project stays unchanged.
 
@@ -36,7 +36,8 @@ The custom folders configure **generated product code and tests**, such as `plug
 
 | ID | Starter | Scope |
 | --- | --- | --- |
-| `blank` | Start Blank | Minimal host entry and settings; no example domain |
+| `blank` | Start Blank | Minimal host entry and settings; no generated domain (the framework's example features stay registered) |
+| `agent-ready` | Agent Ready | Start Blank plus reviewed, inert Airship and Hindsight defaults |
 | `command-utility` | Command Utility | Text utility and preview with local input reset |
 | `quick-capture` | Quick Capture | Inbox, capture modal, record details and source contract |
 | `tasks-projects` | Tasks & Projects | Task/project relationship and list/detail workspace |
@@ -45,6 +46,8 @@ The custom folders configure **generated product code and tests**, such as `plug
 | `vault-dashboard` | Vault Dashboard | Overview, result list and read-only contract |
 | `note-inspector` | Note Inspector | Metadata inspection/review; native active-note binding remains |
 | `import-integration` | Import & Integration | Fixture-first preview/mapping/result; no live API or credentials |
+| `context-menu` | File Context Menu | One extension-filtered file context-menu action |
+| `custom-file-view` | Custom File View | A text-backed file format opened in a dedicated editor view |
 
 Focused starters provide original PRD acceptance TODOs and detailed compositions with synthetic default/narrow/empty/error scenarios. Local input reset and declared navigation compile to UI behavior. Buttons labeled as implementation hooks do not pretend that data was saved. Source ports generate application/services/Pinia/adapter scaffolding; adapters fail explicitly until implemented. The import starter uses `https://example.invalid` and manual reads. No OAuth, parser, recurrence engine, indexing engine or right-sidebar host placement is implied.
 

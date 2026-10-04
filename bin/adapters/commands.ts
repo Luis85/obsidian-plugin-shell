@@ -24,7 +24,7 @@ import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
-const makerHelp = `Shell maker — make first, generate when ready
+const makerHelp = `Workbench CLI — maker commands: make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
   node bin/app first-run schema --json
   node bin/app first-run --input first-run.json --json
@@ -74,7 +74,8 @@ const makerHelp = `Shell maker — make first, generate when ready
   node bin/app design status --json  Claude Design folders under docs/design (configurable paths.design)
   node bin/app design prepare --name my-prototype --json   Prepare docs/design/my-prototype for Claude Design
   node bin/app design sync --name my-prototype --json      Regenerate its context; design work is never touched
-Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
+These maker commands apply only with --apply <planHash> on the same command after reviewing its plan; they have no --yes shortcut.
+Framework commands (setup, make <recipe>, generate, new <dir>, ...) accept --yes or --apply <planHash>: node bin/app help.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
 --starter <project-starter-id> (new, new guide), --name <prototype-slug> and --package <prepared folder> (design),
@@ -168,13 +169,13 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
 function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): Record<string, unknown> {
-    const legacy = args.command === 'new' ? descriptor('new') : undefined;
+    const newCommand = args.command === 'new' ? descriptor('new') : undefined;
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+    return { help: makerHelp + pluginHelp, commands: newCommand ? [{ ...newCommand, options: parameterKinds(newCommand) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
-      ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
+      ...(newCommand ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
 /** A registered plugin root owns its own help and execution; undefined means a built-in command. */

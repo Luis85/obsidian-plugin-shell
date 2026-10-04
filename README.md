@@ -8,6 +8,8 @@ The three promises are **saving time without sacrificing quality**, **documentin
 
 Start with the [product vision](docs/product/PRODUCT-VISION.md), [product principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md). The [product and delivery overview](SHELL-FIRST-OVERVIEW.md) connects the available entry points; the [2026-09-29 vision review](docs/_archive/product/PR5-VISION-REVIEW.md) distinguishes inspected implementation from intended direction.
 
+**Developers:** the [developer guide](DEVELOPER_GUIDE.md) lists every requirement first, then setup and everyday workflows for improving or extending the project.
+
 **Implementation boundary:** Workbench builds on the reusable shell, CLI, compiler and authoring concept in PR #5. A generated scaffold is not a finished application, and the browser authoring concept is not the fully accepted native product. The supported CLI entry is `node bin/app`; package/manifest IDs, schema names and `companion` paths remain unchanged. Generated projects retain the user's chosen identity.
 
 ## Companion and UI-feature starters
@@ -52,8 +54,12 @@ The new project has its own README and short `AGENTS.md`, Claude Code hooks, ski
 and permissions, VS Code debugging, product CI and an in-memory Obsidian example test
 ([what it contains](docs/development/COMPANION-GENERATOR.md#what-the-generated-project-contains)).
 
-`node bin/app help` shows the golden path (new, install, dev, test, check, make).
-`npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`
+`node bin/app help` (the Workbench CLI; package `bin` name `obs-shell`) shows the
+golden path (new, install, dev, test, check, make); `help <group>`, for example
+`help framework`, lists a command group. `make` applies a reviewed plan and then
+runs its planned type, generated-test, event and entity checks, reporting each
+actual result. `npm run check` is the fast daily and agent gate (types, both
+linters, tests and generated authoring tests; `check:fast`
 covers changed files only), and `npm run check:submission` mirrors documented
 Obsidian review rules locally. Neither replaces `npm run verify`. See
 [the check gate](docs/development/FRAMEWORK-CLI.md#golden-path-help-and-the-check-gate).

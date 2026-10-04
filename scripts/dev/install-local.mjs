@@ -2,7 +2,7 @@ import { readFile, mkdir, lstat, mkdtemp, copyFile, writeFile, rename, rm } from
 import { resolve, relative, join, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
-import { runNodeScript as runNode } from '../shared/process.ts';
+import { runNodeProcess } from '../shared/process.ts';
 const assets = ['main.js', 'styles.css', 'manifest.json'];
 async function absent(path) { try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; } }
 async function contained(root, target) {
@@ -91,7 +91,7 @@ async function cli() {
     else if (arg === '--dry-run') dryRun = true;
     else throw new Error(`Unknown option: ${arg}`);
   }
-  if (build && !dryRun) await runNode('scripts/bundling/build.mjs');
+  if (build && !dryRun) await runNodeProcess('scripts/bundling/build.mjs', [], { spawnOptions: { stdio: 'inherit' }, forwardParentSignals: true });
   console.log(JSON.stringify(await installLocal({ vault, configDir, dryRun }), null, 2));
   const identity = JSON.parse(await readFile('manifest.json', 'utf8'));
   console.log(`Open the selected vault in Obsidian. Enable ${identity.name} manually, then run “Open capability showcase”. Restricted Mode was not changed.`);

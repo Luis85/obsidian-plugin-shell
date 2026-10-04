@@ -87,7 +87,7 @@ class Terminal:
 
     def retain(self, directory, name):
         (directory / f"{name}.ansi").write_bytes(self.transcript)
-        cast = [{"version": 2, "width": 110, "height": 30, "title": f"Shell maker: {name}"}, *self.events]
+        cast = [{"version": 2, "width": 110, "height": 30, "title": f"Workbench CLI: {name}"}, *self.events]
         (directory / f"{name}.cast").write_text("\n".join(json.dumps(item) for item in cast) + "\n")
         for screen, text in self.snapshots.items():
             (directory / f"{name}-{screen}.ansi").write_text(text)

@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  portablePath, loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout,
+  handoutPath, loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout,
 } from '../../bin/adapters/framework/handout-workspace.ts';
 import { HANDOUT_PATH, readSnapshot } from '../../bin/adapters/framework/handout-model.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
@@ -67,8 +67,8 @@ test('source changes and explicit PRD overrides persist through refresh', async 
 });
 
 test('portable handout paths reject absolute traversal Windows and protected roots', () => {
-  assert.equal(portablePath('docs/prds'),'docs/prds');
-  for(const path of ['../outside','/etc','C:\\data','.git','.obsidian','a/../b','a//b','.','node_modules/docs','a\\b']) assert.throws(()=>portablePath(path), { code: 'HANDOUT_PATH' });
+  assert.equal(handoutPath('docs/prds'),'docs/prds');
+  for(const path of ['../outside','/etc','C:\\data','.git','.obsidian','a/../b','a//b','.','node_modules/docs','a\\b']) assert.throws(()=>handoutPath(path), { code: 'HANDOUT_PATH' });
 });
 
 test('handout workspace refuses symlinks malformed settings invalid modes and oversized or binary PRDs', async t => {

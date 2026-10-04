@@ -6,19 +6,23 @@ export function operation<Input, Output>(run: (input: Input, signal: AbortSignal
   let revision = 0; let disposed = false; let active: AbortController | undefined;
   function cancel() { revision++; active?.abort(); active = undefined; pending.value = false; }
   onScopeDispose(() => { disposed = true; cancel(); });
-  async function execute(input: Input) {
+  const stale = (current: number) => disposed || current !== revision;
+  const failure = (cause: unknown) => cause instanceof Error && cause.message.startsWith('NOT_IMPLEMENTED:') ? 'not-implemented' : 'operation-failed';
+  function refusal() {
     if (disposed) return {ok:false as const,code:'disposed'};
-    if (pending.value && direction !== 'read') return {ok:false as const,code:'busy'};
+    return pending.value && direction !== 'read' ? {ok:false as const,code:'busy'} : null;
+  }
+  async function execute(input: Input) {
+    const refused = refusal(); if (refused) return refused;
     active?.abort(); const controller = new AbortController(); active = controller;
     const current = ++revision; pending.value = true; error.value = null;
     try {
       const value = await run(input,controller.signal);
-      if (disposed || current !== revision) return {ok:false as const,code:'superseded'};
+      if (stale(current)) return {ok:false as const,code:'superseded'};
       data.value = value; return {ok:true as const,value};
     } catch (cause) {
-      if (disposed || current !== revision) return {ok:false as const,code:'superseded'};
-      const code = cause instanceof Error && cause.message.startsWith('NOT_IMPLEMENTED:') ? 'not-implemented' : 'operation-failed';
-      error.value = code; return {ok:false as const,code};
+      if (stale(current)) return {ok:false as const,code:'superseded'};
+      const code = failure(cause); error.value = code; return {ok:false as const,code};
     } finally { if (current === revision) { pending.value = false; active = undefined; } }
   }
   return {data,pending,error,execute,cancel};

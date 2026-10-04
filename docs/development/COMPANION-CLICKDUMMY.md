@@ -83,7 +83,7 @@ The modern integrated authoring build is produced by:
 node scripts/concepts/build-mvp.mjs
 ```
 
-It writes `reports/companion-mvp/index.html`, the full v6 `companion-project.json` and a build hash receipt. The checked-in concept (`docs/concepts/companion/index.html`) is only the schema 6 build base of this build; it is not relabelled as the new build and is not a supported import format.
+It writes the empty authoring workspace `reports/companion-mvp/index.html` (and the same page as `companion-journey-lens.html`) plus the `build.json` hash receipt, and removes any stale `companion-project.json`/`companion-project-v6.json`: it emits no project export. Load `configs/starters/companion-plugin.json` separately. The checked-in schema 6 concept must pass `build-companion.py --check` before the editor islands are mounted into it.
 
 With the qualified npm explicitly selected and browser tooling provisioned:
 

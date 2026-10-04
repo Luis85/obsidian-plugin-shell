@@ -13,8 +13,10 @@ function vrRuntime(m: Model, add: Add): void {
   const path = `${m.testRoot}/visual-runtime.test.ts`;
   add(path, `// @vitest-environment happy-dom
 import { it, expect, vi } from 'vitest';
-import { defineComponent, nextTick, reactive, type App } from 'vue';
+import { defineComponent, h, nextTick, reactive, resolveComponent, type App } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
+import UFormField from '@nuxt/ui/components/FormField.vue';
+import UInput from '@nuxt/ui/components/Input.vue';
 import { useVisual, provideVisualContext, type VisualContext, type VisualPort } from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/composables/use-visual.ts`))};
 import type { VisualPageSpec, VisualRequest } from ${literal(relativeImport(path, `${m.sourceRoot}/domain/visual-runtime.ts`))};
 import type { UiNode, VisualAction, Scenario } from ${literal(relativeImport(path, `${m.sourceRoot}/domain/visual/visual-ir.mjs`))};
@@ -160,6 +162,22 @@ it('JSON file input parses bounded UTF-8 data, preserves valid values, and ignor
     expect(model.text('read')).toContain('new'); expect(model.text('read')).not.toContain('old'); expect(model.errors.json).toBeUndefined();
     choose(new File([new Uint8Array([255])], 'bad-utf8.json')); await flushPromises(); expect(model.errors.json).toMatch(/UTF-8/);
     choose(pending); wrapper.unmount(); finish(new TextEncoder().encode('{"late":true}').buffer); await flushPromises(); expect(model.text('read')).not.toContain('late');
+  } finally { wrapper.unmount(); }
+});
+it('a control inside a labelled form field is announced by the field label, never its catalog node name', () => {
+  const email: UiNode = { ...control('email', 'text'), name: 'Input' }, search: UiNode = { ...control('search', 'text'), name: 'Search' };
+  const field: UiNode = { id: 'field', kind: 'component', ref: { kind: 'nuxt-ui', entryId: 'u-form-field' }, props: { label: { kind: 'literal', value: 'Email address' } }, slots: { default: [email] }, events: [] };
+  const spec = page([field, search]);
+  // Components resolve by name as in the generated SFC templates, so the runtime's whole prop record binds like v-bind.
+  const wrapper = mount(defineComponent({ components: { UFormField, UInput }, setup() {
+    const model = useVisual(spec, {}, () => {});
+    return () => { const Field = resolveComponent('UFormField'), Input = resolveComponent('UInput');
+      return [h(Field, model.props('field'), { default: () => h(Input, model.props('email')) }), h(Input, model.props('search'))]; };
+  } }), { attachTo: document.body, global: { plugins: [{ install(app: App) { provideVisualContext(app, { ports: [], navigate: () => {}, handle: wrong }); } }] } });
+  const accessibleName = (input: HTMLInputElement): string => input.getAttribute('aria-label') ?? [...document.querySelectorAll('label')].filter(label => input.id !== '' && label.htmlFor === input.id).map(label => label.textContent?.trim() ?? '').join(' ');
+  try { const [named, bare] = wrapper.findAll('input').map(found => found.element);
+    if (!(named instanceof HTMLInputElement) || !(bare instanceof HTMLInputElement)) throw new Error('INPUTS_NOT_RENDERED');
+    expect(named.getAttribute('aria-label')).toBeNull(); expect(accessibleName(named)).toBe('Email address'); expect(accessibleName(bare)).toBe('Search');
   } finally { wrapper.unmount(); }
 });
 it('maps source pending, error and empty states without starting a source operation', async () => {

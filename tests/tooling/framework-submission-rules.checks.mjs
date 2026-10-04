@@ -68,7 +68,9 @@ test('check submission is read-only and reports per-rule outcomes with remediati
   t.after(() => rm(dir, { recursive: true, force: true }));
   await writeFile(join(dir, 'manifest.json'), JSON.stringify(valid)); await writeFile(join(dir, 'versions.json'), JSON.stringify({ '1.0.0': '1.5.0' }));
   await writeFile(join(dir, 'LICENSE'), 'MIT'); await writeFile(join(dir, 'README.md'), '# Quick Capture');
-  await mkdir(join(dir, 'dist')); await writeFile(join(dir, 'dist/main.js'), 'module.exports = {};'); await writeFile(join(dir, 'dist/manifest.json'), JSON.stringify(valid));
+  await mkdir(join(dir, 'dist')); await writeFile(join(dir, 'dist/main.js'), `module.exports = {};/*${'x'.repeat(1_200_000)}*/`);
+  // Bundles above the 1 MiB text bound are still release assets.
+  await writeFile(join(dir, 'dist/manifest.json'), JSON.stringify(valid));
   const before = (await readdir(dir, { recursive: true })).sort();
   const output = spawnSync(process.execPath, [join(root, 'bin/app'), 'check', 'submission', '--root', dir, '--json'], { encoding: 'utf8', timeout: 60000 });
   assert.equal(output.status, 1, output.stderr);

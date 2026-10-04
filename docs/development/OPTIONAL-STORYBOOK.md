@@ -15,7 +15,7 @@ Two **independent**, default-off switches are accepted in the top-level project 
 }
 ```
 
-This is a fragment to add to a complete project, not a complete project definition. Absent fields mean false. Values must be booleans; unknown tooling/Storybook fields are rejected. The current authoring reader accepts the addition for supported v1–v6 inputs and preserves it during migration. The frozen legacy validator and checked-in v5 concept are not retroactively extended; the current composed v6 companion preserves the fields through import, export and recovery validation.
+This is a fragment to add to a complete project, not a complete project definition. Absent fields mean false. Values must be booleans; unknown tooling/Storybook fields are rejected. The authoring reader accepts the addition in project schema 6, the only readable format (earlier schemas are rejected, never migrated); the composed companion preserves the fields through import, export and recovery validation.
 
 | enabled | generateStories | Generated output |
 | --- | --- | --- |

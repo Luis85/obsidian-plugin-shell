@@ -7,6 +7,8 @@ import { deliveryPipelineFiles, deliveryPipelineFolder } from '../../compiler/do
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies. */
 const excludedRoots = [deliveryPipelineFolder, 'configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/'];
 const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
+  // The developer guide describes working in the framework checkout, not an extracted kit.
+  'DEVELOPER_GUIDE.md',
   // Starter-pack qualification reads canonical definitions and concept builders that only the maintainer checkout carries.
   '.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles, ...['golden', 'definitions', 'lifecycle', 'classic-assembly', 'distribution'].map(name => `tests/tooling/starter-${name}.checks.mjs`)]);
 /** These reviewed runtime libraries are compiler dependencies, not starter content. */
@@ -15,19 +17,34 @@ export function included(path: string): boolean {
   if (runtimeAssets.has(path)) return true;
   return !excludedFiles.has(path) && !excludedRoots.some(prefix => path.startsWith(prefix));
 }
+const external = (target: string): boolean => /^(?:[a-z][a-z\d+.-]*:|#|\/\/)/i.test(target);
 function availableLink(path: string, target: string): boolean {
-  if (/^(?:[a-z][a-z\d+.-]*:|#|\/\/)/i.test(target)) return true;
+  if (external(target)) return true;
   return included(posix.normalize(posix.join(posix.dirname(path), decodeURIComponent(target.split(/[?#]/, 1)[0]!))));
 }
-/** Keep the reference prose, but do not leave local links to deliberately unshipped prototype files. */
-function documentation(path: string, source: string): string {
+type LinkMapper = (original: string, label: string, target: string) => string;
+/** Rewrites Markdown links outside fenced code blocks; fenced examples stay byte-exact. */
+function mapLinks(source: string, mapper: LinkMapper): string {
   let fence: string | null = null;
   return source.split('\n').map(line => {
     const match = /^\s{0,3}(`{3,}|~{3,})/.exec(line);
     if (match) { if (!fence) fence = match[1]!; else if (fence[0] === match[1]![0] && match[1]!.length >= fence.length) fence = null; return line; }
     if (fence) return line;
-    return line.replace(/!?\[([^\]\n]*)\]\(([^\s)]+)\)/g, (original: string, label: string, target: string) => availableLink(path, target) ? original : `${label} (prototype asset not included in this kit)`);
+    return line.replace(/!?\[([^\]\n]*)\]\(([^\s)]+)\)/g, mapper);
   }).join('\n');
+}
+/** Keep the reference prose, but do not leave local links to deliberately unshipped prototype files. */
+function documentation(path: string, source: string): string {
+  return mapLinks(source, (original, label, target) => availableLink(path, target) ? original : `${label} (maintainer asset, not included in this kit)`);
+}
+/**
+ * The kit root README sits beside bin/, while the documents it links ship under bin/template/.
+ * Every relative link is rebased onto that shipped copy so it resolves in an extracted kit.
+ */
+export function kitRootReadme(bytes: Buffer): Buffer {
+  const rebased = mapLinks(bytes.toString('utf8'), (original, _label, target) => external(target)
+    ? original : original.replace(`](${target})`, `](${posix.join('bin/template', target)})`));
+  return Buffer.from(rebased);
 }
 export function standaloneSource(path: string, bytes: Buffer): Buffer {
   // Normalize only distributed UTF-8 text; never rewrite checkout files or binary fixtures.

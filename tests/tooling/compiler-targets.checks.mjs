@@ -94,3 +94,19 @@ test('typed authoring validation failures are schema diagnostics, never internal
     assert.ok(result.diagnostics.every(item => item.code !== 'COMPILER_INTERNAL_ERROR'));
   }
 });
+test('identity and design field violations name the offending field and its JSON pointer', async () => {
+  for (const [mutate, pointer, field] of [
+    [document => { document.project.name = 'two\nlines'; }, '/project/name', 'name'],
+    [document => { document.project.description = 'x'.repeat(401); }, '/project/description', 'description'],
+    [document => { document.project.author = 'x'.repeat(81); }, '/project/author', 'author'],
+    [document => { document.design.platform = 'tv'; }, '/design/platform', 'platform'],
+    [document => { document.design.goal = 'x'.repeat(1001); }, '/design/goal', 'goal'],
+  ]) {
+    const document = structuredClone(JSON.parse(source)); mutate(document);
+    const result = await compileProject({ source: JSON.stringify(document), template, sourceName: 'project.json' });
+    assert.equal(result.status, 'failed');
+    const [diagnostic] = result.diagnostics;
+    assert.equal(diagnostic.code, 'COMPILER_SCHEMA_INVALID'); assert.equal(diagnostic.source.jsonPointer, pointer);
+    assert.ok(diagnostic.message.includes(`Field "${field}" at ${pointer}.`), diagnostic.message);
+  }
+});

@@ -4,6 +4,7 @@
  * Steps call installed tool entry points with argument arrays (no shell, no recursive npm).
  */
 import { join } from 'node:path';
+import { readdir } from 'node:fs/promises';
 import { exists } from './files.ts';
 import { lintRoots } from '../../../scripts/shared/project-roots.mjs';
 import { projectConfigPath, projectConfigs } from '../../../scripts/shared/project-configs.mjs';
@@ -39,27 +40,40 @@ function typecheckStep(root: string, project: boolean): CheckStep {
 function vitestConfig(root: string, project: boolean): string[] {
   return ['--config', project ? projectConfigPath(root, 'vitest') ?? projectConfigs.vitest.path : 'configs/testing/vitest.config.mjs'];
 }
-interface Parts { makers: CheckStep[]; typecheck: CheckStep; fullTest: CheckStep; lint: CheckStep | null; eslint: CheckStep; eslintRoots: string[] }
-function stepParts(root: string, project: boolean, makers: CheckStep[], config: string[]): Parts {
-  const lint: CheckStep | null = project ? null : { id: 'lint', display: 'node scripts/quality/lint-source.mjs', entry: 'scripts/quality/lint-source.mjs', args: [] };
+interface Parts { makers: CheckStep[]; typecheck: CheckStep; fullTest: CheckStep; lint: CheckStep | null; eslint: CheckStep; eslintRoots: string[]; authoring: CheckStep[] }
+const authoringTest = /^(?:custom|locale)-[a-z0-9-]+\.checks\.mjs$/;
+/** Tooling tests the custom-maker and locale recipes write; a node:test file runs its tests when executed directly. */
+async function authoringSteps(root: string): Promise<CheckStep[]> {
+  if (!await exists(join(root, 'tests/tooling'))) return [];
+  const names = (await readdir(join(root, 'tests/tooling'))).filter(name => authoringTest.test(name)).sort();
+  return names.map(name => ({ id: `tooling:${name.slice(0, -'.checks.mjs'.length)}`, display: `node tests/tooling/${name}`, entry: `tests/tooling/${name}`, args: [] }));
+}
+const oxlintEntry = 'scripts/quality/lint-source.mjs';
+/** The same two linters as `npm run lint`: oxlint over owned source, then ESLint over the configured roots. */
+function stepParts(root: string, project: boolean, makers: CheckStep[], config: string[], extra: { oxlint: boolean; authoring: CheckStep[] }): Parts {
+  const lint: CheckStep | null = extra.oxlint ? { id: 'lint', display: `node ${oxlintEntry}`, entry: oxlintEntry, args: [] } : null;
   // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
   const eslintRoots = [...(project ? lintRoots(root) : ['src']), ...(makers.length ? ['bin'] : [])];
   const eslintStep: CheckStep = { id: 'eslint', display: `eslint -c ${eslintConfig} ${eslintRoots.join(' ')} --max-warnings 0`, entry: eslint, args: ['-c', eslintConfig, ...eslintRoots, '--max-warnings', '0'] };
   const fullTest: CheckStep = { id: 'test', display: `vitest run ${config.join(' ')}`, entry: vitest, args: ['run', ...config] };
-  return { makers, typecheck: typecheckStep(root, project), fullTest, lint, eslint: eslintStep, eslintRoots };
+  return { makers, typecheck: typecheckStep(root, project), fullTest, lint, eslint: eslintStep, eslintRoots, authoring: extra.authoring };
 }
-const fullSteps = (parts: Parts): CheckStep[] => [parts.typecheck, ...(parts.lint ? [parts.lint] : []), parts.eslint, parts.fullTest, ...parts.makers];
+const fullSteps = (parts: Parts): CheckStep[] => [parts.typecheck, ...(parts.lint ? [parts.lint] : []), parts.eslint, parts.fullTest, ...parts.authoring, ...parts.makers];
 export interface CheckSelection { scope: string; steps: CheckStep[]; changes?: Changes; suites?: Array<{ name: string; reasons: Reason[] }> }
 /** `base` (fast mode only) is the ref whose merge-base with HEAD starts the diff; default origin/main, else HEAD. */
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit, base?: string, skipSuites = false): Promise<CheckSelection> {
   const scope = await checkScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root, project), config = vitestConfig(root, project);
-  const parts = stepParts(root, project, makers, config);
+  // A generated project without the shell's oxlint wrapper keeps ESLint only; the shell always runs both.
+  const oxlint = !project || await exists(join(root, oxlintEntry));
+  const parts = stepParts(root, project, makers, config, { oxlint, authoring: await authoringSteps(root) });
   if (!fast) return { scope, steps: fullSteps(parts) };
   const changes = await changedFiles(root, git, base);
   const suites = await fastSuites(root, project, changes);
-  const steps = fastSteps({ project, changes, typecheck: parts.typecheck, fullTest: parts.fullTest, vitestConfig: config, full: () => fullSteps(parts),
+  const narrowed = fastSteps({ project, changes, typecheck: parts.typecheck, fullTest: parts.fullTest, vitestConfig: config, full: () => fullSteps(parts),
     fullLint: parts.lint, eslintRoots: parts.eslintRoots, fullEslint: parts.eslint, makerTypes: makers.filter(step => step.id === 'maker-types'), suites, skipSuites });
+  // Without a diff source the narrowed gate falls back to the full steps, which already include the authoring tests.
+  const steps = changes.source === 'git' ? [...narrowed, ...parts.authoring] : narrowed;
   return { scope, steps, changes, suites };
 }
 /** ANSI escape sequences are removed from captured output. */

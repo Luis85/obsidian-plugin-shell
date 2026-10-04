@@ -44,7 +44,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -82,9 +82,9 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "knowledge-collection-plugin",
+        "id": "knowledge-collection",
         "name": "Knowledge Collection",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Organize structured notes as a browsable collection with editable details."
       },
@@ -3251,7 +3251,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

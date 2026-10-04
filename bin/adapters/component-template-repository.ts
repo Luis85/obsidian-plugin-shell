@@ -3,6 +3,7 @@ import { lstat, readdir } from 'node:fs/promises';
 import { parseDesignData } from '../../scripts/contracts/json-data.ts';
 import { exists, hash, readBounded } from './framework/files.ts';
 import { requireThat } from './framework/contracts.ts';
+import { resolveTemplateRoot } from './template-root.ts';
 import {
   validateComponentTemplate,
   validateComponentTemplateCatalog,
@@ -62,13 +63,6 @@ async function scanFolder(folder: string, displayRoot: string, origin: Component
   return result;
 }
 
-async function baselineFolder(frameworkRoot: string): Promise<{ path: string; display: string } | null> {
-  const source = resolve(frameworkRoot, TEMPLATE_FOLDER);
-  if (await exists(source)) return { path: source, display: TEMPLATE_FOLDER };
-  const kit = resolve(frameworkRoot, 'bin/template', TEMPLATE_FOLDER);
-  if (await exists(kit)) return { path: kit, display: TEMPLATE_FOLDER };
-  return null;
-}
 
 function uniqueSource(entries: readonly ComponentTemplateEntry[], label: string): void {
   const ids = new Set<string>();
@@ -83,11 +77,12 @@ export async function loadComponentTemplates(
   frameworkRoot: string,
   contributed: readonly ComponentTemplate[] = [],
 ): Promise<ComponentTemplateEntry[]> {
-  const baseline = await baselineFolder(frameworkRoot);
+  // The baseline is the verified kit template (or the source checkout itself); the project library is always scanned
+  // separately, so an extracted kit with its own templates never shadows the packaged baseline.
+  const baseline = resolve(await resolveTemplateRoot(frameworkRoot), TEMPLATE_FOLDER);
   const project = resolve(root, TEMPLATE_FOLDER);
-  const baselineEntries = baseline ? await scanFolder(baseline.path, baseline.display, 'baseline') : [];
-  const projectEntries = (!baseline || resolve(project) !== resolve(baseline.path)) && await exists(project)
-    ? await scanFolder(project, TEMPLATE_FOLDER, 'project') : [];
+  const baselineEntries = await scanFolder(baseline, TEMPLATE_FOLDER, 'baseline');
+  const projectEntries = project === baseline ? [] : await scanFolder(project, TEMPLATE_FOLDER, 'project');
   uniqueSource(baselineEntries, 'Framework baseline');
   uniqueSource(projectEntries, 'Project template library');
   const merged = new Map(baselineEntries.map(entry => [entry.template.id, entry]));

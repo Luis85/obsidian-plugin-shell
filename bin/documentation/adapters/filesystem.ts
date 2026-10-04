@@ -1,4 +1,4 @@
-import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
+import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { lstat, readdir, realpath, open, type FileHandle } from 'node:fs/promises';
 import { constants, type Stats } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
@@ -65,10 +65,9 @@ function glob(pattern: string): RegExp {
   }
   return new RegExp(result + '$', 'i');
 }
-const ignored = new Set(['.git', defaultVaultConfigDirectory, '.framework', '.companion', 'node_modules', '.codex-authoring.lock']);
 interface DiscoveryOptions { recursive: boolean; include: string[]; exclude: string[] }
 interface Discovery { options: DiscoveryOptions; includes: RegExp[]; excludes: RegExp[]; found: Map<string, DocumentationSource>; total: number; visited: number }
-const isIgnored = (part: string): boolean => ignored.has(part.toLowerCase());
+const isIgnored = (part: string): boolean => isProtectedSegment(part);
 function excluded(discovery: Discovery, rel: string): boolean {
   return discovery.excludes.some(pattern => pattern.test(rel)) || rel.split('/').some(isIgnored);
 }

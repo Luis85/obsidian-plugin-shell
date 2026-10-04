@@ -95,9 +95,12 @@ Claude Code cloud environments), is inventoried by exact path with its bytes and
 against a local download server. Other shell files still fail `METRIC_UNCLASSIFIED_INPUT`.
 
 Four measured views are retained: production, executable tooling/configuration,
-test/harness fixtures, and executable example-removal templates. Tooling and
-fixture/template complexity and duplication are diagnostic reports, without a
-claim that production targets have been met in those different corpora. Embedded
+test/harness fixtures, and generated-project templates (the Companion runtime under
+`templates/companion/runtime` and the executable example-removal templates). The
+templates view ships as generated production source, so it blocks at the same
+10/15 complexity and 3% duplication ceilings as production. Tooling and fixture
+complexity and duplication are diagnostic reports, without a claim that production
+targets have been met in those different corpora. Embedded
 maker source strings remain tooling tokens; their actual output becomes ordinary
 production when a consumer is generated and verified.
 
