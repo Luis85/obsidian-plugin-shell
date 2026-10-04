@@ -34,6 +34,9 @@ npm run release:prepare -- --help  Plan consistent stable version metadata; no t
 npm run release:rehearse -- --help  Qualify and retain assets from one clean fixed source commit
 npm run release:plan -- --help  Validate an unexecuted draft/promotion plan and supplied evidence
 npm run release:operate -- --help  Discover remote state; execution needs explicit candidate-bound authorization
+npm run release:changelog -- check  Validate CHANGELOG.md (Keep a Changelog 1.1.0); \`notes --version X.Y.Z\` prints one section
+npm run release:cut -- --version X.Y.Z  Plan a release/X.Y.Z cut; --execute commits it, --remote pushes and opens a draft PR
+npm run release:publish -- --version X.Y.Z --repository owner/repo  Plan publishing a green release PR; --execute merges, tags and releases
 
 Browser provisioning: node node_modules/@playwright/test/cli.js install chromium
 Open .dev-vault in Obsidian, deliberately enable the plugin, then run ${openCommand}.

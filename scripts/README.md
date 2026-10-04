@@ -33,6 +33,17 @@ commands and [authoring tools](../docs/development/AUTHORING-TOOLS.md) for suppo
 recipes. `release/cli.mjs` exposes authenticated planning and separately authorized
 execution through the retained-candidate engine and GitHub adapter; read
 [release execution](../docs/development/RELEASE-EXECUTION.md) before opting in.
+The delivery pipeline adds `release/changelog.mjs` (`release:changelog`: `check`
+validates Keep a Changelog 1.1.0, `notes --version X.Y.Z` prints one section),
+`release/branch.mjs verify --version X.Y.Z` (read-only release-branch metadata gate),
+`release/cut.mjs` (`release:cut`: a plan by default; `--execute` commits
+`release: X.Y.Z` on `release/X.Y.Z`, `--remote` pushes, opens the draft release pull
+request and dispatches `release.yml`) and `release/publish.mjs` (`release:publish`: a
+read-only plan by default; `--execute` merges the green release pull request, tags the
+tested head `X.Y.Z`, publishes the candidate assets with the changelog section and
+deletes the branch). Each script's header comment documents its flags, refusals and
+exit codes (2 means an uncertain remote write: rerun to resume). None of them
+promotes the blocked legacy release profile.
 Entity catalog/check commands (`entities:catalog`, `entities:check`) and event
 catalog/check commands (`events:catalog`, `events:check`) exist. Keep root
 configuration thin and shared policy here.
