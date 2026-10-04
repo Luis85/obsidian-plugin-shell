@@ -90,6 +90,9 @@ Everything else is refused for the whole view, with the reason, instead of being
 - A scan reads at most 20,000 vault entries, 5,000 notes, 1 MB per note and 32 MB in total.
   Narrow a large vault with a top-level `file.inFolder("…")`: only that folder is read.
 
+A website can render collections too: `node bin/app site collections` snapshots the views a site
+project lists into its Astro content collections. See [Astro website projects](ASTRO-SITES.md).
+
 Code: the framework-free reader and evaluator are in `bin/domain/obsidian-base.ts`,
 `base-expression*.ts` and `base-collection.ts`. File access is in `bin/adapters/obsidian-base.ts`.
 Tests: `tests/tooling/interactive-maker-obsidian-bases*.checks.mjs`.

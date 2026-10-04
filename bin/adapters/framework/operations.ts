@@ -13,6 +13,7 @@ import { docsRead } from './docs.ts';
 import { obsidianRead } from './obsidian-cli.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { baseOperation } from './base-command.ts';
+import { siteTemplatesOperation } from './site-command.ts';
 import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
 import { setupProgress } from './setup-progress.ts';
@@ -140,6 +141,7 @@ const routes: Route[] = [
   [(request, effect) => request.command.startsWith('docs ') && effect !== 'plan', docsRead],
   [(_request, effect) => effect === 'fixtures', (request, context) => fixtureOperation(request, context)],
   [prefixed('base '), baseOperation],
+  [named('site templates'), siteTemplatesOperation],
   [isMakerDiscovery, makerDiscovery],
   [isMakerCheck, makerCheck],
   [prefixed('entities '), entityCatalog],

@@ -33,6 +33,7 @@ A folder `projects/<name>/` (lowercase words joined by single hyphens) must hold
 
   `prototypes[].path` is a repository path under `docs/concepts/` or `docs/design/`
   and must exist. `origin` is optional; when present, `origin.starter` must exist.
+  A site project (below) adds a `site` section and may list no prototype.
 - **Its own workflows** in `projects/<name>/.github/workflows/`. They are written as
   if the project were its own repository (paths relative to the project root).
 - **An npm entry for `/projects/<name>`** in the root `.github/dependabot.yml`,
@@ -56,6 +57,29 @@ cd projects/<name>
 npm ci
 npm run check
 ```
+
+## Site projects (opt-in Astro websites)
+
+A site project is a standalone [Astro](https://astro.build) website built from a template
+(`product-page`, `project-page` or `documentation`) whose pages render Obsidian Bases
+collections. Astro is a dependency of the site only; the shell never installs or runs it.
+
+```sh
+node bin/app site templates
+node bin/app site new projects/<name> --template <id> [--title "..."] --yes
+# list Bases collections under site.collections in projects/<name>/workbench.project.json, then:
+node bin/app site collections projects/<name> --yes
+```
+
+Its manifest carries `"site": { "template": "<id>", "collections": [...] }`. `check:projects`
+requires a known template id and valid collections:
+
+- a unique kebab `name`
+- a normalized repository path in `base` to an existing `.base` file, inside the optional `vault`
+- a non-empty `view`
+
+The site needs the same Dependabot entry and workflow sync as any other project. See
+[Astro website projects](../docs/development/ASTRO-SITES.md).
 
 ## Workflows: owned by the project, run by GitHub from the root
 

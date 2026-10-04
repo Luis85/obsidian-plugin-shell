@@ -10,6 +10,8 @@ import { checkProjects, syncWorkflows } from '../../scripts/projects/projects.mj
 import { frameworkProjectFolder } from '../../bin/compiler/domain/template-inputs.ts';
 import { included } from '../../bin/adapters/framework/distribution.ts';
 import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 
 const repository = resolve(import.meta.dirname, '../..');
 const pin = 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1';
@@ -144,6 +146,43 @@ test('[PROJECTS-08] manifest, prototype links, standalone toolchain and dependab
   }
   await rm(join(root, 'projects/demo/workbench.project.json'));
   assert.match((await checkProjects(root)).failures.join('\n'), /PROJECT_MANIFEST_MISSING: projects\/demo\/workbench\.project\.json/);
+});
+
+test('[PROJECTS-12] a site project may list no prototype but needs a known template and valid Bases collections whose .base exists', async t => {
+  const { root, put } = await fixture(t);
+  await syncWorkflows(root);
+  const manifest = site => JSON.stringify({ schemaVersion: 1, name: 'demo', title: 'Demo', prototypes: [], site });
+  await put('vault/Site/Features.base', 'views: []\n');
+  await put('projects/demo/workbench.project.json', manifest({ template: 'product-page', collections: [{ name: 'features', base: 'vault/Site/Features.base', view: 'Cards', vault: 'vault' }] }));
+  const passed = await checkProjects(root);
+  assert.equal(passed.status, 'passed', passed.failures.join('\n'));
+  assert.deepEqual(passed.projects[0], { name: 'demo', title: 'Demo', prototypes: [], site: 'product-page', workflows: ['ci.yml'] });
+  await put('projects/demo/workbench.project.json', manifest({ template: 'blog', collections: [{ name: 'Features', base: 'vault/Site/Missing.base', view: '' }, { name: 'faq', base: 'faq.md', view: 'All' }, { name: 'faq', base: '../x.base', view: 'All' }] }));
+  const failures = (await checkProjects(root)).failures.join('\n');
+  for (const expected of ['SITE_TEMPLATE: site.template must be one of product-page, project-page, documentation', 'site.collections[0].name', 'site.collections[0].view', 'SITE_COLLECTION_BASE_MISSING: vault/Site/Missing.base',
+    'site.collections[1].base must be a normalized repository path ending in .base', 'site.collections[2].base', 'SITE_COLLECTION_DUPLICATE: site.collections[2].name "faq"'])
+    assert.ok(failures.includes(expected), `${expected} in\n${failures}`);
+  await put('projects/demo/workbench.project.json', manifest('product-page'));
+  assert.match((await checkProjects(root)).failures.join('\n'), /SITE_MANIFEST: site must be an object/);
+  await put('projects/demo/workbench.project.json', JSON.stringify({ schemaVersion: 1, name: 'demo', title: 'Demo', prototypes: 'none', site: { template: 'documentation', collections: [] } }));
+  assert.match((await checkProjects(root)).failures.join('\n'), /PROJECT_MANIFEST_PROTOTYPES: prototypes must be a list/);
+  await put('projects/demo/workbench.project.json', JSON.stringify({ schemaVersion: 1, name: 'demo', title: 'Demo', prototypes: [] }));
+  assert.match((await checkProjects(root)).failures.join('\n'), /PROJECT_MANIFEST_PROTOTYPES: list at least one prototype/, 'a non-site project still implements a prototype');
+});
+
+test('[PROJECTS-13] a site rendered by site new meets the projects contract, including the synced workflow security floor', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'projects-site-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const put = async (path, text) => { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), text); };
+  const created = await executeOperation({ command: 'site new', args: ['projects/acme'], options: { template: 'project-page', yes: true } }, { root, frameworkRoot: repository });
+  assert.equal(created.status, 'applied');
+  await put('.github/workflows/shell.yml', "name: Shell\non:\n  pull_request:\n    paths-ignore: ['projects/**']\npermissions:\n  contents: read\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo\n");
+  await put('.github/dependabot.yml', 'version: 2\nupdates:\n  - package-ecosystem: npm\n    directory: /projects/acme\n    schedule:\n      interval: weekly\n');
+  assert.deepEqual((await syncWorkflows(root)).written, ['projects--acme--ci.yml']);
+  const checked = await checkProjects(root);
+  assert.equal(checked.status, 'passed', checked.failures.join('\n'));
+  assert.deepEqual(checked.projects, [{ name: 'acme', title: 'Acme', prototypes: [], site: 'project-page', workflows: ['ci.yml'] }]);
+  assert.equal(inspectWorkflow(await readFile(join(root, '.github/workflows/projects--acme--ci.yml'), 'utf8')).jobs, 1);
 });
 
 test('[PROJECTS-09] sync refuses to write anything while one project workflow cannot be scoped', async t => {
