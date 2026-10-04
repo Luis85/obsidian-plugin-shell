@@ -6712,7 +6712,7 @@
         {
           "name": "list",
           "kind": "flag",
-          "description": "List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility."
+          "description": "List workflows and their jobs: triggers, path filters, runner/matrix summary and local reproducibility. Steps of local composite actions (.github/actions/<name>/action.yml) count as the job's own steps."
         },
         {
           "name": "execute",

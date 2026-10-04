@@ -9,7 +9,8 @@ function validateManifest(manifest) {
   if (manifest?.version !== 1 || !Array.isArray(manifest.files) || !Array.isArray(manifest.registrations)) throw new Error('EXAMPLES_INVALID_MANIFEST');
   for (const item of manifest.files) {
     if (!item || typeof item.path !== 'string' || (item.sha256 !== null && !/^[a-f0-9]{64}$/.test(item.sha256 ?? '')) ||
-      (Object.hasOwn(item, 'template') && (typeof item.template !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.txt$/.test(item.template) || item.template.includes('..')))) throw new Error('EXAMPLES_INVALID_MANIFEST');
+      (Object.hasOwn(item, 'template') && (typeof item.template !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.txt$/.test(item.template) || item.template.includes('..'))) ||
+      (Object.hasOwn(item, 'generated') && item.generated !== 'retain')) throw new Error('EXAMPLES_INVALID_MANIFEST');
   }
   const locals = new Set(); const keys = new Set(); const imports = new Set();
   for (const item of manifest.registrations) {
@@ -98,7 +99,28 @@ async function withoutExamples(root, expected) {
   return { path: registry.path, original: registry.source, content };
 }
 
-/** Ownership manifest is reviewed source, never inferred from a directory name. */
+const receiptPath = '.companion/generation.json';
+/** A generated project's ownership receipt: the hash the generator recorded for each file it wrote. */
+async function generationReceipt(root) {
+  const probe = await createFilePlan(root, [{ path: receiptPath, content: null }]);
+  if (probe.changes[0].beforeHash === null) return null;
+  const bytes = await readFile(resolve(root, receiptPath));
+  if (digest(bytes) !== probe.changes[0].beforeHash) throw new Error('EXAMPLES_STALE_INPUT: ' + receiptPath);
+  let receipt;
+  try { receipt = JSON.parse(bytes.toString('utf8')); } catch { throw new Error('EXAMPLES_INVALID_RECEIPT: ' + receiptPath); }
+  if (receipt?.version !== 1 || !Array.isArray(receipt.files)) throw new Error('EXAMPLES_INVALID_RECEIPT: ' + receiptPath);
+  const hashes = new Map();
+  for (const file of receipt.files) {
+    if (typeof file?.path !== 'string' || !/^[a-f0-9]{64}$/.test(file.hash ?? '') || hashes.has(file.path)) throw new Error('EXAMPLES_INVALID_RECEIPT: ' + receiptPath);
+    hashes.set(file.path, file.hash);
+  }
+  return { hash: digest(bytes), hashes };
+}
+/**
+ * Ownership manifest is reviewed source, never inferred from a directory name. A `generated: "retain"` file belongs
+ * to a generated project (for example its README): there its reviewed preimage is the hash the generation receipt
+ * recorded, it is kept unchanged, and any later edit conflicts exactly like an edited example file.
+ */
 export async function planExampleRemoval(root, { beforeFinalize } = {}) {
   const manifestPath = 'scripts/examples/ownership.json';
   const manifestProbe = await createFilePlan(root, [{ path: manifestPath, content: null }]);
@@ -106,9 +128,16 @@ export async function planExampleRemoval(root, { beforeFinalize } = {}) {
   if (digest(manifestBytes) !== manifestProbe.changes[0].beforeHash) throw new Error('EXAMPLES_STALE_MANIFEST');
   const manifest = JSON.parse(manifestBytes.toString('utf8')); validateManifest(manifest);
   const entries = []; const inspected = new Map(); const inputs = new Map([[manifestPath, digest(manifestBytes)]]); const conflicts = [];
+  const receipt = await generationReceipt(root), retained = [];
+  if (receipt) inputs.set(receiptPath, receipt.hash);
   for (const item of manifest.files) {
     const probe = await createFilePlan(root, [{ path: item.path, content: null }]);
     const currentHash = probe.changes[0].beforeHash;
+    if (receipt && item.generated === 'retain') {
+      if (!receipt.hashes.has(item.path)) throw new Error('EXAMPLES_UNRECORDED_GENERATED_FILE: ' + item.path);
+      if (currentHash !== receipt.hashes.get(item.path)) conflicts.push(item.path); else retained.push(item.path);
+      continue;
+    }
     let content = null;
     if (item.template) {
       const path = 'templates/examples/' + item.template;
@@ -130,7 +159,7 @@ export async function planExampleRemoval(root, { beforeFinalize } = {}) {
   const plan = await createFilePlan(root, entries);
   for (const entry of plan.changes) if (inspected.get(entry.path) !== entry.beforeHash) throw new Error('EXAMPLES_STALE_INPUT: ' + entry.path);
   return { version: 1, status: 'planned', profile: 'foundation', plan,
-    preserved: ['consumer features and registrations', 'edited files (conflict)', 'vaults, notes and plugin data'],
+    preserved: ['consumer features and registrations', 'edited files (conflict)', 'vaults, notes and plugin data', ...retained.map(path => `${path} (generated project file, receipt hash verified)`)],
     next: ['npm run verify', 'npm run test:e2e', 'npm run make -- feature bookmarks --entity bookmark'] };
 }
 
