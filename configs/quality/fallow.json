@@ -888,14 +888,5 @@
         "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
       }
     }
-  ],
-  "ignoreExports": [
-    {
-      "file": "scripts/shared/file-plan.ts",
-      "exports": [
-        "createFilePlan",
-        "applyFilePlan"
-      ]
-    }
   ]
 }

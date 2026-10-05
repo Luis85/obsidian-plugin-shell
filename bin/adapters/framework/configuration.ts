@@ -1,5 +1,6 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { OperationError, requireThat } from './contracts.ts';
+import { hasControls } from '../../domain/errors.ts';
 import { PROTECTED_PROJECT_SEGMENTS, isProtectedSegment, RESERVED_FOLDER_NAMES } from '../../../scripts/shared/protected-directories.ts';
 import { companionRelativeFolder, type AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 export interface Identity { id: string; name: string; author: string; version: string; description: string }
@@ -21,8 +22,7 @@ export function identity(value: unknown): Identity {
   const input = object(value); exactKeys(input, ['id', 'name', 'author', 'version', 'description']);
   const text = (key: string, limit: number) => {
     const item = input[key];
-    // oxlint-disable-next-line no-control-regex
-    requireThat(typeof item === 'string' && item.length <= limit && item === item.trim() && !/[\u0000-\u001f]/.test(item), 'INVALID_IDENTITY', `Invalid project ${key}.`);
+    requireThat(typeof item === 'string' && item.length <= limit && item === item.trim() && !hasControls(item), 'INVALID_IDENTITY', `Invalid project ${key}.`);
     return item;
   };
   const id = text('id', 60), name = text('name', 80), author = text('author', 80);

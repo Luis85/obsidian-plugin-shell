@@ -1,7 +1,7 @@
+import { hasControls } from '../../domain/errors.ts';
 /** Portable relative file identity. This validates names, not filesystem containment. */
 export function portableFile(path: string): boolean {
   return path.length > 0 && path.length <= 2048 && !path.includes('\\') && path.split('/').every(part =>
-    // oxlint-disable-next-line no-control-regex
-    part.length > 0 && part !== '.' && part !== '..' && !/[<>:"|?*\u0000-\u001f]/.test(part) && !/[ .]$/.test(part) &&
+    part.length > 0 && part !== '.' && part !== '..' && !/[<>:"|?*]/.test(part) && !hasControls(part) && !/[ .]$/.test(part) &&
     !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 }
