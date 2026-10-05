@@ -1,0 +1,65 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "brainstorm",
+  "version": 1,
+  "title": "Brainstorm",
+  "description": "Feature-first brainstorming: eight capture sections, a reviewed definition request, a reviewed file plan, then an optional separately reviewed import and a separately approved verification run.",
+  "context": { "title": "{{draft.name|New feature}}", "details": ["", "Escape: previous section", "F1: keyboard help"] },
+  "cancelMessage": "Brainstorm cancelled. No additional files were written.",
+  "reportErrors": true,
+  "steps": [
+    { "id": "mode", "kind": "form", "fields": [
+      { "id": "mode", "kind": "select", "label": "Brainstorm", "default": "feature", "choices": [
+        { "id": "feature", "label": "Brainstorm a new feature" },
+        { "id": "project", "label": "Brainstorm a new project — planned next" }
+      ] }
+    ] },
+    { "id": "project-planned", "kind": "message", "when": { "path": "mode", "equals": "project" },
+      "text": "Project brainstorming is not implemented by this increment. Use New project for the current preset/prototype flow." },
+    { "id": "project-end", "kind": "end", "when": { "path": "mode", "equals": "project" } },
+    { "id": "context", "kind": "action", "action": "brainstorm.context", "barrier": true },
+    { "id": "feature", "kind": "form", "bind": "draft", "title": "Brainstorm / Feature", "details": ["1 / 8", "{{context.project.name}}"], "fields": [
+      { "id": "name", "kind": "title", "label": "What is the name of the new feature?", "maxLength": 80 }
+    ] },
+    { "id": "purpose", "kind": "form", "bind": "draft", "title": "Brainstorm / Purpose", "details": ["2 / 8", "Problem and desired outcome"], "fields": [
+      { "id": "purpose", "kind": "text", "label": "What problem does this feature solve, and what is its purpose?", "required": true, "multiline": true, "maxLength": 2000,
+        "help": "Describe the intent in plain language. Ctrl+J adds a line; Enter continues.", "message": "Enter a description." }
+    ] },
+    { "id": "actors", "kind": "form", "bind": "draft", "title": "Brainstorm / Actors and entities", "details": ["3 / 8", "Planning context only"], "fields": [
+      { "id": "actors", "kind": "list", "label": "Who will use or interact with it?", "multiline": true, "maxItems": 20, "maxLength": 120,
+        "suffix": " (semicolon separated; empty is allowed)", "joiner": "; ",
+        "help": "One item per line. Leave empty when this is not known yet. Ctrl+J adds a line; Enter continues." },
+      { "id": "entities", "kind": "list", "label": "Which actors/entities or business objects are involved?", "multiline": true, "maxItems": 20, "maxLength": 120,
+        "suffix": " (semicolon separated; empty is allowed)", "joiner": "; ",
+        "help": "One item per line. Leave empty when this is not known yet. Ctrl+J adds a line; Enter continues." }
+    ] },
+    { "id": "screens", "kind": "action", "action": "brainstorm.screens", "interactive": true, "title": "Brainstorm / Screens", "details": ["4 / 8", "Main view → pages/dialogs"] },
+    { "id": "interactions", "kind": "action", "action": "brainstorm.interactions", "interactive": true, "title": "Brainstorm / Interactions", "details": ["5 / 8", "Navigation and planned user actions"] },
+    { "id": "acceptance", "kind": "form", "bind": "draft", "title": "Brainstorm / Acceptance", "details": ["6 / 8", "Useful/correct outcomes"], "fields": [
+      { "id": "acceptance", "kind": "list", "label": "How will you recognize the feature as useful and correct?", "multiline": true, "maxItems": 20, "maxLength": 120,
+        "suffix": " (semicolon separated; empty is allowed)", "joiner": "; ",
+        "help": "One item per line. Leave empty when this is not known yet. Ctrl+J adds a line; Enter continues." }
+    ] },
+    { "id": "output", "kind": "form", "bind": "draft", "title": "Brainstorm / Output", "details": ["7 / 8", "Generation is reviewed separately"], "fields": [
+      { "id": "output", "kind": "select", "label": "What should be prepared?", "choices": [
+        { "id": "definition", "label": "Feature definition + canonical concept only" },
+        { "id": "prototype", "label": "Definition + offline prototype source" },
+        { "id": "boilerplate", "label": "Definition + project/plugin boilerplate source" }
+      ] }
+    ] },
+    { "id": "verification", "kind": "form", "bind": "draft", "title": "Brainstorm / Build and test", "details": ["8 / 8", "Processes require another approval"], "fields": [
+      { "id": "verification", "kind": "select", "label": "After generation, what should be available as a separately approved run?",
+        "when": { "path": "output", "notEquals": "definition" }, "choices": [
+        { "id": "none", "label": "Do not run anything" },
+        { "id": "test", "label": "Install dependencies and run tests" },
+        { "id": "test-build", "label": "Install dependencies, run tests and build" }
+      ] }
+    ] },
+    { "id": "approve", "kind": "action", "action": "brainstorm.approve", "barrier": true },
+    { "id": "plan", "kind": "action", "action": "brainstorm.plan" },
+    { "id": "import", "kind": "action", "action": "brainstorm.import" },
+    { "id": "verify", "kind": "action", "action": "brainstorm.verify" },
+    { "id": "complete", "kind": "action", "action": "brainstorm.complete" }
+  ]
+}

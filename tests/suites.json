@@ -22,6 +22,7 @@
         "tests/e2e/**",
         "tests/obsidian/**",
         "tests/browser-specimen/**",
+        "tests/browser-workflows/**",
         "tests/concepts/*.browser.{py,mjs}"
       ]
     },
@@ -66,6 +67,9 @@
     },
     {
       "path": "tests/browser-specimen"
+    },
+    {
+      "path": "tests/browser-workflows"
     },
     {
       "path": "tests/concepts",
@@ -1134,6 +1138,30 @@
       "workflows": [
         "ci"
       ]
+    },
+    {
+      "name": "workflows:browser",
+      "purpose": "Browser test workflows (configs/tests/workflows) run in real headless Chromium: the shipped sign-up example with review screenshots, failing locators, blocked remote requests, masked captures, loopback URL and prototype targets, and the exported @playwright/test spec in the Playwright runner.",
+      "level": "e2e",
+      "runner": {
+        "type": "command",
+        "commands": [
+          [
+            "{node}",
+            "--test",
+            "--test-concurrency=1",
+            "tests/browser-workflows/workflow-run.browser.mjs"
+          ]
+        ]
+      },
+      "include": [
+        "tests/browser-workflows/workflow-run.browser.mjs"
+      ],
+      "prerequisites": [
+        "chromium"
+      ],
+      "verify": "opt-in",
+      "workflows": []
     },
     {
       "name": "browser-specimen",

@@ -1,0 +1,50 @@
+{
+  "$schema": "../../schemas/learning-path.schema.json",
+  "schemaVersion": 1,
+  "id": "author-a-learning-path",
+  "version": 1,
+  "title": "Author a learning path",
+  "summary": "Turn a skill you know into a step-by-step course for node bin/app learn: write the path, link the documentation, define win conditions and validate it with learn check.",
+  "skill": "Data-driven learning paths",
+  "audience": "Contributors who completed a wizard and want to teach a workflow of this repository",
+  "prerequisites": ["author-a-wizard"],
+  "estimatedMinutes": 25,
+  "steps": [
+    {
+      "id": "read-the-format",
+      "title": "Read the learning path format",
+      "goal": "Know the parts of a step and how win conditions decide completion.",
+      "markdown": { "file": "author-a-learning-path/01-format.md" },
+      "checklist": [
+        { "id": "format", "label": "I read \"Write a learning path\"" },
+        { "id": "conditions", "label": "I read the win condition reference" }
+      ],
+      "winConditions": [{ "kind": "checklist-complete" }]
+    },
+    {
+      "id": "plan-your-path",
+      "title": "Plan your learning path",
+      "goal": "Choose the id and the skill of your course.",
+      "fields": [
+        { "id": "pathId", "kind": "text", "label": "Learning path id (lowercase kebab-case, e.g. run-first-run)", "required": true, "maxLength": 60 },
+        { "id": "skill", "kind": "text", "label": "Which skill does it teach?", "required": true, "maxLength": 200 }
+      ],
+      "bind": "course",
+      "winConditions": [{ "kind": "form-valid" }]
+    },
+    {
+      "id": "write-your-path",
+      "title": "Write and check your path",
+      "goal": "Write a path with at least one step and a win condition, and make learn check pass.",
+      "markdown": "Create `configs/learning/paths/<your path id>.json`, then run `learn check` until it reports no issues. Start from [[docs/development/LEARNING-PATHS#A minimal path]].",
+      "actions": [
+        { "id": "check", "kind": "command", "label": "Validate every learning path", "command": "node bin/app learn check --json" },
+        { "id": "status", "kind": "command", "label": "See it as a learner", "command": "node bin/app learn show --name <your-path-id> --json" }
+      ],
+      "winConditions": [
+        { "kind": "file-exists", "file": "configs/learning/paths/{{course.pathId}}.json" },
+        { "kind": "file-contains", "file": "configs/learning/paths/{{course.pathId}}.json", "text": "\"winConditions\"", "label": "Your path defines win conditions" }
+      ]
+    }
+  ]
+}

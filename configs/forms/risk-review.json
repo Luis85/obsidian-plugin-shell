@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "risk-review",
+  "version": 1,
+  "title": "Risk review",
+  "description": "One step of the risk review walk: record today's review with the next action, its due date and the status, skip the risk, or stop.",
+  "fields": [
+    { "id": "decision", "kind": "select", "label": "{{record.id}} — {{record.title}} ({{record.values.level}}, score {{record.values.score}}, due {{record.values.due|none}})",
+      "choices": [{ "id": "review", "label": "Record a review today" }, { "id": "skip", "label": "Skip this risk" }, { "id": "stop", "label": "Stop reviewing" }], "default": "review" },
+    { "id": "nextAction", "kind": "text", "label": "Next action", "maxLength": 500, "when": { "field": "decision", "equals": "review" } },
+    { "id": "due", "kind": "text", "label": "Due date of the next action (YYYY-MM-DD)", "maxLength": 10, "when": { "field": "decision", "equals": "review" } },
+    { "id": "status", "kind": "select", "label": "Status", "choicesFrom": "collection.statuses", "when": { "field": "decision", "equals": "review" } }
+  ]
+}

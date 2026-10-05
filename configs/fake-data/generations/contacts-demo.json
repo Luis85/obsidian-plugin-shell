@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/fake-data-generation.schema.json",
+  "schemaVersion": 1,
+  "id": "contacts-demo",
+  "title": "Contacts demo",
+  "description": "Twenty-five contacts with an Obsidian Bases table, for collection and filter showcases.",
+  "entity": "contact",
+  "count": 25,
+  "out": "Fake Data/Contacts",
+  "seed": 42,
+  "base": true,
+  "referenceDate": "2026-01-01"
+}

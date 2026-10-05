@@ -4,13 +4,16 @@ import { stdin, stdout, stderr } from 'node:process';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { setupOptions, resumeOptions, setupHelp, identityChangeKeys } from './setup/options.mjs';
-import { askHosting, hostingKeys, planHostingFiles, requestedHosting, azureRepositoryUrl } from './setup/hosting.mjs';
+import { askAzureDetails, hostingKeys, hostingPromptDefault, planHostingFiles, requestedHosting, azureRepositoryUrl } from './setup/hosting.mjs';
 import { planIdentity } from './setup/identity.mjs';
 import { planLocalMcp } from './setup/mcp.mjs';
+import { askSetupForm, confirmKeys, hostingFieldKeys, loadSetupForm } from './setup/form.mjs';
 import { readJournal } from './setup/journal.mjs';
 import { executeSetup, setupStages } from './setup/execute.mjs';
 import { projectInstallEnvironment } from './shared/npm-install.mjs';
 
+// The interview is data: configs/forms/setup-identity.json, located from this module so kits and copies agree.
+const setupFormUrl = new URL('../configs/forms/setup-identity.json', import.meta.url);
 let jsonOutput = process.argv.includes('--json');
 async function setup() {
   let options = await setupOptions(process.argv.slice(2)); jsonOutput = Boolean(options.json);
@@ -27,16 +30,16 @@ async function setup() {
   if (!options.yes && !options['dry-run'] && (!stdin.isTTY || options['no-interaction'])) throw new Error('Noninteractive setup requires --yes after reviewing --dry-run');
   let planned = await planIdentity(root, options, previous);
   if (!options.yes && !options['dry-run'] && !options.resume && stdin.isTTY) {
-    const prompt = createInterface({ input: stdin, output: options.json ? stderr : stdout });
+    const form = await loadSetupForm(setupFormUrl);
+    const output = options.json ? stderr : stdout;
+    const prompt = createInterface({ input: stdin, output });
     try {
-      for (const key of ['id', 'name', 'description', 'author', 'repo', 'version']) {
-        const answer = await prompt.question(`${key} [${planned.identity[key] ?? 'optional owner/repo'}]: `);
-        if (answer.trim()) options[key] = answer.trim();
-      }
-      if (!options.explicitKeys.some(key => key === 'mcp' || key === 'no-mcp')) {
-        options.mcp = /^y(es)?$/i.test((await prompt.question('Enable project-local Workbench MCP for Claude Code and Codex? [y/N] ')).trim());
-      }
-      if (!options.explicitKeys.some(key => hostingKeys.includes(key))) await askHosting(root, options, question => prompt.question(question));
+      const explicit = keys => options.explicitKeys.some(key => keys.includes(key));
+      const skip = [...(explicit(['mcp', 'no-mcp']) ? confirmKeys : []), ...(explicit(hostingKeys) ? hostingFieldKeys : [])];
+      const answers = await askSetupForm(form, prompt, { defaults: { ...planned.identity, hosting: await hostingPromptDefault(root) }, skip, write: text => output.write(text) });
+      if (answers.hosting !== undefined) answers.hosting = answers.hosting.toLowerCase();
+      Object.assign(options, answers);
+      if (answers.hosting === 'azure-devops') await askAzureDetails(root, options, question => prompt.question(question));
       requestedHosting(options);
       options.identityRequested = identityChangeKeys.some(key => options[key] !== undefined);
       planned = await planIdentity(root, options, previous);

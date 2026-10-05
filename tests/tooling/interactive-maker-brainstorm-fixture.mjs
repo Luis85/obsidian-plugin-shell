@@ -76,7 +76,11 @@ ${suffix}`);
     },
     /** Changing executable bytes after approval must invalidate the reviewed plan. */
     tamper: () => write('// changed after approval\n'),
-    restore() { if (previous === undefined) delete process.env.QUALIFIED_NPM; else process.env.QUALIFIED_NPM = previous; },
+    /** A timed-out test's body keeps running; its late restore must not clear a later test's own fake. */
+    restore() {
+      if (process.env.QUALIFIED_NPM !== entry) return;
+      if (previous === undefined) delete process.env.QUALIFIED_NPM; else process.env.QUALIFIED_NPM = previous;
+    },
   };
 }
 

@@ -1,0 +1,67 @@
+{
+  "$schema": "../schemas/collection.schema.json",
+  "schemaVersion": 1,
+  "id": "learning",
+  "title": "Learnings",
+  "description": "Lessons learned as Markdown notes with type Learning frontmatter in the configured paths.learnings folder (default docs/learnings): what happened, the insight, its impact and the follow-up that applies it.",
+  "type": "Learning",
+  "pathKey": "learnings",
+  "idPrefix": "LRN-",
+  "idDigits": 4,
+  "titleField": "title",
+  "forms": { "edit": "learning", "review": "learning-review" },
+  "wizards": { "new": "learning-new", "edit": "learning-edit", "review": "learning-review" },
+  "statuses": [
+    { "id": "draft", "label": "Draft", "open": false, "transitions": ["validated", "archived"] },
+    { "id": "validated", "label": "Validated", "open": true, "transitions": ["applied", "superseded", "archived", "draft"] },
+    { "id": "applied", "label": "Applied", "open": false, "transitions": ["validated", "superseded", "archived"], "stamp": "applied" },
+    { "id": "superseded", "label": "Superseded", "open": false, "transitions": ["validated", "archived"] },
+    { "id": "archived", "label": "Archived", "open": false, "transitions": ["draft"] }
+  ],
+  "initialStatus": "draft",
+  "vocabularies": {
+    "category": [
+      { "id": "process", "label": "Process" }, { "id": "technical", "label": "Technical" }, { "id": "tooling", "label": "Tooling" },
+      { "id": "testing", "label": "Testing" }, { "id": "security", "label": "Security" }, { "id": "communication", "label": "Communication" },
+      { "id": "planning", "label": "Planning" }, { "id": "people", "label": "People" }
+    ],
+    "tags": [
+      { "id": "architecture", "label": "Architecture" }, { "id": "automation", "label": "Automation" }, { "id": "ci", "label": "CI" },
+      { "id": "dependencies", "label": "Dependencies" }, { "id": "documentation", "label": "Documentation" }, { "id": "estimation", "label": "Estimation" },
+      { "id": "incident", "label": "Incident" }, { "id": "onboarding", "label": "Onboarding" }, { "id": "performance", "label": "Performance" },
+      { "id": "release", "label": "Release" }, { "id": "requirements", "label": "Requirements" }, { "id": "review", "label": "Code review" }
+    ],
+    "impact": [
+      { "id": "low", "label": "Low" }, { "id": "medium", "label": "Medium" }, { "id": "high", "label": "High" }
+    ]
+  },
+  "fields": [
+    { "key": "title", "label": "Title", "kind": "text", "required": true, "maxLength": 160 },
+    { "key": "observed", "label": "Observed", "kind": "date", "required": true, "default": "today" },
+    { "key": "context", "label": "Context", "kind": "text", "required": true, "maxLength": 1000 },
+    { "key": "insight", "label": "Insight", "kind": "text", "required": true, "maxLength": 1000 },
+    { "key": "category", "label": "Category", "kind": "choice", "vocabulary": "category", "required": true },
+    { "key": "tags", "label": "Tags", "kind": "list", "vocabulary": "tags", "required": true },
+    { "key": "impact", "label": "Impact", "kind": "choice", "vocabulary": "impact", "required": true },
+    { "key": "source", "label": "Source", "kind": "text", "maxLength": 200 },
+    { "key": "applies-to", "label": "Applies to", "kind": "list", "maxLength": 80 },
+    { "key": "follow-up", "label": "Follow-up", "kind": "text", "requiredWhenOpen": true, "maxLength": 500 },
+    { "key": "due", "label": "Due", "kind": "date", "requiredWhenOpen": true, "overdue": true },
+    { "key": "owner", "label": "Owner", "kind": "text", "maxLength": 120 },
+    { "key": "related-risks", "label": "Related risks", "kind": "list", "maxLength": 20, "idPrefix": "RISK-" },
+    { "key": "superseded-by", "label": "Superseded by", "kind": "text", "maxLength": 20, "idPrefix": "LRN-" },
+    { "key": "reviewed", "label": "Reviewed", "kind": "date", "source": "stamp" },
+    { "key": "applied", "label": "Applied", "kind": "date", "source": "stamp" },
+    { "key": "evidence", "label": "Evidence", "kind": "text", "frontmatter": false, "multiline": true, "maxLength": 4000 }
+  ],
+  "body": "# {{title}}\n\n## Context\n\n{{context}}\n\n## Insight\n\n{{insight}}\n\n## Evidence\n\n{{evidence|_No evidence recorded yet._}}\n\n## Follow-up\n\n{{followUp|_No follow-up planned yet._}}\n",
+  "list": { "columns": ["id", "title", "status", "impact", "category", "observed", "due", "owner", "follow-up"] },
+  "report": {
+    "file": "learnings.md",
+    "title": "Learnings",
+    "columns": ["id", "title", "status", "impact", "category", "tags", "observed", "source", "related-risks", "owner", "due", "follow-up"],
+    "sort": [{ "key": "status", "order": "asc" }, { "key": "impact", "order": "desc" }, { "key": "observed", "order": "desc" }],
+    "base": "learnings.base"
+  },
+  "review": { "stamp": "reviewed", "match": [{ "key": "impact", "in": ["high"] }], "overdue": true }
+}

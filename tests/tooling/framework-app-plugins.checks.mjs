@@ -179,8 +179,8 @@ module.exports = class Configured extends Plugin { async onload() { this.addComm
   const shadowed = await run(root, ['configured', 'go', '--config', 'configs/desk-config.json', '--json']);
   assert.equal(shadowed.status, 1);
   assert.equal(JSON.parse(shadowed.stdout).diagnostics[0].code, 'WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID', 'config stays a built-in maker option');
-  await install(root, 'configured', { source: declare(['target']) });
-  const own = await run(root, ['configured', 'go', '--target', 'x', '--json']);
+  await install(root, 'configured', { source: declare(['region']) });
+  const own = await run(root, ['configured', 'go', '--region', 'x', '--json']);
   assert.equal(own.status, 0, own.stdout + own.stderr);
   assert.deepEqual(JSON.parse(own.stdout).data, { ran: true });
 });

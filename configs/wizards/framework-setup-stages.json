@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "framework-setup-stages",
+  "version": 1,
+  "title": "Framework setup stages",
+  "description": "After setup is configured: optional documentation import, then each stage with its own explicit approval (declining one stops the rest), then documentation export. Stopping early retains completed state for setup resume.",
+  "steps": [
+    { "id": "import", "kind": "action", "action": "framework-setup.import-documentation" },
+    { "id": "generate", "kind": "action", "action": "framework-setup.stage", "when": { "path": "stopped", "present": false },
+      "with": { "stage": "generate", "question": "Review and generate source for the accepted project?" } },
+    { "id": "install", "kind": "action", "action": "framework-setup.stage", "when": { "path": "stopped", "present": false },
+      "with": { "stage": "install", "question": "Install the exact lockfile? Registry access and approved dependency hooks may run." } },
+    { "id": "verify", "kind": "action", "action": "framework-setup.stage", "when": { "path": "stopped", "present": false },
+      "with": { "stage": "verify", "question": "Run generated-project verification? Trusted project code writes build output and reports." } },
+    { "id": "preview", "kind": "action", "action": "framework-setup.stage", "when": { "path": "stopped", "present": false },
+      "with": { "stage": "preview", "question": "Build the offline clickdummy? This does not implement missing business actions." } },
+    { "id": "export", "kind": "action", "action": "framework-setup.export-documentation" }
+  ]
+}

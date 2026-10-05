@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "data": {
+    "change": { "title": "Update the YAML parser", "kind": "dependency", "planReviewed": true },
+    "checks": { "typecheck": "passed", "lint": "passed", "tests": "passed", "audit": "not-run", "coverage": 97, "untested": "Native smoke not provisioned." },
+    "review": { "decision": "approve", "approvals": 1 },
+    "release": { "requested": true, "version": "0.4.1", "changelog": false, "notesLink": "" }
+  },
+  "acknowledge": ["dependency-audit", "changelog-entry"]
+}

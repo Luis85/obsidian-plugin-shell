@@ -12,13 +12,20 @@ const maintainerFolders = ['docs/_archive', 'docs/tasks', 'docs/prds', 'docs/rev
   '.claude/skills/companion-prototype-design', '.agents/skills/companion-prototype-design'];
 /** Dated records, milestone plans, reviews, ledgers, release/maintenance and Hindsight (project memory tool) notes. */
 const developmentRecord = /^docs\/development\/(?:ITERATION-|ACCEPTANCE-CLOSURE-|HINDSIGHT|MAINTENANCE-|RELEASE-|MILESTONE-|PR\d+-|PUBLISHED-DISTRIBUTION-|SCRIPTS-CONSOLIDATION|TEMPLATE-READINESS-|SHELL-CAPABILITY-INVENTORY|LOCAL-MCP|EXTRACTED-KIT-SETUP|DELIVERY-PIPELINE|DELIVER-A-CHANGE|CUT-AND-PUBLISH-A-RELEASE|WORKFLOWS\.md$|[A-Z0-9-]+-(?:PLAN|REVIEW(?:-[A-Z])?|CHECKPOINT|RESEARCH|EXCEPTION)\.md$)/;
+/**
+ * Product how-to guides whose names happen to match a record prefix. RELEASE-CANDIDATES.md documents the release-item and
+ * release-candidate commands a generated project uses for its own product releases, not this repository's release
+ * records, so exactly this page ships while every other RELEASE-* document stays excluded.
+ */
+const developmentGuides = new Set(['docs/development/RELEASE-CANDIDATES.md']);
+const developmentOnly = (path: string) => developmentRecord.test(path) && !developmentGuides.has(path);
 /** docs/testing keeps only how-to guides for the product test loop; everything else is a qualification record. */
 const testingGuides = new Set(['OBSIDIAN-TEST-KIT', 'OBSIDIAN-DEV-LOOP', 'TEST-STRATEGY', 'TEST-CONCEPT', 'TEST-SUITES', 'HARNESS-STYLES']);
 const testingRecord = (path: string) => /^docs\/testing\/[^/]+\.md$/.test(path) && !testingGuides.has(posix.basename(path, '.md'));
 const planData = /^docs\/testing\/(?!test-plan\.json$)[a-z-]+-plan\.json$/;
 /** True for repository paths a generated project must not receive. */
 export function frameworkOnlyPath(path: string): boolean {
-  return maintainerFolders.some(folder => underFolder(path, folder)) || developmentRecord.test(path) || testingRecord(path) || planData.test(path);
+  return maintainerFolders.some(folder => underFolder(path, folder)) || developmentOnly(path) || testingRecord(path) || planData.test(path);
 }
 const referenceFolders = ['architecture', 'development', 'testing', 'tooling', 'security', 'design', 'project-setup', 'user-manual'];
 /** Where a kept framework Markdown document lives in a generated project, or null when it keeps its path. */

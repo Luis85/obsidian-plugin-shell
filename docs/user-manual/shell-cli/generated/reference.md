@@ -4964,7 +4964,7 @@ node bin/app check [options]
 | --skip-suites | flag | With --fast: report the node --test suites the diff selects as skipped and leave them to CI; keeps the Dev tier quick and predictable. | See command semantics |
 | --base | value | With --fast or --plan: diff merge-base(&lt;ref&gt;, HEAD) to the working tree, committed or not. Default origin/main when it exists, else HEAD. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
-| --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 per step |
+| --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 per step; 3600000 for node --test suite steps |
 | --json | flag | Print exactly one versioned JSON result on stdout. | See command semantics |
 | --root | value | Project folder to operate on. | Default: nearest folder with shell.config.json or bin/app |
 | --no-interaction | flag | Never prompt, even on a TTY. | See command semantics |

@@ -4,7 +4,7 @@ import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { hash } from './framework/files.ts';
 import { object, list } from '../domain/data.ts';
 import { documentText, openDocument } from '../domain/document.ts';
-import { designRoot, effectivePaths, pathsOverlap, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
+import { collectionPathKeys, designRoot, effectivePaths, pathsOverlap, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { designManifestFile, readDesignManifest } from '../domain/design-folder.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { prepared } from './storage.ts';
@@ -14,7 +14,7 @@ import { retargetDeliveryConfig, type FolderMove } from '../domain/increments/mo
 import { preparedDesignFolders } from './design-folder.ts';
 import { retiredProjectConfigPlan } from './project-config-migration.ts';
 import { retiredProjectConfigPath } from '../compiler/domain/project-config.ts';
-const folderPaths = new Set(['prds', 'app', 'prototypes', 'design', 'increments', 'pullRequests', 'issues']);
+const folderPaths = new Set<string>(['prds', 'app', 'prototypes', 'design', 'increments', 'pullRequests', 'issues', ...collectionPathKeys]);
 const deliveryConfig = 'configs/delivery/delivery.json';
 interface Move { key: string; from: string; to: string; folder: boolean }
 /** The optional design root compares by its effective value, so configuring it for the first time relocates the default root. */

@@ -72,7 +72,7 @@ test('headless import preserves imported identity; wizard does not request a rep
   const chosen = await guidedSetup({ command: 'setup', args: [], options: {} }, ctx, async q => { prompts.push(q); return answers.shift(); }, () => {});
   assert.equal(prompts.length, 5); assert.match(prompts[2], /Airship/); assert.match(prompts[3], /Workbench MCP/);
   // Without a remote the hosting default is GitHub, and accepting it leaves the imported document unchanged.
-  assert.match(prompts[4], /^Hosting platform .*\[github\] $/);
+  assert.match(prompts[4], /^Hosting platform .*\[github\]: $/);
   assert.equal(chosen.options.airship, undefined); assert.equal(chosen.options.mcp, undefined); assert.equal(chosen.options.id, undefined);
   assert.equal(chosen.options.hosting, undefined);
   assert.ok(prompts.every(q=>!/^Plugin (ID|name)|^Author:/.test(q)));

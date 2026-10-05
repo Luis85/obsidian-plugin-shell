@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "book",
+  "title": "Book",
+  "description": "A reading list: titles, author links, genres, publishers, page counts, ratings and a read flag.",
+  "folder": "Books",
+  "titleProperty": "title",
+  "properties": [
+    { "key": "title", "label": "Title", "type": "text", "generator": { "faker": "book.title" } },
+    { "key": "author", "label": "Author", "type": "link", "generator": { "faker": "book.author" } },
+    { "key": "genre", "label": "Genre", "type": "text", "generator": { "faker": "book.genre" } },
+    { "key": "publisher", "label": "Publisher", "type": "text", "generator": { "faker": "book.publisher" }, "required": false },
+    { "key": "published", "label": "Published", "type": "date", "generator": { "faker": "date.between", "args": { "from": "1950-01-01", "to": "2025-12-31" } } },
+    { "key": "pages", "label": "Pages", "type": "number", "generator": { "faker": "number.int", "args": { "min": 80, "max": 900 } } },
+    { "key": "rating", "label": "Rating", "type": "number", "generator": { "choices": [1, 2, 3, 4, 5] }, "required": false },
+    { "key": "read", "label": "Read", "type": "checkbox", "generator": { "faker": "datatype.boolean", "args": { "probability": 0.4 } } },
+    { "key": "tags", "type": "tags", "generator": { "choices": ["fiction", "non-fiction", "classic", "to-read", "favourite"] }, "items": { "min": 1, "max": 2 } },
+    { "key": "review", "type": "text", "generator": { "faker": "lorem.paragraph", "args": { "min": 2, "max": 4 } }, "frontmatter": false }
+  ],
+  "body": "# {{title}}\n\nBy {{author}}.\n\n## Review\n\n{{review}}\n"
+}

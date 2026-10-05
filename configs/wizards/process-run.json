@@ -1,0 +1,24 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "process-run",
+  "version": 1,
+  "title": "Business process run",
+  "description": "Walk one instance of a business process: collect step inputs, evaluate business rules, follow transitions and keep an audit trail.",
+  "context": { "title": "Run {{definition.title|a business process}}", "details": ["Block rules stop a transition; warn rules need your acknowledgement."] },
+  "cancelMessage": "Process run cancelled. Nothing was written.",
+  "steps": [
+    { "id": "select", "kind": "action", "action": "process.select" },
+    { "id": "walk", "kind": "action", "action": "process.walk", "title": "Steps" },
+    { "id": "summary", "kind": "action", "action": "wizard.review", "with": { "value": "summary", "title": "Audit trail" } },
+    { "id": "keep", "kind": "form", "bind": "trail", "title": "Audit trail", "fields": [
+      { "id": "save", "kind": "boolean", "label": "Save the audit trail as JSON?", "yes": "Yes — through a reviewed plan", "no": "No — discard it" }
+    ] },
+    { "id": "file", "kind": "form", "bind": "trail", "when": { "path": "trail.save", "equals": true }, "fields": [
+      { "id": "file", "kind": "text", "label": "Audit trail file (.json)", "required": true, "maxLength": 200, "default": "process-runs/{{summary.process}}.json" }
+    ] },
+    { "id": "save", "kind": "action", "action": "wizard.save-json", "when": { "path": "trail.save", "equals": true }, "retry": "file", "barrier": true,
+      "with": { "value": "summary", "file": "{{trail.file}}" } },
+    { "id": "done", "kind": "end", "text": "{{summary.message}}" }
+  ]
+}

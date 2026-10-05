@@ -37,6 +37,9 @@ node-qualified
 # Isolated generated-plugin test data and local mock sessions
 /.test-vault/
 
+# Learner progress from node bin/app learn is personal state.
+.workbench/learning/
+
 # Optional developer memory is private, never part of Git or plugin artifacts.
 .hindsight/
 .pg0/

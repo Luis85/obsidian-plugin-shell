@@ -5,7 +5,7 @@
   "sources": [
     {
       "path": "package.json",
-      "sha256": "afc350dce6c1c01119b41ac028fe2caf2cd88b67b8097fb6cad875da8e2a8186"
+      "sha256": "72e4417429294c3c6edb5abdb1163f8ca69b80786435dc656eed8dc0efe0b462"
     },
     {
       "path": "bin/adapters/framework/catalog.ts",
@@ -13,7 +13,7 @@
     },
     {
       "path": "bin/adapters/framework/help-text.ts",
-      "sha256": "073c2047a1a775abccad8fbf1cd5c4972fd1b1fcdb3fb68a78789a40908c1357"
+      "sha256": "fd9e5d14859ef8d9e4bc363ca8ecd3238b577551edc0c84400f17685d7810d57"
     },
     {
       "path": "bin/adapters/framework/increment-catalog.ts",
@@ -39,7 +39,7 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "982c5bc8cd4e9f8e633fe4d659d269fff14fefdb8aca5342b5838da5862f89b7"
+      "sha256": "1c36dedfdef5a11d3789a046f9fcea972ebf55c1c83aee65cc494b9426420b88"
     },
     {
       "path": "diagnostics.md",
@@ -47,7 +47,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "85d851aa815fa1c4a6ff226c5baea99b212a26ef243c460313d31f13d9d9033f"
+      "sha256": "fd05dc898b30a4415011176a8f90898990ab6fc907239d360d9d68fb54b208b6"
     }
   ]
 }

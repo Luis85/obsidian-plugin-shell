@@ -114,6 +114,10 @@ not by schema discovery, scans or previews. See [the full example](examples/user
 | `paths.app` | `apps/product` | Generated application source |
 | `paths.brief` | `docs/project-brief.md` | Project/product brief |
 | `paths.firstRunReport` | `reports/first-run.json` | Last recorded managed execution |
+| `paths.risks` | `docs/risks` (optional) | Risk register notes; see [risk management](../docs/development/RISK-MANAGEMENT.md) |
+| `paths.learnings` | `docs/learnings` (optional) | Lessons-learned notes; see [learnings](../docs/development/LEARNINGS.md) |
+| `paths.releaseItems` | `docs/releases/items` (optional) | Release item notes; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
+| `paths.releaseCandidates` | `docs/releases/candidates` (optional) | One folder per release candidate version; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
 | `preferences.author` | `Your name` | Default author on a new project |
 | `preferences.ui` | `auto` | `auto`, `tui` or `plain` presentation |
 | `preferences.scanRecursive` | `true` | Include PRD subfolders |

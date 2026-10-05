@@ -13,10 +13,18 @@ export interface UserSettings {
   schemaVersion: 1;
   /** The documentation feature owns semantic validation of this shared namespace. */
   documentation?: Record<string, unknown>;
-  /** design, increments, pullRequests and issues are optional so existing settings and saved setup state keep their exact path set; effectivePaths resolves them. */
-  paths: { prds: string; project: string; prototypes: string; app: string; brief: string; firstRunReport: string; design?: string; increments?: string; pullRequests?: string; issues?: string };
+  /** design, increments, pullRequests, issues and the collection folders are optional so existing settings and saved setup state keep their exact path set; effectivePaths resolves them. */
+  paths: { prds: string; project: string; prototypes: string; app: string; brief: string; firstRunReport: string; design?: string; increments?: string; pullRequests?: string; issues?: string } & { [K in CollectionPathKey]?: string };
   preferences: { author: string; ui: 'auto' | 'tui' | 'plain'; vaultConfigDirectory: string; scanRecursive: boolean; firstRun: FirstRunPreferences };
 }
+/**
+ * Folders of the typed-note collections in configs/collections (one Markdown note per item) and of the release
+ * candidate documents (one folder per version). Like design they are optional, so existing settings and saved setup
+ * state keep their exact path set; collectionRoot resolves the default.
+ */
+export const collectionPathDefaults = { risks: 'docs/risks', learnings: 'docs/learnings', releaseItems: 'docs/releases/items', releaseCandidates: 'docs/releases/candidates' } as const;
+export type CollectionPathKey = keyof typeof collectionPathDefaults;
+export const collectionPathKeys = Object.keys(collectionPathDefaults) as CollectionPathKey[];
 export const defaultSettings: UserSettings = {
   schemaVersion: 1,
   paths: { prds: 'docs/prds', project: 'design/project.json', prototypes: 'prototypes/project', app: 'apps/product', brief: 'docs/project-brief.md', firstRunReport: 'reports/first-run.json' },
@@ -26,9 +34,11 @@ export const defaultSettings: UserSettings = {
 export const defaultIncrementsRoot = 'docs/increments';
 export const defaultPullRequestsRoot = 'docs/pull-requests';
 export const defaultIssuesRoot = 'docs/issues';
-const optionalPaths = ['design', 'increments', 'pullRequests', 'issues'] as const;
+const optionalPaths = ['design', 'increments', 'pullRequests', 'issues', ...collectionPathKeys] as const;
 /** The folder that holds one Claude Design folder per prototype. */
 export function designRoot(paths: UserSettings['paths']): string { return paths.design ?? defaultDesignRoot; }
+/** The folder of one note collection: the configured path or its default. */
+export function collectionRoot(paths: UserSettings['paths'], key: CollectionPathKey): string { return paths[key] ?? collectionPathDefaults[key]; }
 /** The folder of Increment documents (the Definition of Ready handoffs). */
 export function incrementsRoot(paths: UserSettings['paths']): string { return paths.increments ?? defaultIncrementsRoot; }
 /** The folder of PullRequest documents (the planned pull requests of an increment). */
@@ -37,7 +47,17 @@ export function pullRequestsRoot(paths: UserSettings['paths']): string { return 
 export function issuesRoot(paths: UserSettings['paths']): string { return paths.issues ?? defaultIssuesRoot; }
 /** Every configured location with the optional roots resolved, so checks see the folders the tools actually use. */
 export function effectivePaths(paths: UserSettings['paths']): Required<UserSettings['paths']> {
-  return { ...paths, design: designRoot(paths), increments: incrementsRoot(paths), pullRequests: pullRequestsRoot(paths), issues: issuesRoot(paths) };
+  const collections = Object.fromEntries(collectionPathKeys.map(key => [key, collectionRoot(paths, key)])) as Record<CollectionPathKey, string>;
+  return { ...paths, design: designRoot(paths), increments: incrementsRoot(paths), pullRequests: pullRequestsRoot(paths), issues: issuesRoot(paths), ...collections };
+}
+/** Optional folders a settings form shows with their default; see withoutImplicitPaths. */
+const shownPathDefaults = { increments: defaultIncrementsRoot, pullRequests: defaultPullRequestsRoot, issues: defaultIssuesRoot, ...collectionPathDefaults } as const;
+const shownPathKeys = Object.keys(shownPathDefaults) as (keyof typeof shownPathDefaults)[];
+/** A form shows default document and collection folders; an unchanged default that was never configured is not written. */
+export function withoutImplicitPaths(next: UserSettings, current: UserSettings): UserSettings {
+  const paths = { ...next.paths };
+  for (const key of shownPathKeys) if (current.paths[key] === undefined && paths[key] === shownPathDefaults[key]) delete paths[key];
+  return { ...next, paths };
 }
 /** The one overlap rule for settings, design and migration checks: equal or nested, ignoring case. */
 export function pathsOverlap(a: string, b: string): boolean {

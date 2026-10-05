@@ -23,7 +23,9 @@ test('placement refuses missing, framework-internal, vault, invalid, file and no
   for (const target of ['projects', 'projects/Bad_Name', 'projects/a/b', 'projects/a--b', 'src/projects/a']) {
     assert.equal(await code(starterProjectPlan(request([target], { starter: 'blank' }), { root: frameworkRoot, frameworkRoot })), 'TARGET_INSIDE_FRAMEWORK', target);
   }
-  assert.equal(await code(starterProjectPlan(request(['projects/placement-probe'], { from: join(root, 'missing-export.json') }), { root: frameworkRoot, frameworkRoot })), 'PROJECT_FILE_NOT_FOUND');
+  // A checkout that itself sits inside an Obsidian vault (a .obsidian folder above it) is refused before the export is read.
+  const probeRefusal = await enclosingVault(join(frameworkRoot, 'projects/placement-probe')) ? 'TARGET_INSIDE_VAULT' : 'PROJECT_FILE_NOT_FOUND';
+  assert.equal(await code(starterProjectPlan(request(['projects/placement-probe'], { from: join(root, 'missing-export.json') }), { root: frameworkRoot, frameworkRoot })), probeRefusal);
   await mkdir(join(root, 'vault/.obsidian'), { recursive: true });
   assert.equal(await plan(['vault/project']), 'TARGET_INSIDE_VAULT');
   assert.equal(await plan(['bad*name']), 'TARGET_INVALID');

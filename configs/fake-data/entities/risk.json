@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "risk",
+  "title": "Risk",
+  "description": "Risk notes in the format of configs/collections/risk.json (type Risk, RISK-0001 ids, model statuses, dimensions, categories and 1–5 scales), so node bin/app risk check, list and report read them. Score and level are derived on read.",
+  "folder": "Risks",
+  "titleProperty": "title",
+  "properties": [
+    { "key": "type", "type": "text", "generator": { "value": "Risk" } },
+    { "key": "id", "label": "ID", "type": "text", "generator": { "sequence": "RISK-" }, "unique": true },
+    { "key": "title", "label": "Title", "type": "text", "generator": { "faker": "company.catchPhrase" }, "unique": true },
+    { "key": "status", "label": "Status", "type": "text", "generator": { "choices": ["identified", "assessed", "mitigating", "accepted"] } },
+    { "key": "created", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-06-01", "to": "2025-09-30" } } },
+    { "key": "updated", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-10-01", "to": "2025-12-31" } } },
+    { "key": "description", "label": "Description", "type": "text", "generator": { "faker": "lorem.sentence", "args": { "min": 8, "max": 16 } } },
+    { "key": "next-action", "type": "text", "generator": { "faker": "company.buzzPhrase" } },
+    { "key": "due", "label": "Due", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2026-01-01", "to": "2026-12-31" } } },
+    { "key": "identified", "type": "date", "generator": { "faker": "date.between", "args": { "from": "2025-05-01", "to": "2025-05-31" } } },
+    { "key": "dimension", "label": "Dimension", "type": "text", "generator": { "choices": ["schedule", "cost", "scope", "quality", "security", "compliance", "people"] } },
+    { "key": "category", "label": "Category", "type": "text", "generator": { "choices": ["technical", "external", "organizational", "project-management"] } },
+    { "key": "probability", "label": "Probability", "type": "number", "generator": { "faker": "number.int", "args": { "min": 1, "max": 5 } } },
+    { "key": "impact", "label": "Impact", "type": "number", "generator": { "faker": "number.int", "args": { "min": 1, "max": 5 } } },
+    { "key": "owner", "label": "Owner", "type": "text", "generator": { "faker": "person.fullName" }, "required": false },
+    { "key": "schema_version", "type": "number", "generator": { "value": 1 } },
+    { "key": "mitigation", "type": "text", "generator": { "faker": "lorem.paragraph", "args": { "min": 2, "max": 4 } }, "frontmatter": false }
+  ],
+  "body": "# {{title}}\n\n## Description\n\n{{description}}\n\n## Mitigation\n\n{{mitigation}}\n\n## Notes\n\n"
+}

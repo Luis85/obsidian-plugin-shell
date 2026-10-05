@@ -86,15 +86,15 @@ async function originUrl(root) {
   const config = await readFile(join(root, '.git/config'), 'utf8').catch(() => '');
   return /\[\s*remote\s+"origin"\s*\][^[]*?\burl\s*=\s*(\S+)/i.exec(config)?.[1] ?? null;
 }
-/** Interactive question after the MCP one. A blank answer keeps the current platform; the origin remote only suggests. */
-export async function askHosting(root, options, question) {
-  const origin = await originUrl(root), detected = classifyRemote(origin);
-  const hint = detected ? `, origin looks like ${detected}` : '';
-  const answer = (await question(`Hosting platform: github, azure-devops or none (blank keeps the current one${hint}): `)).trim().toLowerCase();
-  if (!answer) return;
-  options.hosting = answer;
-  if (answer !== 'azure-devops') return;
-  const details = azureRemoteDetails(origin);
+/** The shown default of the setup form's hosting question: blank keeps the current platform; the origin remote only suggests. */
+export async function hostingPromptDefault(root) {
+  const detected = classifyRemote(await originUrl(root));
+  return `keep current${detected ? `, origin looks like ${detected}` : ''}`;
+}
+/** After an interactive azure-devops answer: organization, project and repository, each defaulting from an Azure DevOps
+ * origin remote. A blank organization without a default records the platform only; the project name is not stored twice. */
+export async function askAzureDetails(root, options, question) {
+  const details = azureRemoteDetails(await originUrl(root));
   for (const [key, field] of azureFields) {
     const fallback = details?.[field] ?? (field === 'repository' ? options['azure-project'] : undefined);
     const value = (await question(`Azure DevOps ${field}${fallback ? ` [${fallback}]` : ''}: `)).trim() || fallback;

@@ -21,7 +21,7 @@ qualification and release authorization are separate. Milestone background is in
 | `bin/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
 | `templates/` | Templates for generated projects (companion runtime, developer kit, examples) and, in `templates/sites`, the opt-in Astro site templates. |
 | `scripts/` | Repo tooling: `quality/` gates, `testing/` suites and evidence, `agent/` hooks, `companion/` authoring contracts, makers, styles, release, security, setup. |
-| `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters. |
+| `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters; `configs/wizards/`, `configs/forms/` and `configs/guides/` define every guided CLI process ([wizards and forms](docs/development/WIZARDS-AND-FORMS.md)). |
 | `tests/` | Suites declared in `tests/suites.json` (tooling, runtime, e2e, hindsight, ...). |
 | `plugins/` | Workbench plugin SDK and the example extension. |
 | `harness/` | Browser harness for the served UI; never shipped in the plugin. |
@@ -120,6 +120,12 @@ typecheck scripts; they select workspace compiler entrypoints, never PATH tools.
 
 Hosting is a project choice (`tooling.hosting`: `github` default, `azure-devops`, `none`). Prepare it with `--hosting` or `node bin/app hosting set`; never run `gh`/`az` (including through `node bin/app pr publish|sync`), add remotes or store tokens on the user's behalf without their explicit request, and never delete `.github` or retired platform files unless asked.
 
+Typed-note collections (configs/collections, e.g. risk) are data; code adds only named collection hooks. Read docs/development/NOTE-COLLECTIONS.md before adding one. Lessons learned (`learning` root, `paths.learnings`) are a data-only note collection, separate from the `learn` course runner.
+
+Release candidates (`node bin/app candidate`) document release items (`node bin/app release-item`) only; they never run release:cut/publish, tag, push or edit CHANGELOG.md.
+
+`node bin/app fake-data` generates seeded sample notes only through reviewed, hash-approved plans; it never overwrites notes, writes only relative non-hidden folders inside the root, and calls only the allowlisted Faker methods in bin/domain/fake-data-generators.ts.
+
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.
 
 ## Architecture
@@ -141,7 +147,9 @@ authoring API through `src/features/api.ts`. One explicit registration in bootst
 constructs typed repositories and owns disposal. Features may depend only on
 feature/application/domain contracts, never concrete host/framework adapters.
 New business features should not require editing generic persistence services or
-main.ts; prove the extension path with a distinct test feature.
+main.ts; prove the extension path with a distinct test feature. Runtime forms are JSON in
+`src/features/<feature>/forms/`, declared with `defineForm` and rendered by `DataForm`; they never import
+`configs/forms` (see docs/development/RUNTIME-FORMS.md).
 
 Native modal/notice behavior belongs behind `services.modals` and `services.notices`;
 features must not construct host UI classes. Command/ribbon factories belong to

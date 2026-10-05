@@ -193,15 +193,19 @@ The package contains the full bespoke `execution-prompt.md`, `design-brief.md`,
 `README.md`, `INTEGRATION.md`, complete `companion.project.json`, replayable answers
 and exact guide snapshot, preparation metadata/fingerprints/dependency pins,
 compiler-derived integration mapping, a pending manifest and notices, and **real
-compiler-generated source/** with the canonical Claude skill and its Codex adapter.
-No dependency installation or build is performed by preparation. Pass the prompt
-and package to an agent to start implementation directly. The manifest deliberately
-remains incomplete, with a null `prototype.html` hash, until an actual artifact is
-built and verified using the copied skill helpers.
+compiler-generated source/**. Like every generated project, that source does not
+ship the framework's `companion-prototype-design` skill; it carries only the skill's
+offline click-dummy builder under `source/scripts/clickdummy/`, which the package
+README's build command runs. No dependency installation or build is performed by
+preparation. Pass the prompt and package to an agent to start implementation
+directly. The manifest deliberately remains incomplete, with a null
+`prototype.html` hash, until an actual artifact is built with that builder and
+verified. Project-starter packages (`node bin/app new`) are emitted by the starter
+target and do ship the skill under `source/.claude/skills/`.
 
 ## Extend the guide using data
 
-Edit `bin/guides/prototype.json` or supply `--guide <file.json>` in either mode.
+Edit `configs/guides/prototype.json` or supply `--guide <file.json>` in either mode.
 Its versioned definition owns steps, text/list/select/confirm fields, defaults,
 required values, choices, earlier-field visibility conditions, readiness constraints
 and literal artifact templates. Increment `version` for changed guide contracts;
@@ -213,7 +217,8 @@ boundaries, and JSON arrays can contain semicolons unchanged.
 Template tokens are literal substitutions, never JavaScript evaluation. Every
 answer can be referenced by field ID. Built-in tokens include `title`, `slug`,
 `brief`, `projectJson`, `answersJson`, `contextJson`, `skillPath`, `configPath`, `integrationJson`
-and `manifestJson`. Keep the core projection fields `title`, `mode`, `pages` and
+and `manifestJson`; `skillPath` names a file only in project-starter package
+sources. Keep the core projection fields `title`, `mode`, `pages` and
 `components`, and the handoff artifacts, when expanding this prototype guide.
 Unsafe, duplicate or colliding artifact paths fail in the shared writer.
 

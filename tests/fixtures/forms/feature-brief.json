@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "feature-brief",
+  "version": 1,
+  "title": "Feature brief",
+  "description": "Test-owned copy of the showcase feature brief. Shared form tests read it so they survive example removal.",
+  "fields": [
+    { "id": "name", "kind": "title", "label": "Feature name", "maxLength": 80 },
+    { "id": "summary", "kind": "text", "label": "Summary", "help": "What should a reader understand after one sentence?", "required": true, "multiline": true, "maxLength": 500 },
+    {
+      "id": "priority", "kind": "select", "label": "Priority", "default": "normal",
+      "choices": [{ "id": "low", "label": "Low" }, { "id": "normal", "label": "Normal" }, { "id": "high", "label": "High" }]
+    },
+    { "id": "estimate", "kind": "number", "label": "Estimate in days", "integer": true, "min": 1, "max": 60, "message": "Enter whole days from 1 to 60." },
+    { "id": "surfaces", "kind": "multi", "label": "Surfaces", "required": true, "choices": [{ "id": "view", "label": "View" }, { "id": "command", "label": "Command" }, { "id": "settings", "label": "Settings" }] },
+    { "id": "review", "kind": "boolean", "label": "Request a review", "default": false },
+    { "id": "reviewers", "kind": "list", "label": "Reviewers", "required": true, "maxItems": 5, "maxLength": 80, "when": { "field": "review", "equals": true } },
+    {
+      "id": "links", "kind": "section", "label": "Links", "bind": "links", "help": "Optional references stored under links.",
+      "fields": [
+        { "id": "issue", "kind": "text", "label": "Issue", "maxLength": 200 },
+        { "id": "design", "kind": "text", "label": "Design notes", "maxLength": 200 }
+      ]
+    }
+  ]
+}

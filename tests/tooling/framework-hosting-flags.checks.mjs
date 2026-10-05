@@ -85,7 +85,7 @@ test('the setup interview defaults hosting from an Azure DevOps origin without p
   await writeFile(join(root, '.git/config'), '[core]\n\tbare = false\n[remote "origin"]\n\turl = https://contoso:secret@dev.azure.com/contoso/Demo/_git/demo-repo\n\tfetch = +refs/heads/*:refs/remotes/origin/*\n');
   const chosen = await guidedSetup({ command: 'setup', args: [], options: { input: 'input.json', 'no-airship': true, 'no-mcp': true } }, { root, frameworkRoot },
     async question => { prompts.push(question); return ''; }, text => writes.push(text));
-  assert.match(prompts[0], /\[azure-devops\] $/); assert.match(prompts[1], /\[https:\/\/dev\.azure\.com\/contoso\]/);
+  assert.match(prompts[0], /\[azure-devops\]: $/); assert.match(prompts[1], /\[https:\/\/dev\.azure\.com\/contoso\]/);
   assert.deepEqual([chosen.options.hosting, chosen.options['azure-organization'], chosen.options['azure-project'], chosen.options['azure-repository']],
     ['azure-devops', 'https://dev.azure.com/contoso', 'Demo', 'demo-repo']);
   assert.ok([...prompts, ...writes].every(text => !text.includes('secret')));

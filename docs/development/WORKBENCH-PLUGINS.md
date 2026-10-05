@@ -97,7 +97,7 @@ cli: [{
 }],
 ```
 
-Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in maker commands and framework command roots cannot be shadowed. The top-level `bin/app` launcher resolves registered plugin command IDs before dispatch, so `node bin/app <plugin-command> ...` reaches the plugin in both source and compiled framework kit modes. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
+Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in maker commands and framework command roots cannot be shadowed. Plugin options also cannot reuse a built-in maker option (`makerBooleanOptions` and `makerValueOptions` in `bin/domain/command-options.ts`, for example `--count`, `--status` or `--version`); such a plugin fails to load with `WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID`. The top-level `bin/app` launcher resolves registered plugin command IDs before dispatch, so `node bin/app <plugin-command> ...` reaches the plugin in both source and compiled framework kit modes. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
 
 ## Extending Studio / the TUI
 

@@ -10,8 +10,8 @@ const publisher = `const { Plugin } = require('workbench');
 module.exports = class Publisher extends Plugin {
   onload() {
     this.synced = this.app.events.define('synced', value => typeof value?.count === 'number');
-    this.addCommand({ id: 'sync', name: 'Sync', options: { values: ['count'] }, execute: request => {
-      this.app.events.dispatch(this.synced, { count: Number(request.flags.count ?? 1) });
+    this.addCommand({ id: 'sync', name: 'Sync', options: { values: ['times'] }, execute: request => {
+      this.app.events.dispatch(this.synced, { count: Number(request.flags.times ?? 1) });
       return { dispatched: true };
     } });
   }
@@ -59,7 +59,7 @@ async function setup(t) {
 
 test('plugins share the invocation event bus: own events, built-in app events and late subscription', async t => {
   const { root, events } = await setup(t);
-  const result = await run(root, ['publisher', 'sync', '--count', '3', '--json']);
+  const result = await run(root, ['publisher', 'sync', '--times', '3', '--json']);
   assert.equal(result.status, 0, result.stderr + result.stdout);
   assert.deepEqual(events, [
     { loaded: ['listener', 'publisher'] },

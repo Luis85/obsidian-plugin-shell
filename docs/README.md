@@ -40,6 +40,16 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Setup inside an extracted kit](development/EXTRACTED-KIT-SETUP.md) | Run `node bin/app setup` in a locally packed framework kit. |
 | [Choose GitHub, Azure DevOps or no hosting platform](development/HOSTING-PLATFORMS.md) | `--hosting` for `new`, `setup` and `npm run setup`, `hosting show\|set`, and the read-only `doctor` check of `az`. |
 | [Local and cloud sessions](development/CLOUD-AND-LOCAL-SESSIONS.md) | Take a project from a local checkout to a ready cloud agent session. |
+| [Data-driven wizards and forms](development/WIZARDS-AND-FORMS.md) | Add or change a guided CLI process or reusable form in `configs/wizards` and `configs/forms`. |
+| [Data-driven business processes](development/BUSINESS-PROCESSES.md) | Manage processes, their steps, business rules and docs; check, document, run and simulate them. |
+| [Learning paths](development/LEARNING-PATHS.md) | Follow or write a step-by-step course for `node bin/app learn` in `configs/learning`, including the idea-to-prototype course with Claude Design. |
+| [Manage risks](development/RISK-MANAGEMENT.md) | Keep a risk register as typed Markdown notes with `node bin/app risk`: model, note format, checks and the generated register. |
+| [Manage learnings](development/LEARNINGS.md) | Keep lessons learned as typed Markdown notes with `node bin/app learning`: lifecycle, note format, checks, review and the generated register. |
+| [Browser test workflows](development/TEST-WORKFLOWS.md) | Define Playwright journeys for projects and prototypes as JSON, run them headless, keep generated docs notes and export specs with `node bin/app workflow`. |
+| [Release items and release candidates](development/RELEASE-CANDIDATES.md) | Release items, candidate folders per version, freezing, docs regeneration and the path to release approval. |
+| [Typed-note collections](development/NOTE-COLLECTIONS.md) | Engine API and the steps to add a collection (a JSON definition, a settings path, forms/wizards and a command root). |
+| [Generate fake data](development/FAKE-DATA.md) | Generate seeded sample notes, Bases tables and reusable generation configs with `node bin/app fake-data`. |
+| [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | Render a JSON form inside the plugin from `src/features/<feature>/forms` and receive validated values. |
 | [Shell CLI user manual](user-manual/shell-cli/index.md) | Task pages for design-to-project, daily development, automation, maintenance and troubleshooting. |
 
 **Design, prototype and generate**
@@ -97,6 +107,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | --- | --- |
 | [Authoring tools](development/AUTHORING-TOOLS.md) | Maker catalog, recipes, bounds and `entities:catalog`. |
 | [Plugin-data entities](development/PLUGIN-DATA-ENTITIES.md) | `definePluginDataFeature`, the shared `PluginDataStore` and its write semantics. |
+| [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | `defineForm`, the `DataForm` component, supported kinds, rejected CLI-only constructs and value semantics. |
 | [Modal and notice services](development/MODALS-AND-NOTICES.md) | `services.modals` and `services.notices` APIs. |
 | [Runtime events and owned notifications](development/RUNTIME-SERVICES.md) | Native observations, notification timing, queues and recovery actions. |
 | [Setup and identity](development/SETUP-IDENTITY.md) | `npm run setup` profiles, identity flags, resume and data migration. |

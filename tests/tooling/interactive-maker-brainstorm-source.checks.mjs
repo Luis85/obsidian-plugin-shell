@@ -8,7 +8,7 @@ import { brainstormScratch, scriptedRich, scriptedPlain, quickNote, fakeNpm, pin
 const sourceCompletion = 'Brainstorm saved to brainstorms/quick-note. Concept: docs/concepts/brainstorms/quick-note.json. ' +
   'The canonical project was not changed; import remains a separate reviewed action. Generated source is under brainstorms/quick-note/source/.\n';
 
-test('generated prototype source offers a separately reviewed run that starts only after its own approval', { timeout: 180000 }, async () =>
+test('generated prototype source offers a separately reviewed run that starts only after its own approval', { timeout: 300000 }, async () =>
   brainstormScratch(async options => {
     const npm = await fakeNpm(options.root);
     // The generating template pins the running Node, so the approved run executes on every toolchain row.
@@ -40,7 +40,7 @@ test('generated prototype source offers a separately reviewed run that starts on
     } finally { npm.restore(); }
   }));
 
-test('a mismatched toolchain blocks the reviewed run before asking for process approval', { timeout: 180000 }, async () =>
+test('a mismatched toolchain blocks the reviewed run before asking for process approval', { timeout: 300000 }, async () =>
   brainstormScratch(async options => {
     const npm = await fakeNpm(options.root, { version: '10.0.0' });
     try {

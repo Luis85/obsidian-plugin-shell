@@ -174,7 +174,7 @@ test('relocated setup terminal preserves interview and separately approved conti
   assert.equal(guided.options.mcp, true);
   assert.deepEqual([guided.options.hosting, guided.options['azure-organization'], guided.options['azure-project'], guided.options['azure-repository']],
     ['azure-devops', 'https://dev.azure.com/contoso', 'Demo', 'demo-repo']);
-  assert.match(prompts[6], /\[azure-devops\] $/);
+  assert.match(prompts[6], /\[azure-devops\]: $/);
   assert.ok(writes.some(value => value.startsWith('Azure DevOps hosting:') && value.includes('Setup stays local and preserves every existing remote')));
   assert.ok(writes.every(value => !value.includes('contoso@')));
   assert.equal(prompts.length, 10);

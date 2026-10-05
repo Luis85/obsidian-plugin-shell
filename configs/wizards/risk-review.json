@@ -1,0 +1,16 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "risk-review",
+  "version": 1,
+  "title": "Review risks",
+  "description": "Walk the open high and critical or overdue risks and record a review date, next action, due date and status for each, one reviewed write per risk.",
+  "context": { "title": "Risk review", "details": ["Folder: {{folder}}", "Each review is its own reviewed write.", "Ctrl+C: cancel."] },
+  "cancelMessage": "Review stopped.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "collection.load", "with": { "collection": "risk" } },
+    { "id": "queue", "kind": "action", "action": "collection.review-load" },
+    { "id": "walk", "kind": "action", "action": "collection.review-walk", "interactive": true },
+    { "id": "done", "kind": "end", "text": "Reviewed {{reviewed}} of {{queued}} risks." }
+  ]
+}

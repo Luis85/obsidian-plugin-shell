@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "configs/schemas/fake-data-entity.schema.json",
+  "title": "Workbench fake-data entity",
+  "description": "Editor support only. bin/domain/fake-data-entity.ts is the authoritative validator (allowlisted generators, bounded arguments, references); run node bin/app fake-data validate --input <file> --json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "title", "folder", "titleProperty", "properties"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$", "maxLength": 60 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "description": { "type": "string", "maxLength": 400 },
+    "folder": { "type": "string", "minLength": 1, "maxLength": 160, "description": "Suggested folder name; the default target is Fake Data/<folder>." },
+    "titleProperty": { "type": "string", "description": "A required text property whose value names each note (slugged file name)." },
+    "properties": { "type": "array", "minItems": 1, "maxItems": 40, "items": { "$ref": "#/$defs/property" } },
+    "body": { "type": "string", "maxLength": 4000, "description": "Markdown body; {{key}} is replaced literally with the generated value of a declared property." }
+  },
+  "$defs": {
+    "property": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "type", "generator"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,39}$" },
+        "label": { "type": "string", "maxLength": 80, "description": "Column name in the generated .base table." },
+        "type": { "enum": ["text", "number", "checkbox", "date", "datetime", "list", "tags", "link"] },
+        "generator": { "$ref": "#/$defs/generator" },
+        "required": { "type": "boolean", "default": true, "description": "false leaves the property out of about one note in five." },
+        "unique": { "type": "boolean", "default": false },
+        "frontmatter": { "type": "boolean", "default": true, "description": "false keeps the value for the body template only." },
+        "items": { "type": "object", "additionalProperties": false, "required": ["min", "max"], "description": "Item count of list and tags properties (default 1-3).",
+          "properties": { "min": { "type": "integer", "minimum": 0, "maximum": 20 }, "max": { "type": "integer", "minimum": 0, "maximum": 20 } } }
+      }
+    },
+    "generator": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["faker"], "properties": {
+          "faker": { "enum": ["person.fullName", "person.firstName", "person.lastName", "person.jobTitle", "person.bio", "internet.exampleEmail", "internet.username",
+            "company.name", "company.catchPhrase", "company.buzzPhrase", "location.city", "location.country", "book.title", "book.author", "book.genre", "book.publisher",
+            "music.genre", "music.songName", "commerce.productName", "commerce.department", "color.human", "word.noun", "word.adjective", "lorem.word", "lorem.words",
+            "lorem.sentence", "lorem.paragraph", "lorem.paragraphs", "string.uuid", "string.alphanumeric", "number.int", "number.float", "datatype.boolean",
+            "date.past", "date.future", "date.recent", "date.soon", "date.between", "date.birthdate"] },
+          "args": { "type": "object", "additionalProperties": { "type": ["number", "string"] } } } },
+        { "type": "object", "additionalProperties": false, "required": ["choices"], "properties": {
+          "choices": { "type": "array", "minItems": 1, "maxItems": 100, "items": { "type": ["string", "number", "boolean"] } } } },
+        { "type": "object", "additionalProperties": false, "required": ["sequence"], "properties": { "sequence": { "type": "string", "pattern": "^[A-Za-z0-9 _-]{0,40}$" } } },
+        { "type": "object", "additionalProperties": false, "required": ["value"], "properties": { "value": { "type": ["string", "number", "boolean", "array"] } } }
+      ]
+    }
+  }
+}
