@@ -1,3 +1,4 @@
+import { hasControls } from '../../domain/errors.ts';
 /** The Markdown transport is a projection, never a second executable project format. */
 export type ObjectData = Record<string, unknown>;
 export const DOC_TYPES = ['project', 'page', 'component', 'interaction', 'journey', 'route', 'transition', 'layout', 'component-revision', 'library-component', 'feature', 'prd'] as const;
@@ -26,9 +27,8 @@ export function array(value: unknown): unknown[] {
   insist(Array.isArray(value), 'DOCS_SHAPE', 'Expected an array.'); return value;
 }
 export function text(value: unknown, name = 'value'): string {
-  // Intentional identity boundary: reject ASCII control characters in managed text.
-  // oxlint-disable-next-line no-control-regex
-  insist(typeof value === 'string' && value.length > 0 && value.length <= 240 && !/[\u0000-\u001f\u007f]/u.test(value),
+  // Intentional identity boundary: reject C0/C1 control characters in managed text.
+  insist(typeof value === 'string' && value.length > 0 && value.length <= 240 && !hasControls(value),
     'DOCS_FIELD', `${name} needs nonempty, bounded text.`); return value;
 }
 export function jsonData(value: unknown, depth = 0, budget = { count: 0 }): void {

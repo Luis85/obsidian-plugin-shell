@@ -6,6 +6,7 @@ import { isAbsolute, join } from 'node:path';
 import { readConfiguration } from './files.ts';
 import { readDocumentationSettings } from '../../documentation/adapters/settings.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { hasControls } from '../../domain/errors.ts';
 
 const minimum = [1, 12, 7] as const;
 const outputLimit = 4 * 1024 * 1024;
@@ -15,15 +16,13 @@ export type ObsidianLaunch = (command: 'obsidian', args: string[], options: { cw
 
 function vaultSelector(request: Request): string {
   const value = stringOption(request.options, 'obsidian-vault');
-  // oxlint-disable-next-line no-control-regex
-  requireThat(value && value === value.trim() && value.length <= 200 && !/[\u0000-\u001f=]/.test(value) && !value.startsWith('-'),
+  requireThat(value && value === value.trim() && value.length <= 200 && !value.includes('=') && !hasControls(value) && !value.startsWith('-'),
     'OBSIDIAN_VAULT_REQUIRED', 'Supply one explicit --obsidian-vault <name-or-id>; active-vault fallback is disabled.');
   return value;
 }
 function relativePath(value: string, kind: 'file'|'folder'): string {
   requireThat(value === value.trim() && value.length > 0 && value.length <= 1000 && !value.includes('\\') && !value.startsWith('/') &&
-    // oxlint-disable-next-line no-control-regex
-    !/[\u0000-\u001f]/.test(value) && !value.split('/').some(part => !part || part === '.' || part === '..' || part.startsWith('.')),
+    !hasControls(value) && !value.split('/').some(part => !part || part === '.' || part === '..' || part.startsWith('.')),
     'OBSIDIAN_PATH_INVALID', 'Use a non-hidden vault-relative path without dot segments.');
   if (kind === 'file') requireThat(/\.md$/i.test(value), 'OBSIDIAN_PATH_INVALID', 'Only Markdown reads are exposed by this adapter.');
   return value;
@@ -89,8 +88,7 @@ const excluded = ['eval', 'dev:cdp', 'plugin:install', 'plugin:enable', 'restric
 /** The vault path the CLI reports must be one bounded absolute path. */
 function vaultLocation(text: string): string {
   const location = text.trim();
-  // oxlint-disable-next-line no-control-regex
-  requireThat(location.length > 0 && location.length <= 4096 && isAbsolute(location) && !/[\u0000-\u001f]/.test(location),
+  requireThat(location.length > 0 && location.length <= 4096 && isAbsolute(location) && !hasControls(location),
     'OBSIDIAN_OUTPUT_INVALID', 'Selected vault path from Obsidian CLI is invalid.');
   return location;
 }
