@@ -1,0 +1,30 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "first-run",
+  "version": 1,
+  "title": "First run",
+  "description": "Optional install, type-check, test, build and showcase of the generated application. Execution consent is separate from source generation and always defaults to Skip.",
+  "steps": [
+    { "id": "mode", "kind": "form", "fields": [
+      { "id": "mode", "kind": "select", "label": "First run of the new application", "default": "skip", "choices": [
+        { "id": "skip", "label": "Skip — keep the generated source without running it" },
+        { "id": "verify", "label": "Install dependencies, type-check, test and build" },
+        { "id": "showcase", "label": "Install dependencies, check, build and showcase the application" }
+      ] }
+    ] },
+    { "id": "skipped", "kind": "end", "when": { "path": "mode", "equals": "skip" } },
+    { "id": "preferences", "kind": "action", "action": "first-run.preferences" },
+    { "id": "showcase", "kind": "form", "bind": "options", "when": { "path": "mode", "equals": "showcase" }, "fields": [
+      { "id": "openBrowser", "kind": "boolean", "label": "Open showcase in the default browser?",
+        "no": "No — show the local URL", "yes": "Yes — open after startup succeeds" },
+      { "id": "port", "kind": "number", "label": "Local showcase port" }
+    ] },
+    { "id": "plan", "kind": "action", "action": "first-run.plan" },
+    { "id": "approval", "kind": "form", "fields": [
+      { "id": "execute", "kind": "confirm", "label": "Execute this reviewed first run?" }
+    ] },
+    { "id": "declined", "kind": "end", "when": { "path": "execute", "notEquals": true } },
+    { "id": "execute", "kind": "action", "action": "first-run.execute", "barrier": true }
+  ]
+}

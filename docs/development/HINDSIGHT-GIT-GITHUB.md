@@ -1,5 +1,7 @@
 # Hindsight + Git/GitHub: integration research and decisions
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 Research reviewed 2026-09-27. This is an engineering recommendation and implementation rationale, not a benchmark proving productivity gains.
 
 ## Decision: private working memory, reviewed shared knowledge

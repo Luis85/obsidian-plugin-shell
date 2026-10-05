@@ -4,16 +4,18 @@ import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { hash } from './framework/files.ts';
 import { object, list } from '../domain/data.ts';
 import { documentText, openDocument } from '../domain/document.ts';
-import { designRoot, effectivePaths, pathsOverlap, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
+import { collectionPathKeys, designRoot, effectivePaths, pathsOverlap, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { designManifestFile, readDesignManifest } from '../domain/design-folder.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { prepared } from './storage.ts';
 import { guardedText, jsonText, loadSettings } from './user-settings.ts';
 import { migrationFiles, type MigrationFile } from './migration-files.ts';
+import { retargetDeliveryConfig, type FolderMove } from '../domain/increments/model.ts';
 import { preparedDesignFolders } from './design-folder.ts';
 import { retiredProjectConfigPlan } from './project-config-migration.ts';
 import { retiredProjectConfigPath } from '../compiler/domain/project-config.ts';
-const folderPaths = new Set(['prds', 'app', 'prototypes', 'design']);
+const folderPaths = new Set<string>(['prds', 'app', 'prototypes', 'design', 'increments', 'pullRequests', 'issues', ...collectionPathKeys]);
+const deliveryConfig = 'configs/delivery/delivery.json';
 interface Move { key: string; from: string; to: string; folder: boolean }
 /** The optional design root compares by its effective value, so configuring it for the first time relocates the default root. */
 function movesFor(before: UserSettings, after: UserSettings): Move[] {
@@ -81,6 +83,14 @@ async function manifestEdits(root: string, base: string, moves: Move[], files: M
   }
   return { edits, guards };
 }
+/** The Definition of Ready reads its folders from delivery.json, so a moved increments or pull-requests root retargets it in the same plan. */
+async function deliveryEdit(root: string, moves: Move[]): Promise<{ content: string; beforeHash: string | null } | null> {
+  const folder = (key: string): FolderMove | undefined => moves.find(move => move.key === key);
+  const increments = folder('increments'), pullRequests = folder('pullRequests');
+  if (!increments && !pullRequests) return null;
+  const read = await guardedText(root, deliveryConfig);
+  return read.content === null ? null : { content: retargetDeliveryConfig(read.content, { increments, pullRequests }), beforeHash: read.beforeHash };
+}
 function upsert(edits: Edit[], entry: Edit): void {
   const index = edits.findIndex(item => item.path === entry.path);
   if (index < 0) edits.push(entry); else edits[index] = entry;
@@ -125,16 +135,19 @@ export async function settingsMigrationPlan(root: string, input: unknown) {
   for (const entry of manifests.edits) upsert(edits, entry);
   const metadata = migrateState(state.content, contents, settings);
   if (metadata !== null) edits.push({ path: setupStatePath, content: metadata });
+  const delivery = await deliveryEdit(root, contents);
+  if (delivery) edits.push({ path: deliveryConfig, content: delivery.content });
   edits.push({ path: settingsPath, content: jsonText(settings) });
   edits.push(...current.files.map(file => ({ path: file.path, content: null })));
   const plan = await createFilePlan(root, edits);
   verifySources(plan, current.files, destinations, loaded.beforeHash);
-  requireSketch(manifests.guards.every(guard => plan.changes.find(change => change.path === guard.path)?.beforeHash === guard.beforeHash), 'MAKER_STALE', 'A design manifest changed while planning migration.');
-  const checked = prepared(plan, { settings, moves, retained: current.retained, next: 'Reinstall dependencies and rebuild the relocated application. Empty original directories and excluded build/dependency outputs are retained. Review any hand-written links to old locations.' + (manifests.edits.length ? ' Then run node bin/app design sync for each design folder whose source or brief moved.' : '') }, { snapshotHash });
+  const guards = [...manifests.guards, ...(delivery ? [{ path: deliveryConfig, beforeHash: delivery.beforeHash }] : [])];
+  requireSketch(guards.every(guard => plan.changes.find(change => change.path === guard.path)?.beforeHash === guard.beforeHash), 'MAKER_STALE', 'A design manifest or delivery.json changed while planning migration.');
+  const checked = prepared(plan, { settings, moves, retained: current.retained, next: 'Reinstall dependencies and rebuild the relocated application. Empty original directories and excluded build/dependency outputs are retained. Review any hand-written links to old locations.' + (manifests.edits.length ? ' Then run node bin/app design sync for each design folder whose source or brief moved.' : '') + (delivery ? ' delivery.json now points the Definition of Ready at the moved folders. Wikilinks between increments and pull requests still name the old folders; review them.' : '') }, { snapshotHash });
   return { ...checked, validate: async () => {
     requireSketch(identity((await collect(root, await contentMoves(root, moves))).files) === snapshotHash, 'MAKER_STALE', 'Migration inventory changed after review.');
-    for (const guard of manifests.guards)
-      requireSketch((await guardedText(root, guard.path)).beforeHash === guard.beforeHash, 'MAKER_STALE', 'A design manifest changed after migration review.');
+    for (const guard of guards)
+      requireSketch((await guardedText(root, guard.path)).beforeHash === guard.beforeHash, 'MAKER_STALE', 'A design manifest or delivery.json changed after migration review.');
     requireSketch((await guardedText(root, setupStatePath)).beforeHash === state.beforeHash, 'MAKER_STALE', 'Setup state changed after migration review.');
     requireSketch((await guardedText(root, loaded.settings.paths.project)).beforeHash === project.beforeHash, 'MAKER_STALE', 'Project changed after migration review.');
   } };

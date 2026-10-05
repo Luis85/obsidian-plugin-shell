@@ -50,9 +50,12 @@ test('starters are chosen by number, by id or by default, and unknown choices ar
   assert.equal((await guidedStarter(request(['target']), context, byId.prompt, byId.write)).options.starter, 'webapp');
   const byDefault = scripted(['', 'my-app', '', '', '', '', '']);
   assert.equal((await guidedStarter(request(['target']), context, byDefault.prompt, byDefault.write)).options.starter, 'typed');
+  // The shared select refuses an unknown choice and asks again instead of ending the interview.
   for (const answer of ['9', 'missing']) {
-    const unknown = scripted([answer]);
-    assert.equal(await code(guidedStarter(request(['target']), context, unknown.prompt, unknown.write)), 'STARTER_UNKNOWN');
+    const unknown = scripted([answer, 'webapp', 'my-app', '', '']);
+    assert.equal((await guidedStarter(request(['target']), context, unknown.prompt, unknown.write)).options.starter, 'webapp');
+    assert.ok(unknown.written.some(text => text.includes('Choose one of the displayed options')));
+    assert.equal(unknown.asked.filter(question => question.startsWith('Choose number or ID')).length, 2);
   }
   const absent = scripted([]);
   assert.equal(await code(guidedStarter(request(['target'], { starter: 'gone' }), context, absent.prompt, absent.write)), 'STARTER_UNKNOWN');
@@ -62,14 +65,19 @@ test('typed answers are validated, defaulted and serialized as data only', () =>
   const answers = scripted(['', 'Typed App', '', 'yes', 'bold', '']);
   const guided = await guidedStarter(request(['target'], { starter: 'typed' }), context, answers.prompt, answers.write);
   assert.deepEqual(JSON.parse(guided.options.answers), { id: 'target', name: 'Typed App', count: 3, enabled: true, tone: 'bold', description: 'Typed' });
-  assert.ok(answers.asked.some(question => question === 'Tone (calm, bold): '));
+  // Choices are a numbered select now, so they are listed rather than inlined in the question.
+  assert.ok(answers.written.some(text => text.includes('Tone') && text.includes('1. calm') && text.includes('2. bold')));
   assert.ok(answers.asked.some(question => question === 'Count [3]: '));
   const numbers = scripted(['7', 'no', 'calm', 'text', 'Own']);
   const counted = await guidedStarter(request(['target'], { starter: 'typed', id: 'given', name: 'Given' }), context, numbers.prompt, numbers.write);
   assert.deepEqual(JSON.parse(counted.options.answers), { id: 'given', name: 'Given', count: 7, enabled: false, tone: 'calm', note: 'text', description: 'Own' });
-  for (const [answers, expected] of [[['', 'X', 'many'], 'STARTER_INPUT'], [['', 'X', '', 'maybe'], 'STARTER_INPUT'], [['', 'X', '', '', 'loud'], 'STARTER_INPUT']]) {
+  // Invalid answers are reported and asked again; they never become values (the follow-up blank keeps the default).
+  for (const [answers, reported, key, kept] of [[['', 'X', 'many'], 'Count: enter a number.', 'count', 3],
+    [['', 'X', '', 'maybe'], 'Choose one of the displayed options', 'enabled', false], [['', 'X', '', '', 'loud'], 'Choose one of the displayed options', 'tone', undefined]]) {
     const invalid = scripted(answers);
-    assert.equal(await code(guidedStarter(request(['target'], { starter: 'typed' }), context, invalid.prompt, invalid.write)), expected);
+    const guided = await guidedStarter(request(['target'], { starter: 'typed' }), context, invalid.prompt, invalid.write);
+    assert.ok(invalid.written.some(text => text.includes(reported)), reported);
+    assert.equal(JSON.parse(guided.options.answers)[key], kept);
   }
 }));
 
@@ -87,19 +95,31 @@ test('supplied --answers or --values skip prompts, and both together are refused
 test('a required input without a default must be answered', () => withStarters(async context => {
   const strict = { ...typed, id: 'strict', inputs: [...typed.inputs.slice(0, 2), { id: 'title', label: 'Title', type: 'string', required: true }], files: [{ path: 'README.md', content: '# {{title}} {{id}} {{name}}\n' }] };
   await writeFile(join(context.root, 'configs/starters/strict.json'), JSON.stringify(strict));
-  const blank = scripted(['']);
-  assert.equal(await code(guidedStarter(request(['target'], { starter: 'strict', id: 'strict-app', name: 'Strict' }), context, blank.prompt, blank.write)), 'STARTER_INPUT');
+  // A blank answer is refused and the question asked again until it is answered.
+  const blank = scripted(['', 'Strict title']);
+  const guided = await guidedStarter(request(['target'], { starter: 'strict', id: 'strict-app', name: 'Strict' }), context, blank.prompt, blank.write);
+  assert.deepEqual(blank.asked, ['Title: ', 'Title: ']);
+  assert.ok(blank.written.some(text => text.includes('Title needs text')));
+  assert.equal(JSON.parse(guided.options.answers).title, 'Strict title');
 }));
 
-test('companion starters offer Airship and fill single native integration defaults', async () => {
+test('companion starters offer Airship and hosting and fill single native integration defaults', async () => {
   const context = { root: frameworkRoot, frameworkRoot };
-  const custom = scripted(['', '', '', '', '', 'y', '']);
+  const custom = scripted(['', '', '', '', '', 'y', '', '']);
   const view = await guidedStarter(request(['target'], { starter: 'custom-file-view', id: 'folio-app', name: 'Folio App', author: 'Team' }), context, custom.prompt, custom.write);
   assert.equal(view.options.airship, true); assert.equal(view.options.extension, 'folio');
-  const menu = scripted(['', '', '', '', '', 'md,txt']);
+  // A new folder has no remote: the hosting default is GitHub and accepting it leaves the starter document unchanged.
+  assert.match(custom.asked[6], /^Hosting platform .*\[github\]: $/); assert.equal(view.options.hosting, undefined);
+  const menu = scripted(['', '', '', '', '', 'azure-devops', 'https://dev.azure.com/contoso', 'Menus', 'menu-repo', 'md,txt']);
   const filtered = await guidedStarter(request(['target'], { starter: 'context-menu', id: 'menu-app', name: 'Menu App', author: 'Team', 'no-airship': true }), context, menu.prompt, menu.write);
   assert.equal(filtered.options.airship, undefined); assert.equal(filtered.options.extensions, 'md,txt');
-  const plain = scripted(['', '', '', '']);
+  assert.deepEqual([filtered.options.hosting, filtered.options['azure-organization'], filtered.options['azure-project'], filtered.options['azure-repository']],
+    ['azure-devops', 'https://dev.azure.com/contoso', 'Menus', 'menu-repo']);
+  const plain = scripted(['', '', '', '', 'none']);
   const blank = await guidedStarter(request(['target'], { starter: 'blank', id: 'plain-app', name: 'Plain App', author: 'Team', airship: false }), context, plain.prompt, plain.write);
-  assert.equal(blank.options.extension, undefined); assert.equal(blank.options.extensions, undefined);
+  assert.equal(blank.options.extension, undefined); assert.equal(blank.options.extensions, undefined); assert.equal(blank.options.hosting, 'none');
+  const explicit = scripted([]);
+  const flagged = await guidedStarter(request(['target'], { starter: 'blank', id: 'plain-app', name: 'Plain App', author: 'Team', airship: false, hosting: 'github', answers: '{}' }), context, explicit.prompt, explicit.write);
+  assert.equal(flagged.options.hosting, 'github'); assert.ok(explicit.asked.every(question => !/Hosting|Azure/.test(question)));
+  assert.equal(await code(guidedStarter(request(['target'], { starter: 'blank', id: 'plain-app', name: 'Plain App', author: 'Team', airship: false }), context, scripted(['', '', '', '', 'gitlab']).prompt, () => {})), 'HOSTING_OPTION_PLATFORM');
 });

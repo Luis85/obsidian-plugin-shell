@@ -6,13 +6,13 @@ There are **58 individual task files**: 35 shell/framework, eight concept, ten n
 
 ## Working rules
 
-Priorities express delivery order: P0 framework including its separately approved shipment; P1 secondary concept refinement; P2 native companion; P3 companion publication. They do not downgrade safety or quality. SH-022, SH-034 and CX-007 are hard prerequisites of CP-001. CP-010 is a hard prerequisite of PUB tasks, not of the first framework release. Read the [CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [PR #5 readiness review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md).
+Priorities express delivery order: P0 framework including its separately approved shipment; P1 secondary concept refinement; P2 native companion; P3 companion publication. They do not downgrade safety or quality. SH-022, SH-034 and CX-007 are hard prerequisites of CP-001. CP-010 is a hard prerequisite of PUB tasks, not of the first framework release. Read the [CLI/generator plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [PR #5 readiness review](../_archive/development/PR5-FRAMEWORK-READINESS-REVIEW.md).
 
 Inspect current source and actual evidence before implementing. A task may extend or qualify existing behavior; do not recreate working makers/services because older prose calls them pending. Record covered criteria and implement only the remaining gap. Preserve parent requirements, exact dependency pins, existing thresholds, protected data and unrelated edits.
 
 Use `planned`, `in-progress`, `blocked`, `in-review`, `done`, or `superseded`. A blocked task records reason and next action. A superseded task links its replacement. A done task records commit/artifact, actual commands/results and unexecuted scope. A gate cannot pass just because dependent files say done; review their evidence and any added scope. No gate grants publication authority.
 
-Use the [task template](TASK-TEMPLATE.md). Add new stable IDs when accepted concept work exposes another shell requirement. Do not renumber tasks. All links and dependencies must remain valid and acyclic. For implementation, follow the root [AGENTS.md](../../AGENTS.md).
+A task is delivered through one or more increments (`node bin/app increment new <slug> --from <task path>`), whose deterministic checks are in [Definition of Ready and Done](../development/DEFINITION-OF-READY-AND-DONE.md). Use the [task template](TASK-TEMPLATE.md). Add new stable IDs when accepted concept work exposes another shell requirement. Do not renumber tasks. All links and dependencies must remain valid and acyclic. For implementation, follow the root [AGENTS.md](../../AGENTS.md).
 
 ## Shell foundation P0
 

@@ -70,6 +70,22 @@ test('check outcomes report cancellation, missing tools and failures with their 
   assert.equal(passed.status, 'ok'); assert.equal(passed.diagnostics.length, 0);
 }));
 
+test('node suite steps get the long suite budget by default; an explicit --timeout bounds every step', async () => {
+  const budgets = async options => {
+    const seen = {};
+    await checkOperation({ command: 'check', args: [], options }, { root: frameworkRoot, frameworkRoot }, async (_context, entry, args, timeout) => {
+      seen[[entry, ...args].join(' ')] = timeout; return { exitCode: 0 };
+    }, async () => null);
+    return seen;
+  };
+  const defaults = await budgets({});
+  assert.equal(defaults['scripts/testing/suites.mjs maker'], 3_600_000, 'the maker suite outlives the 10-minute step default');
+  assert.equal(defaults['node_modules/vue-tsc/bin/vue-tsc.js --noEmit'], 600_000);
+  assert.ok(Object.values(await budgets({ timeout: '1000' })).every(timeout => timeout === 1000));
+  const fast = await checkSteps(frameworkRoot, true, git([['M', 'tests/tooling/interactive-maker-guide.checks.mjs']]));
+  assert.equal(fast.steps.find(step => step.id === 'suites').timeoutMs, 3_600_000);
+});
+
 test('manifest rules explain every missing, extra, malformed and forbidden field', () => {
   assert.equal(manifestRules(null)[0].status, 'fail');
   assert.match(manifestRules('[1]')[0].message, /not a single JSON object/);

@@ -16,6 +16,7 @@ import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { commands, parameterKinds, parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { fileSymlink } from './file-symlink.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const { selection: cli } = await projectStarter(frameworkRoot, 'cli');
 const json = value => JSON.stringify(value, null, 2) + '\n';
@@ -61,13 +62,16 @@ test('discovery reads the single top-level configuration, ignores subfolders and
   await put(root, 'configs/Upper-config.json', '{}');
   await assert.rejects(() => locateProjectConfig(root), code('PROJECT_CONFIG_INVALID'));
 }));
-test('linked configuration folders and files are refused, never followed', async () => scratch(async root => {
+test('linked configuration folders and files are refused, never followed', async t => scratch(async root => {
   await put(root, 'outside/desk-config.json', json(cli));
-  await symlink(join(root, 'outside'), join(root, 'configs'));
+  // A junction needs no Windows symlink privilege and is still reported as a link.
+  await symlink(join(root, 'outside'), join(root, 'configs'), 'junction');
   await assert.rejects(() => savedProjectConfig(root), /PLAN_SYMLINK: configs\//);
   await rm(join(root, 'configs'));
-  await mkdir(join(root, 'configs')); await symlink(join(root, 'outside/desk-config.json'), join(root, 'configs/desk-config.json'));
-  await assert.rejects(() => savedProjectConfig(root), /PLAN_SYMLINK: configs\/desk-config\.json/);
+  await mkdir(join(root, 'configs'));
+  if (await fileSymlink(t, join(root, 'outside/desk-config.json'), join(root, 'configs/desk-config.json'))) {
+    await assert.rejects(() => savedProjectConfig(root), /PLAN_SYMLINK: configs\/desk-config\.json/);
+  }
 }));
 test('sketch generation reads the discovered configuration and --config chooses among several', async () => scratch(async root => {
   await put(root, 'design/project.json', documentText(runOperations(newDocument('CLI'), [{ op: 'page.add', title: 'Commands' }]).document));

@@ -1,5 +1,7 @@
 # Compiler architecture
 
+> Type: explanation · Part of the [docs index](../../README.md)
+
 ## Dependency direction
 
 The inward-only core lives in `bin/compiler/`. `bin/compiler/domain/` defines source locations, diagnostics, artifacts, project-starter data, scoped-generation closure and independent semantic checks. `bin/compiler/application/` orchestrates the parse/validate/resolve/lower/emit pipeline using explicit ports. These layers import only inward (application → application/domain, domain → domain) and never access filesystem, network, processes, clocks, random IDs, Vue or Obsidian. The Fallow zones `compiler-domain` and `compiler-application` enforce the same direction, ESLint forbids `node:*`/host imports there, and the maker core coverage floors (95/95/95/90) apply to both folders through `tests/tooling/interactive-maker-compiler-core.checks.mjs`. The former `scripts/compiler/{domain,application}` paths were removed rather than shimmed.

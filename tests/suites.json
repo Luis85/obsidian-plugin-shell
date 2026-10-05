@@ -2,9 +2,59 @@
   "schemaVersion": 1,
   "description": "Every file under the scanned test roots belongs to exactly one suite or one helper entry. Run `npm run test:suites -- --check` after adding a test; docs/testing/TEST-SUITES.md explains each suite.",
   "documentation": "docs/testing/TEST-SUITES.md",
+  "testLevels": [
+    {
+      "name": "unit",
+      "summary": "One module's behavior in-process with in-memory or checked-in inputs and test doubles for its ports; no child process, temp directory, network, browser or host."
+    },
+    {
+      "name": "component",
+      "summary": "A composed part in-process with its real collaborators: a Vue view with its store, the plugin on the in-memory Obsidian host, a CLI/TUI command or editor session driven through its presentation layer."
+    },
+    {
+      "name": "integration",
+      "summary": "Real boundaries without a browser or host: child processes (the CLI, npm, git, Python), temp directories and repositories, generated projects on disk, loopback servers."
+    },
+    {
+      "name": "e2e",
+      "summary": "A real browser or a real Obsidian host. Opt-in in workflows and mandatory in the Release tier (scripts/quality/e2e-policy.mjs).",
+      "paths": [
+        "tests/e2e/**",
+        "tests/obsidian/**",
+        "tests/browser-specimen/**",
+        "tests/browser-workflows/**",
+        "tests/concepts/*.browser.{py,mjs}"
+      ]
+    },
+    {
+      "name": "acceptance",
+      "summary": "Acceptance-criteria checks of one increment, traced to its handoff.",
+      "paths": [
+        "tests/acceptance/**"
+      ]
+    }
+  ],
+  "pyramid": {
+    "warnWhen": [
+      {
+        "upper": "e2e",
+        "lower": "integration",
+        "maxRatio": 1
+      },
+      {
+        "upper": "integration",
+        "lower": "unit",
+        "maxRatio": 1
+      }
+    ]
+  },
   "roots": [
     {
       "path": "tests/tooling"
+    },
+    {
+      "path": "tests/acceptance",
+      "optional": true
     },
     {
       "path": "tests/runtime"
@@ -17,6 +67,9 @@
     },
     {
       "path": "tests/browser-specimen"
+    },
+    {
+      "path": "tests/browser-workflows"
     },
     {
       "path": "tests/concepts",
@@ -110,6 +163,7 @@
     {
       "name": "maker:pty",
       "purpose": "Real Linux/macOS pseudo-terminal authoring, agent parity, safe review and OS terminal restoration; standard-library Python only.",
+      "level": "integration",
       "runner": {
         "type": "command",
         "commands": [
@@ -137,6 +191,61 @@
     {
       "name": "maker",
       "purpose": "Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/interactive-maker-adopt-detectors.checks.mjs",
+          "tests/tooling/interactive-maker-adopt-findings.checks.mjs",
+          "tests/tooling/interactive-maker-adopt-plan.checks.mjs",
+          "tests/tooling/interactive-maker-angular-bricks.checks.mjs",
+          "tests/tooling/interactive-maker-brainstorm-contract.checks.mjs",
+          "tests/tooling/interactive-maker-ci-workflow-model.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-core.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-data.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-host.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-journey.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-kit.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-native-boilerplate.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-persistence.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-storybook.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-visual-files.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-visual-sfc.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-emitters-visual-tests.checks.mjs",
+          "tests/tooling/interactive-maker-compiler-project.checks.mjs",
+          "tests/tooling/interactive-maker-controls.checks.mjs",
+          "tests/tooling/interactive-maker-documentation-codec.checks.mjs",
+          "tests/tooling/interactive-maker-documentation-core.checks.mjs",
+          "tests/tooling/interactive-maker-documentation-model.checks.mjs",
+          "tests/tooling/interactive-maker-domain.checks.mjs",
+          "tests/tooling/interactive-maker-first-run-domain.checks.mjs",
+          "tests/tooling/interactive-maker-handout-model.checks.mjs",
+          "tests/tooling/interactive-maker-handout-questions.checks.mjs",
+          "tests/tooling/interactive-maker-increment-branches.checks.mjs",
+          "tests/tooling/interactive-maker-increment-documents.checks.mjs",
+          "tests/tooling/interactive-maker-increment-transitions.checks.mjs",
+          "tests/tooling/interactive-maker-increment-views.checks.mjs",
+          "tests/tooling/interactive-maker-issue-documents.checks.mjs",
+          "tests/tooling/interactive-maker-operations-catalog.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-documents.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-remote-body.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-sync-merge.checks.mjs",
+          "tests/tooling/interactive-maker-pull-request-sync-record.checks.mjs",
+          "tests/tooling/interactive-maker-setup-domain.checks.mjs",
+          "tests/tooling/interactive-maker-setup-source.checks.mjs",
+          "tests/tooling/interactive-maker-starters-browser.checks.mjs",
+          "tests/tooling/interactive-maker-starters-coverage.checks.mjs",
+          "tests/tooling/interactive-maker-starters-render.checks.mjs",
+          "tests/tooling/interactive-maker-style-export.checks.mjs",
+          "tests/tooling/interactive-maker-terminal-views.checks.mjs",
+          "tests/tooling/interactive-maker-tui-state.checks.mjs",
+          "tests/tooling/interactive-maker-ui-status-domain.checks.mjs"
+        ],
+        "component": [
+          "tests/tooling/interactive-maker-guide.checks.mjs",
+          "tests/tooling/interactive-maker-tui-hardening.checks.mjs",
+          "tests/tooling/interactive-maker-tui-terminal.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -152,6 +261,7 @@
     {
       "name": "workbench-plugins",
       "purpose": "Trusted Workbench plugin SDK: plugin-local contracts, event bus, CLI/TUI contributions, framework adapters and custom starter contributions.",
+      "level": "component",
       "runner": {
         "type": "node-test"
       },
@@ -169,6 +279,12 @@
     {
       "name": "airship",
       "purpose": "Default-off project tooling, source preview mapping, safe explicit processes and regeneration preservation.",
+      "level": "unit",
+      "levels": {
+        "integration": [
+          "tests/tooling/airship-contracts.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -184,6 +300,21 @@
     {
       "name": "compiler",
       "purpose": "Dedicated compiler core, diagnostics, byte-compatibility, architecture, reporting and distribution contracts.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/compiler-architecture.checks.mjs",
+          "tests/tooling/compiler-core.checks.mjs",
+          "tests/tooling/compiler-dependency-direction.checks.mjs",
+          "tests/tooling/compiler-docs.checks.mjs",
+          "tests/tooling/compiler-golden.checks.mjs",
+          "tests/tooling/compiler-retired-modules.checks.mjs",
+          "tests/tooling/compiler-storybook-a11y.checks.mjs",
+          "tests/tooling/compiler-storybook-consolidation.checks.mjs",
+          "tests/tooling/compiler-storybook.checks.mjs",
+          "tests/tooling/compiler-template-layout.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -202,6 +333,7 @@
     {
       "name": "compiler:properties",
       "purpose": "Seeded fast-check compiler invariants; requires installed development dependencies.",
+      "level": "unit",
       "runner": {
         "type": "node-test"
       },
@@ -217,6 +349,12 @@
     {
       "name": "prototypes",
       "purpose": "Design-first prototype helpers, real shell delegation, shared generation/distribution and single-file build boundaries.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/prototype-helpers.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -233,6 +371,7 @@
     {
       "name": "prototypes:python",
       "purpose": "Portable prototype package safety and static skill contract tests.",
+      "level": "integration",
       "runner": {
         "type": "command",
         "commands": [
@@ -263,6 +402,7 @@
     {
       "name": "companion:mvp",
       "purpose": "Compiled Vue/Nuxt UI/Vue Flow sitemap, prototype versions/variants and complete v6 authoring round trips.",
+      "level": "e2e",
       "runner": {
         "type": "command",
         "commands": [
@@ -303,6 +443,44 @@
     {
       "name": "runtime",
       "purpose": "Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit.",
+      "level": "unit",
+      "levels": {
+        "component": [
+          "tests/runtime/acceptance-closure.test.ts",
+          "tests/runtime/authoring-native.test.ts",
+          "tests/runtime/authoring-navigation-failure.test.ts",
+          "tests/runtime/authoring-presentation.test.ts",
+          "tests/runtime/components.test.ts",
+          "tests/runtime/document-lifecycle.test.ts",
+          "tests/runtime/event-authoring.test.ts",
+          "tests/runtime/header.test.ts",
+          "tests/runtime/host-events.test.ts",
+          "tests/runtime/identity.test.ts",
+          "tests/runtime/*-components.test.ts",
+          "tests/runtime/items.test.ts",
+          "tests/runtime/modal-adapters.test.ts",
+          "tests/runtime/mount-lifecycle.test.ts",
+          "tests/runtime/native-adapters*.test.ts",
+          "tests/runtime/native-commands.test.ts",
+          "tests/runtime/native-feature-settings.test.ts",
+          "tests/runtime/native-file-integration.test.ts",
+          "tests/runtime/native-lifecycle.test.ts",
+          "tests/runtime/notification-sinks.test.ts",
+          "tests/runtime/obsidian-test-kit-shell-entry.test.ts",
+          "tests/runtime/obsidian-test-kit-shell.test.ts",
+          "tests/runtime/persistence-outcomes.test.ts",
+          "tests/runtime/presentation-composables.test.ts",
+          "tests/runtime/repository-panel.test.ts",
+          "tests/runtime/resource-qualification.test.ts",
+          "tests/runtime/service-lifecycle.test.ts",
+          "tests/runtime/settings-storage.test.ts",
+          "tests/runtime/shell-entry-lifecycle.test.ts",
+          "tests/runtime/view-state.test.ts"
+        ],
+        "integration": [
+          "tests/runtime/tooling.test.ts"
+        ]
+      },
       "runner": {"type": "vitest", "config": "configs/testing/vitest.config.mjs"},
       "include": ["tests/runtime/**/*.test.ts"],
       "verify": "own-step",
@@ -317,6 +495,18 @@
     {
       "name": "cli",
       "purpose": "Central bin/app CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/framework-analysis-scope.checks.mjs",
+          "tests/tooling/framework-concept-input.checks.mjs",
+          "tests/tooling/framework-docs-codec.checks.mjs",
+          "tests/tooling/framework-docs-model.checks.mjs",
+          "tests/tooling/framework-documents.checks.mjs",
+          "tests/tooling/starter-catalog-docs.checks.mjs",
+          "tests/tooling/starter-submission-identity.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -334,6 +524,7 @@
     {
       "name": "cli:journey",
       "purpose": "Packs the framework ZIP, extracts it and builds independent generated consumers with a qualified npm (slow, writes reports/framework-cli).",
+      "level": "integration",
       "runner": {
         "type": "command",
         "commands": [
@@ -358,6 +549,24 @@
     {
       "name": "generator",
       "purpose": "Project compiler: companion JSON to generated project files, runtime guards, starters and the shared safe file-plan engine.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/project-generator-contract.checks.mjs",
+          "tests/tooling/project-generator-framework-scope.checks.mjs",
+          "tests/tooling/project-generator-http.checks.mjs",
+          "tests/tooling/project-generator-journey-specs.checks.mjs",
+          "tests/tooling/project-generator-native-starters.checks.mjs",
+          "tests/tooling/project-generator-note-operations.checks.mjs",
+          "tests/tooling/project-generator-relationships.checks.mjs",
+          "tests/tooling/project-generator-runtime-guards.checks.mjs",
+          "tests/tooling/project-generator-scenario-runtime.checks.mjs",
+          "tests/tooling/project-generator-surface-acceptance.checks.mjs",
+          "tests/tooling/project-generator-template-rewrite.checks.mjs",
+          "tests/tooling/project-generator-ui-quality.checks.mjs",
+          "tests/tooling/project-generator-visual-refusals.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -375,6 +584,12 @@
     {
       "name": "visual",
       "purpose": "Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, session and generated model tests.",
+      "level": "unit",
+      "levels": {
+        "integration": [
+          "tests/tooling/visual-session.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -391,6 +606,25 @@
     {
       "name": "companion",
       "purpose": "Companion concept contracts: schema 6 project JSON, storymaps and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
+      "level": "unit",
+      "levels": {
+        "component": [
+          "tests/tooling/companion-authoring-state.checks.mjs",
+          "tests/tooling/companion-sitemap-project-store.checks.mjs",
+          "tests/tooling/companion-sitemap-workspace.checks.mjs",
+          "tests/tooling/companion-visual-*.checks.mjs"
+        ],
+        "integration": [
+          "tests/tooling/companion-authoring-evidence.checks.mjs",
+          "tests/tooling/companion-boundaries.checks.mjs",
+          "tests/tooling/companion-composition-contract.checks.mjs",
+          "tests/tooling/companion-project.checks.mjs",
+          "tests/tooling/companion-prototypes-workspace-integrity.checks.mjs",
+          "tests/tooling/companion-schema.checks.mjs",
+          "tests/tooling/concept-metrics.checks.mjs",
+          "tests/tooling/concept-python-inventory.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -408,6 +642,7 @@
     {
       "name": "companion:schema",
       "purpose": "Independent Draft 2020-12 structural validation and semantic-only negative controls over the shared current project corpus.",
+      "level": "integration",
       "runner": {
         "type": "command",
         "commands": [
@@ -434,6 +669,7 @@
     {
       "name": "companion:assembly",
       "purpose": "Offline companion assembly check, Python assembly/tamper test and syntax check of every authored concept module.",
+      "level": "integration",
       "runner": {
         "type": "command",
         "commands": [
@@ -473,6 +709,7 @@
     {
       "name": "companion:browser",
       "purpose": "Aggregated companion concept browser suites on one exact assembled artifact (Python Playwright suites plus the Node Playwright suites listed under companion:visual-browser, Chromium).",
+      "level": "e2e",
       "runner": {
         "type": "command",
         "commands": [
@@ -518,6 +755,7 @@
     {
       "name": "companion:visual-browser",
       "purpose": "Visual page and component editors end to end in the assembled concept (Node Playwright + Chromium), run through the concept browser runner so the evidence is bound to the exact artifact.",
+      "level": "e2e",
       "runner": {
         "type": "command",
         "commands": [
@@ -550,6 +788,7 @@
     {
       "name": "companion:starter-browser",
       "purpose": "Empty current authoring startup, external starter round trip, and independently compiled visual-feature showcase behavior.",
+      "level": "e2e",
       "runner": {
         "type": "command",
         "commands": [
@@ -584,6 +823,7 @@
     {
       "name": "companion:browser-manual",
       "purpose": "Historical concept browser scripts that the aggregated runner does not execute; run individually per docs/concepts/companion/VERIFICATION.md.",
+      "level": "e2e",
       "runner": {
         "type": "manual",
         "instructions": "docs/concepts/companion/VERIFICATION.md"
@@ -609,6 +849,13 @@
     {
       "name": "test-data",
       "purpose": "Companion test-data kit: seeded generators, storage plans, loopback server/client and source inventory.",
+      "level": "unit",
+      "levels": {
+        "integration": [
+          "tests/tooling/test-data-inventory.checks.mjs",
+          "tests/tooling/test-data-storage.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -624,6 +871,13 @@
     {
       "name": "makers",
       "purpose": "Authoring tools: maker recipes and catalog, checks that the custom-maker and locale recipes write into consumer projects, event contracts, generated-code formatting, example removal and README ownership.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/formatting.checks.mjs",
+          "tests/tooling/maker-layout.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -646,6 +900,12 @@
     {
       "name": "memory",
       "purpose": "Opt-in Hindsight contracts, keyless configuration, real Git/venv/stdio fixtures and desktop registration, without installing Hindsight or calling an LLM.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/hindsight/policy.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -666,6 +926,7 @@
     {
       "name": "memory:python",
       "purpose": "Stdlib-only Python adapter tests with explicit SDK/manager doubles; not live Hindsight inference.",
+      "level": "unit",
       "runner": {
         "type": "command",
         "commands": [
@@ -700,6 +961,20 @@
     {
       "name": "native",
       "purpose": "Native host protocol and dev-loop tooling units (isolation, identity, receipts, diagnostics, performance reports) without launching Obsidian.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/native-diagnostic-observer.checks.mjs",
+          "tests/tooling/native-diagnostic-report.checks.mjs",
+          "tests/tooling/native-item-boundary.checks.mjs",
+          "tests/tooling/native-launch-report.checks.mjs",
+          "tests/tooling/native-launch-resources.checks.mjs",
+          "tests/tooling/native-recovery-handles.checks.mjs",
+          "tests/tooling/native-resource-report.checks.mjs",
+          "tests/tooling/native-runtime-observation.checks.mjs",
+          "tests/tooling/obsidian-session-lifecycle.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -718,6 +993,7 @@
     {
       "name": "native:host",
       "purpose": "Real Obsidian smoke in an isolated scratch vault (downloads the host; never a personal vault).",
+      "level": "e2e",
       "runner": {
         "type": "command",
         "commands": [
@@ -741,6 +1017,13 @@
     {
       "name": "setup",
       "purpose": "Guided setup identity, npm install policy, staged build/local install, CSS identity scoping and harness preview.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/harness-preview.checks.mjs",
+          "tests/tooling/identity-styles.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
@@ -760,12 +1043,27 @@
     },
     {
       "name": "release",
-      "purpose": "Release preparation, promotion plans, remote execution, audit classification, maintenance discovery and qualification triggers.",
+      "purpose": "Release preparation, promotion plans, remote execution, Definition of Ready/Done delivery checks, audit classification, maintenance discovery and qualification triggers.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/delivery-documents.checks.mjs",
+          "tests/tooling/delivery-done.checks.mjs",
+          "tests/tooling/delivery-handoff.checks.mjs",
+          "tests/tooling/delivery-ready.checks.mjs",
+          "tests/tooling/delivery-rules-reference.checks.mjs",
+          "tests/tooling/maintenance.checks.mjs",
+          "tests/tooling/qualification-trigger.checks.mjs",
+          "tests/tooling/release-remote.checks.mjs",
+          "tests/tooling/security.checks.mjs"
+        ]
+      },
       "runner": {
         "type": "node-test"
       },
       "include": [
         "tests/tooling/release*.checks.mjs",
+        "tests/tooling/delivery-*.checks.mjs",
         "tests/tooling/security.checks.mjs",
         "tests/tooling/maintenance.checks.mjs",
         "tests/tooling/qualification-*.checks.mjs"
@@ -778,8 +1076,27 @@
       ]
     },
     {
+      "name": "acceptance",
+      "purpose": "Acceptance criterion tests of increments: one stub per criterion generated by scripts/delivery/acceptance.mjs (configs/delivery/delivery.json acceptance), pending until implemented; the Definition of Done requires them implemented.",
+      "level": "acceptance",
+      "runner": {"type": "node-test"},
+      "include": ["tests/acceptance/**/*.checks.mjs"],
+      "verify": "tooling",
+      "workflows": ["ci"],
+      "optional": true
+    },
+    {
       "name": "quality",
       "purpose": "Repository gates: analyzer, lint, coverage inventory, maintainability, tighten-only thresholds, presentation, repository and test-quality policies, evidence producers and this suite manifest.",
+      "level": "integration",
+      "levels": {
+        "unit": [
+          "tests/tooling/evidence-failure.checks.mjs",
+          "tests/tooling/style-literals-generated.checks.mjs",
+          "tests/tooling/suite-levels.checks.mjs",
+          "tests/tooling/test-quality.checks.mjs"
+        ]
+      },
       "runner": {"type": "node-test"},
       "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/projects-boundary.checks.mjs", "tests/tooling/site-templates-qualification.checks.mjs", "tests/tooling/docs-launchers.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/style-literals*.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs", "tests/tooling/verify-*.checks.mjs"],
       "prerequisites": ["build"],
@@ -792,6 +1109,14 @@
     {
       "name": "baseline",
       "purpose": "Dependency-free verification baseline: fault ledger, policy, runner, report, source, token and HTTP style-specimen checks, repeated three times.",
+      "level": "unit",
+      "levels": {
+        "integration": [
+          "tests/verification/runner.test.mjs",
+          "tests/verification/source.test.mjs",
+          "tests/harness-styles/server.test.mjs"
+        ]
+      },
       "runner": {
         "type": "command",
         "commands": [
@@ -815,8 +1140,33 @@
       ]
     },
     {
+      "name": "workflows:browser",
+      "purpose": "Browser test workflows (configs/tests/workflows) run in real headless Chromium: the shipped sign-up example with review screenshots, failing locators, blocked remote requests, masked captures, loopback URL and prototype targets, and the exported @playwright/test spec in the Playwright runner.",
+      "level": "e2e",
+      "runner": {
+        "type": "command",
+        "commands": [
+          [
+            "{node}",
+            "--test",
+            "--test-concurrency=1",
+            "tests/browser-workflows/workflow-run.browser.mjs"
+          ]
+        ]
+      },
+      "include": [
+        "tests/browser-workflows/workflow-run.browser.mjs"
+      ],
+      "prerequisites": [
+        "chromium"
+      ],
+      "verify": "opt-in",
+      "workflows": []
+    },
+    {
       "name": "browser-specimen",
       "purpose": "Host-style specimen assertions in a real browser (served mode).",
+      "level": "e2e",
       "runner": {
         "type": "command",
         "commands": [
@@ -840,6 +1190,7 @@
     {
       "name": "e2e",
       "purpose": "Served harness in Chromium via Playwright: showcase, modals, persistence lifecycle, accessibility and design system.",
+      "level": "e2e",
       "runner": {
         "type": "playwright"
       },
@@ -860,6 +1211,7 @@
     {
       "name": "project",
       "purpose": "Generated product tests (tests/project) that exist only in a project created by the companion compiler.",
+      "level": "component",
       "runner": {"type": "vitest", "config": "configs/testing/vitest.project.config.mjs"},
       "include": ["tests/project/**/*.test.ts", "tests/project/**/*.test.mjs"],
       "optional": true,
@@ -871,6 +1223,7 @@
     {
       "name": "project:ui-effects",
       "purpose": "Generated composition/UI-effect checks of a companion-generated project.",
+      "level": "component",
       "runner": {
         "type": "node-test"
       },
@@ -886,6 +1239,7 @@
     {
       "name": "obsidian",
       "purpose": "Vitest-driven end-to-end tests against a real sandboxed Obsidian host.",
+      "level": "e2e",
       "runner": {
         "type": "npm-script",
         "script": "test:obsidian"

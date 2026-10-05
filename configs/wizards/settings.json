@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "settings",
+  "version": 1,
+  "title": "Settings",
+  "description": "Edit configs/user-settings.json through the user-settings form and a reviewed plan. Moving paths of an initialized project becomes a reviewed migration.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "settings.load" },
+    { "id": "edit", "kind": "form", "form": "user-settings", "bind": "settings" },
+    { "id": "review", "kind": "action", "action": "settings.review", "barrier": true }
+  ]
+}

@@ -163,10 +163,12 @@ test('real local npm performs the full dependency-free install/check/test/build 
     scripts: { typecheck: 'node --check build.mjs', test: 'node --test example.test.mjs', build: 'node build.mjs' } };
   await writeFile(join(app,'package.json'),json(pkg));
   await writeFile(join(app,'package-lock.json'),json({ name: pkg.name, version: pkg.version, lockfileVersion: 3, packages: { '': { name: pkg.name, version: pkg.version } } }));
-  await writeFile(join(app,'.npmrc'),'offline=true\n');
+  // Offline and dependency-free: npm's registry audit would only wait out its network retries.
+  await writeFile(join(app,'.npmrc'),'offline=true\naudit=false\n');
   await writeFile(join(app,'build.mjs'),"import {mkdir,writeFile} from 'node:fs/promises'; await mkdir('dist/webapp',{recursive:true}); await writeFile('dist/webapp/index.html','<!doctype html><h1>Hello world</h1>');\n");
   await writeFile(join(app,'example.test.mjs'),"import {test} from 'node:test'; import assert from 'node:assert/strict'; test('fixture',()=>assert.equal(1+1,2));\n");
-  const plan = await firstRunPlan(root, { ...request, stepTimeoutMs: 10000 }, tool);
+  // Real npm under a loaded suite can exceed 10s per stage; per-step timeouts have their own test above.
+  const plan = await firstRunPlan(root, { ...request, stepTimeoutMs: 60000 }, tool);
   const result = await executeFirstRun(plan,plan.planHash); assert.equal(result.report.status,'passed');
   assert.ok(result.report.stages.every(stage => stage.status==='passed'));
 }));

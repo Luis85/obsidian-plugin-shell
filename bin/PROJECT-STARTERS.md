@@ -178,6 +178,8 @@ The migration refuses when `configs/` already holds a project configuration
 move the file by hand to the name the project ID gives, or regenerate prepared packages and
 generated sources, which write the new location.
 
+Hosting: the project-starter interview does not ask for a hosting platform. The directory form `node bin/app new <dir> --starter <id>` (Companion and `--from` starters) takes `--hosting github|azure-devops|none` with the `--azure-*` details and asks interactively; `companion.project.json` can carry `tooling.hosting` for a later `new <dir> --from`. See [hosting platforms](../docs/development/HOSTING-PLATFORMS.md).
+
 ## Build and readiness boundaries
 
 Generated dependencies use exact direct pins. The new target lockfile initially contains only the root manifest and readiness is **resolution-required**, not locked. Review and explicitly `npm install`; retain the resolved lock and prove a clean `npm ci` before claiming reproducibility. Generation never installs or runs code.

@@ -127,8 +127,9 @@ SessionStart hook that prints the project state, a permission allowlist for the 
 commands, and skills (`implement-requirement`, `debug-in-obsidian`, `add-feature`,
 `write-obsidian-test`, `self-review`) in `.claude/skills/` (mirrored for Codex in
 `.agents/skills/`). Start with [BRIEF.md](BRIEF.md), the product brief the owner fills in;
-pull requests use `.github/pull_request_template.md`.
+pull requests use `{{prTemplatePath}}`.
 
+{{hostingCli}}
 ## What is and is not done
 
 - Generated: typed sources, stores, screens, navigation, browser composition and

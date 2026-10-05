@@ -12,11 +12,11 @@ const manifest = {
   prerequisites: { chromium: { probe: ['{node}', '-e', '0'], hint: 'Provision Chromium.' }, python3: { probe: ['{node}', '-e', '0'], hint: 'Install Python.' }, 'native-runner': { probe: ['{node}', '-e', '0'], hint: 'Provision the native runner.' } },
   suites: [
     suite('maker', ['tests/tooling/interactive-maker-*.checks.mjs'], { workflows: ['interactive-maker'] }),
-    suite('generator', ['tests/tooling/project-generator*.checks.mjs'], { workflows: ['ci', 'starter-flow'] }),
+    suite('generator', ['tests/tooling/project-generator*.checks.mjs'], { workflows: ['ci', 'starter-flow'], level: 'integration', levels: { unit: ['tests/tooling/project-generator-http.checks.mjs'] } }),
     suite('quality', ['tests/tooling/gates.checks.mjs'], { workflows: ['ci'] }),
     suite('native', ['tests/tooling/native-*.checks.mjs'], { prerequisites: ['native-runner'] }),
     suite('memory', ['tests/tooling/memory-*.checks.mjs'], { prerequisites: ['python3'] }),
-    suite('e2e', ['tests/e2e/*.spec.ts'], { verify: 'opt-in', runner: { type: 'playwright' }, prerequisites: ['chromium'], workflows: ['ci', 'starter-flow'] }),
+    suite('e2e', ['tests/e2e/*.spec.ts'], { level: 'e2e', verify: 'opt-in', runner: { type: 'playwright' }, prerequisites: ['chromium'], workflows: ['ci', 'starter-flow'] }),
   ],
 };
 const workflows = {

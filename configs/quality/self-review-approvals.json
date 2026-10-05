@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "description": "Owner approvals for exact quality-configuration lines. check:self-review accepts a SR-QUALITY-CONFIG finding only when every added and removed line of that file in the diff is listed here for it, and reports it as approved. Only the CODEOWNERS owner of configs/quality/ edits this file; agents never add their own approvals. Remove entries once their change has merged.",
+  "approvals": [
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "configs/quality/gate-rules.json",
+      "approvedBy": "@Luis85",
+      "pullRequest": 74,
+      "reason": "Map scripts/testing/test-levels.mjs to the quality suite and the app-plugin sources (bin/adapters/community-plugins/**, bin/domain/community-plugin.ts, plugins/**) to the cli suite. Both only add suite sources, so check --fast selects more suites.",
+      "added": [
+        "    \"cli\": [\"bin/app\", \"bin/app.ts\", \"bin/adapters/framework/**\", \"bin/adapters/framework-cli.ts\", \"bin/presentation/terminal/**\", \"scripts/framework/**\", \"scripts/operations/**\", \"scripts/contracts/**\", \"bin/adapters/community-plugins/**\", \"bin/domain/community-plugin.ts\", \"plugins/**\", \"configs/quality/gate-rules.json\"],",
+        "    \"quality\": [\"scripts/quality/**\", \"configs/quality/**\", \"configs/lint/**\", \"scripts/testing/suite-manifest.mjs\", \"scripts/testing/test-levels.mjs\", \"scripts/testing/evidence-*\"],"
+      ],
+      "removed": [
+        "    \"cli\": [\"bin/app\", \"bin/app.ts\", \"bin/adapters/framework/**\", \"bin/adapters/framework-cli.ts\", \"bin/presentation/terminal/**\", \"scripts/framework/**\", \"scripts/operations/**\", \"scripts/contracts/**\", \"configs/quality/gate-rules.json\"],",
+        "    \"quality\": [\"scripts/quality/**\", \"configs/quality/**\", \"configs/lint/**\", \"scripts/testing/suite-manifest.mjs\", \"scripts/testing/evidence-*\"],"
+      ]
+    }
+  ]
+}

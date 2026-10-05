@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "learning-edit",
+  "version": 1,
+  "title": "Edit learning",
+  "description": "Edit one learning note pre-filled from its frontmatter; status changes follow the allowed transitions, and the path, id, creation dates, other properties and body are kept.",
+  "context": { "title": "Learnings", "details": ["Folder: {{folder}}", "Nothing is written until a reviewed plan is approved.", "Escape: previous step. Ctrl+C: cancel."] },
+  "cancelMessage": "No learning was changed.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "collection.load", "with": { "collection": "learning" } },
+    { "id": "pick", "kind": "form", "title": "Choose", "when": { "path": "pick", "equals": true }, "fields": [
+      { "id": "noteId", "kind": "select", "label": "Which learning do you want to edit?", "choicesFrom": "collection.notes" }
+    ] },
+    { "id": "open", "kind": "action", "action": "collection.open", "retry": "pick" },
+    { "id": "edit", "kind": "form", "title": "Learning", "form": "learning", "bind": "draft" },
+    { "id": "review", "kind": "action", "action": "collection.plan-update", "retry": "edit" },
+    { "id": "done", "kind": "end", "text": "Updated {{updated.id}} in {{updated.path}}." }
+  ]
+}

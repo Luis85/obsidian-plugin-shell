@@ -1,5 +1,7 @@
 # Workbench — product vision
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 > **Version:** 1.0 · **Date:** 2026-09-29 · **Product owner:** Luis85
 > **Status:** Product direction. This document establishes the name and intended value; it is not an implementation, qualification or release claim.
 > **Review baseline:** PR #5 at `15f74eaec78b5555bed94e4310472db841e371f7`.
@@ -88,6 +90,6 @@ Supporting measures are successful first-use completion, manual rework after gen
 
 ## Decision authority and related documents
 
-This document is the canonical source for **the Workbench name, positioning and product promises**. [Product principles](PRODUCT-PRINCIPLES.md) translate the vision into design and backlog decisions. The [PR #5 vision review](PR5-VISION-REVIEW.md) separates inspected implementation from intended direction.
+This document is the canonical source for **the Workbench name, positioning and product promises**. [Product principles](PRODUCT-PRINCIPLES.md) translate the vision into design and backlog decisions. The [PR #5 vision review](../_archive/product/PR5-VISION-REVIEW.md) separates inspected implementation from intended direction.
 
 The [documentation map](README.md) links the existing framework, authoring and MVP requirements. Their requirement IDs, detailed acceptance obligations and [delivery gates](DELIVERY-STRATEGY.md) remain in force. Resolving the product name does not rename the repository, executable, package, manifest ID, storage namespace, schema or generated consumer identity; it does not mark a task done or authorize a release.

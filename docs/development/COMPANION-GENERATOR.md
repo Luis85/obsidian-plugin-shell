@@ -1,6 +1,8 @@
 # Companion project compiler
 
-Related: issue #19, PR #5's full project JSON contract. This is shell tooling, not a completed native companion implementation.
+> Type: reference · Part of the [docs index](../README.md)
+
+The compiler turns a full Companion project JSON (schema 6) into a generated workspace. This is shell tooling, not a completed native companion implementation.
 
 ## User journey
 
@@ -272,4 +274,4 @@ remain active alongside detailed component styles.
 
 ## Local-review reconciliation
 
-The previously unpushed fixture/relationship patch is integrated with the current providers and composition code. See [the reconciliation and fixture workflow](GENERATOR-FIXTURES-AND-RELATIONSHIPS.md). The existing `testdata:*` commands and strict whole-graph relationship policy remain canonical.
+The previously unpushed fixture/relationship patch is integrated with the current providers and composition code. See [the reconciliation and fixture workflow](../_archive/development/GENERATOR-FIXTURES-AND-RELATIONSHIPS.md). The existing `testdata:*` commands and strict whole-graph relationship policy remain canonical.

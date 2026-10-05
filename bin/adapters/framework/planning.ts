@@ -3,6 +3,7 @@ import { docsPlan } from './docs.ts';
 import { prototypesPlan } from './prototypes.ts';
 import { adoptPlanPlan, adoptSkillPlan } from './adopt-plan.ts';
 import { airshipPlan } from './airship-plan.ts';
+import { hostingPlan } from './hosting-plan.ts';
 import { siteCollectionsPlan, siteNewPlan } from './site-command.ts';
 import { communityPluginPlan } from '../community-plugins/operations.ts';
 import { handoutPlan } from './handout-adapter.ts';
@@ -26,7 +27,9 @@ import { customRecipeNames } from '../makers/custom-registry.ts';
 import { pendingChecks } from './maker-checks.ts';
 import { didYouMean, suggestions } from './suggest.ts';
 import type { MakerCheck } from '../makers/plan.ts';
-interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[] }
+import { incrementPlanners } from '../increments/planners.ts';
+/** `steps` are reviewed non-file steps bound into the plan hash; `prepare` runs them right before the file write. */
+interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[]; steps?: readonly unknown[]; prepare?: () => Promise<unknown> }
 /** Built-in and registered custom recipes are resolved before trust: only a real custom recipe needs --trust-custom. */
 async function resolveRecipe(request: Request, context: Context, recipe: string): Promise<void> {
   if (builtinRecipes.includes(recipe)) return;
@@ -81,6 +84,7 @@ const planners: Record<string, Planner> = {
   'docs import': docsPlan, 'docs export': docsPlan,
   'handout generate': handoutPlan, 'handout refresh': handoutPlan,
   'airship enable': airshipPlan, 'airship disable': airshipPlan,
+  'hosting set': hostingPlan,
   'plugins enable': communityPluginPlan, 'plugins disable': communityPluginPlan,
   setup: configurationPlan, 'config set': configurationPlan, 'project import': configurationPlan,
   generate: generationPlan,
@@ -94,6 +98,7 @@ const planners: Record<string, Planner> = {
   'plugin install': (_request, context) => pluginPlan(context),
   'release prepare': releaseVersionPlan,
   'framework upgrade': frameworkUpgradePlan,
+  ...incrementPlanners,
 };
 function plannerFor(command: string): Planner {
   if (Object.hasOwn(planners, command)) return planners[command]!;
@@ -106,9 +111,10 @@ export async function planOperation(request: Request, context: Context) {
   const requestData = canonicalRequest(request);
   const configurationHash = await exists(join(context.root, configFile)) ? hash(await readBounded(join(context.root, configFile))) : null;
   const changes = planned.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash }));
+  const steps = planned.steps ? { steps: planned.steps } : {};
   const binding = { protocolVersion: 1, root: context.root, request: requestData, configurationHash,
-    generatorHash: planned.hash ?? null, changes, conflicts: planned.conflicts };
-  return { ...planned, request: requestData, planHash: hash(json(binding)), review: { planHash: hash(json(binding)), summary: planned.summary, conflicts: planned.conflicts, changes } };
+    generatorHash: planned.hash ?? null, changes, conflicts: planned.conflicts, ...steps };
+  return { ...planned, request: requestData, planHash: hash(json(binding)), review: { planHash: hash(json(binding)), summary: planned.summary, conflicts: planned.conflicts, changes, ...steps } };
 }
 export async function applyOperation(planned: Awaited<ReturnType<typeof planOperation>>, context: Context, expected: string) {
   requireThat(planned.planHash === expected, 'PLAN_STALE', 'The reviewed plan is stale; inspect a new plan.');
@@ -119,10 +125,12 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
   requireThat(fresh.planHash === expected && fresh.conflicts.length === 0, 'PLAN_STALE', 'Inputs changed after review; inspect a new plan.');
   const journal = fresh.request.command.startsWith('docs ')
     ? (await import('../../documentation/adapters/recovery.ts')).journalHook(fresh.plan) : null;
-  return applyFilePlan(fresh.plan, { async beforeWrite() {
+  const prepared = fresh.prepare ? { steps: await fresh.prepare() } : {};
+  const report = await applyFilePlan(fresh.plan, { async beforeWrite() {
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
     await journal?.();
   } });
+  return { ...report, ...prepared };
 }
 export async function saveOperationPlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
   requireThat(planned.request.options.input !== '-', 'STDIN_PLAN_NOT_REPLAYABLE', 'Save the input to a file before exporting a replayable plan.');

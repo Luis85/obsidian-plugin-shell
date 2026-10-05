@@ -9,6 +9,7 @@ The Shell CLI turns an approved plugin design into a working project, helps you 
 | Create your first plugin or use an extracted framework kit | [Getting started](getting-started.md) |
 | Import project JSON, generate source, or build an offline clickdummy | [Design to working project](design-and-generation.md) |
 | Add features and work on a project every day | [Development and testing](development-and-testing.md) |
+| Plan an increment, check its Definition of Ready and Done, and publish its pull requests | [Increments and pull requests](increments-and-pull-requests.md) |
 | Brainstorm features in the TUI or with an AI agent | [Feature brainstorming](brainstorm.md) |
 | Automate safely or integrate an AI agent | [Plans, automation and safety](automation-and-safety.md) |
 | Maintain the framework, upgrade or prepare a release | [Maintenance and release](maintenance-and-release.md) |

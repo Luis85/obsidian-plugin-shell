@@ -28,7 +28,7 @@ test('candidate qualification includes every execution-policy JSON while narrati
     assert.equal(selected(push, file), true, `Execution input must trigger qualification: ${file}`);
   }
   for (const file of ['README.md', 'AGENTS.md', 'docs/development/FRAMEWORK-GUIDE.md',
-    'docs/testing/FRAMEWORK-LIFECYCLE.md', 'docs/testing/evidence/framework-lifecycle-candidate.json']) {
+    'docs/_archive/testing/FRAMEWORK-LIFECYCLE.md', 'docs/_archive/testing/evidence/framework-lifecycle-candidate.json']) {
     assert.equal(selected(push, file), false, `Narrative/evidence document should not trigger native qualification: ${file}`);
   }
 });

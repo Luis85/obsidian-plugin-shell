@@ -1,5 +1,7 @@
 # Obsidian test kit
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 `tests/support/obsidian/` is an in-memory double of the `obsidian` module for Vitest.
 It gives plugin code a real-enough vault, metadata cache, workspace, plugin lifecycle,
 settings DOM, notices, modals and menus, so tests exercise your actual commands and

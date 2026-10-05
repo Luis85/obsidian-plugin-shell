@@ -100,6 +100,26 @@
     "popout": "Move view to new window",
     "close": "Close this view"
   },
+  "form": {
+    "submit": "Submit",
+    "reset": "Reset",
+    "choose": "Choose…",
+    "invalid": "Check the highlighted fields.",
+    "listHint": "One item per line",
+    "issue": {
+      "required": "This field is required.",
+      "text": "Enter text up to {limit} characters.",
+      "title": "Enter a single-line title up to {limit} characters.",
+      "number": "Enter a number.",
+      "integer": "Enter a whole number.",
+      "range": "Enter a number between {min} and {max}.",
+      "min": "Enter a number of at least {min}.",
+      "max": "Enter a number of at most {max}.",
+      "choice": "Choose one of the offered options.",
+      "items": "Enter at most {limit} items.",
+      "invalid": "This value is not valid."
+    }
+  },
   "foundation": {
     "title": "Your plugin",
     "help": "Registered features appear here. Preferences and runtime services are ready."

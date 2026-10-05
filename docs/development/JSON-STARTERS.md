@@ -1,6 +1,8 @@
 # JSON-defined project starters
 
-Workbench starter contract v1. Builds on PR #5; public product name is Workbench.
+> Type: reference · Part of the [docs index](../README.md)
+
+Workbench starter contract v1. The public product name is Workbench.
 The existing repository, plugin and CLI identifiers remain unchanged.
 
 ## Product contract

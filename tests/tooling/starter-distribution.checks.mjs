@@ -32,6 +32,11 @@ test('distribution boundaries exclude canonical definitions from shell and gener
   for (const path of ['configs/starters/webapp.json', 'configs/starters/companion-plugin.json', 'configs/starters/feature-showcase.json']) {
     assert.equal(included(path), false); assert.equal(maintainerOnly(path), true);
   }
+  // The framework's own delivery pipeline is maintainer process: no kit or generated project carries it.
+  for (const path of ['.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/workflows/definition-of-ready.yml', '.github/workflows/definition-of-done.yml', '.github/PULL_REQUEST_TEMPLATE/release.md']) {
+    assert.equal(included(path), false, path); assert.equal(maintainerOnly(path), true, path);
+  }
+  assert.equal(included('.github/workflows/ci.yml'), true); assert.equal(included('.github/workflows/candidate-qualification.yml'), true);
   assert.equal(included('scripts/starters/starter.schema.json'), true);
   assert.equal(included('docs/concepts/companion/vendor/vue-flow-core.iife.js'), true);
   assert.equal(included('docs/concepts/companion/vendor/vue.runtime.global.prod.js'), false);

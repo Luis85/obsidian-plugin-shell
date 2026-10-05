@@ -80,6 +80,8 @@ Some items remain larger than a single iteration until technical refinement. Spl
 
 **Definition of Done:** implement or reconcile the agreed scope; run actual applicable positive/negative/regression cases; preserve inherited security, architecture, accessibility, performance and code-quality gates; update docs and traceability; attach exact-candidate evidence; demonstrate no loss of authored code/data; obtain acceptance for the current revision. Applicable native/backend/platform modes must run in their actual environment. Full MVP-QR-01 interaction completeness remains distinct from source coverage.
 
+The deterministic per-pull-request checks of an implementation increment (DOR-xx and DOD-xx rules over its Increment, PullRequest and Issue documents) are listed in [Definition of Ready and Done](../development/DEFINITION-OF-READY-AND-DONE.md); they complement, not replace, the requirement-level criteria above.
+
 Product acceptance of a PBI does not authorize a release. SH-022/SH-034/CX-007/CP-010 and PUB sequencing remains in force. A gate contribution count is not the gate decision: inherited task criteria and approvals still need separate evidence.
 
 ## 6. Evidence and reproducible acceptance

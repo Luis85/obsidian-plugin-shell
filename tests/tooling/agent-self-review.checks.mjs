@@ -77,6 +77,27 @@ test('[SELF-REVIEW-03] quality configuration, Vitest thresholds and lint rule se
   assert.deepEqual(removed, ['SR-LINT-CONFIG configs/lint/eslint.config.mjs:1']);
 });
 
+test('[SELF-REVIEW-03b] owner approvals accept only exactly listed quality-config lines and fail closed on a malformed record', async t => {
+  const record = 'configs/quality/self-review-approvals.json', file = 'configs/quality/thresholds.json';
+  const approval = (added, removed, extra = {}) => JSON.stringify({ schemaVersion: 1, approvals: [{ rule: 'SR-QUALITY-CONFIG', file, approvedBy: '@owner', reason: 'Owner tightened lines.', added, removed, ...extra }] });
+  const tighten = '{\n  "coverage": { "lines": 96 }\n}\n';
+  const root = await fixture(t);
+  await put(root, { [file]: tighten, [record]: approval(['  "coverage": { "lines": 96 }'], ['  "coverage": { "lines": 95 }']) });
+  const { report, failed } = await runSelfReview(['--base', 'HEAD'], root);
+  // The record itself is not a threshold change; the approved line is reported, not hidden.
+  assert.deepEqual([report.violations, failed, report.approved.map(item => `${item.rule} ${item.file}:${item.line} ${item.approvedBy}`)], [[], false, [`SR-QUALITY-CONFIG ${file}:2 @owner`]]);
+  assert.match(formatReport(report, false), /approved \[SR-QUALITY-CONFIG\] configs\/quality\/thresholds\.json:2 by @owner/);
+  // One unlisted line, a different file or a different rule keeps the finding.
+  const unlisted = '{\n  "coverage": { "lines": 96 },\n  "ignore": ["src/**"]\n}\n';
+  assert.deepEqual(await review(t, { [file]: unlisted, [record]: approval(['  "coverage": { "lines": 96 }'], ['  "coverage": { "lines": 95 }']) }), [`SR-QUALITY-CONFIG ${file}:2`]);
+  assert.deepEqual(await review(t, { [file]: tighten, [record]: approval(['  "coverage": { "lines": 96 }'], ['  "coverage": { "lines": 95 }'], { file: 'configs/quality/other.json' }) }), [`SR-QUALITY-CONFIG ${file}:2`]);
+  for (const broken of ['{', JSON.stringify({ schemaVersion: 1, approvals: [{ rule: 'SR-LINT-DISABLE', file, approvedBy: '@owner', reason: 'x', added: [], removed: [] }] }),
+    approval([], [], { approvedBy: 'owner' }), approval([], [], { reason: ' ' })]) {
+    const broke = await fixture(t); await put(broke, { [file]: tighten, [record]: broken });
+    await assert.rejects(runSelfReview(['--base', 'HEAD'], broke), /SELF_REVIEW_APPROVALS|JSON/);
+  }
+});
+
 test('[SELF-REVIEW-04] screenshot and snapshot baselines are rejected, including added baseline files', async t => {
   const found = await review(t, {
     'tests/e2e/ui.spec.ts': `import { test, expect } from '@playwright/test';\ntest('ui', async ({ page }) => {\n${directive.shot}\n${directive.snap}\n});\n`,

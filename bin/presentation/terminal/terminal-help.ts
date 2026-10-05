@@ -10,6 +10,7 @@ export interface HelpData {
 const effects: Record<string, string> = {
   read: 'read-only.', plan: 'previews a file plan; writes only with --yes or --apply <planHash>.', process: 'runs trusted project tools; --dry-run shows what would run.',
   fixtures: 'test-vault fixtures; applying needs the approval hash.', release: 'guarded release adapter; --yes is never publication authority.',
+  remote: 'reads the hosting platform to preview; writes it only with --yes or --apply <planHash>, never from a saved plan.',
 };
 function optionLine(name: string, kind: 'value' | 'flag' | undefined, doc: OptionHelp): string {
   const flag = `--${name}${kind === 'value' ? ` <${doc.values ? doc.values.join('|') : 'value'}>` : ''}`;

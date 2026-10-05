@@ -21,7 +21,8 @@ export const hasExpression = (input: string): boolean => new RegExp(marker.sourc
 /** `null` marks an unknown value; comparisons and boolean operators propagate it only when it decides the outcome. */
 type Value = string | boolean | null;
 export interface ConditionOptions { lookup: Lookup; success: boolean }
-const tokenPattern = /\s*(?:(&&|\|\||==|!=|[()!])|'((?:[^']|'')*)'|(-?\d+(?:\.\d+)?)|([A-Za-z_][\w-]*(?:\.[\w-]+)*(?:\(\))?))/y;
+// A context path may hold `*` object filters (`github.event.pull_request.labels.*.name`); its lookup decides the value.
+const tokenPattern = /\s*(?:(&&|\|\||==|!=|[()!,])|'((?:[^']|'')*)'|(-?\d+(?:\.\d+)?)|([A-Za-z_][\w-]*(?:\.(?:[\w-]+|\*))*(?:\(\))?))/y;
 type Token = { kind: 'op' | 'text' | 'word'; value: string };
 function tokenize(source: string): Token[] | null {
   const tokens: Token[] = [];
@@ -46,6 +47,9 @@ function or(left: Value, right: Value): Value {
   const [a, b] = [truthy(left), truthy(right)];
   return a === true || b === true ? true : a === null || b === null ? null : false;
 }
+const stringSearch: ReadonlyMap<string, (text: string, part: string) => boolean> = new Map([
+  ['startswith', (text, part) => text.startsWith(part)], ['endswith', (text, part) => text.endsWith(part)], ['contains', (text, part) => text.includes(part)],
+]);
 class Parser {
   private position = 0;
   private readonly tokens: Token[];
@@ -93,7 +97,21 @@ class Parser {
     if (word === 'null') return '';
     if (/^-?\d/.test(word)) return word;
     if (word.endsWith('()')) return this.call(word.slice(0, -2));
+    if (this.accept('(')) return this.search(word, this.arguments());
     return this.options.lookup(word) ?? null;
+  }
+  private arguments(): Value[] {
+    const values = [this.disjunction()];
+    while (this.accept(',')) values.push(this.disjunction());
+    if (!this.accept(')')) throw new SyntaxError('missing )');
+    return values;
+  }
+  /** startsWith, endsWith and contains on two strings, case-insensitive as on GitHub; other functions stay unknown. */
+  private search(name: string, values: Value[]): Value {
+    const compare = stringSearch.get(name.toLowerCase());
+    if (!compare || values.length !== 2) throw new SyntaxError(`unsupported function ${name}()`);
+    const [text, part] = values as [Value, Value];
+    return text === null || part === null ? null : compare(String(text).toLowerCase(), String(part).toLowerCase());
   }
   private call(name: string): Value {
     if (name === 'always') return true;

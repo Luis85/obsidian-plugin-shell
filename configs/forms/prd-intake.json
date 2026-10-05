@@ -1,0 +1,17 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "prd-intake",
+  "version": 1,
+  "title": "PRD intake",
+  "description": "Scan the configured PRD folder or name existing typed Markdown files. Requirements remain unmapped after intake.",
+  "commit": "prd-intake.read",
+  "fields": [
+    { "id": "mode", "kind": "select", "label": "PRD intake", "default": "scan", "choices": [
+      { "id": "scan", "label": "Scan {{draft.settings.paths.prds}}" },
+      { "id": "add", "label": "Add existing typed Markdown files from this vault" }
+    ] },
+    { "id": "files", "kind": "list", "label": "Vault-relative Markdown paths, separated by semicolons", "separator": ";", "maxItems": 500,
+      "when": { "field": "mode", "equals": "add" } }
+  ]
+}

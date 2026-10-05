@@ -51,7 +51,7 @@ All previous requested capabilities remain in scope. This does not add a notific
 
 ## 4. Product review continuity
 
-The [v0.5 review](../reviews/2026-09-22-product-review.md) retains its twenty findings and historical evidence. This pass addresses its test-evidence and finite-qualification gaps through executable inventory, fault expectations, exact test accounting, repeated runs and release scope guards. Its historical test counts are not current totals.
+The [v0.5 review](../_archive/reviews/2026-09-22-product-review.md) retains its twenty findings and historical evidence. This pass addresses its test-evidence and finite-qualification gaps through executable inventory, fault expectations, exact test accounting, repeated runs and release scope guards. Its historical test counts are not current totals.
 
 ## 5. Stack, compatibility and updates
 
@@ -218,6 +218,6 @@ The specified acceptance total is now 96, not a passing runtime-test count. Hand
 
 ## 22. Sources and executed evidence
 
-Primary test-tool documentation is cited in the strategy. Earlier R/S/D and reliability sources remain with existing companions. [The execution record](../testing/2026-09-22-verification-record.md) states the actual local tests, fixed inputs, negative controls, tooling faults corrected, and blocked environments.
+Primary test-tool documentation is cited in the strategy. Earlier R/S/D and reliability sources remain with existing companions. [The execution record](../_archive/testing/2026-09-22-verification-record.md) states the actual local tests, fixed inputs, negative controls, tooling faults corrected, and blocked environments.
 
 This iteration supplies runnable baseline verification—not the unimplemented plugin. Hosted CI, native Obsidian, mobile devices, production coverage, full generated repositories and release acceptance require their own evidence.

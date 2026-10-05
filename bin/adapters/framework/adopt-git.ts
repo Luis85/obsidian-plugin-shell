@@ -16,9 +16,17 @@ async function readConfig(root: string): Promise<string | null> {
     } finally { await handle.close(); }
   } catch { return null; }
 }
+/** The configured origin URL, verbatim; callers must not print it, since it may embed credentials. */
+function originUrl(config: string | null): string | null {
+  return /\[\s*remote\s+"origin"\s*\][^[]*?\burl\s*=\s*(\S+)/i.exec(config ?? '')?.[1] ?? null;
+}
+/** The origin URL of a plain repository at root, read without running git; null when absent or unreadable. */
+export async function readOriginUrl(root: string): Promise<string | null> {
+  return originUrl(await readConfig(root));
+}
 /** Host name of the origin remote; user names, passwords, tokens, ports and paths are dropped. */
 export function remoteHost(config: string | null): string | null {
-  const url = /\[\s*remote\s+"origin"\s*\][^[]*?\burl\s*=\s*(\S+)/i.exec(config ?? '')?.[1];
+  const url = originUrl(config);
   if (!url) return null;
   const host = url.includes('://') ? /^[a-z][a-z0-9+.-]*:\/\/(?:[^@/]*@)?([^:/]+)/i.exec(url)?.[1] : /^(?:[^@/\s]+@)?([^:/\s]+):/.exec(url)?.[1];
   return host && hostPattern.test(host) ? host.toLowerCase() : null;

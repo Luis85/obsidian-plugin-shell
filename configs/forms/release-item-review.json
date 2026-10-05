@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "release-item-review",
+  "version": 1,
+  "title": "Release item review",
+  "description": "One step of the release items review walk: record today's review with the target date, priority and status, skip the release item, or stop.",
+  "fields": [
+    { "id": "decision", "kind": "select", "label": "{{record.id}} — {{record.title}} ({{record.status}}, {{record.values.priority|no}} priority, target {{record.values.target|none}})",
+      "choices": [{ "id": "review", "label": "Record a review today" }, { "id": "skip", "label": "Skip this release item" }, { "id": "stop", "label": "Stop reviewing" }], "default": "review" },
+    { "id": "target", "kind": "text", "label": "Target date (YYYY-MM-DD)", "maxLength": 10, "when": { "field": "decision", "equals": "review" } },
+    { "id": "priority", "kind": "select", "label": "Priority", "choicesFrom": "collection.choices", "when": { "field": "decision", "equals": "review" } },
+    { "id": "status", "kind": "select", "label": "Status", "choicesFrom": "collection.statuses", "when": { "field": "decision", "equals": "review" } }
+  ]
+}

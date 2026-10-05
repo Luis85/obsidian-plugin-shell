@@ -8,10 +8,6 @@ import { Workspace } from '../application/workspace.ts';
 import { outline } from '../application/summary.ts';
 import { readSnapshot, savePlan } from '../adapters/storage.ts';
 import { boilerplatePlan } from '../adapters/compiler.ts';
-import { prototypePlan } from '../adapters/prototype.ts';
-import { prototypeContext } from '../adapters/prototype-context.ts';
-import { loadSettings } from '../adapters/user-settings.ts';
-import { interview } from './guide.ts';
 import { editPage } from './page-editor.ts';
 import { review } from './review.ts';
 import { workspaceContext } from './context.ts';
@@ -19,27 +15,11 @@ import { choose, input, titleInput, confirm, reportError, type Prompts } from '.
 import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
 import { browseComponentTemplates } from './template-browser.ts';
 import { offerDesignFolder } from './design-folder.ts';
+import { startWizard } from './wizards/registry.ts';
 export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime; config?: string }
-async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
-  const snapshot = await readSnapshot(options.root, options.project);
-  return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
-}
-export async function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<string | undefined> {
-  const { guide, selection } = await prototypeContext(options.root, options.guide, options.config);
-  const configured = await loadSettings(options.root);
-  workspace ??= await savedWorkspace(options);
-  const answers = await interview(ui, guide, workspace ? { title: workspace.document.project.name, pages: outline(workspace.document).pages.map(item => item.title) } : {});
-  const out = await input(ui, 'Package output folder', options.out ?? (configured.content ? configured.settings.paths.prototypes : 'prototypes/prepared-prototype'));
-  ui.rich?.busy('Preparing prototype documents and source. No files written yet.');
-  const plan = await prototypePlan({ ...options, out, guide, selection, baseline: workspace?.document ?? null,
-    input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers } });
-  if (!await review(ui, plan, options.signal)) return;
-  const completion = `Start with ${out}/execution-prompt.md. The complete source scaffold is under ${out}/source/.\n`;
-  ui.write(completion);
-  // The prepared package holds the exact prototype model and brief; the design folder follows them on sync.
-  const design = await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: String(answers.title),
-    project: `${out}/companion.project.json`, package: out, signal: options.signal, config: options.config });
-  return completion + (design ?? '');
+/** configs/wizards/prototype.json; an open workspace seeds the brief and is the baseline. */
+export function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<string | undefined> {
+  return startWizard(ui, 'prototype', { ...options, ...(workspace ? { workspace } : {}) });
 }
 async function save(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const plan = await savePlan(options.root, options.project, workspace.document, workspace.beforeHash);

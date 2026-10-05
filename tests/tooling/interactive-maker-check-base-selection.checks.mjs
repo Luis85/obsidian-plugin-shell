@@ -61,6 +61,17 @@ test('fast mode selects node --test suites from manifest includes and rule sourc
   const generator = await checkSteps(dir, true);
   assert.deepEqual(stepOf(generator, 'suites').args, ['maker', 'generator']);
   assert.equal(generator.suites[1].reasons.some(reason => reason.kind === 'suite-source' && reason.detail === 'templates/**'), true);
+  // The Dev tier keeps the same selection but leaves the suites to CI, reported as skipped rather than silently dropped.
+  const dev = await checkSteps(dir, true, undefined, undefined, true);
+  assert.deepEqual([stepOf(dev, 'suites').args, stepOf(dev, 'suites').skip, dev.suites.map(suite => suite.name)],
+    [['maker', 'generator'], "--skip-suites: maker, generator run in CI's Integration tier, not here.", ['maker', 'generator']]);
+  assert.deepEqual(ids(dev), ids(generator), 'only the suites step changes; typecheck, lint, eslint, related tests and maker types still run');
+  assert.ok(ids(dev).filter(id => id !== 'suites').every(id => !stepOf(dev, id).skip || stepOf(generator, id).skip));
+  const run = [];
+  const outcome = await checkOperation({ command: 'check', args: [], options: { fast: true, 'skip-suites': true } }, { root: dir, frameworkRoot: repoRoot }, async (_context, entry, args) => { run.push([entry, ...args].join(' ')); return { exitCode: 0 }; });
+  assert.ok(!run.some(command => command.startsWith('scripts/testing/suites.mjs')), 'no suite process is launched');
+  assert.equal(outcome.data.steps.find(step => step.id === 'suites').status, 'skipped');
+  await assert.rejects(checkOperation({ command: 'check', args: [], options: { 'skip-suites': true } }, { root: dir, frameworkRoot: repoRoot }), { code: 'INVALID_OPTION', message: /requires --fast/ });
 }));
 
 test('fast mode lints and runs eslint on changed files only, and falls back to the full roots when configuration changes', () => withRepo({}, async dir => {

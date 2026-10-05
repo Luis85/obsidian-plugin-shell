@@ -1,5 +1,7 @@
 # Companion golden starter and visual-feature showcase
 
+> Type: reference · Part of the [docs index](../README.md)
+
 The current Companion build starts with an empty workspace (or reopens the user's
 saved project). It does not embed the Companion self-project or a starter catalog.
 The shell and current authoring build share the external starter contract.

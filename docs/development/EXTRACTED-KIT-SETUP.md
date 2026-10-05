@@ -1,5 +1,7 @@
 # Setup inside an extracted framework kit
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Use the qualified Node/npm versions declared by the repository and exact kit. This guide describes a locally packed/extracted kit; it is not a claim that a public release already exists.
 
 Run `node bin/app setup` in the extracted folder. A TTY offers the verified starter catalog or JSON import, identity review and a file-plan confirmation. The kit is already in this folder, so setup reuses its existing configuration/import transaction rather than calling `new` into an occupied directory. Source generation, dependency installation, project verification and clickdummy build have separate prompts and outcomes. A decline stops the sequence while keeping completed steps. GitHub is optional and existing remotes are preserved; connecting a repository is currently a separate deliberate Git operation, not a hidden setup side effect.
@@ -45,5 +47,5 @@ Build output, reports and installed dependencies are deliberately outside this
 source fingerprint: installing dependencies or writing evidence must not make
 its own input stale. This is bounded local input tracking, not whole-repository
 attestation, installed-package integrity or authenticated acceptance evidence.
-Read the [custom-folder recovery record](../testing/SETUP-CUSTOM-ROOTS.md) for the
+Read the [custom-folder recovery record](../_archive/testing/SETUP-CUSTOM-ROOTS.md) for the
 reproduced defect and exact verification scope.

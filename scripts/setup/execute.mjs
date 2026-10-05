@@ -50,6 +50,8 @@ export async function executeSetup(root, options, planned, previous, { run = run
       stages: setupStages(options).map(stage => ({ ...stage, status: stage.selected ? 'pending' : 'skipped' })) };
     await saveJournal();
     await applyFilePlan(planned.plan);
+    // Create-only hosting files (azure-devops); an existing file was excluded while planning and stays untouched.
+    if (planned.hostingFiles?.plan.changes.length) await applyFilePlan(planned.hostingFiles.plan);
     if (planned.agentMcp.action !== 'preserve') {
       await applyFilePlan(planned.agentMcp.plan);
       journal.agentMcp = { ...nextAgentMcp, status: 'verified' };

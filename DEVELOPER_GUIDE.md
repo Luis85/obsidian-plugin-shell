@@ -1,5 +1,7 @@
 # Developer guide
 
+> Type: how-to · Part of the [docs index](docs/README.md)
+
 Step-by-step instructions for setting up this framework checkout and for
 improving or extending the plugin, the CLI and the generator. Each section is
 short and links to the detailed guide for its topic. [AGENTS.md](AGENTS.md)

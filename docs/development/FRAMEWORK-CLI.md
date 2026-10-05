@@ -1,6 +1,8 @@
 # Framework CLI and developer-kit workflow
 
-Implementation on PR #18, 2026-09-25. This is a developer-facing TypeScript CLI and assembled ZIP workflow, not a published framework release or native companion conversion. The [framework-first plan](FRAMEWORK-CLI-GENERATOR-PLAN.md) remains broader than the implemented and qualified scope below.
+> Type: reference · Part of the [docs index](../README.md)
+
+`node bin/app` is a developer-facing TypeScript CLI with an assembled ZIP workflow. It is not a published framework release or native companion conversion. The historical [framework-first plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) is broader than the implemented and qualified scope below.
 
 ## Start a new plugin from a starter
 
@@ -75,6 +77,31 @@ and `INPUT_LIMIT`. An exported ID containing `plugin` (such as the companion's o
 will fail, with a suggested `--id`; an explicit `--id` must follow the creation rule.
 Editing the file after review makes its plan hash stale. See
 [Companion handoff](COMPANION-HANDOFF.md).
+
+### Hosting platform: GitHub, Azure DevOps or none
+
+```sh
+node bin/app new <dir> --starter <id> --hosting azure-devops [--azure-organization https://dev.azure.com/<org> --azure-project <name> [--azure-repository <name>]]
+node bin/app setup --input ./my-project.json --hosting none --dry-run
+node bin/app hosting show
+node bin/app hosting set <github|azure-devops|none> [--azure-*] [--dry-run | --apply <planHash> | --yes]
+```
+
+`--hosting` writes `tooling.hosting` into the design that `new` (Companion starters and
+`--from`) and `setup` (`--starter`, `--input`, `--blank`) compile; omitting it keeps the
+document's own value, and absent means GitHub. Azure details need the `azure-devops`
+platform and both an organization and a project (`HOSTING_OPTION_CONFLICT`,
+`HOSTING_OPTION_INCOMPLETE`); invalid values fail with `COMPANION_TOOLING_INVALID`.
+File starters refuse the flags (`STARTER_OPTION`); setup without a design source refuses
+them (`HOSTING_DESIGN_REQUIRED`). The interviews of `new` and `setup` ask for the platform
+unless `--hosting` is given; setup suggests the platform of the folder's `origin` remote.
+`new` prints the `gh repo create` or `az repos create` and `git remote add` commands after
+writing; it never runs them and `git init` never adds a remote. `hosting set` is a reviewed
+plan bound to the design and its receipts; it creates the new platform's pipeline and
+pull-request template when absent, deletes nothing and lists the previous platform's
+files as `retired`. `doctor` reports the platform and, for Azure DevOps, whether `az` and
+its `azure-devops` extension are available, using one read-only `az version` call. See
+[hosting platforms](HOSTING-PLATFORMS.md).
 
 ## Adopt an existing project
 
@@ -342,4 +369,4 @@ Fixture commands reuse the real exported fixture engine, validators and ownershi
 
 Existing MJS makers, file plans, fixture and release services are reused unchanged or selectively reconciled; their full TypeScript migration, unified legacy/current metadata, arbitrary source migrations and broader native/runtime adapters remain follow-on scope. Do not describe the 57-task backlog as complete because the central workflow runs.
 
-The [continuation record](../testing/PR18-CLI-CONTINUATION.md) records the latest reconciliation and regression evidence; the [earlier execution record](../testing/FRAMEWORK-CLI-IMPLEMENTATION.md) distinguishes local tests, actual ZIP extraction, generated-consumer CI, native qualification and publication. SH-022/SH-034 and companion conversion/publication gates remain blocked until their actual evidence and separate authorizations exist.
+The [continuation record](../_archive/testing/PR18-CLI-CONTINUATION.md) records the latest reconciliation and regression evidence; the [earlier execution record](../_archive/testing/FRAMEWORK-CLI-IMPLEMENTATION.md) distinguishes local tests, actual ZIP extraction, generated-consumer CI, native qualification and publication. SH-022/SH-034 and companion conversion/publication gates remain blocked until their actual evidence and separate authorizations exist.

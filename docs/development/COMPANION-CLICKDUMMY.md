@@ -1,5 +1,7 @@
 # JSON to an offline clickdummy
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 The project compiler emits a browser composition alongside the normal plugin source. Both outputs use the same generated Vue pages, component definitions, source contracts, local effects and navigation store. The browser composition is not an iframe around the companion concept and is not a second hand-maintained mockup.
 
 ## Generate and build
@@ -54,7 +56,7 @@ and dialogs; local effects and navigation remain available. Modal scenarios do
 not yet have an independent selector. External adapters remain trusted consumer
 implementation points, not a sandbox for arbitrary code.
 
-See [scenario execution and limits](../testing/GENERATED-PREVIEW-SCENARIOS.md).
+See [scenario execution and limits](../_archive/testing/GENERATED-PREVIEW-SCENARIOS.md).
 
 To look at every surface, state and scenario in light and dark at wide and narrow widths, run `npm run ui:gallery`; it writes screenshots and an index for human review (not acceptance) as described in [UI review gallery](UI-REVIEW-GALLERY.md).
 
@@ -94,7 +96,7 @@ Qualification verifies the current HTML/JSON receipt before generation, writes i
 
 ## Remaining MVP boundaries
 
-The [current closure map](../testing/MVP-CLOSURE-STATUS.md) distinguishes implemented
+The [current closure map](../_archive/testing/MVP-CLOSURE-STATUS.md) distinguishes implemented
 foundations from remaining acceptance. Public v6 schema discovery, scoped
 generation with dependency closure and reviewed extracted-kit setup/resume are
 implemented on PR35; they are no longer merely proposed capabilities. The full
@@ -108,6 +110,6 @@ companion acceptance remains required for the complete MVP.
 
 ## Historical integrated status — 2026-09-27
 
-The [current review](../product/PR5-PRODUCT-REVIEW.md) and [evidence record](../testing/PR5-REVIEW-EVIDENCE.md) supersede earlier open/failed-status observations for their named artifacts. Current hosted evidence at `ec70e2c` verifies independent install, project verification, build and nine file-origin browser assertions for clickdummy SHA-256 `20d207f58c0ec902f3b2c5730445732af4eb2adbbfa564c0e2dea92cbe60b638`. This does not establish complete business or native companion acceptance.
+The [current review](../_archive/product/PR5-PRODUCT-REVIEW.md) and [evidence record](../_archive/testing/PR5-REVIEW-EVIDENCE.md) supersede earlier open/failed-status observations for their named artifacts. Current hosted evidence at `ec70e2c` verifies independent install, project verification, build and nine file-origin browser assertions for clickdummy SHA-256 `20d207f58c0ec902f3b2c5730445732af4eb2adbbfa564c0e2dea92cbe60b638`. This does not establish complete business or native companion acceptance.
 
-Data-only [project/feature/improvement concept intake](CONCEPT-INTAKE.md) is now implemented. Selected-feature/page/component compiler output with dependency closure is a different capability and remains open, as do complete native editor capabilities, the full extracted-kit entry journey and release qualification. The current generated receipt retains 31 pending requirements. See the [prioritized follow-up plan](../product/PR5-IMPROVEMENT-PLAN.md).
+Data-only [project/feature/improvement concept intake](CONCEPT-INTAKE.md) is now implemented. Selected-feature/page/component compiler output with dependency closure is a different capability and remains open, as do complete native editor capabilities, the full extracted-kit entry journey and release qualification. The current generated receipt retains 31 pending requirements. See the [prioritized follow-up plan](../_archive/product/PR5-IMPROVEMENT-PLAN.md).

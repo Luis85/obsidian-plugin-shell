@@ -24,7 +24,7 @@ export async function projectStarter(frameworkRoot: string, id: unknown) {
   return selected;
 }
 export async function projectGuide(selected: ProjectSelection): Promise<Guide> {
-  const guide = await loadGuide(new URL('../guides/project-prototype.json', import.meta.url));
+  const guide = await loadGuide(new URL('../../configs/guides/project-prototype.json', import.meta.url));
   const adapter = requireFrameworkAdapter(selected.framework, pluginFrameworkAdapters());
   guide.context = `## Project starter\n\nStarter: ${selected.starter.id} ${selected.starter.version}\n\nProject type: ${selected.projectType}\n\nFrontend: ${adapter.label} (${selected.framework})\n\nTargets: ${selected.targets.join(', ')}\n\nHybrid means shared code with separate host entrypoints; it does not add cloud sync or a desktop runtime. Choosing another starter reopens agreement.\n`;
   return guide;

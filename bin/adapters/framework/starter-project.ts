@@ -21,6 +21,7 @@ import { resolveTemplateRoot } from '../template-root.ts';
 import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { withAirshipOption } from '../../../scripts/companion/tooling-options.ts';
+import { hostingSummary, withHostingFlags } from './hosting-options.ts';
 import { exportedProject } from './project-from.ts';
 import { restoreExecutableBits } from './executable-bits.ts';
 import { initializeRepository, type GitReport } from './git-init.ts';
@@ -105,11 +106,12 @@ export async function starterProjectPlan(request: Request, context: Context) {
   const scratch = await mkdtemp(join(tmpdir(), 'shell-new-'));
   try {
     const input = join(scratch, 'project.json');
-    await writeFile(input, JSON.stringify(withAirshipOption(created.document, request.options), null, 2) + '\n', { flag: 'wx' });
+    const document = withHostingFlags(withAirshipOption(created.document, request.options), request.options);
+    await writeFile(input, JSON.stringify(document, null, 2) + '\n', { flag: 'wx' });
     const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template, storybook: storybookFlags(request.options) });
     const summary = { ...created.origin, identity: created.document.project,
       directory: place.directory, vault: place.vault, target: place.target, files: planned.summary.files,
-      acceptanceTodos: planned.summary.acceptanceTodos, warnings: [...(created.warnings ?? []), ...planned.summary.warnings] };
+      acceptanceTodos: planned.summary.acceptanceTodos, warnings: [...(created.warnings ?? []), ...planned.summary.warnings], hosting: hostingSummary(document) };
     return { ...planned, summary };
   } finally { await rm(scratch, { recursive: true, force: true }); }
 }

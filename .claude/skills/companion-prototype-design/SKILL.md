@@ -49,7 +49,7 @@ The TypeScript maker under `bin/` can prepare this workflow with
 `node bin/app prototype` or the equivalent versioned JSON request. Discover
 its data-driven interview using `prototype guide --json`; `sketch schema --json`
 describes page/component/interaction authoring. The guide is
-`bin/guides/prototype.json`, not a separate agent-host skill.
+`configs/guides/prototype.json`, not a separate agent-host skill.
 
 For a prepared package, read `design-brief.md`, `prototype-answers.json`,
 `prototype.preparation.json` and `execution-prompt.md`. Verify the captured guide

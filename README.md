@@ -6,7 +6,7 @@ Workbench is a developer-focused tool to create and manage declarative user inte
 
 The three promises are **saving time without sacrificing quality**, **documenting along the way**, and **putting developer experience first**. Creation is only the beginning: reuse, understandable changes and safe regeneration matter too.
 
-Start with the [product vision](docs/product/PRODUCT-VISION.md), [product principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md). The [product and delivery overview](SHELL-FIRST-OVERVIEW.md) connects the available entry points; the [2026-09-29 vision review](docs/product/PR5-VISION-REVIEW.md) distinguishes inspected implementation from intended direction.
+Start with the [product vision](docs/product/PRODUCT-VISION.md), [product principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md). The [product and delivery overview](SHELL-FIRST-OVERVIEW.md) connects the available entry points; the [2026-09-29 vision review](docs/_archive/product/PR5-VISION-REVIEW.md) distinguishes inspected implementation from intended direction.
 
 **Developers:** the [developer guide](DEVELOPER_GUIDE.md) lists every requirement first, then setup and everyday workflows for improving or extending the project.
 
@@ -66,33 +66,34 @@ Obsidian review rules locally. Neither replaces `npm run verify`. See
 
 The [framework guide](docs/development/FRAMEWORK-GUIDE.md) maps the reusable
 developer API and the path from feature generation to production qualification.
-The [active plan](docs/development/FRAMEWORK-LIFECYCLE-PLAN.md) adds retained-action
+The [plan](docs/_archive/development/FRAMEWORK-LIFECYCLE-PLAN.md) adds retained-action
 permits, precise protected-data recovery, UTF-8 document bounds and independent
-lifecycle observation. The [current execution record](docs/testing/FRAMEWORK-LIFECYCLE.md)
+lifecycle observation. The [execution record](docs/_archive/testing/FRAMEWORK-LIFECYCLE.md)
 keeps its results separate from the prior qualified persistence milestone below.
 
-The [current plan](docs/development/PERSISTENCE-LIFECYCLE-PLAN.md) focuses on
+The [plan](docs/_archive/development/PERSISTENCE-LIFECYCLE-PLAN.md) focuses on
 exact durable outcomes, protected data and disposed view capabilities. Its
-[cross-owner review](docs/development/PERSISTENCE-LIFECYCLE-REVIEW.md) and
-[bounded Windows/native investigation](docs/testing/PERSISTENCE-LIFECYCLE-NATIVE.md)
+[cross-owner review](docs/_archive/development/PERSISTENCE-LIFECYCLE-REVIEW.md) and
+[bounded Windows/native investigation](docs/_archive/testing/PERSISTENCE-LIFECYCLE-NATIVE.md)
 retain assertion and environment limits; qualification belongs to the
-[current execution record](docs/testing/PERSISTENCE-LIFECYCLE.md).
+[execution record](docs/_archive/testing/PERSISTENCE-LIFECYCLE.md).
 
-The [closure plan](docs/development/ACCEPTANCE-CLOSURE-PLAN.md) audits all 96
+The [closure plan](docs/_archive/development/ACCEPTANCE-CLOSURE-PLAN.md) audits all 96
 legacy cases against actual assertions and required modes. Previous results belong
-to the [closure execution record](docs/testing/ACCEPTANCE-CLOSURE.md); the earlier
+to the [closure execution record](docs/_archive/testing/ACCEPTANCE-CLOSURE.md); the earlier
 qualification and its failed native attempts remain retained separately.
 
 Executable qualification now adds input-bound framework evidence, case-specific
 acceptance reports, measured production maintainability, and explicit native
-performance/resource protocols. See the [plan](docs/development/EXECUTABLE-QUALIFICATION-PLAN.md)
-and [execution record](docs/testing/EXECUTABLE-QUALIFICATION.md) for actual results
+performance/resource protocols. See the [plan](docs/_archive/development/EXECUTABLE-QUALIFICATION-PLAN.md)
+and [execution record](docs/_archive/testing/EXECUTABLE-QUALIFICATION.md) for actual results
 and remaining scope. This does not establish complete template release readiness.
 
 The integration baseline includes [opt-in release execution](docs/development/RELEASE-EXECUTION.md)
-from a retained candidate. [Readiness ledger](docs/development/TEMPLATE-READINESS-LEDGER.md)
-tracks remaining requirements; real publication and the privileged Actions interface
-remain unqualified. No release has been published by this implementation task.
+from a retained candidate. [Readiness ledger](docs/_archive/development/TEMPLATE-READINESS-LEDGER.md)
+tracks remaining requirements. The owner-dispatched Release cut and Publish workflows
+exist (see [How work flows](#how-work-flows)) but have not been exercised on GitHub;
+real publication remains unqualified. No release has been published by this implementation task.
 
 A TypeScript/Vue/Pinia plugin with typed entity definitions, separate document
 recipes, Markdown CRUD and explicit plugin-data entities. Task is an optional example;
@@ -119,8 +120,8 @@ the shared services own persistence, native integration, feedback and cleanup.
 | Maintenance and packaging | [Freshness reporting](docs/development/MAINTENANCE-OPERATIONS.md) and [fixed-candidate rehearsal](docs/development/RELEASE-REHEARSAL.md) |
 | Release operations | [Authenticated planning, explicit execution and recovery](docs/development/RELEASE-EXECUTION.md) |
 
-**Qualification:** See the [runtime-authoring record](docs/testing/RUNTIME-AUTHORING.md)
-and historical [iteration 04 verification record](docs/testing/ITERATION-FOUR.md)
+**Qualification:** See the [runtime-authoring record](docs/_archive/testing/RUNTIME-AUTHORING.md)
+and historical [iteration 04 verification record](docs/_archive/testing/ITERATION-FOUR.md)
 for actual execution scope. Whole-production coverage is a blocking gate,
 with an independent stricter domain/application/features gate. The official Obsidian lint
 integration still installs nested ESLint 9.39.5; zero audit findings do not close
@@ -206,8 +207,8 @@ repositories/events are runtime-scoped.
 Start building in [src/features](src/features/README.md): define business fields,
 an optional document recipe, and add one typed registration entry. The template
 wires repositories and lifecycle for you. See [Build a feature](docs/development/BUILD-A-FEATURE.md),
-the [API/compatibility guide](docs/development/ITERATION-THREE.md)
-and [implementation plan](docs/development/ITERATION-THREE-PLAN.md). No generic service
+the [API/compatibility guide](docs/_archive/development/ITERATION-THREE.md)
+and [implementation plan](docs/_archive/development/ITERATION-THREE-PLAN.md). No generic service
 needs a Task-specific branch.
 
 ## Verify
@@ -225,7 +226,7 @@ The current `verify` runs the build, strict runtime/Vue/harness/test types, both
 linters, source/locale/architecture/presentation checks, the zero-finding analyzer,
 Vitest and coverage gates, token/artifact checks, the retained repeated Node
 baseline, and harness build. Served E2E is explicit and separate. This is not the
-complete PRD release gate. See the [current test record](docs/testing/ITERATION-FOUR.md)
+complete PRD release gate. See the [test record](docs/_archive/testing/ITERATION-FOUR.md)
 for actual execution results and coverage scope.
 
 Tests are also separated by responsibility, so one part can be tested on its own:
@@ -279,31 +280,58 @@ and `release:rehearse`. They report discovery failures and retained asset identi
 they do not publish. Expanded native/device, manual accessibility and public
 release promotion require separate evidence and authorization.
 
+## How work flows
+
+Checks tighten as a change matures, so early iteration is not slowed by the full
+qualification:
+
+| Stage | Trigger | Checks |
+| --- | --- | --- |
+| Draft pull request | every push | Dev tier: "Dev checks", a fast diff-scoped gate, and "Definition of Ready" |
+| Ready for review | marking it ready, then every push | Integration tier: "CI result", "Definition of Done" and every pull-request workflow |
+| `release/X.Y.Z` branch | owner-dispatched Release cut | Release tier: every workflow on every matrix leg; the owner-dispatched Publish then merges, tags `X.Y.Z` and creates the GitHub release |
+
+Claude Code skills drive each stage: the ideation chain (`ideation-journey` through
+`ideation-boilerplate`) from an idea to a checked prototype skeleton,
+`feature-delivery` from a draft pull request to a green merge, `self-review` before
+review and `release` for cut and publish. Read the
+[delivery pipeline](docs/development/DELIVERY-PIPELINE.md),
+[deliver a change](docs/development/DELIVER-A-CHANGE.md),
+[cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md) and the
+[workflow reference](docs/development/WORKFLOWS.md).
+
+Work is planned as **increments**: `node bin/app increment new` writes the
+increment document with its acceptance criteria, a kick-off pull request plan, an
+issue, one pending test stub per criterion and the branch `increment/<id>`. The
+increment is refined in its kick-off pull request until the Definition of Ready
+passes, then delivered by change pull requests stacked on that branch
+(`node bin/app pr new`), each closed by the Definition of Done. `pr publish` and
+`pr sync` turn the plans into draft pull requests on GitHub or Azure DevOps and
+keep tasks and amendments in sync, only through a reviewed preview. Start with
+[your first increment](docs/development/FIRST-INCREMENT.md).
+
+Projects can live on GitHub or Azure DevOps: `setup` and `new` ask for the hosting
+platform (or take `--hosting github|azure-devops|none`), and `node bin/app hosting set`
+switches later. Generated projects get the matching pipeline, pull-request template and
+`gh`/`az` hints; see [hosting platforms](docs/development/HOSTING-PLATFORMS.md).
+
 ## Documentation
+
+The [docs index](docs/README.md) lists every current document by type (tutorials,
+how-to guides, reference and explanation), together with plans, workspaces and the
+[archive](docs/_archive/README.md) of historical plans, reviews and records. Start with:
 
 | Document | Purpose |
 | --- | --- |
-| [Workbench product vision](docs/product/PRODUCT-VISION.md) | Product name, intended users, value, scope and success measures. |
-| [Workbench product principles](docs/product/PRODUCT-PRINCIPLES.md) | Declarative authoring, documentation, developer experience and quality decisions. |
-| [Product documentation map](docs/product/README.md) | Relationship between vision, scoped requirements, implementation and dated evidence. |
-| [Iteration-four plan](docs/development/ITERATION-FOUR-PLAN.md) | Baseline gaps, coordinated ownership and acceptance order. |
-| [Iteration-four review](docs/development/ITERATION-FOUR-REVIEW.md) | Independent findings, fixes and remaining limitations. |
-| [Iteration-three guide](docs/development/ITERATION-THREE.md) | Executable entity/repository API, compatibility, safety and remaining scope. |
-| [Iteration-three review](docs/development/ITERATION-THREE-REVIEW.md) | Independent findings, regression fixes and improvement pass. |
-| [Iteration-two guide](docs/development/ITERATION-TWO.md) | Historical layout/header operation, build/install and dependency decisions. |
-| [Iteration-two review](docs/development/ITERATION-TWO-REVIEW.md) | Evidence, fixes, regressions and remaining risks. |
-| [Iteration-one guide](docs/development/ITERATION-ONE.md) | Historical installation and architecture context; the iteration-three guide supplies current capabilities. |
-| [Current test record](docs/testing/ITERATION-FOUR.md) | Actual tests, coverage denominators, native/served evidence and remaining gaps. |
-| [Framework PRD](docs/product/PRD.md) | Reusable Obsidian foundation requirements and retained baseline; Workbench product direction is defined above. |
-| [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
-| [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Required evidence model and verification architecture. |
-| [TypeScript quality-tool research](docs/research/2026-09-23-typescript-quality-tools.md) | Repository-specific assessment, compatibility caveats and primary sources. |
-| [Quality-tool adoption plan](docs/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) | Proposed additional tools, negative controls and CI placement; not blanket implementation claims. |
-| [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Retained full contract; the authoring guide states executable recipes and limitations. |
-| [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Full entity-to-Markdown contract. |
-| [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Canonical outcomes, recovery and notification roadmap. |
-| [Obsidian tokens](docs/design/OBSIDIAN-TOKENS.md) | Native tokens, aliases and pinned host fixture provenance. |
-| [Maintenance/release](docs/development/MAINTENANCE-AND-RELEASE.md) | Full update/candidate/promotion contract. |
+| [Build a feature](docs/development/BUILD-A-FEATURE.md) | Tutorial: add a business feature on the template. |
+| [Framework guide](docs/development/FRAMEWORK-GUIDE.md) | The reusable developer API, from feature to qualification. |
+| [Framework CLI](docs/development/FRAMEWORK-CLI.md) | `node bin/app` reference: new, setup, the check gate and the kit workflow. |
+| [Test suites](docs/testing/TEST-SUITES.md) | Every suite, its command and prerequisites, and how to add a test. |
+| [Test strategy](docs/testing/TEST-STRATEGY.md) | The testing approach and the normative TST rules. |
+| [Quality assurance](docs/development/QUALITY-ASSURANCE.md) | What `npm run verify` runs, partial runs and reports. |
+| [Deliver a change](docs/development/DELIVER-A-CHANGE.md) | Draft pull request, Dev and Integration tiers, green merge. |
+| [Framework PRD](docs/product/PRD.md) | Reusable Obsidian foundation requirements; Workbench direction is in the [product vision](docs/product/PRODUCT-VISION.md). |
+| [Upstream lint dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion. |
 
 [Agent instructions](AGENTS.md) · [License](LICENSE)
 

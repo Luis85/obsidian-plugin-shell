@@ -4,6 +4,7 @@ import { OperationError, requireThat } from '../../../scripts/contracts/errors.t
 export { result } from '../../../scripts/contracts/result.ts';
 export type { Diagnostic, Result, ResultStatus } from '../../../scripts/contracts/result.ts';
 export { OperationError, requireThat } from '../../../scripts/contracts/errors.ts';
+import type { IncrementServices } from '../increments/repository.ts';
 /** Public host-independent operation contract. Requests never grant execution authority. */
 export type Values = Record<string, string | boolean>;
 export interface Request { command: string; args: string[]; options: Values }
@@ -13,6 +14,8 @@ export interface Context {
   signal?: AbortSignal;
   inputText?: string;
   progress?: (message: string) => void;
+  /** Test seams of the increment and pull-request commands (version control runner, hosting remote, clock). @internal */
+  increments?: IncrementServices;
 }
 /** An OperationError keeps its code; another Error may lead with an `UPPER_CASE:` code. */
 function failureCode(error: unknown): string {

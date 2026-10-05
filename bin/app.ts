@@ -6,6 +6,17 @@ import { loadSettings } from './adapters/user-settings.ts';
 import { projectSetupWizard } from './presentation/project-setup-wizard.ts';
 import { settingsWizard } from './presentation/settings.ts';
 import { projectWizard } from './presentation/project-wizard.ts';
+import { launchDefinition } from './presentation/wizards/launch.ts';
+import { startWizard } from './presentation/wizards/registry.ts';
+import { launchLearning } from './presentation/learning-runner.ts';
+import { launchProcess } from './presentation/wizards/process-launch.ts';
+import { interactiveProcess } from './adapters/process-command.ts';
+import { interactiveTestWorkflow } from './adapters/test-workflow-command.ts';
+import { launchTestWorkflow } from './presentation/wizards/test-workflow-launch.ts';
+import { collectionWizard } from './presentation/collection.ts';
+import { collectionCommandRoots } from './domain/command-options.ts';
+import { collectionInteractiveActions } from './adapters/collection-command.ts';
+import { candidateInteractiveActions } from './adapters/release-candidate-command.ts';
 import { readSnapshot } from './adapters/storage.ts';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -29,12 +40,18 @@ import type { CommunityPluginHost } from './adapters/community-plugins/loader.ts
 import { defineDeclaredEvents, invocationEventBus, observeCommand } from './adapters/community-plugins/app-events.ts';
 import type { Context, Request } from './adapters/framework/contracts.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
+/** Whether the command and action name a terminal flow at all; TTY, CI and flags are checked by canInteract. */
+function interactiveCommand(args: Arguments): boolean {
+  if (Object.hasOwn(collectionCommandRoots, args.command)) return collectionInteractiveActions.includes(args.action);
+  if (args.command === 'candidate') return candidateInteractiveActions.includes(args.action);
+  if (!studioCommands.includes(args.command) && !Object.hasOwn(launchers, args.command)) return false;
+  return !args.action || interactiveProcess(args) || interactiveTestWorkflow(args);
+}
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
-  if (!['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm'].includes(args.command)) return false;
   if (env.CI && env.CI !== 'false') return false;
   const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
-  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && !args.action);
+  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && interactiveCommand(args));
 }
 async function interactive(args: Arguments, context: CommandContext, io: IO, controller: AbortController): Promise<void> {
   const env = io.env ?? process.env;
@@ -53,20 +70,37 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
   let completion: string | undefined;
   try {
     terminal?.start();
-    completion = await runInteractiveCommand(args, context, ui, options);
+    completion = Object.hasOwn(collectionCommandRoots, args.command)
+      ? await collectionWizard(ui, collectionCommandRoots[args.command]!, args.action, { ...options, flags: args.flags })
+      : await runInteractiveCommand(args, context, ui, options);
   } finally { terminal?.dispose(); }
   if (terminal && completion) io.error.write(safe(completion));
 }
 
 interface StudioOptions extends CommandContext { project: string; guide?: string; out?: string; kind?: string }
+interface Launch { args: Arguments; context: CommandContext; ui: Prompts; options: StudioOptions }
+const definitionLauncher = ({ ui, args, options }: Launch) => launchDefinition(ui, args, { ...options });
+/** Each interactive maker command and its terminal launcher; studio, new, sketch and prototype share the studio flow below. */
+const launchers: Readonly<Record<string, (launch: Launch) => Promise<string | undefined>>> = {
+  'first-run': ({ ui, context }) => firstRunWizard(ui, context),
+  brainstorm: ({ ui, options }) => brainstormWizard(ui, { ...options, offerImport: true }),
+  'project-setup': ({ ui, context }) => projectSetupWizard(ui, context),
+  settings: async ({ ui, context }) => { await settingsWizard(ui, context); return undefined; },
+  wizard: definitionLauncher,
+  form: definitionLauncher,
+  'fake-data': ({ ui, args, options }) => startWizard(ui, 'fake-data', { ...options, flags: args.flags }),
+  learn: ({ ui, args, options }) => launchLearning(ui, args, { ...options }),
+  process: ({ ui, args, options }) => launchProcess(ui, args, { ...options }),
+  candidate: ({ ui, args, options }) => startWizard(ui, 'candidate-new', { ...options, flags: args.flags }),
+  workflow: ({ ui, args, options }) => launchTestWorkflow(ui, args, { ...options }),
+};
+const studioCommands = ['studio', 'new', 'sketch', 'prototype'];
 async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
-  if (args.command === 'first-run') return firstRunWizard(ui, context);
-  if (args.command === 'brainstorm') return brainstormWizard(ui, { ...options, offerImport: true });
-  if (args.command === 'project-setup') return projectSetupWizard(ui, context);
-  if (args.command === 'settings') { await settingsWizard(ui, context); return; }
+  if (Object.hasOwn(launchers, args.command)) return launchers[args.command]!({ args, context, ui, options });
   if (await shouldCreate(args, context, options)) return createInteractive(args, context, ui, options);
   if (args.command === 'prototype') return await prototypeWizard(ui, options);
-  else await studio(ui, options);
+  await studio(ui, options);
+  return undefined;
 }
 async function shouldCreate(args: Arguments, context: CommandContext, options: StudioOptions): Promise<boolean> {
   if (args.command === 'new') return true;

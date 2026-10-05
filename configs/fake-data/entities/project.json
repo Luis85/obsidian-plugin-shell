@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "project",
+  "title": "Project",
+  "description": "Note-backed projects with the identity properties of the plugin's Project example, a budget and an archived flag.",
+  "folder": "Projects",
+  "titleProperty": "name",
+  "properties": [
+    { "key": "name", "label": "Name", "type": "text", "generator": { "faker": "commerce.productName" }, "unique": true },
+    { "key": "budget", "label": "Budget", "type": "number", "generator": { "faker": "number.int", "args": { "min": 1000, "max": 250000 } } },
+    { "key": "archived", "label": "Archived", "type": "checkbox", "generator": { "faker": "datatype.boolean", "args": { "probability": 0.2 } } },
+    { "key": "owner", "label": "Owner", "type": "link", "generator": { "faker": "person.fullName" }, "required": false },
+    { "key": "type", "type": "text", "generator": { "value": "project" } },
+    { "key": "id", "type": "text", "generator": { "faker": "string.uuid" }, "unique": true },
+    { "key": "schema_version", "type": "number", "generator": { "value": 1 } },
+    { "key": "created_at", "type": "text", "generator": { "faker": "date.recent", "args": { "days": 180 } } },
+    { "key": "summary", "type": "text", "generator": { "faker": "company.catchPhrase" }, "frontmatter": false }
+  ],
+  "body": "# {{name}}\n\n{{summary}}\n"
+}

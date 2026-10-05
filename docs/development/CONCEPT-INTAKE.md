@@ -1,5 +1,7 @@
 # Reviewed concept intake
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 **Implemented:** data-only project, feature and improvement intake through the
 existing shell-cli project-import planner. This does not execute prototypes, install
 dependencies, implement business logic or complete native companion acceptance.
@@ -138,4 +140,4 @@ The final case creates an actual compiled kit, extracts it, runs its dependency-
 CLI, imports a feature, generates its authored Vue page and regenerates an
 improvement while retaining consumer source edits. It does not install/build the
 resulting Vue dependencies or provide native acceptance. Exact executed scope belongs
-in the [continuation verification record](../testing/MVP-CONCEPT-INTAKE.md).
+in the [continuation verification record](../_archive/testing/MVP-CONCEPT-INTAKE.md).

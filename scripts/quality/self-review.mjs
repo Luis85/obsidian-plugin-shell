@@ -6,6 +6,8 @@ import { collectChanges, resolveBase } from './self-review-diff.mjs';
 import { overLimitFiles, unclassifiedTests } from './self-review-files.mjs';
 import { lineViolations } from './self-review-rules.mjs';
 import { ALLOWLIST_PATH, parseAllowlist } from './check-docs-launchers.mjs';
+import { pendingStubAllowance } from '../delivery/acceptance-guard.mjs';
+import { APPROVALS_PATH, approvedFindings, readApprovals } from './self-review-approvals.mjs';
 
 const usage = 'usage: check:self-review [--base <ref>] [--json] [--warn-only]';
 
@@ -25,11 +27,29 @@ export function parseArguments(argv) {
 
 const byLocation = (a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.rule.localeCompare(b.rule);
 
-/** Every violation for a set of parsed changes, sorted by file and line. */
-export async function reviewChanges(root, files) {
+/** Every violation for a set of parsed changes, sorted by file and line. Owner-approved findings move to `approved`. */
+export async function reviewChanges(root, files, approved = []) {
   const found = [...lineViolations(files), ...await unclassifiedTests(root, files), ...await overLimitFiles(root, files)];
   const historical = await historicalLauncherFiles(root);
-  return found.filter(item => item.rule !== 'SR-RETIRED-LAUNCHER' || !historical.some(entry => entry.matcher.test(item.file))).sort(byLocation);
+  const pending = await pendingStubs(root, files, found);
+  const owners = approvedFindings(found, files, await readApprovals(root));
+  for (const [item, approvedBy] of owners) approved.push({ ...item, approvedBy });
+  approved.sort(byLocation);
+  return found.filter(item => item.rule !== 'SR-RETIRED-LAUNCHER' || !historical.some(entry => entry.matcher.test(item.file)))
+    .filter(item => !pending.has(item) && !owners.has(item)).sort(byLocation);
+}
+
+/** SR-FOCUSED-TEST findings that are the pending marker of a generated acceptance stub of an unfinished Increment (scripts/delivery/acceptance-guard.mjs). */
+async function pendingStubs(root, files, found) {
+  const candidates = found.filter(item => item.rule === 'SR-FOCUSED-TEST');
+  if (!candidates.length) return new Set();
+  const allowed = await pendingStubAllowance(root);
+  const kept = new Set();
+  for (const item of candidates) {
+    const line = files.find(file => file.path === item.file)?.added.find(entry => entry.line === item.line)?.text;
+    if (await allowed(item.file, line)) kept.add(item);
+  }
+  return kept;
 }
 
 /** Files the reviewed docs-launchers allowlist keeps as historical records; one list serves both guards. */
@@ -42,6 +62,7 @@ async function historicalLauncherFiles(root) {
 export function formatReport(report, warnOnly) {
   const label = warnOnly ? 'warning' : 'error';
   const lines = report.violations.map(item => `${label} [${item.rule}] ${item.file}:${item.line} ${item.message}`);
+  for (const item of report.approved ?? []) lines.push(`approved [${item.rule}] ${item.file}:${item.line} by ${item.approvedBy} in ${APPROVALS_PATH}`);
   const scope = `${report.files} changed file(s) against ${report.base.ref} (${report.base.sha.slice(0, 12)})`;
   lines.push(report.violations.length
     ? `self-review: ${report.violations.length} finding(s) in ${scope}.${warnOnly ? ' --warn-only: not failing.' : ''}`
@@ -53,8 +74,9 @@ export async function runSelfReview(argv, root = process.cwd()) {
   const options = parseArguments(argv);
   const base = resolveBase(root, options.base);
   const files = collectChanges(root, base.sha);
-  const violations = await reviewChanges(root, files);
-  const report = { status: violations.length ? 'findings' : 'clean', base, files: files.length, violations };
+  const approved = [];
+  const violations = await reviewChanges(root, files, approved);
+  const report = { status: violations.length ? 'findings' : 'clean', base, files: files.length, violations, approved };
   return { report, options, failed: violations.length > 0 && !options.warnOnly };
 }
 

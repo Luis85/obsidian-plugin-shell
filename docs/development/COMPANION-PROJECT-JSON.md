@@ -1,5 +1,7 @@
 # Companion project JSON → shell
 
+> Type: reference · Part of the [docs index](../README.md)
+
 **Project schema 6 only; earlier formats are rejected, never migrated. `companion:generate` remains read-only; `companion:scaffold` is the separate workspace compiler.**
 
 The companion exports a complete **saved authoring definition**. The shell accepts that definition and a target inside an explicitly chosen vault. The first script version validates the transfer envelope and paths, then returns the original JSON bytes. It does not generate, install, activate, run tests, acquire a template or create a target directory.
@@ -109,7 +111,7 @@ The read-only handoff command above remains separate from workspace generation. 
 
 ## Page and component designs
 
-`design.visualDesigns` (subsystem schema 3) holds page definitions owned by sitemap page/modal/settings surfaces, component definitions owned by library entries, saved layouts and immutable published revisions as declarative UI trees. It is validated by `scripts/companion/visual/visual-validate.mjs` (delegated from `authoring-contract.ts`) before browser import, export, CLI handoff and generation; a document cannot carry the retired `detailDesigns`. The catalog is pinned to `{ "id": "nuxt-ui", "version": 1 }`, matching the generated `@nuxt/ui` 4.11.2. The model never evaluates its declarations. See [Visual editors](../concepts/companion/VISUAL-EDITORS.md) and the [design spec](../superpowers/specs/2026-09-26-visual-editors-design.md) for fields, limits and the native conversion boundary. The separate compiler generates Vue SFCs with explicit Nuxt UI imports, typed contracts, source/Pinia projections, slots, extension-owned external-library adapters and declared local UI effects. Arbitrary business intent remains an implementation hook or acceptance TODO, not a successful mock result.
+`design.visualDesigns` (subsystem schema 3) holds page definitions owned by sitemap page/modal/settings surfaces, component definitions owned by library entries, saved layouts and immutable published revisions as declarative UI trees. It is validated by `scripts/companion/visual/visual-validate.mjs` (delegated from `authoring-contract.ts`) before browser import, export, CLI handoff and generation; a document cannot carry the retired `detailDesigns`. The catalog is pinned to `{ "id": "nuxt-ui", "version": 1 }`, matching the generated `@nuxt/ui` 4.11.2. The model never evaluates its declarations. See [Visual editors](../concepts/companion/VISUAL-EDITORS.md) and the [design spec](../_archive/superpowers/specs/2026-09-26-visual-editors-design.md) for fields, limits and the native conversion boundary. The separate compiler generates Vue SFCs with explicit Nuxt UI imports, typed contracts, source/Pinia projections, slots, extension-owned external-library adapters and declared local UI effects. Arbitrary business intent remains an implementation hook or acceptance TODO, not a successful mock result.
 
 ## Design-system frontend extension
 

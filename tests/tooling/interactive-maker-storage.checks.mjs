@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { realpath, mkdtemp, readFile, writeFile, mkdir, rm, symlink } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Readable, Writable } from 'node:stream';
@@ -9,6 +9,7 @@ import { readSnapshot, savePlan, applyPrepared, readData } from '../../bin/adapt
 import { packagePlan, outputBoundary } from '../../bin/adapters/package-plan.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { main } from '../../bin/app.ts';
+import { fileSymlink } from './file-symlink.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(work) { const root = await mkdtemp(join(await realpath(tmpdir()), 'shell-maker-')); try { await work(root); } finally { await rm(root, { recursive: true, force: true }); } }
 const context = root => ({ root, frameworkRoot, input: Readable.from([]) });
@@ -48,9 +49,9 @@ test('every template snapshot root and .framework is a reserved output folder, i
     assert.throws(() => outputBoundary(frameworkRoot, frameworkRoot, out), error => error.code === 'MAKER_OUTPUT', out);
   for (const out of ['generated/configs', 'prototypes/plugins', 'documents']) outputBoundary(frameworkRoot, frameworkRoot, out);
 });
-test('symlink inputs and malformed receipts are refused', async () => scratch(async root => {
+test('symlink inputs and malformed receipts are refused', async t => scratch(async root => {
   const path = join(root, 'real.json'); await writeFile(path, JSON.stringify(newDocument('P')));
-  await symlink(path, join(root, 'linked.json')); await assert.rejects(() => readSnapshot(root, 'linked.json'), /PLAN_SYMLINK: linked.json/);
+  if (await fileSymlink(t, path, join(root, 'linked.json'))) await assert.rejects(() => readSnapshot(root, 'linked.json'), /PLAN_SYMLINK: linked.json/);
   await mkdir(join(root, 'out/.maker'), { recursive: true });
   await writeFile(join(root, 'out/.maker/receipt.json'), '{"schemaVersion":99,"files":[]}');
   await assert.rejects(() => packagePlan(root, 'out', [{ path: 'x', content: 'x' }], {}));

@@ -147,7 +147,7 @@ test('relocated fixture adapter preserves approval, target, reset and cancellati
 test('relocated setup terminal preserves interview and separately approved continuation flow', async () => {
 
   const prompts = [];
-  const answers = ['blank', '', '', 'Example Author', 'yes', 'yes'];
+  const answers = ['blank', '', '', 'Example Author', 'yes', 'yes', '', '', '', ''];
   const writes = [];
   const dependencies = {
     readConfiguration: async () => null,
@@ -156,6 +156,8 @@ test('relocated setup terminal preserves interview and separately approved conti
     derivedName: id => id === 'derived-id' ? 'Derived Id' : 'Unexpected',
     setupDocumentation: async (_mode, value) => value,
     setupObsidian: async () => [],
+    // An Azure DevOps origin pre-selects that platform and its details; nothing is printed or contacted.
+    readOriginUrl: async root => root === '/project' ? 'https://contoso@dev.azure.com/contoso/Demo/_git/demo-repo' : null,
   };
   const guided = await relocatedGuidedSetup(
     { command: 'setup', args: [], options: {} },
@@ -170,8 +172,12 @@ test('relocated setup terminal preserves interview and separately approved conti
   assert.equal(guided.options.author, 'Example Author');
   assert.equal(guided.options.airship, true);
   assert.equal(guided.options.mcp, true);
-  assert.ok(writes.some(value => value.includes('GitHub is optional')));
-  assert.equal(prompts.length, 6);
+  assert.deepEqual([guided.options.hosting, guided.options['azure-organization'], guided.options['azure-project'], guided.options['azure-repository']],
+    ['azure-devops', 'https://dev.azure.com/contoso', 'Demo', 'demo-repo']);
+  assert.match(prompts[6], /\[azure-devops\]: $/);
+  assert.ok(writes.some(value => value.startsWith('Azure DevOps hosting:') && value.includes('Setup stays local and preserves every existing remote')));
+  assert.ok(writes.every(value => !value.includes('contoso@')));
+  assert.equal(prompts.length, 10);
 
   const rendered = [];
   const calls = [];

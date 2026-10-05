@@ -1,0 +1,16 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "learning-review",
+  "version": 1,
+  "title": "Review learnings",
+  "description": "Walk the validated high-impact learnings and those with an overdue follow-up, and record a review date, follow-up, due date and status for each, one reviewed write per learning.",
+  "context": { "title": "Learnings review", "details": ["Folder: {{folder}}", "Each review is its own reviewed write.", "Ctrl+C: cancel."] },
+  "cancelMessage": "Review stopped.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "collection.load", "with": { "collection": "learning" } },
+    { "id": "queue", "kind": "action", "action": "collection.review-load" },
+    { "id": "walk", "kind": "action", "action": "collection.review-walk", "interactive": true },
+    { "id": "done", "kind": "end", "text": "Reviewed {{reviewed}} of {{queued}} learnings." }
+  ]
+}

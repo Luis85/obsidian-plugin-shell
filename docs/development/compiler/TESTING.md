@@ -1,5 +1,7 @@
 # Compiler qualification and extension
 
+> Type: how-to guide · Part of the [docs index](../../README.md)
+
 ## Commands and evidence
 
 `npm run test:compiler` runs unit, golden-baseline, CLI/reporting, architecture, artifact-origin, packed-distribution and four targeted mutation checks. `npm run test:compiler:properties` runs seeded fast-check invariants. `npm run test:compiler:coverage` measures domain/application coverage separately from generated product tests, with minimums of 95% lines, 90% branches and 90% functions. Coverage is not a substitute for observable output assertions.

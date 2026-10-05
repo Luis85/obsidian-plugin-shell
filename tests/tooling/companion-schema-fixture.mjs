@@ -9,6 +9,9 @@ export function schemaCorpus() {
   const accepted = structuredClone(full);
   accepted.design.nodes.find(node => node.kind === 'view').acceptance = { states: ['default', 'empty'], keyboardPath: ['Save', 'Cancel'], focusReturn: true, minWidth: 420, themes: ['dark'], notes: 'Worked example.' };
   positive.push({ name: 'surface with a UX acceptance block', document: accepted });
+  const hosted = structuredClone(full);
+  hosted.tooling = { ...hosted.tooling, hosting: { platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/contoso', project: 'Quick Capture' } } };
+  positive.push({ name: 'Azure DevOps hosting', document: validateAuthoringDocument(hosted) });
   const negative = [];
   const bad = (name, edit, schemaRejects = true) => {
     const document = structuredClone(full); edit(document);
@@ -51,6 +54,12 @@ export function schemaCorpus() {
   bad('feature unknown version', doc => { doc.design.features = { schema: 2, items: [] }; });
   bad('storymap unknown key', doc => { doc.design.storymaps = { schema: 1, nextId: 1, maps: [], eval: true }; });
   bad('design system malformed color', doc => { doc.design.designSystem.colors[0].light = 'red;body{}'; });
+  const hosting = value => doc => { doc.tooling = { ...doc.tooling, hosting: value }; };
+  bad('hosting unknown platform', hosting({ platform: 'gitlab' }));
+  bad('hosting token field', hosting({ platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/c', project: 'P', pat: 'x' } }));
+  bad('hosting organization not an Azure DevOps URL', hosting({ platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/c/', project: 'P' } }));
+  bad('hosting project with a control character', hosting({ platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/c', project: 'P\u0007' } }));
+  bad('hosting Azure details on GitHub', hosting({ platform: 'github', azureDevOps: { organization: 'https://dev.azure.com/c', project: 'P' } }), false);
   bad('duplicate stable surface', doc => { doc.design.nodes.push(structuredClone(doc.design.nodes[0])); }, false);
   bad('missing parent', doc => { doc.design.nodes[0].parent = 'nonexistent'; }, false);
   bad('foreign visual owner', doc => { doc.design.visualDesigns.pages[0].ownerId = 'nonexistent'; }, false);

@@ -114,6 +114,10 @@ not by schema discovery, scans or previews. See [the full example](examples/user
 | `paths.app` | `apps/product` | Generated application source |
 | `paths.brief` | `docs/project-brief.md` | Project/product brief |
 | `paths.firstRunReport` | `reports/first-run.json` | Last recorded managed execution |
+| `paths.risks` | `docs/risks` (optional) | Risk register notes; see [risk management](../docs/development/RISK-MANAGEMENT.md) |
+| `paths.learnings` | `docs/learnings` (optional) | Lessons-learned notes; see [learnings](../docs/development/LEARNINGS.md) |
+| `paths.releaseItems` | `docs/releases/items` (optional) | Release item notes; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
+| `paths.releaseCandidates` | `docs/releases/candidates` (optional) | One folder per release candidate version; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
 | `preferences.author` | `Your name` | Default author on a new project |
 | `preferences.ui` | `auto` | `auto`, `tui` or `plain` presentation |
 | `preferences.scanRecursive` | `true` | Include PRD subfolders |
@@ -295,8 +299,8 @@ production maker coverage, analyzer/architecture/maintainability gates and gener
 Angular install/typecheck/test/build/browser checks with the qualified dependencies.
 The new tests are discovered by the existing `interactive-maker-*.checks.mjs` suite;
 no quality threshold is reduced. The implementation evidence is recorded separately
-under `docs/testing/ANGULAR-PROJECT-SETUP.md` and
-[the Angular rendering verification record](../docs/testing/ANGULAR-BRICKS.md).
+under `docs/_archive/testing/ANGULAR-PROJECT-SETUP.md` and
+[the Angular rendering verification record](../docs/_archive/testing/ANGULAR-BRICKS.md).
 Earlier records retain their original candidate and environment; passing predecessor
 checks are not assigned to a later commit. Setup status records preparation, not
 continuous observation of external npm commands or browser acceptance.

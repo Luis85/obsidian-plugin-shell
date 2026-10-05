@@ -12,6 +12,7 @@ import { projectRoot, exists } from './framework/files.ts';
 import { failure, type Context, type Request, type Result } from './framework/contracts.ts';
 import { invocationDirectory, starterInvocation } from './framework/starter-project.ts';
 import { guidedStarter } from '../presentation/terminal/starter-terminal.ts';
+import { guidedIncrement } from '../presentation/terminal/increment-terminal.ts';
 import { renderCliResult, type CliOutputStream } from '../presentation/terminal/cli-output.ts';
 import { interactiveRun } from '../presentation/terminal/cli-interactive.ts';
 
@@ -65,7 +66,7 @@ async function guidedRequest(request: Request, context: Context, io: FrameworkCl
   const write = (text: string) => { io.error.write(text); };
   if (guidedSetupRun(request)) return guidedSetup(request, context, prompt, write);
   if (request.command === 'new' && !request.options.list) return guidedStarter(request, context, prompt, write);
-  return request;
+  return guidedIncrement(request, prompt);
 }
 /** After an interactive setup in a kit project, each further stage is offered with its own approval. */
 async function continueInteractiveSetup(request: Request, outcome: Result, context: Context, io: FrameworkCliIO, signal: AbortSignal): Promise<Result> {
@@ -73,7 +74,10 @@ async function continueInteractiveSetup(request: Request, outcome: Result, conte
   if (!await exists(join(context.root, 'bin/kit.json')) || !await exists(join(context.root, 'design/project.json'))) return outcome;
   return continueSetup(context, executeOperation, query => ask(io.input, io.error as never, query, signal), value => renderCliResult(value, false, io), outcome);
 }
-function exitCode(outcome: Result): number {
+const uncertain = (data: unknown): boolean => typeof data === 'object' && data !== null && 'uncertain' in data && data.uncertain === true;
+/** 0 success, 1 failed or blocked, 2 a write whose outcome is unknown (`data.uncertain`), 130 cancelled. */
+export function exitCode(outcome: Result): number {
+  if (outcome.status === 'failed' && uncertain(outcome.data)) return 2;
   if (outcome.status === 'failed' || outcome.status === 'blocked') return 1;
   return outcome.status === 'cancelled' ? 130 : 0;
 }

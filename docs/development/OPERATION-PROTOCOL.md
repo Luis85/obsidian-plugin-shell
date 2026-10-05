@@ -1,5 +1,7 @@
 # Data-only capability discovery and operation protocol
 
+> Type: reference · Part of the [docs index](../README.md)
+
 ## Real entrypoints and trust boundary
 
 ```sh
@@ -123,4 +125,4 @@ the dispatch refactor. See [execution record](https://github.com/Luis85/obsidian
 
 ## Historical protocol and current CLI
 
-The linked discovery-only checkpoint is pinned to the original PR #17 source. It is not current execution evidence. The central [framework CLI](FRAMEWORK-CLI.md) exposes a separate shared TypeScript operation interface; its [continuation record](../testing/PR18-CLI-CONTINUATION.md) identifies current source, tests and remaining qualification. Discovery through the v1 protocol above remains read-only.
+The linked discovery-only checkpoint is pinned to the original PR #17 source. It is not current execution evidence. The central [framework CLI](FRAMEWORK-CLI.md) exposes a separate shared TypeScript operation interface; its [continuation record](../_archive/testing/PR18-CLI-CONTINUATION.md) identifies current source, tests and remaining qualification. Discovery through the v1 protocol above remains read-only.

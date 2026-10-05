@@ -65,12 +65,29 @@ jobs:
       - run: npm run typecheck && npm test && npm run build`;
   return ['A separate job keeps the legacy workflows untouched (GitHub Actions detected):', '', ...fence(yaml, 'yaml')];
 }
+/** Azure Repos ignores YAML pr: triggers, so the pipeline is queued by a build-validation branch policy with a path filter. */
+function azurePipelineSnippet(report: AdoptionReport): string[] {
+  if (!report.tooling.ciProviders.includes('azure-pipelines')) return [];
+  const yaml = `# workbench-app.yml: queued by a build-validation branch policy with the path filter /${generatedAppDirectory}/*;/${kitDirectory}/*
+trigger: none
+pool:
+  vmImage: ubuntu-latest
+steps:
+  - checkout: self
+  - task: NodeTool@0
+    inputs: { versionSpec: '${report.targets.node.version ?? '24.21.0'}' }
+  - script: npm install   # switch to npm ci once the resolved lock is committed
+    workingDirectory: ${generatedAppDirectory}/source
+  - script: npm run typecheck && npm test && npm run build
+    workingDirectory: ${generatedAppDirectory}/source`;
+  return ['A separate pipeline keeps the legacy pipelines untouched (Azure Pipelines detected):', '', ...fence(yaml, 'yaml')];
+}
 export function phaseFive(report: AdoptionReport): string[][] {
   const legacy = baselineScripts(report).map(name => scriptCommand(report, name));
   return phase(5, 'Tests and CI gates', {
     goal: 'Protect both the legacy code and the new package with gates that run independently.',
     commands: `${legacy.length ? legacy.join('\n') : '# legacy gates: unchanged (none detected as scripts)'}\n${kitCommand} framework status --root ${kitDirectory}\ncd ${generatedAppDirectory}/source && npm run typecheck && npm test && npm run build`,
-    extra: workflowSnippet(report).length ? [workflowSnippet(report)] : [],
+    extra: [workflowSnippet(report), azurePipelineSnippet(report)].filter(snippet => snippet.length > 0),
     files: [report.tooling.ciProviders.length ? `A new, separate CI job or workflow (${report.tooling.ciProviders.join(', ')} detected); existing jobs keep their current commands.` : 'A CI definition for the provider you choose; none exists today.', 'No change to legacy test configuration.'],
     acceptance: ['The legacy gates stay required and unchanged.', 'The new job fails when the generated package fails and cannot make the legacy job pass.', 'Gate results, not this plan, are the evidence; neither Workbench qualification nor release is implied.'],
   });

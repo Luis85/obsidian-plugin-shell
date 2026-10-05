@@ -74,9 +74,9 @@ external definitions in `configs/starters`. Do not hand-edit it; rebuild it with
 
 Earlier increment reviews and verification reports keep their original
 artifact/version boundaries as dated records. The
-[2026-09-27 PR #5 review](../../product/PR5-PRODUCT-REVIEW.md) and
-[improvement plan](../../product/PR5-IMPROVEMENT-PLAN.md) explain the wider roadmap;
-the [2026-09-29 vision review](../../product/PR5-VISION-REVIEW.md) aligns product
+[2026-09-27 PR #5 review](../../_archive/product/PR5-PRODUCT-REVIEW.md) and
+[improvement plan](../../_archive/product/PR5-IMPROVEMENT-PLAN.md) explain the wider roadmap;
+the [2026-09-29 vision review](../../_archive/product/PR5-VISION-REVIEW.md) aligns product
 identity without requalifying those earlier results.
 
 ## Source and acceptance boundaries

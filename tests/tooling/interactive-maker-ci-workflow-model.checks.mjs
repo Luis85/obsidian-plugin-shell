@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadWorkflows, parseWorkflowText, workflowParser } from '../../bin/adapters/framework/ci-workflows.ts';
@@ -10,6 +10,7 @@ import { parseCommandFile, shellInvocation } from '../../bin/domain/ci-shell.ts'
 import { summarizeWorkflow } from '../../bin/domain/ci-listing.ts';
 import { setupActions } from '../../bin/domain/ci-workflow.ts';
 import { executionBlockers, planJob, skipReason } from '../../bin/domain/ci-plan.ts';
+import { e2eFacts, syncedProjectWorkflow } from '../../scripts/quality/check-repository.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const parseDocument = await workflowParser();
@@ -27,7 +28,9 @@ test('every real workflow in .github/workflows parses into jobs with steps and c
     assert.ok(item.jobs.length > 0, `${item.file} has jobs`);
     assert.ok(item.triggers.length > 0, `${item.file} has triggers`);
     for (const entry of item.jobs) {
-      assert.ok(entry.steps.length > 0, `${item.file}/${entry.id} has steps`);
+      // A job that calls a reusable workflow (release.yml) has no steps of its own and is never reproducible locally.
+      const calls = entry.blockers.includes('calls a reusable workflow');
+      assert.ok(calls ? entry.steps.length === 0 : entry.steps.length > 0, `${item.file}/${entry.id} has steps unless it calls a workflow`);
       for (const step of entry.steps) {
         if (step.uses) assert.equal(step.kind, setupActions.includes(step.uses.split('@')[0]) ? 'setup' : 'external');
         else assert.equal(step.kind, 'run');
@@ -49,11 +52,15 @@ test('ci.yml exposes its known jobs, triggers and resolved YAML anchors', async 
 test('the CI result job aggregates every ci.yml gate job and nothing informational', async () => {
   const ci = (await loadWorkflows(root)).find(item => item.stem === 'ci');
   const result = ci.jobs.find(entry => entry.id === 'ci-result');
-  assert.equal(result.name, 'CI result'); assert.equal(result.condition, 'always()');
+  // A run started by adding the e2e label reports as "E2E result", never as the required check (qualification-e2e-opt-in).
+  assert.equal(result.name, "${{ github.event.action == 'labeled' && 'E2E result' || 'CI result' }}");
+  assert.equal(result.condition, "always() && (github.event.action != 'labeled' || github.event.label.name == 'e2e')");
   const gates = ci.jobs.map(entry => entry.id).filter(id => !['ci-result', 'security-audit'].includes(id));
   assert.deepEqual([...result.needs].sort(), gates.sort(), 'a new ci.yml job must join the required CI result check');
   assert.ok(!result.needs.includes('security-audit'), 'the informational audit never blocks the required check');
   assert.match(result.steps.map(step => step.run ?? '').join('\n'), /select\(\.value\.result != "success" and \.value\.result != "skipped"\)[\s\S]*exit 1/);
+  const hold = result.steps.find(step => step.env?.HEAD_REF === '${{ github.head_ref }}');
+  assert.match(hold?.run ?? '', /release\/\*\)[\s\S]*check_name=Release%20result[\s\S]*!= success[\s\S]*exit 1/, 'a release pull request is green only after its Release result succeeded');
 });
 test('application-docs owns the folded command-handbook checks and site build', async () => {
   const docs = (await loadWorkflows(root)).find(item => item.stem === 'application-docs');
@@ -96,7 +103,7 @@ test('conditions are settled three-valued: true, false or unknown', () => {
     ['${{ !cancelled() }}', true], ["${{ !cancelled() && runner.os == 'Linux' }}", true], ["!cancelled() && runner.os == 'Windows'", false],
     ["matrix.starter != 'cli'", false], ["github.event_name == 'push'", undefined], ["${{ inputs.draft_snapshot != '' }}", undefined],
     ["github.event_name == 'push' && runner.os == 'Windows'", false], ["github.event_name == 'push' || runner.os == 'Linux'", true],
-    ["(runner.os == 'Linux' || runner.os == 'macOS') && matrix.starter == 'cli'", true], ["contains(runner.os, 'Lin')", undefined],
+    ["(runner.os == 'Linux' || runner.os == 'macOS') && matrix.starter == 'cli'", true], ["contains(runner.os, 'Lin')", true], ["format(runner.os, 'Lin')", undefined],
     ["runner.os == 'Linux' &&", undefined], ["runner.os ==", undefined], ["'it''s' == 'IT''S'", true], ['', undefined],
   ];
   for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
@@ -159,6 +166,71 @@ test('condition grammar edge cases stay unknown instead of throwing or guessing'
     ['!github.x', undefined], ['github.x && true', undefined], ['github.x || false', undefined], ['github.x && false', false], ['github.x || true', true], ["github.x == 'a' || github.y != 'b'", undefined],
     ['!!runner.os', true], ["'' && true", false], ["'x' && true", true], ['cancelled()', false], ["runner.os != github.x", undefined], ['true == true', true]];
   for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
+});
+test('string search functions settle on two known arguments and stay unknown otherwise', () => {
+  const lookup = path => ({ 'github.head_ref': 'release/1.2.0', 'inputs.tier': 'integration', 'github.event.pull_request.draft': 'false' })[path];
+  const options = { lookup, success: true };
+  const cases = [["startsWith(github.head_ref, 'release/')", true], ["!startsWith(github.head_ref, 'Release/')", false], ["endsWith(github.head_ref, '.0')", true], ["contains(github.head_ref, 'feature')", false],
+    ["STARTSWITH(github.head_ref, 'x') || inputs.tier == 'integration'", true], ["startsWith(github.unknown, 'release/')", undefined], ["startsWith(github.unknown, 'x') && false", false],
+    ["inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))", false],
+    // An object filter (`labels.*.name`) is a context path: unknown here, so it decides nothing unless another operand does.
+    ["contains(github.event.pull_request.labels.*.name, 'e2e')", undefined], ["inputs.tier == 'integration' || contains(github.event.pull_request.labels.*.name, 'e2e')", true],
+    ["startsWith(github.head_ref)", undefined], ["startsWith(github.head_ref, 'a', 'b')", undefined], ["fromJSON(github.head_ref, 'a')", undefined], ["startsWith(github.head_ref, 'a'", undefined], ["startsWith(, 'a')", undefined]];
+  for (const [expression, expected] of cases) assert.equal(evaluateCondition(expression, options), expected, expression);
+});
+// Dev and the Definition of Ready/Done checks run on every pull request event with their own conditions; they are
+// not Integration workflows, so the release tier reports them through aliases instead of calling them. Synced
+// projects--* copies belong to standalone projects and follow their own CI, never the shell's tiers; the projects-only
+// required checks report those same checks for a pull request that changes only projects/**.
+const ownTier = ['dev', 'definition-of-ready', 'definition-of-done', 'projects-required-checks'];
+test('every pull-request workflow runs its jobs only on ready, non-release pull requests unless called with tier release', async () => {
+  const workflows = await loadWorkflows(root), parse = await workflowParser();
+  const tiered = "inputs.tier == 'release' || (";
+  const gated = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem) && !syncedProjectWorkflow(item.file));
+  assert.ok(gated.length >= 13, 'every integration workflow is listed');
+  for (const item of gated) {
+    const text = await readFile(join(root, '.github/workflows', item.file), 'utf8'), data = parse(text).toJS();
+    // Only a workflow holding opt-in e2e steps listens to `labeled`, so adding the e2e label starts its e2e run.
+    const e2e = e2eFacts(text, item.file).e2e;
+    assert.deepEqual(data.on.pull_request.types, ['opened', 'synchronize', 'reopened', 'ready_for_review', ...(e2e ? ['labeled'] : [])], item.file);
+    assert.equal(data.on.workflow_call.inputs.tier.default, 'integration', item.file);
+    assert.deepEqual(data.on.workflow_dispatch.inputs.tier.options, ['integration', 'release'], item.file);
+    for (const job of item.jobs.filter(entry => entry.id !== 'ci-result')) {
+      assert.ok(job.condition, `${item.file}/${job.id} is gated`);
+      const local = planJob(item, job, { localOs: 'Linux', selector: typeof job.matrix?.os === 'string' ? { os: 'ubuntu-24.04' } : {} });
+      // A local run is a ready pull-request update without a known e2e opt-in: gates run, pure e2e jobs stay undecided.
+      if (job.condition.startsWith(tiered) && !/github\.event_name/.test(job.condition)) assert.equal(local.jobCondition.result, /inputs\.e2e == true/.test(job.condition) ? 'unknown' : 'true', `${item.file}/${job.id} for a local ready pull request`);
+      const release = evaluateCondition(job.condition, { lookup: path => ({ 'inputs.tier': 'release', 'github.event_name': 'push', 'github.head_ref': '' })[path], success: true });
+      const draft = evaluateCondition(job.condition, { lookup: path => ({ 'inputs.tier': '', 'github.event_name': 'pull_request', 'github.event.pull_request.draft': 'true', 'github.head_ref': 'feature' })[path], success: true });
+      const releasePullRequest = evaluateCondition(job.condition, { lookup: path => ({ 'inputs.tier': '', 'github.event_name': 'pull_request', 'github.event.pull_request.draft': 'false', 'github.head_ref': 'release/1.2.0' })[path], success: true });
+      assert.deepEqual([draft, releasePullRequest], [false, false], `${item.file}/${job.id} skips drafts and release heads`);
+      if (!['security-audit', 'self-review'].includes(job.id)) assert.equal(release, true, `${item.file}/${job.id} runs in the release tier`);
+    }
+  }
+});
+test('the release tier calls every gated pull-request workflow and candidate qualification, and Release result requires each call', async () => {
+  const workflows = await loadWorkflows(root), parse = await workflowParser();
+  const release = parse(await readFile(join(root, '.github/workflows/release.yml'), 'utf8')).toJS();
+  const calls = Object.entries(release.jobs).filter(([, job]) => job.uses);
+  const expected = workflows.filter(item => item.triggers.includes('pull_request') && !ownTier.includes(item.stem) && !syncedProjectWorkflow(item.file)).map(item => item.file).concat('candidate-qualification.yml').sort();
+  assert.deepEqual(calls.map(([, job]) => job.uses.replace('./.github/workflows/', '')).sort(), expected);
+  for (const [id, job] of calls) {
+    assert.deepEqual(job.needs, 'metadata', id); assert.equal(job.secrets, undefined, id);
+    if (id !== 'candidate-qualification') assert.deepEqual(job.with, { tier: 'release' }, id);
+  }
+  const result = release.jobs['release-result'];
+  assert.equal(result.name, 'Release result'); assert.equal(result.if, 'always()');
+  const aliases = { 'dev-checks': 'Dev checks', 'ci-result': 'CI result', 'definition-of-ready': 'Definition of Ready', 'definition-of-done': 'Definition of Done' };
+  assert.deepEqual([...result.needs].sort(), Object.keys(release.jobs).filter(id => id !== 'release-result' && !(id in aliases)).sort());
+  // The release pull request reports the required checks from the release tier, never as a skipped pass.
+  for (const [id, name] of Object.entries(aliases)) {
+    const alias = release.jobs[id];
+    assert.deepEqual([alias.name, alias.if, alias.needs], [name, 'always()', 'release-result'], id);
+    assert.match(alias.steps[0].run, /test "\$RELEASE_RESULT" = success/); assert.equal(alias.steps[0].env.RELEASE_RESULT, '${{ needs.release-result.result }}');
+  }
+  assert.match(result.steps[0].run, /select\(\.value\.result != "success"\)[\s\S]*exit 1/);
+  assert.match(release.jobs.metadata.steps.map(step => step.run ?? '').join('\n'), /branch\.mjs verify --version "\$VERSION"/);
+  assert.ok(!Object.values(release.jobs).some(job => job.permissions), 'the release tier stays read-only');
 });
 test('workflow normalization accepts the documented shapes and rejects the rest', () => {
   assert.deepEqual(workflow('name: A\non: push\njobs: {}\n').triggers, ['push']);

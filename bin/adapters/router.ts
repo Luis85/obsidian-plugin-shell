@@ -1,3 +1,4 @@
+import { collectionCommandRoots } from '../domain/command-options.ts';
 export type CliSurface = 'maker' | 'framework' | 'memory';
 export interface RoutedArguments { surface: CliSurface; args: string[] }
 /** Registered plugin CLI commands and framework catalog roots, injected so routing itself stays free of I/O. */
@@ -7,14 +8,16 @@ export interface RouteExtensions { pluginCommands: ReadonlySet<string>; framewor
 const directoryNewFlags = new Set([
   '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions',
   '--install', '--inside-vault', '--no-git', '--storybook', '--storybook-stories', '--airship', '--no-airship',
+  '--hosting', '--azure-organization', '--azure-project', '--azure-repository',
   '--yes', '--dry-run', '--plan-out', '--timeout', '--values', '--answers', '--run', '--trust-processes',
 ]);
 const makerCommands = new Set([
-  'studio', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design',
-  '--ui', '--no-color',
+  'studio', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', 'workflow',
+  ...Object.keys(collectionCommandRoots), '--ui', '--no-color',
 ]);
 const makerHelpCommands = new Set([
-  'sketch', 'prototype', 'studio', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design',
+  'sketch', 'prototype', 'studio', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', 'workflow',
+  ...Object.keys(collectionCommandRoots),
 ]);
 
 function normalizeHelp(argv: readonly string[]): string[] {

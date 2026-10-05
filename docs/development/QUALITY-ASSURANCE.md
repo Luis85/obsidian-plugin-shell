@@ -1,5 +1,7 @@
 # Additional source assurance
 
+> Type: reference · Part of the [docs index](../README.md)
+
 These checks supplement the full coverage, compiler, architecture, official
 Obsidian lint, artifact, browser and native gates. They have deliberately stated
 scope and positive/negative fixtures; passing them is not full release acceptance.
@@ -85,30 +87,20 @@ Its YAML parser rejects malformed or duplicate mappings. The repository policy
 requires job/step structure, full action SHA pins, explicit read-only permissions,
 checkout without persisted credentials and environment-based handling of untrusted
 inputs instead of direct shell interpolation. This is a focused repository policy,
-not a substitute for the complete GitHub Actions schema or actionlint. Privileged
-publication workflows are not allowed by this iteration's checker; introducing
-them requires a separate authorized design and scoped policy change.
+not a substitute for the complete GitHub Actions schema or actionlint. A job may
+call a repository-local reusable workflow (`uses: ./.github/workflows/<name>.yml`)
+only when that file exists and declares `on.workflow_call`, and never passes
+`secrets` (including `secrets: inherit`). The owner-requested, scoped release allowance
+(`scripts/quality/workflow-policy.mjs`) lets only `release-cut.yml` and
+`publish.yml` grant job write scopes: both must be `workflow_dispatch`-only, keep
+read-only top-level permissions, and every write job must target the protected
+`release` environment. Every other workflow, including `starter-distribution.yml`,
+stays read-only.
 
-Current workflows, all read-only:
-
-- `ci.yml` (pull requests, `main`, manual): dependency-free `baseline` on
-  Linux/Windows; `showcase` guided setup + `verify` (Windows on pull requests,
-  plus Linux served e2e on pushes); three parallel template-authoring journeys
-  (`renamed-feature`, `source-archive`, `example-removal`). On pull requests and
-  manual runs only: `framework-cli` on Linux/Windows/macOS, `real-obsidian`,
-  `generated-companion` and three grouped `starter` jobs.
-- `setup-compatibility.yml` (setup/toolchain input changes): Node 24.15.0 +
-  npm 12.0.2 and Node 24.21.0 + npm 11.19.1 on Linux/Windows with the real npm
-  install-policy fixture.
-- `companion-concept-verification.yml` (concept input changes): concept
-  assembly, test data, visual editors and browser suites. Kept separate because
-  the framework kit excludes it.
-- `candidate-qualification.yml` (`main` pushes touching execution inputs,
-  manual): fixed-source rehearsal, repeated runtime suites, both coverage scopes,
-  served browser, three native sessions, timing samples and the live audit.
-- `release-rehearsal.yml` (manual only): rehearsal of a reviewed default-branch
-  commit and version; it cannot publish or tag.
-- `maintenance-status.yml` (weekly, manual): version and action-pin discovery.
+The rule list with its failure codes, every workflow's triggers, jobs, permissions
+and artifacts, and the required checks are in
+[GitHub Actions workflows](WORKFLOWS.md). How the Dev, Integration and Release
+tiers gate a pull request is explained in [Delivery pipeline](DELIVERY-PIPELINE.md).
 
 Owned CSS is parsed with the already selected PostCSS and selector parser. Empty
 declarations and selectors without an owned class or plugin attribute fail. This
@@ -125,7 +117,7 @@ prove malformed workflow, unpinned action, write permission, missing await, focu
 test, invalid CSS, broad selector, incomplete fence and missing local target are
 detected alongside valid controls.
 
-See the [quality adoption plan](TYPESCRIPT-QUALITY-TOOLS-PLAN.md) for the full
+See the [quality adoption plan](../_archive/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) for the full
 remaining work, including external security/dependency-review scanners and broader
 style/documentation tooling. These local checks do not activate external services,
 alter permissions or certify those unprovisioned scanners.
@@ -181,7 +173,9 @@ The flow, also written for agents in `.claude/skills/self-review/SKILL.md`
 
 1. `node bin/app check --plan --base origin/main`, then `node bin/app check`,
    `npm run verify -- --json` and the relevant `node scripts/testing/suites.mjs <suite>`
-   runs; browser and native runs only when provisioned.
+   runs; browser and native runs only when provisioned. End-to-end is opt-in until
+   the Release tier ([why](DELIVERY-PIPELINE.md#end-to-end-tests-opt-in-mandatory-in-release));
+   in CI the pull request label `e2e` opts in.
 2. `npm run check:self-review [-- --base <ref>] [--json] [--warn-only]`.
 3. An adversarial re-read of the diff against `AGENTS.md`, then the template
    filled with real output and the untested scope.
@@ -191,12 +185,12 @@ files) with the merge-base of `HEAD` and `origin/main`, falling back to `main` a
 `origin/HEAD`, or with `--base`. It parses the unified diff and inspects only added
 lines (plus removed lines where a deletion loosens a gate). Findings print as
 `[RULE] file:line message` and exit 1; `--warn-only` reports without failing, `--json`
-emits `{status, base, files, violations[]}`, and an unresolvable base or bad usage
+emits `{status, base, files, violations[], approved[]}`, and an unresolvable base or bad usage
 exits 2. Rules:
 
 | Rule | Flags |
 | --- | --- |
-| `SR-QUALITY-CONFIG` | any change to `configs/quality/**`, the threshold floors or a Fallow rc file |
+| `SR-QUALITY-CONFIG` | any change to `configs/quality/**` (except the approval record below), the threshold floors or a Fallow rc file |
 | `SR-COVERAGE-THRESHOLD` | threshold literals or exclusions added to, or wiring removed from, a Vitest config |
 | `SR-LINT-CONFIG` | lint rules turned off, downgraded or ignored, or severities removed, in `configs/lint/**` |
 | `SR-LINT-DISABLE`, `SR-TS-SUPPRESSION`, `SR-COVERAGE-IGNORE`, `SR-ANALYZER-IGNORE` | suppression comments added |
@@ -210,6 +204,17 @@ exits 2. Rules:
 The guard is a diff heuristic with stated scope: it neither replaces the full gates
 nor proves a change correct. A flagged line that is genuinely justified needs an
 owner-approved note in the pull request; the guard has no inline waiver, so
-loosening is never silent. Fixtures in `tests/tooling/agent-self-review*.checks.mjs`
+loosening is never silent.
+
+The only recorded approval path is `configs/quality/self-review-approvals.json`,
+for `SR-QUALITY-CONFIG`. Each entry names the `rule`, `file`, `approvedBy`
+(`@owner`), a `reason` and the exact `added` and `removed` line texts. A finding
+is accepted only when every added and removed line of that file in the diff is
+listed for it. One extra or edited line flags the file again. Accepted findings
+still print as `approved [RULE] file:line by @owner` and appear under
+`approved[]` in `--json`. A malformed record fails the guard; it never approves
+anything. CODEOWNERS assigns the record to the owner, and `.claude/settings.json`
+denies agents any edit to it, so agents cannot approve their own changes. Remove
+entries once their change has merged. Fixtures in `tests/tooling/agent-self-review*.checks.mjs`
 run each rule against real temporary Git repositories, including a clean change, and
 prove that removed and context lines never trigger findings.

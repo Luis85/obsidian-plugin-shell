@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "project-identity",
+  "version": 1,
+  "title": "Project identity",
+  "description": "Name, description and desired product outcome of a project. Only the name must be a single-line title.",
+  "fields": [
+    { "id": "name", "kind": "title", "label": "Project name", "maxLength": 80 },
+    { "id": "description", "kind": "text", "label": "Describe your project", "required": true, "maxLength": 400 },
+    { "id": "product", "kind": "text", "label": "Describe the product and desired outcome", "required": true, "maxLength": 1000 }
+  ]
+}

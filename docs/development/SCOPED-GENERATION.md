@@ -1,5 +1,7 @@
 # Selected generation over a canonical project
 
+> Type: reference · Part of the [docs index](../README.md)
+
 ```sh
 node bin/app generate --scope feature:workspace --json
 node bin/app generate --scope page:vp-2 --json

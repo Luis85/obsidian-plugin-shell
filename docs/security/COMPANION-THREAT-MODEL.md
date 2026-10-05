@@ -1,5 +1,7 @@
 # Companion and developer-kit trust boundaries
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 Scope: imported project/concept data, trusted developer tools, generated consumers, native storage, optional memory and decision-workbench outputs. This is an implementation threat model and test map, not a penetration test, formal certification or permission to deploy to a personal vault.
 
 ## Assets and actors

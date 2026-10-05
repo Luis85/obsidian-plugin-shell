@@ -1,0 +1,30 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "process-step",
+  "version": 1,
+  "title": "Business process step",
+  "description": "One step: who performs it, the input it collects, the data it produces and where the process goes next.",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Step title", "maxLength": 120 },
+    { "id": "actor", "kind": "select", "label": "Who performs this step?", "choicesFrom": "process.role-choices" },
+    { "id": "description", "kind": "text", "label": "What happens in this step (optional)", "multiline": true, "maxLength": 4000 },
+    { "id": "inputMode", "kind": "select", "label": "Input collected in this step", "choices": [
+      { "id": "none", "label": "None — the actor confirms completion" },
+      { "id": "fields", "label": "Inline fields" },
+      { "id": "form", "label": "A shared form from configs/forms" }
+    ], "default": "none" },
+    { "id": "form", "kind": "select", "label": "Form", "choicesFrom": "process.form-choices", "when": { "field": "inputMode", "equals": "form" } },
+    { "id": "fieldLines", "kind": "list", "label": "Input fields (id:kind:Label)", "required": true, "multiline": true, "suffix": " (separate with ;)",
+      "when": { "field": "inputMode", "equals": "fields" },
+      "help": "One field per line as id:kind:Label. Kinds: text, title, number, boolean, list, select=a/b, multi=a/b. Add * after the kind for a required answer, for example decision:select=approve/reject*:Decision." },
+    { "id": "bind", "kind": "text", "label": "Store the answers under (dotted path, empty for the top level)", "maxLength": 200 },
+    { "id": "outputs", "kind": "list", "label": "Data produced outside the form (dotted paths, optional)", "suffix": " (separate with ;)" },
+    { "id": "terminal", "kind": "boolean", "label": "Does the process end at this step?", "yes": "Yes — terminal step", "no": "No — it continues" },
+    { "id": "outcome", "kind": "text", "label": "Outcome name (for example approved)", "maxLength": 120, "when": { "field": "terminal", "equals": true } },
+    { "id": "transitionLines", "kind": "list", "label": "Next steps, first match wins", "required": true, "multiline": true, "suffix": " (separate with ;)",
+      "when": { "field": "terminal", "equals": false },
+      "help": "One per line: step-id, or step-id if path operator value, for example publish if review.decision equals \"approve\". Only the last line may omit the condition." },
+    { "id": "notes", "kind": "text", "label": "Step notes in Markdown (optional)", "multiline": true, "maxLength": 20000 }
+  ]
+}

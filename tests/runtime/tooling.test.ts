@@ -45,6 +45,7 @@ describe('Real tooling boundaries', () => {
       await cp(join(root, 'scripts/setup'), join(dir, 'setup'), { recursive: true });
       await cp(join(root, 'scripts/shared'), join(dir, 'shared'), { recursive: true });
       await cp(join(root, 'scripts/agent/mcp-config.mjs'), join(dir, 'agent/mcp-config.mjs'));
+      await cp(join(root, 'scripts/companion/schema/hosting.mjs'), join(dir, 'companion/schema/hosting.mjs'));
       for (const name of ['manifest.json', 'package-lock.json', 'versions.json']) await cp(join(root, name), join(dir, name));
       await cp(join(root, 'package.json'), join(dir, 'package.json'));
       for (const args of [['--help'], ['--dry-run']]) {

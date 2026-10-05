@@ -47,6 +47,7 @@ test('suites join test includes, rule sources and path-filtered workflows, with 
   assert.equal(gateOf(data, 'suite:quality').estimateSeconds, null, 'unmeasured suites report null');
   const e2e = gateOf(data, 'suite:e2e');
   assert.deepEqual([e2e.prerequisites, e2e.needs, e2e.viaCheck, e2e.required], [['chromium'], ['browser'], false, true]);
+  assert.deepEqual([generator.levels, e2e.levels, gateOf(data, 'suite:quality').levels], [['integration', 'unit'], ['e2e'], []], 'test-pyramid levels from the manifest');
   assert.ok(data.notes.some(note => /golden snapshots.*kit integrity/.test(note)), 'generator inputs note the snapshot regeneration');
   assert.deepEqual(data.workflows.filter(item => item.via === 'paths').map(item => item.workflow), ['starter-flow']);
   assert.equal(data.estimate.seconds, 187); assert.equal(data.estimate.complete, false);
@@ -151,6 +152,10 @@ test('workflow paths: filters follow GitHub order, negation, anchors, paths-igno
   assert.equal(await parse('name: [unclosed'), null);
   const catchAll = await parse('name: W\non:\n  push:\n    paths: ["**", "!docs/**"]\njobs: {}\n');
   assert.equal(workflowTrigger(toolkit, catchAll, ['src/a.ts']).via, 'always', 'a catch-all filter is not path-specific');
+  const releaseBranches = await parse("name: W\non:\n  push:\n    branches: ['release/**']\n  workflow_dispatch:\njobs: {}\n");
+  assert.deepEqual(workflowTrigger(toolkit, releaseBranches, ['src/a.ts']), { runs: false, event: 'push', via: 'manual-only' }, 'a release-branch push is not a diff trigger');
+  const mainBranch = await parse('name: W\non:\n  push:\n    branches: [main]\njobs: {}\n');
+  assert.deepEqual([mainBranch.events.push, workflowTrigger(toolkit, mainBranch, ['src/a.ts']).via], [{ branches: ['main'] }, 'always']);
 });
 
 test('the shipped workflows parse, the durations table is read, and the gate rules reference real suites and gates', async () => {

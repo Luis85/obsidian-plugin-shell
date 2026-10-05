@@ -4,7 +4,8 @@
 * text=auto eol=lf
 
 # Retained evidence keeps its committed bytes exactly as recorded.
-docs/testing/evidence/** -text
+docs/_archive/testing/evidence/** -text
+docs/_archive/project-setup/evidence/** -text
 
 # Binary assets never receive end-of-line normalization.
 *.png binary

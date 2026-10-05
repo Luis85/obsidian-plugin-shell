@@ -11,6 +11,7 @@ import { renderTemplate } from '../../bin/compiler/emitters/devkit-files.ts';
 import { rebaseMarkdown, relocatedPath } from '../../bin/compiler/emitters/framework-docs.ts';
 import { inspectWorkflow, markdownLinks } from '../../scripts/quality/check-repository.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
+import { permission } from '../support/claude-permissions.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const starter = starterDocument('quick-capture');
@@ -39,6 +40,8 @@ test('[GENERATOR-DEVKIT-01] the product owns the root docs; framework docs and m
   assert.deepEqual(workflows, ['.github/workflows/ci.yml', '.github/workflows/obsidian.yml']);
   for (const path of workflows) assert.ok(inspectWorkflow(text(path)).jobs >= 1);
   assert.ok(files.has('docs/framework/workflows/candidate-qualification.yml'));
+  for (const name of ['dev', 'release', 'release-cut', 'publish']) assert.ok(!files.has(`docs/framework/workflows/${name}.yml`), `${name}.yml is the framework's own delivery pipeline`);
+  assert.ok(![...files.keys()].some(path => path.startsWith('.github/PULL_REQUEST_TEMPLATE/')));
   assert.ok(files.has('.github/dependabot.yml')); assert.ok(![...files.keys()].some(path => path.startsWith('.github/scripts/')));
   assert.ok(!files.has('tests/tooling/qualification-trigger.checks.mjs'));
 });
@@ -82,17 +85,6 @@ test('[GENERATOR-DEVKIT-03] Claude Code, VS Code and agent files are valid, wire
   assert.ok(kit.length >= 16);
   for (const entry of kit) assert.doesNotMatch(entry.content, /\{\{[A-Za-z]+\}\}/, entry.path);
 });
-/** Claude Code permission rules: `*` matches any text, a trailing ` *` also matches the bare command;
- * deny wins over ask, ask over allow. Returns the decision for one command. */
-function permission(settings, command) {
-  const matches = rule => {
-    const pattern = /^Bash\((.*)\)$/.exec(rule)[1];
-    const source = pattern.split('*').map(part => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*').replace(/ \.\*$/, '(?: .*)?');
-    return new RegExp(`^${source}$`).test(command);
-  };
-  for (const decision of ['deny', 'ask', 'allow']) if ((settings.permissions[decision] ?? []).some(matches)) return decision;
-  return 'unlisted';
-}
 test('[GENERATOR-DEVKIT-08] pre-approved agent commands are exact safe forms; downloads are denied and path-writing flags ask', () => {
   const settings = JSON.parse(text('.claude/settings.json'));
   for (const command of ['npm test', 'npm run check', 'npm run check -- --fast', 'npm run -s check -- --fast', 'npm run check:submission', 'node bin/app check submission',

@@ -1,5 +1,7 @@
 # Dedicated project compiler
 
+> Type: reference · Part of the [docs index](../../README.md)
+
 The compiler turns Companion JSON into artifact data. It does not install dependencies, invoke Vite, seed a vault, run tests, or publish. The shell CLI composes this compiler with a separate ownership-aware workspace planner and the existing safe writer.
 
 ## Commands
@@ -34,10 +36,10 @@ In a click-dummy workspace run `npm run typecheck:clickdummy`, then `npm run bui
 
 ## Compatibility and guarantees
 
-The shared authoring contract accepts only Companion project schema 6, including routes and journeys; schema 1–5 input fails with a schema diagnostic and is never migrated. The checked-in concept is schema 6 too; it embeds no project and is not an input of the compiler. See [post-MVP integration](POST-MVP-INTEGRATION.md), the [integrated review](../../product/PR5-PRODUCT-REVIEW.md) and [current evidence](../../testing/PR5-REVIEW-EVIDENCE.md). The existing visual IR is reused, not duplicated. Operation request/result schemas are not the complete public project-v6 schema; that discovery/parity gap remains tracked in the improvement plan. Independent reference errors carry original JSON pointers; errors detected by the contract validator identify the input document and may name its root instead of inventing a source location.
+The shared authoring contract accepts only Companion project schema 6, including routes and journeys; schema 1–5 input fails with a schema diagnostic and is never migrated. The checked-in concept is schema 6 too; it embeds no project and is not an input of the compiler. See [post-MVP integration](POST-MVP-INTEGRATION.md), the [integrated review](../../_archive/product/PR5-PRODUCT-REVIEW.md) and [current evidence](../../_archive/testing/PR5-REVIEW-EVIDENCE.md). The existing visual IR is reused, not duplicated. Operation request/result schemas are not the complete public project-v6 schema; that discovery/parity gap remains tracked in the improvement plan. Independent reference errors carry original JSON pointers; errors detected by the contract validator identify the input document and may name its root instead of inventing a source location.
 
 Compilation uses immutable snapshot data. Fingerprints bind compiler version, input bytes, template fingerprint, output kind, paths, ownership and artifact content. Telemetry clocks/run IDs are excluded. These fingerprints are not approvals or signatures. The workspace plan separately binds existing target bytes and the local ownership receipt. Apply reconstructs/checks the reviewed state through the existing file-plan engine.
 
 No implicit deletion, dependency installation, Git operation, live provider call or plugin activation occurs. Edited extensions are preserved under the pre-existing ownership policy; conflicting generated changes stop apply. The writer uses guarded per-file writes and rollback, **not a filesystem-wide atomic transaction**.
 
-See [architecture](ARCHITECTURE.md), [diagnostics and debugging](DIAGNOSTICS.md), [qualification and extension](TESTING.md), and the [refactor delivery record](IMPLEMENTATION.md).
+See [architecture](ARCHITECTURE.md), [diagnostics and debugging](DIAGNOSTICS.md), [qualification and extension](TESTING.md), and the [refactor delivery record](../../_archive/development/compiler/IMPLEMENTATION.md).

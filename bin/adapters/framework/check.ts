@@ -11,8 +11,9 @@ import { projectConfigPath, projectConfigs } from '../../../scripts/shared/proje
 import { runNode } from './process.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { changedFiles, runGit, type Changes, type Git } from './check-changes.ts';
-import { fastSteps, fastSuites, type Reason } from './check-selection.ts';
-export interface CheckStep { id: string; display: string; entry: string; args: string[]; skip?: string }
+import { fastSteps, fastSuites, suiteTimeoutMs, type Reason } from './check-selection.ts';
+/** `timeoutMs` is a step's default budget; an explicit `check --timeout` overrides it for every step. */
+export interface CheckStep { id: string; display: string; entry: string; args: string[]; skip?: string; timeoutMs?: number }
 export interface StepOutcome {
   id: string; command: string; status: 'passed' | 'failed' | 'skipped' | 'not-run';
   durationMs: number; exitCode: number | null; code?: string; reason?: string; outputTail?: string;
@@ -30,7 +31,7 @@ async function makerSteps(root: string, project: boolean): Promise<CheckStep[]> 
   if (!await exists(join(root, 'bin/app.ts')) || !await exists(join(root, 'configs/types/tsconfig.maker.json'))) return [];
   const types: CheckStep = { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] };
   if (project) return [types];
-  return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] }];
+  return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'], timeoutMs: suiteTimeoutMs }];
 }
 function typecheckStep(root: string, project: boolean): CheckStep {
   if (!project) return { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
@@ -61,7 +62,7 @@ function stepParts(root: string, project: boolean, makers: CheckStep[], config: 
 const fullSteps = (parts: Parts): CheckStep[] => [parts.typecheck, ...(parts.lint ? [parts.lint] : []), parts.eslint, parts.fullTest, ...parts.authoring, ...parts.makers];
 export interface CheckSelection { scope: string; steps: CheckStep[]; changes?: Changes; suites?: Array<{ name: string; reasons: Reason[] }> }
 /** `base` (fast mode only) is the ref whose merge-base with HEAD starts the diff; default origin/main, else HEAD. */
-export async function checkSteps(root: string, fast: boolean, git: Git = runGit, base?: string): Promise<CheckSelection> {
+export async function checkSteps(root: string, fast: boolean, git: Git = runGit, base?: string, skipSuites = false): Promise<CheckSelection> {
   const scope = await checkScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root, project), config = vitestConfig(root, project);
   // A generated project without the shell's oxlint wrapper keeps ESLint only; the shell always runs both.
@@ -71,7 +72,7 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit,
   const changes = await changedFiles(root, git, base);
   const suites = await fastSuites(root, project, changes);
   const narrowed = fastSteps({ project, changes, typecheck: parts.typecheck, fullTest: parts.fullTest, vitestConfig: config, full: () => fullSteps(parts),
-    fullLint: parts.lint, eslintRoots: parts.eslintRoots, fullEslint: parts.eslint, makerTypes: makers.filter(step => step.id === 'maker-types'), suites });
+    fullLint: parts.lint, eslintRoots: parts.eslintRoots, fullEslint: parts.eslint, makerTypes: makers.filter(step => step.id === 'maker-types'), suites, skipSuites });
   // Without a diff source the narrowed gate falls back to the full steps, which already include the authoring tests.
   const steps = changes.source === 'git' ? [...narrowed, ...parts.authoring] : narrowed;
   return { scope, steps, changes, suites };
@@ -106,9 +107,9 @@ async function runCheckStep(step: CheckStep, context: Context, timeout: number, 
   }
 }
 /** Runs every step (no fail-fast) unless cancelled; child output is captured, not streamed. */
-export async function runCheckSteps(steps: readonly CheckStep[], context: Context, timeout = 600_000, run: Runner = runNode): Promise<StepOutcome[]> {
+export async function runCheckSteps(steps: readonly CheckStep[], context: Context, timeout?: number, run: Runner = runNode): Promise<StepOutcome[]> {
   const outcomes: StepOutcome[] = [];
-  for (const step of steps) outcomes.push(await runCheckStep(step, context, timeout, run));
+  for (const step of steps) outcomes.push(await runCheckStep(step, context, timeout ?? step.timeoutMs ?? 600_000, run));
   return outcomes;
 }
 /** A generated project installs with its own `npm ci`, the same instruction AGENTS.md and the README give. */
@@ -133,11 +134,16 @@ function baseOption(request: Request, fast: boolean): string | undefined {
   if (base !== undefined && !fast) throw new OperationError('INVALID_OPTION', '--base requires --fast (or --plan).', 'node bin/app check --fast --base <branch-or-commit>');
   return base;
 }
+function skipSuitesOption(request: Request, fast: boolean): boolean {
+  const skip = request.options['skip-suites'] === true;
+  if (skip && !fast) throw new OperationError('INVALID_OPTION', '--skip-suites requires --fast.', 'node bin/app check --fast --skip-suites');
+  return skip;
+}
 export async function checkOperation(request: Request, context: Context, run: Runner = runNode, git: Git = runGit): Promise<Result> {
   const fast = request.options.fast === true;
-  const timeout = Number(stringOption(request.options, 'timeout') ?? '600000');
+  const explicit = stringOption(request.options, 'timeout'), timeout = explicit === undefined ? undefined : Number(explicit);
   const requestedBase = baseOption(request, fast);
-  const { scope, steps, changes, suites } = await checkSteps(context.root, fast, git, requestedBase);
+  const { scope, steps, changes, suites } = await checkSteps(context.root, fast, git, requestedBase, skipSuitesOption(request, fast));
   const base = { gate: 'check', scope, mode: fast ? 'fast' : 'full', verify: 'not-run', ...changeSummary(changes, suites) };
   if (request.options['dry-run']) return result(request.command, { ...base, execution: 'not-run', steps: plannedSteps(steps) }, 'planned');
   const started = performance.now();

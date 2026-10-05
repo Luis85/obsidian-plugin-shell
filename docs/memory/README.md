@@ -1,5 +1,7 @@
 # Reviewed, Git-backed project knowledge
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 This folder is **not an auto-ingestion trigger**. Adding a file, cloning the repo or opening an agent must not opt a contributor in. It is an optional, reviewable bridge from durable project decisions to a local Hindsight bank.
 
 Create lowercase Markdown files under `decisions/`. Keep each focused on one durable decision and below 64 KiB. Include status (proposed/accepted/superseded), context, decision/rationale, alternatives, affected contracts, source PR/commit and actual verification. Never claim acceptance merely because the record exists on a branch. Do not include raw conversations, customer information, credentials or output from private diagnostics.

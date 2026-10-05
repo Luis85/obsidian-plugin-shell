@@ -40,6 +40,8 @@ node bin/app doctor
 
 `new` creates a separate project; `setup` configures the current project. A positional directory for `new` is relative to the invoking terminal. Do not point `new` at a populated unrelated project. The command protects against unintended vault-local creation; `--inside-vault` is an explicit exception, not the recommended everyday path.
 
+Pull requests and CI default to GitHub. If the project lives in Azure DevOps, add `--hosting azure-devops --azure-organization https://dev.azure.com/<organization> --azure-project <project>` to the preview and creation commands, or `--hosting none` for no CI; an interactive run asks. See [optional integrations](optional-integrations.md#hosting-platform-github-azure-devops-or-none).
+
 Use a stable lowercase ID with letters, digits and hyphens. The reviewed validator rejects IDs containing `obsidian` or `plugin`, so `folio-tools` is suitable whereas `my-plugin` is not. Display names can contain spaces. Changing an established plugin identity is not just a cosmetic rename.
 
 For a custom-file viewer, first inspect the starter, then review a creation such as:

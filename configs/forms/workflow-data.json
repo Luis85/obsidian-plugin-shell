@@ -1,0 +1,14 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "workflow-data",
+  "version": 1,
+  "title": "Browser test workflow data",
+  "description": "Inline test values and seeded fake-data records that step values reference as {{data.path}}.",
+  "fields": [
+    { "id": "valueLines", "kind": "list", "label": "Inline values (path=value, optional)", "multiline": true, "suffix": " (separate with ;)",
+      "help": "One per line, for example user.password=correct horse. Steps use them as {{data.user.password}}." },
+    { "id": "fakeLines", "kind": "list", "label": "Fake-data records (alias=config:<id>#<index>, optional)", "multiline": true, "suffix": " (separate with ;)",
+      "help": "One per line: customer=config:contacts-demo#0 reuses a saved generation config; person=entity:contact@7#2 uses an entity, a seed and a record index. Steps use them as {{data.customer.email}}." }
+  ]
+}

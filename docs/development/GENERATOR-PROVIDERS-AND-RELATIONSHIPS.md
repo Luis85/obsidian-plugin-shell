@@ -1,6 +1,8 @@
 # Generated providers, relationship integrity and test data
 
-This is part of PR #21 / [SH-035](../tasks/shell/SH-035.md) (formerly the colliding SH-023). It extends the existing explicit action, canonical note and scoped Design System compilers. It does not infer business rules from PRD prose or turn the browser concept into a finished native plugin.
+> Type: reference · Part of the [docs index](../README.md)
+
+Tracked as [SH-035](../tasks/shell/SH-035.md) (formerly the colliding SH-023). It extends the existing explicit action, canonical note and scoped Design System compilers. It does not infer business rules from PRD prose or turn the browser concept into a finished native plugin.
 
 ## Supported declaration-to-code mapping
 
@@ -98,4 +100,4 @@ Product work still includes visual Vue Flow editors, any components without auth
 
 These references guide integration. Repository tests, not documentation links, establish the implemented behavior above.
 
-See [the local-review reconciliation](GENERATOR-FIXTURES-AND-RELATIONSHIPS.md) for shared translation, read-only checks, audits and queue disposal.
+See [the local-review reconciliation](../_archive/development/GENERATOR-FIXTURES-AND-RELATIONSHIPS.md) for shared translation, read-only checks, audits and queue disposal.

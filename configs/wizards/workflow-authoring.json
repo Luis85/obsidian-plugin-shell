@@ -1,0 +1,19 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "workflow-authoring",
+  "version": 1,
+  "title": "Browser test workflow authoring",
+  "description": "Create or edit a data-driven browser test workflow: details, target, test data and steps, saved with its documentation note through a reviewed plan.",
+  "context": { "title": "Test workflow {{workflow.title|(new)}}", "details": ["Nothing is written before the reviewed plan."] },
+  "cancelMessage": "Workflow authoring cancelled. Nothing was written.",
+  "steps": [
+    { "id": "load", "kind": "action", "action": "workflow.load" },
+    { "id": "details", "kind": "form", "form": "workflow-details", "bind": "workflow", "title": "Details" },
+    { "id": "target", "kind": "form", "form": "workflow-target", "bind": "workflow.target", "title": "Target" },
+    { "id": "data", "kind": "action", "action": "workflow.edit-data", "interactive": true, "title": "Test data" },
+    { "id": "steps", "kind": "action", "action": "workflow.edit-steps", "interactive": true, "title": "Steps" },
+    { "id": "save", "kind": "action", "action": "workflow.save", "retry": "steps", "barrier": true },
+    { "id": "done", "kind": "end", "text": "Workflow {{saved.workflow}} saved to {{saved.path}} with its note {{saved.doc}}. Next: node bin/app workflow run --name {{saved.workflow}} --json." }
+  ]
+}

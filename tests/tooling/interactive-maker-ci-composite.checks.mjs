@@ -159,13 +159,15 @@ test('the adapter reads action.yml or action.yaml bounded and refuses invalid or
 });
 test('jobs that call this repository\'s setup-qualified action are reproducible and resolve its install input', async () => {
   const listed = await ciOperation({ command: 'ci', args: [], options: { list: true } }, { root, frameworkRoot: root }), listing = listed.data;
-  assert.match(renderHuman(listed, { color: false, unicode: false }).text, /compiler-qualification\/contracts +\$\{\{ matrix\.os \}\}; matrix os x3; \d+ run steps; expands \.\/\.github\/actions\/setup-qualified; reproducible; executable/);
+  assert.match(renderHuman(listed, { color: false, unicode: false }).text, /compiler-qualification\/contracts +\$\{\{ matrix\.os \}\}; matrix os \(computed\); \d+ run steps; expands \.\/\.github\/actions\/setup-qualified; reproducible; executable/);
   const jobs = listing.workflows.flatMap(item => item.jobs).filter(job => job.actions.includes('./.github/actions/setup-qualified'));
   assert.ok(jobs.length >= 10, `${jobs.length} jobs use setup-qualified`);
-  for (const job of jobs) assert.ok(job.reproducible, `${job.reference}: ${job.reasons.join('; ')}`);
+  const privileged = new Set(['release-cut/cut', 'publish/publish']);
+  for (const job of jobs.filter(item => !privileged.has(item.reference))) assert.ok(job.reproducible, `${job.reference}: ${job.reasons.join('; ')}`);
+  for (const job of jobs.filter(item => privileged.has(item.reference))) assert.ok(!job.reproducible && job.reasons.some(reason => /deployment environment/.test(reason)), `${job.reference} stays behind its release environment`);
   const definition = await readFile(join(root, '.github/actions/setup-qualified/action.yml'), 'utf8');
   assert.match(definition, /INSTALL_FLAGS: \$\{\{ inputs\.install-flags \}\}/, 'the action passes inputs through env');
-  const dry = (await ciOperation({ command: 'ci', args: [], options: { job: 'compiler-qualification/contracts' } }, { root, frameworkRoot: root })).data;
+  const dry = (await ciOperation({ command: 'ci', args: [], options: { job: 'compiler-qualification/contracts', matrix: 'os=ubuntu-24.04' } }, { root, frameworkRoot: root })).data;
   const install = dry.steps.find(step => step.env.INSTALL_FLAGS !== undefined);
   assert.deepEqual([install.disposition, install.env.INSTALL_FLAGS, install.action.uses], ['run', '--no-fund', './.github/actions/setup-qualified']);
   assert.equal(dry.steps.find(step => step.env.PLAYWRIGHT_MODE !== undefined).disposition, 'condition-unknown');

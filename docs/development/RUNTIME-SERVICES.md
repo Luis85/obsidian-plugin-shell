@@ -1,5 +1,7 @@
 # Runtime events and owned notifications
 
+> Type: reference · Part of the [docs index](../README.md)
+
 The runtime provides a typed in-process bus, a native observation bridge and a
 notification policy with owned timers/actions. They run per plugin instance.
 Application services remain authoritative for committed results; neither native

@@ -1,5 +1,7 @@
 # Product requirements: Obsidian Plugin Shell
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Version:** 0.11.0 · **Updated:** 2026-09-23 · **Owner:** Luis85
 > **Implementation milestone:** Authoring, optional examples, shared durable persistence
 > and executable qualification milestone, plugin version 0.4.0. Final platform/public-release
@@ -20,14 +22,14 @@ The owner requested the first runnable iteration up to an openable showcase view
 
 ## Requirements remain in force
 
-**Executable qualification extension:** The [selected plan](../development/EXECUTABLE-QUALIFICATION-PLAN.md)
+**Executable qualification extension:** The [selected plan](../_archive/development/EXECUTABLE-QUALIFICATION-PLAN.md)
 addresses TST-08–11/15, QLT-05/12 and NFR-02–05 over the existing implementation.
 Trusted producer adapters bind actual framework/native results to source, tools,
 protocols and candidate assets. An additive crosswalk retains all 96 legacy
 acceptance rows and required modes. Full production function-complexity and clone
 measurements, ownership cycles and controlled-reference timing remain separate
 from execution rates and source coverage. See the
-[execution record](../testing/EXECUTABLE-QUALIFICATION.md) for measured results;
+[execution record](../_archive/testing/EXECUTABLE-QUALIFICATION.md) for measured results;
 unexecuted modes and the blocked release profile remain visible.
 
 **Runtime authoring extension:** Complete narrow publication/observation contracts,
@@ -36,18 +38,18 @@ The optional Items reference uses the existing plugin-data backend for stable-ID
 create/rename/delete, with trimmed 1–120-character labels and separate per-view
 drafts. It shares the preferences writer and refreshes committed projections from
 typed facts. Task remains a distinct Markdown workflow. See the
-[implementation and acceptance plan](../development/RUNTIME-AUTHORING-PLAN.md).
+[implementation and acceptance plan](../_archive/development/RUNTIME-AUTHORING-PLAN.md).
 This work addresses EVT-03/05/06/11/16 and EXA-01–03; execution evidence is recorded
 separately and does not promote all historical acceptance cases. The release
 executor below is now part of the merged integration baseline.
 
-**Release execution extension:** The [milestone plan](../development/RELEASE-EXECUTION-PLAN.md)
+**Release execution extension:** The [milestone plan](../_archive/development/RELEASE-EXECUTION-PLAN.md)
 adds authenticated GitHub discovery and a separately authorized local executor for
 retained candidate drafts, missing uploads and promotion. It reuses the existing
 candidate/planner contracts, preserves public versions and stops on uncertain
 outcomes. Promotion requires an existing matching tag. All workflows remain
 read-only; no publication, tag, listing or permissions change is authorized.
-The [readiness ledger](../development/TEMPLATE-READINESS-LEDGER.md) accounts for
+The [readiness ledger](../_archive/development/TEMPLATE-READINESS-LEDGER.md) accounts for
 remaining requirements and every legacy acceptance row without promoting earlier
 evidence. The standard privileged Actions interface and real first/subsequent
 publication qualification remain open.
@@ -62,9 +64,9 @@ stale snapshots and stop after uncertain writes. Add focused generated formattin
 seeded data properties, rendered accessibility, test/workflow/style/documentation
 checks and fixed-commit retained-asset release preparation. No automatic migration,
 ORM/query language, whole-vault index, publication, permission changes or automerge
-is introduced. See the [plan](../development/ITERATION-FOUR-PLAN.md),
-[review](../development/ITERATION-FOUR-REVIEW.md) and
-[executed evidence](../testing/ITERATION-FOUR.md).
+is introduced. See the [plan](../_archive/development/ITERATION-FOUR-PLAN.md),
+[review](../_archive/development/ITERATION-FOUR-REVIEW.md) and
+[executed evidence](../_archive/testing/ITERATION-FOUR.md).
 
 **Owner amendment — note titles:** On creation, the document service uses the
 projected title verbatim as the Markdown filename, followed only by `.md`.
@@ -90,7 +92,7 @@ any unrelated historical acceptance case.
 definitions, optional document recipes and typed repository CRUD to the template.
 This supersedes the retained exclusion of a generic repository only for the
 bounded, entity-bound Markdown repository described in the
-[iteration plan](../development/ITERATION-THREE-PLAN.md). ORM/query languages,
+[iteration plan](../_archive/development/ITERATION-THREE-PLAN.md). ORM/query languages,
 automatic migrations and whole-vault indexing remain excluded. Task is an example
 consumer; shared services must support another entity without special cases.
 
@@ -99,7 +101,7 @@ The extension path is a first-class template capability: feature authors work in
 registration. Shared dependencies/lifecycle are wired once. Business modules must
 not be buried in adapters or require editing generic repository/service code.
 
-The complete pre-implementation contract is retained verbatim in [SPECIFICATION-0.7.md](SPECIFICATION-0.7.md), incorporating [BASELINE-0.4.md](BASELINE-0.4.md) and all normative companions. Its historical capability/status paragraphs are superseded by this page and the current [iteration record](../testing/ITERATION-THREE.md); the numbered requirements, safety rules and intended final commands are not weakened or deleted.
+The complete pre-implementation contract is retained verbatim in [SPECIFICATION-0.7.md](SPECIFICATION-0.7.md), incorporating [BASELINE-0.4.md](BASELINE-0.4.md) and all normative companions. Its historical capability/status paragraphs are superseded by this page and the current [iteration record](../_archive/testing/ITERATION-THREE.md); the numbered requirements, safety rules and intended final commands are not weakened or deleted.
 
 | Contract | Scope |
 | --- | --- |
@@ -110,7 +112,7 @@ The complete pre-implementation contract is retained verbatim in [SPECIFICATION-
 | [Documents](../architecture/DOCUMENT-CREATION.md) | Typed definitions, preview/commit, Markdown and failure semantics. |
 | [Errors and notifications](../architecture/ERRORS-AND-NOTIFICATIONS.md) | Full outcomes, feedback ownership, queue/timer/recovery policy. |
 | [Harness styles](../testing/HARNESS-STYLES.md) / [tokens](../design/OBSIDIAN-TOKENS.md) | Host fixture provenance, semantic roles, tokens and fidelity. |
-| [Nuxt UI plan](../development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Selected frontend foundation, full integration roadmap and NUI acceptance matrix. |
+| [Nuxt UI plan](../_archive/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Selected frontend foundation, full integration roadmap and NUI acceptance matrix. |
 | [Test strategy](../testing/TEST-STRATEGY.md) / [concept](../testing/TEST-CONCEPT.md) | Determinism, negative gates, evidence and full qualification. |
 
 The [machine plan](../testing/test-plan.json) remains the retained baseline inventory. Iteration-specific runtime/browser IDs and evidence are documented separately; they do not silently turn every prior acceptance item into verified status.
@@ -137,7 +139,7 @@ The [machine plan](../testing/test-plan.json) remains the retained baseline inve
 | CI | Read-only Linux/Windows verification, Linux served-browser and selected native smoke, temporary artifacts only. |
 | Mobile/release/template qualification | Pending. Manifest desktop-only, no public release or directory submission. |
 
-See [ITERATION-THREE.md](../development/ITERATION-THREE.md) and [README](../../README.md)
+See [ITERATION-THREE.md](../_archive/development/ITERATION-THREE.md) and [README](../../README.md)
 for actual APIs/commands. Do not invoke future maker/release commands from contract
 examples until implemented.
 
@@ -161,11 +163,11 @@ The first qualified graph uses Nuxt UI4.11.2, Vue3.5.43, Pinia4.0.3, Vite8.3.0, 
 
 Nuxt UI integrates through plain Vue/Vite without the Nuxt framework/router. A narrow source-hash-guarded build adapter removes two global-style-producing modules. CSS uses an owned root and native semantic variables; selected local SVG assets and dependency notices are bundled. Expanded components, package upgrades, additional overlay/portal behaviors and mobile require requalification.
 
-The retained nested ESLint support exception and its review boundary are in the [dependency exception record](../development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md). Current audit results belong to the [executed verification record](../testing/ITERATION-THREE.md). A lockfile provides reproducibility, not proof that every transitive dependency has no advisory.
+The retained nested ESLint support exception and its review boundary are in the [dependency exception record](../development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md). Current audit results belong to the [executed verification record](../_archive/testing/ITERATION-THREE.md). A lockfile provides reproducibility, not proof that every transitive dependency has no advisory.
 
 ## Verification and definition of this milestone
 
-The [iteration test record](../testing/ITERATION-THREE.md) identifies actual checks,
+The [iteration test record](../_archive/testing/ITERATION-THREE.md) identifies actual checks,
 source/candidate identity, failures corrected and untested scope. `verify` covers
 static/service/production-coverage/artifact/retained-baseline/harness-build checks;
 served E2E and native qualification are separate. Full PRD verification and release
@@ -196,7 +198,7 @@ companion's authoring profile. Other projects are other Obsidian vaults.
 
 The [single-vault contract](../concepts/companion/SINGLE-VAULT.md) identifies the
 implemented browser concept, native persistence/hydration backlog and acceptance
-boundary. The [earlier research](../research/2026-09-23-companion-plugin.md) is dated
+boundary. The [earlier research](../_archive/research/2026-09-23-companion-plugin.md) is dated
 background; its external-source and multi-project proposals are superseded.
 This remains proposed native product scope, not an installable companion,
 marketplace listing, native file-write qualification or change to root-template
@@ -221,4 +223,4 @@ implementation packages; no existing root runtime behavior is replaced here.
 
 The primary developer starts with the assembled GitHub framework release archive, not an installed plugin: extract → console setup/configure → import project JSON → reviewed generation → develop/build/test → explicitly publish the generated plugin → maintain. The compiled TypeScript-authored CLI runs before dependency installation, both directly and through npm aliases, and shares operations/makers/contracts with the template and future companion. An independent project root and custom source/test paths are first-class.
 
-The [implementation plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and SH-023–SH-034 extend the existing requirements. SH-022 remains technically blocked; SH-034 requires new exact-candidate authorization. Existing read-only handoff semantics and all earlier quality/safety requirements remain unchanged. This amendment is not runtime implementation or a release claim.
+The [implementation plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and SH-023–SH-034 extend the existing requirements. SH-022 remains technically blocked; SH-034 requires new exact-candidate authorization. Existing read-only handoff semantics and all earlier quality/safety requirements remain unchanged. This amendment is not runtime implementation or a release claim.

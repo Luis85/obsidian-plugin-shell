@@ -9,6 +9,8 @@ import { checkPlanView } from './check-plan-view.ts';
 import { ciJobView, ciListView } from './ci-view.ts';
 import { uiStatusView } from './ui-status-view.ts';
 import { isMakerResult, makerChecksView } from './maker-view.ts';
+import { deliveryPlanDetails, incrementCheckView, incrementReadView, isDeliveryPlan } from './increment-view.ts';
+import { publishView, pullRequestReadView, syncView, uncertainView } from './pull-request-view.ts';
 import type { UiStatusReport } from '../../domain/ui-status.ts';
 import { bold, duration, marker, nextLine, rows, runnable, type Mark, type Style } from './terminal-style.ts';
 export interface Rendered { text: string; diagnosticsShown: boolean }
@@ -78,10 +80,17 @@ function statusPasses(data: Data, configured: boolean): string[] {
   if (data.designStale === false) passes.push('Generation matches the accepted design');
   return passes;
 }
+/** Platform, plus what doctor found of the az CLI for an Azure DevOps project. */
+function hostingLine(value: unknown): string | null {
+  if (!value) return null;
+  const hosting = record(value), cli = hosting.azureCli ? record(hosting.azureCli) : null;
+  if (!cli) return String(hosting.platform);
+  return `${String(hosting.platform)}; az ${cli.version ? String(cli.version) : 'not found'}, azure-devops extension ${cli.devopsExtension ? String(cli.devopsExtension) : 'missing'}`;
+}
 function statusView(style: Style, value: Result): string {
   const data = record(value.data), manifest = data.manifest ? record(data.manifest) : null, configured = Boolean(data.configuration);
   let text = rows([['Root', String(data.root)], ['Plugin', pluginLine(manifest)], ['Configured', configured ? 'yes (shell.config.json)' : 'no'],
-    ['Design', designState(data)], ['Generated', data.generated ? 'yes' : 'no'],
+    ['Design', designState(data)], ['Generated', data.generated ? 'yes' : 'no'], ['Hosting', hostingLine(data.hosting)],
     ['Dependencies', data.dependencies ? 'installed' : 'missing'], ['Node', process.version], ['Acceptance', typeof data.acceptanceObligations === 'number' ? `${data.acceptanceObligations} obligations pending` : null]]);
   text += `${bold(style, 'Checks')}\n` + statusPasses(data, configured).map(item => `  ${marker(style, 'pass')} ${item}\n`).join('') + diagnosticsBlock(style, value.diagnostics);
   const next = value.diagnostics.find(item => item.next)?.next ?? (typeof data.next === 'string' ? data.next : null);
@@ -187,6 +196,11 @@ const views: Array<[View, boolean]> = [
   [(style, value) => value.command === 'ui status' ? uiStatusView(style, value.data as UiStatusReport) : undefined, false],
   [(style, value) => value.command === 'adopt analyze' ? adoptAnalyzeView(style, value) : undefined, false],
   [(style, value, data) => value.command === 'adopt plan' && typeof data.planHash === 'string' ? adoptPlanView(style, value) : undefined, false],
+  [(style, value) => value.command === 'increment check' ? incrementCheckView(style, value) : undefined, true],
+  [(style, value) => incrementReadView(style, value) ?? pullRequestReadView(style, value), false],
+  [(style, value, data) => value.command === 'pr publish' && typeof data.planHash === 'string' ? publishView(style, value) : undefined, false],
+  [(style, value, data) => value.command === 'pr sync' && typeof data.planHash === 'string' ? syncView(style, value) : undefined, true],
+  [(style, value) => isDeliveryPlan(value) ? planView(style, value, deliveryPlanDetails(style, value)) : undefined, false],
   [(style, value, data) => isMakerResult(value) && typeof data.planHash === 'string' ? planView(style, value, makerChecksView(style, value)) : undefined, false],
   [(style, value, data) => typeof data.planHash === 'string' && Array.isArray(data.changes) ? planView(style, value) : undefined, false],
 ];
@@ -196,6 +210,7 @@ const failureView = (value: Result, data: Data) => value.command === 'check' || 
 const headerLabel = (command: string) => command === 'unknown' ? 'Workbench CLI (no command ran)' : command;
 export function renderHuman(value: Result, style: Style): Rendered {
   const header = `${headerLabel(value.command)}: ${value.status}\n`, data = record(value.data);
+  if (value.status === 'failed' && data.uncertain === true) return { text: header + uncertainView(style, value), diagnosticsShown: false };
   if (value.status === 'failed' && !failureView(value, data)) return { text: header + (Object.keys(data).every(key => key === 'suggestions') ? '' : generic(value.data)), diagnosticsShown: false };
   if (isHelp(value, data)) return { text: helpText(style, value.data as HelpData), diagnosticsShown: false };
   for (const [view, diagnosticsShown] of views) {

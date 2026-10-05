@@ -6,6 +6,7 @@ name: Native integration starters
 # concept sources the assembly check reads.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - '**'
       - '.*'
@@ -19,7 +20,20 @@ on:
       - 'docs/testing/test-plan.json'
       - 'docs/design/obsidian-tokens.json'
       - '!projects/**'
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -27,6 +41,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   contracts-and-adapters:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -43,6 +58,7 @@ jobs:
           node node_modules/vitest/vitest.mjs run --config configs/testing/vitest.config.mjs tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
           python3 scripts/concepts/build-companion.py --check
   generated-starters:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:

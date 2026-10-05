@@ -61,8 +61,8 @@ test('process selection follows --run or --install and requires explicit trust b
   assert.equal(await code(plan(context, { starter: 'note-pack', run: 'hello', yes: true })), 'STARTER_TRUST');
   assert.equal(await code(plan(context, { starter: 'note-pack', install: true, apply: 'hash' })), 'STARTER_TRUST');
   assert.equal(await code(plan(context, { starter: 'idle', install: true })), 'STARTER_PROCESS');
-  for (const key of ['extension', 'extensions', 'airship', 'no-airship', 'storybook', 'storybook-stories']) {
-    assert.equal(await code(plan(context, { starter: 'note-pack', [key]: key === 'extension' ? 'md' : true })), 'STARTER_OPTION');
+  for (const key of ['extension', 'extensions', 'airship', 'no-airship', 'storybook', 'storybook-stories', 'hosting', 'azure-organization', 'azure-project', 'azure-repository']) {
+    assert.equal(await code(plan(context, { starter: 'note-pack', [key]: key === 'extension' ? 'md' : key === 'hosting' ? 'azure-devops' : key.startsWith('azure-') ? 'Demo' : true })), 'STARTER_OPTION');
   }
 }, [fileStarter(), fileStarter({ id: 'idle', firstRun: [] })]));
 

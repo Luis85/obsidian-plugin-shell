@@ -90,11 +90,15 @@ function planStep(workflow: CiWorkflow, job: CiJob, step: CiStep, lookup: Lookup
   const details = planRunDetails(job, step, lookup);
   return { ...planned, ...details, unresolved: unique([...unresolved, ...details.unresolved]) };
 }
+/** A local run stands for an update (synchronize) of a ready (non-draft) pull request from a non-release branch on the
+ * Integration tier; every other event field stays unknown, so the e2e opt-in (`inputs.e2e`, the `e2e` label) is never
+ * guessed and an opt-in end-to-end step is reported as condition-unknown. Runtime values from the environment win. */
+const localPullRequest: ReadonlyMap<string, string> = new Map([['inputs.tier', 'integration'], ['github.event.pull_request.draft', 'false'], ['github.head_ref', ''], ['github.event.action', 'synchronize']]);
 function lookupFor(combination: Combination, os: RunnerOs, environment: Lookup | undefined): Lookup {
   return path => {
     if (path.startsWith('matrix.')) return combination[path.slice(7)];
     if (path === 'runner.os') return os;
-    return environment?.(path);
+    return environment?.(path) ?? localPullRequest.get(path);
   };
 }
 /** Re-resolves one step with extra runtime context (earlier step outputs, runner temp). */
