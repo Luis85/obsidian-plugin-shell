@@ -1,5 +1,6 @@
 import { lstat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { hasPortableProjectSegments } from '../../../scripts/shared/project-path.ts';
 import type { FilePlan } from '../../../scripts/shared/file-plan.ts';
 import { projectConfigPath } from '../../../scripts/shared/project-configs.mjs';
 import { slug, title, recipeOptions } from './arguments.ts';
@@ -23,7 +24,6 @@ const isPreset = (value: string): value is Preset => presets.includes(value);
 const ownerless = ['maker', 'locale', 'plugin'];
 const surfaces = ['feature', 'view', 'store', 'component'];
 const isMissing = (error: unknown): boolean => error instanceof Error && 'code' in error && error.code === 'ENOENT';
-const reservedSegment = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 
 function checkRecipeOptions(maker: string, options: MakerOptions): void {
   if (maker === 'feature' && options['--feature'] !== undefined)
@@ -57,12 +57,10 @@ function resolveBackend(maker: string, options: MakerOptions): Backend {
   if (options['--document'] && backend !== 'markdown') throw new Error('--document requires the markdown backend');
   return backend;
 }
-// Intentional portability boundary: reject Windows-reserved and ASCII control characters in folder segments.
-const unsafeSegment = (part: string): boolean =>
-  // oxlint-disable-next-line no-control-regex
-  !part || part.startsWith('.') || /[<>:"|?*\\\u0000-\u001f]/.test(part) || /[ .]$/.test(part) || reservedSegment.test(part);
+// Intentional portability boundary: folder segments are portable project segments (no Windows-reserved names or
+// characters, no C0/C1 controls) and never hidden.
 function unsafeFolder(folder: string): boolean {
-  return folder.length > 160 || folder !== folder.trim() || folder.split('/').some(unsafeSegment);
+  return folder.length > 160 || folder !== folder.trim() || !hasPortableProjectSegments(folder) || folder.split('/').some(part => part.startsWith('.'));
 }
 function resolveDocument(options: MakerOptions, owner: string | undefined, name: string): { preset: Preset; folder: string } {
   const preset = options['--preset'] ?? 'title';

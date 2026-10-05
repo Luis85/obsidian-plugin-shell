@@ -1,4 +1,5 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
+import { hasControls } from '../../domain/errors.ts';
 import { isProtectedSegment } from '../../../scripts/shared/protected-directories.ts';
 import { lstat, readdir, readFile, realpath } from 'node:fs/promises';
 import { resolve, join, isAbsolute } from 'node:path';
@@ -10,8 +11,7 @@ const MAX_SOURCE_BYTES = 16_000_000;
 const MAX_FILE_BYTES = 1_000_000;
 export interface WorkspaceOptions { prds?: string; virtualFiles?: Record<string, string> }
 export function handoutPath(path: string): string {
-  // oxlint-disable-next-line no-control-regex
-  ensure(typeof path === 'string' && path.length > 0 && path.length <= 1024 && !isAbsolute(path) && !/[\\:\u0000-\u001f]/.test(path), 'HANDOUT_PATH', 'Use a bounded project-relative path with forward slashes.');
+  ensure(typeof path === 'string' && path.length > 0 && path.length <= 1024 && !isAbsolute(path) && !/[\\:]/.test(path) && !hasControls(path), 'HANDOUT_PATH', 'Use a bounded project-relative path with forward slashes.');
   ensure(path.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !isProtectedSegment(part)), 'HANDOUT_PATH', 'The PRD path must stay inside the project and outside protected folders.');
   return path;
 }
