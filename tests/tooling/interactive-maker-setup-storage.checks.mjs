@@ -206,7 +206,8 @@ test('packaged settings and setup examples execute against the canonical schema 
 test('setup runs the installed webapp-angular starter by ID and fails closed when it is missing or not Angular', async () => scratch(async root => {
   await vault(root);
   const plan = await projectSetupPlan(context(root), request());
-  const saved = JSON.parse(plan.plan.changes.find(change => change.path === 'project.config.json').content);
+  const saved = JSON.parse(plan.plan.changes.find(change => change.path === 'configs/example-product-config.json').content);
+  assert.ok(!plan.plan.changes.some(change => change.path === 'project.config.json'));
   assert.equal(saved.schemaVersion, 2); assert.equal(saved.starter.id, 'webapp-angular'); assert.deepEqual(saved, plan.data.selection);
   const shell = join(root, 'shell'); await mkdir(join(shell, 'configs/starters'), { recursive: true });
   await assert.rejects(() => projectSetupPlan({ root, frameworkRoot: shell }, request()), /No project starters are installed/);

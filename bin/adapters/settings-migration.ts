@@ -12,6 +12,8 @@ import { guardedText, jsonText, loadSettings } from './user-settings.ts';
 import { migrationFiles, type MigrationFile } from './migration-files.ts';
 import { retargetDeliveryConfig, type FolderMove } from '../domain/increments/model.ts';
 import { preparedDesignFolders } from './design-folder.ts';
+import { retiredProjectConfigPlan } from './project-config-migration.ts';
+import { retiredProjectConfigPath } from '../compiler/domain/project-config.ts';
 const folderPaths = new Set(['prds', 'app', 'prototypes', 'design', 'increments', 'pullRequests', 'issues']);
 const deliveryConfig = 'configs/delivery/delivery.json';
 interface Move { key: string; from: string; to: string; folder: boolean }
@@ -114,6 +116,11 @@ export async function settingsMigrationPlan(root: string, input: unknown) {
   const loaded = await loadSettings(root), settings = readSettings(input, loaded.settings);
   validateDocumentationSettings(settings);
   const moves = movesFor(loaded.settings, settings);
+  const retired = await retiredProjectConfigPlan(root, loaded.settings.paths.project);
+  if (retired) {
+    requireSketch(!moves.length, 'MIGRATION_ORDER', `Move the retired ${retiredProjectConfigPath} first: run settings migrate with an unchanged request ({"schemaVersion":1}), then migrate paths.`);
+    return retired;
+  }
   requireSketch(moves.length, 'MIGRATION_EMPTY', 'No configured paths changed; use settings for preference updates.');
   verifyDestinations(moves, loaded.settings);
   const state = await guardedText(root, setupStatePath), contents = await contentMoves(root, moves);

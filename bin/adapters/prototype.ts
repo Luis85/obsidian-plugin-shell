@@ -1,4 +1,5 @@
 import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
+import { projectConfigPath } from '../compiler/domain/project-config.ts';
 import { spawnSync } from 'node:child_process';
 import { hash } from './framework/files.ts';
 import { artifactOrigins } from '../compiler/adapters/origins.ts';
@@ -55,7 +56,8 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
   const answersJson = JSON.stringify({ schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers }, null, 2) + '\n';
   const integration = { kind: 'prototype-integration-map', schemaVersion: 1, entries: artifactOrigins(compilation.model!, compilation.artifacts, 'companion.project.json').filter(item => item.origins.length).map(item => ({ designId: item.origins[0]!.entityId, sourceFiles: ['source/' + item.path], origins: item.origins, ownership: 'generated', testIds: [], nativeRemaining: ['Not qualified by preparation'] })) };
   const manifest = { kind: selection ? 'project-prototype-package' : 'obsidian-prototype-package', schemaVersion: 1, slug: slug(String(answers.title), 'prototype'), mode: answers.mode ?? 'new-project', repository: { name: context.repository, commit: context.commit }, project: { path: 'companion.project.json', sha256: hash(projectJson) }, artifact: { path: prototypeArtifactPath(selection), sha256: null }, source: { path: 'source', packageManager: pkg.packageManager }, status: 'incomplete' };
-  const values: Record<string, string> = { title: String(answers.title), slug: slug(String(answers.title), 'prototype'), brief, projectJson,
+  const configPath = projectConfigPath(document.project.id);
+  const values: Record<string, string> = { title: String(answers.title), slug: slug(String(answers.title), 'prototype'), brief, projectJson, configPath,
     contextJson: JSON.stringify(context, null, 2), answersJson, skillPath: prototypeSkillRoot + '/SKILL.md',
     integrationJson: JSON.stringify(integration, null, 2), manifestJson: JSON.stringify(manifest, null, 2) };
   addAnswerValues(values, answers);
@@ -63,7 +65,7 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
   entries.push({ path: 'prototype-guide.json', content: JSON.stringify(guide, null, 2) + '\n' });
   entries.push(...artifacts.map(entry => ({ ...entry, path: 'source/' + entry.path })));
   if (selection) {
-    entries.push({ path: 'project.config.json', content: JSON.stringify(selection, null, 2) + '\n' });
+    entries.push({ path: configPath, content: JSON.stringify(selection, null, 2) + '\n' });
     entries.push({ path: 'project-request.json', content: JSON.stringify({ schemaVersion: 2, starter: selection.starter.id, interview: JSON.parse(answersJson) }, null, 2) + '\n' });
   }
   if (baseline) entries.push({ path: 'baseline.project.json', content: documentText(baseline) });

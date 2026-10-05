@@ -1,7 +1,8 @@
 /** Local-only built-app preview. Starting is explicit; compilation and setup never open a server. */
-export const serveSource = String.raw`import { preview } from 'vite';
+export function serveSource(configPath: string): string {
+  return String.raw`import { preview } from 'vite';
 import { readFile, access } from 'node:fs/promises';
-const config = JSON.parse(await readFile('project.config.json', 'utf8'));
+const config = JSON.parse(await readFile(${JSON.stringify(configPath)}, 'utf8'));
 const target = config.targets.find(value => value === 'webapp' || value === 'website');
 if (!target) throw new Error('A browser target is required.');
 if (process.argv.length > 2) throw new Error('Set PORT in the environment; command arguments are not supported.');
@@ -20,3 +21,4 @@ function close() {
 process.once('SIGINT', close);
 process.once('SIGTERM', close);
 `;
+}

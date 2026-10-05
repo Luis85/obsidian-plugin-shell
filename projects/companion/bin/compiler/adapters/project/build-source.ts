@@ -1,9 +1,10 @@
 /** Build adapter emitted as source; no install, native activation or process runs during compilation. */
-export const buildSource = String.raw`import { readFile, writeFile, mkdir, copyFile, rm, access } from 'node:fs/promises';
+export function buildSource(configPath: string): string {
+  return String.raw`import { readFile, writeFile, mkdir, copyFile, rm, access } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { resolve, join } from 'node:path';
 const root = process.cwd();
-const config = JSON.parse(await readFile('project.config.json', 'utf8'));
+const config = JSON.parse(await readFile(${JSON.stringify(configPath)}, 'utf8'));
 const identity = JSON.parse(await readFile('manifest.json', 'utf8'));
 const args = process.argv.slice(2);
 if (args.some(arg => !['--prototype', '--replace'].includes(arg)) || new Set(args).size !== args.length) throw new Error('Use --prototype and optionally --replace only.');
@@ -73,6 +74,7 @@ if (prototype) {
   }
 }
 `;
+}
 
 export const licenseSource = String.raw`import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

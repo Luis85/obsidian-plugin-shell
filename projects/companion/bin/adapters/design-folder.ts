@@ -20,6 +20,8 @@ export interface DesignFolderOptions {
   package?: string;
   /** A prepared brief file outside the root; its text is kept as notes/prototype-brief.md so sync can reread it. */
   briefFile?: string; title?: string; signal?: AbortSignal;
+  /** An explicit project configuration path when configs/ holds several. */
+  config?: string;
 }
 /** Settings validation already rejects a design root, configured or default, that overlaps another configured path. */
 async function configuredRoot(root: string) {
@@ -68,7 +70,7 @@ export async function designFolderPlan(options: DesignFolderOptions): Promise<Pr
   requireSketch(!previous.manifest || previous.manifest.name === name, 'DESIGN_MANIFEST', 'The manifest names another design folder. It has not been changed.');
   const request = { ...options, name, configuredProject: project, previous: previous.manifest };
   const resolved = await resolveDesignSource(request), brief = await briefFor(options, folder, previous.manifest);
-  const title = options.title ?? previous.manifest?.title ?? resolved.title, target = await designTarget(root);
+  const title = options.title ?? previous.manifest?.title ?? resolved.title, target = await designTarget(root, options.config);
   const facts = await engineeringFacts(root, resolved.document.settings);
   const { managed, seeded: rendered } = renderDesignFolder({ name, title, folder, sourcePath: resolved.source.path, document: resolved.document, brief: brief.text,
     target, tokens: await designTokens(root, options.frameworkRoot), templates: await designTemplates(), facts });

@@ -201,6 +201,11 @@ must be listed in `tests/suites.json`.
   Inspect the plan, then apply it with `--apply <planHash>`. See the
   [generator guide](docs/development/COMPANION-GENERATOR.md) and the
   [project schema](docs/development/COMPANION-PROJECT-SCHEMA.md).
+- **Project configuration**: a project made from a project starter (`new --input`,
+  `project-setup`) records its starter selection at `configs/<project-id>-config.json`.
+  Commands read the single such file directly in `configs/`, or the one named by
+  `--config`; the retired root `project.config.json` is never read. See
+  [project configuration](bin/PROJECT-STARTERS.md#project-configuration).
 - **Companion build**: `npm run companion:build`, then
   `npm run test:companion`.
 - **Framework kit**: `node bin/app framework pack --out <zip> --yes` builds the

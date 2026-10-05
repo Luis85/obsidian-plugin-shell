@@ -5,8 +5,10 @@ import { firstRunDefaults, firstRunPreferenceSchema, readFirstRunPreferences, ty
 import { object, keys, text } from './data.ts';
 import { requireSketch } from './errors.ts';
 import { defaultDesignRoot } from './design-folder.ts';
-export const settingsPath = 'configs/user-settings.json';
-export const setupStatePath = 'configs/project-setup.json';
+/** Settings, setup state, starters and project configurations; configured project paths always stay outside it. */
+const configurationFolder = 'configs';
+export const settingsPath = `${configurationFolder}/user-settings.json`;
+export const setupStatePath = `${configurationFolder}/project-setup.json`;
 export interface UserSettings {
   schemaVersion: 1;
   /** The documentation feature owns semantic validation of this shared namespace. */
@@ -38,7 +40,9 @@ export function projectPath(value: unknown): string {
   return path;
 }
 function validateLocations(paths: UserSettings['paths'], hostDirectory: string): void {
-  const locations = [...Object.values(effectivePaths(paths)), settingsPath, setupStatePath, 'configs/project-setup-draft.json', 'project.config.json', hostDirectory];
+  requireSketch(Object.values(effectivePaths(paths)).every(path => path.split('/')[0]!.toLowerCase() !== configurationFolder), 'SETTINGS_OVERLAP',
+    `Configured paths stay outside ${configurationFolder}/, which holds settings, setup state, starters and project configurations.`);
+  const locations = [...Object.values(effectivePaths(paths)), settingsPath, setupStatePath, 'configs/project-setup-draft.json', hostDirectory];
   for (let i = 0; i < locations.length; i++) for (const other of locations.slice(i + 1))
     requireSketch(!pathsOverlap(locations[i]!, other), 'SETTINGS_OVERLAP', `Input, output and configuration paths must not overlap; paths.design defaults to ${defaultDesignRoot}.`);
 }

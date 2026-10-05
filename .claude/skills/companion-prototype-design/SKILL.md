@@ -36,7 +36,7 @@ Use actual host capabilities; a Claude directory name never requires launching C
 
 ## Project-starter package routing
 
-For `node bin/app new` packages, read `project.config.json` and
+For `node bin/app new` packages, read `configs/<project-id>-config.json` and
 `references/project-starters.md` **before** following the legacy Vue-only flow below.
 Its target/framework contract governs source, build and artifact requirements.
 Do not convert a vanilla, Angular or CLI selection to Vue; no HTML is required for

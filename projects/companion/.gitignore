@@ -11,6 +11,10 @@ dist/
 .dev-vault/
 *.tsbuildinfo
 
+# App plugins installed into this checkout's bin/plugins are user-owned, never framework source; the guide ships.
+/bin/plugins/*
+!/bin/plugins/DEVELOPER-GUIDE.md
+
 dist-harness/
 .qualification/
 node-qualified

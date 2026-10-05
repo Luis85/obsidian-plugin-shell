@@ -75,13 +75,16 @@ test('generated CLI source executes real human/JSON commands without any fronten
   assert.equal(run(['--help']).status, 0); assert.equal(run(['pages', '--json', '--json']).status, 2);
 }));
 test('emitted build adapters are syntactically valid and preserve explicit no-overwrite/CLI boundaries', async () => scratch(async root => {
-  for (const source of [buildSource, licenseSource]) {
+  const build = buildSource('configs/probe-config.json');
+  assert.match(build, /readFile\("configs\/probe-config\.json", 'utf8'\)/);
+  for (const source of [build, licenseSource]) {
     const checked = spawnSync(process.execPath, ['--check', '--input-type=module'], { input: source, encoding: 'utf8', timeout: 5000 });
     assert.equal(checked.status, 0, checked.stderr);
   }
-  await mkdir(join(root, 'scripts')); await writeFile(join(root, 'scripts/build.mjs'), buildSource);
+  await mkdir(join(root, 'scripts')); await writeFile(join(root, 'scripts/build.mjs'), build);
   await writeFile(join(root, 'manifest.json'), JSON.stringify({ id: 'probe', name: 'Probe' }));
-  const config = async value => writeFile(join(root, 'project.config.json'), JSON.stringify(value));
+  await mkdir(join(root, 'configs'));
+  const config = async value => writeFile(join(root, 'configs/probe-config.json'), JSON.stringify(value));
   function run(args) { return spawnSync(process.execPath, ['scripts/build.mjs', ...args], { cwd: root, encoding: 'utf8', timeout: 5000 }); }
   await config({ framework: 'none', targets: ['cli'] });
   assert.match(run(['--prototype']).stderr, /no HTML prototype/);

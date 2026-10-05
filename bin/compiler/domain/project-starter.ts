@@ -1,4 +1,5 @@
 import { CompilerError, diagnostic } from './diagnostics.ts';
+import { portableIdPattern, projectConfigPattern } from './project-config.ts';
 type ProjectTarget = 'plugin' | 'webapp' | 'website' | 'cli';
 export type ProjectFramework = string;
 type ProjectType = ProjectTarget | 'hybrid';
@@ -8,13 +9,12 @@ export interface ProjectGenerator {
   angularPins?: Record<string, string>;
 }
 interface ProjectStarterIdentity { id: string; version: string; sha256: string }
-/** The saved project.config.json sidecar: the chosen starter plus everything generation needs without it. */
+/** The saved project configuration (configs/<project-id>-config.json): the chosen starter plus everything generation needs without it. */
 export interface ProjectSelection {
   schemaVersion: 2; starter: ProjectStarterIdentity; projectType: ProjectType; framework: ProjectFramework;
   targets: ProjectTarget[]; angularPins?: Record<string, string>;
 }
 const targetOrder: readonly ProjectTarget[] = ['plugin', 'webapp', 'website', 'cli'];
-const frameworkId = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 export const angularPackages = ['@angular/core', '@angular/common', '@angular/compiler', '@angular/platform-browser', '@angular/compiler-cli', 'rxjs', 'tslib'] as const;
 function check(value: unknown, message: string): asserts value {
   if (!value) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', message));
@@ -45,7 +45,7 @@ function readTargets(projectType: ProjectType, value: unknown): ProjectTarget[] 
 function readSelectionFields(data: Record<string, unknown>): Omit<ProjectGenerator, 'kind'> {
   check([...targetOrder, 'hybrid'].includes(String(data.projectType)), 'Unknown project type.');
   const projectType = data.projectType as ProjectType;
-  check(typeof data.framework === 'string' && data.framework.length <= 64 && frameworkId.test(data.framework), 'Invalid frontend framework ID.');
+  check(typeof data.framework === 'string' && data.framework.length <= 64 && portableIdPattern.test(data.framework), 'Invalid frontend framework ID.');
   const framework = data.framework, targets = readTargets(projectType, data.targets);
   const visual = targets.some(target => target !== 'cli');
   check(visual ? framework !== 'none' : framework === 'none', 'A CLI-only project requires framework none; visual targets require a frontend framework.');
@@ -59,7 +59,7 @@ export function readProjectGenerator(value: unknown): ProjectGenerator {
 }
 function readIdentity(value: unknown): ProjectStarterIdentity {
   const data = record(value); exact(data, ['id', 'version', 'sha256']);
-  check(typeof data.id === 'string' && data.id.length <= 60 && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(data.id), 'Invalid starter ID.');
+  check(typeof data.id === 'string' && data.id.length <= 60 && portableIdPattern.test(data.id), 'Invalid starter ID.');
   check(typeof data.version === 'string' && /^\d+\.\d+\.\d+$/.test(data.version), 'Invalid starter version.');
   check(typeof data.sha256 === 'string' && /^[a-f0-9]{64}$/.test(data.sha256), 'Invalid starter SHA-256.');
   return { id: data.id, version: data.version, sha256: data.sha256 };
@@ -72,6 +72,6 @@ export function projectSelection(starter: ProjectStarterIdentity, generator: Pro
 /** Revalidate saved sidecars and direct compiler callers; never trust a TypeScript assertion at runtime. */
 export function validateProjectSelection(value: unknown): ProjectSelection {
   const data = record(value); exact(data, ['schemaVersion', 'starter', 'projectType', 'framework', 'targets', 'angularPins']);
-  check(data.schemaVersion === 2, 'Unsupported project.config.json; create the project again from a project starter.');
+  check(data.schemaVersion === 2, `Unsupported project configuration (${projectConfigPattern}); create the project again from a project starter.`);
   return { schemaVersion: 2, starter: readIdentity(data.starter), ...readSelectionFields(data) };
 }

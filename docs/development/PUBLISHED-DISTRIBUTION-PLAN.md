@@ -72,6 +72,37 @@ workbench/
 
 The CLI ZIP is independently runnable. The starter ZIP adds only `configs/starters/*.json`.
 
+### Owner journey: observed layout and open gaps
+
+The owner's target is a single release ZIP that extracts to `bin/`, `docs/`,
+`configs/`, `src/`, `tests/`, `prototypes/`, `package.json` and `README.md`; running a
+starter writes the project's `configs/<project-id>-config.json` (see
+[project configuration](../../bin/PROJECT-STARTERS.md#project-configuration)). Observed
+from a kit packed with `node bin/app framework pack` and extracted, then the starters ZIP
+extracted on top, and checked by `tests/tooling/framework-journey.mjs`
+(`project-starter-layout.json` in its evidence):
+
+| Stage | Top level of the extracted folder |
+| --- | --- |
+| CLI kit only | `LICENSE`, `README.md`, `bin/`, `package.json` |
+| plus starters ZIP | adds `configs/starters/` |
+| `new --input <request> --out projects/<name> --apply <planHash>` | adds `projects/<name>/` with `configs/<project-id>-config.json`, the prepared package and `source/` (`configs/`, `src/`, `tests/`, `package.json`, `README.md`, ...; `docs/` only for Nuxt UI starters, which carry licence notices there) |
+| `prototype` (default `--out prototypes/prepared-prototype`) | adds `prototypes/` |
+| framework `setup` + `generate` in place | adds `src/`, `tests/`, `docs/`, `configs/` tooling folders, `design/` and `shell.config.json`, but no `configs/<project-id>-config.json` and no `prototypes/` |
+
+Gaps left for the single release ZIP (phase 5), not changed here:
+
+1. The CLI kit ships no `docs/`, `src/`, `tests/` or `prototypes/` and no starters; the
+   target archive ships all of them in one ZIP.
+2. A project starter writes a self-contained package under `projects/<name>/` (its own
+   `configs/`, and `src/`/`tests/`/`docs/` under `source/`), never into the extracted
+   folder's root. Writing the starter's project in place needs a decision on how the
+   package files (`README.md`, `execution-prompt.md`, `source/`) map onto the kit root.
+3. Generated starter sources have no `docs/` folder unless the frontend is Nuxt UI.
+4. The in-place framework path keeps its own `shell.config.json` and does not write a
+   starter selection, so the two creation paths still record different configuration
+   files.
+
 ## Version contract
 
 A CLI release has exactly one distribution version, for example `0.5.0`. Its release manifest binds:

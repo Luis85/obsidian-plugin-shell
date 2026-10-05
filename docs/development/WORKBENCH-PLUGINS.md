@@ -180,4 +180,4 @@ Plugin source is trusted code and can use Node APIs available to the Workbench h
 
 Starter JSON remains data-only. Installing a framework adapter does not make starter JSON executable; execution authority comes from the reviewed plugin source that registered the adapter.
 
-Adding a new adapter does not weaken existing starter compatibility. Saved `project.config.json` files retain the adapter ID and generation fails clearly if that adapter is no longer installed.
+Adding a new adapter does not weaken existing starter compatibility. Saved project configurations (`configs/<project-id>-config.json`) retain the adapter ID and generation fails clearly if that adapter is no longer installed.

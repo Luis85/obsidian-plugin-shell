@@ -14,6 +14,8 @@ import { outline } from '../application/summary.ts';
 import { prepared, type Prepared, type Entry } from './storage.ts';
 import { loadSettings, guardedText, jsonText } from './user-settings.ts';
 import { projectStarter, projectGuide } from './projects.ts';
+import { requireProjectConfigSlot } from './project-selection.ts';
+import { projectConfigPath } from '../compiler/domain/project-config.ts';
 import { prototypePlan } from './prototype.ts';
 import { boilerplatePlan } from './compiler.ts';
 import { intakePrds, type Intake } from './prd-intake.ts';
@@ -111,9 +113,11 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
   document = runOperations(document, data.operations).document;
   if (data.boilerplate) packages.push(await boilerplatePlan(root, frameworkRoot, settings.paths.app, document, 'project', signal, selection));
   const brief = `---\ntype: project-brief\nproject: ${document.project.id}\n---\n\n# ${data.project.name}\n\n## Project\n\n${data.project.description}\n\n## Product\n\n${data.project.product}\n\n## Sources\n\n${intake.prds.map(prd => '- ' + prd.source.path + ' (' + prd.source.sha256 + ')').join('\n')}\n\nPRDs were imported verbatim. Requirements have not been mapped or implemented by setup.\n`;
+  const configPath = projectConfigPath(document.project.id);
+  await requireProjectConfigSlot(root, configPath);
   const owned: Entry[] = [
     { path: settings.paths.project, content: documentText(document) },
-    { path: 'project.config.json', content: jsonText(selection) },
+    { path: configPath, content: jsonText(selection) },
     { path: settings.paths.brief, content: brief },
   ];
   const ownerPlan = await createFilePlan(root, owned);
@@ -134,6 +138,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
     next: 'Use node bin/app sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
   return { ...result, validate: async () => {
     await setupPrerequisites(root, settings.preferences.vaultConfigDirectory);
+    await requireProjectConfigSlot(root, configPath);
     requireSketch(intakeIdentity(await intakePrds(root, settings, data.prds)) === intakeHash, 'SETUP_STALE_PRDS', 'PRD inventory changed after preview; review setup again.');
   } };
 }

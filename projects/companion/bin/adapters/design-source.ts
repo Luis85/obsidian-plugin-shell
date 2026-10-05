@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { snapshotPath, type ManagedPrototype, type PrototypeSelection } from '../../scripts/companion/prototypes/model.ts';
 import { loadPrototypeWorkspace } from './framework/prototype-workspace.ts';
 import { exists, hash, readBounded } from './framework/files.ts';
-import { savedProjectSelection } from './project-selection.ts';
+import { savedProjectConfig } from './project-selection.ts';
 import { readSnapshot } from './storage.ts';
 import { guardedText } from './user-settings.ts';
 import { openDocument, type SketchDocument } from '../domain/document.ts';
@@ -70,9 +70,9 @@ export async function readBrief(root: string, path: string | null): Promise<stri
 export async function readBriefFile(path: string): Promise<string> {
   return new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(path, 4_000_000));
 }
-export async function designTarget(root: string): Promise<DesignTarget> {
-  const selection = await savedProjectSelection(root);
-  return selection ? { targets: [...selection.targets], framework: selection.framework, source: 'project.config.json' } : shellTarget;
+export async function designTarget(root: string, config?: string): Promise<DesignTarget> {
+  const saved = await savedProjectConfig(root, config);
+  return saved ? { targets: [...saved.selection.targets], framework: saved.selection.framework, source: saved.path } : shellTarget;
 }
 /** The reviewed Obsidian token names ship with the shell and with generated projects at the same path. */
 export async function designTokens(root: string, frameworkRoot: string): Promise<string | null> {

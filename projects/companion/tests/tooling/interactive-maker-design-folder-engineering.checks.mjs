@@ -47,7 +47,7 @@ test('the engineering guide states the target codebase from its own files and na
   await prepare(root);
   const guide = await read(root, guidePath);
   assert.match(guide, /^# Field notes: engineering handoff guide$/m);
-  assert.match(guide, /Target: Obsidian plugin, frontend `nuxtui` \(source: built-in shell default; no project\.config\.json\)/);
+  assert.match(guide, /Target: Obsidian plugin, frontend `nuxtui` \(source: built-in shell default; no saved project configuration\)/);
   assert.match(guide, /\| `vue` \| 3\.5\.43 \| UI framework \|\n\| `@nuxt\/ui` \| 4\.11\.2 \| component library \|/);
   assert.doesNotMatch(guide, /lodash/, 'only design-relevant packages are listed');
   assert.match(guide, /- `src\/presentation\/components\/`: Vue single-file components/);
@@ -98,7 +98,7 @@ test('a project without fact sources gets an honest guide that names nothing it 
   assert.match(guide, /No token stylesheet was found/);
   assert.match(guide, /No gate scripts were found in package\.json/);
   assert.match(guide, /No architecture documents were found/);
-  assert.match(guide, /\| Source \| SHA-256 \| Note \|\n\| --- \| --- \| --- \|\n\| `built-in shell default; no project\.config\.json` \| — \| target selection \|/);
+  assert.match(guide, /\| Source \| SHA-256 \| Note \|\n\| --- \| --- \| --- \|\n\| `built-in shell default; no saved project configuration` \| — \| target selection \|/);
 }));
 test('linked and invalid fact sources are recorded as unreadable or invalid, never followed', async () => scratch(async root => {
   await factProject(root);
