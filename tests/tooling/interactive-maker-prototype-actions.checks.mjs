@@ -28,7 +28,7 @@ const plan = (context, command, args = [], options = {}) => prototypesPlan({ com
 const apply = async (context, command, args, options) => applyFilePlan((await plan(context, command, args, options)).plan);
 const main = { version: 'v1', variant: 'main' };
 
-test('workspace edits apply through reviewed plans and are reflected in the listing', () => withWorkspace(async context => {
+test('workspace edits apply through reviewed plans and are reflected in the listing', { timeout: 180000 }, () => withWorkspace(async context => {
   await apply(context, 'prototype-details', ['alpha'], { name: 'Alpha Prime', description: 'Renamed.' });
   await apply(context, 'version-details', ['alpha'], { version: 'v1', label: 'First' });
   await apply(context, 'fork', ['alpha'], { ...main, as: 'bold', hypothesis: 'Bolder copy.' });

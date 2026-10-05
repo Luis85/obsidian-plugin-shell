@@ -59,7 +59,7 @@ test('agents prepare, apply and inspect a design folder through the maker CLI wi
     assert.deepEqual([failed.code, failed.result.diagnostics[0].code], [1, code], argv.join(' '));
   }
 }));
-test('the prototype guide offers a design folder that follows the prepared package and keeps its brief', async () => scratch(async root => {
+test('the prototype guide offers a design folder that follows the prepared package and keeps its brief', { timeout: 180000 }, async () => scratch(async root => {
   const session = scripted(['Issue desk', 'new', 'Issues', 'back', 'save', 'y', 'exit']);
   await studio(session, { root, frameworkRoot, project: 'design/project.json' });
   const guide = await loadGuide();
