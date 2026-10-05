@@ -2,19 +2,27 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { join } from 'node:path';
-const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
 import { parseArguments, execute } from '../../bin/adapters/commands.ts';
 import { brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification } from '../../bin/adapters/brainstorm.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { brainstormScratch, captureRequest, fakeNpm, pinGeneratedNode, resign, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { copyTree, pristineFixtures } from '../support/pristine-fixture.mjs';
 
 const out = 'brainstorms/capture-inbox', source = out + '/source';
-/** Generated source is re-pinned to the running Node, so no row adds a Node blocker. */
+const copyFixture = pristineFixtures(after, 'maker-brainstorm-pristine-');
+/**
+ * Generated source is re-pinned to the running Node, so no row adds a Node blocker. Each distinct package is
+ * generated once per file from a freshly seeded scratch root, then copied into this test's own root.
+ */
 async function generated(options, patch) {
-  const plan = await brainstormFeaturePlan({ ...captureRequest, ...patch }, options);
-  await applyPrepared(plan, plan.planHash);
-  if (plan.data.generated) await pinGeneratedNode(options.root, out);
-  return plan;
+  await copyFixture(JSON.stringify(patch), async root => {
+    await copyTree(options.root, root);
+    const seeded = { ...options, root };
+    const plan = await brainstormFeaturePlan({ ...captureRequest, ...patch }, seeded);
+    await applyPrepared(plan, plan.planHash);
+    if (plan.data.generated) await pinGeneratedNode(root, out);
+  }, options.root);
 }
 const verify = (options, extra = []) => execute(parseArguments(['brainstorm', 'verify', '--out', out, ...extra, '--json']),
   { ...options, input: Readable.from([]) });
