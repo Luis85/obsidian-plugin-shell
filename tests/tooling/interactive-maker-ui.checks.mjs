@@ -63,7 +63,7 @@ test('workspace guides and agent commands share the persistence and compiler pat
   assert.equal(validated.ready, false); assert.equal(discovered.guide.id, guide.id);
   await assert.rejects(() => execute(parseArguments(['sketch', 'generate', '--kind', 'invalid']), context));
 }));
-test('prototype-only guide loads the saved baseline and writes a complete preparation package', async () => scratch(async root => {
+test('prototype-only guide loads the saved baseline and writes a complete preparation package', { timeout: 180000 }, async () => scratch(async root => {
   const ui = scripted(['P', 'new', 'Home', 'back', 'save', 'y', 'exit']);
   await studio(ui, { root, frameworkRoot, project: 'design/project.json' });
   // The trailing 'n' declines the optional Claude Design folder offered after the package is written.

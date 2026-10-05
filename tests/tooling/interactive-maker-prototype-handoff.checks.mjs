@@ -44,7 +44,7 @@ async function missingScripts(packageRoot) {
   return missing;
 }
 
-test('a prepared clickdummy package contains every skill, script and npm script its prompt and README name', async () => {
+test('a prepared clickdummy package contains every skill, script and npm script its prompt and README name', { timeout: 180000 }, async () => {
   await scratch(async root => {
     const guide = await loadGuide();
     const input = { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers };

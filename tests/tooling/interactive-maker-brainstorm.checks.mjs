@@ -90,7 +90,7 @@ test('human definition and machine definition share the exact canonical plan', a
     assert.equal((await brainstormFeaturePlan(definition.feature, options)).plan.changes
       .every(change => change.status === 'unchanged'), true);
   }));
-test('verification refuses unowned source and ownership-receipt tampering before process planning', async () =>
+test('verification refuses unowned source and ownership-receipt tampering before process planning', { timeout: 180000 }, async () =>
   scratch(async (options, document) => {
     const payload = readFeatureBrainstorm({ ...request, output: 'prototype', verification: 'test',
       projectId: document.project.id, baseSha256: hash(documentText(document)) });

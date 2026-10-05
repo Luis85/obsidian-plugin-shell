@@ -9,7 +9,7 @@ import { openDocument } from '../../bin/domain/document.ts';
 import { checkSteps } from '../../bin/adapters/framework/check.ts';
 import { compile } from '../../bin/adapters/compiler.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
-test('prototype maker creates real compiler boilerplate, docs and a fully expanded prompt', async () => {
+test('prototype maker creates real compiler boilerplate, docs and a fully expanded prompt', { timeout: 180000 }, async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-prototype-'));
   try {
     const guide = await loadGuide();

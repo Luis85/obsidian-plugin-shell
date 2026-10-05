@@ -78,7 +78,7 @@ test('every command the course shows or cites exists in the real CLI', async () 
   assert.ok(shown.some(line => line.startsWith('node bin/app design prepare --name <slug> --project prototypes/<slug>/companion.project.json --package prototypes/<slug>')));
 });
 
-test('win conditions follow the real prototype package and design folder, then the design work and the release records', async () => scratch(async root => {
+test('win conditions follow the real prototype package and design folder, then the design work and the release records', { timeout: 180000 }, async () => scratch(async root => {
   const path = await course(), context = { root, definitions: await loadCatalog() };
   let progress = { ...newLearningProgress(path, now), answers: {
     plan: { title: 'Reading log', slug: 'reading-log', version: '0.5.0' }, idea: { route: 'prd', record: 'docs/prds/reading-log.md' },

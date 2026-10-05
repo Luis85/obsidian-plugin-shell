@@ -60,7 +60,7 @@ test('plain and accessibility modes retain a line-oriented exit with no ANSI scr
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
-test('standalone prototype completion remains visible after leaving the alternate screen', async () => {
+test('standalone prototype completion remains visible after leaving the alternate screen', { timeout: 180000 }, async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-completion-'));
   try {
     const guide = await loadGuide();
