@@ -49,7 +49,7 @@ test('the engineering guide states the target codebase from its own files and na
   const guide = await read(root, guidePath);
   assert.match(guide, /^# Field notes: engineering handoff guide$/m);
   assert.match(guide, /Target: Obsidian plugin, frontend `nuxtui` \(source: built-in shell default; no saved project configuration\)/);
-  assert.match(guide, /\| `vue` \| 3\.5\.43 \| UI framework \|\n\| `@nuxt\/ui` \| 4\.11\.2 \| component library \|/);
+  assert.match(guide, /\| `vue` \| 3\.5\.43 \| UI framework \|\n\| `@nuxt\/ui` \| 4\.11\.3 \| component library \|/);
   assert.doesNotMatch(guide, /lodash/, 'only design-relevant packages are listed');
   assert.match(guide, /- `src\/presentation\/components\/`: Vue single-file components/);
   assert.match(guide, /- `src\/presentation\/composables\/`: view behaviour/);
