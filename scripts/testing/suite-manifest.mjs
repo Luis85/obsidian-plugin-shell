@@ -60,6 +60,9 @@ function validateSuite(suite, prerequisites) {
   assertStrings(suite.workflows ?? [], `${suite.name}.workflows`, { allowEmpty: true });
   if (!verifyModes.includes(suite.verify)) throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name}.verify must be one of ${verifyModes.join(', ')}`);
   if (suite.verify === 'tooling' && suite.runner?.type !== 'node-test') throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name} verify tooling requires the node-test runner`);
+  // verifyStepId names the verify step that executes a Vitest suite's files, so the tooling inventory can account for them.
+  if (suite.verifyStepId !== undefined && (typeof suite.verifyStepId !== 'string' || !suite.verifyStepId || suite.verify !== 'own-step' || suite.runner?.type !== 'vitest'))
+    throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name}.verifyStepId must name a verify step and needs verify own-step with the vitest runner`);
   validateRunner(suite, prerequisites);
 }
 
@@ -219,8 +222,21 @@ async function documentationFailures(root, manifest) {
     .map(suite => `SUITE_UNDOCUMENTED: suite "${suite.name}" has no \`${suite.name}\` row in ${path}. Add one to its suite table.`);
 }
 
+/** Files of suites verify runs in their own named step (`verifyStepId`): the step must exist and run the suite's Vitest config. */
+function ownStepFiles(suites, steps) {
+  const failures = [], files = [];
+  for (const suite of suites.filter(item => item.verifyStepId)) {
+    const step = steps?.find(item => item.id === suite.verifyStepId);
+    if (!step) failures.push(`SUITE_VERIFY_STEP_UNKNOWN: suite "${suite.name}" names verify step "${suite.verifyStepId}", which the verify step table (scripts/quality/verify-steps.mjs) does not define. ${edit}.`);
+    else if (!step.entry.endsWith('vitest/vitest.mjs') || step.args[0] !== 'run' || step.args[step.args.indexOf('--config') + 1] !== suite.runner.config)
+      failures.push(`SUITE_VERIFY_STEP_MISMATCH: verify step "${step.id}" is not \`vitest run --config ${suite.runner.config}\`, so it does not run suite "${suite.name}". ${edit}.`);
+    else files.push(...suite.files);
+  }
+  return { failures, files: new Set(files) };
+}
+
 /** Classification; with an evidence inventory also npm-script wiring, suite-guide rows and parity with evidence tooling. */
-export async function checkSuites(root, { evidenceInventory } = {}) {
+export async function checkSuites(root, { evidenceInventory, verifySteps } = {}) {
   const manifest = await loadManifest(root);
   const result = await classify(root, manifest);
   const failures = [...result.failures];
@@ -228,8 +244,12 @@ export async function checkSuites(root, { evidenceInventory } = {}) {
     const scripts = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).scripts ?? {};
     failures.push(...scriptFailures(manifest, scripts), ...await documentationFailures(root, manifest));
     const verifyTooling = new Set(result.suites.filter(suite => suite.verify === 'tooling').flatMap(suite => suite.files));
+    // A tooling file verify runs in its own step (the maker suite under coverage) is accounted for there, not in the tooling step.
+    const ownStep = ownStepFiles(result.suites, await verifySteps?.());
+    failures.push(...ownStep.failures);
     for (const path of await evidenceInventory()) {
-      if (!verifyTooling.has(path)) failures.push(`TOOLING_NOT_IN_VERIFY: ${path} runs in evidence tooling but belongs to no verify "tooling" suite. ${edit}.`);
+      if (!verifyTooling.has(path) && !ownStep.files.has(path))
+        failures.push(`TOOLING_NOT_IN_VERIFY: ${path} runs in evidence tooling but belongs to no verify "tooling" suite and no suite whose "verifyStepId" names the verify step that runs it. ${edit}.`);
       verifyTooling.delete(path);
     }
     for (const path of verifyTooling) failures.push(`TOOLING_NOT_IN_EVIDENCE: ${path} is a verify tooling file outside the evidence tooling inventory (tests/tooling/**/*.{checks,test}.mjs).`);

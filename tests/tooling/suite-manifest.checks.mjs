@@ -153,6 +153,24 @@ test('empty suites, missing required roots and tooling outside verify fail; opti
   assert.match(result.stderr, /TOOLING_NOT_IN_VERIFY: tests\/tooling\/beta-one\.checks\.mjs runs in evidence tooling/);
 });
 
+test('a tooling file outside the tooling step is accounted for only by a real verify step that runs its Vitest config', async t => {
+  const vitestBeta = extra => manifest({ suites: [manifest().suites[0], suite('beta', ['tests/tooling/beta-*.checks.mjs'],
+    { verify: 'own-step', runner: { type: 'vitest', config: 'configs/testing/vitest.maker.config.mjs' }, ...extra })] });
+  assert.equal(run(await fixture(t, {}, vitestBeta({ verifyStepId: 'maker-coverage-run' })), ['--check']).status, 0);
+  const nowhere = run(await fixture(t, {}, vitestBeta({})), ['--check']);
+  assert.equal(nowhere.status, 1);
+  assert.match(nowhere.stderr, /TOOLING_NOT_IN_VERIFY: tests\/tooling\/beta-one\.checks\.mjs runs in evidence tooling but belongs to no verify "tooling" suite and no suite whose "verifyStepId"/);
+  const unknown = run(await fixture(t, {}, vitestBeta({ verifyStepId: 'no-such-step' })), ['--check']);
+  assert.equal(unknown.status, 1);
+  assert.match(unknown.stderr, /SUITE_VERIFY_STEP_UNKNOWN: suite "beta" names verify step "no-such-step"/);
+  assert.match(unknown.stderr, /TOOLING_NOT_IN_VERIFY: tests\/tooling\/beta-one\.checks\.mjs/);
+  const other = run(await fixture(t, {}, vitestBeta({ verifyStepId: 'production-coverage-run' })), ['--check']);
+  assert.equal(other.status, 1);
+  assert.match(other.stderr, /SUITE_VERIFY_STEP_MISMATCH: verify step "production-coverage-run" is not `vitest run --config configs\/testing\/vitest\.maker\.config\.mjs`/);
+  assert.throws(() => validateManifest(manifest({ suites: [suite('alpha', ['a'], { verify: 'own-step', verifyStepId: 'maker-coverage-run' })] })), /alpha\.verifyStepId .* vitest runner/);
+  assert.throws(() => validateManifest(vitestBeta({ verify: 'opt-in', verifyStepId: 'maker-coverage-run' })), /beta\.verifyStepId/);
+});
+
 test('npm scripts must exist and run the suite they are declared for', async t => {
   const wrong = JSON.stringify({ type: 'module', scripts: { 'test:alpha': 'node scripts/testing/suites.mjs beta' } });
   assert.match(run(await fixture(t, { 'package.json': wrong }), ['--check']).stderr, /SUITE_SCRIPT_MISMATCH: package.json "test:alpha" does not run suite "alpha"/);
@@ -231,9 +249,13 @@ test('suites really execute: failures propagate and missing prerequisites or man
   assert.match(manual.stderr, /manual suite without an automated runner; follow README\.md/);
 });
 
-test('verify tooling groups cover exactly the evidence tooling inventory, each file once', async () => {
+test('verify tooling groups plus the maker suite verify runs in its own step cover exactly the evidence tooling inventory, each file once', async () => {
   const groups = await toolingGroups(process.cwd());
-  const files = groups.flatMap(group => group.files);
+  const listing = JSON.parse(run(process.cwd(), ['--list', '--json']).stdout);
+  const maker = listing.suites.find(entry => entry.name === 'maker');
+  assert.deepEqual([maker.runner, maker.verify], ['vitest', 'own-step']);
+  assert.ok(maker.files.length > 100 && groups.every(group => group.name !== 'maker'));
+  const files = [...groups.flatMap(group => group.files), ...maker.files];
   assert.equal(new Set(files).size, files.length);
   assert.deepEqual([...files].sort(), await suiteInventory(process.cwd(), 'tooling'));
   assert.ok(groups.every(group => group.files.length > 0), JSON.stringify(groups.map(group => group.name)));

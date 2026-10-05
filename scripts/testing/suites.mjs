@@ -15,7 +15,7 @@ const usage = `Usage: node scripts/testing/suites.mjs <suite...|tooling> [--dry-
        node scripts/testing/suites.mjs --check [--json]
        node scripts/testing/suites.mjs --pyramid [--json]
 Suites and test-pyramid levels are declared in tests/suites.json; docs/testing/TEST-SUITES.md describes them.
-"tooling" selects every suite verify runs in its node --test tooling step.`;
+"tooling" selects every suite verify runs in its node --test tooling step (the maker suite runs in its own coverage step).`;
 
 function parseArguments(argv) {
   const options = { names: [], levels: [], list: false, check: false, pyramid: false, json: false, dryRun: false, help: false, extra: [] };
@@ -170,6 +170,11 @@ async function evidenceInventory(root) {
   const { suiteInventory } = await import('./evidence-identity.mjs');
   return () => suiteInventory(root, 'tooling');
 }
+/** The default verify step table; a checkout without it leaves every suite that names a verify step unaccounted. */
+async function verifyStepTable() {
+  try { return (await import('../quality/verify-steps.mjs')).verifySteps({}); }
+  catch (error) { if (error.code === 'ERR_MODULE_NOT_FOUND') return null; throw error; }
+}
 /** The e2e opt-in policy's classifier; a distributed kit without the repository policy checks only the verify mode. */
 async function e2eKinds() {
   try { return (await import('../quality/e2e-policy.mjs')).e2eKinds; }
@@ -207,7 +212,7 @@ function runLevels(root, result, levels, options) {
 async function main(argv, root = process.cwd()) {
   const options = parseArguments(argv);
   if (options.help) { console.log(usage); return 0; }
-  const result = await checkSuites(root, options.check ? { evidenceInventory: await evidenceInventory(root) } : {});
+  const result = await checkSuites(root, options.check ? { evidenceInventory: await evidenceInventory(root), verifySteps: verifyStepTable } : {});
   if (result.failures.length) return failed(options, result.failures);
   const levels = resolveLevels(result.manifest, result.suites, { removed: removedExampleFiles(root) });
   if (options.check || options.pyramid || options.levels.length) {

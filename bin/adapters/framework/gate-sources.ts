@@ -10,6 +10,8 @@ import { OperationError } from './contracts.ts';
 export interface SuiteDef {
   name: string; include: string[]; exclude?: string[]; workflows?: string[]; npmScript?: string; verify: string;
   runner: { type: string }; prerequisites?: string[]; optional?: boolean;
+  /** The verify step that runs a Vitest suite's files (the maker suite runs in maker-coverage-run). */
+  verifyStepId?: string;
   /** Test-pyramid level and per-level file-pattern overrides (scripts/testing/test-levels.mjs validates them). */
   level?: string; levels?: Record<string, string[]>;
 }

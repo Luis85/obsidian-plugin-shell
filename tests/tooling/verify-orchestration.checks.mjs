@@ -1,14 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseVerifyArgs, planSteps, UsageError } from '../../scripts/quality/verify-plan.mjs';
 import { runPlan } from '../../scripts/quality/verify-run.mjs';
 import { outputTail, renderMarkdown } from '../../scripts/quality/verify-report.mjs';
 import { runVerifyCli } from '../../scripts/quality/verify-cli.mjs';
 import { verifySteps } from '../../scripts/quality/verify-steps.mjs';
+import { matcher, toolingGroups } from '../../scripts/testing/suite-manifest.mjs';
+import { suiteInventory } from '../../scripts/testing/evidence-identity.mjs';
 
 // Fake table: build <- typecheck <- types-report; lint and docs are independent of everything.
 const fake = (id, needs = []) => ({ id, entry: `${id}.mjs`, args: [], needs, display: `${id}.mjs` });
@@ -208,6 +211,24 @@ test('[VERIFY-TABLE] the real step table has unique ids, forward-only dependenci
     assert.equal(tooling.kind === 'tooling-suites', mode === '0');
     assert.deepEqual(steps.find(step => step.id === 'analyzer').needs, ['build']);
   }
+});
+
+/** Every Vitest `run` step of the default verify table, with a matcher for the test files its config includes. */
+async function vitestRunSteps() {
+  const steps = verifySteps({}).filter(step => step.entry === 'node_modules/vitest/vitest.mjs' && step.args[0] === 'run');
+  return Promise.all(steps.map(async step => {
+    const config = (await import(pathToFileURL(resolve(step.args[step.args.indexOf('--config') + 1])).href)).default.test;
+    return { id: step.id, match: matcher({ include: config.include, exclude: config.exclude ?? [] }) };
+  }));
+}
+test('[VERIFY-ONCE] default verify runs every tooling test file exactly once; the maker files only in maker-coverage-run', async () => {
+  const runs = new Map((await suiteInventory(process.cwd(), 'tooling')).map(path => [path, []]));
+  for (const { name, files } of await toolingGroups(process.cwd())) for (const file of files) runs.get(file)?.push(`tooling:${name}`);
+  for (const step of await vitestRunSteps()) for (const [file, owners] of runs) if (step.match(file)) owners.push(step.id);
+  assert.deepEqual([...runs].filter(([, owners]) => owners.length !== 1), [], 'a tooling file runs zero or several times in one verify');
+  const maker = [...runs].filter(([file]) => /^tests\/tooling\/interactive-maker-[^/]*\.checks\.mjs$/.test(file));
+  assert.ok(maker.length > 100, `maker files: ${maker.length}`);
+  assert.deepEqual([...new Set(maker.flatMap(([, owners]) => owners))], ['maker-coverage-run']);
 });
 
 test('[VERIFY-ENTRY] the real npm entry lists steps and rejects unknown ids without running any gate', () => {

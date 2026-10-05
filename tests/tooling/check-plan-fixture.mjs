@@ -8,10 +8,12 @@ import { fileURLToPath } from 'node:url';
 export const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const suite = (name, include, extra = {}) => ({ name, purpose: name, include, verify: 'tooling', runner: { type: 'node-test' }, ...extra });
 const manifest = {
-  schemaVersion: 1, roots: [{ path: 'tests/tooling' }, { path: 'tests/e2e', optional: true }],
+  schemaVersion: 1, roots: [{ path: 'tests/tooling' }, { path: 'tests/e2e', optional: true }, { path: 'tests/runtime', optional: true }],
   prerequisites: { chromium: { probe: ['{node}', '-e', '0'], hint: 'Provision Chromium.' }, python3: { probe: ['{node}', '-e', '0'], hint: 'Install Python.' }, 'native-runner': { probe: ['{node}', '-e', '0'], hint: 'Provision the native runner.' } },
   suites: [
-    suite('maker', ['tests/tooling/interactive-maker-*.checks.mjs'], { workflows: ['interactive-maker'] }),
+    // As in tests/suites.json: verify runs the maker files once, in its own coverage step, never in the tooling step.
+    suite('maker', ['tests/tooling/interactive-maker-*.checks.mjs'], { workflows: ['interactive-maker'], runner: { type: 'vitest', config: 'configs/testing/vitest.maker.config.mjs' }, verify: 'own-step', verifyStepId: 'maker-coverage-run' }),
+    suite('runtime', ['tests/runtime/**/*.test.ts'], { runner: { type: 'vitest', config: 'configs/testing/vitest.config.mjs' }, verify: 'own-step', optional: true }),
     suite('generator', ['tests/tooling/project-generator*.checks.mjs'], { workflows: ['ci', 'starter-flow'], level: 'integration', levels: { unit: ['tests/tooling/project-generator-http.checks.mjs'] } }),
     suite('quality', ['tests/tooling/gates.checks.mjs'], { workflows: ['ci'] }),
     suite('native', ['tests/tooling/native-*.checks.mjs'], { prerequisites: ['native-runner'] }),
@@ -24,7 +26,7 @@ const workflows = {
   'interactive-maker.yml': 'name: Interactive maker\non:\n  pull_request:\njobs: {}\n',
   'starter-flow.yml': 'name: Starter flow\non:\n  pull_request:\n    paths: &inputs\n      - templates/**\n      - "!templates/docs/**"\n      - scripts/starters/**\n  push:\n    paths: *inputs\njobs: {}\n',
 };
-const durations = '| Suite | Purpose | Command | Runner | Prerequisites | In `verify` | Measured |\n| --- | --- | --- | --- | --- | --- | --- |\n| `generator` | g | `npm run test:generator` | `node --test` | none | tooling | 187 s |\n| `maker` | m | `npm run test:maker` | `node --test` | none | tooling | not measured |\n';
+const durations = '| Suite | Purpose | Command | Runner | Prerequisites | In `verify` | Measured |\n| --- | --- | --- | --- | --- | --- | --- |\n| `generator` | g | `npm run test:generator` | `node --test` | none | tooling | 187 s |\n| `maker` | m | `npm run test:maker` | Vitest `configs/testing/vitest.maker.config.mjs` | none | own step | not measured |\n';
 const baseline = { 'src/a.ts': 'export const a = 1;\n', 'README.md': 'readme\n', 'bin/app.ts': 'export {};\n', 'configs/types/tsconfig.maker.json': '{}\n', 'docs/testing/TEST-SUITES.md': durations,
   'package.json': JSON.stringify({ scripts: { verify: 'node verify.mjs' } }), 'tests/suites.json': JSON.stringify(manifest) };
 

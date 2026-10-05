@@ -9458,7 +9458,7 @@
         {
           "name": "fast",
           "kind": "flag",
-          "description": "Typecheck plus tests related to changed files (git), with eslint/lint on those files and the node --test suites they select; for agent Stop hooks."
+          "description": "Typecheck plus tests related to changed files (git), with eslint/lint on those files and the node --test and maker suites they select; for agent Stop hooks."
         },
         {
           "name": "plan",
@@ -9468,7 +9468,7 @@
         {
           "name": "skip-suites",
           "kind": "flag",
-          "description": "With --fast: report the node --test suites the diff selects as skipped and leave them to CI; keeps the Dev tier quick and predictable."
+          "description": "With --fast: report the node --test and maker suites the diff selects as skipped and leave them to CI; keeps the Dev tier quick and predictable."
         },
         {
           "name": "base",
@@ -9484,7 +9484,7 @@
           "name": "timeout",
           "kind": "value",
           "description": "Child-process timeout in milliseconds (1..3600000).",
-          "default": "600000 per step; 3600000 for node --test suite steps"
+          "default": "600000 per step; 3600000 for suite steps"
         },
         {
           "name": "json",

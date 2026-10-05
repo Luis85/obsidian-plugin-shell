@@ -247,12 +247,15 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "vitest",
+        "config": "configs/testing/vitest.maker.config.mjs"
       },
       "include": [
         "tests/tooling/interactive-maker-*.checks.mjs"
       ],
-      "verify": "tooling",
+      "verify": "own-step",
+      "verifyStep": "maker-coverage-run executes every maker file once, under coverage, and maker-coverage-gate gates it; the tooling step leaves them out",
+      "verifyStepId": "maker-coverage-run",
       "npmScript": "test:maker",
       "workflows": [
         "interactive-maker"

@@ -8,7 +8,7 @@ import type { CheckStep } from './check.ts';
 import type { Changes } from './check-changes.ts';
 import type { GateRules, Rule, SuiteDef, SuiteManifest, Toolkit, Workflow } from './gate-sources.ts';
 import { loadGateRules, loadToolkit, workflowTrigger } from './gate-sources.ts';
-/** node --test suites (the maker suite alone runs ~25 minutes in CI) outlive the 10-minute check step default. */
+/** Suite steps (the maker suite alone runs ~25 minutes in CI) outlive the 10-minute check step default. */
 export const suiteTimeoutMs = 3_600_000;
 
 type ReasonKind = 'suite-include' | 'suite-source' | 'rule' | 'workflow-paths';
@@ -70,10 +70,11 @@ export function selectSuiteReasons(toolkit: Toolkit, manifest: SuiteManifest, ru
   const known = new Map(manifest.suites.map((suite, index) => [suite.name, index]));
   return new Map([...selection].filter(([name]) => known.has(name)).sort((a, b) => known.get(a[0])! - known.get(b[0])!));
 }
-/** `check --fast` runs suites it can run unattended: node --test runners. */
-export const fastRunnable = (suite: SuiteDef): boolean => suite.runner.type === 'node-test';
+/** `check --fast` runs suites it can run unattended: node --test runners and Vitest suites that verify runs in a
+ * named step of their own (the maker suite). The runtime Vitest suite is the related-test step's, not a suite step. */
+export const fastRunnable = (suite: SuiteDef): boolean => suite.runner.type === 'node-test' || (suite.runner.type === 'vitest' && Boolean(suite.verifyStepId));
 
-/** Node --test suites selected by the changed paths; empty without git, in generated projects or without the manifest tooling. */
+/** Suites `check --fast` can run that the changed paths select; empty without git, in generated projects or without the manifest tooling. */
 export async function fastSuites(root: string, project: boolean, changes: Changes): Promise<FastContext['suites']> {
   if (project || changes.source !== 'git') return [];
   const toolkit = await loadToolkit(root);
@@ -126,7 +127,7 @@ function suiteStep(ctx: FastContext): CheckStep[] {
   if (ctx.project) return [];
   const names = ctx.suites.map(suite => suite.name);
   const base: CheckStep = { id: 'suites', display: 'node scripts/testing/suites.mjs', entry: 'scripts/testing/suites.mjs', args: names, timeoutMs: suiteTimeoutMs };
-  if (!names.length) return [{ ...base, display: 'node scripts/testing/suites.mjs (no matching suites)', skip: 'No changed path selects a node --test suite.' }];
+  if (!names.length) return [{ ...base, display: 'node scripts/testing/suites.mjs (no matching suites)', skip: 'No changed path selects a node --test or maker suite.' }];
   if (ctx.skipSuites) return [{ ...base, display: `${base.display} ${names.join(' ')} (left to CI)`, skip: `--skip-suites: ${names.join(', ')} run in CI's Integration tier, not here.` }];
   return [{ ...base, display: `${base.display} ${names.join(' ')}` }];
 }

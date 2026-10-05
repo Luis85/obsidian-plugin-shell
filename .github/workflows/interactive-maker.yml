@@ -58,12 +58,11 @@ jobs:
           node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs bin plugins --max-warnings 0
           node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json bin plugins --no-ignore --deny-warnings
           node "$QUALIFIED_NPM" run check:plugins
-      - name: Interactive, agent, compiler and safe-write contracts
+      - name: Workbench plugin contracts
         if: ${{ !cancelled() }}
         run: |
           mkdir -p reports/maker
           set -o pipefail
-          node "$QUALIFIED_NPM" run test:maker 2>&1 | tee reports/maker/tests.log
           node "$QUALIFIED_NPM" run test:plugins 2>&1 | tee reports/maker/plugins.log
       - name: Enable the example extension for the plugin-provided starter
         id: extension
@@ -90,9 +89,13 @@ jobs:
       - name: Actual pseudo-terminal authoring and restoration
         if: ${{ !cancelled() && runner.os != 'Windows' }}
         run: node "$QUALIFIED_NPM" run test:maker:pty
-      - name: Independent full-production and core coverage
+      # The one run of the maker tests: interactive, agent, compiler and safe-write contracts under the coverage gate.
+      - name: Interactive, agent, compiler and safe-write contracts with coverage
         if: ${{ !cancelled() }}
-        run: node "$QUALIFIED_NPM" run test:coverage:maker
+        run: |
+          mkdir -p reports/maker
+          set -o pipefail
+          node "$QUALIFIED_NPM" run test:coverage:maker 2>&1 | tee reports/maker/tests.log
       - name: Source inventory gate
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: |

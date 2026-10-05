@@ -43,15 +43,16 @@ test('the default base is the origin/main merge-base when that ref exists, else 
   await assert.rejects(checkOperation({ command: 'check', args: [], options: { base: 'HEAD' } }, { root: dir, frameworkRoot: repoRoot }), { code: 'INVALID_OPTION' });
 }));
 
-test('fast mode selects node --test suites from manifest includes and rule sources, and runs maker only when it matches', () => withRepo({}, async dir => {
+test('fast mode selects node --test and maker suites from manifest includes and rule sources, and runs maker only when it matches', () => withRepo({}, async dir => {
   await write(dir, { 'src/a.ts': 'export const a = 2;\n' });
   const none = await checkSteps(dir, true);
   assert.ok(!ids(none).includes('maker-tests'), 'the 321 s maker suite no longer runs unconditionally');
-  assert.equal(stepOf(none, 'suites').skip, 'No changed path selects a node --test suite.');
+  assert.equal(stepOf(none, 'suites').skip, 'No changed path selects a node --test or maker suite.');
   assert.ok(ids(none).includes('maker-types'), 'the maker type-check stays');
-  await write(dir, { 'tests/tooling/interactive-maker-new.checks.mjs': 'x\n', 'tests/e2e/shop.spec.ts': 'x\n' });
+  await write(dir, { 'tests/tooling/interactive-maker-new.checks.mjs': 'x\n', 'tests/e2e/shop.spec.ts': 'x\n', 'tests/runtime/shop.test.ts': 'x\n' });
   const tests = await checkSteps(dir, true);
-  assert.deepEqual(stepOf(tests, 'suites').args, ['maker'], 'e2e is a playwright suite and is not run by fast mode');
+  // maker is a Vitest suite verify runs in its maker-coverage-run step, so fast mode still runs it (once, as a suite step).
+  assert.deepEqual(stepOf(tests, 'suites').args, ['maker'], 'e2e is a playwright suite and the runtime Vitest suite belongs to the related-test step');
   assert.deepEqual(tests.suites.map(suite => [suite.name, suite.reasons[0].kind, suite.reasons[0].detail]), [['maker', 'suite-include', 'tests/tooling/interactive-maker-*.checks.mjs']]);
   for (const path of ['bin/adapters/makers/plan.ts', 'scripts/makers/recipes.json']) {
     await write(dir, { [path]: 'x\n' });
