@@ -64,6 +64,17 @@ jobs:
       - name: Qualify explicitly opted-in generated workspace without the browser preview
         if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
         run: node scripts/compiler/qualify-storybook.mjs --no-browser
+      - name: Resolve the pinned Playwright version
+        id: playwright
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      # Same key as ci.yml and setup-qualified, so every workflow shares one browser download.
+      - name: Restore the pinned Chromium download
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Qualify explicitly opted-in generated workspace
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |

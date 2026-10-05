@@ -60,11 +60,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Cold on purpose: no npm download cache, so the install fetches every
+      # locked package from the registry like a first-time consumer.
       - name: Fresh strict-policy install of the committed lockfile
         uses: ./.github/actions/setup-qualified
         with:
           install: 'true'
           install-flags: --strict-allow-scripts
+          npm-cache: 'false'
       - name: Preserve source checkpoint and installed dependency provenance
         if: always()
         run: |
@@ -111,6 +114,18 @@ jobs:
           node scripts/testing/evidence-cli.mjs run coverage 2>&1 | tee reports/candidate-qualification/coverage-production.txt
           node scripts/testing/evidence-cli.mjs run artifact
           node scripts/testing/asset-sizes.mjs > reports/candidate-qualification/asset-sizes.json
+      - name: Resolve the pinned Playwright version
+        id: playwright
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      # Same key as ci.yml and setup-qualified: the browser download only, the
+      # npm install above stays cold.
+      - name: Restore the pinned Chromium download
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Provision pinned Chromium
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |

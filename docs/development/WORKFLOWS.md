@@ -32,7 +32,7 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | `dev.yml` (Dev) | Dev | `pull_request` | `fast` "Dev checks", ubuntu-24.04, 20 min, no gate | none |
 | `definition-of-ready.yml` (Definition of Ready) | Dev | `pull_request` (`opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`), no branch filter | `ready` "Definition of Ready", ubuntu-24.04, 5 min, no install, full history; skips `release/*` heads; `node scripts/delivery/ready.mjs --base origin/<base>` | `definition-of-ready-<attempt>` (7): the refinement brief |
 | `definition-of-done.yml` (Definition of Done) | Integration | `pull_request` (the same plus `labeled`, `unlabeled`), no branch filter | `done` "Definition of Done", ubuntu-24.04, 5 min, no install, full history; skips drafts and `release/*` heads; `node scripts/delivery/done.mjs --base origin/<base>` | `definition-of-done-<attempt>` (7): the generated Completion record, changelog entries and index rows |
-| `ci.yml` (CI) | Integration | `pull_request` (+ `labeled`), push `main`, `workflow_call` (`tier`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `baseline` (ubuntu-24.04, windows-latest), `showcase` (pull request: windows-latest; otherwise ubuntu-24.04 + windows-latest), `renamed-feature`, `source-archive`, `example-removal`: ready-gate. `framework-cli` (Linux; all three OSes for `tier: release`), `generated-companion`, `starter` (3 groups): ready-gate and not on push. `real-obsidian`: end-to-end, only when opted in (always for `tier: release`). `self-review`, `security-audit` (continue-on-error, informational): pull requests only, not draft, not `release/*`. `ci-result` "CI result" ("E2E result" in a run started by the `e2e` label): `always()`, `checks: read`; on a `release/*` head green only after "Release result" succeeded on that commit | `baseline-<os>-<attempt>`, `showcase-<os>-<attempt>`, `renamed-template-authoring`, `template-authoring-source-archive`, `template-authoring-example-removal`, `framework-cli-<os>`, `real-obsidian-evidence`, `project-generator-evidence`, `starters-<group>-evidence` (7); `ui-review-gallery`, `security-audit` (14) |
+| `ci.yml` (CI) | Integration | `pull_request` (+ `labeled`), push `main`, `workflow_call` (`tier`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `baseline` (ubuntu-24.04, windows-latest), `showcase` (pull request and push: windows-latest; dispatch and `tier: release`: ubuntu-24.04 + windows-latest): ready-gate. `renamed-feature` (complete verify), `source-archive` and `example-removal` (targeted verify, see [Template authoring](#template-authoring-in-ciyml)), `framework-cli` (Linux; all three OSes for `tier: release`), `generated-companion`, `starter` (3 groups): ready-gate and not on push. `real-obsidian`: end-to-end, only when opted in (always for `tier: release`). `self-review`, `security-audit` (continue-on-error, informational): pull requests only, not draft, not `release/*`. `ci-result` "CI result" ("E2E result" in a run started by the `e2e` label): `always()`, `checks: read`; on a `release/*` head green only after "Release result" succeeded on that commit | `baseline-<os>-<attempt>`, `showcase-<os>-<attempt>`, `renamed-template-authoring`, `template-authoring-source-archive`, `template-authoring-example-removal`, `framework-cli-<os>`, `real-obsidian-evidence`, `project-generator-evidence`, `starters-<group>-evidence` (7); `ui-review-gallery`, `security-audit` (14) |
 | `airship-compatibility.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `airship-compatibility-<os>` (7) |
 | `angular-setup-acceptance.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-app`: ready-gate; Linux, all three OSes for `tier: release` | `angular-setup-acceptance-<os>` (7) |
 | `application-docs.yml` (Typed Markdown documentation) | Integration | `pull_request` (20 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `qualify` (ubuntu-24.04, windows-latest), `site` "Command handbook site" (needs `qualify`): ready-gate | `shell-cli-manual-markdown-<os>`, `application-docs-qualification-<os>` (7); `shell-cli-manual-site` (14) |
@@ -43,7 +43,7 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | `native-integration-verification.yml` | Integration | `pull_request` (11 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts-and-adapters`, `generated-starters` (2 starters): ready-gate | `native-starter-<starter>` (7) |
 | `optional-storybook.yml` | Integration | `pull_request` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `optional-workspace`: ready-gate | `optional-storybook-evidence` (7) |
 | `project-starter-qualification.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-project` (4 groups), `project-handoff`: ready-gate | `project-starters-<group>`, `project-handoff-<starter>` (7) |
-| `setup-compatibility.yml` (Setup npm policy compatibility) | Integration | `pull_request` and push `main` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `setup`: four legs (Node 24.15.0/npm 12.0.2 and Node 24.21.0/npm 11.19.1 on ubuntu-24.04 and windows-latest), ready-gate | `setup-policy-<os>-npm-<npm>` (7) |
+| `setup-compatibility.yml` (Setup npm policy compatibility) | Integration | `pull_request` and push `main` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `setup`: four legs (Node 24.15.0/npm 12.0.2 and Node 24.21.0/npm 11.19.1 on ubuntu-24.04 and windows-latest), ready-gate; every leg runs a cold fresh setup and the npm policy fixture; only Ubuntu Node 24.15.0/npm 12 runs the complete verify, Windows Node 24.15.0/npm 12 runs `verify --only dependency-policy,build,typecheck,artifacts` and the `setup` suite, and the qualified legs defer verify to `ci.yml` | `setup-policy-<os>-npm-<npm>` (7) |
 | `starter-distribution.yml` (Independent Workbench distributions) | Integration | `pull_request` (21 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `package`: ready-gate | `companion-starter-evidence-<sha>`, `workbench-distributions-<source>` (14) |
 | `projects-boundary.yml` (Projects boundary) | Integration | `pull_request` and push `main` (14 path filters; the only shell workflow that watches `projects/**`), `workflow_call`, `workflow_dispatch` (`tier`) | `boundary` "Projects boundary": ready-gate; `node scripts/projects/projects.mjs check` and `check-repository.mjs` | none |
 | `site-templates.yml` (Site templates) | Integration | `pull_request` and push `main` (9 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `build` "Render and build every site template": ready-gate | `site-templates` (7) |
@@ -67,6 +67,33 @@ between caller and callee would deadlock; a `labeled` run adds `-label-<name>`, 
 it never cancels the full run) and cancels a superseded run, except
 `release-cut`, `publish`, `maintenance-status` and `release-rehearsal`, which never
 cancel, and `starter-distribution`, which cancels only on pull requests.
+
+Caches: jobs that install the committed lock restore the npm download cache
+(`~/.npm`, `~/AppData/Local/npm-cache` on Windows), keyed
+`npm-download-<os>-<hash of package-lock.json>`: `ci.yml`'s `npm-cache` step and
+`setup-qualified` when `install` is `'true'` (input `npm-cache`, default `'true'`).
+It holds downloaded tarballs only; `npm ci` still installs every package and checks
+it against the lock's integrity, and no workflow caches `node_modules`. Cold on
+purpose: `candidate-qualification.yml` (fresh strict-policy install),
+`setup-compatibility.yml` (npm install-policy rows) and the write-scoped
+`release-cut.yml` and `publish.yml` (`npm-cache: 'false'`). The Playwright Chromium
+download is cached as `playwright-chromium-<os>-<Playwright version>` on Linux in
+`ci.yml`, `setup-qualified` (`playwright` input), `interactive-maker.yml`,
+`optional-storybook.yml`, `starter-distribution.yml` and
+`candidate-qualification.yml`; `companion-concept-verification.yml` and
+`project-starter-qualification.yml` still download it on every opted-in run.
+
+## Template authoring in `ci.yml`
+
+| Job | Ready pull request, dispatch, `tier: release` | `e2e` label run | Push to `main` |
+| --- | --- | --- | --- |
+| `renamed-feature` | `setup --defer-verify`, makers, then the complete `npm run verify` (the Ubuntu complete verify the deferred qualified `setup-compatibility` leg relies on) | `verify --only build,harness-build`, served components | skipped |
+| `source-archive` | `git archive` extract with `GIT_CEILING_DIRECTORIES`, `setup --defer-verify`, `verify --only suites-check,build,typecheck,repository,projects,source,artifacts`, runtime and artifact evidence | skipped | skipped |
+| `example-removal` | the renamed-feature state, `examples:remove` dry run and apply with the consumer hash check, `verify --only build,typecheck,entities,events,harness-build`, `make feature reading`, a targeted verify of every step whose inputs removal changes (all but `dependency-policy`, `tooling`, `workbench-suite`, `workbench-check`, `analyzer-after-tooling`), the `native`, `makers` and `generator` suites, coverage and artifact evidence | `verify --only build,harness-build` after removal and after the new feature, served components and browser evidence | skipped |
+
+A step or job skipped by its own condition counts as passing in "CI result". On a
+push to `main` the tree is the one its pull request's merge-ref run qualified (when
+the branch was up to date with `main`); the release tier runs every job again.
 
 ## End-to-end opt-in
 
@@ -97,7 +124,7 @@ listed steps and keeps the rest of the job unconditional):
 
 | Workflow | Job | Gate | E2E steps |
 | --- | --- | --- | --- |
-| `ci.yml` | `showcase` | step | served showcase, UI review gallery (Linux legs only: pushes, dispatch, release) |
+| `ci.yml` | `showcase` | step | served showcase, UI review gallery (Linux legs only: dispatch, release) |
 | `ci.yml` | `renamed-feature` | step | Chromium and served components |
 | `ci.yml` | `example-removal` | step | Chromium, served components after removal, served browser evidence |
 | `ci.yml` | `real-obsidian` | job | Electron libraries, real-Obsidian suite, agent loop smoke |

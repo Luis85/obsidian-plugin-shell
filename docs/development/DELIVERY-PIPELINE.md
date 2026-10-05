@@ -100,7 +100,10 @@ passing, so a draft shows green Integration checks with nothing run. A draft
 cannot be merged, and marking it ready fires `ready_for_review`, which runs every
 gate on the current head. On a push to `main` there is no pull request, so the
 condition is true and the push-triggered jobs run as before, without their
-end-to-end steps.
+end-to-end steps. `ci.yml` leaves out the jobs that would only requalify the tree
+its pull request's merge-ref run already qualified (framework CLI, generators,
+the three template-authoring journeys and the Ubuntu showcase leg); see
+[Workflows](WORKFLOWS.md).
 
 The same files declare `on.workflow_call` with a `tier` input (default
 `integration`), and `workflow_dispatch` with a `tier` choice. `release.yml` calls
