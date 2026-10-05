@@ -46,10 +46,12 @@ jobs:
         run: |
           if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::version must be X.Y.Z"; exit 1; fi
           if [ "$GITHUB_REF" != "refs/heads/main" ]; then echo "::error::Dispatch Release cut from main, not $GITHUB_REF"; exit 1; fi
+      # Write-scoped job: never restore a cache that another run could have saved.
       - uses: ./.github/actions/setup-qualified
         with:
           install: 'true'
           install-flags: --no-fund
+          npm-cache: 'false'
       # The checkout keeps no credentials. cut.mjs fetches, inspects and pushes origin;
       # gh's credential helper supplies GH_TOKEN for this job only (private repositories).
       - name: Configure the commit identity and token-backed git transport

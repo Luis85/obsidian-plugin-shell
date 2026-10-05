@@ -81,8 +81,10 @@ test('ci.yml: real Obsidian is a pure e2e job, the served steps follow the opt-i
   assert.equal(ci.jobs['real-obsidian'].if, pure);
   const served = ci.jobs['renamed-feature'].steps.find(step => /run test:e2e/.test(step.run ?? ''));
   assert.equal(served.if, e2eOptIn);
-  const verify = ci.jobs['renamed-feature'].steps.find(step => /run verify -- /.test(step.run ?? ''));
-  assert.equal(verify.if, undefined, 'the complete verify never waits for the opt-in');
+  const verify = ci.jobs['renamed-feature'].steps.find(step => /run verify -- --report-dir/.test(step.run ?? ''));
+  for (const lookup of [e2eScenarios.readyPullRequest, e2eScenarios.labelledPullRequest, e2eScenarios.release, e2eScenarios.dispatchWithoutE2e])
+    assert.equal(gateValue([verify.if], lookup), true, 'the complete verify never waits for the opt-in');
+  assert.equal(gateValue([verify.if], e2eScenarios.e2eLabelAdded), false, 'the label run adds browser evidence only; the ready run verified the head');
   const result = ci.jobs['ci-result'];
   assert.equal(checkName(result, e2eScenarios.readyPullRequest), 'CI result');
   assert.equal(checkName(result, e2eScenarios.release), 'CI result');

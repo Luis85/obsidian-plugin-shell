@@ -46,15 +46,17 @@ jobs:
     name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
     if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ${{ matrix.os }}
-    # Fresh setup runs every verify gate once on the Node 24.15.0 / npm 12 legs,
-    # which no other workflow covers. The integrated Windows tooling suites alone
-    # approach 30 minutes and Ubuntu setup plus complete verify was measured at
-    # about 39 minutes; 60 minutes retains time for coverage and npm controls
-    # without shortening any gate. The Windows leg then measured 72 minutes of its
-    # 75, and the data-driven wizard suites add about 6.5 minutes on Windows, so
-    # Windows gets 95.
+    # Every leg runs the fresh install under the forwarded configuration and the
+    # real policy fixture without any dependency cache (cold on purpose: the rows
+    # qualify npm's install policy). The Ubuntu Node 24.15.0 / npm 12 leg then runs
+    # every verify gate once: the only complete verify on Node 24.15.0, measured at
+    # about 39 minutes earlier and 58 on the bfe0a5f7 pull request run, so it gets
+    # 75 minutes. Windows legs run no complete verify (the npm 12 leg measured 91
+    # minutes with it); the npm 12 leg runs the targeted gates below, estimated at
+    # 20-30 minutes (not yet measured), and the deferred legs about 1-5 minutes,
+    # so Windows gets 60 (room for a runner about 1.7 times slower).
     # This is a job budget, not a test deadline or product performance threshold.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 95 || 60 }}
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 75 }}
     strategy:
       fail-fast: false
       matrix:
@@ -63,17 +65,26 @@ jobs:
             node: '24.15.0'
             npm: '12.0.2'
             verify: complete
+          # Windows on Node 24.15.0 / npm 12 defers the complete verify and runs
+          # only what npm 12 and this Node can change on Windows: the dependency
+          # policy, the build, types and built artifacts, and the setup suite
+          # (install policy, staged build, identity, harness preview). The other
+          # gates run on this toolchain on Ubuntu (the leg above) and on Windows
+          # with the qualified toolchain ("Showcase / windows-latest"); their
+          # Windows x Node 24.15.0 x npm 12 combination is no longer run, in the
+          # release tier either.
           - os: windows-latest
             node: '24.15.0'
             npm: '12.0.2'
-            verify: complete
-          # The qualified Node 24.21.0 (.nvmrc) / npm 11.19.1 legs still run the
-          # fresh install under the forwarded configuration and the real policy
-          # fixture, but defer the identical complete verify, which ci.yml runs on
-          # every pull request and main push for the same OS and toolchain:
-          # Ubuntu in "Template authoring / renamed feature" (npm run verify after
-          # setup) and Windows in "Showcase / windows-latest" (fresh setup with
-          # the complete verify).
+            verify: deferred
+            targeted: true
+          # The qualified Node 24.21.0 (.nvmrc) / npm 11.19.1 legs defer the
+          # identical complete verify, which ci.yml runs on every ready pull
+          # request (a main push is the tree its merge-ref run qualified) and in
+          # the release tier, for the same OS and toolchain: Ubuntu in
+          # "Template authoring / renamed feature" (npm run verify after setup)
+          # and Windows in "Showcase / windows-latest" (fresh setup with the
+          # complete verify).
           - os: ubuntu-24.04
             node: '24.21.0'
             npm: '11.19.1'
@@ -110,6 +121,14 @@ jobs:
           $extra = @()
           if ($env:SETUP_VERIFY -eq 'deferred') { $extra += '--defer-verify' }
           node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction @extra
+      - name: Targeted gates on this toolchain (dependency policy, build, types, artifacts, setup suite)
+        if: matrix.targeted
+        shell: pwsh
+        run: |
+          node "$env:QUALIFIED_NPM_CLI" run verify -- --only dependency-policy,build,typecheck,artifacts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/testing/suites.mjs setup
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Reproduce EALLOWSCRIPTS and prove scoped approval using actual npm
         shell: pwsh
         run: node scripts/testing/check-npm-install-policy.mjs --npm-cli "$env:QUALIFIED_NPM_CLI"

@@ -2,7 +2,8 @@ name: Set up the qualified toolchain
 description: >-
   Selects the .nvmrc Node, provisions the qualified npm 11.19.1 in runner scratch
   (never globally) and exports QUALIFIED_NPM. Optionally installs the committed
-  lock and the locked Playwright Chromium. Checkout stays a separate step so each
+  lock (with the npm download cache unless npm-cache is 'false') and the locked
+  Playwright Chromium. Checkout stays a separate step so each
   job keeps its own checkout options.
 inputs:
   install:
@@ -13,6 +14,10 @@ inputs:
     description: Space-separated flags for the clean install, for example --no-fund --ignore-scripts.
     required: false
     default: '--no-fund'
+  npm-cache:
+    description: "'true' restores and saves the npm download cache (never node_modules) for the clean install, keyed on the OS and package-lock.json; 'false' keeps a fresh-install qualification or a privileged release job cold."
+    required: false
+    default: 'true'
   playwright:
     description: "Provision the Chromium pinned by the locked @playwright/test: '' (no), 'with-deps' (browser and system libraries) or 'browser' (browser only). Needs install."
     required: false
@@ -28,6 +33,15 @@ runs:
       with:
         node-version-file: .nvmrc
         package-manager-cache: false
+    # Same key and path as ci.yml's npm-cache step. Only the download cache: npm ci
+    # still installs every package and checks it against the lock's integrity.
+    - name: Restore the npm download cache
+      if: inputs.install == 'true' && inputs.npm-cache == 'true'
+      uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      with:
+        path: ${{ runner.os == 'Windows' && '~/AppData/Local/npm-cache' || '~/.npm' }}
+        key: npm-download-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+        restore-keys: npm-download-${{ runner.os }}-
     - name: Select the qualified npm in runner scratch, not globally
       id: npm
       shell: bash
