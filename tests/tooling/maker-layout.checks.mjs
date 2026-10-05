@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { APPROVALS_PATH } from '../../scripts/quality/self-review-approvals.mjs';
 
 // The maker engine and recipes moved to bin/adapters/makers as strict TypeScript, with the recipe catalog data beside
 // them; scripts/makers keeps only the entity catalog entry and the consumer-owned custom registry.
@@ -25,8 +26,10 @@ test('scripts/makers holds only the catalog entry and the consumer custom regist
 
 test('no source, test, plugin or configuration file imports a removed maker path', async () => {
   const removed = [...moved.map(name => `makers/${name}.mjs`), 'quality/format-generated.mjs', 'makers/cli.mjs'];
+  // The owner approvals record quotes deleted configuration lines verbatim; that history is its purpose, not a live reference.
+  const historical = new Set(['tests/tooling/maker-layout.checks.mjs', APPROVALS_PATH]);
   const sources = (await Promise.all(['bin', 'scripts', 'templates', 'tests', 'plugins', 'configs', '.github'].map(files))).flat()
-    .filter(path => /\.(?:[cm]?[jt]s|json|ya?ml)$/.test(path) && path !== 'tests/tooling/maker-layout.checks.mjs');
+    .filter(path => /\.(?:[cm]?[jt]s|json|ya?ml)$/.test(path) && !historical.has(path));
   const offenders = [];
   for (const path of sources) {
     const text = await readFile(join(root, path), 'utf8');
