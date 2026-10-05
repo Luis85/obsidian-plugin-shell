@@ -5,8 +5,8 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler, upgradePlan } from '../../bin/adapters/framework/kit.ts';
-import { extractArchive, extractKit } from './framework-archive-fixture.mjs';
+import { upgradePlan } from '../../bin/adapters/framework/kit.ts';
+import { extractArchive, extractKit, kitFiles } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../bin/adapters/framework/zip.ts';
 import { hash } from '../../bin/adapters/framework/files.ts';
@@ -21,7 +21,7 @@ function cli(dir, args) {
 test('compiled kit bootstraps, imports and generates without dependencies or Git', { timeout: 300000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-kit-'))); t.after(() => rm(dir, { recursive: true, force: true }));
-  const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler()), archive = zip(files);
+  const files = await kitFiles(root), archive = zip(files);
   assert.deepEqual(archive, zip([...files].reverse()), 'ZIP ordering must be deterministic');
   const extracted = await extractArchive(archive, dir);
   assert.equal(extracted.length, files.length);
@@ -139,7 +139,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
 test('compiled kit preserves Storybook overrides and intake ownership across replay', { timeout: 300000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-kit-storybook-'))); t.after(() => rm(dir, { recursive: true, force: true }));
-  const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler());
+  const files = await kitFiles(root);
   await extractArchive(zip(files), dir); await verifyKit(dir);
   const design = selfProject();
   design.project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
