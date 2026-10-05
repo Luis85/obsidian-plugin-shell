@@ -247,7 +247,7 @@ test('[VISUAL-INSPECTOR] Project health lists every check and opens the export p
   const ctx = load();
   const checks = plain(ctx.veHealthChecks());
   assert.deepEqual(checks.map(c => [c[0], c[1]]), [['Full validation', true], ['Project schema', true], ['Nuxt UI catalog', true], ['Page references', true], ['Layouts', true], ['Component contracts', true], ['Component graph', true], ['Scenarios', true]]);
-  assert.match(checks[2][2], /nuxt-ui v1 pinned · @nuxt\/ui 4\.11\.2/);
+  assert.match(checks[2][2], /nuxt-ui v1 pinned · @nuxt\/ui 4\.11\.3/);
   const html = ctx.veHealthHtml();
   assert.match(html, /8 of 8 checks pass/); assert.match(html, /data-action="project-export"[^>]*>.*Inspect project JSON/);
   ctx.host.design.nodes = [surfaces[1]];

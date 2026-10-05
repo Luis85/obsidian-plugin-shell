@@ -97,6 +97,8 @@ test('negative: unknown keys, missing rules, bad severities, params and regular 
   const done = JSON.parse(await read(configFiles.done));
   done.rules['DOD-07'].params.patterns[0].flags = 'i';
   assert.throws(() => validateRulesConfig(done, doneRules, 'd.json'), /unknown key "flags"/);
+  delete done.rules['DOD-07'].params.patterns[0].flags; done.rules['DOD-07'].params.patterns[0].code = 'yes';
+  assert.throws(() => validateRulesConfig(done, doneRules, 'd.json'), /DOD-07\.params\.patterns must be patterns/);
   const lowercase = path => path.endsWith('delivery.json') ? read(configFiles.delivery).then(text => text.replace('"Done"', '"done"')) : read(path.slice(repositoryRoot.length + 1));
   await assert.rejects(loadConfig(repositoryRoot, 'done', doneRules, { read: lowercase }), /DOD-09\.params\.status: "Done" is not one of handoff\.statuses/);
   await assert.rejects(loadConfig(repositoryRoot, 'ready', readyRules, { files: { ready: 'configs/delivery/missing.json' } }), /cannot be read/);

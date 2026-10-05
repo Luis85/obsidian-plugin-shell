@@ -80,7 +80,7 @@ every pull request.
 | DOD-04 | Changelog updated | error | both | A user-facing change (`userFacingRoots`) adds the Changelog lines to `## [Unreleased]` of `CHANGELOG.md`. |
 | DOD-05 | Docs impact delivered and typed | error | both | Every Docs impact target changed in the diff and carries a `> Type:` marker. |
 | DOD-06 | New docs pages indexed | error | both | Every new docs page is listed in `docs/README.md` under the heading of its type. |
-| DOD-07 | No forbidden additions | error | both | Added lines contain no `TODO`/`FIXME` in source, no `console.log(` in the plugin runtime and no focused test (`.only(`). |
+| DOD-07 | No forbidden additions | error | both | Added lines contain no `TODO`/`FIXME` comment marker in source, no `console.log(` in the plugin runtime and no focused test (`.only(`). Patterns with `"code": true` ignore the contents of string and template literals, so generated `TODO(owner)` text and test fixtures are not flagged; a marker counts only right after a comment opener (`//`, `/*`, `*`, `#`, `<!--`). |
 | DOD-08 | Affected areas cover the diff | warning | both | Every changed file matches an affected area (`CHANGELOG.md` and `docs/README.md` always count). |
 | DOD-09 | Increment status done | error | increment | The Increment's status is Done. |
 | DOD-10 | E2E label matches the decision | error | both | With `e2e: required` the pull request carries the `e2e` label (read from `PR_LABELS`; a local run without it warns). |

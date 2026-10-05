@@ -1,7 +1,7 @@
 // Pinned Nuxt UI authoring catalog v1 plus recipes that expand to ordinary IR. Generated projects pin @nuxt/ui to VISUAL_NUXT_UI_VERSION.
 import { visualAssert, visualAllocate, visualElement, visualText, visualNuxt, visualLiteral, visualLayoutRules } from './visual-ir.mjs';
 import { compositionDefaultUI } from '../composition-contract.mjs';
-export const VISUAL_NUXT_UI_VERSION = '4.11.2';
+export const VISUAL_NUXT_UI_VERSION = '4.11.3';
 export const VISUAL_PROP_KINDS = Object.freeze(['string', 'number', 'boolean', 'array', 'object', 'unknown']);
 export const VISUAL_CONTROL_ENTRIES = Object.freeze(['u-input', 'u-textarea', 'u-select', 'u-checkbox', 'u-switch']);
 const vcatColors = ['primary', 'neutral', 'success', 'warning', 'error', 'info'];

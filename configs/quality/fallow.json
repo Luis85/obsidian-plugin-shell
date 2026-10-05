@@ -699,7 +699,8 @@
           "cli-file-plan-contract",
           "cli-files-contract",
           "cli-bounded-map-contract",
-          "project-path-contract"
+          "project-path-contract",
+          "cli-serialization-contract"
         ]
       },
       {
@@ -886,15 +887,6 @@
         "type": "fileExists",
         "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
       }
-    }
-  ],
-  "ignoreExports": [
-    {
-      "file": "scripts/shared/file-plan.ts",
-      "exports": [
-        "createFilePlan",
-        "applyFilePlan"
-      ]
     }
   ]
 }

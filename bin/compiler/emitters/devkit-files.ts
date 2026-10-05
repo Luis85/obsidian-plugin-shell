@@ -51,10 +51,9 @@ export function renderTemplate(text: string, values: Readonly<Record<string, str
 export const makerTests = 'tests/runtime/generated';
 const oneLine = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim();
 export function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add: Add): void {
-  const project = m.project as unknown as Record<string, unknown>;
   const hosting = hostingProfile(projectHosting(m.document));
-  const values = { name: oneLine(project.name) || String(m.project.id), id: String(m.project.id),
-    description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot, ...briefValues(m),
+  const values = { name: oneLine(m.project.name) || String(m.project.id), id: String(m.project.id),
+    description: oneLine(m.project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot, ...briefValues(m),
     prTemplatePath: hosting.prTemplatePath, hostingCli: hosting.cliHints, hostingAgent: hosting.agentHint };
   const read = (template: string) => templateRoot.text(`templates/companion/devkit/${template}`);
   for (const [path, template] of devkitTemplates(hosting)) {

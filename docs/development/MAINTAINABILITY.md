@@ -3,7 +3,7 @@
 > Type: reference · Part of the [docs index](../README.md)
 
 `npm run check:maintainability` measures the entire current source tree with the
-qualified Fallow 3.30.0 CLI. It never rewrites application source. Reports and the
+qualified Fallow 3.31.0 CLI. It never rewrites application source. Reports and the
 unaltered JSON/stderr of each tool invocation go to a new timestamped directory
 under `reports/maintainability`. Run
 `node scripts/quality/check-maintainability.mjs --check REPORT_DIRECTORY` to
@@ -117,7 +117,7 @@ checks still run against the real repository configuration.
 
 Health must report exactly the supplied input count, and any source-discovery or
 degraded-parse diagnostic fails. The metric config also sets `failOnParseError`,
-so health must carry an enforced, passing native `parse-error` gate. Fallow 3.30
+so health must carry an enforced, passing native `parse-error` gate. Fallow 3.31
 arms no parse-error gate for `dupes`; duplication relies on the diagnostics check
 and the exit/verdict agreement instead. Duplication uses Fallow's actual token-bearing
 corpus: import/re-export wiring is excluded by its explicit default. Inputs below

@@ -91,11 +91,25 @@ test('[SELF-REVIEW-03b] owner approvals accept only exactly listed quality-confi
   const unlisted = '{\n  "coverage": { "lines": 96 },\n  "ignore": ["src/**"]\n}\n';
   assert.deepEqual(await review(t, { [file]: unlisted, [record]: approval(['  "coverage": { "lines": 96 }'], ['  "coverage": { "lines": 95 }']) }), [`SR-QUALITY-CONFIG ${file}:2`]);
   assert.deepEqual(await review(t, { [file]: tighten, [record]: approval(['  "coverage": { "lines": 96 }'], ['  "coverage": { "lines": 95 }'], { file: 'configs/quality/other.json' }) }), [`SR-QUALITY-CONFIG ${file}:2`]);
-  for (const broken of ['{', JSON.stringify({ schemaVersion: 1, approvals: [{ rule: 'SR-LINT-DISABLE', file, approvedBy: '@owner', reason: 'x', added: [], removed: [] }] }),
-    approval([], [], { approvedBy: 'owner' }), approval([], [], { reason: ' ' })]) {
+  // Unknown or non-approvable rules, a line rule that lists no line, a bare approver and an empty reason all fail closed.
+  for (const broken of ['{', approval([], [], { rule: 'SR-FOCUSED-TEST' }), approval([], [], { rule: 'SR-NOT-A-RULE' }), approval([], [], { rule: 'SR-LINT-DISABLE', file: 'src/a.ts' }),
+    approval([], [], { approvedBy: 'owner' }), approval([], [], { reason: ' ' }), approval([], [], { rule: 'toString' })]) {
     const broke = await fixture(t); await put(broke, { [file]: tighten, [record]: broken });
     await assert.rejects(runSelfReview(['--base', 'HEAD'], broke), /SELF_REVIEW_APPROVALS|JSON/);
   }
+});
+
+test('[SELF-REVIEW-03c] a line-rule approval moves only the listed flagged line to approved; editing that line flags it again', async t => {
+  const record = 'configs/quality/self-review-approvals.json';
+  const approval = lines => JSON.stringify({ schemaVersion: 1, approvals: [{ rule: 'SR-UNSAFE-CAST', file: 'src/a.ts', approvedBy: '@owner', pullRequest: 1, reason: 'Host type has no guard.', added: lines, removed: [] }] });
+  const source = `export const a = 1;\n${directive.lint}\nexport const b = 2;\n${directive.anyCast}\n${directive.unknownCast}\nexport const c = 3;\n`;
+  const root = await fixture(t);
+  await put(root, { 'src/a.ts': source, [record]: approval([directive.anyCast]) });
+  const { report } = await runSelfReview(['--base', 'HEAD'], root);
+  // Unlisted added lines of the same file (c = 3) do not matter for a line rule; the second cast is not listed.
+  assert.deepEqual([report.violations.map(item => `${item.rule} ${item.line}`), report.approved.map(item => `${item.rule} ${item.line} ${item.approvedBy}`)],
+    [['SR-UNSAFE-CAST 5'], ['SR-UNSAFE-CAST 4 @owner']]);
+  assert.deepEqual(await review(t, { 'src/a.ts': source.replace(directive.anyCast, `${directive.anyCast} `), [record]: approval([directive.anyCast, directive.unknownCast]) }), ['SR-UNSAFE-CAST src/a.ts:4']);
 });
 
 test('[SELF-REVIEW-04] screenshot and snapshot baselines are rejected, including added baseline files', async t => {

@@ -143,7 +143,7 @@ v3/v4 detail designs) are rejected and never migrated, so the detail-schema sect
 `presentation/components/details/<pageId>.vue` and each component to its library SFC with `defineProps`/`defineEmits`/
 `defineSlots` from the typed contract. Elements become their tags, text becomes escaped interpolation or a typed
 binding, slots become `<slot>`, project components are imported by export name and Nuxt UI entries become explicitly
-imported `U*` components (catalog v1 ↔ `@nuxt/ui` 4.11.2, asserted). Interactions call only declared actions
+imported `U*` components (catalog v1 ↔ `@nuxt/ui` 4.11.3, asserted). Interactions call only declared actions
 (navigation port, source operation/mapping port, local runtime effects); an interaction without actions is an
 `IMPLEMENTATION_REQUIRED` TODO. External-library nodes produce extension-owned `<adapter>.adapter.ts` stubs and merge
 their exact package versions into `package.json` ([visual editors](../concepts/companion/VISUAL-EDITORS.md#component-library-dependencies-and-external-adapters-spec-13)).

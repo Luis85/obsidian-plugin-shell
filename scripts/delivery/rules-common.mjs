@@ -15,6 +15,26 @@ export const fail = (message, hint, details) => ({ status: 'fail', message, hint
 export const skip = message => ({ status: 'skip', message });
 export const list = (items, limit = 6) => items.slice(0, limit).join(', ') + (items.length > limit ? ` and ${items.length - limit} more` : '');
 
+/**
+ * One source line with the contents of its string and template literals removed, so a pattern only sees code and
+ * comments. Text after a comment opener is kept verbatim (apostrophes in prose are not quotes); a literal that does not
+ * close on the line is dropped to the end of the line. `keep(contents)` may put a placeholder between the quotes
+ * (the self-review guard marks a non-empty literal); by default the quotes are left empty.
+ */
+export function codeText(line, keep = () => '') {
+  if (/^\s*\*/.test(line)) return line;
+  let out = '';
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    if (char === '/' && (line[index + 1] === '/' || line[index + 1] === '*')) return out + line.slice(index);
+    if (char !== "'" && char !== '"' && char !== '`') { out += char; continue; }
+    let end = index + 1;
+    while (end < line.length && line[end] !== char) end += line[end] === '\\' ? 2 : 1;
+    out += char + keep(line.slice(index + 1, end)) + char; index = end;
+  }
+  return out;
+}
+
 /** An evidence reference without its `#anchor` or `:line[:column]` suffix. */
 export const evidencePath = value => value.replace(/#.*$/, '').replace(/:\d+(?::\d+)?$/, '');
 /** True when a repository file is the path, or sits under it as a folder. */

@@ -4,13 +4,13 @@ import { constants, type Stats } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
 import { sha256 } from '../../../scripts/shared/hash.ts';
 import { insist } from '../domain/contracts.ts';
+import { hasControls } from '../../domain/errors.ts';
 export const documentationDigest = (value: string | Uint8Array): string => sha256(value);
 const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 export function portable(path: string): string {
   insist(typeof path === 'string' && path.length <= 1024 && !isAbsolute(path) && !path.includes('\\'), 'DOCS_PATH', 'Use a portable project-relative path.');
-  // Intentional portability boundary: reject Windows-reserved and ASCII control characters in path segments.
-  // oxlint-disable-next-line no-control-regex
-  insist(path.split('/').every(part => part && part !== '.' && part !== '..' && !/[<>:"|?*\u0000-\u001f]/.test(part) && !/[ .]$/.test(part) && !reserved.test(part)), 'DOCS_PATH', 'Unsafe path segment.');
+  // Intentional portability boundary: reject Windows-reserved characters and C0/C1 controls in path segments.
+  insist(path.split('/').every(part => part && part !== '.' && part !== '..' && !/[<>:"|?*]/.test(part) && !hasControls(part) && !/[ .]$/.test(part) && !reserved.test(part)), 'DOCS_PATH', 'Unsafe path segment.');
   return path;
 }
 export function localPath(root: string, path: string): string | null {
