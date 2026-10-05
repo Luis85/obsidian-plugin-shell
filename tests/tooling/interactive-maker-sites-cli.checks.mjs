@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readdir, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 
 const repository = resolve(import.meta.dirname, '../..');
 const FEATURES = `filters: file.inFolder("Features")
@@ -154,7 +155,7 @@ test('[SITES-CLI-04] site collections refuses unknown and unsupported views, a m
   assert.deepEqual(await files(join(root, 'projects/acme/src/data/collections')), ['README.md'], 'a refused plan writes nothing');
 }));
 
-test('[SITES-CLI-05] the templates are read only from plain, bounded .tmpl files of the installed copy, and an overlay file replaces the base file', () => withRoot(async ({ root, put, run }) => {
+test('[SITES-CLI-05] the templates are read only from plain, bounded .tmpl files of the installed copy, and an overlay file replaces the base file', t => withRoot(async ({ root, put, run }) => {
   const fake = join(root, 'framework');
   assert.equal(failure(await run('site templates', [], {}, fake)), 'failed:SITE_TEMPLATES_MISSING');
   await put('framework/templates/sites/catalog.json', JSON.stringify({ schemaVersion: 1, astro: '7.3.5', templates: [{ id: 'mini', title: 'Mini', summary: 'a test site.', collections: [{ name: 'x', use: 'y' }] }] }));
@@ -172,9 +173,10 @@ test('[SITES-CLI-05] the templates are read only from plain, bounded .tmpl files
   await put('framework/templates/sites/mini/notes.txt', 'x');
   assert.equal(failure(await run('site new', ['projects/b'], { template: 'mini' }, fake)), 'failed:SITE_TEMPLATE_FILE');
   await rm(join(fake, 'templates/sites/mini/notes.txt'));
-  await symlink(join(fake, 'templates/sites/base/README.md.tmpl'), join(fake, 'templates/sites/mini/link.md.tmpl'));
-  assert.equal(failure(await run('site new', ['projects/b'], { template: 'mini' }, fake)), 'failed:SITE_TEMPLATE_FILE');
-  await rm(join(fake, 'templates/sites/mini/link.md.tmpl'));
+  if (await fileSymlink(t, join(fake, 'templates/sites/base/README.md.tmpl'), join(fake, 'templates/sites/mini/link.md.tmpl'))) {
+    assert.equal(failure(await run('site new', ['projects/b'], { template: 'mini' }, fake)), 'failed:SITE_TEMPLATE_FILE');
+    await rm(join(fake, 'templates/sites/mini/link.md.tmpl'));
+  }
   await put('framework/templates/sites/mini/dot-.tmpl', 'x');
   assert.equal(failure(await run('site new', ['projects/b'], { template: 'mini' }, fake)), 'failed:SITE_TEMPLATE_FILE', 'a template file never renders to "."');
   await rm(join(fake, 'templates/sites/mini/dot-.tmpl'));
