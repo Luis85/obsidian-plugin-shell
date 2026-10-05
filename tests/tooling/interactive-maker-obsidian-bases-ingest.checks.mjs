@@ -53,7 +53,8 @@ async function fixture(root) {
   await put('Library/node_modules/pkg/README.md', '---\ntitle: Dependency\n---\n');
   await put('Library/cover.png', 'binary');
   await put('Elsewhere/Outside.md', '---\ntitle: Outside\nrating: 5\n---\n');
-  await symlink(join(root, 'Elsewhere'), join(root, 'Library/Linked'));
+  // A junction needs no Windows symlink privilege and is still reported as a link.
+  await symlink(join(root, 'Elsewhere'), join(root, 'Library/Linked'), 'junction');
   return { root, put };
 }
 
