@@ -2,21 +2,25 @@ import assert from 'node:assert/strict';
 import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
 import { prototypesRead, prototypesCompare, prototypesPlan } from '../../bin/adapters/framework/prototypes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
+import { pristineFixtures } from '../support/pristine-fixture.mjs';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const projectText = starterDocumentText('companion-plugin');
 const code = async pending => { try { await pending; return 'resolved'; } catch (error) { return error.code ?? error.message.split(':')[0]; } };
-/** A project with one managed prototype (alpha / v1 / main) created through the reviewed plan. */
+const copyFixture = pristineFixtures(after, 'prototype-actions-pristine-');
+/** A project with one managed prototype (alpha / v1 / main) created through the reviewed plan once per file; each test edits its own copy. */
 async function withWorkspace(check) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'prototype-actions-')));
   try {
     const context = { root, frameworkRoot };
-    await writeFile(join(root, 'project.json'), projectText);
-    await applyFilePlan((await prototypesPlan({ command: 'prototypes create', args: ['alpha'], options: { input: 'project.json', name: 'Alpha' } }, context)).plan);
+    await copyFixture('alpha', async pristine => {
+      await writeFile(join(pristine, 'project.json'), projectText);
+      await applyFilePlan((await prototypesPlan({ command: 'prototypes create', args: ['alpha'], options: { input: 'project.json', name: 'Alpha' } }, { root: pristine, frameworkRoot })).plan);
+    }, root);
     await check(context);
   } finally { await rm(root, { recursive: true, force: true }); }
 }
