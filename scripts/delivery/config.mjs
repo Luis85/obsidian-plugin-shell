@@ -26,7 +26,7 @@ const checks = {
   regex: value => typeof value === 'string' && value.length > 0,
   'regex[]': strings,
   map: value => isObject(value) && Object.values(value).every(item => typeof item === 'string' && item.length > 0),
-  patterns: value => Array.isArray(value) && value.length > 0 && value.every(item => isObject(item) && typeof item.id === 'string' && typeof item.regex === 'string' && strings(item.include) && Array.isArray(item.exclude) && item.exclude.every(entry => typeof entry === 'string' && entry.length > 0)),
+  patterns: value => Array.isArray(value) && value.length > 0 && value.every(item => isObject(item) && typeof item.id === 'string' && typeof item.regex === 'string' && strings(item.include) && (item.code === undefined || typeof item.code === 'boolean') && Array.isArray(item.exclude) && item.exclude.every(entry => typeof entry === 'string' && entry.length > 0)),
 };
 
 function checkParams(file, id, params, schema) {
@@ -37,7 +37,7 @@ function checkParams(file, id, params, schema) {
     if (type === 'regex') regex(file, `${id}.params.${name}`, value);
     if (type === 'regex[]') value.forEach((item, index) => regex(file, `${id}.params.${name}[${index}]`, item));
     if (type === 'patterns') for (const item of value) {
-      exactKeys(file, `${id}.params.${name}.${item.id}`, item, ['id', 'regex', 'include', 'exclude']);
+      exactKeys(file, `${id}.params.${name}.${item.id}`, item, ['id', 'regex', 'include', 'exclude'], ['code']);
       regex(file, `${id}.params.${name}.${item.id}.regex`, item.regex);
     }
   }

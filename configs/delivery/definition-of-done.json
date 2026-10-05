@@ -20,9 +20,9 @@
       "headings": { "tutorial": "Tutorials", "how-to": "How-to guides", "reference": "Reference", "explanation": "Explanation" }
     } },
     "DOD-07": { "severity": "error", "enabled": true, "params": { "patterns": [
-      { "id": "todo-marker", "regex": "\\b(?:TODO|FIXME)\\b", "include": ["src/**", "bin/**", "scripts/**", "plugins/**", "templates/**", "harness/**"], "exclude": ["**/*.md", "**/*.tmpl"] },
-      { "id": "console-log", "regex": "\\bconsole\\.log\\(", "include": ["src/**", "plugins/*/src/**", "templates/companion/runtime/**"], "exclude": [] },
-      { "id": "focused-test", "regex": "\\.only\\(", "include": ["tests/**", "**/*.test.ts", "**/*.checks.mjs"], "exclude": ["tests/tooling/delivery-*"] }
+      { "id": "todo-marker", "regex": "(?://|/\\*|^\\s*\\*|#|<!--)\\s*(?:TODO|FIXME)\\b", "code": true, "include": ["src/**", "bin/**", "scripts/**", "plugins/**", "templates/**", "harness/**"], "exclude": ["**/*.md", "**/*.tmpl"] },
+      { "id": "console-log", "regex": "\\bconsole\\.log\\(", "code": true, "include": ["src/**", "plugins/*/src/**", "templates/companion/runtime/**"], "exclude": [] },
+      { "id": "focused-test", "regex": "\\.only\\(", "code": true, "include": ["tests/**", "**/*.test.ts", "**/*.checks.mjs"], "exclude": ["tests/tooling/delivery-*"] }
     ] } },
     "DOD-08": { "severity": "warning", "enabled": true, "params": { "alwaysCovered": ["CHANGELOG.md", "docs/README.md"], "maxListed": 15 } },
     "DOD-09": { "severity": "error", "enabled": true, "params": { "status": "Done" } },

@@ -39,6 +39,20 @@ test('negative: each unfinished part fails exactly its own rule with a hint', ()
   assert.equal(done(finished, { diff: [...without('src/features/greeting/command.ts'), { path: 'docs/notes.md', status: 'A', added: [{ line: 1, text: 'TODO list for console.log(' }] }] })['DOD-07'].status, 'pass', 'Markdown and other roots are not scanned');
 });
 
+test('DOD-07 reads code, not text: markers inside string literals and prose are not follow-ups', () => {
+  const added = (path, lines) => ({ path, status: 'M', added: lines.map((text, index) => ({ line: index + 1, text })) });
+  const scan = files => done(finished, { diff: [...without('src/features/greeting/command.ts'), ...files] })['DOD-07'];
+  const quoted = scan([
+    added('bin/emit.ts', ["const section = lines => [`- TODO(owner): ${empty}`];", "out.push('// TODO keep the generated hook');", '/** A title-only interaction is an explicit implementation TODO, never an outcome. */',
+      ' * gets an executable navigation test (otherwise a business-interaction TODO). */', "  `  PRD TODOs  ${count} acceptance obligations remain TODO`,", 'const placeholder = /<(?:TBD|TODO)>|\\b(?:TBD|TODO)\\b/i;']),
+    added('tests/scan.checks.mjs', ["const spec = scanSpec({ text: \"test.describe('g', () => { test.only(\\\"one\\\", () => {}); });\" });"]),
+    added('src/log.ts', ["const hint = 'call console.log(value) to debug';"])]);
+  assert.equal(quoted.status, 'pass', JSON.stringify(quoted.details));
+  const real = scan([added('bin/emit.ts', ['run(); // TODO remove', '/* FIXME: retry */', ' * TODO: split this module', "const label = 'x'; // FIXME it's wrong"]),
+    added('scripts/build.sh', ['# TODO pin the version']), added('tests/scan.checks.mjs', ["test.only('one', () => {});"]), added('src/log.ts', ["console.log('state', state);"])]);
+  assert.deepEqual(real.details, ['bin/emit.ts:1 todo-marker', 'bin/emit.ts:2 todo-marker', 'bin/emit.ts:3 todo-marker', 'bin/emit.ts:4 todo-marker', 'scripts/build.sh:1 todo-marker', 'tests/scan.checks.mjs:1 focused-test', 'src/log.ts:1 console-log']);
+});
+
 test('warnings: the diff escaping the affected areas, a missing Completion record and an unverifiable e2e label', () => {
   const escaped = done(finished, { diff: [...baseContext(config).diff, { path: 'bin/other.ts', status: 'M', added: [] }] });
   assert.equal(escaped['DOD-08'].status, 'warn'); assert.deepEqual(escaped['DOD-08'].details, ['bin/other.ts']); assert.deepEqual(failing(escaped), []);

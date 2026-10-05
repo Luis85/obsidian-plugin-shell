@@ -8,7 +8,7 @@
 import { posix } from 'node:path';
 import { acceptanceCriteria, affectedAreas, changelogEntries, docsImpact, testPlan } from './handoff.mjs';
 import { matchesAny } from './paths.mjs';
-import { anyPullRequest, evidencePath, fail, increment, known, pass, skip } from './rules-common.mjs';
+import { anyPullRequest, codeText, evidencePath, fail, increment, known, pass, skip } from './rules-common.mjs';
 import { documentDoneRules } from './rules-done-documents.mjs';
 import { acceptanceDoneRules } from './rules-acceptance.mjs';
 import { parseChangelog, validateChangelog } from '../release/changelog.mjs';
@@ -117,7 +117,7 @@ const incrementDoneRules = {
       for (const file of changed(context)) for (const rule of params.patterns) {
         if (!matchesAny(rule.include, file.path) || matchesAny(rule.exclude, file.path)) continue;
         const pattern = new RegExp(rule.regex, 'u');
-        for (const line of file.added ?? []) if (pattern.test(line.text)) found.push(`${file.path}:${line.line} ${rule.id}`);
+        for (const line of file.added ?? []) if (pattern.test(rule.code ? codeText(line.text) : line.text)) found.push(`${file.path}:${line.line} ${rule.id}`);
       }
       return found.length ? fail(`${found.length} forbidden addition(s).`, 'Remove the debugging output, focused tests and follow-up markers the patterns name; track follow-ups in a task instead.', found.slice(0, 20)) : pass('No forbidden pattern in added lines.');
     } },
