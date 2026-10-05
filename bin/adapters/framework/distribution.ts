@@ -6,7 +6,7 @@ import { requireThat } from './contracts.ts';
 import { deliveryPipelineFiles, deliveryPipelineFolder } from '../../compiler/domain/template-inputs.ts';
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies; so are the projects/<name>
  * tooling and the workflows it syncs from those standalone projects. */
-const excludedRoots = [deliveryPipelineFolder, '.github/workflows/projects--', 'scripts/projects/', 'configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/', 'tests/fixtures/sites/'];
+const excludedRoots = [deliveryPipelineFolder, '.github/workflows/projects--', 'scripts/projects/', 'configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/agents-prototype-0.15/', 'scripts/concepts/', 'tests/concepts/', 'tests/fixtures/sites/'];
 const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tests/tooling/projects-boundary.checks.mjs', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
   // The developer guide describes working in the framework checkout, not an extracted kit.
   'DEVELOPER_GUIDE.md',

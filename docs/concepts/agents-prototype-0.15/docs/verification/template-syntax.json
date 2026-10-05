@@ -1,0 +1,120 @@
+{
+  "version": "3.5.13",
+  "results": [
+    {
+      "file": "src/presentation/App.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/CharacterEditor.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/CharacterStage.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/EvalLab.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/GurpsSheet.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/InstructionsView.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/JsonStudio.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/OverviewDashboard.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/PersistenceStatus.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/RelationsView.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/RuntimeAdapters.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/SafetyView.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/TeachingAcademy.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/VaultPaths.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/VoxelWorld.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/editor/AgentRoster.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/editor/CharacterCustomizer.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/editor/CharacterDesignPanel.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "file": "src/presentation/components/editor/CharacterThumbnail.vue",
+      "compiled": true,
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "scope": "Template syntax compilation only using locally available Vue global compiler, not the declared dependency version, SFC typecheck, full Nuxt UI app mounting, or Three.js rendering."
+}
