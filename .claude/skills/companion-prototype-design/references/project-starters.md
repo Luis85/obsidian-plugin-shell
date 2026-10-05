@@ -9,12 +9,12 @@ are never overridden at creation; choose (or author) a different starter instead
 The interview is `configs/guides/project-prototype.json`. Agent and terminal paths share
 the installed starters, the interview and the compiler.
 
-A prepared package carries `project.config.json` (the chosen starter's ID, version and
+A prepared package carries `configs/<project-id>-config.json` (the chosen starter's ID, version and
 SHA-256 plus its complete selection), `project-request.json`, `prototype-guide.json`,
 `prototype-answers.json`, the complete Companion document, `design-brief.md`,
 `execution-prompt.md`, integration metadata and `source/`. Read the agreed brief
 without repeating accepted questions. Choosing another starter reopens agreement.
-The source copy of `project.config.json` must match the parent selection.
+The source copy `source/configs/<project-id>-config.json` must match the parent selection.
 Never put target metadata into the closed Companion v6 envelope.
 
 ## Execute the selected target contract

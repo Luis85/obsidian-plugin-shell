@@ -83,7 +83,7 @@ export const fakeDataModule: WizardModule = {
       const catalog = await loadFakeCatalog(options.root), flags = (options.flags ?? {}) as FormValues;
       const entities = await fakeEntityList(options.root, catalog, options.project as string | undefined);
       Object.assign(state, { entities, configs: [...catalog.generations.values()].map(item => item.definition), referenceDate: defaultReferenceDate,
-        start: flags.config ? 'config' : 'entity', configId: typeof flags.config === 'string' ? flags.config : undefined,
+        start: flags.generation ? 'config' : 'entity', configId: typeof flags.generation === 'string' ? flags.generation : undefined,
         run: { entity: typeof flags.entity === 'string' ? flags.entity : entities[0]?.ref, count: whole(flags.count, fakeDefaults.count),
           seed: whole(flags.seed, fakeDefaults.seed), base: flags.base === true, out: options.out ?? '' } });
     },

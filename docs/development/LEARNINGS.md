@@ -182,7 +182,7 @@ project; it replaces the built-in definition completely and is validated fail-cl
 ## Demo data
 
 ```sh
-node bin/app fake-data --config learnings-demo --root <scratch-folder> --json   # then --apply <planHash>
+node bin/app fake-data --generation learnings-demo --root <scratch-folder> --json   # then --apply <planHash>
 node bin/app learning check --root <scratch-folder> --as-of 2026-01-01 --json
 ```
 

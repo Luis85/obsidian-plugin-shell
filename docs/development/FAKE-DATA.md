@@ -33,7 +33,7 @@ The `fake-data` wizard (`configs/wizards/fake-data.json`) asks:
 5. **Review.** The complete file plan is shown. The answer defaults to No.
 6. **Reuse.** You may save the run as a generation config. This is a second reviewed, default-No plan.
 
-Flags preselect answers, for example `node bin/app fake-data --config contacts-demo` or
+Flags preselect answers, for example `node bin/app fake-data --generation contacts-demo` or
 `node bin/app fake-data --entity book --count 30`.
 
 ### Define a new entity in the wizard
@@ -67,19 +67,19 @@ node bin/app fake-data --entity contact --count 25 --out "Fake Data/Contacts" --
 
 node bin/app fake-data configs --json                   # saved generation configs
 node bin/app fake-data show-config --name contacts-demo --json
-node bin/app fake-data --config contacts-demo --json    # plan from a saved config
-node bin/app fake-data --config contacts-demo --count 50 --seed 9 --out "Fake Data/More" --json
+node bin/app fake-data --generation contacts-demo --json    # plan from a saved config
+node bin/app fake-data --generation contacts-demo --count 50 --seed 9 --out "Fake Data/More" --json
 node bin/app fake-data save-config --input generation.json --json        # plan; then --apply <planHash>
 ```
 
 | Option | Meaning |
 | --- | --- |
 | `--entity <ref>` | Entity id, `semantic:<id-or-slug>` or `file:<relative.json>` (see below). |
-| `--config <id>` | A saved generation config; use either this or `--entity`. |
+| `--generation <id>` | A saved generation config; use either this or `--entity`. (`--config` is the project configuration path of other commands.) |
 | `--count <n>` | 1–1000 notes (default 10, or the config's count). |
 | `--out <folder>` | Target folder relative to `--root` (default `Fake Data/<entity folder>`, or the config's). |
 | `--seed <n>` | 0–2147483647 (default 1, or the config's seed). |
-| `--base` | Also write `<out>/<entity id>.base`. With `--config` it can only turn the base on. |
+| `--base` | Also write `<out>/<entity id>.base`. With `--generation` it can only turn the base on. |
 | `--project <file>` | Saved project read for `semantic:` entities (default `design/project.json`). |
 
 `--count`, `--out`, `--seed` and `--base` override a saved config for that run only. The plan's `sample`

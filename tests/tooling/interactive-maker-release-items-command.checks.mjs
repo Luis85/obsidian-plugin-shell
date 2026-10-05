@@ -86,7 +86,7 @@ test('check, list filters and the register cover release items, including a hand
 }));
 
 test('the release-items-demo fake-data preset generates notes that release item check and candidate add accept', async () => scratch(async root => {
-  const fake = (...argv) => execute(parseArguments(['fake-data', '--config', 'release-items-demo', ...argv], []), { root, frameworkRoot: repository, input: process.stdin });
+  const fake = (...argv) => execute(parseArguments(['fake-data', '--generation', 'release-items-demo', ...argv], []), { root, frameworkRoot: repository, input: process.stdin });
   const plan = await fake();
   await fake('--apply', plan.planHash);
   const checked = await execute(parseArguments(['release-item', 'check', '--as-of', '2026-01-01'], []), { root, frameworkRoot: repository, input: process.stdin });

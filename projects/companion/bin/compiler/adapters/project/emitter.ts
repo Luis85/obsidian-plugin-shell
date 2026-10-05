@@ -4,6 +4,7 @@ import { angularLinkerSource } from './angular-linker.ts';
 import { json, type Model } from '../../emitters/model.ts';
 import type { Artifact, TemplateSnapshot } from '../../domain/contracts.ts';
 import { validateProjectSelection, type ProjectSelection } from '../../domain/project-starter.ts';
+import { projectConfigPath } from '../../domain/project-config.ts';
 import { coreSource, browserSource, pluginSource, cliSource, cliEntry, vanillaMount, vueMount, vueComponent, angularMount } from './sources.ts';
 import { buildSource, licenseSource } from './build-source.ts';
 import { packageFiles, typecheckFiles, starterReadme } from './configuration.ts';
@@ -59,17 +60,17 @@ function requireMatchingAdapter(adapter: FrameworkAdapter, selected: ProjectSele
   if (adapter.id !== selected.framework) throw new Error('FRAMEWORK_ADAPTER_SELECTION_MISMATCH:' + selected.framework);
   if (adapter.id !== adapter.engine && adapter.engine !== 'vanilla') throw new Error('FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:' + adapter.id);
 }
-const agentGuide = '# Generated project source\n\nRead project.config.json and the agreed parent design-brief.md. Keep src/core independent of Obsidian, DOM, process and frameworks. Each host owns its entrypoint and lifecycle. Project extensions live under plugins/<name>, export PluginObject, own manifest.json/config.json/source/tests, and register explicitly in plugins/registry.ts. Keep the Companion v6 envelope intact. This is a starting scaffold; acceptance is not inferred from compilation. Do not install, activate, publish or modify external data without authorization. Use the exact .nvmrc/packageManager. Run typecheck, tests, build and target-specific runtime acceptance before claiming completion. Keep source under 400 and tests under 450 code lines, excluding blanks/comments.\n';
+const agentGuide = (configPath: string) => '# Generated project source\n\nRead ' + configPath + ' and the agreed parent design-brief.md. Keep src/core independent of Obsidian, DOM, process and frameworks. Each host owns its entrypoint and lifecycle. Project extensions live under plugins/<name>, export PluginObject, own manifest.json/config.json/source/tests, and register explicitly in plugins/registry.ts. Keep the Companion v6 envelope intact. This is a starting scaffold; acceptance is not inferred from compilation. Do not install, activate, publish or modify external data without authorization. Use the exact .nvmrc/packageManager. Run typecheck, tests, build and target-specific runtime acceptance before claiming completion. Keep source under 400 and tests under 450 code lines, excluding blanks/comments.\n';
 const remainingAcceptance = ['Implement agreed domain actions and visual components.', 'Test enabled/disabled project-plugin activation and cleanup in each selected host.', 'Test actual keyboard/focus, empty, failure and cancel journeys.', 'Measure built artifact and source hashes.', 'Qualify a disposable Obsidian host for plugin targets; do not infer from the browser preview.'];
 function sharedFiles(model: Model, template: TemplateSnapshot, selected: ProjectSelection, adapter: FrameworkAdapter, id: string, name: string): Record<string, string> {
-  const project = model.project;
+  const project = model.project, configPath = projectConfigPath(id);
   return {
     ...packageFiles(template, selected, id, adapter), ...typecheckFiles(selected, adapter),
-    'project.config.json': json(selected), 'design/project.json': json(model.document),
-    'src/core/project.ts': coreSource(model), ...pluginExtensionFiles(), 'scripts/build.mjs': buildSource,
+    [configPath]: json(selected), 'design/project.json': json(model.document),
+    'src/core/project.ts': coreSource(model), ...pluginExtensionFiles(), 'scripts/build.mjs': buildSource(configPath),
     'manifest.json': json({ id, name, version: String(project.version ?? '0.1.0'), minAppVersion: '1.13.0', description: String(project.description ?? 'Project prototype'), author: String(project.author ?? 'Your name'), isDesktopOnly: false }),
-    'README.md': starterReadme(selected), 'tests/scaffold.test.mjs': tests(selected.targets.includes('cli')),
-    'AGENTS.md': agentGuide,
+    'README.md': starterReadme(selected, configPath), 'tests/scaffold.test.mjs': tests(selected.targets.includes('cli')),
+    'AGENTS.md': agentGuide(configPath),
     'prototype.acceptance.json': json({ stage: 'not-implemented', targets: selected.targets.map(target => ({ target, build: 'not-run', runtime: 'not-run', businessAcceptance: 'not-run' })),
       remaining: remainingAcceptance }),
   };
@@ -107,7 +108,7 @@ export function renderStarterProject(model: Model, template: TemplateSnapshot, i
   requireMatchingAdapter(adapter, selected);
   const id = String(model.project.id), name = String(model.project.name);
   const files = sharedFiles(model, template, selected, adapter, id, name);
-  if (selected.targets.some(target => target === 'webapp' || target === 'website')) files['scripts/serve.mjs'] = serveSource;
+  if (selected.targets.some(target => target === 'webapp' || target === 'website')) files['scripts/serve.mjs'] = serveSource(projectConfigPath(id));
   if (selected.targets.some(target => target !== 'cli')) visualFiles(files, adapter, { model, template, selection: selected, projectId: id, projectName: name });
   targetFiles(files, selected, id, name);
   const origins = model.screens.map(page => ({ file: 'companion.project.json', entityId: page.id, jsonPointer: '/design/nodes', document: 'normalized' as const }));

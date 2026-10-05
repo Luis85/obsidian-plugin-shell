@@ -9,8 +9,8 @@
     },
     {
       "path": "SKILL.md",
-      "bytes": 16302,
-      "sha256": "afad96924070cd342754ffc69518427ec952930569c823fe3a19402b7f98aceb"
+      "bytes": 16315,
+      "sha256": "749ccb1582477f2246be8571f34225b878aa69c0aa866ce8c783cd9ccee30742"
     },
     {
       "path": "VERIFICATION.md",
@@ -99,8 +99,8 @@
     },
     {
       "path": "references/project-starters.md",
-      "bytes": 3749,
-      "sha256": "aa4ef0c0128eb4133b8b424d1cce82d9f4d53b165075783cc1cf005a3be947a4"
+      "bytes": 3779,
+      "sha256": "50d325bb6445c8ac7b815e207ee225b8194b7dd71340a313198cc0f258c8f917"
     },
     {
       "path": "references/repository-contract.md",

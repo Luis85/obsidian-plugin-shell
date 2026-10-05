@@ -14,7 +14,7 @@ type Selection = Awaited<ReturnType<typeof prototypeContext>>['selection'];
 export const prototypeModule: WizardModule = {
   actions: {
     'prototype.context': async ({ state, options }) => {
-      const { guide, selection } = await prototypeContext(options.root, options.guide as string | undefined);
+      const { guide, selection } = await prototypeContext(options.root, options.guide as string | undefined, options.config as string | undefined);
       const configured = await loadSettings(options.root);
       let workspace = options.workspace as Workspace | undefined;
       if (!workspace) {
@@ -38,7 +38,7 @@ export const prototypeModule: WizardModule = {
       ui.write(completion);
       // The prepared package holds the exact prototype model and brief; the design folder follows them on sync.
       const design = await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: String(answers.title),
-        project: `${out}/companion.project.json`, package: out, signal: options.signal });
+        project: `${out}/companion.project.json`, package: out, signal: options.signal, config: options.config as string | undefined });
       return { end: true, completion: completion + (design ?? '') };
     },
   },

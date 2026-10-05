@@ -9,7 +9,7 @@ import { installCommand, readFirstRunRequest, type FirstRunRequest } from '../do
 import { guardedText, loadSettings, jsonText } from './user-settings.ts';
 import { firstRunInventory } from './first-run-inventory.ts';
 import { setupPrerequisites } from './project-setup.ts';
-import { savedProjectSelection } from './project-selection.ts';
+import { savedProjectSelection, projectConfigFiles } from './project-selection.ts';
 export interface FirstRunTool { entry: string; sha256: string; version: string; node: string }
 export interface FirstRunStep { id: 'install' | 'typecheck' | 'test' | 'build'; args: string[] }
 export interface FirstRunPlan {
@@ -67,7 +67,7 @@ export async function firstRunPlan(root: string, input: unknown, selectedTool?: 
   const { expected, blockers, steps, pkg, install } = await applicationPlan(root, app, options, tool);
   const inventory = await firstRunInventory(root, app);
   const report = await firstRunReport(root, settings.paths.firstRunReport);
-  const guards = await Promise.all(['configs/user-settings.json', 'configs/project-setup.json', 'project.config.json', '.npmrc'].map(async path => ({ path, beforeHash: (await guardedText(root, path)).beforeHash })));
+  const guards = await Promise.all(['configs/user-settings.json', 'configs/project-setup.json', ...await projectConfigFiles(root), '.npmrc'].map(async path => ({ path, beforeHash: (await guardedText(root, path)).beforeHash })));
   const inputHash = hash(jsonText({ inventory, guards, tool }));
   const planHash = hash(jsonText({ root, app, target, options, inputHash, steps, report: { path: settings.paths.firstRunReport, hash: report.beforeHash } }));
   return { root, app, target, options, inputHash, planHash, inventory, tool, expected, blockers, steps, package: pkg,

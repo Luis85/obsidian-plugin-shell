@@ -169,3 +169,18 @@ test('the Plugin API refuses use before loading and validates every registration
   assert.throws(() => plugin.register('not a function'), { code: 'COMMUNITY_PLUGIN_CLEANUP_INVALID' });
   assert.deepEqual([...binding.commands.keys(), ...binding.actions.keys()], ['greet', 'wave']);
 });
+
+test('an app plugin command cannot declare the built-in --config project-configuration option', async t => {
+  const root = await frameworkRoot(t);
+  const declare = values => `const { Plugin } = require('workbench');
+module.exports = class Configured extends Plugin { async onload() { this.addCommand({ id: 'go', name: 'Go', options: { values: ${JSON.stringify(values)} }, execute: async () => ({ ran: true }) }); } };`;
+  await install(root, 'configured', { source: declare(['config']) });
+  await enable(root, ['configured']);
+  const shadowed = await run(root, ['configured', 'go', '--config', 'configs/desk-config.json', '--json']);
+  assert.equal(shadowed.status, 1);
+  assert.equal(JSON.parse(shadowed.stdout).diagnostics[0].code, 'WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID', 'config stays a built-in maker option');
+  await install(root, 'configured', { source: declare(['region']) });
+  const own = await run(root, ['configured', 'go', '--region', 'x', '--json']);
+  assert.equal(own.status, 0, own.stdout + own.stderr);
+  assert.deepEqual(JSON.parse(own.stdout).data, { ran: true });
+});

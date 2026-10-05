@@ -166,7 +166,7 @@ export async function makerMain(argv: string[], frameworkRoot: string, io: IO = 
     session.root = root;
     plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress, registry, eventBus: bus,
       onError: code => progress(code + '\n') });
-    const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins };
+    const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins, config: option(args, 'config') || undefined };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await observeCommand(bus, args.command, args.action, () => execute(args, context));
     const result = operationResult(command, data, (data.status ?? 'ok') as ResultStatus);

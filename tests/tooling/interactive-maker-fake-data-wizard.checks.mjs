@@ -92,12 +92,12 @@ test('an unsaved entity is used for one run only and is never offered as a saved
 
 test('command-line flags preselect the saved config, and a generation conflict re-asks the run form', async () => scratch(async root => {
   const first = plain(['', '', '', '', '', '', 'y', '']);
-  assert.match(await run(first, root, { config: 'contacts-demo' }), /Generated 25 contact notes in Fake Data\/Contacts \(seed 42\)/);
+  assert.match(await run(first, root, { generation: 'contacts-demo' }), /Generated 25 contact notes in Fake Data\/Contacts \(seed 42\)/);
   const { writeFile } = await import('node:fs/promises');
   const victim = join(root, 'Fake Data/Contacts', (await list(join(root, 'Fake Data/Contacts')))[0]);
   await writeFile(victim, 'edited\n');
   const second = plain(['', '', '', '', '', '', '', 'Fake Data/Elsewhere', '', '', 'n']);
-  assert.equal(await run(second, root, { config: 'contacts-demo' }), 'No notes written.\n');
+  assert.equal(await run(second, root, { generation: 'contacts-demo' }), 'No notes written.\n');
   assert.ok(second.writes.some(text => /FAKE_DATA_CONFLICT/.test(text)) && second.left() === 0);
   assert.equal(await readFile(victim, 'utf8'), 'edited\n');
 }));

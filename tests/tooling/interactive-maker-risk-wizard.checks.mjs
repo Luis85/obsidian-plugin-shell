@@ -132,7 +132,7 @@ test('paths.risks is an optional, validated settings path that migrates like oth
 }));
 
 test('the fake-data risk preset generates a register that risk check accepts', async () => scratch(async root => {
-  const fake = (...argv) => execute(parseArguments(['fake-data', '--config', 'risks-demo', ...argv], []), { root, frameworkRoot, input: process.stdin });
+  const fake = (...argv) => execute(parseArguments(['fake-data', '--generation', 'risks-demo', ...argv], []), { root, frameworkRoot, input: process.stdin });
   const plan = await fake();
   await fake('--apply', plan.planHash);
   const checked = await cli(root, 'check');

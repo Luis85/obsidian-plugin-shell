@@ -15,10 +15,10 @@ function wholeNumber(args: Arguments, name: string): number | undefined {
   requireSketch(/^\d{1,10}$/.test(raw), 'FAKE_DATA_OPTION', `--${name} needs a whole number.`);
   return Number(raw);
 }
-/** Exactly one of --entity and --config; a named config must exist. */
+/** Exactly one of --entity and --generation; a named generation config must exist. */
 function savedGeneration(args: Arguments, catalog: FakeCatalog): FakeGeneration | undefined {
-  const configId = option(args, 'config'), entityOption = option(args, 'entity');
-  requireSketch(Boolean(configId) !== Boolean(entityOption), 'FAKE_DATA_COMMAND', 'Use --entity <id> or --config <saved-config-id> (exactly one).');
+  const configId = option(args, 'generation'), entityOption = option(args, 'entity');
+  requireSketch(Boolean(configId) !== Boolean(entityOption), 'FAKE_DATA_COMMAND', 'Use --entity <id> or --generation <saved-config-id> (exactly one).');
   const saved = configId ? catalog.generations.get(configId)?.definition : undefined;
   requireSketch(!configId || saved, 'FAKE_DATA_CONFIG_UNKNOWN', `Unknown generation config ${configId}; list them with fake-data configs --json.`);
   return saved;
@@ -76,6 +76,6 @@ const fakeDataActions: Readonly<Record<string, FakeDataAction>> = {
  */
 export async function fakeDataCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>): Promise<Record<string, unknown>> {
   const catalog = await loadFakeCatalog(context.root), apply = option(args, 'apply') || undefined, project = option(args, 'project') || undefined;
-  requireSketch(Object.hasOwn(fakeDataActions, args.action), 'FAKE_DATA_COMMAND', 'Use fake-data entities|show|validate|save-entity|configs|show-config|save-config, or fake-data --entity <id>|--config <id> --json.');
+  requireSketch(Object.hasOwn(fakeDataActions, args.action), 'FAKE_DATA_COMMAND', 'Use fake-data entities|show|validate|save-entity|configs|show-config|save-config, or fake-data --entity <id>|--generation <id> --json.');
   return fakeDataActions[args.action]!({ args, context, catalog, apply, project, input });
 }

@@ -201,7 +201,7 @@ outside protected folders, not overlapping another path) and moved with `node bi
 
 ## Fake data
 
-`node bin/app fake-data --config release-items-demo --json` plans 20 release items (proposed, ready and dropped) in
+`node bin/app fake-data --generation release-items-demo --json` plans 20 release items (proposed, ready and dropped) in
 `docs/releases/items` with a `release-items.base` table; `candidate new --input` can include the ready ones.
 
 ## Engine additions

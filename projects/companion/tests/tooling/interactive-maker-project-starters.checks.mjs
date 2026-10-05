@@ -91,7 +91,7 @@ test('every project starter compiles through shared v6 validation into actual ta
     assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
     assert.equal(result.readiness.dependencies, 'resolution-required');
     const files = new Map(result.artifacts.map(item => [item.path, item.content]));
-    assert.deepEqual(JSON.parse(files.get('project.config.json')), selected);
+    assert.deepEqual(JSON.parse(files.get('configs/actual-source-config.json')), selected); assert.ok(!files.has('project.config.json'));
     assert.deepEqual(openDocument(JSON.parse(files.get('design/project.json'))), document);
     assert.ok(!files.get('src/core/project.ts').includes('</script>'));
     assert.match(files.get('README.md'), /NOT a resolved dependency graph/); assert.match(files.get('README.md'), new RegExp('Starter: ' + selected.starter.id));
@@ -159,15 +159,17 @@ test('project plan has deterministic bytes, default no writes, independent sidec
   const options = { root, frameworkRoot, out: 'prepared', input };
   const a = await projectPlan(options), b = await projectPlan(options);
   assert.equal(a.planHash, b.planHash);
-  await assert.rejects(() => readFile(join(root, 'prepared/project.config.json')));
+  await assert.rejects(() => readFile(join(root, 'prepared/configs/project-matrix-config.json')));
   assert.match(a.data.prompt, /vanilla/); assert.doesNotMatch(a.data.prompt, /\{\{\w/);
   await assert.rejects(() => applyPrepared(a, 'not-the-reviewed-hash'), /plan changed/);
   assert.equal((await applyPrepared(a, a.planHash)).status, 'applied');
   const read = async path => JSON.parse(await readFile(join(root, 'prepared', path), 'utf8'));
   const doc = openDocument(await read('companion.project.json'));
   assert.equal(doc.design.nodes.length, 2); assert.ok(!Object.hasOwn(doc, 'framework'));
-  assert.deepEqual(await read('project.config.json'), await read('source/project.config.json'));
-  assert.deepEqual((await read('project.config.json')).starter, selection('webapp-vanilla').starter);
+  assert.deepEqual(await read('configs/project-matrix-config.json'), await read('source/configs/project-matrix-config.json'));
+  assert.deepEqual((await read('configs/project-matrix-config.json')).starter, selection('webapp-vanilla').starter);
+  await assert.rejects(() => readFile(join(root, 'prepared/project.config.json')));
+  assert.match(await readFile(join(root, 'prepared/README.md'), 'utf8'), /configs\/project-matrix-config\.json records the chosen project starter/);
   assert.equal((await read('prototype.manifest.json')).artifact.sha256, null);
   const replay = await read('project-request.json'); assert.deepEqual(Object.keys(replay), ['schemaVersion', 'starter', 'interview']);
   assert.equal((await projectRequest(replay, frameworkRoot)).ready, true);
@@ -229,14 +231,14 @@ test('sketch regeneration respects a saved starter selection and refuses legacy 
   await mkdir(join(root, 'design'));
   const document = runOperations(newDocument('CLI'), [{ op: 'page.add', title: 'Commands' }]).document;
   await writeFile(join(root, 'design/project.json'), documentText(document));
-  await writeFile(join(root, 'project.config.json'), JSON.stringify(selection('cli')));
+  await mkdir(join(root, 'configs')); await writeFile(join(root, 'configs/cli-config.json'), JSON.stringify(selection('cli')));
   const plan = await execute(parseArguments(['sketch', 'generate', '--out', 'code']), context(root));
   assert.equal(plan.outputKind, 'project');
   assert.ok(plan.changes.some(item => item.path === 'code/src/targets/cli/main.ts'));
   assert.ok(!plan.changes.some(item => item.path === 'code/src/ui/Starter.vue'));
   assert.equal((await execute(parseArguments(['sketch', 'generate', '--out', 'code', '--apply', plan.planHash]), context(root))).status, 'applied');
-  assert.deepEqual(JSON.parse(await readFile(join(root, 'code/project.config.json'), 'utf8')), selection('cli'));
-  await writeFile(join(root, 'project.config.json'), JSON.stringify({ schemaVersion: 1, catalogVersion: 1, preset: 'cli', projectType: 'cli', framework: 'none', targets: ['cli'] }));
+  assert.deepEqual(JSON.parse(await readFile(join(root, 'code/configs/cli-config.json'), 'utf8')), selection('cli'));
+  await writeFile(join(root, 'configs/cli-config.json'), JSON.stringify({ schemaVersion: 1, catalogVersion: 1, preset: 'cli', projectType: 'cli', framework: 'none', targets: ['cli'] }));
   await assert.rejects(() => execute(parseArguments(['sketch', 'generate', '--out', 'code']), context(root)), /Unknown|Unsupported/);
 }));
 test('new help documents project starters alongside directory-creation metadata', async () => scratch(async root => {

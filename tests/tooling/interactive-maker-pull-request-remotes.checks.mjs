@@ -134,7 +134,9 @@ test('Azure create passes title and description through private @files that are 
   const args = fake.calls[0].args, files = args.filter(arg => arg.startsWith('@'));
   assert.deepEqual(args, ['repos', 'pr', 'create', ...inRepository, '--source-branch', 'feature/x', '--target-branch', 'main',
     '--title', files[0], '--description', files[1], '--draft', 'true']);
-  assert.deepEqual(seen, { '--title': { text: 'Title "quoted" & more', mode: 0o600 }, '--description': { text: '<!-- wb:pr -->\n- [ ] T-1: $(x)', mode: 0o600 } });
+  // Windows reports only the write bit (0o666 for a writable file); POSIX keeps the owner-only 0o600.
+  const privateMode = process.platform === 'win32' ? 0o666 : 0o600;
+  assert.deepEqual(seen, { '--title': { text: 'Title "quoted" & more', mode: privateMode }, '--description': { text: '<!-- wb:pr -->\n- [ ] T-1: $(x)', mode: privateMode } });
   assert.deepEqual(await readdir(tempRoot), [], 'payload files are removed');
   assert.equal(fake.calls[0].command, 'az');
   const env = fake.calls[0].options.env;

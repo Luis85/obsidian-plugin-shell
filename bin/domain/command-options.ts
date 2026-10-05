@@ -7,5 +7,5 @@ export const collectionCommandRoots: Readonly<Record<string, string>> = Object.f
 /** Built-in maker command roots and options. The parser and plugin validation share them, so a plugin can never shadow one. */
 export const makerCommandIds: readonly string[] = ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm', 'design', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', 'workflow', ...Object.keys(collectionCommandRoots)];
 export const makerBooleanOptions: readonly string[] = ['json', 'no-interaction', 'help', 'no-color', 'base', 'overdue'];
-export const makerValueOptions: readonly string[] = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter', 'name', 'package', 'entity', 'count', 'seed', 'config', 'step',
+export const makerValueOptions: readonly string[] = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter', 'name', 'package', 'entity', 'count', 'seed', 'config', 'generation', 'step',
   'id', 'as-of', 'status', 'dimension', 'category', 'level', 'impact', 'priority', 'version', 'item', 'to', 'target'];

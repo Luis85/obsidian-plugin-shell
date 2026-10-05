@@ -11,7 +11,8 @@ that is also an Obsidian vault. Setup runs the installed `webapp-angular` projec
 starter by ID, read from `configs/starters/` in the CLI package root like every starter;
 extract the separate starters ZIP there first. Setup fails closed when that starter
 is missing or does not select Angular with a webapp target. The shipped starter pins
-Angular 22.0.0; `project.config.json` records the starter ID, version and SHA-256.
+Angular 22.0.0; `configs/<project-id>-config.json` records the starter ID, version and SHA-256
+(see [project configuration](PROJECT-STARTERS.md#project-configuration)).
 A release uses its tested starter definition, not an unreviewed live `latest`
 dependency lookup. This change does not publish a release; use a kit built from the
 implementing commit until shipment is separately approved.
@@ -144,7 +145,8 @@ paths, `..`, backslashes, whitespace normalization, reserved Windows names, case
 collisions, protected host/dependency/Git directories and symbolic links are refused.
 The fixed discovery/metadata files are `configs/user-settings.json`,
 `configs/project-setup.json`, `configs/project-setup-draft.json` and
-`project.config.json`; they cannot relocate themselves.
+`configs/<project-id>-config.json`; they cannot relocate themselves, and configured
+paths stay outside `configs/`.
 There are no provider secrets or arbitrary executable commands in the settings.
 Host/plugin `data.json`, project target selection, prototype answers and transient
 terminal state retain their own existing contracts; they are not duplicated here.

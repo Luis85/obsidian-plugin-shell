@@ -210,7 +210,7 @@ replaced.
 ## Demo data
 
 ```sh
-node bin/app fake-data --config risks-demo --root <scratch-folder> --json   # then --apply <planHash>
+node bin/app fake-data --generation risks-demo --root <scratch-folder> --json   # then --apply <planHash>
 node bin/app risk check --root <scratch-folder> --json
 ```
 

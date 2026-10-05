@@ -151,7 +151,7 @@ test('paths.learnings is an optional, validated settings path that every learnin
 }));
 
 test('the learnings-demo fake-data preset generates notes that learning check and report accept', async () => scratch(async root => {
-  const fake = (...argv) => execute(parseArguments(['fake-data', '--config', 'learnings-demo', ...argv], []), { root, frameworkRoot: repository, input: process.stdin });
+  const fake = (...argv) => execute(parseArguments(['fake-data', '--generation', 'learnings-demo', ...argv], []), { root, frameworkRoot: repository, input: process.stdin });
   const plan = await fake();
   await fake('--apply', plan.planHash);
   const checked = await execute(parseArguments(['learning', 'check', '--as-of', '2026-01-01'], []), { root, frameworkRoot: repository, input: process.stdin });

@@ -1,6 +1,6 @@
 /** Explicit CI qualification of the assembled ZIP. This never publishes or activates a plugin. */
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, writeFile, realpath, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, writeFile, realpath, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -64,7 +64,7 @@ const starterFixture = await realpath(await mkdtemp(join(process.env.RUNNER_TEMP
 const starterKit = join(starterFixture, 'framework'), starterConsumer = join(starterFixture, 'blank-consumer');
 await mkdir(starterKit);
 await extractArchive(bytes, starterKit);
-assert.equal((await (await import('node:fs/promises')).readdir(starterKit)).includes('node_modules'), false, 'extracted kit starts without installed packages');
+assert.equal((await readdir(starterKit)).includes('node_modules'), false, 'extracted kit starts without installed packages');
 const starterApp = join(starterKit, 'bin/app');
 // The shell kit ships no starter data; the separately packed starter ZIP enables discovery and generation.
 const empty = await run('blank-starter-empty', starterKit, starterApp, ['new', '--list', '--json', '--no-interaction']).persist();
@@ -74,6 +74,26 @@ await rm(starterPack, { force: true });
 await run('starters-pack', repository, join(repository, 'bin/app'), ['starters', 'pack', '--out', starterPack, '--yes', '--json', '--no-interaction']).persist();
 await extractArchive(await readFile(starterPack), starterKit);
 await run('blank-starter-discovery', starterKit, starterApp, ['new', '--list', '--json', '--no-interaction']).persist();
+// A project starter run inside the extracted kit records its selection at configs/<project-id>-config.json.
+const projectGuide = await run('project-starter-guide', starterKit, starterApp, ['new', 'guide', '--starter', 'plugin-vanilla', '--json', '--no-interaction']).persist();
+const projectRequest = projectGuide.data.input;
+Object.assign(projectRequest.interview.answers, { title: 'Issue Desk', approved: true });
+await writeFile(join(starterFixture, 'project-request.json'), JSON.stringify(projectRequest));
+const projectArgs = ['new', '--input', join(starterFixture, 'project-request.json'), '--out', 'projects/issue-desk', '--json', '--no-interaction'];
+const projectPlan = await run('project-starter-plan', starterKit, starterApp, projectArgs).persist();
+assert.equal(projectPlan.data.status, 'planned');
+assert.equal((await run('project-starter-apply', starterKit, starterApp, [...projectArgs, '--apply', projectPlan.data.planHash]).persist()).data.status, 'applied');
+const projectPackage = join(starterKit, 'projects/issue-desk');
+const savedSelection = JSON.parse(await readFile(join(projectPackage, 'configs/issue-desk-config.json'), 'utf8'));
+assert.equal(savedSelection.starter.id, 'plugin-vanilla');
+assert.deepEqual(JSON.parse(await readFile(join(projectPackage, 'source/configs/issue-desk-config.json'), 'utf8')), savedSelection);
+for (const folder of [starterKit, projectPackage, join(projectPackage, 'source')]) assert.equal((await readdir(folder)).includes('project.config.json'), false, 'the retired root file is not written');
+const sourceLayout = (await readdir(join(projectPackage, 'source'))).sort();
+for (const entry of ['configs', 'src', 'tests', 'package.json', 'README.md']) assert.ok(sourceLayout.includes(entry), 'generated source lacks ' + entry);
+// docs/ is not asserted: only Nuxt UI sources carry it (licence notices); see the distribution-plan gap note.
+const kitLayout = (await readdir(starterKit)).sort();
+assert.deepEqual(kitLayout, ['LICENSE', 'README.md', 'bin', 'configs', 'package.json', 'projects'], 'the starter writes only its package under projects/');
+await writeFile(join(evidence, 'project-starter-layout.json'), JSON.stringify({ kit: kitLayout, package: (await readdir(projectPackage)).sort(), source: sourceLayout }, null, 2));
 const starter = await run('blank-starter-new', starterKit, starterApp,
   ['new', starterConsumer, '--starter', 'blank', '--id', 'blank-consumer', '--name', 'Blank Consumer',
     '--author', 'Qualification fixture', '--yes', '--json', '--no-interaction']).persist();
@@ -89,7 +109,7 @@ for (const group of ['dependencies', 'devDependencies', 'optionalDependencies'])
     assert.equal(starterLock.packages?.['node_modules/' + name]?.version, pin, group + ': stale installed lockfile entry for ' + name);
   }
 }
-assert.equal((await (await import('node:fs/promises')).readdir(starterConsumer)).includes('node_modules'), false,
+assert.equal((await readdir(starterConsumer)).includes('node_modules'), false,
   'starter must not install dependencies before explicit npm approval');
 const pinCheck = spawnSync(process.execPath, [join(starterConsumer, 'scripts/security/dependency-pins.mjs')], {
   cwd: starterConsumer, encoding: 'utf8', timeout: 30000, maxBuffer: 4_000_000,

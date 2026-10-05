@@ -12,6 +12,7 @@ import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
+import { projectConfigPattern } from '../compiler/domain/project-config.ts';
 import { resolve } from 'node:path';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { readInput } from '../../scripts/shared/input.ts';
@@ -30,7 +31,8 @@ import { pluginCliCommands, type WorkbenchPluginRuntime } from '../../plugins/ru
 import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { collectionCommandRoots, makerBooleanOptions, makerCommandIds, makerValueOptions, option, type Arguments } from '../domain/command-options.ts';
-export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
+/** config is the explicit --config project configuration path; without it the single configs/*-config.json is used. */
+export interface CommandContext { root: string; frameworkRoot: string; input: Readable; config?: string; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
 const makerHelp = `Workbench CLI — maker commands: make first, generate when ready
   node bin/app first-run             Optional install → typecheck → test → build → showcase
   node bin/app first-run schema --json
@@ -98,7 +100,7 @@ const makerHelp = `Workbench CLI — maker commands: make first, generate when r
   node bin/app fake-data --entity contact --count 25 --out "Fake Data/Contacts" --seed 7 --base --json
   node bin/app fake-data configs --json       Saved generation configs (configs/fake-data/generations)
   node bin/app fake-data show-config --name contacts-demo --json
-  node bin/app fake-data --config contacts-demo [--count 50] [--out <folder>] [--seed 9] --json
+  node bin/app fake-data --generation contacts-demo [--count 50] [--out <folder>] [--seed 9] --json
   node bin/app fake-data save-config --input generation.json --json
   node bin/app learn                 Follow a step-by-step learning path (configs/learning/paths); resume later
   node bin/app learn list --json     Learning paths with your progress; learn show --name <id> --json
@@ -157,8 +159,9 @@ These maker commands apply only with --apply <planHash> on the same command afte
 Framework commands (setup, make <recipe>, generate, new <dir>, ...) accept --yes or --apply <planHash>: node bin/app help.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
---starter <project-starter-id> (new, new guide), --step <step-id> (learn complete-step), --name <prototype-slug> and --package <prepared folder> (design),
---entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --config <id> and --base (fake-data),
+--starter <project-starter-id> (new, new guide), --config <configs/<project-id>-config.json> (choose among several saved project configurations),
+--step <step-id> (learn complete-step), --name <prototype-slug> and --package <prepared folder> (design),
+--entity <id|semantic:id|file:path.json>, --count <1-1000>, --seed <0-2147483647>, --generation <id> and --base (fake-data),
 --id <id>, --as-of <YYYY-MM-DD>, --status/--dimension/--category/--level <id>, --overdue and --base (risk),
 --status/--category/--impact <id> with the same --id, --as-of, --overdue and --base (learning; learn is the separate course runner),
 --status/--kind/--priority <id> with the same options (release-item), --version <x.y.z[-rc.N]>, --item <id>, --to <status> and --as-of (candidate),
@@ -211,10 +214,10 @@ async function generate(args: Arguments, context: CommandContext): Promise<Recor
   const path = option(args, 'project', 'design/project.json');
   const snapshot = await readSnapshot(context.root, path);
   requireSketch(snapshot.document, 'MAKER_PROJECT_MISSING', 'Save a sketch before generating.');
-  const selected = await savedProjectSelection(context.root);
+  const selected = await savedProjectSelection(context.root, context.config);
   const kind = option(args, 'kind', selected ? 'project' : 'obsidian-plugin');
   requireSketch(['obsidian-plugin', 'clickdummy', 'project'].includes(kind), 'MAKER_KIND', 'Use project, obsidian-plugin or clickdummy.');
-  requireSketch(kind !== 'project' || selected, 'MAKER_KIND', 'Project output needs a validated project.config.json from a project starter (run new).');
+  requireSketch(kind !== 'project' || selected, 'MAKER_KIND', `Project output needs a validated ${projectConfigPattern} from a project starter (run new).`);
   const out = option(args, 'out', `generated/${snapshot.document.project.id}`);
   const plan = await boilerplatePlan(context.root, context.frameworkRoot, out, snapshot.document, kind as 'project' | 'obsidian-plugin' | 'clickdummy', context.signal, kind === 'project' ? selected : undefined);
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
@@ -244,7 +247,7 @@ async function sketch(args: Arguments, context: CommandContext): Promise<Record<
     : { document: snapshot.document, content: documentText(snapshot.document) };
 }
 async function prototype(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  const { guide, selection } = await prototypeContext(context.root, option(args, 'guide') || undefined);
+  const { guide, selection } = await prototypeContext(context.root, option(args, 'guide') || undefined, context.config);
   if (args.action === 'guide') return { guide, selection, input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: Object.fromEntries(guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => [field.id, field.default])) } };
   const input = await inputData(args, context);
   if (args.action === 'validate') { const result = guideInput(guide, input); return { ...result, ready: !result.pending.length }; }
@@ -304,7 +307,7 @@ function directCommand(args: Arguments, context: CommandContext): CommandResult 
 }
 async function savedProjectCommand(input: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   const args = await configuredArguments(input, context.root);
-  requireSketch(!args.flags.starter, 'PROJECT_OPTION', 'Starter selection is only available on new; saved projects keep project.config.json.');
+  requireSketch(!args.flags.starter, 'PROJECT_OPTION', `Starter selection is only available on new; saved projects keep ${projectConfigPattern}.`);
   return args.command === 'sketch' ? sketch(args, context) : args.command === 'brainstorm' ? brainstormCommand(args, context) : prototype(args, context);
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {

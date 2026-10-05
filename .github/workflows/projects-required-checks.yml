@@ -1,0 +1,56 @@
+name: Projects-only required checks
+# Every shell workflow ignores projects/**, so a pull request that changes only projects/** would never report the four
+# checks main requires and could not merge. This workflow reports them for exactly such a pull request: each project's
+# own synced projects--* workflows are its real gates. When the pull request also changes the shell, the shell
+# workflows report those checks, so these jobs take another name ("<check> (shell changes)") and never stand in for them.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - 'projects/**'
+permissions:
+  contents: read
+concurrency:
+  group: projects-required-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  scope:
+    name: Projects-only scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      projects-only: ${{ steps.scope.outputs.projects-only }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Decide whether the pull request changes only projects/**
+        id: scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+          if [ -n "$changed" ] && ! printf '%s\n' "$changed" | grep -qv '^projects/'; then only=true; else only=false; fi
+          echo "projects-only=$only" >> "$GITHUB_OUTPUT"
+          echo "Changes only under projects/: $only"
+  report:
+    needs: scope
+    strategy:
+      matrix:
+        check: ['Dev checks', 'Definition of Ready', 'CI result', 'Definition of Done']
+    name: ${{ needs.scope.outputs.projects-only == 'true' && matrix.check || format('{0} (shell changes)', matrix.check) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Report the required check
+        env:
+          PROJECTS_ONLY: ${{ needs.scope.outputs.projects-only }}
+          CHECK: ${{ matrix.check }}
+        run: |
+          if [ "$PROJECTS_ONLY" = true ]; then
+            echo "Only projects/** changed: the shell's $CHECK has nothing to check; the project's own workflows gate it."
+          else
+            echo "The shell changed too: $CHECK comes from the shell workflows, not from here."
+          fi

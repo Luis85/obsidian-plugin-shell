@@ -9,7 +9,7 @@ import { angularSetupGuide, setupSchema, setupExample, setupStatus, projectSetup
 import { intakePrds } from './prd-intake.ts';
 import type { CommandContext } from './commands.ts';
 export async function setupCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>): Promise<Record<string, unknown>> {
-  requireSketch(!['project', 'out', 'guide', 'kind', 'starter'].some(key => args.flags[key]), 'SETUP_OPTION', 'Configure setup paths in settings or the setup request; setup uses the webapp-angular starter.');
+  requireSketch(!['project', 'out', 'guide', 'kind', 'starter', 'config'].some(key => args.flags[key]), 'SETUP_OPTION', 'Configure setup paths in settings or the setup request; setup uses the webapp-angular starter.');
   const action = args.action;
   if (args.command === 'project-setup' && ['checkpoint', 'resume', 'checkpoint-status', 'discard-checkpoint'].includes(action)) return checkpointCommand(args, context, input);
   if (args.command === 'settings') return settingsCommand(args, context, input);

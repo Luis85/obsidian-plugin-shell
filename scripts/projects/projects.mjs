@@ -23,6 +23,8 @@ const PROTOTYPE_ROOTS = ['docs/concepts/', 'docs/design/'];
 const OUTSIDE_SPEC = /^(?:file|link|workspace|portal):/;
 /** The one shell workflow that watches projects/ on purpose: it validates the boundary and never builds a project. */
 export const BOUNDARY_WORKFLOW = 'projects-boundary.yml';
+/** Reports main's required checks for a pull request that changes only projects/**, so it must watch projects/ too. */
+export const REQUIRED_CHECKS_WORKFLOW = 'projects-required-checks.yml';
 
 const exists = async path => { try { await lstat(path); return true; } catch (error) { if (error.code === 'ENOENT') return false; throw error; } };
 const isFile = async path => { try { return (await lstat(path)).isFile(); } catch (error) { if (error.code === 'ENOENT') return false; throw error; } };
@@ -191,7 +193,7 @@ export async function workflowDrift(root, expected) {
 /** Shell workflows must not run for a change that only touches projects/. */
 export async function shellIsolation(root) {
   const failures = [];
-  for (const file of (await rootWorkflows(root)).filter(name => !name.startsWith(SYNCED_PREFIX) && name !== BOUNDARY_WORKFLOW)) {
+  for (const file of (await rootWorkflows(root)).filter(name => !name.startsWith(SYNCED_PREFIX) && name !== BOUNDARY_WORKFLOW && name !== REQUIRED_CHECKS_WORKFLOW)) {
     if (!excludesProjects(await readFile(resolve(root, '.github/workflows', file), 'utf8'))) failures.push(`SHELL_WORKFLOW_NOT_ISOLATED: .github/workflows/${file} needs paths-ignore: [projects/**] (or a final '!projects/**' in paths) on push and pull_request`);
   }
   return failures;

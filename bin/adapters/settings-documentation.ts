@@ -1,10 +1,11 @@
 import { validateSettings } from '../documentation/adapters/settings.ts';
 import { collectionPathKeys, collectionRoot, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { requireSketch } from '../domain/errors.ts';
+import { projectConfigFolder } from '../compiler/domain/project-config.ts';
 /** One semantic validator belongs to the documentation owner; maker writes cannot bypass it. */
 export function documentationSettings(settings: UserSettings) {
   const protectedPaths = [...Object.values(settings.paths), ...collectionPathKeys.map(key => collectionRoot(settings.paths, key)), settings.preferences.vaultConfigDirectory,
-    settingsPath, setupStatePath, 'configs/project-setup-draft.json', 'project.config.json'];
+    settingsPath, setupStatePath, 'configs/project-setup-draft.json', projectConfigFolder];
   const documentation = validateSettings(settings.documentation ?? {}, protectedPaths);
   const index = documentation.indexFile.toLowerCase();
   requireSketch(!protectedPaths.some(path => {

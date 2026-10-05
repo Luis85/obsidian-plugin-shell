@@ -35,8 +35,8 @@ async function saveProject(root) {
 test('fake-data is a maker command with its own options, help and routing', () => {
   assert.equal(routeArguments(['fake-data', 'entities']).surface, 'maker');
   assert.deepEqual(routeArguments(['help', 'fake-data']).args, ['fake-data', '--help']);
-  const args = parseArguments(['fake-data', '--entity', 'contact', '--count', '3', '--seed', '9', '--config', 'x', '--base'], []);
-  assert.deepEqual({ ...args.flags }, { entity: 'contact', count: '3', seed: '9', config: 'x', base: true });
+  const args = parseArguments(['fake-data', '--entity', 'contact', '--count', '3', '--seed', '9', '--generation', 'x', '--base'], []);
+  assert.deepEqual({ ...args.flags }, { entity: 'contact', count: '3', seed: '9', generation: 'x', base: true });
   return execute(parseArguments(['fake-data', '--help'], []), { root: repository, frameworkRoot: repository, input: process.stdin }).then(help => {
     assert.ok(help.commands.includes('fake-data')); assert.match(help.help, /fake-data save-config --input generation\.json/);
   });
@@ -68,8 +68,8 @@ test('targets stay relative, inside the root and outside framework template inpu
     await assert.rejects(() => cli(root, '--entity', 'contact', '--out', out, '--json'), /FAKE_DATA_FOLDER|relative folder/, out);
   await assert.rejects(() => cli(repository, '--entity', 'contact', '--out', 'src/fake', '--json'), /template input directory/);
   assert.throws(() => insideRoot(root, '../x'), /inside the project root/);
-  for (const [argv, pattern] of [[['--json'], /exactly one/], [['--entity', 'contact', '--config', 'contacts-demo'], /exactly one/],
-    [['--entity', 'nobody'], /Unknown fake-data entity nobody/], [['--config', 'nobody'], /Unknown generation config nobody/],
+  for (const [argv, pattern] of [[['--json'], /exactly one/], [['--entity', 'contact', '--generation', 'contacts-demo'], /exactly one/],
+    [['--entity', 'nobody'], /Unknown fake-data entity nobody/], [['--generation', 'nobody'], /Unknown generation config nobody/],
     [['--entity', 'contact', '--count', 'many'], /--count needs a whole number/], [['--entity', 'contact', '--count', '1001'], /--count must be/],
     [['--entity', 'contact', '--seed', '99999999999'], /--seed needs a whole number/], [['explode'], /Use fake-data entities/],
     [['show', '--name', 'Nope!'], /--name must be an entity id/], [['show-config', '--name', 'nope'], /Unknown generation config nope/]])
@@ -89,13 +89,13 @@ test('saved generation configs list, show, re-run byte-identically, accept overr
   const saved = await readData(join(root, 'configs/fake-data/generations/team.json'));
   assert.deepEqual(saved, { $schema: '../../schemas/fake-data-generation.schema.json', ...generation, referenceDate: '2026-01-01' });
   assert.deepEqual((await cli(root, 'configs')).configs.map(item => [item.id, item.source]).at(-1), ['team', 'project']);
-  const first = await cli(root, '--config', 'team');
-  await cli(root, '--config', 'team', '--apply', first.planHash);
+  const first = await cli(root, '--generation', 'team');
+  await cli(root, '--generation', 'team', '--apply', first.planHash);
   const bytes = await tree(join(root, 'People/Team'));
   await rm(join(root, 'People'), { recursive: true });
-  await cli(root, '--config', 'team', '--apply', (await cli(root, '--config', 'team')).planHash);
+  await cli(root, '--generation', 'team', '--apply', (await cli(root, '--generation', 'team')).planHash);
   assert.deepEqual(await tree(join(root, 'People/Team')), bytes, 'a saved, seeded config reproduces byte-identical notes');
-  const override = await cli(root, '--config', 'team', '--count', '2', '--seed', '12', '--out', 'People/Other', '--base');
+  const override = await cli(root, '--generation', 'team', '--count', '2', '--seed', '12', '--out', 'People/Other', '--base');
   assert.deepEqual([override.count, override.seed, override.out, override.base, override.files], [2, 12, 'People/Other', true, 3]);
   await writeFile(join(root, 'generation.json'), JSON.stringify({ ...generation, count: 6 }));
   assert.equal((await cli(root, 'save-config', '--input', 'generation.json')).changes[0].status, 'update', 'a changed config is reviewed as an update');

@@ -95,7 +95,8 @@ void test('plugin framework adapter compiles a real React project through the pu
   const pkg = JSON.parse(files.get('package.json') ?? '{}');
   assert.equal(pkg.dependencies.react, '19.3.0');
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
-  assert.equal(JSON.parse(files.get('project.config.json') ?? '{}').framework, 'react');
+  assert.equal(JSON.parse(files.get('configs/react-extension-config.json') ?? '{}').framework, 'react');
+  assert.equal(files.has('project.config.json'), false);
 });
 
 void test('plugin framework adapter drives the real project emitter', () => {
@@ -115,7 +116,7 @@ void test('plugin framework adapter drives the real project emitter', () => {
   const artifacts = renderStarterProject(model as never, template as never, selection, reactAdapter);
   const files = new Map(artifacts.map(item => [item.path, item.content]));
   const pkg = JSON.parse(files.get('package.json')!);
-  assert.equal(JSON.parse(files.get('project.config.json')!).framework, 'react');
+  assert.equal(JSON.parse(files.get('configs/react-app-config.json')!).framework, 'react');
   assert.equal(pkg.dependencies.react, '19.3.0');
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
   assert.match(files.get('src/ui/mount.ts')!, /react-dom\/client/);
@@ -183,9 +184,9 @@ void test('plugin command parsing rejects reserved Workbench command roots', asy
   }), /WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID/);
 });
 
-void test('every built-in maker command and option is reserved for plugins, including design, --name and --package', async () => {
+void test('every built-in maker command and option is reserved for plugins, including design, --name, --package and --config', async () => {
   const runtimeFor = (cli: PluginCliCommand[]) => createPluginRuntime({ root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [{ ...enabled, cli }] });
-  const commands = new Set([...makerCommandIds, 'design']), options = new Set([...makerBooleanOptions, ...makerValueOptions, 'name', 'package']);
+  const commands = new Set([...makerCommandIds, 'design']), options = new Set([...makerBooleanOptions, ...makerValueOptions, 'name', 'package', 'config']);
   for (const id of commands) {
     assert.doesNotThrow(() => parseArguments([id, '--help'], []), id);
     await assert.rejects(() => runtimeFor([{ id, summary: 'shadow', execute: () => ({}) }]), new RegExp(`WORKBENCH_PLUGIN_CLI_RESERVED:${id}$`), id);
