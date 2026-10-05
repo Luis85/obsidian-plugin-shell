@@ -8,10 +8,11 @@ const vueTsc = 'node_modules/vue-tsc/bin/vue-tsc.js', eslint = 'node_modules/esl
 
 /** tests/suites.json owns tooling classification; one step runs every tooling suite group. */
 function toolingStep(env) {
-  // Tooling suites launch real compilers/installers; serialize them to avoid
-  // oversubscribed cold-start processes and cross-suite source-probe races.
+  // Tooling suites launch real compilers/installers; they run one after another to avoid
+  // oversubscribed cold-start processes and cross-suite source-probe races. Within a suite,
+  // files run serially unless tests/suites.json opts it into a measured runner.concurrency.
   if (env.SHELL_EVIDENCE_TOOLING === '1') return script('tooling', 'scripts/testing/evidence-cli.mjs', ['run', 'tooling'], ['suites-check']);
-  return { id: 'tooling', kind: 'tooling-suites', display: 'node --test --test-concurrency=1 <tooling suites from tests/suites.json>', entry: '--test', args: [], needs: ['suites-check'] };
+  return { id: 'tooling', kind: 'tooling-suites', display: 'node --test --test-concurrency=<suite runner.concurrency, default 1> <tooling suites from tests/suites.json>', entry: '--test', args: [], needs: ['suites-check'] };
 }
 
 export function verifySteps(env = process.env) {

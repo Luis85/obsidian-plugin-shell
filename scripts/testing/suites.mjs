@@ -62,7 +62,7 @@ function runnerConfig(root, config) {
 function suiteCommands(root, suite, extra = []) {
   const runner = suite.runner;
   switch (runner.type) {
-    case 'node-test': return [[process.execPath, '--test', '--test-concurrency=1', ...extra, ...suite.files]];
+    case 'node-test': return [[process.execPath, '--test', `--test-concurrency=${runner.concurrency ?? 1}`, ...extra, ...suite.files]];
     // A level selection narrows Vitest to its files with positional filters.
     case 'vitest': return [[process.execPath, 'node_modules/vitest/vitest.mjs', 'run', '--config', runnerConfig(root, runner.config), ...extra, ...(suite.narrowed ? suite.files : [])]];
     case 'playwright': return [[process.execPath, 'node_modules/@playwright/test/cli.js', 'test', '--config', 'configs/testing/playwright.config.ts', ...extra]];

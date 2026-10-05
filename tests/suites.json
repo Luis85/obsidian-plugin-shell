@@ -289,7 +289,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/airship-*.checks.mjs"
@@ -338,7 +339,8 @@
       "purpose": "Seeded fast-check compiler invariants; requires installed development dependencies.",
       "level": "unit",
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/compiler-properties.checks.mjs"
@@ -571,7 +573,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/project-generator*.checks.mjs",
@@ -594,7 +597,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/visual-*.checks.mjs"
@@ -629,7 +633,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/companion-*.checks.mjs",
@@ -860,7 +865,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/test-data-*.checks.mjs"
@@ -979,7 +985,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/native-*.checks.mjs",
@@ -1028,7 +1035,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/setup-*.checks.mjs",
@@ -1062,7 +1070,8 @@
         ]
       },
       "runner": {
-        "type": "node-test"
+        "type": "node-test",
+        "concurrency": 4
       },
       "include": [
         "tests/tooling/release*.checks.mjs",

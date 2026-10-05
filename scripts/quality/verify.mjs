@@ -18,9 +18,9 @@ async function runScript(path, args, write) {
 async function runToolingSuites(write) {
   const { toolingGroups } = await import('../testing/suite-manifest.mjs');
   const failed = [];
-  for (const { name, files } of await toolingGroups(process.cwd())) {
+  for (const { name, files, concurrency } of await toolingGroups(process.cwd())) {
     write(`\n▶ tooling suite: ${name} (${files.length} files)\n`);
-    try { await runScript('--test', ['--test-concurrency=1', ...files], write); } catch { failed.push(name); }
+    try { await runScript('--test', [`--test-concurrency=${concurrency}`, ...files], write); } catch { failed.push(name); }
   }
   if (failed.length) throw new Error(`Tooling suites failed: ${failed.join(', ')}`);
 }

@@ -75,15 +75,28 @@ test('manifest names permit one namespace but reject malformed or ambiguous name
   }
 });
 
+test('node-test suites declare an optional file concurrency that suites and verify use', async t => {
+  const parallel = suite('alpha', ['tests/tooling/alpha-*.checks.mjs'], { npmScript: 'test:alpha', runner: { type: 'node-test', concurrency: 4 } });
+  const data = manifest({ suites: [parallel, suite('beta', ['tests/tooling/beta-*.checks.mjs'])] });
+  const root = await fixture(t, {}, data);
+  assert.deepEqual((await toolingGroups(root)).map(group => [group.name, group.concurrency]), [['alpha', 4], ['beta', 1]]);
+  const report = JSON.parse(run(root, ['alpha', 'beta', '--dry-run', '--json']).stdout);
+  assert.deepEqual(report.outcomes.map(item => item.commands[0][2]), ['--test-concurrency=4', '--test-concurrency=1']);
+  for (const concurrency of [0, 9, 2.5, '4']) {
+    assert.throws(() => validateManifest(manifest({ suites: [suite('alpha', [], { runner: { type: 'node-test', concurrency } })] })), /runner\.concurrency/, String(concurrency));
+  }
+  assert.throws(() => validateManifest(manifest({ suites: [suite('alpha', [], { verify: 'opt-in', runner: { type: 'vitest', config: 'x', concurrency: 2 } })] })), /runner\.concurrency/);
+});
+
 test('namespaced tooling suites retain exact inventory ownership and execute through the public CLI', async t => {
   const path = 'tests/tooling/compiler-properties.checks.mjs';
   const data = manifest({ suites: [...manifest().suites, suite('compiler:properties', [path])] });
   const root = await fixture(t, { [path]: passing }, data);
   const groups = await toolingGroups(root);
   assert.deepEqual(groups, [
-    { name: 'alpha', files: ['tests/tooling/alpha-one.checks.mjs'] },
-    { name: 'beta', files: ['tests/tooling/beta-one.checks.mjs'] },
-    { name: 'compiler:properties', files: [path] },
+    { name: 'alpha', files: ['tests/tooling/alpha-one.checks.mjs'], concurrency: 1 },
+    { name: 'beta', files: ['tests/tooling/beta-one.checks.mjs'], concurrency: 1 },
+    { name: 'compiler:properties', files: [path], concurrency: 1 },
   ]);
   const result = run(root, ['compiler:properties', '--json']);
   assert.equal(result.status, 0, result.stdout + result.stderr);

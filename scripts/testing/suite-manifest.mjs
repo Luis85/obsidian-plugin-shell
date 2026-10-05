@@ -39,6 +39,9 @@ function validateRunner(suite, prerequisites) {
   if (!runner || !runnerTypes.includes(runner.type)) throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name}.runner.type must be one of ${runnerTypes.join(', ')}`);
   if (runner.type === 'vitest' && typeof runner.config !== 'string') throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name}.runner.config`);
   if (runner.type === 'npm-script' && typeof runner.script !== 'string') throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name}.runner.script`);
+  // Files of a node-test suite run in separate processes; only suites measured free of shared-checkout writes opt in.
+  if (runner.concurrency !== undefined && (runner.type !== 'node-test' || !Number.isInteger(runner.concurrency) || runner.concurrency < 1 || runner.concurrency > 8))
+    throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name}.runner.concurrency must be an integer 1..8 on a node-test runner`);
   if (runner.type === 'command') {
     if (!Array.isArray(runner.commands) || !runner.commands.length) throw new Error(`SUITE_MANIFEST_INVALID: ${suite.name}.runner.commands`);
     for (const command of runner.commands) {
@@ -193,7 +196,8 @@ export async function toolingGroups(root) {
   if (result.failures.length) throw new Error(result.failures.join('\n'));
   // An optional suite without files (no increment has acceptance stubs yet) is left out: `node --test` with no
   // file arguments would discover the whole repository instead. A non-optional empty suite already failed above.
-  return result.suites.filter(suite => suite.verify === 'tooling' && suite.files.length).map(suite => ({ name: suite.name, files: suite.files }));
+  return result.suites.filter(suite => suite.verify === 'tooling' && suite.files.length)
+    .map(suite => ({ name: suite.name, files: suite.files, concurrency: suite.runner.concurrency ?? 1 }));
 }
 
 function scriptFailures(manifest, scripts) {

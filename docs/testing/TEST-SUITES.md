@@ -211,15 +211,27 @@ developer workflow). Manual suites also exit nonzero.
 
 `scripts/quality/verify.mjs` runs `suites.mjs --check`, then (unless
 `SHELL_EVIDENCE_TOOLING=1` selects the unchanged evidence producer) runs each
-`verify: "tooling"` suite as its own serialized `node --test --test-concurrency=1`
-call, printing `▶ tooling suite: <name> (<n> files)`. Every tooling suite runs
+`verify: "tooling"` suite as its own `node --test` call, one suite after another,
+printing `▶ tooling suite: <name> (<n> files)`. Files inside a suite run serially
+(`--test-concurrency=1`) unless its runner declares `"concurrency": <1..8>`; only
+suites measured free of writes into the shared checkout opt in. Currently airship,
+compiler:properties, generator, visual, companion, test-data, native, setup and
+release run 4 files at a time (measured locally: companion 173 → 66 s, release
+148 → 73 s, generator 1723 → 936 s, identical results). cli, compiler, makers,
+quality and prototypes stay serial: prototypes writes a concept into the
+checkout's `docs/concepts/` that other suites snapshot, and the others hit
+heavy-test timeouts under load. `suites.mjs` and `check --fast` use the same
+setting; the evidence producer stays serial. Every tooling suite runs
 even after one fails, and the step then fails naming the failed suites, so a
 single `verify` still reports the complete tooling set. `runtime` and `baseline`
 remain dedicated `verify` steps (production coverage and `verify-baseline`).
 
 The `maker` suite is not a tooling suite: `verify` runs its files once, in
 `maker-coverage-run` (`vitest run --coverage --config configs/testing/vitest.maker.config.mjs`,
-the same Vitest config as `npm run test:maker`), gated by `maker-coverage-gate`.
+the same Vitest config as `npm run test:maker`), gated by `maker-coverage-gate`. That config runs
+4 files at a time (`fileParallelism: true, maxWorkers: 4`); two full runs passed all 174 files
+in 14-15 min against 47-57 min serial on Windows, with the coverage gate passing and no
+writes to the checkout.
 Its `verifyStepId` ties it to that step, so `--check` still accounts for every
 maker file in the tooling inventory and fails if the step stops running them.
 With `SHELL_EVIDENCE_TOOLING=1` (candidate qualification) the unchanged evidence
