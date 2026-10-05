@@ -18,9 +18,10 @@ export const list = (items, limit = 6) => items.slice(0, limit).join(', ') + (it
 /**
  * One source line with the contents of its string and template literals removed, so a pattern only sees code and
  * comments. Text after a comment opener is kept verbatim (apostrophes in prose are not quotes); a literal that does not
- * close on the line is dropped to the end of the line.
+ * close on the line is dropped to the end of the line. `keep(contents)` may put a placeholder between the quotes
+ * (the self-review guard marks a non-empty literal); by default the quotes are left empty.
  */
-export function codeText(line) {
+export function codeText(line, keep = () => '') {
   if (/^\s*\*/.test(line)) return line;
   let out = '';
   for (let index = 0; index < line.length; index += 1) {
@@ -29,7 +30,7 @@ export function codeText(line) {
     if (char !== "'" && char !== '"' && char !== '`') { out += char; continue; }
     let end = index + 1;
     while (end < line.length && line[end] !== char) end += line[end] === '\\' ? 2 : 1;
-    out += char + char; index = end;
+    out += char + keep(line.slice(index + 1, end)) + char; index = end;
   }
   return out;
 }

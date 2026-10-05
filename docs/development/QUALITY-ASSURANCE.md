@@ -185,8 +185,9 @@ files) with the merge-base of `HEAD` and `origin/main`, falling back to `main` a
 `origin/HEAD`, or with `--base`. It parses the unified diff and inspects only added
 lines (plus removed lines where a deletion loosens a gate). Findings print as
 `[RULE] file:line message` and exit 1; `--warn-only` reports without failing, `--json`
-emits `{status, base, files, violations[], approved[]}`, and an unresolvable base or bad usage
-exits 2. Rules:
+emits `{status, base, files, violations[], approved[]}` (a finding on a removed line
+carries `side: "removed"`, its line number is in the base), and an unresolvable base or
+bad usage exits 2. Rules:
 
 | Rule | Flags |
 | --- | --- |
@@ -197,9 +198,22 @@ exits 2. Rules:
 | `SR-UNSAFE-CAST` | casts to the catch-all type or through the unknown type (comment-only lines are skipped) |
 | `SR-SCREENSHOT-BASELINE` | screenshot or snapshot assertions in tests, and added snapshot baseline files |
 | `SR-UNCLASSIFIED-TEST` | added or moved test files that `tests/suites.json` does not classify exactly once (shares the suite manifest checker) |
-| `SR-FOCUSED-TEST` | focused, skipped, fixme or todo tests outside fixtures and generated files |
+| `SR-FOCUSED-TEST` | focused, skipped, fixme or todo tests outside fixtures and generated files; a runtime skip that states its reason (`t.skip('why')`, `{ skip: cond && 'why' }`) is not one |
 | `SR-LINE-LIMIT` | changed files over the code-line limits (shares `sourceInputs` with `check:source`) |
 | `SR-RETIRED-LAUNCHER` | references to the retired root launchers (a changelog entry is exempt) |
+
+The code-pattern rules (suppressions, casts, screenshot assertions and focused tests)
+read each line as code: the contents of string and template literals are removed and
+comments stay visible, so a real `eslint-disable` or `@ts-expect-error` comment still
+counts while generated source or fixture text inside a string does not. They skip
+`docs/concepts/**`, the design working directory that the analyzer and the
+Markdown/link check also ignore (each concept keeps its own verification); the
+configuration rules still apply there. `SR-FOCUSED-TEST` reports `.only(`,
+`test.skip(`/`it.skip(`/`describe.skip(`, `.todo(`, `.fixme(`, `.skipIf(`/`.runIf(`,
+a reasonless `t.skip()`, `skip: true`/`todo: true` and a constant `skip: 'why'` on a
+test declaration or its multi-line options; the Jest/Jasmine aliases (`fit`, `xit`,
+…) count when they declare a test (a title, then a callback). The guard reads one
+line at a time, so the contents of a template literal that spans lines are read as code.
 
 The guard is a diff heuristic with stated scope: it neither replaces the full gates
 nor proves a change correct. A flagged line that is genuinely justified needs an
@@ -207,10 +221,22 @@ owner-approved note in the pull request; the guard has no inline waiver, so
 loosening is never silent.
 
 The only recorded approval path is `configs/quality/self-review-approvals.json`,
-for `SR-QUALITY-CONFIG`. Each entry names the `rule`, `file`, `approvedBy`
-(`@owner`), a `reason` and the exact `added` and `removed` line texts. A finding
-is accepted only when every added and removed line of that file in the diff is
-listed for it. One extra or edited line flags the file again. Accepted findings
+for `SR-QUALITY-CONFIG`, `SR-LINT-CONFIG`, `SR-COVERAGE-THRESHOLD`,
+`SR-LINT-DISABLE`, `SR-TS-SUPPRESSION` and `SR-UNSAFE-CAST`. Each entry names the
+`rule`, `file`, `approvedBy` (`@owner`), a `reason` and the exact `added` and
+`removed` line texts (optionally the `pullRequest`). The rules match in two ways:
+
+- `SR-QUALITY-CONFIG` is file-scoped: its finding is accepted only when every added
+  and removed line of that file in the diff is listed for it. One extra or edited
+  line flags the file again.
+- The other rules are line-scoped: an entry lists only the flagged lines (removed
+  lines, such as removed threshold wiring or a removed `error` severity, under
+  `removed`). Each listed text approves one flagged line with exactly that text, so
+  two identical suppressions need the text listed twice. Other lines of the file do
+  not matter, and an edited or extra flagged line is reported again.
+  A line-scoped entry must list at least one line.
+
+Accepted findings
 still print as `approved [RULE] file:line by @owner` and appear under
 `approved[]` in `--json`. A malformed record fails the guard; it never approves
 anything. CODEOWNERS assigns the record to the owner, and `.claude/settings.json`
