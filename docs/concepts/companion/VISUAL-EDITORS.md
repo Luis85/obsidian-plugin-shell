@@ -141,7 +141,7 @@ inlines these modules and the generator imports them; the former `visual-migrate
 with the v5 build base.
 
 ```js
-design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1 },  // ↔ generated @nuxt/ui 4.11.2
+design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1 },  // ↔ generated @nuxt/ui 4.11.3
   pages: PageDefinition[], components: ComponentDefinition[], layouts: LayoutDefinition[], revisions: ComponentRevision[] }
 ```
 

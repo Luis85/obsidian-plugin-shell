@@ -1,4 +1,4 @@
-/** Reviewed local icon set for @nuxt/ui 4.11.2 defaults and shell controls.
+/** Reviewed local icon set for @nuxt/ui 4.11.3 defaults and shell controls.
  * No remote icon provider is needed for these built-in controls. */
 export const localIcons = [
   "lucide:arrow-down",

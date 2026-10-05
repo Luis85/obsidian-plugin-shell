@@ -27,7 +27,7 @@ async function factProject(root) {
     { op: 'interaction.add', page: '@inbox', title: 'Capture note' }]).document;
   await put(root, 'design/project.json', documentText(document));
   await put(root, 'package.json', { name: 'field-notes', scripts: { typecheck: 'tsc', test: 'node --test', 'check:style-literals': 'node x', deploy: 'x' },
-    dependencies: { vue: '3.5.43', '@nuxt/ui': '4.11.2', lodash: '4.17.21' }, devDependencies: { typescript: '6.0.3' } });
+    dependencies: { vue: '3.5.43', '@nuxt/ui': '4.11.3', lodash: '4.17.21' }, devDependencies: { typescript: '6.0.3' } });
   await put(root, 'configs/quality/thresholds.json', { schemaVersion: 1, codeLines: { source: 400, tests: 450, mainTs: 100 } });
   await put(root, 'src/styles/tokens.css', tokens);
   await put(root, 'src/presentation/components/InboxList.vue', "<script setup lang=\"ts\">\nimport UButton from '@nuxt/ui/components/Button.vue';\n</script>\n<template><UCard><UButton /></UCard></template>\n");

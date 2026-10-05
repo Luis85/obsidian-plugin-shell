@@ -280,7 +280,7 @@ test('component contracts declare typed props, emits and slots', () => {
 });
 test('declared component packages merge as exact pins and framework conflicts name both versions', () => {
   const withDeps = dependencies => { const doc = structuredClone(self); doc.design.visualDesigns.components[0].dependencies = dependencies; return projectModel(doc); };
-  const framework = { vue: '3.5.43', '@nuxt/ui': '4.11.2', typescript: '6.0.3' };
+  const framework = { vue: '3.5.43', '@nuxt/ui': '4.11.3', typescript: '6.0.3' };
   assert.deepEqual(visualPackages(projectModel(self), framework), {});
   const name = self.design.visualDesigns.components[0].exportName;
   const merged = visualPackages(withDeps([{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text' }, { package: 'vue', version: '3.5.43', purpose: 'Same pin' }, { package: 'a-lib', version: '1.0.0', purpose: 'Sorting' }]), framework);

@@ -261,7 +261,7 @@ paths, credentials or automatic network reporting.
 
 ## Implementation boundaries
 
-Nuxt UI **4.11.2** is integrated through Vue/Vite, not the Nuxt framework. It uses explicit component imports, local SVG icons, host-owned theme roles, no Tailwind Preflight, and a source-hash-guarded adaptation of two runtime global-style modules. Plugin CSS is composed into one `styles.css`; the extracted Obsidian stylesheet remains harness-only. Dependency notices are retained in the native bundle; no font binaries are shipped.
+Nuxt UI **4.11.3** is integrated through Vue/Vite, not the Nuxt framework. It uses explicit component imports, local SVG icons, host-owned theme roles, no Tailwind Preflight, and a source-hash-guarded adaptation of two runtime global-style modules. Plugin CSS is composed into one `styles.css`; the extracted Obsidian stylesheet remains harness-only. Dependency notices are retained in the native bundle; no font binaries are shipped.
 
 `main.ts` is lifecycle composition. Domain/application remain independent of Obsidian/Vue/Pinia. Handwritten runtime/CSS/scripts stay within 400 code lines, tests/helpers within 450, and `main.ts` within 100. The gate excludes comments and blank lines and counts all code in a Vue SFC. Executable files are named by purpose; iteration names are reserved for historical planning/evidence documents.
 
