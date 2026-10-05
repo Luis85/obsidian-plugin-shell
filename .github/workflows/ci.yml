@@ -294,8 +294,10 @@ jobs:
     name: Template authoring / example removal
     runs-on: ubuntu-24.04
     # Measured at 73-77 minutes (removal, two full verify runs, e2e and four
-    # evidence sessions); 100 minutes is a job budget, not a test deadline.
-    timeout-minutes: 100
+    # evidence sessions). With the data-driven wizard suites it measured 58 and
+    # 74 minutes, and over 100 on a run where every heavy Ubuntu job ran about
+    # 1.7 times slower; 130 minutes is a job budget, not a test deadline.
+    timeout-minutes: 130
     steps:
       - *checkout
       - *setup-node
