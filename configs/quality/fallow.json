@@ -699,7 +699,8 @@
           "cli-file-plan-contract",
           "cli-files-contract",
           "cli-bounded-map-contract",
-          "project-path-contract"
+          "project-path-contract",
+          "cli-serialization-contract"
         ]
       },
       {
