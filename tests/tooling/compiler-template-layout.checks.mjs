@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
+import { APPROVALS_PATH } from '../../scripts/quality/self-review-approvals.mjs';
 
 // Generated-project template sources live in templates/: the companion runtime copied into generated projects,
 // the developer-kit text templates, the example-removal templates, the adoption skill the kit installs into existing projects
@@ -43,8 +44,10 @@ test('the template snapshot copies every templates/ file except the framework-en
 
 test('no source, test, plugin, workflow or configuration file names a removed template path', async () => {
   const self = 'tests/tooling/compiler-template-layout.checks.mjs';
+  // The owner approvals record quotes deleted configuration lines verbatim; that history is its purpose, not a live reference.
+  const historical = new Set([self, APPROVALS_PATH]);
   const sources = (await Promise.all(['bin', 'scripts', 'templates', 'tests', 'plugins', 'configs', '.github', '.claude'].map(files))).flat()
-    .filter(path => /\.(?:[cm]?[jt]s|json|ya?ml|md|py)$/.test(path) && path !== self);
+    .filter(path => /\.(?:[cm]?[jt]s|json|ya?ml|md|py)$/.test(path) && !historical.has(path));
   const offenders = [];
   for (const path of sources) {
     const text = await readFile(join(root, path), 'utf8');
