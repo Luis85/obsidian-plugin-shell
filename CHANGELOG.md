@@ -42,6 +42,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Prototype guides moved from `bin/guides` to `configs/guides`; their content, ids and versions are unchanged.
 - `npm run setup` asks its identity, MCP and hosting-platform questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
 
+### Fixed
+
+- Prepared clickdummy prototype packages no longer tell agents to read `source/.claude/skills/companion-prototype-design` or run its `prototype.mjs`; generated source never ships that skill. The prompt and package README now point at `source/AGENTS.md` and the shipped offline builder `source/scripts/clickdummy/lib/build-worker.mjs`.
+
 ## [0.4.0] - 2026-09-23
 
 Add the integrated maker catalog, optional-example removal and explicit plugin-data entities sharing serialized preference persistence. Preserve existing Markdown authority and protect uncertain writes. Add generated formatting, seeded data properties, rendered accessibility, targeted guard mutation and source/workflow checks. Prepare dependency freshness and fixed-commit retained-asset release rehearsal. No public release, tag or directory submission is performed.
