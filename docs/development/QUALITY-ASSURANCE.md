@@ -142,7 +142,9 @@ Unknown ids or options exit 2 and list the valid ids. A green `--only`/`--skip`
 run reports `data.complete: false` and a `PARTIAL_RUN` diagnostic: it is never a
 complete verify verdict, and the default success sentence is printed only for a
 complete run. The tooling suites remain one `tooling` step that runs every group
-even after a group failure, then fails listing them.
+even after a group failure, then fails listing them. The `maker` suite is not one
+of them: its files run once, under coverage, in `maker-coverage-run`
+([test suites](../testing/TEST-SUITES.md#how-verify-uses-the-manifest)).
 
 The result has the same envelope as `node bin/app check --json`:
 `protocolVersion`, `command: "verify"`, `status` (`ok`, `failed`, `cancelled`),

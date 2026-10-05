@@ -37,7 +37,7 @@ or split after that run.
 | Suite | Level | Purpose | Files | Command | Runner | Prerequisites | In `verify` | Measured (2026-09-26) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `maker:pty` | integration | Real Linux/macOS pseudo-terminal authoring, agent parity, safe review and OS terminal restoration; standard-library Python only. | 1 | `npm run test:maker:pty` | Python command | `python3` | opt-in | not measured |
-| `maker` | integration (+ unit, component) | Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages. | 116 | `npm run test:maker` | `node --test` | none | tooling | not measured |
+| `maker` | integration (+ unit, component) | Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages. | 174 | `npm run test:maker` | Vitest `configs/testing/vitest.maker.config.mjs` | none | own step (`maker-coverage-run`) | not measured |
 | `workbench-plugins` | component | Trusted Workbench plugin SDK: plugin-local contracts, event bus, CLI/TUI contributions, framework adapters and custom starter contributions. | 1 | `npm run test:plugins` | `node --test` | none | own step | not measured |
 | `native-handoff` | not in the manifest | Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics. | 2 | `node scripts/testing/suites.mjs native-handoff` | Python command | `handoff-python` | opt-in | not measured |
 | `airship` | unit (+ integration) | Default-off project tooling, source preview mapping, safe explicit processes and regeneration preservation. | 2 | `npm run test:airship` | `node --test` | none | tooling | not measured |
@@ -182,7 +182,8 @@ match exactly one suite `include` (minus its `exclude`) or one `helpers` entry.
 | `UNDECLARED_TEST_DIRECTORY` / `UNDECLARED_TEST_FILE` | A new `tests/*` directory or loose file: declare it under `roots`/`helperRoots` or move it. |
 | `EMPTY_SUITE` / `TEST_ROOT_MISSING` | A non-optional suite matches nothing, or a required root disappeared. |
 | `SUITE_INVENTORY_MISMATCH` | A suite with an `inventory` (the concept browser runner) differs from the files its runner actually executes. |
-| `TOOLING_NOT_IN_VERIFY` / `TOOLING_NOT_IN_EVIDENCE` | The `verify` tooling suites must equal the evidence producer's tooling inventory (`tests/tooling/**/*.{checks,test}.mjs`), so `SHELL_EVIDENCE_TOOLING=1` runs the identical set. |
+| `TOOLING_NOT_IN_VERIFY` / `TOOLING_NOT_IN_EVIDENCE` | Every file of the evidence producer's tooling inventory (`tests/tooling/**/*.{checks,test}.mjs`) must run in `verify`: in a `verify: "tooling"` suite, or in a suite whose `verifyStepId` names the verify step that runs it (the `maker` suite, in `maker-coverage-run`). A tooling-suite file outside that inventory fails too. |
+| `SUITE_VERIFY_STEP_UNKNOWN` / `SUITE_VERIFY_STEP_MISMATCH` | A `verifyStepId` names no step of `scripts/quality/verify-steps.mjs`, or a step that is not `vitest run --config <the suite's runner config>`; its files then count as running nowhere. |
 | `SUITE_SCRIPT_MISSING` / `SUITE_SCRIPT_MISMATCH` | A declared `npmScript` is absent from `package.json` or does not run that suite. |
 | `TEST_LEVELS_UNDECLARED` / `TEST_LEVELS_INVALID` | `testLevels` is missing, or a level lacks a lowercase name, a summary or valid `paths`. |
 | `SUITE_LEVEL_MISSING` / `SUITE_LEVEL_UNKNOWN` | A suite has no `level`, or a `level`/`levels` key that `testLevels` does not declare. |
@@ -215,6 +216,15 @@ call, printing `▶ tooling suite: <name> (<n> files)`. Every tooling suite runs
 even after one fails, and the step then fails naming the failed suites, so a
 single `verify` still reports the complete tooling set. `runtime` and `baseline`
 remain dedicated `verify` steps (production coverage and `verify-baseline`).
+
+The `maker` suite is not a tooling suite: `verify` runs its files once, in
+`maker-coverage-run` (`vitest run --coverage --config configs/testing/vitest.maker.config.mjs`,
+the same Vitest config as `npm run test:maker`), gated by `maker-coverage-gate`.
+Its `verifyStepId` ties it to that step, so `--check` still accounts for every
+maker file in the tooling inventory and fails if the step stops running them.
+With `SHELL_EVIDENCE_TOOLING=1` (candidate qualification) the unchanged evidence
+producer still records every `tests/tooling` file, the maker files included, so
+that mode runs them twice: once for the evidence packet and once for coverage.
 
 ## Adding a test
 

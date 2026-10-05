@@ -41,6 +41,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - `node bin/app new <dir>` now runs its interview on the shared wizard engine (`configs/wizards/new-starter.json`). Starter inputs are asked as a generated form: choices and booleans are numbered menus, invalid answers are re-asked instead of ending the interview, and `:back` revisits earlier questions. Number form fields accept `required: false`.
 - Prototype guides moved from `bin/guides` to `configs/guides`; their content, ids and versions are unchanged.
 - `npm run setup` asks its identity, MCP and hosting-platform questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
+- `npm run verify` and the interactive-maker workflow run the 174 maker test files once, under coverage (`maker-coverage-run`), instead of a second time in the node --test tooling step; the `maker` suite now uses Vitest, and `suites.mjs --check` fails if a tooling file stops running in verify.
 
 ### Fixed
 
