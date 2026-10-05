@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents.local/schema/character-pack-1.json",
+  "title": "Agents Character Pack",
+  "$comment": "Generated from application runtime shapes. Runtime validation additionally checks references, recipe compatibility, input size/depth, and reserved keys.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 100000
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 100000
+    },
+    "author": {
+      "type": "string",
+      "maxLength": 100000
+    },
+    "builtIn": {
+      "type": "boolean"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "human",
+        "pet",
+        "animal",
+        "item"
+      ]
+    },
+    "modelIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+      },
+      "maxItems": 10000
+    },
+    "partIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+      },
+      "maxItems": 10000
+    },
+    "stylePresetIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+      },
+      "maxItems": 10000
+    },
+    "savedLooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "appearance": {
+            "type": "object",
+            "properties": {
+              "primaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+              },
+              "secondaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+              },
+              "accentColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+              },
+              "eyeStyle": {
+                "type": "string",
+                "enum": [
+                  "expressive",
+                  "round",
+                  "focused",
+                  "visor"
+                ]
+              },
+              "expression": {
+                "type": "string",
+                "enum": [
+                  "friendly",
+                  "calm",
+                  "curious",
+                  "confident"
+                ]
+              },
+              "idleStyle": {
+                "type": "string",
+                "enum": [
+                  "calm",
+                  "playful",
+                  "focused",
+                  "confident"
+                ]
+              },
+              "pattern": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "stripe",
+                  "patch",
+                  "gradient"
+                ]
+              },
+              "finish": {
+                "type": "string",
+                "enum": [
+                  "matte",
+                  "soft",
+                  "metallic",
+                  "glossy"
+                ]
+              },
+              "accessoryIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "maxItems": 10000
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "human",
+                  "pet",
+                  "animal",
+                  "item"
+                ]
+              },
+              "modelId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "packId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "teamStyleId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "parts": {
+                "type": "object",
+                "properties": {
+                  "head": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "body": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "ears": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "tail": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "arms": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "screen": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "base": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "scale": {
+                "type": "number",
+                "minimum": 0.75,
+                "maximum": 1.3
+              },
+              "pose": {
+                "type": "string",
+                "enum": [
+                  "neutral",
+                  "ready",
+                  "wave",
+                  "thinking",
+                  "working",
+                  "celebrate"
+                ]
+              },
+              "teamNickname": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "greeting": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "motto": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "favoriteSymbol": {
+                "type": "string",
+                "maxLength": 100000
+              }
+            },
+            "required": [
+              "primaryColor",
+              "secondaryColor",
+              "accentColor",
+              "eyeStyle",
+              "expression",
+              "idleStyle",
+              "pattern",
+              "finish",
+              "accessoryIds",
+              "category",
+              "modelId",
+              "parts",
+              "scale",
+              "pose",
+              "teamNickname",
+              "greeting",
+              "motto",
+              "favoriteSymbol"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "appearance"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "author",
+    "builtIn",
+    "modelIds",
+    "partIds",
+    "stylePresetIds",
+    "savedLooks"
+  ],
+  "additionalProperties": false
+}

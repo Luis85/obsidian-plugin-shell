@@ -1,0 +1,671 @@
+
+> obsidian-agents-klaus-editor-prototype@0.15.0 check:core
+> npm run test:architecture && npm run test:syntax && npm run test:contracts && npm run schema:check && npm run test:core
+
+
+> obsidian-agents-klaus-editor-prototype@0.15.0 test:architecture
+> node scripts/architecture-check.mjs
+
+Architecture checks passed: 85 source files, 299 imports, explicit layer boundaries and model-factory size budget.
+
+> obsidian-agents-klaus-editor-prototype@0.15.0 test:syntax
+> node scripts/syntax-check.mjs
+
+Syntax/local-import checks passed: 109 TypeScript, Vue-script and JavaScript files; 306 local imports resolve. No external package types are checked here.
+
+> obsidian-agents-klaus-editor-prototype@0.15.0 test:contracts
+> node scripts/static-contracts.mjs
+
+Static model contracts passed: 17 authored bodies match the uploaded baseline. This does not execute Three.js.
+
+> obsidian-agents-klaus-editor-prototype@0.15.0 schema:check
+> node scripts/build-schemas.mjs --check
+
+Verified 2 schemas from strict runtime shapes.
+
+> obsidian-agents-klaus-editor-prototype@0.15.0 test:core
+> node scripts/run-core-tests.mjs
+
+Strict core typecheck passed: 42 TypeScript modules (TypeScript 5.8.3).
+TAP version 13
+# Subtest: untrusted state boundary
+    # Subtest: round-trips the supplied 0.14 seed without any data loss
+    ok 1 - round-trips the supplied 0.14 seed without any data loss
+      ---
+      duration_ms: 9.037831
+      type: 'test'
+      ...
+    # Subtest: never returns a shared mutable import object
+    ok 2 - never returns a shared mutable import object
+      ---
+      duration_ms: 2.536231
+      type: 'test'
+      ...
+    # Subtest: rejects malformed root null
+    ok 3 - rejects malformed root null
+      ---
+      duration_ms: 0.190856
+      type: 'test'
+      ...
+    # Subtest: rejects malformed root []
+    ok 4 - rejects malformed root []
+      ---
+      duration_ms: 0.126831
+      type: 'test'
+      ...
+    # Subtest: rejects malformed root {}
+    ok 5 - rejects malformed root {}
+      ---
+      duration_ms: 0.070045
+      type: 'test'
+      ...
+    # Subtest: rejects malformed root true
+    ok 6 - rejects malformed root true
+      ---
+      duration_ms: 0.049945
+      type: 'test'
+      ...
+    # Subtest: rejects malformed root "text"
+    ok 7 - rejects malformed root "text"
+      ---
+      duration_ms: 0.075573
+      type: 'test'
+      ...
+    # Subtest: rejects malformed root 42
+    ok 8 - rejects malformed root 42
+      ---
+      duration_ms: 0.115954
+      type: 'test'
+      ...
+    # Subtest: rejects malformed root {"schemaVersion":"1.4.0"}
+    ok 9 - rejects malformed root {"schemaVersion":"1.4.0"}
+      ---
+      duration_ms: 0.227101
+      type: 'test'
+      ...
+    # Subtest: does not downgrade unsupported schema 0.9.0
+    ok 10 - does not downgrade unsupported schema 0.9.0
+      ---
+      duration_ms: 0.836828
+      type: 'test'
+      ...
+    # Subtest: does not downgrade unsupported schema 1.4.1
+    ok 11 - does not downgrade unsupported schema 1.4.1
+      ---
+      duration_ms: 0.686661
+      type: 'test'
+      ...
+    # Subtest: does not downgrade unsupported schema 1.5.0
+    ok 12 - does not downgrade unsupported schema 1.5.0
+      ---
+      duration_ms: 0.931389
+      type: 'test'
+      ...
+    # Subtest: does not downgrade unsupported schema 2.0.0
+    ok 13 - does not downgrade unsupported schema 2.0.0
+      ---
+      duration_ms: 0.553832
+      type: 'test'
+      ...
+    # Subtest: does not downgrade unsupported schema latest
+    ok 14 - does not downgrade unsupported schema latest
+      ---
+      duration_ms: 0.555164
+      type: 'test'
+      ...
+    # Subtest: rejects nested null without throwing or changing input
+    ok 15 - rejects nested null without throwing or changing input
+      ---
+      duration_ms: 1.908297
+      type: 'test'
+      ...
+    # Subtest: rejects missing settings without throwing or changing input
+    ok 16 - rejects missing settings without throwing or changing input
+      ---
+      duration_ms: 1.194324
+      type: 'test'
+      ...
+    # Subtest: rejects missing role array without throwing or changing input
+    ok 17 - rejects missing role array without throwing or changing input
+      ---
+      duration_ms: 1.52369
+      type: 'test'
+      ...
+    # Subtest: rejects unknown numeric string without throwing or changing input
+    ok 18 - rejects unknown numeric string without throwing or changing input
+      ---
+      duration_ms: 1.187264
+      type: 'test'
+      ...
+    # Subtest: rejects non-finite number without throwing or changing input
+    ok 19 - rejects non-finite number without throwing or changing input
+      ---
+      duration_ms: 0.876416
+      type: 'test'
+      ...
+    # Subtest: rejects invalid scale without throwing or changing input
+    ok 20 - rejects invalid scale without throwing or changing input
+      ---
+      duration_ms: 1.61058
+      type: 'test'
+      ...
+    # Subtest: rejects invalid color without throwing or changing input
+    ok 21 - rejects invalid color without throwing or changing input
+      ---
+      duration_ms: 1.285061
+      type: 'test'
+      ...
+    # Subtest: rejects invalid expression without throwing or changing input
+    ok 22 - rejects invalid expression without throwing or changing input
+      ---
+      duration_ms: 1.807065
+      type: 'test'
+      ...
+    # Subtest: rejects unknown field without throwing or changing input
+    ok 23 - rejects unknown field without throwing or changing input
+      ---
+      duration_ms: 1.346333
+      type: 'test'
+      ...
+    # Subtest: rejects empty agents without throwing or changing input
+    ok 24 - rejects empty agents without throwing or changing input
+      ---
+      duration_ms: 1.488266
+      type: 'test'
+      ...
+    # Subtest: rejects duplicate IDs without throwing or changing input
+    ok 25 - rejects duplicate IDs without throwing or changing input
+      ---
+      duration_ms: 2.204873
+      type: 'test'
+      ...
+    # Subtest: rejects unknown layer without throwing or changing input
+    ok 26 - rejects unknown layer without throwing or changing input
+      ---
+      duration_ms: 7.374671
+      type: 'test'
+      ...
+    # Subtest: rejects unknown role skill without throwing or changing input
+    ok 27 - rejects unknown role skill without throwing or changing input
+      ---
+      duration_ms: 1.794507
+      type: 'test'
+      ...
+    # Subtest: rejects invalid model without throwing or changing input
+    ok 28 - rejects invalid model without throwing or changing input
+      ---
+      duration_ms: 1.948838
+      type: 'test'
+      ...
+    # Subtest: rejects invalid part without throwing or changing input
+    ok 29 - rejects invalid part without throwing or changing input
+      ---
+      duration_ms: 3.422653
+      type: 'test'
+      ...
+    # Subtest: rejects incompatible part without throwing or changing input
+    ok 30 - rejects incompatible part without throwing or changing input
+      ---
+      duration_ms: 2.80494
+      type: 'test'
+      ...
+    # Subtest: rejects invalid accessory without throwing or changing input
+    ok 31 - rejects invalid accessory without throwing or changing input
+      ---
+      duration_ms: 1.307484
+      type: 'test'
+      ...
+    # Subtest: rejects duplicate accessory without throwing or changing input
+    ok 32 - rejects duplicate accessory without throwing or changing input
+      ---
+      duration_ms: 2.733863
+      type: 'test'
+      ...
+    # Subtest: rejects missing current appearance without throwing or changing input
+    ok 33 - rejects missing current appearance without throwing or changing input
+      ---
+      duration_ms: 1.214755
+      type: 'test'
+      ...
+    # Subtest: rejects missing current packs without throwing or changing input
+    ok 34 - rejects missing current packs without throwing or changing input
+      ---
+      duration_ms: 0.966392
+      type: 'test'
+      ...
+    # Subtest: rejects broken version snapshot without throwing or changing input
+    ok 35 - rejects broken version snapshot without throwing or changing input
+      ---
+      duration_ms: 2.253686
+      type: 'test'
+      ...
+    # Subtest: rejects prototype-pollution keys recursively before migration
+    ok 36 - rejects prototype-pollution keys recursively before migration
+      ---
+      duration_ms: 0.667714
+      type: 'test'
+      ...
+    # Subtest: bounds input nesting and detects cycles
+    ok 37 - bounds input nesting and detects cycles
+      ---
+      duration_ms: 0.682526
+      type: 'test'
+      ...
+    # Subtest: reports malformed JSON rather than rendering it as a valid document
+    ok 38 - reports malformed JSON rather than rendering it as a valid document
+      ---
+      duration_ms: 0.135774
+      type: 'test'
+      ...
+    # Subtest: rejects oversized text before parsing
+    ok 39 - rejects oversized text before parsing
+      ---
+      duration_ms: 0.076355
+      type: 'test'
+      ...
+    1..39
+ok 1 - untrusted state boundary
+  ---
+  duration_ms: 61.536789
+  type: 'suite'
+  ...
+# Subtest: explicit legacy migrations
+    # Subtest: migrates supported 1.0.0 appearance defaults without mutating the input
+    ok 1 - migrates supported 1.0.0 appearance defaults without mutating the input
+      ---
+      duration_ms: 5.112102
+      type: 'test'
+      ...
+    # Subtest: migrates supported 1.1.0 appearance defaults without mutating the input
+    ok 2 - migrates supported 1.1.0 appearance defaults without mutating the input
+      ---
+      duration_ms: 3.327781
+      type: 'test'
+      ...
+    # Subtest: migrates supported 1.2.0 appearance defaults without mutating the input
+    ok 3 - migrates supported 1.2.0 appearance defaults without mutating the input
+      ---
+      duration_ms: 4.648425
+      type: 'test'
+      ...
+    # Subtest: migrates supported 1.3.0 appearance defaults without mutating the input
+    ok 4 - migrates supported 1.3.0 appearance defaults without mutating the input
+      ---
+      duration_ms: 2.568129
+      type: 'test'
+      ...
+    # Subtest: migrates version snapshots as well as live agents
+    ok 5 - migrates version snapshots as well as live agents
+      ---
+      duration_ms: 1.544501
+      type: 'test'
+      ...
+    # Subtest: does not silently replace unknown legacy models
+    ok 6 - does not silently replace unknown legacy models
+      ---
+      duration_ms: 0.908725
+      type: 'test'
+      ...
+    1..6
+ok 2 - explicit legacy migrations
+  ---
+  duration_ms: 18.612137
+  type: 'suite'
+  ...
+# Subtest: character pack validation
+    # Subtest: accepts built-in pack definitions
+    ok 1 - accepts built-in pack definitions
+      ---
+      duration_ms: 0.589907
+      type: 'test'
+      ...
+    # Subtest: rejects missing nested appearance instead of throwing
+    ok 2 - rejects missing nested appearance instead of throwing
+      ---
+      duration_ms: 0.344277
+      type: 'test'
+      ...
+    # Subtest: rejects unknown model and part declarations
+    ok 3 - rejects unknown model and part declarations
+      ---
+      duration_ms: 0.362505
+      type: 'test'
+      ...
+    1..3
+ok 3 - character pack validation
+  ---
+  duration_ms: 1.637831
+  type: 'suite'
+  ...
+# Subtest: atomic application commands
+    # Subtest: adds a specialist to a detached state without mutating its base
+    ok 1 - adds a specialist to a detached state without mutating its base
+      ---
+      duration_ms: 8.362486
+      type: 'test'
+      ...
+    # Subtest: adds inheritance and generates unique slugs for repeated variant labels
+    ok 2 - adds inheritance and generates unique slugs for repeated variant labels
+      ---
+      duration_ms: 4.176025
+      type: 'test'
+      ...
+    # Subtest: uses only the supplied clock and IDs for snapshots and snapshots before bumping
+    ok 3 - uses only the supplied clock and IDs for snapshots and snapshots before bumping
+      ---
+      duration_ms: 1.204259
+      type: 'test'
+      ...
+    # Subtest: makes equivalent inputs and deterministic services produce equivalent outputs
+    ok 4 - makes equivalent inputs and deterministic services produce equivalent outputs
+      ---
+      duration_ms: 1.324851
+      type: 'test'
+      ...
+    # Subtest: rejects missing agents without changing live state
+    ok 5 - rejects missing agents without changing live state
+      ---
+      duration_ms: 0.71884
+      type: 'test'
+      ...
+    # Subtest: rejects invalid variant name of length 0
+    ok 6 - rejects invalid variant name of length 0
+      ---
+      duration_ms: 0.561003
+      type: 'test'
+      ...
+    # Subtest: rejects invalid variant name of length 2
+    ok 7 - rejects invalid variant name of length 2
+      ---
+      duration_ms: 0.577117
+      type: 'test'
+      ...
+    # Subtest: rejects invalid variant name of length 121
+    ok 8 - rejects invalid variant name of length 121
+      ---
+      duration_ms: 0.870237
+      type: 'test'
+      ...
+    # Subtest: detects a broken ID provider instead of creating duplicate entities
+    ok 9 - detects a broken ID provider instead of creating duplicate entities
+      ---
+      duration_ms: 0.73201
+      type: 'test'
+      ...
+    # Subtest: rejects invalid clock values without a partial snapshot or version bump
+    ok 10 - rejects invalid clock values without a partial snapshot or version bump
+      ---
+      duration_ms: 0.782066
+      type: 'test'
+      ...
+    # Subtest: does not partially commit when a dependency throws after draft construction
+    ok 11 - does not partially commit when a dependency throws after draft construction
+      ---
+      duration_ms: 0.98481
+      type: 'test'
+      ...
+    # Subtest: rejects invalid versions instead of silently repairing them during snapshot
+    ok 12 - rejects invalid versions instead of silently repairing them during snapshot
+      ---
+      duration_ms: 0.45218
+      type: 'test'
+      ...
+    # Subtest: rejects dangling, self and duplicate relations
+    ok 13 - rejects dangling, self and duplicate relations
+      ---
+      duration_ms: 1.259963
+      type: 'test'
+      ...
+    # Subtest: rejects inheritance cycles
+    ok 14 - rejects inheritance cycles
+      ---
+      duration_ms: 0.561103
+      type: 'test'
+      ...
+    1..14
+ok 4 - atomic application commands
+  ---
+  duration_ms: 23.69776
+  type: 'suite'
+  ...
+# Subtest: character commands and pack operations
+    # Subtest: saves styles without adding a model dependency
+    ok 1 - saves styles without adding a model dependency
+      ---
+      duration_ms: 2.390863
+      type: 'test'
+      ...
+    # Subtest: applies a look without changing team-facing social identity or operational authority
+    ok 2 - applies a look without changing team-facing social identity or operational authority
+      ---
+      duration_ms: 1.760515
+      type: 'test'
+      ...
+    # Subtest: creates a portable pack with injected unique IDs and model/part declarations
+    ok 3 - creates a portable pack with injected unique IDs and model/part declarations
+      ---
+      duration_ms: 1.883801
+      type: 'test'
+      ...
+    # Subtest: imports a duplicate pack with remapped pack and look identifiers without changing its source
+    ok 4 - imports a duplicate pack with remapped pack and look identifiers without changing its source
+      ---
+      duration_ms: 1.868708
+      type: 'test'
+      ...
+    # Subtest: rejects malformed packs and appearances atomically
+    ok 5 - rejects malformed packs and appearances atomically
+      ---
+      duration_ms: 0.672069
+      type: 'test'
+      ...
+    # Subtest: clones ordinary reactive-style proxies without structuredClone DataCloneError
+    ok 6 - clones ordinary reactive-style proxies without structuredClone DataCloneError
+      ---
+      duration_ms: 0.855075
+      type: 'test'
+      ...
+    1..6
+ok 5 - character commands and pack operations
+  ---
+  duration_ms: 9.614507
+  type: 'suite'
+  ...
+# Subtest: preserved editor and catalog contracts
+    # Subtest: retains eleven unique editor categories
+    ok 1 - retains eleven unique editor categories
+      ---
+      duration_ms: 0.642024
+      type: 'test'
+      ...
+    # Subtest: distinguishes incomplete configuration from behavioral evidence
+    ok 2 - distinguishes incomplete configuration from behavioral evidence
+      ---
+      duration_ms: 2.983473
+      type: 'test'
+      ...
+    # Subtest: toggles membership without mutating the collection
+    ok 3 - toggles membership without mutating the collection
+      ---
+      duration_ms: 0.537788
+      type: 'test'
+      ...
+    # Subtest: keeps presentation copy out of domain recipes
+    ok 4 - keeps presentation copy out of domain recipes
+      ---
+      duration_ms: 0.222474
+      type: 'test'
+      ...
+    # Subtest: retains all fifteen recipes and four embodiment categories
+    ok 5 - retains all fifteen recipes and four embodiment categories
+      ---
+      duration_ms: 0.327331
+      type: 'test'
+      ...
+    # Subtest: keeps part composition independent of model choice
+    ok 6 - keeps part composition independent of model choice
+      ---
+      duration_ms: 0.229434
+      type: 'test'
+      ...
+    # Subtest: styles preserve the current silhouette and part recipe
+    ok 7 - styles preserve the current silhouette and part recipe
+      ---
+      duration_ms: 0.174473
+      type: 'test'
+      ...
+    # Subtest: retains the broad teaching catalog
+    ok 8 - retains the broad teaching catalog
+      ---
+      duration_ms: 0.709897
+      type: 'test'
+      ...
+    1..8
+ok 6 - preserved editor and catalog contracts
+  ---
+  duration_ms: 6.94776
+  type: 'suite'
+  ...
+# Subtest: formats repeated runtime-adapter placeholders without changing other path text
+ok 7 - formats repeated runtime-adapter placeholders without changing other path text
+  ---
+  duration_ms: 0.484097
+  type: 'test'
+  ...
+# Subtest: browser persistence diagnostics
+    # Subtest: distinguishes missing storage from a missing saved workspace
+    ok 1 - distinguishes missing storage from a missing saved workspace
+      ---
+      duration_ms: 1.074384
+      type: 'test'
+      ...
+    # Subtest: round-trips valid state and preserves the input
+    ok 2 - round-trips valid state and preserves the input
+      ---
+      duration_ms: 10.758336
+      type: 'test'
+      ...
+    # Subtest: preserves unreadable stored data ""
+    ok 3 - preserves unreadable stored data ""
+      ---
+      duration_ms: 0.308113
+      type: 'test'
+      ...
+    # Subtest: preserves unreadable stored data "{oops"
+    ok 4 - preserves unreadable stored data "{oops"
+      ---
+      duration_ms: 0.125369
+      type: 'test'
+      ...
+    # Subtest: preserves unreadable stored data "null"
+    ok 5 - preserves unreadable stored data "null"
+      ---
+      duration_ms: 0.168043
+      type: 'test'
+      ...
+    # Subtest: preserves unreadable stored data "{\\"schemaVersion\\":\\"2.0.0\\"}"
+    ok 6 - preserves unreadable stored data "{\\"schemaVersion\\":\\"2.0.0\\"}"
+      ---
+      duration_ms: 0.09949
+      type: 'test'
+      ...
+    # Subtest: preserves unreadable stored data "{\\"schemaVersion\\":\\"1.4.0\\"}"
+    ok 7 - preserves unreadable stored data "{\\"schemaVersion\\":\\"1.4.0\\"}"
+      ---
+      duration_ms: 0.17315
+      type: 'test'
+      ...
+    # Subtest: surfaces denied access even when the localStorage property getter throws
+    ok 8 - surfaces denied access even when the localStorage property getter throws
+      ---
+      duration_ms: 0.777959
+      type: 'test'
+      ...
+    # Subtest: reports quota failures without erasing the previous save
+    ok 9 - reports quota failures without erasing the previous save
+      ---
+      duration_ms: 5.048677
+      type: 'test'
+      ...
+    # Subtest: returns generic read/write failures for other host exceptions
+    ok 10 - returns generic read/write failures for other host exceptions
+      ---
+      duration_ms: 5.796931
+      type: 'test'
+      ...
+    # Subtest: does not write malformed state over a valid workspace
+    ok 11 - does not write malformed state over a valid workspace
+      ---
+      duration_ms: 0.926733
+      type: 'test'
+      ...
+    # Subtest: migrates at load without silently rewriting storage
+    ok 12 - migrates at load without silently rewriting storage
+      ---
+      duration_ms: 2.076871
+      type: 'test'
+      ...
+    # Subtest: rejects cyclic live data before serialization
+    ok 13 - rejects cyclic live data before serialization
+      ---
+      duration_ms: 1.218712
+      type: 'test'
+      ...
+    1..13
+ok 8 - browser persistence diagnostics
+  ---
+  duration_ms: 29.933219
+  type: 'suite'
+  ...
+# Subtest: async repository coordination
+    # Subtest: serializes snapshots in request order and detaches them at enqueue time
+    ok 1 - serializes snapshots in request order and detaches them at enqueue time
+      ---
+      duration_ms: 7.769595
+      type: 'test'
+      ...
+    # Subtest: continues after a repository rejects a save instead of poisoning the queue
+    ok 2 - continues after a repository rejects a save instead of poisoning the queue
+      ---
+      duration_ms: 1.067114
+      type: 'test'
+      ...
+    # Subtest: continues after typed storage failures
+    ok 3 - continues after typed storage failures
+      ---
+      duration_ms: 0.802205
+      type: 'test'
+      ...
+    # Subtest: contains rejected loads without treating them as an empty workspace
+    ok 4 - contains rejected loads without treating them as an empty workspace
+      ---
+      duration_ms: 0.155403
+      type: 'test'
+      ...
+    1..4
+ok 9 - async repository coordination
+  ---
+  duration_ms: 9.984323
+  type: 'suite'
+  ...
+# Subtest: never saves a workspace larger than the reader can reload
+ok 10 - never saves a workspace larger than the reader can reload
+  ---
+  duration_ms: 31.727345
+  type: 'test'
+  ...
+# Subtest: returns a typed snapshot failure instead of throwing before a write is queued
+ok 11 - returns a typed snapshot failure instead of throwing before a write is queued
+  ---
+  duration_ms: 1056.820146
+  type: 'test'
+  ...
+1..11
+# tests 96
+# suites 8
+# pass 96
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1275.224481

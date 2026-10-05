@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-05",
+  "node": "22.16.0",
+  "npm": "10.9.2",
+  "coreTypeScript": "5.8.3",
+  "localTemplateCompiler": "Vue 3.5.13 global, installed with trame_client",
+  "dependencyInstall": "blocked: npm registry unavailable",
+  "fullApplicationBuild": "not executed",
+  "fullVitest": "not executed",
+  "webglVisualRegression": "not executed",
+  "applicationVersion": "0.15.0",
+  "stateSchemaVersion": "1.4.0",
+  "originalArchiveSha256": "018d59c27c3259339e74475720dfa638b395e1fef1520c397cac9e653aae20f6"
+}

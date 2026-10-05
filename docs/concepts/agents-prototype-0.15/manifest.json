@@ -1,0 +1,9 @@
+{
+  "id": "agents",
+  "name": "Agents",
+  "version": "0.15.0",
+  "minAppVersion": "1.10.0",
+  "description": "Design, teach, validate, and manage vault-native AI agent environments with the Klaus Editor.",
+  "author": "Prototype",
+  "isDesktopOnly": false
+}

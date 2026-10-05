@@ -1,0 +1,5 @@
+
+> obsidian-agents-klaus-editor-prototype@0.15.0 build
+> vue-tsc --noEmit && vite build
+
+sh: 1: vue-tsc: not found

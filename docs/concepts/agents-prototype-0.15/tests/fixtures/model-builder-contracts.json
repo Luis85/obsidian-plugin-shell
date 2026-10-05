@@ -1,0 +1,312 @@
+{
+  "description": "Token-level body parity against the uploaded 0.14 source. Comments and whitespace are ignored; named extraction replacements are explicit. This is not a runtime rendering assertion.",
+  "baselineFactorySha256": "80653ed7e0f3cf18a56adf09dbe8a3d60e45b88e01a3540921196cab3c1fd45e",
+  "contracts": [
+    {
+      "label": "Human silhouette body",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:human",
+      "file": "src/infrastructure/three/models/HumanModelBuilder.ts",
+      "selector": "method:HumanModelBuilder:build",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "9c66f0c610c280613a3ea34d2309651d7d7f95638c0b85ffc8e86cda930f87a9"
+    },
+    {
+      "label": "Quadruped silhouette body",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:quadruped",
+      "file": "src/infrastructure/three/models/QuadrupedModelBuilder.ts",
+      "selector": "method:QuadrupedModelBuilder:build",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "b4d9df9a3738d32b6575f0a4a2c3ca8fc0dd101a4fb4a7b320b69f2f136ed1d3"
+    },
+    {
+      "label": "Bird silhouette body",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:bird",
+      "file": "src/infrastructure/three/models/BirdModelBuilder.ts",
+      "selector": "method:BirdModelBuilder:build",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "59671f0929aad453ce547b986fc232d423ea8c9912d5d68a90206fc75c593f78"
+    },
+    {
+      "label": "Head silhouette body",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:head",
+      "file": "src/infrastructure/three/models/HeadModelBuilder.ts",
+      "selector": "method:HeadModelBuilder:build",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "fd5f190d53c1c29b44ff6d3a8906c605e523b5bd65e39f4589f9de62efb763f9"
+    },
+    {
+      "label": "Object silhouette body",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:object",
+      "file": "src/infrastructure/three/models/ObjectModelBuilder.ts",
+      "selector": "method:ObjectModelBuilder:build",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "88bc93808902af9bd48298f58d7afff8ba114c1c23583b81b070183b033f5898"
+    },
+    {
+      "label": "Screen face geometry",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:screenFace",
+      "file": "src/infrastructure/three/models/FaceAssembler.ts",
+      "selector": "function:buildScreenFace",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "00e9b8c2061ac78ddf71ad1a8d306ba1b3984dbfd5d15f9b11530c43e0c28f92"
+    },
+    {
+      "label": "Semantic bounds",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:semanticBounds",
+      "file": "src/infrastructure/three/models/semanticBounds.ts",
+      "selector": "function:semanticBounds",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "b1b4abe62cf536aada79ef3532552aaa03266a14ec6e1fe3a906c241883cda93"
+    },
+    {
+      "label": "Accessory anchors",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:accessoryAnchors",
+      "file": "src/infrastructure/three/accessories/AccessoryAssembler.ts",
+      "selector": "method:AccessoryAssembler:accessoryAnchors",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "4752a51c196df69f642646d9bbc5109f57f47e820279462cc403fc1eb31cb7d7"
+    },
+    {
+      "label": "Accessory construction",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:accessories",
+      "file": "src/infrastructure/three/accessories/AccessoryAssembler.ts",
+      "selector": "method:AccessoryAssembler:assemble",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "c8772538c628b7d7b50e3fd7e4dbbe806a27cb0e180a6ad58de631073e11bb8b"
+    },
+    {
+      "label": "Pattern construction",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "method:CharacterModelFactory:applyPattern",
+      "file": "src/infrastructure/three/patterns/PatternAssembler.ts",
+      "selector": "method:PatternAssembler:assemble",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "db1a0cd8a741e32f71dd2fff4874aef15cf6ecb03d596b611970e71a1344f614"
+    },
+    {
+      "label": "Finish parameters",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "variable:finishProps",
+      "file": "src/infrastructure/three/materials/MaterialFactory.ts",
+      "selector": "variable:finishProps",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "77fd4f20395265f98c2b354bdbdd13d5be63effe18eaa8de21c6f153ab1121af"
+    },
+    {
+      "label": "eyes geometry",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "variable:eyes",
+      "file": "src/infrastructure/three/models/FaceAssembler.ts",
+      "selector": "variable:eyes",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "2505365bef2586ff2fd48906f982818a4f9d2e80a47c0af70698b576f134c8be"
+    },
+    {
+      "label": "badge geometry",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "variable:badge",
+      "file": "src/infrastructure/three/models/FaceAssembler.ts",
+      "selector": "variable:badge",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "2b0a1a4dd28258a73bf1fdfe6f2846576a0f48657cd2d86808b1c982243be67e"
+    },
+    {
+      "label": "Authored hinge construction",
+      "originalSource": "src/infrastructure/three/CharacterModelFactory.ts",
+      "originalSelector": "variable:addHingedBox",
+      "file": "src/infrastructure/three/models/createModelBuildContext.ts",
+      "selector": "variable:addHingedBox",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "d1d1329aaf321ca4a70e73f25c447131f3682f5feb4d9fecb560ef876774fd6d"
+    },
+    {
+      "label": "CharacterRig",
+      "originalSource": "src/infrastructure/three/CharacterRig.ts",
+      "originalSelector": "module-without-imports",
+      "file": "src/infrastructure/three/scene/CharacterRig.ts",
+      "selector": "module-without-imports",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "dec3f587b0f0a3bdb1fb62827116a1e3713e2760d163ff08196ca48d4443f34b"
+    },
+    {
+      "label": "CharacterAnimationController",
+      "originalSource": "src/infrastructure/three/CharacterAnimationController.ts",
+      "originalSelector": "module-without-imports",
+      "file": "src/infrastructure/three/scene/CharacterAnimationController.ts",
+      "selector": "module-without-imports",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "17eafdf6e7ed99004d32719259f08854f1cc3427eae31b50819b9993119134d1"
+    },
+    {
+      "label": "CharacterTurntable",
+      "originalSource": "src/infrastructure/three/CharacterTurntable.ts",
+      "originalSelector": "module-without-imports",
+      "file": "src/infrastructure/three/scene/CharacterTurntable.ts",
+      "selector": "module-without-imports",
+      "replacements": [
+        [
+          "this.screenFace",
+          "buildScreenFace"
+        ],
+        [
+          "this.semanticBounds",
+          "semanticBounds"
+        ]
+      ],
+      "baseline": "d5d41d1a0e8187fb1dac40c14398c9364ad869e36ba2e08839a221ca5b585257"
+    }
+  ]
+}
