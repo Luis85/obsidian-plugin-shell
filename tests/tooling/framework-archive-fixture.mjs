@@ -36,9 +36,21 @@ export async function extractArchive(bytes, root) {
   assert.equal(cursor, indexEnd); return files;
 }
 
-let kitArchive;
+const assembled = new Map(), archives = new Map();
+/** A failed build is not cached: the next caller assembles again, as before sharing. */
+function once(cache, key, make) {
+  if (!cache.has(key)) cache.set(key, make().catch(error => { cache.delete(key); throw error; }));
+  return cache.get(key);
+}
+/**
+ * The actual framework kit's files, assembled once per test process and framework root. Every caller receives its
+ * own array, records and byte buffers, so no test can observe another test's edits to them.
+ */
+export async function kitFiles(frameworkRoot) {
+  const files = await once(assembled, frameworkRoot, async () => assembleKit({ root: frameworkRoot, frameworkRoot }, await installedCompiler()));
+  return files.map(file => ({ path: file.path, bytes: Buffer.from(file.bytes) }));
+}
 /** Extract the actual framework kit, assembled once per test process; in-place generation requires a verified kit. */
 export async function extractKit(frameworkRoot, root) {
-  kitArchive ??= zip(await assembleKit({ root: frameworkRoot, frameworkRoot }, await installedCompiler()));
-  return extractArchive(kitArchive, root);
+  return extractArchive(await once(archives, frameworkRoot, async () => zip(await kitFiles(frameworkRoot))), root);
 }
