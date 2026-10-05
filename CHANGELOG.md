@@ -45,6 +45,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 ### Fixed
 
 - Prepared clickdummy prototype packages no longer tell agents to read `source/.claude/skills/companion-prototype-design` or run its `prototype.mjs`; generated source never ships that skill. The prompt and package README now point at `source/AGENTS.md` and the shipped offline builder `source/scripts/clickdummy/lib/build-worker.mjs`.
+- `node bin/app check` no longer times out its node --test suite steps (`maker-tests` and fast-mode `suites`) at the 10-minute step default; they get a 60-minute budget. An explicit `--timeout` still bounds every step.
 
 ## [0.4.0] - 2026-09-23
 

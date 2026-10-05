@@ -9484,7 +9484,7 @@
           "name": "timeout",
           "kind": "value",
           "description": "Child-process timeout in milliseconds (1..3600000).",
-          "default": "600000 per step"
+          "default": "600000 per step; 3600000 for node --test suite steps"
         },
         {
           "name": "json",

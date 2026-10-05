@@ -377,7 +377,8 @@ function optionDoc(entry: Command, name: string): OptionHelp {
 }
 function timeoutDefault(entry: Command): Partial<OptionHelp> {
   if (['dev', 'storybook dev'].includes(entry.id)) return { default: '3600000' };
-  return ['check', 'ci'].includes(entry.id) ? { default: '600000 per step' } : {};
+  if (entry.id === 'check') return { default: '600000 per step; 3600000 for node --test suite steps' };
+  return entry.id === 'ci' ? { default: '600000 per step' } : {};
 }
 /** A fresh copy on every call: callers can never mutate shared help or execution policy. */
 export function commandHelp(entry: Command): CommandHelp {
