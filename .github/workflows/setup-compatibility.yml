@@ -50,9 +50,11 @@ jobs:
     # which no other workflow covers. The integrated Windows tooling suites alone
     # approach 30 minutes and Ubuntu setup plus complete verify was measured at
     # about 39 minutes; 60 minutes retains time for coverage and npm controls
-    # without shortening any gate.
+    # without shortening any gate. The Windows leg then measured 72 minutes of its
+    # 75, and the data-driven wizard suites add about 6.5 minutes on Windows, so
+    # Windows gets 95.
     # This is a job budget, not a test deadline or product performance threshold.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 60 }}
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 95 || 60 }}
     strategy:
       fail-fast: false
       matrix:

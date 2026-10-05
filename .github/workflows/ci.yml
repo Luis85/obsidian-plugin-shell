@@ -92,8 +92,10 @@ jobs:
     # the same setup and complete verify; keep every test and threshold intact.
     # Ubuntu guided setup was measured at 35-39 minutes, so non-Windows runners
     # get 55 minutes of headroom instead of the earlier 30-minute budget.
+    # Windows verify then measured 72.4 minutes (job 73.8 of 75), and the data-driven
+    # wizard suites add about 6.5 minutes of Windows tooling, so Windows gets 95.
     # This is a job budget, not a test deadline or product performance threshold.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 75 || 55 }}
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 95 || 55 }}
     strategy:
       fail-fast: false
       matrix:
