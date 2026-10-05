@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   handoutPath, loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout,
 } from '../../bin/adapters/framework/handout-workspace.ts';
 import { HANDOUT_PATH, readSnapshot } from '../../bin/adapters/framework/handout-model.ts';
+import { fileSymlink } from './file-symlink.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -73,9 +74,10 @@ test('portable handout paths reject absolute traversal Windows and protected roo
 
 test('handout workspace refuses symlinks malformed settings invalid modes and oversized or binary PRDs', async t => {
   const root=await workspace(t);
-  await symlink(join(root,'docs/prds/PRD-1.md'),join(root,'docs/prds/link.md'));
-  await assert.rejects(prepareHandout(root), { code: 'HANDOUT_SYMLINK' });
-  await rm(join(root,'docs/prds/link.md'));
+  if (await fileSymlink(t,join(root,'docs/prds/PRD-1.md'),join(root,'docs/prds/link.md'))) {
+    await assert.rejects(prepareHandout(root), { code: 'HANDOUT_SYMLINK' });
+    await rm(join(root,'docs/prds/link.md'));
+  }
   await mkdir(join(root,'configs'));
   await writeFile(join(root,'configs/user-settings.json'),'{no');
   await assert.rejects(prepareHandout(root), { code: 'HANDOUT_SETTINGS_JSON' });

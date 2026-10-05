@@ -10,6 +10,7 @@ import { documentTitle, libraryUsage, lineLimits, originFacts, packageFacts, tok
 import { sha256 } from '../../scripts/shared/hash.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
+import { fileSymlink } from './file-symlink.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const folder = 'docs/design/field-notes', guidePath = `${folder}/ENGINEERING_HANDOFF_GUIDE.md`;
 async function scratch(fn) {
@@ -100,16 +101,17 @@ test('a project without fact sources gets an honest guide that names nothing it 
   assert.match(guide, /No architecture documents were found/);
   assert.match(guide, /\| Source \| SHA-256 \| Note \|\n\| --- \| --- \| --- \|\n\| `built-in shell default; no saved project configuration` \| — \| target selection \|/);
 }));
-test('linked and invalid fact sources are recorded as unreadable or invalid, never followed', async () => scratch(async root => {
+test('linked and invalid fact sources are recorded as unreadable or invalid, never followed', async t => scratch(async root => {
   await factProject(root);
   await put(root, 'outside/tokens.css', ':root { --stolen: red; }\n');
   await rm(join(root, 'src/styles/tokens.css'));
-  await symlink(join(root, 'outside/tokens.css'), join(root, 'src/styles/tokens.css'));
+  const linked = await fileSymlink(t, join(root, 'outside/tokens.css'), join(root, 'src/styles/tokens.css'));
   await put(root, 'design/compiler-origins.json', '{ not json');
-  await symlink(join(root, 'outside'), join(root, 'src/presentation/components/linked'));
+  // A junction needs no Windows symlink privilege and is still reported as a link.
+  await symlink(join(root, 'outside'), join(root, 'src/presentation/components/linked'), 'junction');
   const facts = await engineeringFacts(root, { codebaseFolder: 'src', testsFolder: 'tests' });
   assert.equal(facts.tokens, null);
-  assert.ok(facts.sources.some(item => item.path === 'src/styles/tokens.css' && item.note === 'unreadable'));
+  if (linked) assert.ok(facts.sources.some(item => item.path === 'src/styles/tokens.css' && item.note === 'unreadable'));
   assert.ok(facts.sources.some(item => item.path === 'design/compiler-origins.json' && item.note === 'invalid JSON'));
   assert.equal(facts.origins.size, 0);
   assert.ok(facts.components.every(path => !path.includes('linked')));

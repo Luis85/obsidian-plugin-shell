@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 import { main } from '../../bin/adapters/framework-cli.ts';
 import { uiOperation } from '../../bin/adapters/framework/ui-operation.ts';
+import { fileSymlink } from './file-symlink.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 
@@ -79,7 +80,7 @@ test('absolute, drive and backslash implementation paths are treated as missing 
 });
 test('a symlinked linked file is not followed', async t => {
   const root = await project(t);
-  await symlink(join(root, 'tests/project/acceptance/vi-2.test.ts'), join(root, 'tests/project/acceptance/vi-link.test.ts'));
+  if (!await fileSymlink(t, join(root, 'tests/project/acceptance/vi-2.test.ts'), join(root, 'tests/project/acceptance/vi-link.test.ts'))) return;
   await write(root, 'design/visual-traceability.json', { definitions: [{ id: 'vp-1', kind: 'page' }], interactions: [hook('vi-9', { implementation: null, test: 'tests/project/acceptance/vi-link.test.ts' })] });
   const item = find(await status(root), 'vi-9');
   assert.deepEqual([item.state, item.reasons], ['todo', ['test-missing']]);

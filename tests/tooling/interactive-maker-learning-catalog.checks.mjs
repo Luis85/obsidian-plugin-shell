@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir, symlink, writeFile } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { checkedLearningCatalog, learningIssues, learningStepMarkdown, loadLearningCatalog } from '../../bin/adapters/learning-catalog.ts';
@@ -9,6 +9,7 @@ import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { definitionsRoot, loadCatalog } from '../../bin/adapters/wizard-catalog.ts';
 import { completeLearningStep, newLearningProgress } from '../../bin/domain/learning-progress.ts';
 import { contactForm, greetWizard, learningPath, project, put, scratch, step, wizard } from './interactive-maker-learning-fixture.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 const repository = resolve(import.meta.dirname, '../..');
 const now = '2026-10-04T10:00:00.000Z';
 const guide = '# Guide\n\n## Start here\n\nText.\n';
@@ -73,7 +74,7 @@ test('the catalog reports unknown references, unsafe content, broken links and p
   assert.deepEqual([empty.paths.size, empty.contentIssues], [0, []]);
 }));
 
-test('file and catalog win conditions read the project with bounded, link-refusing checks', async () => scratch(async root => {
+test('file and catalog win conditions read the project with bounded, link-refusing checks', async t => scratch(async root => {
   const course = learningPath('files', [step('files', { winConditions: [
     { kind: 'file-exists', file: 'notes/{{me.name}}.md' },
     { kind: 'file-contains', file: 'notes/{{me.name}}.md', text: 'Hello {{me.name}}', label: 'Your note greets you' },
@@ -102,8 +103,7 @@ test('file and catalog win conditions read the project with bounded, link-refusi
   assert.deepEqual((await results())[1], [false, 'Your note greets you', 'notes/ann.md is larger than 1000000 characters.']);
   await put(root, 'outside.txt', 'Hello ann');
   progress.answers.me.name = 'link';
-  await symlink(join(root, 'outside.txt'), join(root, 'notes/link.md'));
-  assert.match((await results())[0][2], /PLAN_SYMLINK/);
+  if (await fileSymlink(t, join(root, 'outside.txt'), join(root, 'notes/link.md'))) assert.match((await results())[0][2], /PLAN_SYMLINK/);
   await put(root, 'configs/wizards/broken.json', wizard('broken', [{ id: 'a', kind: 'form', form: 'missing' }]));
   assert.match((await results())[4][2], /wizard broken.a: unknown form missing/);
   await put(root, 'configs/wizards/broken.json', '{');

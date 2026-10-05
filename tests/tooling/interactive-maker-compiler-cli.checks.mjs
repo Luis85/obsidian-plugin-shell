@@ -1,6 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,7 @@ import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snaps
 import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 import { templateRootFiles as templateFiles, templateRoots } from '../../bin/compiler/domain/template-inputs.ts';
+import { fileSymlink } from './file-symlink.mjs';
 
 // Drives the compiler host CLI adapters (bin/compiler/adapters/{cli,reporting,dependencies,template-snapshot}.ts).
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
@@ -172,6 +173,6 @@ test('template snapshots refuse links, fonts and cancellation and expose only te
   await writeFile(join(folder, 'src/font.woff2'), 'font');
   await assert.rejects(loadTemplateSnapshot(folder), failsWith('COMPILER_TEMPLATE_INVALID'));
   await rm(join(folder, 'src/font.woff2'));
-  await symlink(join(folder, 'src/main.ts'), join(folder, 'src/link.ts'));
+  if (!await fileSymlink(t, join(folder, 'src/main.ts'), join(folder, 'src/link.ts'))) return;
   await assert.rejects(loadTemplateSnapshot(folder), error => failsWith('COMPILER_TEMPLATE_INVALID')(error) && /GENERATOR_TEMPLATE_LINK/.test(error.diagnostic.message));
 });

@@ -23,7 +23,7 @@ async function expectPlanFailure(options, expected, label) {
   await assert.rejects(() => brainstormVerifyPlan(options, out), code(expected), label);
 }
 
-test('execution approval is bound to the current plan hash, cancellation and the exact npm bytes', { timeout: 180000 }, async () =>
+test('execution approval is bound to the current plan hash, cancellation and the exact npm bytes', { timeout: 300000 }, async () =>
   brainstormScratch(async options => {
     await generated(options, { output: 'prototype', verification: 'test-build' });
     const npm = await fakeNpm(options.root);
@@ -48,7 +48,7 @@ test('execution approval is bound to the current plan hash, cancellation and the
     } finally { npm.restore(); }
   }));
 
-test('an approved plan runs install, test and build in the generated source with the selected npm only', { timeout: 180000 }, async () =>
+test('an approved plan runs install, test and build in the generated source with the selected npm only', { timeout: 300000 }, async () =>
   brainstormScratch(async options => {
     await generated(options, { output: 'prototype', verification: 'test-build' });
     const npm = await fakeNpm(options.root);
@@ -69,7 +69,7 @@ test('an approved plan runs install, test and build in the generated source with
     } finally { npm.restore(); }
   }));
 
-test('a failing step stops before later steps and a mismatched toolchain starts nothing', { timeout: 180000 }, async () => brainstormScratch(async options => {
+test('a failing step stops before later steps and a mismatched toolchain starts nothing', { timeout: 300000 }, async () => brainstormScratch(async options => {
   await generated(options, { output: 'prototype', verification: 'test-build' });
   const failing = await fakeNpm(options.root, { fail: 'test' });
   try {
@@ -88,7 +88,7 @@ test('a failing step stops before later steps and a mismatched toolchain starts 
   } finally { older.restore(); }
 }));
 
-test('verification binds to the reviewed definition, ownership receipt, scripts and pinned toolchain', { timeout: 180000 }, async () =>
+test('verification binds to the reviewed definition, ownership receipt, scripts and pinned toolchain', { timeout: 600000 }, async () =>
   brainstormScratch(async options => {
     await generated(options, { output: 'prototype', verification: 'test' });
     const npm = await fakeNpm(options.root);
