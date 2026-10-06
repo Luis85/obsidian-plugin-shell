@@ -4,7 +4,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { evidenceFixture, runtimeEvidenceFixture, browserEvidenceFixture, evidenceCli } from './evidence-fixture.mjs';
-import { vitestReport, playwrightReport, nativeReport, artifactReport, completeResult } from '../../scripts/testing/evidence-adapters.mjs';
+import { vitestReport, playwrightReport, nativeReport, artifactReport, completeResult, windowsOnlyCases } from '../../scripts/testing/evidence-adapters.mjs';
 import { adaptProducer } from '../../scripts/testing/evidence-producers.mjs';
 import { performanceProtocol, summarizePerformance, candidateSizes } from '../../scripts/testing/performance-report.mjs';
 import { sourceInputs, sha256 } from '../../scripts/testing/source-inputs.mjs';
@@ -157,4 +157,46 @@ test('native performance adapter rejects crafted classification, budget, size, g
   }
   const changedGraph = structuredClone(graph); changedGraph.serializer.version = 'other-fixture';
   await writeFile(graphPath, JSON.stringify(changedGraph)); await assert.rejects(parse(report), /EVIDENCE_PERFORMANCE/);
+});
+
+test('[EVIDENCE-REGISTRATION] a tooling wrapper owns the cases of the portable .checks.mjs modules it imports; other strays still fail', async t => {
+  const { mkdtemp, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { spawnSync } = await import('node:child_process');
+  const { pathToFileURL } = await import('node:url');
+  const root = await mkdtemp(join(tmpdir(), 'evidence-registration-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const put = async (path, text) => { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), text); };
+  await put('skill/tests/portable.checks.mjs', 'import test from "node:test"; test("portable case", () => {});\n');
+  await put('skill/tests/stray.checks.mjs', 'import test from "node:test"; test("stray case", () => {});\n');
+  await put('tests/tooling/wrapper.checks.mjs', "/** Register portable tests. */\nimport '../../skill/tests/portable.checks.mjs';\n");
+  await put('tests/tooling/helper-user.checks.mjs', "import { x } from './helper.mjs';\nimport '../../skill/tests/stray.checks.mjs';\nvoid x;\n");
+  await put('tests/tooling/helper.mjs', 'export const x = 1;\n');
+  const reporter = pathToFileURL(join(import.meta.dirname, '../../scripts/testing/node-reporter.mjs')).href;
+  const run = file => {
+    const env = { ...process.env }; delete env.NODE_TEST_CONTEXT;
+    const child = spawnSync(process.execPath, ['--test', `--test-reporter=${reporter}`, file], { cwd: root, encoding: 'utf8', env, timeout: 60000 });
+    return { raw: { stdout: child.stdout, stderr: child.stderr }, exit: child.status };
+  };
+  const wrapped = run('tests/tooling/wrapper.checks.mjs');
+  const result = await adaptProducer('tooling', wrapped.raw, root, ['tests/tooling/wrapper.checks.mjs'], wrapped.exit);
+  assert.equal(result.status, 'passed');
+  assert.deepEqual(result.cases.map(test => [test.file, test.name]), [['tests/tooling/wrapper.checks.mjs', 'portable case']]);
+  // Only a file made of side-effect .checks.mjs imports registers modules; a test file that also imports helpers does not.
+  const stray = run('tests/tooling/helper-user.checks.mjs');
+  await assert.rejects(adaptProducer('tooling', stray.raw, root, ['tests/tooling/helper-user.checks.mjs'], stray.exit), /EVIDENCE_SUITE_INVENTORY/);
+});
+
+test('[EVIDENCE-PLATFORM-SKIPS] every tooling test declared Windows-only is an expected skip off Windows, and nothing else is', async () => {
+  const { readdir } = await import('node:fs/promises');
+  const declared = [];
+  for (const name of (await readdir('tests/tooling')).filter(name => name.endsWith('.checks.mjs')).sort()) {
+    const file = `tests/tooling/${name}`, text = await readFile(file, 'utf8');
+    for (const match of text.matchAll(/^test\('([^']+)',\s*\{\s*skip:\s*process\.platform !== 'win32'/gm)) declared.push([match[1], file]);
+    for (const [, alias] of text.matchAll(/^const (\w+) = process\.platform === 'win32' \? test : test\.skip;/gm)) {
+      for (const match of text.matchAll(new RegExp(`^${alias}\\('([^']+)'`, 'gm'))) declared.push([match[1], file]);
+    }
+  }
+  assert.ok(declared.length >= 6, 'the scan must find the known Windows-only tests');
+  assert.deepEqual([...windowsOnlyCases].sort(), declared.sort());
 });
