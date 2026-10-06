@@ -72,7 +72,17 @@ export function playwrightReport(raw, root) {
   if (total !== specs || !cases.length) throw new Error('EVIDENCE_COUNTS');
   return { cases, frameworkPassed: !raw.errors.length && !raw.stats.unexpected && !raw.stats.flaky && !raw.stats.skipped };
 }
-export function toolingReport(text, root) {
+/** Tooling tests declared Windows-only: off Windows their skip is expected, not a gap. A test keeps this list
+ * equal to every such declaration in tests/tooling. */
+export const windowsOnlyCases = Object.freeze([
+  ['[PLAN-03-09] Windows root case aliases support setup while destination case collisions still fail', 'tests/tooling/file-plan.checks.mjs'],
+  ['[PLAN-03-10] real Windows 8.3 aliases support safe plans and dependency-free setup dry run', 'tests/tooling/file-plan.checks.mjs'],
+  ['Windows existing vault accepts case and 8.3 path spellings returned by the host', 'tests/tooling/interactive-maker-vault-root.checks.mjs'],
+  ['[MAKER-SHORT-PATH] generated DOM tests run when the temporary parent uses a real Windows 8.3 alias', 'tests/tooling/maker-paths.checks.mjs'],
+  ['[NATIVE-ISOLATION-03] Windows case aliases produce canonical requested vault paths', 'tests/tooling/native-isolation.checks.mjs'],
+  ['[TD-CONTAINMENT] Windows drive-letter aliases of a real root are not mistaken for links', 'tests/tooling/test-data-storage.checks.mjs'],
+].map(entry => Object.freeze(entry)));
+export function toolingReport(text, root, registrations = new Map()) {
   const rows = text.trim().split('\n').map(line => JSON.parse(line));
   for (const row of rows) {
     object(row, row.kind === 'summary' ? ['kind', 'schemaVersion', 'success', 'counts'] : ['kind', 'schemaVersion', 'name', 'file', 'status', 'type', 'nesting', 'error']);
@@ -83,16 +93,11 @@ export function toolingReport(text, root) {
   const summary = summaries[0];
   const cases = rows.filter(row => row.kind === 'case' && row.type === 'test').map(row => {
     if (resolve(root, row.name) === resolve(root, row.file)) throw new Error('EVIDENCE_EMPTY_SUITE');
-    const file = fileName(root, row.file);
+    const defined = fileName(root, row.file), file = registrations.get(defined) ?? defined;
     return item(file, row.name, file.startsWith('tests/tooling/evidence-') ? 'node-baseline' : 'tooling-generated', row.status);
   });
   if (integer(summary.counts.tests) !== cases.length || integer(summary.counts.passed) !== cases.filter(test => test.status === 'passed').length) throw new Error('EVIDENCE_COUNTS');
-  const windowsOnly = new Map([
-    ['[PLAN-03-09] Windows root case aliases support setup while destination case collisions still fail', 'tests/tooling/file-plan.checks.mjs'],
-    ['[PLAN-03-10] real Windows 8.3 aliases support safe plans and dependency-free setup dry run', 'tests/tooling/file-plan.checks.mjs'],
-    ['[MAKER-SHORT-PATH] generated DOM tests run when the temporary parent uses a real Windows 8.3 alias', 'tests/tooling/maker-paths.checks.mjs'],
-    ['[NATIVE-ISOLATION-03] Windows case aliases produce canonical requested vault paths', 'tests/tooling/native-isolation.checks.mjs'],
-  ]);
+  const windowsOnly = new Map(windowsOnlyCases);
   const expectedPlatformSkips = process.platform === 'win32' ? [] : cases.filter(test => test.status === 'skipped' && windowsOnly.get(test.name) === test.file).map(test => ({ file: test.file, name: test.name }));
   return { cases, expectedPlatformSkips, frameworkPassed: summary.success === true && rows.every(row => row.status !== 'failed') && ['failed', 'cancelled', 'todo'].every(key => integer(summary.counts[key]) === 0) && integer(summary.counts.skipped) === expectedPlatformSkips.length };
 }
