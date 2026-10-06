@@ -61,7 +61,7 @@
     "build": "node scripts/bundling/build.mjs",
     "build:local": "node scripts/dev/install-local.mjs",
     "test-build": "npm run build:local",
-    "typecheck": "node node_modules/vue-tsc/bin/vue-tsc.js --noEmit",
+    "typecheck": "node node_modules/vue-tsc/bin/vue-tsc.js --noEmit && node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.maker.json",
     "test": "vitest run --config configs/testing/vitest.config.mjs",
     "test:watch": "vitest --config configs/testing/vitest.config.mjs",
     "test:coverage": "vitest run --coverage --config configs/testing/vitest.config.mjs",

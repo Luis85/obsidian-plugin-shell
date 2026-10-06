@@ -70,13 +70,19 @@ Maintainers develop all Workbench CLI modules under src/cli. A built bin directo
 <!-- Lines: - Suite `name`: …  - Gate `command`: …  - New test `tests/…`: …
      - No test change — reason   - E2E: reason for the e2e decision in the frontmatter -->
 
+<!-- Lines: - Suite `name`: …  - Gate `command`: …  - New test `tests/…`: …
+     - No test change — reason   - E2E: reason for the e2e decision in the frontmatter -->
+
 - Suite `maker`: CLI modules and build contracts.
 - Suite `cli`: portable distribution, generation and documentation behavior.
 - Suite `runtime`: real Vue composables and services.
 - Suite `quality`: workflow and source-boundary regressions.
-- Gate `node bin/app check`: agent gate on the resulting source.
-- Gate `node bin/app check --plan --base origin/main`: full verification scope.
+- Gate `npm run check`: agent gate on the resulting source.
+- Gate `npm run app:dev -- check --plan --base origin/main`: full verification scope.
 - E2E: optional because this work changes packaging and lifecycle guards, not visual layout; exercise served tests when a browser is provisioned.
+
+- Gate `npm run typecheck`: strict runtime and CLI checks both pass.
+- New test `tests/tooling/framework-checkout-build.checks.mjs`: fresh tracked checkout builds the CLI; injected runtime and CLI type errors each fail the public check.
 
 ## Docs impact
 

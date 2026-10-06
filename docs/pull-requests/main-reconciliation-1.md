@@ -14,7 +14,7 @@ base: increment/main-reconciliation
 
 ## Summary
 
-Moves Workbench CLI development into src/cli and builds a portable bin product with bundled authoring tools, templates and verified runtime assets. Repairs disposed settings actions, manual provenance and project CI aliases; records the Dependabot review and remaining TypeScript configuration approval in docs/development/MAIN-RECONCILIATION.md.
+Moves Workbench CLI development into src/cli and builds a portable bin product with bundled tools, templates and verified assets. Fixes disposed settings actions, manual provenance and project CI aliases. Fresh checkouts now build from source, and the approved public typecheck runs both strict runtime and CLI projects.
 
 ## Scope
 
@@ -36,6 +36,10 @@ Moves Workbench CLI development into src/cli and builds a portable bin product w
 - [[docs/development/MAIN-RECONCILIATION]]
 
 ## Notes
+
+CI follow-up: removed the three tracked partial bin artifacts so fresh checkouts build the complete standalone CLI. The owner approved separate strict runtime and CLI projects on 2026-10-06; npm run typecheck now runs both and passes. Three fresh-checkout/type-error tests and 23 existing configuration/distribution tests passed. The Dev fast gate passed all five executed checks, with expensive suites explicitly delegated.
+
+The Gates and Evidence sections below record the original pre-publication runs. The root typecheck failure and pending approval recorded there are resolved by this follow-up. Seven self-review configuration flags and the three moderate dependency reports remain visible; no approval record or threshold was changed. See docs/development/MAIN-RECONCILIATION.md for the current results.
 
 ## Gates
 

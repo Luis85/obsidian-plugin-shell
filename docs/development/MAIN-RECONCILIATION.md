@@ -170,20 +170,32 @@ used kit source hash
 Browser, real Obsidian, Windows and macOS checks were not run in this review;
 the served UI did not change and native hosts were not provisioned.
 
-The root Vue TypeScript project now discovers the newly moved CLI through its
-existing `src/**/*.ts` include. The CLI imports JavaScript tooling modules and
-already has a separate strict compiler configuration with JavaScript resolution.
-The proposed fix preserves the original 108 runtime TypeScript inputs and 12 Vue
-components, checks all 514 CLI modules through their dedicated configuration, and makes the public typecheck
-command execute both. Automatic approval review rejected the Vue exclusion as a
-possible coverage reduction, so this configuration change is pending the owner's
-decision. The root typecheck must not be reported as passing meanwhile.
+The first hosted Dev run failed during setup: `bin/app`, `bin/README.md` and
+`bin/plugins/DEVELOPER-GUIDE.md` were still tracked, leaving an incomplete product
+in fresh checkouts. The builder correctly refused that directory because its
+integrity inventory was missing. These generated files are now untracked; their
+development inputs remain in `src/cli`. The builder's integrity checks are unchanged.
 
-The concrete pending change is to exclude `../../src/cli/**` from the Vue project
-and make `npm run typecheck` run both Vue checking and the existing strict maker
-configuration. The read-only inventory proof in
-`reports/reconciliation/type-scope-proof.json` records zero missing runtime inputs,
-zero missing relocated CLI modules and zero maker configuration diagnostics.
+The owner explicitly approved separate strict runtime and CLI typechecking on
+2026-10-06. The Vue project excludes `../../src/cli/**`; the public
+`npm run typecheck` runs Vue checking and the strict maker configuration, and
+passes. This preserves all 108 runtime TypeScript inputs, 12 Vue components and
+514 CLI modules. No compiler strictness flag changed. The inventory proof remains
+in `reports/reconciliation/type-scope-proof.json`.
+
+`tests/tooling/framework-checkout-build.checks.mjs` copies only Git-tracked files
+into a fresh directory, builds the complete CLI, and verifies that a copied `bin`
+runs independently. It also runs the public typecheck against that checkout and
+injects a real assignment error into each source tree to prove both checks fail
+when appropriate. This guards against local build output concealing a broken
+checkout or a source tree silently escaping typechecking.
+
+The CI follow-up passed all three fresh-checkout/type-error tests, 23 existing
+configuration/distribution regressions, and the same fast gate used by Dev CI:
+five executed checks passed, zero failed, with expensive suites explicitly
+delegated to the Integration tier. This resolves the runtime typecheck failure
+shown in the earlier verification table. The separate self-review and security
+findings remain as documented below.
 
 The seven self-review flags cover five files: ESLint's existing error-severity
 rules moved with the CLI; Fallow entries/zones moved and its generated
@@ -197,7 +209,8 @@ No numeric threshold, owner approval record, golden baseline or intentional
 negative test has been relaxed. The self-review guard requires owner review of
 the configuration/path changes; its flags remain visible.
 
-The implementation is committed on the local review branch
-`pr/main-reconciliation/main-reconciliation-1`; it has not been pushed or published
-as a pull request. The Dependabot merge is already on main. This change does not
-authorize a release, tag, listing submission or publication.
+The implementation is published as draft
+[#96](https://github.com/Luis85/obsidian-plugin-shell/pull/96), stacked on planning
+draft [#95](https://github.com/Luis85/obsidian-plugin-shell/pull/95).
+The Dependabot merge is already on main. This change does not authorize a release,
+tag, listing submission or product publication.

@@ -49,6 +49,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Fixed
 
+- Build the standalone CLI from fresh checkouts without tracked partial artifacts in `bin`; run both strict runtime and CLI checks through `npm run typecheck`.
 - Prevent disposed settings views from persisting changes through retained callbacks.
 - Wait for actual project CI before reporting required checks on project-only pull requests, and avoid regenerating the CLI manual for dependency-only changes.
 - Prepared clickdummy prototype packages no longer tell agents to read `source/.claude/skills/companion-prototype-design` or run its `prototype.mjs`; generated source never ships that skill. The prompt and package README now point at `source/AGENTS.md` and the shipped offline builder `source/scripts/clickdummy/lib/build-worker.mjs`.

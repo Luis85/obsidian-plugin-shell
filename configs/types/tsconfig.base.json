@@ -28,6 +28,7 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
+  "exclude": ["../../src/cli/**"],
   "include": [
     "../../src/**/*.ts",
     "../../src/**/*.vue",
