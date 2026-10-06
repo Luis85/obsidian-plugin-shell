@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { readdir } from 'node:fs/promises';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hash } from '../../bin/adapters/framework/files.ts';
-import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
-import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
+import { brainstormWizard } from '../../src/cli/presentation/brainstorm.ts';
+import { brainstormFeaturePlan } from '../../src/cli/adapters/brainstorm.ts';
 import { BACK, brainstormScratch, scriptedRich, quickNote, readText, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 const completionFor = (slug, imported) => 'Brainstorm saved to brainstorms/' + slug + '. Concept: docs/concepts/brainstorms/' + slug +

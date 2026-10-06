@@ -182,7 +182,7 @@ async function e2eKinds() {
 }
 /** Durations from the suite guide's Measured column, through the reader `check --plan` uses; none in a kit without it. */
 async function measuredDurations(root) {
-  try { return await (await import('../../bin/adapters/framework/gate-sources.ts')).loadDurations(root); } catch { return {}; }
+  try { return await (await import('../../src/cli/adapters/framework/gate-sources.ts')).loadDurations(root); } catch { return {}; }
 }
 function failed(options, failures) {
   if (options.json) console.log(JSON.stringify({ status: 'failed', failures }, null, 2));

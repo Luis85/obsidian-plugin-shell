@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer, get } from 'node:http';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { showcase, previewAssets, openShowcaseBrowser } from '../../bin/adapters/first-run-preview.ts';
-import { readFirstRunRequest } from '../../bin/domain/first-run.ts';
+import { showcase, previewAssets, openShowcaseBrowser } from '../../src/cli/adapters/first-run-preview.ts';
+import { readFirstRunRequest } from '../../src/cli/domain/first-run.ts';
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'first-showcase-'));
   try { await writeFile(join(root, 'index.html'), '<!doctype html><h1>Hello world</h1>'); await fn(root); }

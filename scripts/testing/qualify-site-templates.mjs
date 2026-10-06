@@ -10,8 +10,8 @@ import { cp, mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from '
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { readSiteCatalog } from '../../bin/domain/site-template.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { readSiteCatalog } from '../../src/cli/domain/site-template.ts';
 
 export const frameworkRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const FIXTURE_VAULT = 'tests/fixtures/sites/vault';

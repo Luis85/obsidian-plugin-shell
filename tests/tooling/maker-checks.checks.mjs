@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from './maker-fixture.mjs';
-import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
-import { planMaker } from '../../bin/adapters/makers/plan.ts';
+import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
+import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { makerApplied } from '../../bin/adapters/framework/maker-checks.ts';
-import { OperationError } from '../../bin/adapters/framework/contracts.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { makerApplied } from '../../src/cli/adapters/framework/maker-checks.ts';
+import { OperationError } from '../../src/cli/adapters/framework/contracts.ts';
 
 const make = (root, args, options = {}) => executeOperation({ command: 'make', args, options }, { root, frameworkRoot: makerSourceRoot });
 async function prepare(root) {

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { checkSteps, checkOperation } from '../../bin/adapters/framework/check.ts';
+import { checkSteps, checkOperation } from '../../src/cli/adapters/framework/check.ts';
 import { withRepo, git, repoRoot, write } from './check-plan-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
@@ -54,7 +54,7 @@ test('fast mode selects node --test and maker suites from manifest includes and 
   // maker is a Vitest suite verify runs in its maker-coverage-run step, so fast mode still runs it (once, as a suite step).
   assert.deepEqual(stepOf(tests, 'suites').args, ['maker'], 'e2e is a playwright suite and the runtime Vitest suite belongs to the related-test step');
   assert.deepEqual(tests.suites.map(suite => [suite.name, suite.reasons[0].kind, suite.reasons[0].detail]), [['maker', 'suite-include', 'tests/tooling/interactive-maker-*.checks.mjs']]);
-  for (const path of ['bin/adapters/makers/plan.ts', 'scripts/makers/recipes.json']) {
+  for (const path of ['src/cli/adapters/makers/plan.ts', 'scripts/makers/recipes.json']) {
     await write(dir, { [path]: 'x\n' });
     assert.ok(stepOf(await checkSteps(dir, true), 'suites').args.includes('maker'), path);
   }
@@ -76,14 +76,14 @@ test('fast mode selects node --test and maker suites from manifest includes and 
 }));
 
 test('fast mode lints and runs eslint on changed files only, and falls back to the full roots when configuration changes', () => withRepo({}, async dir => {
-  await write(dir, { 'src/a.ts': 'export const a = 2;\n', 'bin/tool.ts': 'export {};\n', 'docs/note.md': 'n\n' });
+  await write(dir, { 'src/a.ts': 'export const a = 2;\n', 'src/cli/tool.ts': 'export {};\n', 'docs/note.md': 'n\n' });
   const narrow = await checkSteps(dir, true);
-  assert.deepEqual(stepOf(narrow, 'lint').args, ['bin/tool.ts', 'src/a.ts']);
-  assert.deepEqual(stepOf(narrow, 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', '--no-warn-ignored', 'bin/tool.ts', 'src/a.ts', '--max-warnings', '0']);
+  assert.deepEqual(stepOf(narrow, 'lint').args, ['src/a.ts', 'src/cli/tool.ts']);
+  assert.deepEqual(stepOf(narrow, 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', '--no-warn-ignored', 'src/a.ts', 'src/cli/tool.ts', '--max-warnings', '0']);
   await write(dir, { 'configs/lint/extra.json': '{}\n' });
   const wide = await checkSteps(dir, true);
   assert.deepEqual(stepOf(wide, 'lint').args, []);
-  assert.deepEqual(stepOf(wide, 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'bin', '--max-warnings', '0']);
+  assert.deepEqual(stepOf(wide, 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', 'src', '--max-warnings', '0']);
   assert.deepEqual(stepOf(wide, 'test').args.slice(0, 2), ['run', '--config']);
   assert.match(wide.changes.reason, /configs\/lint\/extra\.json/);
 }));

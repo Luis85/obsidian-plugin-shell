@@ -29,7 +29,7 @@ async function sources() {
       else if (entry.isFile() && /\.(?:[cm]?js|[cm]?ts)$/.test(entry.name)) entries.set(path, await readFile(resolve(root, path), 'utf8'));
     }
   }
-  for (const folder of ['bin', 'scripts', 'configs', 'plugins', 'src', 'tests']) await walk(folder);
+  for (const folder of ['scripts', 'configs', 'plugins', 'src', 'tests']) await walk(folder);
   return entries;
 }
 test('executable source imports only canonical modules, never deleted compatibility entries', async () => {
@@ -48,12 +48,12 @@ test('retired-module guard catches static, dynamic, side-effect and re-export de
 });
 test('guard preserves generated-source strings and accepts canonical source imports', () => {
   assert.deepEqual(retiredImports(new Map([['tests/tooling/example.checks.mjs', [
-    "import { hash } from '../../bin/adapters/framework/files.ts';",
+    "import { hash } from '../../src/cli/adapters/framework/files.ts';",
     'const output = `import "../../scripts/shared/hash.mjs";`;',
   ].join('\n')]])), []);
 });
 
-const kitMakerCopy = ['bin', 'template', 'bin', 'adapters', 'makers'].join('/');
+const kitMakerCopy = ['bin', 'template', 'src', 'cli', 'adapters', 'makers'].join('/');
 function retiredLayoutLiterals(source, file) {
   const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
   const found = [];
@@ -69,7 +69,7 @@ function retiredLayoutLiterals(source, file) {
 }
 test('runtime discovery never probes retired distribution layouts', async () => {
   for (const [file, source] of await sources()) {
-    if (!/^(?:bin|scripts)\//.test(file)) continue;
+    if (!/^(?:src\/cli|scripts)\//.test(file)) continue;
     assert.deepEqual(retiredLayoutLiterals(source, file), [], file);
   }
   assert.deepEqual(retiredLayoutLiterals("const root = join(base, '.framework/template');", 'example.ts'), ['.framework/template']);

@@ -3,15 +3,15 @@ import { mkdir, mkdtemp, realpath, readFile, writeFile, rm } from 'node:fs/promi
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { readDocumentationSettings as readDocsSettings } from '../../bin/documentation/adapters/settings.ts';
-import { loadSettings, settingsPlan } from '../../bin/adapters/user-settings.ts';
-import { documentationSettings } from '../../bin/adapters/settings-documentation.ts';
-import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
-import { setupCheckpointPlan, resumeSetupCheckpoint } from '../../bin/adapters/setup-checkpoint.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { defaultSettings, readSettings, settingsSchema } from '../../bin/domain/user-settings.ts';
+import { readDocumentationSettings as readDocsSettings } from '../../src/cli/documentation/adapters/settings.ts';
+import { loadSettings, settingsPlan } from '../../src/cli/adapters/user-settings.ts';
+import { documentationSettings } from '../../src/cli/adapters/settings-documentation.ts';
+import { settingsMigrationPlan } from '../../src/cli/adapters/settings-migration.ts';
+import { setupCheckpointPlan, resumeSetupCheckpoint } from '../../src/cli/adapters/setup-checkpoint.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { defaultSettings, readSettings, settingsSchema } from '../../src/cli/domain/user-settings.ts';
 import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.ts';
-import { settingsForm } from '../../bin/presentation/settings.ts';
+import { settingsForm } from '../../src/cli/presentation/settings.ts';
 async function scratch(work) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-settings-integration-'));
   try { await work(root); } finally { await rm(root, { recursive: true, force: true }); }
@@ -93,8 +93,8 @@ test('advanced human preferences expose every first-run field, host directory, r
 
 test('typed documentation follows the configured maker project path for export and import', async () => scratch(async root => {
   const { spawnSync } = await import('node:child_process');
-  const { projectSetupPlan } = await import('../../bin/adapters/project-setup.ts');
-  const { documentationPlan } = await import('../../bin/documentation/adapters/plan.ts');
+  const { projectSetupPlan } = await import('../../src/cli/adapters/project-setup.ts');
+  const { documentationPlan } = await import('../../src/cli/documentation/adapters/plan.ts');
   const { applyFilePlan } = await import('../../scripts/shared/file-plan.ts');
   const { resolve } = await import('node:path');
   assert.equal(spawnSync('git', ['init', root]).status, 0); await mkdir(join(root, '.obsidian'));

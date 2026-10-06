@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { createWorkspace, planThenApply, readyFragment } from '../support/increment-workspace.mjs';
 import { createFakeHostingRemote } from '../support/fake-hosting-remote.mjs';
-import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
+import { renderHuman } from '../../src/cli/presentation/terminal/terminal-render.ts';
 
 const plain = { color: false, unicode: false };
 const human = result => renderHuman(result, plain);

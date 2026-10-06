@@ -4,20 +4,20 @@ import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bundleReleaseCli } from '../../bin/adapters/framework/release-bundle.ts';
-import { bundledNoticeFiles } from '../../bin/adapters/framework/docs-vendor.ts';
+import { bundleReleaseCli } from '../../src/cli/adapters/framework/release-bundle.ts';
+import { bundledNoticeFiles } from '../../src/cli/adapters/framework/docs-vendor.ts';
 
 // The release bundler (release-bundle.ts): one app.js whose real module locations point into the shipped template tree.
-const banner = "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);\n";
+const banner = "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);\nimport { existsSync as __kitExists } from 'node:fs';\nconst __kitTemplateRoot = new URL(__kitExists(new URL('./template/package.json', import.meta.url)) ? './template/' : '../', import.meta.url);\n";
 const sources = {
-  'bin/app.ts': "import { here, dir } from './data.ts';\nimport plain from './plain.js';\nimport js from './meta.mjs';\n" +
-    "import config from '../plugins/demo/config.json';\nimport nested from '../nested/plugins/demo/config.json';\n" +
-    "import { outside } from '../../outside.mjs';\nimport fake from 'fake';\n" +
+  'src/cli/app.ts': "import { here, dir } from './data.ts';\nimport plain from './plain.js';\nimport js from './meta.mjs';\n" +
+    "import config from '../../plugins/demo/config.json';\nimport nested from '../../nested/plugins/demo/config.json';\n" +
+    "import { outside } from '../../../outside.mjs';\nimport fake from 'fake';\n" +
     'console.log(here, dir, plain, js, config, nested, outside, fake, import.meta.env);\n',
-  'bin/data.ts': "export const here: string = import.meta.url;\nexport const dir = import.meta.dirname;\n" +
+  'src/cli/data.ts': "export const here: string = import.meta.url;\nexport const dir = import.meta.dirname;\n" +
     "export const text = 'import.meta.url';\n// import.meta.dirname in a comment\n",
-  'bin/plain.js': 'export default 1;\n',
-  'bin/meta.mjs': 'export default `${import.meta.url}` + "import.meta.dirname";\n',
+  'src/cli/plain.js': 'export default 1;\n',
+  'src/cli/meta.mjs': 'export default `${import.meta.url}` + "import.meta.dirname";\n',
   'plugins/demo/config.json': '{"enabled":true}\n',
   'nested/plugins/demo/config.json': '{"nested":true}\n',
   'node_modules/fake/package.json': '{"name":"fake","type":"module","main":"index.js"}\n',
@@ -25,7 +25,7 @@ const sources = {
 };
 // Exact bytes of the fixture bundle. The release bundle is whitespace-minified (identifiers, syntax and legal
 // notices unchanged), so module boundaries are no longer annotated; the rebased locations are what matters.
-const expected = banner + "import{fileURLToPath as __kitFileURLToPath}from\"node:url\";var here=new URL(\"./template/bin/data.ts\",import.meta.url).href;var dir=__kitFileURLToPath(new URL(\"./template/bin/\",import.meta.url));var plain_default=1;var meta_default=`${new URL(\"./template/bin/meta.mjs\",import.meta.url).href}import.meta.dirname`;import{readFileSync}from\"node:fs\";var config_default=JSON.parse(readFileSync(new URL(\"./plugins/demo/config.json\",import.meta.url),\"utf8\"));var config_default2={nested:true};var outside=import.meta.url;var fake_default=import.meta.url;console.log(here,dir,plain_default,meta_default,config_default,config_default2,outside,fake_default,import.meta.env);\n";
+const expected = banner + "import{fileURLToPath as __kitFileURLToPath}from\"node:url\";var here=new URL(\"src/cli/data.ts\",__kitTemplateRoot).href;var dir=__kitFileURLToPath(new URL(\"src/cli/\",__kitTemplateRoot));var plain_default=1;var meta_default=`${new URL(\"src/cli/meta.mjs\",__kitTemplateRoot).href}import.meta.dirname`;import{readFileSync}from\"node:fs\";var config_default=JSON.parse(readFileSync(new URL(\"./plugins/demo/config.json\",import.meta.url),\"utf8\"));var config_default2={nested:true};var outside=import.meta.url;var fake_default=import.meta.url;console.log(here,dir,plain_default,meta_default,config_default,config_default2,outside,fake_default,import.meta.env);\n";
 
 async function framework(files, run) {
   // Canonical temp root: macOS tmpdir() lives under the /var symlink, which input-path checks correctly refuse.
@@ -57,17 +57,17 @@ test('release bundle rebases the same locations when the framework root is reach
 }));
 
 test('release bundle keeps other meta properties and adds no URL helper without dirname', () => framework({
-  'bin/app.ts': "import { here } from './data.mjs';\nexport const value: number = 1;\nconsole.log(here, value);\n",
-  'bin/data.mjs': 'export const here = import.meta.url;\nexport function Made() { return new.target; }\n',
+  'src/cli/app.ts': "import { here } from './data.mjs';\nexport const value: number = 1;\nconsole.log(here, value);\n",
+  'src/cli/data.mjs': 'export const here = import.meta.url;\nexport function Made() { return new.target; }\n',
 }, async root => {
-  assert.equal((await bundleReleaseCli(root)).bytes.toString('utf8'), banner + "var here=new URL(\"./template/bin/data.mjs\",import.meta.url).href;var value=1;console.log(here,value);export{value};\n");
+  assert.equal((await bundleReleaseCli(root)).bytes.toString('utf8'), banner + "var here=new URL(\"src/cli/data.mjs\",__kitTemplateRoot).href;var value=1;console.log(here,value);export{value};\n");
 }));
 
 test('release bundle refuses a CLI above the archive limit and surfaces build failures', async () => {
-  await framework({ 'bin/app.ts': 'export default "' + 'a'.repeat(8_000_001) + '";\n' }, async root => {
+  await framework({ 'src/cli/app.ts': 'export default "' + 'a'.repeat(8_000_001) + '";\n' }, async root => {
     await assert.rejects(bundleReleaseCli(root), { code: 'KIT_BUNDLE', message: 'Bundled CLI exceeds the verified per-file archive limit.' });
   });
-  await framework({ 'bin/app.ts': "import missing from './missing.ts';\nconsole.log(missing);\n" }, async root => {
+  await framework({ 'src/cli/app.ts': "import missing from './missing.ts';\nconsole.log(missing);\n" }, async root => {
     await assert.rejects(bundleReleaseCli(root), error => error instanceof Error && /missing\.ts/.test(error.message));
   });
 });
@@ -97,6 +97,7 @@ test('every node_modules package bundled into the real release CLI has a shipped
   assert.ok(packages.length > 0);
   assert.deepEqual(notices.map(notice => notice.name).sort(), packages.map(entry => entry.name).sort());
   for (const notice of notices) assert.ok(files.some(file => file.path === 'bin/licenses/' + notice.file && file.bytes.length > 0), notice.name);
-  for (const external of ['prettier', 'typescript', 'esbuild', '@playwright/test', 'playwright-core']) assert.ok(!packages.some(entry => entry.name === external), external + ' must stay an installed external');
-  assert.match(bytes.toString('utf8'), /import\("prettier"\)/, 'makers load the installed prettier on first use');
+  for (const external of ['esbuild', '@playwright/test', 'playwright-core']) assert.ok(!packages.some(entry => entry.name === external), external + ' must stay an installed external');
+  for (const bundled of ['prettier', 'typescript']) assert.ok(packages.some(entry => entry.name === bundled), bundled + ' ships with the CLI');
+  assert.doesNotMatch(bytes.toString('utf8'), /import\("(?:prettier|typescript)"\)/, 'authoring has no external package import');
 });

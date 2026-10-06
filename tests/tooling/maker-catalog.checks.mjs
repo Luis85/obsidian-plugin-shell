@@ -4,12 +4,12 @@ import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from './maker-fixture.mjs';
-import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
-import { planMaker } from '../../bin/adapters/makers/plan.ts';
+import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
+import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { loadCatalog } from '../../bin/adapters/makers/load-catalog.ts';
-import { checkGenerated } from '../../bin/adapters/makers/format-generated.ts';
-import { createMakerContext } from '../../bin/adapters/makers/engine.ts';
+import { loadCatalog } from '../../src/cli/adapters/makers/load-catalog.ts';
+import { checkGenerated } from '../../src/cli/adapters/makers/format-generated.ts';
+import { createMakerContext } from '../../src/cli/adapters/makers/engine.ts';
 import { pathToFileURL } from 'node:url';
 import { measureMaintainability } from '../../scripts/quality/check-maintainability.mjs';
 

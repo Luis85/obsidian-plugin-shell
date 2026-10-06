@@ -1,6 +1,6 @@
 import { pluginRegistry } from './registry.ts';
 import type { WorkbenchPluginObject } from './api.ts';
-import { validateComponentTemplate, type ComponentTemplate } from '../bin/domain/component-template.ts';
+import { validateComponentTemplate, type ComponentTemplate } from '../src/cli/domain/component-template.ts';
 
 export function pluginComponentTemplates(
   registry: readonly WorkbenchPluginObject[] = pluginRegistry,

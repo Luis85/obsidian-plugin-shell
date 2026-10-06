@@ -14,8 +14,8 @@ These commands read maintained JSON metadata relative to the installed tool, not
 relative to the current project. They do not read project package.json, load Vite,
 import custom recipes, execute npm scripts, inspect a vault, install dependencies,
 write files or activate plugins. The same modules run in a Git-free copy containing
-only scripts/operations/cli.mjs, bin/adapters/operations (with operations.json), scripts/contracts,
-scripts/shared/hash.ts and bin/adapters/makers/recipes.json.
+only scripts/operations/cli.mjs, src/cli/adapters/operations (with operations.json), scripts/contracts,
+scripts/shared/hash.ts and src/cli/adapters/makers/recipes.json.
 No companion code or npm installation is required for discovery.
 
 The catalog describes fourteen actual built-in maker registrations and seven
@@ -34,12 +34,12 @@ Custom makers remain executable local code, not metadata to import in a renderer
 
 ## Source of truth and drift checks
 
-- bin/adapters/makers/recipes.json owns built-in names, options, descriptions, schema
+- src/cli/adapters/makers/recipes.json owns built-in names, options, descriptions, schema
   metadata, prerequisites and supported outputs. Argument validation and listing use
-  this data; bin/adapters/makers/dispatch.ts owns the actual implementation registrations.
-- bin/adapters/operations/operations.json describes the bounded operation catalog.
-  bin/adapters/operations/protocol.ts registers the actual two discovery handlers.
-- bin/adapters/operations/catalog.ts validates supported schema keywords, duplicates,
+  this data; src/cli/adapters/makers/dispatch.ts owns the actual implementation registrations.
+- src/cli/adapters/operations/operations.json describes the bounded operation catalog.
+  src/cli/adapters/operations/protocol.ts registers the actual two discovery handlers.
+- src/cli/adapters/operations/catalog.ts validates supported schema keywords, duplicates,
   aliases, implementation/transport claims and maker option parity. Tests additionally
   compare actual handler keys and package script/entrypoint declarations.
 

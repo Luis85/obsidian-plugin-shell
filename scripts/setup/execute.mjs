@@ -23,6 +23,7 @@ function activeToolchain(options) {
 export function setupStages(options) {
   return [
     { id: 'install', selected: !options['skip-install'], command: ['active-npm', 'ci', '--no-fund'] },
+    { id: 'cli-build', selected: true, command: ['scripts/bundling/build-cli.mjs'] },
     { id: 'browser-provision', selected: Boolean(options['provision-browser']), command: ['node_modules/@playwright/test/cli.js', 'install', 'chromium'] },
     { id: 'verify', selected: !options['defer-verify'], command: ['scripts/quality/verify.mjs'] },
     { id: 'native-install', selected: options.profile === 'native', command: ['scripts/dev/install-local.mjs', '--no-build'] },

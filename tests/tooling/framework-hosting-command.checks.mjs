@@ -4,12 +4,12 @@ import { mkdtemp, mkdir, readFile, rm, realpath, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { planOperation } from '../../bin/adapters/framework/planning.ts';
-import { status } from '../../bin/adapters/framework/inspection.ts';
-import { parseAzureVersion } from '../../bin/adapters/framework/hosting-cli.ts';
-import { hash } from '../../bin/adapters/framework/files.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { planOperation } from '../../src/cli/adapters/framework/planning.ts';
+import { status } from '../../src/cli/adapters/framework/inspection.ts';
+import { parseAzureVersion } from '../../src/cli/adapters/framework/hosting-cli.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const frameworkRoot = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 const azure = ['--azure-organization', 'https://dev.azure.com/contoso', '--azure-project', 'Demo'];

@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { visualSpecs, visualDefinitions, visualNuxtImports, visualContractTypes, visualLibraryWithoutDefinition, visualPackages, visualComponentName } from '../../bin/compiler/emitters/visual-model.ts';
-import { visualSfc } from '../../bin/compiler/emitters/visual-code.ts';
-import { visualSources, visualPorts } from '../../bin/compiler/emitters/visual-ports.ts';
+import { visualSpecs, visualDefinitions, visualNuxtImports, visualContractTypes, visualLibraryWithoutDefinition, visualPackages, visualComponentName } from '../../src/cli/compiler/emitters/visual-model.ts';
+import { visualSfc } from '../../src/cli/compiler/emitters/visual-code.ts';
+import { visualSources, visualPorts } from '../../src/cli/compiler/emitters/visual-ports.ts';
 import { richVisualDocument, detailDocument, model, recorder } from './compiler-emitters-fixture.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
 

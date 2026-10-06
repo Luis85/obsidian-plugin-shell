@@ -3,15 +3,15 @@ import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { collectionWizard } from '../../bin/presentation/collection.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
-import { settingsPlan, loadSettings } from '../../bin/adapters/user-settings.ts';
-import { documentationSettings } from '../../bin/adapters/settings-documentation.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { collectionPathDefaults, defaultSettings, effectivePaths, readSettings, settingsSchema, withoutImplicitPaths } from '../../bin/domain/user-settings.ts';
-import { wizardRegistry } from '../../bin/presentation/wizards/registry.ts';
+import { collectionWizard } from '../../src/cli/presentation/collection.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { settingsMigrationPlan } from '../../src/cli/adapters/settings-migration.ts';
+import { settingsPlan, loadSettings } from '../../src/cli/adapters/user-settings.ts';
+import { documentationSettings } from '../../src/cli/adapters/settings-documentation.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { collectionPathDefaults, defaultSettings, effectivePaths, readSettings, settingsSchema, withoutImplicitPaths } from '../../src/cli/domain/user-settings.ts';
+import { wizardRegistry } from '../../src/cli/presentation/wizards/registry.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const BACK = Symbol('back');
 async function scratch(fn) {
@@ -50,8 +50,8 @@ test('risk new asks the data-driven form, previews the note and writes exactly t
   assert.equal(session.left(), 0);
   const written = await readFile(join(folder(root), 'RISK-0001-vendor-late.md'), 'utf8');
   await writeFile(join(root, 'same.json'), JSON.stringify({ ...base, mitigation: 'Keep the v1 adapter.' }));
-  const { collectionCreate } = await import('../../bin/domain/collection-record.ts');
-  const { loadCollection } = await import('../../bin/adapters/collection-catalog.ts');
+  const { collectionCreate } = await import('../../src/cli/domain/collection-record.ts');
+  const { loadCollection } = await import('../../src/cli/adapters/collection-catalog.ts');
   const { definition, hook } = await loadCollection(root, 'risk');
   const expected = collectionCreate(definition, hook, { ...base, mitigation: 'Keep the v1 adapter.' }, 'RISK-0001', '2026-10-04');
   assert.ok(written.endsWith(expected.body) && written.includes('score: 12\nlevel: "high"'));

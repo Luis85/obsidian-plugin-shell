@@ -3,7 +3,7 @@ import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
-import { prototypesRead, prototypesCompare, prototypesPlan } from '../../bin/adapters/framework/prototypes.ts';
+import { prototypesRead, prototypesCompare, prototypesPlan } from '../../src/cli/adapters/framework/prototypes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 import { pristineFixtures } from '../support/pristine-fixture.mjs';

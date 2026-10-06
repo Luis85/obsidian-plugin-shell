@@ -8,20 +8,20 @@ import {
   componentTemplateSchema,
   validateComponentTemplate,
   validateComponentTemplateCatalog,
-} from '../../bin/domain/component-template.ts';
-import { instantiateComponentTemplate } from '../../bin/domain/template-instantiation.ts';
-import { loadComponentTemplates } from '../../bin/adapters/component-template-repository.ts';
+} from '../../src/cli/domain/component-template.ts';
+import { instantiateComponentTemplate } from '../../src/cli/domain/template-instantiation.ts';
+import { loadComponentTemplates } from '../../src/cli/adapters/component-template-repository.ts';
 import {
   componentTemplateCoverage,
   componentTemplateSummary,
   componentTemplateTree,
   filterComponentTemplates,
-} from '../../bin/application/component-template-catalog.ts';
-import { componentTemplateDocumentation } from '../../bin/application/component-template-docs.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
-import { Workspace } from '../../bin/application/workspace.ts';
-import { browseComponentTemplates } from '../../bin/presentation/template-browser.ts';
+} from '../../src/cli/application/component-template-catalog.ts';
+import { componentTemplateDocumentation } from '../../src/cli/application/component-template-docs.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { newDocument, documentText, openDocument } from '../../src/cli/domain/document.ts';
+import { Workspace } from '../../src/cli/application/workspace.ts';
+import { browseComponentTemplates } from '../../src/cli/presentation/template-browser.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 

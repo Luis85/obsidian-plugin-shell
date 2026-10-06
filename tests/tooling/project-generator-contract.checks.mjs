@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { sourceInputs, sha256 } from '../../scripts/testing/source-inputs.mjs';
 import assert from 'node:assert/strict';
 import { matches, NotImplementedError } from '../../templates/companion/runtime/contract.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
 
 test('generate rejects removed target/vault compatibility options', () => {
   assert.throws(() => parseCliArguments(['generate', '--target', 'plugin']), /--target/);
@@ -18,16 +18,16 @@ test('unimplemented adapter errors preserve explicit source and operation identi
   assert.throws(() => { throw error; }, { name: 'NotImplementedError', message: error.message });
 });
 
-test('root CLI and compiler policy are fingerprinted and covered as tooling', async () => {
+test('CLI launcher source and compiler policy are fingerprinted', async () => {
   const inventory = await sourceInputs(process.cwd());
-  for (const path of ['bin/app', 'configs/types/tsconfig.generator.json', 'configs/starters/companion-plugin.json']) {
+  for (const path of ['src/cli/launcher.mjs', 'configs/types/tsconfig.generator.json', 'configs/starters/companion-plugin.json']) {
     const entries = inventory.files.filter(file => file.path === path);
     assert.equal(entries.length, 1);
     assert.equal(entries[0].sha256, sha256(await readFile(path)));
   }
   const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   assert.equal(config.boundaries.coverage.requireAllFiles, true);
-  assert.ok(config.entry.includes('bin/app.ts'));
+  assert.ok(config.entry.includes('src/cli/app.ts'));
   assert.ok(!config.entry.includes('app.mjs') && !config.entry.includes('shell.mjs'));
 });
 

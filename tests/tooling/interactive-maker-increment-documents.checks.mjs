@@ -3,14 +3,14 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { formatScalar, formatValue, lineEnding, parseFrontmatter, setFrontmatterValue, textLines } from '../../bin/domain/increments/frontmatter.ts';
-import { extractWikilinks, formatWikilink, linkProblems, parseWikilink, resolveWikilink } from '../../bin/domain/increments/wikilinks.ts';
-import { appendListItem, findMarkedRegion, findSection, insertSection, outline, prose, replaceMarkedRegion, words } from '../../bin/domain/increments/sections.ts';
-import { acceptanceStubPath, defaultDeliverySchema, deliveryPathsDrift, deliverySchemaFrom, incrementExtensionKeys, retargetDeliveryConfig } from '../../bin/domain/increments/model.ts';
-import { incrementTemplate } from '../../bin/domain/increments/increment-template.ts';
-import { editIncrement, malformedCriteria, parseIncrement, readinessProblems, renderIncrement, validateIncrement } from '../../bin/domain/increments/increment-document.ts';
-import { incrementLinkDrift, issueTableIds, pullRequestRow, pullRequestTableIds, setIssueTable, setPullRequestTable } from '../../bin/domain/increments/generated-lists.ts';
-import { parseInputFragment } from '../../bin/domain/increments/input-fragment.ts';
+import { formatScalar, formatValue, lineEnding, parseFrontmatter, setFrontmatterValue, textLines } from '../../src/cli/domain/increments/frontmatter.ts';
+import { extractWikilinks, formatWikilink, linkProblems, parseWikilink, resolveWikilink } from '../../src/cli/domain/increments/wikilinks.ts';
+import { appendListItem, findMarkedRegion, findSection, insertSection, outline, prose, replaceMarkedRegion, words } from '../../src/cli/domain/increments/sections.ts';
+import { acceptanceStubPath, defaultDeliverySchema, deliveryPathsDrift, deliverySchemaFrom, incrementExtensionKeys, retargetDeliveryConfig } from '../../src/cli/domain/increments/model.ts';
+import { incrementTemplate } from '../../src/cli/domain/increments/increment-template.ts';
+import { editIncrement, malformedCriteria, parseIncrement, readinessProblems, renderIncrement, validateIncrement } from '../../src/cli/domain/increments/increment-document.ts';
+import { incrementLinkDrift, issueTableIds, pullRequestRow, pullRequestTableIds, setIssueTable, setPullRequestTable } from '../../src/cli/domain/increments/generated-lists.ts';
+import { parseInputFragment } from '../../src/cli/domain/increments/input-fragment.ts';
 
 const root = resolve(import.meta.dirname, '../..');
 const deliveryFile = resolve(root, 'configs/delivery/delivery.json'), handoffScript = resolve(root, 'scripts/delivery/handoff.mjs');
@@ -22,7 +22,7 @@ const code = expected => error => { assert.equal(error.code, expected, error.mes
 function apply(text, ...edits) { return edits.reduce((current, edit) => editIncrement(current, edit).text, text); }
 function ready() {
   const fragment = parseInputFragment(['## Summary', '', 'Adds the increment commands to the CLI.', '## Outcome', '', 'Maintainers plan increments from the terminal.',
-    '## Affected areas', '', '- `bin/domain/increments/**`: the document model', '## Test plan', '', '- Suite `maker`: proves the documents', '- E2E: no rendered UI changes',
+    '## Affected areas', '', '- `src/cli/domain/increments/**`: the document model', '## Test plan', '', '- Suite `maker`: proves the documents', '- E2E: no rendered UI changes',
     '## Docs impact', '', 'None — internal model only', '## Changelog', '', '- Added: Increment documents can be edited from the CLI.',
     '## Risks and rollback', '', 'Revert the commit; documents stay readable.', '## Dependencies', '', 'None — standalone', '## Open questions', '', 'None'].join('\n'), defaultDeliverySchema.handoff.sections);
   return apply(fresh(), { kind: 'fragment', fragment }, { kind: 'scope', side: 'in', text: 'Document model' }, { kind: 'scope', side: 'out', text: 'Remote sync' },

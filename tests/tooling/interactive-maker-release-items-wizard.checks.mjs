@@ -3,10 +3,10 @@ import { mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/pro
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { collectionWizard } from '../../bin/presentation/collection.ts';
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { collectionCreate } from '../../bin/domain/collection-record.ts';
-import { loadCollection } from '../../bin/adapters/collection-catalog.ts';
+import { collectionWizard } from '../../src/cli/presentation/collection.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { collectionCreate } from '../../src/cli/domain/collection-record.ts';
+import { loadCollection } from '../../src/cli/adapters/collection-catalog.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'release-items-wizard-'));

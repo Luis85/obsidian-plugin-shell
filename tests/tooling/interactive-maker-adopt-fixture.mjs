@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
-import { main } from '../../bin/adapters/framework-cli.ts';
+import { main } from '../../src/cli/adapters/framework-cli.ts';
 
 export const frameworkRoot = resolve(import.meta.dirname, '../..');
 const fixtureRoot = join(frameworkRoot, 'tests/fixtures/adoption');

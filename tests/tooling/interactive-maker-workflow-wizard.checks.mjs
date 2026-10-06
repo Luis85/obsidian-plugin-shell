@@ -3,9 +3,9 @@ import { mkdtemp, mkdir, readFile, readdir, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { launchTestWorkflow } from '../../bin/presentation/wizards/test-workflow-launch.ts';
-import { parseTestWorkflowLocatorLine, testWorkflowDataFromView, testWorkflowDataView, testWorkflowLocatorLine, testWorkflowStepFromView, testWorkflowStepView } from '../../bin/presentation/test-workflow-editor.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
+import { launchTestWorkflow } from '../../src/cli/presentation/wizards/test-workflow-launch.ts';
+import { parseTestWorkflowLocatorLine, testWorkflowDataFromView, testWorkflowDataView, testWorkflowLocatorLine, testWorkflowStepFromView, testWorkflowStepView } from '../../src/cli/presentation/test-workflow-editor.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const BACK = Symbol('back');
 async function scratch(fn) {

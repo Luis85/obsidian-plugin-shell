@@ -1,8 +1,6 @@
 name: Projects-only required checks
-# Every shell workflow ignores projects/**, so a pull request that changes only projects/** would never report the four
-# checks main requires and could not merge. This workflow reports them for exactly such a pull request: each project's
-# own synced projects--* workflows are its real gates. When the pull request also changes the shell, the shell
-# workflows report those checks, so these jobs take another name ("<check> (shell changes)") and never stand in for them.
+# Shell workflows ignore projects/**. Report their required names only after the
+# changed projects' own CI succeeds for this exact pull-request head.
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
@@ -10,6 +8,7 @@ on:
       - 'projects/**'
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: projects-required-checks-${{ github.ref }}
   cancel-in-progress: true
@@ -35,8 +34,30 @@ jobs:
           if [ -n "$changed" ] && ! printf '%s\n' "$changed" | grep -qv '^projects/'; then only=true; else only=false; fi
           echo "projects-only=$only" >> "$GITHUB_OUTPUT"
           echo "Changes only under projects/: $only"
-  report:
+  project-ci:
+    name: Changed project CI
     needs: scope
+    if: needs.scope.outputs.projects-only == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Require successful CI for every changed project
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/projects/required-checks.mjs
+  report:
+    needs: [scope, project-ci]
+    if: always()
     strategy:
       matrix:
         check: ['Dev checks', 'Definition of Ready', 'CI result', 'Definition of Done']
@@ -48,9 +69,13 @@ jobs:
         env:
           PROJECTS_ONLY: ${{ needs.scope.outputs.projects-only }}
           CHECK: ${{ matrix.check }}
+          SCOPE_RESULT: ${{ needs.scope.result }}
+          PROJECT_CI_RESULT: ${{ needs.project-ci.result }}
         run: |
+          test "$SCOPE_RESULT" = success
           if [ "$PROJECTS_ONLY" = true ]; then
-            echo "Only projects/** changed: the shell's $CHECK has nothing to check; the project's own workflows gate it."
+            test "$PROJECT_CI_RESULT" = success
+            echo "Project CI passed for this head; reporting $CHECK."
           else
             echo "The shell changed too: $CHECK comes from the shell workflows, not from here."
           fi

@@ -8,22 +8,22 @@ import { spawnSync } from 'node:child_process';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { extractKit } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { newDocument } from '../../bin/domain/document.ts';
-import { savePlan, applyPrepared } from '../../bin/adapters/storage.ts';
-import { openDocument } from '../../bin/domain/document.ts';
-import { addPage } from '../../bin/domain/pages.ts';
-import { attachComponents } from '../../bin/domain/components.ts';
-import { defaults } from '../../bin/adapters/framework/configuration.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { newDocument } from '../../src/cli/domain/document.ts';
+import { savePlan, applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { openDocument } from '../../src/cli/domain/document.ts';
+import { addPage } from '../../src/cli/domain/pages.ts';
+import { attachComponents } from '../../src/cli/domain/components.ts';
+import { defaults } from '../../src/cli/adapters/framework/configuration.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../src/cli/adapters/framework/planning.ts';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { projectEntities } from '../../bin/documentation/adapters/model.ts';
-import { keyOf } from '../../bin/documentation/domain/contracts.ts';
-import { parseMarkdown, renderMarkdown } from '../../bin/documentation/adapters/markdown.ts';
-import { journalHook, recoverDocuments } from '../../bin/documentation/adapters/recovery.ts';
-import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
-import { documentationStatus } from '../../bin/documentation/adapters/plan.ts';
+import { projectEntities } from '../../src/cli/documentation/adapters/model.ts';
+import { keyOf } from '../../src/cli/documentation/domain/contracts.ts';
+import { parseMarkdown, renderMarkdown } from '../../src/cli/documentation/adapters/markdown.ts';
+import { journalHook, recoverDocuments } from '../../src/cli/documentation/adapters/recovery.ts';
+import { documentationDigest as digest } from '../../src/cli/documentation/adapters/filesystem.ts';
+import { documentationStatus } from '../../src/cli/documentation/adapters/plan.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 test('documentation status adapter remains an explicit lazy-load contract', () => { assert.equal(typeof documentationStatus, 'function'); });
 async function directory(t) { const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-docs-'))); t.after(() => rm(dir, { recursive: true, force: true })); return dir; }
@@ -174,8 +174,8 @@ test('machine schema discovery succeeds outside a configured project without pro
 });
 
 test('interactive setup reviews docs import before generation and offers independent docs export', async () => {
-  const { continueSetup } = await import('../../bin/presentation/terminal/setup-terminal.ts');
-  const { result } = await import('../../bin/adapters/framework/contracts.ts');
+  const { continueSetup } = await import('../../src/cli/presentation/terminal/setup-terminal.ts');
+  const { result } = await import('../../src/cli/adapters/framework/contracts.ts');
   const answers=['no','yes','docs/application','yes','no','yes','yes'], calls=[];
   const execute=async request=>{calls.push(request);return request.options.apply ? result(request.command,{},'applied') : result(request.command,{planHash:'a'.repeat(64)},'planned');};
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},execute,async()=>answers.shift(),()=>{},result('setup',{},'applied'));
@@ -183,7 +183,7 @@ test('interactive setup reviews docs import before generation and offers indepen
   assert.deepEqual(calls[0].args,['docs/application']);assert.equal(calls[1].options.apply,'a'.repeat(64));assert.equal(answers.length,0);
 });
 test('declining reviewed docs changes cancels setup rather than applying or generating', async()=>{
-  const { continueSetup }=await import('../../bin/presentation/terminal/setup-terminal.ts');const { result }=await import('../../bin/adapters/framework/contracts.ts');
+  const { continueSetup }=await import('../../src/cli/presentation/terminal/setup-terminal.ts');const { result }=await import('../../src/cli/adapters/framework/contracts.ts');
   const answers=['no','yes','','no'], calls=[];
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},async request=>{calls.push(request.command);return result(request.command,{planHash:'b'.repeat(64)},'planned');},async()=>answers.shift(),()=>{},result('setup',{},'applied'));
   assert.equal(outcome.status,'cancelled');assert.deepEqual(calls,['docs import']);
@@ -198,7 +198,7 @@ for (const boundary of [0, 1, 3]) test(`terminated writer recovers at destinatio
   const entries = [{path:'docs/page.md',content:'After page'}, {path:'docs/added.md',content:'New document'},
     {path:'design/project.json',content:'{"after":true}\n'}, {path:'design/docs-index.json',content:'{"baseline":"after"}\n'}];
   const writer = new URL('../../scripts/shared/file-plan.ts', import.meta.url).href;
-  const journal = new URL('../../bin/documentation/adapters/recovery.ts', import.meta.url).href;
+  const journal = new URL('../../src/cli/documentation/adapters/recovery.ts', import.meta.url).href;
   const code = `import {createFilePlan,applyFilePlan} from ${JSON.stringify(writer)}; import {journalHook} from ${JSON.stringify(journal)};
     const plan=await createFilePlan(${JSON.stringify(root)},${JSON.stringify(entries)}), record=journalHook(plan);
     await applyFilePlan(plan,{async beforeWrite(change,index){await record();if(index===${boundary})process.kill(process.pid,'SIGKILL');}});`;

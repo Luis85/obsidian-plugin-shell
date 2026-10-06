@@ -6,9 +6,9 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import {
   appendAmendment, changePullRequestStatus, kickoffPullRequest, editPullRequest, isPublished, nextPullRequestId, parsePullRequest, renderPullRequest, replacePullRequestRegion,
   setPullRequestBinding, setPullRequestField, setPullRequestStatus, validatePullRequest, writeTasks,
-} from '../../bin/domain/increments/pull-request-document.ts';
-import { fragmentBody, fragmentItems, inputText, parseInputFragment, renderInputFragment } from '../../bin/domain/increments/input-fragment.ts';
-import { limits, pullRequestRegions } from '../../bin/domain/increments/model.ts';
+} from '../../src/cli/domain/increments/pull-request-document.ts';
+import { fragmentBody, fragmentItems, inputText, parseInputFragment, renderInputFragment } from '../../src/cli/domain/increments/input-fragment.ts';
+import { limits, pullRequestRegions } from '../../src/cli/domain/increments/model.ts';
 
 const handoffScript = resolve(import.meta.dirname, '../../scripts/delivery/handoff.mjs');
 const noScripts = existsSync(handoffScript) ? false : 'scripts/delivery is not on this branch yet; the DoR parser is compared once it lands';

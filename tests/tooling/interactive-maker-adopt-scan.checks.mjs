@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { access, chmod, mkdir, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { readGit, remoteHost } from '../../bin/adapters/framework/adopt-git.ts';
-import { defaultLimits, scanProject } from '../../bin/adapters/framework/adopt-scan.ts';
-import { readTargets } from '../../bin/adapters/framework/adopt-targets.ts';
+import { readGit, remoteHost } from '../../src/cli/adapters/framework/adopt-git.ts';
+import { defaultLimits, scanProject } from '../../src/cli/adapters/framework/adopt-scan.ts';
+import { readTargets } from '../../src/cli/adapters/framework/adopt-targets.ts';
 import { fileSymlink } from './file-symlink.mjs';
 import { frameworkRoot, git, initRepository, withProject } from './interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));

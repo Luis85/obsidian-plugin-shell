@@ -1,9 +1,9 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { renderManagedBlock } from '../../bin/domain/increments/remote-body.ts';
-import { createSyncRecord, parseSyncRecord, recordDigest, remoteRevision, serializeSyncRecord, syncRecordPath } from '../../bin/domain/increments/sync-record.ts';
-import { azureRemoteState, githubRemoteState, isTerminalState, localStatus, statusFromRemote } from '../../bin/domain/increments/remote-state.ts';
-import { syncPullRequest } from '../../bin/domain/increments/sync-merge.ts';
+import { renderManagedBlock } from '../../src/cli/domain/increments/remote-body.ts';
+import { createSyncRecord, parseSyncRecord, recordDigest, remoteRevision, serializeSyncRecord, syncRecordPath } from '../../src/cli/domain/increments/sync-record.ts';
+import { azureRemoteState, githubRemoteState, isTerminalState, localStatus, statusFromRemote } from '../../src/cli/domain/increments/remote-state.ts';
+import { syncPullRequest } from '../../src/cli/domain/increments/sync-merge.ts';
 import { samplePullRequestView, sha256 } from '../support/fake-hosting-remote.mjs';
 
 const links = { platform: 'github', web: 'https://github.com/octo/demo', ref: 'feature/hosting-set' };

@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { journeyCode } from '../../bin/compiler/emitters/journey-code.ts';
-import { journeyBootstrapCode } from '../../bin/compiler/emitters/journey-bootstrap-code.ts';
-import { journeyTestCode } from '../../bin/compiler/emitters/journey-test-code.ts';
+import { journeyCode } from '../../src/cli/compiler/emitters/journey-code.ts';
+import { journeyBootstrapCode } from '../../src/cli/compiler/emitters/journey-bootstrap-code.ts';
+import { journeyTestCode } from '../../src/cli/compiler/emitters/journey-test-code.ts';
 import { journeyDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
 
@@ -70,7 +70,7 @@ test('journey emission is opt-in and refuses an incomplete or still-bridged edit
   const m = model(await journeyDocument());
   const missing = editorTemplate(bridge); missing.frameworkFiles = missing.frameworkFiles.filter(file => file.path !== prefix + 'workspace/contracts.ts');
   assert.throws(() => journeyCode(missing, m, recorder().add), { message: 'JOURNEY_TEMPLATE_MISSING: workspace/contracts.ts' });
-  for (const leaked of ["const contract = 'authoring-contract.ts';\n", 'const flow = root.ownerDocument.defaultView!.VueFlowCore;\n', "import { x } from '../../../../bin/adapters/starters/browser.ts';\n"])
+  for (const leaked of ["const contract = 'authoring-contract.ts';\n", 'const flow = root.ownerDocument.defaultView!.VueFlowCore;\n', "import { x } from '../../../../src/cli/adapters/starters/browser.ts';\n"])
     assert.throws(() => journeyCode(editorTemplate(leaked), m, recorder().add), { message: 'JOURNEY_MOUNT_CONTRACT' });
 });
 

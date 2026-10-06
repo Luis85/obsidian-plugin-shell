@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { readSettings, defaultSettings, projectPath, settingsSchema } from '../../bin/domain/user-settings.ts';
-import { typedPrd } from '../../bin/domain/prd-markdown.ts';
-import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
-import { runOperations } from '../../bin/application/operations.ts';
-import { sketchSchema } from '../../bin/application/schema.ts';
-import { setupSchema } from '../../bin/application/setup-schema.ts';
+import { readSettings, defaultSettings, projectPath, settingsSchema } from '../../src/cli/domain/user-settings.ts';
+import { typedPrd } from '../../src/cli/domain/prd-markdown.ts';
+import { newDocument, documentText, openDocument } from '../../src/cli/domain/document.ts';
+import { runOperations } from '../../src/cli/application/operations.ts';
+import { sketchSchema } from '../../src/cli/application/schema.ts';
+import { setupSchema } from '../../src/cli/application/setup-schema.ts';
 const markdown = '---\ntype: prd\nid: PRD-001\ntitle: "A product"\nstatus: draft\n---\n# Scope\n\nOriginal content.\n';
 const project = () => runOperations(newDocument('Example'), [{ op: 'page.add', title: 'Home', as: 'home' }, { op: 'page.add', title: 'Details', as: 'details' }]);
 test('settings merge defaults and partial updates, preserve false, and reject unknown/future input', () => {

@@ -1,4 +1,4 @@
-// Dependency-free reader for the shared form format (configs/forms, bin/domain/form.ts), limited to
+// Dependency-free reader for the shared form format (configs/forms, src/cli/domain/form.ts), limited to
 // the subset npm run setup asks before dependencies or TypeScript tooling exist. Anything else fails closed.
 import { readFile } from 'node:fs/promises';
 export const identityKeys = Object.freeze(['id', 'name', 'description', 'author', 'repo', 'version']);

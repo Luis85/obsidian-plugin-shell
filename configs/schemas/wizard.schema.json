@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "configs/schemas/wizard.schema.json",
   "title": "Workbench data-driven wizard",
-  "description": "Editor support only. bin/domain/wizard.ts is the authoritative validator; run node bin/app wizard check --json.",
+  "description": "Editor support only. src/cli/domain/wizard.ts is the authoritative validator; run node bin/app wizard check --json.",
   "type": "object",
   "additionalProperties": false,
   "required": [

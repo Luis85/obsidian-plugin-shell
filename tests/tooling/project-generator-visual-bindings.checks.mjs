@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { stripVTControlCharacters } from 'node:util';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
 import { projectFiles } from '../support/project-render.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // Resolved through the package manifest so the check also runs where node_modules sits in an ancestor directory.

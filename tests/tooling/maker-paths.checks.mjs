@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { join, relative, isAbsolute } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { makerFixture, installMakerFoundation, makerSourceRoot } from './maker-fixture.mjs';
-import { planMaker } from '../../bin/adapters/makers/plan.ts';
-import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
+import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 
 test('[MAKER-CANONICAL-ROOT] the fixture exposes its actual filesystem spelling', () => makerFixture(async root => {

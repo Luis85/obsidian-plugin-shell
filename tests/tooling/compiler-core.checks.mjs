@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { runCompiler } from '../../bin/compiler/application/pipeline.ts';
-import { artifactCollector, validateArtifacts, canonicalJson } from '../../bin/compiler/domain/artifacts.ts';
-import { diagnostic, CompilerError, orderedDiagnostics } from '../../bin/compiler/domain/diagnostics.ts';
-import { referenceDiagnostics } from '../../bin/compiler/domain/references.ts';
-import { dependencyReadiness } from '../../bin/compiler/adapters/dependencies.ts';
+import { runCompiler } from '../../src/cli/compiler/application/pipeline.ts';
+import { artifactCollector, validateArtifacts, canonicalJson } from '../../src/cli/compiler/domain/artifacts.ts';
+import { diagnostic, CompilerError, orderedDiagnostics } from '../../src/cli/compiler/domain/diagnostics.ts';
+import { referenceDiagnostics } from '../../src/cli/compiler/domain/references.ts';
+import { dependencyReadiness } from '../../src/cli/compiler/adapters/dependencies.ts';
 
 const artifact = (path, content = 'safe') => ({path, content, ownership:'managed', producer:'fixture'});
 const template = Object.freeze({fingerprint:'fixture',frameworkFiles:[],skillFiles:[],text(){throw new Error('unexpected template read');}});

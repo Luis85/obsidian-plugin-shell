@@ -4,12 +4,12 @@ import { mkdtemp, mkdir, readFile, rm, realpath, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { planOperation } from '../../bin/adapters/framework/planning.ts';
-import { routeArguments } from '../../bin/adapters/router.ts';
-import { guidedSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
-import { starterText } from '../../bin/presentation/terminal/starter-terminal.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { planOperation } from '../../src/cli/adapters/framework/planning.ts';
+import { routeArguments } from '../../src/cli/adapters/router.ts';
+import { guidedSetup } from '../../src/cli/presentation/terminal/setup-terminal.ts';
+import { starterText } from '../../src/cli/presentation/terminal/starter-terminal.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const frameworkRoot = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 const azure = ['--hosting', 'azure-devops', '--azure-organization', 'https://dev.azure.com/contoso', '--azure-project', 'Demo'];

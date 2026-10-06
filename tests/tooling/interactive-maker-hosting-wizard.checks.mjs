@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { guidedStarter } from '../../bin/presentation/terminal/starter-terminal.ts';
-import { guidedSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
-import { setupDefaults } from '../../bin/presentation/wizards/framework-setup.ts';
-import { hostingNote } from '../../bin/presentation/wizards/hosting.ts';
-import { wizardRegistry } from '../../bin/presentation/wizards/registry.ts';
+import { guidedStarter } from '../../src/cli/presentation/terminal/starter-terminal.ts';
+import { guidedSetup } from '../../src/cli/presentation/terminal/setup-terminal.ts';
+import { setupDefaults } from '../../src/cli/presentation/wizards/framework-setup.ts';
+import { hostingNote } from '../../src/cli/presentation/wizards/hosting.ts';
+import { wizardRegistry } from '../../src/cli/presentation/wizards/registry.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const context = { root: frameworkRoot, frameworkRoot };

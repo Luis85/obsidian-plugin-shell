@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hasControls } from '../../bin/domain/errors.ts';
+import { hasControls } from '../../src/cli/domain/errors.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 test('control detection rejects all C0/C1 controls while allowing declared text whitespace', () => {
   for (let code = 0; code <= 159; code++) {

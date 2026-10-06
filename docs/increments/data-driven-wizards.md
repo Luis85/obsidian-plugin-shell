@@ -67,7 +67,7 @@ editing the CLI dispatcher or the runners.
 - `bin/**`: the form and wizard engines, the new commands and the converted processes.
 - `configs/forms/**`: reusable form definitions.
 - `configs/wizards/**`: wizard definitions.
-- `configs/guides/**`: the prototype guides moved from `bin/guides`.
+- `configs/guides/**`: the prototype guides moved from `src/cli/guides`.
 - `configs/schemas/**`: JSON schemas of the new definition formats.
 - `configs/fake-data/**`: fake-data entities and generation configs.
 - `configs/learning/**`: learning paths and their Markdown content.
@@ -134,7 +134,7 @@ editing the CLI dispatcher or the runners.
 - Added: Fake-data generator: `node bin/app fake-data` creates seeded, reproducible Markdown notes with YAML frontmatter from built-in presets (contact, task, project, book, meeting), project definitions or saved-project entities, optionally with an Obsidian Bases table, through one reviewed file plan. Runs can be saved and re-run as generation configs in `configs/fake-data/generations`. Adds the exact dependency `@faker-js/faker` 10.6.0 (MIT), bundled into the kit with its license notice.
 - Added: Data-driven forms in the plugin runtime: a feature ships a JSON form in `src/features/<feature>/forms/`, declares it with `defineForm` from the feature API and renders it with the shared `DataForm` component, which validates the draft and returns typed values without persisting anything. The runtime reads the same format as `configs/forms` but rejects CLI-only hooks and kinds; the showcase gains a Forms page.
 - Changed: `node bin/app new <dir>` now runs its interview on the shared wizard engine (`configs/wizards/new-starter.json`). Starter inputs are asked as a generated form: choices and booleans are numbered menus, invalid answers are re-asked instead of ending the interview, and `:back` revisits earlier questions. Number form fields accept `required: false`.
-- Changed: Prototype guides moved from `bin/guides` to `configs/guides`; their content, ids and versions are unchanged.
+- Changed: Prototype guides moved from `src/cli/guides` to `configs/guides`; their content, ids and versions are unchanged.
 - Changed: `npm run setup` asks its identity, MCP and hosting-platform questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
 
 ## Risks and rollback

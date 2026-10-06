@@ -277,7 +277,7 @@ test('verify tooling groups plus the maker suite verify runs in its own step cov
 test('tooling checks written by the custom-maker and locale recipes are claimed by exactly one verify suite', async () => {
   const { readFile } = await import('node:fs/promises');
   const real = JSON.parse(await readFile(resolve('tests/suites.json'), 'utf8'));
-  // Paths mirror bin/adapters/makers/extra-recipes.ts, which writes these files into consumer projects.
+  // Paths mirror src/cli/adapters/makers/extra-recipes.ts, which writes these files into consumer projects.
   for (const path of ['tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']) {
     const owners = real.suites.filter(entry => (entry.include ?? []).some(pattern => globToRegExp(pattern).test(path)));
     assert.deepEqual(owners.map(entry => entry.name), ['makers'], path);

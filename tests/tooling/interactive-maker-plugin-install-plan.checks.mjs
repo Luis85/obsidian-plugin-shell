@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
+import { planOperation, applyOperation } from '../../src/cli/adapters/framework/planning.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const code = async pending => { try { await pending; return 'resolved'; } catch (error) { return error.code ?? error.message; } };

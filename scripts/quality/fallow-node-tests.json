@@ -9,6 +9,7 @@
     "scripts/compiler/verify-preview-host.mjs",
     "tests/runtime/types.ts",
     "tests/tooling/*.checks.mjs",
+    "tests/acceptance/**/*.checks.mjs",
     "tests/tooling/*.test.mjs",
     "tests/hindsight/*.checks.mjs",
     "tests/verification/*.test.mjs",

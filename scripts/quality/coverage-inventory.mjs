@@ -70,7 +70,7 @@ async function selectedCoreScope() {
 function sources(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
-    return entry.isDirectory() ? sources(path) : /\.(ts|vue)$/.test(entry.name) ? [path] : [];
+    return path === join('src', 'cli') ? [] : entry.isDirectory() ? sources(path) : /\.(ts|vue)$/.test(entry.name) ? [path] : [];
   });
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { changeIssueStatus, editIssue, nextIssueId, parseIssue, renderIssue, validateIssue } from '../../bin/domain/increments/issue-document.ts';
-import { checkIssueTransition, issueStatus, issueTransitions, requireIssueEditable } from '../../bin/domain/increments/transitions.ts';
-import { parseInputFragment } from '../../bin/domain/increments/input-fragment.ts';
-import { issueStatuses } from '../../bin/domain/increments/model.ts';
+import { changeIssueStatus, editIssue, nextIssueId, parseIssue, renderIssue, validateIssue } from '../../src/cli/domain/increments/issue-document.ts';
+import { checkIssueTransition, issueStatus, issueTransitions, requireIssueEditable } from '../../src/cli/domain/increments/transitions.ts';
+import { parseInputFragment } from '../../src/cli/domain/increments/input-fragment.ts';
+import { issueStatuses } from '../../src/cli/domain/increments/model.ts';
 
 const code = expected => error => { assert.equal(error.code, expected, error.message); assert.ok(error.message.startsWith(`${expected}: `)); return true; };
 const fresh = (extra = {}) => renderIssue({ id: 'delivery', title: 'Plan the delivery', increment: 'delivery', ...extra });

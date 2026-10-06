@@ -124,7 +124,7 @@ Five example generation configs are shipped:
 
 ## Entity definition reference
 
-Each definition is validated by `bin/domain/fake-data-entity.ts`. Validation fails closed on:
+Each definition is validated by `src/cli/domain/fake-data-entity.ts`. Validation fails closed on:
 
 - unknown keys;
 - unsafe or duplicate property keys;
@@ -188,7 +188,7 @@ needs. Frontmatter is written with the same YAML serializer and options as the p
 ### Allowlisted generators
 
 `fake-data` only calls the methods below. Each one is dispatched explicitly in
-`bin/adapters/fake-data-faker.ts`, never looked up by path.
+`src/cli/adapters/fake-data-faker.ts`, never looked up by path.
 
 | Method | Arguments (bounded) | Fits |
 | --- | --- | --- |
@@ -252,7 +252,7 @@ as a project definition and edit it.
 ```
 
 `entity` accepts the same references as `--entity`. `description` is optional, `base` defaults to `false` and
-`referenceDate` to `2026-01-01`. The authoritative validator is `bin/domain/fake-data-config.ts`. When you save
+`referenceDate` to `2026-01-01`. The authoritative validator is `src/cli/domain/fake-data-config.ts`. When you save
 a config under an existing id with different content, the review lists it as an `update`.
 
 ## The Bases file

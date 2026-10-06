@@ -4,12 +4,12 @@ import { Readable } from 'node:stream';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
-import { hash } from '../../bin/adapters/framework/files.ts';
-import { readFeatureBrainstorm, featureConcept, brainstormSchema } from '../../bin/domain/brainstorm.ts';
-import { brainstormFeaturePlan, brainstormVerifyPlan } from '../../bin/adapters/brainstorm.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { parseArguments, execute } from '../../bin/adapters/commands.ts';
+import { newDocument, documentText, openDocument } from '../../src/cli/domain/document.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
+import { readFeatureBrainstorm, featureConcept, brainstormSchema } from '../../src/cli/domain/brainstorm.ts';
+import { brainstormFeaturePlan, brainstormVerifyPlan } from '../../src/cli/adapters/brainstorm.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { parseArguments, execute } from '../../src/cli/adapters/commands.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const request = { schemaVersion: 1, name: 'Capture inbox', purpose: 'Quickly capture and inspect ideas',
   actors: ['Member'], entities: ['Capture'], acceptance: ['A saved capture can be reopened'],

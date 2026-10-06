@@ -5,9 +5,9 @@ import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { included } from '../../bin/adapters/framework/distribution.ts';
-import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
-import { listFiles } from '../../bin/adapters/framework/kit-integrity.ts';
+import { included } from '../../src/cli/adapters/framework/distribution.ts';
+import { assembleKit, installedCompiler } from '../../src/cli/adapters/framework/kit.ts';
+import { listFiles } from '../../src/cli/adapters/framework/kit-integrity.ts';
 import { materialize } from './interactive-maker-adopt-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 

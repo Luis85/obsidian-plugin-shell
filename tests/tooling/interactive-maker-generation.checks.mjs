@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { generationPlan as relocatedPlan, generateSourcePlan as relocatedSourcePlan } from '../../bin/adapters/framework/generation.ts';
+import { generationPlan as relocatedPlan, generateSourcePlan as relocatedSourcePlan } from '../../src/cli/adapters/framework/generation.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

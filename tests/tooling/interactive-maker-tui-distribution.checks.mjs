@@ -4,8 +4,8 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
-import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
+import { assembleKit, installedCompiler } from '../../src/cli/adapters/framework/kit.ts';
+import { assembleStarterPack } from '../../src/cli/adapters/starters/operations.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 let compilerVersion;
@@ -54,6 +54,6 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
     assert.ok(bundle.includes('loadVaultFixtures(join(import.meta.dirname, '), 'devkit test template keeps import.meta.dirname');
     assert.ok(bundle.includes("fileURLToPath(new URL('../../tests/support/obsidian/index.ts', import.meta.url))"), 'devkit Vitest template keeps import.meta.url');
     // The release bundle is whitespace-minified, so the argument separator may carry no space.
-    assert.match(bundle, /new URL\("\.\/template\/[^"]+",\s*import\.meta\.url\)\.href/);
+    assert.match(bundle, /new URL\("[^"]+",\s*__kitTemplateRoot\)\.href/);
   } finally { await rm(root, { recursive: true, force: true }); }
 });

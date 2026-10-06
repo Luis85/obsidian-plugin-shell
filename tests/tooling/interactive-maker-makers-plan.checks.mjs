@@ -4,17 +4,17 @@ import { mkdir, readFile, writeFile, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { makerFixture, installMakerFoundation } from './maker-fixture.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { parseArguments, recipeOptions, builtinRecipes, slug, title, makerSymbol } from '../../bin/adapters/makers/arguments.ts';
-import { planMaker } from '../../bin/adapters/makers/plan.ts';
-import { dispatchMaker, builtinHandlers } from '../../bin/adapters/makers/dispatch.ts';
-import { defineLocalMaker } from '../../bin/adapters/makers/custom-contract.ts';
-import { loadCatalog } from '../../bin/adapters/makers/load-catalog.ts';
-import { templates } from '../../bin/adapters/makers/templates.ts';
-import { formatGenerated, checkGenerated } from '../../bin/adapters/makers/format-generated.ts';
-import { hasSyntaxErrors } from '../../bin/adapters/makers/syntax.ts';
+import { parseArguments, recipeOptions, builtinRecipes, slug, title, makerSymbol } from '../../src/cli/adapters/makers/arguments.ts';
+import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
+import { dispatchMaker, builtinHandlers } from '../../src/cli/adapters/makers/dispatch.ts';
+import { defineLocalMaker } from '../../src/cli/adapters/makers/custom-contract.ts';
+import { loadCatalog } from '../../src/cli/adapters/makers/load-catalog.ts';
+import { templates } from '../../src/cli/adapters/makers/templates.ts';
+import { formatGenerated, checkGenerated } from '../../src/cli/adapters/makers/format-generated.ts';
+import { hasSyntaxErrors } from '../../src/cli/adapters/makers/syntax.ts';
 
 // Drives the maker request parser, planner, dispatch table, custom-recipe contract and entity catalog
-// (bin/adapters/makers) under the maker floors, against an isolated author fixture with real recipes.
+// (src/cli/adapters/makers) under the maker floors, against an isolated author fixture with real recipes.
 const args = (...values) => parseArguments(values);
 const plan = (root, ...values) => planMaker(root, args(...values));
 const apply = async (root, ...values) => { const planned = await plan(root, ...values); await applyFilePlan(planned.plan); return planned; };

@@ -5,9 +5,9 @@ import { posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const pureEntrypoints = [
-  'bin/compiler/adapters/plugin-emitter.ts', 'bin/compiler/adapters/clickdummy-emitter.ts',
-  'bin/compiler/adapters/target-lowering.ts', 'bin/compiler/adapters/project/emitter.ts',
-  'bin/compiler/adapters/frontend.ts', 'bin/compiler/adapters/dependencies.ts', 'bin/compiler/adapters/origins.ts',
+  'src/cli/compiler/adapters/plugin-emitter.ts', 'src/cli/compiler/adapters/clickdummy-emitter.ts',
+  'src/cli/compiler/adapters/target-lowering.ts', 'src/cli/compiler/adapters/project/emitter.ts',
+  'src/cli/compiler/adapters/frontend.ts', 'src/cli/compiler/adapters/dependencies.ts', 'src/cli/compiler/adapters/origins.ts',
 ];
 // Existing runtime modules expose pure validators alongside deferred runtime operations.
 // Only function-local timers in these two legacy modules are permitted; module-level effects stay forbidden.
@@ -17,8 +17,8 @@ function deferredTimer(path, node) {
   for (let parent = node.parent; parent; parent = parent.parent) if (ts.isFunctionLike(parent)) return true;
   return false;
 }
-// The inward-only compiler core lives in bin/compiler/{domain,application}; host adapters live beside it in bin/compiler/adapters.
-const compilerDomain = 'bin/compiler/domain/', compilerApplication = 'bin/compiler/application/';
+// The inward-only compiler core lives in src/cli/compiler/{domain,application}; host adapters live beside it in src/cli/compiler/adapters.
+const compilerDomain = 'src/cli/compiler/domain/', compilerApplication = 'src/cli/compiler/application/';
 const safePureImports = new Set(['node:crypto', 'node:path']);
 /** Uses a syntax tree: imports inside generated source string literals are not compiler dependencies. */
 export function inspectModule(path, text) {
@@ -89,7 +89,7 @@ export async function compilerSourceInventory(root) {
       else if (entry.isFile() && /\.(?:ts|mjs)$/.test(path)) sources.set(path, await readFile(resolve(root,path),'utf8'));
     }
   }
-  for (const folder of ['bin/compiler','scripts/compiler','scripts/companion','scripts/companion-tools','templates/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
+  for (const folder of ['src/cli/compiler','scripts/compiler','scripts/companion','scripts/companion-tools','templates/companion','scripts/contracts','docs/concepts/companion/test-kit']) await walk(folder);
   return sources;
 }
 /** A listed pure entrypoint outside the inventory would otherwise be skipped silently. */

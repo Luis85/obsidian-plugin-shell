@@ -1,9 +1,9 @@
-// Human views of the increment, pr and issue commands over fixed result shapes (bin/presentation/terminal/increment-view.ts
+// Human views of the increment, pr and issue commands over fixed result shapes (src/cli/presentation/terminal/increment-view.ts
 // and pull-request-view.ts): which facts each view shows, its Next: line, and that --json output is untouched.
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
-import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
+import { renderHuman } from '../../src/cli/presentation/terminal/terminal-render.ts';
+import { renderCliResult } from '../../src/cli/presentation/terminal/cli-output.ts';
 
 const plain = { color: false, unicode: false }, rich = { color: true, unicode: true };
 const view = (value, style = plain) => renderHuman({ diagnostics: [], ...value }, style);

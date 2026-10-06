@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { readTestWorkflow, readTestWorkflowStep, testWorkflowJson, testWorkflowLimits } from '../../bin/domain/test-workflow.ts';
-import { describeTestWorkflowLocator, escapeTestWorkflowRegExp, fillTestWorkflowTemplates, readTestWorkflowLocator, testWorkflowLocatorTexts, testWorkflowTemplatePaths, testWorkflowText } from '../../bin/domain/test-workflow-locator.ts';
-import { readTestWorkflowData, resolveTestWorkflowText, testWorkflowDataContext } from '../../bin/domain/test-workflow-data.ts';
-import { describeTestWorkflowTarget, readTestWorkflowTarget, readTestWorkflowUrl, testWorkflowTargetOverride } from '../../bin/domain/test-workflow-target.ts';
-import { readGeneratedBlock, requireIntactBlock, wrapGeneratedBlock } from '../../bin/domain/generated-block.ts';
+import { readTestWorkflow, readTestWorkflowStep, testWorkflowJson, testWorkflowLimits } from '../../src/cli/domain/test-workflow.ts';
+import { describeTestWorkflowLocator, escapeTestWorkflowRegExp, fillTestWorkflowTemplates, readTestWorkflowLocator, testWorkflowLocatorTexts, testWorkflowTemplatePaths, testWorkflowText } from '../../src/cli/domain/test-workflow-locator.ts';
+import { readTestWorkflowData, resolveTestWorkflowText, testWorkflowDataContext } from '../../src/cli/domain/test-workflow-data.ts';
+import { describeTestWorkflowTarget, readTestWorkflowTarget, readTestWorkflowUrl, testWorkflowTargetOverride } from '../../src/cli/domain/test-workflow-target.ts';
+import { readGeneratedBlock, requireIntactBlock, wrapGeneratedBlock } from '../../src/cli/domain/generated-block.ts';
 const sample = (extra = {}) => ({ $schema: '../../schemas/test-workflow.schema.json', schemaVersion: 1, id: 'checkout', title: 'Checkout', purpose: 'Buy one item.', status: 'active',
   target: { kind: 'static', folder: 'tests/fixtures/shop' }, data: { values: { user: { email: 'a@example.com', age: 30, vip: true } }, fakeData: { buyer: { config: 'contacts-demo', index: 2 } } },
   steps: [

@@ -6,13 +6,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
-      - 'bin/app'
-      - 'bin/documentation/**'
-      - 'bin/adapters/settings-documentation.ts'
-      - 'bin/adapters/framework/**'
-      - 'bin/adapters/framework-cli.ts'
-      - 'bin/presentation/terminal/**'
-      - 'bin/compiler/domain/**'
+      - 'src/cli/launcher.mjs'
+      - 'src/cli/documentation/**'
+      - 'src/cli/adapters/settings-documentation.ts'
+      - 'src/cli/adapters/framework/**'
+      - 'src/cli/adapters/framework-cli.ts'
+      - 'src/cli/presentation/terminal/**'
+      - 'src/cli/compiler/domain/**'
       - 'scripts/shared/file-plan*.ts'
       - 'scripts/documentation/**'
       - 'tests/tooling/framework-docs-*'

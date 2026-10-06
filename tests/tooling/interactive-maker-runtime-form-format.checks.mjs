@@ -3,8 +3,8 @@ import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { readForm } from '../../bin/domain/form.ts';
-import { formValueIssues } from '../../bin/domain/form-values.ts';
+import { readForm } from '../../src/cli/domain/form.ts';
+import { formValueIssues } from '../../src/cli/domain/form-values.ts';
 
 const features = resolve(import.meta.dirname, '../../src/features');
 // Test-owned copy of the showcase example: these checks must survive `examples:remove`.

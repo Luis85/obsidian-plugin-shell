@@ -232,7 +232,7 @@ These record intended work and acceptance; they are not implementation evidence.
 Docs next to the code: [`src/features`](../src/features/README.md),
 [`plugins`](../plugins/README.md), [`scripts`](../scripts/README.md),
 [`harness/styles`](../harness/styles/README.md) and the CLI guides in
-[`bin/`](../bin/README.md) (for example [project starters](../bin/PROJECT-STARTERS.md)).
+[`bin/`](../src/cli/README.md) (for example [project starters](../src/cli/PROJECT-STARTERS.md)).
 
 ## Skills
 
@@ -268,7 +268,7 @@ maintained and not normative unless a current page links them as such.
   pages under `architecture/`, `development/`, `testing/`, `tooling/`, `security/`,
   `design/`, `project-setup/` and `user-manual/` ship to generated projects as
   framework reference; plans, records and maintainer pages do not. The exact rule
-  is `bin/compiler/emitters/framework-scope.ts`.
+  is `src/cli/compiler/emitters/framework-scope.ts`.
 - **Status headers only when needed.** Add a status line only for a page whose
   authority is limited (a proposed contract, a plan, a retained target). Describe
   the current state, not the iteration or pull request that produced it.

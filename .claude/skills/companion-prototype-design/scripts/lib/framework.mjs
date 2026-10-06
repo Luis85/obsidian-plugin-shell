@@ -10,7 +10,7 @@ export async function framework(directory) {
   // An extracted kit runs one bundled bin/app.js and ships its editable sources under bin/template.
   const distribution = fs.existsSync(path.join(root, 'bin/kit.json'));
   const moduleRoot = distribution ? path.join(root, 'bin/template') : root;
-  const load = name => import(pathToFileURL(noLinks(path.join(moduleRoot, `bin/adapters/framework/${name}.ts`))).href);
+  const load = name => import(pathToFileURL(noLinks(path.join(moduleRoot, `src/cli/adapters/framework/${name}.ts`))).href);
   const [operations, catalog, processes, contracts] = await Promise.all([
     load('operations'), load('catalog'), load('process'), load('contracts'),
   ]);

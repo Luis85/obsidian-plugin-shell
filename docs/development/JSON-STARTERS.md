@@ -85,7 +85,7 @@ its JSON files to a configured alternative folder explicitly.
 
 The editor schema is `scripts/starters/starter.schema.json` (catalog data, kept beside
 the other JSON catalogs so starter files and in-place kit projects can reference it);
-the runtime validator in `bin/adapters/starters/validation.ts` also checks semantic
+the runtime validator in `src/cli/adapters/starters/validation.ts` also checks semantic
 rules such as path containment, dependency cycles, identity fields, current
 Companion version, and input type/default compatibility.
 `schemaVersion` versions this contract; `version` versions the individual starter.
@@ -152,7 +152,7 @@ prototype interview supplies identity and design, and the compiler owns every fi
 Project starters run through `node bin/app new` (terminal) or `new guide --starter
 <id>` / `new --input` (agents), which prepare a reviewed prototype package; `new <dir>
 --starter <project-starter>` refuses with `STARTER_KIND`. The maker reads them from
-the `configs/starters/` folder in the package root beside `bin/`. See [project starters](../../bin/PROJECT-STARTERS.md).
+the `configs/starters/` folder in the package root beside `bin/`. See [project starters](../../src/cli/PROJECT-STARTERS.md).
 Generic compiler/runtime/template code still belongs to the shell; starter-specific
 project designs and choices belong to the JSON. Native feature behavior retains
 the existing compiler's scaffold and acceptance boundaries.

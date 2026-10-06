@@ -15,7 +15,7 @@ from this step (action *Run the prototype maker*), with `node bin/app prototype`
 
 The package contains `design-brief.md`, `execution-prompt.md`, `README.md`, `INTEGRATION.md`,
 `companion.project.json`, the replayable `prototype-answers.json`, the guide snapshot, a pending manifest and a
-compiler-generated `source/` workspace. Read [[bin/README#Prepare a prototype|Prepare a prototype]].
+compiler-generated `source/` workspace. Read [[src/cli/README#Prepare a prototype|Prepare a prototype]].
 
 Agents and scripts use the same guide without prompts:
 
@@ -28,7 +28,7 @@ records your agreement with the brief, so set it only after reviewing the defaul
 
 Starting a whole new project instead? `node bin/app new` runs a project starter and the same prototype
 interview, and its package also holds `design-brief.md` and `execution-prompt.md`
-([[bin/PROJECT-STARTERS#Prepared package and generation|prepared package]]). Its design folder is created inside
+([[src/cli/PROJECT-STARTERS#Prepared package and generation|prepared package]]). Its design folder is created inside
 the generated `source/` project, so this course's checks follow the prototype maker route.
 
 At the end the maker asks whether to create a Claude Design folder. The next step explains that question;

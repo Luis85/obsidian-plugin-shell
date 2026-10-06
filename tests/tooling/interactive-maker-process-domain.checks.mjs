@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { processText, readProcess } from '../../bin/domain/process.ts';
-import { processDataIssues, processGraphIssues } from '../../bin/domain/process-graph.ts';
-import { assessStep, explainRule, nextTransition, processRulesFor, simulateProcess } from '../../bin/domain/process-engine.ts';
+import { processText, readProcess } from '../../src/cli/domain/process.ts';
+import { processDataIssues, processGraphIssues } from '../../src/cli/domain/process-graph.ts';
+import { assessStep, explainRule, nextTransition, processRulesFor, simulateProcess } from '../../src/cli/domain/process-engine.ts';
 const repository = resolve(import.meta.dirname, '../..');
 const roles = [{ id: 'author', title: 'Author' }, { id: 'lead', title: 'Lead', description: 'Decides.' }];
 const steps = () => [

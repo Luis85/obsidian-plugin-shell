@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { evaluateRule, missingRulePaths, readRuleClause, readRuleExpression, ruleClauses, rulePaths, ruleText } from '../../bin/domain/process-rules.ts';
+import { evaluateRule, missingRulePaths, readRuleClause, readRuleExpression, ruleClauses, rulePaths, ruleText } from '../../src/cli/domain/process-rules.ts';
 
 const data = { change: { kind: 'fix', title: 'Fix parser', tags: ['cli', 'docs'], empty: '' }, checks: { coverage: 92, tests: 'passed', ok: true }, nothing: null };
 const evaluate = condition => evaluateRule(readRuleExpression(condition, 'rule'), data);

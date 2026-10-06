@@ -76,7 +76,7 @@
     "check:presentation": "node scripts/quality/check-presentation.mjs",
     "check:self-review": "node scripts/quality/self-review.mjs",
     "check:artifacts": "node scripts/quality/check-artifacts.mjs",
-    "lint": "node scripts/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src bin plugins templates/companion/runtime",
+    "lint": "node scripts/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src plugins templates/companion/runtime",
     "analyze": "fallow dead-code -c configs/quality/fallow.json",
     "verify": "node scripts/quality/verify.mjs",
     "help": "node scripts/help.mjs",
@@ -141,7 +141,7 @@
     "test:setup": "node scripts/testing/suites.mjs setup",
     "test:release": "node scripts/testing/suites.mjs release",
     "test:quality": "node scripts/testing/suites.mjs quality",
-    "check": "node bin/app check",
+    "check": "node scripts/bundling/build-cli.mjs && node src/cli/app.ts check",
     "check:fast": "node bin/app check --fast",
     "check:submission": "node bin/app check submission",
     "companion:build": "node scripts/concepts/build-mvp.mjs",
@@ -167,7 +167,9 @@
     "test:maker:pty": "node scripts/testing/suites.mjs maker:pty",
     "test:coverage:maker": "vitest run --coverage --config configs/testing/vitest.maker.config.mjs && node scripts/quality/maker-coverage.mjs",
     "test:plugins": "node scripts/testing/suites.mjs workbench-plugins",
-    "check:plugins": "node scripts/quality/check-workbench-plugins.mjs"
+    "check:plugins": "node scripts/quality/check-workbench-plugins.mjs",
+    "build:cli": "node scripts/bundling/build-cli.mjs",
+    "app:dev": "node src/cli/app.ts"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

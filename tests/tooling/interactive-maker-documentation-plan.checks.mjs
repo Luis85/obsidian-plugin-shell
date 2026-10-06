@@ -5,16 +5,16 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { parseMarkdown, renderMarkdown } from '../../bin/documentation/adapters/markdown.ts';
-import { projectEntities } from '../../bin/documentation/adapters/model.ts';
-import { documentationPlan, documentationStatus } from '../../bin/documentation/adapters/plan.ts';
-import { journalHook, recoverDocuments } from '../../bin/documentation/adapters/recovery.ts';
-import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
+import { parseMarkdown, renderMarkdown } from '../../src/cli/documentation/adapters/markdown.ts';
+import { projectEntities } from '../../src/cli/documentation/adapters/model.ts';
+import { documentationPlan, documentationStatus } from '../../src/cli/documentation/adapters/plan.ts';
+import { journalHook, recoverDocuments } from '../../src/cli/documentation/adapters/recovery.ts';
+import { documentationDigest as digest } from '../../src/cli/documentation/adapters/filesystem.ts';
 
-// Drives documentation planning, workspace reading and recovery (bin/documentation/adapters) through the public docs commands.
+// Drives documentation planning, workspace reading and recovery (src/cli/documentation/adapters) through the public docs commands.
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 async function directory(t) { const dir = await realpath(await mkdtemp(join(tmpdir(), 'maker-docs-'))); after(t, () => rm(dir, { recursive: true, force: true })); return dir; }

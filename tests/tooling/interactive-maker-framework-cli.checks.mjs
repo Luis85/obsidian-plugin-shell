@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { main } from '../../bin/adapters/framework-cli.ts';
+import { main } from '../../src/cli/adapters/framework-cli.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');

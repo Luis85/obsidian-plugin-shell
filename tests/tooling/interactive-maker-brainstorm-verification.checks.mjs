@@ -3,9 +3,9 @@ import { readFile, writeFile, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { join } from 'node:path';
 const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
-import { parseArguments, execute } from '../../bin/adapters/commands.ts';
-import { brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification } from '../../bin/adapters/brainstorm.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
+import { parseArguments, execute } from '../../src/cli/adapters/commands.ts';
+import { brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification } from '../../src/cli/adapters/brainstorm.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
 import { brainstormScratch, captureRequest, fakeNpm, pinGeneratedNode, resign, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
 import { copyTree, pristineFixtures } from '../support/pristine-fixture.mjs';
 

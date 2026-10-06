@@ -8,7 +8,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, ex
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 
 const frameworkRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const identity = ['-c', 'user.name=Workbench Test', '-c', 'user.email=test@workbench.invalid', '-c', 'commit.gpgsign=false'];

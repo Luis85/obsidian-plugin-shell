@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { commands, parameterKinds, parseCliArguments, validateRequest } from '../../bin/adapters/framework/catalog.ts';
-import { commandHelp, groups } from '../../bin/adapters/framework/help-text.ts';
-import { incrementCommands } from '../../bin/adapters/framework/increment-catalog.ts';
+import { commands, parameterKinds, parseCliArguments, validateRequest } from '../../src/cli/adapters/framework/catalog.ts';
+import { commandHelp, groups } from '../../src/cli/adapters/framework/help-text.ts';
+import { incrementCommands } from '../../src/cli/adapters/framework/increment-catalog.ts';
 import { buildModel } from '../../scripts/documentation/render.mjs';
-import { exitCode } from '../../bin/adapters/framework-cli.ts';
-import { interactiveRun } from '../../bin/presentation/terminal/cli-interactive.ts';
-import { guidedIncrement } from '../../bin/presentation/terminal/increment-terminal.ts';
+import { exitCode } from '../../src/cli/adapters/framework-cli.ts';
+import { interactiveRun } from '../../src/cli/presentation/terminal/cli-interactive.ts';
+import { guidedIncrement } from '../../src/cli/presentation/terminal/increment-terminal.ts';
 import { createWorkspace, planThenApply, readyFragment } from '../support/increment-workspace.mjs';
 
 const fails = (outcome, code) => { assert.equal(outcome.status, 'failed', JSON.stringify(outcome)); assert.equal(outcome.diagnostics[0].code, code, outcome.diagnostics[0].message); return outcome; };

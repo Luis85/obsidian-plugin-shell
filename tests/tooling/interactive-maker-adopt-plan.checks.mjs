@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { analyzeInventory } from '../../bin/application/adoption/analyze.ts';
-import { renderPlan } from '../../bin/domain/adoption/plan-render.ts';
-import { screensRequest } from '../../bin/domain/adoption/plan-phases.ts';
-import { bullets, code, document, fence, plain, table } from '../../bin/domain/adoption/plan-markdown.ts';
+import { analyzeInventory } from '../../src/cli/application/adoption/analyze.ts';
+import { renderPlan } from '../../src/cli/domain/adoption/plan-render.ts';
+import { screensRequest } from '../../src/cli/domain/adoption/plan-phases.ts';
+import { bullets, code, document, fence, plain, table } from '../../src/cli/domain/adoption/plan-markdown.ts';
 import { inventoryOf, targets } from './interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 

@@ -209,6 +209,6 @@ outside protected folders, not overlapping another path) and moved with `node bi
 Release items needed three generic [note-collection engine](NOTE-COLLECTIONS.md) features: the `accepts` field option
 (project paths, release versions and id prefixes), the `managed` field source and `managed` statuses with
 `collectionManagedUpdate`, and `mergeCollectionBlock`, the register's marker merge for any named generated block.
-The candidate modules are `bin/domain/release-candidate*.ts`, `bin/adapters/release-candidate-*.ts` and the
-`candidate-new` wizard (`bin/presentation/wizards/release-candidate.ts`, `configs/wizards/candidate-new.json`,
+The candidate modules are `src/cli/domain/release-candidate*.ts`, `src/cli/adapters/release-candidate-*.ts` and the
+`candidate-new` wizard (`src/cli/presentation/wizards/release-candidate.ts`, `configs/wizards/candidate-new.json`,
 `configs/forms/candidate.json`).

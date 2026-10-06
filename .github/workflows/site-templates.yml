@@ -8,10 +8,10 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths: &site-template-inputs
       - 'templates/sites/**'
-      - 'bin/domain/site-template.ts'
-      - 'bin/domain/site-collections.ts'
-      - 'bin/adapters/site-templates.ts'
-      - 'bin/adapters/framework/site-command.ts'
+      - 'src/cli/domain/site-template.ts'
+      - 'src/cli/domain/site-collections.ts'
+      - 'src/cli/adapters/site-templates.ts'
+      - 'src/cli/adapters/framework/site-command.ts'
       - 'scripts/testing/qualify-site-templates.mjs'
       - 'tests/fixtures/sites/**'
       - '.github/workflows/site-templates.yml'

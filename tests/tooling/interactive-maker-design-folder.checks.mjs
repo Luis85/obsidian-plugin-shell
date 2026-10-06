@@ -3,17 +3,17 @@ import { mkdir, mkdtemp, readFile, realpath, rm, unlink, writeFile } from 'node:
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { designFolderPlan, designFolderStatus } from '../../bin/adapters/design-folder.ts';
-import { currentSourceHash } from '../../bin/adapters/design-source.ts';
-import { offerDesignFolder } from '../../bin/presentation/design-folder.ts';
-import { readSettings } from '../../bin/domain/user-settings.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { prototypesPlan } from '../../bin/adapters/framework/prototypes.ts';
-import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
+import { designFolderPlan, designFolderStatus } from '../../src/cli/adapters/design-folder.ts';
+import { currentSourceHash } from '../../src/cli/adapters/design-source.ts';
+import { offerDesignFolder } from '../../src/cli/presentation/design-folder.ts';
+import { readSettings } from '../../src/cli/domain/user-settings.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { prototypesPlan } from '../../src/cli/adapters/framework/prototypes.ts';
+import { settingsMigrationPlan } from '../../src/cli/adapters/settings-migration.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { sha256 } from '../../scripts/shared/hash.ts';
-import { newDocument, documentText } from '../../bin/domain/document.ts';
-import { runOperations } from '../../bin/application/operations.ts';
+import { newDocument, documentText } from '../../src/cli/domain/document.ts';
+import { runOperations } from '../../src/cli/application/operations.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const issueDesk = [
   { op: 'page.add', title: 'Issues', as: 'issues' }, { op: 'page.add', title: 'Details', as: 'details' },

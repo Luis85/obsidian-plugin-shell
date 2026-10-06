@@ -178,7 +178,7 @@ A condition that cannot be evaluated is unmet and shows why.
 
 ## Validation and safety
 
-`readLearningPath` (`bin/domain/learning-path.ts`) validates each file and fails closed on:
+`readLearningPath` (`src/cli/domain/learning-path.ts`) validates each file and fails closed on:
 
 - unknown keys or kinds, missing ids, and duplicate step, item or action ids;
 - unsafe bind or answer paths, including prototype keys;
@@ -186,7 +186,7 @@ A condition that cannot be evaluated is unmet and shows why.
 - conditions without their source (a checklist, a form, or a wizard action in the same step);
 - commands outside `node bin/app` and `npm run`.
 
-`learn check` (`bin/adapters/learning-catalog.ts`) then reports:
+`learn check` (`src/cli/adapters/learning-catalog.ts`) then reports:
 
 - unknown forms and wizards;
 - code hooks in inline fields;

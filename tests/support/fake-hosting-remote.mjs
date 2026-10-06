@@ -1,12 +1,12 @@
 /**
- * In-memory HostingRemote (bin/application/increments/remote-port.ts) for publish/sync tests: records every call,
+ * In-memory HostingRemote (src/cli/application/increments/remote-port.ts) for publish/sync tests: records every call,
  * simulates people editing the pull request on the platform, and injects failures with the adapters' codes and
  * RemoteFailure details. `uncertain` failures can be applied or not, as a lost response would be in reality.
  * Never contacts GitHub or Azure DevOps.
  */
 import { createHash } from 'node:crypto';
 import { OperationError } from '../../scripts/contracts/errors.ts';
-import { remoteRevision } from '../../bin/domain/increments/sync-record.ts';
+import { remoteRevision } from '../../src/cli/domain/increments/sync-record.ts';
 
 export const sha256 = text => createHash('sha256').update(text, 'utf8').digest('hex');
 const webs = { github: repository => `https://github.com/${repository}`, 'azure-devops': () => 'https://dev.azure.com/contoso/Demo/_git/demo' };

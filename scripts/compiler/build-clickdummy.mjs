@@ -1,5 +1,5 @@
 /** Explicit build adapter. It reuses the devKit's pinned offline builder, never installs dependencies. */
-import { readBounded } from '../../bin/adapters/framework/files.ts';
+import { readBounded } from '../../src/cli/adapters/framework/files.ts';
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';

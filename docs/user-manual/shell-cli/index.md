@@ -50,7 +50,7 @@ The direct Node entry works without an npm alias or file extension. These forms 
 | `npx obs-shell help` | Inside the project only: the package `bin` maps `obs-shell` to `bin/app`, and flags pass through without `--`. Outside a project, npx would look for a registry package instead. |
 | `npm run app -- help` | Package script; npm consumes flags such as `--json` unless they follow `--`. There is no `npm run shell` alias. |
 
-The entry point is `bin/app` (`bin/app.ts` in source, bundled `bin/app.js` in a kit). It is the single supported CLI launcher for source checkouts and packaged distributions.
+The entry point is `bin/app` (`src/cli/app.ts` in source, bundled `bin/app.js` in a kit). It is the single supported CLI launcher for source checkouts and packaged distributions.
 
 Do not assume that an unqualified global `shell-cli` command or an npm registry package has been published.
 

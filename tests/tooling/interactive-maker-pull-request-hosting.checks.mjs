@@ -5,10 +5,10 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { commandRunner, readTargetSources, resolveHostingTarget } from '../../bin/adapters/increments/hosting-target.ts';
-import { remoteLockPath, withRemoteLock } from '../../bin/adapters/increments/remote-lock.ts';
-import { remoteMarker, renderManagedBlock } from '../../bin/domain/increments/remote-body.ts';
-import { planPublish } from '../../bin/domain/increments/remote-state.ts';
+import { commandRunner, readTargetSources, resolveHostingTarget } from '../../src/cli/adapters/increments/hosting-target.ts';
+import { remoteLockPath, withRemoteLock } from '../../src/cli/adapters/increments/remote-lock.ts';
+import { remoteMarker, renderManagedBlock } from '../../src/cli/domain/increments/remote-body.ts';
+import { planPublish } from '../../src/cli/domain/increments/remote-state.ts';
 import { createFakeHostingRemote, samplePullRequestView } from '../support/fake-hosting-remote.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
 

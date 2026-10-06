@@ -1,9 +1,10 @@
 {
   "entry": [
+    "src/cli/launcher.mjs",
     "scripts/concepts/export-golden-project.mjs",
     "scripts/concepts/contract-bundle.mjs",
     "scripts/concepts/concept-contract.ts",
-    "bin/compiler/index.ts",
+    "src/cli/compiler/index.ts",
     "scripts/compiler/build-clickdummy.mjs",
     "src/main.ts",
     "src/features/api.ts",
@@ -192,7 +193,7 @@
     "scripts/companion-tools/qualify-starter.mjs",
     "scripts/concepts/mvp-bridge.js",
     "scripts/concepts/prototype-bridge.js",
-    "bin/app.ts",
+    "src/cli/app.ts",
     "scripts/compiler/qualify-project-starters.mjs",
     "scripts/companion/prd-limits.mjs",
     "plugins/*/src/index.ts"
@@ -207,7 +208,8 @@
     "dist-harness/**",
     "reports/**",
     "docs/**",
-    "projects/**"
+    "projects/**",
+    "bin/template/package.json"
   ],
   "boundaries": {
     "coverage": {
@@ -217,50 +219,51 @@
       {
         "name": "maker-domain",
         "patterns": [
-          "bin/domain/**",
-          "bin/documentation/domain/**"
+          "src/cli/domain/**",
+          "src/cli/documentation/domain/**"
         ]
       },
       {
         "name": "maker-application",
         "patterns": [
-          "bin/application/**",
-          "bin/documentation/application/**"
+          "src/cli/application/**",
+          "src/cli/documentation/application/**"
         ]
       },
       {
         "name": "maker-host",
         "patterns": [
-          "bin/adapters/**",
-          "bin/documentation/adapters/**",
-          "bin/presentation/**",
-          "bin/app.ts",
+          "src/cli/adapters/**",
+          "src/cli/documentation/adapters/**",
+          "src/cli/presentation/**",
+          "src/cli/app.ts",
+          "src/cli/launcher.mjs",
           "plugins/**"
         ]
       },
       {
         "name": "compiler-domain",
         "patterns": [
-          "bin/compiler/domain/**"
+          "src/cli/compiler/domain/**"
         ]
       },
       {
         "name": "compiler-application",
         "patterns": [
-          "bin/compiler/application/**"
+          "src/cli/compiler/application/**"
         ]
       },
       {
         "name": "compiler-host",
         "patterns": [
-          "bin/compiler/adapters/**",
-          "bin/compiler/index.ts"
+          "src/cli/compiler/adapters/**",
+          "src/cli/compiler/index.ts"
         ]
       },
       {
         "name": "compiler-emitters",
         "patterns": [
-          "bin/compiler/emitters/**"
+          "src/cli/compiler/emitters/**"
         ]
       },
       {

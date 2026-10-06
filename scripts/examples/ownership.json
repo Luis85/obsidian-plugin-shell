@@ -99,7 +99,7 @@
     },
     {
       "path": "tests/runtime/presentation-composables.test.ts",
-      "sha256": "f8ee6707d7ecef27da5f4c4ecd806c8ad4cf9051fbf9b293f42a163e144b7922"
+      "sha256": "04aa934f5f1a7309b3c5a26754928ca9cd130382036a984defa72b7d7bf191c8"
     },
     {
       "path": "tests/e2e/layout-and-header.spec.ts",
@@ -222,7 +222,7 @@
     },
     {
       "path": "tests/runtime/shell-entry-lifecycle.test.ts",
-      "sha256": "24f931b2cc715b46149e76863fbf7963a12541ce45b33dc03611735b68ab9720",
+      "sha256": "46cfe2862e883fa30b4c625101d1439b717f80e3a43cc68ea64886998a6149ff",
       "template": "tests__runtime__shell-entry-lifecycle.test.ts.txt"
     },
     {
@@ -272,7 +272,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "ea7517ba541cf1cbbf3b21bca21705cef73f2ea0e32f7891a88d1fdb7e462d5d",
+      "sha256": "1a3de2be13880fa77c69fa1cab5f346ddfc78745363932df8dcd2ac03c984fc7",
       "template": "README.md.txt",
       "generated": "retain"
     },
@@ -453,7 +453,7 @@
     },
     {
       "path": "tests/runtime/obsidian-test-kit-shell-entry.test.ts",
-      "sha256": "298c4f5e22955d120d73890d17d7e6a69156a323a437431971e9691c9ea3d982"
+      "sha256": "a64bf05c487ca79a6cce2e2633c5b164765f97e78c20485212bee74b3d1c0763"
     },
     {
       "path": "src/features/showcase/feature-brief.ts",

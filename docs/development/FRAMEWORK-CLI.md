@@ -2,7 +2,7 @@
 
 > Type: reference · Part of the [docs index](../README.md)
 
-`node bin/app` is a developer-facing TypeScript CLI with an assembled ZIP workflow. It is not a published framework release or native companion conversion. The historical [framework-first plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) is broader than the implemented and qualified scope below.
+`src/cli` holds the TypeScript development source. `npm run app:dev -- <command>` runs it directly; `npm run build:cli` produces the standalone `node bin/app` product and `framework pack` assembles the ZIP. It is not a published framework release or native companion conversion. The historical [framework-first plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md) is broader than the implemented and qualified scope below.
 
 ## Start a new plugin from a starter
 
@@ -30,7 +30,7 @@ node bin/app new <dir> --starter <id> --apply <planHash>
   folder. Pass `--inside-vault` only for a disposable test vault you own.
 - Plugin IDs use lowercase letters, digits and single hyphens, start with a letter and
   must not contain `obsidian` or `plugin` (the same rule `check submission` applies,
-  from `bin/adapters/framework/plugin-id.ts`). An explicit `--id my-plugin` is refused with
+  from `src/cli/adapters/framework/plugin-id.ts`). An explicit `--id my-plugin` is refused with
   a suggestion. The default ID is the folder name without the words `obsidian` and
   `plugin`; a remainder shorter than three characters is combined with the starter's
   ID (`../my-plugin` with `quick-capture` gives `my-quick-capture`, with `blank` it
@@ -188,8 +188,8 @@ with `BASE_NOT_FOUND`. `data.changes.base` reports the `source` (`option`,
 A node suite is selected when a changed path matches its `include` globs in
 `tests/suites.json` (a changed test file), or a source glob in
 `configs/quality/gate-rules.json` `suiteSources` (the code the suite protects, for
-example `templates/**`, `bin/compiler/**` and `scripts/companion/**` for `generator`;
-`bin/adapters/makers/**` and `scripts/makers/**` for `maker`), or a change-type rule that
+example `templates/**`, `src/cli/compiler/**` and `scripts/companion/**` for `generator`;
+`src/cli/adapters/makers/**` and `scripts/makers/**` for `maker`), or a change-type rule that
 names it. `data.suites[]` lists each selected suite with the matched pattern and sample
 paths. The slow `maker` suite therefore runs only when something it covers changed;
 the full `check` still always runs it. The lint, eslint and test steps fall back to
@@ -224,7 +224,7 @@ gate. The JSON result keeps the check protocol (`protocolVersion` 1, `command` `
   the `check` gate also lists its exact `steps`;
 - `data.flags[]` (a change under `configs/quality/**` or the threshold code carries
   `THRESHOLD_CHANGE`: "threshold change: requires owner review"), `data.notes[]`
-  (generated-snapshot regeneration for `templates/**`, `bin/compiler/**`, `scripts/compiler/**`,
+  (generated-snapshot regeneration for `templates/**`, `src/cli/compiler/**`, `scripts/compiler/**`,
   `scripts/companion/**`; workflow changes; dependency manifests; documentation-only
   diffs), `data.workflows[]` (workflows that run for this diff) and `data.estimate`.
 
@@ -271,7 +271,7 @@ The build of the framework distribution is an explicit maintainer action:
 node bin/app framework pack --out ./plugin-framework.zip --yes --json
 ```
 
-This uses the installed TypeScript compiler and emits a self-contained CLI below `bin/`: `bin/app` is the only launcher, `bin/app.js` is the compiled runtime, supporting templates live under `bin/template/`, plugin configuration under `bin/plugins/`, licenses under `bin/licenses/`, and integrity metadata in `bin/kit.json`. Each `bin/plugins/<id>/config.json` is editable data (for example `enabled: true`): `framework status` validates its schema (a JSON object whose optional `enabled` is a boolean) instead of fingerprinting it, and the fingerprinted default is the matching `bin/template/plugins/<id>/config.json`. Every third-party package bundled into `bin/app.js` ships its license text under `bin/licenses/` and an exact-version entry in `bin/licenses/NOTICES.json`; packing fails when a bundled package has no license file. Installed development tools (TypeScript, esbuild, Prettier) are not bundled: makers and packing load them from the project's installed dependencies. The ZIP has deterministic sorted entries and fixed timestamps. Packing does not upload, publish or install anything. A configured consumer cannot be repackaged as the framework by this command. Checksums detect corruption; they do not authenticate an untrusted distributor.
+This uses the installed TypeScript compiler and emits a self-contained CLI below `bin/`: `bin/app` is the only launcher, `bin/app.js` is the compiled runtime, supporting templates live under `bin/template/`, plugin configuration under `bin/plugins/`, licenses under `bin/licenses/`, and integrity metadata in `bin/kit.json` (schema 3). `bin/package.json` fixes module interpretation even outside this repository. Copying only `bin` is supported; the root README, license and package aliases in the ZIP are optional convenience files. Each `bin/plugins/<id>/config.json` is editable data (for example `enabled: true`): `framework status` validates its schema (a JSON object whose optional `enabled` is a boolean) instead of fingerprinting it, and the fingerprinted default is the matching `bin/template/plugins/<id>/config.json`. Every third-party package bundled into `bin/app.js` ships its license text under `bin/licenses/` and an exact-version entry in `bin/licenses/NOTICES.json`; packing fails when a bundled package has no license file. The CLI includes TypeScript under `bin/tools/` and Prettier with its explicit language plugins in the runtime bundle. Maker planning and formatting work before dependency installation. Applied makers still run the target project's checks, which require that project's dependencies; missing tools produce explicit failed checks while preserving the authored files. Project builds, tests, browsers and framework repackaging use the installed project toolchain. The ZIP has deterministic sorted entries and fixed timestamps. Packing does not upload, publish or install anything. A configured consumer cannot be repackaged as the framework by this command. Checksums detect corruption; they do not authenticate an untrusted distributor.
 
 The user extracts that ZIP into a new directory and runs either:
 
@@ -365,8 +365,24 @@ Fixture commands reuse the real exported fixture engine, validators and ownershi
 
 ## Shared API and remaining gates
 
-`bin/adapters/framework/operations.ts` exports `executeOperation(request, context)`. Terminal and headless companion-facing tests submit the same validated requests and get the same plans/results. Contracts and schemas contain no terminal state; Node adapters own file/process access. The native companion has not been converted and direct mobile/runtime RPC is not implemented.
+`src/cli/adapters/framework/operations.ts` exports `executeOperation(request, context)`. Terminal and headless companion-facing tests submit the same validated requests and get the same plans/results. Contracts and schemas contain no terminal state; Node adapters own file/process access. The native companion has not been converted and direct mobile/runtime RPC is not implemented.
 
 Existing MJS makers, file plans, fixture and release services are reused unchanged or selectively reconciled; their full TypeScript migration, unified legacy/current metadata, arbitrary source migrations and broader native/runtime adapters remain follow-on scope. Do not describe the 57-task backlog as complete because the central workflow runs.
 
 The [continuation record](../_archive/testing/PR18-CLI-CONTINUATION.md) records the latest reconciliation and regression evidence; the [earlier execution record](../_archive/testing/FRAMEWORK-CLI-IMPLEMENTATION.md) distinguishes local tests, actual ZIP extraction, generated-consumer CI, native qualification and publication. SH-022/SH-034 and companion conversion/publication gates remain blocked until their actual evidence and separate authorizations exist.
+
+
+## CLI build and source ownership
+
+Run `npm ci` with the qualified toolchain, then `npm run build:cli`. The build stages
+and verifies the complete candidate before replacing `bin`. It refuses unknown or
+modified owned output, preserves installed `bin/plugins` and edited settings, and
+keeps the previous complete output on failure. A concurrent build is refused.
+The compiled launcher never falls back to TypeScript source.
+
+`src/cli` is checked by the same architecture, lint and CLI coverage gates as the
+former source tree. Plugin runtime coverage and CLI coverage have independent
+unchanged thresholds. Generated source projects carry a compiled CLI and
+`bin/cli.json` inventory; their own source tree supplies their template data.
+Older kit schema 2 output must be kept separately and replaced with a fresh schema 3
+build; it is not silently treated as a current standalone artifact.

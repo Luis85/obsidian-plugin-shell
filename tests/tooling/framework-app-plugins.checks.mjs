@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { enable, frameworkRoot, install, manifestFor, operation, run } from './app-plugins-fixture.mjs';
-import { communityInventory } from '../../bin/adapters/community-plugins/inventory.ts';
-import { bindPlugin, Plugin } from '../../bin/adapters/community-plugins/plugin.ts';
-import { compareVersions, validateCommunityManifest, validateEnabledList, withEnabled } from '../../bin/domain/community-plugin.ts';
+import { communityInventory } from '../../src/cli/adapters/community-plugins/inventory.ts';
+import { bindPlugin, Plugin } from '../../src/cli/adapters/community-plugins/plugin.ts';
+import { compareVersions, validateCommunityManifest, validateEnabledList, withEnabled } from '../../src/cli/domain/community-plugin.ts';
 
 test('manifest, enabled list and version rules follow the Obsidian community-plugin shape', () => {
   assert.deepEqual(validateCommunityManifest(manifestFor('hello-world', { fundingUrl: 'x' }), 'hello-world', '0.4.0').issues, []);

@@ -54,7 +54,8 @@ test('[NPM-03] reviewed pins cover the lockfile hooks without blanket approvals'
 
 async function fixture() {
   const dir = await mkdtemp(join(tmpdir(), 'shell npm spaces ü-'));
-  await mkdir(join(dir, 'scripts'), { recursive: true });
+  await mkdir(join(dir, 'scripts/bundling'), { recursive: true });
+  await writeFile(join(dir, 'scripts/bundling/build-cli.mjs'), "console.log('Synthetic CLI build boundary; portable CLI has separate acceptance tests');\n");
   await cp(join(root, 'scripts/setup.mjs'), join(dir, 'scripts/setup.mjs'));
   await cp(join(root, 'scripts/setup'), join(dir, 'scripts/setup'), { recursive: true });
   await cp(join(root, 'scripts/shared'), join(dir, 'scripts/shared'), { recursive: true });

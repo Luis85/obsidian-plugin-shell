@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { handoutSections as relocated } from '../../bin/adapters/framework/handout-questions.ts';
+import { handoutSections as relocated } from '../../src/cli/adapters/framework/handout-questions.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 test('relocated handout question catalog preserves compatibility identity and stable structure', () => {

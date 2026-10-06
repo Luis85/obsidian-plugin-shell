@@ -58,6 +58,10 @@ runs:
       run: |
         read -r -a flags <<< "$INSTALL_FLAGS"
         node "$QUALIFIED_NPM" ci "${flags[@]}"
+    - name: Build the standalone CLI from source
+      if: inputs.install == 'true'
+      shell: bash
+      run: node scripts/bundling/build-cli.mjs
     - name: Resolve the pinned Playwright version
       id: playwright
       if: inputs.playwright != ''

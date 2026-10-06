@@ -30,7 +30,7 @@ export function useSettingsForm() {
     Object.assign(base, value);
   });
   async function save() {
-    if (pending.value || services.preferences.readonly) return;
+    if (!alive || pending.value || services.preferences.readonly) return;
     pending.value = true; error.value = '';
     const patch = changedPreferences(form, base);
     try {
@@ -42,7 +42,7 @@ export function useSettingsForm() {
     finally { if (alive) pending.value = false; }
   }
   async function toggleHeader(event: Event) {
-    if (headerPending.value || services.preferences.readonly) return;
+    if (!alive || headerPending.value || services.preferences.readonly) return;
     const target = event.currentTarget;
     if (!checkbox(target)) return;
     const requested = target.checked;

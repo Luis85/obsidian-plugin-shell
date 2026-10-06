@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { providerProject } from '../../tests/fixtures/generator-provider-project.mjs';
 import { boundaryProject } from '../../tests/fixtures/generator-boundaries.mjs';
-import { planProject, applyProject, reviewProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { planProject, applyProject, reviewProject } from '../../src/cli/compiler/adapters/project-plan.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const npm = process.env.QUALIFIED_NPM;
 if (!npm) throw new Error('QUALIFICATION_NPM_REQUIRED: select the qualified npm explicitly.');

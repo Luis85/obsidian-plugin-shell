@@ -5,11 +5,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { galleryOptions, parseGalleryArguments } from '../../scripts/ui/gallery-options.ts';
 import { runCli } from '../../scripts/ui/gallery-cli.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { galleryArguments } from '../../bin/adapters/framework/ui-gallery.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { commandHelp } from '../../bin/adapters/framework/help-text.ts';
-import { descriptor } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { galleryArguments } from '../../src/cli/adapters/framework/ui-gallery.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { commandHelp } from '../../src/cli/adapters/framework/help-text.ts';
+import { descriptor } from '../../src/cli/adapters/framework/catalog.ts';
 
 const code = (value, pattern) => assert.throws(value, error => pattern.test(error.code ?? error.message));
 

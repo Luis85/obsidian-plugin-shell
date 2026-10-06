@@ -3,10 +3,10 @@ import { mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/pro
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { startWizard } from '../../bin/presentation/wizards/registry.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { parseCollectionNote } from '../../bin/adapters/collection-notes.ts';
+import { startWizard } from '../../src/cli/presentation/wizards/registry.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { parseCollectionNote } from '../../src/cli/adapters/collection-notes.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const BACK = Symbol('back');
 async function scratch(fn) {

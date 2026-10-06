@@ -76,4 +76,20 @@ describe('Presentation composables with actual application services', () => {
       dialog?.close(); await opened;
     } finally { f.dispose(); }
   });
+  it('retained settings actions cannot write after their view is disposed', async () => {
+    const f = await composition(useSettingsForm);
+    f.state.form.taskFolder = 'Closed/Draft';
+    const toggle = document.createElement('input'); toggle.type = 'checkbox'; toggle.checked = true;
+    const event = new Event('change'); Object.defineProperty(event, 'currentTarget', { value: toggle });
+    f.close();
+    try {
+      await f.state.save(); await f.state.toggleHeader(event);
+      expect(f.save).not.toHaveBeenCalled();
+      expect(f.services.preferences.current.taskFolder).toBe('Tasks');
+      expect(f.services.preferences.current.hideObsidianViewHeader).toBe(false);
+      expect(f.services.notifications.current).toEqual([]);
+      expect(f.state.pending.value).toBe(false); expect(f.state.headerPending.value).toBe(false);
+      expect(toggle.checked).toBe(true);
+    } finally { f.services.dispose(); }
+  });
 });

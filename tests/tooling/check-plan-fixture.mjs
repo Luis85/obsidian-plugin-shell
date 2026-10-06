@@ -27,7 +27,7 @@ const workflows = {
   'starter-flow.yml': 'name: Starter flow\non:\n  pull_request:\n    paths: &inputs\n      - templates/**\n      - "!templates/docs/**"\n      - scripts/starters/**\n  push:\n    paths: *inputs\njobs: {}\n',
 };
 const durations = '| Suite | Purpose | Command | Runner | Prerequisites | In `verify` | Measured |\n| --- | --- | --- | --- | --- | --- | --- |\n| `generator` | g | `npm run test:generator` | `node --test` | none | tooling | 187 s |\n| `maker` | m | `npm run test:maker` | Vitest `configs/testing/vitest.maker.config.mjs` | none | own step | not measured |\n';
-const baseline = { 'src/a.ts': 'export const a = 1;\n', 'README.md': 'readme\n', 'bin/app.ts': 'export {};\n', 'configs/types/tsconfig.maker.json': '{}\n', 'docs/testing/TEST-SUITES.md': durations,
+const baseline = { 'src/a.ts': 'export const a = 1;\n', 'README.md': 'readme\n', 'src/cli/app.ts': 'export {};\n', 'configs/types/tsconfig.maker.json': '{}\n', 'docs/testing/TEST-SUITES.md': durations,
   'package.json': JSON.stringify({ scripts: { verify: 'node verify.mjs' } }), 'tests/suites.json': JSON.stringify(manifest) };
 
 export function git(cwd, ...args) {

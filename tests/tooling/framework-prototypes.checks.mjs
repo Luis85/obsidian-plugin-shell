@@ -5,10 +5,10 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
-import { loadPrototypeWorkspace } from '../../bin/adapters/framework/prototype-workspace.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../src/cli/adapters/framework/planning.ts';
+import { loadPrototypeWorkspace } from '../../src/cli/adapters/framework/prototype-workspace.ts';
 import { extractKit } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { api, document, main, alternate } from '../support/prototype-fixture.mjs';
@@ -143,7 +143,7 @@ test('in-place managed generation names adoption when canonical design is absent
   assert.equal(result.status,'failed');assert.match(result.diagnostics[0].message,/adopt/);
 });
 test('managed-generation adapter rejects a lookalike provenance receipt before any writes',async t=>{
-  const {managedGenerationPlan}=await import('../../bin/adapters/framework/prototype-generation.ts');
+  const {managedGenerationPlan}=await import('../../src/cli/adapters/framework/prototype-generation.ts');
   const {createFilePlan}=await import('../../scripts/shared/file-plan.ts');
   // In place: the canonical design is the adopted active variant and the receipt sits at the project root.
   const ctx=await activated(t),target=ctx.root,receipt=join(target,'.companion/prototype-selection.json');

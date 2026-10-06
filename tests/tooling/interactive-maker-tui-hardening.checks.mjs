@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { PassThrough, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { TerminalSession } from '../../bin/presentation/tui/session.ts';
-import { initialState, paste, step } from '../../bin/presentation/tui/state.ts';
-import { dimensions, frame } from '../../bin/presentation/tui/frame.ts';
-import { graphemes } from '../../bin/presentation/tui/text.ts';
+import { TerminalSession } from '../../src/cli/presentation/tui/session.ts';
+import { initialState, paste, step } from '../../src/cli/presentation/tui/state.ts';
+import { dimensions, frame } from '../../src/cli/presentation/tui/frame.ts';
+import { graphemes } from '../../src/cli/presentation/tui/text.ts';
 import { terminalFixture } from './interactive-maker-tui-fixture.mjs';
 
 test('incremental combining characters and joined emoji keep the caret at a real grapheme boundary', () => {
@@ -82,11 +82,11 @@ test('disposing an already destroyed output still observes its scheduled error w
 });
 
 test('shared discovery accepts the real launcher and TypeScript sources but rejects unsafe source paths', async () => {
-  const { capabilityCatalog, validateCatalog } = await import('../../bin/adapters/operations/catalog.ts');
+  const { capabilityCatalog, validateCatalog } = await import('../../src/cli/adapters/operations/catalog.ts');
   const catalog = capabilityCatalog(), maker = catalog.operations.find(item => item.id === 'source.make');
   assert.equal(maker.cli.command, 'node bin/app make');
   assert.ok(maker.cli.sourceFiles.includes('bin/app'));
-  assert.ok(maker.cli.sourceFiles.includes('bin/adapters/framework-cli.ts'));
+  assert.ok(maker.cli.sourceFiles.includes('src/cli/adapters/framework-cli.ts'));
   assert.equal(validateCatalog(catalog), true);
   for (const path of ['../bin/app', '/bin/app', 'bin/../app', 'app.mjs', 'shell.mjs', 'scripts/../bin/app', 'scripts//cli.ts', 'scripts/cli.js', 'node_modules/tool.mjs', 'scripts\\cli.ts']) {
     const invalid = structuredClone(catalog);

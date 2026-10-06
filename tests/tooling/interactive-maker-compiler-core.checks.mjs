@@ -1,16 +1,16 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { runCompiler, compilerPhases, compilerVersion } from '../../bin/compiler/application/pipeline.ts';
-import { artifactCollector, validateArtifacts, canonicalJson, portableArtifactPath } from '../../bin/compiler/domain/artifacts.ts';
-import { diagnostic, diagnosticCatalog, CompilerError, CompilationFailure, orderedDiagnostics } from '../../bin/compiler/domain/diagnostics.ts';
-import { referenceDiagnostics } from '../../bin/compiler/domain/references.ts';
-import { sourceReferenceDiagnostics } from '../../bin/compiler/domain/source-references.ts';
-import { parseSelection, selectionClosure, SelectionError } from '../../bin/compiler/domain/selection.ts';
-import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../bin/compiler/domain/project-starter.ts';
-import { frameworkAdapter } from '../../bin/compiler/adapters/project/framework-registry.ts';
+import { runCompiler, compilerPhases, compilerVersion } from '../../src/cli/compiler/application/pipeline.ts';
+import { artifactCollector, validateArtifacts, canonicalJson, portableArtifactPath } from '../../src/cli/compiler/domain/artifacts.ts';
+import { diagnostic, diagnosticCatalog, CompilerError, CompilationFailure, orderedDiagnostics } from '../../src/cli/compiler/domain/diagnostics.ts';
+import { referenceDiagnostics } from '../../src/cli/compiler/domain/references.ts';
+import { sourceReferenceDiagnostics } from '../../src/cli/compiler/domain/source-references.ts';
+import { parseSelection, selectionClosure, SelectionError } from '../../src/cli/compiler/domain/selection.ts';
+import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../src/cli/compiler/domain/project-starter.ts';
+import { frameworkAdapter } from '../../src/cli/compiler/adapters/project/framework-registry.ts';
 
-// Drives the inward-only compiler core (bin/compiler/{domain,application}) to the maker core floors.
+// Drives the inward-only compiler core (src/cli/compiler/{domain,application}) to the maker core floors.
 const artifact = (path, content = 'safe', extra = {}) => ({ path, content, ownership: 'managed', producer: 'fixture', ...extra });
 const template = Object.freeze({ fingerprint: 'fixture', frameworkFiles: [], skillFiles: [], text() { throw new Error('unexpected template read'); } });
 const hash = (value, encoding) => createHash('sha256').update(value, encoding === 'base64' ? 'base64' : 'utf8').digest('hex');

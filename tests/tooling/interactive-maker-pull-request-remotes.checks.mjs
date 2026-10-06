@@ -5,10 +5,10 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readdir, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createGitHubRemote } from '../../bin/adapters/increments/github-remote.ts';
-import { createAzureRemote } from '../../bin/adapters/increments/azure-remote.ts';
-import { requireConfigured } from '../../bin/adapters/increments/hosting-target.ts';
-import { remoteRevision } from '../../bin/domain/increments/sync-record.ts';
+import { createGitHubRemote } from '../../src/cli/adapters/increments/github-remote.ts';
+import { createAzureRemote } from '../../src/cli/adapters/increments/azure-remote.ts';
+import { requireConfigured } from '../../src/cli/adapters/increments/hosting-target.ts';
+import { remoteRevision } from '../../src/cli/domain/increments/sync-record.ts';
 import { sha256 } from '../support/fake-hosting-remote.mjs';
 
 const secret = 'ghp_SECRETTOKEN1234567890';

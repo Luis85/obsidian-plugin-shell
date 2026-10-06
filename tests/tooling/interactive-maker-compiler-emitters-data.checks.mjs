@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { dataCode } from '../../bin/compiler/emitters/data-code.ts';
-import { typeCode, sample, sampleCode } from '../../bin/compiler/emitters/schema-code.ts';
-import { noteWireSchemas, validateNoteWire } from '../../bin/compiler/emitters/note-contracts.ts';
+import { dataCode } from '../../src/cli/compiler/emitters/data-code.ts';
+import { typeCode, sample, sampleCode } from '../../src/cli/compiler/emitters/schema-code.ts';
+import { noteWireSchemas, validateNoteWire } from '../../src/cli/compiler/emitters/note-contracts.ts';
 import { dataDocument, model, recorder } from './compiler-emitters-fixture.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
 

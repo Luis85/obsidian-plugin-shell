@@ -150,4 +150,5 @@ export async function copyMakerSuite(root) {
   }
   // A source checkout carries the whole CLI: generated locale checks run the project's own bin/app.
   await symlink(resolve(makerSourceRoot, 'bin'), join(root, 'bin'), process.platform === 'win32' ? 'junction' : 'dir');
+  await symlink(resolve(makerSourceRoot, 'src/cli'), join(root, 'src/cli'), process.platform === 'win32' ? 'junction' : 'dir');
 }

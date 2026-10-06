@@ -13,10 +13,10 @@
     "typeRoots": ["../../tooling/documentation/node_modules/@types"]
   },
   "files": [
-    "../../bin/adapters/framework/catalog.ts",
-    "../../bin/adapters/framework/help-text.ts",
-    "../../bin/adapters/framework/contracts.ts",
-    "../../bin/compiler/domain/contracts.ts",
-    "../../bin/compiler/domain/diagnostics.ts"
+    "../../src/cli/adapters/framework/catalog.ts",
+    "../../src/cli/adapters/framework/help-text.ts",
+    "../../src/cli/adapters/framework/contracts.ts",
+    "../../src/cli/compiler/domain/contracts.ts",
+    "../../src/cli/compiler/domain/diagnostics.ts"
   ]
 }

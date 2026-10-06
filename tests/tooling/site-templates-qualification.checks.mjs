@@ -80,8 +80,8 @@ test('[SITE-QUALIFY-04] the site-templates workflow meets the security floor, st
   const text = await readFile(join(repository, '.github/workflows/site-templates.yml'), 'utf8'), data = parse(text);
   assert.equal(inspectWorkflow(text).jobs, 1);
   assert.equal(excludesProjects(text), true);
-  for (const event of ['pull_request', 'push']) for (const path of ['templates/sites/**', 'bin/domain/site-template.ts', 'bin/domain/site-collections.ts', 'bin/adapters/site-templates.ts',
-    'bin/adapters/framework/site-command.ts', 'scripts/testing/qualify-site-templates.mjs', 'tests/fixtures/sites/**', '.github/workflows/site-templates.yml'])
+  for (const event of ['pull_request', 'push']) for (const path of ['templates/sites/**', 'src/cli/domain/site-template.ts', 'src/cli/domain/site-collections.ts', 'src/cli/adapters/site-templates.ts',
+    'src/cli/adapters/framework/site-command.ts', 'scripts/testing/qualify-site-templates.mjs', 'tests/fixtures/sites/**', '.github/workflows/site-templates.yml'])
     assert.ok(data.on[event].paths.includes(path), `${event}: ${path}`);
   const job = Object.values(data.jobs)[0];
   assert.deepEqual([job['runs-on'], typeof job['timeout-minutes']], ['ubuntu-24.04', 'number']);

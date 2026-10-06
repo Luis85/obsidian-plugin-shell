@@ -3,12 +3,12 @@ import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { routeArguments } from '../../bin/adapters/router.ts';
-import { parseCollectionNote } from '../../bin/adapters/collection-notes.ts';
-import { settingsPlan } from '../../bin/adapters/user-settings.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { effectivePaths, defaultSettings, readSettings } from '../../bin/domain/user-settings.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { routeArguments } from '../../src/cli/adapters/router.ts';
+import { parseCollectionNote } from '../../src/cli/adapters/collection-notes.ts';
+import { settingsPlan } from '../../src/cli/adapters/user-settings.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { effectivePaths, defaultSettings, readSettings } from '../../src/cli/domain/user-settings.ts';
 const repository = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'candidates-command-'));
