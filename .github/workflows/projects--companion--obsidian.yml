@@ -49,13 +49,20 @@ jobs:
         with:
           path: projects/companion/.native-cache
           key: obsidian-host-${{ runner.os }}-app-1.13.7-launcher-3.2.1
+      # The host's singleton socket lives under <project>/.nq/<scratch>/ (temporary data stays contained), and Linux
+      # caps socket paths at 107 bytes. Inside the shell repository the project folder alone is 76 bytes, so the
+      # Obsidian steps run from a bind mount of this same folder at a short path; writes still land in the project.
+      - name: Mount the project at a short path (Linux socket path budget)
+        run: sudo mkdir -p /wc && sudo mount --bind "$PWD" /wc
       - name: Real-Obsidian tests (private Xvfb display, fresh vault per test)
+        working-directory: /wc
         env:
           OBSIDIAN_ALLOW_DOWNLOAD: '1'
           SOURCE_COMMIT: ${{ github.sha }}
         run: node "$PINNED_NPM" run test:obsidian
       - name: Agent loop smoke (build, launch, reload once, JSON summary)
         if: always()
+        working-directory: /wc
         env:
           OBSIDIAN_ALLOW_DOWNLOAD: '1'
         run: |
