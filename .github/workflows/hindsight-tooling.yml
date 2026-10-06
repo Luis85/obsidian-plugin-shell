@@ -1,19 +1,39 @@
 name: Optional memory tooling contracts
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths: &memory-inputs
       - 'scripts/hindsight/**'
       - 'tests/hindsight/**'
       - 'tests/support/hindsight-fixture.mjs'
       - 'tests/suites.json'
-      - 'shell.mjs'
+      - 'bin/app'
+      - 'bin/app.ts'
+      - 'bin/adapters/router.ts'
       - 'package.json'
-      - 'tsconfig.hindsight.json'
+      - 'package-lock.json'
+      - '.nvmrc'
+      - 'configs/types/tsconfig.hindsight.json'
+      - '.github/actions/setup-qualified/**'
       - '.github/workflows/hindsight-tooling.yml'
+      - '!projects/**'
   push:
     branches: [main]
     paths: *memory-inputs
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
 permissions:
   contents: read
 concurrency:
@@ -21,27 +41,34 @@ concurrency:
   cancel-in-progress: true
 jobs:
   contracts:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Integration (ready pull requests, main) runs the Linux leg; the release tier runs every OS.
+        os: ${{ fromJSON(inputs.tier == 'release' && '["ubuntu-24.04", "windows-latest", "macos-latest"]' || '["ubuntu-24.04"]') }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    # The locked install for the memory typecheck adds a few minutes on Windows and macOS.
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: ./.github/actions/setup-qualified
         with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
+          install: 'true'
+          install-flags: --no-fund --ignore-scripts
       - name: Check Python prerequisite for stdlib TOML and disposable venv fixtures
         shell: bash
         run: python3 -c 'import sys; assert sys.version_info >= (3, 11)'
       - name: Verify every test directory is registered
         run: node scripts/testing/suites.mjs --check
+      - name: Typecheck the memory tooling with the locked TypeScript
+        shell: bash
+        run: node "$QUALIFIED_NPM" run typecheck:memory
       - name: Node policy, real Git, venv and stdio contracts without Hindsight installation
-        run: npm run test:memory
+        shell: bash
+        run: node "$QUALIFIED_NPM" run test:memory
       - name: Stdlib Python adapter contracts with explicit SDK doubles
         shell: bash
         run: python3 -B -m unittest discover -s tests/hindsight -p 'test_*.py' -v

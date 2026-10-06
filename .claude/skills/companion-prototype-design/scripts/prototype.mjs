@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** One entrypoint; source kits use the same native TypeScript launch as shell.mjs. */
+/** One entrypoint; source kits use the same native TypeScript launch as bin/app. */
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { args, need, isMain } from './lib/io.mjs';

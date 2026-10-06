@@ -6,9 +6,10 @@ The Shell CLI turns an approved plugin design into a working project, helps you 
 
 | You need to… | Read |
 | --- | --- |
-| Create your first plugin or use an extracted developer kit | [Getting started](getting-started.md) |
+| Create your first plugin or use an extracted framework kit | [Getting started](getting-started.md) |
 | Import project JSON, generate source, or build an offline clickdummy | [Design to working project](design-and-generation.md) |
 | Add features and work on a project every day | [Development and testing](development-and-testing.md) |
+| Plan an increment, check its Definition of Ready and Done, and publish its pull requests | [Increments and pull requests](increments-and-pull-requests.md) |
 | Brainstorm features in the TUI or with an AI agent | [Feature brainstorming](brainstorm.md) |
 | Automate safely or integrate an AI agent | [Plans, automation and safety](automation-and-safety.md) |
 | Maintain the framework, upgrade or prepare a release | [Maintenance and release](maintenance-and-release.md) |
@@ -31,16 +32,27 @@ No documentation package installation is needed for that command. Rendering the 
 
 ## First orientation
 
-From the folder containing `shell.mjs`:
+From the CLI package root containing `bin/app`:
 
 ```sh
-node shell.mjs help
-node shell.mjs help --all
-node shell.mjs help new
-node shell.mjs version --json
+node bin/app help
+node bin/app help --all
+node bin/app help new
+node bin/app version --json
 ```
 
-The direct Node entry works without an npm alias. Where project package scripts are present, `npm run shell -- help` forwards to the same entry. Do not assume that an unqualified global `shell-cli` command or an npm registry package has been published.
+The direct Node entry works without an npm alias or file extension. These forms all reach the same CLI:
+
+| Form | Notes |
+| --- | --- |
+| `node bin/app help` | Extensionless entry; works on every platform. |
+| `./bin/app help` | macOS/Linux, when the file keeps its executable bit. |
+| `npx obs-shell help` | Inside the project only: the package `bin` maps `obs-shell` to `bin/app`, and flags pass through without `--`. Outside a project, npx would look for a registry package instead. |
+| `npm run app -- help` | Package script; npm consumes flags such as `--json` unless they follow `--`. There is no `npm run shell` alias. |
+
+The entry point is `bin/app` (`bin/app.ts` in source, bundled `bin/app.js` in a kit). It is the single supported CLI launcher for source checkouts and packaged distributions.
+
+Do not assume that an unqualified global `shell-cli` command or an npm registry package has been published.
 
 Commands in examples are separate steps, not a script to execute blindly. Replace filenames, project names and hashes with your own values. Inspection and preview come before approval. A successful command, generated scaffold or browser clickdummy does **not** establish completed business behavior, native Obsidian acceptance or permission to publish.
 
@@ -48,4 +60,4 @@ Commands in examples are separate steps, not a script to execute blindly. Replac
 
 This handbook was reconciled against PR #5 source commit `f140c7e89570329fc7ed40ee2d4cb885f4524fc2` on 2026-09-28. The generated reference always reflects the checkout used to generate it. Its manifest records relevant source fingerprints; it is not a digital signature or an acceptance report.
 
-There are three distinct environments: the framework source checkout, an extracted compiled developer kit, and a generated consumer project. Build documentation in the first. Read the supplied documentation in the others. In the inspected kit layout, documentation is retained below `.framework/template/docs/` before project generation; do not assume every template file is already at the extraction root.
+There are three distinct environments: the framework source checkout, an extracted compiled framework kit, and a generated consumer project. Build documentation in the first. Read the supplied documentation in the others. In the inspected kit layout, documentation is retained below `bin/template/docs/` before project generation; do not assume every template file is already at the extraction root.

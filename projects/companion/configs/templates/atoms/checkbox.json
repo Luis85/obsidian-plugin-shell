@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "atom.checkbox",
+  "name": "Checkbox",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "atom",
+  "category": "Forms",
+  "description": "Boolean form control for independent choices.",
+  "tags": [
+    "atom",
+    "forms",
+    "form",
+    "boolean"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "boolean-input"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-checkbox"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

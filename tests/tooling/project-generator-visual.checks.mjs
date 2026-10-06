@@ -5,21 +5,22 @@ import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import { createApp, effectScope, nextTick, reactive } from 'vue';
 import { Window } from 'happy-dom';
+import { selfProject } from '../support/starter-documents.mjs';
 
 // Resolves through ancestor node_modules so the check also runs inside git worktrees.
 const tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
 test('visual runtime type-checks under the generator configuration', () => {
-  const run = spawnSync(process.execPath, [tsc, '--noEmit', '--project', 'tsconfig.generator.json'], { encoding: 'utf8' });
+  const run = spawnSync(process.execPath, [tsc, '--noEmit', '--project', 'configs/types/tsconfig.generator.json'], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stdout + run.stderr);
 });
 test('runtime exposes the IR surface used by generated SFCs', async () => {
-  const text = await readFile('scripts/companion/runtime/use-visual.ts', 'utf8');
+  const text = await readFile('templates/companion/runtime/use-visual.ts', 'utf8');
   for (const name of ['visible', 'style', 'text', 'a11y', 'props', 'attrs', 'on', 'message', 'attach', 'theme', 'state', 'external']) assert.match(text, new RegExp('\\b' + name + '\\b'));
   assert.doesNotMatch(text, /\beval\b|new Function/);
 });
 
-const { useVisual, provideVisualContext } = await import('../../scripts/companion/runtime/use-visual.ts');
-const { visualIndex } = await import('../../scripts/companion/runtime/visual-runtime.ts');
+const { useVisual, provideVisualContext } = await import('../../templates/companion/runtime/use-visual.ts');
+const { visualIndex } = await import('../../templates/companion/runtime/visual-runtime.ts');
 const dom = new Window();
 globalThis.HTMLElement ??= dom.HTMLElement;
 
@@ -71,6 +72,15 @@ test('a11y returns author accessibility notes and undefined when absent or empty
   const { model } = mountVisual(page([text('vn-1', lit('a'), { a11y: 'Totals for the current filter' }), text('vn-2', lit('b'), { a11y: '' }), text('vn-3', lit('c'))]));
   assert.equal(model.a11y('vn-1'), 'Totals for the current filter');
   assert.equal(model.a11y('vn-2'), undefined); assert.equal(model.a11y('vn-3'), undefined); assert.equal(model.a11y('vn-404'), undefined);
+});
+test('controls in a labelled form field keep the field label as their accessible name; others fall back to the node name', () => {
+  const field = (id, label, child) => nuxt(id, 'u-form-field', label === undefined ? {} : { label: lit(label) }, { slots: { default: [child] } });
+  const input = (id, name, props = {}) => nuxt(id, 'u-input', props, { name, control: { kind: 'text' } });
+  const { model } = mountVisual(page([field('vn-1', 'Email address', nuxt('vn-2', 'u-card', {}, { slots: { default: [input('vn-3', 'Input')] } })),
+    field('vn-4', '  ', input('vn-5', 'Blank field')), field('vn-6', undefined, input('vn-7', 'Unlabelled field')), input('vn-8', 'Search'), input('vn-9', 'Input', { 'aria-label': lit('Own name') })]));
+  assert.equal(Object.hasOwn(model.props('vn-3'), 'aria-label'), false, 'a nested control inherits the form-field label, not its catalog name');
+  assert.equal(model.props('vn-5')['aria-label'], 'Blank field'); assert.equal(model.props('vn-7')['aria-label'], 'Unlabelled field');
+  assert.equal(model.props('vn-8')['aria-label'], 'Search'); assert.equal(model.props('vn-9')['aria-label'], 'Own name');
 });
 test('source actions run the matching port with the mapped payload and report failures', async () => {
   const save = port('orders', 'save', null, async input => (input.title === 'bad' ? { ok: false } : { ok: true }));
@@ -218,10 +228,9 @@ test('external adapters mount after render and never mount an element removed be
   assert.equal(created, 1); assert.deepEqual(log, [['mount', true, 'v'], ['destroy']]);
 });
 
-const { projectModel } = await import('../../scripts/companion/compiler/model.ts');
-const { migrateCompanionDocument } = await import('../../scripts/companion/project-contract.mjs');
-const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
-const self = migrateCompanionDocument(JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'))).document;
+const { projectModel } = await import('../../bin/compiler/emitters/model.ts');
+const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualContractNames, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../bin/compiler/emitters/visual-model.ts');
+const self = structuredClone(selfProject());
 test('model exposes validated definitions and explicit Nuxt UI imports', () => {
   const m = projectModel(self), store = visualDefinitions(m);
   assert.equal(visualSpecs(m).length, store.pages.length + store.components.length);
@@ -264,11 +273,14 @@ test('Nuxt UI imports are unique, sorted and cover slot content', () => {
 test('component contracts declare typed props, emits and slots', () => {
   const source = visualContractTypes({ props: [{ name: 'title', type: 'string', required: true }, { name: 'count', type: 'number', required: false }], slots: [{ name: 'actions', required: false }, { name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }, { name: 'pick', payloadType: 'unknown' }, { name: 'toggle', payloadType: 'boolean' }], variants: [] });
   assert.equal(source, 'export interface ComponentProps {\n  "title": string;\n  "count"?: number;\n}\nexport interface ComponentEvents {\n  "close": [payload: undefined];\n  "pick": [payload: unknown];\n  "toggle": [payload: boolean];\n}\nexport interface ComponentSlots {\n  "actions"?: () => unknown;\n  "body": () => unknown;\n}\n');
-  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n}\nexport interface ComponentEvents {\n}\nexport interface ComponentSlots {\n}\n');
+  // An empty interface fails the generated no-empty-object-type rule, so only declared members are emitted.
+  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export {};\n');
+  assert.equal(visualContractTypes({ props: [{ name: 'title', type: 'string', required: false }], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n  "title"?: string;\n}\n');
+  assert.deepEqual(visualContractNames({ props: [], slots: [{ name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }] }), ['ComponentEvents', 'ComponentSlots']);
 });
 test('declared component packages merge as exact pins and framework conflicts name both versions', () => {
   const withDeps = dependencies => { const doc = structuredClone(self); doc.design.visualDesigns.components[0].dependencies = dependencies; return projectModel(doc); };
-  const framework = { vue: '3.5.43', '@nuxt/ui': '4.11.2', typescript: '6.0.3' };
+  const framework = { vue: '3.5.43', '@nuxt/ui': '4.11.3', typescript: '6.0.3' };
   assert.deepEqual(visualPackages(projectModel(self), framework), {});
   const name = self.design.visualDesigns.components[0].exportName;
   const merged = visualPackages(withDeps([{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text' }, { package: 'vue', version: '3.5.43', purpose: 'Same pin' }, { package: 'a-lib', version: '1.0.0', purpose: 'Sorting' }]), framework);
@@ -276,16 +288,17 @@ test('declared component packages merge as exact pins and framework conflicts na
   assert.throws(() => visualPackages(withDeps([{ package: 'vue', version: '3.0.0', purpose: 'Old' }]), framework), { message: 'VISUAL_INVALID: vue is pinned to 3.5.43 by the framework and 3.0.0 by ' + name + '.' });
 });
 
-const { visualSfc } = await import('../../scripts/companion/compiler/visual-code.ts');
+const { visualSfc } = await import('../../bin/compiler/emitters/visual-code.ts');
 const { writeFile } = await import('node:fs/promises');
 const { readFileSync } = await import('node:fs');
 const { visualNodes } = await import('../../scripts/companion/visual/visual-ir.mjs');
 const { parse: parseSfc, compileTemplate } = await import('vue/compiler-sfc');
-/** Golden fixture: the reviewed v5 seed plus an editor wrapping a declared package and a placeholder component. */
+/** Golden fixture: the reviewed visual store fixture on the current self-project plus an editor wrapping a declared package and a placeholder component. */
 function goldenFixture() {
-  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-v5.json', 'utf8'));
-  const [page] = design.nodes.filter(n => n.kind === 'page');
-  design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: null, components: [], bricks: [] })));
+  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-store.json', 'utf8'));
+  const [page] = design.nodes.filter(n => n.kind === 'page'), view = design.nodes.find(n => n.kind === 'view');
+  // Internal pages belong to the native view (the v6 sitemap contract).
+  design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: view.id, components: [], bricks: [] })));
   const [library] = design.library;
   design.library.push(...[['library-search', 'SearchField'], ['library-editor', 'RichEditor'], ['library-pending', 'PendingCard']].map(([id, name]) => ({ ...library, id, name })));
   const [source] = design.dataSources.sources, [operation] = source.operations;
@@ -377,7 +390,7 @@ test('names and identifiers that could escape template syntax stop lowering', ()
   assert.ok(scripted.includes(`case "${lt}/script${gt}${lt}script${gt}x": if (typeof payload === "string")`));
 });
 
-const { projectFiles } = await import('../../scripts/companion/compiler/project-files.ts');
+const { projectFiles } = await import('../support/project-render.mjs');
 test('self-project generates visual files and no detail artifacts', async () => {
   const files = await projectFiles(process.cwd(), projectModel(self)); const paths = files.map(f => f.path);
   assert.ok(paths.some(p => /presentation\/components\/details\/vp-\d+\.vue$/.test(p)));

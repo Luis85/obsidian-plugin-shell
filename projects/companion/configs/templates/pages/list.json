@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "page.list",
+  "name": "List Page",
+  "version": "1.0.0",
+  "templateType": "page-with-bricks",
+  "atomicLevel": "page",
+  "category": "Pages",
+  "description": "Collection page with heading, filters and structured records.",
+  "tags": [
+    "page",
+    "pages",
+    "list",
+    "crud"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "collection-browse"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [
+    {
+      "template": "organism.app-header",
+      "slot": "header"
+    },
+    {
+      "template": "organism.filter-bar",
+      "slot": "filters"
+    },
+    {
+      "template": "organism.data-table",
+      "slot": "records"
+    }
+  ],
+  "slots": [
+    {
+      "id": "header",
+      "role": "header",
+      "accepts": [
+        "organism"
+      ]
+    },
+    {
+      "id": "filters",
+      "role": "content",
+      "accepts": [
+        "organism",
+        "molecule"
+      ]
+    },
+    {
+      "id": "records",
+      "role": "content",
+      "accepts": [
+        "organism"
+      ]
+    }
+  ],
+  "design": {
+    "kind": "page",
+    "layout": "stack"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

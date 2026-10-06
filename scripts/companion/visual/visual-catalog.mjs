@@ -1,7 +1,7 @@
 // Pinned Nuxt UI authoring catalog v1 plus recipes that expand to ordinary IR. Generated projects pin @nuxt/ui to VISUAL_NUXT_UI_VERSION.
 import { visualAssert, visualAllocate, visualElement, visualText, visualNuxt, visualLiteral, visualLayoutRules } from './visual-ir.mjs';
 import { compositionDefaultUI } from '../composition-contract.mjs';
-export const VISUAL_NUXT_UI_VERSION = '4.11.2';
+export const VISUAL_NUXT_UI_VERSION = '4.11.3';
 export const VISUAL_PROP_KINDS = Object.freeze(['string', 'number', 'boolean', 'array', 'object', 'unknown']);
 export const VISUAL_CONTROL_ENTRIES = Object.freeze(['u-input', 'u-textarea', 'u-select', 'u-checkbox', 'u-switch']);
 const vcatColors = ['primary', 'neutral', 'success', 'warning', 'error', 'info'];
@@ -59,6 +59,18 @@ const vcatMasterDetail = s => [vcatBox(s, 'div', 'grid', 'Master / detail', [vca
 function vcatSettings(s) { const form = vcatUi(s, 'u-form', 'Settings form'); form.slots.default = [vcatField(s, 'Name', 'u-input', { placeholder: 'Workspace name' }), vcatField(s, 'Notifications', 'u-switch', { label: 'Email notifications' })]; return [vcatBox(s, 'div', 'row', 'Settings', [vcatBox(s, 'nav', 'stack', 'Settings sections', [vcatUi(s, 'u-button', 'General section', { label: 'General', variant: 'ghost' }), vcatUi(s, 'u-button', 'Notifications section', { label: 'Notifications', variant: 'ghost' })]), form])]; }
 const vcatEmpty = s => [vcatBox(s, 'section', 'stack', 'Empty state', [vcatTxt(s, 'Nothing here yet', 'h2', 'Empty title'), vcatTxt(s, 'Create the first item to get started.', 'p', 'Empty copy'), vcatUi(s, 'u-button', 'Empty action', { label: 'Create' })])];
 const vcatDashboard = s => [vcatBox(s, 'section', 'stack', 'Dashboard', [vcatTxt(s, 'Overview', 'h1', 'Title'), vcatBox(s, 'div', 'grid', 'KPI summary', [vcatCard(s, 'Active', '0'), vcatCard(s, 'Revenue', '0'), vcatCard(s, 'Attention', '0')], { columns: 3 }), vcatUi(s, 'u-table', 'Activity', { columns: [{ accessorKey: 'event', header: 'Event' }], data: [] })])];
+const vcatBar = (s, label, value) => vcatBox(s, 'div', 'row', label + ' bar', [
+  vcatTxt(s, label, 'span', label + ' label'),
+  vcatUi(s, 'u-progress', label + ' value', { modelValue: value, max: 100 }, { a11y: label + ': ' + value + ' percent' }),
+  vcatTxt(s, value + '%', 'span', label + ' value label'),
+]);
+const vcatBarChart = s => [vcatBox(s, 'section', 'stack', 'Bar chart', [
+  vcatTxt(s, 'Category comparison', 'h2', 'Chart title'),
+  vcatTxt(s, 'Example values. Bind the chart to application data in the component editor.', 'p', 'Chart description'),
+  vcatBar(s, 'Alpha', 72),
+  vcatBar(s, 'Beta', 46),
+  vcatBar(s, 'Gamma', 88),
+])];
 function vcatForm(s) { const form = vcatUi(s, 'u-form', 'Record form'); form.slots.default = [vcatField(s, 'Title', 'u-input', { placeholder: 'Title' }), vcatField(s, 'Description', 'u-textarea', { rows: 4 })]; return [vcatBox(s, 'section', 'stack', 'Form workflow', [vcatTxt(s, 'New record', 'h1', 'Title'), form, vcatBox(s, 'footer', 'row', 'Form actions', [vcatUi(s, 'u-button', 'Cancel', { label: 'Cancel', variant: 'ghost' }), vcatUi(s, 'u-button', 'Save', { label: 'Save' })], { justify: 'end' })])]; }
 const vcatRecipe = (id, label, description, build) => Object.freeze({ id, label, category: 'Application patterns', description, build });
 export const visualRecipes = Object.freeze([
@@ -68,6 +80,7 @@ export const visualRecipes = Object.freeze([
   vcatRecipe('recipe-master-detail', 'Master / Detail', 'Record collection with a detail pane', vcatMasterDetail),
   vcatRecipe('recipe-settings', 'Settings Form', 'Section navigation plus grouped validated form', vcatSettings),
   vcatRecipe('recipe-empty-state', 'Empty State', 'Message, supporting copy and primary action', vcatEmpty),
+  vcatRecipe('recipe-bar-chart', 'Bar Chart', 'Accessible categorical comparison with visible values', vcatBarChart),
 ]);
 const vcatLayout = (id, name, category, description, build) => Object.freeze({ id, name, category, scope: 'page', description, build });
 export const visualBuiltinLayouts = Object.freeze([

@@ -49,14 +49,14 @@ browser-check runner, change reporting, safe ZIP packaging; helper regression te
 See `scripts/README.md` for commands and `VERIFICATION.md` for tested/untested scope.
 
 The observed PR #5 head is 6178b1025336941ad6fb10eae4e26930622363f9. This skill explicitly
-rechecks it each time. At inspection the real contract was v5, not the v4 text still
-present in parts of the PR description.
+rechecks it each time. The real contract is now project schema 6 only
+(`scripts/companion/authoring-contract.ts`); schema 1–5 input is rejected, never migrated.
 
 ## Important boundaries
 
 The companion imports complete authoring JSON, not arbitrary Vue files. Source handover
 is separate and traceable. Feature imports are reviewed full-project replacements, not
-magic merges. `companion:generate` is read-only byte echo; `shell.mjs generate` and
+magic merges. `companion:generate` is read-only byte echo; `bin/app generate` and
 `companion:scaffold` are separate plan/apply generation paths. The HTML assembler consumes
 already compiled Vue output; it does not fake a Nuxt UI application or compiler.
 

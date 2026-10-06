@@ -42,14 +42,14 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
       "label": "Description",
       "type": "string",
       "required": false,
-      "default": "Own a text-backed file format and open it in a dedicated Obsidian editor."
+      "default": "Own a text-backed file format and open it in a dedicated editor view."
     },
     {
       "id": "version",
@@ -84,21 +84,21 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "custom-file-view-plugin",
+        "id": "custom-file-view",
         "name": "Custom File View",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
-        "description": "Own a text-backed file format and open it in a dedicated Obsidian editor."
+        "description": "Own a text-backed file format and open it in a dedicated editor view."
       },
       "settings": {
         "codebaseFolder": "src",
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Create, open, edit and save .folio documents without replacing Markdown or another core format.",
         "platform": "desktop",
@@ -1163,7 +1163,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

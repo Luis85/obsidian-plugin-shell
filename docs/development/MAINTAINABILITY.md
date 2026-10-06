@@ -1,7 +1,9 @@
 # Maintainability measurement
 
+> Type: reference · Part of the [docs index](../README.md)
+
 `npm run check:maintainability` measures the entire current source tree with the
-qualified Fallow 3.30.0 CLI. It never rewrites application source. Reports and the
+qualified Fallow 3.31.0 CLI. It never rewrites application source. Reports and the
 unaltered JSON/stderr of each tool invocation go to a new timestamped directory
 under `reports/maintainability`. Run
 `node scripts/quality/check-maintainability.mjs --check REPORT_DIRECTORY` to
@@ -87,10 +89,18 @@ change any measured production denominator or add Python to default setup.
 Unreviewed files in those directories still fail `METRIC_UNCLASSIFIED_INPUT`.
 The separate optional-memory workflow owns adapter tests and provider acceptance.
 
+The one POSIX shell file, `scripts/agent/cloud-setup.sh` (the paste-in setup script for
+Claude Code cloud environments), is inventoried by exact path with its bytes and
+`measurement: not-measured`; `tests/tooling/agent-cloud-setup.checks.mjs` runs it
+against a local download server. Other shell files still fail `METRIC_UNCLASSIFIED_INPUT`.
+
 Four measured views are retained: production, executable tooling/configuration,
-test/harness fixtures, and executable example-removal templates. Tooling and
-fixture/template complexity and duplication are diagnostic reports, without a
-claim that production targets have been met in those different corpora. Embedded
+test/harness fixtures, and generated-project templates (the Companion runtime under
+`templates/companion/runtime` and the executable example-removal templates). The
+templates view ships as generated production source, so it blocks at the same
+10/15 complexity and 3% duplication ceilings as production. Tooling and fixture
+complexity and duplication are diagnostic reports, without a claim that production
+targets have been met in those different corpora. Embedded
 maker source strings remain tooling tokens; their actual output becomes ordinary
 production when a consumer is generated and verified.
 
@@ -107,7 +117,7 @@ checks still run against the real repository configuration.
 
 Health must report exactly the supplied input count, and any source-discovery or
 degraded-parse diagnostic fails. The metric config also sets `failOnParseError`,
-so health must carry an enforced, passing native `parse-error` gate. Fallow 3.30
+so health must carry an enforced, passing native `parse-error` gate. Fallow 3.31
 arms no parse-error gate for `dupes`; duplication relies on the diagnostics check
 and the exit/verdict agreement instead. Duplication uses Fallow's actual token-bearing
 corpus: import/re-export wiring is excluded by its explicit default. Inputs below

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "molecule.alert",
+  "name": "Alert",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "molecule",
+  "category": "Feedback",
+  "description": "Persistent contextual feedback.",
+  "tags": [
+    "molecule",
+    "feedback",
+    "message"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "feedback"
+  ],
+  "states": [
+    "default",
+    "error"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-alert"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

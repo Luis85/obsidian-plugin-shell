@@ -8,14 +8,16 @@ From the repository root, after installing its qualified locked dependencies:
 npm run companion:build
 ```
 
-Open `reports/companion-mvp/companion-journey-lens.html`. Its companion export is
-`reports/companion-mvp/companion-project-v6.json`. Both are byte-identical aliases
-of the checked authoring outputs `index.html` and `companion-project.json` in that
-**reports** directory, not the old checked-in v5 compatibility files.
+Open `reports/companion-mvp/companion-journey-lens.html`, a byte-identical alias of
+`reports/companion-mvp/index.html`. The qualification export of the golden self-project
+is `reports/companion-mvp/companion-project-v6.json` (alias `companion-project.json`),
+written from `configs/starters/companion-plugin.json`. The checked-in schema 6 concept
+`docs/concepts/companion/index.html` is only the build base.
 The existing Companion workflow includes these files in `companion-mvp-authoring`.
 The HTML embeds its runtime, CSS and icons; it needs no server or runtime CDN.
 
-Use **Load companion project**, confirm the import, then **Design → Sitemap & views**.
+In **Project starters**, select `configs/starters/companion-plugin.json`, review and confirm,
+then **Design → Sitemap & views**.
 Journey Lens replaces the old sitemap inside the existing Companion workbench.
 The page editor, component library, data sources, requirements and other workspaces
 remain in that shell. This is not a second application or a generated clickdummy.
@@ -57,9 +59,10 @@ remain authoritative. Full project v6 import/export retains page designs, compon
 revisions, requirements, storymaps and source bindings. No schema bump or second
 Journey Lens document is introduced by this integration pass.
 
-The checked-in v5 HTML/JSON pair is intentionally retained as a byte-exact
-compatibility fixture for existing assembly and migration checks. Do not use it
-to review the replacement. No old qualification result is relabeled as new evidence.
+The checked-in `index.html` is only the schema 6 build base this build composes
+from; project schema 1–5 imports are rejected,
+never migrated. Do not use it to review the replacement. No old qualification
+result is relabeled as new evidence.
 
 ## Verification
 
@@ -94,4 +97,4 @@ Apply updates the same saved journey and preserves surviving step IDs. Cancel
 or Escape discards only the draft. Undo/Redo restore exact committed states.
 Unsaved edits block Reload as well as navigation; cancel the draft deliberately
 before reloading a newer project. Failed saves never become successful writes.
-See the [execution and verification boundaries](../../testing/MVP-JOURNEY-MAINTENANCE.md).
+See the [execution and verification boundaries](../../_archive/testing/MVP-JOURNEY-MAINTENANCE.md).

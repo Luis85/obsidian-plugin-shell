@@ -1,6 +1,8 @@
 # Focused sitemap authoring and arrangement
 
-This increment builds on the existing Vue 3/Pinia/Nuxt UI/Vue Flow island; it does not replace the surrounding companion or create a second saved format. Build current authoring with `npm run companion:build`. The checked-in v5 compatibility HTML is not this output.
+> Type: reference · Part of the [docs index](../README.md)
+
+This increment builds on the existing Vue 3/Pinia/Nuxt UI/Vue Flow island; it does not replace the surrounding companion or create a second saved format. Build current authoring with `npm run companion:build`. The checked-in build base (`docs/concepts/companion/index.html`) is not this output.
 
 ## Explicit editing behavior
 
@@ -18,4 +20,4 @@ The pure [`arrangeSitemap`](../../scripts/companion/sitemap/arrangement.ts) cont
 
 Labels clamp to the footprint while retaining full text in names/titles and the inspector. Controls have minimum target dimensions; scoped reduced-motion rules disable incidental transitions. Keyboard shortcuts ignore composition events and editable ancestors. These changes do not establish complete accessibility conformance or native mobile support.
 
-Pure-model and actual pinned Vue/Pinia store tests cover layout bounds/determinism, coordinate preservation, invalid input, review/cancel, saved commands, Undo/Redo, focus restoration and draft protection. The existing file-origin MVP browser suite adds real arrangement, position and focus assertions; see the [execution record](../testing/PR5-IMPROVEMENT-EXECUTION.md) for whether a given candidate actually ran them. Complete assistive-technology, pointer/device and native multiple-leaf acceptance remain separate.
+Pure-model and actual pinned Vue/Pinia store tests cover layout bounds/determinism, coordinate preservation, invalid input, review/cancel, saved commands, Undo/Redo, focus restoration and draft protection. The existing file-origin MVP browser suite adds real arrangement, position and focus assertions; see the [execution record](../_archive/testing/PR5-IMPROVEMENT-EXECUTION.md) for whether a given candidate actually ran them. Complete assistive-technology, pointer/device and native multiple-leaf acceptance remain separate.

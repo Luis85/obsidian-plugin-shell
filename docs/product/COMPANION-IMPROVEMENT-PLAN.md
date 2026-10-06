@@ -2,15 +2,15 @@
 
 **Revision:** 1.2 · **Date:** 2026-09-24 · **Status:** Planned work, not implementation evidence.
 
-**Controlling decision:** Qualify and ship the standalone framework developer kit containing shell, shared TypeScript CLI and JSON project generator first. Continue concept design secondarily; convert its agreed scope on the shipped framework; publish the companion only after native qualification. See the [detailed implementation plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
+**Controlling decision:** Qualify and ship the standalone framework developer kit containing shell, shared TypeScript CLI and JSON project generator first. Continue concept design secondarily; convert its agreed scope on the shipped framework; publish the companion only after native qualification. See the [detailed implementation plan](../_archive/development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
 
-This revises the supplied `COMPANION-IMPROVEMENT-PLAN.md` (SHA-256 `7c8236b401ca4d3c9c8530dcd8ffecd37b52007546b40e21f16bcfde5c6cdad8`). Its product outcomes are retained, but its companion-first investment order and immediate root-identity recommendation are superseded by the owner's subsequent shell-first instruction. Baseline inspected: PR #5 at `e413ec628b4227c4b8dc8b6ec3d12b8487533557`. That is the historical planning baseline. The [current bounded review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md) inspects PR #5 at `e71c655fe376e51a520fb8f194800e9294eb8e4e`, including Windows CI failures and missing PR #17 discovery integration; this revision is documentation, not their implementation.
+This revises the supplied `COMPANION-IMPROVEMENT-PLAN.md` (SHA-256 `7c8236b401ca4d3c9c8530dcd8ffecd37b52007546b40e21f16bcfde5c6cdad8`). Its product outcomes are retained, but its companion-first investment order and immediate root-identity recommendation are superseded by the owner's subsequent shell-first instruction. Baseline inspected: PR #5 at `e413ec628b4227c4b8dc8b6ec3d12b8487533557`. That is the historical planning baseline. The [current bounded review](../_archive/development/PR5-FRAMEWORK-READINESS-REVIEW.md) inspects PR #5 at `e71c655fe376e51a520fb8f194800e9294eb8e4e`, including Windows CI failures and missing PR #17 discovery integration; this revision is documentation, not their implementation.
 
 Read the [delivery strategy](DELIVERY-STRATEGY.md), [task index](../tasks/README.md), [traceability crosswalk](../tasks/TRACEABILITY.md) and [companion architecture contract](../architecture/COMPANION-ON-SHELL.md).
 
 ## Integration update — 2026-09-25
 
-PR #20's TypeScript project compiler and `shell.mjs` entry now exist in the base and are preserved by the PR #18 reconciliation. [SH-035](../tasks/shell/SH-035.md) retains that compiler task, formerly a colliding SH-023, under verification; SH-028 extends its existing behavior. The [generator guide](../development/COMPANION-GENERATOR.md) describes commands available now. Earlier pending descriptions below specify the complete framework target, not a request to discard or recreate the implemented compiler. A compiled developer-kit release and native companion readiness remain unqualified.
+PR #20's TypeScript project compiler and `bin/app` CLI entry (a root launcher at that date) now exist in the base and are preserved by the PR #18 reconciliation. [SH-035](../tasks/shell/SH-035.md) retains that compiler task, formerly a colliding SH-023, under verification; SH-028 extends its existing behavior. The [generator guide](../development/COMPANION-GENERATOR.md) describes commands available now. Earlier pending descriptions below specify the complete framework target, not a request to discard or recreate the implemented compiler. A compiled developer-kit release and native companion readiness remain unqualified.
 
 ## 1. Product relationship
 
@@ -24,7 +24,7 @@ The primary entry is a downloaded framework release archive, not an installed pl
 
 ## 2. Baseline and limits
 
-The [parent PRD](PRD.md), [authoring guide](../development/AUTHORING-TOOLS.md) and [readiness ledger](../development/TEMPLATE-READINESS-LEDGER.md) already describe substantial implemented shell services and makers. Do not rebuild them because an older companion baseline listed fewer capabilities.
+The [parent PRD](PRD.md), [authoring guide](../development/AUTHORING-TOOLS.md) and [readiness ledger](../_archive/development/TEMPLATE-READINESS-LEDGER.md) already describe substantial implemented shell services and makers. Do not rebuild them because an older companion baseline listed fewer capabilities.
 
 The [single-vault contract](../concepts/companion/SINGLE-VAULT.md) and [Data Sources contract](../concepts/companion/DATA-SOURCES.md) distinguish modeled behavior, virtual source previews and real execution. The later [editor review](../concepts/companion/EDITORS-REVIEW.md) is a regression source, not proof that native conversion happened.
 
@@ -169,6 +169,6 @@ PUB-004 requires new, explicit owner approval for the exact release candidate an
 
 ## Source and document provenance
 
-Repository baseline: [PR #5](https://github.com/Luis85/obsidian-plugin-shell/pull/5), commit `e413ec628b4227c4b8dc8b6ec3d12b8487533557`. The full previous companion requirements remain in [COMPANION-REQUIREMENTS-0.3.md](COMPANION-REQUIREMENTS-0.3.md). The prior root guide is preserved in [TEMPLATE-GUIDE.md](../../TEMPLATE-GUIDE.md).
+Repository baseline: [PR #5](https://github.com/Luis85/obsidian-plugin-shell/pull/5), commit `e413ec628b4227c4b8dc8b6ec3d12b8487533557`. The full previous companion requirements remain in [COMPANION-REQUIREMENTS-0.3.md](../_archive/product/COMPANION-REQUIREMENTS-0.3.md). The prior root guide is preserved in [TEMPLATE-GUIDE.md](../../TEMPLATE-GUIDE.md).
 
 The supplied plan cited official Obsidian developer policies, submission/Vault/security documentation, Nx Console and W3C accessibility guidance. Those are retained research leads, not newly verified external facts in this documentation change. Publication and platform tasks must recheck the applicable primary sources when executed; no acceptance guarantee is inferred.

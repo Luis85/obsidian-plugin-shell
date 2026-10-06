@@ -1,0 +1,10 @@
+<script setup lang="ts">
+const open=defineModel<boolean>({default:false})
+const emit=defineEmits<{run:[id:string]}>()
+const groups=[
+ {id:'insert',label:'Insert',items:[{id:'insert-table',label:'Insert data table',icon:'i-lucide-table-2'},{id:'insert-form',label:'Insert form',icon:'i-lucide-clipboard-pen-line'},{id:'insert-modal',label:'Insert modal',icon:'i-lucide-panels-top-left'}]},
+ {id:'page',label:'Page',items:[{id:'save-layout',label:'Save page as layout',icon:'i-lucide-bookmark-plus'},{id:'apply-layout',label:'Apply layout…',icon:'i-lucide-layout-template'},{id:'preview',label:'Preview page',icon:'i-lucide-play'}]},
+ {id:'selection',label:'Selection',items:[{id:'duplicate',label:'Duplicate selected',icon:'i-lucide-copy'},{id:'bind',label:'Bind data…',icon:'i-lucide-database'},{id:'interaction',label:'Add interaction…',icon:'i-lucide-zap'}]}
+]
+</script>
+<template><UModal v-model:open="open"><template #content><UCommandPalette :groups="groups" placeholder="Search actions, components and layouts…" @update:model-value="(x:any)=>{if(x?.id){emit('run',x.id);open=false}}"/></template></UModal></template>

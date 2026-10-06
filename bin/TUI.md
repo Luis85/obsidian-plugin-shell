@@ -1,17 +1,17 @@
 # Full-screen terminal UI
 
 The default interactive maker now uses a persistent keyboard-driven work surface
-when stdin/stderr are terminals with raw-input support. Run `node shell.mjs`,
-`node shell.mjs sketch`, `node shell.mjs brainstorm` or `node shell.mjs prototype`. The same TypeScript code
+when stdin/stderr are terminals with raw-input support. Run `node bin/app`,
+`node bin/app sketch`, `node bin/app brainstorm` or `node bin/app prototype`. The same TypeScript code
 ships in the pre-install compiled kit; no additional package or runtime is needed.
 The library comparison and design rationale are in
-[CLI TUI research](../docs/research/CLI-TUI-RESEARCH.md).
+[CLI TUI research](../docs/_archive/research/CLI-TUI-RESEARCH.md).
 
 ```sh
-node shell.mjs studio --ui tui
-node shell.mjs studio --ui plain
-node shell.mjs prototype --no-color
-node shell.mjs brainstorm --ui tui
+node bin/app studio --ui tui
+node bin/app studio --ui plain
+node bin/app prototype --no-color
+node bin/app brainstorm --ui tui
 ```
 
 `--ui auto|tui|plain` selects the presentation. `SHELL_UI` supplies its default;
@@ -64,7 +64,7 @@ remain explicit manual acceptance scope, not inferred from stream-based tests.
 `npm run test:maker` retains the portable keyboard, frame, stream and parity tests.
 `npm run test:maker:pty` is the additional opt-in Linux/macOS acceptance suite. It
 needs Python 3's standard library only, not a new application dependency. It drives
-the actual `shell.mjs` through an OS pseudo-terminal, creates a page with bulk
+the actual `bin/app` launcher through an OS pseudo-terminal, creates a page with bulk
 components, refuses a save first, approves a second reviewed plan, and compares
 the written bytes against agent-mode creation. It also checks small-window paste
 protection, F1 help, Ctrl+C, external SIGTERM, empty stdout and exact termios

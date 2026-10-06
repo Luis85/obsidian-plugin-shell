@@ -3,12 +3,17 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout, stderr } from 'node:process';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { setupOptions, resumeOptions, setupHelp } from './setup/options.mjs';
+import { setupOptions, resumeOptions, setupHelp, identityChangeKeys } from './setup/options.mjs';
+import { askAzureDetails, hostingKeys, hostingPromptDefault, planHostingFiles, requestedHosting, azureRepositoryUrl } from './setup/hosting.mjs';
 import { planIdentity } from './setup/identity.mjs';
+import { planLocalMcp } from './setup/mcp.mjs';
+import { askSetupForm, confirmKeys, hostingFieldKeys, loadSetupForm } from './setup/form.mjs';
 import { readJournal } from './setup/journal.mjs';
 import { executeSetup, setupStages } from './setup/execute.mjs';
 import { projectInstallEnvironment } from './shared/npm-install.mjs';
 
+// The interview is data: configs/forms/setup-identity.json, located from this module so kits and copies agree.
+const setupFormUrl = new URL('../configs/forms/setup-identity.json', import.meta.url);
 let jsonOutput = process.argv.includes('--json');
 async function setup() {
   let options = await setupOptions(process.argv.slice(2)); jsonOutput = Boolean(options.json);
@@ -25,23 +30,38 @@ async function setup() {
   if (!options.yes && !options['dry-run'] && (!stdin.isTTY || options['no-interaction'])) throw new Error('Noninteractive setup requires --yes after reviewing --dry-run');
   let planned = await planIdentity(root, options, previous);
   if (!options.yes && !options['dry-run'] && !options.resume && stdin.isTTY) {
-    const prompt = createInterface({ input: stdin, output: options.json ? stderr : stdout });
+    const form = await loadSetupForm(setupFormUrl);
+    const output = options.json ? stderr : stdout;
+    const prompt = createInterface({ input: stdin, output });
     try {
-      for (const key of ['id', 'name', 'description', 'author', 'repo', 'version']) {
-        const answer = await prompt.question(`${key} [${planned.identity[key] ?? 'optional owner/repo'}]: `);
-        if (answer.trim()) options[key] = answer.trim();
-      }
-      options.identityRequested = ['id', 'name', 'description', 'author', 'repo', 'version'].some(key => options[key] !== undefined);
+      const explicit = keys => options.explicitKeys.some(key => keys.includes(key));
+      const skip = [...(explicit(['mcp', 'no-mcp']) ? confirmKeys : []), ...(explicit(hostingKeys) ? hostingFieldKeys : [])];
+      const answers = await askSetupForm(form, prompt, { defaults: { ...planned.identity, hosting: await hostingPromptDefault(root) }, skip, write: text => output.write(text) });
+      if (answers.hosting !== undefined) answers.hosting = answers.hosting.toLowerCase();
+      Object.assign(options, answers);
+      if (answers.hosting === 'azure-devops') await askAzureDetails(root, options, question => prompt.question(question));
+      requestedHosting(options);
+      options.identityRequested = identityChangeKeys.some(key => options[key] !== undefined);
       planned = await planIdentity(root, options, previous);
     } finally { prompt.close(); }
   }
+  const explicitMcpFalse = options.explicitKeys.includes('mcp') && options.mcp === false;
+  const mcpAction = options.mcp === true ? 'enable' : options['no-mcp'] || explicitMcpFalse ? 'disable' : 'preserve';
+  const agentMcp = await planLocalMcp(root, mcpAction, existing?.agentMcp);
+  options.mcp = agentMcp.enabled;
+  const hostingFiles = await planHostingFiles(root, requestedHosting(options));
+  planned = { ...planned, agentMcp, hostingFiles };
   const plan = { status: 'planned', identity: planned.identity, profile: options.profile,
     lifecycleHooks: { reviewedAllowlist: Object.entries(pkg.allowScripts).filter(([, allowed]) => allowed === true).map(([name]) => name),
       persistentPolicyPreserved: true, installation: 'npm ci may replace node_modules; registry/network access and reviewed dependency hooks are part of the selected install stage' },
     files: planned.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash })),
+    hosting: { platform: planned.hosting?.platform ?? null, action: hostingFiles.action, files: hostingFiles.files, preserved: hostingFiles.preserved,
+      repositoryUrl: azureRepositoryUrl(planned.hosting), remote: 'not-contacted', github: '.github is never deleted' },
+    agentMcp: { action: agentMcp.action, enabled: agentMcp.enabled, server: agentMcp.server, transport: agentMcp.transport, clients: agentMcp.clients, files: agentMcp.files },
     migration: planned.migration ? { from: planned.migration.from, to: planned.migration.to, oldInstallationPreserved: true,
       files: planned.migration.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path: `.dev-vault/.obsidian/plugins/${path}`, status, beforeHash, afterHash })) } : null,
     stages: setupStages(options), exclusions: ['No personal vault, host install, global packages, PATH edits, Restricted Mode changes, enabling plugins, publishing, or dependency upgrades',
+      'MCP is preserved unless explicitly enabled or disabled; --no-mcp removes only unchanged setup-owned client configuration',
       'Only root package-lock identity metadata changes; resolved dependency entries are retained', 'Multi-file edits, dependency installation and caches are separate stages, not one globally atomic transaction'],
   };
   const progress = options.json ? stderr : stdout;
@@ -58,8 +78,9 @@ async function setup() {
   const handoff = { status: result.status, identity: result.identity, toolchain: result.toolchain, profile: options.profile,
     inputFingerprint: result.fingerprint, lockHash: result.lockHash,
     scope: { staticServiceArtifactChecks: options['defer-verify'] ? 'deferred: run npm run verify' : 'verified', servedBrowser: 'not-run', nativeHost: 'not-run', release: 'not-run' },
-    stages: result.stages, migration: result.migration, journal: '.template-state/setup.json',
+    stages: result.stages, migration: result.migration, agentMcp: result.agentMcp, hosting: plan.hosting, journal: '.template-state/setup.json',
     vault: options.profile === 'native' ? resolve('.dev-vault') : null,
+    agentNext: result.agentMcp.enabled ? 'Restart or reopen Claude Code/Codex, trust the project configuration, then inspect the workbench MCP tools. Client authentication remains separate.' : null,
     next: options.profile === 'native' ? `Open the contained vault and deliberately enable ${planned.identity.name}. Old migrated installation remains preserved and disabled.` : 'Run npm run dev:ui. Browser/native/device/release qualification remains separately scoped.' };
   console.log(options.json ? JSON.stringify(handoff) : `Setup completed.\n${JSON.stringify(handoff, null, 2)}`);
 }

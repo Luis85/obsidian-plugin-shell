@@ -6,15 +6,15 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { stripTypeScriptTypes } from 'node:module';
-import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
-import { included } from '../../scripts/framework/distribution.ts';
-import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
-import { zip } from '../../scripts/framework/zip.ts';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
+import { included } from '../../bin/adapters/framework/distribution.ts';
+import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
 import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
-import { loadDefinitions } from '../../scripts/starters/repository.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
+import { loadDefinitions } from '../../bin/adapters/starters/repository.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 async function temp(t) { const path = await realpath(await mkdtemp(join(tmpdir(), 'starter-distribution-'))); t.after(() => rm(path, { recursive: true, force: true })); return path; }
@@ -28,19 +28,24 @@ async function compiler() {
     } };
   }
 }
-test('distribution boundaries exclude canonical and legacy definitions from shell and generated framework copies', () => {
-  for (const path of ['configs/starters/webapp.json', 'docs/concepts/companion/companion-project.json', 'docs/concepts/companion/seeds/visual-self-project.json', 'docs/concepts/companion/starters/catalog.json', 'docs/concepts/companion/starters/blank.companion.json']) {
+test('distribution boundaries exclude canonical definitions from shell and generated framework copies', () => {
+  for (const path of ['configs/starters/webapp.json', 'configs/starters/companion-plugin.json', 'configs/starters/feature-showcase.json']) {
     assert.equal(included(path), false); assert.equal(maintainerOnly(path), true);
   }
+  // The framework's own delivery pipeline is maintainer process: no kit or generated project carries it.
+  for (const path of ['.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/workflows/definition-of-ready.yml', '.github/workflows/definition-of-done.yml', '.github/PULL_REQUEST_TEMPLATE/release.md']) {
+    assert.equal(included(path), false, path); assert.equal(maintainerOnly(path), true, path);
+  }
+  assert.equal(included('.github/workflows/ci.yml'), true); assert.equal(included('.github/workflows/candidate-qualification.yml'), true);
   assert.equal(included('scripts/starters/starter.schema.json'), true);
   assert.equal(included('docs/concepts/companion/vendor/vue-flow-core.iife.js'), true);
   assert.equal(included('docs/concepts/companion/vendor/vue.runtime.global.prod.js'), false);
 });
 test('standalone starter ZIP is deterministic and loads after independent extraction', async t => {
   const directory = await temp(t), files = await assembleStarterPack({ root, frameworkRoot: root });
-  assert.equal(files.length, 25); assert.ok(files.every(file => /^configs\/starters\/[a-z-]+\.json$/.test(file.path)));
+  assert.equal(files.length, 26); assert.ok(files.every(file => /^configs\/starters\/[a-z-]+\.json$/.test(file.path)));
   const first = zip(files), second = zip(await assembleStarterPack({ root, frameworkRoot: root })); assert.deepEqual(first, second);
-  await extractArchive(first, directory); const loaded = await loadDefinitions(directory, []); assert.equal(loaded.length, 25);
+  await extractArchive(first, directory); const loaded = await loadDefinitions(directory, []); assert.equal(loaded.length, 26);
   for (const entry of loaded) assert.deepEqual(entry.bytes, files.find(file => file.path === entry.file).bytes);
 });
 test('pack preview is read-only and publishing/overwriting archives is never implicit', async t => {
@@ -58,16 +63,16 @@ test('extracted compiled shell contains no starter data; a separate pack enables
   const files = await assembleKit({ root, frameworkRoot: root }, await compiler());
   assert.ok(!files.some(file => /(?:^|\/)configs\/starters\//.test(file.path) || file.path.includes('/companion/starters/')));
   assert.ok(!files.some(file => file.path.endsWith('/companion/companion-project.json') || file.path.includes('/companion/seeds/')));
-  for (const asset of ['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt']) assert.ok(files.some(file => file.path === '.framework/template/docs/concepts/companion/vendor/' + asset), asset);
+  for (const asset of ['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt']) assert.ok(files.some(file => file.path === 'bin/template/docs/concepts/companion/vendor/' + asset), asset);
   const archive = zip(files); await extractArchive(archive, shellRoot);
   const cli = args => {
-    const result = spawnSync(process.execPath, [join(shellRoot, 'shell.mjs'), ...args, '--json'], { cwd: shellRoot, encoding: 'utf8', timeout: 90000, maxBuffer: 16_000_000 });
+    const result = spawnSync(process.execPath, [join(shellRoot, 'bin/app'), ...args, '--json'], { cwd: shellRoot, encoding: 'utf8', timeout: 90000, maxBuffer: 16_000_000 });
     assert.equal(result.stdout.trim().split('\n').length, 1, result.stderr); return { code: result.status, result: JSON.parse(result.stdout) };
   };
   const bare = cli(['starters', 'list']); assert.equal(bare.code, 0, JSON.stringify(bare)); assert.deepEqual(bare.result.data.starters, []);
   const emptyNew = cli(['new', '../missing-product', '--starter', 'blank']); assert.equal(emptyNew.code, 1); assert.equal(emptyNew.result.diagnostics[0].code, 'STARTER_UNKNOWN');
   await extractArchive(zip(await assembleStarterPack({ root, frameworkRoot: root })), shellRoot);
-  assert.equal(cli(['new', '--list']).result.data.starters.length, 25);
+  assert.equal(cli(['new', '--list']).result.data.starters.length, 26);
   const direct = cli(['new', '../direct-project', '--starter', 'plugin-angular']); assert.equal(direct.code, 1); assert.equal(direct.result.diagnostics[0].code, 'STARTER_KIND');
   const guided = cli(['new', 'guide', '--starter', 'plugin-angular']); assert.equal(guided.code, 0, JSON.stringify(guided)); assert.equal(guided.result.data.selection.framework, 'angular');
   assert.equal(cli(['starters', 'schema']).result.data.title, 'Workbench starter definition');

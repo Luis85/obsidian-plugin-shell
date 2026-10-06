@@ -8,32 +8,18 @@ import { Workspace } from '../application/workspace.ts';
 import { outline } from '../application/summary.ts';
 import { readSnapshot, savePlan } from '../adapters/storage.ts';
 import { boilerplatePlan } from '../adapters/compiler.ts';
-import { prototypePlan } from '../adapters/prototype.ts';
-import { prototypeContext } from '../adapters/prototype-context.ts';
-import { loadSettings } from '../adapters/user-settings.ts';
-import { interview } from './guide.ts';
 import { editPage } from './page-editor.ts';
 import { review } from './review.ts';
 import { workspaceContext } from './context.ts';
 import { choose, input, titleInput, confirm, reportError, type Prompts } from './prompts.ts';
 import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
-export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime }
-async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
-  const snapshot = await readSnapshot(options.root, options.project);
-  return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
-}
-export async function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<string | undefined> {
-  const { guide, selection } = await prototypeContext(options.root, options.guide);
-  const configured = await loadSettings(options.root);
-  workspace ??= await savedWorkspace(options);
-  const answers = await interview(ui, guide, workspace ? { title: workspace.document.project.name, pages: outline(workspace.document).pages.map(item => item.title) } : {});
-  const out = await input(ui, 'Package output folder', options.out ?? (configured.content ? configured.settings.paths.prototypes : 'prototypes/prepared-prototype'));
-  ui.rich?.busy('Preparing prototype documents and source. No files written yet.');
-  const plan = await prototypePlan({ ...options, out, guide, selection, baseline: workspace?.document ?? null,
-    input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers } });
-  if (!await review(ui, plan, options.signal)) return;
-  const completion = `Start with ${out}/execution-prompt.md. The complete source scaffold is under ${out}/source/.\n`;
-  ui.write(completion); return completion;
+import { browseComponentTemplates } from './template-browser.ts';
+import { offerDesignFolder } from './design-folder.ts';
+import { startWizard } from './wizards/registry.ts';
+export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime; config?: string }
+/** configs/wizards/prototype.json; an open workspace seeds the brief and is the baseline. */
+export function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<string | undefined> {
+  return startWizard(ui, 'prototype', { ...options, ...(workspace ? { workspace } : {}) });
 }
 async function save(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const plan = await savePlan(options.root, options.project, workspace.document, workspace.beforeHash);
@@ -52,7 +38,7 @@ async function library(ui: Prompts, workspace: Workspace): Promise<void> {
 }
 async function generate(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const out = await input(ui, 'Boilerplate output folder', options.out ?? `generated/${workspace.document.project.id}`);
-  const selection = await savedProjectSelection(options.root);
+  const selection = await savedProjectSelection(options.root, options.config);
   const kind = await choose(ui, 'Output kind', selection ? [{ id: 'project', label: selection.targets.join(' + ') + ' / ' + selection.framework }] : [
     { id: 'obsidian-plugin', label: 'Obsidian plugin' }, { id: 'clickdummy', label: 'Offline clickdummy source' },
   ], selection ? 'project' : options.kind ?? 'obsidian-plugin');
@@ -71,6 +57,7 @@ export function studioActions(ui: Prompts, options: StudioOptions, workspace: Wo
     page: { label: 'Continue an existing page', run: () => selectPage(ui, workspace) },
     bricks: { label: 'Edit sitemap, layout, entities, data sources and journeys', run: () => editBricks(ui, workspace) },
     library: { label: 'Create or rename components', run: () => library(ui, workspace) },
+    templates: { label: 'Browse component and page templates', run: () => browseComponentTemplates(ui, workspace, options) },
     brainstorm: { label: 'Brainstorm a new project or feature', run: async () => {
       if (workspace.dirty) {
         if (!await confirm(ui, 'Save current project before starting a feature brainstorm?')) return;
@@ -81,6 +68,10 @@ export function studioActions(ui: Prompts, options: StudioOptions, workspace: Wo
     } },
     prototype: { label: 'Prepare a prototype with the guided maker', run: () => prototypeWizard(ui, { ...options, out: undefined }, workspace) },
     save: { label: 'Save Companion project JSON', run: () => save(ui, options, workspace) },
+    design: { label: 'Prepare or sync a Claude Design folder for this project', run: async () => {
+      if (workspace.dirty) { ui.write('Save the project first; the design folder is prepared from the saved project JSON.\n'); return; }
+      await offerDesignFolder(ui, { root: options.root, frameworkRoot: options.frameworkRoot, title: workspace.document.project.name, project: options.project, signal: options.signal, config: options.config });
+    } },
     'first-run': { label: 'Install, build and showcase the generated application', run: () => firstRunWizard(ui, options) },
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },

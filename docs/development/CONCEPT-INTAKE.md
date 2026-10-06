@@ -1,5 +1,7 @@
 # Reviewed concept intake
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 **Implemented:** data-only project, feature and improvement intake through the
 existing shell-cli project-import planner. This does not execute prototypes, install
 dependencies, implement business logic or complete native companion acceptance.
@@ -7,14 +9,14 @@ dependencies, implement business logic or complete native companion acceptance.
 ## Inspect, review, apply, generate
 
 ```sh
-node shell.mjs concept schema --json
-node shell.mjs concept inspect --json
-node shell.mjs concept inspect --input docs/concepts/capture/concept.json --json
-node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json
-node shell.mjs plan inspect concept.plan.json
-node shell.mjs plan apply concept.plan.json --yes
-node shell.mjs generate --plan-out generation.plan.json
-node shell.mjs plan apply generation.plan.json --yes
+node bin/app concept schema --json
+node bin/app concept inspect --json
+node bin/app concept inspect --input docs/concepts/capture/concept.json --json
+node bin/app concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json
+node bin/app plan inspect concept.plan.json
+node bin/app plan apply concept.plan.json --yes
+node bin/app generate --plan-out generation.plan.json
+node bin/app plan apply generation.plan.json --yes
 ```
 
 `concept schema` is project-independent data discovery. Inspection without `--input`
@@ -31,8 +33,8 @@ installation or executable configuration discovery occurs.
 ## Formats and modes
 
 A complete ordinary `obsidian-companion-project` JSON is a **project** import.
-Supported legacy versions migrate through the shared v6 authoring contract, with
-its migration report retained. Existing project configuration and generated identity
+Only project schema 6 is accepted; earlier versions are rejected by the shared
+authoring contract and never migrated. Existing project configuration and generated identity
 still require the normal explicit `--resolve project|import` reconciliation. This
 flag does not rename internal design IDs and is unavailable for scoped imports.
 
@@ -123,7 +125,7 @@ subsequent generation uses its existing conflict and preservation rules.
 ## Implementation and verification
 
 `scripts/companion/concepts/` owns framework-free data contracts and candidate
-transformation. `scripts/framework/concept-input.ts` owns bounded local file and
+transformation. `bin/adapters/framework/concept-input.ts` owns bounded local file and
 HTML decoding; `concepts.ts` composes the shared import/file-plan infrastructure.
 CLI catalog, help and programmatic operations expose the same three commands.
 No second generator, storage writer or process execution path is introduced.
@@ -138,4 +140,4 @@ The final case creates an actual compiled kit, extracts it, runs its dependency-
 CLI, imports a feature, generates its authored Vue page and regenerates an
 improvement while retaining consumer source edits. It does not install/build the
 resulting Vue dependencies or provide native acceptance. Exact executed scope belongs
-in the [continuation verification record](../testing/MVP-CONCEPT-INTAKE.md).
+in the [continuation verification record](../_archive/testing/MVP-CONCEPT-INTAKE.md).

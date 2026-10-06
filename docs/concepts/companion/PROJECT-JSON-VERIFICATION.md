@@ -61,7 +61,7 @@ Filesystem and storage precondition checks are best-effort rather than atomic cr
 node --test tests/tooling/companion-project.checks.mjs tests/tooling/test-data-*.checks.mjs
 python -B scripts/concepts/build-companion.py --check
 python -B tests/concepts/companion-assembly.test.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
+SHELL_CHROMIUM=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
 # Requires the repository's pinned dependencies:
 node --test tests/tooling/companion-boundaries.checks.mjs
 ```

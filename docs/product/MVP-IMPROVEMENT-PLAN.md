@@ -4,7 +4,7 @@
 > **Planning baseline:** PR #5, `docs/companion-plugin-prd`, commit `f3778ed120e845a781c9cc08afc9b16a8b1a3e8c`.
 > **Quality amendment baseline:** `40799d9489e0bd436a47f819732292e8a35a4774`; the source observations below retain their original planning baseline.
 > **Status:** Implementation and acceptance plan with the mandatory owner-directed MVP-QR-01 amendment. No implementation, runtime qualification, task closure or publication is performed by updating it.
-> **Companions:** [Acceptance scenarios](MVP-VISION-ACCEPTANCE.md) · [Baseline and requirement crosswalk](MVP-VISION-BASELINE.md) · [Operational boilerplate quality requirement](MVP-BOILERPLATE-QUALITY.md).
+> **Companions:** [Acceptance scenarios](MVP-VISION-ACCEPTANCE.md) · [Baseline and requirement crosswalk](../_archive/product/MVP-VISION-BASELINE.md) · [Operational boilerplate quality requirement](MVP-BOILERPLATE-QUALITY.md).
 
 ## 1. MVP decision
 
@@ -18,7 +18,7 @@ This operationalizes the [vision](PRODUCT-VISION.md): **Focus on your idea. Save
 
 ### Authority and scope
 
-This is the product-oriented execution supplement to the [retained MVP PRD](../prds/MVP-JSON-TO-CLICKDUMMY.md), its [implementation plan](../prds/MVP-IMPLEMENTATION-PLAN.md) and the [September 27 improvement plan](PR5-IMPROVEMENT-PLAN.md). It adds vision-derived work and reconciles newer source; it does not replace their requirement IDs or erase unfulfilled acceptance. MVP-QR-01 is a later mandatory requirement, not a suggestion or a claim that the generator already meets it.
+This is the product-oriented execution supplement to the [retained MVP PRD](../prds/MVP-JSON-TO-CLICKDUMMY.md), its [implementation plan](../prds/MVP-IMPLEMENTATION-PLAN.md) and the [September 27 improvement plan](../_archive/product/PR5-IMPROVEMENT-PLAN.md). It adds vision-derived work and reconciles newer source; it does not replace their requirement IDs or erase unfulfilled acceptance. MVP-QR-01 is a later mandatory requirement, not a suggestion or a claim that the generator already meets it.
 
 `WM-01`–`WM-19` identify work packages in this plan; `WVA-01`–`WVA-20` identify additional acceptance scenarios. BQ/BQA clauses extend these packages and cases; none is a replacement task-status system. Existing SH/CX/CP/PUB task frontmatter remains authoritative. Split implementation into those tasks or newly allocated, noncolliding task IDs after checking current source. Map every added requirement into the relevant readiness gate before closing it.
 
@@ -26,7 +26,7 @@ The [delivery strategy](DELIVERY-STRATEGY.md) still governs: **SH-022 technical 
 
 ## 2. What needs adding, improving or qualifying
 
-The baseline contains substantial reusable implementation. Do not rebuild it simply because an older plan described it as missing. Detailed sources and limits are in the [baseline review](MVP-VISION-BASELINE.md).
+The baseline contains substantial reusable implementation. Do not rebuild it simply because an older plan described it as missing. Detailed sources and limits are in the [baseline review](../_archive/product/MVP-VISION-BASELINE.md).
 
 | Area | Inspected foundation | MVP response |
 | --- | --- | --- |

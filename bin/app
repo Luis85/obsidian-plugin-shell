@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+// Single CLI entry point for both source checkouts and packaged distributions.
+import { existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const binRoot = dirname(fileURLToPath(import.meta.url));
+const frameworkRoot = resolve(binRoot, '..');
+const bundle = resolve(binRoot, 'app.js');
+const args = process.argv.slice(2);
+// One layout decision: a kit runs its bundle and keeps the bootstrap-safe envelope under bin/template; a checkout runs app.ts.
+const packaged = existsSync(bundle);
+const envelopeModule = packaged ? './template/scripts/contracts/result-runtime.mjs' : '../scripts/contracts/result-runtime.mjs';
+
+try {
+  if (packaged) {
+    process.exitCode = await (await import(pathToFileURL(bundle).href)).main(args, frameworkRoot);
+  } else if (process.features.typescript || process.execArgv.includes('--experimental-strip-types')) {
+    process.exitCode = await (await import('./app.ts')).main(args, frameworkRoot);
+  } else {
+    const child = spawnSync(process.execPath, ['--experimental-strip-types', fileURLToPath(import.meta.url), ...args], { stdio: 'inherit' });
+    if (child.error) throw child.error;
+    process.exitCode = child.status ?? 1;
+  }
+} catch (error) {
+  const message = error instanceof Error ? error.message : 'Unable to start the Workbench CLI.';
+  if (args.includes('--json')) {
+    const { resultEnvelope } = await import(envelopeModule);
+    process.stdout.write(JSON.stringify(resultEnvelope('bootstrap', null, 'failed', [{ code: 'BOOTSTRAP_FAILED', message }])) + '\n');
+  } else process.stderr.write(message + '\n');
+  process.exitCode = 1;
+}

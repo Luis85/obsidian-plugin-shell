@@ -6,13 +6,14 @@ import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { projectStarters, projectStarter, projectGuide, projectRequest, projectPlan } from '../../bin/adapters/projects.ts';
-import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../scripts/compiler/domain/project-starter.ts';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../../bin/compiler/domain/project-starter.ts';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/shell.ts';
+// Maker-only surface: these requests must not be routed to the framework CLI.
+import { makerMain as main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const starters = await projectStarters(frameworkRoot);
 const expectedIds = ['cli', 'hybrid-angular', 'hybrid-nuxtui', 'hybrid-vanilla', 'plugin-angular', 'plugin-nuxtui', 'plugin-vanilla', 'webapp-angular', 'webapp-nuxtui', 'webapp-vanilla', 'website'];
@@ -90,7 +91,7 @@ test('every project starter compiles through shared v6 validation into actual ta
     assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
     assert.equal(result.readiness.dependencies, 'resolution-required');
     const files = new Map(result.artifacts.map(item => [item.path, item.content]));
-    assert.deepEqual(JSON.parse(files.get('project.config.json')), selected);
+    assert.deepEqual(JSON.parse(files.get('configs/actual-source-config.json')), selected); assert.ok(!files.has('project.config.json'));
     assert.deepEqual(openDocument(JSON.parse(files.get('design/project.json'))), document);
     assert.ok(!files.get('src/core/project.ts').includes('</script>'));
     assert.match(files.get('README.md'), /NOT a resolved dependency graph/); assert.match(files.get('README.md'), new RegExp('Starter: ' + selected.starter.id));
@@ -107,9 +108,9 @@ test('every project starter compiles through shared v6 validation into actual ta
     assert.match(files.get('plugins/starter-extension/src/index.ts'), /export const PluginObject/);
     assert.equal(JSON.parse(files.get('plugins/starter-extension/manifest.json')).id, 'starter-extension');
     assert.equal(JSON.parse(files.get('plugins/starter-extension/config.json')).enabled, true);
-    for (const path of ['tsconfig.angular.json', 'tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
+    for (const path of ['configs/types/tsconfig.angular.json', 'configs/types/tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
     if (selected.targets.includes('cli')) {
-      assert.equal(JSON.parse(files.get('tsconfig.cli.json')).compilerOptions.rootDir, '.');
+      assert.equal(JSON.parse(files.get('configs/types/tsconfig.cli.json')).compilerOptions.rootDir, '../..');
       assert.equal(pkg.scripts['start:cli'], 'node dist/cli/src/targets/cli/main.js');
     }
     for (const target of selected.targets) assert.ok(files.has(`src/targets/${target}/main.ts`));
@@ -120,10 +121,10 @@ test('every project starter compiles through shared v6 validation into actual ta
       assert.equal(pkg.dependencies['@angular/core'], selected.angularPins['@angular/core']); assert.equal(pkg.devDependencies['@angular/compiler-cli'], selected.angularPins['@angular/compiler-cli']);
       assert.ok(!pkg.dependencies.vue); assert.ok(!pkg.dependencies['zone.js']);
       assert.match(files.get('src/ui/mount.ts'), /createApplication/); assert.match(files.get('src/ui/mount.ts'), /app.destroy/);
-      assert.equal(JSON.parse(files.get('tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
+      assert.equal(JSON.parse(files.get('configs/types/tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
     }
     if (selected.framework === 'nuxtui') {
-      assert.equal(pkg.dependencies['@nuxt/ui'], '4.11.2'); assert.ok(!pkg.dependencies.nuxt);
+      assert.equal(pkg.dependencies['@nuxt/ui'], '4.11.3'); assert.ok(!pkg.dependencies.nuxt);
       assert.match(files.get('scripts/bundling/vite-shared.mjs'), /Unqualified Nuxt UI module/);
       assert.ok(files.has('src/ui/Starter.vue'));
       for (const [, imported] of files.get('scripts/bundling/vite-shared.mjs').matchAll(/from ['"](\.\/[^'"]+)['"]/g)) assert.ok(files.has('scripts/bundling/' + imported.slice(2)), imported);
@@ -158,15 +159,17 @@ test('project plan has deterministic bytes, default no writes, independent sidec
   const options = { root, frameworkRoot, out: 'prepared', input };
   const a = await projectPlan(options), b = await projectPlan(options);
   assert.equal(a.planHash, b.planHash);
-  await assert.rejects(() => readFile(join(root, 'prepared/project.config.json')));
+  await assert.rejects(() => readFile(join(root, 'prepared/configs/project-matrix-config.json')));
   assert.match(a.data.prompt, /vanilla/); assert.doesNotMatch(a.data.prompt, /\{\{\w/);
   await assert.rejects(() => applyPrepared(a, 'not-the-reviewed-hash'), /plan changed/);
   assert.equal((await applyPrepared(a, a.planHash)).status, 'applied');
   const read = async path => JSON.parse(await readFile(join(root, 'prepared', path), 'utf8'));
   const doc = openDocument(await read('companion.project.json'));
   assert.equal(doc.design.nodes.length, 2); assert.ok(!Object.hasOwn(doc, 'framework'));
-  assert.deepEqual(await read('project.config.json'), await read('source/project.config.json'));
-  assert.deepEqual((await read('project.config.json')).starter, selection('webapp-vanilla').starter);
+  assert.deepEqual(await read('configs/project-matrix-config.json'), await read('source/configs/project-matrix-config.json'));
+  assert.deepEqual((await read('configs/project-matrix-config.json')).starter, selection('webapp-vanilla').starter);
+  await assert.rejects(() => readFile(join(root, 'prepared/project.config.json')));
+  assert.match(await readFile(join(root, 'prepared/README.md'), 'utf8'), /configs\/project-matrix-config\.json records the chosen project starter/);
   assert.equal((await read('prototype.manifest.json')).artifact.sha256, null);
   const replay = await read('project-request.json'); assert.deepEqual(Object.keys(replay), ['schemaVersion', 'starter', 'interview']);
   assert.equal((await projectRequest(replay, frameworkRoot)).ready, true);
@@ -213,7 +216,7 @@ test('machine stdout stays one JSON response; directory creation refuses project
   io.input.isTTY = true; io.error.isTTY = true;
   assert.equal(await main(['new', '--input', '-', '--json', '--ui', 'tui', '--root', root, '--out', 'machine'], frameworkRoot, io), 0);
   assert.equal(output.length, 1); assert.equal(JSON.parse(output[0]).status, 'planned'); assert.equal(errors.length, 0);
-  const shell = args => spawnSync(process.execPath, ['--experimental-strip-types', 'shell.mjs', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
+  const shell = args => spawnSync(process.execPath, ['bin/app', ...args, '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 30000 });
   const child = shell(['new', '--list']);
   assert.equal(child.status, 0, child.stderr + child.stdout);
   const listed = JSON.parse(child.stdout).data.starters.find(item => item.id === 'cli');
@@ -228,20 +231,19 @@ test('sketch regeneration respects a saved starter selection and refuses legacy 
   await mkdir(join(root, 'design'));
   const document = runOperations(newDocument('CLI'), [{ op: 'page.add', title: 'Commands' }]).document;
   await writeFile(join(root, 'design/project.json'), documentText(document));
-  await writeFile(join(root, 'project.config.json'), JSON.stringify(selection('cli')));
+  await mkdir(join(root, 'configs')); await writeFile(join(root, 'configs/cli-config.json'), JSON.stringify(selection('cli')));
   const plan = await execute(parseArguments(['sketch', 'generate', '--out', 'code']), context(root));
   assert.equal(plan.outputKind, 'project');
   assert.ok(plan.changes.some(item => item.path === 'code/src/targets/cli/main.ts'));
   assert.ok(!plan.changes.some(item => item.path === 'code/src/ui/Starter.vue'));
   assert.equal((await execute(parseArguments(['sketch', 'generate', '--out', 'code', '--apply', plan.planHash]), context(root))).status, 'applied');
-  assert.deepEqual(JSON.parse(await readFile(join(root, 'code/project.config.json'), 'utf8')), selection('cli'));
-  await writeFile(join(root, 'project.config.json'), JSON.stringify({ schemaVersion: 1, catalogVersion: 1, preset: 'cli', projectType: 'cli', framework: 'none', targets: ['cli'] }));
+  assert.deepEqual(JSON.parse(await readFile(join(root, 'code/configs/cli-config.json'), 'utf8')), selection('cli'));
+  await writeFile(join(root, 'configs/cli-config.json'), JSON.stringify({ schemaVersion: 1, catalogVersion: 1, preset: 'cli', projectType: 'cli', framework: 'none', targets: ['cli'] }));
   await assert.rejects(() => execute(parseArguments(['sketch', 'generate', '--out', 'code']), context(root)), /Unknown|Unsupported/);
 }));
 test('new help documents project starters alongside directory-creation metadata', async () => scratch(async root => {
   const help = await execute(parseArguments(['new', '--help']), context(root));
   const legacy = help.commands.find(command => command.id === 'new');
-  assert.equal(legacy.options.from, 'value'); assert.equal(legacy.options.starter, 'value');
   assert.match(help.help, /new <dir>.*--from <project\.json>/);
   assert.match(help.help, /new starters --json/); assert.match(help.help, /new guide --starter/);
   assert.doesNotMatch(help.help, /--preset|--framework|--targets|new presets/);

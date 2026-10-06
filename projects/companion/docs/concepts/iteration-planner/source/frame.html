@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src __SCRIPT_POLICY__; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="An offline iteration-planner concept: backlog, planning, daily walkthrough, increment review, and retrospective.">
+<title>Iteration planner · Companion concept</title>
+<style>/*__STYLES__*/</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div id="app"></div>
+<dialog id="planner-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description"></dialog>
+<input id="workspace-import" type="file" accept="application/json,.json" hidden aria-label="Import planner workspace">
+<div id="notice" role="status" aria-live="polite" aria-atomic="true"></div>
+<noscript>This offline prototype needs JavaScript enabled to demonstrate its interactions.</noscript>
+<!--__PAYLOAD__-->
+<script>/*__BUNDLE__*/</script>
+</body>
+</html>

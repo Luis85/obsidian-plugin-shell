@@ -1,0 +1,891 @@
+{
+  "entry": [
+    "scripts/concepts/export-golden-project.mjs",
+    "scripts/concepts/contract-bundle.mjs",
+    "scripts/concepts/concept-contract.ts",
+    "bin/compiler/index.ts",
+    "scripts/compiler/build-clickdummy.mjs",
+    "src/main.ts",
+    "src/features/api.ts",
+    "harness/app/main.ts",
+    "harness/style-fixture/fixture.js",
+    "scripts/testing/node-reporter.mjs",
+    "configs/testing/vitest.obsidian.config.mjs",
+    "scripts/testing/evidence-vitest-reporter.mjs",
+    "scripts/styles/export-host-css.mjs",
+    "scripts/testing/check-browser-specimen.mjs",
+    "scripts/harness/serve-style-fixture.mjs",
+    "src/infrastructure/ui/static-plugin.ts",
+    "src/styles/index.css",
+    "harness/style-fixture/fixture.css",
+    "harness/styles/obsidian.css",
+    "harness/styles/simulated.css",
+    "harness/styles/host-adapter.css",
+    "scripts/makers/custom/registry.mjs",
+    "src/bootstrap/authoring-domains.ts",
+    "src/bootstrap/event-catalog.ts",
+    "docs/concepts/companion/src/brick-actions.js",
+    "docs/concepts/companion/src/brick-catalog.js",
+    "docs/concepts/companion/src/brick-model.js",
+    "docs/concepts/companion/src/brick-views.js",
+    "docs/concepts/companion/src/bricks.css",
+    "docs/concepts/companion/src/canvas-actions.js",
+    "docs/concepts/companion/src/canvas-catalog.js",
+    "docs/concepts/companion/src/canvas-layout.js",
+    "docs/concepts/companion/src/canvas-model.js",
+    "docs/concepts/companion/src/canvas-pointer.js",
+    "docs/concepts/companion/src/canvas-view.js",
+    "docs/concepts/companion/src/canvas.css",
+    "docs/concepts/companion/src/catalog.js",
+    "docs/concepts/companion/src/component-variants.css",
+    "docs/concepts/companion/src/component-variants.js",
+    "docs/concepts/companion/src/component-views.js",
+    "docs/concepts/companion/src/connection-actions.js",
+    "docs/concepts/companion/src/connection-menu.js",
+    "docs/concepts/companion/src/connection-model.js",
+    "docs/concepts/companion/src/connection-views.js",
+    "docs/concepts/companion/src/connection.css",
+    "docs/concepts/companion/src/design-actions.js",
+    "docs/concepts/companion/src/design-dialogs.js",
+    "docs/concepts/companion/src/design-model.js",
+    "docs/concepts/companion/src/design-plan.js",
+    "docs/concepts/companion/src/design-views.js",
+    "docs/concepts/companion/src/design.css",
+    "docs/concepts/companion/src/edge-editing.js",
+    "docs/concepts/companion/src/flow-actions.js",
+    "docs/concepts/companion/src/flow-catalog.js",
+    "docs/concepts/companion/src/flow-edge.js",
+    "docs/concepts/companion/src/flow-model.js",
+    "docs/concepts/companion/src/flow-runtime.js",
+    "docs/concepts/companion/src/flow-views.js",
+    "docs/concepts/companion/src/flow.css",
+    "docs/concepts/companion/src/interaction-polish.js",
+    "docs/concepts/companion/src/library-actions.js",
+    "docs/concepts/companion/src/library-model.js",
+    "docs/concepts/companion/src/library-views.js",
+    "docs/concepts/companion/src/library.css",
+    "docs/concepts/companion/src/prd-views.js",
+    "docs/concepts/companion/src/product-actions.js",
+    "docs/concepts/companion/src/product-model.js",
+    "docs/concepts/companion/src/product-plan.js",
+    "docs/concepts/companion/src/product.css",
+    "docs/concepts/companion/src/reference-actions.js",
+    "docs/concepts/companion/src/reference-content.js",
+    "docs/concepts/companion/src/reference-model.js",
+    "docs/concepts/companion/src/reference-views.js",
+    "docs/concepts/companion/src/reference.css",
+    "docs/concepts/companion/src/semantic-actions.js",
+    "docs/concepts/companion/src/semantic-generation.js",
+    "docs/concepts/companion/src/semantic-model.js",
+    "docs/concepts/companion/src/semantic-runtime.js",
+    "docs/concepts/companion/src/semantic-views.js",
+    "docs/concepts/companion/src/semantic.css",
+    "docs/concepts/companion/src/spatial-model.js",
+    "docs/concepts/companion/src/spatial-runtime.js",
+    "docs/concepts/companion/src/state-safety.js",
+    "docs/concepts/companion/src/surface-view.js",
+    "docs/concepts/companion/src/surface.css",
+    "docs/concepts/companion/src/unified-library.js",
+    "docs/concepts/companion/src/unified.css",
+    "docs/concepts/companion/src/vault-preparation.js",
+    "docs/concepts/companion/src/vault-project.js",
+    "docs/concepts/companion/src/vault-workspace.js",
+    "docs/concepts/companion/src/vault.css",
+    "docs/concepts/companion/src/workflow-actions.js",
+    "docs/concepts/companion/src/workflow-model.js",
+    "docs/concepts/companion/src/workflow-views.js",
+    "docs/concepts/companion/src/workflow.css",
+    "docs/concepts/companion/vendor/pinia.iife.prod.js",
+    "docs/concepts/companion/vendor/vue-flow-core.iife.js",
+    "docs/concepts/companion/vendor/vue-flow.css",
+    "docs/concepts/companion/vendor/vue-flow.scoped.css",
+    "docs/concepts/companion/vendor/vue.runtime.global.prod.js",
+    "docs/concepts/companion/src/semantic-geometry.js",
+    "docs/concepts/companion/src/semantic-interaction.js",
+    "docs/concepts/companion/src/data-source-model.js",
+    "docs/concepts/companion/src/data-source-actions.js",
+    "docs/concepts/companion/src/data-source-views.js",
+    "docs/concepts/companion/src/data-source-flow.js",
+    "docs/concepts/companion/src/data-source-generation.js",
+    "docs/concepts/companion/src/data-source.css",
+    "docs/concepts/companion/src/editor-selection.js",
+    "docs/concepts/companion/src/editor-removal.js",
+    "docs/concepts/companion/src/test-data-model.js",
+    "docs/concepts/companion/src/test-data-actions.js",
+    "docs/concepts/companion/src/test-data-views.js",
+    "docs/concepts/companion/src/test-data-export.js",
+    "docs/concepts/companion/src/test-data.css",
+    "docs/concepts/companion/test-kit/engine.mjs",
+    "docs/concepts/companion/test-kit/adapters.mjs",
+    "docs/concepts/companion/test-kit/storage.mjs",
+    "docs/concepts/companion/test-kit/server.mjs",
+    "docs/concepts/companion/test-kit/cli.mjs",
+    "docs/concepts/companion/test-kit/faker-provider.mjs",
+    "docs/concepts/companion/src/style-guide-model.js",
+    "docs/concepts/companion/src/style-guide-actions.js",
+    "docs/concepts/companion/src/style-guide-views.js",
+    "docs/concepts/companion/src/style-guide-export.js",
+    "docs/concepts/companion/src/style-guide.css",
+    "docs/concepts/companion/test-kit/client.mjs",
+    "docs/concepts/companion/src/workbench.css",
+    "docs/concepts/companion/src/ui-fields.js",
+    "docs/concepts/companion/src/ve-state.js",
+    "docs/concepts/companion/src/ve-catalog-preview.js",
+    "docs/concepts/companion/src/ve-canvas.js",
+    "docs/concepts/companion/src/ve-outline.js",
+    "docs/concepts/companion/src/ve-insert.js",
+    "docs/concepts/companion/src/ve-layouts.js",
+    "docs/concepts/companion/src/ve-fields.js",
+    "docs/concepts/companion/src/ve-review.js",
+    "docs/concepts/companion/src/ve-interactions.js",
+    "docs/concepts/companion/src/ve-page-inspector.js",
+    "docs/concepts/companion/src/ve-contract.js",
+    "docs/concepts/companion/src/ve-child-inspector.js",
+    "docs/concepts/companion/src/ve-publish.js",
+    "docs/concepts/companion/src/ve-component-views.js",
+    "docs/concepts/companion/src/ve-page-views.js",
+    "docs/concepts/companion/src/ve-structure.js",
+    "docs/concepts/companion/src/ve-entry.js",
+    "docs/concepts/companion/src/ve-actions.js",
+    "docs/concepts/companion/src/ve.css",
+    "docs/concepts/companion/src/project-transfer.js",
+    "docs/concepts/companion/editor/prototype-manager.ts",
+    "docs/concepts/companion/editor/prototype-view.ts",
+    "docs/concepts/companion/editor/prototype-navigation.ts",
+    "docs/concepts/companion/editor/prototype-comparison-view.ts",
+    "docs/concepts/companion/editor/prototype-host.ts",
+    "docs/concepts/companion/editor/prototype-markup.ts",
+    "docs/concepts/companion/editor/prototypes.css",
+    "scripts/companion/native-contract.mjs",
+    "templates/companion/runtime/operation.ts",
+    "docs/concepts/companion/src/storymap-model.js",
+    "docs/concepts/companion/src/storymap-review.js",
+    "docs/concepts/companion/src/storymap-actions.js",
+    "docs/concepts/companion/src/storymap-forms.js",
+    "docs/concepts/companion/src/storymap-views.js",
+    "docs/concepts/companion/src/storymap-runtime.js",
+    "docs/concepts/companion/src/storymap-export.js",
+    "docs/concepts/companion/src/storymap.css",
+    "scripts/companion/storymap-contract.mjs",
+    "templates/companion/runtime/use-visual.ts",
+    "templates/companion/runtime/visual-runtime.ts",
+    "templates/companion/runtime/detail-actions.ts",
+    "docs/concepts/companion/src/style-guide-frontend.js",
+    "scripts/companion/design-system-roles.mjs",
+    "scripts/companion/design-system-contract.mjs",
+    "scripts/companion/design-system-css.mjs",
+    "scripts/companion/composition-contract.mjs",
+    "scripts/companion/visual/visual-ir.mjs",
+    "scripts/companion/visual/visual-mapping.mjs",
+    "scripts/companion/visual/visual-catalog.mjs",
+    "scripts/companion/visual/visual-composition.mjs",
+    "scripts/companion/visual/visual-validate.mjs",
+    "scripts/companion/visual/visual-layout.mjs",
+    "scripts/companion/visual/visual-commands.mjs",
+    "scripts/companion/visual/visual-session.mjs",
+    "scripts/companion/test-data-manifest.mjs",
+    "scripts/companion/starter-contract.mjs",
+    "docs/concepts/companion/src/project-starters.js",
+    "docs/concepts/companion/src/companion-contract.js",
+    "docs/concepts/companion/src/project-starter-views.js",
+    "docs/concepts/companion/src/project-starters.css",
+    "scripts/companion-tools/qualify-starter.mjs",
+    "scripts/concepts/mvp-bridge.js",
+    "scripts/concepts/prototype-bridge.js",
+    "bin/app.ts",
+    "scripts/compiler/qualify-project-starters.mjs",
+    "scripts/companion/prd-limits.mjs",
+    "plugins/*/src/index.ts"
+  ],
+  "plugins": [
+    "scripts/quality/fallow-node-tests.json"
+  ],
+  "ignorePatterns": [
+    "dist/main.js",
+    "dist/styles.css",
+    "dist/manifest.json",
+    "dist-harness/**",
+    "reports/**",
+    "docs/**",
+    "projects/**"
+  ],
+  "boundaries": {
+    "coverage": {
+      "requireAllFiles": true
+    },
+    "zones": [
+      {
+        "name": "maker-domain",
+        "patterns": [
+          "bin/domain/**",
+          "bin/documentation/domain/**"
+        ]
+      },
+      {
+        "name": "maker-application",
+        "patterns": [
+          "bin/application/**",
+          "bin/documentation/application/**"
+        ]
+      },
+      {
+        "name": "maker-host",
+        "patterns": [
+          "bin/adapters/**",
+          "bin/documentation/adapters/**",
+          "bin/presentation/**",
+          "bin/app.ts",
+          "plugins/**"
+        ]
+      },
+      {
+        "name": "compiler-domain",
+        "patterns": [
+          "bin/compiler/domain/**"
+        ]
+      },
+      {
+        "name": "compiler-application",
+        "patterns": [
+          "bin/compiler/application/**"
+        ]
+      },
+      {
+        "name": "compiler-host",
+        "patterns": [
+          "bin/compiler/adapters/**",
+          "bin/compiler/index.ts"
+        ]
+      },
+      {
+        "name": "compiler-emitters",
+        "patterns": [
+          "bin/compiler/emitters/**"
+        ]
+      },
+      {
+        "name": "companion-authoring-contract",
+        "patterns": [
+          "scripts/companion/authoring-contract.ts",
+          "scripts/companion/tooling-contract.ts",
+          "scripts/companion/tooling-contract.mjs",
+          "scripts/companion/tooling-options.ts",
+          "scripts/companion/concepts/**",
+          "scripts/companion/journey/**",
+          "scripts/companion/sitemap/**",
+          "scripts/companion/prototypes/**",
+          "scripts/companion/visual/**",
+          "scripts/companion/native-contract.mjs",
+          "scripts/companion/design-system-contract.mjs",
+          "scripts/companion/design-system-roles.mjs",
+          "scripts/companion/storymap-contract.mjs",
+          "scripts/companion/composition-contract.mjs",
+          "scripts/companion/prd-limits.mjs",
+          "scripts/companion/design-system-css.mjs",
+          "scripts/companion/starter-contract.mjs",
+          "scripts/companion/test-data-manifest.mjs",
+          "scripts/companion/schema/**"
+        ]
+      },
+      {
+        "name": "project-templates",
+        "patterns": [
+          "templates/**"
+        ]
+      },
+      {
+        "name": "domain",
+        "patterns": [
+          "src/domain/**"
+        ]
+      },
+      {
+        "name": "application",
+        "patterns": [
+          "src/application/**"
+        ]
+      },
+      {
+        "name": "features",
+        "patterns": [
+          "src/features/**"
+        ]
+      },
+      {
+        "name": "infrastructure",
+        "patterns": [
+          "src/infrastructure/**"
+        ]
+      },
+      {
+        "name": "presentation",
+        "patterns": [
+          "src/presentation/**"
+        ]
+      },
+      {
+        "name": "bootstrap",
+        "patterns": [
+          "src/bootstrap/**",
+          "src/main.ts"
+        ]
+      },
+      {
+        "name": "test",
+        "patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "name": "harness",
+        "patterns": [
+          "harness/**"
+        ]
+      },
+      {
+        "name": "cli-data-contract",
+        "patterns": [
+          "scripts/contracts/json-data.ts"
+        ]
+      },
+      {
+        "name": "cli-result-contract",
+        "patterns": [
+          "scripts/contracts/result-runtime.mjs",
+          "scripts/contracts/result.ts",
+          "scripts/contracts/errors.ts"
+        ]
+      },
+      {
+        "name": "cli-process-contract",
+        "patterns": [
+          "scripts/shared/process.ts"
+        ]
+      },
+      {
+        "name": "cli-file-plan-contract",
+        "patterns": [
+          "scripts/shared/file-plan-types.ts",
+          "scripts/shared/file-plan.ts",
+          "scripts/shared/file-plan-runtime.ts"
+        ]
+      },
+      {
+        "name": "cli-confirmation-contract",
+        "patterns": [
+          "scripts/shared/confirmation.ts"
+        ]
+      },
+      {
+        "name": "cli-input-contract",
+        "patterns": [
+          "scripts/shared/input.ts"
+        ]
+      },
+      {
+        "name": "cli-files-contract",
+        "patterns": [
+          "scripts/shared/hash.ts",
+          "scripts/shared/fs-presence.ts"
+        ]
+      },
+      {
+        "name": "cli-bounded-map-contract",
+        "patterns": [
+          "scripts/shared/bounded-map.ts"
+        ]
+      },
+      {
+        "name": "project-path-contract",
+        "patterns": [
+          "scripts/shared/project-path.ts",
+          "scripts/shared/protected-directories.ts"
+        ]
+      },
+      {
+        "name": "cli-serialization-contract",
+        "patterns": [
+          "scripts/contracts/serialization.ts"
+        ]
+      },
+      {
+        "name": "tooling",
+        "patterns": [
+          "scripts/**",
+          "configs/**"
+        ]
+      },
+      {
+        "name": "styles",
+        "patterns": [
+          "src/styles/**"
+        ]
+      },
+      {
+        "name": "companion-concept",
+        "patterns": [
+          "docs/concepts/companion/src/**",
+          "docs/concepts/companion/vendor/**"
+        ]
+      },
+      {
+        "name": "companion-test-kit",
+        "patterns": [
+          "docs/concepts/companion/test-kit/**"
+        ]
+      },
+      {
+        "name": "companion-editor",
+        "patterns": [
+          "docs/concepts/companion/editor/**"
+        ]
+      },
+      {
+        "name": "prototype-skill",
+        "patterns": [
+          ".claude/skills/**"
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "from": "domain",
+        "allow": [
+          "domain"
+        ]
+      },
+      {
+        "from": "application",
+        "allow": [
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "features",
+        "allow": [
+          "features",
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "infrastructure",
+        "allow": [
+          "infrastructure",
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "presentation",
+        "allow": [
+          "presentation",
+          "features",
+          "application",
+          "domain",
+          "styles"
+        ]
+      },
+      {
+        "from": "bootstrap",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "styles"
+        ]
+      },
+      {
+        "from": "test",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles",
+          "companion-test-kit",
+          "companion-authoring-contract",
+          "project-templates",
+          "prototype-skill",
+          "maker-domain",
+          "maker-application",
+          "maker-host",
+          "compiler-domain",
+          "compiler-application",
+          "compiler-host",
+          "compiler-emitters",
+          "project-path-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-confirmation-contract",
+          "cli-file-plan-contract",
+          "cli-input-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract",
+          "cli-serialization-contract"
+        ]
+      },
+      {
+        "from": "harness",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles",
+          "companion-authoring-contract"
+        ]
+      },
+      {
+        "from": "tooling",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles",
+          "companion-test-kit",
+          "companion-authoring-contract",
+          "project-templates",
+          "maker-domain",
+          "maker-application",
+          "maker-host",
+          "compiler-domain",
+          "compiler-application",
+          "compiler-host",
+          "compiler-emitters",
+          "project-path-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-confirmation-contract",
+          "cli-file-plan-contract",
+          "cli-input-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract",
+          "cli-serialization-contract"
+        ]
+      },
+      {
+        "from": "styles",
+        "allow": [
+          "styles"
+        ]
+      },
+      {
+        "from": "companion-concept",
+        "allow": []
+      },
+      {
+        "from": "companion-test-kit",
+        "allow": [
+          "companion-test-kit"
+        ]
+      },
+      {
+        "from": "companion-authoring-contract",
+        "allow": [
+          "companion-authoring-contract",
+          "cli-data-contract"
+        ]
+      },
+      {
+        "from": "project-templates",
+        "allow": [
+          "project-templates",
+          "companion-authoring-contract"
+        ]
+      },
+      {
+        "from": "companion-editor",
+        "allow": [
+          "companion-editor",
+          "companion-authoring-contract"
+        ]
+      },
+      {
+        "from": "prototype-skill",
+        "allow": [
+          "prototype-skill"
+        ]
+      },
+      {
+        "from": "maker-domain",
+        "allow": [
+          "maker-domain",
+          "companion-authoring-contract",
+          "project-path-contract"
+        ]
+      },
+      {
+        "from": "maker-application",
+        "allow": [
+          "maker-application",
+          "maker-domain"
+        ]
+      },
+      {
+        "from": "maker-host",
+        "allow": [
+          "maker-host",
+          "compiler-domain",
+          "compiler-application",
+          "compiler-host",
+          "compiler-emitters",
+          "maker-application",
+          "maker-domain",
+          "tooling",
+          "companion-authoring-contract",
+          "prototype-skill",
+          "project-path-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-confirmation-contract",
+          "cli-file-plan-contract",
+          "cli-input-contract",
+          "cli-process-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract",
+          "cli-serialization-contract",
+          "companion-test-kit"
+        ]
+      },
+      {
+        "from": "compiler-domain",
+        "allow": [
+          "compiler-domain"
+        ]
+      },
+      {
+        "from": "compiler-application",
+        "allow": [
+          "compiler-application",
+          "compiler-domain"
+        ]
+      },
+      {
+        "from": "compiler-host",
+        "allow": [
+          "compiler-host",
+          "compiler-emitters",
+          "compiler-application",
+          "compiler-domain",
+          "maker-host",
+          "companion-authoring-contract",
+          "companion-test-kit",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-file-plan-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract",
+          "project-path-contract"
+        ]
+      },
+      {
+        "from": "compiler-emitters",
+        "allow": [
+          "compiler-emitters",
+          "compiler-domain",
+          "companion-authoring-contract",
+          "project-templates",
+          "cli-serialization-contract"
+        ]
+      },
+      {
+        "from": "cli-serialization-contract",
+        "allow": [
+          "cli-serialization-contract"
+        ]
+      },
+      {
+        "from": "cli-data-contract",
+        "allow": [
+          "cli-data-contract"
+        ]
+      },
+      {
+        "from": "cli-result-contract",
+        "allow": [
+          "cli-result-contract"
+        ]
+      },
+      {
+        "from": "cli-process-contract",
+        "allow": [
+          "cli-process-contract"
+        ]
+      },
+      {
+        "from": "cli-file-plan-contract",
+        "allow": [
+          "cli-file-plan-contract",
+          "cli-bounded-map-contract",
+          "cli-files-contract",
+          "project-path-contract"
+        ]
+      },
+      {
+        "from": "cli-confirmation-contract",
+        "allow": [
+          "cli-confirmation-contract"
+        ]
+      },
+      {
+        "from": "cli-input-contract",
+        "allow": [
+          "cli-input-contract",
+          "cli-result-contract"
+        ]
+      },
+      {
+        "from": "cli-files-contract",
+        "allow": [
+          "cli-files-contract"
+        ]
+      },
+      {
+        "from": "cli-bounded-map-contract",
+        "allow": [
+          "cli-bounded-map-contract"
+        ]
+      },
+      {
+        "from": "project-path-contract",
+        "allow": [
+          "project-path-contract"
+        ]
+      }
+    ]
+  },
+  "ignoreDependencies": [
+    "obsidian"
+  ],
+  "ignoreUnresolvedImports": [
+    "/__host.css",
+    "./vendor/obsidian.css"
+  ],
+  "usedClassMembers": [
+    {
+      "extends": "TextFileView",
+      "members": [
+        "getIcon",
+        "getViewData",
+        "setViewData",
+        "save",
+        "disposeNativeView"
+      ]
+    },
+    {
+      "extends": "PluginSettingTab",
+      "members": [
+        "getSettingDefinitions",
+        "getControlValue",
+        "setControlValue",
+        "hide"
+      ]
+    }
+  ],
+  "failOnParseError": true,
+  "rules": {
+    "policy-violation": "off",
+    "deprecated-exports-in-use": "error"
+  },
+  "framework": [
+    {
+      "name": "project-tool-configs",
+      "entryPointRole": "support",
+      "entryPoints": [
+        "configs/bundling/vite.config.mjs",
+        "configs/bundling/vite.harness.config.mjs",
+        "configs/testing/vitest.config.mjs",
+        "configs/testing/vitest.production.config.mjs",
+        "configs/testing/vitest.maker.config.mjs",
+        "configs/testing/playwright.config.ts",
+        "configs/lint/eslint.config.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": "configs/bundling/vite.config.mjs"
+      }
+    },
+    {
+      "name": "airship-source-preview-tools",
+      "entryPointRole": "support",
+      "entryPoints": [
+        "scripts/airship/preview-config.mjs",
+        "scripts/airship/qualify.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": "scripts/airship/preview-config.mjs"
+      }
+    },
+    {
+      "name": "optional-storybook-qualification",
+      "entryPointRole": "test",
+      "entryPoints": [
+        "scripts/compiler/qualify-storybook.mjs",
+        "scripts/compiler/verify-storybook.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": "scripts/compiler/qualify-storybook.mjs"
+      }
+    },
+    {
+      "name": "prototype-build-tools",
+      "entryPointRole": "support",
+      "entryPoints": [
+        ".claude/skills/companion-prototype-design/scripts/build-prototype.mjs",
+        ".claude/skills/companion-prototype-design/scripts/build-single-file.mjs",
+        ".claude/skills/companion-prototype-design/scripts/check-offline.mjs",
+        ".claude/skills/companion-prototype-design/scripts/diff-project.mjs",
+        ".claude/skills/companion-prototype-design/scripts/inspect-repository.mjs",
+        ".claude/skills/companion-prototype-design/scripts/prototype.mjs",
+        ".claude/skills/companion-prototype-design/scripts/save-concept.mjs",
+        ".claude/skills/companion-prototype-design/scripts/validate-project.mjs",
+        ".claude/skills/companion-prototype-design/scripts/verify-browser.mjs",
+        "scripts/concepts/build-mvp.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
+      }
+    },
+    {
+      "name": "prototype-build-tests",
+      "entryPointRole": "test",
+      "entryPoints": [
+        ".claude/skills/companion-prototype-design/tests/helpers.checks.mjs",
+        ".claude/skills/companion-prototype-design/tests/integration.checks.mjs",
+        ".claude/skills/companion-prototype-design/tests/validator.checks.mjs",
+        ".claude/skills/companion-prototype-design/tests/worker-output.checks.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
+      }
+    }
+  ]
+}

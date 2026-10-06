@@ -1,0 +1,9 @@
+---
+interface Props { name: string; known: boolean }
+const { name, known } = Astro.props;
+---
+<div class="empty-state" role="status">
+  {known
+    ? <p>The <code>{name}</code> collection has no records yet.</p>
+    : <p>No <code>{name}</code> collection yet. List it under <code>site.collections</code> in <code>workbench.project.json</code> and run <code>node bin/app site collections</code> in the Workbench shell.</p>}
+</div>

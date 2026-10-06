@@ -1,25 +1,26 @@
 /** Consolidated negative and integration coverage from the two alternative Storybook proposals. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { validateTooling, airshipOptions, toolingSchema } from '../../scripts/companion/tooling-contract.mjs';
 import { withStorybookOptions, storybookOptions } from '../../scripts/companion/tooling-contract.ts';
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { selfProject } from '../support/starter-documents.mjs';
+import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const template = await loadTemplateSnapshot(root);
-const source = JSON.parse(await readFile(new URL('../fixtures/companion/detail-v3.json', import.meta.url), 'utf8'));
+const source = selfProject();
 const get = (result, path) => result.artifacts.find(file => file.path === path)?.content;
 test('both integrations share one strict tooling schema and preserve independent defaults', () => {
   const schema = toolingSchema();
-  assert.deepEqual(Object.keys(schema.properties).sort(), ['airship', 'storybook']);
+  assert.deepEqual(Object.keys(schema.properties).sort(), ['airship', 'hindsight', 'hosting', 'storybook']);
   assert.equal(schema.additionalProperties, false);
   assert.deepEqual(storybookOptions({}), { enabled: false, generateStories: false });
   assert.equal(airshipOptions({ storybook: { enabled: true } }).enabled, false);
   assert.deepEqual(storybookOptions({ tooling: { airship: { enabled: true } } }), { enabled: false, generateStories: false });
+  assert.deepEqual(storybookOptions({ tooling: { hosting: { platform: 'none' } } }), { enabled: false, generateStories: false });
+  assert.equal(airshipOptions({ hosting: { platform: 'azure-devops' } }).enabled, false);
 });
 test('data-only validation rejects inherited switches, accessors, symbols and undefined without invoking code', () => {
   let invoked = 0;
@@ -35,11 +36,10 @@ test('data-only validation rejects inherited switches, accessors, symbols and un
   assert.throws(() => validateTooling({ airship: undefined }));
   assert.equal(invoked, 0);
 });
-test('legacy migration and explicit CLI overrides retain the sibling integration without mutating input', () => {
+test('explicit CLI overrides retain the sibling integration without mutating input', () => {
   const original = { ...source, tooling: { airship: { enabled: true, agent: 'codex' }, storybook: { generateStories: true } } };
   const before = JSON.stringify(original);
-  const migrated = migrateAuthoringDocument(original).document;
-  const override = withStorybookOptions(migrated, { enabled: true });
+  const override = withStorybookOptions(original, { enabled: true });
   const final = withAirshipOption(override, { 'no-airship': true });
   assert.equal(JSON.stringify(original), before);
   assert.deepEqual(final.tooling.storybook, { enabled: true, generateStories: true });
@@ -80,9 +80,8 @@ test('superseded design.storybook input fails visibly instead of being silently 
 });
 
 test('CSF source exposes statically indexable identifiers for titles, stable IDs, tags and scenario labels', async () => {
-  const document = migrateAuthoringDocument(structuredClone(source)).document;
-  document.design.visualDesigns.components[0].scenarios.push({ id: 'vs-100', name: 'Narrow empty preview', state: 'empty', width: 'narrow', values: {}, bindings: [] });
-  document.design.visualDesigns.nextId = Math.max(document.design.visualDesigns.nextId, 101);
+  const document = structuredClone(source), visual = document.design.visualDesigns;
+  visual.components.find(c => c.libraryId === 'project-json-review').scenarios.push({ id: 'vs-' + visual.nextId++, name: 'Narrow empty preview', state: 'empty', width: 'narrow', values: {}, bindings: [] });
   const result = await compileProject({ source: JSON.stringify(document), template, storybook: { generateStories: true } });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
   const code = get(result, 'storybook/generated/components/project-json-review.stories.ts');

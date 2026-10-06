@@ -1,24 +1,72 @@
 name: CI
-# Every always-on pull-request gate in one place. Path-filtered checks stay in
+# Every always-on Integration-tier gate in one place. Path-filtered checks stay in
 # setup-compatibility.yml and companion-concept-verification.yml; heavy native
-# qualification of main is candidate-qualification.yml; releases are manual.
+# qualification of main is candidate-qualification.yml; release.yml calls this
+# workflow with tier release on release/X.Y.Z branches. dev.yml is the Dev tier.
+# "CI result" aggregates every gate job below, so branch protection can require
+# that single check instead of each matrix leg.
+# Integration tier: every gate job is skipped on a draft pull request and on a
+# release/* head (release.yml qualifies that head instead), so "CI result" then
+# passes with every gate skipped. Drafts cannot merge, marking one ready for review
+# (ready_for_review) runs every gate, and Publish requires "Release result" first.
+# End-to-end steps (served UI in Chromium, the UI review gallery, real Obsidian;
+# scripts/quality/e2e-policy.mjs lists them) are opt-in: they run with tier
+# release (always), the e2e dispatch/call input or the pull request label e2e.
+# Adding the label starts a run of only the jobs that hold e2e steps; its
+# aggregator reports as "E2E result", never as the required "CI result". In that
+# label run the template-authoring jobs rebuild only what the served steps need
+# (build and harness-build), not their verify gates, which the ready run already ran.
+# A push to main skips the three template-authoring jobs and the Ubuntu showcase
+# leg: the pull request's merge-ref run already qualified that tree. They still
+# run on pull requests, manual dispatch and the release tier.
+# Jobs that install dependencies restore the npm download cache (~/.npm, keyed on
+# the OS and package-lock.json); node_modules is never cached, so every
+# "clean checkout without node_modules" install stays a real npm ci.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths-ignore:
+      - 'projects/**'
   push:
     branches: [main]
+    paths-ignore:
+      - 'projects/**'
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg and push-skipped job)
+        type: string
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: true
 jobs:
   baseline:
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Baseline / ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # The shipped `bin/app ci` help and manual use `ci/baseline --matrix
+        # os=ubuntu-24.04` as their example, so the pinned image name stays here.
+        os: [ubuntu-24.04, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -43,19 +91,30 @@ jobs:
           if-no-files-found: error
 
   showcase:
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Showcase / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # Guided setup runs the complete verify gates once before the served showcase.
     # The integrated Windows suites exceed 30 minutes before coverage finishes.
-    # Match setup-compatibility's job budget; keep every test and threshold intact.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 30 }}
+    # The budget first matched setup-compatibility's Windows leg (75 minutes), which
+    # then ran the same setup and complete verify; keep every test and threshold intact.
+    # Ubuntu guided setup was measured at 35-39 minutes, so non-Windows runners
+    # get 55 minutes of headroom instead of the earlier 30-minute budget.
+    # Windows verify then measured 72.4 minutes (job 73.8 of 75), and the data-driven
+    # wizard suites add about 6.5 minutes of Windows tooling, so Windows gets 95.
+    # This Windows leg is the only complete verify on Windows for pull requests and
+    # main (setup-compatibility's Windows legs run targeted gates only).
+    # This is a job budget, not a test deadline or product performance threshold.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 95 || 55 }}
     strategy:
       fail-fast: false
       matrix:
         # On pull requests template-authoring's renamed-feature job already runs
         # setup, the complete verify and served e2e on Ubuntu with the same
-        # toolchain; Ubuntu showcase runs on pushes and manual dispatch.
-        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-latest", "windows-latest"]') }}
+        # toolchain. A push to main is the tree that pull request's merge-ref run
+        # already qualified, so the Ubuntu leg runs only on manual dispatch and in
+        # the release tier (a release/* push is a push too, hence the tier check).
+        os: ${{ fromJSON((inputs.tier == 'release' || github.event_name == 'workflow_dispatch') && '["ubuntu-24.04", "windows-latest"]' || '["windows-latest"]') }}
     steps:
       - *checkout
       - &windows-dev-drive
@@ -64,6 +123,16 @@ jobs:
         shell: pwsh
         run: ./.github/scripts/prepare-windows-runner.ps1
       - *setup-node
+      # The npm download cache only (never node_modules): a cache hit saves the
+      # registry downloads, npm ci still installs and verifies every package
+      # against the lock's integrity hashes. Windows npm keeps it in LocalAppData.
+      - &npm-cache
+        name: Restore the npm download cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ runner.os == 'Windows' && '~/AppData/Local/npm-cache' || '~/.npm' }}
+          key: npm-download-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-download-${{ runner.os }}-
       - &select-npm
         name: Select exact npm in runner scratch, not globally
         shell: bash
@@ -76,20 +145,36 @@ jobs:
       - &playwright-version
         name: Resolve the pinned Playwright version
         id: playwright
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - &playwright-cache
         name: Restore the pinned Chromium download
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Exercise the actual served showcase
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
+      - name: Capture the UI review gallery (evidence for human review, not acceptance)
+        if: always() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
+        run: node "$QUALIFIED_NPM" run ui:gallery
+      - name: Retain the UI review gallery
+        id: ui-gallery
+        if: always() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-review-gallery
+          path: reports/ui-gallery/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Link the UI review gallery in the job summary
+        if: always() && runner.os == 'Linux' && steps.ui-gallery.outputs.artifact-url != ''
+        run: |
+          echo "UI review gallery for reviewers (open gallery.html): ${{ steps.ui-gallery.outputs.artifact-url }} - evidence for human review, not acceptance, not a baseline." >> "$GITHUB_STEP_SUMMARY"
       - name: Archive tracked source only
         if: always()
         run: git archive --format=zip --output=candidate-source.zip HEAD
@@ -111,18 +196,29 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  # Three independent template-authoring journeys run in parallel. Each still
-  # runs every gate on its own fresh checkout.
+  # Three independent template-authoring journeys run in parallel, each on its own
+  # fresh checkout. renamed-feature runs the complete verify (the Ubuntu complete
+  # verify that setup-compatibility's deferred qualified leg relies on);
+  # source-archive and example-removal run the verify steps and suites their own
+  # claim depends on. None of them runs on a push to main (the merge-ref run of
+  # the pull request qualified that tree); all run in the release tier.
   renamed-feature:
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / renamed feature
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    # Measured at 30-37 minutes on #60 and 44 minutes on #68 (identity adoption,
+    # maker, extended verify and served components), and 58 minutes of the earlier
+    # 60-minute budget on the bfe0a5f7 pull request run, so it gets 75. This is a
+    # job budget, not a test deadline.
+    timeout-minutes: 75
     steps:
       - *checkout
       - *setup-node
+      - *npm-cache
       - *select-npm
-      # Both jobs using this step run the complete verify later on a superset of
-      # this tree, so setup defers its own identical verify stage.
+      # renamed-feature runs the complete verify later on a superset of this tree
+      # and example-removal reproduces exactly this state before removing examples,
+      # so setup defers its own identical verify stage.
       - &adopt-identity
         name: Adopt a distinct identity from a fresh checkout, deferring verify to the extended template
         run: |
@@ -145,14 +241,22 @@ jobs:
           node "$QUALIFIED_NPM" run make -- event refreshed --feature bookmarks --yes --no-interaction
           node "$QUALIFIED_NPM" run make -- listener observe --feature bookmarks --event refreshed --yes --no-interaction
           node "$QUALIFIED_NPM" run events:check
+      # A run started by adding the e2e label exists only to add browser evidence:
+      # the ready run of the same head already ran this complete verify.
       - name: Verify the complete renamed and extended template
+        if: github.event.action != 'labeled'
         run: |
           set -o pipefail
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/verify.txt
+          node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/verify-summary 2>&1 | tee reports/template-authoring/verify.txt
           node scripts/quality/check-artifacts.mjs > reports/template-authoring/assets.json
+      - &label-run-build
+        name: Build only the plugin and served harness the browser steps need (e2e label run)
+        if: github.event.action == 'labeled'
+        run: node "$QUALIFIED_NPM" run verify -- --only build,harness-build
       - *playwright-version
       - *playwright-cache
       - name: Provision pinned Chromium and exercise served components
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
@@ -183,13 +287,24 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
+  # Its own claim: guided setup, the build and the source-walking gates work from a
+  # literal git archive with no ancestor repository. Setup defers its complete
+  # verify; the steps below run the verify steps that read the extracted tree
+  # (suite inventory, build, types, repository, projects, source, artifacts) and
+  # the runtime and artifact evidence, whose identity must work without Git.
+  # Every other verify step runs on the same tree in renamed-feature.
   source-archive:
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / source archive
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    # Measured at 59 minutes with setup's complete verify (bfe0a5f7); without it
+    # an estimated 15-20 minutes (not yet measured); 40 minutes leaves room for a
+    # slow runner. It is a job budget, not a test deadline.
     timeout-minutes: 40
     steps:
       - *checkout
       - *setup-node
+      - *npm-cache
       - *select-npm
       - name: Exercise literal source archive without ancestor Git discovery
         run: |
@@ -202,7 +317,8 @@ jobs:
           if git rev-parse --show-toplevel; then exit 1; fi
           node scripts/setup.mjs --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --dry-run --json > "$GITHUB_WORKSPACE/reports/template-authoring/archive-dry-run.json"
           set -o pipefail
-          node "$QUALIFIED_NPM" run setup -- --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee "$GITHUB_WORKSPACE/reports/template-authoring/archive-setup.txt"
+          node "$QUALIFIED_NPM" run setup -- --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --defer-verify --yes --no-interaction 2>&1 | tee "$GITHUB_WORKSPACE/reports/template-authoring/archive-setup.txt"
+          node "$QUALIFIED_NPM" run verify -- --only suites-check,build,typecheck,repository,projects,source,artifacts 2>&1 | tee "$GITHUB_WORKSPACE/reports/template-authoring/archive-verify.txt"
           node scripts/testing/evidence-cli.mjs run runtime
           node scripts/testing/evidence-cli.mjs run artifact
           cp -R reports "$GITHUB_WORKSPACE/reports/template-authoring/archive-reports"
@@ -221,12 +337,20 @@ jobs:
           if-no-files-found: error
 
   example-removal:
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     name: Template authoring / example removal
-    runs-on: ubuntu-latest
-    timeout-minutes: 75
+    runs-on: ubuntu-24.04
+    # Measured at 73-77 minutes with two complete verify runs, e2e and four
+    # evidence sessions; 58-74 minutes with the data-driven wizard suites and about
+    # 100 on the bfe0a5f7 pull request run. One cheap gate plus one targeted verify,
+    # the removal-sensitive suites and two evidence sessions are estimated at 45-55
+    # minutes (not yet measured); 95 minutes keeps room for a runner about 1.7 times
+    # slower. It is a job budget, not a test deadline.
+    timeout-minutes: 95
     steps:
       - *checkout
       - *setup-node
+      - *npm-cache
       - *select-npm
       # Reproduces the renamed-feature consumer state; that job verifies it before removal.
       - *adopt-identity
@@ -235,6 +359,7 @@ jobs:
       - *playwright-version
       - *playwright-cache
       - name: Provision pinned Chromium
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - name: Remove reviewed examples while preserving the consumer feature
         run: |
@@ -243,17 +368,42 @@ jobs:
           node "$QUALIFIED_NPM" run examples:remove -- --dry-run --json > reports/template-authoring/removal-plan.json
           node "$QUALIFIED_NPM" run examples:remove -- --yes --no-interaction --json > reports/template-authoring/removal.json
           sha256sum --check reports/template-authoring/consumer-before.sha256
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/foundation-verify.txt
-          node "$QUALIFIED_NPM" run test:e2e
-      - name: Generate and qualify another working feature after removal
+      # Localizes a removal defect before another feature is generated; the served
+      # harness is rebuilt here because the browser step below serves this state.
+      - name: Gate the foundation right after removal (build, types, entities, events, harness)
+        if: github.event.action != 'labeled'
         run: |
           set -o pipefail
-          node "$QUALIFIED_NPM" run make -- feature reading --entity reading-item --yes --no-interaction
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
-          node scripts/testing/evidence-cli.mjs run runtime
+          node "$QUALIFIED_NPM" run verify -- --only build,typecheck,entities,events,harness-build --report-dir reports/template-authoring/foundation-gate-summary 2>&1 | tee reports/template-authoring/foundation-gate.txt
+      - *label-run-build
+      - name: Exercise served components after removal
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: node "$QUALIFIED_NPM" run test:e2e
+      - name: Generate another working feature after removal
+        run: node "$QUALIFIED_NPM" run make -- feature reading --entity reading-item --yes --no-interaction
+      # Every verify step that reads the removed and regenerated source, tests,
+      # styles or examples state; the tooling step is replaced by the suites whose
+      # files or assertions follow example removal (native and makers lose
+      # example-owned files; generator and the maker suite run by maker coverage
+      # assert every consumer state). Left out, because removal changes none of
+      # their inputs: dependency-policy (lockfile), the full tooling step,
+      # workbench-suite/workbench-check (plugins/) and analyzer-after-tooling.
+      # The coverage evidence session runs every runtime test (the runtime suite's
+      # include list), so a separate runtime session would run them a third time.
+      - name: Qualify the requalified consumer with every gate removal touches
+        if: github.event.action != 'labeled'
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run verify -- --only suites-check,build,analyzer,typecheck,lint-source,eslint-source,maker-types,maker-coverage-gate,eslint-tests,test-quality,repository,projects,source,presentation,architecture,maintainability,entities,events,selected-core-coverage,style-tokens,style-literals,artifacts,baseline,harness-build --report-dir reports/template-authoring/extended-foundation-verify-summary 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
+          node scripts/testing/suites.mjs native makers generator 2>&1 | tee reports/template-authoring/removal-suites.txt
           node scripts/testing/evidence-cli.mjs run coverage
           node scripts/testing/evidence-cli.mjs run artifact
-          node scripts/testing/evidence-cli.mjs run browser
+      - *label-run-build
+      - name: Capture served browser evidence of the requalified consumer
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: node scripts/testing/evidence-cli.mjs run browser
+      - name: Report every evidence session of the requalified consumer
+        run: |
           for session in reports/evidence/*; do
             node scripts/testing/evidence-cli.mjs report "$session" > "reports/template-authoring/consumer-acceptance-$(basename "$session").json"
           done
@@ -285,15 +435,17 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
-  # Framework CLI, real Obsidian and generator jobs run on pull requests and
-  # manual dispatch only, as before consolidation.
+  # Framework CLI and generator jobs run on pull requests and manual dispatch
+  # only, as before consolidation, and always in the release tier. Real Obsidian
+  # is e2e: opt-in, and always in the release tier.
   framework-cli:
     name: Framework CLI / ${{ matrix.os }}
-    if: github.event_name != 'push'
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Integration runs the Linux leg; the release tier runs every OS.
+        os: ${{ fromJSON(inputs.tier == 'release' && '["ubuntu-24.04", "windows-latest", "macos-latest"]' || '["ubuntu-24.04"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     defaults:
@@ -303,6 +455,7 @@ jobs:
       - *checkout
       - *windows-dev-drive
       - *setup-node
+      - *npm-cache
       - *select-npm
       - name: Install locked build dependencies
         run: node "$QUALIFIED_NPM" ci --no-fund
@@ -313,14 +466,14 @@ jobs:
           node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          node "$QUALIFIED_NPM" run typecheck:framework
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.sitemap.json
+          node "$QUALIFIED_NPM" run typecheck:sitemap
           node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
@@ -339,12 +492,14 @@ jobs:
 
   real-obsidian:
     name: Real Obsidian E2E
-    if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    # Pure e2e: only when opted in (pushes to main never are), always in the release tier.
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && (inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - *checkout
       - *setup-node
+      - *npm-cache
       - *select-npm
       - name: Install exact dependencies
         run: node "$QUALIFIED_NPM" ci --no-fund
@@ -378,12 +533,13 @@ jobs:
 
   generated-companion:
     name: Project generator / generated companion
-    if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - *checkout
       - *setup-node
+      - *npm-cache
       - *select-npm
       - name: Install the framework
         run: node "$QUALIFIED_NPM" ci --no-fund
@@ -394,22 +550,23 @@ jobs:
           node scripts/quality/check-repository.mjs
           node scripts/quality/check-source.mjs
           node --test --test-name-pattern=ANALYZER-ARCHIVE tests/tooling/gates.checks.mjs
-      - name: Type-check the compiler and test ownership, contracts and legacy handoff
+      - name: Type-check the compiler and test ownership, contracts and the read-only handoff
         run: |
           node "$QUALIFIED_NPM" run typecheck:generator
           node --test tests/tooling/project-generator*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
           node "$QUALIFIED_NPM" run test:visual
       - name: Generate, independently install, build and test the companion project
         run: |
-          node scripts/companion/qualify-project.mjs
-          node scripts/companion/qualify-project.mjs --boundary-fixture
-          node scripts/companion/qualify-project.mjs --provider-fixture
+          node scripts/companion-tools/qualify-project.mjs
+          node scripts/companion-tools/qualify-project.mjs --boundary-fixture
+          node scripts/companion-tools/qualify-project.mjs --provider-fixture
       - *playwright-version
       - *playwright-cache
       - name: Exercise generated stylesheet against real Nuxt UI components
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
-          node scripts/companion/qualify-styles.mjs
+          node scripts/companion-tools/qualify-styles.mjs
       - name: Retain exact source and generated project without dependencies or machine state
         if: always()
         run: |
@@ -434,8 +591,8 @@ jobs:
   # disposable workspace; three per job avoids nine runner slots of setup.
   starter:
     name: Project generator / starters ${{ matrix.ids }}
-    if: github.event_name != 'push'
-    runs-on: ubuntu-latest
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -450,6 +607,7 @@ jobs:
     steps:
       - *checkout
       - *setup-node
+      - *npm-cache
       - *select-npm
       - name: Generate and independently install, build, typecheck and test each starter
         env:
@@ -458,7 +616,7 @@ jobs:
           failed=""
           for id in $STARTER_IDS; do
             echo "::group::Starter $id"
-            node scripts/companion/qualify-starter.mjs "$id" || failed="$failed $id"
+            node scripts/companion-tools/qualify-starter.mjs "$id" || failed="$failed $id"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi
@@ -469,3 +627,108 @@ jobs:
           path: reports/project-starters/
           retention-days: 7
           if-no-files-found: error
+
+  # Blocking in Integration (Dev runs the same guard with --warn-only): the
+  # diff-based self-review guard against the pull request's base branch.
+  self-review:
+    name: Self-review guard
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+      - name: Self-review guard against the pull request base
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node "$QUALIFIED_NPM" run check:self-review -- --base "origin/$BASE_REF"
+
+  # Informational, not a gate: a live audit regression shows as a failed job on
+  # the pull request without failing the workflow. The unchanged blocking gate
+  # is candidate-qualification.yml's live security gate on main and release/*.
+  security-audit:
+    name: Security audit (informational)
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - *checkout
+      - *setup-node
+      - *npm-cache
+      - *select-npm
+      - name: Install the committed lock without lifecycle scripts
+        run: node "$QUALIFIED_NPM" ci --no-fund --no-audit --ignore-scripts
+      # The audit result is reported, not enforced: a finding becomes a warning
+      # annotation and job summary entry while the check itself stays green.
+      - name: Live audit, all installed dependency categories
+        id: audit
+        continue-on-error: true
+        run: node "$QUALIFIED_NPM" run check:security
+      - name: Report audit findings
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::warning title=Security audit::check:security reported findings; see docs/development/MOMENT-ADVISORY-EXCEPTION.md and the security-audit artifact."
+          echo "### Security audit: findings reported (informational)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: security-audit
+          path: reports/security/
+          retention-days: 14
+          if-no-files-found: warn
+
+  # One required check for branch protection. A job skipped by its own condition
+  # (framework-cli, the three template-authoring jobs, real-obsidian and the
+  # generators on push, real-obsidian without
+  # the e2e opt-in, self-review outside pull requests, every gate on a draft or
+  # release/* pull request) counts as passing; any failure or cancellation fails
+  # this check. The informational security-audit job is deliberately not listed.
+  # A run started by adding the e2e label skips every job without e2e steps, so it
+  # reports as "E2E result" and can never stand in for a full "CI result" on that
+  # head; another label starts no job at all.
+  ci-result:
+    name: ${{ github.event.action == 'labeled' && 'E2E result' || 'CI result' }}
+    if: always() && (github.event.action != 'labeled' || github.event.label.name == 'e2e')
+    needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter, self-review]
+    permissions:
+      contents: read
+      checks: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every gate job succeeded or was skipped by its own condition
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | "\(.key)=\(.value.result)"' <<< "$NEEDS")
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<< "$NEEDS"
+          if [ -n "$failed" ]; then
+            echo "::error::CI gate jobs did not succeed: $(tr '\n' ' ' <<< "$failed")"
+            exit 1
+          fi
+      # On a release/* pull request every gate above skips, so this run would report a
+      # green "CI result" before the Release tier finished. It passes only when the
+      # Release workflow already reported a successful "Release result" on the same
+      # head commit; otherwise it fails, and the Release workflow's own "CI result"
+      # alias, reported after "Release result" succeeds, becomes the latest check of
+      # that name. Marking the release PR ready after Release finished stays green.
+      - name: Hold release pull requests until the Release tier passed on this head
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "$HEAD_REF" in
+            release/*) ;;
+            *) exit 0;;
+          esac
+          conclusion=$(gh api "repos/$REPOSITORY/commits/$HEAD_SHA/check-runs?check_name=Release%20result" \
+            --jq '[.check_runs[] | select(.status == "completed")] | sort_by(.completed_at) | last | .conclusion // "missing"')
+          if [ "$conclusion" != success ]; then
+            echo "::error::Release pull requests are gated by the Release workflow; Release result on $HEAD_SHA is $conclusion."
+            exit 1
+          fi

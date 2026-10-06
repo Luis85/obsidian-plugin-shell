@@ -5,14 +5,14 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { firstRunPlan, firstRunTool, firstRunReport } from '../../bin/adapters/first-run-plan.ts';
 import { executeFirstRun } from '../../bin/adapters/first-run.ts';
 import { settingsPlan } from '../../bin/adapters/user-settings.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { claimFirstRun, assertNoFirstRun } from '../../bin/adapters/first-run-lock.ts';
 import { projectStarter } from '../../bin/adapters/projects.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const json = value => JSON.stringify(value, null, 2) + '\n';
 async function scratch(fn) {
@@ -25,7 +25,7 @@ async function fixture(root, code = '') {
   await mkdir(join(root, '.obsidian')); await writeFile(join(root, '.obsidian/app.json'), 'preserve');
   const app = join(root, 'apps/product'); await mkdir(join(app, '.maker'), { recursive: true });
   const { selection } = await projectStarter(frameworkRoot, 'webapp-angular');
-  await writeFile(join(app, 'project.config.json'), json(selection));
+  await mkdir(join(app, 'configs')); await writeFile(join(app, 'configs/product-config.json'), json(selection));
   await writeFile(join(app, '.nvmrc'), process.versions.node + '\n');
   await writeFile(join(app, '.maker/receipt.json'), json({ schemaVersion: 1, files: [] }));
   await writeFile(join(app, 'package.json'), json({ name: 'fixture', packageManager: 'npm@11.19.1', scripts: { typecheck: 'fixture typecheck', test: 'fixture test', build: 'fixture build' }, dependencies: { fixture: '1.0.0' } }));
@@ -163,10 +163,12 @@ test('real local npm performs the full dependency-free install/check/test/build 
     scripts: { typecheck: 'node --check build.mjs', test: 'node --test example.test.mjs', build: 'node build.mjs' } };
   await writeFile(join(app,'package.json'),json(pkg));
   await writeFile(join(app,'package-lock.json'),json({ name: pkg.name, version: pkg.version, lockfileVersion: 3, packages: { '': { name: pkg.name, version: pkg.version } } }));
-  await writeFile(join(app,'.npmrc'),'offline=true\n');
+  // Offline and dependency-free: npm's registry audit would only wait out its network retries.
+  await writeFile(join(app,'.npmrc'),'offline=true\naudit=false\n');
   await writeFile(join(app,'build.mjs'),"import {mkdir,writeFile} from 'node:fs/promises'; await mkdir('dist/webapp',{recursive:true}); await writeFile('dist/webapp/index.html','<!doctype html><h1>Hello world</h1>');\n");
   await writeFile(join(app,'example.test.mjs'),"import {test} from 'node:test'; import assert from 'node:assert/strict'; test('fixture',()=>assert.equal(1+1,2));\n");
-  const plan = await firstRunPlan(root, { ...request, stepTimeoutMs: 10000 }, tool);
+  // Real npm under a loaded suite can exceed 10s per stage; per-step timeouts have their own test above.
+  const plan = await firstRunPlan(root, { ...request, stepTimeoutMs: 60000 }, tool);
   const result = await executeFirstRun(plan,plan.planHash); assert.equal(result.report.status,'passed');
   assert.ok(result.report.stages.every(stage => stage.status==='passed'));
 }));

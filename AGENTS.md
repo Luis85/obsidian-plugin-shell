@@ -1,32 +1,109 @@
 # Repository instructions
 
-## Current state
+## Start here
 
-The runtime-authoring milestone extends iteration 04 with narrow event contracts,
-source-derived catalogs and an optional plugin-data Items workflow. Read
-[README](README.md), [authoring](docs/development/AUTHORING-TOOLS.md),
-[plugin-data semantics](docs/development/PLUGIN-DATA-ENTITIES.md), the
-[milestone plan](docs/development/RUNTIME-AUTHORING-PLAN.md), the current
-[execution record](docs/testing/RUNTIME-AUTHORING.md) and the historical
-[iteration-four test record](docs/testing/ITERATION-FOUR.md) first. The
-[PRD](docs/product/PRD.md) and retained normative companions remain the complete
-target; qualification and release authorization are separate.
+**What this repo is.** Workbench is a reusable Obsidian plugin shell with three
+parts: the plugin runtime in `src/` (Vue, Pinia, Nuxt UI), the `node bin/app` CLI
+that sets up, checks and extends projects (`new`, `setup`, `make`, `generate`,
+`check`, `ci`, `ui`, `memory`, `adopt`, `design`, `increment`, `pr`, `issue`), and the authoring path from the browser companion
+concept through the dedicated compiler to independent generated projects (project
+starters, `node bin/app new`). Generated projects carry their own short
+`AGENTS.md` and the same `check` gate. `node bin/app` is the only CLI entry; there
+is no root launcher script. The [PRD](docs/product/PRD.md) is the complete target;
+qualification and release authorization are separate. Milestone background is in
+[milestone context](docs/development/MILESTONE-CONTEXT.md).
 
-The executable qualification extension adds trusted evidence producers, an
-additive acceptance crosswalk, full production maintainability gates and explicit
-native resource/performance protocols. Read its
-[plan](docs/development/EXECUTABLE-QUALIFICATION-PLAN.md),
-[evidence guide](docs/testing/EXECUTABLE-EVIDENCE.md),
-[metric scope](docs/development/MAINTAINABILITY.md) and
-[execution record](docs/testing/EXECUTABLE-QUALIFICATION.md) for current scope.
-Keep every legacy acceptance row/mode and the blocked release profile. Read-only
-report validation is not proof of honest execution or release authorization.
+| Path | Holds |
+| --- | --- |
+| `src/` | The shell's plugin runtime: domain, application, features, infrastructure, presentation, bootstrap, styles, locales; `main.ts` is lifecycle composition only. |
+| `projects/<name>/` | Standalone projects built from concepts (first: `companion`). Each has its own lock, `AGENTS.md`, gates and workflows, and a `workbench.project.json` linking its prototypes. Opt-in Astro websites from `templates/sites` render Bases collections (`node bin/app site`; Astro is a site-only dependency). Shell gates and workflows ignore `projects/`. Work inside a project as its own repository, and run `npm run projects:sync` after changing its workflows. See `projects/README.md`. |
+| `bin/` | The `bin/app` CLI: adapters, application, domain, presentation, guides, examples. |
+| `bin/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
+| `templates/` | Templates for generated projects (companion runtime, developer kit, examples) and, in `templates/sites`, the opt-in Astro site templates. |
+| `scripts/` | Repo tooling: `quality/` gates, `testing/` suites and evidence, `agent/` hooks, `companion/` authoring contracts, makers, styles, release, security, setup. |
+| `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters; `configs/wizards/`, `configs/forms/` and `configs/guides/` define every guided CLI process ([wizards and forms](docs/development/WIZARDS-AND-FORMS.md)). |
+| `tests/` | Suites declared in `tests/suites.json` (tooling, runtime, e2e, hindsight, ...). |
+| `plugins/` | Workbench plugin SDK and the example extension. |
+| `harness/` | Browser harness for the served UI; never shipped in the plugin. |
+| `docs/` | Product, development and testing docs; `docs/concepts/companion` is the authoring concept. |
+| `docs/development/ADOPT-EXISTING-PROJECT.md` | Adding Workbench to an existing project: `node bin/app adopt analyze`, `adopt plan` and `adopt skill`, with the `adopt-existing-project` skill. |
+| `.claude/skills/ideation-*` | Ideation chain: `ideation-journey` → `-brainstorm` → `-concept` → `-design` → `-prototype` → `-boilerplate` → `increment-handoff` → `feature-delivery` → `self-review`; overview in `.claude/skills/ideation-journey/references/chain.md`. |
+| `.claude/skills/increment-handoff`, `.claude/skills/feature-delivery`, `.claude/skills/release` | Increment handoff until the Definition of Ready passes, draft pull request through the Definition of Done to green merge, and release cut to publish (Codex adapters in `.agents/skills/`). |
+| `docs/design/<prototype>/` | Per-prototype Claude Design folders (`node bin/app design status\|prepare\|sync`); see [Claude Design folders](docs/development/CLAUDE-DESIGN-HANDOFF.md). Generated files there are owned by sync, including `ENGINEERING_HANDOFF_GUIDE.md`, which is built only from facts read from the project's files; `prototypes/`, `assets/`, `notes/` and `handoff/implementation-map.md` are design work. |
 
-Setup supports reviewed identity changes, browser/native profiles, verified resume
-and explicit disabled-plugin data migration inside the contained vault. Makers
-implement the explicit catalog described by their help, composed from primitives
-and the shared safe-plan engine. Locale output is a pending translation draft,
-not a newly reviewed selectable language. Do not advertise unexecuted qualification.
+**Setup.** Use the qualified Node 24.21.0/npm 11.19.1 (`.nvmrc`) and `npm ci` with
+the exact lock; do not run `npm install`. In Claude Code, `scripts/agent/session-start.mjs`
+runs automatically at session start (cloud and local). Browser runs use the
+provisioned Playwright Chromium; `SHELL_CHROMIUM=/absolute/chromium` overrides it.
+`npm run setup` is the guided local setup described below. Cloud sessions provision the
+qualified Node themselves and an environment setup script exists: see
+[local and cloud sessions](docs/development/CLOUD-AND-LOCAL-SESSIONS.md).
+
+**Gates.** Run the cheapest gate that proves your change, and `check` before you stop.
+
+| Need | Command |
+| --- | --- |
+| Fast gate on changed files | `node bin/app check --fast --base origin/main` |
+| Dev tier (draft pull request) | `node bin/app check --fast --skip-suites --base origin/main`, `node scripts/testing/suites.mjs --check`, `node scripts/release/changelog.mjs check` |
+| What do I need to run? | `node bin/app check --plan --base origin/main` |
+| Agent gate (types, lint, tests) | `node bin/app check` |
+| Full pre-PR | `npm run verify -- --json --keep-going` |
+| One suite | `node scripts/testing/suites.mjs <suite>` (`--list` shows all) |
+| Served browser UI | `npm run test:e2e` |
+| Reproduce a CI job | `node bin/app ci --job <workflow>/<job>` (`ci --list`) |
+| Self-review | `npm run check:self-review` and `.claude/skills/self-review` |
+| UI state and gallery | `node bin/app ui status`, `node bin/app ui gallery` |
+
+Report actual command output, never assumed success. Source checks need the locked
+TypeScript 6.0.3; report an unrunnable check as not run.
+
+**Definition of done.** The change is covered by tests that run real services, the
+relevant gate above passed with real output, no threshold or guard was weakened,
+and the PR description follows `.github/pull_request_template.md`. Do not
+advertise unexecuted qualification. Keep every legacy acceptance row/mode and the
+blocked release profile; read-only report validation is not proof of honest
+execution or release authorization. This is not the final release-ready GitHub
+template: retain all existing product requirements and qualify each extension with
+its relevant tests. Locale output is a pending translation draft, not a newly
+reviewed selectable language.
+
+**Delivery process.** Branch from `main` (or stack on another pull request's
+branch) and keep a **draft** pull request: only the fast Dev tier ("Dev checks")
+runs. Marking it ready for review starts the Integration tier ("CI result" and every
+pull-request workflow); merge a green pull request with a merge commit. A
+`release/X.Y.Z` branch runs the Release tier, and the owner-dispatched Publish
+workflow merges its pull request, tags `X.Y.Z` and creates the GitHub release; never
+merge a release pull request manually. Agents never dispatch Release cut or Publish,
+tag, merge or push to a release branch without the user's explicit request in this
+conversation. Add user-facing changes under `## [Unreleased]` in `CHANGELOG.md`. See
+[delivery pipeline](docs/development/DELIVERY-PIPELINE.md),
+[deliver a change](docs/development/DELIVER-A-CHANGE.md) and
+[cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md).
+
+**Increments.** Plan work as an increment with `node bin/app increment`, `pr` and
+`issue`. The Increment, PullRequest and Issue documents (`docs/increments/`,
+`docs/pull-requests/`, `docs/issues/`) are the source of truth; change them
+through the CLI's reviewed plans (preview, then `--apply <planHash>` or `--yes`),
+never by hand-editing generated lists or bindings. Implement only after the
+Definition of Ready passes (`node bin/app increment check <id>`), refined in the
+kick-off pull request (`increment/<id>` into `main`); deliver in change pull
+requests stacked on the increment branch, and pass the Definition of Done
+(`node scripts/delivery/done.mjs --base origin/<base>`) before marking a pull
+request ready or merging it. Never run `pr publish`, `pr sync` or a push without
+the user's explicit request in this conversation, and never retry an uncertain
+remote write (exit 2) blindly. `e2e: required` means the `e2e` label. Every new
+test file has a test-pyramid level in `tests/suites.json`
+(`node scripts/testing/suites.mjs --check`). Rules:
+[Definition of Ready and Done](docs/development/DEFINITION-OF-READY-AND-DONE.md);
+guide: [your first increment](docs/development/FIRST-INCREMENT.md).
+
+Read first when relevant: [README](README.md),
+[developer guide](DEVELOPER_GUIDE.md) (requirements and setup),
+[authoring](docs/development/AUTHORING-TOOLS.md),
+[plugin-data semantics](docs/development/PLUGIN-DATA-ENTITIES.md),
+[metric scope](docs/development/MAINTAINABILITY.md),
+[evidence guide](docs/testing/EXECUTABLE-EVIDENCE.md) and
+[test suites](docs/testing/TEST-SUITES.md).
 
 ## Commands and environment
 
@@ -36,9 +113,18 @@ checks. Do not substitute a global TypeScript 5.x installation, link it into
 node_modules, or report a 5.x run as current validation. If locked tooling cannot
 be installed, report the TypeScript check as not run and use hosted qualification.
 Historical evidence records retain their actual compiler versions. Use the npm
-typecheck scripts; they select workspace compiler entrypoints, never PATH tools. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
+typecheck scripts; they select workspace compiler entrypoints, never PATH tools.
+`npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. Setup supports reviewed identity changes, browser/native profiles, verified resume and explicit disabled-plugin data migration inside the contained vault. Makers implement the explicit catalog described by their help, composed from primitives and the shared safe-plan engine. No install/prepare lifecycle hook may recurse into setup.
 
-`npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. Use actual tool output, not assumed success.
+`npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. End-to-end tests (served UI, browser suites, real Obsidian) are opt-in in workflows and processes (pull request label `e2e` or the `e2e` input) and mandatory in the Release tier; `check:repository` enforces both, see docs/development/WORKFLOWS.md. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. `check:docs-launchers` fails on references to retired launchers in live docs, skills, templates and source. Use actual tool output, not assumed success.
+
+Hosting is a project choice (`tooling.hosting`: `github` default, `azure-devops`, `none`). Prepare it with `--hosting` or `node bin/app hosting set`; never run `gh`/`az` (including through `node bin/app pr publish|sync`), add remotes or store tokens on the user's behalf without their explicit request, and never delete `.github` or retired platform files unless asked.
+
+Typed-note collections (configs/collections, e.g. risk) are data; code adds only named collection hooks. Read docs/development/NOTE-COLLECTIONS.md before adding one. Lessons learned (`learning` root, `paths.learnings`) are a data-only note collection, separate from the `learn` course runner.
+
+Release candidates (`node bin/app candidate`) document release items (`node bin/app release-item`) only; they never run release:cut/publish, tag, push or edit CHANGELOG.md.
+
+`node bin/app fake-data` generates seeded sample notes only through reviewed, hash-approved plans; it never overwrites notes, writes only relative non-hidden folders inside the root, and calls only the allowlisted Faker methods in bin/domain/fake-data-generators.ts.
 
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.
 
@@ -61,7 +147,9 @@ authoring API through `src/features/api.ts`. One explicit registration in bootst
 constructs typed repositories and owns disposal. Features may depend only on
 feature/application/domain contracts, never concrete host/framework adapters.
 New business features should not require editing generic persistence services or
-main.ts; prove the extension path with a distinct test feature.
+main.ts; prove the extension path with a distinct test feature. Runtime forms are JSON in
+`src/features/<feature>/forms/`, declared with `defineForm` and rendered by `DataForm`; they never import
+`configs/forms` (see docs/development/RUNTIME-FORMS.md).
 
 Native modal/notice behavior belongs behind `services.modals` and `services.notices`;
 features must not construct host UI classes. Command/ribbon factories belong to
@@ -75,6 +163,12 @@ Keep their scripts to imports, props and composable/template bindings. Place vie
 behavior in TypeScript composables, per-view state in stores, and injection/types
 in context. Presentation TypeScript does not import Vue components; bootstrap
 assembles the component tree. `check:presentation` enforces this concern boundary.
+
+Companion project JSON is **schema 6 only**. Reject schema 1–5 with a clear
+diagnostic; never add migration or compatibility readers (the retired formats'
+history is in Git). `docs/concepts/companion/index.html` is the generated schema 6
+build base of `npm run companion:build`; it embeds no project or starter data.
+Use `configs/starters` documents as project inputs and test fixtures.
 
 Validate unknown stored data, serialize preference writes, preserve corrupt/future data, and keep preview free of writes. Never overwrite conflicting notes, retry uncertain writes blindly, or turn failed opening into another create operation.
 
@@ -93,7 +187,7 @@ No Tailwind Preflight or broad host reset. Shared pipeline scopes selectors and 
 
 ## Quality and testing
 
-Handwritten runtime/CSS/scripts: 400 code lines. Tests/helpers: 450; main.ts: 100. Count nonblank lines containing code across complete SFCs, excluding comments. Comment markers inside strings, templates and regular expressions are code. Retain physical counts only as diagnostics. This owner-requested iteration 03 policy supersedes the older physical-line rule. Generated application scaffolds obey the same limits; composed/vendor outputs retain only their named provenance-backed exemptions.
+Handwritten runtime/CSS/scripts: 400 code lines. Tests/helpers: 450; main.ts: 100. Count nonblank lines containing code across complete SFCs, excluding comments. Comment markers inside strings, templates and regular expressions are code. Retain physical counts only as diagnostics. This owner-requested policy supersedes the older physical-line rule (see [milestone context](docs/development/MILESTONE-CONTEXT.md)). Generated application scaffolds obey the same limits; composed/vendor outputs retain only their named provenance-backed exemptions.
 
 Name executable tests, scripts and workflows by behavior or responsibility, not iteration number. Historical iteration guides/evidence records may retain iteration names. Update imports, workflows and inventories whenever executable files are renamed.
 
@@ -110,5 +204,3 @@ Deploy only inside approved codebase-contained test vaults. Preserve data.json, 
 Maintain exact tested stable dependencies through reviewed updates. TypeScript 6.0.3 is a documented parser-compatibility choice; do not force TypeScript 7 through unsupported peers. Host app/API/installer/mobile and toolchain versions remain separate. No silent host-floor increase or broad permanent update ignore.
 
 Known unresolved acceptance criterion: the official Obsidian ESLint package retains nested ESLint 9.39.5 through its SDL/import peers. Root ESLint 10 and the audit pass, but the entire dependency graph is not supported. Read docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md before proposing updates. Do not force incompatible peers, claim deduplication removed it, or equate an audit pass with support.
-
-This milestone is not the final release-ready GitHub template. Retain all existing product requirements and qualify each extension with its relevant tests.

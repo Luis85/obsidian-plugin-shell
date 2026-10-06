@@ -1,5 +1,7 @@
 # Workbench — product principles
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 > **Version:** 1.0 · **Date:** 2026-09-29
 > **Status:** Product and design guidance derived from the [vision](PRODUCT-VISION.md). Requirements and proposed follow-up acceptance below are not claims that every capability is implemented.
 
@@ -82,7 +84,7 @@ Design-only work should not require an account, external AI, Node/npm/Git or a t
 
 The product is **Workbench**. Use “Workbench” in new product copy and refer descriptively to its visual authoring, CLI, compiler and reusable shell. “Shell Workbench,” “Plugin Shell companion” and “Companion” may remain in historical records or as explanations of existing code paths; they are not alternative public product names.
 
-For now, preserve `shell.mjs`, existing npm commands, repository/package identifiers, `companion` paths, JSON/schema versions and manifest/storage identities. Generated projects keep the user's chosen product name. Any executable or storage-identity rename needs a separately reviewed compatibility and migration change. Do not break links or rewrite historical evidence to make a cosmetic rename look complete.
+For now, preserve the `node bin/app` CLI entry, existing npm commands, repository/package identifiers, `companion` paths, JSON/schema versions and manifest/storage identities. Generated projects keep the user's chosen product name. Any executable or storage-identity rename needs a separately reviewed compatibility and migration change. Do not break links or rewrite historical evidence to make a cosmetic rename look complete.
 
 ## Backlog decision filter
 

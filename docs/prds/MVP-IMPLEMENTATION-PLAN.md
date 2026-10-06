@@ -8,7 +8,7 @@
 | Inspected baseline | `6178b1025336941ad6fb10eae4e26930622363f9` |
 | Product contract | [MVP PRD](MVP-JSON-TO-CLICKDUMMY.md) |
 
-> **Current status (2026-09-27):** Read the [integrated review](../product/PR5-PRODUCT-REVIEW.md), [work-package and A01–A20 reconciliation](../product/PR5-IMPROVEMENT-PLAN.md) and [evidence](../testing/PR5-REVIEW-EVIDENCE.md). The original plan below is preserved as the acceptance contract. Later source implements the integrated v6 editor, dedicated compiler, generated clickdummy and concept intake; native companion and complete release-journey acceptance remain open. “Proposed” in the original command table is historical, not proof that the command is still absent.
+> **Current status (2026-09-27):** Read the [integrated review](../_archive/product/PR5-PRODUCT-REVIEW.md), [work-package and A01–A20 reconciliation](../_archive/product/PR5-IMPROVEMENT-PLAN.md) and [evidence](../_archive/testing/PR5-REVIEW-EVIDENCE.md). The original plan below is preserved as the acceptance contract. Later source implements the integrated v6 editor, dedicated compiler, generated clickdummy and concept intake; native companion and complete release-journey acceptance remain open. “Proposed” in the original command table is historical, not proof that the command is still absent.
 
 ## 1. Delivery sequence
 
@@ -40,7 +40,7 @@ Assign accountable owners by responsibility: product/acceptance, shared contract
 | `docs/concepts/companion/companion-project.json` | Generated golden export, never independently hand-maintained |
 | `scripts/companion/project-contract.mjs`, `scripts/companion/visual/` | Shared transport/semantic validation and migrations |
 | `scripts/companion/compiler/` | Normalize/lower definitions, generate source/tests/traceability |
-| `scripts/framework/operations.ts`, `shell.mjs` | Shared typed operations and public CLI; keep launch bootstrap small |
+| `scripts/framework/operations.ts`, `bin/app` | Shared typed operations and public CLI; keep launch bootstrap small |
 | `scripts/shared/file-plan.mjs` | Reuse locking, preconditions, ownership and recovery |
 | `src/features/api.ts`, `src/bootstrap/`, presentation/adapters | Native companion composition through the existing shell APIs |
 | Concept/browser/tooling/project-generator workflows | Add named behavior tests, inventory entries and exact-artifact evidence |
@@ -185,10 +185,10 @@ The table distinguishes existing entry points from MVP extensions. Proposed synt
 
 | User intent | Existing seam | MVP extension / contract |
 | --- | --- | --- |
-| Setup in the extracted folder | `node shell.mjs setup` | Add first-class starter-or-JSON choice; preserve safe kit ownership and resume |
-| Create another project elsewhere | `node shell.mjs new <dir> --starter <id>` or `--from <file>` | Keep compatibility; do not substitute this target policy for extracted-kit setup |
+| Setup in the extracted folder | `node bin/app setup` | Add first-class starter-or-JSON choice; preserve safe kit ownership and resume |
+| Create another project elsewhere | `node bin/app new <dir> --starter <id>` or `--from <file>` | Keep compatibility; do not substitute this target policy for extracted-kit setup |
 | Inspect/import JSON | `project inspect`, `project import` | Shared v6 validation and explicit migration/reconciliation |
-| Generate code | `node shell.mjs generate` and makers | Add reviewed scope selectors such as `--scope feature:<id>`, page/component/full-project |
+| Generate code | `node bin/app generate` and makers | Add reviewed scope selectors such as `--scope feature:<id>`, page/component/full-project |
 | Build offline clickdummy | Shared compiler/build services | Proposed `clickdummy build`; explicit source-generation and process approvals |
 | Import a concept | Shared project import + file planner | Proposed `concept inspect` / `concept import`; versioned data-only transport |
 | Prepare/check a release | `release prepare`, `release check`, `release rehearse` | Complete profile-specific candidate/evidence path |

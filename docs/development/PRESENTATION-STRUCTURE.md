@@ -1,5 +1,7 @@
 # Presentation concerns
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 Vue single-file components own markup and minimal bindings. TypeScript composables
 own screen behavior and lifecycle, and per-view stores own state shared between
 panels. Application services remain responsible for canonical data, validation,

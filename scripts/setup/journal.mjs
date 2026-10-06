@@ -1,10 +1,19 @@
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createHash } from 'node:crypto';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { sha256 } from '../shared/hash.ts';
+import { statIfPresent as present } from '../shared/fs-presence.ts';
+import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 const journalPath = '.template-state/setup.json';
-export const digest = value => createHash('sha256').update(value).digest('hex');
-async function present(path) { try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; } }
+export const digest = value => sha256(value);
+function invalidAgentMcp(value) {
+  if (value === undefined) return false;
+  return !value || value.version !== 1 || typeof value.enabled !== 'boolean' || value.server !== 'workbench' || value.transport !== 'stdio'
+    || !Array.isArray(value.clients) || value.clients.some(client => !['claude-code', 'codex'].includes(client))
+    || !['pending', 'skipped', 'verified'].includes(value.status) || !Array.isArray(value.files)
+    || value.files.some(file => !file || typeof file.path !== 'string' || !['create', 'update', 'unchanged', 'delete'].includes(file.status)
+      || (file.beforeHash !== null && !/^[a-f0-9]{64}$/.test(file.beforeHash ?? ''))
+      || (file.afterHash !== null && !/^[a-f0-9]{64}$/.test(file.afterHash ?? '')));
+}
 export async function readJournal(root) {
   await createFilePlan(root, [{ path: journalPath, content: null }]);
   if (!await present(join(root, journalPath))) return null;
@@ -13,7 +22,7 @@ export async function readJournal(root) {
   const ids = new Set();
   if (!journal || journal.version !== 1 || !/^[a-f0-9]{64}$/.test(journal.fingerprint ?? '') || !Array.isArray(journal.stages)
     || !['running', 'failed', 'verified'].includes(journal.status) || !journal.options || typeof journal.options !== 'object' || Array.isArray(journal.options)
-    || !journal.identity || typeof journal.identity !== 'object' || Array.isArray(journal.identity)
+    || !journal.identity || typeof journal.identity !== 'object' || Array.isArray(journal.identity) || invalidAgentMcp(journal.agentMcp)
     || journal.stages.some(stage => {
       if (!stage || !['install', 'browser-provision', 'verify', 'native-install'].includes(stage.id) || ids.has(stage.id) || typeof stage.selected !== 'boolean'
         || !['pending', 'skipped', 'running', 'failed', 'verified'].includes(stage.status) || !Array.isArray(stage.command) || stage.command.some(value => typeof value !== 'string')) return true;
@@ -36,9 +45,9 @@ export async function inputFingerprint(root, toolchain, options) {
     if (stat.isDirectory()) for (const name of (await readdir(absolute)).sort()) await visit(`${path}/${name}`);
     else if (stat.isFile()) files.push([path, digest(await readFile(absolute))]);
   }
-  for (const path of ['src', 'scripts', 'harness', 'tests', '.github', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json',
-    'docs/testing/test-plan.json', 'docs/design/obsidian-tokens.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts']) await visit(path);
-  return digest(JSON.stringify({ files, toolchain, profile: options.profile, skipInstall: Boolean(options['skip-install']), deferVerify: Boolean(options['defer-verify']), browser: Boolean(options['provision-browser']) }));
+  for (const path of ['src', 'scripts', 'templates', 'harness', 'tests', '.github', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'docs/testing/test-plan.json', 'docs/design/obsidian-tokens.json', 'tsconfig.json', 'configs', '.azuredevops', 'azure-pipelines.yml']) await visit(path);
+  return digest(JSON.stringify({ files, toolchain, profile: options.profile, skipInstall: Boolean(options['skip-install']), deferVerify: Boolean(options['defer-verify']),
+    browser: Boolean(options['provision-browser']), mcp: Boolean(options.mcp) }));
 }
 export async function artifactHashes(root, installedId) {
   const hashes = {};
@@ -76,5 +85,5 @@ export async function stageIsCurrent(root, stage, identity) {
     const candidate = await artifactHashes(root);
     return current !== null && JSON.stringify(current) === JSON.stringify(stage.assets) && JSON.stringify(current) === JSON.stringify(candidate);
   }
-  return false; // Always re-run verification; saved outputs cannot certify today's dependency execution or browser cache.
+  return false;
 }

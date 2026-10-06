@@ -4,14 +4,15 @@ import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath, symlink } f
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../scripts/framework/operations.ts';
-import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { setupProgress } from '../../scripts/framework/setup-progress.ts';
-import { guidedSetup, continueSetup } from '../../scripts/framework/setup-terminal.ts';
-import { result } from '../../scripts/framework/contracts.ts';
-import { assembleStarterPack } from '../../scripts/starters/operations.ts';
-import { zip } from '../../scripts/framework/zip.ts';
+import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { setupProgress } from '../../bin/adapters/framework/setup-progress.ts';
+import { guidedSetup, continueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
+import { result } from '../../bin/adapters/framework/contracts.ts';
+import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'setup-journey-')));
@@ -64,13 +65,16 @@ test('source choice ambiguity, unknown starters and native options without a sta
 });
 test('headless import preserves imported identity; wizard does not request a replacement identity for JSON', async t => {
   const ctx = await fixture(t);
-  const document = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/starters/quick-capture.companion.json')));
+  const document = starterDocument('quick-capture');
   document.project.author = 'Synthetic author';
   await writeFile(join(ctx.root, 'input.json'), JSON.stringify(document));
-  const prompts = [], answers = ['json', 'input.json', ''];
+  const prompts = [], answers = ['json', 'input.json', '', '', ''];
   const chosen = await guidedSetup({ command: 'setup', args: [], options: {} }, ctx, async q => { prompts.push(q); return answers.shift(); }, () => {});
-  assert.equal(prompts.length, 3); assert.match(prompts[2], /Airship/);
-  assert.equal(chosen.options.airship, undefined); assert.equal(chosen.options.id, undefined);
+  assert.equal(prompts.length, 5); assert.match(prompts[2], /Airship/); assert.match(prompts[3], /Workbench MCP/);
+  // Without a remote the hosting default is GitHub, and accepting it leaves the imported document unchanged.
+  assert.match(prompts[4], /^Hosting platform .*\[github\]: $/);
+  assert.equal(chosen.options.airship, undefined); assert.equal(chosen.options.mcp, undefined); assert.equal(chosen.options.id, undefined);
+  assert.equal(chosen.options.hosting, undefined);
   assert.ok(prompts.every(q=>!/^Plugin (ID|name)|^Author:/.test(q)));
   const imported = await executeOperation({ ...chosen, options: { ...chosen.options, yes: true } }, ctx);
   assert.equal(imported.status, 'applied', JSON.stringify(imported));
@@ -135,7 +139,7 @@ test('source changes during verification block reported acceptance; foreign prog
   assert.equal(await readFile(join(ctx.root, '.framework/setup-progress.json'), 'utf8'), 'foreign');
 });
 test('wizard stops after denied installation without silently invoking verification or a native host', async () => {
-  const calls = [], answers = ['no', 'yes', 'yes', 'no', 'no'];
+  const calls = [], answers = ['no', 'no', 'yes', 'yes', 'no', 'no'];
   const execute = async command => { if (command.command === 'setup resume') assert.equal(command.options.apply, 'b'.repeat(64)); calls.push(command.command); return command.command === 'generate' ? result('generate', { planHash: 'b'.repeat(64) }, 'planned')
     : command.command === 'setup status' ? result(command.command, { resumeHash: 'a'.repeat(64) }) : result(command.command, {}, 'applied'); };
   const response = await continueSetup({ root: '/', frameworkRoot: '/' }, execute, async () => answers.shift(), () => {}, result('setup', {}, 'applied'));
@@ -163,7 +167,7 @@ test('a reviewed generation hash survives the resume adapter instead of being re
 
 async function customConfigured(t) {
   const ctx = await fixture(t);
-  const input = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/starters/quick-capture.companion.json')));
+  const input = starterDocument('quick-capture');
   input.project = { ...input.project, id: 'capture', name: 'Capture', author: 'Example' };
   input.settings = { codebaseFolder: 'application', testsFolder: 'checks' };
   await writeFile(join(ctx.root, 'input.json'), JSON.stringify(input));
@@ -214,11 +218,16 @@ test('inherited source links are rejected with custom roots and unrelated output
   assert.equal(await readFile(join(outside.root, 'outside.ts'), 'utf8'), 'export const value = 1;');
 });
 
-test('setup Airship opt-in is explicit and does not re-interview an imported identity',async t=>{
-  const ctx=await fixture(t);let prompts=0;
-  const yes=await guidedSetup({command:'setup',args:[],options:{input:'input.json'}},ctx,async message=>{prompts++;assert.match(message,/Airship/);return 'yes';},()=>{});
-  assert.equal(prompts,1);assert.equal(yes.options.airship,true);assert.equal(yes.options.id,undefined);
-  for(const options of [{input:'input.json',airship:true},{input:'input.json','no-airship':true}]) {
+test('setup Airship, MCP and hosting opt-ins are explicit and do not re-interview an imported identity',async t=>{
+  const ctx=await fixture(t);const prompts=[];
+  const answers=['yes','yes','azure-devops','https://dev.azure.com/contoso','Demo',''];
+  const yes=await guidedSetup({command:'setup',args:[],options:{input:'input.json'}},ctx,async message=>{prompts.push(message);return answers.shift();},()=>{});
+  assert.equal(prompts.length,6);assert.match(prompts[0],/Airship/);assert.match(prompts[1],/Workbench MCP/);assert.match(prompts[2],/^Hosting platform/);
+  assert.match(prompts[3],/organization URL/);assert.match(prompts[4],/project/);assert.match(prompts[5],/repository \[Demo\]/);
+  assert.equal(yes.options.airship,true);assert.equal(yes.options.mcp,true);assert.equal(yes.options.id,undefined);
+  assert.equal(yes.options.hosting,'azure-devops');assert.equal(yes.options['azure-organization'],'https://dev.azure.com/contoso');
+  assert.equal(yes.options['azure-project'],'Demo');assert.equal(yes.options['azure-repository'],undefined);
+  for(const options of [{input:'input.json',airship:true,mcp:true,hosting:'github'},{input:'input.json','no-airship':true,'no-mcp':true,hosting:'none'}]) {
     const same=await guidedSetup({command:'setup',args:[],options},ctx,async()=>assert.fail('Explicit choice must not prompt'),()=>{});
     assert.deepEqual(same.options,options);
   }

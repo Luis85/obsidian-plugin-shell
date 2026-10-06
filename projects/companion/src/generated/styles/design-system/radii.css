@@ -1,0 +1,7 @@
+/* Generated design system. Edit saved tokens, not this managed file. */
+[data-plugin-ui="workbench-companion"].ps--workbench-companion {
+  --workbench-companion-ds-radii-control: 6px;
+  --workbench-companion-ds-radii-surface: 12px;
+}
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-radii-control { border-radius: var(--workbench-companion-ds-radii-control); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-radii-surface { border-radius: var(--workbench-companion-ds-radii-surface); }

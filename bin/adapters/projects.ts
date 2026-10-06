@@ -1,12 +1,12 @@
-import { loadDefinitions } from '../../scripts/starters/repository.ts';
-import { projectSelection, type ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
-import { frameworkAdapter, requireFrameworkAdapter } from '../../scripts/compiler/adapters/project/framework-registry.ts';
+import { loadDefinitions } from './starters/repository.ts';
+import { projectSelection, type ProjectSelection } from '../compiler/domain/project-starter.ts';
+import { frameworkAdapter, requireFrameworkAdapter } from '../compiler/adapters/project/framework-registry.ts';
 import { pluginFrameworkAdapters } from '../../plugins/runtime.ts';
 import { object, keys } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { guideBrief, type Guide } from '../domain/guide.ts';
 import { loadGuide, guideInput, prototypePlan } from './prototype.ts';
-/** Project starters are read from the shell's own starters folder (beside shell.mjs); there is no bundled fallback. */
+/** Project starters are read from the shell's own starters folder (in the package root); there is no bundled fallback. */
 export async function projectStarters(frameworkRoot: string) {
   return (await loadDefinitions(frameworkRoot)).flatMap(({ definition: d, sha256, file }) => {
     if (d.generator.kind !== 'project') return [];
@@ -20,11 +20,11 @@ export async function projectStarter(frameworkRoot: string, id: unknown) {
   const selected = starters.find(item => item.id === id);
   requireSketch(selected, 'PROJECT_STARTER_UNKNOWN', starters.length
     ? `Choose an installed project starter: ${starters.map(item => item.id).join(', ')}.`
-    : 'No project starters are installed. Extract the separate starters ZIP beside shell.mjs (configs/starters/).');
+    : 'No project starters are installed. Extract the separate starters ZIP into the package root (configs/starters/).');
   return selected;
 }
 export async function projectGuide(selected: ProjectSelection): Promise<Guide> {
-  const guide = await loadGuide(new URL('../guides/project-prototype.json', import.meta.url));
+  const guide = await loadGuide(new URL('../../configs/guides/project-prototype.json', import.meta.url));
   const adapter = requireFrameworkAdapter(selected.framework, pluginFrameworkAdapters());
   guide.context = `## Project starter\n\nStarter: ${selected.starter.id} ${selected.starter.version}\n\nProject type: ${selected.projectType}\n\nFrontend: ${adapter.label} (${selected.framework})\n\nTargets: ${selected.targets.join(', ')}\n\nHybrid means shared code with separate host entrypoints; it does not add cloud sync or a desktop runtime. Choosing another starter reopens agreement.\n`;
   return guide;

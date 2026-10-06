@@ -1,9 +1,11 @@
 # Journey Lens in generated native plugins
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 This implementation connects the maintained Vue 3 / Nuxt UI / Vue Flow editor to
 a generated plugin. It does not wrap the prototype HTML or infer an editor engine
 from a static page design. Native-host acceptance remains a separate executable
-check; see [implementation and evidence](../testing/JOURNEY-LENS-NATIVE-IMPLEMENTATION.md).
+check; see [implementation and evidence](../_archive/testing/JOURNEY-LENS-NATIVE-IMPLEMENTATION.md).
 
 ## Declare the editor
 
@@ -26,14 +28,14 @@ This is a fragment, not a complete project. Use an existing page/view ID and kee
 all other project fields. The schema accepts only the named built-in editor, not
 URLs, script bodies, arbitrary packages or filesystem entrypoints. Ordinary
 projects without a binding retain the previous generator behavior. The modern
-Companion self-project declares the binding automatically; the historical v5
-fixture remains unchanged.
+Companion self-project declares the binding automatically. Only project schema 6
+is read; earlier formats are rejected, never migrated.
 
 Generate using the normal reviewed command:
 
 ```sh
-node shell.mjs new ../folio-tools --from ./project.companion.json
-node shell.mjs new ../folio-tools --from ./project.companion.json --apply <reviewed-plan-hash>
+node bin/app new ../folio-tools --from ./project.companion.json
+node bin/app new ../folio-tools --from ./project.companion.json --apply <reviewed-plan-hash>
 cd ../folio-tools
 npm ci
 npm run verify:project

@@ -5,12 +5,12 @@ The interactive workspace now has a full-screen keyboard-driven TUI. See
 for the line-oriented presentation. Existing agent commands remain available.
 
 `bin/` is the TypeScript application for make-first authoring. It is included in
-framework release kits and compiler-generated projects. Use the qualified toolchain
+framework kits and compiler-generated projects. Use the qualified toolchain
 from the repository's `AGENTS.md` and exact lockfile; this feature adds no dependency.
 
 ## Set up an existing vault for Angular
 
-Run `node shell.mjs project-setup --root <existing-vault>` for the existing-Git,
+Run `node bin/app project-setup --root <existing-vault>` for the existing-Git,
 existing-Obsidian-vault workflow. It configures `configs/user-settings.json`,
 imports typed Markdown PRDs, optionally prepares an Angular prototype, edits
 application bricks, and optionally generates the product scaffold in one reviewed
@@ -25,9 +25,15 @@ generated templates, hash routes, scoped interactions and external-adapter bound
 Advanced settings and typed Markdown share `configs/user-settings.json`; the setup
 guide includes reviewed path migration and configured canonical-project behavior.
 
+## Extend the app with plugins
+
+Drop your own plugin into `bin/plugins/<id>/` with `main.js`, `manifest.json` and `settings.json`, then review and
+enable it with `node bin/app plugins enable <id> --yes`. Its commands run as `node bin/app <id> <command>`, including
+from a compiled kit. The model follows Obsidian community plugins; see [the app plugin developer guide](plugins/DEVELOPER-GUIDE.md).
+
 ## Create a project
 
-Run `node shell.mjs new` (or `node shell.mjs` without a saved project) to choose an
+Run `node bin/app new` (or `node bin/app` without a saved project) to choose an
 installed project starter and start the prototype interview. Running a starter is the
 only way to create a project; each starter fixes its targets and frontend. Plugin,
 webapp, website, CLI and hybrid targets generate matching source adapters; design
@@ -35,11 +41,27 @@ agreement and file-write approval remain separate. See the
 [project starter and agent guide](PROJECT-STARTERS.md) for the shipped starters,
 noninteractive requests, generated artifacts and build-qualification boundaries.
 
+## Prepare a Claude Design folder
+
+After the prototype maker or `new` writes a prototype, the app asks whether to create a design folder
+at `docs/design/<prototype>` (configurable as `paths.design`). It is a self-contained folder for Claude
+Design: brief, screens, components, design tokens and agent instructions, plus `prototypes/`,
+`assets/`, `notes/` and an implementation map that sync never touches. Agents use the same reviewed
+plan/apply protocol:
+
+```sh
+node bin/app design status --json
+node bin/app design prepare --name issue-desk --json   # then repeat with --apply <planHash>
+node bin/app design sync --name issue-desk --json      # after the project model changed
+```
+
+See [Claude Design folders](../docs/development/CLAUDE-DESIGN-HANDOFF.md).
+
 ## Make a page
 
 ```sh
-node shell.mjs sketch
-# A saved project also opens its editor through: node shell.mjs
+node bin/app sketch
+# A saved project also opens its editor through: node bin/app
 ```
 
 Enter a project title, choose **Sketch a new page**, and enter its title. The page
@@ -76,10 +98,10 @@ prompts/progress are on stderr. Exit 0 means the requested operation completed
 `ready`/`pending` in prototype validation, not only its exit code.
 
 ```sh
-node shell.mjs sketch schema --json
-node shell.mjs sketch show --json
-node shell.mjs sketch export --json
-node shell.mjs sketch --input sketch-request.json --json --no-interaction
+node bin/app sketch schema --json
+node bin/app sketch show --json
+node bin/app sketch export --json
+node bin/app sketch --input sketch-request.json --json --no-interaction
 ```
 
 Example `sketch-request.json` (title is required only for a new project):
@@ -107,8 +129,8 @@ The first run only returns a plan. Inspect `data.document`, `changes` and `planH
 Repeat the **same command and unchanged input** with `--apply <planHash>` to write:
 
 ```sh
-node shell.mjs sketch --input sketch-request.json --json --apply <reviewed-planHash>
-node shell.mjs sketch generate --kind obsidian-plugin --out generated/issue-desk --json
+node bin/app sketch --input sketch-request.json --json --apply <reviewed-planHash>
+node bin/app sketch generate --kind obsidian-plugin --out generated/issue-desk --json
 # Review, then repeat with --apply <the-generation-planHash>.
 ```
 
@@ -129,11 +151,11 @@ filesystem transactions. Do not blindly retry an uncertain write; inspect recove
 ## Prepare a prototype
 
 ```sh
-node shell.mjs prototype
-# aliases: node shell.mjs make prototype; npm run make -- prototype
-node shell.mjs prototype guide --json
-node shell.mjs prototype validate --input prototype-answers.json --json
-node shell.mjs prototype --input prototype-answers.json --out prototypes/issue-desk --json
+node bin/app prototype
+# Use node bin/app prototype directly; no make-prototype alias is retained.
+node bin/app prototype guide --json
+node bin/app prototype validate --input prototype-answers.json --json
+node bin/app prototype --input prototype-answers.json --out prototypes/issue-desk --json
 # Review the prompt and full file manifest, then repeat with --apply <planHash>.
 ```
 
@@ -153,7 +175,8 @@ A minimal new-prototype answer envelope is:
 }
 ```
 
-The example above is for an unselected project. When `project.config.json` exists,
+The example above is for an unselected project. When a project configuration
+(`configs/<project-id>-config.json`) exists,
 `prototype guide` and the interactive prototype maker retain that project selection
 and use its guide. Always discover the actual guide ID/version before submitting
 answers; an Angular project does not silently fall back to a plugin clickdummy.
@@ -170,15 +193,19 @@ The package contains the full bespoke `execution-prompt.md`, `design-brief.md`,
 `README.md`, `INTEGRATION.md`, complete `companion.project.json`, replayable answers
 and exact guide snapshot, preparation metadata/fingerprints/dependency pins,
 compiler-derived integration mapping, a pending manifest and notices, and **real
-compiler-generated source/** with the canonical Claude skill and its Codex adapter.
-No dependency installation or build is performed by preparation. Pass the prompt
-and package to an agent to start implementation directly. The manifest deliberately
-remains incomplete, with a null `prototype.html` hash, until an actual artifact is
-built and verified using the copied skill helpers.
+compiler-generated source/**. Like every generated project, that source does not
+ship the framework's `companion-prototype-design` skill; it carries only the skill's
+offline click-dummy builder under `source/scripts/clickdummy/`, which the package
+README's build command runs. No dependency installation or build is performed by
+preparation. Pass the prompt and package to an agent to start implementation
+directly. The manifest deliberately remains incomplete, with a null
+`prototype.html` hash, until an actual artifact is built with that builder and
+verified. Project-starter packages (`node bin/app new`) are emitted by the starter
+target and do ship the skill under `source/.claude/skills/`.
 
 ## Extend the guide using data
 
-Edit `bin/guides/prototype.json` or supply `--guide <file.json>` in either mode.
+Edit `configs/guides/prototype.json` or supply `--guide <file.json>` in either mode.
 Its versioned definition owns steps, text/list/select/confirm fields, defaults,
 required values, choices, earlier-field visibility conditions, readiness constraints
 and literal artifact templates. Increment `version` for changed guide contracts;
@@ -189,8 +216,9 @@ boundaries, and JSON arrays can contain semicolons unchanged.
 
 Template tokens are literal substitutions, never JavaScript evaluation. Every
 answer can be referenced by field ID. Built-in tokens include `title`, `slug`,
-`brief`, `projectJson`, `answersJson`, `contextJson`, `skillPath`, `integrationJson`
-and `manifestJson`. Keep the core projection fields `title`, `mode`, `pages` and
+`brief`, `projectJson`, `answersJson`, `contextJson`, `skillPath`, `configPath`, `integrationJson`
+and `manifestJson`; `skillPath` names a file only in project-starter package
+sources. Keep the core projection fields `title`, `mode`, `pages` and
 `components`, and the handoff artifacts, when expanding this prototype guide.
 Unsafe, duplicate or colliding artifact paths fail in the shared writer.
 
@@ -200,7 +228,7 @@ Unsafe, duplicate or colliding artifact paths fail in the shared writer.
 `application/` owns transactions, discovery schema, outline and history.
 `adapters/` integrates bounded IO, the existing compiler, versioned input and safe
 plans. `presentation/` maps terminal choices into exactly those operations.
-`bin/shell.ts` is the process composition root. The legacy CLI remains available.
+`bin/app.ts` is the process composition root. The legacy CLI remains available.
 
 ```sh
 npm run typecheck:maker
@@ -223,4 +251,4 @@ include maker checks. The dedicated CI job uses the exact pinned toolchain.
 
 ## Project starters
 
-`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` beside `shell.mjs`, `generator.kind: "project"`). Projects use the strict `project.config.json` sidecar, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.
+`new` runs the installed project starters documented in [PROJECT-STARTERS.md](PROJECT-STARTERS.md) (`configs/starters/*.json` in the package root beside `bin/`, `generator.kind: "project"`). Projects use the strict `configs/<project-id>-config.json` project configuration, which records the chosen starter, and `new --input`/`new validate` accept only the `schemaVersion: 2` starter request; unknown fields fail validation without writing. Plans retain hashes and default-No writes.

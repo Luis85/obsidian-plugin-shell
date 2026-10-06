@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { included } from '../../scripts/framework/distribution.ts';
-import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
+import { included } from '../../bin/adapters/framework/distribution.ts';
+import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
 
 const root = 'docs/concepts/jev-prompt-editor/';
 const files = ['jev-studio.html', 'src/domain/context.ts', 'vendor/vue.global.prod.js', 'dist/app.js', 'schema/jev-prompt.schema.json', 'docs/RESEARCH.html'];
@@ -16,7 +16,7 @@ test('Jev concept is excluded from generated project scaffolds', () => {
   for (const file of files) assert.equal(maintainerOnly(root + file), true, file);
 });
 test('ordinary documentation remains available to consumers', () => {
-  for (const file of ['docs/product/PRD.md', 'docs/concepts/companion/PROJECT-JSON.md']) {
+  for (const file of ['docs/development/FRAMEWORK-CLI.md', 'docs/concepts/companion/PROJECT-JSON.md']) {
     assert.equal(included(file), true, file);
     assert.equal(maintainerOnly(file), false, file);
   }

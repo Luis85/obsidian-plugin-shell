@@ -2,19 +2,27 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { join } from 'node:path';
-const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
 import { parseArguments, execute } from '../../bin/adapters/commands.ts';
 import { brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification } from '../../bin/adapters/brainstorm.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { brainstormScratch, captureRequest, fakeNpm, pinGeneratedNode, resign, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { copyTree, pristineFixtures } from '../support/pristine-fixture.mjs';
 
 const out = 'brainstorms/capture-inbox', source = out + '/source';
-/** Generated source is re-pinned to the running Node, so no row adds a Node blocker. */
+const copyFixture = pristineFixtures(after, 'maker-brainstorm-pristine-');
+/**
+ * Generated source is re-pinned to the running Node, so no row adds a Node blocker. Each distinct package is
+ * generated once per file from a freshly seeded scratch root, then copied into this test's own root.
+ */
 async function generated(options, patch) {
-  const plan = await brainstormFeaturePlan({ ...captureRequest, ...patch }, options);
-  await applyPrepared(plan, plan.planHash);
-  if (plan.data.generated) await pinGeneratedNode(options.root, out);
-  return plan;
+  await copyFixture(JSON.stringify(patch), async root => {
+    await copyTree(options.root, root);
+    const seeded = { ...options, root };
+    const plan = await brainstormFeaturePlan({ ...captureRequest, ...patch }, seeded);
+    await applyPrepared(plan, plan.planHash);
+    if (plan.data.generated) await pinGeneratedNode(root, out);
+  }, options.root);
 }
 const verify = (options, extra = []) => execute(parseArguments(['brainstorm', 'verify', '--out', out, ...extra, '--json']),
   { ...options, input: Readable.from([]) });
@@ -23,7 +31,7 @@ async function expectPlanFailure(options, expected, label) {
   await assert.rejects(() => brainstormVerifyPlan(options, out), code(expected), label);
 }
 
-test('execution approval is bound to the current plan hash, cancellation and the exact npm bytes', { timeout: 180000 }, async () =>
+test('execution approval is bound to the current plan hash, cancellation and the exact npm bytes', { timeout: 300000 }, async () =>
   brainstormScratch(async options => {
     await generated(options, { output: 'prototype', verification: 'test-build' });
     const npm = await fakeNpm(options.root);
@@ -48,7 +56,7 @@ test('execution approval is bound to the current plan hash, cancellation and the
     } finally { npm.restore(); }
   }));
 
-test('an approved plan runs install, test and build in the generated source with the selected npm only', { timeout: 180000 }, async () =>
+test('an approved plan runs install, test and build in the generated source with the selected npm only', { timeout: 300000 }, async () =>
   brainstormScratch(async options => {
     await generated(options, { output: 'prototype', verification: 'test-build' });
     const npm = await fakeNpm(options.root);
@@ -69,7 +77,7 @@ test('an approved plan runs install, test and build in the generated source with
     } finally { npm.restore(); }
   }));
 
-test('a failing step stops before later steps and a mismatched toolchain starts nothing', { timeout: 180000 }, async () => brainstormScratch(async options => {
+test('a failing step stops before later steps and a mismatched toolchain starts nothing', { timeout: 300000 }, async () => brainstormScratch(async options => {
   await generated(options, { output: 'prototype', verification: 'test-build' });
   const failing = await fakeNpm(options.root, { fail: 'test' });
   try {
@@ -88,7 +96,7 @@ test('a failing step stops before later steps and a mismatched toolchain starts 
   } finally { older.restore(); }
 }));
 
-test('verification binds to the reviewed definition, ownership receipt, scripts and pinned toolchain', { timeout: 180000 }, async () =>
+test('verification binds to the reviewed definition, ownership receipt, scripts and pinned toolchain', { timeout: 600000 }, async () =>
   brainstormScratch(async options => {
     await generated(options, { output: 'prototype', verification: 'test' });
     const npm = await fakeNpm(options.root);

@@ -1,59 +1,30 @@
-import { runNode } from '../shared/process.mjs';
-import { toolingGroups } from '../testing/suite-manifest.mjs';
+import { runNodeProcess } from '../shared/process.ts';
+import { runVerifyCli } from './verify-cli.mjs';
+import { verifySteps } from './verify-steps.mjs';
+// Step order, ids and dependencies live in verify-steps.mjs; semantics are documented in
+// docs/development/QUALITY-ASSURANCE.md. Child output is streamed and also kept as a bounded tail.
+const outputLimit = 64 * 1024 * 1024;
+async function runScript(path, args, write) {
+  try { await runNodeProcess(path, args, { captureOutput: true, outputLimit, onOutput: write, forwardParentSignals: true, spawnOptions: { cwd: process.cwd() } }); }
+  catch (error) {
+    const exited = error?.kind === 'exit';
+    const failure = new Error(exited ? `Command failed (${error.exitCode ?? error.signal}): ${path}` : error.message);
+    failure.exitCode = error?.exitCode ?? null;
+    throw failure;
+  }
+}
 // tests/suites.json owns tooling classification; every group runs even after a
 // failure so one run still reports the complete tooling set, as before grouping.
-const toolingStep = Symbol('tooling suites');
-async function runToolingSuites() {
+async function runToolingSuites(write) {
+  const { toolingGroups } = await import('../testing/suite-manifest.mjs');
   const failed = [];
-  for (const { name, files } of await toolingGroups(process.cwd())) {
-    console.log(`\n▶ tooling suite: ${name} (${files.length} files)`);
-    try { await runNode('--test', ['--test-concurrency=1', ...files]); } catch { failed.push(name); }
+  for (const { name, files, concurrency } of await toolingGroups(process.cwd())) {
+    write(`\n▶ tooling suite: ${name} (${files.length} files)\n`);
+    try { await runScript('--test', [`--test-concurrency=${concurrency}`, ...files], write); } catch { failed.push(name); }
   }
   if (failed.length) throw new Error(`Tooling suites failed: ${failed.join(', ')}`);
 }
-const commands = [
-  // Fail closed before any suite runs: every test file belongs to exactly one suite.
-  ['scripts/testing/suites.mjs', '--check'],
-  ['scripts/security/check-dependencies.mjs'],
-  // The qualified build creates Nuxt's generated type inputs before type-aware
-  // lint probes inspect a fresh checkout. Verification never invents those types.
-  ['scripts/bundling/build.mjs'],
-  // Catch integration inventory defects before expensive compiler/install suites.
-  // The later analyzer pass is retained to catch drift left by those suites.
-  ['scripts/quality/check-analyzer.mjs'],
-  // Tooling suites launch real compilers/installers; serialize them to avoid
-  // oversubscribed cold-start processes and cross-suite source-probe races.
-  process.env.SHELL_EVIDENCE_TOOLING === '1'
-    ? ['scripts/testing/evidence-cli.mjs', 'run', 'tooling']
-    : toolingStep,
-  ['scripts/testing/suites.mjs', 'workbench-plugins'],
-  ['scripts/quality/check-workbench-plugins.mjs'],
-  ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
-  ['scripts/quality/lint-source.mjs'],
-  ['node_modules/eslint/bin/eslint.js', 'src', 'bin', 'plugins', '--max-warnings', '0'],
-  ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'tsconfig.maker.json'],
-  ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.maker.config.mjs'],
-  ['scripts/quality/maker-coverage.mjs'],
-  ['node_modules/eslint/bin/eslint.js', 'tests/runtime', 'tests/support', 'tests/e2e', 'tests/obsidian', 'harness/app', '--max-warnings', '0'],
-  ['scripts/quality/check-test-quality.mjs'],
-  ['scripts/quality/check-repository.mjs'],
-  ['scripts/quality/check-source.mjs'],
-  ['scripts/quality/check-presentation.mjs'],
-  ['scripts/quality/check-architecture.mjs'],
-  ['scripts/quality/check-analyzer.mjs'],
-  ['scripts/quality/check-maintainability.mjs'],
-  ['scripts/makers/entities.mjs', '--check'],
-  ['scripts/events/catalog.mjs', '--check'],
-  // One run gates both scopes: production coverage and, from the same per-file
-  // counts, the selected-core thresholds and include list in vitest.config.mjs.
-  ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.production.config.mjs'],
-  ['scripts/quality/coverage-inventory.mjs', '--selected-core'],
-  ['scripts/styles/check-tokens.mjs'],
-  ['scripts/quality/check-artifacts.mjs'],
-  ['scripts/testing/verify-baseline.mjs', '--repeat', '3'],
-  ['node_modules/vite/bin/vite.js', 'build', '--config', 'vite.harness.config.mjs'],
-];
-try { for (const command of commands) {
-  if (command === toolingStep) { await runToolingSuites(); continue; }
-  const [path, ...args] = command; console.log(`\n▶ ${path} ${args.join(' ')}`); await runNode(path, args); } console.log('Static/service/production-coverage/artifact/analyzer/baseline verification passed. Run test:e2e for served-browser evidence and test:mutation for targeted guard qualification. Native/device/release qualification is NOT implied.'); }
-catch (error) { console.error(error.message); process.exitCode = 1; }
+let cancelled = false;
+for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => { cancelled = true; });
+const run = (step, write) => step.kind === 'tooling-suites' ? runToolingSuites(write) : runScript(step.entry, step.args, write);
+process.exitCode = await runVerifyCli({ argv: process.argv.slice(2), steps: verifySteps(), execute: run, isCancelled: () => cancelled });

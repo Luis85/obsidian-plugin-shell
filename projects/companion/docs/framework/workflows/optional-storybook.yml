@@ -1,0 +1,53 @@
+name: Optional Storybook qualification
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/companion/**'
+      - 'templates/**'
+      - 'scripts/compiler/**'
+      - 'bin/compiler/**'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
+      - 'scripts/bundling/**'
+      - 'tests/tooling/compiler-storybook*.checks.mjs'
+      - 'package*.json'
+      - '.github/actions/setup-qualified/**'
+      - '.github/workflows/optional-storybook.yml'
+      - '!projects/**'
+permissions:
+  contents: read
+concurrency:
+  group: optional-storybook-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  optional-workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+      - name: Check contracts on the unchanged root toolchain
+        run: |
+          node --test --test-concurrency=1 tests/tooling/compiler-storybook*.checks.mjs
+      - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
+        run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
+      - name: Qualify explicitly opted-in generated workspace
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node scripts/compiler/qualify-storybook.mjs
+      - name: Retain evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: optional-storybook-evidence
+          path: reports/storybook-qualification
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7

@@ -43,7 +43,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -78,12 +78,12 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "vault-dashboard-plugin",
+        "id": "vault-dashboard",
         "name": "Vault Dashboard",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Present note-backed results in a calm overview and drill-down list."
       },
@@ -92,7 +92,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Adapt for a home view, reading dashboard or project health overview.",
         "platform": "desktop",
@@ -3205,7 +3205,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

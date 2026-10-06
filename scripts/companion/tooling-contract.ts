@@ -1,11 +1,16 @@
 /** Optional development tooling. Neither switch implies the other or authorizes a process. */
 import { assertJson, record, requireSitemap } from './sitemap/safety.ts';
 import { validateTooling, toolingSchema } from './tooling-contract.mjs';
+import type { ProjectHosting } from './schema/hosting.mjs';
 // Keep authoring types independent of compiler request DTOs and executable adapters.
 interface StorybookOptions { enabled?: boolean; generateStories?: boolean }
 export interface ProjectTooling {
   storybook?: StorybookOptions;
   airship?: { enabled: boolean; agent?: 'claude' | 'codex' | 'opencode'; targetPort?: number; port?: number };
+  /** Inert project defaults; Hindsight remains a separately approved user-local tool. */
+  hindsight?: { enabled: boolean; agents: Array<'claude-code'|'codex'|'cursor-cli'|'copilot-cli'|'opencode'>; git?: 'none'|'message'|'full'; sessions?: boolean };
+  /** Where pull requests and CI live; absent means GitHub. Non-secret identifiers only. */
+  hosting?: ProjectHosting;
 }
 export function validateProjectTooling(value: unknown): asserts value is ProjectTooling | undefined {
   validateTooling(value);

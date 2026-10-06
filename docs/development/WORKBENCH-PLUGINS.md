@@ -1,8 +1,10 @@
 # Workbench plugin development
 
+> Type: reference · Part of the [docs index](../README.md)
+
 Workbench has a trusted TypeScript plugin SDK for extending the **development framework itself** without adding framework IDs, starter IDs, CLI commands or Studio actions to central switch statements.
 
-This is separate from the plugin system emitted into generated projects. Workbench plugins extend project creation and authoring; generated-project plugins extend the generated application.
+This is separate from the plugin system emitted into generated projects. Workbench plugins extend project creation and authoring; generated-project plugins extend the generated application. To add a plugin to an installed or compiled `bin/app` without rebuilding it, use [app plugins](../../bin/plugins/DEVELOPER-GUIDE.md) in `bin/plugins/<id>/` instead.
 
 ## Required directory contract
 
@@ -31,7 +33,7 @@ npm run make -- plugin my-extension --dry-run
 npm run make -- plugin my-extension --yes
 ```
 
-The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed. This authoring command targets the Workbench source checkout itself; generated applications and extracted immutable developer kits use their own extension boundaries and do not mutate the reviewed Workbench plugin registry.
+The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed. This authoring command targets the Workbench source checkout itself; generated applications and extracted immutable framework kits use their own extension boundaries and do not mutate the reviewed Workbench plugin registry.
 
 Run:
 
@@ -95,7 +97,7 @@ cli: [{
 }],
 ```
 
-Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in maker commands and framework command roots cannot be shadowed. The top-level `shell.mjs` launcher resolves registered plugin command IDs before dispatch, so `node shell.mjs <plugin-command> ...` reaches the plugin in both source and compiled developer-kit modes. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
+Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in maker commands and framework command roots cannot be shadowed. Plugin options also cannot reuse a built-in maker option (`makerBooleanOptions` and `makerValueOptions` in `bin/domain/command-options.ts`, for example `--count`, `--status` or `--version`); such a plugin fails to load with `WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID`. The top-level `bin/app` launcher resolves registered plugin command IDs before dispatch, so `node bin/app <plugin-command> ...` reaches the plugin in both source and compiled framework kit modes. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
 
 ## Extending Studio / the TUI
 
@@ -178,4 +180,4 @@ Plugin source is trusted code and can use Node APIs available to the Workbench h
 
 Starter JSON remains data-only. Installing a framework adapter does not make starter JSON executable; execution authority comes from the reviewed plugin source that registered the adapter.
 
-Adding a new adapter does not weaken existing starter compatibility. Saved `project.config.json` files retain the adapter ID and generation fails clearly if that adapter is no longer installed.
+Adding a new adapter does not weaken existing starter compatibility. Saved project configurations (`configs/<project-id>-config.json`) retain the adapter ID and generation fails clearly if that adapter is no longer installed.

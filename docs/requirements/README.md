@@ -1,6 +1,6 @@
 # Workbench MVP requirements
 
-This directory contains **54 use-case PBIs** with `type: PBI`, grouped into **8 JTBD epics** and **28 features**. Each PBI has four observable acceptance criteria: **216 criteria** in total. These are reviewable requirements, not evidence that their behavior already works.
+This directory contains **55 use-case PBIs** with `type: PBI`, grouped into **8 JTBD epics** and **28 features**. Each PBI has four observable acceptance criteria: **220 criteria** in total. Baseline `WB-MVP-2026-09-30-v2` added WB-PBI-055 through [change record CR-2026-09-30-01](changes/CR-2026-09-30-01.md). These are reviewable requirements, not evidence that their behavior already works.
 
 Start with [governance and the attribute contract](GOVERNANCE.md), [the current progress snapshot](PROGRESS.md) and [traceability](TRACEABILITY.md). The authoritative hierarchy and fixed scope denominator are in [backlog.json](backlog.json). The [frontmatter schema](schema/pbi.schema.json) describes parsed metadata; the [template](templates/PBI.template.md) is excluded from the backlog.
 
@@ -208,6 +208,7 @@ When delivering a reusable kit, prove quality and independent use on exact artif
 | --- | --- | --- |
 | [WB-PBI-044](WB-PBI-044.md) | Prepare and rehearse a fixed release candidate | foundation / I3 |
 | [WB-PBI-045](WB-PBI-045.md) | Publish and verify an approved framework release | publication / I4 |
+| [WB-PBI-055](WB-PBI-055.md) | Pin every dependency exactly before publishing any version | foundation / I3 |
 
 ## WB-E07 — Use and deliver native Workbench
 

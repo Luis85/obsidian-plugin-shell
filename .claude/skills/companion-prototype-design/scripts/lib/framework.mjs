@@ -6,16 +6,15 @@ import { noLinks, readBytes, readJson } from './io.mjs';
 
 export async function framework(directory) {
   const root = noLinks(directory);
-  readBytes(path.join(root, 'shell.mjs'));
-  const compiled = path.join(root, '.framework/compiled');
-  const distribution = fs.existsSync(path.join(compiled, 'scripts/framework/operations.js'));
-  const moduleRoot = distribution ? compiled : root;
-  const extension = distribution ? 'js' : 'ts';
-  const load = name => import(pathToFileURL(noLinks(path.join(moduleRoot, `scripts/framework/${name}.${extension}`))).href);
+  readBytes(path.join(root, 'bin/app'));
+  // An extracted kit runs one bundled bin/app.js and ships its editable sources under bin/template.
+  const distribution = fs.existsSync(path.join(root, 'bin/kit.json'));
+  const moduleRoot = distribution ? path.join(root, 'bin/template') : root;
+  const load = name => import(pathToFileURL(noLinks(path.join(moduleRoot, `bin/adapters/framework/${name}.ts`))).href);
   const [operations, catalog, processes, contracts] = await Promise.all([
     load('operations'), load('catalog'), load('process'), load('contracts'),
   ]);
-  return { root, distribution: distribution ? 'compiled-kit' : 'source',
+  return { root, moduleRoot, distribution: distribution ? 'compiled-kit' : 'source',
     context: { root, frameworkRoot: root, progress: text => process.stderr.write(text) },
     ...operations, ...catalog, ...processes, ...contracts };
 }
@@ -43,7 +42,7 @@ export function checkPrototypeAuthority(request, descriptor, execute) {
 export async function shellOperation(directory, argv, { execute = false, signal } = {}) {
   const api = await framework(directory);
   const parsed = api.parseCliArguments(argv);
-  // Match shell.mjs terminal path semantics without changing process-global cwd.
+  // Match bin/app terminal path semantics without changing process-global cwd.
   if (parsed.command === 'new') {
     if (parsed.args[0]) parsed.args[0] = path.resolve(parsed.args[0]);
     if (typeof parsed.options.from === 'string') parsed.options.from = path.resolve(parsed.options.from);

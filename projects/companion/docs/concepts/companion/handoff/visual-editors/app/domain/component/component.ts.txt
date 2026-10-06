@@ -1,0 +1,32 @@
+import type { Id, Scalar, UiNode } from '../shared/ir'
+
+export type PropType = 'string'|'number'|'boolean'
+export interface PropDefinition { name:string; type:PropType; required:boolean; default?:Scalar; description?:string }
+export interface SlotDefinition { name:string; required:boolean; description?:string }
+export interface EmitDefinition { name:string; payloadType:'void'|'string'|'number'|'boolean'|'unknown'; description?:string }
+export interface Variant { id:Id; name:string; values:Record<string,Scalar> }
+
+export interface ComponentDefinition {
+  id:Id; name:string; exportName:string; description?:string
+  props:PropDefinition[]; slots:SlotDefinition[]; emits:EmitDefinition[]
+  variants:Variant[]; states:string[]; template:UiNode[]
+}
+
+const identifier=/^[A-Za-z_$][\w$-]*$/
+export function validateComponent(c:ComponentDefinition):string[] {
+  const issues:string[]=[]
+  if(!c.id) issues.push('Component id is required')
+  if(!/^[A-Z][A-Za-z0-9]*$/.test(c.exportName)) issues.push('exportName must be a PascalCase Vue component name')
+  for(const [label,names] of [['prop',c.props.map(x=>x.name)],['slot',c.slots.map(x=>x.name)],['emit',c.emits.map(x=>x.name)]] as const){
+    const seen=new Set<string>()
+    for(const name of names){ if(!identifier.test(name)) issues.push(`Invalid ${label} name: ${name}`); if(seen.has(name)) issues.push(`Duplicate ${label}: ${name}`); seen.add(name) }
+  }
+  const emits=new Set(c.emits.map(x=>x.name))
+  const walk=(nodes:UiNode[])=>nodes.forEach(n=>{
+    if(n.kind==='slot'&&!c.slots.some(s=>s.name===n.name)) issues.push(`Template references undeclared slot: ${n.name}`)
+    if('events' in n&&n.events) Object.values(n.events).flat().forEach(a=>{if(a.kind==='emit'&&!emits.has(a.event))issues.push(`Template emits undeclared event: ${a.event}`)})
+    if(n.kind==='element'&&n.children)walk(n.children); if(n.kind==='slot'&&n.fallback)walk(n.fallback)
+    if(n.kind==='component'&&n.slots)Object.values(n.slots).forEach(walk)
+  }); walk(c.template)
+  return issues
+}

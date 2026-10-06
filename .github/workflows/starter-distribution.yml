@@ -1,51 +1,78 @@
 name: Independent Workbench distributions
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths:
       - 'configs/starters/**'
       - 'scripts/starters/**'
+      - 'bin/adapters/starters/**'
       - 'scripts/companion/**'
+      - 'scripts/companion-tools/**'
+      - 'templates/**'
       - 'scripts/compiler/**'
+      - 'bin/compiler/**'
       - 'scripts/concepts/**'
       - 'scripts/bundling/**'
       - 'docs/licenses/**'
       - 'tests/concepts/*-showcase.browser.mjs'
       - 'tests/concepts/starter-workspace.browser.mjs'
-      - 'scripts/framework/**'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
       - 'scripts/companion/starter-*.mjs'
-      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'bin/compiler/emitters/framework-docs.ts'
       - 'tests/tooling/starter-*.checks.mjs'
+      - '.github/actions/setup-qualified/**'
       - '.github/workflows/starter-distribution.yml'
+      - '!projects/**'
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
+# A newer push to the same pull request supersedes the read-only asset build;
+# manual dispatches still run to completion.
 concurrency:
-  group: starter-distribution-${{ github.ref }}
-  cancel-in-progress: false
+  group: starter-distribution-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   package:
-    runs-on: ubuntu-latest
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
       source: ${{ steps.identity.outputs.source }}
       version: ${{ steps.identity.outputs.version }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - name: Install locked dependencies with the .nvmrc Node and qualified npm
+        uses: ./.github/actions/setup-qualified
         with:
-          node-version: 24.21.0
-          package-manager-cache: false
-      - name: Select qualified npm locally
+          install: 'true'
+          install-flags: --strict-allow-scripts
+      - name: Test the independent definition contract
         run: |
-          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
-      - name: Install locked dependencies
-        run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
-      - name: Typecheck and test the independent definition contract
-        run: |
-          node "$QUALIFIED_NPM" run typecheck:framework
           node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/framework-new-project.checks.mjs tests/tooling/framework-distribution.checks.mjs
       - name: Check suite registration and bounded asset contracts
         run: node scripts/testing/suites.mjs --check
@@ -54,10 +81,10 @@ jobs:
           node scripts/concepts/build-mvp.mjs
           node scripts/concepts/export-golden-project.mjs
           node scripts/concepts/export-golden-project.mjs --check
-          node shell.mjs starters coverage feature-showcase --require-model-coverage --json
+          node bin/app starters coverage feature-showcase --require-model-coverage --json
       - name: Generate and independently install the visual-feature showcase
         run: |
-          node shell.mjs new "$RUNNER_TEMP/workbench-feature-showcase" --starter feature-showcase --yes --json
+          node bin/app new "$RUNNER_TEMP/workbench-feature-showcase" --starter feature-showcase --yes --json
           cd "$RUNNER_TEMP/workbench-feature-showcase"
           node "$QUALIFIED_NPM" ci --strict-allow-scripts
           node "$QUALIFIED_NPM" run typecheck:project
@@ -66,7 +93,19 @@ jobs:
           node "$QUALIFIED_NPM" run testdata:check
           node "$QUALIFIED_NPM" run build
           node "$QUALIFIED_NPM" run build:clickdummy
+      - name: Resolve the pinned Playwright version
+        id: playwright
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      # Same key as ci.yml and setup-qualified, so every workflow shares one browser download.
+      - name: Restore the pinned Chromium download
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Exercise current startup and the independently compiled UI in Chromium
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           mkdir -p reports/feature-showcase
@@ -75,7 +114,7 @@ jobs:
           node tests/concepts/feature-showcase.browser.mjs --html reports/feature-showcase/clickdummy.html
       - name: Retain source-bound starter and browser evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: companion-starter-evidence-${{ github.sha }}
           path: |
@@ -83,6 +122,7 @@ jobs:
             reports/companion-mvp/qualification-project.json
             reports/companion-mvp/starter-lifecycle/
             reports/feature-showcase/browser-evidence/
+          retention-days: 14
           if-no-files-found: warn
       - name: Bind assets to exact checked-out source
         id: identity
@@ -99,8 +139,8 @@ jobs:
           SOURCE_COMMIT: ${{ steps.identity.outputs.source }}
         run: |
           mkdir -p reports/workbench-distributions
-          node shell.mjs framework pack --out "reports/workbench-distributions/workbench-shell-$RELEASE_VERSION.zip" --yes --json
-          node shell.mjs starters pack --out "reports/workbench-distributions/workbench-starters-$RELEASE_VERSION.zip" --yes --json
+          node bin/app framework pack --out "reports/workbench-distributions/workbench-shell-$RELEASE_VERSION.zip" --yes --json
+          node bin/app starters pack --out "reports/workbench-distributions/workbench-starters-$RELEASE_VERSION.zip" --yes --json
           node --input-type=module <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
           import { createHash } from 'node:crypto';
@@ -115,8 +155,9 @@ jobs:
           await writeFile(root + 'workbench-SHA256SUMS', assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join(''));
           NODE
       - name: Retain separate assets and their manifest
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: workbench-distributions-${{ steps.identity.outputs.source }}
           path: reports/workbench-distributions/
+          retention-days: 14
           if-no-files-found: error

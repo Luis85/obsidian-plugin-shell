@@ -1,0 +1,14 @@
+import { ref, shallowRef, computed, onScopeDispose, onErrorCaptured } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { en, de } from '@nuxt/ui/locale';
+import { useServices } from '../context/use-services';
+import { useViewPreferences } from './use-view-preferences';
+export function useFoundationShell() {
+  const { t, locale } = useI18n(); const services = useServices(); const view = useViewPreferences();
+  const failed = ref(false); const uiLocale = computed(() => locale.value === 'de' ? de : en);
+  const current = () => services.notifications.current.filter(item => (item.owner.startsWith(view.owner + ':') || item.scope === 'runtime') && !item.native && item.visible !== false);
+  const feedback = shallowRef(current()); const stop = services.notifications.subscribe(() => { feedback.value = current(); });
+  onScopeDispose(stop);
+  onErrorCaptured(() => { failed.value = true; services.diagnostics.report('vue.render', 'view.render'); return false; });
+  return { t, locale, services, failed, uiLocale, feedback };
+}

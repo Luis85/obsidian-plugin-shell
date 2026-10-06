@@ -11,7 +11,8 @@ command from this document when the current capability response disagrees.
 
 Run static `inspect-repository.mjs` before trusting a new checkout. Live discovery
 executes repository modules, so do it only with an approved local repository. Source
-checkouts and `.framework/compiled` release kits are both supported. The launcher uses
+checkouts and extracted kits (`bin/kit.json`, editable sources under `bin/template`) are
+both supported through the canonical `bin/app` launcher. It uses
 the shell's Node type-stripping convention on older supported Node; use the qualified
 `.nvmrc`/packageManager/lockfile for actual qualification.
 
@@ -75,7 +76,7 @@ npm run prototype:tools -- npm --repo ../concept-source --script check:presentat
 
 Process operations are previewed unless `--execute` is present. They execute trusted
 project code and can write builds/reports/caches. Their cancellation/timeouts and npm
-selection use `scripts/framework/process.ts`; they do not claim rollback of process effects.
+selection use `bin/adapters/framework/process.ts`; they do not claim rollback of process effects.
 Ordinary shell `--root` is not accepted through the adapter: choose the one explicit
 `--repo`. Fixture mutation uses `data`'s own `approval` hash, not a generator plan hash.
 

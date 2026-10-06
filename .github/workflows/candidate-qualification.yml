@@ -1,8 +1,22 @@
 name: Candidate qualification
 # Heavy qualification of main after merge: fixed-source rehearsal, repeated
 # runtime suites, served browser, three native sessions and the live audit.
-# Narrative-only documentation changes do not trigger it.
+# Narrative-only documentation changes do not trigger it. release.yml also calls
+# it on release/X.Y.Z, where GITHUB_SHA is the release branch head it rehearses.
+# The served-browser and native-host evidence is e2e: mandatory in the release
+# tier (release.yml calls without inputs, so the call's tier defaults to
+# release), opt-in on main (dispatch with e2e or tier release).
 on:
+  workflow_call:
+    inputs:
+      tier:
+        description: release (the default; release.yml calls without inputs) runs the browser and native evidence
+        type: string
+        default: release
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -16,7 +30,18 @@ on:
       - 'docs/testing/native-evidence-checks.json'
       - 'docs/testing/test-plan.json'
       - 'docs/design/obsidian-tokens.json'
+      - '!projects/**'
   workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (browser and native evidence only with e2e) or release (everything)
+        type: choice
+        options: [integration, release]
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -24,22 +49,25 @@ concurrency:
   cancel-in-progress: true
 jobs:
   candidate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    runs-on: ubuntu-24.04
+    # Job budget sized from measured steps: npm ci (~3 min), release:rehearse
+    # with the complete verify (~28 min), three runtime repeats, core and
+    # production coverage, browser provisioning and served components, three
+    # native sessions plus timing samples and the live security gate. 70 minutes
+    # covers every step; it is not a test deadline or performance threshold.
+    timeout-minutes: 70
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Select npm independently without global installation
-        run: |
-          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      # Cold on purpose: no npm download cache, so the install fetches every
+      # locked package from the registry like a first-time consumer.
       - name: Fresh strict-policy install of the committed lockfile
-        run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
+        uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --strict-allow-scripts
+          npm-cache: 'false'
       - name: Preserve source checkpoint and installed dependency provenance
         if: always()
         run: |
@@ -49,7 +77,7 @@ jobs:
           node "$QUALIFIED_NPM" ls --all --json > reports/candidate-qualification/dependency-tree.json
       - name: Retain exact source for interrupted-session recovery
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: candidate-recovery-source
           path: reports/candidate-qualification/candidate-source.zip
@@ -65,7 +93,7 @@ jobs:
           node "$QUALIFIED_NPM" run release:rehearse -- --commit "$GITHUB_SHA" --version "$VERSION" 2>&1 | tee reports/candidate-qualification/verify.txt
           node scripts/quality/check-artifacts.mjs > reports/candidate-qualification/candidate-assets.json
       - name: Retain the built candidate for independent platform qualification
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: retained-build
           path: |
@@ -86,15 +114,31 @@ jobs:
           node scripts/testing/evidence-cli.mjs run coverage 2>&1 | tee reports/candidate-qualification/coverage-production.txt
           node scripts/testing/evidence-cli.mjs run artifact
           node scripts/testing/asset-sizes.mjs > reports/candidate-qualification/asset-sizes.json
+      - name: Resolve the pinned Playwright version
+        id: playwright
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      # Same key as ci.yml and setup-qualified: the browser download only, the
+      # npm install above stays cold.
+      - name: Restore the pinned Chromium download
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Provision pinned Chromium
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           sudo apt-get install -y xdotool
       - name: Exercise actual served components and capture scope-labeled screenshots
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node scripts/testing/evidence-cli.mjs run browser
       - name: Provision isolated native host provider
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node "$QUALIFIED_NPM" install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
       - name: Verify the unchanged installed candidate in three fresh native sessions, no retries
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           for run in 1 2 3; do
             xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/evidence-cli.mjs run native --allow-download
@@ -102,6 +146,7 @@ jobs:
           done
           cp -R reports/native-run-3 reports/native
       - name: Retain shared-runner timing samples separately from reference budgets
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download --performance
       - name: Reconcile every registered evidence attempt and retain all acceptance gaps
         if: always()
@@ -124,7 +169,7 @@ jobs:
           cd package && zip -r ../candidate-plugin.zip "$PLUGIN_ID"
       - name: Retain candidate and sanitized, scope-labeled evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: qualified-candidate
           path: |

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "configs/schemas/business-process.schema.json",
+  "title": "Workbench data-driven business process",
+  "description": "Editor support only. bin/domain/process.ts is the authoritative validator; run node bin/app process check --json. See docs/development/BUSINESS-PROCESSES.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "version", "title", "purpose", "status", "owner", "roles", "steps"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "version": { "type": "integer", "minimum": 1 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "purpose": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "status": { "enum": ["draft", "active", "retired"] },
+    "owner": { "$ref": "#/$defs/id" },
+    "roles": { "type": "array", "maxItems": 30, "items": { "$ref": "#/$defs/role" } },
+    "references": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entities": { "$ref": "#/$defs/references" },
+        "journeys": { "$ref": "#/$defs/references" },
+        "pages": { "$ref": "#/$defs/references" }
+      }
+    },
+    "steps": { "type": "array", "minItems": 1, "maxItems": 60, "items": { "$ref": "#/$defs/step" } },
+    "rules": { "type": "array", "maxItems": 80, "items": { "$ref": "#/$defs/rule" } },
+    "doc": { "$ref": "#/$defs/doc" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$", "maxLength": 80 },
+    "path": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*(?:\\.[A-Za-z][A-Za-z0-9]*)*$", "maxLength": 200 },
+    "references": { "type": "array", "maxItems": 60, "items": { "type": "string", "minLength": 1, "maxLength": 120 } },
+    "doc": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 20000, "description": "Markdown; [[path]] wikilinks must resolve to repository files." },
+        "file": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*\\.md$", "description": "Below configs/processes/docs." }
+      }
+    },
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 2000 }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["to"],
+      "properties": {
+        "to": { "$ref": "#/$defs/id" },
+        "when": { "$ref": "#/$defs/condition" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 120 }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "actor"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "actor": { "$ref": "#/$defs/id" },
+        "description": { "type": "string", "maxLength": 4000 },
+        "form": { "$ref": "#/$defs/id" },
+        "fields": { "type": "array", "maxItems": 80, "items": { "$ref": "form.schema.json#/$defs/field" } },
+        "bind": { "$ref": "#/$defs/path" },
+        "outputs": { "type": "array", "maxItems": 30, "items": { "$ref": "#/$defs/path" } },
+        "next": { "type": "array", "minItems": 1, "maxItems": 12, "items": { "$ref": "#/$defs/transition" } },
+        "terminal": { "const": true },
+        "outcome": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "doc": { "$ref": "#/$defs/doc" }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "severity", "require"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "statement": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "rationale": { "type": "string", "maxLength": 2000 },
+        "severity": { "enum": ["block", "warn", "info"] },
+        "steps": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" } },
+        "when": { "$ref": "#/$defs/condition" },
+        "require": { "$ref": "#/$defs/condition" },
+        "doc": { "$ref": "#/$defs/doc" }
+      }
+    },
+    "scalar": { "type": ["string", "number", "boolean"] },
+    "condition": {
+      "description": "Inert JSON condition: all/any/not, or one comparison on a dotted path. Never code.",
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["all"], "properties": { "all": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/condition" } } } },
+        { "type": "object", "additionalProperties": false, "required": ["any"], "properties": { "any": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/condition" } } } },
+        { "type": "object", "additionalProperties": false, "required": ["not"], "properties": { "not": { "$ref": "#/$defs/condition" } } },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path"],
+          "minProperties": 2,
+          "properties": {
+            "path": { "$ref": "#/$defs/path" },
+            "length": { "const": true },
+            "equals": { "$ref": "#/$defs/scalar" },
+            "notEquals": { "$ref": "#/$defs/scalar" },
+            "in": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/scalar" } },
+            "notIn": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/scalar" } },
+            "contains": { "$ref": "#/$defs/scalar" },
+            "gt": { "type": "number" },
+            "gte": { "type": "number" },
+            "lt": { "type": "number" },
+            "lte": { "type": "number" },
+            "present": { "type": "boolean" },
+            "matches": { "type": "string", "minLength": 1, "maxLength": 100, "description": "Anchored wildcard pattern: * any run, ? one character." }
+          }
+        }
+      ]
+    }
+  }
+}

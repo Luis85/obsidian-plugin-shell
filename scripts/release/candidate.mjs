@@ -1,9 +1,11 @@
-import { sha256 } from '../shared/hash.mjs';
-export { sha256 } from '../shared/hash.mjs';
+import { sha256 } from '../shared/hash.ts';
+export { sha256 } from '../shared/hash.ts';
 import { lstat, readFile, readdir, mkdir, writeFile, rename, mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { stableVersion } from './prepare.mjs';
+import { checkDependencyPins } from '../security/dependency-pins.mjs';
+import { extractNotes } from './changelog.mjs';
 
 export const assetNames = Object.freeze(['main.js', 'manifest.json', 'styles.css']);
 export function git(root, args) { return execFileSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true }).trim(); }
@@ -22,7 +24,7 @@ async function directory(path) {
   if (!entry.isDirectory() || entry.isSymbolicLink()) throw new Error('UNSAFE_CANDIDATE_DIRECTORY');
 }
 export async function collectAssets(root, input, version) {
-  stableVersion(version); await directory(input);
+  stableVersion(version); const dependencyPins = await checkDependencyPins(root); await directory(input);
   const names = (await readdir(input)).sort();
   if (JSON.stringify(names) !== JSON.stringify([...assetNames].sort())) throw new Error('ASSET_SET_MISMATCH');
   const bytes = Object.fromEntries(await Promise.all(assetNames.map(async name => [name, await regularBytes(join(input, name))])));
@@ -35,20 +37,23 @@ export async function collectAssets(root, input, version) {
   const lock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
   const versions = JSON.parse(await readFile(join(root, 'versions.json'), 'utf8'));
   if (pkg.version !== version || lock.version !== version || lock.packages?.['']?.version !== version || versions[version] !== manifest.minAppVersion) throw new Error('SOURCE_VERSION_MISMATCH');
-  return { bytes, manifest };
+  return { bytes, manifest, dependencyPins };
 }
 export async function retainCandidate({ root, input, output, commit, version, qualification }) {
   fixedSource(root, commit);
   if (qualification?.status !== 'passed' || qualification.sourceCommit !== commit || qualification.command !== 'verify') throw new Error('QUALIFICATION_REQUIRED');
   if (qualification.node !== 'v24.21.0' || qualification.npm !== '11.19.1') throw new Error('QUALIFIED_TOOLCHAIN_REQUIRED');
-  const { bytes, manifest } = await collectAssets(root, input, version);
+  const { bytes, manifest, dependencyPins } = await collectAssets(root, input, version);
   const hashes = Object.fromEntries(assetNames.map(name => [name, sha256(bytes[name])]));
   if (JSON.stringify(qualification.assetHashes) !== JSON.stringify(hashes)) throw new Error('QUALIFICATION_HASH_MISMATCH');
-  const notes = await regularBytes(join(root, 'CHANGELOG.md'));
-  if (!notes.toString().includes(`## ${version}\n`)) throw new Error('VERSION_NOTES_REQUIRED');
+  // release-notes.md is only this version's Keep a Changelog section body, the exact text a release publishes.
+  let section;
+  try { section = extractNotes((await regularBytes(join(root, 'CHANGELOG.md'))).toString('utf8'), version); }
+  catch (error) { throw new Error(`VERSION_NOTES_REQUIRED: ${error.message}`); }
+  const notes = Buffer.from(section + '\n');
   const record = { schemaVersion: 1, kind: 'release-rehearsal', sourceCommit: commit, version,
     identity: manifest.id, minAppVersion: manifest.minAppVersion, isDesktopOnly: manifest.isDesktopOnly,
-    assetHashes: hashes, notesHash: sha256(notes), lockHash: sha256(await readFile(join(root, 'package-lock.json'))),
+    assetHashes: hashes, notesHash: sha256(notes), lockHash: dependencyPins.lockfile.hash, dependencyPins,
     tools: { node: qualification.node, npm: qualification.npm }, packagingNode: process.version, createdAt: new Date().toISOString(),
     qualification, nativeAcceptance: { status: 'not-run' }, publication: 'not-authorized' };
   output = resolve(output); await mkdir(dirname(output), { recursive: true });
@@ -72,6 +77,10 @@ export async function validateRetained(directoryPath, expectedCommit, expectedVe
   if (record.schemaVersion !== 1 || record.kind !== 'release-rehearsal' || record.sourceCommit !== expectedCommit || record.version !== expectedVersion) throw new Error('PROVENANCE_MISMATCH');
   if (record.tools?.node !== 'v24.21.0' || record.tools?.npm !== '11.19.1' || record.qualification?.node !== record.tools.node || record.qualification?.npm !== '11.19.1') throw new Error('QUALIFIED_TOOLCHAIN_REQUIRED');
   if (!/^[a-f0-9]{64}$/.test(record.lockHash ?? '') || !Number.isFinite(Date.parse(record.createdAt)) || record.publication !== 'not-authorized' || record.nativeAcceptance?.status !== 'not-run') throw new Error('PROVENANCE_MISMATCH');
+  if (record.dependencyPins?.schemaVersion !== 1 || record.dependencyPins?.policy !== 'exact-npm-pins-v1' ||
+      record.dependencyPins?.lockfile?.hash !== record.lockHash || !Array.isArray(record.dependencyPins?.manifests) ||
+      !record.dependencyPins.manifests.some(entry => entry?.path === 'package.json' && /^[a-f0-9]{64}$/.test(entry?.hash ?? '')))
+    throw new Error('PROVENANCE_MISMATCH');
   if (record.qualification?.status !== 'passed' || record.qualification.command !== 'verify' || record.qualification.sourceCommit !== expectedCommit) throw new Error('QUALIFICATION_REQUIRED');
   if (JSON.stringify(Object.keys(record.assetHashes ?? {}).sort()) !== JSON.stringify([...assetNames].sort())) throw new Error('ASSET_SET_MISMATCH');
   for (const name of assetNames) {

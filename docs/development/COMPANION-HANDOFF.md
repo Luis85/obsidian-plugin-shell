@@ -1,6 +1,8 @@
 # Companion handoff: one artifact, two front ends
 
-The shell has two front ends: the terminal (`node shell.mjs …`) and the companion
+> Type: explanation · Part of the [docs index](../README.md)
+
+The shell has two front ends: the terminal (`node bin/app …`) and the companion
 (today the offline browser concept in `docs/concepts/companion/index.html`). This page
 is the contract between them. The research behind it is the "Dual interface" section
 of the developer-experience research: one operation core, schemas as the contract,
@@ -11,11 +13,11 @@ always preview, apply only a reviewed plan hash.
 The **exported project JSON** is the only thing that moves from the companion to the
 terminal or to a coding agent.
 
-- Format: `kind: "obsidian-companion-project"`, a versioned `schemaVersion` (currently
-  4; the shared contract also accepts 1–3), `executable: false`, `project` identity,
-  `settings` folders, `design`, `notes`. It is defined once in
-  `scripts/companion/project-contract.mjs` and assembled unchanged into the concept,
-  so the browser and the CLI validate with the same code. See
+- Format: `kind: "obsidian-companion-project"`, `schemaVersion` 6 (the only current
+  schema; 1–5 are refused with `COMPANION_VERSION`, never migrated), `executable: false`,
+  `project` identity, `settings` folders, `design`, `notes` and optional `tooling`. It is
+  defined once in `scripts/companion/authoring-contract.ts` and bundled unchanged into
+  the concept, so the browser and the CLI validate with the same code. See
   [Companion project JSON](COMPANION-PROJECT-JSON.md).
 - It is data. It carries no approvals, trust, credentials, machine paths, test
   results or plan hashes, and nothing in it is evaluated, imported or executed.
@@ -31,10 +33,10 @@ or download only, and it never starts a process.
 
 | Step | Command | Notes |
 |---|---|---|
-| Create a new project | `node shell.mjs new <dir> --from <id>.companion.json` | Preview by default. `--yes` or `--apply <planHash>` writes. `--id/--name/--author` override identity only. Mutually exclusive with `--starter`. |
-| Adopt a design into an existing project | `node shell.mjs project import --input <file>` then `node shell.mjs generate` | Reviews configuration conflicts, then regenerates in place from `design/project.json` (requires an extracted, verified kit). |
-| Explicit placement (lower level) | `node shell.mjs generate --input <file> --vault <dir> --target <rel>` | The compiler interface that `new` composes. |
-| Discovery for tools and agents | `node shell.mjs help --json`, `capabilities --json`, `schema --json` | Machine-readable command catalog and request/result schemas. |
+| Create a new project | `node bin/app new <dir> --from <id>.companion.json` | Preview by default. `--yes` or `--apply <planHash>` writes. `--id/--name/--author` override identity only. Mutually exclusive with `--starter`. |
+| Adopt a design into an existing project | `node bin/app project import --input <file>` then `node bin/app generate` | Reviews configuration conflicts, then regenerates in place from `design/project.json` (requires an extracted, verified kit). |
+| Explicit placement (lower level) | `node bin/app generate --input <file> --vault <dir> --target <rel>` | The compiler interface that `new` composes. |
+| Discovery for tools and agents | `node bin/app help --json`, `capabilities --json`, `schema --json` | Machine-readable command catalog and request/result schemas. |
 
 `new --from` reuses the same pieces as `new --starter`: placement (the target must
 be absent or empty and outside the framework checkout), the unchanged compiler plan,
@@ -63,7 +65,7 @@ generator** in the read-only JSON handoff.
 2. **Terminal commands**, each with its own labelled copy button, plus **Copy all
    commands**:
    ```sh
-   node shell.mjs new ../<id> --from <id>.companion.json
+   node bin/app new ../<id> --from <id>.companion.json
    cd ../<id>
    npm ci
    npm run check          # script of the generated project
@@ -100,7 +102,7 @@ confirmed starter and checks the following. The command list contains the projec
 ID. Every command has a labelled copy button. The prompt is read-only, labelled and
 names the plugin and every requirement ID. The copy buttons copy exact text and run
 nothing. The layout does not overflow at 390 px. It also runs the displayed
-`node shell.mjs new … --from …` argument vector on the actual downloaded bytes in a
+`node bin/app new … --from …` argument vector on the actual downloaded bytes in a
 temporary folder and confirms a `planned` result that writes nothing.
 `tests/tooling/framework-new-from-project.checks.mjs` covers the CLI: preview,
 identity overrides, apply, stale input, and refusal of malformed, future, invalid,
@@ -116,7 +118,7 @@ provide `verify:project`, `test:watch` and `test:tdd`.
   same operations as the terminal: `executeOperation` requests validated against
   `schema`, `--json` results with the same states (planned/blocked/applied/
   unchanged/failed), and forms rendered from the schema instead of written by hand.
-  Spawning `node shell.mjs` requires Node APIs and a desktop-only plugin, so it would
+  Spawning `node bin/app` requires Node APIs and a desktop-only plugin, so it would
   be an explicit **desktop developer mode** opt-in that streams JSON results. The
   default stays handoff-only (copy/download), which works on every platform and passes
   review.

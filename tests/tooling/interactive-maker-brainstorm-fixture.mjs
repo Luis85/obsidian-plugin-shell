@@ -3,11 +3,12 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, rm } from 'node:fs/promi
 import { Readable } from 'node:stream';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { hash } from '../../scripts/framework/files.ts';
-import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
+import { mapBounded } from '../../scripts/shared/bounded-map.ts';
+import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
-import { applyOperation, planOperation } from '../../scripts/framework/planning.ts';
+import { applyOperation, planOperation } from '../../bin/adapters/framework/planning.ts';
 import { Back } from '../../bin/presentation/prompts.ts';
 
 export const frameworkRoot = resolve(import.meta.dirname, '../..');
@@ -76,7 +77,11 @@ ${suffix}`);
     },
     /** Changing executable bytes after approval must invalidate the reviewed plan. */
     tamper: () => write('// changed after approval\n'),
-    restore() { if (previous === undefined) delete process.env.QUALIFIED_NPM; else process.env.QUALIFIED_NPM = previous; },
+    /** A timed-out test's body keeps running; its late restore must not clear a later test's own fake. */
+    restore() {
+      if (process.env.QUALIFIED_NPM !== entry) return;
+      if (previous === undefined) delete process.env.QUALIFIED_NPM; else process.env.QUALIFIED_NPM = previous;
+    },
   };
 }
 
@@ -117,10 +122,10 @@ export async function pinGeneratedNode(root, out) {
  */
 export async function pinnedFramework(root) {
   const target = join(root, 'pinned-framework'), snapshot = await loadTemplateSnapshot(frameworkRoot);
-  for (const file of [...snapshot.frameworkFiles, ...snapshot.skillFiles]) {
-    await mkdir(dirname(join(target, file.path)), { recursive: true });
-    await writeFile(join(target, file.path), Buffer.from(file.content, file.encoding ?? 'utf8'));
-  }
+  const files = [...snapshot.frameworkFiles, ...snapshot.skillFiles];
+  // Each folder is created once, then the same bytes are written with bounded parallelism instead of one by one.
+  for (const folder of new Set(files.map(file => dirname(join(target, file.path))))) await mkdir(folder, { recursive: true });
+  await mapBounded(files, 16, file => writeFile(join(target, file.path), Buffer.from(file.content, file.encoding ?? 'utf8')));
   await writeFile(join(target, '.nvmrc'), process.versions.node + '\n');
   return target;
 }

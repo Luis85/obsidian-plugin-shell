@@ -135,7 +135,7 @@ The product choices above are decisions, not platform mandates. Reviewed on 2026
 - [Obsidian: Configuration folder](https://help.obsidian.md/Files+and+folders/Configuration+folder) — `.obsidian` is the default, with alternate retained profiles possible.
 - [Obsidian developer: Vault](https://docs.obsidian.md/Plugins/Vault) — visible-note API versus hidden-folder adapter access; safe content updates and rechecking asynchronous preconditions with `Vault.process`.
 
-The [earlier research](../../research/2026-09-23-companion-plugin.md) remains historical context. Its external-source default and multi-project launcher no longer define this product.
+The [earlier research](../../_archive/research/2026-09-23-companion-plugin.md) remains historical context. Its external-source default and multi-project launcher no longer define this product.
 
 ## 8. Semantic model and variants
 

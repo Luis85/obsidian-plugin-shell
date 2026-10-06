@@ -1,12 +1,14 @@
 # Project Starters
 
+> **Retired built-in catalog.** The embedded `starters/` catalog of the former v5 concept was removed; the checked-in concept is schema 6 and embeds no starter. Current starters are the external project v6 definitions in `configs/starters/`, listed in the catalog below; see [Companion starters](../../development/COMPANION-STARTERS.md) and [JSON starters](../../development/JSON-STARTERS.md). The shell rejects retired v5 starter documents; they are never migrated.
+
 Project Starters is an offline, curated way to create an **independent full companion project** from ordinary project JSON. It builds on the existing one-vault/one-project workflow. It is not a remote marketplace, plugin installer, alternate generator or finished collection of native plugins.
 
 ## Use
 
 Open **Project Starters** in navigation or **Choose a starter** on the empty welcome page. Search by use case and optionally filter by category. Preview a starter to see its actual surfaces, included scope, remaining implementation and synthetic-data boundary. Configure identity and the generated source/test folders, then choose **Review project**. Nothing replaces the current project until the confirmation checkbox and final action are used.
 
-Start Blank supplies only a minimal runnable workspace entry, settings surface and design tokens. It contains no example entity, source recipe, product requirement or detailed product composition. The generator requires a navigable surface; an entirely empty sitemap is therefore not advertised as a runnable plugin.
+Start Blank supplies only a minimal runnable workspace entry, settings surface and design tokens. Its project defines no example entity, source recipe, product requirement or detailed product composition; the copied framework still registers its own Task, Project and Items example features. The generator requires a navigable surface; an entirely empty sitemap is therefore not advertised as a runnable plugin.
 
 After confirmation, use the existing PRD, sitemap, Page, Component, entity, source, test-data and Design System editors. The JSON is an independent copy, not a live link to the catalog. The built-in project stays unchanged.
 
@@ -16,8 +18,8 @@ Use **Generate plugin shell** on the project overview to open the handoff. It of
 2. Terminal commands, each with its own copy button (and **Copy all commands**):
 
 ```sh
-node shell.mjs new ../my-plugin --from my-plugin.companion.json   # preview: plan + plan hash, writes nothing
-node shell.mjs new ../my-plugin --from my-plugin.companion.json --yes   # or --apply <planHash>
+node bin/app new ../my-plugin --from my-plugin.companion.json   # preview: plan + plan hash, writes nothing
+node bin/app new ../my-plugin --from my-plugin.companion.json --yes   # or --apply <planHash>
 cd ../my-plugin
 npm ci
 npm run check          # generated-project script
@@ -26,7 +28,7 @@ npm run dev:obsidian   # generated-project script; isolated sandbox vault only
 
 3. **Copy agent prompt**: a short prompt for Claude Code, Codex or another coding agent with the plugin ID/name, the `new --from` command, "read AGENTS.md", the requirement IDs in `design/traceability.json`, the `npm run test:tdd` loop and "finish only when `npm run check` passes".
 
-`new --from` validates the JSON with the same shared contract, keeps its identity (unless `--id/--name/--author` override it) and plans with the unchanged compiler; see [Companion handoff](../../development/COMPANION-HANDOFF.md). The lower-level `node shell.mjs generate --input … --vault … --target …` (alias `npm run companion:scaffold --`) remains available. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
+`new --from` validates the JSON with the same shared contract, keeps its identity (unless `--id/--name/--author` override it) and plans with the unchanged compiler; see [Companion handoff](../../development/COMPANION-HANDOFF.md). The lower-level `node bin/app generate --input … --vault … --target …` (alias `npm run companion:scaffold --`) remains available. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
 
 The custom folders configure **generated product code and tests**, such as `plugin/src/generated` and `plugin/tests/project`. They do not relocate the shell's internal foundation. No handoff command is executed in the browser.
 
@@ -34,7 +36,8 @@ The custom folders configure **generated product code and tests**, such as `plug
 
 | ID | Starter | Scope |
 | --- | --- | --- |
-| `blank` | Start Blank | Minimal host entry and settings; no example domain |
+| `blank` | Start Blank | Minimal host entry and settings; no generated domain (the framework's example features stay registered) |
+| `agent-ready` | Agent Ready | Start Blank plus reviewed, inert Airship and Hindsight defaults |
 | `command-utility` | Command Utility | Text utility and preview with local input reset |
 | `quick-capture` | Quick Capture | Inbox, capture modal, record details and source contract |
 | `tasks-projects` | Tasks & Projects | Task/project relationship and list/detail workspace |
@@ -43,14 +46,16 @@ The custom folders configure **generated product code and tests**, such as `plug
 | `vault-dashboard` | Vault Dashboard | Overview, result list and read-only contract |
 | `note-inspector` | Note Inspector | Metadata inspection/review; native active-note binding remains |
 | `import-integration` | Import & Integration | Fixture-first preview/mapping/result; no live API or credentials |
+| `context-menu` | File Context Menu | One extension-filtered file context-menu action |
+| `custom-file-view` | Custom File View | A text-backed file format opened in a dedicated editor view |
 
 Focused starters provide original PRD acceptance TODOs and detailed compositions with synthetic default/narrow/empty/error scenarios. Local input reset and declared navigation compile to UI behavior. Buttons labeled as implementation hooks do not pretend that data was saved. Source ports generate application/services/Pinia/adapter scaffolding; adapters fail explicitly until implemented. The import starter uses `https://example.invalid` and manual reads. No OAuth, parser, recurrence engine, indexing engine or right-sidebar host placement is implied.
 
 ## Files and contracts
 
-`starters/catalog.json` has catalog schema 1 and bounded metadata: stable ID, version, category, difficulty, description, outcome, includes, remaining implementation, tags, local filename and SHA-256. Each `<id>.companion.json` is a complete ordinary **project-v4** document. There is no starter-specific project schema or executable payload.
+Starters are the external definitions in `configs/starters/*.json` (see `scripts/starters/starter.schema.json`); a Companion starter embeds one complete ordinary **project schema 6** document. There is no starter-specific project schema or executable payload, and the concept HTML embeds no starter.
 
-The builder embeds these exact JSON files into the self-contained HTML, escaping `<` before insertion into a data-only script block. `scripts/companion/starter-contract.mjs` validates the same embedded catalog and customizes a deep copy. `starter-files.mjs` validates local file identity, integrity, regular-file status and inventory for tooling. The generator consumes the normal exported project document, not catalog metadata.
+The concept loads selected definition files into its session catalog, hashes their exact bytes, and validates and configures them with the same bundled contract the shell uses (`scripts/concepts/concept-contract.ts`: `bin/adapters/starters/browser.ts` and `scripts/companion/starter-contract.mjs`). The generator consumes the normal exported project document, not catalog metadata.
 
 A provenance note records starter ID/version/source hash. It is informational Markdown and grants no execution authority. The source hash identifies the built-in template bytes, not the later customized project. Renaming plugin identity does not rewrite domain labels, entity slugs, internal IDs or design tokens.
 
@@ -68,15 +73,14 @@ These are browser safeguards. Native Markdown transactions and real multi-window
 
 Create the full definition through the existing companion authoring model and export it. Keep the project small, original, bounded, offline and meaningful. Describe one differentiating use case; avoid multiplying label-only clones. Include realistic remaining work and designed acceptance rather than assertions of implementation.
 
-Place the file under `starters/`, update its exact SHA-256 in `catalog.json`, and maintain a unique portable ID. Bump the starter's version when changing its template contract. Preserve meaningful internal references; never silently migrate an already created project.
+Place the definition under `configs/starters/` with a unique portable ID, then review the generated-output baseline with `node scripts/compiler/golden.mjs --write` and `--check`. Bump the starter's version when changing its template contract. Preserve meaningful internal references; never silently migrate an already created project.
 
-The folder has an exact inventory. Unlisted files, missing files, duplicate sources, traversal, symlinks and altered bytes, including a CRLF checkout, are rejected. The repository `.gitattributes` pins LF on every platform so a Windows `autocrlf` checkout cannot turn a reviewed SHA-256 into a false integrity failure. No remote URLs can stand in for a source filename. Adding a runtime source or style also requires the existing exact assembly/analyzer entry. Do not exempt a new source from maintainability gates.
+The concept's own assembly inputs keep an exact inventory: adding a runtime source or style requires the existing exact assembly/analyzer entry. Do not exempt a new source from maintainability gates.
 
 Run:
 
 ```sh
 python3 scripts/concepts/build-companion.py
-python3 scripts/concepts/export-companion-project.py
 python3 -B tests/concepts/companion-assembly.test.py
 node --test tests/tooling/project-starters.checks.mjs
 python3 tests/concepts/companion-project-starters.browser.py
@@ -85,7 +89,7 @@ python3 scripts/concepts/run-browser-checks.py --real-storage
 
 Use Node 24.21.0 and npm 11.19.1 for qualification. Local Node22 strip-types checks are supplementary, not substitutes for pinned-toolchain evidence.
 
-The generator workflow has a per-starter matrix. `scripts/companion/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
+The generator workflow has a per-starter matrix. `scripts/companion-tools/qualify-starter.mjs <id>` creates a real independent generated target, installs locked dependencies with the explicitly selected npm, runs `verify:project`, records output hashes and removes its temporary workspace. `QUALIFIED_NPM` must name the qualified npm CLI. Per-starter `summary.json` and logs are retained as workflow artifacts. They qualify scaffolding only, not native business acceptance.
 
 ## Companion self-project
 

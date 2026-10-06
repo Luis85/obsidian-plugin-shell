@@ -1,0 +1,3 @@
+import type { Id, UiNode } from '../shared/ir'
+export interface PageDefinition { id:Id; name:string; route:string; root:UiNode[]; meta?:Record<string,string> }
+export function validatePage(p:PageDefinition):string[]{const out:string[]=[];if(!p.id)out.push('Page id is required');if(!p.route.startsWith('/'))out.push('Page route must start with /');return out}

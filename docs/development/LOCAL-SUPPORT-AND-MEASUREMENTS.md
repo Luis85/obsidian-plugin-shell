@@ -1,11 +1,13 @@
 # Local support reports and authoring measurements
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 These commands use the same CLI catalog and typed operation dispatcher as other shell commands. Neither executes imported project code, installs dependencies, launches Obsidian, sends telemetry or writes files. Redirecting stdout is an explicit action performed by the invoking shell.
 
 ## Share a minimal support report
 
 ```sh
-node shell.mjs support report --json
+node bin/app support report --json
 ```
 
 The versioned report includes framework distribution/version, selected Node version, actual Node/platform/architecture, dependency presence, design freshness, outstanding acceptance count and a finite set of diagnostic codes. Native and release readiness are explicitly not inferred.
@@ -17,11 +19,11 @@ Ordinary `doctor`, `compiler inspect --stage ir`, recovery exports, generated pr
 ## Measure actual model operations
 
 ```sh
-node shell.mjs project measure --input project.json --samples 10 --dry-run --json
-node shell.mjs project measure --input project.json --samples 10 --json
+node bin/app project measure --input project.json --samples 10 --dry-run --json
+node bin/app project measure --input project.json --samples 10 --json
 ```
 
-Input may be `-` for bounded UTF-8 JSON on stdin. Three to thirty measured samples are supported. Each of four operations records one cold sample, three warmups and every measured sample: import/validation/migration, JSON export, hierarchy projection and an arrangement proposal. Samples use `performance.now`; median/p95 are nearest-rank observations and no slow result is discarded. The collector yields between samples so cancellation can stop the sequence. A failed warmup, invalid clock, missing/nonfinite sample or cancelled run cannot become passing evidence.
+Input may be `-` for bounded UTF-8 JSON on stdin. Three to thirty measured samples are supported. Each of four operations records one cold sample, three warmups and every measured sample: import/validation (`import-validate`), JSON export, hierarchy projection and an arrangement proposal. Samples use `performance.now`; median/p95 are nearest-rank observations and no slow result is discarded. The collector yields between samples so cancellation can stop the sequence. A failed warmup, invalid clock, missing/nonfinite sample or cancelled run cannot become passing evidence.
 
 The result binds the exact input bytes by SHA-256 and includes counts and environment metadata, but not project content. **This input fingerprint is intentionally absent from the support report.** Heap observations are not isolated, forced-GC measurements or leak proof. The command excludes disk I/O timing, UI interaction/rendering, native lifecycle, dependency installation and generated builds. Budgets remain `not-established` until separately agreed; a completed measurement is not qualification.
 
@@ -38,4 +40,4 @@ Use both representative complex projects and bounded size fixtures. A sixty-surf
 | Uncertain durable write | Preserve the current evidence and resolve ownership/storage before reload or another write. Do not retry blindly. |
 | Unsupported/future/corrupt data | Keep the original file and recovery copy. A support failure must not reset it. |
 
-See the [threat model](../security/COMPANION-THREAT-MODEL.md), [authoring guide](AUTHORING-EXPERIENCE.md) and [execution record](../testing/PR5-IMPROVEMENT-EXECUTION.md).
+See the [threat model](../security/COMPANION-THREAT-MODEL.md), [authoring guide](AUTHORING-EXPERIENCE.md) and [execution record](../_archive/testing/PR5-IMPROVEMENT-EXECUTION.md).

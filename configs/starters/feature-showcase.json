@@ -45,7 +45,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -85,7 +85,7 @@
       "project": {
         "id": "feature-showcase",
         "name": "Workbench Feature Showcase",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Interactive UI capability examples with deterministic fixtures. Native authoring parity is reported separately."
       },
@@ -134,6 +134,12 @@
             "command": false,
             "ribbon": false,
             "entry": false,
+            "acceptance": {
+              "states": ["default", "loading", "empty", "error", "disabled"],
+              "keyboardPath": ["vn-36", "vn-39", "vn-42", "vn-45", "vn-54", "vn-69"],
+              "minWidth": 360,
+              "notes": "Tab order follows the visual order of the controls; every control keeps a visible focus ring."
+            },
             "instance": "reuse",
             "patterns": [],
             "goal": "Form controls",
@@ -218,6 +224,12 @@
             "command": false,
             "ribbon": false,
             "entry": false,
+            "acceptance": {
+              "states": ["default"],
+              "keyboardPath": ["Open Example dialog", "Close Example dialog", "Open Example drawer", "Close Example drawer"],
+              "focusReturn": true,
+              "themes": ["light", "dark"]
+            },
             "instance": "reuse",
             "patterns": [],
             "goal": "Dialogs and drawers",
@@ -5119,7 +5131,8 @@
     "build-preview"
   ],
   "nextSteps": [
-    "npm run verify:project",
+    "npm ci",
+    "npm run check",
     "npm run build:clickdummy",
     "npm run dev:preview"
   ]

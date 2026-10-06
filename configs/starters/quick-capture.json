@@ -42,7 +42,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -77,12 +77,12 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "quick-capture-plugin",
+        "id": "quick-capture",
         "name": "Quick Capture",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Collect ideas through a focused capture dialog and a reviewable inbox."
       },
@@ -91,7 +91,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Adapt for notes, bookmarks, meeting intake or a personal inbox.",
         "platform": "desktop",
@@ -3191,7 +3191,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

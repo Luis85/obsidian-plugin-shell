@@ -1,5 +1,7 @@
 # Native file extensions and file context menus
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 ## Choose a starter
 
 `custom-file-view` creates a plugin for a dedicated text/JSON file format. Its default is `.folio`. The generated plugin registers a `TextFileView`, a **Create Folio document** command, folder **Create** actions, and matching-file **Open** actions. Files open through the normal Obsidian file explorer. The starter editor is a raw-text baseline with validation, not a finished domain-specific visual editor.
@@ -7,9 +9,9 @@
 `context-menu` adds **Inspect file details** to matching files. Its default filter is `.md`. The generated handler receives an immutable-shaped plain file snapshot and returns a title/message. The host adapter renders that result as literal text in a native dialog; it does not modify the file or replace Markdown's view.
 
 ```sh
-node shell.mjs new --list
-node shell.mjs new ../folio-tools --starter custom-file-view --extension folio --yes
-node shell.mjs new ../file-tools --starter context-menu --extensions md,txt --yes
+node bin/app new --list
+node bin/app new ../folio-tools --starter custom-file-view --extension folio --yes
+node bin/app new ../file-tools --starter context-menu --extensions md,txt --yes
 ```
 
 Without `--yes`, inspect the dry-run/review first. Interactive `new` asks for the native suffix or filters when omitted. The companion starter dialog offers the same choices. The full project JSON retains declarations through export/import, blueprint transfer, replacement, undo and redo. Its browser preview does not claim to register an Obsidian file type.
@@ -19,10 +21,10 @@ Without `--yes`, inspect the dry-run/review first. Interactive `new` asks for th
 Create a feature owner once, then add one or both recipes:
 
 ```sh
-node shell.mjs make feature documents --yes
-node shell.mjs make file-extension board --feature documents --extension board --format json --dry-run
-node shell.mjs make file-extension board --feature documents --extension board --format json --yes
-node shell.mjs make context-menu inspect --feature documents --extensions md,board --yes
+node bin/app make feature documents --yes
+node bin/app make file-extension board --feature documents --extension board --format json --dry-run
+node bin/app make file-extension board --feature documents --extension board --format json --yes
+node bin/app make context-menu inspect --feature documents --extensions md,board --yes
 ```
 
 Use `--format text` for plain text with an empty initial file. JSON starts with a valid versioned object. Edit `src/features/documents/board.file-extension.ts` or `inspect.context-menu.ts` to define your format, domain validation, and behavior. Matching generated unit tests live in `tests/runtime/generated`. Makers update the explicit arrays in `src/bootstrap/native-integrations.ts`; they do not patch `main.ts` or register arbitrary strings as executable code.
@@ -31,7 +33,7 @@ Makers reuse the existing file planner and AST-aware registration editor. Duplic
 
 ## Portable JSON contract
 
-The optional `design.nativeIntegrations` namespace is additive to companion project schema v5; it has its own `schemaVersion: 1`:
+The optional `design.nativeIntegrations` namespace is part of companion project schema 6; it has its own `schemaVersion: 1`:
 
 ```json
 {

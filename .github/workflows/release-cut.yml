@@ -1,0 +1,82 @@
+name: Release cut
+# Owner-dispatched: creates release/X.Y.Z from main, runs release:prepare (version
+# bump and changelog promotion), commits, pushes, opens the draft release pull
+# request and dispatches the Release workflow on the new branch.
+# Privileged by a scoped, reviewed allowance (scripts/quality/workflow-policy.mjs):
+# manual dispatch only, read-only top level, and the one write job waits for the
+# reviewers of the protected "release" environment.
+# Tokens: pushes and pull requests made with GITHUB_TOKEN start no workflows, so
+# the cut dispatches release.yml itself (actions: write). The optional
+# RELEASE_TOKEN secret (a fine-grained PAT or GitHub App token with contents,
+# pull requests and actions write on this repository) makes the push and the
+# release pull request start the normal push and pull-request workflows too;
+# without it, release.yml reports "Dev checks" and "CI result" on the release
+# head itself. GITHUB_TOKEN is the fallback.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable version X.Y.Z to cut from main
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-cut
+  cancel-in-progress: false
+jobs:
+  cut:
+    name: Cut release branch
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: release
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require a stable version and a dispatch from main
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::version must be X.Y.Z"; exit 1; fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then echo "::error::Dispatch Release cut from main, not $GITHUB_REF"; exit 1; fi
+      # Write-scoped job: never restore a cache that another run could have saved.
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+          npm-cache: 'false'
+      # The checkout keeps no credentials. cut.mjs fetches, inspects and pushes origin;
+      # gh's credential helper supplies GH_TOKEN for this job only (private repositories).
+      - name: Configure the commit identity and token-backed git transport
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          gh auth setup-git
+      - name: Cut the release branch, open the draft release pull request and dispatch Release
+        run: |
+          mkdir -p reports/release-cut
+          set -o pipefail
+          node scripts/release/cut.mjs --version "$VERSION" --execute --remote 2>&1 | tee reports/release-cut/cut.log
+      - name: Summarize the cut
+        if: always()
+        run: |
+          {
+            echo "## Release cut $VERSION"
+            echo "Source: $GITHUB_SHA on $GITHUB_REF_NAME. Next: wait for Release result on release/$VERSION, then dispatch Publish."
+            if [ -f reports/release-cut/cut.log ]; then echo '```'; tail -n 40 reports/release-cut/cut.log; echo '```'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain the cut log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-cut-${{ inputs.version }}-${{ github.run_attempt }}
+          path: reports/release-cut/
+          retention-days: 30
+          if-no-files-found: warn

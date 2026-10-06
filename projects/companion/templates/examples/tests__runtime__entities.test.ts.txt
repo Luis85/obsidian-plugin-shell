@@ -1,0 +1,97 @@
+import { describe, it, expect } from 'vitest';
+import { parse } from 'yaml';
+import { defineEntity, fields } from '../../src/domain/entity';
+import { taskEntity } from '../fixtures/tasks/entity';
+import { parseTask } from '../fixtures/tasks/form';
+import { projectEntity } from '../fixtures/projects/entity';
+import { defineDocument, heading, validateDocumentCatalog } from '../../src/application/document-definition';
+import { taskDocument } from '../fixtures/tasks/definition';
+import { projectDocument } from '../fixtures/projects/definition';
+import { markdownCodec, renderMarkdown } from '../../src/infrastructure/markdown';
+import { unwrap } from './repository-helpers';
+
+describe('Registered entity definitions', () => {
+  it('[ENT-03-01] derives typed defaults while preserving false, zero and optional absence', () => {
+    expect(unwrap(projectEntity.parse({ name: '  Project  ' }))).toEqual({ name: 'Project', budget: 0, archived: false });
+    expect(unwrap(taskEntity.parse({ title: 'Task' }))).toEqual({ title: 'Task', status: 'todo', tags: [] });
+    expect(unwrap(projectEntity.parse({ name: 'Project', budget: 0, archived: false }))).toEqual({ name: 'Project', budget: 0, archived: false });
+    const entity = defineEntity('text', 1, { value: fields.defaulted(fields.text(), 'default') });
+    expect(unwrap(entity.parse({ value: '' }))).toEqual({ value: '' });
+  });
+  it('[ENT-03-02] rejects unknown, managed, prototype, null and unsupported values', () => {
+    for (const value of [null, [], new Date(), { title: 'Task', id: 'override' }, { title: 'Task', status: 'other' }, { title: 'Task', tags: 'text' }, { title: 'Task', due: null }, { title: 'Task', due: '2026-02-29' }, { title: 'Task', tags: [null] }]) expect(taskEntity.decode(value).ok).toBe(false);
+    for (const budget of [NaN, Infinity, -1, '0']) expect(projectEntity.decode({ name: 'Project', budget }).ok).toBe(false);
+    expect(taskEntity.decode({ title: 'Task', due: '2028-02-29' }).ok).toBe(true);
+    expect(taskEntity.decode({ title: 'Task', tags: ['bad tag'] }).ok).toBe(false);
+    expect(projectEntity.decode({ name: 'Project', archived: 'false' }).ok).toBe(false);
+  });
+  it('[ENT-03-03] definitions and defaults cannot be changed after registration', () => {
+    const choices = ['one', 'two']; const options = { min: 1, max: 10 };
+    const field = fields.text(options);
+    const entity = defineEntity('sample', 1, { title: field, choice: fields.enum(choices) });
+    choices.push('three'); options.min = 100;
+    expect(entity.parse({ title: 'Title', choice: 'one' }).ok).toBe(true);
+    expect(entity.parse({ title: 'Title', choice: 'three' }).ok).toBe(false);
+    expect(Object.isFrozen(entity.fields.title)).toBe(true);
+    expect(() => fields.defaulted(fields.number({ min: 0 }), -1)).toThrow('Invalid entity default');
+  });
+  it('[ENT-03-04] rejects invalid definitions and protected/duplicate mappings', () => {
+    expect(() => defineEntity('invalid key', 1, { title: fields.text() })).toThrow();
+    expect(() => defineEntity('sample', 0, { title: fields.text() })).toThrow();
+    expect(() => defineEntity('sample', 1, { id: fields.text() })).toThrow();
+    expect(() => defineEntity('sample', 1, {})).toThrow();
+    for (const property of ['id', '__proto__', 'constructor', '<<', 'schema_version']) expect(() => defineDocument(projectEntity, { mappings: [{ field: 'name', property }], title: value => value.name, body: () => '' })).toThrow();
+    expect(() => defineDocument(projectEntity, { mappings: [{ field: 'name', property: 'name' }, { field: 'name', property: 'name' }], title: value => value.name, body: () => '' })).toThrow();
+  });
+  it('[ENT-03-05] examples share typed recipes and explicit safe projection', () => {
+    const project = unwrap(projectDocument.project({ name: '<b>*Project*</b>', budget: 0 }));
+    expect(project.properties).toEqual({ name: '<b>*Project*</b>', budget: 0, archived: false });
+    expect(project.body).toBe('# &lt;b&gt;\\*Project\\*&lt;/b&gt;\n\n## Notes\n\n');
+    expect(heading('line\nbreak # [link](url) `code` &')).toBe('line break \\# \\[link\\]\\(url\\) \\`code\\` &amp;');
+    expect(taskDocument.decode({ title: 'Task', tags: [], status: 'todo', unrelated: true }).ok).toBe(true);
+    expect(taskDocument.decode({ title: 'Task', tags: [] }).ok).toBe(false);
+  });
+  it('[ENT-03-06] registration rejects duplicate recipes and conflicting property meanings', () => {
+    expect(() => validateDocumentCatalog([taskDocument, projectDocument])).not.toThrow();
+    expect(() => validateDocumentCatalog([taskDocument, taskDocument])).toThrow('Duplicate document registration');
+    const other = defineEntity('other', 1, { title: fields.boolean() });
+    const document = defineDocument(other, { mappings: [{ field: 'title', property: 'title' }], title: () => 'Other', body: () => '' });
+    expect(() => validateDocumentCatalog([taskDocument, document])).toThrow('Conflicting property types');
+    expect(() => validateDocumentCatalog([{ entity: { key: 'bad', fields: {} }, mappings: [{ field: 'missing', property: 'missing' }] }])).toThrow();
+  });
+  it('[ENT-03-07] form-only comma-separated conversion remains separate from strict entities', () => {
+    expect(Reflect.apply(parseTask, undefined, [null]).ok).toBe(false);
+    expect(parseTask({ title: 'Task', due: '', tags: 'x'.repeat(301) }).ok).toBe(false);
+    expect(Reflect.apply(parseTask, undefined, [{ title: 'Task', due: null, tags: '' }]).ok).toBe(false);
+    expect(Reflect.apply(parseTask, undefined, [{ title: 'Task', due: '', tags: [], other: true }]).ok).toBe(false);
+    expect(Reflect.apply(parseTask, undefined, [{ title: 'Task', due: '', tags: [] }]).ok).toBe(false);
+    expect(unwrap(parseTask({ title: 'Task', due: '', tags: 'one, one, two' })).tags).toEqual(['one', 'two']);
+  });
+});
+
+describe('Safe Markdown codec', () => {
+  it('[YAML-03-01] round trips ambiguous scalars and preserves exact body bytes during patch', () => {
+    const body = '\r\n# Manually edited\r\n\r\n---\r\nbody: yes\r\n';
+    const original = '---\r\ntype: task\r\nid: old-001\r\nschema_version: 1\r\ntitle: Old\r\nstatus: todo\r\ntags: []\r\ncustom: # retain comment\r\n  nested: true\r\n---\r\n' + body;
+    const changed = unwrap(markdownCodec.patch(original, { title: 'false: # [x]', status: 'done', tags: ['work'] }, ['title', 'status', 'tags', 'due']));
+    const decoded = unwrap(markdownCodec.read(changed));
+    expect(decoded?.body).toBe(body);
+    expect(decoded?.properties).toMatchObject({ id: 'old-001', custom: { nested: true }, title: 'false: # [x]', status: 'done' });
+    expect(changed).toContain('# retain comment');
+    const scalars = { title: '001', label: 'false', link: '[[note]]', unicode: '日本語', hash: '# hi', delimiter: '---', backslash: '\\', finite: 0, flag: false };
+    expect(unwrap(markdownCodec.read(renderMarkdown(scalars, '')))?.properties).toEqual(scalars);
+    expect(parse(/^---\n([\s\S]*?)\n---\n/.exec(renderMarkdown(scalars, ''))?.[1] ?? '')).toEqual(scalars);
+  });
+  it('[YAML-03-02] rejects corrupt, duplicate, aliased, custom-tag and dangerous frontmatter', () => {
+    for (const yaml of ['title: a\ntitle: b', 'x: &x [one]\ny: *x', 'x: !custom value', '__proto__: value', 'constructor: value', '<<: value', '[not, a, map]', 'x: [unterminated']) expect(markdownCodec.read(`---\n${yaml}\n---\nbody`).ok, yaml).toBe(false);
+    expect(markdownCodec.read('---\nunclosed').ok).toBe(false);
+    expect(markdownCodec.read('x'.repeat(1_000_001)).ok).toBe(false);
+    expect(unwrap(markdownCodec.read('# Ordinary note'))).toBeUndefined();
+    expect(markdownCodec.patch('# Ordinary note', {}, []).ok).toBe(false);
+  });
+  it('[YAML-03-03] removes an absent mapped optional field without touching unrelated content', () => {
+    const original = renderMarkdown({ type: 'task', due: '2026-09-30', unknown: 'retain' }, '# Body\n');
+    const changed = unwrap(markdownCodec.patch(original, {}, ['due']));
+    expect(unwrap(markdownCodec.read(changed))).toEqual({ properties: { type: 'task', unknown: 'retain' }, body: '\n# Body\n' });
+  });
+});

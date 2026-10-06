@@ -1,11 +1,13 @@
 # Guided setup and maker tooling
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 > **Contract:** Retained complete PRD 0.4 target. Current implementation includes reviewed
 > [identity setup/resume](SETUP-IDENTITY.md) and the integrated
 > [maker catalog](AUTHORING-TOOLS.md). Recipe details and bounds in that current guide
 > supersede historical pending descriptions; examples below are not blanket executable claims.
 > **Requirements:** TOOL-01–06, SETUP-01–12, MAKE-01–12, extended by DOC-19 for entities.  
-> **Related:** [PRD](../product/PRD.md), [entity documents](ENTITY-DOCUMENTS.md), [DocumentCreationService](../architecture/DOCUMENT-CREATION.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
+> **Related:** [PRD](../product/PRD.md), [entity documents](ENTITY-DOCUMENTS.md), [DocumentCreationService](../architecture/DOCUMENT-CREATION.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
 
 ## 1. Fresh-checkout setup
 
@@ -75,11 +77,9 @@ scripts/
   setup/
     bootstrap/                 # Node built-ins/checked-in helpers only
     steps/
-  make/
-    registry.mjs
-    makers/                    # includes entity.mjs
-    templates/                 # local versioned source templates
-    custom/
+  makers/
+    entities.mjs               # entity catalog check entry
+    custom/                    # trusted local recipes and their registry
   shared/
     file-plan.mjs
     process-runner.mjs
@@ -93,6 +93,8 @@ scripts/
   quality/                     # includes entity/catalog checks
   release/
   maintenance/
+bin/
+  adapters/makers/             # maker engine, recipes and templates (strict TypeScript), recipes.json catalog data
 tests/tooling/
 ```
 
@@ -160,7 +162,7 @@ Missing owners/events/entities fail with an actionable prerequisite. Composite m
 
 **MAKE-07:** Stage complete plans, recheck hashes, restore only owned unchanged writes. Preserve concurrent edits, report incomplete rollback/staged files, lock shared registrations. Multi-file operations are not filesystem-wide atomic transactions.
 
-**MAKE-08:** Small typed/JSDoc custom-maker contract: metadata/options, read-only context, declarative file/edit plan. Explicit local custom registry; runner owns prompts/I/O/format/report/checks. No remote templates, arbitrary JSON hooks, or dependency installation during a maker run. Trusted local maker code is not sandboxed.
+**MAKE-08:** Small typed/JSDoc custom-maker contract: metadata/options, read-only context, declarative file/edit plan. The runner injects the context and the shared primitives, so generated recipes and their checks import no framework internals and probe no layout. Explicit local custom registry; runner owns prompts/I/O/format/report/checks. No remote templates, arbitrary JSON hooks, or dependency installation during a maker run. Trusted local maker code is not sandboxed.
 
 **MAKE-09:** --no-interaction/--yes/--dry-run/--json and specific help. Report maker/template version, paths/preconditions/written/skipped/conflicts and checks actually run. Missing input fails; npm run --silent keeps machine output clean.
 

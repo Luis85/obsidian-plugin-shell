@@ -4,7 +4,7 @@ Brainstorm is available in the Projects TUI and through the same validated shell
 
 ## TUI workflow
 
-Open a saved project with `node shell.mjs` and choose **Brainstorm**, or start directly with `node shell.mjs brainstorm`. Full-screen and accessible plain terminals share the same validation. Unsaved edits must be reviewed and saved before the feature workflow starts.
+Open a saved project with `node bin/app` and choose **Brainstorm**, or start directly with `node bin/app brainstorm`. Full-screen and accessible plain terminals share the same validation. Unsaved edits must be reviewed and saved before the feature workflow starts.
 
 The wizard asks for the feature's name and purpose, actors, entities, screens and dialogs, the purpose of each screen, navigation, planned action outcomes, and acceptance criteria. The first screen becomes a native feature view. Other pages belong to it; dialogs remain overlays. Navigation produces canonical sitemap links. **Planned actions are descriptive only:** no arbitrary callbacks or commands are executed.
 
@@ -14,12 +14,12 @@ Choose a definition-only package, an offline prototype, or application/plugin bo
 
 Agents use these same entry points, without parsing terminal text:
 
-    node shell.mjs brainstorm guide --json
-    node shell.mjs brainstorm schema --json
-    node shell.mjs brainstorm context --json
-    node shell.mjs brainstorm validate --input feature.json --json
-    node shell.mjs brainstorm feature --input feature.json --out brainstorms/example --json
-    node shell.mjs brainstorm feature --input feature.json --out brainstorms/example --apply <fresh-planHash> --json
+    node bin/app brainstorm guide --json
+    node bin/app brainstorm schema --json
+    node bin/app brainstorm context --json
+    node bin/app brainstorm validate --input feature.json --json
+    node bin/app brainstorm feature --input feature.json --out brainstorms/example --json
+    node bin/app brainstorm feature --input feature.json --out brainstorms/example --apply <fresh-planHash> --json
 
 Use the current `projectId` and exact `baseSha256` supplied by `brainstorm context` to reject stale agent drafts. Requests are strict, versioned, inert JSON. `--input -` accepts JSON on stdin. Feature ownership is additive; modifying existing features requires a separate improvement concept.
 
@@ -29,8 +29,8 @@ Optional generated source comes from PR5's existing compiler. It currently emits
 
 If the request selects tests or build, inspect a separate process plan:
 
-    node shell.mjs brainstorm verify --out brainstorms/example --json
-    node shell.mjs brainstorm verify --out brainstorms/example --apply <fresh-verificationPlanHash> --json
+    node bin/app brainstorm verify --out brainstorms/example --json
+    node bin/app brainstorm verify --out brainstorms/example --apply <fresh-verificationPlanHash> --json
 
 This execution may download dependencies and run npm lifecycle, test and build scripts under the current user's permissions. Generated source and local caches are not rolled back after execution errors. No process begins during discovery, validation, file planning or initial generation approval; no path authorizes publishing or plugin activation.
 

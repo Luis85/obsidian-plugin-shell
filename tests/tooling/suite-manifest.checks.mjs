@@ -16,10 +16,11 @@ function run(cwd, args, env = {}) {
   assert.ifError(result.error);
   return result;
 }
-const suite = (name, include, extra = {}) => ({ name, purpose: `${name} purpose`, runner: { type: 'node-test' }, include, verify: 'tooling', ...extra });
+const suite = (name, include, extra = {}) => ({ name, purpose: `${name} purpose`, level: 'unit', runner: { type: 'node-test' }, include, verify: 'tooling', ...extra });
 function manifest(overrides = {}) {
   return {
     schemaVersion: 1,
+    testLevels: [{ name: 'unit', summary: 'in-process' }, { name: 'integration', summary: 'processes' }, { name: 'e2e', summary: 'browser' }],
     roots: [{ path: 'tests/tooling' }, { path: 'tests/concepts', optional: true }],
     helperRoots: ['tests/support'],
     prerequisites: { secret: { env: 'SUITE_FIXTURE_UNSET_VARIABLE', hint: 'Set the fixture variable.' } },
@@ -74,15 +75,28 @@ test('manifest names permit one namespace but reject malformed or ambiguous name
   }
 });
 
+test('node-test suites declare an optional file concurrency that suites and verify use', async t => {
+  const parallel = suite('alpha', ['tests/tooling/alpha-*.checks.mjs'], { npmScript: 'test:alpha', runner: { type: 'node-test', concurrency: 4 } });
+  const data = manifest({ suites: [parallel, suite('beta', ['tests/tooling/beta-*.checks.mjs'])] });
+  const root = await fixture(t, {}, data);
+  assert.deepEqual((await toolingGroups(root)).map(group => [group.name, group.concurrency]), [['alpha', 4], ['beta', 1]]);
+  const report = JSON.parse(run(root, ['alpha', 'beta', '--dry-run', '--json']).stdout);
+  assert.deepEqual(report.outcomes.map(item => item.commands[0][2]), ['--test-concurrency=4', '--test-concurrency=1']);
+  for (const concurrency of [0, 9, 2.5, '4']) {
+    assert.throws(() => validateManifest(manifest({ suites: [suite('alpha', [], { runner: { type: 'node-test', concurrency } })] })), /runner\.concurrency/, String(concurrency));
+  }
+  assert.throws(() => validateManifest(manifest({ suites: [suite('alpha', [], { verify: 'opt-in', runner: { type: 'vitest', config: 'x', concurrency: 2 } })] })), /runner\.concurrency/);
+});
+
 test('namespaced tooling suites retain exact inventory ownership and execute through the public CLI', async t => {
   const path = 'tests/tooling/compiler-properties.checks.mjs';
   const data = manifest({ suites: [...manifest().suites, suite('compiler:properties', [path])] });
   const root = await fixture(t, { [path]: passing }, data);
   const groups = await toolingGroups(root);
   assert.deepEqual(groups, [
-    { name: 'alpha', files: ['tests/tooling/alpha-one.checks.mjs'] },
-    { name: 'beta', files: ['tests/tooling/beta-one.checks.mjs'] },
-    { name: 'compiler:properties', files: [path] },
+    { name: 'alpha', files: ['tests/tooling/alpha-one.checks.mjs'], concurrency: 1 },
+    { name: 'beta', files: ['tests/tooling/beta-one.checks.mjs'], concurrency: 1 },
+    { name: 'compiler:properties', files: [path], concurrency: 1 },
   ]);
   const result = run(root, ['compiler:properties', '--json']);
   assert.equal(result.status, 0, result.stdout + result.stderr);
@@ -106,13 +120,13 @@ test('--list --json reports each suite with its runner, verify mode, prerequisit
   const listing = JSON.parse(result.stdout);
   assert.equal(listing.schemaVersion, 1);
   assert.deepEqual(listing.helpers, ['tests/tooling/shared-fixture.mjs']);
-  assert.deepEqual(listing.suites.map(item => Object.keys(item).sort()), Array(2).fill(['fileCount', 'files', 'name', 'npmScript', 'optional', 'prerequisites', 'purpose', 'runner', 'verify', 'workflows']));
-  assert.deepEqual(listing.suites[0], { name: 'alpha', purpose: 'alpha purpose', runner: 'node-test', verify: 'tooling', prerequisites: [], npmScript: 'test:alpha',
+  assert.deepEqual(listing.suites.map(item => Object.keys(item).sort()), Array(2).fill(['fileCount', 'fileLevels', 'files', 'level', 'name', 'npmScript', 'optional', 'prerequisites', 'purpose', 'runner', 'verify', 'workflows']));
+  assert.deepEqual(listing.suites[0], { name: 'alpha', purpose: 'alpha purpose', level: 'unit', fileLevels: { 'tests/tooling/alpha-one.checks.mjs': 'unit' }, runner: 'node-test', verify: 'tooling', prerequisites: [], npmScript: 'test:alpha',
     workflows: [], optional: false, fileCount: 1, files: ['tests/tooling/alpha-one.checks.mjs'] });
   const table = run(root, ['--list']);
   assert.equal(table.status, 0, table.stderr);
-  assert.match(table.stdout, /^suite\s+files\s+runner\s+verify\s+prerequisites\s+command$/m);
-  assert.match(table.stdout, /^alpha\s+1\s+node-test\s+tooling\s+-\s+npm run test:alpha$/m);
+  assert.match(table.stdout, /^suite\s+level\s+files\s+runner\s+verify\s+prerequisites\s+command$/m);
+  assert.match(table.stdout, /^alpha\s+unit\s+1\s+node-test\s+tooling\s+-\s+npm run test:alpha$/m);
 });
 
 test('an unclassified test file fails closed and names the manifest to edit', async t => {
@@ -152,6 +166,24 @@ test('empty suites, missing required roots and tooling outside verify fail; opti
   assert.match(result.stderr, /TOOLING_NOT_IN_VERIFY: tests\/tooling\/beta-one\.checks\.mjs runs in evidence tooling/);
 });
 
+test('a tooling file outside the tooling step is accounted for only by a real verify step that runs its Vitest config', async t => {
+  const vitestBeta = extra => manifest({ suites: [manifest().suites[0], suite('beta', ['tests/tooling/beta-*.checks.mjs'],
+    { verify: 'own-step', runner: { type: 'vitest', config: 'configs/testing/vitest.maker.config.mjs' }, ...extra })] });
+  assert.equal(run(await fixture(t, {}, vitestBeta({ verifyStepId: 'maker-coverage-run' })), ['--check']).status, 0);
+  const nowhere = run(await fixture(t, {}, vitestBeta({})), ['--check']);
+  assert.equal(nowhere.status, 1);
+  assert.match(nowhere.stderr, /TOOLING_NOT_IN_VERIFY: tests\/tooling\/beta-one\.checks\.mjs runs in evidence tooling but belongs to no verify "tooling" suite and no suite whose "verifyStepId"/);
+  const unknown = run(await fixture(t, {}, vitestBeta({ verifyStepId: 'no-such-step' })), ['--check']);
+  assert.equal(unknown.status, 1);
+  assert.match(unknown.stderr, /SUITE_VERIFY_STEP_UNKNOWN: suite "beta" names verify step "no-such-step"/);
+  assert.match(unknown.stderr, /TOOLING_NOT_IN_VERIFY: tests\/tooling\/beta-one\.checks\.mjs/);
+  const other = run(await fixture(t, {}, vitestBeta({ verifyStepId: 'production-coverage-run' })), ['--check']);
+  assert.equal(other.status, 1);
+  assert.match(other.stderr, /SUITE_VERIFY_STEP_MISMATCH: verify step "production-coverage-run" is not `vitest run --config configs\/testing\/vitest\.maker\.config\.mjs`/);
+  assert.throws(() => validateManifest(manifest({ suites: [suite('alpha', ['a'], { verify: 'own-step', verifyStepId: 'maker-coverage-run' })] })), /alpha\.verifyStepId .* vitest runner/);
+  assert.throws(() => validateManifest(vitestBeta({ verify: 'opt-in', verifyStepId: 'maker-coverage-run' })), /beta\.verifyStepId/);
+});
+
 test('npm scripts must exist and run the suite they are declared for', async t => {
   const wrong = JSON.stringify({ type: 'module', scripts: { 'test:alpha': 'node scripts/testing/suites.mjs beta' } });
   assert.match(run(await fixture(t, { 'package.json': wrong }), ['--check']).stderr, /SUITE_SCRIPT_MISMATCH: package.json "test:alpha" does not run suite "alpha"/);
@@ -159,8 +191,23 @@ test('npm scripts must exist and run the suite they are declared for', async t =
   assert.match(run(await fixture(t, { 'package.json': absent }), ['--check']).stderr, /SUITE_SCRIPT_MISSING: package.json has no "test:alpha" script/);
 });
 
+test('every suite needs a row in the declared suite guide, which must exist', async t => {
+  assert.throws(() => validateManifest(manifest({ documentation: '' })), /documentation must be/);
+  const documented = manifest({ documentation: 'docs/SUITES.md' });
+  const table = rows => `| Suite | Purpose |\n| --- | --- |\n${rows.map(name => `| \`${name}\` | text |`).join('\n')}\n`;
+  const partial = run(await fixture(t, { 'docs/SUITES.md': `${table(['alpha'])}\nProse naming \`beta\` is not a row.\n` }, documented), ['--check']);
+  assert.equal(partial.status, 1);
+  assert.match(partial.stderr, /SUITE_UNDOCUMENTED: suite "beta" has no `beta` row in docs\/SUITES\.md/);
+  assert.doesNotMatch(partial.stderr, /suite "alpha"/);
+  const missing = run(await fixture(t, {}, documented), ['--check']);
+  assert.equal(missing.status, 1);
+  assert.match(missing.stderr, /SUITE_DOCUMENTATION_MISSING: tests\/suites\.json names docs\/SUITES\.md, which cannot be read \(ENOENT\)/);
+  const complete = run(await fixture(t, { 'docs/SUITES.md': table(['alpha', 'beta']) }, documented), ['--check']);
+  assert.equal(complete.status, 0, complete.stdout + complete.stderr);
+});
+
 test('runner-declared inventories must equal the suite files in both directions', async t => {
-  const browser = { name: 'browser', purpose: 'browser', runner: { type: 'command', commands: [['{python}', 'runner.py']] }, include: ['tests/concepts/*.browser.py'],
+  const browser = { name: 'browser', purpose: 'browser', level: 'e2e', runner: { type: 'command', commands: [['{python}', 'runner.py']] }, include: ['tests/concepts/*.browser.py'],
     inventory: { source: 'runner.py', pattern: "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json'\\)", file: 'tests/concepts/companion-$1.browser.py' }, verify: 'opt-in', optional: true };
   const data = manifest({ suites: [...manifest().suites, browser] });
   const root = await fixture(t, { 'runner.py': "SUITES = [('declared', 'declared/checks.json')]\n", 'tests/concepts/companion-extra.browser.py': '' }, data);
@@ -215,9 +262,13 @@ test('suites really execute: failures propagate and missing prerequisites or man
   assert.match(manual.stderr, /manual suite without an automated runner; follow README\.md/);
 });
 
-test('verify tooling groups cover exactly the evidence tooling inventory, each file once', async () => {
+test('verify tooling groups plus the maker suite verify runs in its own step cover exactly the evidence tooling inventory, each file once', async () => {
   const groups = await toolingGroups(process.cwd());
-  const files = groups.flatMap(group => group.files);
+  const listing = JSON.parse(run(process.cwd(), ['--list', '--json']).stdout);
+  const maker = listing.suites.find(entry => entry.name === 'maker');
+  assert.deepEqual([maker.runner, maker.verify], ['vitest', 'own-step']);
+  assert.ok(maker.files.length > 100 && groups.every(group => group.name !== 'maker'));
+  const files = [...groups.flatMap(group => group.files), ...maker.files];
   assert.equal(new Set(files).size, files.length);
   assert.deepEqual([...files].sort(), await suiteInventory(process.cwd(), 'tooling'));
   assert.ok(groups.every(group => group.files.length > 0), JSON.stringify(groups.map(group => group.name)));
@@ -226,7 +277,7 @@ test('verify tooling groups cover exactly the evidence tooling inventory, each f
 test('tooling checks written by the custom-maker and locale recipes are claimed by exactly one verify suite', async () => {
   const { readFile } = await import('node:fs/promises');
   const real = JSON.parse(await readFile(resolve('tests/suites.json'), 'utf8'));
-  // Paths mirror scripts/makers/extra-recipes.mjs, which writes these files into consumer projects.
+  // Paths mirror bin/adapters/makers/extra-recipes.ts, which writes these files into consumer projects.
   for (const path of ['tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']) {
     const owners = real.suites.filter(entry => (entry.include ?? []).some(pattern => globToRegExp(pattern).test(path)));
     assert.deepEqual(owners.map(entry => entry.name), ['makers'], path);

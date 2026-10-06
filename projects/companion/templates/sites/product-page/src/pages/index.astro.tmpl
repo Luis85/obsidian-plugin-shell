@@ -1,0 +1,22 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import CollectionCards from '../components/CollectionCards.astro';
+import project from '../../workbench.project.json';
+
+/** Product page: a hero, the "features" collection as cards and the "faq" collection as a question list. */
+---
+<SiteLayout>
+  <section class="hero" aria-labelledby="hero-title">
+    <h1 id="hero-title">{project.title}</h1>
+    <p>{project.summary}</p>
+    <a class="button" href="#features">See the features</a>
+  </section>
+  <section aria-labelledby="features">
+    <h2 id="features">Features</h2>
+    <CollectionCards name="features" />
+  </section>
+  <section aria-labelledby="faq">
+    <h2 id="faq">Frequently asked questions</h2>
+    <CollectionCards name="faq" layout="list" />
+  </section>
+</SiteLayout>

@@ -18,4 +18,4 @@ Default-on activation would surprise contributors. A committed database would mi
 
 ## Sources and verification
 
-Implementation/research: docs/development/HINDSIGHT.md and HINDSIGHT-GIT-GITHUB.md. Verification evidence and live gaps: docs/development/HINDSIGHT-VERIFICATION.md. The import adapter records the exact Git commit and content SHA-256; this proposed record is not proof that live native-agent acceptance or a merge has happened.
+Implementation/research: docs/development/HINDSIGHT.md and HINDSIGHT-GIT-GITHUB.md. Verification evidence and live gaps (archived): docs/_archive/development/HINDSIGHT-VERIFICATION.md. The import adapter records the exact Git commit and content SHA-256; this proposed record is not proof that live native-agent acceptance or a merge has happened.

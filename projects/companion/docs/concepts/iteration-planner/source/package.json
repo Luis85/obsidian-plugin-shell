@@ -1,0 +1,14 @@
+{
+  "name": "iteration-planner-interaction-concept",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dependency-free TypeScript interaction fallback; not the qualified Vue/Nuxt prototype pipeline.",
+  "engines": { "node": ">=22.16.0" },
+  "scripts": {
+    "prototype:build": "node build.mjs",
+    "prototype:check": "node build.mjs --check",
+    "test": "node --experimental-strip-types --test ../tests/domain.test.mjs",
+    "test:browser": "python ../tests/browser_journeys.py"
+  }
+}

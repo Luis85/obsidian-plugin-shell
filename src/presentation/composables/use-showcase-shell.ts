@@ -10,6 +10,6 @@ export function useShowcaseShell() {
   const failed = ref(false);
   const uiLocale = computed(() => locale.value === 'de' ? de : en);
   onErrorCaptured(() => { failed.value = true; services.diagnostics.report('vue.render', 'view.render'); return false; });
-  const icons = { overview: 'i-lucide-layout-dashboard', documents: 'i-lucide-file-plus-2', events: 'i-lucide-radio', settings: 'i-lucide-sliders-horizontal' };
+  const icons = { overview: 'i-lucide-layout-dashboard', documents: 'i-lucide-file-plus-2', forms: 'i-lucide-scan-text', events: 'i-lucide-radio', settings: 'i-lucide-sliders-horizontal' };
   return { t, locale, services, failed, uiLocale, icons, pages };
 }

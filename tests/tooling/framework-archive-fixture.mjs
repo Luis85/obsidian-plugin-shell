@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { crc32 } from 'node:zlib';
+import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
+import { zip } from '../../bin/adapters/framework/zip.ts';
 /** Independent central-directory reader used only by qualification, not by the ZIP writer. */
 export async function extractArchive(bytes, root) {
   const end = bytes.length - 22;
@@ -32,4 +34,23 @@ export async function extractArchive(bytes, root) {
     cursor += 46 + nameLength + bytes.readUInt16LE(cursor + 30) + bytes.readUInt16LE(cursor + 32);
   }
   assert.equal(cursor, indexEnd); return files;
+}
+
+const assembled = new Map(), archives = new Map();
+/** A failed build is not cached: the next caller assembles again, as before sharing. */
+function once(cache, key, make) {
+  if (!cache.has(key)) cache.set(key, make().catch(error => { cache.delete(key); throw error; }));
+  return cache.get(key);
+}
+/**
+ * The actual framework kit's files, assembled once per test process and framework root. Every caller receives its
+ * own array, records and byte buffers, so no test can observe another test's edits to them.
+ */
+export async function kitFiles(frameworkRoot) {
+  const files = await once(assembled, frameworkRoot, async () => assembleKit({ root: frameworkRoot, frameworkRoot }, await installedCompiler()));
+  return files.map(file => ({ path: file.path, bytes: Buffer.from(file.bytes) }));
+}
+/** Extract the actual framework kit, assembled once per test process; in-place generation requires a verified kit. */
+export async function extractKit(frameworkRoot, root) {
+  return extractArchive(await once(archives, frameworkRoot, async () => zip(await kitFiles(frameworkRoot))), root);
 }

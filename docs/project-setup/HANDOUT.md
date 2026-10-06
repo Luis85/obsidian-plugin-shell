@@ -1,5 +1,7 @@
 # Project setup handout
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Workbench’s root [PROJECT-SETUP-HANDOUT.md](../../PROJECT-SETUP-HANDOUT.md) turns an existing set of PRDs and a product-trio discussion into a reviewed brief for the first bespoke prototype. It is not a PRD replacement, a second application model, or an executable process manifest.
 
 ## What the meeting produces
@@ -22,42 +24,42 @@ These commands are included in this contribution. Use a checkout or compiled kit
 
 ```sh
 # Discover the actual installed command set first.
-node shell.mjs capabilities --json
+node bin/app capabilities --json
 
 # Create-only preview. Existing handouts are preserved.
-node shell.mjs handout generate --dry-run --json
+node bin/app handout generate --dry-run --json
 
 # Retain a reviewed file plan, inspect it, then explicitly apply it.
-node shell.mjs handout generate --plan-out handout.plan.json --json
-node shell.mjs plan inspect handout.plan.json --json
-node shell.mjs plan apply handout.plan.json --yes --json
+node bin/app handout generate --plan-out handout.plan.json --json
+node bin/app plan inspect handout.plan.json --json
+node bin/app plan apply handout.plan.json --yes --json
 
 # Read-only readiness and structured answer export.
-node shell.mjs handout validate --json
-node shell.mjs handout inspect --json
+node bin/app handout validate --json
+node bin/app handout inspect --json
 
 # After PRDs or settings change: preserve answers/notes, reset review marks.
-node shell.mjs handout refresh --plan-out handout-refresh.plan.json --json
-node shell.mjs plan inspect handout-refresh.plan.json --json
-node shell.mjs plan apply handout-refresh.plan.json --yes --json
+node bin/app handout refresh --plan-out handout-refresh.plan.json --json
+node bin/app plan inspect handout-refresh.plan.json --json
+node bin/app plan apply handout-refresh.plan.json --yes --json
 ```
 
 `handout generate` and `handout refresh` use the existing framework file-plan/hash/apply machinery. They never execute project processes. A stale plan must be reviewed again; `--yes` does not carry execution approval. `handout validate` and `handout inspect` are read-only; incomplete, malformed or stale documents return `blocked` and a nonzero CLI exit code. `inspect` includes the parsed answers; `validate` omits those potentially sensitive meeting answers and returns counts and diagnostics. Neither response grants execution permission: `executionAuthorized` remains `false`.
 
 Refresh updates only the generated source-snapshot comment and the actual review checkboxes, preserving answers and free-form notes. If source fingerprints are unchanged, refresh is a byte-for-byte no-op. A changed snapshot resets all review marks rather than guessing which decisions remain valid. Retained answers must be checked against changed inputs. Damaged/unsupported forms are preserved and must be repaired or explicitly migrated; refresh does not silently replace them.
 
-## Standalone source entry
+## Project-root selection
 
-The bundled source entry works without installing third-party packages. It supports dependency-free preparation without loading the broader framework adapter.
+Use the same canonical CLI entry to operate on an explicit project directory. Source checkouts use the repository’s locked toolchain; extracted framework kits run the bundled CLI.
 
 ```sh
-node --experimental-strip-types scripts/handout.mjs generate --root /path/to/project --dry-run --json
-node --experimental-strip-types scripts/handout.mjs generate --root /path/to/project --write --json
-node --experimental-strip-types scripts/handout.mjs validate --root /path/to/project --json
-node --experimental-strip-types scripts/handout.mjs inspect --root /path/to/project --json
+node bin/app handout generate --root /path/to/project --dry-run --json
+node bin/app handout generate --root /path/to/project --yes --json
+node bin/app handout validate --root /path/to/project --json
+node bin/app handout inspect --root /path/to/project --json
 ```
 
-The standalone entry supports only create-only generation, validation and inspection. `--write` explicitly authorizes exclusive creation of the one root Markdown file; it cannot replace an existing file. Refresh deliberately requires the integrated reviewed-plan route. Use Node with type-stripping support (the source entry was tested with Node 22.16.0); the existing compiled-kit pipeline remains the intended release mechanism.
+All four handout commands use this entry. `--yes` applies the freshly rebuilt generation plan, which preserves an existing handout. Use `handout refresh` to review source-snapshot changes without replacing authored answers. The retired `scripts/handout.mjs` entry is no longer available.
 
 ## Input paths and settings compatibility
 
@@ -87,4 +89,4 @@ npm run typecheck:framework
 npm run test:framework-cli
 ```
 
-The implementation bundle records executed local evidence separately in `HANDOUT-VERIFICATION.md`. The focused source tests and isolated typecheck do not substitute for the full framework suite, compiled developer-kit packaging, CI on the exact applied commit, or native acceptance. Both test files use the existing framework-*.checks.mjs naming convention and are selected by the CLI suite in tests/suites.json. The five framework-integration tests still require execution in a complete checkout; discovery is not a passing test result.
+The implementation bundle records executed local evidence separately in `HANDOUT-VERIFICATION.md`. The focused source tests and isolated typecheck do not substitute for the full framework suite, compiled framework kit packaging, CI on the exact applied commit, or native acceptance. Both test files use the existing framework-*.checks.mjs naming convention and are selected by the CLI suite in tests/suites.json. The five framework-integration tests still require execution in a complete checkout; discovery is not a passing test result.

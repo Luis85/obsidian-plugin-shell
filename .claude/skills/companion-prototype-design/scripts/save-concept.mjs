@@ -20,9 +20,8 @@ export async function saveConcept(repo, directory, slug, { execute = false, appl
   if (apply !== undefined && (!execute || !/^[a-f0-9]{64}$/.test(apply))) throw new Error('PROTOTYPE_APPROVAL: --execute and a SHA-256 --apply hash are required');
   const api = await framework(repo), root = noLinks(directory);
   api.requireThat(!signal?.aborted, 'CANCELLED', 'Concept save cancelled before planning.');
-  // A source checkout contains the shared writer; a release uses its compiled MJS copy.
-  const moduleRoot = api.distribution === 'compiled-kit' ? path.join(api.root, '.framework/compiled') : api.root;
-  const { createFilePlan, applyFilePlan } = await import(pathToFileURL(noLinks(path.join(moduleRoot, 'scripts/shared/file-plan.mjs'))).href);
+  // A source checkout contains the shared writer; an extracted kit ships it under bin/template.
+  const { createFilePlan, applyFilePlan } = await import(pathToFileURL(noLinks(path.join(api.moduleRoot, 'scripts/shared/file-plan.ts'))).href);
   const inventory = packageInventory(root);
   if (inventory.slug !== slug) throw new Error('PROTOTYPE_SLUG: requested folder and package identity differ');
   const destination = `docs/concepts/${slug}`;

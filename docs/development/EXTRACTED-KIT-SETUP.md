@@ -1,21 +1,23 @@
-# Setup inside an extracted developer kit
+# Setup inside an extracted framework kit
+
+> Type: how-to guide · Part of the [docs index](../README.md)
 
 Use the qualified Node/npm versions declared by the repository and exact kit. This guide describes a locally packed/extracted kit; it is not a claim that a public release already exists.
 
-Run `node shell.mjs setup` in the extracted folder. A TTY offers the verified starter catalog or JSON import, identity review and a file-plan confirmation. The kit is already in this folder, so setup reuses its existing configuration/import transaction rather than calling `new` into an occupied directory. Source generation, dependency installation, project verification and clickdummy build have separate prompts and outcomes. A decline stops the sequence while keeping completed steps. GitHub is optional and existing remotes are preserved; connecting a repository is currently a separate deliberate Git operation, not a hidden setup side effect.
+Run `node bin/app setup` in the extracted folder. A TTY offers the verified starter catalog or JSON import, identity review and a file-plan confirmation. The kit is already in this folder, so setup reuses its existing configuration/import transaction rather than calling `new` into an occupied directory. Source generation, dependency installation, project verification and clickdummy build have separate prompts and outcomes. A decline stops the sequence while keeping completed steps. GitHub is optional and existing remotes are preserved; connecting a repository is currently a separate deliberate Git operation, not a hidden setup side effect.
 
 Headless examples:
 
 ```sh
-node shell.mjs setup --starter quick-capture --id capture --name Capture --author "Example" --json
-node shell.mjs setup --input project.json --json
+node bin/app setup --starter quick-capture --id capture --name Capture --author "Example" --json
+node bin/app setup --input project.json --json
 # Review; repeat the same request with --apply <planHash>.
-node shell.mjs generate --json
+node bin/app generate --json
 # Review; repeat with --apply <planHash>.
-node shell.mjs setup status --json
-node shell.mjs setup resume --stage install --dry-run --json
+node bin/app setup status --json
+node bin/app setup resume --stage install --dry-run --json
 # After reviewing the current resumeHash, explicitly run just one stage:
-node shell.mjs setup resume --stage install --resume-hash <resumeHash> --yes
+node bin/app setup resume --stage install --resume-hash <resumeHash> --yes
 ```
 
 `--starter`, `--input` and `--blank` are mutually exclusive. Native starter options (`--extension` / `--extensions`) are available only with a starter. Imported identity is preserved by default; invalid/incomplete identity is rejected, not replaced with a convenient generated ID. Sources and test paths keep their existing conflict, ownership and migration protections.
@@ -45,5 +47,5 @@ Build output, reports and installed dependencies are deliberately outside this
 source fingerprint: installing dependencies or writing evidence must not make
 its own input stale. This is bounded local input tracking, not whole-repository
 attestation, installed-package integrity or authenticated acceptance evidence.
-Read the [custom-folder recovery record](../testing/SETUP-CUSTOM-ROOTS.md) for the
+Read the [custom-folder recovery record](../_archive/testing/SETUP-CUSTOM-ROOTS.md) for the
 reproduced defect and exact verification scope.

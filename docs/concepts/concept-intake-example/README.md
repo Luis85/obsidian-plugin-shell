@@ -7,26 +7,26 @@ They are an example, not completed note-capture business behavior.
 From a fresh **extracted shell-cli kit**, retain these files under this directory:
 
 ```sh
-node shell.mjs setup --input docs/concepts/concept-intake-example/project.json --yes
-node shell.mjs concept inspect --input docs/concepts/concept-intake-example/feature.json
-node shell.mjs concept import --input docs/concepts/concept-intake-example/feature.json --plan-out feature.plan.json
-node shell.mjs plan inspect feature.plan.json
-node shell.mjs plan apply feature.plan.json --yes
-node shell.mjs generate --plan-out generation.plan.json
-node shell.mjs plan apply generation.plan.json --yes
+node bin/app setup --input docs/concepts/concept-intake-example/project.json --yes
+node bin/app concept inspect --input docs/concepts/concept-intake-example/feature.json
+node bin/app concept import --input docs/concepts/concept-intake-example/feature.json --plan-out feature.plan.json
+node bin/app plan inspect feature.plan.json
+node bin/app plan apply feature.plan.json --yes
+node bin/app generate --plan-out generation.plan.json
+node bin/app plan apply generation.plan.json --yes
 ```
 
 The generated `Capture` surface has authored text and a declared navigation link.
 Generation does not install dependencies or execute providers. After explicit locked
-installation, the existing `node shell.mjs clickdummy build` command builds the preview.
+installation, the existing `node bin/app clickdummy build` command builds the preview.
 
 To update that page, without changing its stable identity:
 
 ```sh
-node shell.mjs concept import --input docs/concepts/concept-intake-example/improvement.json --plan-out improvement.plan.json
-node shell.mjs plan apply improvement.plan.json --yes
-node shell.mjs generate --plan-out regeneration.plan.json
-node shell.mjs plan apply regeneration.plan.json --yes
+node bin/app concept import --input docs/concepts/concept-intake-example/improvement.json --plan-out improvement.plan.json
+node bin/app plan apply improvement.plan.json --yes
+node bin/app generate --plan-out regeneration.plan.json
+node bin/app plan apply regeneration.plan.json --yes
 ```
 
 The example's base hashes match the exact canonical snapshots in this sequence.

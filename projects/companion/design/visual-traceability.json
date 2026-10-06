@@ -1,0 +1,4097 @@
+{
+  "definitions": [
+    {
+      "id": "vp-115",
+      "kind": "page",
+      "ownerId": "node-50",
+      "component": "src/generated/presentation/components/details/vp-115.vue"
+    },
+    {
+      "id": "vp-122",
+      "kind": "page",
+      "ownerId": "node-29",
+      "component": "src/generated/presentation/components/details/vp-122.vue"
+    },
+    {
+      "id": "vp-531",
+      "kind": "page",
+      "ownerId": "node-3",
+      "component": "src/generated/presentation/components/details/vp-531.vue"
+    },
+    {
+      "id": "vp-553",
+      "kind": "page",
+      "ownerId": "node-5",
+      "component": "src/generated/presentation/components/details/vp-553.vue"
+    },
+    {
+      "id": "vp-587",
+      "kind": "page",
+      "ownerId": "node-7",
+      "component": "src/generated/presentation/components/details/vp-587.vue"
+    },
+    {
+      "id": "vp-604",
+      "kind": "page",
+      "ownerId": "node-9",
+      "component": "src/generated/presentation/components/details/vp-604.vue"
+    },
+    {
+      "id": "vp-621",
+      "kind": "page",
+      "ownerId": "node-11",
+      "component": "src/generated/presentation/components/details/vp-621.vue"
+    },
+    {
+      "id": "vp-637",
+      "kind": "page",
+      "ownerId": "node-13",
+      "component": "src/generated/presentation/components/details/vp-637.vue"
+    },
+    {
+      "id": "vp-653",
+      "kind": "page",
+      "ownerId": "node-15",
+      "component": "src/generated/presentation/components/details/vp-653.vue"
+    },
+    {
+      "id": "vp-670",
+      "kind": "page",
+      "ownerId": "node-17",
+      "component": "src/generated/presentation/components/details/vp-670.vue"
+    },
+    {
+      "id": "vp-686",
+      "kind": "page",
+      "ownerId": "node-19",
+      "component": "src/generated/presentation/components/details/vp-686.vue"
+    },
+    {
+      "id": "vp-702",
+      "kind": "page",
+      "ownerId": "node-21",
+      "component": "src/generated/presentation/components/details/vp-702.vue"
+    },
+    {
+      "id": "vp-719",
+      "kind": "page",
+      "ownerId": "node-23",
+      "component": "src/generated/presentation/components/details/vp-719.vue"
+    },
+    {
+      "id": "vp-736",
+      "kind": "page",
+      "ownerId": "node-25",
+      "component": "src/generated/presentation/components/details/vp-736.vue"
+    },
+    {
+      "id": "vp-753",
+      "kind": "page",
+      "ownerId": "node-27",
+      "component": "src/generated/presentation/components/details/vp-753.vue"
+    },
+    {
+      "id": "vp-770",
+      "kind": "page",
+      "ownerId": "node-31",
+      "component": "src/generated/presentation/components/details/vp-770.vue"
+    },
+    {
+      "id": "vp-792",
+      "kind": "page",
+      "ownerId": "node-33",
+      "component": "src/generated/presentation/components/details/vp-792.vue"
+    },
+    {
+      "id": "vp-814",
+      "kind": "page",
+      "ownerId": "node-35",
+      "component": "src/generated/presentation/components/details/vp-814.vue"
+    },
+    {
+      "id": "vp-831",
+      "kind": "page",
+      "ownerId": "node-37",
+      "component": "src/generated/presentation/components/details/vp-831.vue"
+    },
+    {
+      "id": "vp-848",
+      "kind": "page",
+      "ownerId": "node-39",
+      "component": "src/generated/presentation/components/details/vp-848.vue"
+    },
+    {
+      "id": "vp-870",
+      "kind": "page",
+      "ownerId": "node-41",
+      "component": "src/generated/presentation/components/details/vp-870.vue"
+    },
+    {
+      "id": "vp-887",
+      "kind": "page",
+      "ownerId": "node-43",
+      "component": "src/generated/presentation/components/details/vp-887.vue"
+    },
+    {
+      "id": "vp-904",
+      "kind": "page",
+      "ownerId": "node-45",
+      "component": "src/generated/presentation/components/details/vp-904.vue"
+    },
+    {
+      "id": "vp-921",
+      "kind": "page",
+      "ownerId": "node-47",
+      "component": "src/generated/presentation/components/details/vp-921.vue"
+    },
+    {
+      "id": "vp-938",
+      "kind": "page",
+      "ownerId": "node-49",
+      "component": "src/generated/presentation/components/details/vp-938.vue"
+    },
+    {
+      "id": "vp-955",
+      "kind": "page",
+      "ownerId": "node-52",
+      "component": "src/generated/presentation/components/details/vp-955.vue"
+    },
+    {
+      "id": "vp-977",
+      "kind": "page",
+      "ownerId": "node-54",
+      "component": "src/generated/presentation/components/details/vp-977.vue"
+    },
+    {
+      "id": "vc-55",
+      "kind": "component",
+      "libraryId": "record-card",
+      "component": "src/generated/presentation/components/library/record-card.vue"
+    },
+    {
+      "id": "vc-56",
+      "kind": "component",
+      "libraryId": "capture-form",
+      "component": "src/generated/presentation/components/library/capture-form.vue"
+    },
+    {
+      "id": "vc-57",
+      "kind": "component",
+      "libraryId": "empty-state",
+      "component": "src/generated/presentation/components/library/empty-state.vue"
+    },
+    {
+      "id": "vc-58",
+      "kind": "component",
+      "libraryId": "filter-toolbar",
+      "component": "src/generated/presentation/components/library/filter-toolbar.vue"
+    },
+    {
+      "id": "vc-59",
+      "kind": "component",
+      "libraryId": "status-notice",
+      "component": "src/generated/presentation/components/library/status-notice.vue"
+    },
+    {
+      "id": "vc-60",
+      "kind": "component",
+      "libraryId": "property-editor",
+      "component": "src/generated/presentation/components/library/property-editor.vue"
+    },
+    {
+      "id": "vc-61",
+      "kind": "component",
+      "libraryId": "content-heading",
+      "component": "src/generated/presentation/components/library/content-heading.vue"
+    },
+    {
+      "id": "vc-62",
+      "kind": "component",
+      "libraryId": "content-text",
+      "component": "src/generated/presentation/components/library/content-text.vue"
+    },
+    {
+      "id": "vc-63",
+      "kind": "component",
+      "libraryId": "content-navigation",
+      "component": "src/generated/presentation/components/library/content-navigation.vue"
+    },
+    {
+      "id": "vc-64",
+      "kind": "component",
+      "libraryId": "content-toolbar",
+      "component": "src/generated/presentation/components/library/content-toolbar.vue"
+    },
+    {
+      "id": "vc-65",
+      "kind": "component",
+      "libraryId": "content-list",
+      "component": "src/generated/presentation/components/library/content-list.vue"
+    },
+    {
+      "id": "vc-66",
+      "kind": "component",
+      "libraryId": "content-table",
+      "component": "src/generated/presentation/components/library/content-table.vue"
+    },
+    {
+      "id": "vc-67",
+      "kind": "component",
+      "libraryId": "content-board",
+      "component": "src/generated/presentation/components/library/content-board.vue"
+    },
+    {
+      "id": "vc-68",
+      "kind": "component",
+      "libraryId": "content-detail",
+      "component": "src/generated/presentation/components/library/content-detail.vue"
+    },
+    {
+      "id": "vc-69",
+      "kind": "component",
+      "libraryId": "content-form",
+      "component": "src/generated/presentation/components/library/content-form.vue"
+    },
+    {
+      "id": "vc-70",
+      "kind": "component",
+      "libraryId": "content-chart",
+      "component": "src/generated/presentation/components/library/content-chart.vue"
+    },
+    {
+      "id": "vc-71",
+      "kind": "component",
+      "libraryId": "content-media",
+      "component": "src/generated/presentation/components/library/content-media.vue"
+    },
+    {
+      "id": "vc-72",
+      "kind": "component",
+      "libraryId": "content-actions",
+      "component": "src/generated/presentation/components/library/content-actions.vue"
+    },
+    {
+      "id": "vc-73",
+      "kind": "component",
+      "libraryId": "content-empty",
+      "component": "src/generated/presentation/components/library/content-empty.vue"
+    },
+    {
+      "id": "vc-74",
+      "kind": "component",
+      "libraryId": "content-notice",
+      "component": "src/generated/presentation/components/library/content-notice.vue"
+    },
+    {
+      "id": "vc-75",
+      "kind": "component",
+      "libraryId": "pattern-site-header",
+      "component": "src/generated/presentation/components/library/pattern-site-header.vue"
+    },
+    {
+      "id": "vc-76",
+      "kind": "component",
+      "libraryId": "pattern-hero",
+      "component": "src/generated/presentation/components/library/pattern-hero.vue"
+    },
+    {
+      "id": "vc-77",
+      "kind": "component",
+      "libraryId": "pattern-feature-grid",
+      "component": "src/generated/presentation/components/library/pattern-feature-grid.vue"
+    },
+    {
+      "id": "vc-78",
+      "kind": "component",
+      "libraryId": "pattern-pricing",
+      "component": "src/generated/presentation/components/library/pattern-pricing.vue"
+    },
+    {
+      "id": "vc-79",
+      "kind": "component",
+      "libraryId": "pattern-testimonials",
+      "component": "src/generated/presentation/components/library/pattern-testimonials.vue"
+    },
+    {
+      "id": "vc-80",
+      "kind": "component",
+      "libraryId": "pattern-faq",
+      "component": "src/generated/presentation/components/library/pattern-faq.vue"
+    },
+    {
+      "id": "vc-81",
+      "kind": "component",
+      "libraryId": "pattern-site-footer",
+      "component": "src/generated/presentation/components/library/pattern-site-footer.vue"
+    },
+    {
+      "id": "vc-82",
+      "kind": "component",
+      "libraryId": "pattern-image-gallery",
+      "component": "src/generated/presentation/components/library/pattern-image-gallery.vue"
+    },
+    {
+      "id": "vc-83",
+      "kind": "component",
+      "libraryId": "pattern-contact",
+      "component": "src/generated/presentation/components/library/pattern-contact.vue"
+    },
+    {
+      "id": "vc-84",
+      "kind": "component",
+      "libraryId": "pattern-newsletter",
+      "component": "src/generated/presentation/components/library/pattern-newsletter.vue"
+    },
+    {
+      "id": "vc-85",
+      "kind": "component",
+      "libraryId": "pattern-article",
+      "component": "src/generated/presentation/components/library/pattern-article.vue"
+    },
+    {
+      "id": "vc-86",
+      "kind": "component",
+      "libraryId": "pattern-breadcrumbs",
+      "component": "src/generated/presentation/components/library/pattern-breadcrumbs.vue"
+    },
+    {
+      "id": "vc-87",
+      "kind": "component",
+      "libraryId": "pattern-app-sidebar",
+      "component": "src/generated/presentation/components/library/pattern-app-sidebar.vue"
+    },
+    {
+      "id": "vc-88",
+      "kind": "component",
+      "libraryId": "pattern-tab-strip",
+      "component": "src/generated/presentation/components/library/pattern-tab-strip.vue"
+    },
+    {
+      "id": "vc-89",
+      "kind": "component",
+      "libraryId": "pattern-metric-summary",
+      "component": "src/generated/presentation/components/library/pattern-metric-summary.vue"
+    },
+    {
+      "id": "vc-90",
+      "kind": "component",
+      "libraryId": "pattern-activity-timeline",
+      "component": "src/generated/presentation/components/library/pattern-activity-timeline.vue"
+    },
+    {
+      "id": "vc-91",
+      "kind": "component",
+      "libraryId": "pattern-calendar",
+      "component": "src/generated/presentation/components/library/pattern-calendar.vue"
+    },
+    {
+      "id": "vc-92",
+      "kind": "component",
+      "libraryId": "pattern-file-upload",
+      "component": "src/generated/presentation/components/library/pattern-file-upload.vue"
+    },
+    {
+      "id": "vc-93",
+      "kind": "component",
+      "libraryId": "pattern-profile",
+      "component": "src/generated/presentation/components/library/pattern-profile.vue"
+    },
+    {
+      "id": "vc-94",
+      "kind": "component",
+      "libraryId": "pattern-code-editor",
+      "component": "src/generated/presentation/components/library/pattern-code-editor.vue"
+    },
+    {
+      "id": "vc-95",
+      "kind": "component",
+      "libraryId": "pattern-conversation",
+      "component": "src/generated/presentation/components/library/pattern-conversation.vue"
+    },
+    {
+      "id": "vc-96",
+      "kind": "component",
+      "libraryId": "pattern-progress",
+      "component": "src/generated/presentation/components/library/pattern-progress.vue"
+    },
+    {
+      "id": "vc-97",
+      "kind": "component",
+      "libraryId": "pattern-command-search",
+      "component": "src/generated/presentation/components/library/pattern-command-search.vue"
+    },
+    {
+      "id": "vc-98",
+      "kind": "component",
+      "libraryId": "pattern-permissions",
+      "component": "src/generated/presentation/components/library/pattern-permissions.vue"
+    },
+    {
+      "id": "vc-99",
+      "kind": "component",
+      "libraryId": "workflow-rail",
+      "component": "src/generated/presentation/components/library/workflow-rail.vue"
+    },
+    {
+      "id": "vc-100",
+      "kind": "component",
+      "libraryId": "review-findings",
+      "component": "src/generated/presentation/components/library/review-findings.vue"
+    },
+    {
+      "id": "vc-101",
+      "kind": "component",
+      "libraryId": "requirements-panel",
+      "component": "src/generated/presentation/components/library/requirements-panel.vue"
+    },
+    {
+      "id": "vc-102",
+      "kind": "component",
+      "libraryId": "diagram-inspector",
+      "component": "src/generated/presentation/components/library/diagram-inspector.vue"
+    },
+    {
+      "id": "vc-103",
+      "kind": "component",
+      "libraryId": "source-operation-editor",
+      "component": "src/generated/presentation/components/library/source-operation-editor.vue"
+    },
+    {
+      "id": "vc-104",
+      "kind": "component",
+      "libraryId": "test-operation-panel",
+      "component": "src/generated/presentation/components/library/test-operation-panel.vue"
+    },
+    {
+      "id": "vc-105",
+      "kind": "component",
+      "libraryId": "design-token-editor",
+      "component": "src/generated/presentation/components/library/design-token-editor.vue"
+    },
+    {
+      "id": "vc-106",
+      "kind": "component",
+      "libraryId": "component-contract-panel",
+      "component": "src/generated/presentation/components/library/component-contract-panel.vue"
+    },
+    {
+      "id": "vc-107",
+      "kind": "component",
+      "libraryId": "project-json-review",
+      "component": "src/generated/presentation/components/library/project-json-review.vue"
+    },
+    {
+      "id": "vc-108",
+      "kind": "component",
+      "libraryId": "shell-handoff-panel",
+      "component": "src/generated/presentation/components/library/shell-handoff-panel.vue"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "node-1",
+      "kind": "view",
+      "label": "Workbench",
+      "definitionIds": [],
+      "acceptance": null,
+      "testIds": [],
+      "evidence": []
+    },
+    {
+      "id": "node-3",
+      "kind": "page",
+      "label": "Project overview",
+      "definitionIds": [
+        "vp-531"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-65] Choose a project starter",
+        "vitest:tests/project/navigation.test.ts#[edge-68] Define the outcome",
+        "vitest:tests/project/navigation.test.ts#[edge-75] Import a project",
+        "vitest:tests/project/navigation.test.ts#[edge-76] Export the full project",
+        "vitest:visual-definitions:vp-531 Project overview > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-531 Project overview > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-531 Project overview > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-531 Project overview > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-531 Project overview > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-3:light",
+        "ui-quality:node-3:dark",
+        "journey:journey-design/step-1",
+        "journey:journey-starter/step-1"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-5",
+      "kind": "page",
+      "label": "Project Starters",
+      "definitionIds": [
+        "vp-553"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-65] Choose a project starter",
+        "vitest:tests/project/navigation.test.ts#[edge-66] Review configured starter",
+        "vitest:tests/project/navigation.test.ts#[edge-67] Generate the confirmed project",
+        "vitest:visual-definitions:vp-553 Project Starters > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-553 Project Starters > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-553 Project Starters > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-553 Project Starters > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-553 Project Starters > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-5:light",
+        "ui-quality:node-5:dark",
+        "journey:journey-starter/step-2"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-7",
+      "kind": "page",
+      "label": "Product requirements",
+      "definitionIds": [
+        "vp-587"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-56] Browse linked storymaps",
+        "vitest:tests/project/navigation.test.ts#[edge-58] Open linked map",
+        "vitest:tests/project/navigation.test.ts#[edge-68] Define the outcome",
+        "vitest:tests/project/navigation.test.ts#[edge-69] Shape the experience",
+        "vitest:visual-definitions:vp-587 Product requirements > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-587 Product requirements > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-587 Product requirements > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-587 Product requirements > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-587 Product requirements > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-7:light",
+        "ui-quality:node-7:dark",
+        "journey:journey-design/step-2"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-9",
+      "kind": "page",
+      "label": "Storymaps overview",
+      "definitionIds": [
+        "vp-604"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-56] Browse linked storymaps",
+        "vitest:tests/project/navigation.test.ts#[edge-57] Open a storymap",
+        "vitest:visual-definitions:vp-604 Storymaps overview > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-604 Storymaps overview > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-604 Storymaps overview > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-604 Storymaps overview > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-604 Storymaps overview > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-9:light",
+        "ui-quality:node-9:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-11",
+      "kind": "page",
+      "label": "Storymap editor",
+      "definitionIds": [
+        "vp-621"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-57] Open a storymap",
+        "vitest:tests/project/navigation.test.ts#[edge-58] Open linked map",
+        "vitest:tests/project/navigation.test.ts#[edge-59] Locate a linked surface",
+        "vitest:tests/project/navigation.test.ts#[edge-61] Design linked page",
+        "vitest:visual-definitions:vp-621 Storymap editor > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-621 Storymap editor > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-621 Storymap editor > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-621 Storymap editor > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-621 Storymap editor > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-11:light",
+        "ui-quality:node-11:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-13",
+      "kind": "page",
+      "label": "Sitemap & views",
+      "definitionIds": [
+        "vp-637"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-59] Locate a linked surface",
+        "vitest:tests/project/navigation.test.ts#[edge-60] Design surface details",
+        "vitest:tests/project/navigation.test.ts#[edge-69] Shape the experience",
+        "vitest:tests/project/navigation.test.ts#[edge-70] Describe meaning",
+        "vitest:tests/project/navigation.test.ts#[edge-73] Place a component",
+        "vitest:visual-definitions:vp-637 Sitemap & views > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-637 Sitemap & views > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-637 Sitemap & views > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-637 Sitemap & views > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-637 Sitemap & views > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-13:light",
+        "ui-quality:node-13:dark",
+        "journey:journey-design/step-3"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-15",
+      "kind": "page",
+      "label": "Pages overview",
+      "definitionIds": [
+        "vp-653"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-62] Open page design",
+        "vitest:visual-definitions:vp-653 Pages overview > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-653 Pages overview > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-653 Pages overview > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-653 Pages overview > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-653 Pages overview > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-15:light",
+        "ui-quality:node-15:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-17",
+      "kind": "page",
+      "label": "Page editor",
+      "definitionIds": [
+        "vp-670"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-60] Design surface details",
+        "vitest:tests/project/navigation.test.ts#[edge-61] Design linked page",
+        "vitest:tests/project/navigation.test.ts#[edge-62] Open page design",
+        "vitest:tests/project/navigation.test.ts#[edge-64] Edit instance definition",
+        "vitest:visual-definitions:vp-670 Page editor > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-670 Page editor > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-670 Page editor > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-670 Page editor > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-670 Page editor > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-17:light",
+        "ui-quality:node-17:dark",
+        "journey:journey-design/step-4"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-19",
+      "kind": "page",
+      "label": "Component editor",
+      "definitionIds": [
+        "vp-686"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-63] Design reusable internals",
+        "vitest:tests/project/navigation.test.ts#[edge-64] Edit instance definition",
+        "vitest:visual-definitions:vp-686 Component editor > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-686 Component editor > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-686 Component editor > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-686 Component editor > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-686 Component editor > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-19:light",
+        "ui-quality:node-19:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-21",
+      "kind": "page",
+      "label": "Entity relationships",
+      "definitionIds": [
+        "vp-702"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-70] Describe meaning",
+        "vitest:tests/project/navigation.test.ts#[edge-71] Bind a source contract",
+        "vitest:visual-definitions:vp-702 Entity relationships > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-702 Entity relationships > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-702 Entity relationships > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-702 Entity relationships > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-702 Entity relationships > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-21:light",
+        "ui-quality:node-21:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-23",
+      "kind": "page",
+      "label": "Data Sources",
+      "definitionIds": [
+        "vp-719"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-71] Bind a source contract",
+        "vitest:tests/project/navigation.test.ts#[edge-72] Try a source operation",
+        "vitest:visual-definitions:vp-719 Data Sources > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-719 Data Sources > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-719 Data Sources > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-719 Data Sources > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-719 Data Sources > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-23:light",
+        "ui-quality:node-23:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-25",
+      "kind": "page",
+      "label": "Test Data",
+      "definitionIds": [
+        "vp-736"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-72] Try a source operation",
+        "vitest:visual-definitions:vp-736 Test Data > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-736 Test Data > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-736 Test Data > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-736 Test Data > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-736 Test Data > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-25:light",
+        "ui-quality:node-25:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-27",
+      "kind": "page",
+      "label": "Design System",
+      "definitionIds": [
+        "vp-753"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-74] Review component guidance",
+        "vitest:visual-definitions:vp-753 Design System > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-753 Design System > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-753 Design System > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-753 Design System > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-753 Design System > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-27:light",
+        "ui-quality:node-27:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-29",
+      "kind": "page",
+      "label": "Component library",
+      "definitionIds": [
+        "vp-122"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-63] Design reusable internals",
+        "vitest:tests/project/navigation.test.ts#[edge-73] Place a component",
+        "vitest:tests/project/navigation.test.ts#[edge-74] Review component guidance",
+        "vitest:visual-definitions:vp-122 Component library > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-122 Component library > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-122 Component library > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-122 Component library > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-122 Component library > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-29:light",
+        "ui-quality:node-29:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-31",
+      "kind": "page",
+      "label": "Blueprints",
+      "definitionIds": [
+        "vp-770"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:visual-definitions:vp-770 Blueprints > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-770 Blueprints > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-770 Blueprints > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-770 Blueprints > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-770 Blueprints > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-31:light",
+        "ui-quality:node-31:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-33",
+      "kind": "page",
+      "label": "Action patterns",
+      "definitionIds": [
+        "vp-792"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:visual-definitions:vp-792 Action patterns > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-792 Action patterns > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-792 Action patterns > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-792 Action patterns > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-792 Action patterns > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-33:light",
+        "ui-quality:node-33:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-35",
+      "kind": "page",
+      "label": "Prepare project",
+      "definitionIds": [
+        "vp-814"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-77] Review CLI handoff",
+        "vitest:tests/project/navigation.test.ts#[edge-79] Continue after preparation",
+        "vitest:visual-definitions:vp-814 Prepare project > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-814 Prepare project > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-814 Prepare project > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-814 Prepare project > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-814 Prepare project > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-35:light",
+        "ui-quality:node-35:dark",
+        "journey:journey-delivery/step-1"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-37",
+      "kind": "page",
+      "label": "Generate a feature",
+      "definitionIds": [
+        "vp-831"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:visual-definitions:vp-831 Generate a feature > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-831 Generate a feature > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-831 Generate a feature > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-831 Generate a feature > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-831 Generate a feature > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-37:light",
+        "ui-quality:node-37:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-39",
+      "kind": "page",
+      "label": "Development",
+      "definitionIds": [
+        "vp-848"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-79] Continue after preparation",
+        "vitest:tests/project/navigation.test.ts#[edge-80] Inspect current evidence",
+        "vitest:visual-definitions:vp-848 Development > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-848 Development > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-848 Development > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-848 Development > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-848 Development > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-39:light",
+        "ui-quality:node-39:dark",
+        "journey:journey-delivery/step-2"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-41",
+      "kind": "page",
+      "label": "Quality & verification",
+      "definitionIds": [
+        "vp-870"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-80] Inspect current evidence",
+        "vitest:tests/project/navigation.test.ts#[edge-81] Review publication gates",
+        "vitest:visual-definitions:vp-870 Quality & verification > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-870 Quality & verification > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-870 Quality & verification > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-870 Quality & verification > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-870 Quality & verification > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-41:light",
+        "ui-quality:node-41:dark",
+        "journey:journey-delivery/step-3"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-43",
+      "kind": "page",
+      "label": "Shell capabilities",
+      "definitionIds": [
+        "vp-887"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:visual-definitions:vp-887 Shell capabilities > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-887 Shell capabilities > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-887 Shell capabilities > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-887 Shell capabilities > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-887 Shell capabilities > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-43:light",
+        "ui-quality:node-43:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-45",
+      "kind": "page",
+      "label": "Release readiness",
+      "definitionIds": [
+        "vp-904"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-81] Review publication gates",
+        "vitest:visual-definitions:vp-904 Release readiness > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-904 Release readiness > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-904 Release readiness > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-904 Release readiness > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-904 Release readiness > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-45:light",
+        "ui-quality:node-45:dark",
+        "journey:journey-delivery/step-4"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-47",
+      "kind": "page",
+      "label": "Runs & recovery",
+      "definitionIds": [
+        "vp-921"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:visual-definitions:vp-921 Runs & recovery > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-921 Runs & recovery > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-921 Runs & recovery > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-921 Runs & recovery > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-921 Runs & recovery > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-47:light",
+        "ui-quality:node-47:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-49",
+      "kind": "settings",
+      "label": "Workbench preferences",
+      "definitionIds": [
+        "vp-938"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:visual-definitions:vp-938 Workbench preferences > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-938 Workbench preferences > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-938 Workbench preferences > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-938 Workbench preferences > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-938 Workbench preferences > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-49:light",
+        "ui-quality:node-49:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-50",
+      "kind": "modal",
+      "label": "Import project JSON",
+      "definitionIds": [
+        "vp-115"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-66] Review configured starter",
+        "vitest:tests/project/navigation.test.ts#[edge-75] Import a project",
+        "vitest:visual-definitions:vp-115 Import project JSON > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-115 Import project JSON > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-115 Import project JSON > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-115 Import project JSON > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-115 Import project JSON > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-50:light",
+        "ui-quality:node-50:dark",
+        "journey:journey-starter/step-3"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-52",
+      "kind": "modal",
+      "label": "Export project JSON",
+      "definitionIds": [
+        "vp-955"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-76] Export the full project",
+        "vitest:tests/project/navigation.test.ts#[edge-78] Save project JSON",
+        "vitest:visual-definitions:vp-955 Export project JSON > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-955 Export project JSON > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-955 Export project JSON > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-955 Export project JSON > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-955 Export project JSON > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-52:light",
+        "ui-quality:node-52:dark"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "node-54",
+      "kind": "modal",
+      "label": "Shell JSON handoff",
+      "definitionIds": [
+        "vp-977"
+      ],
+      "acceptance": null,
+      "testIds": [
+        "vitest:tests/project/navigation.test.ts#[edge-67] Generate the confirmed project",
+        "vitest:tests/project/navigation.test.ts#[edge-77] Review CLI handoff",
+        "vitest:tests/project/navigation.test.ts#[edge-78] Save project JSON",
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > renders declared default visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > renders declared loading visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > renders declared empty visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > renders declared error visibility including hidden ancestors",
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > renders declared disabled visibility including hidden ancestors",
+        "ui-quality:node-54:light",
+        "ui-quality:node-54:dark"
+      ],
+      "evidence": []
+    }
+  ],
+  "interactions": [
+    {
+      "definitionId": "vp-115",
+      "nodeId": "vn-117",
+      "id": "vi-121",
+      "event": "change",
+      "label": "Review selected file",
+      "notes": "Validate a bounded local JSON document before presenting replacement confirmation.",
+      "acceptance": "Given an existing project\nWhen valid JSON is selected\nThen show a review without replacing current data.",
+      "actions": [],
+      "component": "src/generated/presentation/components/details/vp-115.vue",
+      "implementation": "src/generated/application/interactions/vi-121.ts",
+      "test": "tests/project/acceptance/vi-121.test.ts",
+      "verification": "business-todo",
+      "testIds": [
+        "vitest:tests/project/acceptance/vi-121.test.ts#[vi-121] Review selected file — Given an existing project\nWhen valid JSON is selected\nThen show a review without replacing current data.",
+        "vitest:visual-definitions:vp-115 Import project JSON > [vi-121] dispatches the designed change interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-122",
+      "nodeId": "vn-125",
+      "id": "vi-127",
+      "event": "click",
+      "label": "Open selected component",
+      "notes": "Resolve the selected reusable definition by its stable ID. Do not duplicate it.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-19"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-122.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-122 Component library > [vi-127] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-63] Design reusable internals"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-531",
+      "nodeId": "vn-540",
+      "id": "vi-550",
+      "event": "click",
+      "label": "Open product requirements",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-7"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-531.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-531 Project overview > [vi-550] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-68] Define the outcome"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-531",
+      "nodeId": "vn-541",
+      "id": "vi-551",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-535"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-531.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-531 Project overview > [vi-551] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-531",
+      "nodeId": "vn-543",
+      "id": "vi-552",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-531.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-531 Project overview > [vi-552] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-553",
+      "nodeId": "vn-562",
+      "id": "vi-584",
+      "event": "click",
+      "label": "Review configured starter",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-50"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-553.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-553 Project Starters > [vi-584] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-66] Review configured starter"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-553",
+      "nodeId": "vn-563",
+      "id": "vi-585",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-557"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-553.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-553 Project Starters > [vi-585] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-553",
+      "nodeId": "vn-565",
+      "id": "vi-586",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-553.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-553 Project Starters > [vi-586] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-587",
+      "nodeId": "vn-596",
+      "id": "vi-601",
+      "event": "click",
+      "label": "Open storymaps",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-9"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-587.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-587 Product requirements > [vi-601] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-56] Browse linked storymaps"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-587",
+      "nodeId": "vn-597",
+      "id": "vi-602",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-591"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-587.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-587 Product requirements > [vi-602] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-587",
+      "nodeId": "vn-599",
+      "id": "vi-603",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-587.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-587 Product requirements > [vi-603] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-604",
+      "nodeId": "vn-613",
+      "id": "vi-618",
+      "event": "click",
+      "label": "Open storymap",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-11"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-604.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-604 Storymaps overview > [vi-618] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-57] Open a storymap"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-604",
+      "nodeId": "vn-614",
+      "id": "vi-619",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-608"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-604.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-604 Storymaps overview > [vi-619] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-604",
+      "nodeId": "vn-616",
+      "id": "vi-620",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-604.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-604 Storymaps overview > [vi-620] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-621",
+      "nodeId": "vn-630",
+      "id": "vi-634",
+      "event": "click",
+      "label": "Design linked page",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-17"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-621.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-621 Storymap editor > [vi-634] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-61] Design linked page"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-621",
+      "nodeId": "vn-631",
+      "id": "vi-635",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-625"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-621.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-621 Storymap editor > [vi-635] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-621",
+      "nodeId": "vn-633",
+      "id": "vi-636",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-621.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-621 Storymap editor > [vi-636] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-637",
+      "nodeId": "vn-646",
+      "id": "vi-650",
+      "event": "click",
+      "label": "Open page designs",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-15"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-637.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-637 Sitemap & views > [vi-650] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-637",
+      "nodeId": "vn-647",
+      "id": "vi-651",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-641"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-637.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-637 Sitemap & views > [vi-651] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-637",
+      "nodeId": "vn-649",
+      "id": "vi-652",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-637.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-637 Sitemap & views > [vi-652] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-653",
+      "nodeId": "vn-662",
+      "id": "vi-667",
+      "event": "click",
+      "label": "Open page editor",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-17"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-653.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-653 Pages overview > [vi-667] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-62] Open page design"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-653",
+      "nodeId": "vn-663",
+      "id": "vi-668",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-657"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-653.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-653 Pages overview > [vi-668] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-653",
+      "nodeId": "vn-665",
+      "id": "vi-669",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-653.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-653 Pages overview > [vi-669] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-670",
+      "nodeId": "vn-679",
+      "id": "vi-683",
+      "event": "click",
+      "label": "Open component library",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-29"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-670.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-670 Page editor > [vi-683] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-670",
+      "nodeId": "vn-680",
+      "id": "vi-684",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-674"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-670.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-670 Page editor > [vi-684] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-670",
+      "nodeId": "vn-682",
+      "id": "vi-685",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-670.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-670 Page editor > [vi-685] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-686",
+      "nodeId": "vn-695",
+      "id": "vi-699",
+      "event": "click",
+      "label": "Inspect component contracts",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-29"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-686.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-686 Component editor > [vi-699] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-686",
+      "nodeId": "vn-696",
+      "id": "vi-700",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-690"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-686.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-686 Component editor > [vi-700] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-686",
+      "nodeId": "vn-698",
+      "id": "vi-701",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-686.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-686 Component editor > [vi-701] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-702",
+      "nodeId": "vn-711",
+      "id": "vi-716",
+      "event": "click",
+      "label": "Configure data sources",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-23"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-702.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-702 Entity relationships > [vi-716] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-71] Bind a source contract"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-702",
+      "nodeId": "vn-712",
+      "id": "vi-717",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-706"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-702.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-702 Entity relationships > [vi-717] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-702",
+      "nodeId": "vn-714",
+      "id": "vi-718",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-702.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-702 Entity relationships > [vi-718] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-719",
+      "nodeId": "vn-728",
+      "id": "vi-733",
+      "event": "click",
+      "label": "Prepare test data",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-25"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-719.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-719 Data Sources > [vi-733] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-72] Try a source operation"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-719",
+      "nodeId": "vn-729",
+      "id": "vi-734",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-723"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-719.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-719 Data Sources > [vi-734] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-719",
+      "nodeId": "vn-731",
+      "id": "vi-735",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-719.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-719 Data Sources > [vi-735] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-736",
+      "nodeId": "vn-745",
+      "id": "vi-750",
+      "event": "click",
+      "label": "Review source contracts",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-23"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-736.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-736 Test Data > [vi-750] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-736",
+      "nodeId": "vn-746",
+      "id": "vi-751",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-740"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-736.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-736 Test Data > [vi-751] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-736",
+      "nodeId": "vn-748",
+      "id": "vi-752",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-736.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-736 Test Data > [vi-752] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-753",
+      "nodeId": "vn-762",
+      "id": "vi-767",
+      "event": "click",
+      "label": "Inspect component designs",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-29"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-753.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-753 Design System > [vi-767] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-74] Review component guidance"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-753",
+      "nodeId": "vn-763",
+      "id": "vi-768",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-757"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-753.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-753 Design System > [vi-768] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-753",
+      "nodeId": "vn-765",
+      "id": "vi-769",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-753.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-753 Design System > [vi-769] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-770",
+      "nodeId": "vn-779",
+      "id": "vi-789",
+      "event": "click",
+      "label": "Review sitemap",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-13"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-770.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-770 Blueprints > [vi-789] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-770",
+      "nodeId": "vn-780",
+      "id": "vi-790",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-774"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-770.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-770 Blueprints > [vi-790] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-770",
+      "nodeId": "vn-782",
+      "id": "vi-791",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-770.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-770 Blueprints > [vi-791] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-792",
+      "nodeId": "vn-801",
+      "id": "vi-811",
+      "event": "click",
+      "label": "Inspect sitemap",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-13"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-792.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-792 Action patterns > [vi-811] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-792",
+      "nodeId": "vn-802",
+      "id": "vi-812",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-796"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-792.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-792 Action patterns > [vi-812] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-792",
+      "nodeId": "vn-804",
+      "id": "vi-813",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-792.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-792 Action patterns > [vi-813] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-814",
+      "nodeId": "vn-823",
+      "id": "vi-828",
+      "event": "click",
+      "label": "Open generator",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-37"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-814.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-814 Prepare project > [vi-828] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-814",
+      "nodeId": "vn-824",
+      "id": "vi-829",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-818"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-814.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-814 Prepare project > [vi-829] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-814",
+      "nodeId": "vn-826",
+      "id": "vi-830",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-814.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-814 Prepare project > [vi-830] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-831",
+      "nodeId": "vn-840",
+      "id": "vi-845",
+      "event": "click",
+      "label": "Continue development",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-39"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-831.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-831 Generate a feature > [vi-845] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-831",
+      "nodeId": "vn-841",
+      "id": "vi-846",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-835"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-831.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-831 Generate a feature > [vi-846] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-831",
+      "nodeId": "vn-843",
+      "id": "vi-847",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-831.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-831 Generate a feature > [vi-847] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-848",
+      "nodeId": "vn-857",
+      "id": "vi-867",
+      "event": "click",
+      "label": "Inspect quality",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-41"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-848.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-848 Development > [vi-867] dispatches the designed click interaction",
+        "vitest:tests/project/navigation.test.ts#[edge-80] Inspect current evidence"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-848",
+      "nodeId": "vn-858",
+      "id": "vi-868",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-852"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-848.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-848 Development > [vi-868] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-848",
+      "nodeId": "vn-860",
+      "id": "vi-869",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-848.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-848 Development > [vi-869] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-870",
+      "nodeId": "vn-879",
+      "id": "vi-884",
+      "event": "click",
+      "label": "Review capabilities",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-43"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-870.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-870 Quality & verification > [vi-884] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-870",
+      "nodeId": "vn-880",
+      "id": "vi-885",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-874"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-870.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-870 Quality & verification > [vi-885] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-870",
+      "nodeId": "vn-882",
+      "id": "vi-886",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-870.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-870 Quality & verification > [vi-886] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-887",
+      "nodeId": "vn-896",
+      "id": "vi-901",
+      "event": "click",
+      "label": "Review release readiness",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-45"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-887.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-887 Shell capabilities > [vi-901] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-887",
+      "nodeId": "vn-897",
+      "id": "vi-902",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-891"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-887.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-887 Shell capabilities > [vi-902] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-887",
+      "nodeId": "vn-899",
+      "id": "vi-903",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-887.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-887 Shell capabilities > [vi-903] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-904",
+      "nodeId": "vn-913",
+      "id": "vi-918",
+      "event": "click",
+      "label": "Inspect execution history",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-47"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-904.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-904 Release readiness > [vi-918] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-904",
+      "nodeId": "vn-914",
+      "id": "vi-919",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-908"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-904.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-904 Release readiness > [vi-919] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-904",
+      "nodeId": "vn-916",
+      "id": "vi-920",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-904.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-904 Release readiness > [vi-920] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-921",
+      "nodeId": "vn-930",
+      "id": "vi-935",
+      "event": "click",
+      "label": "Return to overview",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-3"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-921.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-921 Runs & recovery > [vi-935] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-921",
+      "nodeId": "vn-931",
+      "id": "vi-936",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-925"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-921.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-921 Runs & recovery > [vi-936] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-921",
+      "nodeId": "vn-933",
+      "id": "vi-937",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-921.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-921 Runs & recovery > [vi-937] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-938",
+      "nodeId": "vn-948",
+      "id": "vi-952",
+      "event": "click",
+      "label": "Review project preparation",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-35"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-938.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-938 Workbench preferences > [vi-952] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-938",
+      "nodeId": "vn-949",
+      "id": "vi-953",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-942"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-938.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-938 Workbench preferences > [vi-953] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-938",
+      "nodeId": "vn-951",
+      "id": "vi-954",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-938.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-938 Workbench preferences > [vi-954] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-955",
+      "nodeId": "vn-964",
+      "id": "vi-974",
+      "event": "click",
+      "label": "Review project handoff",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-54"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-955.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-955 Export project JSON > [vi-974] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-955",
+      "nodeId": "vn-965",
+      "id": "vi-975",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-959"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-955.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-955 Export project JSON > [vi-975] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-955",
+      "nodeId": "vn-967",
+      "id": "vi-976",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-955.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-955 Export project JSON > [vi-976] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-977",
+      "nodeId": "vn-986",
+      "id": "vi-990",
+      "event": "click",
+      "label": "Open project preparation",
+      "notes": "Open the existing target surface; do not create a copy.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "navigate",
+          "surfaceId": "node-35"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-977.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "navigation",
+      "testIds": [
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > [vi-990] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-977",
+      "nodeId": "vn-987",
+      "id": "vi-991",
+      "event": "click",
+      "label": "Focus the search field",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "focus",
+          "nodeId": "vn-981"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-977.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > [vi-991] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vp-977",
+      "nodeId": "vn-989",
+      "id": "vi-992",
+      "event": "click",
+      "label": "Reset local preview state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "default"
+        }
+      ],
+      "component": "src/generated/presentation/components/details/vp-977.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vp-977 Shell JSON handoff > [vi-992] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-55",
+      "nodeId": "vn-132",
+      "id": "vi-134",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/record-card.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-55 RecordCard > [vi-134] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-56",
+      "nodeId": "vn-139",
+      "id": "vi-141",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/capture-form.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-56 CaptureForm > [vi-141] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-57",
+      "nodeId": "vn-146",
+      "id": "vi-148",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/empty-state.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-57 EmptyState > [vi-148] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-58",
+      "nodeId": "vn-153",
+      "id": "vi-155",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/filter-toolbar.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-58 FilterToolbar > [vi-155] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-59",
+      "nodeId": "vn-160",
+      "id": "vi-162",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/status-notice.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-59 StatusNotice > [vi-162] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-60",
+      "nodeId": "vn-167",
+      "id": "vi-169",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/property-editor.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-60 PropertyEditor > [vi-169] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-61",
+      "nodeId": "vn-174",
+      "id": "vi-176",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-heading.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-61 HeadingBlock > [vi-176] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-62",
+      "nodeId": "vn-181",
+      "id": "vi-183",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-text.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-62 TextBlock > [vi-183] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-63",
+      "nodeId": "vn-188",
+      "id": "vi-194",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-navigation.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-63 NavigationBlock > [vi-194] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-64",
+      "nodeId": "vn-199",
+      "id": "vi-201",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-toolbar.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-64 ToolbarBlock > [vi-201] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-65",
+      "nodeId": "vn-206",
+      "id": "vi-212",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-list.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-65 ListBlock > [vi-212] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-66",
+      "nodeId": "vn-217",
+      "id": "vi-220",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-table.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-66 TableBlock > [vi-220] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-67",
+      "nodeId": "vn-225",
+      "id": "vi-231",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-board.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-67 BoardBlock > [vi-231] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-68",
+      "nodeId": "vn-236",
+      "id": "vi-238",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-detail.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-68 DetailBlock > [vi-238] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-69",
+      "nodeId": "vn-243",
+      "id": "vi-245",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-form.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-69 FormBlock > [vi-245] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-70",
+      "nodeId": "vn-250",
+      "id": "vi-252",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-chart.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-70 ChartBlock > [vi-252] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-71",
+      "nodeId": "vn-257",
+      "id": "vi-259",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-media.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-71 MediaBlock > [vi-259] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-72",
+      "nodeId": "vn-264",
+      "id": "vi-266",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-actions.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-72 ActionsBlock > [vi-266] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-73",
+      "nodeId": "vn-271",
+      "id": "vi-273",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-empty.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-73 EmptyBlock > [vi-273] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-74",
+      "nodeId": "vn-278",
+      "id": "vi-280",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/content-notice.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-74 NoticeBlock > [vi-280] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-75",
+      "nodeId": "vn-285",
+      "id": "vi-287",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-site-header.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-75 SiteHeader > [vi-287] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-76",
+      "nodeId": "vn-292",
+      "id": "vi-294",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-hero.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-76 HeroSection > [vi-294] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-77",
+      "nodeId": "vn-299",
+      "id": "vi-301",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-feature-grid.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-77 FeatureGrid > [vi-301] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-78",
+      "nodeId": "vn-306",
+      "id": "vi-308",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-pricing.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-78 PricingPlans > [vi-308] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-79",
+      "nodeId": "vn-313",
+      "id": "vi-315",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-testimonials.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-79 Testimonials > [vi-315] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-80",
+      "nodeId": "vn-320",
+      "id": "vi-322",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-faq.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-80 FaqAccordion > [vi-322] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-81",
+      "nodeId": "vn-327",
+      "id": "vi-329",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-site-footer.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-81 SiteFooter > [vi-329] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-82",
+      "nodeId": "vn-334",
+      "id": "vi-336",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-image-gallery.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-82 ImageGallery > [vi-336] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-83",
+      "nodeId": "vn-341",
+      "id": "vi-343",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-contact.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-83 ContactForm > [vi-343] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-84",
+      "nodeId": "vn-348",
+      "id": "vi-350",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-newsletter.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-84 NewsletterSignup > [vi-350] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-85",
+      "nodeId": "vn-355",
+      "id": "vi-357",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-article.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-85 ArticleBody > [vi-357] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-86",
+      "nodeId": "vn-362",
+      "id": "vi-364",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-breadcrumbs.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-86 BreadcrumbTrail > [vi-364] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-87",
+      "nodeId": "vn-369",
+      "id": "vi-375",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-app-sidebar.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-87 AppSidebar > [vi-375] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-88",
+      "nodeId": "vn-380",
+      "id": "vi-382",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-tab-strip.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-88 TabStrip > [vi-382] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-89",
+      "nodeId": "vn-387",
+      "id": "vi-389",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-metric-summary.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-89 MetricSummary > [vi-389] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-90",
+      "nodeId": "vn-394",
+      "id": "vi-400",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-activity-timeline.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-90 ActivityTimeline > [vi-400] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-91",
+      "nodeId": "vn-405",
+      "id": "vi-407",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-calendar.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-91 CalendarView > [vi-407] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-92",
+      "nodeId": "vn-412",
+      "id": "vi-414",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-file-upload.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-92 FileUpload > [vi-414] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-93",
+      "nodeId": "vn-419",
+      "id": "vi-421",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-profile.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-93 UserProfile > [vi-421] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-94",
+      "nodeId": "vn-426",
+      "id": "vi-428",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-code-editor.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-94 CodeEditor > [vi-428] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-95",
+      "nodeId": "vn-433",
+      "id": "vi-439",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-conversation.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-95 Conversation > [vi-439] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-96",
+      "nodeId": "vn-444",
+      "id": "vi-446",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-progress.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-96 ProgressTracker > [vi-446] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-97",
+      "nodeId": "vn-451",
+      "id": "vi-453",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-command-search.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-97 CommandSearch > [vi-453] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-98",
+      "nodeId": "vn-458",
+      "id": "vi-461",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/pattern-permissions.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-98 PermissionsTable > [vi-461] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-99",
+      "nodeId": "vn-466",
+      "id": "vi-472",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/workflow-rail.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-99 WorkflowRail > [vi-472] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-100",
+      "nodeId": "vn-477",
+      "id": "vi-480",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/review-findings.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-100 ReviewFindings > [vi-480] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-101",
+      "nodeId": "vn-485",
+      "id": "vi-488",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/requirements-panel.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-101 RequirementsPanel > [vi-488] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-102",
+      "nodeId": "vn-493",
+      "id": "vi-495",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/diagram-inspector.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-102 DiagramInspector > [vi-495] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-103",
+      "nodeId": "vn-500",
+      "id": "vi-502",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/source-operation-editor.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-103 SourceOperationEditor > [vi-502] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-104",
+      "nodeId": "vn-507",
+      "id": "vi-509",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/test-operation-panel.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-104 TestOperationPanel > [vi-509] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-105",
+      "nodeId": "vn-514",
+      "id": "vi-516",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/design-token-editor.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-105 DesignTokenEditor > [vi-516] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-106",
+      "nodeId": "vn-521",
+      "id": "vi-523",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/component-contract-panel.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-106 ComponentContractPanel > [vi-523] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-107",
+      "nodeId": "vn-112",
+      "id": "vi-114",
+      "event": "click",
+      "label": "Confirm reviewed project",
+      "notes": "Only request replacement after validation and explicit confirmation. Emit select to the owning page.",
+      "acceptance": "Given a reviewed project and confirmation\nWhen replacement is requested\nThen the page receives the selection event and retains recoverable errors.",
+      "actions": [],
+      "component": "src/generated/presentation/components/library/project-json-review.vue",
+      "implementation": "src/generated/application/interactions/vi-114.ts",
+      "test": "tests/project/acceptance/vi-114.test.ts",
+      "verification": "business-todo",
+      "testIds": [
+        "vitest:tests/project/acceptance/vi-114.test.ts#[vi-114] Confirm reviewed project — Given a reviewed project and confirmation\nWhen replacement is requested\nThen the page receives the selection event and retains recoverable errors.",
+        "vitest:visual-definitions:vc-107 ProjectJsonReview > [vi-114] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    },
+    {
+      "definitionId": "vc-108",
+      "nodeId": "vn-528",
+      "id": "vi-530",
+      "event": "click",
+      "label": "Show local error state",
+      "notes": "Local UI effect only; no business or source write is implied.",
+      "acceptance": "",
+      "actions": [
+        {
+          "kind": "set-state",
+          "state": "error"
+        }
+      ],
+      "component": "src/generated/presentation/components/library/shell-handoff-panel.vue",
+      "implementation": null,
+      "test": null,
+      "verification": "executable-ui-effect",
+      "testIds": [
+        "vitest:visual-definitions:vc-108 ShellHandoffPanel > [vi-530] dispatches the designed click interaction"
+      ],
+      "evidence": []
+    }
+  ],
+  "adapters": [],
+  "businessAcceptance": "not-implemented"
+}

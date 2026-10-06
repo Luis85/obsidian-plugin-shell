@@ -1,0 +1,51 @@
+name: Airship generated-project compatibility
+on:
+  pull_request:
+    paths-ignore:
+      - 'projects/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: airship-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+          playwright: ${{ runner.os == 'Linux' && 'with-deps' || '' }}
+      - name: Validate source contracts
+        run: |
+          node "$QUALIFIED_NPM" run check:compiler-architecture
+          node "$QUALIFIED_NPM" run test:airship
+          node scripts/testing/suites.mjs --check
+          python -B scripts/concepts/build-companion.py --check
+      - name: Qualify actual generated preview and pinned Airship
+        if: runner.os == 'Linux'
+        run: node scripts/airship/qualify.mjs
+      - name: Retain named compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: airship-compatibility-${{ matrix.os }}
+          path: |
+            reports/airship-qualification/evidence.json
+            reports/airship-qualification/servers.log
+            reports/airship-qualification/airship-preview.png
+          if-no-files-found: ignore
+          retention-days: 7

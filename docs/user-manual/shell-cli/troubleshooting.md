@@ -18,15 +18,15 @@ Record the command with secrets removed, working directory, framework/Node/npm v
 | Dependency resolution required | Declared packages and exact lockfile | Review dependency changes; resolve deliberately, review lock, then run exact-lock install |
 | A test profile cannot run | Required tools, test configuration and host prerequisites | Report “not run”; satisfy prerequisites before claiming evidence |
 | Clickdummy builds but an action is inert | Pending business adapters/acceptance obligations | Implement and test the behavior; do not relabel the scaffold as complete |
-| Kit status fails in a source checkout | Whether `.framework/kit.json` is expected in this distribution | Use the correct environment; do not manufacture an integrity manifest |
+| Kit status fails in a source checkout | Whether `bin/kit.json` is expected in this distribution | Use the correct environment; do not manufacture an integrity manifest |
 | Release command asks for authorization | Reviewed candidate and release operation document | Obtain the separate authorization; `--yes` cannot replace it |
 | Memory setup is unavailable | Optional integration version/platform/provider prerequisites | Use `memory --help` and `HINDSIGHT.md`; keep default project operation independent |
 
 ## Compiler diagnostics
 
 ```sh
-node shell.mjs compiler explain COMPILER_REFERENCE_MISSING
-node shell.mjs compiler check --input design/project.json --json
+node bin/app compiler explain COMPILER_REFERENCE_MISSING
+node bin/app compiler check --input design/project.json --json
 ```
 
 Use the generated **Compiler diagnostics** page for the current stable codes and recovery hints. Syntax errors, missing references, duplicate IDs, path collisions, template defects and unresolved dependencies have different causes. Do not “repair” a template defect by arbitrarily editing user design data.

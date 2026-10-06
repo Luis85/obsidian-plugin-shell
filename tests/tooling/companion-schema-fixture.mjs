@@ -1,18 +1,17 @@
-import { readFileSync, readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { companionProjectSchema } from '../../scripts/companion/schema/project.mjs';
-import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-const root = new URL('../../', import.meta.url);
-const read = path => JSON.parse(readFileSync(new URL(path, root), 'utf8'));
+import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { companionStarterIds, starterDocument, starterPath } from '../support/starter-documents.mjs';
 /** Shared inert corpus; an independent Draft 2020-12 implementation also consumes these bytes. */
 export function schemaCorpus() {
-  const starters = 'docs/concepts/companion/starters/';
-  const paths = [
-    'docs/concepts/companion/companion-project.json',
-    ...readdirSync(fileURLToPath(new URL(starters, root))).filter(name => name.endsWith('.companion.json')).sort().map(name => starters + name),
-  ];
-  const positive = paths.map(path => ({ name: path, document: migrateAuthoringDocument(read(path)).document }));
-  const full = positive[0].document;
+  const ids = companionStarterIds();
+  const positive = ids.map(id => ({ name: starterPath(id), document: validateAuthoringDocument(starterDocument(id)) }));
+  const full = positive[ids.indexOf('companion-plugin')].document;
+  const accepted = structuredClone(full);
+  accepted.design.nodes.find(node => node.kind === 'view').acceptance = { states: ['default', 'empty'], keyboardPath: ['Save', 'Cancel'], focusReturn: true, minWidth: 420, themes: ['dark'], notes: 'Worked example.' };
+  positive.push({ name: 'surface with a UX acceptance block', document: accepted });
+  const hosted = structuredClone(full);
+  hosted.tooling = { ...hosted.tooling, hosting: { platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/contoso', project: 'Quick Capture' } } };
+  positive.push({ name: 'Azure DevOps hosting', document: validateAuthoringDocument(hosted) });
   const negative = [];
   const bad = (name, edit, schemaRejects = true) => {
     const document = structuredClone(full); edit(document);
@@ -21,7 +20,23 @@ export function schemaCorpus() {
     if (!rejected) throw new Error('CORPUS_INVALID_NEGATIVE: ' + name);
     negative.push({ name, document, schemaRejects });
   };
+  const view = doc => doc.design.nodes.find(node => node.kind === 'view');
+  const withAcceptance = acceptance => doc => { view(doc).acceptance = acceptance; };
+  bad('surface acceptance unknown state', withAcceptance({ states: ['sleeping'] }));
+  bad('surface acceptance duplicate state', withAcceptance({ states: ['error', 'error'] }));
+  bad('surface acceptance empty themes', withAcceptance({ themes: [] }));
+  bad('surface acceptance unknown theme', withAcceptance({ themes: ['sepia'] }));
+  bad('surface acceptance non-numeric width', withAcceptance({ minWidth: 'wide' }));
+  bad('surface acceptance width below range', withAcceptance({ minWidth: 50 }));
+  bad('surface acceptance fractional width', withAcceptance({ minWidth: 360.5 }));
+  bad('surface acceptance blank keyboard step', withAcceptance({ keyboardPath: ['save', '  '] }));
+  bad('surface acceptance keyboard path not a list', withAcceptance({ keyboardPath: 'save' }));
+  bad('surface acceptance focusReturn not boolean', withAcceptance({ focusReturn: 'yes' }));
+  bad('surface acceptance unknown member', withAcceptance({ timeoutMs: 5 }));
+  bad('surface acceptance notes too long', withAcceptance({ notes: 'x'.repeat(2001) }));
   bad('future version', doc => { doc.schemaVersion = 7; });
+  bad('retired version', doc => { doc.schemaVersion = 5; doc.design.schema = 5; });
+  bad('retired detail designs', doc => { doc.design.detailDesigns = { schema: 2, nextId: 1, documents: [], revisions: [] }; });
   bad('future design', doc => { doc.design.schema = 7; });
   bad('wrong kind', doc => { doc.kind = 'jev-workspace'; });
   bad('execution flag', doc => { doc.executable = true; });
@@ -39,6 +54,12 @@ export function schemaCorpus() {
   bad('feature unknown version', doc => { doc.design.features = { schema: 2, items: [] }; });
   bad('storymap unknown key', doc => { doc.design.storymaps = { schema: 1, nextId: 1, maps: [], eval: true }; });
   bad('design system malformed color', doc => { doc.design.designSystem.colors[0].light = 'red;body{}'; });
+  const hosting = value => doc => { doc.tooling = { ...doc.tooling, hosting: value }; };
+  bad('hosting unknown platform', hosting({ platform: 'gitlab' }));
+  bad('hosting token field', hosting({ platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/c', project: 'P', pat: 'x' } }));
+  bad('hosting organization not an Azure DevOps URL', hosting({ platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/c/', project: 'P' } }));
+  bad('hosting project with a control character', hosting({ platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/c', project: 'P\u0007' } }));
+  bad('hosting Azure details on GitHub', hosting({ platform: 'github', azureDevOps: { organization: 'https://dev.azure.com/c', project: 'P' } }), false);
   bad('duplicate stable surface', doc => { doc.design.nodes.push(structuredClone(doc.design.nodes[0])); }, false);
   bad('missing parent', doc => { doc.design.nodes[0].parent = 'nonexistent'; }, false);
   bad('foreign visual owner', doc => { doc.design.visualDesigns.pages[0].ownerId = 'nonexistent'; }, false);

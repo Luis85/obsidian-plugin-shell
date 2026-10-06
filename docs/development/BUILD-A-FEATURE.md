@@ -1,5 +1,7 @@
 # Build a feature on the template
 
+> Type: tutorial · Part of the [docs index](../README.md)
+
 Start in `src/features`, not in the persistence adapters. For a generated starting
 point, run `npm run make -- feature bookmarks --entity bookmark --dry-run`, review,
 then apply with `--yes --no-interaction`. See [Authoring tools](AUTHORING-TOOLS.md).

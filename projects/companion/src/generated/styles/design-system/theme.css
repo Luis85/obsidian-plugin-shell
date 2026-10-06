@@ -1,0 +1,102 @@
+/* Generated design system. Edit saved tokens, not this managed file. */
+[data-plugin-ui="workbench-companion"].ps--workbench-companion {
+  --ui-primary: var(--workbench-companion-ds-colors-accent);
+  --workbench-companion-accent: var(--workbench-companion-ds-colors-accent);
+  --workbench-companion-accent-hover: var(--workbench-companion-ds-colors-accent);
+  --workbench-companion-link: var(--workbench-companion-ds-colors-accent);
+  --workbench-companion-border-focus: var(--workbench-companion-ds-colors-accent);
+  --ui-text: var(--workbench-companion-ds-colors-text);
+  --workbench-companion-text: var(--workbench-companion-ds-colors-text);
+  --ui-text-muted: var(--workbench-companion-ds-colors-muted);
+  --ui-text-toned: var(--workbench-companion-ds-colors-muted);
+  --ui-text-dimmed: var(--workbench-companion-ds-colors-muted);
+  --workbench-companion-text-muted: var(--workbench-companion-ds-colors-muted);
+  --workbench-companion-text-subtle: var(--workbench-companion-ds-colors-muted);
+  --ui-text-highlighted: var(--workbench-companion-ds-colors-text);
+  --ui-text-inverted: var(--workbench-companion-ds-colors-accent-text);
+  --workbench-companion-text-on-accent: var(--workbench-companion-ds-colors-accent-text);
+  --ui-bg: var(--workbench-companion-ds-colors-background);
+  --workbench-companion-surface: var(--workbench-companion-ds-colors-background);
+  --ui-bg-muted: var(--workbench-companion-ds-colors-background);
+  --workbench-companion-surface-muted: var(--workbench-companion-ds-colors-background);
+  --ui-bg-elevated: var(--workbench-companion-ds-colors-background);
+  --workbench-companion-surface-raised: var(--workbench-companion-ds-colors-background);
+  --ui-bg-inverted: var(--workbench-companion-ds-colors-text);
+  --ui-border-inverted: var(--workbench-companion-ds-colors-text);
+  --workbench-companion-font-ui: var(--workbench-companion-ds-fonts-interface);
+  --workbench-companion-font-code: var(--workbench-companion-ds-fonts-code);
+  --workbench-companion-space-xs: var(--workbench-companion-ds-spacing-xs);
+  --workbench-companion-space-sm: var(--workbench-companion-ds-spacing-sm);
+  --workbench-companion-space-md: var(--workbench-companion-ds-spacing-md);
+  --workbench-companion-space-lg: var(--workbench-companion-ds-spacing-lg);
+  --workbench-companion-space-xl: var(--workbench-companion-ds-spacing-xl);
+  --workbench-companion-space-2xl: var(--workbench-companion-ds-spacing-xl);
+  --workbench-companion-control-radius: var(--workbench-companion-ds-radii-control);
+  --workbench-companion-radius-sm: var(--workbench-companion-ds-radii-control);
+  --workbench-companion-radius-md: var(--workbench-companion-ds-radii-control);
+  --workbench-companion-radius-lg: var(--workbench-companion-ds-radii-surface);
+  --workbench-companion-control-height: var(--workbench-companion-ds-sizes-control);
+  --workbench-companion-icon-size: var(--workbench-companion-ds-sizes-icon);
+  --ps-font-sans: var(--workbench-companion-ds-fonts-interface);
+  font-family: var(--workbench-companion-ds-fonts-interface);
+  --ps-font-mono: var(--workbench-companion-ds-fonts-code);
+  --ps-text-base: var(--workbench-companion-ds-typography-body-size);
+  --ps-text-base--line-height: var(--workbench-companion-ds-typography-body-line-height);
+  --workbench-companion-text-size: var(--workbench-companion-ds-typography-body-size);
+  --workbench-companion-weight-normal: var(--workbench-companion-ds-typography-body-weight);
+  --workbench-companion-line-height: var(--workbench-companion-ds-typography-body-line-height);
+  --ps-text-sm: var(--workbench-companion-ds-typography-label-size);
+  --ps-text-sm--line-height: var(--workbench-companion-ds-typography-label-line-height);
+  --workbench-companion-text-size-sm: var(--workbench-companion-ds-typography-label-size);
+  --workbench-companion-weight-strong: var(--workbench-companion-ds-typography-label-weight);
+  --ps-text-2xl: var(--workbench-companion-ds-typography-page-title-size);
+  --ps-text-2xl--line-height: var(--workbench-companion-ds-typography-page-title-line-height);
+  --ps-text-lg: var(--workbench-companion-ds-typography-section-title-size);
+  --ps-text-lg--line-height: var(--workbench-companion-ds-typography-section-title-line-height);
+  --ps-spacing: var(--workbench-companion-ds-spacing-xs);
+  --ui-radius: calc(var(--workbench-companion-ds-radii-control) / 1.5);
+  --workbench-companion-inspector-width: var(--workbench-companion-ds-sizes-inspector);
+  color: var(--workbench-companion-ds-colors-text);
+  background-color: var(--workbench-companion-ds-colors-background);
+  accent-color: var(--workbench-companion-ds-colors-accent);
+}
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :is(code,pre,kbd,samp) { font-family: var(--workbench-companion-ds-fonts-code); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion, [data-plugin-ui="workbench-companion"].ps--workbench-companion :is(.shell-app,.shell-lead,.shell-capability p,.shell-flow-card p,.generated-workbench) {
+  font-family: var(--workbench-companion-ds-typography-body-font);
+  font-size: var(--workbench-companion-ds-typography-body-size);
+  font-weight: var(--workbench-companion-ds-typography-body-weight);
+  line-height: var(--workbench-companion-ds-typography-body-line-height);
+  letter-spacing: var(--workbench-companion-ds-typography-body-tracking);
+}
+
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :is(label,button,input,select,textarea) {
+  font-family: var(--workbench-companion-ds-typography-label-font);
+  font-size: var(--workbench-companion-ds-typography-label-size);
+  font-weight: var(--workbench-companion-ds-typography-label-weight);
+  line-height: var(--workbench-companion-ds-typography-label-line-height);
+  letter-spacing: var(--workbench-companion-ds-typography-label-tracking);
+}
+
+[data-plugin-ui="workbench-companion"].ps--workbench-companion h1 {
+  font-family: var(--workbench-companion-ds-typography-page-title-font);
+  font-size: var(--workbench-companion-ds-typography-page-title-size);
+  font-weight: var(--workbench-companion-ds-typography-page-title-weight);
+  line-height: var(--workbench-companion-ds-typography-page-title-line-height);
+  letter-spacing: var(--workbench-companion-ds-typography-page-title-tracking);
+}
+
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :is(h2,h3) {
+  font-family: var(--workbench-companion-ds-typography-section-title-font);
+  font-size: var(--workbench-companion-ds-typography-section-title-size);
+  font-weight: var(--workbench-companion-ds-typography-section-title-weight);
+  line-height: var(--workbench-companion-ds-typography-section-title-line-height);
+  letter-spacing: var(--workbench-companion-ds-typography-section-title-tracking);
+}
+
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :is(button,input,select,textarea) { border-radius: var(--workbench-companion-ds-radii-control); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :is(.shell-capability,.shell-settings-card,.shell-preview,.generated-component) { border-radius: var(--workbench-companion-ds-radii-surface); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :is(button,input:not([type="checkbox"]):not([type="radio"]),select) { min-height: var(--workbench-companion-ds-sizes-control); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :is([data-slot="leadingIcon"],[data-slot="trailingIcon"]) { width: var(--workbench-companion-ds-sizes-icon); height: var(--workbench-companion-ds-sizes-icon); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion [data-ds-layout="inspector"] { width: var(--workbench-companion-ds-sizes-inspector); max-width: 100%; min-width: 0; }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion :focus-visible { outline-color: var(--workbench-companion-ds-colors-accent); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion [class~="ps:text-primary"] { color: var(--ui-primary); }

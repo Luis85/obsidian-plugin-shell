@@ -1,5 +1,7 @@
 # Companion golden starter and visual-feature showcase
 
+> Type: reference · Part of the [docs index](../README.md)
+
 The current Companion build starts with an empty workspace (or reopens the user's
 saved project). It does not embed the Companion self-project or a starter catalog.
 The shell and current authoring build share the external starter contract.
@@ -12,17 +14,20 @@ The shell and current authoring build share the external starter contract.
 | `configs/starters/feature-showcase.json` | Executable examples of every currently catalogued visual primitive, control kind, action kind, state and layout. |
 | `reports/companion-mvp/index.html` | Current empty authoring build, created by `npm run companion:build`. |
 | `reports/companion-mvp/companion-project*.json` | Explicit, derived qualification inputs only; not maintained project authorities or starter distribution assets. |
-| `docs/concepts/companion/index.html`, its project JSON and visual seed | Retained **v5 compatibility fixtures**. They are not the current empty entry point or the golden development template. |
+| `docs/concepts/companion/index.html` | The checked-in schema 6 concept that `npm run companion:build` mounts the editor islands into (`build-companion.py --check` must pass first). It embeds no starter or project; it is not the current empty entry point or the golden development template. |
 
 The canonical starter holds the full design, not a screenshot or an HTML wrapper.
 It contains 28 surfaces, 27 visual pages, 54 components and 54 pinned component
 revisions, 23 routes and three journeys. These counts describe the model, not
-completed business behavior. Keep historical fixtures independently qualified;
-do not edit them to advance the current golden model.
+completed business behavior. Advance the current golden model in
+`configs/starters/companion-plugin.json`, never in the checked-in concept.
 
-The current starter pack has 14 independent JSON files. The eleven original v5
-starter models remain compatible, alongside the file-based webapp, the v6 golden
-Companion and the v6 visual-feature showcase. No central catalog file is required.
+The current project format is **Companion project schema 6 only**. Every Companion
+starter (the twelve focused examples, the golden Companion and the visual-feature
+showcase: fourteen definitions) embeds a project v6 document; a definition embedding
+schema 1–5 is rejected with `STARTER_VERSION`, and earlier formats are never migrated.
+The eleven original examples were converted once from their v5 models (only the two
+version fields changed); `agent-ready` was authored in v6. No central catalog file is required.
 
 ## Empty startup and project setup
 
@@ -76,28 +81,28 @@ and uses the current project's identity/folders as export defaults. Other input
 values come from that recipe's defaults.
 
 ```sh
-node shell.mjs starters validate companion-plugin --json
-node shell.mjs starters show companion-plugin --json
-node shell.mjs starters coverage companion-plugin --json
+node bin/app starters validate companion-plugin --json
+node bin/app starters show companion-plugin --json
+node bin/app starters coverage companion-plugin --json
 
 # Preview the proposed definition edit; add --yes only after reviewing it.
-node shell.mjs starters edit companion-plugin --input ./reviewed-companion-plugin.json
+node bin/app starters edit companion-plugin --input ./reviewed-companion-plugin.json
 ```
 
 ## Generate through the shell
 
 Extract the shell and starter archives separately into the same workspace, so
-`configs/starters/` is beside `shell.mjs`. An extracted shell alone lists zero
+`configs/starters/` is in the same package root as `bin/app`. An extracted shell alone lists zero
 starters. A configured `paths.startersFolder` in `configs/user-settings.json` can
 select another contained folder. There is no fallback to an embedded library.
 
 ```sh
-node shell.mjs starters list
-node shell.mjs new ../companion-development --starter companion-plugin
-node shell.mjs new ../companion-development --starter companion-plugin --yes
+node bin/app starters list
+node bin/app new ../companion-development --starter companion-plugin
+node bin/app new ../companion-development --starter companion-plugin --yes
 
-node shell.mjs new ../visual-feature-demo --starter feature-showcase
-node shell.mjs new ../visual-feature-demo --starter feature-showcase --yes
+node bin/app new ../visual-feature-demo --starter feature-showcase
+node bin/app new ../visual-feature-demo --starter feature-showcase --yes
 ```
 
 Only the confirmed file plan creates the project. Run subsequent processes by
@@ -152,7 +157,7 @@ disposed reads. Legacy JSON textarea input retains its earlier paste-as-text
 behavior. JSON definitions never carry executable event callbacks.
 
 ```sh
-node shell.mjs starters coverage feature-showcase --require-model-coverage --json
+node bin/app starters coverage feature-showcase --require-model-coverage --json
 ```
 
 This command reports **model inventory**, not executed or native acceptance. Its
@@ -200,10 +205,10 @@ compatibility. Do not relabel their reports as hosted/native acceptance.
 
 `companion:starter-browser` in the suite manifest requires the current authoring
 build and a copied compiled artifact at `reports/feature-showcase/clickdummy.html`.
-The retained v5 browser suites remain separate and retain all their assertions.
+The concept browser suites of the checked-in concept remain separate and retain all their assertions.
 
-Shell packaging excludes current definitions, legacy starter data, the legacy
-self-project JSON and visual seeds. Only a closed list of reviewed Vue Flow
+Shell packaging excludes current definitions (the concept embeds no starter data,
+self-project JSON or visual seed). Only a closed list of reviewed Vue Flow
 runtime assets and notices remains: the generated Journey Lens needs this engine
 code, not a starter. The standalone starter ZIP contains definitions only.
 

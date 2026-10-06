@@ -1,10 +1,23 @@
 # Identity setup and resumable qualification
 
+> Type: reference · Part of the [docs index](../README.md)
+
 `npm run setup` starts without project dependencies. Its default profile is
 browser-first. It reviews the chosen identity, exact file hashes, selected commands,
 dependency lifecycle allowlist and excluded actions before applying anything.
 Interactive setup asks for identity values and confirmation. Existing values are
 defaults; unattended use requires `--yes --no-interaction` after reviewing a plan.
+
+The interview questions are data in `configs/forms/setup-identity.json`, in the
+shared [form format](WIZARDS-AND-FORMS.md). Because setup runs before dependencies
+exist, the dependency-free `scripts/setup/form.mjs` reads only `text` and `confirm`
+fields with `id`, `kind`, `label` and `help`. It requires the text field ids to be
+exactly the identity `--answers` keys plus `hosting` and the confirm field to be `mcp`; any other
+kind, key or id stops setup before a question is asked. Labels, help and question
+order may change; the answers contract does not. `setup.mjs` locates the file from
+its own module path, so a framework kit, which ships `configs/`, uses the same form.
+Enter keeps the shown value, and the final "Apply this plan" consent stays a
+separate question.
 
 ```sh
 npm run --silent setup -- --id field-notes --name "Field Notes" --author "Your name" --repo your-account/field-notes --version 1.0.0 --profile browser --dry-run --json
@@ -42,6 +55,33 @@ derive their identity from the manifest; setup does not search/replace source
 strings. The shared file-plan engine checks paths, case collisions, symlinks and
 original hashes, stages complete edits, and restores only bytes still owned by the
 failed operation. This is not a filesystem-wide atomic transaction.
+
+## Hosting platform
+
+`--hosting github|azure-devops|none` records where pull requests and CI live; it is an
+identity change, so the files above are planned with it. Without the flag the current
+platform is kept (GitHub when none was recorded); interactive setup asks the form's `hosting`
+question after the MCP question, a blank answer keeps the platform, and an Azure DevOps `origin`
+remote is only used to suggest defaults. An `azure-devops` answer is followed by the organization,
+project and repository questions of `scripts/setup/hosting.mjs`, which the form subset cannot express. `azure-devops` takes `--azure-organization
+https://dev.azure.com/<organization>`, `--azure-project` and optional
+`--azure-repository`; values are validated by the shared hosting contract and are
+never tokens. `--repo owner/name` remains the GitHub shorthand and is refused with
+`azure-devops`.
+
+- `package.json` `repository` becomes the Azure Repos URL
+  `https://dev.azure.com/<organization>/<project>/_git/<repository>` when the details are known.
+- `PROJECT-IDENTITY.md` gains one `Hosting:` line for a non-default platform; GitHub adds
+  none, so earlier setups stay byte-identical. A changed line, or an Azure line that no
+  longer matches `package.json`, is treated as a user edit.
+- The plan's `hosting` block lists create-only `azure-pipelines.yml` (baseline plus
+  `npm run verify` on Linux) and `.azuredevops/pull_request_template.md` (a copy of the
+  GitHub template). An existing file is listed under `preserved` and never replaced.
+- `.github` is never deleted, and setup never runs `gh` or `az`, adds a remote or signs in.
+
+The journal saves the hosting options for `--resume`, and its input fingerprint includes
+`.azuredevops` and `azure-pipelines.yml` only when they exist. See
+[hosting platforms](HOSTING-PLATFORMS.md) for generated projects.
 
 ## Profiles and machine-readable answers
 

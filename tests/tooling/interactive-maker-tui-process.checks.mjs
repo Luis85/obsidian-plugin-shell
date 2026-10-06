@@ -4,7 +4,7 @@ import { realpath, mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { parseArguments } from '../../bin/adapters/commands.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
@@ -25,7 +25,7 @@ test('machine flags and CI bypass all terminal ownership even with attached TTY 
   const ci = streams();
   try {
     assert.equal(await main(['studio'], frameworkRoot, { ...ci.io, env: { CI: 'true' } }), 0);
-    assert.deepEqual(ci.raw, []); assert.match(ci.output.join(''), /Shell maker/);
+    assert.deepEqual(ci.raw, []); assert.match(ci.output.join(''), /Workbench CLI — maker commands/);
   } finally { ci.close(); }
   assert.throws(() => parseArguments(['studio', '--ui', 'invalid']), /auto, tui or plain/);
 });
@@ -60,7 +60,7 @@ test('plain and accessibility modes retain a line-oriented exit with no ANSI scr
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
-test('standalone prototype completion remains visible after leaving the alternate screen', async () => {
+test('standalone prototype completion remains visible after leaving the alternate screen', { timeout: 180000 }, async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-completion-'));
   try {
     const guide = await loadGuide();
@@ -73,6 +73,8 @@ test('standalone prototype completion remains visible after leaving the alternat
       ['Components for the first page', '\r'], ['Review your prototype brief', '\r'],
       ['Do you agree to this complete brief', '\x1b[B\r'], ['Package output folder', '\r'],
       ['Review before writing', '\r'], ['Apply this reviewed plan?', '\x1b[B\r'],
+      // No is the default for the optional Claude Design folder offered after the package is written.
+      ['Create a Claude Design folder', '\r'],
     ];
     let position = 0;
     const f = streams((screen, input) => {

@@ -1,5 +1,7 @@
 # Optional Storybook and generated stories
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Two **independent**, default-off switches are accepted in the top-level project JSON:
 
 ```json
@@ -13,7 +15,7 @@ Two **independent**, default-off switches are accepted in the top-level project 
 }
 ```
 
-This is a fragment to add to a complete project, not a complete project definition. Absent fields mean false. Values must be booleans; unknown tooling/Storybook fields are rejected. The current authoring reader accepts the addition for supported v1–v6 inputs and preserves it during migration. The frozen legacy validator and checked-in v5 concept are not retroactively extended; the current composed v6 companion preserves the fields through import, export and recovery validation.
+This is a fragment to add to a complete project, not a complete project definition. Absent fields mean false. Values must be booleans; unknown tooling/Storybook fields are rejected. The authoring reader accepts the addition in project schema 6, the only readable format (earlier schemas are rejected, never migrated); the composed companion preserves the fields through import, export and recovery validation.
 
 | enabled | generateStories | Generated output |
 | --- | --- | --- |
@@ -29,35 +31,43 @@ Neither setting installs packages, starts a server or grants execution authority
 The terminal, shared operation API, compiler inspection, `new`, and legacy generator support independent `--storybook-stories on|off` and `--storybook on|off` overrides:
 
 ```sh
-node shell.mjs new ../folio-tools --from project.json --storybook-stories on --storybook on --yes
-node shell.mjs compiler inspect --input project.json --stage artifacts --storybook-stories on --json
+node bin/app new ../folio-tools --from project.json --storybook-stories on --storybook on --yes
+node bin/app compiler inspect --input project.json --stage artifacts --storybook-stories on --json
 # In an extracted/generated kit with imported project JSON:
-node shell.mjs generate --storybook-stories on --storybook on --plan-out storybook.plan.json
-node shell.mjs plan apply storybook.plan.json --yes
+node bin/app generate --storybook-stories on --storybook on --plan-out storybook.plan.json
+node bin/app plan apply storybook.plan.json --yes
 ```
 
 External `--input`/`--from` files are never overwritten. Overrides are written to the generated `design/project.json`; a reviewed in-place generation also updates the intake receipt, so the next generation and import can still verify ownership. A saved plan remains bound to its request and exact output; toggling either flag invalidates an old approval.
 
-The TypeScript API accepts `compileProject({ source, template, storybook: { enabled, generateStories } })`. It remains pure after the template snapshot is loaded. `node shell.mjs schema --json` exposes the optional field schema as `projectTooling`, alongside the existing request/result schemas.
+The TypeScript API accepts `compileProject({ source, template, storybook: { enabled, generateStories } })`. It remains pure after the template snapshot is loaded. `node bin/app schema --json` exposes the optional field schema as `projectTooling`, alongside the existing request/result schemas.
 
 ## Install and operate Storybook separately
 
 After opting in and generating, install the normal root dependencies separately. Then:
 
 ```sh
-node shell.mjs storybook status --json
-node shell.mjs storybook install --dry-run
-node shell.mjs storybook install --yes
-node shell.mjs storybook check
-node shell.mjs storybook build
-node shell.mjs storybook dev
+node bin/app storybook status --json
+node bin/app storybook install --dry-run
+node bin/app storybook install --yes
+node bin/app storybook check
+node bin/app storybook build
+node bin/app storybook dev
 ```
 
 The first explicitly approved optional install runs npm install in `storybook/` to resolve its own lockfile. Review and commit that lockfile. Subsequent installs run npm ci; a manifest/lock mismatch is refused instead of silently updating it. Dependency lifecycle scripts are trusted project execution, not part of JSON import or generation.
 
-Storybook 10.6.0, its Vue 3/Vite framework and Docs addon have exact matching direct pins. Vue, Vite, Vue plugin, Node declarations, TypeScript **6.0.3** and vue-tsc follow the qualified framework pins. No TypeScript 5 substitution, floating latest version or fabricated lockfile is supplied.
+Storybook 10.6.0, its Vue 3/Vite framework, Docs addon and Accessibility (`@storybook/addon-a11y`) addon have exact matching direct pins; the a11y addon always equals the Storybook version, and the generator emits both from one constant. The addon lives only in the generated `storybook/package.json`; the root package.json and package-lock.json do not gain it, and the optional lockfile resolves it on the first explicit `storybook install`. Vue, Vite, Vue plugin, Node declarations, TypeScript **6.0.3** and vue-tsc follow the qualified framework pins. No TypeScript 5 substitution, floating latest version or fabricated lockfile is supplied.
 
 Build/dev/check invoke **local installed** tools with the project root as cwd; no npx auto-install or global Storybook discovery. The shared Vite adapter retains the shell's guarded Nuxt UI integration, scoped styles and local icons. Development binds to 127.0.0.1:6006 with no browser auto-open. The launcher sets `STORYBOOK_DISABLE_TELEMETRY=true` before startup, and generated config also disables telemetry and crash reports. Static output stays under `storybook/storybook-static`; publication is not performed.
+
+## Themes and accessibility
+
+The extension-owned `storybook/.storybook/preview.ts` provides a toolbar **Theme** global (Light/Dark, default Light). Its decorator toggles Obsidian's `theme-light`/`theme-dark` classes and `color-scheme` on `document.body`, so Teleported overlays and docs pages follow the toolbar like the simulated host root inside each story. The Accessibility addon is registered in `main.ts`; the panel reports axe violations while developing (`parameters.a11y.test` is `todo`, so it does not break builds).
+
+The qualification (`scripts/compiler/verify-storybook.mjs` through `scripts/compiler/storybook-a11y.mjs`) opens up to 60 stories, sorted by ID, in **both** themes via `&globals=theme:light|dark`, waits for the body theme class, and runs `@axe-core/playwright` (WCAG 2.0/2.1 A and AA rules, the root dev dependency) on the story host. Serious or critical violations fail the run; the rule IDs, impact and selectors (no DOM text) are retained in `browser.json` under `a11y`. Placeholder stories that report an unfinished adapter are listed under `placeholders` instead of being audited, so they are never read as accepted. The qualification also checks that the a11y addon pin equals Storybook's in both `package.json` and the resolved optional lockfile. This does not replace manual accessibility review, and it does not use `@storybook/test-runner`.
+
+Unit tests (`compiler-storybook.checks.mjs`, `compiler-storybook-a11y.checks.mjs`) cover the emitted dependency, addon registration, decorator and the audit helpers offline; the hosted qualification is the only place the registry resolution and axe results on real stories are exercised.
 
 ## Story fidelity and boundaries
 
@@ -82,7 +92,7 @@ Authoritative format/config references (checked 2026-09-28):
 - https://storybook.js.org/docs/configure/telemetry
 - https://github.com/storybookjs/storybook/releases/tag/v10.6.0
 
-Execution status and limitations are recorded in [the verification record](../testing/OPTIONAL-STORYBOOK.md).
+Execution status and limitations are recorded in [the verification record](../_archive/testing/OPTIONAL-STORYBOOK.md).
 
 ## PR41 / PR42 consolidation
 

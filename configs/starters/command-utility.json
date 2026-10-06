@@ -42,7 +42,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -77,12 +77,12 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "command-utility-plugin",
+        "id": "command-utility",
         "name": "Command Utility",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "A small command-led tool for transforming or inspecting text."
       },
@@ -91,7 +91,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Start here for a focused utility rather than a large workspace.",
         "platform": "desktop",
@@ -2161,7 +2161,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

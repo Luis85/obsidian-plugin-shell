@@ -1,0 +1,13 @@
+<script setup lang="ts">
+defineProps<{label:string}>()
+const emit=defineEmits<{insert:[],duplicate:[],wrap:[],bind:[],action:[],more:[]}>()
+</script>
+<template><div class="inline-flex items-center gap-1 p-1 bg-default border border-default rounded-lg shadow-lg">
+ <span class="text-xs font-medium px-2">{{label}}</span><USeparator orientation="vertical" class="h-5"/>
+ <UTooltip text="Insert after"><UButton icon="i-lucide-plus" size="xs" variant="ghost" @click="emit('insert')"/></UTooltip>
+ <UTooltip text="Duplicate"><UButton icon="i-lucide-copy" size="xs" variant="ghost" @click="emit('duplicate')"/></UTooltip>
+ <UTooltip text="Wrap / group"><UButton icon="i-lucide-box-select" size="xs" variant="ghost" @click="emit('wrap')"/></UTooltip>
+ <UTooltip text="Bind data"><UButton icon="i-lucide-database" size="xs" variant="ghost" @click="emit('bind')"/></UTooltip>
+ <UTooltip text="Add interaction"><UButton icon="i-lucide-zap" size="xs" variant="ghost" @click="emit('action')"/></UTooltip>
+ <UButton icon="i-lucide-ellipsis" size="xs" variant="ghost" @click="emit('more')"/>
+</div></template>

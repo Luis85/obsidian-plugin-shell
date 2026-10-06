@@ -2,13 +2,13 @@
 
 > Current page and component editors of the companion concept (2026-09-26). They replace the Vue Flow detail editors
 > described in [DETAIL-EDITORS.md](DETAIL-EDITORS.md) and [COMPOSITION.md](COMPOSITION.md), which are now historical.
-> Binding design: [visual editors spec](../../superpowers/specs/2026-09-26-visual-editors-design.md) (including its
+> Binding design: [visual editors spec](../../_archive/superpowers/specs/2026-09-26-visual-editors-design.md) (including its
 > §11 refinements and §13 component library dependencies). Executed evidence and untested scope:
 > [VISUAL-EDITORS-VERIFICATION.md](VISUAL-EDITORS-VERIFICATION.md).
 
 The editors describe what a page or reusable component contains, how it responds to the user and which data it
 shows, as a declarative UI tree rather than free canvas geometry. The same tree is the project JSON format
-(`design.visualDesigns`, companion format v5), the input of the reviewed project generator (Vue SFCs with real Nuxt UI
+(`design.visualDesigns`, companion project schema 6), the input of the reviewed project generator (Vue SFCs with real Nuxt UI
 components) and the data behind the concept's previews. The concept stays one offline `index.html` under the same
 strict CSP. It renders Nuxt UI-like HTML/CSS previews, not real Nuxt UI.
 
@@ -136,11 +136,12 @@ in component templates and their revisions.
 ## Data contract summary
 
 Full rules: spec §2 and §11–§13. The runtime contract lives in `scripts/companion/visual/*.mjs`
-(`ir`, `catalog`, `validate`, `composition`, `layout`, `migrate`, `session`, `commands`, `mapping`). The concept
-inlines these modules and the generator imports them.
+(`ir`, `catalog`, `validate`, `composition`, `layout`, `session`, `commands`, `mapping`). The concept
+inlines these modules and the generator imports them; the former `visual-migrate.mjs` was removed
+with the v5 build base.
 
 ```js
-design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1 },  // ↔ generated @nuxt/ui 4.11.2
+design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1 },  // ↔ generated @nuxt/ui 4.11.3
   pages: PageDefinition[], components: ComponentDefinition[], layouts: LayoutDefinition[], revisions: ComponentRevision[] }
 ```
 
@@ -170,71 +171,12 @@ design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1
 - Editor session state (selection, viewport, open panes, inspector tab, scenario, palette) lives in `veUi` and never
   enters project JSON.
 
-## Migration from v1–v4 and what is dropped
+## Retired formats
 
-Companion v5 documents carry `visualDesigns` and must not carry `detailDesigns`. v1–v4 documents remain importable.
-`migrateDetailDesigns` converts legacy detail designs:
-
-- regions become `div` elements with layout rules;
-- primitives become Nuxt UI entries (`u-button`, `u-input`, `u-select` …) or elements;
-- bindings become `source` values;
-- edges become interactions (navigate, effect, action, or both navigate and an effect);
-- library free-text members become typed contracts.
-
-Migration runs on import, on reading an export (`companion:generate`/scaffold) and once on startup for saved browser
-state. Saved-state migration clears the design undo/redo history, because legacy snapshots cannot be replayed, and
-says so: “This project was upgraded to the new page and component editors. Earlier undo history was cleared.”
-Import shows the migration report before the explicit replacement. The report also maps every legacy edge to the
-interaction that replaced it (`interactionIds: { "detail-edge-13": "vi-14" }`); import review lists it under
-“Interaction IDs”, and a generator plan from a legacy file prints it as `legacyInteractionIds`.
-
-A saved project whose one-time upgrade fails is kept unchanged, with its only copy of the legacy detail designs. The
-notice and the Pages view name the recovery: **Export project JSON** on the Pages view writes the unchanged legacy
-document at its legacy version, `detailDesigns` included, and importing that file retries the upgrade; **Export
-recovery snapshot** is the raw alternative. The blueprint export keeps the legacy store too, and a blueprint import
-over such a project is refused, because it would discard the store. Editing pages and components stays refused until
-the project is upgraded.
-
-### Regenerating a project generated from detail designs
-
-Generated file paths changed with the visual IR, and regeneration never deletes a file:
-
-- page SFCs moved from `presentation/components/details/<detail document ID>.vue` to
-  `presentation/components/details/<vp-N>.vue`, and their spec modules from `domain/details/` to `domain/visual/`;
-- interaction hooks moved from `application/interactions/<edge ID>.ts` to `application/interactions/<vi-N>.ts`.
-
-Either regenerate into a fresh target and move your business code across, or regenerate in place: the old files stay
-(the reviewed plan tracks them as retired), `domain/detail-actions.ts` keeps a deprecated `DetailAction` type so the
-retained `domain/detail-runtime.ts` still type-checks, and you port each hook from `<edge ID>.ts` to the `<vi-N>.ts`
-named by the migration's `interactionIds` (import review or the plan's `legacyInteractionIds`). Delete the retired
-files once nothing imports them.
-
-**Dropped by design:** free canvas geometry (`position`, `size`) and outline references (`sourceBrickId`), counted as
-`droppedPositions`, `droppedSizes` and `droppedOutlineRefs`. Real data lost nothing else:
-
-| Input | Positions / sizes dropped | Any other counted loss |
-| --- | --- | --- |
-| Self-project (v4 fixture, 81 designs) | 847 / 847 | none |
-| Each of the eight non-blank starters | 30–40 / 30–40 | none |
-
-The report also counts these edge cases, all 0 on real data:
-
-| Counter | What it counts |
-| --- | --- |
-| `droppedInteractions` | Edges from text, heading or slot nodes. |
-| `droppedSlotRules` | Slot capacity/kind rules. |
-| `listBindings` | Bound lists that render one bound item and no longer repeat. |
-| `droppedFallbackBindings` | Shadowed bindings. |
-| `droppedProps` | Instance values that no longer match the contract. |
-| `truncatedNotes` | Notes over 4000 characters. |
-| `unparsedMembers` | Library member lines that could not be typed. These are kept as `string`/`unknown` with the original text as description. |
-
-`createdComponents` is not a loss: it lists component definitions created for library entries that pages used without
-a design.
-
-An undo entry recorded before the upgrade is refused while visual designs exist, rather than discarding them. A restored
-entry that holds visual designs drops a legacy store inherited from the current design; a design that is still legacy
-(for example after a failed startup upgrade) keeps its store across every undo/redo path.
+The current project format is Companion project schema 6 only. Schema 1–5 documents, including v3/v4 documents
+that carry `detailDesigns`, are rejected by the shell, compiler and current authoring build with a
+`COMPANION_VERSION` diagnostic and are never migrated; the retired formats' history lives in Git. The checked-in
+`index.html` is only the schema 6 build base of the current authoring build.
 
 ## Keyboard map
 

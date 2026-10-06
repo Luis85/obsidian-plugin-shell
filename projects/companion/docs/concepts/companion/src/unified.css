@@ -1,0 +1,73 @@
+/* One measured card grid, independent of diagram zoom. */
+.ref-canvas .map-node.brick-page{padding:8px;box-sizing:border-box}
+.ref-canvas .flow-node-content{display:flex;flex-direction:column;min-width:0}
+.ref-card-header{flex:0 0 58px;padding:12px 26px 8px!important;height:58px}
+.ref-canvas .brick-stack{gap:5px;flex:none}
+.ref-canvas .content-brick{flex:none;box-sizing:border-box;border-radius:4px}
+.ref-canvas .brick-open{padding:8px 22px!important;box-sizing:border-box}
+.ref-canvas .brick-title-row{height:16px;min-width:0;margin:0 0 4px}
+.ref-canvas .brick-title-row strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:15px;min-width:0}
+.ref-canvas .brick-wireframe{width:100%;height:calc(100% - 20px);margin:0;overflow:hidden}
+.ref-canvas .brick-grip{left:0;top:0;bottom:0;width:20px;justify-content:center}
+.ref-canvas .brick-reorder-actions{right:1px;top:20px;width:20px}
+.ref-canvas .brick-reorder-actions button{width:18px;height:21px;padding:2px}
+.ref-canvas .brick-add{flex:0 0 28px;height:28px;min-height:28px;margin:5px 0 0;padding:0}
+.ref-card-footer{flex:0 0 18px;height:18px;min-height:18px;margin:0;align-items:center;padding:0 3px}
+.ref-canvas .brick-stack.labels .brick-open{padding:7px 22px!important}
+/* Handles retain dimensions and DOM identity. Do not use display:none. */
+#vf-root .map-node .flow-port{opacity:0!important;pointer-events:none;transition:opacity .12s ease}
+#vf-root .map-node:is(:hover,.selected,:focus-within) .flow-port,
+#vf-root .vue-flow__node:hover .flow-port,
+#vf-root[data-connecting="true"] .map-node .flow-port{opacity:1!important;pointer-events:all}
+#vf-root .flow-structural-port{opacity:0!important;pointer-events:none!important}
+#vf-root .flow-port{width:24px!important;height:24px!important;min-width:24px;min-height:24px}
+#vf-root .flow-port::after{inset:6px!important}
+#vf-root .flow-port:hover::after,#vf-root .flow-port:focus-visible::after{inset:4px!important}
+#vf-root .flow-port:focus-visible{outline:2px solid var(--map-accent);outline-offset:1px;border-radius:50%}
+/* Float behind nodes, while section headers stay clickable. */
+#ref-section-layer{z-index:0;overflow:visible;pointer-events:none}
+#vf-root{position:relative;z-index:1}
+.spatial-zone{position:absolute;border:1px dashed color-mix(in srgb,var(--map-accent) 40%,var(--ref-line));border-radius:16px;background:color-mix(in srgb,var(--map-accent) 3%,transparent);box-sizing:border-box;pointer-events:none}
+.spatial-zone.drop-active{border:2px solid var(--map-accent);background:color-mix(in srgb,var(--map-accent) 12%,transparent)}
+.spatial-zone-heading{position:absolute;top:12px;left:16px;right:16px;display:flex;gap:10px;align-items:center;white-space:nowrap;font-size:12px;color:var(--ref-ink)}
+.spatial-zone-heading>span{font-size:10px;color:var(--ref-muted)}
+.spatial-zone-heading .ref-tool{margin-left:auto;width:26px;height:26px;pointer-events:auto}
+.spatial-zone>p{position:absolute;inset:70px 10px 10px;display:grid;align-content:center;justify-content:center;text-align:center;color:var(--ref-muted);font-size:13px;line-height:1.8;margin:0}
+.spatial-drop-hint{position:absolute;bottom:8px;left:16px;font-size:11px;background:var(--ref-panel);padding:4px 8px;border-radius:4px;color:var(--map-accent)}
+#alignment-guides{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden}
+.alignment-guide{position:absolute;border-color:#be55cb;color:var(--ref-ink);font-size:10px}
+.alignment-guide.axis-x{top:0;bottom:0;border-left:1px dashed #be55cb}
+.alignment-guide.axis-y{left:0;right:0;border-top:1px dashed #be55cb}
+.alignment-guide span{position:absolute;background:var(--ref-panel);padding:3px 6px;border-radius:4px;white-space:nowrap;box-shadow:0 2px 8px #0002}
+.alignment-guide.axis-x span{top:65px;left:5px}.alignment-guide.axis-y span{right:16px;top:5px}
+.component-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.component-tags button{padding:5px 9px;min-height:28px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--muted);font-size:11px}
+.component-tags button[aria-pressed="true"]{border-color:var(--accent);color:var(--text);background:var(--accent-soft)}
+.library-detail>.component-tags{margin:18px 0 16px}
+.unified-filterbar{gap:12px;flex-wrap:wrap;justify-content:flex-start}
+.unified-sort{margin-left:auto;display:flex;gap:7px;align-items:center;font-size:12px;color:var(--muted)}
+.unified-sort select{width:160px}
+.library-brick-preview .library-preview-block{min-height:100px}
+.library-brick-preview .brick-wireframe{width:100%;height:120px}
+.library-item{min-height:78px}
+.library-miniature .brick-wireframe{width:54px;height:42px}
+@media(max-width:760px){.unified-sort{margin-left:0}.spatial-zone-heading{font-size:10px;gap:5px}.spatial-zone-heading>span{display:none}}
+@media(prefers-reduced-motion:reduce){#vf-root .map-node .flow-port{transition:none}}
+/* Override the former ID-scoped card reset at its actual boundary. */
+#vf-root .map-node.brick-page{padding:8px!important;box-sizing:border-box}
+#vf-root .brick-page .flow-node-content{display:flex;padding:0;overflow:visible;min-width:0}
+#vf-root .brick-page .ref-card-header .map-card-title{display:block;font-size:15px;line-height:20px;margin:0;white-space:nowrap;max-width:100%;text-overflow:ellipsis}
+#vf-root .brick-page>.flow-port.vue-flow__handle-left{left:-1px!important}
+#vf-root .brick-page>.flow-port.vue-flow__handle-right{right:-1px!important}
+#vf-root .map-node>.flow-port.vue-flow__handle-top{top:-1px!important}
+#vf-root .map-node>.flow-port.vue-flow__handle-bottom{bottom:-1px!important}
+#vf-root .brick-page .brick-add{opacity:.7}
+#vf-root .brick-page .ref-card-footer{opacity:.8}
+#vf-root .brick-page .ref-card-footer .flow-card-intent{min-height:0!important;max-height:18px!important;display:flex!important;line-height:14px!important}
+#vf-root .brick-page .brick-add:hover{opacity:1}
+
+#section-controls{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.section-control{position:absolute;pointer-events:auto}
+.section-control .ref-tool{background:var(--ref-panel);width:30px;height:30px}
+.unified-tag-select{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.unified-tag-select select{width:150px}

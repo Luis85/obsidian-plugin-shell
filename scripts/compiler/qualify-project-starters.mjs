@@ -9,8 +9,9 @@ const root = process.cwd(), args = process.argv.slice(2), options = {};
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
   if (arg === '--execute') options.execute = true;
+  else if (arg === '--no-browser') options.noBrowser = true;
   else if (arg === '--starter' && args[i + 1] && !args[i + 1].startsWith('--')) options.starter = args[++i];
-  else throw new Error('Use --starter <project-starter-id> --execute.');
+  else throw new Error('Use --starter <project-starter-id> --execute [--no-browser].');
 }
 if (!options.execute) {
   console.log(JSON.stringify({ status: 'planned', starter: options.starter ?? null, steps: ['Create disposable approved fixture from the installed project starter through new guide/plan/apply.', 'Explicit npm install, clean npm ci, typecheck, tests and build.', 'Exact-artifact offline browser or CLI acceptance; native host not activated.'], requires: '--execute and QUALIFIED_NPM' }));
@@ -35,12 +36,12 @@ async function qualify() {
   try {
     if (run('npm version', root, [process.env.QUALIFIED_NPM, '--version']).trim() !== '11.19.1') throw new Error('Wrong npm version.');
     scratch = await mkdtemp(join(tmpdir(), 'qualify-project-'));
-    const discovery = JSON.parse(run('discover', root, ['shell.mjs', 'new', 'guide', '--starter', starter, '--json']));
+    const discovery = JSON.parse(run('discover', root, ['bin/app', 'new', 'guide', '--starter', starter, '--json']));
     const input = discovery.data.input; report.selection = discovery.data.selection;
     if (report.selection.starter.id !== starter || input.starter !== starter) throw new Error('Discovery did not select the requested starter.');
     Object.assign(input.interview.answers, { title: 'Qualified starter fixture', pages: ['Overview', 'Details'], components: [], approved: true });
     await writeFile(join(scratch, 'request.json'), JSON.stringify(input));
-    const planArgs = ['shell.mjs', 'new', '--root', scratch, '--input', 'request.json', '--out', 'prepared', '--json'];
+    const planArgs = ['bin/app', 'new', '--root', scratch, '--input', 'request.json', '--out', 'prepared', '--json'];
     const plan = JSON.parse(run('plan', root, planArgs)); report.fingerprint = plan.data.compilerFingerprint;
     const applied = JSON.parse(run('apply', root, [...planArgs, '--apply', plan.data.planHash]));
     if (applied.status !== 'applied') throw new Error('Expected an applied source fixture.');
@@ -59,10 +60,12 @@ async function qualify() {
     if (report.selection.framework !== 'none') {
       run('offline prototype build', source, [npm, 'run', 'build:prototype']);
       await copyFile(join(source, 'dist/prototype.html'), join(folder, 'prototype.html'));
-      await browserCheck(join(source, 'dist/prototype.html'), report);
+      // --no-browser (CI without the e2e opt-in) keeps the build and retained prototype; the browser smoke is not run.
+      if (options.noBrowser) report.browser = 'not-run: --no-browser';
+      else await browserCheck(join(source, 'dist/prototype.html'), report);
     }
     await collect(join(source, 'dist'), report.artifacts, source);
-    report.status = 'passed-source-build-and-target-smoke';
+    report.status = options.noBrowser && report.selection.framework !== 'none' ? 'passed-source-build-without-browser-smoke' : 'passed-source-build-and-target-smoke';
     report.productAcceptance = 'not-inferred: agreed product behavior must be implemented separately';
   } catch (error) {
     report.status = 'failed'; report.error = error instanceof Error ? error.message : String(error); process.exitCode = 1;
@@ -81,7 +84,8 @@ async function collect(folder, inventory, source) {
 }
 async function browserCheck(path, report) {
   const { chromium, expect } = await import('@playwright/test');
-  const browser = await chromium.launch({ headless: true });
+  const { chromiumLaunchOptions } = await import('../testing/browser-executable.mjs');
+  const browser = await chromium.launch({ headless: true, ...chromiumLaunchOptions() });
   const errors = [], network = [];
   report.browser = { status: 'running', source: 'exact Vite-built prototype.html', errors, network };
   try {

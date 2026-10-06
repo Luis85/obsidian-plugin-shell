@@ -8,10 +8,11 @@ replacement generator and does not change framework `setup` behavior.
 
 Use `project-setup` to prepare a new Angular **webapp** in an existing Git worktree
 that is also an Obsidian vault. Setup runs the installed `webapp-angular` project
-starter by ID, read from `configs/starters/` beside `shell.mjs` like every starter;
+starter by ID, read from `configs/starters/` in the CLI package root like every starter;
 extract the separate starters ZIP there first. Setup fails closed when that starter
 is missing or does not select Angular with a webapp target. The shipped starter pins
-Angular 22.0.0; `project.config.json` records the starter ID, version and SHA-256.
+Angular 22.0.0; `configs/<project-id>-config.json` records the starter ID, version and SHA-256
+(see [project configuration](PROJECT-STARTERS.md#project-configuration)).
 A release uses its tested starter definition, not an unreviewed live `latest`
 dependency lookup. This change does not publish a release; use a kit built from the
 implementing commit until shipment is separately approved.
@@ -41,12 +42,12 @@ Keep the downloaded/extracted CLI kit intact, for example under
 `<project>/tools/shell-cli/`. From the **project root**, run:
 
 ```sh
-node tools/shell-cli/shell.mjs project-setup --root .
+node tools/shell-cli/bin/app project-setup --root .
 ```
 
-From a source checkout instead, run `node shell.mjs project-setup --root <vault>`.
+From a source checkout instead, run `node bin/app project-setup --root <vault>`.
 Use the qualified Node 24.21.0/npm 11.19.1 toolchain. Source checks require the locked
-repository TypeScript 6.0.3; release kits carry compiled CLI modules and do not
+repository TypeScript 6.0.3; framework kits carry compiled CLI modules and do not
 require an implicit npm install to discover commands or prepare a plan.
 
 The wizard checks the selected folder is itself the Git working-tree root and has
@@ -73,8 +74,8 @@ After selecting boilerplate, choose the separately reviewed first run in the wiz
 or start it later from the project root:
 
 ```sh
-node tools/shell-cli/shell.mjs first-run
-node tools/shell-cli/shell.mjs first-run status --json
+node tools/shell-cli/bin/app first-run
+node tools/shell-cli/bin/app first-run status --json
 ```
 
 The runner stops on the first failure and preserves generated source and completed
@@ -113,6 +114,10 @@ not by schema discovery, scans or previews. See [the full example](examples/user
 | `paths.app` | `apps/product` | Generated application source |
 | `paths.brief` | `docs/project-brief.md` | Project/product brief |
 | `paths.firstRunReport` | `reports/first-run.json` | Last recorded managed execution |
+| `paths.risks` | `docs/risks` (optional) | Risk register notes; see [risk management](../docs/development/RISK-MANAGEMENT.md) |
+| `paths.learnings` | `docs/learnings` (optional) | Lessons-learned notes; see [learnings](../docs/development/LEARNINGS.md) |
+| `paths.releaseItems` | `docs/releases/items` (optional) | Release item notes; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
+| `paths.releaseCandidates` | `docs/releases/candidates` (optional) | One folder per release candidate version; see [release candidates](../docs/development/RELEASE-CANDIDATES.md) |
 | `preferences.author` | `Your name` | Default author on a new project |
 | `preferences.ui` | `auto` | `auto`, `tui` or `plain` presentation |
 | `preferences.scanRecursive` | `true` | Include PRD subfolders |
@@ -140,16 +145,17 @@ paths, `..`, backslashes, whitespace normalization, reserved Windows names, case
 collisions, protected host/dependency/Git directories and symbolic links are refused.
 The fixed discovery/metadata files are `configs/user-settings.json`,
 `configs/project-setup.json`, `configs/project-setup-draft.json` and
-`project.config.json`; they cannot relocate themselves.
+`configs/<project-id>-config.json`; they cannot relocate themselves, and configured
+paths stay outside `configs/`.
 There are no provider secrets or arbitrary executable commands in the settings.
 Host/plugin `data.json`, project target selection, prototype answers and transient
 terminal state retain their own existing contracts; they are not duplicated here.
 
 ```sh
-node tools/shell-cli/shell.mjs settings
-node tools/shell-cli/shell.mjs settings show --json
-node tools/shell-cli/shell.mjs settings schema --json
-node tools/shell-cli/shell.mjs settings --input settings-change.json --json
+node tools/shell-cli/bin/app settings
+node tools/shell-cli/bin/app settings show --json
+node tools/shell-cli/bin/app settings schema --json
+node tools/shell-cli/bin/app settings --input settings-change.json --json
 ```
 
 A settings mutation is a preview until repeated with its reviewed `--apply` hash.
@@ -158,7 +164,7 @@ rewrite. The interactive settings form selects a migration plan when application
 paths change; agents explicitly call:
 
 ```sh
-node tools/shell-cli/shell.mjs settings migrate --input paths.json --json
+node tools/shell-cli/bin/app settings migrate --input paths.json --json
 # Review file moves, then repeat with --apply <current-planHash>.
 ```
 
@@ -215,12 +221,12 @@ progress/prompts use stderr. Inspect `data.status` and diagnostics, not just exi
 uses 130. No `--yes` approval bypass is added.
 
 ```sh
-node tools/shell-cli/shell.mjs project-setup schema --json
-node tools/shell-cli/shell.mjs project-setup guide --json
-node tools/shell-cli/shell.mjs project-setup scan --json
-node tools/shell-cli/shell.mjs sketch schema --json
-node tools/shell-cli/shell.mjs project-setup validate --input setup.json --json
-node tools/shell-cli/shell.mjs project-setup --input setup.json --json
+node tools/shell-cli/bin/app project-setup schema --json
+node tools/shell-cli/bin/app project-setup guide --json
+node tools/shell-cli/bin/app project-setup scan --json
+node tools/shell-cli/bin/app sketch schema --json
+node tools/shell-cli/bin/app project-setup validate --input setup.json --json
+node tools/shell-cli/bin/app project-setup --input setup.json --json
 ```
 
 Start from [the request example](examples/angular-setup.json). Set
@@ -252,13 +258,13 @@ continue authoring instead of rerunning initialization.
 ## Further brick authoring
 
 ```sh
-node tools/shell-cli/shell.mjs sketch
-node tools/shell-cli/shell.mjs sketch show --json
-node tools/shell-cli/shell.mjs sketch --input changes.json --json
-node tools/shell-cli/shell.mjs sketch generate --json
-node tools/shell-cli/shell.mjs prototype guide --json
-node tools/shell-cli/shell.mjs prototype
-node tools/shell-cli/shell.mjs project-setup status --json
+node tools/shell-cli/bin/app sketch
+node tools/shell-cli/bin/app sketch show --json
+node tools/shell-cli/bin/app sketch --input changes.json --json
+node tools/shell-cli/bin/app sketch generate --json
+node tools/shell-cli/bin/app prototype guide --json
+node tools/shell-cli/bin/app prototype
+node tools/shell-cli/bin/app project-setup status --json
 ```
 
 These commands use saved project/output paths, and generation/prototype preparation
@@ -293,8 +299,8 @@ production maker coverage, analyzer/architecture/maintainability gates and gener
 Angular install/typecheck/test/build/browser checks with the qualified dependencies.
 The new tests are discovered by the existing `interactive-maker-*.checks.mjs` suite;
 no quality threshold is reduced. The implementation evidence is recorded separately
-under `docs/testing/ANGULAR-PROJECT-SETUP.md` and
-[the Angular rendering verification record](../docs/testing/ANGULAR-BRICKS.md).
+under `docs/_archive/testing/ANGULAR-PROJECT-SETUP.md` and
+[the Angular rendering verification record](../docs/_archive/testing/ANGULAR-BRICKS.md).
 Earlier records retain their original candidate and environment; passing predecessor
 checks are not assigned to a later commit. Setup status records preparation, not
 continuous observation of external npm commands or browser acceptance.

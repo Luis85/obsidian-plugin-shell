@@ -44,7 +44,7 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
@@ -79,12 +79,12 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "knowledge-collection-plugin",
+        "id": "knowledge-collection",
         "name": "Knowledge Collection",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
         "description": "Organize structured notes as a browsable collection with editable details."
       },
@@ -93,7 +93,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Adapt into a reading list, research library, asset register or simple CRM.",
         "platform": "desktop",
@@ -3251,7 +3251,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

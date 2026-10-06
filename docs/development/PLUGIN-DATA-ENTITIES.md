@@ -1,5 +1,7 @@
 # Plugin-data entities
 
+> Type: reference · Part of the [docs index](../README.md)
+
 Choose this backend for feature data that belongs in the plugin's `data.json`.
 Markdown-backed features continue to use `defineNoteFeature` and Markdown remains
 their only canonical store. Registration rejects duplicate entity keys across

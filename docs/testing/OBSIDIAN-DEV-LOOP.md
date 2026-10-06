@@ -1,5 +1,7 @@
 # Real-Obsidian dev loop and E2E tests
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 Two commands run the built plugin inside a real Obsidian desktop app. Both use
 only contained vaults inside this checkout; they never open a personal vault.
 
@@ -39,7 +41,7 @@ hot-reloaded over the DevTools protocol. The loop disables the plugin, re-reads
 its manifest and enables it again. A status line reports build, reload and total
 time. A failed build keeps the last good build installed. The watchers cover `src/`,
 `scripts/bundling/`, the product roots a generated project names in
-`tsconfig.project.json` (for example a custom `<codebaseFolder>/generated`) and the
+`configs/types/tsconfig.project.json` (for example a custom `<codebaseFolder>/generated`) and the
 build configuration; a watched folder that is deleted and recreated is watched again.
 
 Ctrl-C or SIGTERM works at any point, including during the build and launch: every

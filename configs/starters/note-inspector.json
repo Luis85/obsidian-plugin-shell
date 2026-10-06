@@ -44,14 +44,14 @@
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Your Name"
     },
     {
       "id": "description",
       "label": "Description",
       "type": "string",
       "required": false,
-      "default": "Inspect a note’s declared metadata and review a possible edit."
+      "default": "Inspect the declared metadata of a note and review a possible edit."
     },
     {
       "id": "version",
@@ -79,21 +79,21 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "note-inspector-plugin",
+        "id": "note-inspector",
         "name": "Note Inspector",
-        "author": "",
+        "author": "Your Name",
         "version": "0.1.0",
-        "description": "Inspect a note’s declared metadata and review a possible edit."
+        "description": "Inspect the declared metadata of a note and review a possible edit."
       },
       "settings": {
         "codebaseFolder": "src",
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Use for contextual helpers, property editors or note-quality tools.",
         "platform": "desktop",
@@ -2527,7 +2527,7 @@
   ],
   "nextSteps": [
     "npm ci",
-    "npm run verify:project",
+    "npm run check",
     "npm run dev:ui"
   ]
 }

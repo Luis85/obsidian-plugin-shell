@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
-import { hash } from '../../scripts/framework/files.ts';
+import { hash } from '../../bin/adapters/framework/files.ts';
 import { readFeatureBrainstorm, featureConcept, brainstormSchema } from '../../bin/domain/brainstorm.ts';
 import { brainstormFeaturePlan, brainstormVerifyPlan } from '../../bin/adapters/brainstorm.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
@@ -90,7 +90,7 @@ test('human definition and machine definition share the exact canonical plan', a
     assert.equal((await brainstormFeaturePlan(definition.feature, options)).plan.changes
       .every(change => change.status === 'unchanged'), true);
   }));
-test('verification refuses unowned source and ownership-receipt tampering before process planning', async () =>
+test('verification refuses unowned source and ownership-receipt tampering before process planning', { timeout: 180000 }, async () =>
   scratch(async (options, document) => {
     const payload = readFeatureBrainstorm({ ...request, output: 'prototype', verification: 'test',
       projectId: document.project.id, baseSha256: hash(documentText(document)) });

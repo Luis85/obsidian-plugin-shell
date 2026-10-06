@@ -13,11 +13,15 @@ package scripts, side effects and execution plan hash. Approving file generation
 never approves package execution. The first-run choice is offered only after
 boilerplate was created; it can also be started later from the studio or CLI.
 
+The commands below use the extracted-kit path: the CLI kit lives under
+`<project>/tools/shell-cli/` and the commands run from the project root. From a
+source checkout of this repository, the same commands are `node bin/app <command>`.
+
 ```sh
 # From the project root, with the CLI kit kept intact:
-node tools/shell-cli/shell.mjs project-setup --root .
-node tools/shell-cli/shell.mjs first-run
-node tools/shell-cli/shell.mjs first-run status --json
+node tools/shell-cli/bin/app project-setup --root .
+node tools/shell-cli/bin/app first-run
+node tools/shell-cli/bin/app first-run status --json
 ```
 
 ## What is executed
@@ -104,11 +108,11 @@ There is no interactive-only execution path. Agents first apply the setup's file
 plan, then prepare and separately approve a first-run execution plan:
 
 ```sh
-node tools/shell-cli/shell.mjs first-run schema --json
-node tools/shell-cli/shell.mjs first-run --input first-run.json --json
+node tools/shell-cli/bin/app first-run schema --json
+node tools/shell-cli/bin/app first-run --input first-run.json --json
 # Inspect data.package, data.review, data.blockers, data.steps and data.planHash.
-node tools/shell-cli/shell.mjs first-run --input first-run.json --json --apply "$PLAN_HASH"
-node tools/shell-cli/shell.mjs first-run status --json
+node tools/shell-cli/bin/app first-run --input first-run.json --json --apply "$PLAN_HASH"
+node tools/shell-cli/bin/app first-run status --json
 ```
 
 [Example request](examples/first-run.json): choose mode `verify` for build-only
@@ -145,4 +149,4 @@ termination of the owned child tree with taskkill. Arbitrary external scripts ar
 not transactional or universally contained by this coordination mechanism.
 
 The validation record is in
-[docs/testing/FIRST-RUN.md](../docs/testing/FIRST-RUN.md).
+[docs/_archive/testing/FIRST-RUN.md](../docs/_archive/testing/FIRST-RUN.md).
