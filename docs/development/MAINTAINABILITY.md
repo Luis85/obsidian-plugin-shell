@@ -6,7 +6,7 @@
 qualified Fallow 3.31.0 CLI. It never rewrites application source. Reports and the
 unaltered JSON/stderr of each tool invocation go to a new timestamped directory
 under `reports/maintainability`. Run
-`node scripts/quality/check-maintainability.mjs --check REPORT_DIRECTORY` to
+`node tooling/quality/check-maintainability.mjs --check REPORT_DIRECTORY` to
 validate a retained result against current source and installed tool identities.
 Report commands are descriptive data; the checker never executes them.
 
@@ -35,7 +35,7 @@ policy decision still comes from the actual numeric measurements below. A tool
 crash, unknown schema or invalid JSON never counts as a measurement. The independent zero-finding `check:analyzer`,
 architecture, source-line and coverage checks retain their own rules.
 
-The separate dead-code analyzer declares `src/features/api.ts` as one explicit
+The separate dead-code analyzer declares `src/plugin/features/api.ts` as one explicit
 public library entry. Fallow treats entry exports as externally consumed;
 the installed `schema.json` documents this through `entry` and
 `includeEntryExports`. This preserves the reviewed authoring contracts after
@@ -70,7 +70,7 @@ classified as unsupported by this JS/TS/Vue function/clone measurement. They kee
 their independent parser, provenance, style and source-line checks.
 
 The companion adds Python assembly/browser tooling as immediate `.py` files in
-`scripts/concepts` and `tests/concepts`. These are retained with exact hashes,
+`tooling/concepts` and `src/companion/tests/concepts`. These are retained with exact hashes,
 byte counts and `view: unsupported`, `measurement: not-measured`, plus an explicit
 Python scope reason. They do not enter any Fallow function/clone corpus or inflate
 the production denominator. Changing or omitting one still invalidates a retained
@@ -82,16 +82,16 @@ suites. Syntax success is not Python complexity, coverage or native qualificatio
 normal template setup does not acquire an additional Python runtime prerequisite.
 
 The optional memory integration similarly inventories only these reviewed Python
-paths: `scripts/hindsight/embedded.py`, `tests/hindsight/test_embedded.py` and
-`tests/hindsight/test_providers.py`. Their exact bytes remain fingerprinted with
+paths: `src/cli/tooling/hindsight/embedded.py`, `tooling/tests/hindsight/test_embedded.py` and
+`tooling/tests/hindsight/test_providers.py`. Their exact bytes remain fingerprinted with
 an explicit optional-memory reason and `measurement: not-measured`. They do not
 change any measured production denominator or add Python to default setup.
 Unreviewed files in those directories still fail `METRIC_UNCLASSIFIED_INPUT`.
 The separate optional-memory workflow owns adapter tests and provider acceptance.
 
-The one POSIX shell file, `scripts/agent/cloud-setup.sh` (the paste-in setup script for
+The one POSIX shell file, `tooling/agent/cloud-setup.sh` (the paste-in setup script for
 Claude Code cloud environments), is inventoried by exact path with its bytes and
-`measurement: not-measured`; `tests/tooling/agent-cloud-setup.checks.mjs` runs it
+`measurement: not-measured`; `tooling/tests/agent-cloud-setup.checks.mjs` runs it
 against a local download server. Other shell files still fail `METRIC_UNCLASSIFIED_INPUT`.
 
 Four measured views are retained: production, executable tooling/configuration,

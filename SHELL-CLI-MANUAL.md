@@ -9,7 +9,7 @@ maintenance, release preparation and troubleshooting.
 Generate the command reference from the same metadata as terminal help:
 
 ```sh
-node --experimental-strip-types scripts/documentation/manual.mjs
+node --experimental-strip-types tooling/documentation/manual.mjs
 ```
 
 See [documentation authoring](docs/user-manual/shell-cli/documentation-authoring.md)

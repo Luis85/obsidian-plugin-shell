@@ -157,13 +157,13 @@ native qualification stay in `verify` and CI.
 
 | Scope | Detected by | Steps |
 |---|---|---|
-| Shell repository | default | `vue-tsc --noEmit`, `scripts/quality/lint-source.mjs`, `eslint src bin --max-warnings 0`, `vitest run`, `tsc --project configs/types/tsconfig.maker.json`, the `maker` suite |
+| Shell repository | default | `vue-tsc --noEmit`, `tooling/quality/lint-source.mjs`, `eslint src bin --max-warnings 0`, `vitest run`, `tsc --project configs/types/tsconfig.maker.json`, the `maker` suite |
 | Generated project | `.companion/generation.json` and `configs/types/tsconfig.project.json` | `vue-tsc --noEmit --project configs/types/tsconfig.project.json`, `eslint src <product roots> --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
 
 A generated project's product roots are the folders named in `configs/types/tsconfig.project.json`
 that are not test roots (`tests/suites.json`), for example `<codebaseFolder>/generated`
 for a custom codebase folder. ESLint, the dev watchers and the agent hooks all derive
-them from `scripts/shared/project-roots.mjs`. After a passing run in a generated
+them from `src/shared/platform/project-roots.mjs`. After a passing run in a generated
 project, the summary points to `npm run verify:project`; in the shell it points to
 `verify`.
 
@@ -180,16 +180,16 @@ with `BASE_NOT_FOUND`. `data.changes.base` reports the `source` (`option`,
 | Fast step | Narrowed to | Falls back to |
 |---|---|---|
 | `typecheck`, `maker-types` | unchanged | unchanged |
-| `lint` (`scripts/quality/lint-source.mjs`) | changed `src`, `bin`, `plugins`, `templates/companion/runtime` files | every owned input |
+| `lint` (`tooling/quality/lint-source.mjs`) | changed `src`, `bin`, `plugins`, `templates/companion/runtime` files | every owned input |
 | `eslint` | changed code files under the eslint roots (`--no-warn-ignored`) | the full roots |
 | `test` | `vitest related --run --passWithNoTests` over changed code files; skipped when none | `vitest run` |
-| `suites` | `node scripts/testing/suites.mjs <names>` for the node `--test` suites a changed path selects (below); skipped when none | none |
+| `suites` | `node tooling/testing/suites.mjs <names>` for the node `--test` suites a changed path selects (below); skipped when none | none |
 
 A node suite is selected when a changed path matches its `include` globs in
 `tests/suites.json` (a changed test file), or a source glob in
 `configs/quality/gate-rules.json` `suiteSources` (the code the suite protects, for
-example `templates/**`, `src/cli/compiler/**` and `scripts/companion/**` for `generator`;
-`src/cli/adapters/makers/**` and `scripts/makers/**` for `maker`), or a change-type rule that
+example `templates/**`, `src/cli/compiler/**` and `src/shared/companion/**` for `generator`;
+`src/cli/adapters/makers/**` and `tooling/makers/**` for `maker`), or a change-type rule that
 names it. `data.suites[]` lists each selected suite with the matched pattern and sample
 paths. The slow `maker` suite therefore runs only when something it covers changed;
 the full `check` still always runs it. The lint, eslint and test steps fall back to
@@ -224,12 +224,12 @@ gate. The JSON result keeps the check protocol (`protocolVersion` 1, `command` `
   the `check` gate also lists its exact `steps`;
 - `data.flags[]` (a change under `configs/quality/**` or the threshold code carries
   `THRESHOLD_CHANGE`: "threshold change: requires owner review"), `data.notes[]`
-  (generated-snapshot regeneration for `templates/**`, `src/cli/compiler/**`, `scripts/compiler/**`,
-  `scripts/companion/**`; workflow changes; dependency manifests; documentation-only
+  (generated-snapshot regeneration for `templates/**`, `src/cli/compiler/**`, `tooling/compiler/**`,
+  `src/shared/companion/**`; workflow changes; dependency manifests; documentation-only
   diffs), `data.workflows[]` (workflows that run for this diff) and `data.estimate`.
 
 Rules: `src/**` requires `check` and `npm run test:coverage:production`;
-`src/presentation/**` adds `check:presentation`; event files add `events:check`; a
+`src/plugin/presentation/**` adds `check:presentation`; event files add `events:check`; a
 documentation-only diff requires only the documentation checks. Every plan ends with
 `npm run verify`, the pre-PR full gate (`npm run verify:project` in a generated project).
 A suite selected only because a path-filtered workflow runs it is reported with

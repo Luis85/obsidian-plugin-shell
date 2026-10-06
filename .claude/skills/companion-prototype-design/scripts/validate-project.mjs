@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { args, need, readBytes, noLinks, sha256, isMain, cli } from './lib/io.mjs';
+import { args, need, readBytes, layoutPath, noLinks, sha256, isMain, cli } from './lib/io.mjs';
 
 // Runs local repository code. Only point --repo at the trusted, inspected checkout.
 // No dependency installation, CLI apply, native host, or live vault is involved.
@@ -10,7 +10,7 @@ export function validateProject(directory, input, timeout = 120000) {
   const repo = noLinks(directory);
   const source = noLinks(input);
   const bytes = readBytes(source, 4_000_000);
-  const reader = path.join(repo, 'scripts/companion-tools/generate.mjs');
+  const reader = path.join(repo, layoutPath(repo, 'tooling/companion-tools/generate.mjs', 'scripts/companion-tools/generate.mjs'));
   const app = path.join(repo, 'bin/app');
   readBytes(reader); readBytes(app);
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'prototype-contract-'));

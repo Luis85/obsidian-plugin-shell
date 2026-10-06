@@ -11,7 +11,7 @@ This is separate from the plugin system emitted into generated projects. Workben
 Each plugin is self-contained:
 
 ```text
-plugins/
+src/cli/sdk/
   registry.ts
   my-plugin/
     manifest.json
@@ -24,7 +24,7 @@ plugins/
 
 `src/index.ts` exports a named `PluginObject` satisfying `WorkbenchPluginObject`. The manifest ID must equal the directory name; `npm run check:plugins` verifies the directory, manifest/config, source/test layout and explicit registry entry. `config.json` is plugin-owned configuration and may set `enabled: false`. Disabled plugins contribute nothing and are not activated.
 
-Register the plugin explicitly in `plugins/registry.ts`. Workbench does not scan folders and execute whatever it finds. Plugin code is trusted application/tooling code, not a sandbox.
+Register the plugin explicitly in `src/cli/sdk/registry.ts`. Workbench does not scan folders and execute whatever it finds. Plugin code is trusted application/tooling code, not a sandbox.
 
 Create a plugin through the reviewed maker instead of hand-creating the package:
 

@@ -19,7 +19,7 @@ npm run setup
 
 Node/npm must already exist; an npm command cannot install its own required runtime first. A source download without .git can still use browser setup, while Git-dependent release operations report that prerequisite separately.
 
-**SETUP-01:** Map setup to `node scripts/setup.mjs`. Its bootstrap imports only Node built-ins or checked-in dependency-free .mjs files until installation succeeds. No local TS runner, Vite, prompt package, or node_modules is needed to start/help/dry-run. Locked npm ci is an internal stage, not a hidden prerequisite.
+**SETUP-01:** Map setup to `node tooling/setup.mjs`. Its bootstrap imports only Node built-ins or checked-in dependency-free .mjs files until installation succeeds. No local TS runner, Vite, prompt package, or node_modules is needed to start/help/dry-run. Locked npm ci is an internal stage, not a hidden prerequisite.
 
 **SETUP-02:** The wizard is explicitly invoked, never recursively launched by root preinstall/install/postinstall/prepare/presetup/postsetup. Dependency installation must not ask for identity, mutate a vault, launch watchers, or publish. Review the qualified dependency lifecycle-script policy; neither unexamined unrestricted hooks nor blanket disabling needed native hooks is a sound workaround. [S01–S03]
 
@@ -70,7 +70,7 @@ npm's silent mode avoids script banners in JSON stdout. Human progress uses stde
 **TOOL-02:** Conventional root Vite/Vitest/Playwright/ESLint/TS/package/manifest configs may remain declarative or thin adapters. Runtime code and entity definitions are not moved into tooling merely to satisfy folder conventions.
 
 ```text
-scripts/
+tooling/
   setup.mjs
   make.mjs
   help.mjs
@@ -180,7 +180,7 @@ A style file must join the real CSS/SFC graph. Update ordered imports once, neve
 
 An entity definition validates values; its separate document definition maps allowed frontmatter/body/destination. The shared DocumentCreationService handles preparation/create/results. The generated Task recipe does not build YAML by hand, overwrite existing notes, create notes at startup, or duplicate its canonical data in data.json. [Document contract](../architecture/DOCUMENT-CREATION.md)
 
-`entities:check` validates registered schemas/defaults/projections/property-name type consistency; `entities:catalog` derives documentation. Implement both under scripts/quality and compose them into normal verification. Domain entities without document mappings remain allowed.
+`entities:check` validates registered schemas/defaults/projections/property-name type consistency; `entities:catalog` derives documentation. Implement both under tooling/quality and compose them into normal verification. Domain entities without document mappings remain allowed.
 
 ## 5. Qualification boundary
 

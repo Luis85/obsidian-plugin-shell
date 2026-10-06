@@ -361,7 +361,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/session-start.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tooling/agent/session-start.mjs\"",
             "timeout": 600
           }
         ]
@@ -372,7 +372,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/stop-check.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tooling/agent/stop-check.mjs\"",
             "timeout": 330
           }
         ]

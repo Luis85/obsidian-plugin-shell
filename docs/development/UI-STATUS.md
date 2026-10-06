@@ -13,7 +13,7 @@ the same CLI. It never writes, runs a test, starts a browser or reads outside th
 | `design/visual-traceability.json` | Surfaces (page and component definitions) and interactions with their linked stub and acceptance-test paths. |
 | `design/project.json` | Surface labels and `design.sitemap.journeys[].steps`. |
 | Linked `src/generated/application/interactions/<id>.ts` and `tests/**/acceptance/<id>.test.ts` | Static implementation state (below). |
-| `tests/e2e/**/*.spec.*` | Which specs mention a surface or interaction id, and which journey steps have a spec titled `[journeyId/stepId]`. |
+| `src/plugin/tests/e2e/**/*.spec.*` | Which specs mention a surface or interaction id, and which journey steps have a spec titled `[journeyId/stepId]`. |
 | `reports/e2e/results.json` (Playwright JSON reporter) | Passed/failed/skipped specs, project names, themes and widths observed in labels, and ids found in passing titles. |
 | `reports/ui-gallery/index.json` | Capture count, surfaces, themes and widths, and surfaces with no capture. |
 
@@ -61,7 +61,7 @@ Journey titles must be literal; interpolated template titles cannot be matched s
 - `src/cli/adapters/framework/ui-status.ts`: bounded file-system port and the operation.
 - `src/cli/adapters/framework/ui-operation.ts`: the `ui` group dispatch. Add a subcommand with one handler entry here and one catalog row.
 - `src/cli/presentation/terminal/ui-status-view.ts`: the human table.
-- Tests: `tests/tooling/interactive-maker-ui-status-domain.checks.mjs` and `...-adapter.checks.mjs` (maker suite, so they count toward the CLI coverage gate).
+- Tests: `src/cli/tests/interactive-maker-ui-status-domain.checks.mjs` and `...-adapter.checks.mjs` (maker suite, so they count toward the CLI coverage gate).
 
 No generator output changed, so generated-project snapshots and the kit inventory only change through
 the new files under `bin/`.

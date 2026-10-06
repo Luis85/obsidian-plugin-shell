@@ -3,7 +3,7 @@
 ## Start here
 
 **What this repo is.** Workbench is a reusable Obsidian plugin shell with three
-parts: development sources in `src/` (plugin runtime and `src/cli`), the built `node bin/app` CLI
+parts: development sources in `src/`, split into self-contained source projects (`shared`, `tui`, `cli`, `companion`, `plugin`), the built `node bin/app` CLI
 that sets up, checks and extends projects (`new`, `setup`, `make`, `generate`,
 `check`, `ci`, `ui`, `memory`, `adopt`, `design`, `increment`, `pr`, `issue`), and the authoring path from the browser companion
 concept through the dedicated compiler to independent generated projects (project
@@ -15,25 +15,28 @@ qualification and release authorization are separate. Milestone background is in
 
 | Path | Holds |
 | --- | --- |
-| `src/` | The shell's plugin runtime: domain, application, features, infrastructure, presentation, bootstrap, styles, locales; `main.ts` is lifecycle composition only. |
+| `src/` | Source projects, each self-contained (own code, `tests/`, fixtures, `tsconfig.json`) and declared in `workbench.sources.json`. Dependency graph: `shared` has none; `tui` → `shared`; `cli` → `shared`, `tui`; `companion` → `shared`; `plugin` → `shared`. Nothing else lives at the `src/` root. Source projects never import `tooling/` or root `tests/`. |
+| `src/shared/` | Library: `platform/` helpers, `contracts/`, and `companion/` schema and contracts used by the CLI and the companion. Imported as `#shared/*`. |
+| `src/tui/` | Library: reusable terminal UI engine and generic terminal helpers, no entrypoint. Imported as `#tui/*`. |
+| `src/cli/` | Workbench CLI development: adapters, application, domain, presentation, compiler, guides and examples; `src/cli/sdk/` is the Workbench extension SDK and example extension (was `plugins/`). `npm run app:dev -- <args>` runs current source. |
+| `src/companion/` | Browser companion application: `editor/` and `app/` (the authoring concept sources; `npm run companion:build` still writes `docs/concepts/companion/index.html`). |
+| `src/plugin/` | The shell's Obsidian plugin runtime: domain, application, features, infrastructure, presentation, bootstrap, styles, locales; `main.ts` is lifecycle composition only. `src/plugin/harness/` is the browser harness for the served UI (was `harness/`); never shipped in the plugin. |
+| `workbench.sources.json` | Manifest of the source projects (name, kind, path, references). Manage them with `node bin/app source list`, `graph`, `check` (`--fix` for a reviewed plan), `add`, `link`, `unlink`, `rename` and `remove`; writing operations preview first and apply with `--apply <planHash>` or `--yes`. Do not hand-edit the derived tsconfig references or `package.json` `imports`. |
 | `projects/<name>/` | Standalone projects built from concepts (first: `companion`). Each has its own lock, `AGENTS.md`, gates and workflows, and a `workbench.project.json` linking its prototypes. Opt-in Astro websites from `templates/sites` render Bases collections (`node bin/app site`; Astro is a site-only dependency). Shell gates and workflows ignore `projects/`. Work inside a project as its own repository, and run `npm run projects:sync` after changing its workflows. See `projects/README.md`. |
-| `src/cli/` | Workbench CLI development: adapters, application, domain, presentation, compiler, guides and examples. `npm run app:dev -- <args>` runs current source. |
 | `bin/` | Generated standalone CLI product, built with `npm run build:cli`. Keep the whole folder together: launcher, runtime, authoring tools, templates, plugin defaults, licenses and integrity metadata. Never edit generated files here. |
 | `src/cli/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
 | `templates/` | Templates for generated projects (companion runtime, developer kit, examples) and, in `templates/sites`, the opt-in Astro site templates. |
-| `scripts/` | Repo tooling: `quality/` gates, `testing/` suites and evidence, `agent/` hooks, `companion/` authoring contracts, makers, styles, release, security, setup. |
+| `tooling/` | Repository machinery (was `scripts/`): `quality/` gates, `testing/` suites and evidence, `agent/` hooks, makers, styles, bundling, release, delivery, security, setup, and `tooling/tests/` for tests of tooling modules. May import source projects. |
 | `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters; `configs/wizards/`, `configs/forms/` and `configs/guides/` define every guided CLI process ([wizards and forms](docs/development/WIZARDS-AND-FORMS.md)). |
-| `tests/` | Suites declared in `tests/suites.json` (tooling, runtime, e2e, hindsight, ...). |
-| `plugins/` | Workbench plugin SDK and the example extension. |
-| `harness/` | Browser harness for the served UI; never shipped in the plugin. |
-| `docs/` | Product, development and testing docs; `docs/concepts/companion` is the authoring concept. |
+| `tests/` | Cross-project suites only (acceptance, journeys, verification, browser specimens), declared with every other suite in `tests/suites.json`. Project tests live in `src/<project>/tests/`. |
+| `docs/` | Product, development and testing docs; `docs/concepts/companion` holds the authoring concept documents and the generated `index.html`. |
 | `docs/development/ADOPT-EXISTING-PROJECT.md` | Adding Workbench to an existing project: `node bin/app adopt analyze`, `adopt plan` and `adopt skill`, with the `adopt-existing-project` skill. |
 | `.claude/skills/ideation-*` | Ideation chain: `ideation-journey` → `-brainstorm` → `-concept` → `-design` → `-prototype` → `-boilerplate` → `increment-handoff` → `feature-delivery` → `self-review`; overview in `.claude/skills/ideation-journey/references/chain.md`. |
 | `.claude/skills/increment-handoff`, `.claude/skills/feature-delivery`, `.claude/skills/release` | Increment handoff until the Definition of Ready passes, draft pull request through the Definition of Done to green merge, and release cut to publish (Codex adapters in `.agents/skills/`). |
 | `docs/design/<prototype>/` | Per-prototype Claude Design folders (`node bin/app design status\|prepare\|sync`); see [Claude Design folders](docs/development/CLAUDE-DESIGN-HANDOFF.md). Generated files there are owned by sync, including `ENGINEERING_HANDOFF_GUIDE.md`, which is built only from facts read from the project's files; `prototypes/`, `assets/`, `notes/` and `handoff/implementation-map.md` are design work. |
 
 **Setup.** Use the qualified Node 24.21.0/npm 11.19.1 (`.nvmrc`) and `npm ci` with
-the exact lock; do not run `npm install`. Run `npm run build:cli` before using `node bin/app` from a fresh checkout. In Claude Code, `scripts/agent/session-start.mjs`
+the exact lock; do not run `npm install`. Run `npm run build:cli` before using `node bin/app` from a fresh checkout. In Claude Code, `tooling/agent/session-start.mjs`
 runs automatically at session start (cloud and local). Browser runs use the
 provisioned Playwright Chromium; `SHELL_CHROMIUM=/absolute/chromium` overrides it.
 `npm run setup` is the guided local setup described below. Cloud sessions provision the
@@ -45,11 +48,11 @@ qualified Node themselves and an environment setup script exists: see
 | Need | Command |
 | --- | --- |
 | Fast gate on changed files | `node bin/app check --fast --base origin/main` |
-| Dev tier (draft pull request) | `node bin/app check --fast --skip-suites --base origin/main`, `node scripts/testing/suites.mjs --check`, `node scripts/release/changelog.mjs check` |
+| Dev tier (draft pull request) | `node bin/app check --fast --skip-suites --base origin/main`, `node tooling/testing/suites.mjs --check`, `node src/cli/tooling/release/changelog.mjs check` |
 | What do I need to run? | `node bin/app check --plan --base origin/main` |
 | Agent gate (types, lint, tests) | `node bin/app check` |
 | Full pre-PR | `npm run verify -- --json --keep-going` |
-| One suite | `node scripts/testing/suites.mjs <suite>` (`--list` shows all) |
+| One suite | `node tooling/testing/suites.mjs <suite>` (`--list` shows all) |
 | Served browser UI | `npm run test:e2e` |
 | Reproduce a CI job | `node bin/app ci --job <workflow>/<job>` (`ci --list`) |
 | Self-review | `npm run check:self-review` and `.claude/skills/self-review` |
@@ -89,12 +92,12 @@ never by hand-editing generated lists or bindings. Implement only after the
 Definition of Ready passes (`node bin/app increment check <id>`), refined in the
 kick-off pull request (`increment/<id>` into `main`); deliver in change pull
 requests stacked on the increment branch, and pass the Definition of Done
-(`node scripts/delivery/done.mjs --base origin/<base>`) before marking a pull
+(`node tooling/delivery/done.mjs --base origin/<base>`) before marking a pull
 request ready or merging it. Never run `pr publish`, `pr sync` or a push without
 the user's explicit request in this conversation, and never retry an uncertain
 remote write (exit 2) blindly. `e2e: required` means the `e2e` label. Every new
 test file has a test-pyramid level in `tests/suites.json`
-(`node scripts/testing/suites.mjs --check`). Rules:
+(`node tooling/testing/suites.mjs --check`). Rules:
 [Definition of Ready and Done](docs/development/DEFINITION-OF-READY-AND-DONE.md);
 guide: [your first increment](docs/development/FIRST-INCREMENT.md).
 
@@ -143,13 +146,13 @@ Query projections after subscribing and discard older query completions.
 
 Task/Project are example definitions, not branches inside generic services. Repository recipes must persist every entity field. Keep note IDs/paths/creation metadata, unrelated properties and body content when updating. Prevalidate full candidate bytes before persistence. Recheck folder/disposal after awaited preflight; use revision-checked native processing and reversible trash. Never claim cross-process atomic trash or use incomplete mappings as silent data loss.
 
-Keep feature-author code in `src/features/<name>` and expose the small shared
-authoring API through `src/features/api.ts`. One explicit registration in bootstrap
+Keep feature-author code in `src/plugin/features/<name>` and expose the small shared
+authoring API through `src/plugin/features/api.ts`. One explicit registration in bootstrap
 constructs typed repositories and owns disposal. Features may depend only on
 feature/application/domain contracts, never concrete host/framework adapters.
 New business features should not require editing generic persistence services or
 main.ts; prove the extension path with a distinct test feature. Runtime forms are JSON in
-`src/features/<feature>/forms/`, declared with `defineForm` and rendered by `DataForm`; they never import
+`src/plugin/features/<feature>/forms/`, declared with `defineForm` and rendered by `DataForm`; they never import
 `configs/forms` (see docs/development/RUNTIME-FORMS.md).
 
 Native modal/notice behavior belongs behind `services.modals` and `services.notices`;
@@ -159,7 +162,7 @@ side-effect free and palette/ribbon execution shared. Structured logging accepts
 declared catalogs and safe metadata; diagnostic error observation stays independent
 of debug level and log delivery. Never export raw causes, note content or paths.
 
-All Vue files belong under `src/presentation/components` (including panels).
+All Vue files belong under `src/plugin/presentation/components` (including panels).
 Keep their scripts to imports, props and composable/template bindings. Place view
 behavior in TypeScript composables, per-view state in stores, and injection/types
 in context. Presentation TypeScript does not import Vue components; bootstrap

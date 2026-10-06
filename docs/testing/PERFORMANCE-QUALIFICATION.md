@@ -13,9 +13,9 @@ are recorded for a named environment.
 ```sh
 npm run test:native -- --allow-download --performance
 npm run test:native -- --allow-download --performance --controlled-reference
-node scripts/testing/asset-sizes.mjs dist
-node node_modules/vitest/vitest.mjs run tests/runtime/resource-qualification.test.ts
-node --test tests/tooling/performance-report.checks.mjs
+node tooling/testing/asset-sizes.mjs dist
+node node_modules/vitest/vitest.mjs run src/plugin/tests/unit/resource-qualification.test.ts
+node --test tooling/tests/performance-report.checks.mjs
 ```
 
 Native execution requires the separately provisioned launcher 3.2.1, the existing
@@ -28,7 +28,7 @@ reference computer. It records the operator's classification, not proof of proce
 isolation. Run without installs, builds, coverage, analyzers or other known heavy
 workloads. Hosted/shared-runner timings remain advisory.
 
-The checked-in protocol in `scripts/testing/performance-report.mjs` declares:
+The checked-in protocol in `tooling/testing/performance-report.mjs` declares:
 
 - Three warmups followed by **30** measured samples for each metric, all retained;
   no retries, sample filtering, outlier removal or finish-line changes.

@@ -16,12 +16,12 @@ Read at minimum:
 AGENTS.md
 package.json, package-lock.json, .nvmrc
 README.md, TEMPLATE-GUIDE.md
-scripts/companion/authoring-contract.ts
+src/shared/companion/authoring-contract.ts
 src/cli/adapters/framework/read-project.ts
-scripts/companion-tools/generate.mjs
-scripts/companion/visual/visual-validate.mjs
-scripts/companion/visual/visual-ir.mjs (locate the actual IR/types file)
-scripts/companion/visual/visual-catalog.mjs (locate the actual catalog file)
+tooling/companion-tools/generate.mjs
+src/shared/companion/visual/visual-validate.mjs
+src/shared/companion/visual/visual-ir.mjs (locate the actual IR/types file)
+src/shared/companion/visual/visual-catalog.mjs (locate the actual catalog file)
 src/cli/compiler/emitters/ (actual emitted paths and extension ownership)
 templates/companion/devkit/ (generated developer kit)
 docs/development/COMPANION-PROJECT-JSON.md
@@ -31,7 +31,7 @@ docs/development/COMPANION-HANDOFF.md
 docs/development/DESIGN-SYSTEM-STYLES.md
 docs/concepts/companion/VISUAL-EDITORS.md
 configs/starters/ (choose an actual full current starter; each embeds project schema 6)
-harness/, src/bootstrap/, scripts/styles/, scripts/bundling/
+src/plugin/harness/, src/plugin/bootstrap/, tooling/styles/, tooling/bundling/
 ```
 
 Some paths are discovery targets, not claims that a module has a particular filename.
@@ -98,7 +98,7 @@ label native work still pending. Never count acceptance TODOs as passing tests.
 
 ## Read-only handoff versus generation
 
-`node scripts/companion-tools/generate.mjs --input <json> --vault <existing-dir> --target <relative>`
+`node tooling/companion-tools/generate.mjs --input <json> --vault <existing-dir> --target <relative>`
 validates and echoes the **original bytes**. `npm run companion:generate` is the same
 read-only path. It is not a generator.
 
@@ -141,7 +141,7 @@ application/service owner, not Pinia/localStorage. Native UI uses modal/notice p
 
 The generator may put product code under `<codebaseFolder>/generated` and product
 tests under `<testsFolder>/project` while retaining the foundation under `src` and
-`tests/runtime`. Derive exact paths from the plan and traceability, not a parallel
+`src/plugin/tests/unit`. Derive exact paths from the plan and traceability, not a parallel
 home-made architecture. Preserve generated/extension/framework ownership receipts.
 
 Nuxt UI uses plain Vue/Vite, explicit selected components and local icons; no Nuxt

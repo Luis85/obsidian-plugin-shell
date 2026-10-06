@@ -10,12 +10,12 @@ rule, how the checks choose what to check, and how to configure and run them.
 - The rules, severities and parameters live in `configs/delivery/definition-of-ready.json`
   and `configs/delivery/definition-of-done.json`.
 - The documents and the branch model live in `configs/delivery/delivery.json`.
-- The checks are `scripts/delivery/ready.mjs` and `scripts/delivery/done.mjs`;
+- The checks are `tooling/delivery/ready.mjs` and `tooling/delivery/done.mjs`;
   `node bin/app increment check` runs the same code in-process.
 - The documents themselves are described in [Increments reference](INCREMENTS-REFERENCE.md).
 
 The tables below were generated from the two JSON files and the rule titles in
-`scripts/delivery/rules-*.mjs`. `tests/tooling/delivery-rules-reference.checks.mjs`
+`tooling/delivery/rules-*.mjs`. `src/cli/tests/delivery-rules-reference.checks.mjs`
 fails when a configured rule is missing here or its severity differs.
 
 ## Severities and outcomes
@@ -133,8 +133,8 @@ the Increment and holds one pending `test.todo(...)`. The criterion's `Evidence:
 defaults to the stub path.
 
 - **Created by** `node bin/app increment new` and `increment ac add` (in their
-  reviewed plans), `node scripts/delivery/ready.mjs --write`, or
-  `node scripts/delivery/acceptance.mjs stubs --increment <id> --write`. Stubs are
+  reviewed plans), `node tooling/delivery/ready.mjs --write`, or
+  `node tooling/delivery/acceptance.mjs stubs --increment <id> --write`. Stubs are
   never overwritten; a stub without a criterion is reported as an orphan (DOR-25).
 - **Definition of Ready:** every criterion has a stub or other test evidence (DOR-24).
 - **Definition of Done:** the stubs in scope contain assertions
@@ -148,7 +148,7 @@ stub (`ac-<n>…`) directly inside the acceptance folder of an Increment, and th
 Increment's status is still in `acceptance.pendingStatuses` (New, Refining, Ready,
 In progress). Anywhere else, or once the Increment is Done, a pending marker stays a
 finding. A missing or invalid delivery configuration allows nothing
-(`scripts/delivery/acceptance-guard.mjs`).
+(`tooling/delivery/acceptance-guard.mjs`).
 
 ## Run the checks
 
@@ -157,8 +157,8 @@ finding. A missing or invalid delivery configuration allows nothing
 | Ready check of one Increment, from the CLI | `node bin/app increment check <id>` (exit 1 with the refinement brief when not ready) |
 | Done check of one Increment, from the CLI | `node bin/app increment check <id> --gate done --base <ref>` |
 | Plan the Done outputs through a reviewed plan | `node bin/app increment complete <id> --dry-run` |
-| Ready check of the current branch | `node scripts/delivery/ready.mjs --base origin/main` |
-| Done check of the current branch | `node scripts/delivery/done.mjs --base origin/main` |
+| Ready check of the current branch | `node tooling/delivery/ready.mjs --base origin/main` |
+| Done check of the current branch | `node tooling/delivery/done.mjs --base origin/main` |
 
 The scripts exit 0 when the rules pass or the pull request is exempt, 1 when they
 do not pass, and 2 on a usage, configuration or base error. `--json` prints the
@@ -168,7 +168,7 @@ instead of the checkout.
 
 `increment check` names its Increment explicitly, so DOR-01 always selects it, and reports the gate's
 `refinement` brief: the questions per failed rule and the skills that answer them
-(`refinement.skills` in `delivery.json`). Without `scripts/delivery`, a
+(`refinement.skills` in `delivery.json`). Without `tooling/delivery`, a
 `delivery.json` or a commit to diff against, `increment check` falls back to a
 structural Ready check and the Done gate is unavailable
 (`INCREMENT_GATES_UNAVAILABLE`). `increment status <id> Ready` runs the same
@@ -222,8 +222,8 @@ maintainer pipeline; generated projects do not receive them.
 
 | Workflow | Check name | Runs on | Command |
 | --- | --- | --- | --- |
-| `.github/workflows/definition-of-ready.yml` | Definition of Ready | `opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`, drafts included | `node scripts/delivery/ready.mjs --base origin/<base>` |
-| `.github/workflows/definition-of-done.yml` | Definition of Done | the same plus `labeled`, `unlabeled`; skips drafts | `node scripts/delivery/done.mjs --base origin/<base>` |
+| `.github/workflows/definition-of-ready.yml` | Definition of Ready | `opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`, drafts included | `node tooling/delivery/ready.mjs --base origin/<base>` |
+| `.github/workflows/definition-of-done.yml` | Definition of Done | the same plus `labeled`, `unlabeled`; skips drafts | `node tooling/delivery/done.mjs --base origin/<base>` |
 
 Both skip `release/*` heads and have no branch filter, so pull requests into an
 increment branch run them too. Branch protection on `main` requires "Dev checks",

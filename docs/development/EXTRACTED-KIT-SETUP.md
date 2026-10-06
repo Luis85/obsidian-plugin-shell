@@ -37,7 +37,7 @@ No setup stage publishes, tags, enables a native plugin, changes Restricted Mode
 
 Generated product folders supplement the inherited framework; they do not replace
 `src/` and `tests/`. Setup status and resume fingerprint both the configured
-product folders and the fixed `src/`, `tests/`, `scripts/` and `harness/` trees.
+product folders and the fixed `src/`, `tests/`, `tooling/` and `src/plugin/harness/` trees.
 Adding, editing or deleting a file in any of those trees invalidates an earlier
 resume approval. A change during verification records a blocked attempt rather
 than a current success. Symlinked source roots remain refused even when custom

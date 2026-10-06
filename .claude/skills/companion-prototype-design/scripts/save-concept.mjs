@@ -4,7 +4,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { framework } from './lib/framework.mjs';
-import { noLinks, readBytes, sha256 } from './lib/io.mjs';
+import { layoutPath, noLinks, readBytes, sha256 } from './lib/io.mjs';
 
 function packageInventory(directory) {
   const child = spawnSync(process.env.PYTHON || 'python3', ['-B', fileURLToPath(new URL('pack-concept.py', import.meta.url)),
@@ -21,7 +21,7 @@ export async function saveConcept(repo, directory, slug, { execute = false, appl
   const api = await framework(repo), root = noLinks(directory);
   api.requireThat(!signal?.aborted, 'CANCELLED', 'Concept save cancelled before planning.');
   // A source checkout contains the shared writer; an extracted kit ships it under bin/template.
-  const { createFilePlan, applyFilePlan } = await import(pathToFileURL(noLinks(path.join(api.moduleRoot, 'scripts/shared/file-plan.ts'))).href);
+  const { createFilePlan, applyFilePlan } = await import(pathToFileURL(noLinks(path.join(api.moduleRoot, layoutPath(api.moduleRoot, 'src/shared/platform/file-plan.ts', 'scripts/shared/file-plan.ts')))).href);
   const inventory = packageInventory(root);
   if (inventory.slug !== slug) throw new Error('PROTOTYPE_SLUG: requested folder and package identity differ');
   const destination = `docs/concepts/${slug}`;

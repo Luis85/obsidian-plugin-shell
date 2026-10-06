@@ -50,7 +50,7 @@ See `scripts/README.md` for commands and `VERIFICATION.md` for tested/untested s
 
 The observed PR #5 head is 6178b1025336941ad6fb10eae4e26930622363f9. This skill explicitly
 rechecks it each time. The real contract is now project schema 6 only
-(`scripts/companion/authoring-contract.ts`); schema 1–5 input is rejected, never migrated.
+(`src/shared/companion/authoring-contract.ts`); schema 1–5 input is rejected, never migrated.
 
 ## Important boundaries
 

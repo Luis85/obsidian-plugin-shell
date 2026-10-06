@@ -7,15 +7,15 @@
 ```sh
 npm run --silent capabilities
 npm run --silent capabilities -- makers
-node scripts/operations/cli.mjs --request < request.json
+node tooling/operations/cli.mjs --request < request.json
 ```
 
 These commands read maintained JSON metadata relative to the installed tool, not
 relative to the current project. They do not read project package.json, load Vite,
 import custom recipes, execute npm scripts, inspect a vault, install dependencies,
 write files or activate plugins. The same modules run in a Git-free copy containing
-only scripts/operations/cli.mjs, src/cli/adapters/operations (with operations.json), scripts/contracts,
-scripts/shared/hash.ts and src/cli/adapters/makers/recipes.json.
+only tooling/operations/cli.mjs, src/cli/adapters/operations (with operations.json), src/shared/contracts,
+src/shared/platform/hash.ts and src/cli/adapters/makers/recipes.json.
 No companion code or npm installation is required for discovery.
 
 The catalog describes fourteen actual built-in maker registrations and seven
@@ -117,7 +117,7 @@ forms cannot qualify them. Imported receipts never authorize machine-local work.
 
 ## Verification
 
-Run `node --test tests/tooling/capability-discovery.checks.mjs` for actual CLI and
+Run `node --test src/cli/tests/capability-discovery.checks.mjs` for actual CLI and
 independent-copy probes, handler/catalog parity, hostile consumer scripts, malformed
 JSON/versions, output tampering and existing maker help/list compatibility. Existing
 maker and consumer suites must additionally qualify actual source generation after

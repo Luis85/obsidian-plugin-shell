@@ -469,14 +469,14 @@ jobs:
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
           node "$QUALIFIED_NPM" run typecheck:framework
-          node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs src/cli/tests/capability-discovery.checks.mjs
+          node --test --test-concurrency=1 src/cli/tests/framework-*.checks.mjs src/shared/tests/framework-*.checks.mjs tooling/tests/framework-*.checks.mjs src/cli/tests/capability-discovery.checks.mjs
           node tooling/testing/suites.mjs prototypes prototypes:python
           node tooling/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
           node "$QUALIFIED_NPM" run typecheck:sitemap
-          node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs src/shared/tests/companion-concept-intake.checks.mjs
+          node --test --test-concurrency=1 src/cli/tests/companion-sitemap-*.checks.mjs src/shared/tests/companion-sitemap-*.checks.mjs src/shared/tests/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node src/cli/tests/framework-journey.mjs
       - name: Record exact source revision
@@ -559,7 +559,7 @@ jobs:
       - name: Type-check the compiler and test ownership, contracts and the read-only handoff
         run: |
           node "$QUALIFIED_NPM" run typecheck:generator
-          node --test tests/tooling/project-generator*.checks.mjs src/cli/tests/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs src/cli/tests/companion-project.checks.mjs
+          node --test src/cli/tests/project-generator*.checks.mjs tooling/tests/project-generator*.checks.mjs src/cli/tests/project-starters.checks.mjs src/shared/tests/file-plan*.checks.mjs src/cli/tests/companion-project.checks.mjs
           node "$QUALIFIED_NPM" run test:visual
       - name: Generate, independently install, build and test the companion project
         run: |

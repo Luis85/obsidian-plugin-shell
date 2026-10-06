@@ -82,7 +82,7 @@ All generated theme files participate in the existing reviewed plan, receipt has
 
 ## Token application
 
-The finite binding catalog is `scripts/companion/design-system-roles.mjs`. It covers Nuxt UI primary/secondary/status colors; normal, muted, highlighted and inverted text; surface and border roles; interface/code fonts; body, label, page and section typography; the Tailwind spacing unit and shell spacing scale; control/surface radii; control height, icon size and inspector width.
+The finite binding catalog is `src/shared/companion/design-system-roles.mjs`. It covers Nuxt UI primary/secondary/status colors; normal, muted, highlighted and inverted text; surface and border roles; interface/code fonts; body, label, page and section typography; the Tailwind spacing unit and shell spacing scale; control/surface radii; control height, icon size and inspector width.
 
 Nuxt UI consumes scoped `--ui-*` semantic variables and Tailwind's prefixed `--ps-*` variables. The existing shell's host aliases are overridden only within that plugin root. Foundation CSS now consumes its own aliases, so the same design system reaches both Nuxt UI components and surrounding shell surfaces without redefining Obsidian variables.
 
@@ -109,10 +109,10 @@ Guidelines remain plain documentation. Component-internal layouts, arbitrary var
 
 ## Verification
 
-- `tests/tooling/project-generator-design-system.checks.mjs`: deterministic generation, semantic mappings, zero/unit handling, hostile inputs, exact scope, bounded fragments, legacy systems, custom roots and real plan/apply/regeneration conflicts.
-- `tests/concepts/companion-design-styles.browser.py`: actual binding controls, guarded Save, Undo/Redo, JSON/CSS downloads, browser/CLI byte parity, computed token styling, modes and host/sibling-root isolation.
-- `tests/e2e/design-system.spec.ts`: real bundled Nuxt UI buttons and inputs, fonts, corners, focus, mode changes, independent leaves and forced colors. It drives showcase controls, so it is example-owned and `examples:remove` deletes it with the showcase.
-- `scripts/companion-tools/qualify-styles.mjs`: independently generated project build plus its real Nuxt UI harness. It alters only the disposable qualification fixture to load the generated product CSS. CI retains the logs separately from native acceptance.
+- `src/cli/tests/project-generator-design-system.checks.mjs`: deterministic generation, semantic mappings, zero/unit handling, hostile inputs, exact scope, bounded fragments, legacy systems, custom roots and real plan/apply/regeneration conflicts.
+- `src/companion/tests/concepts/companion-design-styles.browser.py`: actual binding controls, guarded Save, Undo/Redo, JSON/CSS downloads, browser/CLI byte parity, computed token styling, modes and host/sibling-root isolation.
+- `src/plugin/tests/e2e/design-system.spec.ts`: real bundled Nuxt UI buttons and inputs, fonts, corners, focus, mode changes, independent leaves and forced colors. It drives showcase controls, so it is example-owned and `examples:remove` deletes it with the showcase.
+- `tooling/companion-tools/qualify-styles.mjs`: independently generated project build plus its real Nuxt UI harness. It alters only the disposable qualification fixture to load the generated product CSS. CI retains the logs separately from native acceptance.
 
 Run the repository's qualified Node/npm versions. Native Obsidian acceptance and release checks are still separate gates.
 

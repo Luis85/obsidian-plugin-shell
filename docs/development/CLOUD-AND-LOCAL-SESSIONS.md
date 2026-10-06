@@ -9,14 +9,14 @@ and to every project generated with `node bin/app new`.
 ## The path
 
 1. **Create locally.** `node bin/app new <dir> --starter <id> --yes` writes the project and makes one
-   initial git commit. `bin/app` and `scripts/agent/cloud-setup.sh` are committed executable.
+   initial git commit. `bin/app` and `tooling/agent/cloud-setup.sh` are committed executable.
    `npm ci` then `npm run check` work on the qualified toolchain (`.nvmrc`, `packageManager`).
 2. **Push.** Add a remote and push: `new` prints the matching `gh repo create` or `az repos create`
    and `git remote add` commands for the chosen `--hosting` platform but never runs them
    ([hosting platforms](HOSTING-PLATFORMS.md)). The cloud sessions described here start from a
    GitHub repository; an Azure Repos project keeps the same local loop and uses `az` for pull
    requests and pipelines. Everything a session needs is committed: the exact
-   `package-lock.json`, `.claude/settings.json` (hooks, allowlist) and the `scripts/agent/*` hooks.
+   `package-lock.json`, `.claude/settings.json` (hooks, allowlist) and the `tooling/agent/*` hooks.
    Personal overrides live in the ignored `.claude/settings.local.json`. `clickdummy.html` is a
    build artifact and is ignored: `npm run test:e2e` and `npm run build:clickdummy` rebuild it.
 3. **Open a cloud session.** Claude Code on the web clones the repository into a fresh Linux container
@@ -25,7 +25,7 @@ and to every project generated with `node bin/app new`.
 
 ## What the SessionStart hook does
 
-`scripts/agent/session-start.mjs` prints a status of at most ten lines (it becomes the agent's context),
+`tooling/agent/session-start.mjs` prints a status of at most ten lines (it becomes the agent's context),
 always exits 0 and never claims a qualification it did not verify. In a cloud session it:
 
 | Step | Behaviour |
@@ -56,7 +56,7 @@ unless you opt in.
 ## Browser caveat
 
 The cloud image's Chromium is older than the revision the pinned Playwright expects (for example r1194
-against r1243). `scripts/testing/browser-executable.mjs` never uses a different revision silently. In a
+against r1243). `src/cli/tooling/testing/browser-executable.mjs` never uses a different revision silently. In a
 cloud session the hook exports `SHELL_CHROMIUM=<older chromium>` and says so: **browser evidence from that
 session (`npm run test:e2e`, `npm run test:ui-quality`, `npm run ui:gallery`) comes from a non-pinned
 Chromium** and is not the qualified revision. Report it that way. To use the pinned revision instead,
@@ -70,12 +70,12 @@ new session starts. Point it at the repository's script so the toolchain and `no
 before the agent starts, and persist per environment where the platform snapshots it:
 
 ```sh
-sh scripts/agent/cloud-setup.sh
+sh tooling/agent/cloud-setup.sh
 ```
 
 The script needs the checkout: it finds it through `CLAUDE_PROJECT_DIR`, the git top level or the current
 directory and otherwise does nothing (exit 0). Which directories a platform snapshot keeps between sessions is the
-platform's behaviour; whatever the setup script could not prepare, the SessionStart hook prepares again. The script delegates to `node scripts/agent/session-start.mjs --provision-only` when Node
+platform's behaviour; whatever the setup script could not prepare, the SessionStart hook prepares again. The script delegates to `node tooling/agent/session-start.mjs --provision-only` when Node
 18 or newer exists; otherwise it downloads and verifies the qualified Node itself with `curl` (or `wget`),
 `tar` and `sha256sum`/`shasum`. It always exits 0 (a failing setup script would stop the session) and prints
 what it could not do. The SessionStart hook then finds the cached Node instantly. `SHELL_SESSION_START_NODE=0`
@@ -84,8 +84,8 @@ and `SHELL_SESSION_START_INSTALL=0` apply here too.
 ## Prove it: handoff qualification (framework repository)
 
 ```sh
-node scripts/testing/qualify-project-handoff.mjs --starter quick-capture --base-node <a Node 22 install>
-node scripts/testing/qualify-project-handoff.mjs --target framework --base-node <a Node 22 install>
+node tooling/testing/qualify-project-handoff.mjs --starter quick-capture --base-node <a Node 22 install>
+node tooling/testing/qualify-project-handoff.mjs --target framework --base-node <a Node 22 install>
 ```
 
 Maintainer tooling of the framework repository (generated projects do not carry it). It generates a project,

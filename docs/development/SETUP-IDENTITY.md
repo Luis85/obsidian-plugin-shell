@@ -10,7 +10,7 @@ defaults; unattended use requires `--yes --no-interaction` after reviewing a pla
 
 The interview questions are data in `configs/forms/setup-identity.json`, in the
 shared [form format](WIZARDS-AND-FORMS.md). Because setup runs before dependencies
-exist, the dependency-free `scripts/setup/form.mjs` reads only `text` and `confirm`
+exist, the dependency-free `tooling/setup/form.mjs` reads only `text` and `confirm`
 fields with `id`, `kind`, `label` and `help`. It requires the text field ids to be
 exactly the identity `--answers` keys plus `hosting` and the confirm field to be `mcp`; any other
 kind, key or id stops setup before a question is asked. Labels, help and question
@@ -63,7 +63,7 @@ identity change, so the files above are planned with it. Without the flag the cu
 platform is kept (GitHub when none was recorded); interactive setup asks the form's `hosting`
 question after the MCP question, a blank answer keeps the platform, and an Azure DevOps `origin`
 remote is only used to suggest defaults. An `azure-devops` answer is followed by the organization,
-project and repository questions of `scripts/setup/hosting.mjs`, which the form subset cannot express. `azure-devops` takes `--azure-organization
+project and repository questions of `tooling/setup/hosting.mjs`, which the form subset cannot express. `azure-devops` takes `--azure-organization
 https://dev.azure.com/<organization>`, `--azure-project` and optional
 `--azure-repository`; values are validated by the shared hosting contract and are
 never tokens. `--repo owner/name` remains the GitHub shorthand and is refused with
@@ -191,7 +191,7 @@ clean directory.
 
 ## Evidence boundaries
 
-`tests/tooling/setup-identity.checks.mjs` exercises the actual dependency-free CLI,
+`tooling/tests/setup-identity.checks.mjs` exercises the actual dependency-free CLI,
 safe file plans, metadata preservation, dry run, data-only answers, rejected
 collisions, rollback, journaled failures, dependency-loss detection, concurrent
 source edits and contained migration. Process-boundary fixtures deliberately use

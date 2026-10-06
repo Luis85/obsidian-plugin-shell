@@ -83,7 +83,7 @@ its JSON files to a configured alternative folder explicitly.
 
 ## Definition structure
 
-The editor schema is `scripts/starters/starter.schema.json` (catalog data, kept beside
+The editor schema is `tooling/starters/starter.schema.json` (catalog data, kept beside
 the other JSON catalogs so starter files and in-place kit projects can reference it);
 the runtime validator in `src/cli/adapters/starters/validation.ts` also checks semantic
 rules such as path containment, dependency cycles, identity fields, current
@@ -290,7 +290,7 @@ was performed to implement this feature.
 
 ## Verification scope
 
-`tests/tooling/starter-*.checks.mjs` covers data contracts, dynamic discovery,
+`src/cli/tests/starter-*.checks.mjs src/shared/tests/starter-*.checks.mjs tooling/tests/starter-*.checks.mjs` covers data contracts, dynamic discovery,
 editing, generation, explicit process execution, stale plans, path/symlink defenses,
 empty installations and extraction of independently packaged archives. Existing
 starter/native-generator tests continue checking every authored Companion starter model.

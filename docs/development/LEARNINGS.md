@@ -203,6 +203,6 @@ and related risk ids `RISK-0001`–`RISK-0008`. Generate into a scratch `--root`
 
 | File | Covers |
 | --- | --- |
-| `tests/tooling/interactive-maker-learnings-domain.checks.mjs` | Definition validation (including `idPrefix`), reading, create/update rules, transitions and stamps, queries, review queue, register |
-| `tests/tooling/interactive-maker-learnings-command.checks.mjs` | CLI routing beside `learn`, plan/apply, preserving updates, check/list/show, report preservation, `paths.learnings` and migration, the `learnings-demo` preset passing `learning check` |
-| `tests/tooling/interactive-maker-learnings-wizard.checks.mjs` | The real `learning-new`, `learning-edit` and `learning-review` wizards with scripted plain prompts |
+| `src/cli/tests/interactive-maker-learnings-domain.checks.mjs` | Definition validation (including `idPrefix`), reading, create/update rules, transitions and stamps, queries, review queue, register |
+| `src/cli/tests/interactive-maker-learnings-command.checks.mjs` | CLI routing beside `learn`, plan/apply, preserving updates, check/list/show, report preservation, `paths.learnings` and migration, the `learnings-demo` preset passing `learning check` |
+| `src/cli/tests/interactive-maker-learnings-wizard.checks.mjs` | The real `learning-new`, `learning-edit` and `learning-review` wizards with scripted plain prompts |

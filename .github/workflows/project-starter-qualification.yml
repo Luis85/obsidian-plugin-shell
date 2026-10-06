@@ -136,7 +136,7 @@ jobs:
         if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
         run: |
           status=0
-          node scripts/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json' --skip-e2e || status=$?
+          node tooling/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json' --skip-e2e || status=$?
           if [ "$status" -eq 3 ]; then
             node -e 'const s = require(process.argv[1]); const open = s.steps.filter(step => step.status !== "passed"); process.exit(open.length === 1 && open[0].name === "e2e" && open[0].status === "not-run" ? 0 : 1)' "$PWD/reports/project-handoff-${{ matrix.starter }}.json"
           else
@@ -144,7 +144,7 @@ jobs:
           fi
       - name: Generate, push-simulate (git clone) and replay a cloud session start
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
-        run: node scripts/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json'
+        run: node tooling/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json'
       - name: Retain the step summary
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

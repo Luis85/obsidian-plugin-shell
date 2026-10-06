@@ -23,7 +23,7 @@ npm run evidence -- check reports/evidence/<input-digest>/<run-id>/packet.json
 npm run evidence -- report reports/evidence/<input-digest>
 ```
 
-The underlying command is `node scripts/testing/evidence-cli.mjs`. `--root DIR`
+The underlying command is `node tooling/testing/evidence-cli.mjs`. `--root DIR`
 selects a checkout/consumer/archive for run, check or report; it supplies no
 executable hook. Production coverage must run with that root as the working
 directory because the existing coverage gate resolves its business scopes there.
@@ -163,7 +163,7 @@ together with consistent repetitions. A test title alone cannot establish reload
 The selected rows describe concrete missing assertions or unlinked evidence rather
 than treating every unqualified row as missing implementation.
 
-`tests/tooling/evidence-cli.checks.mjs` executes actual child producers and checks
+`tooling/tests/evidence-cli.checks.mjs` executes actual child producers and checks
 the real CLI, including a deliberately failing assertion, skipped case, overflowing
 fault ledger, empty suite, source mutation, stale/missing reports and failed first
 attempt followed by success. `evidence-adapters.checks.mjs` runs real Vitest and

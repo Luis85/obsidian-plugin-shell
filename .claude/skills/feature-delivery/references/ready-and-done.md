@@ -6,8 +6,8 @@ Both checks read the increment of the pull request, `docs/increments/<slug>.md` 
 
 | Moment | Local command | Pull request check | Workflow |
 | --- | --- | --- | --- |
-| Before implementation, before and after opening the draft | `node bin/app increment check <slug>`, or `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md` or `--base origin/<base>` | "Definition of Ready" (drafts included) | `definition-of-ready.yml` |
-| After implementation, before marking ready and before merging | `node scripts/delivery/done.mjs --base origin/<base>`, or `node bin/app increment check <slug> --gate done --base origin/<base>` | "Definition of Done" (skips drafts) | `definition-of-done.yml` |
+| Before implementation, before and after opening the draft | `node bin/app increment check <slug>`, or `node tooling/delivery/ready.mjs --handoff docs/increments/<slug>.md` or `--base origin/<base>` | "Definition of Ready" (drafts included) | `definition-of-ready.yml` |
+| After implementation, before marking ready and before merging | `node tooling/delivery/done.mjs --base origin/<base>`, or `node bin/app increment check <slug> --gate done --base origin/<base>` | "Definition of Done" (skips drafts) | `definition-of-done.yml` |
 
 The Definition of Done is kind-aware. A change pull request (base `increment/<slug>`) is checked against its PullRequest document: its tasks done, the criteria it `delivers` ticked with evidence and their stubs implemented, the increment still In progress. The kick-off pull request (`increment/<slug>` into `main`) is checked against the whole increment: every criterion, every other pull request merged or closed, every issue done or cancelled, status Done.
 
@@ -24,14 +24,14 @@ The report lists each failing rule with a hint and a refinement brief: questions
 3. When the brief says the problem or scope itself is unclear, that skill escalates to `ideation-brainstorm` or `ideation-concept`, or splits the increment.
 4. Push the updated handoff; the check reruns on push and when the pull request body is edited.
 
-`node scripts/delivery/ready.mjs --write` only adds missing section scaffolds to the handoff and never overwrites authored text. Scaffolds are not answers.
+`node tooling/delivery/ready.mjs --write` only adds missing section scaffolds to the handoff and never overwrites authored text. Scaffolds are not answers.
 
 ## Definition of Done is red
 
 Typical findings: an acceptance criterion not checked or without existing evidence, source changes without test changes (and no stated reason in the Test plan), a user-facing change without an Unreleased entry, a Docs impact target not changed or missing its Diataxis `> Type:` marker, a new doc page not indexed in `docs/README.md`, added debug or focus markers, or a diff that escapes the handoff's affected areas.
 
 1. Fix the cause in the change: write the missing test or doc, implement the pending acceptance stub, tick a task (`node bin/app pr task set <pr-id> T-<n> --status done`) or a criterion (`node bin/app increment ac set <slug> AC-<n> --status done --evidence <path>`) only when it is really done and its evidence exists.
-2. Generate the documentation the rules expect: `node scripts/delivery/done.mjs --base origin/<base> --write` writes the handoff's completion record (changed files by area, criterion-to-evidence table, gates), the `## [Unreleased]` entry from the handoff's Changelog line and the docs index rows for new pages.
+2. Generate the documentation the rules expect: `node tooling/delivery/done.mjs --base origin/<base> --write` writes the handoff's completion record (changed files by area, criterion-to-evidence table, gates), the `## [Unreleased]` entry from the handoff's Changelog line and the docs index rows for new pages.
 3. Review the generated diff with `git diff`; correct anything wrong in the handoff, not in the generated output, and rerun. Commit on the user's approval.
 4. In CI the check is read-only: it puts the same generated content in the job summary and an artifact so it can be applied locally with `--write`.
 

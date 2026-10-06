@@ -1,6 +1,6 @@
 # Refinement session: question bank
 
-Use this when `node bin/app increment check <slug>` (or `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md`) exits 1. The report lists each failing rule with a hint and a refinement brief (questions per failed rule and a suggested skill). Start from that brief; the questions below fill gaps and keep rounds concrete. Rule identifiers come from the report, never from this page.
+Use this when `node bin/app increment check <slug>` (or `node tooling/delivery/ready.mjs --handoff docs/increments/<slug>.md`) exits 1. The report lists each failing rule with a hint and a refinement brief (questions per failed rule and a suggested skill). Start from that brief; the questions below fill gaps and keep rounds concrete. Rule identifiers come from the report, never from this page.
 
 ## How to run a round
 

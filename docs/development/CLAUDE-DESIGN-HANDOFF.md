@@ -143,4 +143,4 @@ reviewed plan; sync afterwards to refresh the source path named in the folder's 
   project's components, tokens and gates, and screenshots stay review evidence, not baselines.
 - A prototype that adds structure (a screen, component or interaction) changes the project model first;
   the folder follows on the next sync.
-- Tests: `tests/tooling/interactive-maker-design-folder*.checks.mjs` in the `maker` suite, including the engineering guide in `interactive-maker-design-folder-engineering.checks.mjs`.
+- Tests: `src/cli/tests/interactive-maker-design-folder*.checks.mjs` in the `maker` suite, including the engineering guide in `interactive-maker-design-folder-engineering.checks.mjs`.

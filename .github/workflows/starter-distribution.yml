@@ -19,9 +19,12 @@ on:
       - 'src/cli/adapters/framework/**'
       - 'src/cli/adapters/framework-cli.ts'
       - 'src/cli/presentation/terminal/**'
+      - 'src/tui/**'
       - 'src/shared/companion/starter-*.mjs'
       - 'src/cli/compiler/emitters/framework-docs.ts'
-      - 'tests/tooling/starter-*.checks.mjs'
+      - 'src/cli/tests/starter-*.checks.mjs'
+      - 'src/shared/tests/starter-*.checks.mjs'
+      - 'tooling/tests/starter-*.checks.mjs'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/starter-distribution.yml'
       - '!projects/**'
@@ -73,7 +76,7 @@ jobs:
           install-flags: --strict-allow-scripts
       - name: Test the independent definition contract
         run: |
-          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs src/cli/tests/project-starters.checks.mjs src/cli/tests/framework-new-project.checks.mjs tooling/tests/framework-distribution.checks.mjs
+          node --experimental-strip-types --test --test-concurrency=1 src/cli/tests/starter-*.checks.mjs src/shared/tests/starter-*.checks.mjs tooling/tests/starter-*.checks.mjs src/cli/tests/project-starters.checks.mjs src/cli/tests/framework-new-project.checks.mjs tooling/tests/framework-distribution.checks.mjs
       - name: Check suite registration and bounded asset contracts
         run: node tooling/testing/suites.mjs --check
       - name: Build current empty authoring and source-bound qualification input

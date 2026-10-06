@@ -11,7 +11,7 @@ on:
       - 'tooling/testing/check-npm-install-policy.mjs'
       - 'tooling/testing/local-npm-registry.mjs'
       - 'src/shared/tests/npm-install.checks.mjs'
-      - 'tests/tooling/setup-identity*.mjs'
+      - 'tooling/tests/setup-identity*.mjs'
       - '.gitattributes'
       - '.nvmrc'
       - '.github/workflows/setup-compatibility.yml'

@@ -14,7 +14,7 @@ rationale, planned designs and first CI notes) is archived as
 
 ## The plan: `test-plan.json`
 
-`scripts/testing/test-plan.mjs` validates the bounded data shape, rejecting
+`tooling/testing/test-plan.mjs` validates the bounded data shape, rejecting
 unknown fields; it is not a general JSON Schema engine.
 
 | Field | Contract |
@@ -48,9 +48,9 @@ its companion contracts. Newer evidence is linked additively through the
 ## Baseline command
 
 ```sh
-node scripts/testing/verify-baseline.mjs --repeat 3          # also: npm run test:baseline
-node scripts/testing/verify-baseline.mjs --repeat 3 --json
-node scripts/testing/verify-baseline.mjs --profile release --json
+node tooling/testing/verify-baseline.mjs --repeat 3          # also: npm run test:baseline
+node tooling/testing/verify-baseline.mjs --repeat 3 --json
+node tooling/testing/verify-baseline.mjs --profile release --json
 ```
 
 Options: `--repeat 2..10`, `--profile baseline|release`, `--json`. `npm run verify`
@@ -82,8 +82,8 @@ release through this tool, and it never publishes or tags.
 ## Browser specimen
 
 ```sh
-node scripts/testing/check-browser-specimen.mjs --mode served --repeat 2
-node scripts/testing/check-browser-specimen.mjs --mode inline --repeat 2
+node tooling/testing/check-browser-specimen.mjs --mode served --repeat 2
+node tooling/testing/check-browser-specimen.mjs --mode inline --repeat 2
 ```
 
 Options: `--host extracted|simulated` (default `extracted`), `--mode served|inline`,
@@ -97,7 +97,7 @@ diagnostic artifacts, not golden baselines.
 ## Evidence identity
 
 - `inputDigest` binds the execution inputs listed in
-  `scripts/testing/source-inputs.mjs` (`src`, `harness`, `scripts`, `tests`,
+  `tooling/testing/source-inputs.mjs` (`src`, `harness`, `scripts`, `tests`,
   `configs`, `bin`, `templates`, `plugins`, `.github/workflows`, the token catalog,
   `test-plan.json`, the root package, manifest and TypeScript files and a few
   optional concept and skill inputs), including uncommitted files. It is not a
