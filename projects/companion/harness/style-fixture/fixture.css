@@ -1,0 +1,31 @@
+/* Gallery-only layout. Not host CSS and never plugin CSS. */
+.fixture-page { max-inline-size: 72rem; margin-inline: auto; padding: 1.5rem; }
+.fixture-intro { max-inline-size: 48rem; }
+.fixture-eyebrow { color: var(--text-muted); font-size: var(--font-ui-small); letter-spacing: 0.04em; }
+.fixture-toolbar { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.5rem; padding: 1rem; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-m); }
+.fixture-toolbar label { display: grid; gap: 0.35rem; flex: 1 1 10rem; min-inline-size: 0; }
+.fixture-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+.fixture-field { display: grid; gap: 0.4rem; margin-block-end: 1rem; }
+.fixture-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.fixture-feedback { padding: 1rem; border: 1px solid var(--background-modifier-border); border-inline-start: 4px solid var(--text-warning); border-radius: var(--radius-s); margin-block: 1rem; }
+.fixture-feedback p { margin-block: 0.25rem; }
+.fixture-field-error { color: var(--text-error); font-size: var(--font-ui-small); }
+.fixture-caption { color: var(--text-muted); font-size: var(--font-ui-small); }
+.fixture-static-notice { margin-block: 0.5rem; }
+.fixture-notice-actions { margin-block-start: 0.75rem; }
+.fixture-long { overflow-wrap: anywhere; }
+.fixture-list { padding-inline-start: 1.2rem; }
+.fixture-list li { margin-block: 0.5rem; }
+.fixture-stack { display: grid; gap: 1.25rem; }
+body[data-density=comfortable] { --input-height: 44px; }
+body[data-narrow=true] .fixture-page { max-inline-size: 26rem; }
+body[data-narrow=true] .fixture-layout { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 760px) { .fixture-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 540px) { .fixture-page { padding: 0.75rem; } }
+
+.fixture-page .view-header h2 { margin: 0; font-size: var(--font-ui-medium); }
+
+/* Alias consumers are specimen-only examples of production source tokens. */
+.fixture-token-proof { margin-block: var(--size-4-6); }
+.token-surface { background: var(--plugin-shell-surface); color: var(--plugin-shell-text); padding: var(--plugin-shell-space-lg); border: 1px solid var(--plugin-shell-border); border-radius: var(--plugin-shell-radius-md); }
+button.token-accent { background: var(--plugin-shell-accent); color: var(--plugin-shell-text-on-accent); margin-block-start: var(--size-4-2); }

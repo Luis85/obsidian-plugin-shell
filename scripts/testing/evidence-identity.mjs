@@ -1,12 +1,12 @@
 import { readFile, readdir, lstat, realpath } from 'node:fs/promises';
 import { resolve, relative, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
 import { release } from 'node:os';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
+import { resolveBrowserExecutable } from './browser-executable.mjs';
 import { validateRetained } from '../release/candidate.mjs';
 
-const protocol = 'executable-evidence/1';
+const protocol = 'executable-evidence/2';
 const producerNames = ['runtime', 'browser', 'tooling', 'coverage', 'artifact', 'native'];
 export async function filesUnder(root, directory, pattern) {
   const files = [];
@@ -81,8 +81,9 @@ export async function evidenceIdentity(root, producer) {
   if (!policyFiles.length) throw new Error('EVIDENCE_PROTOCOL_MISSING');
   let browser = null;
   if (producer === 'browser') {
-    const playwright = await import(pathToFileURL(join(root, 'node_modules/playwright-core/index.mjs')).href);
-    const executable = process.env.SHELL_CHROMIUM || playwright.chromium.executablePath();
+    const resolved = resolveBrowserExecutable({ root });
+    if (!resolved.executablePath) throw new Error(`EVIDENCE_BROWSER_UNAVAILABLE: ${resolved.hint}`);
+    const executable = resolved.executablePath;
     const bytes = await readFile(executable);
     browser = { executable, bytes: bytes.length, sha256: sha256(bytes) };
   }
@@ -93,6 +94,10 @@ export async function evidenceIdentity(root, producer) {
 export async function suiteInventory(root, producer) {
   if (['runtime', 'coverage'].includes(producer)) return filesUnder(root, 'tests/runtime', /\.test\.ts$/);
   if (producer === 'browser') return filesUnder(root, 'tests/e2e', /\.spec\.ts$/);
-  if (producer === 'tooling') return filesUnder(root, 'tests/tooling', /\.(checks|test)\.mjs$/);
+  // Acceptance criterion tests (tests/acceptance, configs/delivery/delivery.json `acceptance`) run with the tooling suites; the folder is absent until an increment generates stubs.
+  if (producer === 'tooling') {
+    const acceptance = await lstat(join(root, 'tests/acceptance')).then(() => filesUnder(root, 'tests/acceptance', /\.checks\.mjs$/), () => []);
+    return [...await filesUnder(root, 'tests/tooling', /\.(checks|test)\.mjs$/), ...acceptance].sort();
+  }
   return [producer === 'native' ? 'scripts/testing/check-native.mjs' : 'scripts/quality/check-artifacts.mjs'];
 }

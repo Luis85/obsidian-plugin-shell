@@ -1,0 +1,9 @@
+.shell-data-form-heading h2 { margin: 0 0 6px; }
+.shell-data-form-group { display: grid; gap: 18px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.shell-data-form-section { padding: 16px; border: 1px solid var(--plugin-shell-border); border-radius: var(--plugin-shell-radius-sm); }
+.shell-data-form-group > legend { padding: 0 4px; font-size: 12px; font-weight: 550; }
+.shell-data-form-group.shell-field { gap: 8px; }
+.shell-data-form-choice { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.shell-data-form .shell-field textarea { width: 100%; }
+.shell-data-form .shell-field[data-kind="boolean"] input { width: auto; min-height: 0; justify-self: start; }
+.shell-data-form select { color: var(--plugin-shell-text); background: var(--background-modifier-form-field); border: 1px solid var(--plugin-shell-border); border-radius: var(--plugin-shell-control-radius); min-height: 36px; padding: 8px 12px; font: inherit; }

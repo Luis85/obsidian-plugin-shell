@@ -1,0 +1,20 @@
+{
+  "kind": "iteration-planner-source-completion-evidence",
+  "parentCommit": "7081d06bdca784165e807a3aa3c83b62b01a8347",
+  "scope": "Complete original source/test files assembled in a fresh local directory without a pre-existing HTML artifact; not repository-wide CI or native acceptance",
+  "toolchain": {"node": "22.16.0", "npm": "10.9.2", "repositoryQualified": false},
+  "sourceTree": "76ecf321735a386c485992be0c5f7fbcb38aad95",
+  "testTree": "dc087c1a01d0c99161b21ee975cd8369b736b3e4",
+  "sourceFileCount": 16,
+  "testFileCount": 2,
+  "checks": [
+    {"command": "npm ci --ignore-scripts", "cwd": "source", "status": "passed", "exitCode": 0},
+    {"command": "npm run prototype:build", "cwd": "source", "status": "passed", "exitCode": 0},
+    {"command": "npm run prototype:check", "cwd": "source", "status": "passed", "exitCode": 0},
+    {"command": "npm test", "cwd": "source", "status": "passed", "exitCode": 0, "passed": 38, "failed": 0, "skipped": 0, "todo": 0},
+    {"command": "npm run test:browser", "cwd": "source", "status": "timed-out", "exitCode": null, "timeoutSeconds": 120, "completedCheckIds": ["B01","B02","B03","B04","B05","B06","B07","B08","B09","B10","B11","B12","B13","B14","B15","B16","B17"], "unverifiedCheckIds": ["B18","B19","B20"], "finalReportProduced": false}
+  ],
+  "artifact": {"path": "prototype.html", "generatedLocally": true, "committed": false, "bytes": 54462, "sha256": "8b4c6da3015c8350a127c7ae5151061e39459cba54aa235a6907e224ae60a8f5", "matchesOriginalAttachment": true},
+  "evidence": {"excerptPath": "completion-checks.log", "fullLocalBuildAndDomainLogSha256": "b866afb9c1cd39a4c4f9c206f647ef20361206d9a4ab98fc11c0b17b788b5d54", "fullLocalBrowserLogSha256": "6d88982c8558d2625f1fc7639d1032ac1ccedc0dc27f082a0b3fadfdb110b190"},
+  "limitations": ["Node type stripping is not TypeScript type checking", "No current full browser pass or file-origin acceptance claimed", "Canonical Vue/Pinia/Nuxt UI and Companion compiler/import integration remain outstanding", "No native Obsidian, vault, release or hosted CI qualification"]
+}

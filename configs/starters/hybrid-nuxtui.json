@@ -1,0 +1,52 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "hybrid-nuxtui",
+  "name": "Hybrid with Nuxt UI",
+  "version": "1.0.0",
+  "category": "Projects",
+  "level": "Advanced",
+  "summary": "Plugin, webapp, website and CLI targets sharing project data and a Vue + Nuxt UI browser UI.",
+  "outcome": "A reviewed prototype package with Obsidian plugin + web application + static website + command-line application source (Vue 3 + Nuxt UI), ready for explicit dependency resolution and implementation.",
+  "includes": [
+    "Shared core in src/core with stable page data",
+    "Obsidian plugin entrypoint and manifest",
+    "Web application entrypoint and local preview server",
+    "Static website entrypoint and local preview server",
+    "CLI entrypoint with --json output and exit code 2 on invalid input",
+    "Offline single-file prototype build (npm run build:prototype)",
+    "Exact dependency pins with a root-only lock for explicit resolution"
+  ],
+  "implementation": [
+    "Agree the prototype brief in the interview before any files are written",
+    "Implement the agreed visual components and business actions",
+    "Resolve dependencies explicitly, then typecheck, test and build every target",
+    "Qualify plugin behavior in a disposable Obsidian vault"
+  ],
+  "tags": [
+    "hybrid",
+    "multi-target",
+    "nuxtui",
+    "vue"
+  ],
+  "inputs": [],
+  "generator": {
+    "kind": "project",
+    "projectType": "hybrid",
+    "framework": "nuxtui",
+    "targets": [
+      "plugin",
+      "webapp",
+      "website",
+      "cli"
+    ]
+  },
+  "files": [],
+  "processes": [],
+  "firstRun": [],
+  "nextSteps": [
+    "Review execution-prompt.md and source/README.md in the prepared package.",
+    "In source/, run npm install, then npm run typecheck, npm test and npm run build.",
+    "Hybrid means separate host entrypoints over shared local code; it adds no cloud sync or desktop runtime."
+  ]
+}

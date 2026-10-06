@@ -1,0 +1,57 @@
+{
+  "$schema": "../schemas/collection.schema.json",
+  "schemaVersion": 1,
+  "id": "release-item",
+  "title": "Release items",
+  "description": "Release items as Markdown notes with type ReleaseItem frontmatter in the configured paths.releaseItems folder (default docs/releases/items): what changes, why, where it came from (sources), how it is accepted, its risks, and the release candidate that includes it.",
+  "type": "ReleaseItem",
+  "pathKey": "releaseItems",
+  "idPrefix": "ITEM-",
+  "idDigits": 4,
+  "titleField": "title",
+  "forms": { "edit": "release-item", "review": "release-item-review" },
+  "wizards": { "new": "release-item-new", "edit": "release-item-edit", "review": "release-item-review" },
+  "statuses": [
+    { "id": "proposed", "label": "Proposed", "open": false, "transitions": ["ready", "dropped"] },
+    { "id": "ready", "label": "Ready", "open": true, "transitions": ["proposed", "dropped"] },
+    { "id": "included", "label": "Included", "open": true, "transitions": [], "managed": true },
+    { "id": "shipped", "label": "Shipped", "open": false, "transitions": [], "stamp": "shipped", "managed": true },
+    { "id": "dropped", "label": "Dropped", "open": false, "transitions": ["proposed"] }
+  ],
+  "initialStatus": "proposed",
+  "vocabularies": {
+    "kind": [
+      { "id": "feature", "label": "Feature" }, { "id": "fix", "label": "Fix" }, { "id": "improvement", "label": "Improvement" },
+      { "id": "docs", "label": "Documentation" }, { "id": "chore", "label": "Chore" }
+    ],
+    "priority": [
+      { "id": "low", "label": "Low" }, { "id": "medium", "label": "Medium" }, { "id": "high", "label": "High" }
+    ]
+  },
+  "fields": [
+    { "key": "title", "label": "Title", "kind": "text", "required": true, "maxLength": 160 },
+    { "key": "summary", "label": "Summary", "kind": "text", "required": true, "maxLength": 1000 },
+    { "key": "kind", "label": "Kind", "kind": "choice", "vocabulary": "kind", "required": true },
+    { "key": "priority", "label": "Priority", "kind": "choice", "vocabulary": "priority" },
+    { "key": "sources", "label": "Sources", "kind": "list", "maxLength": 200, "accepts": ["path", "RISK-", "LRN-", "ITEM-"] },
+    { "key": "acceptance", "label": "Acceptance", "kind": "list", "maxLength": 300, "requiredWhenOpen": true },
+    { "key": "risks", "label": "Risks", "kind": "list", "maxLength": 20, "idPrefix": "RISK-" },
+    { "key": "owner", "label": "Owner", "kind": "text", "maxLength": 120 },
+    { "key": "proposed", "label": "Proposed", "kind": "date", "required": true, "default": "today" },
+    { "key": "target", "label": "Target", "kind": "date", "overdue": true },
+    { "key": "candidate", "label": "Candidate", "kind": "text", "source": "managed", "maxLength": 40, "accepts": ["release-version"] },
+    { "key": "reviewed", "label": "Reviewed", "kind": "date", "source": "stamp" },
+    { "key": "shipped", "label": "Shipped", "kind": "date", "source": "stamp" },
+    { "key": "notes", "label": "Notes", "kind": "text", "frontmatter": false, "multiline": true, "maxLength": 4000 }
+  ],
+  "body": "# {{title}}\n\n## Summary\n\n{{summary}}\n\n## Notes\n\n{{notes|_No notes yet._}}\n",
+  "list": { "columns": ["id", "title", "status", "kind", "priority", "candidate", "target", "owner"] },
+  "report": {
+    "file": "release-items.md",
+    "title": "Release items",
+    "columns": ["id", "title", "status", "kind", "priority", "candidate", "target", "owner", "sources", "risks"],
+    "sort": [{ "key": "status", "order": "asc" }, { "key": "priority", "order": "desc" }],
+    "base": "release-items.base"
+  },
+  "review": { "stamp": "reviewed", "match": [{ "key": "priority", "in": ["high"] }], "overdue": true }
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "frameworkVersion": "0.4.0",
+  "commandCount": 173,
+  "sources": [
+    {
+      "path": "package.json",
+      "sha256": "ef1c601f3b9089dae739b291ed2a9b767284f200d9032f0a4a6d391b63d006ae"
+    },
+    {
+      "path": "bin/adapters/framework/catalog.ts",
+      "sha256": "f29bd0038726bdcbbeb88ca5ce3bab4bd511e08708b244e0a85719775fcca93d"
+    },
+    {
+      "path": "bin/adapters/framework/help-text.ts",
+      "sha256": "3c779211fff3dd3ca098d2697b05a0b01b628faa609ea3e76b6e452c5eee8fce"
+    },
+    {
+      "path": "bin/adapters/framework/increment-catalog.ts",
+      "sha256": "155c674d71f58aeed5bce9ac4c7f7166838f03b7dbd9fef72f2983cbb6203ffd"
+    },
+    {
+      "path": "bin/adapters/framework/increment-help.ts",
+      "sha256": "4482f64b12eefff667822a6fe13cc0f6c0a524cb424b4f722456121ac22063a0"
+    },
+    {
+      "path": "bin/compiler/domain/diagnostics.ts",
+      "sha256": "8cf40898f461b38aa39a7d5399a1e4108e65279611c6067831236270e9e364b6"
+    },
+    {
+      "path": "scripts/documentation/render.mjs",
+      "sha256": "0be40ac240d9f023f8da14e9999a6d27a80563511e293517030ff9243ddaa417"
+    },
+    {
+      "path": "scripts/documentation/manual.mjs",
+      "sha256": "1935b2e601e6a233718c68243edd42cca165abcdc32f4e3e95f5d1196af438cb"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "reference.md",
+      "sha256": "a9ef65a7ff56c41de5e0fd37a2ed352af11190328f7e25db543fa547d2819dab"
+    },
+    {
+      "path": "diagnostics.md",
+      "sha256": "6be5f78b74ad5d3f02260870d34bdf3acfeec3f9464dd1e78d505ac8d7929c03"
+    },
+    {
+      "path": "commands.json",
+      "sha256": "658eb85ebf03082834b3676a69c64251bf2b36b3864c813036c8799ab2e09341"
+    }
+  ]
+}

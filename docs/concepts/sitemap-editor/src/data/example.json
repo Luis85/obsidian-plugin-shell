@@ -1,0 +1,945 @@
+{
+  "schema": "companion.journey-lens",
+  "version": 1,
+  "workspace": {
+    "id": "northstar-workspace",
+    "name": "Northstar Workspace",
+    "description": "A collaborative SaaS workspace for projects, customers and operations."
+  },
+  "pages": [
+    {
+      "id": "workspace",
+      "parentId": null,
+      "title": "Workspace",
+      "route": "",
+      "icon": "home",
+      "type": "container",
+      "description": "Page hierarchy",
+      "purpose": "Organizational root of the sitemap. This is not a routable page.",
+      "layoutId": "app-shell",
+      "access": "public",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "hidden",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "app-sidebar"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "dashboard",
+      "parentId": "workspace",
+      "title": "Dashboard",
+      "route": "/app",
+      "icon": "dashboard",
+      "type": "page",
+      "description": "Overview & activity",
+      "purpose": "Understand workspace health, recent activity and the work that needs attention.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "primary",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "projects",
+      "parentId": "workspace",
+      "title": "Projects",
+      "route": "/projects",
+      "icon": "folder",
+      "type": "page",
+      "description": "Project management",
+      "purpose": "Discover projects, review their health and open a project workspace.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "primary",
+      "breadcrumbs": true,
+      "tabsEnabled": true,
+      "navItems": [
+        "all-tasks",
+        "project-files",
+        "project-activity",
+        "templates"
+      ],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs",
+        "data-table",
+        "empty-state"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "customers",
+      "parentId": "workspace",
+      "title": "Customers",
+      "route": "/customers",
+      "icon": "users",
+      "type": "page",
+      "description": "Customer CRM",
+      "purpose": "Find customer accounts and the people connected to each account.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "primary",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "data-table",
+        "empty-state"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "reports",
+      "parentId": "workspace",
+      "title": "Reports",
+      "route": "/reports",
+      "icon": "reports",
+      "type": "page",
+      "description": "Analytics & insights",
+      "purpose": "Review operational performance and create reports for the team.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "primary",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "data-table"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "automations",
+      "parentId": "workspace",
+      "title": "Automations",
+      "route": "/automations",
+      "icon": "bolt",
+      "type": "page",
+      "description": "Triggers & workflows",
+      "purpose": "Create and manage repeatable workflows across the workspace.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner"
+      ],
+      "status": "Active",
+      "nav": "primary",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "workspace-settings",
+      "parentId": "workspace",
+      "title": "Settings",
+      "route": "/settings",
+      "icon": "settings",
+      "type": "page",
+      "description": "Workspace configuration",
+      "purpose": "Manage workspace-wide membership, billing and integrations.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Product Manager"
+      ],
+      "status": "Active",
+      "nav": "primary",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "all-tasks",
+      "parentId": "projects",
+      "title": "All tasks",
+      "route": "/projects/tasks",
+      "icon": "tasks",
+      "type": "page",
+      "description": "Tasks across projects",
+      "purpose": "Find and prioritize tasks across every project you can access.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs",
+        "data-table"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "project",
+      "parentId": "projects",
+      "title": "Project details",
+      "route": "/projects/:projectId",
+      "icon": "page",
+      "type": "page",
+      "description": "Project workspace",
+      "purpose": "Main workspace for a specific project. Shows key information, tasks, files, team, and settings.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": true,
+      "navItems": [
+        "summary",
+        "tasks",
+        "files",
+        "discussions",
+        "team",
+        "project-settings"
+      ],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs",
+        "tab-navigation"
+      ],
+      "notes": "Uses a dynamic project ID. Resolve the current project before rendering. Check project membership in the production authorization layer."
+    },
+    {
+      "id": "project-files",
+      "parentId": "projects",
+      "title": "Files",
+      "route": "/projects/files",
+      "icon": "folder",
+      "type": "page",
+      "description": "Files across projects",
+      "purpose": "Search files across accessible projects.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "project-activity",
+      "parentId": "projects",
+      "title": "Activity",
+      "route": "/projects/activity",
+      "icon": "activity",
+      "type": "page",
+      "description": "Team activity",
+      "purpose": "Follow meaningful updates across projects and teammates.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "templates",
+      "parentId": "projects",
+      "title": "Templates",
+      "route": "/projects/templates",
+      "icon": "layers",
+      "type": "page",
+      "description": "Reusable project setups",
+      "purpose": "Start a project from a reusable template.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "data-table",
+        "empty-state"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "summary",
+      "parentId": "project",
+      "title": "Summary",
+      "route": "/projects/:projectId/summary",
+      "icon": "page",
+      "type": "contextual",
+      "description": "Key information",
+      "purpose": "Review milestones, project health and the most important next steps.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs",
+        "tab-navigation"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "tasks",
+      "parentId": "project",
+      "title": "Tasks",
+      "route": "/projects/:projectId/tasks",
+      "icon": "tasks",
+      "type": "contextual",
+      "description": "Project-specific tasks",
+      "purpose": "Review remaining work, assign ownership and track completion within a project.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs",
+        "tab-navigation",
+        "data-table",
+        "empty-state"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "files",
+      "parentId": "project",
+      "title": "Files",
+      "route": "/projects/:projectId/files",
+      "icon": "folder",
+      "type": "contextual",
+      "description": "Project files",
+      "purpose": "Upload, find and discuss documents in this project.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs",
+        "tab-navigation",
+        "data-table"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "discussions",
+      "parentId": "project",
+      "title": "Discussions",
+      "route": "/projects/:projectId/discussions",
+      "icon": "chat",
+      "type": "contextual",
+      "description": "Comments & decisions",
+      "purpose": "Discuss project work and keep important decisions in context.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "team",
+      "parentId": "project",
+      "title": "Team",
+      "route": "/projects/:projectId/team",
+      "icon": "users",
+      "type": "contextual",
+      "description": "Project collaborators",
+      "purpose": "See who works on this project and understand their responsibilities.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "project-settings",
+      "parentId": "project",
+      "title": "Settings",
+      "route": "/projects/:projectId/settings",
+      "icon": "settings",
+      "type": "contextual",
+      "description": "Project configuration",
+      "purpose": "Configure this project, manage membership and connect integrations.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": true,
+      "navItems": [
+        "general",
+        "members",
+        "project-integrations"
+      ],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "general",
+      "parentId": "project-settings",
+      "title": "General",
+      "route": "/projects/:projectId/settings/general",
+      "icon": "folder",
+      "type": "contextual",
+      "description": "Basic settings",
+      "purpose": "Edit the project name, description and lifecycle settings.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "members",
+      "parentId": "project-settings",
+      "title": "Members",
+      "route": "/projects/:projectId/settings/members",
+      "icon": "users",
+      "type": "contextual",
+      "description": "Project access",
+      "purpose": "Manage membership for this project.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Project Owner"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs",
+        "data-table"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "project-integrations",
+      "parentId": "project-settings",
+      "title": "Integrations",
+      "route": "/projects/:projectId/settings/integrations",
+      "icon": "link",
+      "type": "contextual",
+      "description": "Connected tools",
+      "purpose": "Configure the external systems connected to this project.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Project Owner"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "customer",
+      "parentId": "customers",
+      "title": "Customer details",
+      "route": "/customers/:customerId",
+      "icon": "person",
+      "type": "contextual",
+      "description": "Customer overview",
+      "purpose": "Review the account relationship, contacts and associated projects.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "contacts",
+      "parentId": "customers",
+      "title": "Contacts",
+      "route": "/customers/contacts",
+      "icon": "users",
+      "type": "page",
+      "description": "People & relationships",
+      "purpose": "Find and maintain customer contact records.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "data-table"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "saved-reports",
+      "parentId": "reports",
+      "title": "Saved reports",
+      "route": "/reports/saved",
+      "icon": "reports",
+      "type": "page",
+      "description": "Your reporting library",
+      "purpose": "Open and manage reports saved by the team.",
+      "layoutId": "app-shell",
+      "access": "members",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner",
+        "Member"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "report-builder",
+      "parentId": "reports",
+      "title": "Report builder",
+      "route": "/reports/new",
+      "icon": "sliders",
+      "type": "page",
+      "description": "Build a custom report",
+      "purpose": "",
+      "layoutId": "full-width",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Product Manager"
+      ],
+      "status": "Draft",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "automation-builder",
+      "parentId": "automations",
+      "title": "Workflow builder",
+      "route": "/automations/:automationId",
+      "icon": "journey",
+      "type": "page",
+      "description": "Design an automation",
+      "purpose": "",
+      "layoutId": "full-width",
+      "access": "restricted",
+      "roles": [
+        "Admin",
+        "Product Manager",
+        "Project Owner"
+      ],
+      "status": "Draft",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "workspace-members",
+      "parentId": "workspace-settings",
+      "title": "Members",
+      "route": "/settings/members",
+      "icon": "users",
+      "type": "page",
+      "description": "Workspace membership",
+      "purpose": "Invite members and manage workspace-level roles.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "billing",
+      "parentId": "workspace-settings",
+      "title": "Billing",
+      "route": "/settings/billing",
+      "icon": "credit-card",
+      "type": "page",
+      "description": "Plan & billing",
+      "purpose": "Manage the subscription, payment method and invoices.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "workspace-integrations",
+      "parentId": "workspace-settings",
+      "title": "Integrations",
+      "route": "/settings/integrations",
+      "icon": "link",
+      "type": "page",
+      "description": "Workspace connections",
+      "purpose": "Connect external systems at workspace level.",
+      "layoutId": "app-shell",
+      "access": "restricted",
+      "roles": [
+        "Admin"
+      ],
+      "status": "Active",
+      "nav": "contextual",
+      "breadcrumbs": true,
+      "tabsEnabled": false,
+      "navItems": [],
+      "componentIds": [
+        "page-header",
+        "breadcrumbs"
+      ],
+      "notes": ""
+    }
+  ],
+  "layouts": [
+    {
+      "id": "app-shell",
+      "name": "App (with sidebar)",
+      "description": "Persistent workspace navigation, a page header and a main content area."
+    },
+    {
+      "id": "full-width",
+      "name": "Full-width workspace",
+      "description": "An expanded work surface for focused, complex editors."
+    },
+    {
+      "id": "authentication",
+      "name": "Authentication",
+      "description": "A focused layout for sign-in and account recovery screens."
+    }
+  ],
+  "components": [
+    {
+      "id": "app-sidebar",
+      "name": "App sidebar",
+      "description": "Primary workspace navigation and the account context."
+    },
+    {
+      "id": "page-header",
+      "name": "Page header",
+      "description": "Page title, purpose and contextual actions."
+    },
+    {
+      "id": "breadcrumbs",
+      "name": "Breadcrumbs",
+      "description": "Links to the ancestors of the current page."
+    },
+    {
+      "id": "tab-navigation",
+      "name": "Tab navigation",
+      "description": "Secondary navigation referencing existing pages."
+    },
+    {
+      "id": "data-table",
+      "name": "Data table",
+      "description": "Sortable business records with consistent status treatments."
+    },
+    {
+      "id": "empty-state",
+      "name": "Empty state",
+      "description": "A helpful explanation and next action when no records exist."
+    }
+  ],
+  "journeys": [
+    {
+      "id": "review-tasks",
+      "name": "Review project tasks",
+      "description": "Find a project and review its remaining work.",
+      "role": "Member",
+      "steps": [
+        {
+          "pageId": "projects",
+          "action": "Open a project"
+        },
+        {
+          "pageId": "project",
+          "action": "Select the Tasks tab"
+        },
+        {
+          "pageId": "tasks",
+          "action": "Review remaining work"
+        }
+      ]
+    },
+    {
+      "id": "invite-team",
+      "name": "Invite a project member",
+      "description": "Open project settings and manage the team.",
+      "role": "Project Owner",
+      "steps": [
+        {
+          "pageId": "projects",
+          "action": "Open a project"
+        },
+        {
+          "pageId": "project",
+          "action": "Open Settings"
+        },
+        {
+          "pageId": "project-settings",
+          "action": "Choose Members"
+        },
+        {
+          "pageId": "members",
+          "action": "Review project membership"
+        }
+      ]
+    },
+    {
+      "id": "manage-billing",
+      "name": "Manage workspace billing",
+      "description": "Understand how an administrator finds billing.",
+      "role": "Admin",
+      "steps": [
+        {
+          "pageId": "dashboard",
+          "action": "Open Settings"
+        },
+        {
+          "pageId": "workspace-settings",
+          "action": "Choose Billing"
+        },
+        {
+          "pageId": "billing",
+          "action": "Review the subscription"
+        }
+      ]
+    }
+  ]
+}

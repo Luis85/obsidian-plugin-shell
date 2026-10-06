@@ -1,11 +1,17 @@
 # Fixed-candidate release rehearsal
 
+> Type: how-to · Part of the [docs index](../README.md)
+
 The rehearsal supplies a local version plan, a read-only release rehearsal and
 validated [draft/promotion operation plans](RELEASE-OPERATION-PLANS.md). The separate
 [opt-in executor](RELEASE-EXECUTION.md) can operate retained packets after explicit
 authorization; the rehearsal itself never mutates GitHub. No release, tag,
 listing, repository permission, environment protection or automerge change is
 performed. Those remain explicit future work in the [full contract](MAINTENANCE-AND-RELEASE.md).
+
+The rehearsal is a manual, offline-capable qualification aid. The standard way to
+release a new version is the automated [cut and publish](CUT-AND-PUBLISH-A-RELEASE.md)
+path, whose Release tier runs the same rehearsal through Candidate qualification.
 
 ## Prepare metadata
 
@@ -81,10 +87,11 @@ run; the selected `verify` gate cannot certify those scopes.
 
 ## Actions and manual acceptance
 
-The topic-branch **Candidate qualification** workflow runs the same fixed-source
+The **Candidate qualification** workflow (pushes to `main` that change execution
+inputs, manual dispatch, and every Release tier run on `release/X.Y.Z`) runs the same fixed-source
 rehearsal before browser/native checks. Its recovery archive stays under ignored
 `reports/`, so source cleanliness remains an actual gate. The retained packet and
-subsequent unchanged-asset evidence are uploaded together. This proposal-level
+subsequent unchanged-asset evidence are uploaded together. This post-merge
 qualification has read-only permissions and cannot publish or create a tag.
 
 After merge, **Release rehearsal** accepts a full source SHA and stable version.
@@ -110,9 +117,10 @@ a new candidate and evidence.
 
 The local executor rejects existing public versions, mismatched tags, incomplete
 promotion uploads and changed hashes. It validates supplied native evidence and
-explicit confirmation, and uses the retained bytes. The future privileged Actions
-stage still requires separate authorization and scoped policy review; do not rely
-on token-created tags to trigger another workflow. The rehearsal cannot publish
+explicit confirmation, and uses the retained bytes. The privileged Actions
+stage is the owner-dispatched Publish workflow (scoped write policy, `release`
+environment approval); it publishes the Release tier's retained candidate, not a
+rehearsal artifact, and no workflow relies on a token-created tag to start another. The rehearsal cannot publish
 even when all checks pass. Real first/subsequent public release and remote failure
 recovery qualification remain unperformed; synthetic operation/transport tests
 are documented separately.

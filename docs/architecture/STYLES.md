@@ -1,8 +1,10 @@
 # Modular CSS and composed styles.css
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Contract:** PRD 0.3 extension; requirements CSS-01–12.  
-> **Status:** Required build/authoring behavior, not an implemented stylesheet pipeline.  
-> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
+> **Status:** Normative target; the shared pipeline exists. `src/styles/index.css` and Vue SFC styles compose through the shared Vite configuration (`scripts/bundling/vite-shared.mjs`) and selector scoping (`scripts/bundling/css-ownership.mjs`) into one `dist/styles.css`; `npm run check:tokens` and `npm run check:style-literals` guard token use. File layouts below are illustrative; CSS-01–12 remain in force.  
+> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
 
 ## 1. The intended result
 
@@ -59,9 +61,9 @@ scripts/
     vite-shared.mjs
   quality/
     check-styles.mjs
-  make/
-    makers/style.mjs
-    templates/
+bin/
+  adapters/makers/
+    extra-recipes.ts           # style recipe
 ```
 
 Create only modules with an actual use. A large product can split its feature/native entries further without changing the pipeline.
@@ -158,7 +160,7 @@ may exceed 400 because it is generated composition output; it remains subject to
 artifact-size budgets, complete-source provenance and output validation. Do not
 exempt handwritten large files by naming them generated.
 
-The existing initial CSS artifact budget of 100 KiB remains a proposed target, not a substitute for source maintainability. Minification does not make an oversized source file comply with its line limit.
+The initial CSS artifact budget is 160 KiB since the owner-reviewed 2026-09-27 change (NFR-04 targets 100 KiB; see [QUALITY-ASSURANCE](../development/QUALITY-ASSURANCE.md)). It remains a proposed target, not a substitute for source maintainability. Minification does not make an oversized source file comply with its line limit.
 
 | Future command | Contract |
 | --- | --- |

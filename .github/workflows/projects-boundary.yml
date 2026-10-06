@@ -1,0 +1,64 @@
+name: Projects boundary
+# The only shell workflow that watches projects/: it never installs, builds or tests a
+# project (each project's own synced workflows do that). It proves that every project
+# is standalone, links its prototypes, and that its workflows are synced exactly and
+# stay isolated from the shell's. A site project's Bases collection snapshots must match
+# their current .base files, so any .base edit re-runs it. See projects/README.md.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths: &boundary-inputs
+      - 'projects/**'
+      - 'scripts/projects/**'
+      - '**/*.base'
+      - 'bin/domain/site-*.ts'
+      - 'bin/domain/obsidian-base.ts'
+      - 'bin/domain/base-*.ts'
+      - 'bin/adapters/obsidian-base.ts'
+      - 'templates/sites/catalog.json'
+      - 'scripts/quality/check-repository.mjs'
+      - '.github/dependabot.yml'
+      - '.github/workflows/**'
+      - '.github/actions/setup-qualified/**'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches: [main]
+    paths: *boundary-inputs
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
+permissions:
+  contents: read
+concurrency:
+  group: projects-boundary-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  boundary:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    name: Projects boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund --ignore-scripts
+      - name: Standalone projects, prototype links, synced and isolated workflows
+        run: node scripts/projects/projects.mjs check
+      - name: Shell workflow security floor (also covers the synced project copies)
+        run: node scripts/quality/check-repository.mjs

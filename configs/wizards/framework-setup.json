@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "framework-setup",
+  "version": 1,
+  "title": "Framework setup",
+  "description": "Terminal interview of node bin/app setup: source (starter or project JSON), identity, explicit opt-ins and, for a new design, the hosting platform (GitHub, Azure DevOps or none). Only missing answers are asked; headless callers pass explicit options.",
+  "steps": [
+    { "id": "prepare", "kind": "action", "action": "framework-setup.prepare" },
+    { "id": "source", "kind": "form", "when": { "path": "askSource", "equals": true }, "fields": [
+      { "id": "source", "kind": "text", "label": "Starter ID, or json", "default": "blank" },
+      { "id": "input", "kind": "text", "label": "Project JSON path", "bind": "setup.input", "required": true, "when": { "field": "source", "equals": "json" } }
+    ] },
+    { "id": "source-check", "kind": "action", "action": "framework-setup.source", "when": { "path": "askSource", "equals": true } },
+    { "id": "questions", "kind": "action", "action": "framework-setup.questions" },
+    { "id": "suggest-id", "kind": "action", "action": "framework-setup.suggest-id", "when": { "path": "needsIdentity", "equals": true } },
+    { "id": "plugin-id", "kind": "form", "bind": "setup", "when": { "path": "needsIdentity", "equals": true }, "fields": [
+      { "id": "id", "kind": "text", "label": "Plugin ID", "default": "{{suggestedId}}", "when": { "path": "id", "present": false } }
+    ] },
+    { "id": "suggest-name", "kind": "action", "action": "framework-setup.suggest-name", "when": { "path": "needsIdentity", "equals": true } },
+    { "id": "plugin-name", "kind": "form", "bind": "setup", "when": { "path": "needsIdentity", "equals": true }, "fields": [
+      { "id": "name", "kind": "text", "label": "Plugin name", "default": "{{suggestedName}}", "when": { "path": "name", "present": false } },
+      { "id": "author", "kind": "text", "label": "Author", "when": { "path": "author", "present": false } }
+    ] },
+    { "id": "airship", "kind": "form", "bind": "setup", "when": { "path": "askAirship", "equals": true }, "fields": [
+      { "id": "airship", "kind": "confirm", "label": "Enable optional Airship development tooling? No installation or launch is performed.",
+        "transient": true, "effect": "framework-setup.opt-in" }
+    ] },
+    { "id": "mcp", "kind": "form", "bind": "setup", "when": { "path": "askMcp", "equals": true }, "fields": [
+      { "id": "mcp", "kind": "confirm", "label": "Enable the project-local Workbench MCP for Claude Code and Codex? This writes project settings but installs no client.",
+        "transient": true, "effect": "framework-setup.opt-in" }
+    ] },
+    { "id": "hosting-prepare", "kind": "action", "action": "framework-setup.hosting" },
+    { "id": "hosting", "kind": "form", "bind": "hosting", "when": { "path": "hosting.ask", "equals": true }, "fields": [
+      { "id": "answer", "kind": "text", "label": "Hosting platform for pull requests and CI: github, azure-devops or none? Prepares files and CLI hints only; nothing signs in. [{{hosting.fallback}}]" }
+    ] },
+    { "id": "hosting-platform", "kind": "action", "action": "hosting.platform", "when": { "path": "hosting.ask", "equals": true } },
+    { "id": "azure-organization", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askOrganization", "equals": true }, "fields": [
+      { "id": "organization", "kind": "text", "label": "Azure DevOps organization URL (https://dev.azure.com/<organization>)", "default": "{{hosting.details.organization}}",
+        "when": { "path": "details", "present": true } },
+      { "id": "organizationLater", "kind": "text", "label": "Azure DevOps organization URL (https://dev.azure.com/<organization>), blank to add later", "bind": "organization",
+        "when": { "path": "details", "present": false } }
+    ] },
+    { "id": "hosting-organization", "kind": "action", "action": "hosting.organization", "when": { "path": "hosting.askOrganization", "equals": true } },
+    { "id": "azure-project", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askProject", "equals": true }, "fields": [
+      { "id": "project", "kind": "text", "label": "Azure DevOps project", "default": "{{hosting.details.project}}", "required": true }
+    ] },
+    { "id": "hosting-project", "kind": "action", "action": "hosting.project", "when": { "path": "hosting.azure", "equals": true } },
+    { "id": "azure-repository", "kind": "form", "bind": "hosting", "when": { "path": "hosting.askRepository", "equals": true }, "fields": [
+      { "id": "repository", "kind": "text", "label": "Azure DevOps repository", "default": "{{hosting.repositoryDefault}}" }
+    ] },
+    { "id": "hosting-apply", "kind": "action", "action": "hosting.apply", "with": { "into": "setup" } },
+    { "id": "hosting-note", "kind": "action", "action": "framework-setup.hosting-note" }
+  ]
+}

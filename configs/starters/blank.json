@@ -1,0 +1,509 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "blank",
+  "name": "Start Blank",
+  "category": "Foundations",
+  "level": "Foundation",
+  "summary": "A minimal runnable shell with an empty generated workspace and no product requirements; the framework's Task, Project and Items examples stay registered until you run npm run examples:remove.",
+  "outcome": "Best when your idea does not fit an existing pattern.",
+  "tags": [
+    "blank",
+    "empty",
+    "minimal",
+    "custom"
+  ],
+  "includes": [
+    "Command and ribbon entry to an empty workspace",
+    "Native settings surface and host-friendly design tokens",
+    "No generated entities, source recipes or PRDs (the framework's example features stay registered; npm run examples:remove removes them)"
+  ],
+  "implementation": [
+    "Your domain model, pages and business behavior",
+    "Native acceptance and release qualification"
+  ],
+  "version": "1.0.0",
+  "inputs": [
+    {
+      "id": "id",
+      "label": "Project ID",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "name",
+      "label": "Project name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "author",
+      "label": "Author",
+      "type": "string",
+      "required": false,
+      "default": "Your Name"
+    },
+    {
+      "id": "description",
+      "label": "Description",
+      "type": "string",
+      "required": false,
+      "default": "A minimal starting point with an empty workspace and no product requirements."
+    },
+    {
+      "id": "version",
+      "label": "Project version",
+      "type": "string",
+      "required": true,
+      "default": "0.1.0"
+    },
+    {
+      "id": "codebaseFolder",
+      "label": "Source folder",
+      "type": "string",
+      "required": true,
+      "default": "src"
+    },
+    {
+      "id": "testsFolder",
+      "label": "Tests folder",
+      "type": "string",
+      "required": true,
+      "default": "tests"
+    }
+  ],
+  "generator": {
+    "kind": "companion",
+    "document": {
+      "kind": "obsidian-companion-project",
+      "schemaVersion": 6,
+      "executable": false,
+      "project": {
+        "id": "my-vault-tool",
+        "name": "My Vault Tool",
+        "author": "Your Name",
+        "version": "0.1.0",
+        "description": "A minimal starting point with an empty workspace and no product requirements."
+      },
+      "settings": {
+        "codebaseFolder": "src",
+        "testsFolder": "tests"
+      },
+      "design": {
+        "schema": 6,
+        "blueprint": "blank",
+        "goal": "",
+        "platform": "desktop",
+        "nodes": [
+          {
+            "id": "node-1",
+            "slug": "workspace",
+            "label": "Workspace",
+            "kind": "view",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": null,
+            "nav": false,
+            "command": true,
+            "ribbon": true,
+            "entry": true,
+            "instance": "reuse",
+            "patterns": [
+              "open-view"
+            ],
+            "goal": "Add your first feature.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-2",
+            "slug": "preferences",
+            "label": "Preferences",
+            "kind": "settings",
+            "layout": "form",
+            "placement": "tab",
+            "parent": null,
+            "nav": false,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [
+              "settings"
+            ],
+            "goal": "Configure this plugin without changing unrelated host settings.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          }
+        ],
+        "links": [],
+        "nextId": 3,
+        "library": [],
+        "prds": [],
+        "librarySchema": 3,
+        "canvas": {
+          "schema": 1,
+          "layout": "vertical",
+          "positions": {},
+          "pan": {
+            "x": 32,
+            "y": 28
+          },
+          "zoom": 1,
+          "snap": true,
+          "collapsed": [],
+          "edges": "selected",
+          "custom": false,
+          "arrangedFor": "",
+          "fitted": false
+        },
+        "semantic": {
+          "schema": 1,
+          "nextId": 1,
+          "entities": [],
+          "relationships": [],
+          "sections": [],
+          "canvas": {
+            "positions": {},
+            "viewport": {
+              "x": 40,
+              "y": 40,
+              "zoom": 1
+            },
+            "snap": true
+          }
+        },
+        "dataSources": {
+          "schema": 1,
+          "nextId": 1,
+          "sources": [],
+          "flows": [],
+          "positions": {}
+        },
+        "designSystem": {
+          "schema": 1,
+          "name": "My Plugin tokens",
+          "description": "A starting point for a plugin that belongs in Obsidian. Customize these declarations before implementation.",
+          "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+          "fonts": [
+            {
+              "id": "interface",
+              "name": "Interface",
+              "source": "interface",
+              "families": "",
+              "fallback": "system-ui",
+              "usage": "Navigation, controls and labels.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "body",
+              "name": "Reading",
+              "source": "text",
+              "families": "",
+              "fallback": "sans-serif",
+              "usage": "Descriptions and long-form content.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "code",
+              "name": "Code",
+              "source": "mono",
+              "families": "",
+              "fallback": "monospace",
+              "usage": "Identifiers, paths and code samples.",
+              "license": "Host font preference. No font files are embedded."
+            }
+          ],
+          "typography": [
+            {
+              "id": "page-title",
+              "name": "Page title",
+              "font": "interface",
+              "size": 24,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.25,
+              "letterSpacing": 0,
+              "usage": "One primary heading per view."
+            },
+            {
+              "id": "section-title",
+              "name": "Section title",
+              "font": "interface",
+              "size": 18,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Group related controls or content."
+            },
+            {
+              "id": "body",
+              "name": "Body",
+              "font": "body",
+              "size": 16,
+              "unit": "px",
+              "weight": 400,
+              "lineHeight": 1.5,
+              "letterSpacing": 0,
+              "usage": "Main descriptive copy."
+            },
+            {
+              "id": "label",
+              "name": "Label",
+              "font": "interface",
+              "size": 14,
+              "unit": "px",
+              "weight": 500,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Form labels; do not rely on placeholders."
+            }
+          ],
+          "spacing": [
+            {
+              "id": "xs",
+              "name": "XS",
+              "value": 4,
+              "unit": "px",
+              "usage": "Related inline items"
+            },
+            {
+              "id": "sm",
+              "name": "SM",
+              "value": 8,
+              "unit": "px",
+              "usage": "Within a control group"
+            },
+            {
+              "id": "md",
+              "name": "MD",
+              "value": 16,
+              "unit": "px",
+              "usage": "Between related blocks"
+            },
+            {
+              "id": "lg",
+              "name": "LG",
+              "value": 24,
+              "unit": "px",
+              "usage": "Between sections"
+            },
+            {
+              "id": "xl",
+              "name": "XL",
+              "value": 32,
+              "unit": "px",
+              "usage": "Major content separation"
+            }
+          ],
+          "sizes": [
+            {
+              "id": "control",
+              "name": "Control height",
+              "value": 36,
+              "unit": "px",
+              "usage": "Proposed default, not an accessibility guarantee."
+            },
+            {
+              "id": "icon",
+              "name": "Icon",
+              "value": 18,
+              "unit": "px",
+              "usage": "Glyph size, not the clickable target."
+            },
+            {
+              "id": "inspector",
+              "name": "Inspector width",
+              "value": 320,
+              "unit": "px",
+              "usage": "Preferred width; adapt for narrower panes."
+            }
+          ],
+          "radii": [
+            {
+              "id": "control",
+              "name": "Control radius",
+              "value": 6,
+              "unit": "px",
+              "usage": "Inputs and compact actions."
+            },
+            {
+              "id": "surface",
+              "name": "Surface radius",
+              "value": 12,
+              "unit": "px",
+              "usage": "Standalone panels."
+            }
+          ],
+          "colors": [
+            {
+              "id": "background",
+              "name": "Background",
+              "light": "#FFFFFF",
+              "dark": "#1E1E24",
+              "host": "--background-primary",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "text",
+              "name": "Primary text",
+              "light": "#202027",
+              "dark": "#ECECF2",
+              "host": "--text-normal",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "muted",
+              "name": "Secondary text",
+              "light": "#595964",
+              "dark": "#B6B6C4",
+              "host": "--text-muted",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent",
+              "name": "Accent",
+              "light": "#6550B9",
+              "dark": "#B7A3FF",
+              "host": "--interactive-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent-text",
+              "name": "Text on accent",
+              "light": "#FFFFFF",
+              "dark": "#17131F",
+              "host": "--text-on-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            }
+          ],
+          "guidelines": [
+            {
+              "id": "interaction",
+              "name": "Interaction states",
+              "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+            },
+            {
+              "id": "components",
+              "name": "Component usage",
+              "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+            }
+          ],
+          "frontend": {
+            "schema": 1,
+            "target": "nuxt-ui",
+            "colorPolicy": "host",
+            "bindings": {}
+          }
+        },
+        "storymaps": {
+          "schema": 1,
+          "nextId": 1,
+          "maps": []
+        },
+        "visualDesigns": {
+          "schema": 3,
+          "nextId": 1,
+          "catalog": {
+            "id": "nuxt-ui",
+            "version": 1
+          },
+          "pages": [],
+          "components": [],
+          "layouts": [],
+          "revisions": []
+        }
+      },
+      "notes": [
+        "# Starter scope\n\nCommand and ribbon entry to an empty workspace\nNative settings surface and host-friendly design tokens\nNo example entities, source recipes or PRDs\n\n## Implementation work\n\nYour domain model, pages and business behavior\nNative acceptance and release qualification\n\nNo business acceptance has passed. Use a separate development vault. Never insert credentials in this portable JSON.\n"
+      ]
+    }
+  },
+  "files": [],
+  "processes": [
+    {
+      "id": "install",
+      "label": "Install dependencies",
+      "description": "Install the exact project dependency graph; network and dependency lifecycle effects require trust.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "ci",
+            "--no-fund"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "label": "Verify generated project",
+      "description": "Run the generated project verification without claiming native acceptance.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "verify:project"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "label": "Build project",
+      "description": "Build generated project artifacts.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "showcase",
+      "label": "Preview project",
+      "description": "Run the local browser showcase in the foreground; stop it with Ctrl+C.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "dev:ui"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    }
+  ],
+  "firstRun": [
+    "install",
+    "verify"
+  ],
+  "nextSteps": [
+    "npm ci",
+    "npm run check",
+    "npm run dev:ui"
+  ]
+}

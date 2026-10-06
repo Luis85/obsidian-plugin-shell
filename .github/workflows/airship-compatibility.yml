@@ -1,0 +1,76 @@
+name: Airship generated-project compatibility
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths-ignore:
+      - 'projects/**'
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: airship-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    strategy:
+      fail-fast: false
+      matrix:
+        # Integration (ready pull requests, main) runs the Linux leg; the release tier runs every OS.
+        os: ${{ fromJSON(inputs.tier == 'release' && '["ubuntu-24.04", "windows-latest", "macos-latest"]' || '["ubuntu-24.04"]') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+          playwright: ${{ runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && 'with-deps' || '' }}
+      - name: Validate source contracts
+        run: |
+          node "$QUALIFIED_NPM" run check:compiler-architecture
+          node "$QUALIFIED_NPM" run test:airship
+          node scripts/testing/suites.mjs --check
+          python -B scripts/concepts/build-companion.py --check
+      # E2E: the generated preview served to Chromium; opt-in, always in the release tier.
+      - name: Qualify actual generated preview and pinned Airship
+        if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
+        run: node scripts/airship/qualify.mjs
+      - name: Retain named compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: airship-compatibility-${{ matrix.os }}
+          path: |
+            reports/airship-qualification/evidence.json
+            reports/airship-qualification/servers.log
+            reports/airship-qualification/airship-preview.png
+          if-no-files-found: ignore
+          retention-days: 7

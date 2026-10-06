@@ -1,5 +1,13 @@
 # Execute a retained release candidate
 
+> Type: how-to · Part of the [docs index](../README.md)
+
+This is the manual, local release tool for a retained candidate packet. The
+standard path for a new version is automated: [cut and publish a
+release](CUT-AND-PUBLISH-A-RELEASE.md) through the Release cut, Release and
+Publish workflows. Use this executor when you operate a retained packet outside
+that path, for example a draft or promotion from a rehearsal artifact.
+
 `npm run release:operate -- --input operation.json` authenticates with the existing
 GitHub CLI login and performs read-only discovery. It validates the retained
 five-file packet, repository/default-branch ancestry, tags, release state and
@@ -76,15 +84,18 @@ be current and bound to the same source/assets. Evidence JSON is validated but i
 not cryptographically authenticated: the operator owns its provenance.
 
 Promotion requires an existing complete draft and an existing exact version tag
-that resolves to the retained source, including annotated-tag resolution. Tag
-creation remains a separate explicitly authorized maintainer action. The CLI
+that resolves to the retained source, including annotated-tag resolution. This
+executor never creates a tag: tag creation is a separate explicitly authorized
+maintainer action here (Publish creates it in the automated path). The CLI
 publishes that draft by ID, rechecks the resulting public assets/source and never
 rebuilds. It does not submit to the Obsidian directory.
 
-This milestone supplies the local opt-in interface. All committed Actions jobs
-remain read-only; there is no privileged publication job or permission change.
-The standard Actions publication interface, automatic tag creation, real first/
-subsequent public-release qualification and directory submission remain open
-requirements in the [readiness ledger](TEMPLATE-READINESS-LEDGER.md). Synthetic
-remote tests qualify operation decisions and transport requests, not GitHub token
-permissions, successful public publication or real host acceptance.
+This executor is the local opt-in interface; it changes no repository permission.
+The automated path's only write-scoped Actions jobs are `release-cut.yml` and
+`publish.yml`, dispatch-only behind the `release` environment
+([workflows](WORKFLOWS.md)). Real first/subsequent public-release qualification
+and directory submission remain open requirements in the
+[readiness ledger](../_archive/development/TEMPLATE-READINESS-LEDGER.md): neither
+path has published a release yet. Synthetic remote tests qualify operation
+decisions and transport requests, not GitHub token permissions, successful public
+publication or real host acceptance.

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "name": "companion",
+  "title": "Workbench Companion",
+  "summary": "The native companion plugin, generated from the golden companion starter and built independently of the shell.",
+  "prototypes": [
+    { "path": "docs/concepts/companion", "role": "Browser authoring concept (Journey Lens) this project implements" },
+    { "path": "docs/concepts/sitemap-editor", "role": "Editor-only Journey Lens iteration in the requested Vue + Nuxt UI + Vue Flow stack" }
+  ],
+  "origin": {
+    "starter": "configs/starters/companion-plugin.json",
+    "command": "node bin/app new projects/companion --starter companion-plugin --id workbench-companion --name \"Workbench Companion\" --author \"Luis Mendez\" --yes"
+  }
+}

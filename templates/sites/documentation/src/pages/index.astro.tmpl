@@ -1,0 +1,40 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import DocsNav from '../components/DocsNav.astro';
+import { collectionInfo, collectionNames, collectionRecords, href } from '../lib/collections';
+import project from '../../workbench.project.json';
+
+/** Documentation home: the navigation and an overview of every collection with its record count. */
+const names = collectionNames();
+const overview = await Promise.all(names.map(async name => ({ name, info: collectionInfo(name), count: (await collectionRecords(name)).length })));
+---
+<SiteLayout>
+  <div class="docs-layout">
+    <DocsNav />
+    <div>
+      <section class="hero" aria-labelledby="hero-title">
+        <h1 id="hero-title">{project.title}</h1>
+        <p>{project.summary}</p>
+      </section>
+      <section aria-labelledby="reference">
+        <h2 id="reference">Reference</h2>
+        {overview.length > 0
+          ? (
+            <ul class="collection-cards collection-cards--grid" role="list">
+              {overview.map(item => (
+                <li class="collection-card">
+                  <h3 class="collection-card__title"><a href={href(`/reference/${item.name}/`)}>{item.info?.view.name ?? item.name}</a></h3>
+                  <p>{item.count} {item.count === 1 ? 'entry' : 'entries'} from <code>{item.info?.base.path}</code></p>
+                </li>
+              ))}
+            </ul>
+          )
+          : (
+            <div class="empty-state" role="status">
+              <p>No collections yet. List them under <code>site.collections</code> in <code>workbench.project.json</code> and run <code>node bin/app site collections</code> in the Workbench shell.</p>
+            </div>
+          )}
+      </section>
+    </div>
+  </div>
+</SiteLayout>

@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "process-rule",
+  "version": 1,
+  "title": "Business rule",
+  "description": "A plain-language rule with a severity, a scope and a safe data condition evaluated against the process data.",
+  "fields": [
+    { "id": "statement", "kind": "text", "label": "Rule statement in plain language", "required": true, "maxLength": 1000 },
+    { "id": "severity", "kind": "select", "label": "Severity", "choices": [
+      { "id": "block", "label": "Block — stops the transition" },
+      { "id": "warn", "label": "Warn — needs an explicit acknowledgement" },
+      { "id": "info", "label": "Info — recorded in the audit trail" }
+    ], "default": "block" },
+    { "id": "rationale", "kind": "text", "label": "Why the rule exists (optional)", "multiline": true, "maxLength": 2000 },
+    { "id": "scope", "kind": "select", "label": "Where is the rule checked?", "choices": [
+      { "id": "steps", "label": "When leaving specific steps" },
+      { "id": "process", "label": "At every step of the process" }
+    ], "default": "steps" },
+    { "id": "steps", "kind": "multi", "label": "Steps", "choicesFrom": "process.step-choices", "required": true, "when": { "field": "scope", "equals": "steps" } },
+    { "id": "whenLines", "kind": "list", "label": "Applies only when (all must hold; empty for always)", "multiline": true, "suffix": " (separate with ;)",
+      "help": "One condition per line: path operator value. Operators: equals, notEquals, in, notIn, contains, gt, gte, lt, lte, matches (wildcards * and ?), present, missing. Put length after the path to compare a count." },
+    { "id": "combine", "kind": "select", "label": "The requirement holds when", "choices": [
+      { "id": "all", "label": "All conditions hold" },
+      { "id": "any", "label": "Any condition holds" }
+    ], "default": "all" },
+    { "id": "requireLines", "kind": "list", "label": "Requirement conditions (path operator value)", "required": true, "multiline": true, "suffix": " (separate with ;)",
+      "help": "For example checks.typecheck equals \"passed\". A line written as all(...), any(...) or not(...) is a nested condition kept from the JSON while it is unchanged." },
+    { "id": "notes", "kind": "text", "label": "Rule notes in Markdown (optional)", "multiline": true, "maxLength": 20000 }
+  ]
+}

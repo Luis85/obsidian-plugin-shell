@@ -1,0 +1,70 @@
+name: Native integration starters
+# The jobs type-check src, bin and the generator, run runtime and tooling tests,
+# check the companion concept assembly and generate starters from templates, so
+# every non-narrative input triggers them. The filter mirrors
+# candidate-qualification.yml's narrative-documentation exclusion and keeps the
+# concept sources the assembly check reads.
+on:
+  pull_request:
+    paths:
+      - '**'
+      - '.*'
+      - '.*/**'
+      - '!docs/**'
+      - '!README.md'
+      - '!AGENTS.md'
+      - 'docs/concepts/**'
+      - 'docs/testing/acceptance-crosswalk.json'
+      - 'docs/testing/native-evidence-checks.json'
+      - 'docs/testing/test-plan.json'
+      - 'docs/design/obsidian-tokens.json'
+      - '!projects/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-integrations-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts-and-adapters:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+      - name: Verify contracts, makers and host lifecycle
+        run: |
+          node --test tests/tooling/native-integrations.checks.mjs
+          node node_modules/vitest/vitest.mjs run --config configs/testing/vitest.config.mjs tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
+          python3 scripts/concepts/build-companion.py --check
+  generated-starters:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        starter: [custom-file-view, context-menu]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+      - name: Independently install, build, typecheck and test generated plugin
+        env:
+          STARTER: ${{ matrix.starter }}
+        run: node scripts/companion-tools/qualify-starter.mjs "$STARTER"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: native-starter-${{ matrix.starter }}
+          path: reports/project-starters/${{ matrix.starter }}/
+          retention-days: 7
+          if-no-files-found: error

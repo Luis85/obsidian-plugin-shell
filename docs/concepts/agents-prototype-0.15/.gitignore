@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.vite/
+coverage/
+*.tsbuildinfo
+auto-imports.d.ts
+components.d.ts
+.DS_Store

@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "documentation-settings",
+  "version": 1,
+  "title": "Markdown documentation settings",
+  "description": "The documentation owner validates the result; authored content is always preserved and conflicts are always reviewed.",
+  "fields": [
+    { "id": "root", "kind": "text", "label": "Application documentation root" },
+    { "id": "resetFolders", "kind": "confirm", "label": "Reset documentation folders beneath the new root?", "transient": true,
+      "when": { "field": "root", "changed": true }, "effect": "documentation.reset-folders" },
+    { "id": "indexFile", "kind": "text", "label": "Documentation index JSON" },
+    { "id": "recursive", "kind": "boolean", "label": "Scan documentation subfolders?" },
+    { "id": "linkFormat", "kind": "select", "label": "Documentation link format", "choices": ["markdown", "wikilink"] },
+    { "id": "include", "kind": "list", "label": "Included glob patterns, separated by semicolons", "separator": ";" },
+    { "id": "exclude", "kind": "list", "label": "Excluded glob patterns, separated by semicolons", "separator": ";" },
+    { "id": "folders", "kind": "section", "label": "Documentation folders", "gate": "Configure individual documentation folders?",
+      "fields": [ { "id": "paths", "kind": "record", "label": "Documentation folder: ", "bind": "paths" } ] }
+  ]
+}

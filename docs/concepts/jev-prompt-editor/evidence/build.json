@@ -1,0 +1,16 @@
+{
+  "artifact": "jev-studio.html",
+  "sha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df",
+  "bytes": 629151,
+  "builtWith": {
+    "node": "v22.16.0",
+    "typescript": "Version 5.8.3",
+    "vue": "3.5.13"
+  },
+  "csp": {
+    "network": "disabled",
+    "scriptPolicy": "SHA-256 hashes; no unsafe-eval; build-time precompiled Vue templates"
+  },
+  "pr5Baseline": "b66200e2f43cd0682028f0151f9bdffc853cd2bf",
+  "nativeIntegration": false
+}

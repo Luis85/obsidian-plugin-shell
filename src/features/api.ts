@@ -8,6 +8,10 @@ export { defineLogCatalog } from '../application/logging';
 export { BooleanSetting } from '../application/boolean-setting';
 export { defineEvent } from '../application/event-definition';
 export { createActionScope } from '../application/action-scope';
+export { defineForm, readDataForm } from '../domain/forms/definition';
+export { readDataFormValue } from '../domain/forms/values';
+export type { DataFormDefinition, DataFormField, DataFormValue, DataFormValues } from '../domain/forms/model';
+export type { DataFormIssue, DataFormOutcome } from '../domain/forms/values';
 export type { ActionScope, OperationPermit } from '../application/action-scope';
 export type { Result, Failure } from '../domain/outcome';
 export type { NoteSnapshot } from '../application/note-repository';
@@ -16,3 +20,5 @@ export type { AuthoringServices, AuthoringExtension } from '../application/autho
 export type { LifecycleObservation, Diagnostic } from '../application/ports';
 export type { EventDefinition, EventPayload, EventMapOf } from '../application/event-definition';
 export type { EventObserver, EventPublisher, EventSubscriber, EventInput } from '../application/events';
+
+export type { NativeFileDefinition, NativeMenuDefinition, NativeFileContext, NativeMenuResult } from '../domain/native-integrations';

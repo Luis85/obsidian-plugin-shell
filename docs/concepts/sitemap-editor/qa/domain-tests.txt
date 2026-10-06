@@ -1,0 +1,236 @@
+
+> journey-lens-sitemap-editor@2.0.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: migrates the existing v1 export and retains all 28 pages plus root
+ok 1 - migrates the existing v1 export and retains all 28 pages plus root
+  ---
+  duration_ms: 3.599678
+  type: 'test'
+  ...
+# Subtest: v2 round-trip is lossless
+ok 2 - v2 round-trip is lossless
+  ---
+  duration_ms: 7.265914
+  type: 'test'
+  ...
+# Subtest: preserves legacy journey descriptions as purpose
+ok 3 - preserves legacy journey descriptions as purpose
+  ---
+  duration_ms: 0.443925
+  type: 'test'
+  ...
+# Subtest: finds siblings through stable parent IDs
+ok 4 - finds siblings through stable parent IDs
+  ---
+  duration_ms: 0.665839
+  type: 'test'
+  ...
+# Subtest: adds a page and inherits access and layout metadata
+ok 5 - adds a page and inherits access and layout metadata
+  ---
+  duration_ms: 2.557214
+  type: 'test'
+  ...
+# Subtest: rejects a blank page name
+ok 6 - rejects a blank page name
+  ---
+  duration_ms: 0.964377
+  type: 'test'
+  ...
+# Subtest: rejects duplicate routes
+ok 7 - rejects duplicate routes
+  ---
+  duration_ms: 0.617776
+  type: 'test'
+  ...
+# Subtest: rejects equivalent dynamic route patterns
+ok 8 - rejects equivalent dynamic route patterns
+  ---
+  duration_ms: 0.503716
+  type: 'test'
+  ...
+# Subtest: rejects routes with query strings
+ok 9 - rejects routes with query strings
+  ---
+  duration_ms: 0.701231
+  type: 'test'
+  ...
+# Subtest: rejects protocol-relative routes
+ok 10 - rejects protocol-relative routes
+  ---
+  duration_ms: 0.7205
+  type: 'test'
+  ...
+# Subtest: rejects unsafe external link schemes
+ok 11 - rejects unsafe external link schemes
+  ---
+  duration_ms: 1.164747
+  type: 'test'
+  ...
+# Subtest: accepts HTTPS external links
+ok 12 - accepts HTTPS external links
+  ---
+  duration_ms: 0.805478
+  type: 'test'
+  ...
+# Subtest: reparenting preserves every route and navigation link
+ok 13 - reparenting preserves every route and navigation link
+  ---
+  duration_ms: 0.81347
+  type: 'test'
+  ...
+# Subtest: rejects moving the root
+ok 14 - rejects moving the root
+  ---
+  duration_ms: 0.504196
+  type: 'test'
+  ...
+# Subtest: rejects moving a page inside itself
+ok 15 - rejects moving a page inside itself
+  ---
+  duration_ms: 0.556294
+  type: 'test'
+  ...
+# Subtest: rejects moving a page inside a descendant
+ok 16 - rejects moving a page inside a descendant
+  ---
+  duration_ms: 0.464116
+  type: 'test'
+  ...
+# Subtest: duplicate dynamic page creates a genuinely different route
+ok 17 - duplicate dynamic page creates a genuinely different route
+  ---
+  duration_ms: 0.744496
+  type: 'test'
+  ...
+# Subtest: duplicate can be repeated without route collisions
+ok 18 - duplicate can be repeated without route collisions
+  ---
+  duration_ms: 1.257796
+  type: 'test'
+  ...
+# Subtest: updates reject invalid routes without mutating the original
+ok 19 - updates reject invalid routes without mutating the original
+  ---
+  duration_ms: 0.585287
+  type: 'test'
+  ...
+# Subtest: root type cannot change
+ok 20 - root type cannot change
+  ---
+  duration_ms: 0.410576
+  type: 'test'
+  ...
+# Subtest: page with children cannot become an external link
+ok 21 - page with children cannot become an external link
+  ---
+  duration_ms: 0.383025
+  type: 'test'
+  ...
+# Subtest: delete only reparents child pages
+ok 22 - delete only reparents child pages
+  ---
+  duration_ms: 0.882423
+  type: 'test'
+  ...
+# Subtest: delete branch removes navigation and journey references safely
+ok 23 - delete branch removes navigation and journey references safely
+  ---
+  duration_ms: 0.838497
+  type: 'test'
+  ...
+# Subtest: root deletion is rejected
+ok 24 - root deletion is rejected
+  ---
+  duration_ms: 0.423655
+  type: 'test'
+  ...
+# Subtest: import rejects a hierarchy cycle
+ok 25 - import rejects a hierarchy cycle
+  ---
+  duration_ms: 0.453289
+  type: 'test'
+  ...
+# Subtest: import rejects a missing parent
+ok 26 - import rejects a missing parent
+  ---
+  duration_ms: 0.497796
+  type: 'test'
+  ...
+# Subtest: import rejects duplicate IDs
+ok 27 - import rejects duplicate IDs
+  ---
+  duration_ms: 0.788442
+  type: 'test'
+  ...
+# Subtest: import rejects missing navigation references
+ok 28 - import rejects missing navigation references
+  ---
+  duration_ms: 0.449143
+  type: 'test'
+  ...
+# Subtest: import rejects missing component references
+ok 29 - import rejects missing component references
+  ---
+  duration_ms: 0.391978
+  type: 'test'
+  ...
+# Subtest: import rejects unsupported schemas and versions
+ok 30 - import rejects unsupported schemas and versions
+  ---
+  duration_ms: 0.431427
+  type: 'test'
+  ...
+# Subtest: layout excludes collapsed descendants and retains selection context
+ok 31 - layout excludes collapsed descendants and retains selection context
+  ---
+  duration_ms: 0.665468
+  type: 'test'
+  ...
+# Subtest: saved positions round-trip without altering hierarchy
+ok 32 - saved positions round-trip without altering hierarchy
+  ---
+  duration_ms: 1.132308
+  type: 'test'
+  ...
+# Subtest: non-finite positions are discarded
+ok 33 - non-finite positions are discarded
+  ---
+  duration_ms: 0.825528
+  type: 'test'
+  ...
+# Subtest: Guest cannot access member-only pages
+ok 34 - Guest cannot access member-only pages
+  ---
+  duration_ms: 0.35333
+  type: 'test'
+  ...
+# Subtest: role previews do not implicitly grant administrators access
+ok 35 - role previews do not implicitly grant administrators access
+  ---
+  duration_ms: 0.082264
+  type: 'test'
+  ...
+# Subtest: seed exposes its two existing content checks
+ok 36 - seed exposes its two existing content checks
+  ---
+  duration_ms: 0.562774
+  type: 'test'
+  ...
+# Subtest: edited routes are trimmed before persistence
+ok 37 - edited routes are trimmed before persistence
+  ---
+  duration_ms: 1.319199
+  type: 'test'
+  ...
+1..37
+# tests 37
+# suites 0
+# pass 37
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 103.753809

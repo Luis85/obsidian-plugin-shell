@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/wizard.schema.json",
+  "schemaVersion": 1,
+  "id": "new-project",
+  "version": 1,
+  "title": "New project",
+  "description": "Project starter → prototype brief → reviewed package. Revisiting the starter never carries approval or stale answers into a different project.",
+  "context": { "title": "New project", "details": ["Starter → prototype → review", "Nothing is written until the complete plan is approved.", "Escape: previous step. Ctrl+C: cancel."] },
+  "steps": [
+    { "id": "starters", "kind": "action", "action": "project.starters" },
+    { "id": "starter", "kind": "form", "title": "Project starter", "retry": true, "fields": [
+      { "id": "starterId", "kind": "select", "label": "Which project starter do you want to run?", "choicesFrom": "project.starters" }
+    ] },
+    { "id": "guide", "kind": "action", "action": "project.guide", "retry": "starter" },
+    { "id": "brief", "kind": "guide", "title": "Prototype brief", "guide": "guide", "initial": "answers", "bind": "answers", "agreement": true, "retry": true },
+    { "id": "output", "kind": "form", "title": "Output and review", "retry": true, "fields": [
+      { "id": "out", "kind": "text", "label": "Project package output folder", "required": true }
+    ] },
+    { "id": "review", "kind": "action", "action": "project.review", "retry": "output" },
+    { "id": "complete", "kind": "action", "action": "project.complete", "barrier": true }
+  ]
+}

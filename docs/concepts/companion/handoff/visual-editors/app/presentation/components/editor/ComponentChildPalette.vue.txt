@@ -1,0 +1,19 @@
+<script setup lang="ts">
+import { nuxtUiCatalog } from '../../../domain/catalog/nuxt-ui-catalog'
+const tab=ref('project'),query=ref('')
+const emit=defineEmits<{insertProject:[id:string],insertNuxt:[id:string],insertElement:[tag:string],insertSlot:[]}>()
+const project=[
+{id:'cmp-search-field',name:'SearchField',desc:'Search input with clear action'},
+{id:'cmp-filter-button',name:'FilterButton',desc:'Filter trigger with active count'},
+{id:'cmp-status-badge',name:'StatusBadge',desc:'Semantic status presentation'},
+{id:'cmp-empty-state',name:'EmptyState',desc:'Reusable no-results state'}
+]
+const semantic=['div','section','header','main','span','p','h2']
+</script>
+<template><div class="p-3">
+<UInput v-model="query" icon="i-lucide-search" placeholder="Find child…" size="sm"/>
+<UTabs v-model="tab" :items="[{label:'Project',value:'project'},{label:'Nuxt UI',value:'nuxt'},{label:'Basic',value:'basic'}]" class="mt-2"/>
+<div v-if="tab==='project'" class="mt-3 space-y-1"><button v-for="x in project" :key="x.id" class="w-full p-2 rounded-lg hover:bg-elevated text-left flex gap-2" @click="emit('insertProject',x.id)"><UIcon name="i-lucide-component" class="mt-1 text-primary"/><span><strong class="text-xs block">{{x.name}}</strong><span class="text-[11px] text-muted">{{x.desc}}</span></span><UIcon name="i-lucide-plus" class="ml-auto mt-1"/></button></div>
+<div v-else-if="tab==='nuxt'" class="mt-3 space-y-1"><button v-for="x in nuxtUiCatalog.slice(0,12)" :key="x.id" class="w-full p-2 rounded-lg hover:bg-elevated text-left flex items-center" @click="emit('insertNuxt',x.id)"><UIcon name="i-lucide-box" class="mr-2 text-muted"/><span class="text-xs">{{x.label}}</span><code class="ml-auto text-[10px] text-primary">{{x.component}}</code></button></div>
+<div v-else class="mt-3"><p class="text-[10px] uppercase text-muted font-semibold mb-2">Semantic elements</p><div class="grid grid-cols-2 gap-2"><UButton v-for="tag in semantic" :key="tag" color="neutral" variant="outline" size="sm" @click="emit('insertElement',tag)">&lt;{{tag}}&gt;</UButton></div><USeparator class="my-3"/><UButton block variant="outline" icon="i-lucide-brackets" @click="emit('insertSlot')">Public slot</UButton></div>
+</div></template>

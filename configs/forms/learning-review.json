@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "learning-review",
+  "version": 1,
+  "title": "Learning review",
+  "description": "One step of the learnings review walk: record today's review with the follow-up, its due date and the status, skip the learning, or stop.",
+  "fields": [
+    { "id": "decision", "kind": "select", "label": "{{record.id}} — {{record.title}} ({{record.values.impact}} impact, follow-up due {{record.values.due|none}})",
+      "choices": [{ "id": "review", "label": "Record a review today" }, { "id": "skip", "label": "Skip this learning" }, { "id": "stop", "label": "Stop reviewing" }], "default": "review" },
+    { "id": "followUp", "kind": "text", "label": "Follow-up action", "maxLength": 500, "when": { "field": "decision", "equals": "review" } },
+    { "id": "due", "kind": "text", "label": "Due date of the follow-up (YYYY-MM-DD)", "maxLength": 10, "when": { "field": "decision", "equals": "review" } },
+    { "id": "status", "kind": "select", "label": "Status", "choicesFrom": "collection.statuses", "when": { "field": "decision", "equals": "review" } }
+  ]
+}

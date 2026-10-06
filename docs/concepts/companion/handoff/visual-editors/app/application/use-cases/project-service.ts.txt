@@ -1,0 +1,11 @@
+import type { EditorProject } from '../../domain/shared/project'
+import { validateProject } from '../../domain/shared/project'
+import type { ProjectRepository } from '../ports/project-repository'
+import type { ProjectCodec } from '../ports/project-codec'
+
+export class ProjectService {
+ constructor(private readonly repo:ProjectRepository,private readonly codec:ProjectCodec){}
+ async save(project:EditorProject){const issues=validateProject(project);if(issues.length)throw new Error(issues.join('\n'));await this.repo.save(project)}
+ export(project:EditorProject){const issues=validateProject(project);if(issues.length)throw new Error(issues.join('\n'));return this.codec.encode(project)}
+ import(source:string){const project=this.codec.decode(source);const issues=validateProject(project);if(issues.length)throw new Error(issues.join('\n'));return project}
+}

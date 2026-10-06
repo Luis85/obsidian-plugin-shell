@@ -1,0 +1,30 @@
+/* Generated design system. Edit saved tokens, not this managed file. */
+[data-plugin-ui="workbench-companion"].ps--workbench-companion {
+  --workbench-companion-ds-colors-accent: var(--interactive-accent, #6550B9);
+  --workbench-companion-ds-colors-accent-text: var(--text-on-accent, #FFFFFF);
+  --workbench-companion-ds-colors-background: var(--background-primary, #FFFFFF);
+  --workbench-companion-ds-colors-muted: var(--text-muted, #595964);
+  --workbench-companion-ds-colors-text: var(--text-normal, #202027);
+}
+[data-plugin-ui="workbench-companion"].ps--workbench-companion.dark {
+  --workbench-companion-ds-colors-accent: var(--interactive-accent, #B7A3FF);
+  --workbench-companion-ds-colors-accent-text: var(--text-on-accent, #17131F);
+  --workbench-companion-ds-colors-background: var(--background-primary, #1E1E24);
+  --workbench-companion-ds-colors-muted: var(--text-muted, #B6B6C4);
+  --workbench-companion-ds-colors-text: var(--text-normal, #ECECF2);
+}
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-colors-accent { color: var(--workbench-companion-ds-colors-accent); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-bg-accent { background-color: var(--workbench-companion-ds-colors-accent); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-border-accent { border-color: var(--workbench-companion-ds-colors-accent); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-colors-accent-text { color: var(--workbench-companion-ds-colors-accent-text); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-bg-accent-text { background-color: var(--workbench-companion-ds-colors-accent-text); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-border-accent-text { border-color: var(--workbench-companion-ds-colors-accent-text); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-colors-background { color: var(--workbench-companion-ds-colors-background); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-bg-background { background-color: var(--workbench-companion-ds-colors-background); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-border-background { border-color: var(--workbench-companion-ds-colors-background); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-colors-muted { color: var(--workbench-companion-ds-colors-muted); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-bg-muted { background-color: var(--workbench-companion-ds-colors-muted); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-border-muted { border-color: var(--workbench-companion-ds-colors-muted); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-colors-text { color: var(--workbench-companion-ds-colors-text); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-bg-text { background-color: var(--workbench-companion-ds-colors-text); }
+[data-plugin-ui="workbench-companion"].ps--workbench-companion .workbench-companion-ds-border-text { border-color: var(--workbench-companion-ds-colors-text); }

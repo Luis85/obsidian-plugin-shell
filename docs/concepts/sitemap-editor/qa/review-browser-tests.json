@@ -1,0 +1,30 @@
+{
+  "scope": "VANILLA-JS REVIEW ONLY. Does not verify Vue/Nuxt UI/Vue Flow.",
+  "checks": [
+    "review runtime identity is explicit",
+    "no application navigation rail, account selector or preview shell",
+    "initial model has 28 pages and a root",
+    "page tree opens and shows the current hierarchy",
+    "related panel includes parent, siblings and children",
+    "sibling link selects the same page entity",
+    "inspector edits update the exported model",
+    "undo restores the previous purpose",
+    "redo restores the edit",
+    "add page creates one new entity",
+    "moving a page preserves its URL",
+    "move is reversible",
+    "outline is a functional alternate editor view",
+    "journey remains a canvas overlay without simulated application",
+    "JSON export includes edited entities and journeys",
+    "no external network requests from review",
+    "mobile does not open an inspector over the canvas initially",
+    "mobile has no document-wide horizontal overflow",
+    "mobile add and map icons are visible",
+    "mobile tree is reachable",
+    "mobile selection switches from tree to inspector",
+    "no browser console exceptions"
+  ],
+  "passed": 22,
+  "errors": [],
+  "network_requests": []
+}

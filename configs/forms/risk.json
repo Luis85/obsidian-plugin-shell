@@ -1,0 +1,23 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "risk",
+  "version": 1,
+  "title": "Risk",
+  "description": "One risk note in the configured paths.risks folder. Choices come from configs/collections/risk.json; the collection engine validates the result before a reviewed plan is shown.",
+  "fields": [
+    { "id": "title", "kind": "title", "label": "Risk title", "maxLength": 160 },
+    { "id": "description", "kind": "text", "label": "Description (one line; details go in the note body)", "required": true, "maxLength": 1000 },
+    { "id": "status", "kind": "select", "label": "Status", "choicesFrom": "collection.statuses" },
+    { "id": "dimension", "kind": "select", "label": "Dimension (what the risk affects)", "choicesFrom": "collection.choices" },
+    { "id": "category", "kind": "select", "label": "Category (where the risk comes from)", "choicesFrom": "collection.choices" },
+    { "id": "probability", "kind": "select", "label": "Probability", "choicesFrom": "collection.choices" },
+    { "id": "impact", "kind": "select", "label": "Impact", "choicesFrom": "collection.choices" },
+    { "id": "nextAction", "kind": "text", "label": "Next action (required while the risk is open)", "maxLength": 500 },
+    { "id": "due", "kind": "text", "label": "Due date of the next action (YYYY-MM-DD)", "maxLength": 10 },
+    { "id": "owner", "kind": "text", "label": "Owner (optional)", "maxLength": 120 },
+    { "id": "identified", "kind": "text", "label": "Identified on (YYYY-MM-DD, empty for today)", "maxLength": 10, "when": { "path": "id", "present": false } },
+    { "id": "mitigation", "kind": "text", "label": "Mitigation plan (optional, written to the note body)", "maxLength": 4000, "when": { "path": "id", "present": false } },
+    { "id": "notes", "kind": "text", "label": "Notes (optional, written to the note body)", "maxLength": 4000, "when": { "path": "id", "present": false } }
+  ]
+}

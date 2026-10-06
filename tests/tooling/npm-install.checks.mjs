@@ -58,6 +58,8 @@ async function fixture() {
   await cp(join(root, 'scripts/setup.mjs'), join(dir, 'scripts/setup.mjs'));
   await cp(join(root, 'scripts/setup'), join(dir, 'scripts/setup'), { recursive: true });
   await cp(join(root, 'scripts/shared'), join(dir, 'scripts/shared'), { recursive: true });
+  await cp(join(root, 'scripts/agent/mcp-config.mjs'), join(dir, 'scripts/agent/mcp-config.mjs'));
+  await cp(join(root, 'scripts/companion/schema/hosting.mjs'), join(dir, 'scripts/companion/schema/hosting.mjs'));
   await cp(join(root, 'package.json'), join(dir, 'package.json'));
   for (const name of ['manifest.json', 'package-lock.json', 'versions.json']) await cp(join(root, name), join(dir, name));
   return dir;

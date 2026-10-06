@@ -1,5 +1,7 @@
 # Structured logging and runtime debugging
 
+> Type: how-to guide · Part of the [docs index](../README.md)
+
 The runtime exposes `services.logger` and `services.debugging`. Logging starts at
 `info`; detailed debug logging is off until explicitly enabled. The setting belongs
 to the current plugin runtime and resets on reload. No preference migration,
@@ -10,6 +12,9 @@ The toggle uses a localized `NoticeService.info` message. Inspection uses the ow
 `ModalService.info` path and displays the latest 50 safe records as plain JSON,
 with retained/exported/omitted counts. Closing the modal does
 not clear evidence, retry an operation, or change canonical data.
+
+`npm run dev:obsidian` runs the toggle after every sandbox reload and, with `--json`,
+saves the inspection report; see [the real-Obsidian dev loop](../testing/OBSIDIAN-DEV-LOOP.md).
 
 ## Developer API
 

@@ -1,0 +1,2752 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents.local/schema/agent-definition-1.4.0.json",
+  "title": "Agents Plugin Definition",
+  "$comment": "Generated from application runtime shapes. Runtime validation additionally checks references, recipe compatibility, input size/depth, and reserved keys.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": "1.4.0"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "repoPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "vaultName": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 100000
+        }
+      },
+      "required": [
+        "name",
+        "repoPath",
+        "vaultName",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "agentsPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "rolesPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "skillsPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "toolsPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "dataSourcesPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "relationsPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "guardrailsPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "generatedPath": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "autoSave": {
+          "type": "boolean"
+        },
+        "sourceOfTruth": {
+          "type": "string",
+          "enum": [
+            "markdown-frontmatter"
+          ]
+        }
+      },
+      "required": [
+        "agentsPath",
+        "rolesPath",
+        "skillsPath",
+        "toolsPath",
+        "dataSourcesPath",
+        "relationsPath",
+        "guardrailsPath",
+        "generatedPath",
+        "autoSave",
+        "sourceOfTruth"
+      ],
+      "additionalProperties": false
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "general",
+              "specialist"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "deprecated"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+          },
+          "model": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "appearance": {
+            "type": "object",
+            "properties": {
+              "primaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+              },
+              "secondaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+              },
+              "accentColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+              },
+              "eyeStyle": {
+                "type": "string",
+                "enum": [
+                  "expressive",
+                  "round",
+                  "focused",
+                  "visor"
+                ]
+              },
+              "expression": {
+                "type": "string",
+                "enum": [
+                  "friendly",
+                  "calm",
+                  "curious",
+                  "confident"
+                ]
+              },
+              "idleStyle": {
+                "type": "string",
+                "enum": [
+                  "calm",
+                  "playful",
+                  "focused",
+                  "confident"
+                ]
+              },
+              "pattern": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "stripe",
+                  "patch",
+                  "gradient"
+                ]
+              },
+              "finish": {
+                "type": "string",
+                "enum": [
+                  "matte",
+                  "soft",
+                  "metallic",
+                  "glossy"
+                ]
+              },
+              "accessoryIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "maxItems": 10000
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "human",
+                  "pet",
+                  "animal",
+                  "item"
+                ]
+              },
+              "modelId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "packId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "teamStyleId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "parts": {
+                "type": "object",
+                "properties": {
+                  "head": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "body": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "ears": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "tail": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "arms": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "screen": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "base": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "scale": {
+                "type": "number",
+                "minimum": 0.75,
+                "maximum": 1.3
+              },
+              "pose": {
+                "type": "string",
+                "enum": [
+                  "neutral",
+                  "ready",
+                  "wave",
+                  "thinking",
+                  "working",
+                  "celebrate"
+                ]
+              },
+              "teamNickname": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "greeting": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "motto": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "favoriteSymbol": {
+                "type": "string",
+                "maxLength": 100000
+              }
+            },
+            "required": [
+              "primaryColor",
+              "secondaryColor",
+              "accentColor",
+              "eyeStyle",
+              "expression",
+              "idleStyle",
+              "pattern",
+              "finish",
+              "accessoryIds",
+              "category",
+              "modelId",
+              "parts",
+              "scale",
+              "pose",
+              "teamNickname",
+              "greeting",
+              "motto",
+              "favoriteSymbol"
+            ],
+            "additionalProperties": false
+          },
+          "roleId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "description": "Expected a numeric semantic version (major.minor.patch)."
+          },
+          "variantOf": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "variantLabel": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "inheritance": {
+            "type": "object",
+            "properties": {
+              "baseAgentId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "baseVersion": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                "description": "Expected a numeric semantic version (major.minor.patch)."
+              },
+              "overridePaths": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "maxItems": 10000
+              }
+            },
+            "required": [
+              "baseAgentId",
+              "baseVersion",
+              "overridePaths"
+            ],
+            "additionalProperties": false
+          },
+          "systemPrompt": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "goals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100000
+            },
+            "maxItems": 10000
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100000
+            },
+            "maxItems": 10000
+          },
+          "invocation": {
+            "type": "object",
+            "properties": {
+              "userInvocable": {
+                "type": "boolean"
+              },
+              "allowAutoDelegation": {
+                "type": "boolean"
+              },
+              "handoffDescription": {
+                "type": "string",
+                "maxLength": 100000
+              }
+            },
+            "required": [
+              "userInvocable",
+              "allowAutoDelegation",
+              "handoffDescription"
+            ],
+            "additionalProperties": false
+          },
+          "autonomy": {
+            "type": "object",
+            "properties": {
+              "maxSteps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "approvalPolicy": {
+                "type": "string",
+                "enum": [
+                  "never",
+                  "on-write",
+                  "on-risk",
+                  "always"
+                ]
+              },
+              "stopConditions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "maxItems": 10000
+              }
+            },
+            "required": [
+              "maxSteps",
+              "approvalPolicy",
+              "stopConditions"
+            ],
+            "additionalProperties": false
+          },
+          "instructionLayerIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "guardrailIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "toolIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "dataSourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "shortTermMemory": {
+            "type": "object",
+            "properties": {
+              "strategy": {
+                "type": "string",
+                "enum": [
+                  "context-window"
+                ]
+              },
+              "tokenBudget": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "workingNotes": {
+                "type": "boolean"
+              },
+              "retrieval": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "compaction": {
+                "type": "string",
+                "maxLength": 100000
+              }
+            },
+            "required": [
+              "strategy",
+              "tokenBudget",
+              "workingNotes",
+              "retrieval",
+              "compaction"
+            ],
+            "additionalProperties": false
+          },
+          "longTermMemory": {
+            "type": "object",
+            "properties": {
+              "strategy": {
+                "type": "string",
+                "enum": [
+                  "obsidian-vault+git"
+                ]
+              },
+              "summaryPath": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "retrievalNotes": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "indexing": {
+                "type": "string",
+                "enum": [
+                  "properties+links+search",
+                  "search",
+                  "external-index"
+                ]
+              }
+            },
+            "required": [
+              "strategy",
+              "summaryPath",
+              "retrievalNotes",
+              "indexing"
+            ],
+            "additionalProperties": false
+          },
+          "pathPolicies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "entity": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "permissions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "read",
+                      "write",
+                      "create",
+                      "delete",
+                      "search"
+                    ]
+                  },
+                  "maxItems": 10000
+                },
+                "purpose": {
+                  "type": "string",
+                  "maxLength": 100000
+                }
+              },
+              "required": [
+                "id",
+                "entity",
+                "path",
+                "permissions",
+                "purpose"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10000
+          },
+          "gurps": {
+            "type": "object",
+            "properties": {
+              "st": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "dx": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "iq": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "ht": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "hp": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "will": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "per": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "fp": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "pointTotal": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "unspentPoints": {
+                "type": "number",
+                "minimum": -1.7976931348623157e+308,
+                "maximum": 1.7976931348623157e+308
+              },
+              "advantages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "points": {
+                      "type": "number",
+                      "minimum": -1.7976931348623157e+308,
+                      "maximum": 1.7976931348623157e+308
+                    },
+                    "notes": {
+                      "type": "string",
+                      "maxLength": 100000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "points"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000
+              },
+              "disadvantages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "points": {
+                      "type": "number",
+                      "minimum": -1.7976931348623157e+308,
+                      "maximum": 1.7976931348623157e+308
+                    },
+                    "notes": {
+                      "type": "string",
+                      "maxLength": 100000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "points"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000
+              },
+              "quirks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "notes": {
+                      "type": "string",
+                      "maxLength": 100000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000
+              },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "points": {
+                      "type": "number",
+                      "minimum": -1.7976931348623157e+308,
+                      "maximum": 1.7976931348623157e+308
+                    },
+                    "notes": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "level": {
+                      "type": "number",
+                      "minimum": -1.7976931348623157e+308,
+                      "maximum": 1.7976931348623157e+308
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "points",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000
+              }
+            },
+            "required": [
+              "st",
+              "dx",
+              "iq",
+              "ht",
+              "hp",
+              "will",
+              "per",
+              "fp",
+              "pointTotal",
+              "unspentPoints",
+              "advantages",
+              "disadvantages",
+              "quirks",
+              "skills"
+            ],
+            "additionalProperties": false
+          },
+          "evals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "name": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "not-run",
+                    "passing",
+                    "failing"
+                  ]
+                },
+                "task": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "criteria": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 100000
+                  },
+                  "maxItems": 10000
+                },
+                "lastScore": {
+                  "type": "number",
+                  "minimum": -1.7976931348623157e+308,
+                  "maximum": 1.7976931348623157e+308
+                },
+                "lastRunAt": {
+                  "type": "string",
+                  "maxLength": 100000
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "status",
+                "task",
+                "criteria"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "kind",
+          "status",
+          "description",
+          "color",
+          "model",
+          "appearance",
+          "roleId",
+          "version",
+          "systemPrompt",
+          "goals",
+          "constraints",
+          "invocation",
+          "autonomy",
+          "instructionLayerIds",
+          "guardrailIds",
+          "skillIds",
+          "toolIds",
+          "dataSourceIds",
+          "shortTermMemory",
+          "longTermMemory",
+          "pathPolicies",
+          "gurps",
+          "evals"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "purpose": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "responsibilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100000
+            },
+            "maxItems": 10000
+          },
+          "defaultSkillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "defaultToolIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "purpose",
+          "responsibilities",
+          "defaultSkillIds",
+          "defaultToolIds"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "entrypoint": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "loading": {
+            "type": "string",
+            "enum": [
+              "on-demand",
+              "preload"
+            ]
+          },
+          "allowedToolIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "resourcePaths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100000
+            },
+            "maxItems": 10000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "category",
+          "entrypoint",
+          "loading",
+          "allowedToolIds",
+          "resourcePaths"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "namespace": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "data",
+              "action",
+              "orchestration",
+              "mcp"
+            ]
+          },
+          "risk": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "approval": {
+            "type": "string",
+            "enum": [
+              "never",
+              "on-write",
+              "on-risk",
+              "always"
+            ]
+          },
+          "sideEffects": {
+            "type": "boolean"
+          },
+          "destructive": {
+            "type": "boolean"
+          },
+          "inputSchema": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "mcpServerId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "category",
+          "namespace",
+          "kind",
+          "risk",
+          "approval",
+          "sideEffects",
+          "destructive",
+          "inputSchema",
+          "outputSchema"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "dataSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "vault",
+              "git",
+              "api",
+              "database",
+              "filesystem",
+              "mcp-resource"
+            ]
+          },
+          "connection": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "trust": {
+            "type": "string",
+            "enum": [
+              "trusted",
+              "mixed",
+              "untrusted"
+            ]
+          },
+          "freshness": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "retrieval": {
+            "type": "string",
+            "maxLength": 100000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "category",
+          "type",
+          "connection",
+          "trust",
+          "freshness",
+          "retrieval"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "instructionLayers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "repository",
+              "path",
+              "agent",
+              "task"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "sourcePath": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "applyTo": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "priority": {
+            "type": "number",
+            "minimum": -1.7976931348623157e+308,
+            "maximum": 1.7976931348623157e+308
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "scope",
+          "content",
+          "priority"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "guardrails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "input",
+              "output",
+              "tool",
+              "path"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "enforcement": {
+            "type": "string",
+            "enum": [
+              "block",
+              "review",
+              "redact",
+              "warn"
+            ]
+          },
+          "toolIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "description",
+          "enforcement"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "mcpServers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "protocolVersion": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "transport": {
+            "type": "string",
+            "enum": [
+              "stdio",
+              "streamable-http",
+              "hosted"
+            ]
+          },
+          "endpoint": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "auth": {
+            "type": "string",
+            "enum": [
+              "none",
+              "oauth",
+              "managed",
+              "environment"
+            ]
+          },
+          "capabilityTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "tools",
+                "resources",
+                "prompts"
+              ]
+            },
+            "maxItems": 10000
+          },
+          "trust": {
+            "type": "string",
+            "enum": [
+              "trusted",
+              "mixed",
+              "untrusted"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "protocolVersion",
+          "transport",
+          "endpoint",
+          "auth",
+          "capabilityTypes",
+          "trust"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "runtimeAdapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "obsidian-markdown",
+              "agents-md",
+              "github-custom-agent",
+              "agent-skill",
+              "mcp-config",
+              "generic-json"
+            ]
+          },
+          "targetPath": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "generated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "targetPath",
+          "description",
+          "generated"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "characterStyles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "primaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+          },
+          "secondaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+          },
+          "accentColor": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+          },
+          "eyeStyle": {
+            "type": "string",
+            "enum": [
+              "expressive",
+              "round",
+              "focused",
+              "visor"
+            ]
+          },
+          "expression": {
+            "type": "string",
+            "enum": [
+              "friendly",
+              "calm",
+              "curious",
+              "confident"
+            ]
+          },
+          "idleStyle": {
+            "type": "string",
+            "enum": [
+              "calm",
+              "playful",
+              "focused",
+              "confident"
+            ]
+          },
+          "pattern": {
+            "type": "string",
+            "enum": [
+              "none",
+              "stripe",
+              "patch",
+              "gradient"
+            ]
+          },
+          "finish": {
+            "type": "string",
+            "enum": [
+              "matte",
+              "soft",
+              "metallic",
+              "glossy"
+            ]
+          },
+          "accessoryIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "builtIn": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "primaryColor",
+          "secondaryColor",
+          "accentColor",
+          "eyeStyle",
+          "expression",
+          "idleStyle",
+          "pattern",
+          "finish",
+          "accessoryIds",
+          "id",
+          "name",
+          "description",
+          "builtIn"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "characterPacks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "author": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "builtIn": {
+            "type": "boolean"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "human",
+              "pet",
+              "animal",
+              "item"
+            ]
+          },
+          "modelIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "partIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "stylePresetIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+              "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+            },
+            "maxItems": 10000
+          },
+          "savedLooks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "name": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "appearance": {
+                  "type": "object",
+                  "properties": {
+                    "primaryColor": {
+                      "type": "string",
+                      "pattern": "^#[0-9a-fA-F]{6}$",
+                      "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+                    },
+                    "secondaryColor": {
+                      "type": "string",
+                      "pattern": "^#[0-9a-fA-F]{6}$",
+                      "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+                    },
+                    "accentColor": {
+                      "type": "string",
+                      "pattern": "^#[0-9a-fA-F]{6}$",
+                      "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+                    },
+                    "eyeStyle": {
+                      "type": "string",
+                      "enum": [
+                        "expressive",
+                        "round",
+                        "focused",
+                        "visor"
+                      ]
+                    },
+                    "expression": {
+                      "type": "string",
+                      "enum": [
+                        "friendly",
+                        "calm",
+                        "curious",
+                        "confident"
+                      ]
+                    },
+                    "idleStyle": {
+                      "type": "string",
+                      "enum": [
+                        "calm",
+                        "playful",
+                        "focused",
+                        "confident"
+                      ]
+                    },
+                    "pattern": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "stripe",
+                        "patch",
+                        "gradient"
+                      ]
+                    },
+                    "finish": {
+                      "type": "string",
+                      "enum": [
+                        "matte",
+                        "soft",
+                        "metallic",
+                        "glossy"
+                      ]
+                    },
+                    "accessoryIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      },
+                      "maxItems": 10000
+                    },
+                    "category": {
+                      "type": "string",
+                      "enum": [
+                        "human",
+                        "pet",
+                        "animal",
+                        "item"
+                      ]
+                    },
+                    "modelId": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "packId": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "teamStyleId": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "parts": {
+                      "type": "object",
+                      "properties": {
+                        "head": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "body": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "ears": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "tail": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "arms": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "screen": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "base": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    },
+                    "scale": {
+                      "type": "number",
+                      "minimum": 0.75,
+                      "maximum": 1.3
+                    },
+                    "pose": {
+                      "type": "string",
+                      "enum": [
+                        "neutral",
+                        "ready",
+                        "wave",
+                        "thinking",
+                        "working",
+                        "celebrate"
+                      ]
+                    },
+                    "teamNickname": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "greeting": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "motto": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "favoriteSymbol": {
+                      "type": "string",
+                      "maxLength": 100000
+                    }
+                  },
+                  "required": [
+                    "primaryColor",
+                    "secondaryColor",
+                    "accentColor",
+                    "eyeStyle",
+                    "expression",
+                    "idleStyle",
+                    "pattern",
+                    "finish",
+                    "accessoryIds",
+                    "category",
+                    "modelId",
+                    "parts",
+                    "scale",
+                    "pose",
+                    "teamNickname",
+                    "greeting",
+                    "motto",
+                    "favoriteSymbol"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "appearance"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "author",
+          "builtIn",
+          "modelIds",
+          "partIds",
+          "stylePresetIds",
+          "savedLooks"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "fromAgentId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "toAgentId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "delegates-to",
+              "consults",
+              "supervises",
+              "inherits-from",
+              "shares-memory-with",
+              "uses-output-of",
+              "reviews"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 100000
+          }
+        },
+        "required": [
+          "id",
+          "fromAgentId",
+          "toAgentId",
+          "type",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "agentId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+            "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "description": "Expected a numeric semantic version (major.minor.patch)."
+          },
+          "createdAt": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "snapshot": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "slug": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "general",
+                  "specialist"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "active",
+                  "deprecated"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+              },
+              "model": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "appearance": {
+                "type": "object",
+                "properties": {
+                  "primaryColor": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$",
+                    "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+                  },
+                  "secondaryColor": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$",
+                    "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+                  },
+                  "accentColor": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$",
+                    "description": "Expected a six-digit hexadecimal color such as #8b5cf6."
+                  },
+                  "eyeStyle": {
+                    "type": "string",
+                    "enum": [
+                      "expressive",
+                      "round",
+                      "focused",
+                      "visor"
+                    ]
+                  },
+                  "expression": {
+                    "type": "string",
+                    "enum": [
+                      "friendly",
+                      "calm",
+                      "curious",
+                      "confident"
+                    ]
+                  },
+                  "idleStyle": {
+                    "type": "string",
+                    "enum": [
+                      "calm",
+                      "playful",
+                      "focused",
+                      "confident"
+                    ]
+                  },
+                  "pattern": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "stripe",
+                      "patch",
+                      "gradient"
+                    ]
+                  },
+                  "finish": {
+                    "type": "string",
+                    "enum": [
+                      "matte",
+                      "soft",
+                      "metallic",
+                      "glossy"
+                    ]
+                  },
+                  "accessoryIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "maxItems": 10000
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "human",
+                      "pet",
+                      "animal",
+                      "item"
+                    ]
+                  },
+                  "modelId": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "packId": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "teamStyleId": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "parts": {
+                    "type": "object",
+                    "properties": {
+                      "head": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      },
+                      "body": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      },
+                      "ears": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      },
+                      "tail": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      },
+                      "arms": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      },
+                      "screen": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      },
+                      "base": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                        "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "scale": {
+                    "type": "number",
+                    "minimum": 0.75,
+                    "maximum": 1.3
+                  },
+                  "pose": {
+                    "type": "string",
+                    "enum": [
+                      "neutral",
+                      "ready",
+                      "wave",
+                      "thinking",
+                      "working",
+                      "celebrate"
+                    ]
+                  },
+                  "teamNickname": {
+                    "type": "string",
+                    "maxLength": 100000
+                  },
+                  "greeting": {
+                    "type": "string",
+                    "maxLength": 100000
+                  },
+                  "motto": {
+                    "type": "string",
+                    "maxLength": 100000
+                  },
+                  "favoriteSymbol": {
+                    "type": "string",
+                    "maxLength": 100000
+                  }
+                },
+                "required": [
+                  "primaryColor",
+                  "secondaryColor",
+                  "accentColor",
+                  "eyeStyle",
+                  "expression",
+                  "idleStyle",
+                  "pattern",
+                  "finish",
+                  "accessoryIds",
+                  "category",
+                  "modelId",
+                  "parts",
+                  "scale",
+                  "pose",
+                  "teamNickname",
+                  "greeting",
+                  "motto",
+                  "favoriteSymbol"
+                ],
+                "additionalProperties": false
+              },
+              "roleId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                "description": "Expected a numeric semantic version (major.minor.patch)."
+              },
+              "variantOf": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+              },
+              "variantLabel": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "inheritance": {
+                "type": "object",
+                "properties": {
+                  "baseAgentId": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                    "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                  },
+                  "baseVersion": {
+                    "type": "string",
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                    "description": "Expected a numeric semantic version (major.minor.patch)."
+                  },
+                  "overridePaths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "maxItems": 10000
+                  }
+                },
+                "required": [
+                  "baseAgentId",
+                  "baseVersion",
+                  "overridePaths"
+                ],
+                "additionalProperties": false
+              },
+              "systemPrompt": {
+                "type": "string",
+                "maxLength": 100000
+              },
+              "goals": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "maxItems": 10000
+              },
+              "constraints": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 100000
+                },
+                "maxItems": 10000
+              },
+              "invocation": {
+                "type": "object",
+                "properties": {
+                  "userInvocable": {
+                    "type": "boolean"
+                  },
+                  "allowAutoDelegation": {
+                    "type": "boolean"
+                  },
+                  "handoffDescription": {
+                    "type": "string",
+                    "maxLength": 100000
+                  }
+                },
+                "required": [
+                  "userInvocable",
+                  "allowAutoDelegation",
+                  "handoffDescription"
+                ],
+                "additionalProperties": false
+              },
+              "autonomy": {
+                "type": "object",
+                "properties": {
+                  "maxSteps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100000
+                  },
+                  "approvalPolicy": {
+                    "type": "string",
+                    "enum": [
+                      "never",
+                      "on-write",
+                      "on-risk",
+                      "always"
+                    ]
+                  },
+                  "stopConditions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "maxItems": 10000
+                  }
+                },
+                "required": [
+                  "maxSteps",
+                  "approvalPolicy",
+                  "stopConditions"
+                ],
+                "additionalProperties": false
+              },
+              "instructionLayerIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "maxItems": 10000
+              },
+              "guardrailIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "maxItems": 10000
+              },
+              "skillIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "maxItems": 10000
+              },
+              "toolIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "maxItems": 10000
+              },
+              "dataSourceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                  "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                },
+                "maxItems": 10000
+              },
+              "shortTermMemory": {
+                "type": "object",
+                "properties": {
+                  "strategy": {
+                    "type": "string",
+                    "enum": [
+                      "context-window"
+                    ]
+                  },
+                  "tokenBudget": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  },
+                  "workingNotes": {
+                    "type": "boolean"
+                  },
+                  "retrieval": {
+                    "type": "string",
+                    "maxLength": 100000
+                  },
+                  "compaction": {
+                    "type": "string",
+                    "maxLength": 100000
+                  }
+                },
+                "required": [
+                  "strategy",
+                  "tokenBudget",
+                  "workingNotes",
+                  "retrieval",
+                  "compaction"
+                ],
+                "additionalProperties": false
+              },
+              "longTermMemory": {
+                "type": "object",
+                "properties": {
+                  "strategy": {
+                    "type": "string",
+                    "enum": [
+                      "obsidian-vault+git"
+                    ]
+                  },
+                  "summaryPath": {
+                    "type": "string",
+                    "maxLength": 100000
+                  },
+                  "retrievalNotes": {
+                    "type": "string",
+                    "maxLength": 100000
+                  },
+                  "indexing": {
+                    "type": "string",
+                    "enum": [
+                      "properties+links+search",
+                      "search",
+                      "external-index"
+                    ]
+                  }
+                },
+                "required": [
+                  "strategy",
+                  "summaryPath",
+                  "retrievalNotes",
+                  "indexing"
+                ],
+                "additionalProperties": false
+              },
+              "pathPolicies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "entity": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "path": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "permissions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "read",
+                          "write",
+                          "create",
+                          "delete",
+                          "search"
+                        ]
+                      },
+                      "maxItems": 10000
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "maxLength": 100000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "entity",
+                    "path",
+                    "permissions",
+                    "purpose"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000
+              },
+              "gurps": {
+                "type": "object",
+                "properties": {
+                  "st": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "dx": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "iq": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "ht": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "hp": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "will": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "per": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "fp": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "pointTotal": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "unspentPoints": {
+                    "type": "number",
+                    "minimum": -1.7976931348623157e+308,
+                    "maximum": 1.7976931348623157e+308
+                  },
+                  "advantages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 100000
+                        },
+                        "points": {
+                          "type": "number",
+                          "minimum": -1.7976931348623157e+308,
+                          "maximum": 1.7976931348623157e+308
+                        },
+                        "notes": {
+                          "type": "string",
+                          "maxLength": 100000
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "points"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 10000
+                  },
+                  "disadvantages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 100000
+                        },
+                        "points": {
+                          "type": "number",
+                          "minimum": -1.7976931348623157e+308,
+                          "maximum": 1.7976931348623157e+308
+                        },
+                        "notes": {
+                          "type": "string",
+                          "maxLength": 100000
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "points"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 10000
+                  },
+                  "quirks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 100000
+                        },
+                        "notes": {
+                          "type": "string",
+                          "maxLength": 100000
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 10000
+                  },
+                  "skills": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                          "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 100000
+                        },
+                        "points": {
+                          "type": "number",
+                          "minimum": -1.7976931348623157e+308,
+                          "maximum": 1.7976931348623157e+308
+                        },
+                        "notes": {
+                          "type": "string",
+                          "maxLength": 100000
+                        },
+                        "level": {
+                          "type": "number",
+                          "minimum": -1.7976931348623157e+308,
+                          "maximum": 1.7976931348623157e+308
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "points",
+                        "level"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 10000
+                  }
+                },
+                "required": [
+                  "st",
+                  "dx",
+                  "iq",
+                  "ht",
+                  "hp",
+                  "will",
+                  "per",
+                  "fp",
+                  "pointTotal",
+                  "unspentPoints",
+                  "advantages",
+                  "disadvantages",
+                  "quirks",
+                  "skills"
+                ],
+                "additionalProperties": false
+              },
+              "evals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,159}$",
+                      "description": "Expected a stable ID (letters, digits, dots, hyphens or underscores; up to 160 characters)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "not-run",
+                        "passing",
+                        "failing"
+                      ]
+                    },
+                    "task": {
+                      "type": "string",
+                      "maxLength": 100000
+                    },
+                    "criteria": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 100000
+                      },
+                      "maxItems": 10000
+                    },
+                    "lastScore": {
+                      "type": "number",
+                      "minimum": -1.7976931348623157e+308,
+                      "maximum": 1.7976931348623157e+308
+                    },
+                    "lastRunAt": {
+                      "type": "string",
+                      "maxLength": 100000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "status",
+                    "task",
+                    "criteria"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "slug",
+              "kind",
+              "status",
+              "description",
+              "color",
+              "model",
+              "appearance",
+              "roleId",
+              "version",
+              "systemPrompt",
+              "goals",
+              "constraints",
+              "invocation",
+              "autonomy",
+              "instructionLayerIds",
+              "guardrailIds",
+              "skillIds",
+              "toolIds",
+              "dataSourceIds",
+              "shortTermMemory",
+              "longTermMemory",
+              "pathPolicies",
+              "gurps",
+              "evals"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "agentId",
+          "version",
+          "createdAt",
+          "note",
+          "snapshot"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "project",
+    "settings",
+    "agents",
+    "roles",
+    "skills",
+    "tools",
+    "dataSources",
+    "instructionLayers",
+    "guardrails",
+    "mcpServers",
+    "runtimeAdapters",
+    "characterStyles",
+    "characterPacks",
+    "relations",
+    "versions"
+  ],
+  "additionalProperties": false
+}

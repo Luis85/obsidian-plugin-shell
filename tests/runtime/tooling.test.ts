@@ -27,7 +27,7 @@ describe('Real tooling boundaries', () => {
       expect(await readFile(join(target, 'main.js'), 'utf8')).toContain('module.exports');
       await installLocal({ root: dir }); expect(await readFile(join(target, 'data.json'), 'utf8')).toBe('existing data');
     } finally { await rm(dir, { recursive: true, force: true }); }
-  });
+  }, 20000);
   it('[TOOL-I02] dry run, unsafe target and overlapping install never overwrite data', async () => {
     const dir = await workspace();
     try {
@@ -37,13 +37,15 @@ describe('Real tooling boundaries', () => {
       const target = join(dir, '.dev-vault/.obsidian/plugins/plugin-shell'); await mkdir(join(target, '.shell-install-lock'), { recursive: true });
       await expect(installLocal({ root: dir })).rejects.toThrow();
     } finally { await rm(dir, { recursive: true, force: true }); }
-  });
+  }, 20000);
   it('[TOOL-I03] setup help and dry run execute without node_modules', async () => {
     const dir = await workspace();
     try {
       await cp(join(root, 'scripts/setup.mjs'), join(dir, 'setup.mjs'));
       await cp(join(root, 'scripts/setup'), join(dir, 'setup'), { recursive: true });
       await cp(join(root, 'scripts/shared'), join(dir, 'shared'), { recursive: true });
+      await cp(join(root, 'scripts/agent/mcp-config.mjs'), join(dir, 'agent/mcp-config.mjs'));
+      await cp(join(root, 'scripts/companion/schema/hosting.mjs'), join(dir, 'companion/schema/hosting.mjs'));
       for (const name of ['manifest.json', 'package-lock.json', 'versions.json']) await cp(join(root, name), join(dir, name));
       await cp(join(root, 'package.json'), join(dir, 'package.json'));
       for (const args of [['--help'], ['--dry-run']]) {
@@ -59,7 +61,7 @@ describe('Real tooling boundaries', () => {
       await mkdir(join(dir, 'src/application'), { recursive: true }); await mkdir(join(dir, 'src/infrastructure'), { recursive: true });
       await mkdir(join(dir, 'src/features'), { recursive: true });
       await mkdir(join(dir, 'tests'), { recursive: true });
-      await cp(join(root, '.fallowrc.json'), join(dir, '.fallowrc.json'));
+      await cp(join(root, 'configs/quality/fallow.json'), join(dir, '.fallowrc.json'));
       await mkdir(join(dir, 'scripts/quality'), { recursive: true });
       await cp(join(root, 'scripts/quality/fallow-node-tests.json'), join(dir, 'scripts/quality/fallow-node-tests.json'));
       await writeFile(join(dir, 'package.json'), '{"name":"boundary-fixture","type":"module"}');

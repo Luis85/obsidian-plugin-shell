@@ -1,0 +1,27 @@
+<script setup lang="ts">
+const leftMode=ref<'structure'|'insert'>('structure')
+const editorMode=ref('Design')
+const selected=ref('search')
+const componentName=ref('CustomerToolbar')
+const structure=[
+{id:'toolbar',label:'CustomerToolbar',depth:0,icon:'i-lucide-component'},
+{id:'search',label:'SearchField',depth:1,icon:'i-lucide-component'},
+{id:'filter',label:'FilterButton',depth:1,icon:'i-lucide-component'},
+{id:'actions',label:'#actions',depth:1,icon:'i-lucide-brackets'},
+{id:'create',label:'UButton',depth:1,icon:'i-lucide-box'}
+]
+</script>
+<template><div class="h-full grid grid-cols-[260px_minmax(0,1fr)_330px] bg-default">
+<aside class="border-r border-default min-h-0 flex flex-col">
+ <div class="p-3 border-b border-default"><p class="text-xs text-muted">Component editor</p><div class="flex items-center"><strong>{{componentName}}</strong><div class="flex-1"/><UBadge variant="subtle">composite</UBadge></div></div>
+ <div class="p-2 border-b border-default"><UButtonGroup class="w-full"><UButton class="flex-1" icon="i-lucide-list-tree" size="sm" :variant="leftMode==='structure'?'soft':'ghost'" @click="leftMode='structure'">Structure</UButton><UButton class="flex-1" icon="i-lucide-plus" size="sm" :variant="leftMode==='insert'?'soft':'ghost'" @click="leftMode='insert'">Insert child</UButton></UButtonGroup></div>
+ <div class="flex-1 overflow-auto"><div v-if="leftMode==='structure'" class="p-2"><button v-for="n in structure" :key="n.id" class="w-full flex items-center gap-2 rounded-md py-2 text-sm hover:bg-elevated" :class="selected===n.id?'bg-elevated ring-1 ring-primary/30':''" :style="{paddingLeft:(8+n.depth*18)+'px'}" @click="selected=n.id"><UIcon :name="n.icon" :class="n.id==='actions'?'text-warning':'text-primary'"/><span>{{n.label}}</span><UIcon v-if="n.depth" name="i-lucide-link-2" class="ml-auto text-muted"/></button></div><ComponentChildPalette v-else @insert-project="()=>leftMode='structure'" @insert-nuxt="()=>leftMode='structure'" @insert-element="()=>leftMode='structure'" @insert-slot="()=>leftMode='structure'"/></div>
+ <div class="p-3 border-t border-default space-y-2"><UButton block variant="outline" icon="i-lucide-git-compare">Dependency graph</UButton><UButton block icon="i-lucide-package-check">Publish revision</UButton></div>
+</aside>
+<section class="min-w-0 min-h-0 grid grid-rows-[48px_1fr_38px]">
+ <div class="border-b border-default flex items-center px-3 gap-2"><UButtonGroup><UButton v-for="x in ['Design','Preview','Review']" :key="x" size="sm" :variant="editorMode===x?'solid':'ghost'" @click="editorMode=x">{{x}}</UButton></UButtonGroup><div class="flex-1"/><UBadge color="primary" variant="subtle">Vue 3 composition</UBadge><UButton icon="i-lucide-play" variant="outline" size="sm">Play</UButton></div>
+ <div class="overflow-auto bg-elevated p-8"><div class="max-w-5xl mx-auto"><CompositeComponentCanvas v-model="selected"/></div></div>
+ <div class="border-t border-default flex items-center px-3 gap-2 text-xs text-muted"><span>{{componentName}}</span><span>›</span><strong class="text-highlighted">{{selected}}</strong><div class="flex-1"/><span>3 dependencies</span><span>•</span><span>No cycles</span><span>•</span><span>Generator ready</span></div>
+</section>
+<aside class="border-l border-default min-h-0"><ChildComponentInspector v-model="selected"/></aside>
+</div></template>

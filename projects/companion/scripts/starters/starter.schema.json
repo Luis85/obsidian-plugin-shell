@@ -1,0 +1,577 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workbench starter definition",
+  "description": "Workbench starter definition v1. Companion generators embed a fully validated project v6 document (earlier project formats are rejected, never migrated); project generators select a compiler project target and frontend. No execution trust is imported.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 60,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "level": {
+      "enum": [
+        "Foundation",
+        "Everyday",
+        "Advanced"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "outcome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "includes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 400,
+        "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+      },
+      "maxItems": 32,
+      "minItems": 1
+    },
+    "implementation": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 400,
+        "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+      },
+      "maxItems": 32,
+      "minItems": 1
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 400,
+        "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+      },
+      "maxItems": 32,
+      "minItems": 1
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/input"
+      },
+      "maxItems": 64,
+      "minItems": 0
+    },
+    "generator": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "files"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "companion"
+            },
+            "document": {
+              "type": "object",
+              "description": "Validated by the current Companion project v6 semantic validator.",
+              "properties": {
+                "schemaVersion": {
+                  "const": 6
+                }
+              },
+              "required": [
+                "schemaVersion"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "document"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Project starter: prepared through the maker's prototype interview and the project compiler. The runtime validator also enforces target/framework compatibility and canonical target order.",
+          "properties": {
+            "kind": {
+              "const": "project"
+            },
+            "projectType": {
+              "enum": [
+                "plugin",
+                "webapp",
+                "website",
+                "cli",
+                "hybrid"
+              ]
+            },
+            "framework": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            },
+            "targets": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "plugin",
+                  "webapp",
+                  "website",
+                  "cli"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 4,
+              "uniqueItems": true
+            },
+            "angularPins": {
+              "$ref": "#/$defs/angularPins"
+            }
+          },
+          "required": [
+            "kind",
+            "projectType",
+            "framework",
+            "targets"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "framework": {
+                    "const": "angular"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "angularPins"
+                ]
+              },
+              "else": {
+                "not": {
+                  "required": [
+                    "angularPins"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/file"
+      },
+      "maxItems": 1000,
+      "minItems": 0
+    },
+    "processes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/process"
+      },
+      "maxItems": 32,
+      "minItems": 0
+    },
+    "firstRun": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 60,
+        "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      },
+      "maxItems": 32,
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "nextSteps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 400,
+        "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+      },
+      "maxItems": 32,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "version",
+    "category",
+    "level",
+    "summary",
+    "outcome",
+    "includes",
+    "implementation",
+    "tags",
+    "inputs",
+    "generator",
+    "files",
+    "processes",
+    "firstRun",
+    "nextSteps"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "generator": {
+            "properties": {
+              "kind": {
+                "const": "project"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "inputs": {
+            "maxItems": 0
+          },
+          "files": {
+            "maxItems": 0
+          },
+          "processes": {
+            "maxItems": 0
+          },
+          "firstRun": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9]*$",
+          "maxLength": 60
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "type": {
+          "enum": [
+            "string",
+            "boolean",
+            "integer"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": [
+            "string",
+            "boolean",
+            "integer"
+          ]
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string",
+              "boolean",
+              "integer"
+            ]
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "type",
+        "required"
+      ]
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runner": {
+          "enum": [
+            "node",
+            "npm"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "maxItems": 64,
+          "minItems": 0
+        },
+        "script": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "cwd": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        }
+      },
+      "required": [
+        "runner",
+        "args",
+        "cwd",
+        "timeout"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "runner": {
+                "const": "node"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "script"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "script"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 60,
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "dependsOn": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 60,
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          },
+          "maxItems": 32,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "description",
+        "dependsOn",
+        "steps"
+      ]
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 500000
+        },
+        "json": {
+          "$ref": "#/$defs/json"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "content"
+          ],
+          "not": {
+            "required": [
+              "json"
+            ]
+          }
+        },
+        {
+          "required": [
+            "json"
+          ],
+          "not": {
+            "required": [
+              "content"
+            ]
+          }
+        }
+      ]
+    },
+    "json": {
+      "oneOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number",
+            "string"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/json"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/json"
+          }
+        }
+      ]
+    },
+    "angularPins": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Exact pins; every @angular package uses one version.",
+      "properties": {
+        "@angular/core": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "@angular/common": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "@angular/compiler": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "@angular/platform-browser": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "@angular/compiler-cli": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "rxjs": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "tslib": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      },
+      "required": [
+        "@angular/core",
+        "@angular/common",
+        "@angular/compiler",
+        "@angular/platform-browser",
+        "@angular/compiler-cli",
+        "rxjs",
+        "tslib"
+      ]
+    }
+  }
+}

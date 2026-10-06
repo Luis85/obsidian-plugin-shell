@@ -1,8 +1,8 @@
 import { mkdir, rm, readFile, access, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { applyFilePlan, createFilePlan } from '../shared/file-plan.mjs';
-import { runNode } from '../shared/process.mjs';
+import { applyFilePlan, createFilePlan } from '../shared/file-plan.ts';
+import { runNodeProcess } from '../shared/process.ts';
 import { projectInstallEnvironment } from '../shared/npm-install.mjs';
 import { savedOptions } from './options.mjs';
 import { writeJournal, inputFingerprint, stageIsCurrent, artifactHashes, digest } from './journal.mjs';
@@ -24,11 +24,13 @@ export function setupStages(options) {
   return [
     { id: 'install', selected: !options['skip-install'], command: ['active-npm', 'ci', '--no-fund'] },
     { id: 'browser-provision', selected: Boolean(options['provision-browser']), command: ['node_modules/@playwright/test/cli.js', 'install', 'chromium'] },
-    { id: 'verify', selected: true, command: ['scripts/quality/verify.mjs'] },
+    { id: 'verify', selected: !options['defer-verify'], command: ['scripts/quality/verify.mjs'] },
     { id: 'native-install', selected: options.profile === 'native', command: ['scripts/dev/install-local.mjs', '--no-build'] },
   ];
 }
-export async function executeSetup(root, options, planned, previous, { run = runNode } = {}) {
+/** Stage commands inherit the terminal unless a caller redirects stdio; failures carry exitCode/signal from NodeProcessFailure. */
+const runStage = (path, args, spawnOptions) => runNodeProcess(path, args, { spawnOptions: { stdio: 'inherit', ...spawnOptions }, forwardParentSignals: true });
+export async function executeSetup(root, options, planned, previous, { run = runStage } = {}) {
   const lock = join(root, '.template-setup.lock');
   await createFilePlan(root, []);
   await mkdir(lock).catch(error => { if (error.code === 'EEXIST') throw new Error('SETUP_LOCKED: another setup or interrupted run owns .template-setup.lock; inspect it before manual recovery'); throw error; });
@@ -37,16 +39,29 @@ export async function executeSetup(root, options, planned, previous, { run = run
   const saveJournal = async () => { journalHash = await writeJournal(root, journal, journalHash); };
   try {
     const toolchain = activeToolchain(options);
+    const nextAgentMcp = { version: 1, action: planned.agentMcp.action, enabled: planned.agentMcp.enabled,
+      server: planned.agentMcp.server, transport: planned.agentMcp.transport, clients: planned.agentMcp.clients,
+      status: planned.agentMcp.action === 'preserve' ? (planned.agentMcp.enabled ? 'verified' : 'skipped') : 'pending',
+      files: planned.agentMcp.files };
+    const retainedAgentMcp = planned.agentMcp.action !== 'preserve' && previous?.agentMcp
+      ? { ...previous.agentMcp, action: planned.agentMcp.action } : nextAgentMcp;
     journal = { version: 1, identity: planned.identity, options: savedOptions(options), fingerprint: await inputFingerprint(root, toolchain, options), toolchain,
-      status: 'running', migration: null, stages: setupStages(options).map(stage => ({ ...stage, status: stage.selected ? 'pending' : 'skipped' })) };
-    await saveJournal(); // Record desired public options before the first identity write, so interruption can resume.
+      status: 'running', migration: null, agentMcp: retainedAgentMcp,
+      stages: setupStages(options).map(stage => ({ ...stage, status: stage.selected ? 'pending' : 'skipped' })) };
+    await saveJournal();
     await applyFilePlan(planned.plan);
+    // Create-only hosting files (azure-devops); an existing file was excluded while planning and stays untouched.
+    if (planned.hostingFiles?.plan.changes.length) await applyFilePlan(planned.hostingFiles.plan);
+    if (planned.agentMcp.action !== 'preserve') {
+      await applyFilePlan(planned.agentMcp.plan);
+      journal.agentMcp = { ...nextAgentMcp, status: 'verified' };
+      await saveJournal();
+    }
     const fingerprint = await inputFingerprint(root, toolchain, options); journal.fingerprint = fingerprint;
     journal.lockHash = digest(await readFile(join(root, 'package-lock.json')));
     const compatible = previous?.fingerprint === fingerprint;
     await saveJournal();
     if (planned.migration) {
-      // Revalidate disabled state and source/destination data immediately before this separate stage.
       const migration = await planMigration(root, { from: planned.migration.from, to: planned.identity.id, previousId: planned.identity.id, profile: options.profile,
         expectedManifest: planned.manifest, previousManifest: planned.manifest, receipt: previous?.migration });
       if (JSON.stringify(migration.plan.changes) !== JSON.stringify(planned.migration.plan.changes)) throw new Error('Migration inputs changed after review; review a new plan');
@@ -57,7 +72,7 @@ export async function executeSetup(root, options, planned, previous, { run = run
     const env = projectInstallEnvironment().env;
     for (const stage of journal.stages) {
       if (!stage.selected) continue;
-      const prior = compatible && previous.stages.find(item => item.id === stage.id);
+      const prior = compatible && previous?.stages.find(item => item.id === stage.id);
       if (options.resume && prior && await stageIsCurrent(root, prior, planned.identity)) {
         Object.assign(stage, { status: 'verified', resumed: true, exitCode: prior.exitCode, ...(prior.outputHash ? { outputHash: prior.outputHash } : {}), ...(prior.assets ? { assets: prior.assets } : {}) });
         await saveJournal(); continue;

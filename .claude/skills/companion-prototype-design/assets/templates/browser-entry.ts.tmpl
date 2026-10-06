@@ -1,0 +1,29 @@
+// Place at harness/prototype/main.ts in the generated workspace, replacing every placeholder.
+// Browser-only composition: domain/application remain free of Vue, Pinia and host APIs.
+import { createApp, nextTick } from 'vue';
+import { createPinia, disposePinia } from 'pinia';
+import ui from '@nuxt/ui/vue-plugin';
+import PrototypeRoot from '{{relative_component_import}}';
+import '../../src/styles/app.css';
+import './frame.css'; // Original synthetic host-token defaults, no extracted host CSS or fonts.
+
+async function mountPrototype(): Promise<void> {
+  const root = document.getElementById('prototype-app');
+  if (!root) throw new Error('PROTOTYPE_MOUNT_MISSING');
+  const pinia = createPinia();
+  const app = createApp(PrototypeRoot);
+  app.use(pinia);
+  app.use(ui);
+  // Provide the real component's typed context here, backed by deterministic browser adapters.
+  // Do not import obsidian, Node, the native plugin entry, or silently fake business success.
+  let failed = false;
+  app.config.errorHandler = error => { failed = true; console.error(error); delete document.documentElement.dataset.prototypeReady; };
+  app.mount(root);
+  await nextTick();
+  if (failed) throw new Error('PROTOTYPE_MOUNT_FAILED');
+  document.documentElement.dataset.prototypeReady = 'true';
+  window.addEventListener('pagehide', () => {
+    app.unmount(); disposePinia(pinia); delete document.documentElement.dataset.prototypeReady;
+  }, { once: true });
+}
+void mountPrototype().catch(error => { console.error(error); delete document.documentElement.dataset.prototypeReady; });

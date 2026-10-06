@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 const openCommand = JSON.parse(readFileSync(new URL('../src/locales/en.json', import.meta.url), 'utf8')).command.open;
-console.log(`Obsidian plugin template — available commands
+console.log(`Workbench CLI — npm script shortcuts (every command: node bin/app help)
 npm run setup             Review identity/profile, install exact dependencies and verify
 npm run setup -- --help   Identity flags, explicit native migration, dry-run and resume
+npm run companion:generate -- --help  Read a companion JSON export; v1 prints data and writes nothing
 npm run make -- --list    Discover integrated source recipes and their prerequisites
 npm run examples:remove -- --dry-run  Review optional-example removal without deleting user features
 npm run entities:check    Validate actual registered entity/document definitions
@@ -12,6 +13,8 @@ npm run events:catalog    Print the source-derived event catalog (also supports 
 npm run dev:ui            Real plugin UI in the browser
 npm run build:local       Build/install to .dev-vault without touching notes or security settings
 npm run dev:local         Rebuild and install successful changes; manually reload Obsidian
+npm run dev:obsidian      Real Obsidian on a contained sandbox: watch, hot reload, logs (-- --json for agents)
+npm run test:obsidian     Vitest E2E in real Obsidian, fresh vault copy per case (first run: -- --allow-download)
 npm run verify            Current iteration's type/lint/architecture/unit/build/baseline checks
 npm run test:e2e          Served real-component browser tests (provision browsers first)
 npm run test:coverage     Enforce selected-core/feature coverage
@@ -31,6 +34,13 @@ npm run release:prepare -- --help  Plan consistent stable version metadata; no t
 npm run release:rehearse -- --help  Qualify and retain assets from one clean fixed source commit
 npm run release:plan -- --help  Validate an unexecuted draft/promotion plan and supplied evidence
 npm run release:operate -- --help  Discover remote state; execution needs explicit candidate-bound authorization
+npm run release:changelog -- check  Validate CHANGELOG.md (Keep a Changelog 1.1.0); \`notes --version X.Y.Z\` prints one section
+npm run release:cut -- --version X.Y.Z  Plan a release/X.Y.Z cut; --execute commits it, --remote pushes and opens a draft PR
+npm run release:publish -- --version X.Y.Z --repository owner/repo  Plan publishing a green release PR; --execute merges, tags and releases
+npm run increment:new -- <slug>  Print an increment handoff from the template; --write creates docs/increments/<slug>.md
+npm run dor -- --base origin/main  Definition of Ready: check the increment handoff before implementation
+npm run dod -- --base origin/main  Definition of Done: check the handoff against the diff; --write generates its docs
+npm run acceptance:stubs -- --increment <id>  List one pending test stub per acceptance criterion; --write creates them (never overwrites)
 
 Browser provisioning: node node_modules/@playwright/test/cli.js install chromium
 Open .dev-vault in Obsidian, deliberately enable the plugin, then run ${openCommand}.

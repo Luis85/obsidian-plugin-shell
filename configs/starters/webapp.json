@@ -1,0 +1,149 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "webapp",
+  "name": "Web Application",
+  "version": "1.0.0",
+  "category": "Web",
+  "level": "Foundation",
+  "summary": "A dependency-free browser app with build, test and local preview scripts fully defined in JSON.",
+  "outcome": "An editable web application without a required framework or package download.",
+  "includes": [
+    "HTML application",
+    "Deterministic local build",
+    "Node smoke test and preview server"
+  ],
+  "implementation": [
+    "Add product behavior and styles",
+    "Complete browser and accessibility acceptance"
+  ],
+  "tags": [
+    "webapp",
+    "offline",
+    "vanilla"
+  ],
+  "inputs": [
+    {
+      "id": "id",
+      "label": "Project ID",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "name",
+      "label": "Project name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "description",
+      "label": "Description",
+      "type": "string",
+      "required": false,
+      "default": "My application"
+    }
+  ],
+  "generator": {
+    "kind": "files"
+  },
+  "files": [
+    {
+      "path": "package.json",
+      "json": {
+        "name": "{{id}}",
+        "version": "0.1.0",
+        "private": true,
+        "type": "module",
+        "scripts": {
+          "build": "node tools/build.mjs",
+          "test": "node --test tests/app.test.mjs",
+          "showcase": "node tools/serve.mjs"
+        }
+      }
+    },
+    {
+      "path": "index.html",
+      "content": "<!doctype html>\n<html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>{{name|html}}</title>\n<style>body{font:18px system-ui;max-width:60rem;margin:4rem auto;padding:1rem}button{font:inherit;padding:.5rem 1rem}</style>\n<main><h1>{{name|html}}</h1><p>{{description|html}}</p><button type=\"button\" id=\"counter\">Count: 0</button></main>\n<script type=\"module\" src=\"./src/app.js\"></script></html>\n"
+    },
+    {
+      "path": "src/app.js",
+      "content": "const button = document.querySelector('#counter');\nlet count = 0;\nbutton.addEventListener('click', () => { count += 1; button.textContent = `Count: ${count}`; });\n"
+    },
+    {
+      "path": "tools/build.mjs",
+      "content": "import { cp, mkdir } from 'node:fs/promises';\nawait mkdir('dist/src', { recursive: true });\nawait cp('index.html', 'dist/index.html');\nawait cp('src/app.js', 'dist/src/app.js');\nconsole.log('Built dist/');\n"
+    },
+    {
+      "path": "tools/serve.mjs",
+      "content": "import { createServer } from 'node:http';\nimport { readFile } from 'node:fs/promises';\nconst routes = new Map([['/', ['index.html', 'text/html']], ['/src/app.js', ['src/app.js', 'text/javascript']]]);\nconst server = createServer(async (req, res) => {\n const route = routes.get((req.url ?? '/').split('?')[0]);\n if (!route) { res.writeHead(404).end('Not found'); return; }\n try { const bytes = await readFile(route[0]); res.writeHead(200, { 'Content-Type': route[1] + '; charset=utf-8', 'X-Content-Type-Options': 'nosniff' }); res.end(bytes); }\n catch { res.writeHead(500).end('Unable to read application'); }\n});\nserver.listen(4173, '127.0.0.1', () => console.log('Preview: http://127.0.0.1:4173'));\nfor (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => server.close());\n"
+    },
+    {
+      "path": "tests/app.test.mjs",
+      "content": "import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { readFile } from 'node:fs/promises';\ntest('application has an accessible native button and local module', async () => {\n const html = await readFile('index.html', 'utf8');\n assert.match(html, /<button type=\"button\"/);\n assert.match(html, /src=\".\\/src\\/app.js\"/);\n});\n"
+    },
+    {
+      "path": "README.md",
+      "content": "# {{name}}\n\n{{description}}\n\nNo dependency installation is needed.\n\n- `node tools/build.mjs` builds the app.\n- `node --test tests/app.test.mjs` checks the scaffold.\n- `node tools/serve.mjs` opens a loopback-only server; browse to http://127.0.0.1:4173 and stop it with Ctrl+C.\n\nThis scaffold is not browser, security or accessibility acceptance evidence.\n"
+    },
+    {
+      "path": ".gitignore",
+      "content": "dist/\nnode_modules/\n"
+    }
+  ],
+  "processes": [
+    {
+      "id": "verify",
+      "label": "Verify application",
+      "description": "Run the Node scaffold test; this is not browser acceptance.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "node",
+          "script": "tests/app.test.mjs",
+          "args": [],
+          "cwd": ".",
+          "timeout": 60000
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "label": "Build application",
+      "description": "Create the dist folder from project source.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "node",
+          "script": "tools/build.mjs",
+          "args": [],
+          "cwd": ".",
+          "timeout": 60000
+        }
+      ]
+    },
+    {
+      "id": "showcase",
+      "label": "Preview application",
+      "description": "Serve the app at http://127.0.0.1:4173 in the foreground; stop with Ctrl+C.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "node",
+          "script": "tools/serve.mjs",
+          "args": [],
+          "cwd": ".",
+          "timeout": 3600000
+        }
+      ]
+    }
+  ],
+  "firstRun": [
+    "verify",
+    "build"
+  ],
+  "nextSteps": [
+    "node tools/build.mjs",
+    "node --test tests/app.test.mjs",
+    "node tools/serve.mjs"
+  ]
+}

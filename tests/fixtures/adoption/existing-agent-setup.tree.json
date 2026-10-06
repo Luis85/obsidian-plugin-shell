@@ -1,0 +1,29 @@
+{
+  "description": "Angular 22 application that already has AGENTS.md, CLAUDE.md, .claude/settings.json with hooks and permissions, a skill, Cursor and Copilot instructions, a design/ folder and a docs/workbench/ folder: every merge and collision path.",
+  "files": {
+    "package.json": {
+      "name": "field-service",
+      "version": "1.0.0",
+      "private": true,
+      "scripts": { "build": "ng build", "test": "ng test --watch=false", "lint": "ng lint" },
+      "dependencies": { "@angular/core": "22.0.0", "@angular/common": "22.0.0", "@angular/router": "22.0.0", "@angular/platform-browser": "22.0.0", "rxjs": "7.8.2" },
+      "devDependencies": { "@angular/build": "22.0.0", "@angular/cli": "22.0.0", "typescript": "6.0.3", "vitest": "^3.0.0" }
+    },
+    "package-lock.json": { "name": "field-service", "lockfileVersion": 3, "packages": {} },
+    ".nvmrc": ["24.21.0"],
+    "angular.json": { "version": 1, "projects": { "field-service": { "projectType": "application", "root": "", "architect": { "build": { "builder": "@angular/build:application" }, "test": { "builder": "@angular/build:unit-test" } } } } },
+    "tsconfig.json": { "compilerOptions": { "strict": true } },
+    "src/main.ts": ["import { bootstrapApplication } from '@angular/platform-browser';", "import { App } from './app/app';", "bootstrapApplication(App);"],
+    "src/app/app.routes.ts": ["import { Routes } from '@angular/router';", "export const routes: Routes = [{ path: 'jobs', loadComponent: () => import('./jobs').then(m => m.Jobs) }, { path: 'technicians', loadComponent: () => import('./techs').then(m => m.Techs) }];"],
+    "src/app/app.ts": ["import { Component, signal } from '@angular/core';", "@Component({ selector: 'app-root', template: '<h1>{{ title() }}</h1>' })", "export class App { readonly title = signal('Field service'); }"],
+    "AGENTS.md": ["# Field service", "", "Run `npm test` before every commit. Keep components small."],
+    "CLAUDE.md": ["@AGENTS.md"],
+    ".claude/settings.json": { "permissions": { "allow": ["Bash(npm test)"] }, "hooks": { "Stop": [{ "hooks": [{ "type": "command", "command": "npm run lint" }] }] } },
+    ".claude/skills/release-notes/SKILL.md": ["---", "name: release-notes", "description: Draft release notes.", "---", "Summarise merged pull requests."],
+    ".cursor/rules/style.mdc": ["Prefer signals over RxJS for local state."],
+    ".github/copilot-instructions.md": ["Follow AGENTS.md."],
+    ".mcp.json": { "mcpServers": {} },
+    "design/tokens.json": { "color": { "primary": "#0b5fff" } },
+    "docs/workbench/NOTES.md": ["Earlier notes about a Workbench trial."]
+  }
+}

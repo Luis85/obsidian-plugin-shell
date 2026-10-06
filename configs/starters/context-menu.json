@@ -1,0 +1,1169 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "context-menu",
+  "name": "File Context Menu",
+  "category": "Foundations",
+  "level": "Foundation",
+  "summary": "Add a focused, extension-filtered action to Obsidian’s file context menu.",
+  "outcome": "Right-click a Markdown file and inspect its metadata through an editable, host-independent action.",
+  "tags": [
+    "context-menu",
+    "file-menu",
+    "markdown",
+    "native",
+    "action"
+  ],
+  "includes": [
+    "Plugin-owned file-menu event with Markdown filtering",
+    "Read-only inspect-file handler and native result dialog",
+    "Domain context contract, safe error boundary and unload cleanup"
+  ],
+  "implementation": [
+    "Replace the inspection handler with your own business operation",
+    "Introduce explicit application ports and confirmation before adding writes"
+  ],
+  "version": "1.0.0",
+  "inputs": [
+    {
+      "id": "id",
+      "label": "Project ID",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "name",
+      "label": "Project name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "author",
+      "label": "Author",
+      "type": "string",
+      "required": false,
+      "default": "Your Name"
+    },
+    {
+      "id": "description",
+      "label": "Description",
+      "type": "string",
+      "required": false,
+      "default": "Add a focused, extension-filtered action to the file context menu."
+    },
+    {
+      "id": "version",
+      "label": "Project version",
+      "type": "string",
+      "required": true,
+      "default": "0.1.0"
+    },
+    {
+      "id": "codebaseFolder",
+      "label": "Source folder",
+      "type": "string",
+      "required": true,
+      "default": "src"
+    },
+    {
+      "id": "testsFolder",
+      "label": "Tests folder",
+      "type": "string",
+      "required": true,
+      "default": "tests"
+    },
+    {
+      "id": "extensions",
+      "label": "File extensions (comma-separated)",
+      "type": "string",
+      "required": true,
+      "default": "md"
+    }
+  ],
+  "generator": {
+    "kind": "companion",
+    "document": {
+      "kind": "obsidian-companion-project",
+      "schemaVersion": 6,
+      "executable": false,
+      "project": {
+        "id": "file-context-menu",
+        "name": "File Context Menu",
+        "author": "Your Name",
+        "version": "0.1.0",
+        "description": "Add a focused, extension-filtered action to the file context menu."
+      },
+      "settings": {
+        "codebaseFolder": "src",
+        "testsFolder": "tests"
+      },
+      "design": {
+        "schema": 6,
+        "blueprint": "blank",
+        "goal": "Right-click a Markdown file and inspect its metadata through an editable, host-independent action.",
+        "platform": "desktop",
+        "nodes": [
+          {
+            "id": "node-1",
+            "slug": "workspace",
+            "label": "File Context Menu guide",
+            "kind": "view",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": null,
+            "nav": true,
+            "command": true,
+            "ribbon": false,
+            "entry": true,
+            "instance": "reuse",
+            "patterns": [
+              "open-view"
+            ],
+            "goal": "Right-click a Markdown file and inspect its metadata through an editable, host-independent action.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-3",
+            "slug": "integration-contract",
+            "label": "Own your action",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [
+              "open-view"
+            ],
+            "goal": "The generated inspectFile handler receives a plain snapshot: path, name and extension. It can be tested without importing Obsidian.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-2",
+            "slug": "preferences",
+            "label": "Acceptance and safety",
+            "kind": "settings",
+            "layout": "form",
+            "placement": "tab",
+            "parent": null,
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [
+              "settings"
+            ],
+            "goal": "Verify .md files receive the menu entry while folders, PDFs and unrelated files do not. Open and dismiss the result dialog with a keyboard.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          }
+        ],
+        "links": [],
+        "nextId": 4,
+        "library": [],
+        "prds": [
+          {
+            "id": "starter-requirements",
+            "title": "File Context Menu requirements",
+            "version": "0.1.0",
+            "revision": 1,
+            "status": "draft",
+            "problem": "Add a focused, extension-filtered action to Obsidian’s file context menu.",
+            "audience": "Obsidian plugin authors and users of custom native file workflows.",
+            "goals": "Right-click a Markdown file and inspect its metadata through an editable, host-independent action.",
+            "nonGoals": "Binary formats, editor-selection menus, network access and domain-specific visual document editing.",
+            "notes": "Native adapters are generated. These acceptance requirements remain designed until qualified in a disposable Obsidian vault.",
+            "nextReq": 5,
+            "baselines": [],
+            "requirements": [
+              {
+                "id": "starter-1",
+                "title": "Discover a relevant context action",
+                "priority": "must",
+                "status": "designed",
+                "kind": "functional",
+                "acceptance": "Given a Markdown file, its context menu includes Inspect file details; folders and unrelated extensions do not.",
+                "nodes": [
+                  "node-1"
+                ],
+                "components": [],
+                "patterns": []
+              },
+              {
+                "id": "starter-2",
+                "title": "Execute a host-independent handler",
+                "priority": "must",
+                "status": "designed",
+                "kind": "functional",
+                "acceptance": "Given an explicit menu selection, pass a plain file snapshot into the handler and show the returned title and message as text.",
+                "nodes": [
+                  "node-1"
+                ],
+                "components": [],
+                "patterns": []
+              },
+              {
+                "id": "starter-3",
+                "title": "Keep inspection read-only and errors safe",
+                "priority": "must",
+                "status": "designed",
+                "kind": "quality",
+                "acceptance": "Given a handler failure, surface a recoverable generic error without writes, automatic retries or raw file contents in diagnostics.",
+                "nodes": [
+                  "node-3"
+                ],
+                "components": [],
+                "patterns": []
+              },
+              {
+                "id": "starter-4",
+                "title": "Release listeners and late results",
+                "priority": "must",
+                "status": "designed",
+                "kind": "quality",
+                "acceptance": "Given plugin unload while an action is pending, remove listeners, close owned dialogs and ignore late results.",
+                "nodes": [
+                  "node-1"
+                ],
+                "components": [],
+                "patterns": []
+              }
+            ]
+          }
+        ],
+        "librarySchema": 3,
+        "canvas": {
+          "schema": 1,
+          "layout": "vertical",
+          "positions": {},
+          "pan": {
+            "x": 32,
+            "y": 28
+          },
+          "zoom": 1,
+          "snap": true,
+          "collapsed": [],
+          "edges": "selected",
+          "custom": false,
+          "arrangedFor": "",
+          "fitted": false
+        },
+        "semantic": {
+          "schema": 1,
+          "nextId": 1,
+          "entities": [],
+          "relationships": [],
+          "sections": [],
+          "canvas": {
+            "positions": {},
+            "viewport": {
+              "x": 40,
+              "y": 40,
+              "zoom": 1
+            },
+            "snap": true
+          }
+        },
+        "dataSources": {
+          "schema": 1,
+          "nextId": 1,
+          "sources": [],
+          "flows": [],
+          "positions": {}
+        },
+        "designSystem": {
+          "schema": 1,
+          "name": "File Context Menu tokens",
+          "description": "A starting point for a plugin that belongs in Obsidian. Customize these declarations before implementation.",
+          "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+          "fonts": [
+            {
+              "id": "interface",
+              "name": "Interface",
+              "source": "interface",
+              "families": "",
+              "fallback": "system-ui",
+              "usage": "Navigation, controls and labels.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "body",
+              "name": "Reading",
+              "source": "text",
+              "families": "",
+              "fallback": "sans-serif",
+              "usage": "Descriptions and long-form content.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "code",
+              "name": "Code",
+              "source": "mono",
+              "families": "",
+              "fallback": "monospace",
+              "usage": "Identifiers, paths and code samples.",
+              "license": "Host font preference. No font files are embedded."
+            }
+          ],
+          "typography": [
+            {
+              "id": "page-title",
+              "name": "Page title",
+              "font": "interface",
+              "size": 24,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.25,
+              "letterSpacing": 0,
+              "usage": "One primary heading per view."
+            },
+            {
+              "id": "section-title",
+              "name": "Section title",
+              "font": "interface",
+              "size": 18,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Group related controls or content."
+            },
+            {
+              "id": "body",
+              "name": "Body",
+              "font": "body",
+              "size": 16,
+              "unit": "px",
+              "weight": 400,
+              "lineHeight": 1.5,
+              "letterSpacing": 0,
+              "usage": "Main descriptive copy."
+            },
+            {
+              "id": "label",
+              "name": "Label",
+              "font": "interface",
+              "size": 14,
+              "unit": "px",
+              "weight": 500,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Form labels; do not rely on placeholders."
+            }
+          ],
+          "spacing": [
+            {
+              "id": "xs",
+              "name": "XS",
+              "value": 4,
+              "unit": "px",
+              "usage": "Related inline items"
+            },
+            {
+              "id": "sm",
+              "name": "SM",
+              "value": 8,
+              "unit": "px",
+              "usage": "Within a control group"
+            },
+            {
+              "id": "md",
+              "name": "MD",
+              "value": 16,
+              "unit": "px",
+              "usage": "Between related blocks"
+            },
+            {
+              "id": "lg",
+              "name": "LG",
+              "value": 24,
+              "unit": "px",
+              "usage": "Between sections"
+            },
+            {
+              "id": "xl",
+              "name": "XL",
+              "value": 32,
+              "unit": "px",
+              "usage": "Major content separation"
+            }
+          ],
+          "sizes": [
+            {
+              "id": "control",
+              "name": "Control height",
+              "value": 36,
+              "unit": "px",
+              "usage": "Proposed default, not an accessibility guarantee."
+            },
+            {
+              "id": "icon",
+              "name": "Icon",
+              "value": 18,
+              "unit": "px",
+              "usage": "Glyph size, not the clickable target."
+            },
+            {
+              "id": "inspector",
+              "name": "Inspector width",
+              "value": 320,
+              "unit": "px",
+              "usage": "Preferred width; adapt for narrower panes."
+            }
+          ],
+          "radii": [
+            {
+              "id": "control",
+              "name": "Control radius",
+              "value": 6,
+              "unit": "px",
+              "usage": "Inputs and compact actions."
+            },
+            {
+              "id": "surface",
+              "name": "Surface radius",
+              "value": 12,
+              "unit": "px",
+              "usage": "Standalone panels."
+            }
+          ],
+          "colors": [
+            {
+              "id": "background",
+              "name": "Background",
+              "light": "#FFFFFF",
+              "dark": "#1E1E24",
+              "host": "--background-primary",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "text",
+              "name": "Primary text",
+              "light": "#202027",
+              "dark": "#ECECF2",
+              "host": "--text-normal",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "muted",
+              "name": "Secondary text",
+              "light": "#595964",
+              "dark": "#B6B6C4",
+              "host": "--text-muted",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent",
+              "name": "Accent",
+              "light": "#6550B9",
+              "dark": "#B7A3FF",
+              "host": "--interactive-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent-text",
+              "name": "Text on accent",
+              "light": "#FFFFFF",
+              "dark": "#17131F",
+              "host": "--text-on-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            }
+          ],
+          "guidelines": [
+            {
+              "id": "interaction",
+              "name": "Interaction states",
+              "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+            },
+            {
+              "id": "components",
+              "name": "Component usage",
+              "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+            }
+          ],
+          "frontend": {
+            "schema": 1,
+            "target": "nuxt-ui",
+            "colorPolicy": "host",
+            "bindings": {}
+          }
+        },
+        "storymaps": {
+          "schema": 1,
+          "nextId": 1,
+          "maps": []
+        },
+        "visualDesigns": {
+          "schema": 3,
+          "nextId": 22,
+          "catalog": {
+            "id": "nuxt-ui",
+            "version": 1
+          },
+          "pages": [
+            {
+              "id": "vp-4",
+              "ownerId": "node-1",
+              "name": "Your file context action",
+              "root": [
+                {
+                  "id": "vn-5",
+                  "kind": "element",
+                  "tag": "div",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-1",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Your file context action"
+                      },
+                      "name": "Your file context action",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-2",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Right-click a Markdown file in Obsidian and choose Inspect file details. A native dialog shows its name, extension and vault-relative path."
+                      },
+                      "name": "Your file context action",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-3",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Folders and unrelated extensions do not receive the action. The starter does not replace the file’s normal view or change its contents."
+                      },
+                      "name": "Your file context action",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "events": [],
+                  "name": "Your file context action layout",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-6",
+                  "name": "Default",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-7",
+                  "name": "Narrow",
+                  "state": "default",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Native capability guide. The file-view and context-menu behavior runs in Obsidian, not inside the browser concept."
+            },
+            {
+              "id": "vp-11",
+              "ownerId": "node-3",
+              "name": "Own your action",
+              "root": [
+                {
+                  "id": "vn-12",
+                  "kind": "element",
+                  "tag": "div",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-8",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Own your action"
+                      },
+                      "name": "Own your action",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-9",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "The generated inspectFile handler receives a plain snapshot: path, name and extension. It can be tested without importing Obsidian."
+                      },
+                      "name": "Own your action",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-10",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Change the extension filters in design.nativeIntegrations before generation. Edit the generated application handler after generation; regeneration preserves your edits."
+                      },
+                      "name": "Own your action",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "events": [],
+                  "name": "Own your action layout",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-13",
+                  "name": "Default",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-14",
+                  "name": "Narrow",
+                  "state": "default",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Native capability guide. The file-view and context-menu behavior runs in Obsidian, not inside the browser concept."
+            },
+            {
+              "id": "vp-18",
+              "ownerId": "node-2",
+              "name": "Native acceptance checklist",
+              "root": [
+                {
+                  "id": "vn-19",
+                  "kind": "element",
+                  "tag": "div",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-15",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Native acceptance checklist"
+                      },
+                      "name": "Native acceptance checklist",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-16",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Verify .md files receive the menu entry while folders, PDFs and unrelated files do not. Open and dismiss the result dialog with a keyboard."
+                      },
+                      "name": "Native acceptance checklist",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-17",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Throw or reject from the handler and verify a safe error. Disable the plugin while an action is pending: it must not open a late dialog or retain listeners."
+                      },
+                      "name": "Native acceptance checklist",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "events": [],
+                  "name": "Native acceptance checklist layout",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-20",
+                  "name": "Default",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-21",
+                  "name": "Narrow",
+                  "state": "default",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Native capability guide. The file-view and context-menu behavior runs in Obsidian, not inside the browser concept."
+            }
+          ],
+          "components": [],
+          "layouts": [],
+          "revisions": []
+        },
+        "nativeIntegrations": {
+          "schemaVersion": 1,
+          "fileTypes": [],
+          "contextMenus": [
+            {
+              "id": "inspect-file",
+              "name": "Inspect file details",
+              "extensions": [
+                "md"
+              ]
+            }
+          ]
+        }
+      },
+      "notes": [
+        "# Native starter scope\n\nPlugin-owned file-menu event with Markdown filtering\nRead-only inspect-file handler and native result dialog\nDomain context contract, safe error boundary and unload cleanup\n\n## Remaining acceptance\n\nReplace the inspection handler with your own business operation\nIntroduce explicit application ports and confirmation before adding writes\n\nUse an isolated development vault. The browser previews declarative guidance; only an enabled native plugin registers extensions or host menus. No credentials or code are embedded in this JSON."
+      ]
+    }
+  },
+  "files": [],
+  "processes": [
+    {
+      "id": "install",
+      "label": "Install dependencies",
+      "description": "Install the exact project dependency graph; network and dependency lifecycle effects require trust.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "ci",
+            "--no-fund"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "label": "Verify generated project",
+      "description": "Run the generated project verification without claiming native acceptance.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "verify:project"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "label": "Build project",
+      "description": "Build generated project artifacts.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "showcase",
+      "label": "Preview project",
+      "description": "Run the local browser showcase in the foreground; stop it with Ctrl+C.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "dev:ui"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    }
+  ],
+  "firstRun": [
+    "install",
+    "verify"
+  ],
+  "nextSteps": [
+    "npm ci",
+    "npm run check",
+    "npm run dev:ui"
+  ]
+}

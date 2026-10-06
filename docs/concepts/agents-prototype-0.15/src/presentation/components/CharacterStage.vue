@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import { onBeforeUnmount,onMounted,ref,watch } from 'vue'
+import type { Agent } from '../../domain/agents/types'
+import type { CharacterEditorCategoryId } from '../character-catalog/editorCategories'
+import type { CharacterMotionState } from '../../domain/characters/types'
+import { CharacterStageScene,type CharacterRenderQuality,type CharacterStageView } from '../../infrastructure/three/scene/CharacterStageScene'
+const props=withDefaults(defineProps<{agent:Agent;activeCategory:CharacterEditorCategoryId;quality?:CharacterRenderQuality;motion?:CharacterMotionState}>(),{quality:'High',motion:'idle'});const emit=defineEmits<{category:[id:CharacterEditorCategoryId];rotation:[degrees:number]}>();const host=ref<HTMLDivElement|null>(null);let scene:CharacterStageScene|undefined;onMounted(()=>{if(host.value){scene=new CharacterStageScene(host.value,props.agent,{onCategorySelected:c=>emit('category',c),onRotationChange:d=>emit('rotation',d)});scene.setActiveCategory(props.activeCategory);scene.setQuality(props.quality);scene.setMotion(props.motion)}});watch(()=>props.agent,a=>scene?.updateAgent(a),{deep:true});watch(()=>props.activeCategory,c=>scene?.setActiveCategory(c));watch(()=>props.quality,q=>scene?.setQuality(q));watch(()=>props.motion,m=>scene?.setMotion(m));onBeforeUnmount(()=>scene?.dispose());defineExpose({setFront:()=>scene?.setFront(),setView:(v:CharacterStageView)=>scene?.setView(v),setRotation:(d:number)=>scene?.setRotation(d),getRotation:()=>scene?.getRotation()??0,rotate:(d:-1|1)=>scene?.rotate(d),zoom:(d:-1|1)=>scene?.zoom(d)})
+</script>
+<template><div ref="host" class="character-stage-canvas" role="img" aria-label="Interactive 3D agent character on a fixed-camera turntable. Drag horizontally to rotate the model through 360 degrees, use the wheel to zoom, or click character regions to edit."/></template>

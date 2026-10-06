@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "organism.data-table",
+  "name": "Data Table",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "organism",
+  "category": "Data display",
+  "description": "Structured records with columns, loading and empty-state support.",
+  "tags": [
+    "organism",
+    "data-display",
+    "table",
+    "records"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "tabular-data",
+    "selection",
+    "sorting",
+    "filtering"
+  ],
+  "states": [
+    "default",
+    "loading",
+    "empty",
+    "error",
+    "disabled"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-table"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

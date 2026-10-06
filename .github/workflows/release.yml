@@ -1,0 +1,218 @@
+name: Release
+# Release tier for release/X.Y.Z branches: verifies the release metadata, then
+# calls every pull-request workflow with tier release (every matrix leg and job,
+# whatever the path filters say) plus candidate qualification (rehearsal,
+# native host sessions and the blocking live security audit) on the release head.
+# "Release result" is what Publish requires before it merges, tags and releases;
+# it never runs on ordinary pull requests, so it is not a branch-protection check.
+# Release cut pushes the branch with GITHUB_TOKEN, which starts no push workflow,
+# so it dispatches this workflow on the release branch explicitly. With the
+# optional RELEASE_TOKEN secret (a fine-grained PAT or GitHub App token) the cut's
+# push and pull request also start the normal push and pull-request workflows.
+on:
+  push:
+    branches: ['release/**']
+    paths-ignore:
+      - 'projects/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+# Distinct from every called workflow's group (ci-, airship-, ...): a shared group
+# between caller and callee would deadlock. A newer push supersedes the run.
+concurrency:
+  group: release-tier-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  metadata:
+    name: Release metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      # Full history and tags: the verifier compares with origin/main and existing tags.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+      - name: Derive the version from the release branch name
+        run: |
+          case "$GITHUB_REF_NAME" in
+            release/*) VERSION="${GITHUB_REF_NAME#release/}" ;;
+            *) echo "::error::Release runs on release/X.Y.Z branches only, not $GITHUB_REF_NAME"; exit 1 ;;
+          esac
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release branch $GITHUB_REF_NAME does not name a stable X.Y.Z version"; exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      - name: Verify branch, versions, changelog section and absent tag
+        run: node scripts/release/branch.mjs verify --version "$VERSION"
+      - name: Show the release notes
+        run: |
+          {
+            echo "## Release $VERSION ($GITHUB_SHA)"
+            node scripts/release/changelog.mjs notes --version "$VERSION"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # One call per pull-request workflow. Each keeps read-only permissions, gets
+  # no secrets and uploads uniquely named artifacts into this run.
+  ci:
+    name: CI
+    needs: metadata
+    uses: ./.github/workflows/ci.yml
+    with:
+      tier: release
+  airship-compatibility:
+    name: Airship
+    needs: metadata
+    uses: ./.github/workflows/airship-compatibility.yml
+    with:
+      tier: release
+  angular-setup-acceptance:
+    name: Angular setup
+    needs: metadata
+    uses: ./.github/workflows/angular-setup-acceptance.yml
+    with:
+      tier: release
+  application-docs:
+    name: Application docs
+    needs: metadata
+    uses: ./.github/workflows/application-docs.yml
+    with:
+      tier: release
+  companion-concept-verification:
+    name: Companion concept
+    needs: metadata
+    uses: ./.github/workflows/companion-concept-verification.yml
+    with:
+      tier: release
+  compiler-qualification:
+    name: Compiler
+    needs: metadata
+    uses: ./.github/workflows/compiler-qualification.yml
+    with:
+      tier: release
+  hindsight-tooling:
+    name: Memory tooling
+    needs: metadata
+    uses: ./.github/workflows/hindsight-tooling.yml
+    with:
+      tier: release
+  interactive-maker:
+    name: Interactive maker
+    needs: metadata
+    uses: ./.github/workflows/interactive-maker.yml
+    with:
+      tier: release
+  native-integration-verification:
+    name: Native integrations
+    needs: metadata
+    uses: ./.github/workflows/native-integration-verification.yml
+    with:
+      tier: release
+  optional-storybook:
+    name: Optional Storybook
+    needs: metadata
+    uses: ./.github/workflows/optional-storybook.yml
+    with:
+      tier: release
+  project-starter-qualification:
+    name: Project starters
+    needs: metadata
+    uses: ./.github/workflows/project-starter-qualification.yml
+    with:
+      tier: release
+  setup-compatibility:
+    name: Setup compatibility
+    needs: metadata
+    uses: ./.github/workflows/setup-compatibility.yml
+    with:
+      tier: release
+  starter-distribution:
+    name: Starter distribution
+    needs: metadata
+    uses: ./.github/workflows/starter-distribution.yml
+    with:
+      tier: release
+  projects-boundary:
+    name: Projects boundary
+    needs: metadata
+    uses: ./.github/workflows/projects-boundary.yml
+    with:
+      tier: release
+  site-templates:
+    name: Site templates
+    needs: metadata
+    uses: ./.github/workflows/site-templates.yml
+    with:
+      tier: release
+  candidate-qualification:
+    name: Candidate qualification
+    needs: metadata
+    uses: ./.github/workflows/candidate-qualification.yml
+
+  # The check Publish requires. Unlike "CI result", nothing may be skipped here:
+  # metadata and every called workflow must succeed.
+  release-result:
+    name: Release result
+    if: always()
+    needs: [metadata, ci, airship-compatibility, angular-setup-acceptance, application-docs, companion-concept-verification, compiler-qualification, hindsight-tooling, interactive-maker, native-integration-verification, optional-storybook, project-starter-qualification, setup-compatibility, starter-distribution, projects-boundary, site-templates, candidate-qualification]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless metadata and every called workflow succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[] | "- \(.key): \(.value.result)"' <<< "$NEEDS" | tee -a "$GITHUB_STEP_SUMMARY"
+          failed=$(jq -r 'to_entries[] | select(.value.result != "success") | "\(.key)=\(.value.result)"' <<< "$NEEDS")
+          if [ -n "$failed" ]; then
+            echo "::error::Release tier jobs did not succeed: $(tr '\n' ' ' <<< "$failed")"
+            exit 1
+          fi
+
+  # The release pull request is opened with GITHUB_TOKEN, so dev.yml and ci.yml
+  # never report on it, and the required "Dev checks" and "CI result" checks would
+  # block Publish's merge. The release tier is a strict superset of both (it runs
+  # ci.yml in full plus every other workflow), so these aliases report them on the
+  # release head from "Release result". `always()` keeps them from being skipped,
+  # because a skipped required check would count as passing. "Definition of Ready"
+  # and "Definition of Done" skip release heads (a release pull request carries the
+  # release template, not an increment handoff), so they are reported the same way.
+  dev-checks:
+    name: Dev checks
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - &release-alias
+        name: Pass only when Release result succeeded
+        env:
+          RELEASE_RESULT: ${{ needs.release-result.result }}
+        run: |
+          echo "Release result: $RELEASE_RESULT"
+          test "$RELEASE_RESULT" = success
+  ci-result:
+    name: CI result
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - *release-alias
+  definition-of-ready:
+    name: Definition of Ready
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - *release-alias
+  definition-of-done:
+    name: Definition of Done
+    if: always()
+    needs: release-result
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - *release-alias

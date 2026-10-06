@@ -1,0 +1,19 @@
+{
+  "$schema": "../../schemas/fake-data-entity.schema.json",
+  "schemaVersion": 1,
+  "id": "meeting",
+  "title": "Meeting",
+  "description": "Meeting notes with a date and time, attendees, location, status and an agenda body.",
+  "folder": "Meetings",
+  "titleProperty": "topic",
+  "properties": [
+    { "key": "topic", "label": "Topic", "type": "text", "generator": { "faker": "company.buzzPhrase" } },
+    { "key": "when", "label": "When", "type": "datetime", "generator": { "faker": "date.soon", "args": { "days": 45 } } },
+    { "key": "attendees", "label": "Attendees", "type": "list", "generator": { "faker": "person.fullName" }, "items": { "min": 2, "max": 5 } },
+    { "key": "location", "label": "Location", "type": "text", "generator": { "choices": ["Online", "Room A", "Room B", "Cafeteria"] } },
+    { "key": "status", "label": "Status", "type": "text", "generator": { "choices": ["planned", "held", "cancelled"] } },
+    { "key": "tags", "type": "tags", "generator": { "choices": ["planning", "review", "one-on-one", "kickoff"] }, "items": { "min": 1, "max": 1 } },
+    { "key": "agenda", "type": "text", "generator": { "faker": "lorem.paragraphs", "args": { "min": 1, "max": 3 } }, "frontmatter": false }
+  ],
+  "body": "# {{topic}}\n\nAttendees: {{attendees}}\n\n## Agenda\n\n{{agenda}}\n"
+}

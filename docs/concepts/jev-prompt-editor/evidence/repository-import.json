@@ -1,0 +1,13 @@
+{
+  "scope": "Clean source import, exact artifact rebuild, domain and schema tests",
+  "baseCommit": "e540157e63c9b81fdadb7bd84eca4aa56a8809b0",
+  "artifactSha256": "f6261d764e2579a4ace89db034973f3da0b30a61bd744615b7dcea25598ded07",
+  "node": "v22.16.0",
+  "typescript": "5.8.3",
+  "vue": "3.5.13",
+  "domainPassed": 64,
+  "schemaPassed": 9,
+  "browser": "49 checks re-run locally before repository publication; see retained browser.json. Not re-run in this job.",
+  "nativeObsidianTested": false,
+  "liveJevTested": false
+}

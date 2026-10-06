@@ -1,7 +1,9 @@
 # Maintainability measurement
 
+> Type: reference · Part of the [docs index](../README.md)
+
 `npm run check:maintainability` measures the entire current source tree with the
-qualified Fallow 3.30.0 CLI. It never rewrites application source. Reports and the
+qualified Fallow 3.31.0 CLI. It never rewrites application source. Reports and the
 unaltered JSON/stderr of each tool invocation go to a new timestamped directory
 under `reports/maintainability`. Run
 `node scripts/quality/check-maintainability.mjs --check REPORT_DIRECTORY` to
@@ -67,10 +69,38 @@ Styles, markup-only HTML, data and compressed vendor material are visibly
 classified as unsupported by this JS/TS/Vue function/clone measurement. They keep
 their independent parser, provenance, style and source-line checks.
 
+The companion adds Python assembly/browser tooling as immediate `.py` files in
+`scripts/concepts` and `tests/concepts`. These are retained with exact hashes,
+byte counts and `view: unsupported`, `measurement: not-measured`, plus an explicit
+Python scope reason. They do not enter any Fallow function/clone corpus or inflate
+the production denominator. Changing or omitting one still invalidates a retained
+report. This classification does not accept Python in `src`, unrelated folders,
+nested concept folders, bytecode or arbitrary extensions. Unknown inputs still fail.
+The separate companion CI parses every concept Python source without executing
+it or writing bytecode, then runs the existing assembly tests and current browser
+suites. Syntax success is not Python complexity, coverage or native qualification;
+normal template setup does not acquire an additional Python runtime prerequisite.
+
+The optional memory integration similarly inventories only these reviewed Python
+paths: `scripts/hindsight/embedded.py`, `tests/hindsight/test_embedded.py` and
+`tests/hindsight/test_providers.py`. Their exact bytes remain fingerprinted with
+an explicit optional-memory reason and `measurement: not-measured`. They do not
+change any measured production denominator or add Python to default setup.
+Unreviewed files in those directories still fail `METRIC_UNCLASSIFIED_INPUT`.
+The separate optional-memory workflow owns adapter tests and provider acceptance.
+
+The one POSIX shell file, `scripts/agent/cloud-setup.sh` (the paste-in setup script for
+Claude Code cloud environments), is inventoried by exact path with its bytes and
+`measurement: not-measured`; `tests/tooling/agent-cloud-setup.checks.mjs` runs it
+against a local download server. Other shell files still fail `METRIC_UNCLASSIFIED_INPUT`.
+
 Four measured views are retained: production, executable tooling/configuration,
-test/harness fixtures, and executable example-removal templates. Tooling and
-fixture/template complexity and duplication are diagnostic reports, without a
-claim that production targets have been met in those different corpora. Embedded
+test/harness fixtures, and generated-project templates (the Companion runtime under
+`templates/companion/runtime` and the executable example-removal templates). The
+templates view ships as generated production source, so it blocks at the same
+10/15 complexity and 3% duplication ceilings as production. Tooling and fixture
+complexity and duplication are diagnostic reports, without a claim that production
+targets have been met in those different corpora. Embedded
 maker source strings remain tooling tokens; their actual output becomes ordinary
 production when a consumer is generated and verified.
 
@@ -87,7 +117,7 @@ checks still run against the real repository configuration.
 
 Health must report exactly the supplied input count, and any source-discovery or
 degraded-parse diagnostic fails. The metric config also sets `failOnParseError`,
-so health must carry an enforced, passing native `parse-error` gate. Fallow 3.30
+so health must carry an enforced, passing native `parse-error` gate. Fallow 3.31
 arms no parse-error gate for `dupes`; duplication relies on the diagnostics check
 and the exit/verdict agreement instead. Duplication uses Fallow's actual token-bearing
 corpus: import/re-export wiring is excluded by its explicit default. Inputs below
@@ -103,7 +133,7 @@ not physical repository lines or the code-line-limit denominator. Token statisti
 are retained separately; Fallow's duplicated-token count excludes one retained
 copy of each clone. Clone findings retain source path/ranges and minimum counts.
 Native threshold decisions and clone instance/file counts must agree with the
-reported totals; nonempty clone groups cannot claim zero duplicated lines/tokens.
+reported totals; nonempty clone groups cannot claim zero duplicated_lines/tokens.
 
 Initial source qualification exposed 33 executable function violations and four
 Vue template aggregates. Cohesive validation, request preparation, owned feedback,
@@ -120,7 +150,9 @@ changed source, omitted inventory, contradictory clone totals and unknown report
 schemas. A real CRAP-only function must remain a visible `warn` finding without
 failing, and tampered severities, health verdicts, a removed parse gate or an exit
 code contradicting the verdicts are rejected. They also prove the
-immutable vendor input is inventoried and altered bytes are rejected. Raw outputs
+immutable vendor input is inventoried and altered bytes are rejected. They exercise
+all actual concept Python sources, unchanged production metrics, stale/omitted
+Python records and rejection outside the narrow language scope. Raw outputs
 are kept; no report is synthesized as the only positive control.
 
 The report binds the source inventory, policy, Node version, installed package and

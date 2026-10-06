@@ -1,0 +1,17 @@
+import type { ComponentDefinition } from '../../domain/component/component'
+import type { UiNode, ValueExpression } from '../../domain/shared/ir'
+
+const expr=(v:ValueExpression)=>v.kind==='literal'?JSON.stringify(v.value):v.name
+const node=(n:UiNode):string=>{
+ if(n.kind==='text')return `{{ ${expr(n.value)} }}`
+ if(n.kind==='slot')return `<slot name="${n.name}">${(n.fallback??[]).map(node).join('')}</slot>`
+ if(n.kind==='component')return `<component :is="'${n.componentId}'">${Object.entries(n.slots??{}).map(([k,v])=>`<template #${k}>${v.map(node).join('')}</template>`).join('')}</component>`
+ const attrs=Object.entries(n.attrs??{}).map(([k,v])=>` :${k}="${expr(v)}"`).join('')
+ const events=Object.entries(n.events??{}).map(([dom,actions])=>{const a=actions[0];return a?.kind==='emit'?` @${dom}="$emit('${a.event}')"`:''}).join('')
+ return `<${n.tag}${attrs}${events}>${(n.children??[]).map(node).join('')}</${n.tag}>`
+}
+export function generateComponentSfc(c:ComponentDefinition):string{
+ const props=Object.fromEntries(c.props.map(p=>[p.name,{type:p.type,required:p.required,default:p.default}]))
+ const emits=c.emits.map(e=>e.name)
+ return `<script setup lang="ts">\nconst props = defineProps(${JSON.stringify(props,null,2)})\nconst emit = defineEmits(${JSON.stringify(emits)})\n</script>\n<template>\n${c.template.map(node).join('\n')}\n</template>\n`
+}

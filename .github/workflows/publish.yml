@@ -1,0 +1,76 @@
+name: Publish
+# Owner-dispatched once "Release result" is green on release/X.Y.Z. Publish
+# re-checks that result, merges the release pull request into main (merge
+# commit), tags X.Y.Z on the tested release head, creates the GitHub release
+# with the changelog section and the candidate assets, then deletes the release
+# branch. The script is idempotent and resumable and never replaces a tag,
+# release or asset.
+# Privileged by a scoped, reviewed allowance (scripts/quality/workflow-policy.mjs):
+# manual dispatch only, read-only top level, and the one write job waits for the
+# reviewers of the protected "release" environment.
+# Tokens: GITHUB_TOKEN is the fallback. Set the optional RELEASE_TOKEN secret (a
+# fine-grained token with contents and pull requests write on this repository)
+# when branch protection does not let GITHUB_TOKEN merge the release pull request.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version X.Y.Z whose release/X.Y.Z branch passed Release result
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    name: Publish release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: release
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+      checks: read
+    env:
+      VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require a stable version and a dispatch from main
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::version must be X.Y.Z"; exit 1; fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then echo "::error::Dispatch Publish from main, not $GITHUB_REF"; exit 1; fi
+      # Write-scoped job: never restore a cache that another run could have saved.
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+          npm-cache: 'false'
+      # Every remote step goes through the GitHub API with GH_TOKEN; git needs no credentials.
+      - name: Merge, tag, release and delete the release branch
+        run: |
+          mkdir -p reports/publish
+          set -o pipefail
+          node scripts/release/publish.mjs --version "$VERSION" --repository "$GITHUB_REPOSITORY" --execute 2>&1 | tee reports/publish/publish.log
+      - name: Summarize the publication
+        if: always()
+        run: |
+          {
+            echo "## Publish $VERSION"
+            echo "Release: https://github.com/$GITHUB_REPOSITORY/releases/tag/$VERSION"
+            if [ -f reports/publish/publish.log ]; then echo '```'; tail -n 40 reports/publish/publish.log; echo '```'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain the publication log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: publish-${{ inputs.version }}-${{ github.run_attempt }}
+          path: reports/publish/
+          retention-days: 30
+          if-no-files-found: warn

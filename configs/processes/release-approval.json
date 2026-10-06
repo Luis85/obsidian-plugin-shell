@@ -1,0 +1,183 @@
+{
+  "$schema": "../schemas/business-process.schema.json",
+  "schemaVersion": 1,
+  "id": "release-approval",
+  "version": 1,
+  "title": "Release approval",
+  "purpose": "Take one change from proposal to a published release with the delivery rules of this repository: reviewed file plans, required checks with honest untested scope, an approving review and an explicitly requested publication.",
+  "status": "active",
+  "owner": "maintainer",
+  "roles": [
+    { "id": "contributor", "title": "Contributor", "description": "Proposes the change, runs the gates and reports real output." },
+    { "id": "maintainer", "title": "Maintainer", "description": "Reviews the change and decides whether it ships." },
+    { "id": "release-manager", "title": "Release manager", "description": "Publishes a release only when the owner explicitly asked for it." }
+  ],
+  "steps": [
+    {
+      "id": "propose",
+      "title": "Propose the change",
+      "actor": "contributor",
+      "description": "Describe the change and confirm that every write went through a reviewed, hash-approved file plan.",
+      "bind": "change",
+      "fields": [
+        { "id": "title", "kind": "title", "label": "Change title" },
+        { "id": "kind", "kind": "select", "label": "Kind of change", "choices": ["feature", "fix", "dependency", "docs"], "default": "feature" },
+        { "id": "planReviewed", "kind": "boolean", "label": "Did every write go through a reviewed, hash-approved file plan?", "yes": "Yes", "no": "No" }
+      ],
+      "next": [{ "to": "checks" }]
+    },
+    {
+      "id": "checks",
+      "title": "Run the required checks",
+      "actor": "contributor",
+      "description": "Run the gates and paste their real output; a check that was not run is reported as not run, never as passed.",
+      "bind": "checks",
+      "fields": [
+        { "id": "typecheck", "kind": "select", "label": "Type check", "choices": ["passed", "failed", "not-run"], "default": "not-run" },
+        { "id": "lint", "kind": "select", "label": "Lint", "choices": ["passed", "failed", "not-run"], "default": "not-run" },
+        { "id": "tests", "kind": "select", "label": "Relevant test suites", "choices": ["passed", "failed", "not-run"], "default": "not-run" },
+        { "id": "audit", "kind": "select", "label": "Live security audit (check:security)", "choices": ["passed", "failed", "not-run"], "default": "not-run" },
+        { "id": "coverage", "kind": "number", "label": "Line coverage of the changed code (%)", "min": 0, "max": 100 },
+        { "id": "untested", "kind": "text", "label": "Untested scope (write none when everything was tested)", "maxLength": 2000 }
+      ],
+      "next": [{ "to": "review" }],
+      "doc": { "text": "Suites and their purpose are listed in [[docs/testing/TEST-SUITES]]. Coverage floors come from the reviewed thresholds and may only tighten." }
+    },
+    {
+      "id": "review",
+      "title": "Review the change",
+      "actor": "maintainer",
+      "description": "Read the diff, the gate output and the untested scope, then decide.",
+      "bind": "review",
+      "fields": [
+        { "id": "decision", "kind": "select", "label": "Decision", "choices": [
+          { "id": "approve", "label": "Approve" }, { "id": "changes", "label": "Request changes" }, { "id": "reject", "label": "Reject" }
+        ] },
+        { "id": "approvals", "kind": "number", "label": "Approving reviews so far", "integer": true, "min": 0, "default": 0 }
+      ],
+      "next": [
+        { "to": "publish", "when": { "path": "review.decision", "equals": "approve" }, "label": "approved" },
+        { "to": "rework", "when": { "path": "review.decision", "equals": "changes" }, "label": "changes requested" },
+        { "to": "rejected", "label": "rejected" }
+      ]
+    },
+    {
+      "id": "rework",
+      "title": "Rework the change",
+      "actor": "contributor",
+      "bind": "rework",
+      "fields": [{ "id": "summary", "kind": "text", "label": "What changed after the review?", "required": true, "multiline": true }],
+      "next": [{ "to": "checks" }]
+    },
+    {
+      "id": "publish",
+      "title": "Publish the release",
+      "actor": "release-manager",
+      "description": "Tag and publish only on the owner's explicit request; the changelog names the release.",
+      "bind": "release",
+      "fields": [
+        { "id": "requested", "kind": "boolean", "label": "Did the owner explicitly request this publication?", "yes": "Yes", "no": "No" },
+        { "id": "version", "kind": "text", "label": "Release version (major.minor.patch)", "required": true, "maxLength": 40 },
+        { "id": "changelog", "kind": "boolean", "label": "Is the CHANGELOG entry written?", "yes": "Yes", "no": "No" },
+        { "id": "notesLink", "kind": "text", "label": "Execution record path (optional)", "maxLength": 200 }
+      ],
+      "terminal": true,
+      "outcome": "released"
+    },
+    {
+      "id": "rejected",
+      "title": "Close as rejected",
+      "actor": "maintainer",
+      "terminal": true,
+      "outcome": "rejected"
+    }
+  ],
+  "rules": [
+    {
+      "id": "reviewed-file-plans",
+      "statement": "Every write goes through a reviewed, hash-approved file plan.",
+      "rationale": "Nothing in this repository overwrites user files silently.",
+      "severity": "block",
+      "steps": ["propose"],
+      "require": { "path": "change.planReviewed", "equals": true }
+    },
+    {
+      "id": "required-checks-pass",
+      "statement": "Type check, lint and the relevant test suites pass before review.",
+      "rationale": "Reviewers judge real gate output, not assumed success.",
+      "severity": "block",
+      "steps": ["checks"],
+      "require": { "all": [
+        { "path": "checks.typecheck", "equals": "passed" },
+        { "path": "checks.lint", "equals": "passed" },
+        { "path": "checks.tests", "equals": "passed" }
+      ] }
+    },
+    {
+      "id": "coverage-floor",
+      "statement": "Changed feature and fix code keeps at least 90 % line coverage.",
+      "rationale": "The maker coverage gate never weakens; moving code does not lower its floor.",
+      "severity": "block",
+      "steps": ["checks"],
+      "when": { "path": "change.kind", "in": ["feature", "fix"] },
+      "require": { "path": "checks.coverage", "gte": 90 }
+    },
+    {
+      "id": "dependency-audit",
+      "statement": "A dependency change runs the live security audit.",
+      "rationale": "An audit that was not run is reported honestly; the maintainer decides whether to continue.",
+      "severity": "warn",
+      "steps": ["checks"],
+      "when": { "path": "change.kind", "equals": "dependency" },
+      "require": { "path": "checks.audit", "equals": "passed" }
+    },
+    {
+      "id": "untested-scope-stated",
+      "statement": "The change states its untested scope.",
+      "severity": "warn",
+      "steps": ["checks"],
+      "require": { "path": "checks.untested", "length": true, "gte": 1 }
+    },
+    {
+      "id": "approval-before-publish",
+      "statement": "An approved change has at least one approving review.",
+      "severity": "block",
+      "steps": ["review"],
+      "when": { "path": "review.decision", "equals": "approve" },
+      "require": { "path": "review.approvals", "gte": 1 }
+    },
+    {
+      "id": "explicit-publish-request",
+      "statement": "Publishing and tagging happen only when the owner explicitly requested them.",
+      "severity": "block",
+      "steps": ["publish"],
+      "require": { "path": "release.requested", "equals": true },
+      "doc": { "text": "See the safety rules in [[AGENTS]]: no task publishes, tags or submits listings unless specifically requested." }
+    },
+    {
+      "id": "semantic-version",
+      "statement": "The release version has three dot-separated parts.",
+      "severity": "block",
+      "steps": ["publish"],
+      "require": { "all": [
+        { "path": "release.version", "matches": "?*.?*.?*" },
+        { "not": { "path": "release.version", "contains": " " } }
+      ] }
+    },
+    {
+      "id": "changelog-entry",
+      "statement": "The CHANGELOG has an entry for the release.",
+      "severity": "warn",
+      "steps": ["publish"],
+      "require": { "path": "release.changelog", "equals": true }
+    },
+    {
+      "id": "execution-record-linked",
+      "statement": "The release links its execution record under docs/.",
+      "severity": "info",
+      "steps": ["publish"],
+      "require": { "path": "release.notesLink", "matches": "docs/*" }
+    }
+  ],
+  "doc": { "file": "release-approval.md" }
+}

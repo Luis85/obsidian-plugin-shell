@@ -1,0 +1,379 @@
+name: Companion concept source verification
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths: &concept-inputs
+      - 'configs/starters/**'
+      - 'scripts/starters/**'
+      - 'bin/adapters/starters/**'
+      - 'docs/concepts/companion/**'
+      - 'scripts/concepts/**'
+      - 'scripts/companion/**'
+      - 'scripts/companion-tools/**'
+      - 'templates/**'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
+      - 'tests/tooling/*prototypes*.checks.mjs'
+      - 'tests/support/prototype-fixture.mjs'
+      - 'scripts/compiler/**'
+      - 'bin/compiler/**'
+      - 'scripts/bundling/**'
+      - 'tests/tooling/compiler-journey*.checks.mjs'
+      - 'tests/tooling/companion-project.checks.mjs'
+      - 'tests/tooling/companion-composition-contract.checks.mjs'
+      - 'tests/support/concept-realm.mjs'
+      - 'tests/tooling/companion-visual-*.checks.mjs'
+      - 'tests/tooling/visual-*.checks.mjs'
+      - 'tests/fixtures/companion/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'docs/concepts/jev-prompt-editor/**'
+      - 'tests/tooling/jev-concept-distribution.checks.mjs'
+      - 'tests/concepts/**'
+      - 'tests/tooling/test-data-*'
+      - 'configs/quality/fallow.json'
+      - 'scripts/quality/maintainability-inventory.mjs'
+      - 'tests/tooling/maintainability.checks.mjs'
+      - '.github/actions/setup-qualified/**'
+      - '.github/workflows/companion-concept-verification.yml'
+      - '!projects/**'
+  push:
+    branches: [main]
+    paths: *concept-inputs
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
+      e2e:
+        description: also run the opt-in end-to-end steps (real browser, real Obsidian); tier release always runs them
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: companion-concept-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
+  cancel-in-progress: true
+jobs:
+  source:
+    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund --ignore-scripts
+      - name: Parse all concept Python sources without executing them or writing bytecode
+        shell: bash
+        run: |
+          python3 -B - <<'PYTHON'
+          import hashlib, json
+          from pathlib import Path
+          files = sorted(path for root in ['scripts/concepts', 'tests/concepts'] for path in Path(root).rglob('*.py'))
+          if not files:
+              raise SystemExit('No concept Python inputs found')
+          records = []
+          for path in files:
+              if path.is_symlink() or not path.is_file():
+                  raise SystemExit('Non-regular Python input: ' + str(path))
+              raw = path.read_bytes()
+              compile(raw, str(path), 'exec', dont_inherit=True)
+              records.append({'path': str(path), 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)})
+          print(json.dumps({'status': 'passed', 'scope': 'Python syntax only; no execution or JS complexity claim', 'files': records}))
+          PYTHON
+      - name: Check exact offline concept assembly
+        run: python3 scripts/concepts/build-companion.py --check
+      - name: Exercise assembly, inventory and tamper rejection
+        run: python3 -B tests/concepts/companion-assembly.test.py
+      - name: Check authored JavaScript syntax without executing project operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          for file in docs/concepts/companion/src/*.js; do
+            node --check "$file"
+            count=$((count + 1))
+          done
+          test "$count" -gt 0
+          echo "Syntax checked $count concept modules. Browser and native evidence are separate."
+      - name: Exercise real test-data generators, file safety and loopback adapters
+        run: node --test tests/tooling/test-data-*.checks.mjs
+      - name: Exercise full-project JSON and read-only shell handoff
+        run: |
+          node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-composition-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
+          node "$QUALIFIED_NPM" run test:visual
+      - name: Exercise prototype lifecycle, safe persistence and pinned generation
+        run: node --test tests/tooling/companion-prototypes*.checks.mjs tests/tooling/framework-prototypes.checks.mjs
+      - name: Validate the published project schema with an independent implementation
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/project-schema-env"
+          "$RUNNER_TEMP/project-schema-env/bin/python" -m pip install jsonschema==4.26.0
+          "$RUNNER_TEMP/project-schema-env/bin/python" -B tests/concepts/companion-schema.test.py
+      - name: Package exact review source without Git metadata or credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=tar.gz HEAD -o "$RUNNER_TEMP/companion-review-source.tar.gz"
+          git rev-parse HEAD > "$RUNNER_TEMP/companion-review-source.commit"
+          sha256sum "$RUNNER_TEMP/companion-review-source.tar.gz" > "$RUNNER_TEMP/companion-review-source.sha256"
+      - name: Preserve reproducible review source
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: companion-review-source
+          path: |
+            ${{ runner.temp }}/companion-review-source.tar.gz
+            ${{ runner.temp }}/companion-review-source.commit
+            ${{ runner.temp }}/companion-review-source.sha256
+          retention-days: 7
+          if-no-files-found: error
+  # E2E: opt-in, always in the release tier.
+  browser:
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && (inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund --ignore-scripts
+      - name: Provision isolated pinned browser test tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/companion-browsers"
+          printf 'PLAYWRIGHT_BROWSERS_PATH=%s\n' "$PLAYWRIGHT_BROWSERS_PATH" >> "$GITHUB_ENV"
+          python3 -m venv "$RUNNER_TEMP/companion-browser-env"
+          "$RUNNER_TEMP/companion-browser-env/bin/python" -m pip install playwright==1.57.0
+          "$RUNNER_TEMP/companion-browser-env/bin/python" -m playwright install chromium
+          # The Node suites drive the Chromium pinned by the locked @playwright/test into the same scratch path.
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          "$RUNNER_TEMP/companion-browser-env/bin/python" - <<'PYTHON'
+          import os
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as pw:
+              with open(os.environ['GITHUB_ENV'], 'a') as output:
+                  output.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
+          PYTHON
+      # The aggregated runner stops at the first failing suite; run the page and component editors on their own first.
+      - name: Exercise the page and component editors on the exact artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --only visual-editors
+      - name: Exercise current concept and real-origin storage on one exact artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --real-storage
+      - name: Retain concept evidence even when a check fails
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: companion-browser-evidence
+          path: |
+            reports/concepts/
+            docs/concepts/companion/index.html
+          retention-days: 7
+          if-no-files-found: error
+  # Typecheck, contracts, build and generation always run; its browser steps are e2e.
+  journey-editor:
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+      - name: Provision isolated browser tooling
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: |
+          python3 -m venv "$RUNNER_TEMP/authoring-browser"
+          "$RUNNER_TEMP/authoring-browser/bin/python" -m pip install playwright==1.57.0
+          "$RUNNER_TEMP/authoring-browser/bin/python" -m playwright install --with-deps chromium
+          echo "PYTHON=$RUNNER_TEMP/authoring-browser/bin/python" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/authoring-browser/bin/python" - <<'PY'
+          import os
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as pw:
+              with open(os.environ['GITHUB_ENV'], 'a') as env:
+                  env.write('SHELL_CHROMIUM=' + pw.chromium.executable_path + '\n')
+          PY
+      - name: Typecheck the actual Vue authoring components and run their contracts
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p reports/companion-mvp
+          node "$QUALIFIED_NPM" run typecheck:authoring 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
+          node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
+      - name: Build the empty companion and explicitly derive golden qualification input
+        run: |
+          node scripts/concepts/build-mvp.mjs
+          node scripts/concepts/export-golden-project.mjs
+      - name: Verify empty startup and external starter lifecycle
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: node tests/concepts/starter-workspace.browser.mjs
+      - name: Exercise real editor actions, full JSON round trip and offline assets
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: |
+          "$PYTHON" -B tests/concepts/companion-mvp.browser.py
+          "$PYTHON" -B tests/concepts/companion-prototypes.browser.py
+      - name: Inspect the exported project, then generate and independently build the exact v6 self-project and offline clickdummy
+        run: |
+          node bin/app project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
+          git rev-parse HEAD > reports/companion-mvp/source-commit.txt
+          node scripts/companion-tools/qualify-project.mjs --authoring-fixture
+      - name: Exercise the generated offline clickdummy
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: |
+          "$PYTHON" -B tests/concepts/companion-mvp.browser.py --clickdummy
+      - name: Retain exact authoring artifacts and browser evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: companion-mvp-authoring
+          path: reports/companion-mvp/
+          retention-days: 7
+          if-no-files-found: warn
+
+  journey-native:
+    name: Generated Journey Lens / real Obsidian file lifecycle
+    # E2E (real Obsidian): opt-in, always in the release tier.
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && (inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --no-fund
+      - name: Provision the locked export browser and Electron system libraries
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - name: Build the authored definition and independently generate the native consumer
+        # A short scratch root respects the existing Linux singleton-socket budget.
+        # Each test still launches only the generated consumer's contained .nq vault.
+        env:
+          COMPANION_QUALIFICATION_ROOT: /tmp
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p reports/journey-native
+          node scripts/concepts/build-mvp.mjs 2>&1 | tee reports/journey-native/definition-build.log
+          node scripts/concepts/export-golden-project.mjs 2>&1 | tee reports/journey-native/golden-source.log
+          node scripts/companion-tools/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
+      - name: Exercise create, edit, reopen and independent leaves against the generated plugin
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: |
+          target=$(cat reports/companion-mvp/generation/target.txt)
+          case "$target" in /tmp/companion-qualification-*/companion) ;; *) echo "Unexpected generated target"; exit 1;; esac
+          test -f "$target/tests/obsidian/journey-lens.obsidian.ts"
+          cd "$target"
+          node "$QUALIFIED_NPM" run test:obsidian -- --allow-download journey-lens
+      - name: Collect exact generated/native evidence without dependencies or host downloads
+        if: always()
+        run: |
+          mkdir -p reports/journey-native
+          git rev-parse HEAD > reports/journey-native/source-commit.txt
+          if test -f reports/companion-mvp/generation/target.txt; then
+            target=$(cat reports/companion-mvp/generation/target.txt)
+            case "$target" in /tmp/companion-qualification-*/companion) ;; *) exit 1;; esac
+            if test -d "$target/reports/obsidian"; then cp -R "$target/reports/obsidian" reports/journey-native/; fi
+            if test -f "$target/design/journey-lens.json"; then cp "$target/design/journey-lens.json" reports/journey-native/; fi
+          fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: generated-journey-native-evidence
+          path: |
+            reports/journey-native/
+            reports/companion-mvp/generation/
+          retention-days: 7
+          if-no-files-found: error
+
+  jev-typescript6:
+    name: Jev / locked TypeScript 6 build and regression checks
+    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+        with:
+          install: 'true'
+          install-flags: --ignore-scripts --no-fund
+      - name: Verify retained inventory and compiler-selection negative controls
+        run: |
+          node docs/concepts/jev-prompt-editor/scripts/manifest.cjs
+          node --test docs/concepts/jev-prompt-editor/tests/compiler.test.cjs docs/concepts/jev-prompt-editor/tests/compiler-integration.test.cjs
+      - name: Compile all Jev sources with TypeScript 6 and test the freshly emitted code
+        run: |
+          node docs/concepts/jev-prompt-editor/scripts/build.cjs
+          node --test --test-reporter=tap docs/concepts/jev-prompt-editor/tests/domain.test.cjs docs/concepts/jev-prompt-editor/tests/logic.test.cjs > docs/concepts/jev-prompt-editor/evidence/typescript6-domain.tap
+          git rev-parse HEAD > docs/concepts/jev-prompt-editor/evidence/typescript6-source.txt
+      - name: Provision isolated schema tooling
+        run: |
+          python3 -m venv "$RUNNER_TEMP/jev-browser"
+          "$RUNNER_TEMP/jev-browser/bin/python" -m pip install jsonschema==4.25.1
+      - name: Provision the isolated pinned browser
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: |
+          "$RUNNER_TEMP/jev-browser/bin/python" -m pip install playwright==1.57.0
+          "$RUNNER_TEMP/jev-browser/bin/python" -m playwright install --with-deps chromium
+          "$RUNNER_TEMP/jev-browser/bin/python" - <<'PYTHON'
+          import os
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as pw:
+              with open(os.environ['GITHUB_ENV'], 'a') as output:
+                  output.write('CHROMIUM=' + pw.chromium.executable_path + '\n')
+          PYTHON
+      - name: Exercise rebuilt HTML with explicit test Storage
+        if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
+        run: |
+          "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/browser.test.py
+          "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/logic.browser.py
+      - name: Validate JSON examples
+        run: |
+          "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/schema.test.py
+      - name: Retain compiler receipt and exact rebuilt artifact, not native acceptance
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: jev-typescript6-evidence
+          path: |
+            docs/concepts/jev-prompt-editor/jev-studio.html
+            docs/concepts/jev-prompt-editor/dist/
+            docs/concepts/jev-prompt-editor/evidence/
+            !docs/concepts/jev-prompt-editor/evidence/*.png
+          retention-days: 7
+          if-no-files-found: error

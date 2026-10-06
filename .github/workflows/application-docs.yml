@@ -1,0 +1,141 @@
+name: Typed Markdown documentation
+# Also owns the command handbook: the former shell-cli-manual.yml contracts were
+# a subset of the qualify job, so its dependency-free checks run here before the
+# install and its HTML site builds in the site job below.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'bin/app'
+      - 'bin/documentation/**'
+      - 'bin/adapters/settings-documentation.ts'
+      - 'bin/adapters/framework/**'
+      - 'bin/adapters/framework-cli.ts'
+      - 'bin/presentation/terminal/**'
+      - 'bin/compiler/domain/**'
+      - 'scripts/shared/file-plan*.ts'
+      - 'scripts/documentation/**'
+      - 'tests/tooling/framework-docs-*'
+      - 'tests/tooling/framework-manual.checks.mjs'
+      - 'tests/tooling/interactive-maker-documentation-*'
+      - 'tests/fixtures/application-docs/**'
+      - 'tooling/documentation/**'
+      - 'docs/user-manual/shell-cli/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
+      - '.github/actions/setup-qualified/**'
+      - '.github/workflows/application-docs.yml'
+      - '!projects/**'
+  # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
+  workflow_call:
+    inputs:
+      tier:
+        description: integration (ready pull requests and main) or release (every matrix leg)
+        type: string
+        default: integration
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: integration (three-OS matrices run Linux only) or release (every matrix leg)
+        type: choice
+        options: [integration, release]
+        default: integration
+permissions:
+  contents: read
+concurrency:
+  group: application-docs-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Retain exact review source without local secrets or dependencies
+        run: |
+          mkdir -p reports/application-docs
+          git rev-parse HEAD > reports/application-docs/checkout.txt
+          git archive --format=tar.gz HEAD -o reports/application-docs/source.tgz
+      - uses: ./.github/actions/setup-qualified
+      # These run before any dependency is installed: the manual tooling must stay
+      # dependency-free. --check compares the committed handbook with the command
+      # catalog without regenerating it first, so a stale handbook fails here.
+      - name: Dependency-free manual contracts, committed-handbook drift and authored-example audit
+        run: |
+          set -o pipefail
+          node --test tests/tooling/framework-manual.checks.mjs 2>&1 | tee reports/application-docs/manual-contracts.log
+          node --experimental-strip-types scripts/documentation/manual.mjs --check 2>&1 | tee reports/application-docs/manual.log
+          node --experimental-strip-types scripts/documentation/audit.mjs 2>&1 | tee -a reports/application-docs/manual.log
+      - name: Retain the checked command handbook
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: shell-cli-manual-markdown-${{ matrix.os }}
+          path: docs/user-manual/shell-cli/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Install the committed dependency lock without lifecycle scripts
+        run: node "$QUALIFIED_NPM" ci --ignore-scripts --no-audit --no-fund
+      - name: Record exact toolchain
+        run: |
+          node -p 'JSON.stringify({node:process.version,yaml:require("yaml/package.json").version,typescript:require("typescript/package.json").version},null,2)' > reports/application-docs/toolchain.json
+      - name: Full repository analyzer and architecture gates
+        if: runner.os == 'Linux'
+        run: |
+          set -o pipefail
+          node scripts/quality/check-analyzer.mjs 2>&1 | tee reports/application-docs/analyzer.log
+          node scripts/quality/check-architecture.mjs 2>&1 | tee reports/application-docs/architecture.log
+          node scripts/compiler/check-architecture.mjs 2>&1 | tee -a reports/application-docs/architecture.log
+      - name: Require and execute every documentation contract suite
+        run: |
+          set -o pipefail
+          node -e 'for(const name of ["model","codec","operations","kit","safety"])if(!require("node:fs").existsSync("tests/tooling/framework-docs-"+name+".checks.mjs"))throw Error("Missing documentation suite: "+name)'
+          node --experimental-strip-types --test tests/tooling/framework-docs-model.checks.mjs tests/tooling/framework-docs-codec.checks.mjs tests/tooling/framework-docs-operations.checks.mjs tests/tooling/framework-docs-kit.checks.mjs tests/tooling/framework-docs-safety.checks.mjs tests/tooling/interactive-maker-documentation-core.checks.mjs tests/tooling/interactive-maker-documentation-codec.checks.mjs tests/tooling/interactive-maker-documentation-model.checks.mjs tests/tooling/interactive-maker-documentation-plan.checks.mjs 2>&1 | tee reports/application-docs/tests.log
+      - name: Preserve existing CLI and setup contracts
+        run: |
+          set -o pipefail
+          node --experimental-strip-types --test tests/tooling/framework-core.checks.mjs tests/tooling/framework-manual.checks.mjs tests/tooling/framework-cli-guidance.checks.mjs tests/tooling/framework-documents.checks.mjs tests/tooling/framework-input-style.checks.mjs tests/tooling/framework-setup-journey.checks.mjs tests/tooling/framework-handout.checks.mjs tests/tooling/framework-handout-integration.checks.mjs 2>&1 | tee reports/application-docs/regressions.log
+      - name: Retain scope-labeled results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: application-docs-qualification-${{ matrix.os }}
+          path: reports/application-docs/
+          retention-days: 7
+          if-no-files-found: warn
+  site:
+    name: Command handbook site
+    if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-qualified
+      - name: Install the isolated renderer from its committed lock without lifecycle scripts
+        run: node "$QUALIFIED_NPM" ci --prefix tooling/documentation --ignore-scripts --no-audit --no-fund
+      - name: Build source comments and handbook into HTML
+        run: node "$QUALIFIED_NPM" --prefix tooling/documentation run build
+      - name: Prove the site build left the committed handbook unchanged
+        run: git diff --exit-code -- docs/user-manual/shell-cli/
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: shell-cli-manual-site
+          path: |
+            reports/shell-cli-manual/
+            tooling/documentation/package-lock.json
+          retention-days: 14
+          if-no-files-found: error

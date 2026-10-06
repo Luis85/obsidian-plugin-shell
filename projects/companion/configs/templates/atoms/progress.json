@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "atom.progress",
+  "name": "Progress",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "atom",
+  "category": "Feedback",
+  "description": "Progress bar for bounded completion or comparison values.",
+  "tags": [
+    "atom",
+    "feedback",
+    "progress"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "progress",
+    "bounded-value"
+  ],
+  "states": [
+    "default",
+    "disabled"
+  ],
+  "props": [
+    {
+      "name": "max",
+      "type": "number",
+      "required": false,
+      "default": 100,
+      "description": "Maximum progress value."
+    }
+  ],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-progress"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

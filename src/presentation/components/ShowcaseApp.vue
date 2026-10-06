@@ -6,6 +6,7 @@ import OverviewPanel from './panels/OverviewPanel.vue';
 import DocumentPanel from './panels/DocumentPanel.vue';
 import EventsPanel from './panels/EventsPanel.vue';
 import SettingsPanel from './panels/SettingsPanel.vue';
+import FormsPanel from './panels/FormsPanel.vue';
 import AuthoringHost from './AuthoringHost.vue';
 import { useShowcaseShell } from '../composables/use-showcase-shell';
 import { useShowcase } from '../stores/showcase';
@@ -34,6 +35,7 @@ const { t, locale, services, failed, uiLocale, icons, pages } = useShowcaseShell
             <AuthoringHost />
             <OverviewPanel v-if="model.page === 'overview'" />
             <DocumentPanel v-else-if="model.page === 'documents'" />
+            <FormsPanel v-else-if="model.page === 'forms'" />
             <EventsPanel v-else-if="model.page === 'events'" />
             <SettingsPanel v-else />
           </template>

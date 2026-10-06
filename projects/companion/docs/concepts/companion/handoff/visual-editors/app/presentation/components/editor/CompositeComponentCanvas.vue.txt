@@ -1,0 +1,15 @@
+<script setup lang="ts">
+const selected=defineModel<string>({default:'toolbar'})
+</script>
+<template><div class="min-h-[520px] bg-default border border-default rounded-xl shadow-xl relative p-10">
+<div class="absolute top-4 left-4 flex gap-2"><UBadge color="primary" variant="subtle">Composite component</UBadge><UBadge variant="subtle">CustomerToolbar</UBadge></div>
+<div class="mt-16 border-2 border-primary rounded-lg p-5 relative" @click="selected='toolbar'"><UBadge color="primary" class="absolute -top-7 left-0">CustomerToolbar</UBadge>
+ <div class="flex items-center gap-3">
+  <div class="border border-default rounded-lg p-2 relative" :class="selected==='search'?'ring-2 ring-primary':''" @click.stop="selected='search'"><span class="absolute -top-5 left-0 text-[10px] text-primary">SearchField</span><UInput icon="i-lucide-search" placeholder="Search customers…" class="w-64"/></div>
+  <div class="border border-default rounded-lg p-2 relative" :class="selected==='filter'?'ring-2 ring-primary':''" @click.stop="selected='filter'"><span class="absolute -top-5 left-0 text-[10px] text-primary">FilterButton</span><UButton variant="outline" icon="i-lucide-list-filter">Filters <UBadge class="ml-1" size="xs">3</UBadge></UButton></div>
+  <div class="flex-1 border border-dashed border-primary/50 rounded-lg h-12 grid place-items-center text-xs text-muted">#actions slot</div>
+  <div class="border border-default rounded-lg p-2 relative" :class="selected==='create'?'ring-2 ring-primary':''" @click.stop="selected='create'"><span class="absolute -top-5 left-0 text-[10px] text-primary">UButton</span><UButton icon="i-lucide-plus">New customer</UButton></div>
+ </div>
+</div>
+<div class="absolute bottom-4 left-4 right-4 text-xs text-muted flex gap-2"><UIcon name="i-lucide-git-branch"/>3 child component references<span>•</span>1 public slot<span>•</span>No cycles<span>•</span>Generator ready</div>
+</div></template>

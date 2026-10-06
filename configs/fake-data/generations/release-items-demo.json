@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/fake-data-generation.schema.json",
+  "schemaVersion": 1,
+  "id": "release-items-demo",
+  "title": "Release items demo",
+  "description": "Twenty release items in the default paths.releaseItems folder, ready for node bin/app release-item list, check and report and for node bin/app candidate add, plus a Bases table.",
+  "entity": "release-item",
+  "count": 20,
+  "out": "docs/releases/items",
+  "seed": 17,
+  "base": true,
+  "referenceDate": "2026-01-01"
+}

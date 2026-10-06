@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "atom.skeleton",
+  "name": "Skeleton",
+  "version": "1.0.0",
+  "templateType": "component",
+  "atomicLevel": "atom",
+  "category": "Feedback",
+  "description": "Loading placeholder for content that is not available yet.",
+  "tags": [
+    "atom",
+    "feedback",
+    "loading",
+    "placeholder"
+  ],
+  "recommendedFor": [
+    "webapp",
+    "obsidian-plugin"
+  ],
+  "useWhen": [
+    "The application needs this common UI pattern."
+  ],
+  "avoidWhen": [
+    "A simpler native control already communicates the interaction."
+  ],
+  "capabilities": [
+    "loading-placeholder"
+  ],
+  "states": [
+    "loading",
+    "default"
+  ],
+  "props": [],
+  "events": [],
+  "children": [],
+  "slots": [],
+  "design": {
+    "kind": "catalog",
+    "entryId": "u-skeleton"
+  },
+  "accessibility": {
+    "notes": "Use semantic labels, visible focus, sufficient contrast and a keyboard-reachable interaction model.",
+    "keyboard": [
+      "All interactive controls remain keyboard reachable."
+    ],
+    "aria": [
+      "Prefer native semantics and explicit accessible names."
+    ]
+  }
+}

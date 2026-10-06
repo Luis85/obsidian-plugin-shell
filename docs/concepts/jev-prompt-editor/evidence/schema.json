@@ -1,0 +1,85 @@
+{
+  "passed": 20,
+  "checks": [
+    {
+      "name": "inbox-routing.prompt.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "edited-roundtrip.prompt.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "starter-library.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "business-logic.workspace.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "event-capable.prompt.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "inbox-routing.demo-request.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio portable library v1 is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio business logic v1 is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio event-capable prompt v2 is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio editable prompt recipe v1 is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio emitted request subset is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio linked workspace v2 is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "API request is not accepted as editable recipe",
+      "status": "passed"
+    },
+    {
+      "name": "Future recipe version rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown workspace fields rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Future workspace version rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown executable rule fields rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Excessive step limit rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid event trigger rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Older schema fails closed on linked workspace",
+      "status": "passed"
+    }
+  ]
+}

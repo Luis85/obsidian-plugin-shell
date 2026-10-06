@@ -1,10 +1,14 @@
 # Developer workflow
 
+> Type: how-to · Part of the [docs index](../README.md)
+
 **Current applicability:** Read the [capability matrix](../product/PRD.md#current-capabilities)
-and [iteration 03 plan](ITERATION-THREE-PLAN.md). The repository now has a real
+and [iteration 03 plan](../_archive/development/ITERATION-THREE-PLAN.md). The repository now has a real
 Vue/Obsidian plugin, application services and pinned toolchain. Reviewed setup,
 identity/resume, contained settings migration and note-feature/entity makers are
-implemented. Broader maker recipes and release automation remain planned.
+implemented. Broader maker recipes remain planned. Pull requests, CI tiers and
+releases follow [Deliver a change](DELIVER-A-CHANGE.md) and
+[Cut and publish a release](CUT-AND-PUBLISH-A-RELEASE.md).
 
 ## 1. What you can run now
 
@@ -18,7 +22,7 @@ node scripts/harness/serve-style-fixture.mjs --port 4174
 node --test tests/harness-styles/server.test.mjs
 ```
 
-Inspect light/dark controls, settings, notices and a modal in the printed loopback URL. These are isolated appearance/interaction specimens; they create no notes and do not run Vue or native Obsidian. See [host-style documentation](../testing/HARNESS-STYLES.md) and the [review evidence](../reviews/2026-09-22-product-review.md).
+Inspect light/dark controls, settings, notices and a modal in the printed loopback URL. These are isolated appearance/interaction specimens; they create no notes and do not run Vue or native Obsidian. See [host-style documentation](../testing/HARNESS-STYLES.md) and the [review evidence](../_archive/reviews/2026-09-22-product-review.md).
 
 ## 2. First setup and generated note feature
 
@@ -91,16 +95,24 @@ Native modal/settings roots need their own owned namespace/tokens. CSS does not 
 
 ## 6. Verification and evidence
 
-Use the implemented `dev:ui`, `verify`, `test:e2e` and optional explicitly provisioned
-`test:native` commands; broader maker/release workflows remain pending. Run targeted
-checks during changes and full required checks before handoff. Source/CSS/tooling
-≤400 code lines, tests/helpers ≤450, composition-only main.ts ≤100. Count code
-across complete SFCs; exclude comments and blank lines. Name executable files for
-their behavior or responsibility, such as `layout-and-header.spec.ts`.
+Run targeted checks during changes and the full required checks before handoff:
+`node bin/app check --fast` while iterating, then `node bin/app check`,
+`npm run verify` and, for UI changes, `npm run test:e2e`; native smoke only when
+explicitly provisioned. Which gates run in which pull-request state is described in
+[Deliver a change](DELIVER-A-CHANGE.md); [Quality assurance](QUALITY-ASSURANCE.md)
+documents `verify` and the self-review guard. Source/CSS/tooling ≤400 code lines,
+tests/helpers ≤450, composition-only main.ts ≤100. Count code across complete SFCs;
+exclude comments and blank lines. Name executable files for their behavior or
+responsibility, such as `layout-and-header.spec.ts`.
 
 Browser checks must observe caught Vue/application errors in addition to console/pageerror. Negative scenarios assert exact expected codes/counts and no extras. A rendered fallback is not enough to pass. Screenshots and static Markdown specimens do not prove persistence or native APIs.
 
 Use the declared scenario/theme/locale/seed and owned readiness signals. Record source/build/style identity, actual commands, and missing environments. Never accept baselines or suppress errors just to complete a task.
+
+To reproduce a failing CI job, `node bin/app ci --list` lists the workflows and
+`node bin/app ci --job <workflow>/<job>` prints the job's exact commands (dry run);
+dry runs, matrix selection, `--execute` and its refusals are documented in
+[GitHub Actions workflows](WORKFLOWS.md#reproduce-a-job-locally).
 
 ## 7. Native work and release
 
@@ -111,7 +123,11 @@ separate explicit provisioning and uses its isolated fixture, not a personal vau
 
 Real host/device checks remain separate from specimen and real-component harness evidence. Confirm native Notice/Modal behavior, pop-outs, created Task frontmatter, no-overwrite writes, and claimed mobile functionality using the exact candidate.
 
-The [maintenance/release guide](MAINTENANCE-AND-RELEASE.md) retains reviewed dependency updates and fixed-commit draft/promotion. No dependency update auto-publishes; no native acceptance based solely on fixture tests. First directory submission is separate.
+Releases are cut from `main` and published by owner-dispatched workflows; see
+[Cut and publish a release](CUT-AND-PUBLISH-A-RELEASE.md). The
+[maintenance/release guide](MAINTENANCE-AND-RELEASE.md) retains reviewed dependency
+updates and the release contract. No dependency update auto-publishes; no native
+acceptance based solely on fixture tests. First directory submission is separate.
 
 ## 8. Troubleshooting principles
 
@@ -127,3 +143,41 @@ The [maintenance/release guide](MAINTENANCE-AND-RELEASE.md) retains reviewed dep
 | Host unavailable | Report not run; fixture screenshots cannot substitute. |
 
 A handoff describes actual behavior, exact checks and limitations. Extensive generated code or a polished specimen is not a completed template.
+
+## Cloud and agent sessions
+
+Cloud containers (Claude Code on the web) usually ship a different Node/npm than the qualified
+toolchain (`.nvmrc`, `package.json` engines and `packageManager`: Node 24.21.0, npm 11.19.1) and may start
+without `node_modules`. The repository's `.claude/settings.json` therefore registers a `SessionStart` hook,
+`scripts/agent/session-start.mjs` (the same file serves generated projects), and the existing `Stop` hook
+(`scripts/agent/stop-check.mjs`, which runs the fast check, `node bin/app check --fast`).
+
+The SessionStart hook prints at most ten lines of context and never fails the session (it always exits 0 and
+reports problems as text). It is read-only and fast when everything is fine:
+
+- **Toolchain report:** actual Node/npm versus the qualified ones, distinguishing "qualified", "satisfies engines
+  but is not the qualified version" and "outside engines". If another qualified Node exists in a well-known place
+  (`/opt/node<major>/bin`, nvm, n, Volta, `SHELL_NODE_BIN` or the Workbench cache), it is put first on `PATH` for the
+  session through `CLAUDE_ENV_FILE`. In a cloud session without one, the exact `.nvmrc` Node is downloaded from
+  nodejs.org, checked against the official SHA-256, cached under `${XDG_CACHE_HOME:-~/.cache}/workbench` with its
+  pinned npm and used (`SHELL_SESSION_START_NODE=0` disables it); otherwise the report names the install command.
+  Version drift is reported, never hidden. Details, switches and troubleshooting: [CLOUD-AND-LOCAL-SESSIONS.md](CLOUD-AND-LOCAL-SESSIONS.md).
+- **Dependencies:** a missing `node_modules` is restored with `npm ci --ignore-scripts`, using the qualified Node
+  when one was found. This only happens in cloud sessions (`CLAUDE_CODE_REMOTE=true`) or when
+  `SHELL_SESSION_START_INSTALL=1`; `SHELL_SESSION_START_INSTALL=0` disables it everywhere. Local sessions are never
+  changed unasked. Lifecycle scripts stay off and nothing is downloaded beyond the locked packages (and, in cloud
+  sessions, the qualified Node itself).
+- **Browser:** reported through the single resolver, `scripts/testing/browser-executable.mjs`. It never downloads a
+  browser. In a cloud session an installed Chromium of another revision is exported as `SHELL_CHROMIUM` and
+  labelled non-pinned; locally only the hint is printed.
+
+Browser executable selection has one canonical override, `SHELL_CHROMIUM` (an absolute path to a Chromium
+executable; Playwright config, browser scripts, the evidence browser producer and the Python concept checks all
+read it). Without it the Chromium revision pinned by the installed Playwright
+(`node_modules/playwright-core/browsers.json`) must exist in the Playwright cache (`PLAYWRIGHT_BROWSERS_PATH`).
+An installed but different revision, such as the cloud image's `/opt/pw-browsers/chromium-1194`, is a
+`revision-mismatch`: browser suites are reported `not-run` with the reason `browser-revision-mismatch` and the exact
+opt-in, for example `SHELL_CHROMIUM=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. A mismatched Chromium is
+never used silently and never reported as a pass. `node scripts/testing/browser-executable.mjs [--json]` prints the
+resolution (exit 0 only when a browser is usable). The earlier names `CHROMIUM_EXECUTABLE`, `CHROMIUM_PATH`,
+`PLAYWRIGHT_EXECUTABLE_PATH` and the `--browser` option of the browser specimen check are removed.

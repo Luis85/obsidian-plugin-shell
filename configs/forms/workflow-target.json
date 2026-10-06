@@ -1,0 +1,21 @@
+{
+  "$schema": "../schemas/form.schema.json",
+  "schemaVersion": 1,
+  "id": "workflow-target",
+  "version": 1,
+  "title": "Browser test workflow target",
+  "description": "Where the app under test lives. Every target is offline or on loopback; remote hosts are never contacted.",
+  "fields": [
+    { "id": "kind", "kind": "select", "label": "Target", "choices": [
+      { "id": "static", "label": "Static folder with index.html — served on 127.0.0.1 by the run" },
+      { "id": "prototype", "label": "Prototype package — its built offline HTML (prototype.manifest.json)" },
+      { "id": "url", "label": "Loopback URL — an app you already serve, such as npm start on 127.0.0.1:4173" }
+    ], "default": "static" },
+    { "id": "folder", "kind": "text", "label": "Project-relative folder with index.html", "required": true, "maxLength": 300, "when": { "field": "kind", "equals": "static" },
+      "help": "For example tests/fixtures/workflows/sign-up. Only files inside the folder are served." },
+    { "id": "package", "kind": "text", "label": "Prototype package folder", "required": true, "maxLength": 300, "when": { "field": "kind", "equals": "prototype" },
+      "help": "For example prototypes/my-prototype, as prepared by node bin/app prototype --out prototypes/my-prototype." },
+    { "id": "url", "kind": "text", "label": "Loopback URL with port", "required": true, "maxLength": 300, "when": { "field": "kind", "equals": "url" },
+      "help": "For example http://127.0.0.1:4173/. Only 127.0.0.1, localhost and [::1] are accepted." }
+  ]
+}

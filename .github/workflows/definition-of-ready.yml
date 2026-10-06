@@ -1,0 +1,50 @@
+name: Definition of Ready
+# Before implementation: checks the increment handoff (docs/increments/<slug>.md) that a
+# pull request, drafts included, carries against configs/delivery/definition-of-ready.json.
+# A not-ready handoff fails with a refinement brief in the job summary and artifact.
+# Dependency-free (no install), read-only, about twenty seconds. Release pull requests
+# skip it (release.yml reports the check for them); dependabot and other configured
+# exemptions pass with a notice. Runs on `edited` so a `Handoff:` line in the body counts.
+# No branch filter: pull requests into increment branches (increment/<id>) run it too, and
+# DELIVERY_BASE_REF/DELIVERY_HEAD_REF let it check their PullRequest documents' branches.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths-ignore:
+      - 'projects/**'
+permissions:
+  contents: read
+concurrency:
+  group: definition-of-ready-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ready:
+    name: Definition of Ready
+    if: ${{ !startsWith(github.head_ref, 'release/') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      DELIVERY_BASE_REF: ${{ github.base_ref }}
+      DELIVERY_HEAD_REF: ${{ github.head_ref }}
+      DELIVERY_ACTOR: ${{ github.event.pull_request.user.login }}
+      DELIVERY_PR_BODY: ${{ github.event.pull_request.body }}
+    steps:
+      # Full history: the handoff is found in the diff against the merge base.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Check the increment handoff against the Definition of Ready
+        run: node scripts/delivery/ready.mjs --base "origin/$DELIVERY_BASE_REF" --summary "$GITHUB_STEP_SUMMARY" --out "$RUNNER_TEMP/definition-of-ready"
+      - name: Upload the refinement brief
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: definition-of-ready-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/definition-of-ready/
+          retention-days: 7
+          if-no-files-found: ignore

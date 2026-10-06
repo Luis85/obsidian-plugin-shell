@@ -1,5 +1,7 @@
 # Obsidian tokens and native host styling
 
+> Type: reference · Part of the [docs index](../README.md)
+
 **Version:** 1.0 · **Date:** 2026-09-22 · **PRD:** 0.7, TOK-01–06 (product requirements; executable test IDs are separately scoped).
 
 ## Developer use
@@ -68,11 +70,14 @@ The previous original simulator remains at `simulated.css` and `style-fixture/si
 
 ```sh
 node scripts/styles/check-tokens.mjs
+npm run check:style-literals
 node scripts/testing/verify-baseline.mjs --repeat 3 --json
 node scripts/harness/serve-style-fixture.mjs --port 4174
 ```
 
 The checks validate the pinned snapshot, runtime repair/hash, inventory drift, alias grammar/scope, prohibited host-default redefinitions, missing/deprecated names, load order, profile distinction and HTTP-delivered bytes. The alias grammar check is intentionally narrow, not a new general CSS parser. Corrupt archives/oversized decoded content fail; raw source cannot bypass integrity by having a vendor-like filename.
+
+`check:style-literals` closes the other direction: handwritten CSS and Vue style blocks under `src/` may not carry their own palette. Hex, `rgb()`/`hsl()`-style colour functions with literal channels, named colours and literal `var(--token, #fallback)` values fail with `file:line:column`, the literal and suggested tokens from the reviewed catalog. Allowed forms are `var(--token)`, `color-mix()` over tokens, `rgba(var(--host-rgb), alpha)`, `transparent`, `currentColor` and `inherit`. Exceptions are exact-file entries with a reason in `scripts/styles/style-literal-allowlist.json` (currently empty); a stale entry fails. Compiler-emitted projects are checked by `tests/tooling/style-literals-generated.checks.mjs`: the generated design-system colour tokens are declared exceptions, and the journey editor CSS copied from the companion concept is a labelled known gap (its `var(--host-token, #fallback)` values keep the standalone concept readable).
 
 Browser checks extend the existing 8 cases to 12 per profile. They assert native input/radius/spacing, theme override propagation, missing alias/host negative controls, and selected-profile evidence, alongside original interactions. Fixed sleeps are not used to await computed-style changes.
 

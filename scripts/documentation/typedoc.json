@@ -1,0 +1,29 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Shell CLI user manual",
+  "tsconfig": "./tsconfig.json",
+  "entryPoints": ["../../bin/adapters/framework/catalog.ts", "../../bin/adapters/framework/help-text.ts", "../../bin/adapters/framework/contracts.ts", "../contracts/result.ts", "../../bin/compiler/domain/contracts.ts", "../../bin/compiler/domain/diagnostics.ts"],
+  "readme": "../../docs/user-manual/shell-cli/index.md",
+  "projectDocuments": [
+    "../../docs/user-manual/shell-cli/getting-started.md",
+    "../../docs/user-manual/shell-cli/design-and-generation.md",
+    "../../docs/user-manual/shell-cli/development-and-testing.md",
+    "../../docs/user-manual/shell-cli/increments-and-pull-requests.md",
+    "../../docs/user-manual/shell-cli/automation-and-safety.md",
+    "../../docs/user-manual/shell-cli/maintenance-and-release.md",
+    "../../docs/user-manual/shell-cli/optional-integrations.md",
+    "../../docs/user-manual/shell-cli/troubleshooting.md",
+    "../../docs/user-manual/shell-cli/documentation-authoring.md",
+    "../../docs/user-manual/shell-cli/application-documentation.md",
+    "../../docs/user-manual/shell-cli/generated/*.md"
+  ],
+  "out": "../../reports/shell-cli-manual",
+  "includeVersion": false,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "validation": { "invalidLink": true, "invalidPath": true, "notExported": true },
+  "treatWarningsAsErrors": true,
+  "highlightLanguages": ["bash", "console", "css", "html", "javascript", "json", "jsonc", "json5", "tsx", "typescript", "markdown"],
+  "navigation": { "includeGroups": true },
+  "sortEntryPoints": false
+}

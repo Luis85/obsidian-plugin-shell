@@ -1,13 +1,15 @@
 # Entity-driven DocumentCreationService
 
+> Type: reference · Part of the [docs index](../README.md)
+
 > **Contract:** PRD 0.4 extension, requirements **DOC-01–20**.  
-> **Status:** Normative target. Executable creation began in iteration 01;
-> iteration 03 extends the template with typed definitions and a separate CRUD
-> repository. See the [iteration plan](../development/ITERATION-THREE-PLAN.md).
-> Numbered requirements below remain in force; implementation and qualification
-> must be read from the relevant iteration record.
+> **Status:** Normative target. Entity-driven creation (`src/application/document-service.ts`)
+> and a separate typed CRUD repository are implemented; [Build a feature](../development/BUILD-A-FEATURE.md)
+> and [entity documents](../development/ENTITY-DOCUMENTS.md) describe the current API.
+> Numbered requirements below remain in force; qualification results are in the
+> dated records under the [archive](../_archive/README.md).
 > **Purpose:** Define an entity and its document representation once, then create valid, portable Markdown notes through one typed application service.  
-> **Related:** [PRD](../product/PRD.md), [developer recipe](../development/ENTITY-DOCUMENTS.md), [makers](../development/SETUP-AND-MAKERS.md), [events](EVENT-BUS.md), [styles](STYLES.md), [research](../research/2026-09-22-entity-documents.md).
+> **Related:** [PRD](../product/PRD.md), [developer recipe](../development/ENTITY-DOCUMENTS.md), [makers](../development/SETUP-AND-MAKERS.md), [events](EVENT-BUS.md), [styles](STYLES.md), [research](../_archive/research/2026-09-22-entity-documents.md).
 
 ## 1. Product behavior
 
@@ -181,4 +183,4 @@ All handwritten source/generated scaffolds and CSS obey the 400-line limit; test
 
 ## 10. Evidence boundary
 
-This document defines the proposed service and its contracts. The repository remains specification-only until code, definitions, makers, and tests are implemented. One complete host write is a design requirement to validate, not a claim that Obsidian exposes a cross-process atomic transaction. See the [research notes](../research/2026-09-22-entity-documents.md) for the primary sources and remaining qualification work.
+This document defines the proposed service and its contracts. The repository remains specification-only until code, definitions, makers, and tests are implemented. One complete host write is a design requirement to validate, not a claim that Obsidian exposes a cross-process atomic transaction. See the [research notes](../_archive/research/2026-09-22-entity-documents.md) for the primary sources and remaining qualification work.
