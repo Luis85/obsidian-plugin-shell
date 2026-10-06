@@ -1,7 +1,7 @@
 ---
 type: PullRequest
 id: main-reconciliation-1
-title: "Reconcile CLI source layout and quality gates"
+title: "Reconcile standalone CLI and harden runtime workflows"
 kind: change
 increment: main-reconciliation
 status: New
@@ -10,11 +10,11 @@ head: "pr/main-reconciliation/main-reconciliation-1"
 base: increment/main-reconciliation
 ---
 
-# Reconcile CLI source layout and quality gates
+# Reconcile standalone CLI and harden runtime workflows
 
 ## Summary
 
-Moves Workbench CLI development into src/cli and builds a portable bin product with bundled tools, templates and verified assets. Fixes disposed settings actions, manual provenance and project CI aliases. Fresh checkouts now build from source, and the approved public typecheck runs both strict runtime and CLI projects.
+Develop Workbench CLI sources under src/cli and build a verified standalone bin distribution. Reconcile strict checks, dependency workflow evidence and Vue lifecycle behavior; harden note recovery, settings feedback and accessible runtime forms. Draft CI now tests clean-checkout portability and retains diagnostic artifacts.
 
 ## Scope
 
@@ -37,9 +37,13 @@ Moves Workbench CLI development into src/cli and builds a portable bin product w
 
 ## Notes
 
-CI follow-up: removed the three tracked partial bin artifacts so fresh checkouts build the complete standalone CLI. The owner approved separate strict runtime and CLI projects on 2026-10-06; npm run typecheck now runs both and passes. Three fresh-checkout/type-error tests and 23 existing configuration/distribution tests passed. The Dev fast gate passed all five executed checks, with expensive suites explicitly delegated.
+Current follow-up (2026-10-06): the product review fixed oversized runtime-form checkboxes, missing control descriptions, optional-select clearing, uncertain note-write recovery, selection changes during pending writes and misleading settings-save errors after feedback failures. Draft Dev CI now runs the clean-checkout/strict-typecheck regression and retains results as an artifact. No new product feature, dependency change, threshold change or approval waiver was introduced.
 
-The Gates and Evidence sections below record the original pre-publication runs. The root typecheck failure and pending approval recorded there are resolved by this follow-up. Seven self-review configuration flags and the three moderate dependency reports remain visible; no approval record or threshold was changed. See docs/development/MAIN-RECONCILIATION.md for the current results.
+All 51 served-browser tests passed with the explicit Chromium 151.0.7922.173 override. All 520 runtime tests passed with unchanged production and selected-core coverage gates; the three fresh-checkout/type-error regressions passed. Twenty light/dark, narrow/desktop screenshots are available in reports/ui-gallery/gallery.html as review evidence, not acceptance baselines. See docs/development/MAIN-RECONCILIATION.md for the complete review and final gate results.
+
+The sections below retain the original pre-publication evidence and limitations; they are historical, not the current status. The owner has approved the separate strict projects, both public typechecks pass, PR #96 is published, and served-browser tests have now run. The former statements that approval was pending and all changes were local are superseded. The initial failed full verify run is still not represented as passing.
+
+This follow-up has zero self-review findings. The complete PR retains seven earlier source-layout configuration flags; the three previously measured moderate Moment/Obsidian reports remain unresolved. The PR stays draft. Pinned-browser, native Obsidian, Windows, macOS and independent Companion qualification remain outside this follow-up; release or publication is not authorized.
 
 ## Gates
 

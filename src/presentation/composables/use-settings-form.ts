@@ -36,8 +36,10 @@ export function useSettingsForm() {
     try {
       const result = await services.preferences.update(patch);
       if (!alive) return;
-      if (result.ok) services.notifications.show(`${model.owner}:settings`, 'success', 'settings.saved');
-      else error.value = result.error.key;
+      if (result.ok) {
+        try { services.notifications.show(`${model.owner}:settings`, 'success', 'settings.saved'); }
+        catch { services.diagnostics.report('notice.unexpected', 'notice.show'); }
+      } else error.value = result.error.key;
     } catch { if (alive) error.value = 'error.unexpected'; services.diagnostics.report('settings.unexpected', 'settings.save'); }
     finally { if (alive) pending.value = false; }
   }

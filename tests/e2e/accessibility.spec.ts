@@ -12,7 +12,7 @@ test('[A11Y-01] all real panels in both host themes and an open validation dialo
   await page.goto('/harness/app/'); await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
   for (const theme of ['light', 'dark']) {
     await page.locator(`#theme-${theme}`).click();
-    for (const name of ['Overview', 'Documents', 'Events & feedback', 'Preferences']) {
+    for (const name of ['Overview', 'Documents', 'Forms', 'Events & feedback', 'Preferences']) {
       await page.getByRole('button', { name, exact: true }).click();
       expect(await scan(page), `${theme}/${name}`).toEqual([]);
     }
@@ -53,5 +53,42 @@ test('[A11Y-03] German narrow view, reduced motion and forced colors remain keyb
   await expect(header).toBeChecked();
   expect(await scan(page)).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  expect(await page.evaluate(() => window.__SHELL_TEST__.faults)).toEqual([]);
+});
+
+test('form choices keep native sizing and keyboard error recovery across widths and themes', async ({ page }) => {
+  await page.goto('/harness/app/'); await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
+  await page.getByRole('button', { name: 'Forms', exact: true }).click();
+  const form = page.locator('form[data-form="feature-brief"]');
+  const surfaces = form.getByRole('group', { name: 'Surfaces', exact: false });
+  for (const width of [360, 1360]) for (const theme of ['light', 'dark']) {
+    await page.setViewportSize({ width, height: 960 }); await page.locator(`#theme-${theme}`).click();
+    for (const checkbox of await surfaces.getByRole('checkbox').all()) {
+      const geometry = await checkbox.evaluate(input => {
+        const box = input.getBoundingClientRect(), label = input.closest('label');
+        if (!label) throw new Error('Missing choice label');
+        const range = document.createRange(); range.selectNodeContents(label.lastChild ?? label);
+        return { width: box.width, height: box.height, labelHeight: label.getBoundingClientRect().height, textLines: range.getClientRects().length };
+      });
+      expect(geometry.width).toBeGreaterThan(0); expect(geometry.width).toBeLessThanOrEqual(24);
+      expect(geometry.height).toBeLessThanOrEqual(24); expect(geometry.labelHeight).toBeGreaterThanOrEqual(24);
+      expect(geometry.textLines).toBe(1);
+    }
+  }
+  await form.getByRole('textbox', { name: 'Feature name' }).fill('Accessible draft');
+  await form.getByRole('textbox', { name: 'Summary' }).fill('Keyboard and error recovery.');
+  await form.getByRole('button', { name: 'Submit', exact: true }).click();
+  const view = surfaces.getByRole('checkbox', { name: 'View', exact: true });
+  await expect(view).toBeFocused(); await expect(view).toHaveAccessibleDescription('This field is required.');
+  await view.press('Space'); await expect(view).toBeChecked();
+  await form.getByRole('checkbox', { name: 'Request a review' }).check();
+  const reviewers = form.getByRole('textbox', { name: 'Reviewers' });
+  await expect(reviewers).toHaveAccessibleDescription(/One item per line/);
+  await reviewers.fill('Ada\nGrace');
+  await form.getByRole('button', { name: 'Submit', exact: true }).click();
+  await expect(page.getByTestId('form-result')).toContainText('Accessible draft');
+  await expect(form.getByRole('alert')).toHaveCount(0);
+  expect(await scan(page)).toEqual([]);
+  expect(await page.evaluate(() => window.__SHELL_TEST__.files())).toEqual({});
   expect(await page.evaluate(() => window.__SHELL_TEST__.faults)).toEqual([]);
 });

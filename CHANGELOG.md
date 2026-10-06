@@ -49,6 +49,9 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Fixed
 
+- Keep uncertain Task note edits blocked until a successful reload, preserve selection during pending writes, and report preference feedback failures without mislabeling committed saves.
+- Restore native checkbox sizing in runtime forms, connect choice errors and list instructions to controls, and allow clearing optional selections without resetting other fields.
+- Exercise clean-checkout CLI builds and strict typecheck regressions in draft Dev CI, retaining revision-bound check results for diagnosis.
 - Build the standalone CLI from fresh checkouts without tracked partial artifacts in `bin`; run both strict runtime and CLI checks through `npm run typecheck`.
 - Prevent disposed settings views from persisting changes through retained callbacks.
 - Wait for actual project CI before reporting required checks on project-only pull requests, and avoid regenerating the CLI manual for dependency-only changes.

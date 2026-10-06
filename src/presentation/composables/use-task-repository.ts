@@ -11,6 +11,7 @@ export function useTaskRepository() {
   const selected = shallowRef<NoteSnapshot<TaskValues>>();
   const error = shallowRef<Failure>();
   const busy = ref(false);
+  const blocked = ref(false);
   const loaded = ref(false);
   const confirming = ref(false);
   const message = ref('');
@@ -21,13 +22,19 @@ export function useTaskRepository() {
   const off = services.preferences.subscribe(value => {
     if (folder === value.taskFolder) return;
     folder = value.taskFolder; scope.invalidate(); notes.value = []; selected.value = undefined;
-    loaded.value = false; confirming.value = false; message.value = ''; error.value = undefined;
+    loaded.value = false; blocked.value = false; confirming.value = false; message.value = ''; error.value = undefined;
   });
   onScopeDispose(() => { scope.dispose(); off(); });
-  function edit(note: NoteSnapshot<TaskValues>) {
-    if (!scope.active()) return;
+  function select(note: NoteSnapshot<TaskValues>) {
     selected.value = note; error.value = undefined; confirming.value = false; message.value = '';
     Object.assign(draft, { ...note.values, due: note.values.due ?? '', tags: note.values.tags.join(', ') });
+  }
+  function edit(note: NoteSnapshot<TaskValues>) {
+    if (scope.active() && !busy.value && !blocked.value) select(note);
+  }
+  function failed(value: Failure) {
+    error.value = value;
+    if (value.effect === 'uncertain') blocked.value = true;
   }
   async function run(operation: (permit: OperationPermit) => Promise<void>) {
     if (!scope.active() || busy.value) return;
@@ -36,20 +43,20 @@ export function useTaskRepository() {
     try { await operation(permit); }
     catch {
       services.diagnostics.report('repository.unexpected', 'repository.action');
-      if (permit.active()) error.value = { code: 'unexpected', key: 'error.unexpected', effect: 'uncertain' };
+      if (permit.active()) failed({ code: 'unexpected', key: 'error.unexpected', effect: 'uncertain' });
     } finally { if (scope.active()) busy.value = false; }
   }
   async function reload() {
     await run(async permit => {
       const result = await repository.list();
       if (!permit.active()) return;
-      if (!result.ok) { error.value = result.error; return; }
-      notes.value = result.value; loaded.value = true; selected.value = undefined; confirming.value = false;
+      if (!result.ok) { failed(result.error); return; }
+      notes.value = result.value; loaded.value = true; blocked.value = false; selected.value = undefined; confirming.value = false;
     });
   }
   async function save() {
     const snapshot = selected.value;
-    if (!snapshot || error.value?.effect === 'uncertain') return;
+    if (!snapshot || blocked.value) return;
     await run(async permit => {
       const status = draft.status;
       if (status !== 'todo' && status !== 'doing' && status !== 'done') return;
@@ -57,25 +64,25 @@ export function useTaskRepository() {
         due: draft.due || undefined, tags: draft.tags.split(',').map(value => value.trim()).filter(Boolean) }, permit);
       if (!permit.active()) return;
       if (!result.ok) {
-        error.value = result.error;
+        failed(result.error);
         await nextTick();
         if (permit.active() && result.error.field) form.value?.querySelector<HTMLInputElement>(`[name="edit-${result.error.field}"]`)?.focus();
         return;
       }
       notes.value = notes.value.map(note => note.path === snapshot.path ? result.value : note);
-      edit(result.value); message.value = 'repo.saved';
+      select(result.value); message.value = 'repo.saved';
     });
   }
   async function remove() {
     const snapshot = selected.value;
-    if (!snapshot || !confirming.value || error.value?.effect === 'uncertain') return;
+    if (!snapshot || !confirming.value || blocked.value) return;
     await run(async permit => {
       const result = await repository.delete(snapshot, permit);
       if (!permit.active()) return;
-      if (!result.ok) { error.value = result.error; return; }
+      if (!result.ok) { failed(result.error); return; }
       notes.value = notes.value.filter(note => note.path !== snapshot.path);
       selected.value = undefined; confirming.value = false; message.value = 'repo.deleted';
     });
   }
-  return { uid, notes, selected, error, busy, loaded, confirming, message, draft, form, edit, reload, save, remove };
+  return { uid, notes, selected, error, busy, blocked, loaded, confirming, message, draft, form, edit, reload, save, remove };
 }

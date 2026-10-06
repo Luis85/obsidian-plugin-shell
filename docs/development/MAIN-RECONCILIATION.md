@@ -214,3 +214,61 @@ The implementation is published as draft
 draft [#95](https://github.com/Luis85/obsidian-plugin-shell/pull/95).
 The Dependabot merge is already on main. This change does not authorize a release,
 tag, listing submission or product publication.
+
+## Follow-up product review and polish — 2026-10-06
+
+This pass reviews the existing product without extending its feature set. The
+runtime harness was inspected at 360 px and 1360 px, in light and dark themes,
+across Overview, Documents, Forms, Events & feedback, and Preferences. The initial
+20-panel scan had zero axe findings and no horizontal overflow, but visual
+inspection exposed a form layout defect that those checks did not detect.
+
+| Perspective | Finding and disposition |
+| --- | --- |
+| Task completion and recovery | Task note selection could clear an uncertain-write error and allow another action without a successful reload. Recovery now has independent blocked state, retained through failed reloads. A successful explicit reload or change of note folder resets it. |
+| Vue lifecycle and concurrency | A retained edit action could replace the selected note while a write was pending. Public edit actions now honor pending and recovery state; applying a committed result stays an internal operation. |
+| Persistence and feedback | An unexpected settings-notification failure was caught as a save failure even after preferences had committed. Feedback has its own error boundary and diagnostic, preserving the actual persistence result. |
+| Visual consistency and touch | The generic text-input rule also sized multi-choice checkboxes to full width and 36 px height, squeezing labels into multiple lines. Checkboxes retain native sizing; the clickable label uses the existing host control-height token. |
+| Accessibility and forms | Choice errors described the group but not the focused checkbox; list instructions had no control association. Controls now reference both guidance and errors. Optional selects without defaults can be cleared without resetting other drafts; declared defaults retain their existing semantics. |
+| Test coverage | The general accessibility and responsive-panel loops omitted Forms. Forms now participates, with real browser assertions for checkbox geometry, readable labels, keyboard error recovery, conditional list guidance, and submission without persistence. |
+| Delivery and diagnosis | Draft CI previously deferred the clean-checkout regression to Integration. Dev now executes it and keeps its output, the fast-gate JSON, and checked-out revision in a seven-day artifact. No gate is weakened. |
+| Architecture and maintainability | Existing framework-free services, per-view composables, thin Vue components, and source/build ownership remain intact. The fixes use those boundaries without adding another abstraction layer. |
+| Performance and resource ownership | Existing served tests exercise twenty mount/disposal cycles and owned timers, dialogs, notices and subscriptions. They passed; no new runtime dependency or background activity was added. Native performance remains separately qualified. |
+| Standalone CLI and supply chain | Reviewed replacement/integrity checks, user-plugin preservation, source execution, and isolated-bin acceptance coverage. Their established contracts remain. No dependency or lockfile changed in this pass; the documented Moment advisory and held updates still need separate qualification. |
+
+The three new lifecycle tests failed against the previous implementation before
+the fixes. They use real preference/note services with controlled storage or
+feedback failures and check persisted bytes, write counts, retained drafts, and
+absence of false success. Form tests exercise the real shared component.
+
+Browser evidence uses the explicitly selected `/usr/bin/chromium`, Chromium
+151.0.7922.173, rather than the locked Playwright browser revision. Screenshots in
+`reports/ui-gallery/gallery.html` are review evidence, not accepted baselines.
+Windows, macOS, native Obsidian, other browser engines and the independent
+Companion implementation are not newly qualified by this runtime harness pass.
+
+Follow-up validation uses Node 24.21.0, npm 11.19.1 and the unchanged lockfile:
+
+| Check | Actual result |
+| --- | --- |
+| Selected verification | 26 passed, zero failed; explicitly partial, not a complete `verify` verdict |
+| Dev fast gate against the PR base | Five executed checks passed, zero failed; expensive suite delegation remains explicit |
+| Runtime production and selected-core coverage | All 81 files and 520 tests passed; 97.44% statements, 95.12% branches, 97.69% functions, 99.11% lines; both gates passed |
+| Served browser suite | All 51 tests passed, including both themes, 320–1920 px layouts, keyboard/error recovery and existing persistence/lifecycle journeys |
+| Clean-checkout and public type-error regressions | Three passed, including copied-bin execution without checkout dependencies and negative errors in both strict source projects |
+| Standalone authoring acceptance | Passed: copied `bin` generates a project and authors a feature without checkout dependencies; missing consumer dependencies are reported honestly |
+| Maintainability | Zero gated findings across 635 production inputs and 47 template inputs; tooling/fixture advisories remain separate |
+| Legacy baseline | 53 tests passed in each of three runs |
+| Self-review | Zero findings for the follow-up; the complete PR retains the same seven earlier configuration flags |
+| Gallery | 20 captures, zero capture failures; inspected changed Forms in narrow light and desktop dark layouts |
+
+The selected verification includes exact dependency policy, CLI/plugin/harness
+builds, the full analyzer, both strict type projects, source and test ESLint,
+source limits, repository/project policy, architecture/presentation boundaries,
+test-quality checks, entity/event catalogs, style gates and artifact integrity.
+The full all-tooling/maker qualification was not repeated for this focused
+runtime/CSS/workflow change. Earlier full-run evidence remains historical.
+Machine output is retained in `reports/reconciliation/polish-verification.json`,
+`polish-checkout.log`, `polish-e2e.log`, `polish-self-review.json` and
+`polish-pr-self-review.json`. Gallery metadata records parent `929ff1b9`; its
+captures show the follow-up working tree, not that parent's unchanged sources.
