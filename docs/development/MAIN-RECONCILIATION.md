@@ -33,6 +33,10 @@ including custom source paths, regeneration, unchanged lockfiles and the expecte
 release-readiness refusals; native execution and publication were not run.
 Lifecycle acceptance reads an owned Vitest JSON report and rejects empty or
 partially passing runs, so CI's ANSI colors cannot turn successful tests red.
+Windows clean-checkout evidence exposed esbuild package paths that are absolute
+when the dependency junction crosses drives. License assembly now resolves those
+paths before reading metadata; its regression reproduces the failed absolute
+path read while retaining exact-version, license and input-link checks.
 The final copied-bin acceptance also passed after the metadata synchronization.
 Evidence is retained in `reports/reconciliation/integrated-verification.json`,
 `integrated-full-verify.log`, `integrated-check.log` and `final-copied-bin.log`.

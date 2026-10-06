@@ -78,7 +78,7 @@ function templateLocations(ts: Typescript, root: string): Plugin {
   };
 }
 
-/** Every node_modules package whose files esbuild read into the bundle; metafile paths are root-relative with `/`. */
+/** Bundled node_modules packages; esbuild uses `/` paths, absolute when a Windows junction crosses drives. */
 function bundledPackages(inputs: readonly string[]): BundledPackage[] {
   const found = new Map<string, BundledPackage>();
   for (const input of inputs) {

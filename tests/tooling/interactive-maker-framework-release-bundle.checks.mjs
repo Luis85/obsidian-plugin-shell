@@ -2,7 +2,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bundleReleaseCli } from '../../src/cli/adapters/framework/release-bundle.ts';
 import { bundledNoticeFiles } from '../../src/cli/adapters/framework/docs-vendor.ts';
@@ -84,6 +84,9 @@ test('bundled third-party packages each ship a license and exact-version notice,
   assert.deepEqual(files.map(file => file.path), ['bin/licenses/fake.LICENSE', 'bin/licenses/NOTICES.json']);
   assert.equal(files[0].bytes.toString('utf8'), 'fake license');
   assert.deepEqual(JSON.parse(files[1].bytes.toString('utf8')).packages, [{ name: 'fake', version: '1.0.0', license: 'MIT', file: 'fake.LICENSE' }]);
+  // esbuild reports absolute package paths when a Windows junction crosses drives.
+  const absolutePackages = packages.map(pkg => ({ ...pkg, directory: resolve(root, pkg.directory) }));
+  assert.deepEqual(await bundledNoticeFiles(root, absolutePackages), files);
   await writeFile(join(root, 'package.json'), JSON.stringify({ devDependencies: { fake: '1.0.1' } }));
   await assert.rejects(bundledNoticeFiles(root, packages), { code: 'KIT_NOTICE_VERSION' });
   await assert.rejects(bundledNoticeFiles(root, [{ name: 'other', directory: 'node_modules/fake' }]), { code: 'KIT_NOTICE_PACKAGE' });
