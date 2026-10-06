@@ -34,7 +34,7 @@ test('typed JSON data contract is an explicit narrow architecture boundary', () 
 
 test('companion code emitters own a zone that may read the project templates; compiler-host may not', () => {
   const rule = name => config.boundaries.rules.find(item => item.from === name)?.allow;
-  assert.deepEqual(config.boundaries.zones.find(item => item.name === 'compiler-emitters')?.patterns, ['bin/compiler/emitters/**']);
+  assert.deepEqual(config.boundaries.zones.find(item => item.name === 'compiler-emitters')?.patterns, ['src/cli/compiler/emitters/**']);
   assert.deepEqual(rule('compiler-emitters'), ['compiler-emitters', 'compiler-domain', 'companion-authoring-contract', 'project-templates', 'cli-serialization-contract']);
   for (const source of ['compiler-host', 'maker-host', 'test', 'tooling']) assert.ok(rule(source)?.includes('compiler-emitters'), source);
   assert.equal(rule('compiler-host')?.includes('project-templates'), false);
@@ -138,7 +138,7 @@ test('retired compatibility modules are absent and canonical implementations exi
 
 test('framework typechecking includes the production CLI rather than removed wrappers', async () => {
   const types = JSON.parse(await readFile(new URL('configs/types/tsconfig.framework.json', root), 'utf8'));
-  assert.ok(types.include.includes('../../bin/**/*.ts'));
+  assert.ok(types.include.includes('../../src/cli/**/*.ts'));
   assert.ok(!types.include.includes('../../scripts/framework/**/*.ts'));
   // The release bundler was the folder's last module; scripts/framework no longer exists.
   await assert.rejects(readdir(new URL('scripts/framework/', root)), { code: 'ENOENT' });

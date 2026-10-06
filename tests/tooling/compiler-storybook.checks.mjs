@@ -5,13 +5,13 @@ import { dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { visualNodes, visualRoot } from '../../scripts/companion/visual/visual-ir.mjs';
-import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { selfProject, starterDocumentText } from '../support/starter-documents.mjs';
 import { withStorybookOptions, projectToolingSchema } from '../../scripts/companion/tooling-contract.ts';
-import { storybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { storybookFlags } from '../../src/cli/adapters/framework/storybook-options.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);
 // The current self-project: every reusable component, including the reviewed project JSON review card.
 const source = starterDocumentText('companion-plugin');

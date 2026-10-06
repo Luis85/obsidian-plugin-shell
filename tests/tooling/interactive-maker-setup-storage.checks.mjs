@@ -5,14 +5,14 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { loadSettings, settingsPlan, guardedText } from '../../bin/adapters/user-settings.ts';
-import { defaultSettings } from '../../bin/domain/user-settings.ts';
-import { intakePrds } from '../../bin/adapters/prd-intake.ts';
-import { projectSetupPlan, setupStatus, setupPrerequisites, angularSetupGuide } from '../../bin/adapters/project-setup.ts';
-import { setupExample } from '../../bin/application/setup-schema.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/app.ts';
+import { loadSettings, settingsPlan, guardedText } from '../../src/cli/adapters/user-settings.ts';
+import { defaultSettings } from '../../src/cli/domain/user-settings.ts';
+import { intakePrds } from '../../src/cli/adapters/prd-intake.ts';
+import { projectSetupPlan, setupStatus, setupPrerequisites, angularSetupGuide } from '../../src/cli/adapters/project-setup.ts';
+import { setupExample } from '../../src/cli/application/setup-schema.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { main } from '../../src/cli/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const markdown = (id = 'PRD-1') => `---\ntype: prd\nid: ${id}\ntitle: Product\n---\n# Original\nUntouched source.\n`;
 async function scratch(fn) {
@@ -190,9 +190,9 @@ test('later prototype preparation retains saved Angular selection and uses its c
 
 test('packaged settings and setup examples execute against the canonical schema and real services', async () => scratch(async root => {
   await vault(root);
-  const input = JSON.parse(await readFile(join(frameworkRoot, 'bin/examples/angular-setup.json'), 'utf8'));
-  input.settings = JSON.parse(await readFile(join(frameworkRoot, 'bin/examples/user-settings.json'), 'utf8'));
-  const source = await readFile(join(frameworkRoot, 'bin/examples/product-prd.md'), 'utf8');
+  const input = JSON.parse(await readFile(join(frameworkRoot, 'src/cli/examples/angular-setup.json'), 'utf8'));
+  input.settings = JSON.parse(await readFile(join(frameworkRoot, 'src/cli/examples/user-settings.json'), 'utf8'));
+  const source = await readFile(join(frameworkRoot, 'src/cli/examples/product-prd.md'), 'utf8');
   input.prds = { mode: 'add', documents: [{ filename: 'example.md', markdown: source }] };
   const plan = await projectSetupPlan(context(root), input);
   assert.equal(plan.data.document.design.semantic.entities[0].properties.length, 2);

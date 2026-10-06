@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { mkdtemp, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { portableFile } from '../../bin/adapters/framework/archive-path.ts';
-import { identity } from '../../bin/adapters/framework/configuration.ts';
-import { handoutPath } from '../../bin/adapters/framework/handout-workspace.ts';
-import { obsidianRead } from '../../bin/adapters/framework/obsidian-cli.ts';
-import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
-import { planMaker } from '../../bin/adapters/makers/plan.ts';
-import { portable } from '../../bin/documentation/adapters/filesystem.ts';
-import { text } from '../../bin/documentation/domain/contracts.ts';
+import { portableFile } from '../../src/cli/adapters/framework/archive-path.ts';
+import { identity } from '../../src/cli/adapters/framework/configuration.ts';
+import { handoutPath } from '../../src/cli/adapters/framework/handout-workspace.ts';
+import { obsidianRead } from '../../src/cli/adapters/framework/obsidian-cli.ts';
+import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
+import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
+import { portable } from '../../src/cli/documentation/adapters/filesystem.ts';
+import { text } from '../../src/cli/documentation/domain/contracts.ts';
 import { makerFixture } from './maker-fixture.mjs';
 
 // The CLI's single-line identity and path boundaries share hasControls(): C0 controls, DEL and the C1 range

@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
-import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
-import { renderProjectFiles } from '../../bin/compiler/adapters/plugin-emitter.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/adapters/template-snapshot.ts';
+import { renderProjectFiles } from '../../src/cli/compiler/adapters/plugin-emitter.ts';
 
 const repositoryRoot = resolve(import.meta.dirname, '../..');
 let repositorySnapshot;

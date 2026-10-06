@@ -6,10 +6,10 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { spawnSync } from 'node:child_process';
-import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../../bin/adapters/operations/catalog.ts';
-import { builtinRecipes, parseArguments } from '../../bin/adapters/makers/arguments.ts';
-import { builtinHandlers } from '../../bin/adapters/makers/dispatch.ts';
-import { handleRequest, validateMessage, protocolHandlers } from '../../bin/adapters/operations/protocol.ts';
+import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../../src/cli/adapters/operations/catalog.ts';
+import { builtinRecipes, parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
+import { builtinHandlers } from '../../src/cli/adapters/makers/dispatch.ts';
+import { handleRequest, validateMessage, protocolHandlers } from '../../src/cli/adapters/operations/protocol.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = resolve(root, 'scripts/operations/cli.mjs');
@@ -78,13 +78,13 @@ test('[CAP-03] data-only CLI discovery never imports custom recipes or executes 
 }));
 
 test('[CAP-04] fresh Git-free copy discovers capabilities without installed packages or concept assets', () => fixture(async folder => {
-  for (const path of ['scripts/operations', 'scripts/contracts', 'bin/adapters/operations']) {
+  for (const path of ['scripts/operations', 'scripts/contracts', 'src/cli/adapters/operations']) {
     await mkdir(join(folder, path), { recursive: true });
     await cp(join(root, path), join(folder, path), { recursive: true });
   }
-  // The maker catalog is data beside the maker engine; discovery reads only this file from bin/adapters/makers.
-  await mkdir(join(folder, 'bin/adapters/makers'), { recursive: true });
-  await cp(join(root, 'bin/adapters/makers/recipes.json'), join(folder, 'bin/adapters/makers/recipes.json'));
+  // The maker catalog is data beside the maker engine; discovery reads only this file from src/cli/adapters/makers.
+  await mkdir(join(folder, 'src/cli/adapters/makers'), { recursive: true });
+  await cp(join(root, 'src/cli/adapters/makers/recipes.json'), join(folder, 'src/cli/adapters/makers/recipes.json'));
   // The dependency-free canonical digest is part of the discovery surface.
   await mkdir(join(folder, 'scripts/shared'), { recursive: true });
   for (const file of ['hash.ts']) await cp(join(root, 'scripts/shared', file), join(folder, 'scripts/shared', file));

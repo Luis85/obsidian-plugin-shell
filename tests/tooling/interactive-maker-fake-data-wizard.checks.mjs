@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parse } from 'yaml';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { startWizard, wizardRegistry } from '../../bin/presentation/wizards/registry.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
-import { fakeDataCommand } from '../../bin/adapters/fake-data-command.ts';
+import { startWizard, wizardRegistry } from '../../src/cli/presentation/wizards/registry.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
+import { fakeDataCommand } from '../../src/cli/adapters/fake-data-command.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const BACK = Symbol('back');
 async function scratch(fn) {

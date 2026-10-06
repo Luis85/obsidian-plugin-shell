@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { authoredJourneyCode } from '../../bin/compiler/emitters/authored-journey-code.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
+import { authoredJourneyCode } from '../../src/cli/compiler/emitters/authored-journey-code.ts';
 import { projectFiles } from '../support/project-render.mjs';
-import { parseBrowserStarter } from '../../bin/adapters/starters/browser.ts';
+import { parseBrowserStarter } from '../../src/cli/adapters/starters/browser.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const starter = async name => parseBrowserStarter(await readFile(`${root}configs/starters/${name}.json`, 'utf8')).generator.document;

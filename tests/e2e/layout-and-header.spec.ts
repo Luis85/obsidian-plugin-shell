@@ -37,7 +37,7 @@ for (const width of [320, 480, 768, 1280, 1920]) {
   test(`[UI-02-L${width}] all panels use their own leaf width with aligned gutters and contained overflow`, async ({ page }) => {
     await page.setViewportSize({ width: 2000, height: 1080 }); await open(page);
     await page.evaluate(value => window.__SHELL_TEST__.leafWidth(value), width);
-    for (const panel of ['Overview', 'Documents', 'Events & feedback', 'Preferences']) {
+    for (const panel of ['Overview', 'Documents', 'Forms', 'Events & feedback', 'Preferences']) {
       await primary(page).getByRole('button', { name: panel, exact: true }).click();
       const result = await geometry(page);
       expect(result.leaf).toBeCloseTo(width, 0);

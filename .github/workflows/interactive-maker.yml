@@ -55,8 +55,8 @@ jobs:
       - name: TypeScript and both source linters
         run: |
           node "$QUALIFIED_NPM" run typecheck:maker
-          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs bin plugins --max-warnings 0
-          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json bin plugins --no-ignore --deny-warnings
+          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs src/cli plugins --max-warnings 0
+          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json src/cli plugins --no-ignore --deny-warnings
           node "$QUALIFIED_NPM" run check:plugins
       - name: Workbench plugin contracts
         if: ${{ !cancelled() }}
@@ -68,10 +68,11 @@ jobs:
         id: extension
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: |
-          cp plugins/example-extension/config.json "$RUNNER_TEMP/example-extension-config.json"
+          cp bin/plugins/example-extension/config.json "$RUNNER_TEMP/example-extension-config.json"
           node --input-type=module - <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
-          const path = 'plugins/example-extension/config.json';
+          // The standalone CLI reads its editable runtime configuration beside the bundle.
+          const path = 'bin/plugins/example-extension/config.json';
           const config = JSON.parse(await readFile(path, 'utf8'));
           await writeFile(path, JSON.stringify({ ...config, enabled: true }, null, 2) + '\n');
           NODE
@@ -85,7 +86,7 @@ jobs:
       # Same key as ci.yml and setup-qualified, so every workflow shares one browser download.
       - name: Restore the pinned Chromium download
         if: ${{ !cancelled() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
@@ -96,7 +97,7 @@ jobs:
           node scripts/compiler/qualify-project-starters.mjs --starter webapp-react --execute
       - name: Restore the example extension configuration
         if: ${{ always() && steps.extension.outcome != 'skipped' }}
-        run: cp "$RUNNER_TEMP/example-extension-config.json" plugins/example-extension/config.json
+        run: cp "$RUNNER_TEMP/example-extension-config.json" bin/plugins/example-extension/config.json
       - name: Actual pseudo-terminal authoring and restoration
         if: ${{ !cancelled() && runner.os != 'Windows' }}
         run: node "$QUALIFIED_NPM" run test:maker:pty

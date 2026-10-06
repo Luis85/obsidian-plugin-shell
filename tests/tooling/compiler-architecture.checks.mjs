@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { checkCompilerArchitecture, checkCompilerBoundaries, compilerSourceInventory, inspectModule, missingPureEntrypoints, pureEntrypoints } from '../../scripts/compiler/check-architecture.mjs';
-const domain='bin/compiler/domain/example.ts', app='bin/compiler/application/example.ts';
+const domain='src/cli/compiler/domain/example.ts', app='src/cli/compiler/application/example.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 test('compiler dependency rules hold on resolved production sources',async()=>{
   const result=await checkCompilerArchitecture(root);assert.ok(result.files>20);
@@ -15,7 +15,7 @@ test('domain and application reject framework, filesystem, dynamic imports and g
   assert.deepEqual(checkCompilerBoundaries(new Map([[app,"import '../domain/example.ts';"],[domain,'export {};']])),[]);
 });
 test('pure emitters cannot reach filesystem through a transitive helper',()=>{
-  const emitter='bin/compiler/adapters/plugin-emitter.ts', helper='bin/compiler/adapters/helper.ts';
+  const emitter='src/cli/compiler/adapters/plugin-emitter.ts', helper='src/cli/compiler/adapters/helper.ts';
   const findings=checkCompilerBoundaries(new Map([[emitter,"import './helper.ts';"],[helper,"import 'node:fs';"]]));
   assert.ok(findings.some(f=>f.includes('plugin-emitter.ts ->')&&f.includes('node:fs')));
 });
@@ -26,7 +26,7 @@ test('generated source string imports are not mistaken for compiler effects',()=
 test('every pure entrypoint exists in the inventory; a missing one fails instead of being skipped',async()=>{
   const sources=await compilerSourceInventory(root);
   assert.deepEqual(missingPureEntrypoints(sources),[]);
-  assert.ok([...sources.keys()].some(path=>path.startsWith('bin/compiler/domain/'))&&[...sources.keys()].some(path=>path.startsWith('bin/compiler/application/')));
+  assert.ok([...sources.keys()].some(path=>path.startsWith('src/cli/compiler/domain/'))&&[...sources.keys()].some(path=>path.startsWith('src/cli/compiler/application/')));
   const without=new Map(sources);without.delete(pureEntrypoints[0]);
   assert.deepEqual(missingPureEntrypoints(without),[`${pureEntrypoints[0]}: pure entrypoint is missing from the compiler source inventory`]);
 });

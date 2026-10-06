@@ -4,10 +4,10 @@ import { mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } f
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { loadPrototypeWorkspace } from '../../bin/adapters/framework/prototype-workspace.ts';
-import { managedGenerationPlan } from '../../bin/adapters/framework/prototype-generation.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { loadPrototypeWorkspace } from '../../src/cli/adapters/framework/prototype-workspace.ts';
+import { managedGenerationPlan } from '../../src/cli/adapters/framework/prototype-generation.ts';
 import { document } from '../support/prototype-fixture.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t) {

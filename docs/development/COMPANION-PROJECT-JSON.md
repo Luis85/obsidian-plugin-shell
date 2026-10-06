@@ -87,7 +87,7 @@ Import and folder changes refuse observed stale storage, modified owned Project.
 
 - `scripts/companion/storymap-contract.mjs`: shared bounded Storymaps records and reference validation, no I/O.
 - `scripts/companion/authoring-contract.ts`: shared schema 6 transport/path validation, no I/O.
-- `bin/adapters/framework/read-project.ts`: bounded file read and contained target inspection; returns `{content, document, vault, target}` without writing.
+- `src/cli/adapters/framework/read-project.ts`: bounded file read and contained target inspection; returns `{content, document, vault, target}` without writing.
 - `scripts/companion-tools/generate.mjs`: CLI arguments and stdout/stderr contract, **read-only v1**.
 - `docs/concepts/companion/src/project-transfer.js`: reviewed import/export and folder settings.
 - `docs/concepts/companion/src/companion-project.js`: declarative self-project seed, not an implemented native plugin.

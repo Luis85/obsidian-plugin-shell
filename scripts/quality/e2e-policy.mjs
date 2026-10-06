@@ -5,7 +5,7 @@
  * fixtures in tests/tooling/qualification-e2e-opt-in.checks.mjs follow. Conditions are settled with the same
  * three-valued evaluator `node bin/app ci` uses, so "cannot be decided" fails closed like "wrong".
  */
-import { evaluateCondition } from '../../bin/domain/ci-expression.ts';
+import { evaluateCondition } from '../../src/cli/domain/ci-expression.ts';
 
 /** The one opt-in signal, written the same way in every workflow: the Release tier, a dispatch/call input or the label. */
 export const e2eOptIn = "inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')";

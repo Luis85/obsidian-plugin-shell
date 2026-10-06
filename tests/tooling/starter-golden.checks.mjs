@@ -4,10 +4,10 @@ import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
-import { parseBrowserStarter, configureBrowserStarter, exportBrowserStarter, starterProjection, STARTER_MAX_BYTES } from '../../bin/adapters/starters/browser.ts';
-import { starterCoverage } from '../../bin/adapters/starters/coverage.ts';
-import { parseDefinition, loadDefinitions } from '../../bin/adapters/starters/repository.ts';
-import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
+import { parseBrowserStarter, configureBrowserStarter, exportBrowserStarter, starterProjection, STARTER_MAX_BYTES } from '../../src/cli/adapters/starters/browser.ts';
+import { starterCoverage } from '../../src/cli/adapters/starters/coverage.ts';
+import { parseDefinition, loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
+import { validateDefinition } from '../../src/cli/adapters/starters/validation.ts';
 import { parseJsonData, assertJsonData, assertDesignData } from '../../scripts/contracts/json-data.ts';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { exportGoldenProject } from '../../scripts/concepts/export-golden-project.mjs';
@@ -93,7 +93,7 @@ test('golden reports unresolved interactions rather than treating empty actions 
   assert.equal(report.nativeAcceptance, 'not-run'); assert.deepEqual(report.shippedEditors, ['journey-lens']);
 });
 test('every first-run npm script exists in the generated devkit contract', async () => {
-  const emitter = await readFile(new URL('bin/compiler/adapters/plugin-emitter.ts',root),'utf8');
+  const emitter = await readFile(new URL('src/cli/compiler/adapters/plugin-emitter.ts',root),'utf8');
   for (const definition of [golden,showcase]) {
     assert.ok(definition.firstRun.includes('build-preview'));
     const step = definition.processes.find(p => p.id === 'build-preview').steps[0];

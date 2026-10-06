@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { definitionProjectPlan, receiptFile } from '../../bin/adapters/starters/project.ts';
-import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
+import { definitionProjectPlan, receiptFile } from '../../src/cli/adapters/starters/project.ts';
+import { validateDefinition } from '../../src/cli/adapters/starters/validation.ts';
 import { code, fileStarter, request, shipped, workspace } from './starters-fixture.mjs';
 
 // Definition-driven project plans (project.ts): starter selection, input values, process selection and the receipt.

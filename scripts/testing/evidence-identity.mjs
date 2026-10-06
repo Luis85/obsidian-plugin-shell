@@ -1,5 +1,5 @@
 import { readFile, readdir, lstat, realpath } from 'node:fs/promises';
-import { resolve, relative, join } from 'node:path';
+import { dirname, resolve, relative, join, sep } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { release } from 'node:os';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
@@ -8,7 +8,7 @@ import { validateRetained } from '../release/candidate.mjs';
 
 const protocol = 'executable-evidence/2';
 const producerNames = ['runtime', 'browser', 'tooling', 'coverage', 'artifact', 'native'];
-export async function filesUnder(root, directory, pattern) {
+async function filesUnder(root, directory, pattern) {
   const files = [];
   async function visit(path) {
     for (const item of await readdir(path, { withFileTypes: true })) {
@@ -90,6 +90,21 @@ export async function evidenceIdentity(root, producer) {
   return { sourceDigest: sha256(JSON.stringify({ source: source.digest, crosswalk, nativeChecks })), sourceInputsDigest: source.digest, checkout, lock: await fileIdentity(root, 'package-lock.json'),
     protocol: { id: protocol, sha256: sha256(JSON.stringify({ policyFiles, crosswalk, nativeChecks })) }, tools,
     environment: { platform: process.platform, release: release(), architecture: process.arch, timezone: 'UTC', locale: 'C.UTF-8', browser } };
+}
+const registrationImport = /^import\s+(['"])([^'"]+\.checks\.mjs)\1;?$/;
+/** Portable test modules (e.g. a skill's own .checks.mjs) that a tooling file registers through nothing but
+ * side-effect imports. node:test reports their cases under the defining module, so evidence credits them to
+ * the registering inventory file; a file that also holds code or other imports registers nothing. */
+export async function toolingRegistrations(root, files) {
+  const owners = new Map();
+  for (const file of files) {
+    const lines = (await readFile(join(root, file), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '').split(/\r?\n/)
+      .map(line => line.trim()).filter(line => line && !line.startsWith('//'));
+    const imports = lines.map(line => registrationImport.exec(line));
+    if (!imports.length || imports.some(match => !match)) continue;
+    for (const match of imports) owners.set(relative(root, resolve(root, dirname(file), match[2])).split(sep).join('/'), file);
+  }
+  return owners;
 }
 export async function suiteInventory(root, producer) {
   if (['runtime', 'coverage'].includes(producer)) return filesUnder(root, 'tests/runtime', /\.test\.ts$/);

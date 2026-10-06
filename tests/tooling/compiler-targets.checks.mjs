@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import ts from 'typescript';
-import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),template=await loadTemplateSnapshot(root);
 const source=starterDocumentText('quick-capture');

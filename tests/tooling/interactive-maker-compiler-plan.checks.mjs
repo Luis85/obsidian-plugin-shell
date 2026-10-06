@@ -4,16 +4,16 @@ import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { planArtifacts, applyProject, reviewProject, generationReceipt } from '../../bin/compiler/adapters/workspace-plan.ts';
-import { planProject } from '../../bin/compiler/adapters/project-plan.ts';
-import { generationSelection } from '../../bin/compiler/adapters/selection.ts';
-import { renderProjectFiles } from '../../bin/compiler/adapters/plugin-emitter.ts';
-import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
-import { compileProject, analyzeProject } from '../../bin/compiler/index.ts';
-import { projectModel, digest } from '../../bin/compiler/emitters/model.ts';
+import { planArtifacts, applyProject, reviewProject, generationReceipt } from '../../src/cli/compiler/adapters/workspace-plan.ts';
+import { planProject } from '../../src/cli/compiler/adapters/project-plan.ts';
+import { generationSelection } from '../../src/cli/compiler/adapters/selection.ts';
+import { renderProjectFiles } from '../../src/cli/compiler/adapters/plugin-emitter.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/adapters/template-snapshot.ts';
+import { compileProject, analyzeProject } from '../../src/cli/compiler/index.ts';
+import { projectModel, digest } from '../../src/cli/compiler/emitters/model.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 
-// Drives workspace planning, project planning, scoped selection and the plugin emitter (bin/compiler) under the maker floors.
+// Drives workspace planning, project planning, scoped selection and the plugin emitter (src/cli/compiler) under the maker floors.
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const blankText = starterDocumentText('blank');

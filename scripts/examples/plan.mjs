@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { createFilePlan } from '../shared/file-plan.ts';
-import { readRegistry, validateRegistrySource } from '../../bin/adapters/makers/registry.ts';
+import { readRegistry, validateRegistrySource } from '../../src/cli/adapters/makers/registry.ts';
 
 const digest = value => createHash('sha256').update(value).digest('hex');
 function validateManifest(manifest) {

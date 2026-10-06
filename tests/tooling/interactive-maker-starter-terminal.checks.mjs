@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { guidedStarter } from '../../bin/presentation/terminal/starter-terminal.ts';
+import { guidedStarter } from '../../src/cli/presentation/terminal/starter-terminal.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const webapp = JSON.parse(await readFile(join(frameworkRoot, 'configs/starters/webapp.json'), 'utf8'));

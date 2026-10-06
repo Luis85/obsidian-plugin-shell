@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { EventEmitter } from 'node:events';
-import { obsidianRead, systemPort } from '../../bin/adapters/framework/obsidian-cli.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { obsidianRead, systemPort } from '../../src/cli/adapters/framework/obsidian-cli.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
 
 /** Runs a check against a disposable project root that is removed afterwards. */
 async function withFixture(check) {
@@ -77,8 +77,8 @@ test('catalog exposes only the read adapter surface; dangerous Obsidian commands
     assert.throws(()=>parseCliArguments([...denied,'--obsidian-vault','Work']));
 });
 test('setup opt-in verifies the named vault, prepares on request and imports its typed notes through reviewed plans', async () => {
-  const { continueSetup } = await import('../../bin/presentation/terminal/setup-terminal.ts');
-  const { result } = await import('../../bin/adapters/framework/contracts.ts');
+  const { continueSetup } = await import('../../src/cli/presentation/terminal/setup-terminal.ts');
+  const { result } = await import('../../src/cli/adapters/framework/contracts.ts');
   const notes = ['/vault/docs/application/project.md', '/vault/docs/application/page.md'];
   const answers = ['yes', 'Work', 'yes', 'yes', 'yes', 'no', 'no'], prompts = [], calls = [];
   const execute = async request => {
@@ -96,8 +96,8 @@ test('setup opt-in verifies the named vault, prepares on request and imports its
   assert.ok(!prompts.some(question => /^File or folder/.test(question)), 'vault notes replace the generic import path question');
 });
 test('an unavailable Obsidian CLI or a declined prepare only skips the vault step', async () => {
-  const { continueSetup } = await import('../../bin/presentation/terminal/setup-terminal.ts');
-  const { result } = await import('../../bin/adapters/framework/contracts.ts');
+  const { continueSetup } = await import('../../src/cli/presentation/terminal/setup-terminal.ts');
+  const { result } = await import('../../src/cli/adapters/framework/contracts.ts');
   // Remaining answers decline the generic docs import, generation and docs export.
   for (const [failing, answers] of [[true, ['yes', 'Work', 'no', 'no', 'no']], [false, ['yes', 'Work', 'no', 'no', 'no', 'no']]]) {
     const calls = [], expected = ['obsidian status'];
@@ -187,8 +187,8 @@ test('status and prepare refuse invalid vault output and oversized scans', () =>
   assert.match(broken.data.import.next, /No supported typed Markdown/);
 }));
 test('setup Obsidian step skips cleanly on decline, blank vault, failed status or prepare and malformed batches', async () => {
-  const { setupObsidian } = await import('../../bin/presentation/terminal/obsidian-setup.ts');
-  const { result } = await import('../../bin/adapters/framework/contracts.ts');
+  const { setupObsidian } = await import('../../src/cli/presentation/terminal/obsidian-setup.ts');
+  const { result } = await import('../../src/cli/adapters/framework/contracts.ts');
   const run = async (answers, respond) => {
     const calls = [];
     const batches = await setupObsidian({ root: '/' }, async request => { calls.push(request.command); return respond(request); }, async () => answers.shift() ?? '', () => {});

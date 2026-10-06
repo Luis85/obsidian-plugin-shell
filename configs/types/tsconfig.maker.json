@@ -6,7 +6,7 @@
     "resolveJsonModule": true
   },
   "include": [
-    "../../bin/**/*.ts",
+    "../../src/cli/**/*.ts",
     "../../plugins/**/*.ts"
   ]
 }

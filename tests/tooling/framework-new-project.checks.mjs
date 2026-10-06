@@ -6,8 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { derivedId, derivedName, enclosingVault, invocationDirectory, pluginIdProblem } from '../../bin/adapters/framework/starter-project.ts';
-import { pluginIdWordProblem } from '../../bin/adapters/framework/plugin-id.ts';
+import { derivedId, derivedName, enclosingVault, invocationDirectory, pluginIdProblem } from '../../src/cli/adapters/framework/starter-project.ts';
+import { pluginIdWordProblem } from '../../src/cli/adapters/framework/plugin-id.ts';
 import { starterDocument } from '../support/starter-documents.mjs';
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 async function scratch(t) {

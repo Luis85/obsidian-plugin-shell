@@ -7,7 +7,7 @@ import {
   configurationPlan as relocatedConfigurationPlan,
   vaultPlan as relocatedVaultPlan,
   releaseVersionPlan as relocatedReleaseVersionPlan,
-} from '../../bin/adapters/framework/changes.ts';
+} from '../../src/cli/adapters/framework/changes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));

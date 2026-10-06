@@ -33,7 +33,7 @@ build commands for `source/`. The prototype tooling is described in
 [[docs/development/PROTOTYPE-TOOLING#Entry points|prototype tooling]] (`npm run prototype:tools -- discover --repo .`
 shows the available commands) and the offline clickdummy in
 [[docs/development/COMPANION-CLICKDUMMY#Generate and build|the clickdummy guide]]. Angular projects use the
-[[bin/ANGULAR-BRICKS|Angular bricks]]. Run the gates of the root [[AGENTS]] file, at least `node bin/app check`
+[[src/cli/ANGULAR-BRICKS|Angular bricks]]. Run the gates of the root [[AGENTS]] file, at least `node bin/app check`
 ([[docs/user-manual/shell-cli/development-and-testing#Choose the right test/check|choose the right check]]).
 A successful build or screenshot is review evidence, not native or business acceptance.
 

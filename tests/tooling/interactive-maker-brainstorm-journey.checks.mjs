@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { readdir } from 'node:fs/promises';
 import { PassThrough, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { hash } from '../../bin/adapters/framework/files.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
 // Maker-only surface: these requests must not be routed to the framework CLI.
-import { makerMain as main } from '../../bin/app.ts';
-import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
-import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
+import { makerMain as main } from '../../src/cli/app.ts';
+import { brainstormWizard } from '../../src/cli/presentation/brainstorm.ts';
+import { brainstormFeaturePlan } from '../../src/cli/adapters/brainstorm.ts';
 import { terminalFixture } from './interactive-maker-tui-fixture.mjs';
 import { brainstormScratch, frameworkRoot, scriptedPlain, readText, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';
 

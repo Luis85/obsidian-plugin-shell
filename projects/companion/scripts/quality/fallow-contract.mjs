@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 
 // The one reviewed Fallow CLI identity. An update changes these values only after
 // inspecting the installed types/output-contract.d.ts, schema.json and real runs.
-export const fallowVersion = '3.30.0';
+export const fallowVersion = '3.31.0';
 export const fallowSchemas = Object.freeze({ 'dead-code': 9, health: 11, dupes: 10, 'suppression-inventory': '1' });
 
 // Fallow 3.30 always emits the default exit rule of dead-code/health and, with

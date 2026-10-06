@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { supportSnapshot, supportReport } from '../../bin/adapters/framework/support-report.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { supportSnapshot, supportReport } from '../../src/cli/adapters/framework/support-report.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const observation=()=>({data:{generated:true,imported:true,dependencies:true,designStale:false,acceptanceObligations:31,
   root:'/private/secret',manifest:{id:'private-name'},configuration:{token:'private-token'},note:'private-note'},

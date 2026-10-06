@@ -5,12 +5,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { commands } from '../../bin/adapters/framework/catalog.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { groups, goldenPath } from '../../bin/adapters/framework/help-text.ts';
-import { suggestions } from '../../bin/adapters/framework/suggest.ts';
-import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
-import { terminalStyle } from '../../bin/presentation/terminal/terminal-style.ts';
+import { commands } from '../../src/cli/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { groups, goldenPath } from '../../src/cli/adapters/framework/help-text.ts';
+import { suggestions } from '../../src/cli/adapters/framework/suggest.ts';
+import { renderHuman } from '../../src/cli/presentation/terminal/terminal-render.ts';
+import { terminalStyle } from '../../src/cli/presentation/terminal/terminal-style.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 /** The real entry point with piped (non-TTY) streams; NO_COLOR is controlled per call. */
 function cli(args, env = {}) {

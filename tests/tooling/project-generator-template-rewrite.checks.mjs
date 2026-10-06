@@ -2,13 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 import { selfProject } from '../support/starter-documents.mjs';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { copiedTemplateMarker, rewriteTemplate } from '../../bin/compiler/emitters/file-code.ts';
-import { relationshipCode } from '../../bin/compiler/emitters/relationship-code.ts';
-import { httpCode } from '../../bin/compiler/emitters/http-code.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
+import { copiedTemplateMarker, rewriteTemplate } from '../../src/cli/compiler/emitters/file-code.ts';
+import { relationshipCode } from '../../src/cli/compiler/emitters/relationship-code.ts';
+import { httpCode } from '../../src/cli/compiler/emitters/http-code.ts';
 
 // Copied template text is rewritten by exact literals; a drifted literal must stop generation, never emit stale text.
 const root = fileURLToPath(new URL('../../', import.meta.url));

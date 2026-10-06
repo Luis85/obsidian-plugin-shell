@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { firstRunDefaults, readFirstRunPreferences, readFirstRunRequest, installCommand, firstRunSchema } from '../../bin/domain/first-run.ts';
-import { readSettings, defaultSettings } from '../../bin/domain/user-settings.ts';
-import { firstRunWizard } from '../../bin/presentation/first-run.ts';
-import { parseArguments } from '../../bin/adapters/commands.ts';
+import { firstRunDefaults, readFirstRunPreferences, readFirstRunRequest, installCommand, firstRunSchema } from '../../src/cli/domain/first-run.ts';
+import { readSettings, defaultSettings } from '../../src/cli/domain/user-settings.ts';
+import { firstRunWizard } from '../../src/cli/presentation/first-run.ts';
+import { parseArguments } from '../../src/cli/adapters/commands.ts';
 test('first-run preferences merge without granting permission, preserving explicit false', () => {
   assert.deepEqual(readFirstRunPreferences({}), firstRunDefaults);
   assert.deepEqual(readFirstRunRequest({ schemaVersion: 1, mode: 'verify' }), { schemaVersion: 1, mode: 'verify', ...firstRunDefaults });

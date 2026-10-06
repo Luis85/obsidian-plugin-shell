@@ -3,11 +3,11 @@ import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { fieldAnswer, readForm } from '../../bin/domain/form.ts';
-import { formValueIssues } from '../../bin/domain/form-values.ts';
-import { starterInputForm } from '../../bin/presentation/wizards/starter-inputs.ts';
-import { startWizard } from '../../bin/presentation/wizards/registry.ts';
-import { guidedStarter } from '../../bin/presentation/terminal/starter-terminal.ts';
+import { fieldAnswer, readForm } from '../../src/cli/domain/form.ts';
+import { formValueIssues } from '../../src/cli/domain/form-values.ts';
+import { starterInputForm } from '../../src/cli/presentation/wizards/starter-inputs.ts';
+import { startWizard } from '../../src/cli/presentation/wizards/registry.ts';
+import { guidedStarter } from '../../src/cli/presentation/terminal/starter-terminal.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const webapp = JSON.parse(await readFile(join(frameworkRoot, 'configs/starters/webapp.json'), 'utf8'));

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "configs/schemas/fake-data-generation.schema.json",
   "title": "Workbench fake-data generation config",
-  "description": "Editor support only. bin/domain/fake-data-config.ts is the authoritative validator; the file name must be <id>.json. Re-running a config reproduces byte-identical notes.",
+  "description": "Editor support only. src/cli/domain/fake-data-config.ts is the authoritative validator; the file name must be <id>.json. Re-running a config reproduces byte-identical notes.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "title", "entity", "count", "out", "seed"],

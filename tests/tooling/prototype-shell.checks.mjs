@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../bin/adapters/framework/prototype-skill.ts';
+import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../src/cli/adapters/framework/prototype-skill.ts';
 import { shellOperation, npmOperation } from '../../.claude/skills/companion-prototype-design/scripts/lib/framework.mjs';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -67,7 +67,7 @@ test('reviewed starter generation ships the product kit and only the click-dummy
   const adapterBytes = fs.readFileSync(adapterFile, 'utf8');
   fs.writeFileSync(adapterFile, adapterBytes + '\nUser adapter annotation.\n');
   const original = fs.readFileSync(skillFile, 'utf8'); fs.writeFileSync(skillFile, original + '\nUser customization.\n');
-  const { planProject, applyProject } = await import('../../bin/compiler/adapters/project-plan.ts');
+  const { planProject, applyProject } = await import('../../src/cli/compiler/adapters/project-plan.ts');
   const options = { input: path.join(target, 'design/project.json'), vault: temp, target: path.basename(target), templateRoot: root };
   const regeneration = await planProject(options); assert.deepEqual(regeneration.conflicts, []);
   await applyProject(regeneration, regeneration.hash);

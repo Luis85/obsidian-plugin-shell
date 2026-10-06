@@ -1,10 +1,10 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { compileProject } from '../../bin/compiler/index.ts';
-import { devkitFiles, renderTemplate, makerTests } from '../../bin/compiler/emitters/devkit-files.ts';
-import { componentFile, relativeImport, rewriteTemplate, copiedTemplateTest, copiedTemplateMarker } from '../../bin/compiler/emitters/file-code.ts';
-import { relocatedPath, maintainerOnly, rebaseMarkdown, relocateFrameworkDocuments } from '../../bin/compiler/emitters/framework-docs.ts';
-import { projectModel, schema, symbol, literal, text, rows } from '../../bin/compiler/emitters/model.ts';
+import { compileProject } from '../../src/cli/compiler/index.ts';
+import { devkitFiles, renderTemplate, makerTests } from '../../src/cli/compiler/emitters/devkit-files.ts';
+import { componentFile, relativeImport, rewriteTemplate, copiedTemplateTest, copiedTemplateMarker } from '../../src/cli/compiler/emitters/file-code.ts';
+import { relocatedPath, maintainerOnly, rebaseMarkdown, relocateFrameworkDocuments } from '../../src/cli/compiler/emitters/framework-docs.ts';
+import { projectModel, schema, symbol, literal, text, rows } from '../../src/cli/compiler/emitters/model.ts';
 import { dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
 

@@ -4,12 +4,12 @@ import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { validateNativeIntegrations, nativeReservedExtensions } from '../../scripts/companion/native-contract.mjs';
 import { reservedFileExtensions } from '../../src/domain/native-integrations.ts';
-import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { companionStarters, loadDefinitions } from '../../bin/adapters/starters/repository.ts';
-import { customizeStarter as customizeLoaded } from '../../bin/adapters/starters/customize.ts';
-import { planMaker } from '../../bin/adapters/makers/plan.ts';
-import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
+import { nativeCode } from '../../src/cli/compiler/emitters/native-code.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
+import { companionStarters, loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
+import { customizeStarter as customizeLoaded } from '../../src/cli/adapters/starters/customize.ts';
+import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
+import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
 const file = {

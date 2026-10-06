@@ -1,15 +1,15 @@
-import { guidedStarter } from '../../bin/presentation/terminal/starter-terminal.ts';
+import { guidedStarter } from '../../src/cli/presentation/terminal/starter-terminal.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, realpath, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
-import { processPlan } from '../../bin/adapters/starters/processes.ts';
-import { commandHelp } from '../../bin/adapters/framework/help-text.ts';
-import { commands } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../src/cli/adapters/framework/planning.ts';
+import { processPlan } from '../../src/cli/adapters/starters/processes.ts';
+import { commandHelp } from '../../src/cli/adapters/framework/help-text.ts';
+import { commands } from '../../src/cli/adapters/framework/catalog.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 const original = JSON.parse(await readFile(join(frameworkRoot, 'configs/starters/webapp.json'), 'utf8'));
 async function workspace(t) {

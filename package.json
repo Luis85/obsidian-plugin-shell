@@ -8,14 +8,14 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
-    "@iconify-json/lucide": "1.2.138",
+    "@iconify-json/lucide": "1.2.139",
     "@playwright/test": "1.63.0",
-    "@types/node": "26.6.3",
+    "@types/node": "26.6.4",
     "@vitejs/plugin-vue": "6.0.9",
     "@vitest/coverage-v8": "5.0.3",
     "@vue/test-utils": "2.5.1",
     "esbuild": "0.28.2",
-    "eslint": "10.11.0",
+    "eslint": "10.12.0",
     "eslint-plugin-obsidianmd": "0.4.2",
     "eslint-plugin-vue": "10.11.1",
     "fallow": "3.31.0",
@@ -31,14 +31,14 @@
     "typescript-eslint": "8.71.0",
     "vite": "8.3.2",
     "vitest": "5.0.3",
-    "vue-tsc": "3.3.11"
+    "vue-tsc": "3.3.12"
   },
   "dependencies": {
     "@faker-js/faker": "10.6.0",
     "@nuxt/ui": "4.11.3",
     "pinia": "4.0.3",
     "vue": "3.5.43",
-    "vue-i18n": "11.4.12",
+    "vue-i18n": "11.4.13",
     "yaml": "2.9.1"
   },
   "description": "An Obsidian plugin foundation with a working Nuxt UI capability showcase",
@@ -61,7 +61,7 @@
     "build": "node scripts/bundling/build.mjs",
     "build:local": "node scripts/dev/install-local.mjs",
     "test-build": "npm run build:local",
-    "typecheck": "node node_modules/vue-tsc/bin/vue-tsc.js --noEmit",
+    "typecheck": "node node_modules/vue-tsc/bin/vue-tsc.js --noEmit && node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.maker.json",
     "test": "vitest run --config configs/testing/vitest.config.mjs",
     "test:watch": "vitest --config configs/testing/vitest.config.mjs",
     "test:coverage": "vitest run --coverage --config configs/testing/vitest.config.mjs",
@@ -76,7 +76,7 @@
     "check:presentation": "node scripts/quality/check-presentation.mjs",
     "check:self-review": "node scripts/quality/self-review.mjs",
     "check:artifacts": "node scripts/quality/check-artifacts.mjs",
-    "lint": "node scripts/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src bin plugins templates/companion/runtime",
+    "lint": "node scripts/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src plugins templates/companion/runtime",
     "analyze": "fallow dead-code -c configs/quality/fallow.json",
     "verify": "node scripts/quality/verify.mjs",
     "help": "node scripts/help.mjs",
@@ -141,7 +141,7 @@
     "test:setup": "node scripts/testing/suites.mjs setup",
     "test:release": "node scripts/testing/suites.mjs release",
     "test:quality": "node scripts/testing/suites.mjs quality",
-    "check": "node bin/app check",
+    "check": "node scripts/bundling/build-cli.mjs && node src/cli/app.ts check",
     "check:fast": "node bin/app check --fast",
     "check:submission": "node bin/app check submission",
     "companion:build": "node scripts/concepts/build-mvp.mjs",
@@ -167,7 +167,9 @@
     "test:maker:pty": "node scripts/testing/suites.mjs maker:pty",
     "test:coverage:maker": "vitest run --coverage --config configs/testing/vitest.maker.config.mjs && node scripts/quality/maker-coverage.mjs",
     "test:plugins": "node scripts/testing/suites.mjs workbench-plugins",
-    "check:plugins": "node scripts/quality/check-workbench-plugins.mjs"
+    "check:plugins": "node scripts/quality/check-workbench-plugins.mjs",
+    "build:cli": "node scripts/bundling/build-cli.mjs",
+    "app:dev": "node src/cli/app.ts"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

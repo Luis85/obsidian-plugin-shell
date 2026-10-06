@@ -1,10 +1,10 @@
 import { pluginRegistry } from './registry.ts';
-import { defineFrameworkAdapter, type FrameworkAdapter } from '../bin/compiler/adapters/project/framework-adapter.ts';
-import type { StarterDefinition } from '../bin/adapters/starters/types.ts';
-import { loadComponentTemplates } from '../bin/adapters/component-template-repository.ts';
+import { defineFrameworkAdapter, type FrameworkAdapter } from '../src/cli/compiler/adapters/project/framework-adapter.ts';
+import type { StarterDefinition } from '../src/cli/adapters/starters/types.ts';
+import { loadComponentTemplates } from '../src/cli/adapters/component-template-repository.ts';
 import { pluginComponentTemplates } from './template-contributions.ts';
-import { commands as frameworkCommands } from '../bin/adapters/framework/catalog.ts';
-import { makerBooleanOptions, makerCommandIds, makerValueOptions } from '../bin/domain/command-options.ts';
+import { commands as frameworkCommands } from '../src/cli/adapters/framework/catalog.ts';
+import { makerBooleanOptions, makerCommandIds, makerValueOptions } from '../src/cli/domain/command-options.ts';
 import type {
   ComponentTemplateCatalogApi,
   PluginCliCommand,

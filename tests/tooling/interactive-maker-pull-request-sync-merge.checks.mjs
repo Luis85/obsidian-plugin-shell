@@ -1,9 +1,9 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { renderManagedBlock } from '../../bin/domain/increments/remote-body.ts';
-import { canonicalWikilinks } from '../../bin/domain/increments/remote-links.ts';
-import { createSyncRecord } from '../../bin/domain/increments/sync-record.ts';
-import { syncPullRequest } from '../../bin/domain/increments/sync-merge.ts';
+import { renderManagedBlock } from '../../src/cli/domain/increments/remote-body.ts';
+import { canonicalWikilinks } from '../../src/cli/domain/increments/remote-links.ts';
+import { createSyncRecord } from '../../src/cli/domain/increments/sync-record.ts';
+import { syncPullRequest } from '../../src/cli/domain/increments/sync-merge.ts';
 import { samplePullRequestView, sha256 } from '../support/fake-hosting-remote.mjs';
 
 const links = { platform: 'github', web: 'https://github.com/octo/demo', ref: 'feature/hosting-set' };

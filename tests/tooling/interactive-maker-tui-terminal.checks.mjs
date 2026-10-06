@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { terminalFixture } from './interactive-maker-tui-fixture.mjs';
-import { Back, input, titleInput, bulkTitles, confirm, choose, selectMany } from '../../bin/presentation/prompts.ts';
+import { Back, input, titleInput, bulkTitles, confirm, choose, selectMany } from '../../src/cli/presentation/prompts.ts';
 test('real key decoder selects with arrows, renders once per changed frame and restores terminal ownership', async () => {
   const f = terminalFixture({ raw: true }); let unrelated = 0; const listener = () => unrelated++;
   f.input.on('data', listener); f.session.start();

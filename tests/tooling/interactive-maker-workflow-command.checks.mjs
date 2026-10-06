@@ -4,11 +4,11 @@ import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { testWorkflowCommand, interactiveTestWorkflow } from '../../bin/adapters/test-workflow-command.ts';
-import { serveTestWorkflowAssets, testWorkflowServable } from '../../bin/adapters/test-workflow-serve.ts';
-import { testWorkflowSpec } from '../../bin/adapters/test-workflow-export.ts';
-import { readTestWorkflow, testWorkflowJson } from '../../bin/domain/test-workflow.ts';
-import { hash } from '../../bin/adapters/framework/files.ts';
+import { testWorkflowCommand, interactiveTestWorkflow } from '../../src/cli/adapters/test-workflow-command.ts';
+import { serveTestWorkflowAssets, testWorkflowServable } from '../../src/cli/adapters/test-workflow-serve.ts';
+import { testWorkflowSpec } from '../../src/cli/adapters/test-workflow-export.ts';
+import { readTestWorkflow, testWorkflowJson } from '../../src/cli/domain/test-workflow.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'workflow-command-'));

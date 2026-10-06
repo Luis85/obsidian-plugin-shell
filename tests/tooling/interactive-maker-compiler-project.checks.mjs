@@ -2,14 +2,14 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import assert from 'node:assert/strict';
 
 import { fileURLToPath } from 'node:url';
-import { defineFrameworkAdapter } from '../../bin/compiler/adapters/project/framework-adapter.ts';
-import { frameworkAdapter, requireFrameworkAdapter } from '../../bin/compiler/adapters/project/framework-registry.ts';
-import { packageFiles, typecheckFiles } from '../../bin/compiler/adapters/project/configuration.ts';
-import { renderStarterProject } from '../../bin/compiler/adapters/project/emitter.ts';
-import { companionFrontend } from '../../bin/compiler/adapters/frontend.ts';
+import { defineFrameworkAdapter } from '../../src/cli/compiler/adapters/project/framework-adapter.ts';
+import { frameworkAdapter, requireFrameworkAdapter } from '../../src/cli/compiler/adapters/project/framework-registry.ts';
+import { packageFiles, typecheckFiles } from '../../src/cli/compiler/adapters/project/configuration.ts';
+import { renderStarterProject } from '../../src/cli/compiler/adapters/project/emitter.ts';
+import { companionFrontend } from '../../src/cli/compiler/adapters/frontend.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 
-// Drives the project-starter host adapters (bin/compiler/adapters/project/*) through their refusal paths.
+// Drives the project-starter host adapters (src/cli/compiler/adapters/project/*) through their refusal paths.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const source = starterDocumentText('blank');
 const frontend = companionFrontend('blank.json');

@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
-import { standaloneSource, updateOwnership } from '../../bin/adapters/framework/distribution.ts';
-import { hash } from '../../bin/adapters/framework/files.ts';
+import { standaloneSource, updateOwnership } from '../../src/cli/adapters/framework/distribution.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const optionalFixture = 'docs/concepts/companion/editor/inventory-probe.ts';
@@ -108,6 +108,7 @@ test('reviewed style removal preserves tokens across checkout line endings', asy
   const panels = report.plan.changes.find(change => change.path === 'src/styles/panels.css');
   assert.match(shell.content, /var\(--plugin-shell-surface\)/);
   assert.match(panels.content, /var\(--plugin-shell-control-radius\)/);
+  assert.ok(panels.content.includes('.shell-field input:not([type="checkbox"])'), 'removing examples must preserve the checkbox sizing fix');
   assert.ok(!shell.content.includes('.shell-sidebar'));
   const path = join(folder, 'src/styles/shell.css');
   const canonical = await readFile(path, 'utf8');

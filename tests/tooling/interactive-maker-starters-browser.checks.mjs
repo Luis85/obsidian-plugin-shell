@@ -1,7 +1,7 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { STARTER_MAX_BYTES, parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '../../bin/adapters/starters/browser.ts';
-import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
+import { STARTER_MAX_BYTES, parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '../../src/cli/adapters/starters/browser.ts';
+import { validateDefinition } from '../../src/cli/adapters/starters/validation.ts';
 import { fileStarter, shipped } from './starters-fixture.mjs';
 
 // Browser/CLI-shared starter semantics (browser.ts): bounded parsing, the Companion projection, configuration and export.

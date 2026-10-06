@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
-import { starterText } from '../../bin/presentation/terminal/starter-terminal.ts';
+import { renderHuman } from '../../src/cli/presentation/terminal/terminal-render.ts';
+import { starterText } from '../../src/cli/presentation/terminal/starter-terminal.ts';
 
 const plain = { color: false, unicode: false }, rich = { color: true, unicode: true };
 const view = (value, style = plain) => renderHuman({ diagnostics: [], ...value }, style);

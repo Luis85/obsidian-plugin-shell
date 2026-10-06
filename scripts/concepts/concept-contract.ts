@@ -5,4 +5,4 @@ export { validateProjectTooling } from '../companion/tooling-contract.ts';
 export { validateSitemapModel } from '../companion/sitemap/validate.ts';
 export { canonicalKey } from '../companion/sitemap/safety.ts';
 export { validateStarterCatalog } from '../companion/starter-contract.mjs';
-export { parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '../../bin/adapters/starters/browser.ts';
+export { parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '../../src/cli/adapters/starters/browser.ts';

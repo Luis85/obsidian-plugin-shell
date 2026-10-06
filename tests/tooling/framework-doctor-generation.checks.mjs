@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
-import { status } from '../../bin/adapters/framework/inspection.ts';
+import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
+import { status } from '../../src/cli/adapters/framework/inspection.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

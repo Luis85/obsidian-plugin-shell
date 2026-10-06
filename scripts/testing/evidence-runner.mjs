@@ -42,8 +42,12 @@ async function execute(root, producer, args, output, candidate, timeoutMs) {
     child.on('close', (exitCode, signal) => { clearTimeout(timer); resolve({ exitCode, signal, failure, stdout, stderr }); });
   });
 }
-export async function runEvidence(root, producer, { allowDownload = false, candidate: suppliedCandidate, timeoutMs = 30 * 60 * 1000 } = {}) {
-  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30 * 60 * 1000) throw new Error('EVIDENCE_TIMEOUT_POLICY');
+export async function runEvidence(root, producer, { allowDownload = false, candidate: suppliedCandidate, timeoutMs } = {}) {
+  // Tooling runs the complete serial suite inventory, measured at 43 minutes.
+  // This process-tree budget does not alter individual assertion deadlines.
+  const maximumTimeoutMs = (producer === 'tooling' ? 60 : 30) * 60 * 1000;
+  if (timeoutMs === undefined) timeoutMs = maximumTimeoutMs;
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > maximumTimeoutMs) throw new Error('EVIDENCE_TIMEOUT_POLICY');
   if (producer === 'native' && !allowDownload) throw new Error('EVIDENCE_NATIVE_REQUIRES_ALLOW_DOWNLOAD');
   const before = await evidenceIdentity(root, producer);
   const suites = await suiteInventory(root, producer);

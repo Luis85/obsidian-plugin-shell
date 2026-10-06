@@ -1,6 +1,6 @@
 import { PassThrough, Writable } from 'node:stream';
 import assert from 'node:assert/strict';
-import { TerminalSession } from '../../bin/presentation/tui/session.ts';
+import { TerminalSession } from '../../src/cli/presentation/tui/session.ts';
 export function terminalFixture(options = {}) {
   const input = new PassThrough(); input.isTTY = true; input.isRaw = options.raw ?? false;
   const raw = []; input.setRawMode = mode => { raw.push(mode); input.isRaw = mode; };

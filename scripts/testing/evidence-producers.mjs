@@ -3,8 +3,8 @@ import { constants } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { vitestReport, playwrightReport, toolingReport, artifactReport, nativeReport, completeResult, object } from './evidence-adapters.mjs';
-import { assertCoverageGates } from '../quality/coverage-inventory.mjs';
-import { filesUnder } from './evidence-identity.mjs';
+import { assertCoverageGates, runtimeCoverageInputs } from '../quality/coverage-inventory.mjs';
+import { toolingRegistrations } from './evidence-identity.mjs';
 import { performanceProtocol, summarizePerformance, candidateSizes } from './performance-report.mjs';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
 
@@ -82,7 +82,7 @@ export async function adaptProducer(producer, raw, root, files, exitCode, versio
     if (typeof text !== 'string' || !text.length) throw new Error('EVIDENCE_REPORT_MISSING');
     result = playwrightReport(JSON.parse(text), root);
   }
-  else if (producer === 'tooling') result = toolingReport(raw.stdout, root);
+  else if (producer === 'tooling') result = toolingReport(raw.stdout, root, await toolingRegistrations(root, files));
   else if (producer === 'artifact') result = artifactReport(JSON.parse(raw.stdout));
   else if (producer === 'native') {
     const expected = JSON.parse(await readFile(join(root, 'docs/testing/native-evidence-checks.json'), 'utf8'));
@@ -100,7 +100,7 @@ export async function adaptProducer(producer, raw, root, files, exitCode, versio
     if (report.performance) result.performance = await nativePerformance(report, root);
   } else throw new Error('EVIDENCE_PRODUCER');
   if (producer === 'coverage') {
-    const sources = await filesUnder(root, 'src', /\.(ts|vue)$/);
+    const sources = runtimeCoverageInputs(root);
     // Coverage paths are absolute in the real framework output. The existing gate
     // uses the current root for its independent business-domain floor.
     if (root !== process.cwd()) throw new Error('EVIDENCE_COVERAGE_ROOT');

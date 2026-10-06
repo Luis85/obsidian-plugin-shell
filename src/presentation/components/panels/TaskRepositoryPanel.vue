@@ -4,7 +4,7 @@ import UInput from '@nuxt/ui/components/Input.vue';
 import { useTaskRepository } from '../../composables/use-task-repository';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-const { uid, notes, selected, error, busy, loaded, confirming, message, draft, form, edit, reload, save, remove } = useTaskRepository();
+const { uid, notes, selected, error, busy, blocked, loaded, confirming, message, draft, form, edit, reload, save, remove } = useTaskRepository();
 </script>
 <template>
   <section class="shell-repository" :aria-labelledby="`${uid}-repository`" :aria-busy="busy" data-testid="task-repository">
@@ -13,14 +13,14 @@ const { uid, notes, selected, error, busy, loaded, confirming, message, draft, f
     <p v-if="!loaded" class="shell-empty-text">{{ t('repo.initial') }}</p>
     <p v-else-if="!notes.length" class="shell-empty-text">{{ t('repo.empty') }}</p>
     <ul v-else class="shell-note-list">
-      <li v-for="note in notes" :key="note.path"><div><strong>{{ note.values.title }}</strong><small>{{ t(`repo.${note.values.status}`) }} · {{ note.path }}</small></div><UButton color="neutral" variant="outline" :disabled="busy" :aria-label="t('repo.editNamed', { title: note.values.title })" @click="edit(note)">{{ t('repo.edit') }}</UButton></li>
+      <li v-for="note in notes" :key="note.path"><div><strong>{{ note.values.title }}</strong><small>{{ t(`repo.${note.values.status}`) }} · {{ note.path }}</small></div><UButton color="neutral" variant="outline" :disabled="busy || blocked" :aria-label="t('repo.editNamed', { title: note.values.title })" @click="edit(note)">{{ t('repo.edit') }}</UButton></li>
     </ul>
     <p v-if="error" :id="`${uid}-error`" class="shell-error" role="alert">{{ t(error.key) }} <span v-if="error.code === 'stale'">{{ t('repo.stale') }}</span></p>
     <p v-if="message" class="shell-created" role="status">{{ t(message) }}</p>
     <form v-if="selected" ref="form" class="shell-form shell-note-editor" @submit.prevent="save">
       <h3>{{ t('repo.editing', { title: selected.values.title }) }}</h3>
       <code>{{ selected.path }}</code>
-      <fieldset :disabled="busy || error?.effect === 'uncertain'">
+      <fieldset :disabled="busy || blocked">
         <div class="shell-field"><label :for="`${uid}-edit-title`">{{ t('repo.editTitle') }}</label><UInput :id="`${uid}-edit-title`" v-model="draft.title" name="edit-title" :aria-invalid="error?.field === 'title'" :aria-describedby="error?.field === 'title' ? `${uid}-error` : undefined" /></div>
         <div class="shell-field"><label :for="`${uid}-edit-status`">{{ t('repo.status') }}</label><select :id="`${uid}-edit-status`" v-model="draft.status" name="edit-status"><option value="todo">{{ t('repo.todo') }}</option><option value="doing">{{ t('repo.doing') }}</option><option value="done">{{ t('repo.done') }}</option></select></div>
         <div class="shell-field"><label :for="`${uid}-edit-due`">{{ t('repo.editDue') }}</label><UInput :id="`${uid}-edit-due`" v-model="draft.due" type="date" name="edit-due" :aria-invalid="error?.field === 'due'" :aria-describedby="error?.field === 'due' ? `${uid}-error` : undefined" /></div>

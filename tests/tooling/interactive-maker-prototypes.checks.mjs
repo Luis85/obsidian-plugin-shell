@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { prototypesRead as relocatedRead, prototypesCompare as relocatedCompare, prototypesPlan as relocatedPlan } from '../../bin/adapters/framework/prototypes.ts';
+import { prototypesRead as relocatedRead, prototypesCompare as relocatedCompare, prototypesPlan as relocatedPlan } from '../../src/cli/adapters/framework/prototypes.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));

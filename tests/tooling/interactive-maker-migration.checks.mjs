@@ -4,11 +4,11 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { projectSetupPlan } from '../../bin/adapters/project-setup.ts';
-import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
-import { migrationFiles } from '../../bin/adapters/migration-files.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { settingsPlan, loadSettings } from '../../bin/adapters/user-settings.ts';
+import { projectSetupPlan } from '../../src/cli/adapters/project-setup.ts';
+import { settingsMigrationPlan } from '../../src/cli/adapters/settings-migration.ts';
+import { migrationFiles } from '../../src/cli/adapters/migration-files.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { settingsPlan, loadSettings } from '../../src/cli/adapters/user-settings.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-migrate-'));

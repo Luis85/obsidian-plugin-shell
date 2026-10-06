@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { relocateFrameworkDocuments } from '../../bin/compiler/emitters/framework-docs.ts';
-import { frameworkBanner } from '../../bin/compiler/emitters/framework-scope.ts';
-import { templateRootFiles, templateRoots as roots } from '../../bin/compiler/domain/template-inputs.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
+import { relocateFrameworkDocuments } from '../../src/cli/compiler/emitters/framework-docs.ts';
+import { frameworkBanner } from '../../src/cli/compiler/emitters/framework-scope.ts';
+import { templateRootFiles, templateRoots as roots } from '../../src/cli/compiler/domain/template-inputs.ts';
 
 // README.md and AGENTS.md exist at both homes in a generated project: the product's at the root, the framework's under docs/framework/.
 const frameworkOnly = ['TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'];
@@ -17,7 +17,10 @@ async function generatedLayout(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'template-snapshot-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const folder of roots) await mkdir(join(root, folder), { recursive: true });
-  for (const name of rootFiles) await writeFile(join(root, name), name.endsWith('.json') ? '{}\n' : 'product ' + name + '\n');
+  for (const name of rootFiles) {
+    await mkdir(join(root, name, '..'), { recursive: true });
+    await writeFile(join(root, name), name.endsWith('.json') ? '{}\n' : 'product ' + name + '\n');
+  }
   await mkdir(join(root, 'docs/framework/workflows'), { recursive: true });
   for (const name of relocated) await writeFile(join(root, 'docs/framework', name), '# ' + name + '\n');
   await mkdir(join(root, '.github/workflows'), { recursive: true });

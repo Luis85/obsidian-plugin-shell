@@ -4,16 +4,16 @@ import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { projectSetupWizard } from '../../bin/presentation/project-setup-wizard.ts';
-import { settingsWizard } from '../../bin/presentation/settings.ts';
-import { editBricks } from '../../bin/presentation/brick-editor.ts';
-import { projectSetupPlan } from '../../bin/adapters/project-setup.ts';
-import { configuredArguments } from '../../bin/adapters/setup-command.ts';
-import { parseArguments } from '../../bin/adapters/commands.ts';
-import { defaultSettings } from '../../bin/domain/user-settings.ts';
-import { newDocument, documentText } from '../../bin/domain/document.ts';
-import { Workspace } from '../../bin/application/workspace.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
+import { projectSetupWizard } from '../../src/cli/presentation/project-setup-wizard.ts';
+import { settingsWizard } from '../../src/cli/presentation/settings.ts';
+import { editBricks } from '../../src/cli/presentation/brick-editor.ts';
+import { projectSetupPlan } from '../../src/cli/adapters/project-setup.ts';
+import { configuredArguments } from '../../src/cli/adapters/setup-command.ts';
+import { parseArguments } from '../../src/cli/adapters/commands.ts';
+import { defaultSettings } from '../../src/cli/domain/user-settings.ts';
+import { newDocument, documentText } from '../../src/cli/domain/document.ts';
+import { Workspace } from '../../src/cli/application/workspace.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const markdown = '---\ntype: prd\nid: PRD-1\ntitle: Test\n---\nOriginal\n';
 async function scratch(fn) {
@@ -136,8 +136,8 @@ test('approved boilerplate offers first run afterward and Skip leaves a source-o
 // Resume invokes the real wizard and service, not a mocked setup writer.
 test('wizard resumes saved answers and prior brick operations without authorizing a first run', async () => scratch(async root => {
   await vault(root);
-  const { setupCheckpointPlan } = await import('../../bin/adapters/setup-checkpoint.ts');
-  const { applyPrepared } = await import('../../bin/adapters/storage.ts');
+  const { setupCheckpointPlan } = await import('../../src/cli/adapters/setup-checkpoint.ts');
+  const { applyPrepared } = await import('../../src/cli/adapters/storage.ts');
   const plan = await setupCheckpointPlan(root, { schemaVersion: 1, project: { name: 'Resumed product', description: 'Saved context.', product: 'Saved outcome.' },
     prds: { mode: 'scan' }, prototypeInterview: null, operations: [{ op: 'page.add', title: 'Saved page' }], boilerplate: false });
   await applyPrepared(plan, plan.planHash);

@@ -71,5 +71,5 @@ Generated projects get the same script and `npm run ui:gallery`; wiring it into 
 | `scripts/ui/gallery-report.ts` | `index.json` entries and escaped `gallery.html` |
 | `scripts/ui/gallery-run.ts` | Capture loop over an injected session; writes files, always closes the session |
 | `scripts/ui/gallery-browser.ts`, `gallery-harness.ts`, `gallery-clickdummy.ts` | Playwright sessions for the two targets |
-| `bin/adapters/framework/ui-gallery.ts` | `node bin/app ui gallery` (validates, then runs the script) |
+| `src/cli/adapters/framework/ui-gallery.ts` | `node bin/app ui gallery` (validates, then runs the script) |
 | `tests/tooling/framework-ui-gallery*.checks.mjs` | Matrix, ordering, index shape, HTML escaping and CLI parsing with a fake capture function (no browser) |

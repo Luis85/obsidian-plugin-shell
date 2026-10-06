@@ -42,6 +42,11 @@ scope passed, 1 means recorded execution/session failure, and 2 means malformed
 input, missing prerequisite or infrastructure failure. An individual successful
 `check` describes one execution; only `report` reconciles the complete session.
 
+Producer processes have finite execution budgets: 60 minutes for the complete
+tooling inventory (measured at 43 minutes), and 30 minutes for every other
+producer. These aggregate budgets leave individual test deadlines unchanged.
+A timeout terminates the owned process tree and retains a failed evidence packet.
+
 ## Producers and scope
 
 | Producer | Actual structured input | Evidence scope |

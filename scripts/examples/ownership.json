@@ -63,7 +63,7 @@
     },
     {
       "path": "src/presentation/components/panels/TaskRepositoryPanel.vue",
-      "sha256": "974bff1c7d6d3fa5b017ea16607f3bd9094b0a6fa31b9fd2bc702d6867e686fb"
+      "sha256": "89aca8dcb1560c3d268f77507e06cfb96517790b99248d8febb604d4525d51b2"
     },
     {
       "path": "src/presentation/stores/showcase.ts",
@@ -83,7 +83,7 @@
     },
     {
       "path": "src/presentation/composables/use-task-repository.ts",
-      "sha256": "d2ea3754345d4e1ca767ebb16be3f9536c742e218e087fb48643ff63f38b42ab"
+      "sha256": "00d9b045a66debca0e1e5f1a624144660cc4290c164294c927941b1bc8d286d2"
     },
     {
       "path": "tests/runtime/view-state.test.ts",
@@ -91,7 +91,7 @@
     },
     {
       "path": "tests/runtime/repository-panel.test.ts",
-      "sha256": "b8fd7d066a3f9f64f4296cc9421e91617353eb025304fd96007421954581398f"
+      "sha256": "0d85453a30ecff6af8c65ca0a87d877a333a36dd1e0c81be4bd593b47f022ea5"
     },
     {
       "path": "tests/runtime/components.test.ts",
@@ -99,11 +99,11 @@
     },
     {
       "path": "tests/runtime/presentation-composables.test.ts",
-      "sha256": "f8ee6707d7ecef27da5f4c4ecd806c8ad4cf9051fbf9b293f42a163e144b7922"
+      "sha256": "dc396d1db040352bd8abbd80d2079e180975d99004c8330ba1522573491a6146"
     },
     {
       "path": "tests/e2e/layout-and-header.spec.ts",
-      "sha256": "82b0c0ab20ad3eab0bc014b3423f6491c965ea59c3d11ec7d14331815763eb18"
+      "sha256": "b63743434ba678f4b9fd98206a299da8a3abfa47964476e0182691ceda1f1c44"
     },
     {
       "path": "tests/e2e/modals.spec.ts",
@@ -123,7 +123,7 @@
     },
     {
       "path": "tests/e2e/accessibility.spec.ts",
-      "sha256": "924570c60cbeeb2571ab3dd0fa9da84dad4427e2bbe7aa373f883c6563a572eb"
+      "sha256": "ab04a066c2b9ed17e3bdea636345a8ca0ceaa6578c04f55b921b9de52db28e34"
     },
     {
       "path": "src/bootstrap/services.ts",
@@ -222,7 +222,7 @@
     },
     {
       "path": "tests/runtime/shell-entry-lifecycle.test.ts",
-      "sha256": "24f931b2cc715b46149e76863fbf7963a12541ce45b33dc03611735b68ab9720",
+      "sha256": "46cfe2862e883fa30b4c625101d1439b717f80e3a43cc68ea64886998a6149ff",
       "template": "tests__runtime__shell-entry-lifecycle.test.ts.txt"
     },
     {
@@ -252,7 +252,7 @@
     },
     {
       "path": "src/styles/panels.css",
-      "sha256": "89e9e2e5f6870e020c8a113356b1afa7e72859529d5cabb66599b96ee9a09146",
+      "sha256": "b76b5d2782d008a5073b57580a787baf706cf11af591088be3a0170c07b277b6",
       "template": "src__styles__panels.css.txt"
     },
     {
@@ -272,7 +272,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "ea7517ba541cf1cbbf3b21bca21705cef73f2ea0e32f7891a88d1fdb7e462d5d",
+      "sha256": "1a3de2be13880fa77c69fa1cab5f346ddfc78745363932df8dcd2ac03c984fc7",
       "template": "README.md.txt",
       "generated": "retain"
     },
@@ -453,7 +453,7 @@
     },
     {
       "path": "tests/runtime/obsidian-test-kit-shell-entry.test.ts",
-      "sha256": "298c4f5e22955d120d73890d17d7e6a69156a323a437431971e9691c9ea3d982"
+      "sha256": "a64bf05c487ca79a6cce2e2633c5b164765f97e78c20485212bee74b3d1c0763"
     },
     {
       "path": "src/features/showcase/feature-brief.ts",

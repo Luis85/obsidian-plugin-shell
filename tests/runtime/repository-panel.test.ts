@@ -58,6 +58,11 @@ it('[UI-03-03] invalid values and failed delete do not show success or lose the 
     await click(f.root, 'Move to trash…'); await click(f.root, 'Confirm move to trash');
     expect(f.files.size).toBe(1); expect(f.root.textContent).not.toContain('Task note moved to trash');
     expect(f.root.querySelector('fieldset')?.disabled).toBe(true);
+    expect(f.root.querySelector<HTMLButtonElement>('.shell-note-list button')?.disabled).toBe(true);
+    vi.spyOn(f.services.repositories.task, 'list').mockResolvedValueOnce(failure('storage', 'error.read'));
+    await click(f.root, 'Reload notes');
+    expect(f.root.querySelector('fieldset')?.disabled).toBe(true);
+    expect(f.root.querySelector<HTMLButtonElement>('.shell-note-list button')?.disabled).toBe(true);
     await click(f.root, 'Reload notes'); expect(f.root.querySelector('fieldset')).toBeNull();
   } finally { f.dispose(); }
 });

@@ -15,7 +15,7 @@
     ]
   },
   "include": [
-    "../../bin/compiler/emitters/**/*.ts",
+    "../../src/cli/compiler/emitters/**/*.ts",
     "../../templates/companion/runtime/**/*.ts"
   ]
 }

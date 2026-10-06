@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, readFile, writeFile, readdir, rm, symlink } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { buildModel, renderReference, renderDiagnostics } from '../../scripts/documentation/render.mjs';
-import { synchronize, main } from '../../scripts/documentation/manual.mjs';
+import { synchronize, main, outputs } from '../../scripts/documentation/manual.mjs';
 const command = { id: 'sample inspect', summary: 'Inspect the sample.', options: { input: 'value' }, maxArgs: 0, effect: 'read' };
 const help = { group: 'inspect', usage: 'node bin/app sample inspect --input sample.json', examples: ['node bin/app sample inspect --input sample.json'], optionHelp: { input: { description: 'Source file.', default: 'sample.json' }, json: { description: 'Structured result.' } } };
 const groups = [{ id: 'inspect', title: 'Inspection', commands: ['sample inspect'] }];
@@ -107,6 +107,34 @@ test('symlinked generated files are refused', async t => {
 test('unsupported CLI arguments fail before importing framework modules', async () => {
   await assert.rejects(main(['--unknown']), /MANUAL_ARGUMENT/);
   await assert.rejects(main(['--check', '--check']), /MANUAL_ARGUMENT/);
+});
+
+test('manual provenance tracks package version while dependency-only updates leave the manual current', async t => {
+  const base = await temporary(t);
+  const fixtures = {
+    'src/cli/adapters/framework/catalog.ts': `export const commands = [${JSON.stringify(command)}]; export const parameterKinds = item => ({ ...item.options, json: 'flag', yes: 'flag' });`,
+    'src/cli/adapters/framework/help-text.ts': `export const commandHelp = () => (${JSON.stringify(help)}); export const groups = ${JSON.stringify(groups)};`,
+    'src/cli/adapters/framework/increment-catalog.ts': '// catalog input',
+    'src/cli/adapters/framework/increment-help.ts': '// help input',
+    'src/cli/compiler/domain/diagnostics.ts': 'export const diagnosticCatalog = { EXAMPLE: "Example." };',
+    'scripts/documentation/render.mjs': '// renderer input',
+    'scripts/documentation/manual.mjs': '// generator input',
+  };
+  for (const [path, content] of Object.entries(fixtures)) {
+    await mkdir(join(base, path, '..'), { recursive: true });
+    await writeFile(join(base, path), content);
+  }
+  const packagePath = join(base, 'package.json');
+  await writeFile(packagePath, JSON.stringify({ type: 'module', version: '1.0.0', dependencies: { vue: '3.5.42' } }));
+  const initial = await outputs(base);
+  await synchronize(initial, { base });
+  await writeFile(packagePath, JSON.stringify({ type: 'module', version: '1.0.0', dependencies: { vue: '3.5.43' } }));
+  assert.deepEqual(await outputs(base), initial);
+  assert.deepEqual(await synchronize(await outputs(base), { base, check: true }), []);
+  await writeFile(packagePath, JSON.stringify({ type: 'module', version: '1.0.1' }));
+  assert.ok((await synchronize(await outputs(base), { base, check: true })).includes('manifest.json'));
+  await writeFile(join(base, 'src/cli/adapters/framework/increment-catalog.ts'), '// changed command catalog');
+  assert.notEqual((await outputs(base))['manifest.json'], initial['manifest.json']);
 });
 
 test('manual renderer highlights the typed Markdown example without relaxing validation', async () => {

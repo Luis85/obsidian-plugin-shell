@@ -3,9 +3,9 @@ import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { checkSteps, checkOperation, runCheckSteps } from '../../bin/adapters/framework/check.ts';
-import { manifestRules, versionsRule, lintRule, submissionCheck } from '../../bin/adapters/framework/submission.ts';
-import { OperationError } from '../../bin/adapters/framework/contracts.ts';
+import { checkSteps, checkOperation, runCheckSteps } from '../../src/cli/adapters/framework/check.ts';
+import { manifestRules, versionsRule, lintRule, submissionCheck } from '../../src/cli/adapters/framework/submission.ts';
+import { OperationError } from '../../src/cli/adapters/framework/contracts.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function withRoot(check) {
@@ -44,13 +44,13 @@ test('a generated project typechecks its own config and lints its configured roo
   assert.match(full.steps[0].display, /--project configs\/types\/tsconfig\.project\.json/);
   assert.ok(!full.steps.some(step => step.id === 'lint'));
   assert.ok(testStep(full).args.includes('--config'));
-  await mkdir(join(root, 'bin'), { recursive: true }); await writeFile(join(root, 'bin/app.ts'), 'export {};');
+  await mkdir(join(root, 'src/cli'), { recursive: true }); await writeFile(join(root, 'src/cli/app.ts'), 'export {};');
   await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
   for (const plan of [await checkSteps(root, false), await checkSteps(root, true, async () => null)]) {
     assert.ok(plan.steps.some(step => step.id === 'maker-types'));
     assert.ok(!plan.steps.some(step => step.id === 'maker-tests'), 'the shell maker qualification needs shell-only fixtures');
   }
-  assert.ok((await checkSteps(root, false)).steps.find(step => step.id === 'eslint').args.includes('bin'));
+  assert.ok((await checkSteps(root, false)).steps.find(step => step.id === 'eslint').args.includes('src'));
 }));
 
 test('check outcomes report cancellation, missing tools and failures with their next step', () => withRoot(async root => {

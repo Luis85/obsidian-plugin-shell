@@ -4,9 +4,9 @@ import { realpath, mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { mcpResponse, runMcpServer, runWorkbench, workbenchMcpTools } from '../../bin/adapters/mcp-server.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { main as appMain } from '../../bin/app.ts';
+import { mcpResponse, runMcpServer, runWorkbench, workbenchMcpTools } from '../../src/cli/adapters/mcp-server.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { main as appMain } from '../../src/cli/app.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const ok = async args => ({ exitCode: 0, signal: null, stdout: JSON.stringify({ args }), stderr: '', timedOut: false, overflow: false });

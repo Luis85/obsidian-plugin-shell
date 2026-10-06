@@ -3,11 +3,11 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { filled, outputPath, readSiteCatalog, record, renderTemplate, selectTemplate, siteManifest, siteNextSteps, siteProjectName, siteTitle } from '../../bin/domain/site-template.ts';
-import { readSiteSection, repositoryPath, siteIssues, snapshotDecisions, snapshotPath, snapshotState, snapshotText, GENERATED_BY } from '../../bin/domain/site-collections.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { descriptor } from '../../bin/adapters/framework/catalog.ts';
-import { commandHelp } from '../../bin/adapters/framework/help-text.ts';
+import { filled, outputPath, readSiteCatalog, record, renderTemplate, selectTemplate, siteManifest, siteNextSteps, siteProjectName, siteTitle } from '../../src/cli/domain/site-template.ts';
+import { readSiteSection, repositoryPath, siteIssues, snapshotDecisions, snapshotPath, snapshotState, snapshotText, GENERATED_BY } from '../../src/cli/domain/site-collections.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { descriptor } from '../../src/cli/adapters/framework/catalog.ts';
+import { commandHelp } from '../../src/cli/adapters/framework/help-text.ts';
 
 const repository = resolve(import.meta.dirname, '../..');
 const sha256 = text => createHash('sha256').update(text).digest('hex');

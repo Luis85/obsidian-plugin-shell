@@ -16025,7 +16025,7 @@ Edge: ${id2}`,
 		return names.includes(segment.toLowerCase());
 	}
 	//#endregion
-	//#region bin/compiler/domain/diagnostics.ts
+	//#region src/cli/compiler/domain/diagnostics.ts
 	/** Codes are public API. Catalog changes require documentation and protocol tests. */
 	var diagnosticCatalog = Object.freeze({
 		COMPILER_JSON_INVALID: "Supply a complete UTF-8 project JSON document; check its syntax.",
@@ -16081,7 +16081,7 @@ Edge: ${id2}`,
 	/** The portable lowercase ID rule shared by Companion v6 project identities and starter definitions. */
 	var portableIdPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 	//#endregion
-	//#region bin/compiler/domain/project-starter.ts
+	//#region src/cli/compiler/domain/project-starter.ts
 	var targetOrder = [
 		"plugin",
 		"webapp",
@@ -16153,7 +16153,7 @@ Edge: ${id2}`,
 		};
 	}
 	//#endregion
-	//#region bin/adapters/starters/validation.ts
+	//#region src/cli/adapters/starters/validation.ts
 	function record(value) {
 		requireThat(value !== null && typeof value === "object" && !Array.isArray(value), "STARTER_INVALID", "Expected an object.");
 		return value;
@@ -16442,7 +16442,7 @@ Edge: ${id2}`,
 		};
 	}
 	//#endregion
-	//#region bin/adapters/starters/render.ts
+	//#region src/cli/adapters/starters/render.ts
 	function resolveValues(definition, supplied) {
 		const source = record(supplied), values = {};
 		requireThat(Object.keys(source).every((key) => definition.inputs.some((input) => input.id === key)), "STARTER_INPUT", "Unknown input name.");
@@ -16454,7 +16454,7 @@ Edge: ${id2}`,
 		return values;
 	}
 	//#endregion
-	//#region bin/adapters/starters/customize.ts
+	//#region src/cli/adapters/starters/customize.ts
 	/** Turns a loaded Companion starter into an independent, editable project v6 document. No catalog projection or execution trust. */
 	var FIELDS = [
 		"id",

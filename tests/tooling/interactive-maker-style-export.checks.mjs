@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { exportDesignSystem as relocated } from '../../bin/adapters/framework/style-export.ts';
+import { exportDesignSystem as relocated } from '../../src/cli/adapters/framework/style-export.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 test('relocated style renderer preserves compatibility identity and all supported formats', () => {

@@ -3,10 +3,10 @@ import { join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseDocument } from 'yaml';
 import { excludesProjects, parseSyncedName, scopeWorkflow, syncedName, SYNCED_PREFIX } from './workflows.mjs';
-import { readSiteCatalog } from '../../bin/domain/site-template.ts';
-import { repositoryPath, siteIssues, SNAPSHOT_FOLDER, snapshotPath, snapshotState, SNAPSHOT_SUFFIX } from '../../bin/domain/site-collections.ts';
-import { selectView } from '../../bin/domain/obsidian-base.ts';
-import { loadBase, resolveVault } from '../../bin/adapters/obsidian-base.ts';
+import { readSiteCatalog } from '../../src/cli/domain/site-template.ts';
+import { repositoryPath, siteIssues, SNAPSHOT_FOLDER, snapshotPath, snapshotState, SNAPSHOT_SUFFIX } from '../../src/cli/domain/site-collections.ts';
+import { selectView } from '../../src/cli/domain/obsidian-base.ts';
+import { loadBase, resolveVault } from '../../src/cli/adapters/obsidian-base.ts';
 import { sha256 } from '../shared/hash.ts';
 
 /**

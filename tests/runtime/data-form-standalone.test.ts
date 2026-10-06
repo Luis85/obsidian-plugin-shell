@@ -76,6 +76,38 @@ describe('DataForm outside the showcase', () => {
     wrapper.unmount();
   });
 
+  it('optional selects can be cleared without resetting the rest of the form', async () => {
+    const wrapper = mount(DataForm, { props: { definition: contact, initial: { name: 'Grace', address: { street: 'Main 1' } } }, global: { plugins: plugins() } });
+    try {
+      const select = wrapper.find('[data-field="channel"] select');
+      await select.setValue('email');
+      expect(select.find('option[value=""]').attributes('disabled')).toBeUndefined();
+      await select.setValue('');
+      await wrapper.find('form').trigger('submit'); await settle();
+      expect(wrapper.emitted('submit')).toEqual([[{ name: 'Grace', topics: [], subscribe: false, notes: '', address: { street: 'Main 1', tags: [] } }]]);
+    } finally { wrapper.unmount(); }
+  });
+
+  it('choice errors and list instructions are described directly on their controls', async () => {
+    const definition = defineForm({ schemaVersion: 1, id: 'accessible-choices', version: 1, title: 'Choices', fields: [
+      { id: 'channels', kind: 'multi', label: 'Channels', required: true, help: 'Pick at least one', choices: ['email', 'phone'] },
+      { id: 'channel', kind: 'select', label: 'Primary channel', default: 'email', choices: ['email', 'phone'] },
+      { id: 'names', kind: 'list', label: 'Names', required: true },
+    ] });
+    const wrapper = mount(DataForm, { props: { definition }, global: { plugins: plugins() }, attachTo: document.body });
+    try {
+      await wrapper.find('form').trigger('submit'); await settle();
+      for (const control of wrapper.findAll('input, textarea')) {
+        const ids = control.attributes('aria-describedby')?.split(' ') ?? [];
+        expect(ids).toHaveLength(2);
+        expect(ids.map(id => document.getElementById(id)?.textContent)).toContain('This field is required.');
+      }
+      expect(document.activeElement).toBe(wrapper.find('input').element);
+      expect(wrapper.find('textarea').attributes('aria-describedby')).toContain('names-hint');
+      expect(wrapper.find('select option[value=""]').attributes('disabled')).toBeDefined();
+    } finally { wrapper.unmount(); }
+  });
+
   it('[FORMS-16] the composable tolerates foreign events and unknown paths without inventing values', () => {
     const pinia = createPinia(); const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
     let model: ReturnType<typeof useDataForm> | undefined;

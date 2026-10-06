@@ -4,11 +4,11 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { readSetupDraft, setupCheckpointPath } from '../../bin/domain/setup-checkpoint.ts';
-import { loadSetupCheckpoint, setupCheckpointPlan, resumeSetupCheckpoint, discardSetupCheckpointPlan } from '../../bin/adapters/setup-checkpoint.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { beginSetupDraft, pauseSetup } from '../../bin/presentation/setup-progress.ts';
+import { readSetupDraft, setupCheckpointPath } from '../../src/cli/domain/setup-checkpoint.ts';
+import { loadSetupCheckpoint, setupCheckpointPlan, resumeSetupCheckpoint, discardSetupCheckpointPlan } from '../../src/cli/adapters/setup-checkpoint.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { beginSetupDraft, pauseSetup } from '../../src/cli/presentation/setup-progress.ts';
 const prd = '---\ntype: prd\nid: PRD-A\n---\nOriginal\n';
 const draft = () => ({ schemaVersion: 1, project: { name: 'Checkpoint', description: 'Preserve answers.', product: 'Continue safely.' }, prds: { mode: 'scan' }, operations: [], boilerplate: true });
 async function scratch(work) {

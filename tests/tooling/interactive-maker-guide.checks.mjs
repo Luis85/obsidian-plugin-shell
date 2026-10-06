@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { loadGuide, guideInput } from '../../bin/adapters/prototype.ts';
-import { readGuide, resolveAnswers, renderTemplate, guideBrief, answer, visible } from '../../bin/domain/guide.ts';
-import { interview } from '../../bin/presentation/guide.ts';
-import { Back, choose, confirm, selectMany, input, safe, reportError } from '../../bin/presentation/prompts.ts';
-import { SketchError } from '../../bin/domain/errors.ts';
+import { loadGuide, guideInput } from '../../src/cli/adapters/prototype.ts';
+import { readGuide, resolveAnswers, renderTemplate, guideBrief, answer, visible } from '../../src/cli/domain/guide.ts';
+import { interview } from '../../src/cli/presentation/guide.ts';
+import { Back, choose, confirm, selectMany, input, safe, reportError } from '../../src/cli/presentation/prompts.ts';
+import { SketchError } from '../../src/cli/domain/errors.ts';
 const scripted = values => { let index = 0; const output = []; return { output, ask: async () => { assert.ok(index < values.length, 'scripted prompt exhausted'); return values[index++]; }, write: text => output.push(text) }; };
 test('declarative guide resolves defaults, branches and explicit readiness', async () => {
   const guide = await loadGuide(), ready = resolveAnswers(guide, { title: 'Prototype', approved: true });

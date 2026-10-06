@@ -130,7 +130,7 @@ The transport supports at most 40 prototypes, 40 versions per prototype, 40 vari
 
 ## Implementation and verification boundaries
 
-The shared typed domain lives in `scripts/companion/prototypes/`; shell adapters are `bin/adapters/framework/prototype*.ts`. The maintained browser editor and trusted host bridge are composed into the current build, leaving v5 fixtures unchanged. Test recipes are registered in `tests/suites.json` and the existing companion workflow.
+The shared typed domain lives in `scripts/companion/prototypes/`; shell adapters are `src/cli/adapters/framework/prototype*.ts`. The maintained browser editor and trusted host bridge are composed into the current build, leaving v5 fixtures unchanged. Test recipes are registered in `tests/suites.json` and the existing companion workflow.
 
 See [verification record](PROTOTYPES-VERIFICATION.md) for executed checks and outstanding hosted evidence. This increment implements browser authoring plus shell persistence/generation. It does **not** convert the companion into a natively accepted Obsidian plugin, add real vault writes to the browser, merge variants automatically, or mark the broader PR #5 MVP complete.
 

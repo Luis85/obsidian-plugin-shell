@@ -8,10 +8,10 @@ import { dirname, join, resolve } from 'node:path';
 import { parse } from 'yaml';
 import { excludesProjects, scopePath, scopeWorkflow, syncedName } from '../../scripts/projects/workflows.mjs';
 import { checkProjects, syncWorkflows } from '../../scripts/projects/projects.mjs';
-import { frameworkProjectFolder } from '../../bin/compiler/domain/template-inputs.ts';
-import { included } from '../../bin/adapters/framework/distribution.ts';
-import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { frameworkProjectFolder } from '../../src/cli/compiler/domain/template-inputs.ts';
+import { included } from '../../src/cli/adapters/framework/distribution.ts';
+import { maintainerOnly } from '../../src/cli/compiler/emitters/framework-docs.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 
 const repository = resolve(import.meta.dirname, '../..');
@@ -288,4 +288,53 @@ test('[PROJECTS-REQUIRED-01] a projects-only pull request reports the required c
   await put('src/a.ts', 'b\n'); git('commit', '--quiet', '-am', 'shell too');
   assert.equal(scope(git('rev-parse', 'HEAD')), 'projects-only=false');
   assert.equal(scope(base), 'projects-only=false', 'an empty diff is not projects-only');
+});
+
+
+test('[PROJECTS-REQUIRED-02] required checks fail closed on pending, failed, skipped or stale project CI', async () => {
+  const { requiredProjects, projectCheckState } = await import('../../scripts/projects/required-checks.mjs');
+  assert.deepEqual(requiredProjects(['projects/companion/a.ts', 'projects/companion/b.ts', 'projects/workbench-site/package.json', 'projects/README.md']), ['companion', 'workbench-site']);
+  const green = { id: 1, head_sha: 'current', event: 'pull_request', status: 'completed', conclusion: 'success' };
+  assert.equal(projectCheckState([green], 'current'), 'passed');
+  for (const conclusion of ['failure', 'cancelled', 'skipped', 'timed_out', 'action_required', null]) {
+    assert.equal(projectCheckState([green, { ...green, id: 2, conclusion }], 'current'), 'failed');
+  }
+  for (const status of ['queued', 'in_progress', 'waiting']) {
+    assert.equal(projectCheckState([green, { ...green, id: 2, status }], 'current'), 'pending');
+  }
+  assert.equal(projectCheckState([green], 'new-head'), 'pending');
+  assert.equal(projectCheckState([{ ...green, event: 'push' }], 'current'), 'pending');
+  const workflow = parse(await readFile(join(repository, '.github/workflows/projects-required-checks.yml'), 'utf8'));
+  assert.deepEqual(workflow.jobs.report.needs, ['scope', 'project-ci']);
+  const report = workflow.jobs.report.steps[0].run;
+  for (const result of ['failure', 'cancelled', 'skipped']) {
+    assert.throws(() => execFileSync('bash', ['-e', '-c', report], { env: { ...process.env, PROJECTS_ONLY: 'true', SCOPE_RESULT: 'success', PROJECT_CI_RESULT: result } }));
+  }
+  execFileSync('bash', ['-e', '-c', report], { env: { ...process.env, PROJECTS_ONLY: 'true', SCOPE_RESULT: 'success', PROJECT_CI_RESULT: 'success' } });
+});
+
+test('[PROJECTS-NATIVE-SOCKET] synced steps that launch Obsidian run from a root inside the Linux socket path budget', async () => {
+  const { assertNativeSocketBudget } = await import('../../scripts/testing/native-isolation.mjs');
+  const { posix } = await import('node:path');
+  // GitHub checks this repository out at /home/runner/work/<repo>/<repo>; a project folder below it is 76 bytes long.
+  const workspace = '/home/runner/work/obsidian-plugin-shell/obsidian-plugin-shell';
+  let launches = 0;
+  for (const file of (await readdir(join(repository, '.github/workflows'))).filter(name => name.startsWith('projects--'))) {
+    const data = parse(await readFile(join(repository, '.github/workflows', file), 'utf8'));
+    for (const job of Object.values(data.jobs)) {
+      const steps = job.steps ?? [];
+      for (const [index, step] of steps.entries()) {
+        if (!/test:obsidian|obsidian-dev\.mjs/.test(step.run ?? '')) continue;
+        launches++;
+        const directory = step['working-directory'] ?? job.defaults?.run?.['working-directory'] ?? data.defaults?.run?.['working-directory'] ?? '.';
+        const cwd = posix.isAbsolute(directory) ? directory : posix.join(workspace, directory);
+        assert.doesNotThrow(() => assertNativeSocketBudget(posix.join(cwd, '.nq', 'XXXXXX'), 'linux'), `${file}: ${step.name}`);
+        // A short absolute root must be the project itself, bind-mounted (not a symlink, which realpath would undo).
+        if (posix.isAbsolute(directory)) {
+          assert.ok(steps.slice(0, index).some(earlier => (earlier.run ?? '').includes(`mount --bind "$PWD" ${directory}`)), `${file}: ${directory} is not a bind mount of the project`);
+        }
+      }
+    }
+  }
+  assert.ok(launches > 0, 'the companion Real Obsidian workflow launches the host');
 });

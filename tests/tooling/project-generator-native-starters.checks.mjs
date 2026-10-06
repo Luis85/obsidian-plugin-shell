@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
-import { included } from '../../bin/adapters/framework/distribution.ts';
-import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
-import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
-import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
-import { companionStarters, loadDefinitions } from '../../bin/adapters/starters/repository.ts';
+import { included } from '../../src/cli/adapters/framework/distribution.ts';
+import { maintainerOnly } from '../../src/cli/compiler/emitters/framework-docs.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/adapters/template-snapshot.ts';
+import { assembleStarterPack } from '../../src/cli/adapters/starters/operations.ts';
+import { companionStarters, loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 
 test('this maintainer regression reads the starter pack and is not copied into kits or consumer projects', () => {

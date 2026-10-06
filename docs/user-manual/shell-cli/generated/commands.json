@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "frameworkVersion": "0.4.0",
-  "source": "bin/adapters/framework/catalog.ts + help-text.ts",
+  "source": "src/cli/adapters/framework/catalog.ts + help-text.ts",
   "groups": [
     {
       "id": "templates",

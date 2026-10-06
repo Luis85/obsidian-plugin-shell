@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 // Framework checkout only: loads the shell's own src/main.ts entry. A generated project replaces src/main.ts with its
-// generated entry, so the generator does not ship this file (bin/compiler/emitters/framework-docs.ts maintainerFiles).
+// generated entry, so the generator does not ship this file (src/cli/compiler/emitters/framework-docs.ts maintainerFiles).
 import { afterEach, expect, it, vi } from 'vitest';
 vi.mock('obsidian', () => import('@test/obsidian'));
 import { App } from 'obsidian';

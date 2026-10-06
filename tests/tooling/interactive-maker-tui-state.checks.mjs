@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { initialState, step, paste, matches } from '../../bin/presentation/tui/state.ts';
-import { documentLines } from '../../bin/presentation/tui/documents.ts';
-import { dimensions, frame } from '../../bin/presentation/tui/frame.ts';
-import { clean, cells, clip, fit, wrap, graphemes } from '../../bin/presentation/tui/text.ts';
-import { useColor, useTerminal } from '../../bin/presentation/tui/mode.ts';
+import { initialState, step, paste, matches } from '../../src/cli/presentation/tui/state.ts';
+import { documentLines } from '../../src/cli/presentation/tui/documents.ts';
+import { dimensions, frame } from '../../src/cli/presentation/tui/frame.ts';
+import { clean, cells, clip, fit, wrap, graphemes } from '../../src/cli/presentation/tui/text.ts';
+import { useColor, useTerminal } from '../../src/cli/presentation/tui/mode.ts';
 const items = Array.from({ length: 40 }, (_, i) => ({ id: `id-${i}`, label: `Component ${i}` }));
 const state = (kind = 'select') => initialState({ kind, title: 'Add components', items });
 const key = (s, name, options = {}) => step(s, { name, ...options });

@@ -7,12 +7,12 @@ import { fileURLToPath } from 'node:url';
 import { validateAuthoringDocument, parseAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { airshipOptions, airshipConfig, toolingSchema } from '../../scripts/companion/tooling-contract.mjs';
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
-import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { planArtifacts, applyProject } from '../../bin/compiler/adapters/workspace-plan.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { planOperation, applyOperation } from '../../bin/adapters/framework/planning.ts';
-import { airshipEnvironment } from '../../bin/adapters/framework/airship.ts';
+import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
+import { planArtifacts, applyProject } from '../../src/cli/compiler/adapters/workspace-plan.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { planOperation, applyOperation } from '../../src/cli/adapters/framework/planning.ts';
+import { airshipEnvironment } from '../../src/cli/adapters/framework/airship.ts';
 import { exampleStarterIds, starterDocument } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const source = starterDocument('quick-capture');
@@ -168,8 +168,8 @@ test('generated preview entry points are analyzed and inert tooling stays inside
 });
 
 test('every optional Airship command has real parseable help examples for the source-driven manual',async()=>{
-  const {commands,parseCliArguments}=await import('../../bin/adapters/framework/catalog.ts');
-  const {commandHelp}=await import('../../bin/adapters/framework/help-text.ts');
+  const {commands,parseCliArguments}=await import('../../src/cli/adapters/framework/catalog.ts');
+  const {commandHelp}=await import('../../src/cli/adapters/framework/help-text.ts');
   const entries=commands.filter(entry=>entry.id.startsWith('airship '));assert.equal(entries.length,6);
   for(const entry of entries){const help=commandHelp(entry);assert.ok(help.examples.length,entry.id);
     for(const example of help.examples){const request=parseCliArguments(example.split(' ').slice(2));assert.equal(request.command,entry.id);}}

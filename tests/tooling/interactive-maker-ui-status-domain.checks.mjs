@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { computeUiStatus } from '../../bin/domain/ui-status.ts';
-import { readDefinitions, readInteractions, readJourneys } from '../../bin/domain/ui-status-input.ts';
-import { scanStub, scanAcceptanceTest, scanSpec, mentions } from '../../bin/domain/ui-status-source.ts';
-import { summarizeE2e, summarizeGallery } from '../../bin/domain/ui-status-evidence.ts';
+import { computeUiStatus } from '../../src/cli/domain/ui-status.ts';
+import { readDefinitions, readInteractions, readJourneys } from '../../src/cli/domain/ui-status-input.ts';
+import { scanStub, scanAcceptanceTest, scanSpec, mentions } from '../../src/cli/domain/ui-status-source.ts';
+import { summarizeE2e, summarizeGallery } from '../../src/cli/domain/ui-status-evidence.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const STUB = 'export const execute = async () => { throw new NotImplementedError("vp-1", "vi-1"); };\n';

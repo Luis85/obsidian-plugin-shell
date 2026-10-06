@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
-import { brainstormVerifyPlan } from '../../bin/adapters/brainstorm.ts';
+import { brainstormWizard } from '../../src/cli/presentation/brainstorm.ts';
+import { brainstormVerifyPlan } from '../../src/cli/adapters/brainstorm.ts';
 import { brainstormScratch, scriptedRich, scriptedPlain, quickNote, fakeNpm, pinnedFramework, readScratchJson, readText }
   from './interactive-maker-brainstorm-fixture.mjs';
 
@@ -18,7 +18,7 @@ test('generated prototype source offers a separately reviewed run that starts on
         'After generation, what should be available as a separately approved run?': ['test'],
         'Run the reviewed install/test plan?': [run] });
       const declined = scriptedRich(answers('no'));
-      assert.equal(await brainstormWizard(declined.ui, pinned), sourceCompletion);
+      assert.equal(await brainstormWizard(declined.ui, pinned), sourceCompletion, declined.writes.join(""));
       assert.deepEqual(declined.left(), []);
       assert.deepEqual(await npm.calls(), [], 'file-plan approval never authorizes processes');
       const execution = declined.reviews.find(item => item.title === 'Review generated-source execution');

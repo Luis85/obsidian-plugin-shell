@@ -6,7 +6,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, realpath } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 const frameworkRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 async function context(t) {
   // macOS exposes its temp directory through the system /var -> /private/var alias.

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { setupPrerequisites } from '../../bin/adapters/project-setup.ts';
+import { setupPrerequisites } from '../../src/cli/adapters/project-setup.ts';
 async function scratch(work) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-vault-root-'));
   try {

@@ -5,11 +5,11 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
+import { assembleKit, installedCompiler } from '../../src/cli/adapters/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { zip } from '../../bin/adapters/framework/zip.ts';
-import { assembleStarterPack } from '../../bin/adapters/starters/operations.ts';
+import { zip } from '../../src/cli/adapters/framework/zip.ts';
+import { assembleStarterPack } from '../../src/cli/adapters/starters/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args, expected = 0) {
   const result = spawnSync(process.execPath, [join(dir, 'bin/app'), ...args, '--json'], {

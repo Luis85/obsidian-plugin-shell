@@ -13,7 +13,7 @@ import { loadThresholds } from './thresholds.mjs';
 const limits = loadThresholds().maintainability;
 const policy = { version: 2, cyclomatic: limits.cyclomatic, cognitive: limits.cognitive, duplication: limits.duplicationPercent,
   minTokens: limits.duplicationMinTokens, minLines: limits.duplicationMinLines,
-  mode: 'mild', ignoreImports: true, production: 'every src and bin JS/TS/Vue file, including generated consumers',
+  mode: 'mild', ignoreImports: true, production: 'every authored src JS/TS/Vue file, including the CLI and generated consumers',
   gated: ['production', 'templates'],
   severities: { 'complexity-cyclomatic': 'error', 'complexity-cognitive': 'error', 'complexity-crap': 'warn' } };
 const stageConfig = { failOnParseError: true, duplicates: { ignoreDefaults: false },

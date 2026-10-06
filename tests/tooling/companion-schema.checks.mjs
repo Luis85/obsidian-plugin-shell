@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { companionProjectSchema } from '../../scripts/companion/schema/project.mjs';
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
 import { schemaCorpus } from './companion-schema-fixture.mjs';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 import { retiredProjectText } from '../support/retired-projects.mjs';

@@ -24,7 +24,7 @@ export async function readJournal(root) {
     || !['running', 'failed', 'verified'].includes(journal.status) || !journal.options || typeof journal.options !== 'object' || Array.isArray(journal.options)
     || !journal.identity || typeof journal.identity !== 'object' || Array.isArray(journal.identity) || invalidAgentMcp(journal.agentMcp)
     || journal.stages.some(stage => {
-      if (!stage || !['install', 'browser-provision', 'verify', 'native-install'].includes(stage.id) || ids.has(stage.id) || typeof stage.selected !== 'boolean'
+      if (!stage || !['install', 'cli-build', 'browser-provision', 'verify', 'native-install'].includes(stage.id) || ids.has(stage.id) || typeof stage.selected !== 'boolean'
         || !['pending', 'skipped', 'running', 'failed', 'verified'].includes(stage.status) || !Array.isArray(stage.command) || stage.command.some(value => typeof value !== 'string')) return true;
       ids.add(stage.id); return false;
     })) throw new Error('Invalid setup journal; preserve it for inspection');

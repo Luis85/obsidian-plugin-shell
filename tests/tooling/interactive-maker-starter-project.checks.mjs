@@ -3,8 +3,8 @@ import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { starterProjectPlan, completeStarterProject, companionStarterSet, starterInvocation, invocationDirectory, enclosingVault, derivedId, derivedName } from '../../bin/adapters/framework/starter-project.ts';
-import { result } from '../../bin/adapters/framework/contracts.ts';
+import { starterProjectPlan, completeStarterProject, companionStarterSet, starterInvocation, invocationDirectory, enclosingVault, derivedId, derivedName } from '../../src/cli/adapters/framework/starter-project.ts';
+import { result } from '../../src/cli/adapters/framework/contracts.ts';
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function withWorkspace(check) {

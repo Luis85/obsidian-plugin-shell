@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { starterFolder, checkDirectoryChain, parseDefinition, loadDefinitions, companionStarters } from '../../bin/adapters/starters/repository.ts';
-import { validateDefinition } from '../../bin/adapters/starters/validation.ts';
+import { starterFolder, checkDirectoryChain, parseDefinition, loadDefinitions, companionStarters } from '../../src/cli/adapters/starters/repository.ts';
+import { validateDefinition } from '../../src/cli/adapters/starters/validation.ts';
 import { code, fileStarter, shipped, workspace } from './starters-fixture.mjs';
 import { retiredProject } from '../support/retired-projects.mjs';
 

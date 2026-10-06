@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
+import { maintainerOnly } from '../../src/cli/compiler/emitters/framework-docs.ts';
 import { APPROVALS_PATH } from '../../scripts/quality/self-review-approvals.mjs';
 
 // Generated-project template sources live in templates/: the companion runtime copied into generated projects,
@@ -46,7 +46,7 @@ test('no source, test, plugin, workflow or configuration file names a removed te
   const self = 'tests/tooling/compiler-template-layout.checks.mjs';
   // The owner approvals record quotes deleted configuration lines verbatim; that history is its purpose, not a live reference.
   const historical = new Set([self, APPROVALS_PATH]);
-  const sources = (await Promise.all(['bin', 'scripts', 'templates', 'tests', 'plugins', 'configs', '.github', '.claude'].map(files))).flat()
+  const sources = (await Promise.all(['src', 'scripts', 'templates', 'tests', 'plugins', 'configs', '.github', '.claude'].map(files))).flat()
     .filter(path => /\.(?:[cm]?[jt]s|json|ya?ml|md|py)$/.test(path) && !historical.has(path));
   const offenders = [];
   for (const path of sources) {

@@ -3,8 +3,8 @@ import { mkdtemp, mkdir, readFile, readdir, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { launchProcess } from '../../bin/presentation/wizards/process-launch.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
+import { launchProcess } from '../../src/cli/presentation/wizards/process-launch.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const BACK = Symbol('back');
 async function scratch(fn) {

@@ -1,15 +1,15 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { newDocument, openDocument, documentText } from '../../bin/domain/document.ts';
-import { slug, title } from '../../bin/domain/errors.ts';
-import { runOperations } from '../../bin/application/operations.ts';
-import { outline } from '../../bin/application/summary.ts';
-import { Workspace } from '../../bin/application/workspace.ts';
-import { sketchSchema } from '../../bin/application/schema.ts';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { noteEntity } from '../../bin/compiler/emitters/persistence-code.ts';
+import { newDocument, openDocument, documentText } from '../../src/cli/domain/document.ts';
+import { slug, title } from '../../src/cli/domain/errors.ts';
+import { runOperations } from '../../src/cli/application/operations.ts';
+import { outline } from '../../src/cli/application/summary.ts';
+import { Workspace } from '../../src/cli/application/workspace.ts';
+import { sketchSchema } from '../../src/cli/application/schema.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
+import { noteEntity } from '../../src/cli/compiler/emitters/persistence-code.ts';
 import { noteOperations } from '../../templates/companion/runtime/note-operations.ts';
-import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
+import { visualSources } from '../../src/cli/compiler/emitters/visual-ports.ts';
 import { visualAllocate, visualText } from '../../scripts/companion/visual/visual-ir.mjs';
 const base = () => newDocument('My sketch');
 function page() { return runOperations(base(), [{ op: 'page.add', title: 'Home', as: 'home' }]); }

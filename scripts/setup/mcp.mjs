@@ -29,7 +29,12 @@ export async function planLocalMcp(root, request, previous = null) {
     if (conflict) throw new Error(`MCP_CONFIG_CONFLICT: ${conflict} is edited or not setup-owned; preserve/reconcile it before disabling MCP.`);
     return { version: 1, action, enabled: false, server: 'workbench', transport: 'stdio', clients: [], plan, files: receipt(plan) };
   }
-  await access(join(root, 'bin/app'));
+  try { await access(join(root, 'bin/app')); }
+  catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    // Source setup builds the launcher before MCP can be started.
+    await access(join(root, 'src/cli/launcher.mjs'));
+  }
   const plan = await createFilePlan(root, setupMcpFiles());
   const [conflict] = mcpConflicts(plan.changes, owned);
   if (conflict) throw new Error(`MCP_CONFIG_CONFLICT: ${conflict} has user or external changes; preserve/reconcile it before setup manages this file.`);

@@ -1,7 +1,7 @@
-import { loadDefinitions } from '../../bin/adapters/starters/repository.ts';
+import { loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
 /** Run with node --inspect-brk --experimental-strip-types scripts/compiler/debug-fixture.mjs. */
 import { fileURLToPath } from 'node:url';
-import { analyzeProject } from '../../bin/compiler/index.ts';
+import { analyzeProject } from '../../src/cli/compiler/index.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const source=JSON.stringify((await loadDefinitions(root)).find(entry=>entry.definition.id==='blank').definition.generator.document);
 const result=await analyzeProject(source,'blank.companion.json',{

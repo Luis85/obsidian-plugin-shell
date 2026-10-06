@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { manifestRules } from '../../bin/adapters/framework/submission.ts';
+import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
+import { manifestRules } from '../../src/cli/adapters/framework/submission.ts';
 
 // A project generated from a shipped starter with its embedded identity must pass the manifest rules of `check submission`.
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);

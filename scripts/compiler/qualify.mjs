@@ -1,4 +1,4 @@
-import { loadDefinitions } from '../../bin/adapters/starters/repository.ts';
+import { loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
 /** Explicit qualified-toolchain integration: generated plugin and offline browser output. */
 import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -7,8 +7,8 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
 import { createHash } from 'node:crypto';
-import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
-import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
+import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const npm=process.env.QUALIFIED_NPM;
 // --no-browser (CI without the e2e opt-in) keeps generation, install, verification and builds and skips both browser runs.

@@ -67,15 +67,18 @@ async function selectedCoreScope() {
   const { include, thresholds } = config.test.coverage;
   return { files: include.flatMap(pattern => globSync(pattern)), thresholds };
 }
-function sources(directory) {
+function sources(directory, cliRoot) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
-    return entry.isDirectory() ? sources(path) : /\.(ts|vue)$/.test(entry.name) ? [path] : [];
+    return path === cliRoot ? [] : entry.isDirectory() ? sources(path, cliRoot) : /\.(ts|vue)$/.test(entry.name) ? [path] : [];
   });
+}
+export function runtimeCoverageInputs(root = process.cwd()) {
+  return sources(join(root, 'src'), join(root, 'src', 'cli'));
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const report = JSON.parse(readFileSync('reports/production-coverage/coverage-summary.json', 'utf8'));
-  const result = assertCoverageGates(report, sources('src'));
+  const result = assertCoverageGates(report, runtimeCoverageInputs());
   if (process.argv.includes('--selected-core')) {
     const core = await selectedCoreScope();
     result.selectedCore = assertSelectedCoreGate(report, core.files, core.thresholds);

@@ -20,6 +20,7 @@ export function verifySteps(env = process.env) {
     // Fail closed before any suite runs: every test file belongs to exactly one suite.
     script('suites-check', 'scripts/testing/suites.mjs', ['--check']),
     script('dependency-policy', 'scripts/security/check-dependencies.mjs'),
+    script('cli-build', 'scripts/bundling/build-cli.mjs'),
     // The qualified build creates Nuxt's generated type inputs before type-aware
     // lint probes inspect a fresh checkout. Verification never invents those types.
     script('build', 'scripts/bundling/build.mjs'),
@@ -31,7 +32,7 @@ export function verifySteps(env = process.env) {
     script('workbench-check', 'scripts/quality/check-workbench-plugins.mjs'),
     script('typecheck', vueTsc, ['--noEmit'], ['build']),
     script('lint-source', 'scripts/quality/lint-source.mjs'),
-    script('eslint-source', eslint, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'bin', 'plugins', '--max-warnings', '0'], ['build']),
+    script('eslint-source', eslint, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'plugins', '--max-warnings', '0'], ['build']),
     script('maker-types', 'node_modules/typescript/bin/tsc', ['--noEmit', '--project', 'configs/types/tsconfig.maker.json']),
     script('maker-coverage-run', vitest, ['run', '--coverage', '--config', 'configs/testing/vitest.maker.config.mjs']),
     script('maker-coverage-gate', 'scripts/quality/maker-coverage.mjs', [], ['maker-coverage-run']),

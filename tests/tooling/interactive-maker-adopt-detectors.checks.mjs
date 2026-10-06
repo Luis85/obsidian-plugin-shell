@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { analyzeInventory } from '../../bin/application/adoption/analyze.ts';
-import { builderClass } from '../../bin/domain/adoption/angular.ts';
-import { InventoryView, parseLooseJson } from '../../bin/domain/adoption/source.ts';
-import { majorOf, rangeAdmitsMajor, versionOf } from '../../bin/domain/adoption/version.ts';
+import { analyzeInventory } from '../../src/cli/application/adoption/analyze.ts';
+import { builderClass } from '../../src/cli/domain/adoption/angular.ts';
+import { InventoryView, parseLooseJson } from '../../src/cli/domain/adoption/source.ts';
+import { majorOf, rangeAdmitsMajor, versionOf } from '../../src/cli/domain/adoption/version.ts';
 import { inventoryOf, noTargets, targets } from './interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
