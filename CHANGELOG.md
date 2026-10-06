@@ -50,6 +50,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 ### Fixed
 
 - Candidate qualification gives the complete tooling evidence inventory a bounded 60-minute execution budget after measured runs exceeded the previous 30-minute cap. Individual test deadlines and other producer limits remain unchanged, and timed-out process trees still produce failed evidence.
+- Candidate runtime evidence uses the same complete runtime inventory as its coverage gate after CLI sources moved to `src/cli`; CLI coverage remains independently checked.
 
 - Keep uncertain Task note edits blocked until a successful reload, preserve selection during pending writes, and report preference feedback failures without mislabeling committed saves.
 - Restore native checkbox sizing in runtime forms, connect choice errors and list instructions to controls, and allow clearing optional selections without resetting other fields.
