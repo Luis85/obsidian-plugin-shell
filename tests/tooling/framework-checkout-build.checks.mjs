@@ -11,19 +11,20 @@ import { extractArchive } from './framework-archive-fixture.mjs';
 
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 
-test('a fresh tracked checkout builds a complete CLI that runs outside the checkout', { timeout: 180000 }, async t => {
+test('a clean source snapshot builds a complete CLI that runs outside the checkout', { timeout: 180000 }, async t => {
   const scratch = await realpath(await mkdtemp(join(tmpdir(), 'workbench-checkout-')));
   t.after(() => rm(scratch, { recursive: true, force: true }));
   const checkout = join(scratch, 'checkout'), portable = join(scratch, 'portable');
   await mkdir(checkout); await mkdir(portable);
-  const tracked = execFileSync('git', ['ls-files', '--cached', '-z'], {
+  const inputs = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {
     cwd: repository, encoding: 'utf8', maxBuffer: 4_000_000,
   }).split('\0').filter(Boolean);
-  assert.ok(tracked.length > 0, 'exercise a real source inventory');
-  assert.deepEqual(tracked.filter(path => path.startsWith('bin/')), [], 'the maintainer repository must not track partial build output');
-  // Copy only tracked inputs: a locally built bin must not conceal a broken clean checkout.
-  for (let offset = 0; offset < tracked.length; offset += 32) {
-    await Promise.all(tracked.slice(offset, offset + 32).map(async path => {
+  assert.ok(inputs.length > 0, 'exercise a real source inventory');
+  assert.deepEqual(inputs.filter(path => path.startsWith('bin/')), [], 'generated build output must stay outside the source inventory');
+  // Include new consumer features alongside their edited registrations, excluding ignored build output.
+  // A locally built bin must not conceal a broken build from the source snapshot.
+  for (let offset = 0; offset < inputs.length; offset += 32) {
+    await Promise.all(inputs.slice(offset, offset + 32).map(async path => {
       await mkdir(dirname(join(checkout, path)), { recursive: true });
       await cp(join(repository, path), join(checkout, path));
     }));
@@ -36,14 +37,24 @@ test('a fresh tracked checkout builds a complete CLI that runs outside the check
   // Packaging through the compiled CLI must retain the shipped compiler's identity.
   // Direct source calls alone cannot detect a broken bundled TypeScript import.
   const archive = join(scratch, 'framework.zip'), repacked = join(scratch, 'repacked');
-  execFileSync(process.execPath, ['bin/app', 'framework', 'pack', '--out', archive, '--yes', '--json'], {
+  const packed = spawnSync(process.execPath, ['bin/app', 'framework', 'pack', '--out', archive, '--yes', '--json'], {
     cwd: checkout, encoding: 'utf8', timeout: 120000, maxBuffer: 4_000_000,
   });
-  await mkdir(repacked);
-  await extractArchive(await readFile(archive), repacked);
-  const kit = await verifyKit(repacked);
-  const pkg = JSON.parse(await readFile(join(checkout, 'package.json'), 'utf8'));
-  assert.equal(kit.compilerVersion, pkg.devDependencies.typescript);
+  assert.equal(packed.error, undefined, packed.error?.message);
+  const identity = JSON.parse(await readFile(join(checkout, 'manifest.json'), 'utf8'));
+  if (identity.id === 'plugin-shell') {
+    assert.equal(packed.status, 0, packed.stdout + packed.stderr);
+    await mkdir(repacked);
+    await extractArchive(await readFile(archive), repacked);
+    const kit = await verifyKit(repacked);
+    const pkg = JSON.parse(await readFile(join(checkout, 'package.json'), 'utf8'));
+    assert.equal(kit.compilerVersion, pkg.devDependencies.typescript);
+  } else {
+    // Renamed-template qualification must retain the consumer's distribution boundary.
+    assert.equal(packed.status, 1, packed.stdout + packed.stderr);
+    assert.equal(JSON.parse(packed.stdout).diagnostics[0].code, 'KIT_AUTHORING_ROOT');
+    assert.ok(!(await readdir(scratch)).includes('framework.zip'), 'refused consumer packaging writes no archive');
+  }
   await cp(join(checkout, 'bin'), join(portable, 'bin'), { recursive: true });
   assert.deepEqual(await readdir(portable), ['bin']);
   for (const args of [['version'], ['framework', 'status']]) {

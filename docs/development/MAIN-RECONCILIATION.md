@@ -37,6 +37,12 @@ Windows clean-checkout evidence exposed esbuild package paths that are absolute
 when the dependency junction crosses drives. License assembly now resolves those
 paths before reading metadata; its regression reproduces the failed absolute
 path read while retaining exact-version, license and input-link checks.
+The checkout regression also honors the adopted plugin identity: framework
+sources must produce a valid compiled archive, while renamed consumers must
+refuse framework distribution packaging without writing an archive. Both retain
+the isolated CLI and strict type-error probes. Its source snapshot includes new,
+non-ignored consumer features together with edited registrations, while excluding
+the ignored built output so a pre-existing CLI cannot conceal a build defect.
 The final copied-bin acceptance also passed after the metadata synchronization.
 Evidence is retained in `reports/reconciliation/integrated-verification.json`,
 `integrated-full-verify.log`, `integrated-check.log` and `final-copied-bin.log`.
