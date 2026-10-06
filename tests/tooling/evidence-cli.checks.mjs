@@ -83,6 +83,19 @@ test('a hung actual producer is terminated as an owned process tree and retains 
   assert.notEqual(evidenceCli(root, 'check', result.path).status, 0);
 });
 
+test('tooling can complete under its aggregate budget while every producer rejects invalid deadlines', async t => {
+  const root = await evidenceFixture(t);
+  const result = await runEvidence(root, 'tooling', { timeoutMs: 30 * 60 * 1000 + 1 });
+  assert.equal(result.packet.status, 'passed');
+  assert.equal(evidenceCli(root, 'check', result.path).status, 0);
+  for (const producer of ['tooling', 'runtime', 'coverage', 'browser', 'native', 'artifact']) {
+    const maximum = (producer === 'tooling' ? 60 : 30) * 60 * 1000;
+    for (const timeoutMs of [null, 0, -1, 1.5, NaN, Infinity, maximum + 1]) {
+      await assert.rejects(runEvidence(root, producer, { timeoutMs }), /EVIDENCE_TIMEOUT_POLICY/);
+    }
+  }
+});
+
 test('actual CLI distinguishes a literal archive from malformed local Git metadata without falling back to archive', async t => {
   const root = await evidenceFixture(t);
   const first = await producedPacket(root); assert.equal(first.run.status, 0, first.run.stderr);

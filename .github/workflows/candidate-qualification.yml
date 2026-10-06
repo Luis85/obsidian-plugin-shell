@@ -51,11 +51,11 @@ jobs:
   candidate:
     runs-on: ubuntu-24.04
     # Job budget sized from measured steps: npm ci (~3 min), release:rehearse
-    # with the complete verify (~28 min), three runtime repeats, core and
+    # with the complete verify (~59 min, including ~43 min of tooling), three runtime repeats, core and
     # production coverage, browser provisioning and served components, three
-    # native sessions plus timing samples and the live security gate. 70 minutes
+    # native sessions plus timing samples and the live security gate. 100 minutes
     # covers every step; it is not a test deadline or performance threshold.
-    timeout-minutes: 70
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
