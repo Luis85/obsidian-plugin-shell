@@ -66,7 +66,7 @@ export async function kitPresent(root: string): Promise<boolean> {
   return exists(join(root, 'bin/kit.json'));
 }
 
-const templatePluginConfig = /^bin\/template\/plugins\/([^/]+)\/config\.json$/;
+const templatePluginConfig = /^bin\/template\/src\/cli\/sdk\/([^/]+)\/config\.json$/;
 /**
  * The bundled CLI reads each Workbench plugin's runtime config beside app.js. That copy is editable data (enable/disable),
  * so it is schema-checked instead of fingerprinted; its shipped default is the fingerprinted template copy.

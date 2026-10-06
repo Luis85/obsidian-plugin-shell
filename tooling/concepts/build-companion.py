@@ -1,6 +1,9 @@
 from pathlib import Path
 import argparse, hashlib, json, os, shutil, subprocess
-ROOT=Path(__file__).resolve().parents[2] / "docs/concepts/companion"
+REPO=Path(__file__).resolve().parents[2]
+ROOT=REPO / "docs/concepts/companion"
+# Editable concept modules live in the companion source project; vendor and test-kit stay beside the concept.
+APP=REPO / "src/companion/app"
 
 # The one schema 6 project contract, bundled by the pinned Node toolchain. The embedded bytes are part of --check.
 def contract_bundle():
@@ -11,7 +14,7 @@ def contract_bundle():
  return run.stdout.decode('utf-8')
 
 def build(output: Path, check: bool = False):
- s=(ROOT/'src/base.html').read_text(encoding='utf-8')
+ s=(APP/'base.html').read_text(encoding='utf-8')
  def change(old,new):
   nonlocal s
   if s.count(old)!=1:raise ValueError(f'Expected one baseline seam, got {s.count(old)}: {old[:90]}')
@@ -65,12 +68,11 @@ def build(output: Path, check: bool = False):
  vendor_inputs=vendor_scripts+['vue-flow.css','vue-flow.scoped.css']
  source_inputs=modules+['companion-contract.js','style-guide-model.js','test-data-model.js','data-source-model.js','semantic-model.js','component-variants.js','vault-project.js','brick-catalog.js','catalog.js','canvas-catalog.js','flow-catalog.js']+styles
  tools=['engine.mjs','adapters.mjs','storage.mjs','server.mjs','cli.mjs','faker-provider.mjs','client.mjs']
- inputs={'src/'+name for name in source_inputs}|{'vendor/'+name for name in vendor_inputs}|{'test-kit/'+name for name in tools}
- config=json.loads((ROOT.parents[2]/'configs/quality/fallow.json').read_text(encoding='utf-8'))
- prefix='docs/concepts/companion/'
- owned_roots=('src/','vendor/','test-kit/')
- registered=[entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix) and entry[len(prefix):].startswith(owned_roots)]
- actual={file.relative_to(ROOT).as_posix() for folder in ['src','vendor','test-kit'] for file in (ROOT/folder).rglob('*') if file.suffix in {'.js','.css','.mjs'}}
+ owned={'src/companion/app/':source_inputs,'docs/concepts/companion/vendor/':vendor_inputs,'docs/concepts/companion/test-kit/':tools}
+ inputs={folder+name for folder,names in owned.items() for name in names}
+ config=json.loads((REPO/'configs/quality/fallow.json').read_text(encoding='utf-8'))
+ registered=[entry for entry in config['entry'] if entry.startswith(tuple(owned))]
+ actual={file.relative_to(REPO).as_posix() for folder in owned for file in (REPO/folder).rglob('*') if file.suffix in {'.js','.css','.mjs'}}
  if inputs!=set(registered) or len(registered)!=len(inputs) or inputs!=actual:
   raise ValueError('Concept assembly/analyzer entry inventory differs; do not hide unassembled source')
  # Pin the provenance manifest too: edits cannot legitimize altered vendor bytes.
@@ -84,7 +86,7 @@ def build(output: Path, check: bool = False):
  tool_sources={name:(ROOT/'test-kit'/name).read_text(encoding='utf-8') for name in tools}
  engine=tool_sources['engine.mjs'].replace('export function createFixtureEngine()', 'function createFixtureEngine()',1)
  adapters=tool_sources['adapters.mjs'].replace("import { createFixtureEngine } from './engine.mjs';\n",'',1).replace('export function createFixtureAdapter(', 'function createFixtureAdapter(',1)
- extension=engine+'\n'+adapters+'\n'+'\n'.join((ROOT/'src'/m).read_text(encoding='utf-8') for m in modules)
+ extension=engine+'\n'+adapters+'\n'+'\n'.join((APP/m).read_text(encoding='utf-8') for m in modules)
  s=s.replace('</head>', '<script type="application/json" id="test-data-tool-sources">'+json.dumps(tool_sources).replace('<','\\u003c')+'</script>\n</head>',1)
  change("window.addEventListener('beforeunload',save);\nrender();", "window.addEventListener('beforeunload',save);\n"+extension+"\nrender();")
  for path in ['tooling/concepts/concept-contract.ts','tooling/concepts/contract-bundle.mjs']:
@@ -108,8 +110,8 @@ def build(output: Path, check: bool = False):
  prd_limits=ROOT.parents[2]/'src/shared/companion/prd-limits.mjs'
  if 'src/shared/companion/prd-limits.mjs' not in config['entry']:raise ValueError('Shared PRD limits missing from inventory')
  shared=(ds_shared+'\n'+composition_contract.read_text(encoding='utf-8')+visual_shared+'\n'+storymap_contract.read_text(encoding='utf-8')+'\n'+prd_limits.read_text(encoding='utf-8').replace('export const ','const ')).replace('export const ', 'const ').replace('export function ', 'function ')
- change('<script>','<script>\n'+shared+'\n'+(ROOT/'src/companion-contract.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/brick-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/canvas-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/flow-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/vault-project.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/style-guide-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/test-data-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/data-source-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/semantic-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/component-variants.js').read_text(encoding='utf-8')+'\nlet dialogReturnFocus=null;\n')
- change('</style>',''.join((ROOT/'src'/name).read_text(encoding='utf-8') for name in styles)+'\n</style>')
+ change('<script>','<script>\n'+shared+'\n'+(APP/'companion-contract.js').read_text(encoding='utf-8')+'\n'+(APP/'brick-catalog.js').read_text(encoding='utf-8')+'\n'+(APP/'catalog.js').read_text(encoding='utf-8')+'\n'+(APP/'canvas-catalog.js').read_text(encoding='utf-8')+'\n'+(APP/'flow-catalog.js').read_text(encoding='utf-8')+'\n'+(APP/'vault-project.js').read_text(encoding='utf-8')+'\n'+(APP/'style-guide-model.js').read_text(encoding='utf-8')+'\n'+(APP/'test-data-model.js').read_text(encoding='utf-8')+'\n'+(APP/'data-source-model.js').read_text(encoding='utf-8')+'\n'+(APP/'semantic-model.js').read_text(encoding='utf-8')+'\n'+(APP/'component-variants.js').read_text(encoding='utf-8')+'\nlet dialogReturnFocus=null;\n')
+ change('</style>',''.join((APP/name).read_text(encoding='utf-8') for name in styles)+'\n</style>')
  # Local pinned vendors only. Preserve upstream licenses and no runtime requests.
  vendor=ROOT/'vendor'
  css=(vendor/'vue-flow.scoped.css').read_text(encoding='utf-8')

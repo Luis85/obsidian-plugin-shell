@@ -3,4 +3,4 @@
 @import "@nuxt/ui";
 @import "./editor-reset.css";
 @source "./components";
-@source "../../../../node_modules/.nuxt-ui";
+@source "../../../node_modules/.nuxt-ui";

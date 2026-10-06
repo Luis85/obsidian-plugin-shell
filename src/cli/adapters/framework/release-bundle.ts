@@ -49,9 +49,11 @@ function rebaseModuleLocations(ts: Typescript, content: string, file: string): s
 /** A Workbench plugin's config.json is editable kit data (enable/disable), not bundled code: read it beside app.js. */
 function pluginConfig(root: string, { path }: OnLoadArgs): OnLoadResult | undefined {
   const file = relative(root, path).split(sep).join('/');
-  if (!/^plugins\/[^/]+\/config\.json$/.test(file)) return undefined;
+  // The SDK source is src/cli/sdk/<id>/; its editable runtime copy ships as bin/plugins/<id>/config.json.
+  const plugin = /^src\/cli\/sdk\/([^/]+)\/config\.json$/.exec(file);
+  if (!plugin) return undefined;
   return { loader: 'js', contents: "import { readFileSync } from 'node:fs';\nexport default JSON.parse(readFileSync(new URL(" +
-    JSON.stringify('./' + file) + ", import.meta.url), 'utf8'));\n" };
+    JSON.stringify(`./plugins/${plugin[1]}/config.json`) + ", import.meta.url), 'utf8'));\n" };
 }
 
 const insideDependencies = (path: string): boolean => path === 'node_modules' || path.startsWith('node_modules' + sep);
@@ -72,7 +74,7 @@ function templateLocations(ts: Typescript, root: string): Plugin {
     name: 'release-template-locations',
     setup(builder: PluginBuild) {
       builder.onResolve({ filter: /^typescript$/ }, () => ({ path: './tools/typescript.js', external: true }));
-      builder.onLoad({ filter: /[\\/]plugins[\\/][^\\/]+[\\/]config\.json$/ }, args => pluginConfig(root, args));
+      builder.onLoad({ filter: /[\\/]sdk[\\/][^\\/]+[\\/]config\.json$/ }, args => pluginConfig(root, args));
       builder.onLoad({ filter: /\.(?:[cm]?js|ts)$/ }, args => frameworkSource(ts, root, args));
     },
   };

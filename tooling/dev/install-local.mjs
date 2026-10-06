@@ -22,7 +22,7 @@ export async function installLocal({ root = process.cwd(), vault = '.dev-vault',
   const manifest = JSON.parse(await readFile(join(sourcePath, 'manifest.json'), 'utf8'));
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(manifest.id)) throw new Error('INVALID_PLUGIN_ID');
   const vaultPath = resolve(root, vault); await contained(root, vaultPath);
-  const target = join(vaultPath, configDir, 'src/cli/sdk', manifest.id); await contained(root, target);
+  const target = join(vaultPath, configDir, 'plugins', manifest.id); await contained(root, target);
   const plan = []; const snapshot = new Map();
   for (const name of assets) {
     const artifact = join(sourcePath, name); const stat = await lstat(artifact);

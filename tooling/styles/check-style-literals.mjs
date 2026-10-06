@@ -6,11 +6,14 @@ import { scanStyleSource } from './style-literals.mjs';
 import { suggestTokens } from './style-literal-suggestions.mjs';
 const defaultRoot = fileURLToPath(new URL('../../', import.meta.url));
 const scanned = ['src'];
+// Same scope as before the src project split: these subtrees were docs/concepts/companion and harness/, outside src.
+// The companion concept keeps its own assembly and browser verification; the harness carries the simulated host palette.
+const preSplitOutside = new Set(['src/companion', 'src/plugin/harness']);
 async function listFiles(root, folder) {
   const found = [];
   for (const entry of await readdir(join(root, folder), { withFileTypes: true })) {
     const path = folder + '/' + entry.name;
-    if (entry.isDirectory()) found.push(...await listFiles(root, path));
+    if (entry.isDirectory()) { if (!preSplitOutside.has(path)) found.push(...await listFiles(root, path)); }
     else if (/\.(?:vue|css)$/.test(entry.name)) found.push(path);
   }
   return found.sort();
