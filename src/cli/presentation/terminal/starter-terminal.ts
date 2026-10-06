@@ -1,5 +1,5 @@
 import { OperationError, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
-import { Back } from '../prompts.ts';
+import { Back } from '#tui/prompts.ts';
 import { startWizard } from '../wizards/registry.ts';
 import { starterRequest } from '../wizards/starter.ts';
 /** Terminal-only presentation and prompts for `new`. The operation result stays the authority. */

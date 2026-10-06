@@ -1,10 +1,10 @@
 import type { Workspace } from '../application/workspace.ts';
 import { outline } from '../application/summary.ts';
 import { pageNodes, surfaceFor } from '../domain/pages.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { interactions } from '../domain/interactions.ts';
 import { workspaceContext } from './context.ts';
-import { titleInput, bulkTitles, choose, selectMany, input, reportError, type Prompts } from './prompts.ts';
+import { titleInput, bulkTitles, choose, selectMany, input, reportError, type Prompts } from '#tui/prompts.ts';
 interface SavedSource { id: string; name: string; kind: string; status?: string; operations: { id: string; slug: string; name: string; direction: string; input?: { mode?: string } }[] }
 function availableSources(workspace: Workspace): SavedSource[] {
   const saved = workspace.document.design.dataSources as { sources?: SavedSource[] } | undefined;

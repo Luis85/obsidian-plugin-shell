@@ -22,7 +22,7 @@
         "../../node_modules/.nuxt-ui/*"
       ],
       "@test/obsidian": [
-        "../../tests/support/obsidian/index.ts"
+        "../../src/plugin/tests/support/obsidian/index.ts"
       ]
     },
     "noEmit": true,
@@ -32,11 +32,11 @@
   "include": [
     "../../src/**/*.ts",
     "../../src/**/*.vue",
-    "../../harness/app/**/*.ts",
-    "../../tests/runtime/**/*.ts",
+    "../../src/plugin/harness/app/**/*.ts",
+    "../../src/plugin/tests/unit/**/*.ts",
     "../../tests/support/**/*.ts",
-    "../../tests/e2e/**/*.ts",
-    "../../tests/obsidian/**/*.ts",
+    "../../src/plugin/tests/e2e/**/*.ts",
+    "../../src/plugin/tests/obsidian/**/*.ts",
     "../testing/playwright.config.ts"
   ]
 }

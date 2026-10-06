@@ -1,7 +1,7 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { relationshipScope } from './relationship-model.ts';
 import { literal, requireValue, symbol, type Model, type Entity, type Operation } from './model.ts';
-import type { Schema } from '../../../../templates/companion/runtime/contract.ts';
+import type { Schema } from '#shared/companion/runtime-contract.ts';
 import { relativeImport, type Add } from './file-code.ts';
 import { sampleCode, typeCode } from './schema-code.ts';
 import { validateNoteWire } from './note-contracts.ts';

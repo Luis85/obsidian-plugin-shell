@@ -1,5 +1,5 @@
 import { object, keys, list } from './data.ts';
-import { requireSketch, hasControls } from './errors.ts';
+import { requireSketch, hasControls } from '#shared/contracts/sketch-errors.ts';
 import { getPath, matches, readPath } from './form-model.ts';
 /**
  * The business-rule expression language: inert JSON, never code. A comparison reads one dotted path of the

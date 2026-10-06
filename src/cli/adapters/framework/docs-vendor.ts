@@ -1,6 +1,6 @@
 import { readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { readBounded, readJson } from './files.ts';
 import { object } from './configuration.ts';
 import { requireThat } from './contracts.ts';

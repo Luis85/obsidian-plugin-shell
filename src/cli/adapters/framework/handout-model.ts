@@ -1,4 +1,4 @@
-import { sha256 } from '../../../../scripts/shared/hash.ts';
+import { sha256 } from '#shared/platform/hash.ts';
 import { handoutSections } from './handout-questions.ts';
 
 export const HANDOUT_PATH = 'PROJECT-SETUP-HANDOUT.md';

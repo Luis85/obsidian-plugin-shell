@@ -3,9 +3,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths: &memory-inputs
-      - 'scripts/hindsight/**'
-      - 'tests/hindsight/**'
-      - 'tests/support/hindsight-fixture.mjs'
+      - 'src/cli/tooling/hindsight/**'
+      - 'tooling/tests/hindsight/**'
+      - 'tooling/tests/support/hindsight-fixture.mjs'
       - 'tests/suites.json'
       - 'src/cli/launcher.mjs'
       - 'src/cli/app.ts'
@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: python3 -c 'import sys; assert sys.version_info >= (3, 11)'
       - name: Verify every test directory is registered
-        run: node scripts/testing/suites.mjs --check
+        run: node tooling/testing/suites.mjs --check
       - name: Typecheck the memory tooling with the locked TypeScript
         shell: bash
         run: node "$QUALIFIED_NPM" run typecheck:memory
@@ -71,4 +71,4 @@ jobs:
         run: node "$QUALIFIED_NPM" run test:memory
       - name: Stdlib Python adapter contracts with explicit SDK doubles
         shell: bash
-        run: python3 -B -m unittest discover -s tests/hindsight -p 'test_*.py' -v
+        run: python3 -B -m unittest discover -s tooling/tests/hindsight -p 'test_*.py' -v

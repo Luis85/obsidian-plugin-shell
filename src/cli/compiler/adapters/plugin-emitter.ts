@@ -19,11 +19,11 @@ import { uiQualityCode, uiQualityScripts } from '../emitters/ui-quality-code.ts'
 import { hostCode } from '../emitters/host-code.ts';
 import { visualCode } from '../emitters/visual-files.ts';
 import { visualDefinitions, visualPackages, visualAdapterPath } from '../emitters/visual-model.ts';
-import { visualNodes } from '../../../../scripts/companion/visual/visual-ir.mjs';
+import { visualNodes } from '#shared/companion/visual/visual-ir.mjs';
 import { styleCode } from '../emitters/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../emitters/devkit-files.ts';
 import { maintainerOnly, relocateFrameworkDocuments, scopeExampleOwnership } from '../emitters/framework-docs.ts';
-import { hostingProfile, projectHosting, prunedByHosting } from '../../../../scripts/companion/schema/hosting.mjs';
+import { hostingProfile, projectHosting, prunedByHosting } from '#shared/companion/schema/hosting.mjs';
 import { maintainerScript, rewriteDocReferences } from '../emitters/framework-scope.ts';
 /** Framework customization is explicit; visual lowering replaces only UI placeholders/registries. */
 function replacedProducer(previous: string | undefined, producer: string): string | undefined {

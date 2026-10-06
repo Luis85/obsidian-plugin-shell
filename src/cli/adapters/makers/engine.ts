@@ -2,8 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type TS from 'typescript';
 import { hasSyntaxErrors, loadTypescript, parseTypescript as parseSource, variableDeclarations, type Typescript } from './syntax.ts';
-import { sha256 as hash } from '../../../../scripts/shared/hash.ts';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { sha256 as hash } from '#shared/platform/hash.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { formatGenerated } from './format-generated.ts';
 import type { MakerContext, RegistryImport } from './contracts.ts';
 

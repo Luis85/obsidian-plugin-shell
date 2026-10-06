@@ -3,7 +3,7 @@
  * An Increment is the Definition of Ready handoff (configs/delivery/delivery.json); a PullRequest is the
  * plan of one pull request that delivers part of it. Both are frontmatter+Markdown files in a configured folder.
  */
-import { hasControls } from '../errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 import { insistDelivery, type DeliveryErrorCode } from './errors.ts';
 
 export const incrementStatuses = ['New', 'Refining', 'Ready', 'In progress', 'Done', 'Cancelled'] as const;

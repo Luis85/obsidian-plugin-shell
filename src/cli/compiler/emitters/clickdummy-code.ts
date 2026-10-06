@@ -1,5 +1,5 @@
-import { editorBindings } from '../../../../scripts/companion/sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../../../../scripts/companion/sitemap/model.ts';
+import { editorBindings } from '#shared/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '#shared/companion/sitemap/model.ts';
 import { literal, symbol, type Model } from './model.ts';
 import { sampleCode } from './schema-code.ts';
 import { relativeImport, type Add } from './file-code.ts';

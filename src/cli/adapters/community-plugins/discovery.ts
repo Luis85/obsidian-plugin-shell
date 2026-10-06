@@ -1,7 +1,7 @@
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { exists, readBounded } from '../framework/files.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import {
   communityPluginLimit, communityPluginsFolder, enabledListFile, isCommunityPluginId, isSettingsDocument, validateCommunityManifest,
   validateEnabledList, type CommunityPluginIssue, type CommunityPluginManifest,

@@ -1,5 +1,5 @@
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { requireSketch, SketchError, slug } from '../domain/errors.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { requireSketch, SketchError, slug } from '#shared/contracts/sketch-errors.ts';
 import { collectionRoot } from '../domain/user-settings.ts';
 import { collectionCreate, collectionUpdate, isCollectionDate, nextCollectionId, readCollectionRecord } from '../domain/collection-record.ts';
 import type { CollectionEntry } from '../domain/collection-query.ts';

@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { requireSketch, SketchError, title as titleText } from './errors.ts';
+import { requireSketch, SketchError, title as titleText } from '#shared/contracts/sketch-errors.ts';
 import { definitionId, fieldId, getPath, matches, readCondition, readPath, type FormCondition, type FormValues } from './form-model.ts';
 export type FieldKind = 'text' | 'title' | 'number' | 'select' | 'multi' | 'boolean' | 'confirm' | 'list' | 'record' | 'section';
 export interface FormChoice { id: string; label: string }

@@ -1,4 +1,4 @@
-import { SketchError } from '../../domain/errors.ts';
+import { SketchError } from '#shared/contracts/sketch-errors.ts';
 import { selectView, viewIssues, type BaseView } from '../../domain/obsidian-base.ts';
 import { collectRecords } from '../../domain/base-collection.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';

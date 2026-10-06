@@ -2,7 +2,7 @@
  * Branch names of an increment: one increment branch from the base, the kick-off pull request merging it back,
  * and change pull requests stacked on the increment branch. Pure naming and checks; Git itself is an adapter.
  */
-import { hasControls } from '../errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 import { insistDelivery, type DeliveryErrorCode } from './errors.ts';
 import { defaultDeliverySchema, type BranchConfig, type Problem, type PullRequestKind } from './model.ts';
 

@@ -1,4 +1,4 @@
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { stringOption, requireThat, result, type Request, type Context } from './contracts.ts';
 import { prepareHandout, prepareHandoutRefresh, inspectHandout } from './handout-workspace.ts';
 

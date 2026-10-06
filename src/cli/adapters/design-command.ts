@@ -1,6 +1,6 @@
 /** `node bin/app design`: prepare, sync and inspect per-prototype Claude Design folders. Writes need --apply <planHash>. */
 import { option, type Arguments } from '../domain/command-options.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { applyPrepared } from './storage.ts';
 import { designFolderPlan, designFolderStatus } from './design-folder.ts';
 interface DesignContext { root: string; frameworkRoot: string; signal?: AbortSignal; config?: string }

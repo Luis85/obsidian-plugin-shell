@@ -2,7 +2,7 @@ name: Release cut
 # Owner-dispatched: creates release/X.Y.Z from main, runs release:prepare (version
 # bump and changelog promotion), commits, pushes, opens the draft release pull
 # request and dispatches the Release workflow on the new branch.
-# Privileged by a scoped, reviewed allowance (scripts/quality/workflow-policy.mjs):
+# Privileged by a scoped, reviewed allowance (tooling/quality/workflow-policy.mjs):
 # manual dispatch only, read-only top level, and the one write job waits for the
 # reviewers of the protected "release" environment.
 # Tokens: pushes and pull requests made with GITHUB_TOKEN start no workflows, so
@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir -p reports/release-cut
           set -o pipefail
-          node scripts/release/cut.mjs --version "$VERSION" --execute --remote 2>&1 | tee reports/release-cut/cut.log
+          node tooling/release/cut.mjs --version "$VERSION" --execute --remote 2>&1 | tee reports/release-cut/cut.log
       - name: Summarize the cut
         if: always()
         run: |

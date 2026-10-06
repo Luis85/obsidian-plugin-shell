@@ -1,8 +1,8 @@
 import { hostname } from 'node:os';
 import { join } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { assertJsonData } from '../../../../scripts/contracts/json-data.ts';
-import { serializeJson } from '../../../../scripts/contracts/serialization.ts';
+import { createFilePlan, applyFilePlan } from '#shared/platform/file-plan.ts';
+import { assertJsonData } from '#shared/contracts/json-data.ts';
+import { serializeJson } from '#shared/contracts/serialization.ts';
 import { exists, readBounded, hash } from './files.ts';
 import { setupSnapshot } from './setup-state.ts';
 import { requireThat, result, failure, stringOption, type Context, type Request, type Result } from './contracts.ts';

@@ -1,8 +1,8 @@
 import { lstat, readdir, realpath } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { isAlias, isNode, parseDocument, visit } from 'yaml';
-import { assertJsonData } from '../../../scripts/contracts/json-data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { assertJsonData } from '#shared/contracts/json-data.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { BaseNote, BaseValue } from '../domain/base-expression.ts';
 import { readBase, requiredFolder, type BaseDefinition } from '../domain/obsidian-base.ts';
 import type { BaseSource } from '../domain/base-collection.ts';

@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { sourceInputs, physicalLines, lineLimit } from '../../scripts/testing/source-inputs.mjs';
-import { codeLines } from '../../scripts/testing/code-lines.mjs';
+import { sourceInputs, physicalLines, lineLimit } from '../../tooling/testing/source-inputs.mjs';
+import { codeLines } from '../../tooling/testing/code-lines.mjs';
 test('[SRC-01] code limits exclude comments and blanks but preserve literal and mixed-line code', () => {
   assert.equal(physicalLines(''), 0); assert.equal(physicalLines('x\n'), 1);
   assert.equal(physicalLines('x\r\n\r\n'), 2);

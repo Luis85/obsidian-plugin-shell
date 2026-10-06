@@ -5,8 +5,8 @@
  * A remote write with an unknown outcome, or a local record that fails after a remote write, is PR_REMOTE_UNCERTAIN
  * with `data.uncertain: true` (exit 2); nothing is retried. Never portable through --plan-out or plan apply.
  */
-import { applyFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { applyFilePlan } from '#shared/platform/file-plan.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { canonicalRequest } from '../framework/catalog.ts';
 import { hash } from '../framework/files.ts';
 import { OperationError, requireThat, type Context, type Request } from '../framework/contracts.ts';

@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { lstat, readdir } from 'node:fs/promises';
 import { readBounded, readConfiguration, exists, hash } from './files.ts';
 import { designFile, configFile } from './configuration.ts';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { kitPresent, verifyKit } from './kit-integrity.ts';
 import { requireThat, type Context } from './contracts.ts';
 

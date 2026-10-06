@@ -1,7 +1,7 @@
-import { newSitemapSurface } from '../../../scripts/companion/sitemap/create.ts';
-import { visualAllocate, visualLayoutRules, visualLocate, visualNodes, type PageDefinition, type UiNode } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { newSitemapSurface } from '#shared/companion/sitemap/create.ts';
+import { visualAllocate, visualLayoutRules, visualLocate, visualNodes, type PageDefinition, type UiNode } from '#shared/companion/visual/visual-ir.mjs';
 import type { SketchDocument } from './document.ts';
-import { requireSketch, slug, title } from './errors.ts';
+import { requireSketch, slug, title } from '#shared/contracts/sketch-errors.ts';
 
 export function surfaceFor(document: SketchDocument, id: string) {
   const surface = document.design.nodes.find(item => item.id === id);

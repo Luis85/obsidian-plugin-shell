@@ -1,9 +1,9 @@
-import { applyConcept } from '../../../scripts/companion/concepts/apply.ts';
-import { parseConcept, type Concept } from '../../../scripts/companion/concepts/contract.ts';
-import { newSitemapSurface } from '../../../scripts/companion/sitemap/create.ts';
-import { visualAllocate, visualText } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { applyConcept } from '#shared/companion/concepts/apply.ts';
+import { parseConcept, type Concept } from '#shared/companion/concepts/contract.ts';
+import { newSitemapSurface } from '#shared/companion/sitemap/create.ts';
+import { visualAllocate, visualText } from '#shared/companion/visual/visual-ir.mjs';
 import { object, keys, list, text } from './data.ts';
-import { requireSketch, slug } from './errors.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
 import type { SketchDocument } from './document.ts';
 
 export type BrainstormOutput = 'definition' | 'prototype' | 'boilerplate';

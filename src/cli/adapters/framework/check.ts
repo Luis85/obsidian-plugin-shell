@@ -6,8 +6,8 @@
 import { join } from 'node:path';
 import { readdir } from 'node:fs/promises';
 import { exists } from './files.ts';
-import { lintRoots } from '../../../../scripts/shared/project-roots.mjs';
-import { projectConfigPath, projectConfigs } from '../../../../scripts/shared/project-configs.mjs';
+import { lintRoots } from '#shared/platform/project-roots.mjs';
+import { projectConfigPath, projectConfigs } from '#shared/platform/project-configs.mjs';
 import { runNode } from './process.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { changedFiles, runGit, type Changes, type Git } from './check-changes.ts';

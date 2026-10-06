@@ -1,6 +1,6 @@
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import type { LearningPath } from '../domain/learning-path.ts';
 import { learningProgressPath, learningSummary, readLearningProgress, type LearningProgress } from '../domain/learning-progress.ts';
 import { prepared, type Prepared } from './storage.ts';

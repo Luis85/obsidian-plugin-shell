@@ -1,5 +1,5 @@
-import type { PluginState } from '../shared/PluginState'
-import type { ValidationIssue } from '../shared/ValidationIssue'
+import type { PluginState } from './PluginState'
+import type { ValidationIssue } from './ValidationIssue'
 import { CHARACTER_ACCESSORY_RULES as CHARACTER_ACCESSORIES } from '../characters/accessoryRules'
 import { CHARACTER_MODEL_RULES as CHARACTER_MODELS } from '../characters/modelRules'
 import { CHARACTER_PART_RULES as CHARACTER_PARTS } from '../characters/partRules'

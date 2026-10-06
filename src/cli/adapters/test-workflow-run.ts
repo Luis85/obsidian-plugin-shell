@@ -1,7 +1,7 @@
 import { stripVTControlCharacters } from 'node:util';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
-import { applyFilePlan, createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { chromiumLaunchOptions, resolveBrowserExecutable, type BrowserResolution } from '../../../scripts/testing/browser-executable.mjs';
+import { applyFilePlan, createFilePlan } from '#shared/platform/file-plan.ts';
+import { chromiumLaunchOptions, resolveBrowserExecutable, type BrowserResolution } from '../tooling/testing/browser-executable.mjs';
 import { testWorkflowJson, type TestWorkflowDefinition, type TestWorkflowStep } from '../domain/test-workflow.ts';
 import { resolveTestWorkflowText } from '../domain/test-workflow-data.ts';
 import { describeTestWorkflowStep } from '../domain/test-workflow-docs.ts';

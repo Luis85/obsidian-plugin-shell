@@ -1,8 +1,8 @@
 /** Plans, syncs and inspects per-prototype Claude Design folders through the shared guarded file writer. */
 import { join } from 'node:path';
 import { opendir } from 'node:fs/promises';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { exists, hash } from './framework/files.ts';
 import { prepared, type Prepared } from './storage.ts';
 import { guardedText, jsonText, loadSettings } from './user-settings.ts';
@@ -11,7 +11,7 @@ import { engineeringFacts } from './design-facts.ts';
 import { renderDesignFolder } from '../application/design-folder.ts';
 import { designRoot } from '../domain/user-settings.ts';
 import { designFolderName, designManifestFile, designerOwned, isDesignSlug, keptBrief, readDesignManifest, type DesignBrief, type DesignManifest } from '../domain/design-folder.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 export interface DesignFolderOptions {
   root: string; frameworkRoot: string; name: string; mode: 'prepare' | 'sync';
   /** Project model path; overrides a managed prototype or a synced folder's source. */

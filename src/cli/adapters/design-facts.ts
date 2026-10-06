@@ -2,7 +2,7 @@
 import { opendir } from 'node:fs/promises';
 import type { Dirent } from 'node:fs';
 import { join } from 'node:path';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { exists, hash, readBounded } from './framework/files.ts';
 import { guardedText } from './user-settings.ts';
 import { documentTitle, libraryUsage, placementRoles, lineLimits, originFacts, packageFacts, tokenFacts, traceFacts,

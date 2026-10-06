@@ -1,9 +1,9 @@
 import { defaultVaultConfigDirectory } from '../domain/host-paths.ts';
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { hash, readBounded } from './framework/files.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { projectPath } from '../domain/user-settings.ts';
 const generated = new Set(['node_modules', 'dist', '.compiled', '.prototype-build']);
 /** The approval includes all local application inputs, not merely package.json. Build/dependency outputs are excluded. */

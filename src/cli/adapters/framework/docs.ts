@@ -1,5 +1,5 @@
 import { result, stringOption, type Context, type Request, type ResultStatus } from './contracts.ts';
-import type { FilePlan } from '../../../../scripts/shared/file-plan.ts';
+import type { FilePlan } from '#shared/platform/file-plan.ts';
 import { DOC_TYPES, fieldNames } from '../../documentation/domain/contracts.ts';
 
 interface DocumentationStatus {

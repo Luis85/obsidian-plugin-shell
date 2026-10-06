@@ -1,15 +1,15 @@
 import { loadTestWorkflows, type TestWorkflowEntry } from '../../adapters/test-workflow-catalog.ts';
 import { testWorkflowSavePlan } from '../../adapters/test-workflow-command.ts';
-import { requireSketch, slug } from '../../domain/errors.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
 import { getPath, type FormValues } from '../../domain/form-model.ts';
 import type { TestWorkflowStep } from '../../domain/test-workflow.ts';
 import type { TestWorkflowData } from '../../domain/test-workflow-data.ts';
 import { describeTestWorkflowStep } from '../../domain/test-workflow-docs.ts';
 import { editCollection } from '../process-editor.ts';
 import { formDefinition, runForm } from '../form-runner.ts';
-import { choose, reportError, type Prompts } from '../prompts.ts';
+import { choose, reportError, type Prompts } from '#tui/prompts.ts';
 import { review } from '../review.ts';
-import { SketchError } from '../../domain/errors.ts';
+import { SketchError } from '#shared/contracts/sketch-errors.ts';
 import { testWorkflowDataFromView, testWorkflowDataView, testWorkflowStepFromView, testWorkflowStepView } from '../test-workflow-editor.ts';
 import type { ActionContext } from '../wizard-runner.ts';
 import type { WizardModule } from './module.ts';

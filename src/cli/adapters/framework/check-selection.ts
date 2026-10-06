@@ -3,7 +3,7 @@
  * protect, by change-type rules and (for the plan only) by workflow `paths:` filters; plus the narrowed
  * `check --fast` step list built from the same selection.
  */
-import { isWithinRoot } from '../../../../scripts/shared/project-roots.mjs';
+import { isWithinRoot } from '#shared/platform/project-roots.mjs';
 import type { CheckStep } from './check.ts';
 import type { Changes } from './check-changes.ts';
 import type { GateRules, Rule, SuiteDef, SuiteManifest, Toolkit, Workflow } from './gate-sources.ts';

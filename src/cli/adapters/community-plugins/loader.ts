@@ -8,7 +8,7 @@ import { createApp, type AppHost, type AppSession, type WorkbenchApp } from './a
 import { pluginsLoaded } from './app-events.ts';
 import { isLoadable, type CommunityPluginInventory } from './discovery.ts';
 import type { CommunityPluginManifest } from '../../domain/community-plugin.ts';
-import type { PluginCliCommand, PluginTuiAction, WorkbenchPluginObject } from '../../../../plugins/api.ts';
+import type { PluginCliCommand, PluginTuiAction, WorkbenchPluginObject } from '../../sdk/api.ts';
 
 export interface CommunityPluginFailure { readonly id: string; readonly code: string; readonly message: string }
 export interface CommunityPluginHost {

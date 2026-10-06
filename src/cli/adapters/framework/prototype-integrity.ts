@@ -1,7 +1,7 @@
 import { opendir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { PROTOTYPE_REGISTRY, PROTOTYPE_ROOT } from '../../../../scripts/companion/prototypes/model.ts';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { PROTOTYPE_REGISTRY, PROTOTYPE_ROOT } from '#shared/companion/prototypes/model.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { exists } from './files.ts';
 import { requireThat, type Context } from './contracts.ts';
 

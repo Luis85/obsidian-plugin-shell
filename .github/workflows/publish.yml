@@ -5,7 +5,7 @@ name: Publish
 # with the changelog section and the candidate assets, then deletes the release
 # branch. The script is idempotent and resumable and never replaces a tag,
 # release or asset.
-# Privileged by a scoped, reviewed allowance (scripts/quality/workflow-policy.mjs):
+# Privileged by a scoped, reviewed allowance (tooling/quality/workflow-policy.mjs):
 # manual dispatch only, read-only top level, and the one write job waits for the
 # reviewers of the protected "release" environment.
 # Tokens: GITHUB_TOKEN is the fallback. Set the optional RELEASE_TOKEN secret (a
@@ -57,7 +57,7 @@ jobs:
         run: |
           mkdir -p reports/publish
           set -o pipefail
-          node scripts/release/publish.mjs --version "$VERSION" --repository "$GITHUB_REPOSITORY" --execute 2>&1 | tee reports/publish/publish.log
+          node tooling/release/publish.mjs --version "$VERSION" --repository "$GITHUB_REPOSITORY" --execute 2>&1 | tee reports/publish/publish.log
       - name: Summarize the publication
         if: always()
         run: |

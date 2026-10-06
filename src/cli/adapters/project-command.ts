@@ -1,9 +1,9 @@
 import { resolve } from 'node:path';
-import { readInput } from '../../../scripts/shared/input.ts';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { readInput } from '#shared/platform/input.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import type { Arguments, CommandContext } from './commands.ts';
 import { option } from '../domain/command-options.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { projectGuide, projectRequest, projectPlan, projectStarter, projectStarters } from './projects.ts';
 import { readData, applyPrepared } from './storage.ts';
 const projectFlow = ['starter', 'prototype', 'agreement', 'plan-review', 'apply'];

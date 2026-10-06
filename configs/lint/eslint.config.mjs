@@ -2,8 +2,8 @@ import ts from 'typescript-eslint';
 import vue from 'eslint-plugin-vue';
 import obsidian from 'eslint-plugin-obsidianmd';
 import { fileURLToPath } from 'node:url';
-import { sourceRoots } from '../../scripts/shared/project-roots.mjs';
-import { projectConfigPath, projectConfigs } from '../../scripts/shared/project-configs.mjs';
+import { sourceRoots } from '../../src/shared/platform/project-roots.mjs';
+import { projectConfigPath, projectConfigs } from '../../src/shared/platform/project-configs.mjs';
 // This file lives in configs/lint; every path and tsconfig resolves from the project root.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 /** A generated project may keep product code outside src (its codebase folder, named in
@@ -17,12 +17,12 @@ export default ts.config(
   { ignores: ['node_modules/**', 'dist/**', 'dist-harness/**', 'reports/**'] },
   ...ts.configs.recommended,
   ...vue.configs['flat/essential'],
-  { files: ['src/domain/**/*.ts', 'src/application/**/*.ts', 'src/features/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
+  { files: ['src/plugin/domain/**/*.ts', 'src/plugin/application/**/*.ts', 'src/plugin/features/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
   { files: ['src/**/*.{ts,vue}'], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian },
     rules: pluginRules,
   },
-  { files: ['src/cli/**/*.ts', 'plugins/**/*.ts'], languageOptions: { parserOptions: { projectService: false, project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
+  { files: ['src/cli/**/*.ts', 'src/cli/sdk/**/*.ts'], languageOptions: { parserOptions: { projectService: false, project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
   // Companion runtime templates are copied verbatim into generated plugins; lint them as the plugin code they become.
   { files: ['templates/companion/runtime/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.generator.json'], tsconfigRootDir: root } },
@@ -33,8 +33,8 @@ export default ts.config(
   // The click-dummy harness runs in a plain browser outside Obsidian, so the host-API rules do not apply to it.
   ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
     languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
-    ...(folder === 'harness' || folder.startsWith('harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
-  { files: ['tests/runtime/**/*.ts', 'tests/support/**/*.ts', 'tests/e2e/**/*.ts', 'tests/obsidian/**/*.ts', 'harness/app/**/*.ts'],
+    ...(folder === 'src/plugin/harness' || folder.startsWith('src/plugin/harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
+  { files: ['src/plugin/tests/unit/**/*.ts', 'tests/support/**/*.ts', 'src/plugin/tests/e2e/**/*.ts', 'src/plugin/tests/obsidian/**/*.ts', 'src/plugin/harness/app/**/*.ts'],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },
     rules: { '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],

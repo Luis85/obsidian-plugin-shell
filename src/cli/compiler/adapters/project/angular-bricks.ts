@@ -1,8 +1,8 @@
 import { literal, json, digest, type Model } from '../../emitters/model.ts';
-import { validateAuthoringDocument } from '../../../../../scripts/companion/authoring-contract.ts';
-import { emptyVisualDesigns, type VisualDesigns } from '../../../../../scripts/companion/visual/visual-ir.mjs';
+import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { emptyVisualDesigns, type VisualDesigns } from '#shared/companion/visual/visual-ir.mjs';
 import { angularDefinitionSource, type AngularDefinition, type AngularGap } from './angular-brick-templates.ts';
-import { compositionTheme } from '../../../../../scripts/companion/composition-contract.mjs';
+import { compositionTheme } from '#shared/companion/composition-contract.mjs';
 import { angularBrickRuntime } from './angular-brick-runtime.ts';
 /** AOT component/page sources are derived from the canonical IR, not from user-supplied template strings. */
 export function angularBrickFiles(model: Model): Record<string, string> {

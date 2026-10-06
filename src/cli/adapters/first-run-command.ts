@@ -1,5 +1,5 @@
 import { firstRunDefaults, firstRunSchema } from '../domain/first-run.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
 import { loadSettings } from './user-settings.ts';
 import { firstRunPlan, firstRunReport } from './first-run-plan.ts';

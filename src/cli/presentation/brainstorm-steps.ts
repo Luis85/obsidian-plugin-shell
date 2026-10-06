@@ -3,7 +3,7 @@ import { applyOperation, planOperation } from '../adapters/framework/planning.ts
 import type { Request } from '../adapters/framework/contracts.ts';
 import { brainstormVerifyPlan, executeBrainstormVerification, type BrainstormOptions } from '../adapters/brainstorm.ts';
 import type { FeatureBrainstorm, BrainstormPage } from '../domain/brainstorm.ts';
-import { Back, choose, confirm, input, titleInput, type Prompts } from './prompts.ts';
+import { Back, choose, confirm, input, titleInput, type Prompts } from '#tui/prompts.ts';
 
 export interface BrainstormWizardOptions extends BrainstormOptions { offerImport?: boolean }
 

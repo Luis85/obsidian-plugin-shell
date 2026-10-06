@@ -3,7 +3,7 @@ import { validateProjectSelection, type ProjectSelection } from './domain/projec
 import { CompilerError, diagnostic } from './domain/diagnostics.ts';
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
 import { createHash } from 'node:crypto';
-import { withStorybookOptions } from '../../../scripts/companion/tooling-contract.ts';
+import { withStorybookOptions } from '#shared/companion/tooling-contract.ts';
 import { lowerTarget } from './adapters/target-lowering.ts';
 import { runCompiler } from './application/pipeline.ts';
 import type { CompileRequest } from './application/ports.ts';

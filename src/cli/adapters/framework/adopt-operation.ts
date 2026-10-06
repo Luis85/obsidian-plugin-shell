@@ -2,8 +2,8 @@ import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path
 import { analyzeInventory } from '../../application/adoption/analyze.ts';
 import { AdoptionError, type AdoptionReport } from '../../domain/adoption/contracts.ts';
 import { documentationDirectory } from '../../domain/adoption/paths.ts';
-import { serializeJson } from '../../../../scripts/contracts/serialization.ts';
-import { applyFilePlan, createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { serializeJson } from '#shared/contracts/serialization.ts';
+import { applyFilePlan, createFilePlan } from '#shared/platform/file-plan.ts';
 import { realpath } from 'node:fs/promises';
 import { readGit } from './adopt-git.ts';
 import { scanProject } from './adopt-scan.ts';

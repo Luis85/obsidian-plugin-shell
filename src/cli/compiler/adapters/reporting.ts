@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { createFilePlan, applyFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan, applyFilePlan } from '#shared/platform/file-plan.ts';
 import { portableArtifactPath } from '../domain/artifacts.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { CompilerEvent, Phase, CompilerDiagnostic, Readiness } from '../domain/contracts.ts';

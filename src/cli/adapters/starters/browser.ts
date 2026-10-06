@@ -1,9 +1,9 @@
 /** Browser/CLI-shared starter semantics. No filesystem, process, URL-fetch or storage authority. */
-import { parseDesignData } from '../../../../scripts/contracts/json-data.ts';
+import { parseDesignData } from '#shared/contracts/json-data.ts';
 import { validateDefinition } from './validation.ts';
 import { resolveValues } from './render.ts';
 import { customizeStarter } from './customize.ts';
-import { validateAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { requireThat } from '../framework/contracts.ts';
 import type { StarterDefinition } from './types.ts';
 export const STARTER_MAX_BYTES = 4_000_000;

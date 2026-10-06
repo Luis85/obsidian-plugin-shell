@@ -5,7 +5,7 @@
  * marks a draft ready, merges or stores credentials.
  */
 import { githubRemoteState } from '../../domain/increments/remote-state.ts';
-import { hasControls } from '../../domain/errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 import { bodySize } from '../../domain/increments/remote-body.ts';
 import type { LinkTarget } from '../../domain/increments/remote-model.ts';
 import type { CreatePullRequest, HostingRemote, RemoteDiagnostic, RemoteFailure, RemotePullRequest, RemoteReadiness } from '../../application/increments/remote-port.ts';

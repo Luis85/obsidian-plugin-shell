@@ -1,9 +1,9 @@
 import { loadDefinitions } from './starters/repository.ts';
 import { projectSelection, type ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { frameworkAdapter, requireFrameworkAdapter } from '../compiler/adapters/project/framework-registry.ts';
-import { pluginFrameworkAdapters } from '../../../plugins/runtime.ts';
+import { pluginFrameworkAdapters } from '../sdk/runtime.ts';
 import { object, keys } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { guideBrief, type Guide } from '../domain/guide.ts';
 import { loadGuide, guideInput, prototypePlan } from './prototype.ts';
 /** Project starters are read from the shell's own starters folder (in the package root); there is no bundled fallback. */

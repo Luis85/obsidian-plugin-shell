@@ -1,4 +1,4 @@
-import type { FilePlan } from '../../../../scripts/shared/file-plan.ts';
+import type { FilePlan } from '#shared/platform/file-plan.ts';
 
 export const flagOptions = ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--document', '--refresh'] as const;
 export const valueOptions = ['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference', '--extension', '--format', '--extensions'] as const;

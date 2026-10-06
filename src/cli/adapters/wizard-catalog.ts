@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readForm, type FormDefinition, type FormField } from '../domain/form.ts';
 import { readWizard, stepReferences, type WizardDefinition } from '../domain/wizard.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { readData } from './storage.ts';
 /** Data-driven definitions live beside the other shipped configuration; the compiled kit rebases this URL. */
 export const definitionsRoot = fileURLToPath(new URL('../../../configs/', import.meta.url));

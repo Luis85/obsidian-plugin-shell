@@ -2,7 +2,7 @@ import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Document } from 'yaml';
 import { loadYaml, yamlRuntime } from './yaml-runtime.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { projectPath } from '../domain/user-settings.ts';
 import type { CollectionValue } from '../domain/collection-record.ts';
 import { renderNote } from './fake-data-plan.ts';

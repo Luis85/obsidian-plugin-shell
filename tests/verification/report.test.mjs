@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assertRepeatable, outcomeDigest, assertEvidenceFresh, xmlReport } from '../../scripts/testing/report.mjs';
+import { assertRepeatable, outcomeDigest, assertEvidenceFresh, xmlReport } from '../../tooling/testing/report.mjs';
 const run = () => [{ id: 'one', status: 'passed', duration: 200, cases: [{ name: '[X-01] a', status: 'passed' }] }];
 test('[RPT-01] execution duration is not a semantic determinism failure', () => {
   const a = run(); const b = run(); b[0].duration = 999;

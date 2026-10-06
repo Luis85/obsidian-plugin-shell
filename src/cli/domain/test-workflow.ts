@@ -1,5 +1,5 @@
 import { keys, list, object, text } from './data.ts';
-import { hasControls, requireSketch } from './errors.ts';
+import { hasControls, requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { definitionId } from './form-model.ts';
 import { readTestWorkflowLocator, testWorkflowText, type TestWorkflowLocator } from './test-workflow-locator.ts';
 import { readTestWorkflowData, type TestWorkflowData } from './test-workflow-data.ts';

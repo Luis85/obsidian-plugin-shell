@@ -1,8 +1,8 @@
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { OperationError, requireThat } from '../framework/contracts.ts';
 import { readProjectGenerator } from '../../compiler/domain/project-starter.ts';
-import { assertDesignData } from '../../../../scripts/contracts/json-data.ts';
-import { AUTHORING_VERSION, validateAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { assertDesignData } from '#shared/contracts/json-data.ts';
+import { AUTHORING_VERSION, validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import type { InputValue, StarterDefinition, StarterInput, StarterProcess, StarterStep, StarterFile, Json } from './types.ts';
 export function record(value: unknown): Record<string, unknown> {
   requireThat(value !== null && typeof value === 'object' && !Array.isArray(value), 'STARTER_INVALID', 'Expected an object.');

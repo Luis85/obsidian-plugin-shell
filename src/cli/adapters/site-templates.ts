@@ -1,6 +1,6 @@
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { outputPath, readSiteCatalog, SITE_BASE, SITE_TEMPLATES, type SiteCatalog, type SiteTemplate } from '../domain/site-template.ts';
 import { exists, readBounded, readJson } from './framework/files.ts';
 import { resolveTemplateRoot } from './template-root.ts';

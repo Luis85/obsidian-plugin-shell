@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { BaseRecord, CollectionResult } from './base-collection.ts';
 import type { BaseValue } from './base-expression.ts';
 import { filled, PROJECT_NAME, record } from './site-template.ts';

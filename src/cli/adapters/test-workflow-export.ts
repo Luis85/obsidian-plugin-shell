@@ -1,7 +1,7 @@
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../../scripts/shared/project-path.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '#shared/platform/project-path.ts';
 import { literal } from '../compiler/emitters/model.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { TestWorkflowDefinition, TestWorkflowStep } from '../domain/test-workflow.ts';
 import { resolveTestWorkflowText } from '../domain/test-workflow-data.ts';
 import { describeTestWorkflowStep } from '../domain/test-workflow-docs.ts';

@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     name: 'real-obsidian', environment: 'node', globals: false,
-    include: ['tests/obsidian/**/*.obsidian.ts'],
+    include: ['src/plugin/tests/obsidian/**/*.obsidian.ts'],
     pool: 'forks', maxWorkers: 1, fileParallelism: false, isolate: true,
     sequence: { concurrent: false }, retry: 0,
     testTimeout: 120_000, hookTimeout: 180_000, teardownTimeout: 60_000,

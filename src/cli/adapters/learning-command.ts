@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 import { option, type Arguments } from '../domain/command-options.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { setPath } from '../domain/form-model.ts';
 import { formValueIssues } from '../domain/form-values.ts';
 import { learningStepForm } from '../domain/learning-conditions.ts';

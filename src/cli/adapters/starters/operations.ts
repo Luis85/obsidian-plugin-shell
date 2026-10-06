@@ -1,16 +1,16 @@
 import { starterCoverage } from './coverage.ts';
 import { basename, dirname, join, resolve } from 'node:path';
 import { readdir } from 'node:fs/promises';
-import { createFilePlan, applyFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan, applyFilePlan } from '#shared/platform/file-plan.ts';
 import { hash, readBounded, exists } from '../framework/files.ts';
 import { zip } from '../framework/zip.ts';
 import { result, requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
 import { STARTER_MAX_BYTES } from './browser.ts';
 import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts';
-import { pluginStarterDefinitions } from '../../../../plugins/runtime.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { pluginStarterDefinitions } from '../../sdk/runtime.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { resolveTemplateRoot } from '../template-root.ts';
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 export async function listStarters(context: Context, command = 'starters list') {
   const definitions = await loadDefinitions(context.root), folder = await starterFolder(context.root);
   return result(command, { folder, integrity: 'local-content-sha256; not a signature', starters: definitions.map(({ definition: d, sha256, file }) => ({

@@ -5,8 +5,8 @@ import { learningDocLink, learningDocTargets, renderLearningMarkdown } from '../
 import type { LearningPath, LearningStep } from '../domain/learning-path.ts';
 import type { LearningProgress } from '../domain/learning-progress.ts';
 import type { LearningSession } from './learning-actions.ts';
-import type { Prompts } from './prompts.ts';
-import type { Section } from './tui/contracts.ts';
+import type { Prompts } from '#tui/prompts.ts';
+import type { Section } from '#tui/engine/contracts.ts';
 const box = (done: boolean) => done ? '[x]' : '[ ]';
 /** The terminal UI pages through sections; plain prompts print the same text once. */
 export async function showSections(ui: Prompts, path: LearningPath, sections: Section[], index?: number): Promise<void> {

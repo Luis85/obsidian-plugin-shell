@@ -3,7 +3,7 @@ import { editDocument, type SketchDocument } from '../domain/document.ts';
 import { addPage, renamePage, moveNode, setPageLayout } from '../domain/pages.ts';
 import { addComponent, attachComponents, renameComponent, removeNode, pageCollectionTable, pageBindSource, type ComponentChoice } from '../domain/components.ts';
 import { addInteraction, renameInteraction, removeInteraction, setInteractionAction, setSourceInteractionAction } from '../domain/interactions.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { object, keys, text, list } from '../domain/data.ts';
 
 /** Aliases are scoped to a transaction, never persisted as a second identity system. */

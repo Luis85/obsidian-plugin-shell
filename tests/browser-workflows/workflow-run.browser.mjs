@@ -6,7 +6,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { test } from 'node:test';
-import { chromiumLaunchOptions, resolveBrowserExecutable } from '../../scripts/testing/browser-executable.mjs';
+import { chromiumLaunchOptions, resolveBrowserExecutable } from '../../src/cli/tooling/testing/browser-executable.mjs';
 import { testWorkflowCommand } from '../../src/cli/adapters/test-workflow-command.ts';
 import { previewAssets } from '../../src/cli/adapters/first-run-preview.ts';
 import { serveTestWorkflowAssets } from '../../src/cli/adapters/test-workflow-serve.ts';

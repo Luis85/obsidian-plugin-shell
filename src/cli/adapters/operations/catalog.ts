@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { sha256 } from '../../../../scripts/shared/hash.ts';
-import { assertJsonData, parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { sha256 } from '#shared/platform/hash.ts';
+import { assertJsonData, parseJsonData } from '#shared/contracts/json-data.ts';
 
 /** Dependency-free discovery metadata: Node built-ins and the typed JSON/hash contracts only. */
 type Descriptor = { id: string; aliases: string[] } & Record<string, unknown>;

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { codeLines } from '../../scripts/testing/code-lines.mjs';
+import { codeLines } from '../../tooling/testing/code-lines.mjs';
 const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 test('[CSS-01] explicit simulator entry retains its five original modules', async () => {
   const entry = await read('harness/styles/simulated.css');

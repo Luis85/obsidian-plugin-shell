@@ -1,6 +1,6 @@
-import { VISUAL_STATES, VISUAL_TAGS } from '../../../scripts/companion/visual/visual-ir.mjs';
-import { visualBuiltinLayouts, visualCatalogEntry, visualRecipes } from '../../../scripts/companion/visual/visual-catalog.mjs';
-import { requireSketch } from './errors.ts';
+import { VISUAL_STATES, VISUAL_TAGS } from '#shared/companion/visual/visual-ir.mjs';
+import { visualBuiltinLayouts, visualCatalogEntry, visualRecipes } from '#shared/companion/visual/visual-catalog.mjs';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { buildComponentTemplateSchema } from './component-template-schema.ts';
 
 const TEMPLATE_TYPES = ['component', 'component-with-children', 'page', 'page-with-bricks'] as const;

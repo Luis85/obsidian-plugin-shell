@@ -1,4 +1,4 @@
-import type { ComponentDefinition, EmitDefinition, PageDefinition, PropDefinition } from '../../../../scripts/companion/visual/visual-ir.mjs';
+import type { ComponentDefinition, EmitDefinition, PageDefinition, PropDefinition } from '#shared/companion/visual/visual-ir.mjs';
 import type { Artifact } from '../domain/contracts.ts';
 import { visualDefinitions, visualComponentPath, visualPagePath } from './visual-model.ts';
 import { literal, type Model } from './model.ts';

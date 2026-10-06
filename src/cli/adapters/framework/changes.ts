@@ -1,12 +1,12 @@
 import { setupSource } from './setup-source.ts';
 import { prepareHandout } from './handout-workspace.ts';
-import { mcpConflicts, setupMcpFiles } from '../../../../scripts/agent/mcp-config.mjs';
-import { withAirshipOption } from '../../../../scripts/companion/tooling-options.ts';
+import { mcpConflicts, setupMcpFiles } from '../../tooling/agent/mcp-config.mjs';
+import { withAirshipOption } from '#shared/companion/tooling-options.ts';
 import { hostingRequested, hostingSummary, withHostingFlags } from './hosting-options.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { join, resolve } from 'node:path';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { parseAuthoringDocument, AUTHORING_VERSION as COMPANION_VERSION } from '../../../../scripts/companion/authoring-contract.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { parseAuthoringDocument, AUTHORING_VERSION as COMPANION_VERSION } from '#shared/companion/authoring-contract.ts';
 import { readCompanionProject } from './read-project.ts';
 import { projectModel } from '../../compiler/emitters/model.ts';
 import { defaults, configuration, identity, object, configFile, designFile, resolveImport, type Configuration } from './configuration.ts';
@@ -172,7 +172,7 @@ export async function vaultPlan(context: Context) {
 export async function releaseVersionPlan(request: Request, context: Context) {
   const version = stringOption(request.options, 'version'), notes = stringOption(request.options, 'notes-file');
   requireThat(version && notes, 'RELEASE_INPUT_REQUIRED', 'Supply --version and --notes-file.');
-  const { prepareVersion } = await import('../../../../scripts/release/prepare.mjs');
+  const { prepareVersion } = await import('../../tooling/release/prepare.mjs');
   const prepared = await prepareVersion(context.root, version, (await readBounded(resolve(context.root, notes))).toString('utf8'));
   const config = await readConfiguration(context.root);
   const entries = prepared.plan.changes.map((change: { path: string; content: string | null }) => ({ path: change.path, content: change.content }));

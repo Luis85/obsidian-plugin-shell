@@ -7,6 +7,6 @@
   },
   "include": [
     "../../src/cli/**/*.ts",
-    "../../plugins/**/*.ts"
+    "../../src/cli/sdk/**/*.ts"
   ]
 }

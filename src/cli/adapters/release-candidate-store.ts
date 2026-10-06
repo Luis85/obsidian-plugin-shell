@@ -1,5 +1,5 @@
 import { posix } from 'node:path';
-import { SketchError } from '../domain/errors.ts';
+import { SketchError } from '#shared/contracts/sketch-errors.ts';
 import { collectionRoot } from '../domain/user-settings.ts';
 import { collectionField } from '../domain/collection-definition.ts';
 import { mergeCollectionBlock } from '../domain/collection-register.ts';

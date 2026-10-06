@@ -6,7 +6,7 @@ import { artifactOrigins } from '../compiler/adapters/origins.ts';
 import { prototypeSkillRoot } from './framework/prototype-skill.ts';
 import { newDocument, documentText, type SketchDocument } from '../domain/document.ts';
 import { readGuide, resolveAnswers, guideBrief, renderTemplate, type Guide, type Answers } from '../domain/guide.ts';
-import { requireSketch, slug } from '../domain/errors.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
 import { object, keys } from '../domain/data.ts';
 import { runOperations } from '../application/operations.ts';
 import { compile } from './compiler.ts';

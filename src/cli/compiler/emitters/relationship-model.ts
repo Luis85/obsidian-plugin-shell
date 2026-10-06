@@ -1,6 +1,6 @@
 import { row, rows, text, requireValue, type Model, type Operation, type Source } from './model.ts';
 import type { RelationshipRule } from '../../../../templates/companion/runtime/relationships.ts';
-import { RELATIONSHIP_CARDINALITIES } from '../../../../scripts/companion/authoring-contract.ts';
+import { RELATIONSHIP_CARDINALITIES } from '#shared/companion/authoring-contract.ts';
 export function relationshipDefinitions(m:Model):RelationshipRule[]{
   const rules=rows(row(row(m.document.design).semantic ?? {}).relationships ?? [],120).map(value=>{
     const source=m.entities.find(e=>e.id===value.source),target=m.entities.find(e=>e.id===value.target);

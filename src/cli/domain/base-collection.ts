@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { BaseNote, BaseValue } from './base-expression.ts';
 import { NoteScope, requiredFolder, viewIssues, type BaseDefinition, type BaseSort, type BaseView } from './obsidian-base.ts';
 

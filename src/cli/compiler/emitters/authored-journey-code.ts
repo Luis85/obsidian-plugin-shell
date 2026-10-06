@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { literal, type Model } from './model.ts';
 import type { Add } from './file-code.ts';
-import { editorBindings } from '../../../../scripts/companion/sitemap/editor-bindings.ts';
-import type { SitemapDesign, SitemapJourney } from '../../../../scripts/companion/sitemap/model.ts';
+import { editorBindings } from '#shared/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign, SitemapJourney } from '#shared/companion/sitemap/model.ts';
 
 /** Browser specs for the journeys authored in design.sitemap.journeys. Steps the generated preview can perform
  * (open a screen by address, follow a navigation control, see a dialog) become real assertions. Steps that need

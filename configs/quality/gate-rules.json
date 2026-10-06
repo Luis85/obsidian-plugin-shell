@@ -3,20 +3,20 @@
   "description": "Data behind `node bin/app check --plan` and the suite selection of `check --fast`. It joins changed paths to gates. tests/suites.json supplies per-suite test-file includes and workflow names, .github/workflows/*.yml supplies `paths:` filters, and this file adds what those cannot say: which source files a suite protects, the change-type rules, the gate commands and the docs-only globs. Durations come from docs/testing/TEST-SUITES.md (Measured column). Glob syntax is the suites manifest syntax (*, **, ?, {a,b}).",
   "docsGlobs": ["docs/**", "**/*.md", "LICENSE", "THIRD-PARTY-NOTICES*"],
   "suiteSources": {
-    "maker": ["src/cli/adapters/makers/**", "scripts/makers/**", "src/cli/adapters/framework/check*.ts", "src/cli/adapters/framework/gate-*.ts", "src/cli/adapters/framework/adopt-*.ts", "src/cli/domain/adoption/**", "src/cli/application/adoption/**", "src/cli/presentation/terminal/adopt-view.ts", "configs/quality/gate-rules.json"],
-    "makers": ["src/cli/adapters/makers/**", "scripts/makers/**", "scripts/events/**", "scripts/examples/**"],
-    "cli": ["src/cli/launcher.mjs", "scripts/bundling/build-cli.mjs", "src/cli/app.ts", "src/cli/adapters/framework/**", "src/cli/adapters/framework-cli.ts", "src/cli/presentation/terminal/**", "scripts/framework/**", "scripts/operations/**", "scripts/contracts/**", "src/cli/adapters/community-plugins/**", "src/cli/domain/community-plugin.ts", "plugins/**", "configs/quality/gate-rules.json"],
-    "generator": ["templates/**", "configs/templates/**", "src/cli/compiler/**", "scripts/compiler/**", "scripts/starters/**", "src/cli/adapters/starters/**", "configs/starters/**", "scripts/shared/file-plan*"],
-    "compiler": ["src/cli/compiler/**", "scripts/compiler/**"],
-    "companion": ["scripts/companion/**", "scripts/concepts/**", "templates/**"],
-    "visual": ["scripts/companion/visual/**"],
-    "airship": ["scripts/airship/**", "src/cli/adapters/framework/airship*.ts"],
-    "prototypes": ["scripts/companion/prototypes/**", "src/cli/adapters/prototype*.ts", "src/cli/adapters/framework/prototype*.ts"],
-    "native": ["scripts/testing/native-*", "scripts/testing/obsidian-*", "scripts/dev/**"],
-    "setup": ["scripts/setup.mjs", "scripts/setup/**", "scripts/shared/npm-install.mjs", "scripts/bundling/**"],
-    "release": ["scripts/release/**", "scripts/security/**", "scripts/maintenance/**"],
-    "quality": ["scripts/quality/**", "configs/quality/**", "configs/lint/**", "scripts/testing/suite-manifest.mjs", "scripts/testing/test-levels.mjs", "scripts/testing/evidence-*"],
-    "test-data": ["scripts/companion/test-data-manifest.mjs"]
+    "maker": ["src/cli/adapters/makers/**", "tooling/makers/**", "src/cli/adapters/framework/check*.ts", "src/cli/adapters/framework/gate-*.ts", "src/cli/adapters/framework/adopt-*.ts", "src/cli/domain/adoption/**", "src/cli/application/adoption/**", "src/cli/presentation/terminal/adopt-view.ts", "configs/quality/gate-rules.json"],
+    "makers": ["src/cli/adapters/makers/**", "tooling/makers/**", "tooling/events/**", "tooling/examples/**"],
+    "cli": ["src/cli/launcher.mjs", "tooling/bundling/build-cli.mjs", "src/cli/app.ts", "src/cli/adapters/framework/**", "src/cli/adapters/framework-cli.ts", "src/cli/presentation/terminal/**", "scripts/framework/**", "tooling/operations/**", "src/shared/contracts/**", "src/cli/adapters/community-plugins/**", "src/cli/domain/community-plugin.ts", "src/cli/sdk/**", "configs/quality/gate-rules.json"],
+    "generator": ["templates/**", "configs/templates/**", "src/cli/compiler/**", "tooling/compiler/**", "tooling/starters/**", "src/cli/adapters/starters/**", "configs/starters/**", "src/shared/platform/file-plan*"],
+    "compiler": ["src/cli/compiler/**", "tooling/compiler/**"],
+    "companion": ["src/shared/companion/**", "tooling/concepts/**", "templates/**"],
+    "visual": ["src/shared/companion/visual/**"],
+    "airship": ["tooling/airship/**", "src/cli/adapters/framework/airship*.ts"],
+    "prototypes": ["src/shared/companion/prototypes/**", "src/cli/adapters/prototype*.ts", "src/cli/adapters/framework/prototype*.ts"],
+    "native": ["scripts/testing/native-*", "scripts/testing/obsidian-*", "tooling/dev/**"],
+    "setup": ["tooling/setup.mjs", "tooling/setup/**", "src/shared/platform/npm-install.mjs", "tooling/bundling/**"],
+    "release": ["scripts/release/**", "scripts/security/**", "tooling/maintenance/**"],
+    "quality": ["scripts/quality/**", "configs/quality/**", "configs/lint/**", "src/cli/tooling/testing/suite-manifest.mjs", "tooling/testing/test-levels.mjs", "scripts/testing/evidence-*"],
+    "test-data": ["src/shared/companion/test-data-manifest.mjs"]
   },
   "gates": {
     "check": { "label": "Agent gate (typecheck, eslint, lint-source, related tests, matching node suites)", "command": ["node", "bin/app", "check", "--fast"], "kind": "check", "prerequisites": [] },
@@ -29,19 +29,19 @@
   },
   "rules": [
     { "id": "runtime-source", "label": "Plugin runtime source", "paths": ["src/**"], "gates": ["check", "coverage-production"] },
-    { "id": "presentation", "label": "Presentation layer", "paths": ["src/presentation/**"], "gates": ["check-presentation"] },
-    { "id": "events", "label": "Event contracts", "paths": ["src/application/event*", "src/application/event-definitions/**", "src/bootstrap/*event*", "src/features/**/events.ts", "src/infrastructure/events/**"], "gates": ["events-check"] },
+    { "id": "presentation", "label": "Presentation layer", "paths": ["src/plugin/presentation/**"], "gates": ["check-presentation"] },
+    { "id": "events", "label": "Event contracts", "paths": ["src/plugin/application/event*", "src/plugin/application/event-definitions/**", "src/plugin/bootstrap/*event*", "src/plugin/features/**/events.ts", "src/plugin/infrastructure/events/**"], "gates": ["events-check"] },
     { "id": "test-sources", "label": "Test and helper files", "paths": ["tests/**"], "gates": ["check"] },
-    { "id": "shell-tooling", "label": "Shell CLI and tooling sources", "paths": ["src/cli/**", "scripts/**", "plugins/**"], "gates": ["check"] },
+    { "id": "shell-tooling", "label": "Shell CLI and tooling sources", "paths": ["src/cli/**", "scripts/**", "src/cli/sdk/**"], "gates": ["check"] },
     {
       "id": "generator-inputs", "label": "Generator, compiler and companion inputs",
-      "paths": ["templates/**", "configs/templates/**", "src/cli/compiler/**", "scripts/companion/**", "scripts/compiler/**"],
+      "paths": ["templates/**", "configs/templates/**", "src/cli/compiler/**", "src/shared/companion/**", "tooling/compiler/**"],
       "gates": ["check"], "suites": ["generator", "compiler"],
       "notes": ["Generated output may change: golden snapshots, the template snapshot and kit integrity (bin/kit.json) can drift. A generator/compiler suite failure that names a golden or integrity lock needs a reviewed regeneration; do not edit those files by hand."]
     },
-    { "id": "workflows", "label": "CI workflows", "paths": [".github/workflows/**", ".github/actions/**"], "notes": ["CI workflow changed: it cannot run locally. Review trigger paths and pinned actions; `node bin/app ci --list` shows the jobs once available, and tests/tooling/repository.checks.mjs validates workflow shape."], "suites": ["quality"] },
+    { "id": "workflows", "label": "CI workflows", "paths": [".github/workflows/**", ".github/actions/**"], "notes": ["CI workflow changed: it cannot run locally. Review trigger paths and pinned actions; `node bin/app ci --list` shows the jobs once available, and tooling/tests/repository.checks.mjs validates workflow shape."], "suites": ["quality"] },
     { "id": "dependency-manifests", "label": "Dependency manifests", "paths": ["package.json", "package-lock.json"], "gates": ["check"], "notes": ["Dependency manifest changed: `check --fast` falls back to the full check; installs, lockfile and security checks run only in `npm run verify` and CI."] },
-    { "id": "threshold-change", "label": "Quality thresholds", "paths": ["configs/quality/**", "scripts/quality/thresholds.mjs", "tests/tooling/quality-thresholds.checks.mjs"], "suites": ["quality"], "flags": [{ "code": "THRESHOLD_CHANGE", "message": "threshold change: requires owner review" }] }
+    { "id": "threshold-change", "label": "Quality thresholds", "paths": ["configs/quality/**", "tooling/quality/thresholds.mjs", "tooling/tests/quality-thresholds.checks.mjs"], "suites": ["quality"], "flags": [{ "code": "THRESHOLD_CHANGE", "message": "threshold change: requires owner review" }] }
   ],
   "docsOnly": { "gates": ["check-repository", "docs-launchers"], "note": "Documentation-only diff: only the documentation checks apply before the final verify." },
   "final": ["verify"]

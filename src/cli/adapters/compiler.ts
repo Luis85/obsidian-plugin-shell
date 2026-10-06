@@ -2,7 +2,7 @@ import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { hash } from './framework/files.ts';
 import { resolveTemplateRoot } from './template-root.ts';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
-import { pluginFrameworkAdapters } from '../../../plugins/runtime.ts';
+import { pluginFrameworkAdapters } from '../sdk/runtime.ts';
 import { generationReceipt } from '../compiler/adapters/workspace-plan.ts';
 import { CompilationFailure } from '../compiler/domain/diagnostics.ts';
 import { documentText, type SketchDocument } from '../domain/document.ts';

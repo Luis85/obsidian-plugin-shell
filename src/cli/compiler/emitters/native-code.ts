@@ -1,4 +1,4 @@
-import { validateNativeIntegrations } from '../../../../scripts/companion/native-contract.mjs';
+import { validateNativeIntegrations } from '#shared/companion/native-contract.mjs';
 import { nativeDeclarationSource, nativeDeclarationTest } from './native-boilerplate.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';

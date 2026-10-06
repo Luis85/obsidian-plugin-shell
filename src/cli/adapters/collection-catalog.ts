@@ -1,7 +1,7 @@
 import { realpath } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { readCollectionDefinition, type CollectionDefinition } from '../domain/collection-definition.ts';
 import { collectionHooks } from '../domain/collection-hooks.ts';
 import type { CollectionHook } from '../domain/collection-record.ts';

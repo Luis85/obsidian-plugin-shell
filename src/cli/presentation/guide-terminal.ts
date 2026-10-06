@@ -1,6 +1,6 @@
 import { answer, visible, guideBrief, type Answers, type Answer, type Guide, type GuideField } from '../domain/guide.ts';
-import { Back, type Prompts } from './prompts.ts';
-import type { RichPrompts } from './tui/contracts.ts';
+import { Back, type Prompts } from '#tui/prompts.ts';
+import type { RichPrompts } from '#tui/engine/contracts.ts';
 function defaultValue(field: GuideField, cache: Answers): Answer {
   return field.kind === 'confirm' ? false : cache[field.id] ?? field.default;
 }

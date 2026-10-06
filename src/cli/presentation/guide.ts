@@ -1,6 +1,6 @@
 import { terminalInterview } from './guide-terminal.ts';
 import { answer, visible, guideBrief, type Answers, type Answer, type Guide, type GuideField } from '../domain/guide.ts';
-import { input, choose, confirm, reportError, Back, type Prompts } from './prompts.ts';
+import { input, choose, confirm, reportError, Back, type Prompts } from '#tui/prompts.ts';
 async function readAnswer(ui: Prompts, guide: Guide, field: GuideField, answers: Answers, fallback: Answer): Promise<unknown> {
   if (field.kind === 'confirm') {
     ui.write(guideBrief(guide, answers) + '\n');

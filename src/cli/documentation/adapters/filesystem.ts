@@ -1,10 +1,10 @@
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { lstat, readdir, realpath, open, type FileHandle } from 'node:fs/promises';
 import { constants, type Stats } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
-import { sha256 } from '../../../../scripts/shared/hash.ts';
+import { sha256 } from '#shared/platform/hash.ts';
 import { insist } from '../domain/contracts.ts';
-import { hasControls } from '../../domain/errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 export const documentationDigest = (value: string | Uint8Array): string => sha256(value);
 const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 export function portable(path: string): string {

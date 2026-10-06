@@ -55,8 +55,8 @@ jobs:
       - name: Verify contracts, makers and host lifecycle
         run: |
           node --test tests/tooling/native-integrations.checks.mjs
-          node node_modules/vitest/vitest.mjs run --config configs/testing/vitest.config.mjs tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
-          python3 scripts/concepts/build-companion.py --check
+          node node_modules/vitest/vitest.mjs run --config configs/testing/vitest.config.mjs src/plugin/tests/unit/native-file-domain.test.ts src/plugin/tests/unit/native-file-integration.test.ts
+          python3 tooling/concepts/build-companion.py --check
   generated-starters:
     if: inputs.tier == 'release' || (github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
     runs-on: ubuntu-24.04
@@ -76,7 +76,7 @@ jobs:
       - name: Independently install, build, typecheck and test generated plugin
         env:
           STARTER: ${{ matrix.starter }}
-        run: node scripts/companion-tools/qualify-starter.mjs "$STARTER"
+        run: node tooling/companion-tools/qualify-starter.mjs "$STARTER"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:

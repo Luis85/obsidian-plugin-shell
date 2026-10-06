@@ -1,5 +1,5 @@
 import { AdoptionError, requireAdoption, reportSchemaId, severityOrder, type AdoptionReport, type AngularFacts, type Finding, type GitFacts, type ScanFacts, type TargetVersion } from './contracts.ts';
-import { hasControls } from '../errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 import { isRecord, type JsonRecord } from './source.ts';
 
 const fail = (path: string, expected: string): never => { throw new AdoptionError('ADOPT_REPORT_INVALID', `Report field ${path} must be ${expected}.`); };

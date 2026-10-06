@@ -3,7 +3,7 @@
  * into the same options a headless caller passes, so both paths plan identical files. TTY only; never with --json,
  * --yes or --no-interaction (framework-cli decides).
  */
-import { parseConfirmation } from '../../../../scripts/shared/confirmation.ts';
+import { parseConfirmation } from '#shared/platform/confirmation.ts';
 import { requireThat, type Request } from '../../adapters/framework/contracts.ts';
 
 type Prompt = (query: string) => Promise<string>;

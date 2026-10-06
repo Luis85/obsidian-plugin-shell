@@ -1,5 +1,5 @@
 import { option, type Arguments } from '../domain/command-options.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { readFakeEntity, type FakeEntity } from '../domain/fake-data-entity.ts';
 import { defaultReferenceDate, fakeCount, fakeSeed, readEntityRef, readFakeGeneration, type FakeGeneration } from '../domain/fake-data-config.ts';
 import { fakeEntityList, loadFakeCatalog, resolveFakeEntity, type FakeCatalog } from './fake-data-catalog.ts';

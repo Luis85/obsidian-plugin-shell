@@ -1,8 +1,8 @@
-import { visualAllocate, visualLocate, visualProject, visualText, visualLiteral, visualNodes, visualNuxt, type ValueExpression, type UiNode, type ComponentDefinition } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualAllocate, visualLocate, visualProject, visualText, visualLiteral, visualNodes, visualNuxt, type ValueExpression, type UiNode, type ComponentDefinition } from '#shared/companion/visual/visual-ir.mjs';
 import type { SketchDocument } from './document.ts';
-import { visualCatalogEntry } from '../../../scripts/companion/visual/visual-catalog.mjs';
+import { visualCatalogEntry } from '#shared/companion/visual/visual-catalog.mjs';
 import { sourceOperation } from './bricks.ts';
-import { requireSketch, slug, title } from './errors.ts';
+import { requireSketch, slug, title } from '#shared/contracts/sketch-errors.ts';
 import { pageContent, pageFor, pageNodes, surfaceFor } from './pages.ts';
 
 export type ComponentChoice = { kind: 'new'; title: string } | { kind: 'existing'; id: string };

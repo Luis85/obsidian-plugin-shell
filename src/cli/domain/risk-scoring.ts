@@ -1,5 +1,5 @@
 import { object, keys, list, text } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { collectionField, collectionStatus, type CollectionDefinition, type CollectionField } from './collection-definition.ts';
 import type { CollectionHook, CollectionRecord, CollectionValues } from './collection-record.ts';
 import { collectionTableText } from './collection-register.ts';

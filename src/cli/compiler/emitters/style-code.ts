@@ -1,4 +1,4 @@
-import { compileDesignSystem } from '../../../../scripts/companion/design-system-css.mjs';
+import { compileDesignSystem } from '#shared/companion/design-system-css.mjs';
 import { json, type Model } from './model.ts';
 import type { Add } from './file-code.ts';
 /** Managed styles participate in the original plan/hash/ownership transaction. */

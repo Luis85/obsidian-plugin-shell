@@ -1,5 +1,5 @@
 import { Faker, base, en } from '@faker-js/faker';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { FakeArgs } from '../domain/fake-data-generators.ts';
 import type { FakeSource } from '../domain/fake-data.ts';
 type Call = (faker: Faker, args: FakeArgs) => unknown;

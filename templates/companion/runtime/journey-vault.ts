@@ -1,5 +1,5 @@
 import type { Vault, TFile } from 'obsidian';
-import { projectFilePath, type ProjectFilePort, type ProjectWrite } from '../../../scripts/companion/journey/project-store.ts';
+import { projectFilePath, type ProjectFilePort, type ProjectWrite } from '../../../src/shared/companion/journey/project-store.ts';
 
 /** The vault owns serialization and file association. Never split read/modify into separate writes. */
 export function journeyVaultFiles(vault: Vault): ProjectFilePort {

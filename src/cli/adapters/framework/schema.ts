@@ -1,4 +1,4 @@
-import { projectToolingSchema } from '../../../../scripts/companion/tooling-contract.ts';
+import { projectToolingSchema } from '#shared/companion/tooling-contract.ts';
 import { commands, parameterKinds } from './catalog.ts';
 /** These describe transport shape, not trust, filesystem containment or business readiness. */
 export function operationSchemas() {

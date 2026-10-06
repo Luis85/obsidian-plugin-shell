@@ -1,5 +1,5 @@
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../../scripts/shared/project-path.ts';
-import { requireSketch } from './errors.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '#shared/platform/project-path.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { FormDefinition } from './form.ts';
 import { getPath, matches, renderText, definitionId, type FormCondition, type FormValues } from './form-model.ts';
 import { formValueIssues } from './form-values.ts';

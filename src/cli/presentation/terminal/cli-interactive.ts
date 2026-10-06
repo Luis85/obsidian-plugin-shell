@@ -1,10 +1,10 @@
 import { stdin, stderr } from 'node:process';
-import { ask } from '../../../../scripts/shared/input.ts';
-import { parseConfirmation } from '../../../../scripts/shared/confirmation.ts';
+import { ask } from '#shared/platform/input.ts';
+import { parseConfirmation } from '#shared/platform/confirmation.ts';
 import { descriptor } from '../../adapters/framework/catalog.ts';
 import { executeOperation } from '../../adapters/framework/operations.ts';
 import type { Context, Request } from '../../adapters/framework/contracts.ts';
-import type { Result } from '../../../../scripts/contracts/result.ts';
+import type { Result } from '#shared/contracts/result.ts';
 import { renderCliResult } from './cli-output.ts';
 
 type Execute = (request: Request, context: Context) => Promise<Result>;

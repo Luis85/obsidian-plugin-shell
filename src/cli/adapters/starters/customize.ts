@@ -1,6 +1,6 @@
 /** Turns a loaded Companion starter into an independent, editable project v6 document. No catalog projection or execution trust. */
-import { parseAuthoringDocument, validateAuthoringDocument, validateCompanionFolders, type AuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { record } from '../../../../scripts/companion/sitemap/safety.ts';
+import { parseAuthoringDocument, validateAuthoringDocument, validateCompanionFolders, type AuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { record } from '#shared/companion/sitemap/safety.ts';
 import type { StarterDefinition } from './types.ts';
 const FIELDS = ['id', 'name', 'author', 'version', 'description', 'codebaseFolder', 'testsFolder', 'extension', 'extensions'];
 const IDENTITY = ['id', 'name', 'author', 'version', 'description'] as const;

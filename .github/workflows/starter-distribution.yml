@@ -4,22 +4,22 @@ on:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths:
       - 'configs/starters/**'
-      - 'scripts/starters/**'
+      - 'tooling/starters/**'
       - 'src/cli/adapters/starters/**'
-      - 'scripts/companion/**'
-      - 'scripts/companion-tools/**'
+      - 'src/shared/companion/**'
+      - 'tooling/companion-tools/**'
       - 'templates/**'
-      - 'scripts/compiler/**'
+      - 'tooling/compiler/**'
       - 'src/cli/compiler/**'
-      - 'scripts/concepts/**'
-      - 'scripts/bundling/**'
+      - 'tooling/concepts/**'
+      - 'tooling/bundling/**'
       - 'docs/licenses/**'
-      - 'tests/concepts/*-showcase.browser.mjs'
-      - 'tests/concepts/starter-workspace.browser.mjs'
+      - 'src/companion/tests/concepts/*-showcase.browser.mjs'
+      - 'src/companion/tests/concepts/starter-workspace.browser.mjs'
       - 'src/cli/adapters/framework/**'
       - 'src/cli/adapters/framework-cli.ts'
       - 'src/cli/presentation/terminal/**'
-      - 'scripts/companion/starter-*.mjs'
+      - 'src/shared/companion/starter-*.mjs'
       - 'src/cli/compiler/emitters/framework-docs.ts'
       - 'tests/tooling/starter-*.checks.mjs'
       - '.github/actions/setup-qualified/**'
@@ -73,14 +73,14 @@ jobs:
           install-flags: --strict-allow-scripts
       - name: Test the independent definition contract
         run: |
-          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/framework-new-project.checks.mjs tests/tooling/framework-distribution.checks.mjs
+          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs src/cli/tests/project-starters.checks.mjs src/cli/tests/framework-new-project.checks.mjs tooling/tests/framework-distribution.checks.mjs
       - name: Check suite registration and bounded asset contracts
-        run: node scripts/testing/suites.mjs --check
+        run: node tooling/testing/suites.mjs --check
       - name: Build current empty authoring and source-bound qualification input
         run: |
-          node scripts/concepts/build-mvp.mjs
-          node scripts/concepts/export-golden-project.mjs
-          node scripts/concepts/export-golden-project.mjs --check
+          node tooling/concepts/build-mvp.mjs
+          node tooling/concepts/export-golden-project.mjs
+          node tooling/concepts/export-golden-project.mjs --check
           node bin/app starters coverage feature-showcase --require-model-coverage --json
       - name: Generate and independently install the visual-feature showcase
         run: |
@@ -110,8 +110,8 @@ jobs:
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           mkdir -p reports/feature-showcase
           cp "$RUNNER_TEMP/workbench-feature-showcase/clickdummy.html" reports/feature-showcase/clickdummy.html
-          node tests/concepts/starter-workspace.browser.mjs
-          node tests/concepts/feature-showcase.browser.mjs --html reports/feature-showcase/clickdummy.html
+          node src/companion/tests/concepts/starter-workspace.browser.mjs
+          node src/companion/tests/concepts/feature-showcase.browser.mjs --html reports/feature-showcase/clickdummy.html
       - name: Retain source-bound starter and browser evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

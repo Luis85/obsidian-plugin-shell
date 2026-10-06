@@ -50,16 +50,16 @@ jobs:
         run: |
           mkdir -p reports/dev
           set -o pipefail
-          node --test tests/tooling/framework-checkout-build.checks.mjs 2>&1 | tee reports/dev/checkout-build.txt
+          node --test src/cli/tests/framework-checkout-build.checks.mjs 2>&1 | tee reports/dev/checkout-build.txt
       - name: Test suite registration and documentation
         if: ${{ !cancelled() }}
-        run: node scripts/testing/suites.mjs --check
+        run: node tooling/testing/suites.mjs --check
       - name: Repository policy (workflows, composite actions, owned CSS, root Markdown)
         if: ${{ !cancelled() }}
         run: node "$QUALIFIED_NPM" run check:repository
       - name: Changelog structure
         if: ${{ !cancelled() }}
-        run: node scripts/release/changelog.mjs check
+        run: node src/cli/tooling/release/changelog.mjs check
       - name: Self-review guard (advisory here, blocking in CI)
         if: ${{ !cancelled() }}
         run: node "$QUALIFIED_NPM" run check:self-review -- --base "origin/$BASE_REF" --warn-only

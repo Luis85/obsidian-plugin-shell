@@ -4,8 +4,8 @@ import { planPath, skillName, skillRoots } from '../../domain/adoption/paths.ts'
 import { renderPlan } from '../../domain/adoption/plan-render.ts';
 import { parseReport } from '../../domain/adoption/report-codec.ts';
 import { recommend } from '../../domain/adoption/strategy.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
-import { createFilePlan, type FilePlan, type FilePlanEntry } from '../../../../scripts/shared/file-plan.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
+import { createFilePlan, type FilePlan, type FilePlanEntry } from '#shared/platform/file-plan.ts';
 import { analyzeTarget, translating } from './adopt-operation.ts';
 import { exists, hash, readBounded } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';

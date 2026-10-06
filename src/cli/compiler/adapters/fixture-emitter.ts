@@ -1,7 +1,7 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { fixtureNoteTests } from '../emitters/fixture-notes-code.ts';
 import { sampleCode } from '../emitters/schema-code.ts';
-import { buildCompanionFixtureManifest } from '../../../../scripts/companion/test-data-manifest.mjs';
+import { buildCompanionFixtureManifest } from '#shared/companion/test-data-manifest.mjs';
 import { createFixtureEngine } from '../../../../docs/concepts/companion/test-kit/engine.mjs';
 import { createFixtureAdapter } from '../../../../docs/concepts/companion/test-kit/adapters.mjs';
 import { noteEntity } from '../emitters/persistence-code.ts';

@@ -1,8 +1,8 @@
 import { lstat } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { hasPortableProjectSegments } from '../../../../scripts/shared/project-path.ts';
-import type { FilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { projectConfigPath } from '../../../../scripts/shared/project-configs.mjs';
+import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
+import type { FilePlan } from '#shared/platform/file-plan.ts';
+import { projectConfigPath } from '#shared/platform/project-configs.mjs';
 import { slug, title, recipeOptions } from './arguments.ts';
 import { createMakerContext } from './engine.ts';
 import { dispatchMaker } from './dispatch.ts';

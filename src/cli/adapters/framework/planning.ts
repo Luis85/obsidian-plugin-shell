@@ -1,4 +1,4 @@
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { docsPlan } from './docs.ts';
 import { prototypesPlan } from './prototypes.ts';
 import { adoptPlanPlan, adoptSkillPlan } from './adopt-plan.ts';
@@ -7,9 +7,9 @@ import { hostingPlan } from './hosting-plan.ts';
 import { siteCollectionsPlan, siteNewPlan } from './site-command.ts';
 import { communityPluginPlan } from '../community-plugins/operations.ts';
 import { handoutPlan } from './handout-adapter.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
-import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '#shared/platform/file-plan.ts';
 import { parseArguments as makerArguments, builtinRecipes } from '../makers/arguments.ts';
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';

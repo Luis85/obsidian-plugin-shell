@@ -1,6 +1,6 @@
 import { readSettings, withoutImplicitPaths, type UserSettings } from '../domain/user-settings.ts';
 import { startForm, startWizard } from './wizards/registry.ts';
-import type { Prompts } from './prompts.ts';
+import type { Prompts } from '#tui/prompts.ts';
 /**
  * configs/forms/user-settings.json (with its advanced and documentation sections), committed through readSettings. Optional
  * folders the form shows with their default are kept only when configured or changed, so the saved path set stays exact.

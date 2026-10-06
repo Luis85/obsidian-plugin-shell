@@ -2,7 +2,7 @@ import { getPath, setPath, type FormValues } from '../domain/form-model.ts';
 import { assessStep, explainRule, nextTransition, processVisitLimit, runSummary, stepById, trailEntry, type ProcessRunStatus, type ProcessRunSummary, type ProcessTrailEntry } from '../domain/process-engine.ts';
 import type { ProcessDefinition, ProcessStep } from '../domain/process.ts';
 import { formDefinition, runFields, runForm } from './form-runner.ts';
-import { choose, confirm, input } from './prompts.ts';
+import { choose, confirm, input } from '#tui/prompts.ts';
 import type { ActionContext } from './wizard-runner.ts';
 /**
  * `process run`: walk one instance through its steps in a terminal. Inputs use the form engine; block rules stop the

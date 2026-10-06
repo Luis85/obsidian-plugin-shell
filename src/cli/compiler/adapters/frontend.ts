@@ -1,6 +1,6 @@
 /** Companion is an input adapter, not a second schema or visual-model implementation. */
-import { SitemapError } from '../../../../scripts/companion/sitemap/safety.ts';
-import { CompanionFieldError } from '../../../../scripts/companion/authoring-contract.ts';
+import { SitemapError } from '#shared/companion/sitemap/safety.ts';
+import { CompanionFieldError } from '#shared/companion/authoring-contract.ts';
 import { projectModel, type Model } from '../emitters/model.ts';
 import { visualDefinitions } from '../emitters/visual-model.ts';
 import { visualSources } from '../emitters/visual-ports.ts';

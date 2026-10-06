@@ -1,6 +1,6 @@
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';
 import { planProject } from '../../compiler/adapters/project-plan.ts';

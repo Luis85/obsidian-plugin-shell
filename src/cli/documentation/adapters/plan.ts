@@ -1,8 +1,8 @@
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdir } from 'node:fs/promises';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import type { AuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import type { AuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { documentationProjectIntake } from './project-intake.ts';
 import { keyOf, equal, stable, insist, type DocsIndex, type Entity, type Conflict } from '../domain/contracts.ts';
 import { reconcile } from '../application/reconcile.ts';

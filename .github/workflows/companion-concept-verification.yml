@@ -4,37 +4,37 @@ on:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths: &concept-inputs
       - 'configs/starters/**'
-      - 'scripts/starters/**'
+      - 'tooling/starters/**'
       - 'src/cli/adapters/starters/**'
       - 'docs/concepts/companion/**'
-      - 'scripts/concepts/**'
-      - 'scripts/companion/**'
-      - 'scripts/companion-tools/**'
+      - 'tooling/concepts/**'
+      - 'src/shared/companion/**'
+      - 'tooling/companion-tools/**'
       - 'templates/**'
       - 'src/cli/adapters/framework/**'
       - 'src/cli/adapters/framework-cli.ts'
       - 'src/cli/presentation/terminal/**'
       - 'tests/tooling/*prototypes*.checks.mjs'
       - 'tests/support/prototype-fixture.mjs'
-      - 'scripts/compiler/**'
+      - 'tooling/compiler/**'
       - 'src/cli/compiler/**'
-      - 'scripts/bundling/**'
+      - 'tooling/bundling/**'
       - 'tests/tooling/compiler-journey*.checks.mjs'
-      - 'tests/tooling/companion-project.checks.mjs'
-      - 'tests/tooling/companion-composition-contract.checks.mjs'
-      - 'tests/support/concept-realm.mjs'
+      - 'src/cli/tests/companion-project.checks.mjs'
+      - 'src/shared/tests/companion-composition-contract.checks.mjs'
+      - 'tooling/tests/support/concept-realm.mjs'
       - 'tests/tooling/companion-visual-*.checks.mjs'
       - 'tests/tooling/visual-*.checks.mjs'
       - 'tests/fixtures/companion/**'
       - 'package.json'
       - 'package-lock.json'
       - 'docs/concepts/jev-prompt-editor/**'
-      - 'tests/tooling/jev-concept-distribution.checks.mjs'
-      - 'tests/concepts/**'
+      - 'src/cli/tests/jev-concept-distribution.checks.mjs'
+      - 'src/companion/tests/concepts/**'
       - 'tests/tooling/test-data-*'
       - 'configs/quality/fallow.json'
-      - 'scripts/quality/maintainability-inventory.mjs'
-      - 'tests/tooling/maintainability.checks.mjs'
+      - 'tooling/quality/maintainability-inventory.mjs'
+      - 'tooling/tests/maintainability.checks.mjs'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/companion-concept-verification.yml'
       - '!projects/**'
@@ -87,7 +87,7 @@ jobs:
           python3 -B - <<'PYTHON'
           import hashlib, json
           from pathlib import Path
-          files = sorted(path for root in ['scripts/concepts', 'tests/concepts'] for path in Path(root).rglob('*.py'))
+          files = sorted(path for root in ['tooling/concepts', 'src/companion/tests/concepts'] for path in Path(root).rglob('*.py'))
           if not files:
               raise SystemExit('No concept Python inputs found')
           records = []
@@ -100,15 +100,15 @@ jobs:
           print(json.dumps({'status': 'passed', 'scope': 'Python syntax only; no execution or JS complexity claim', 'files': records}))
           PYTHON
       - name: Check exact offline concept assembly
-        run: python3 scripts/concepts/build-companion.py --check
+        run: python3 tooling/concepts/build-companion.py --check
       - name: Exercise assembly, inventory and tamper rejection
-        run: python3 -B tests/concepts/companion-assembly.test.py
+        run: python3 -B src/companion/tests/concepts/companion-assembly.test.py
       - name: Check authored JavaScript syntax without executing project operations
         shell: bash
         run: |
           set -euo pipefail
           count=0
-          for file in docs/concepts/companion/src/*.js; do
+          for file in src/companion/app/*.js; do
             node --check "$file"
             count=$((count + 1))
           done
@@ -118,16 +118,16 @@ jobs:
         run: node --test tests/tooling/test-data-*.checks.mjs
       - name: Exercise full-project JSON and read-only shell handoff
         run: |
-          node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-composition-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
+          node --test src/cli/tests/companion-project.checks.mjs src/shared/tests/companion-storymaps.checks.mjs src/shared/tests/companion-composition-contract.checks.mjs tooling/tests/companion-visual-state.checks.mjs tooling/tests/companion-visual-canvas.checks.mjs tooling/tests/companion-visual-page-editor.checks.mjs tooling/tests/companion-visual-inspector.checks.mjs tooling/tests/companion-visual-component-editor.checks.mjs tooling/tests/companion-visual-entry.checks.mjs
           node "$QUALIFIED_NPM" run test:visual
       - name: Exercise prototype lifecycle, safe persistence and pinned generation
-        run: node --test tests/tooling/companion-prototypes*.checks.mjs tests/tooling/framework-prototypes.checks.mjs
+        run: node --test tests/tooling/companion-prototypes*.checks.mjs src/cli/tests/framework-prototypes.checks.mjs
       - name: Validate the published project schema with an independent implementation
         shell: bash
         run: |
           python3 -m venv "$RUNNER_TEMP/project-schema-env"
           "$RUNNER_TEMP/project-schema-env/bin/python" -m pip install jsonschema==4.26.0
-          "$RUNNER_TEMP/project-schema-env/bin/python" -B tests/concepts/companion-schema.test.py
+          "$RUNNER_TEMP/project-schema-env/bin/python" -B src/companion/tests/concepts/companion-schema.test.py
       - name: Package exact review source without Git metadata or credentials
         shell: bash
         run: |
@@ -181,12 +181,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --only visual-editors
+          "$RUNNER_TEMP/companion-browser-env/bin/python" tooling/concepts/run-browser-checks.py --only visual-editors
       - name: Exercise current concept and real-origin storage on one exact artifact
         shell: bash
         run: |
           set -euo pipefail
-          "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --real-storage
+          "$RUNNER_TEMP/companion-browser-env/bin/python" tooling/concepts/run-browser-checks.py --real-storage
       - name: Retain concept evidence even when a check fails
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -233,25 +233,25 @@ jobs:
           node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
       - name: Build the empty companion and explicitly derive golden qualification input
         run: |
-          node scripts/concepts/build-mvp.mjs
-          node scripts/concepts/export-golden-project.mjs
+          node tooling/concepts/build-mvp.mjs
+          node tooling/concepts/export-golden-project.mjs
       - name: Verify empty startup and external starter lifecycle
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
-        run: node tests/concepts/starter-workspace.browser.mjs
+        run: node src/companion/tests/concepts/starter-workspace.browser.mjs
       - name: Exercise real editor actions, full JSON round trip and offline assets
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
-          "$PYTHON" -B tests/concepts/companion-mvp.browser.py
-          "$PYTHON" -B tests/concepts/companion-prototypes.browser.py
+          "$PYTHON" -B src/companion/tests/concepts/companion-mvp.browser.py
+          "$PYTHON" -B src/companion/tests/concepts/companion-prototypes.browser.py
       - name: Inspect the exported project, then generate and independently build the exact v6 self-project and offline clickdummy
         run: |
           node bin/app project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
           git rev-parse HEAD > reports/companion-mvp/source-commit.txt
-          node scripts/companion-tools/qualify-project.mjs --authoring-fixture
+          node tooling/companion-tools/qualify-project.mjs --authoring-fixture
       - name: Exercise the generated offline clickdummy
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
-          "$PYTHON" -B tests/concepts/companion-mvp.browser.py --clickdummy
+          "$PYTHON" -B src/companion/tests/concepts/companion-mvp.browser.py --clickdummy
       - name: Retain exact authoring artifacts and browser evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -286,9 +286,9 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports/journey-native
-          node scripts/concepts/build-mvp.mjs 2>&1 | tee reports/journey-native/definition-build.log
-          node scripts/concepts/export-golden-project.mjs 2>&1 | tee reports/journey-native/golden-source.log
-          node scripts/companion-tools/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
+          node tooling/concepts/build-mvp.mjs 2>&1 | tee reports/journey-native/definition-build.log
+          node tooling/concepts/export-golden-project.mjs 2>&1 | tee reports/journey-native/golden-source.log
+          node tooling/companion-tools/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
       - name: Exercise create, edit, reopen and independent leaves against the generated plugin
         env:
           SOURCE_COMMIT: ${{ github.sha }}

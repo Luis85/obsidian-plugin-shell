@@ -45,12 +45,12 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
       - name: Verify branch, versions, changelog section and absent tag
-        run: node scripts/release/branch.mjs verify --version "$VERSION"
+        run: node tooling/release/branch.mjs verify --version "$VERSION"
       - name: Show the release notes
         run: |
           {
             echo "## Release $VERSION ($GITHUB_SHA)"
-            node scripts/release/changelog.mjs notes --version "$VERSION"
+            node src/cli/tooling/release/changelog.mjs notes --version "$VERSION"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # One call per pull-request workflow. Each keeps read-only permissions, gets

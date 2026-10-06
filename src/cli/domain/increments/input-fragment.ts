@@ -3,7 +3,7 @@
  * sections (and `###` subsections) named like the target document's sections. The same fragment drives the
  * headless and the guided path, so both plan identical edits.
  */
-import { hasControls } from '../errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 import { insistDelivery, type DeliveryErrorCode } from './errors.ts';
 import { limits } from './model.ts';
 import { parseFrontmatter } from './frontmatter.ts';

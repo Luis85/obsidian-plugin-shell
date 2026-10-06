@@ -1,8 +1,8 @@
 import { resolve } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
 import { keys, list, object, text } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { readForm } from '../domain/form.ts';
 import { getPath } from '../domain/form-model.ts';
 import { formValueIssues } from '../domain/form-values.ts';

@@ -1,10 +1,10 @@
 import { validateDocumentationSettings } from './settings-documentation.ts';
 import { join } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { hash, readBounded } from './framework/files.ts';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { defaultSettings, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { prepared, type Entry } from './storage.ts';
 export const jsonText = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
 /** Read guards join the eventual plan; changed bytes cannot be silently adopted. */

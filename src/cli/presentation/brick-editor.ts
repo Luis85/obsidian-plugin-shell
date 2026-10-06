@@ -1,8 +1,8 @@
 import type { Workspace } from '../application/workspace.ts';
 import { outline } from '../application/summary.ts';
 import { object, list } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
-import { input, choose, titleInput, confirm, reportError, type Prompts } from './prompts.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
+import { input, choose, titleInput, confirm, reportError, type Prompts } from '#tui/prompts.ts';
 type Edit = Record<string, unknown>;
 async function page(ui: Prompts, workspace: Workspace): Promise<string> {
   const pages = outline(workspace.document).pages;

@@ -1,9 +1,9 @@
 import { computed, inject, nextTick, watch, onScopeDispose, reactive, shallowReactive, ref, toRaw, type App, type InjectionKey, type WatchStopHandle } from 'vue';
 import { parseDetailControl, copyDetailData, type DetailData } from './detail-controls.ts';
-import { compositionStyle, compositionTheme } from '../../../scripts/companion/composition-contract.mjs';
+import { compositionStyle, compositionTheme } from '../../../src/shared/companion/composition-contract.mjs';
 import { mapDetailPayload } from './detail-actions.ts';
-import { visualSession, visualTransition, visualVisible, visualRead, type Session } from '../../../scripts/companion/visual/visual-session.mjs';
-import type { UiNode, ValueExpression, VisualState, Interaction, VisualAction } from '../../../scripts/companion/visual/visual-ir.mjs';
+import { visualSession, visualTransition, visualVisible, visualRead, type Session } from '../../../src/shared/companion/visual/visual-session.mjs';
+import type { UiNode, ValueExpression, VisualState, Interaction, VisualAction } from '../../../src/shared/companion/visual/visual-ir.mjs';
 import { visualIndex, visualParents, visualExpressions, visualTextValue, visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, VISUAL_RUNTIME_LOCAL,
   type VisualExternalAdapter, type VisualRequest, type VisualSpec } from './visual-runtime.ts';
 export interface VisualPort {

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { readJson, exists, hash } from './files.ts';
 import { object, designFile } from './configuration.ts';
 import { requireThat, type Context } from './contracts.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 export type Entry = { path: string; content: string };
 /** The generation receipt must still own the unedited design; it then records the new hashes. */
 async function generationReceiptEntry(context: Context, projectId: string, before: Buffer, entries: Entry[], code: string): Promise<Entry | null> {

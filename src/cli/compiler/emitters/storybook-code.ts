@@ -1,5 +1,5 @@
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
-import { storybookOptions, validateProjectTooling } from '../../../../scripts/companion/tooling-contract.ts';
+import { storybookOptions, validateProjectTooling } from '#shared/companion/tooling-contract.ts';
 import { storybookStories } from './storybook-stories.ts';
 import { storybookHost } from './storybook-host.ts';
 import { storybookWorkspace, storybookVersion } from './storybook-workspace.ts';

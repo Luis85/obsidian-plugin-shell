@@ -33,8 +33,8 @@ export async function runGate(ws: DeliveryWorkspace, path: string, gate: Gate, e
   const base = await gateBase(ws, explicitBase);
   if (!base || !await available(ws)) return null;
   const [{ loadConfig }, { repositorySnapshot }, { runReady, runDone }, { readyRules }, { doneRules }] = await Promise.all([
-    import('../../../../scripts/delivery/config.mjs'), import('../../../../scripts/delivery/repository.mjs'), import('../../../../scripts/delivery/run.mjs'),
-    import('../../../../scripts/delivery/rules-ready.mjs'), import('../../../../scripts/delivery/rules-done.mjs')]);
+    import('../../tooling/delivery/config.mjs'), import('../../tooling/delivery/repository.mjs'), import('../../tooling/delivery/run.mjs'),
+    import('../../tooling/delivery/rules-ready.mjs'), import('../../tooling/delivery/rules-done.mjs')]);
   const config = await loadConfig(ws.root, gate, gate === 'ready' ? readyRules : doneRules);
   if (gate === 'done') Object.assign(config, { ready: (await loadConfig(ws.root, 'ready', readyRules)).rules });
   const snapshot = repositorySnapshot(ws.root, base, { env: {} });

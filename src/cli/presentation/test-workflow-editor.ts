@@ -1,4 +1,4 @@
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { getPath, type FormValues } from '../domain/form-model.ts';
 import { readTestWorkflowStep, testWorkflowStepKinds, testWorkflowStepShapes, type TestWorkflowStep } from '../domain/test-workflow.ts';
 import type { TestWorkflowData, TestWorkflowFakeSource, TestWorkflowValue, TestWorkflowValues } from '../domain/test-workflow-data.ts';

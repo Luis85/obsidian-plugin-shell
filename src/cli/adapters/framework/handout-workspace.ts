@@ -1,10 +1,10 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
-import { hasControls } from '../../domain/errors.ts';
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { lstat, readdir, readFile, realpath } from 'node:fs/promises';
 import { resolve, join, isAbsolute } from 'node:path';
 import { HANDOUT_LIMIT, HANDOUT_PATH, HandoutError, digest, ensure, makeSnapshot, readSnapshot, renderHandout, refreshHandout, validateHandout, type SourceFile, type Suggestion } from './handout-model.ts';
-import { statIfPresent } from '../../../../scripts/shared/fs-presence.ts';
+import { statIfPresent } from '#shared/platform/fs-presence.ts';
 
 const CONFIGURATION_FILES = ['configs/user-settings.json', 'shell.config.json'];
 const MAX_SOURCE_BYTES = 16_000_000;

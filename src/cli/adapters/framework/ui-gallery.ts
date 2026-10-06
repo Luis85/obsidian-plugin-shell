@@ -1,4 +1,4 @@
-import { galleryOptions, type GalleryOptions } from '../../../../scripts/ui/gallery-options.ts';
+import { galleryOptions, type GalleryOptions } from '../../tooling/ui/gallery-options.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
 

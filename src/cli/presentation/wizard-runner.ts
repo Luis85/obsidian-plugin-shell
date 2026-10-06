@@ -1,12 +1,12 @@
 import { getPath, matches, renderText, setPath, type FormValues } from '../domain/form-model.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { Guide } from '../domain/guide.ts';
 import type { WizardDefinition, WizardStep } from '../domain/wizard.ts';
 import { guideInput } from '../adapters/prototype.ts';
 import type { DefinitionCatalog } from '../adapters/wizard-catalog.ts';
 import { formDefinition, runFields, runForm, type FormEnvironment, type FormHooks } from './form-runner.ts';
 import { interview } from './guide.ts';
-import { Back, reportError, type Prompts } from './prompts.ts';
+import { Back, reportError, type Prompts } from '#tui/prompts.ts';
 export interface WizardOptions { root: string; frameworkRoot: string; signal?: AbortSignal; [option: string]: unknown }
 export type ActionOutcome = void | { end: true; completion?: string };
 export interface ActionContext {

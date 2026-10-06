@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
-import { validateNativeIntegrations } from '../../../../scripts/companion/native-contract.mjs';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
+import { validateNativeIntegrations } from '#shared/companion/native-contract.mjs';
 import { readJson } from '../../adapters/framework/files.ts';
 import { requireThat, type Request } from '../../adapters/framework/contracts.ts';
 import { companionStarterSet, derivedName, invocationDirectory } from '../../adapters/framework/starter-project.ts';

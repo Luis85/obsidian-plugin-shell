@@ -1,4 +1,4 @@
-import { hasControls, requireSketch, SketchError, slug } from './errors.ts';
+import { hasControls, requireSketch, SketchError, slug } from '#shared/contracts/sketch-errors.ts';
 import { bodyReference, type FakeEntity, type FakeProperty } from './fake-data-entity.ts';
 import type { FakeArgs } from './fake-data-generators.ts';
 /**

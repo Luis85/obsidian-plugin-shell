@@ -2,7 +2,7 @@ import { realpath } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { object } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { readFakeEntity, type FakeEntity } from '../domain/fake-data-entity.ts';
 import { inferFakeEntity, readFakeGeneration, type FakeGeneration } from '../domain/fake-data-config.ts';
 import { readData, readSnapshot } from './storage.ts';

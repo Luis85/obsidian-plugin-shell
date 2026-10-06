@@ -1,5 +1,5 @@
-import { definePluginEvent, type WorkbenchPluginObject } from '../../../../plugins/api.ts';
-import { WorkbenchEventBus } from '../../../../plugins/runtime.ts';
+import { definePluginEvent, type WorkbenchPluginObject } from '../../sdk/api.ts';
+import { WorkbenchEventBus } from '../../sdk/runtime.ts';
 
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const strings = (value: Record<string, unknown>, ...keys: string[]) => keys.every(key => typeof value[key] === 'string');

@@ -1,7 +1,7 @@
-import { PROTECTED_PROJECT_SEGMENTS } from '../../../../scripts/shared/protected-directories.ts';
+import { PROTECTED_PROJECT_SEGMENTS } from '#shared/platform/protected-directories.ts';
 import { relative, resolve, isAbsolute, sep } from 'node:path';
-import { parseAuthoringDocument as parseCompanionDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { parseAuthoringDocument as parseCompanionDocument } from '#shared/companion/authoring-contract.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { exportDesignSystem } from './style-export.ts';
 import { readBounded, readConfiguration, hash } from './files.ts';
 import { object, designFile } from './configuration.ts';

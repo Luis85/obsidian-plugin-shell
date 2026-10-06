@@ -1,11 +1,11 @@
 import { join, relative } from 'node:path';
-import { activeVariant } from '../../../../scripts/companion/prototypes/commands.ts';
-import { snapshotPath } from '../../../../scripts/companion/prototypes/model.ts';
-import { validateSelection } from '../../../../scripts/companion/prototypes/validate.ts';
-import { workspaceKey, prototypeObject, revision } from '../../../../scripts/companion/prototypes/safety.ts';
-import { prototypeJsonText } from '../../../../scripts/companion/prototypes/files.ts';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { activeVariant } from '#shared/companion/prototypes/commands.ts';
+import { snapshotPath } from '#shared/companion/prototypes/model.ts';
+import { validateSelection } from '#shared/companion/prototypes/validate.ts';
+import { workspaceKey, prototypeObject, revision } from '#shared/companion/prototypes/safety.ts';
+import { prototypeJsonText } from '#shared/companion/prototypes/files.ts';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { designFile } from './configuration.ts';
 import { hash, readBounded, exists } from './files.ts';
 import { stringOption, requireThat, type Request, type Context } from './contracts.ts';

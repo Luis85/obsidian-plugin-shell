@@ -3,7 +3,7 @@ import { join, posix, win32 } from 'node:path';
 import { collectUiStatus, isUiProject, type UiStatusPort } from '../../application/ui-status.ts';
 import type { ReportRead } from '../../domain/ui-status-evidence.ts';
 import type { SpecFile } from '../../domain/ui-status-source.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { readBounded } from './files.ts';
 import { OperationError, result, type Context, type Request, type Result } from './contracts.ts';
 

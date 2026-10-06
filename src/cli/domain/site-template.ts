@@ -1,4 +1,4 @@
-import { hasControls, requireSketch } from './errors.ts';
+import { hasControls, requireSketch } from '#shared/contracts/sketch-errors.ts';
 
 /**
  * Opt-in Astro website templates. `templates/sites/` holds a shared `base` and one overlay folder per template; every

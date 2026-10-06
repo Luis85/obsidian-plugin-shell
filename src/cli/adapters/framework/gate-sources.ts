@@ -28,7 +28,7 @@ export interface Toolkit { glob: (patterns: string[]) => PathMatcher; matchSuite
 
 export async function loadToolkit(root: string): Promise<Toolkit | null> {
   try {
-    const module = await import('../../../../scripts/testing/suite-manifest.mjs');
+    const module = await import('../../tooling/testing/suite-manifest.mjs');
     const compile = (patterns: string[]) => patterns.map(pattern => module.globToRegExp(pattern));
     return {
       glob: patterns => { const compiled = compile(patterns); return path => compiled.some(pattern => pattern.test(path)); },

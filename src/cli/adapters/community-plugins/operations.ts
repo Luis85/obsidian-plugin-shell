@@ -1,8 +1,8 @@
 import { join } from 'node:path';
-import { createFilePlan, type FilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { serializeJson } from '../../../../scripts/contracts/serialization.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
-import { pluginRegistry } from '../../../../plugins/registry.ts';
+import { createFilePlan, type FilePlan } from '#shared/platform/file-plan.ts';
+import { serializeJson } from '#shared/contracts/serialization.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
+import { pluginRegistry } from '../../sdk/registry.ts';
 import { OperationError, requireThat, result, type Context, type Request, type Result } from '../framework/contracts.ts';
 import { readBounded } from '../framework/files.ts';
 import { didYouMean, suggestions } from '../framework/suggest.ts';

@@ -1,5 +1,5 @@
 import { object } from './data.ts';
-import { SketchError } from './errors.ts';
+import { SketchError } from '#shared/contracts/sketch-errors.ts';
 import { bindingOf, fieldAnswer, fieldVisible, type FormDefinition, type FormField } from './form.ts';
 import { getPath, type FormValues } from './form-model.ts';
 export interface FormIssue { field: string; code: string; message: string }

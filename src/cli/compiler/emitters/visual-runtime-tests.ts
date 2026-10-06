@@ -1,6 +1,6 @@
-import type { ComponentDefinition, ComponentNode, ExternalNode, UiNode, ValueExpression } from '../../../../scripts/companion/visual/visual-ir.mjs';
-import { visualCatalogEntry } from '../../../../scripts/companion/visual/visual-catalog.mjs';
-import { visualRead, visualSession, visualVisible } from '../../../../scripts/companion/visual/visual-session.mjs';
+import type { ComponentDefinition, ComponentNode, ExternalNode, UiNode, ValueExpression } from '#shared/companion/visual/visual-ir.mjs';
+import { visualCatalogEntry } from '#shared/companion/visual/visual-catalog.mjs';
+import { visualRead, visualSession, visualVisible } from '#shared/companion/visual/visual-session.mjs';
 import { visualTextValue, type VisualSpec } from '../../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, symbol, type Model } from './model.ts';
 import { componentFile, relativeImport, type Add } from './file-code.ts';

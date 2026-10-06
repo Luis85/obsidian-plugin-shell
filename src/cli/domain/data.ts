@@ -1,4 +1,4 @@
-import { requireSketch, hasControls } from './errors.ts';
+import { requireSketch, hasControls } from '#shared/contracts/sketch-errors.ts';
 export function object(value: unknown): Record<string, unknown> {
   requireSketch(value !== null && typeof value === 'object' && !Array.isArray(value), 'MAKER_INPUT', 'Expected a JSON object.');
   return value as Record<string, unknown>;

@@ -1,10 +1,10 @@
-import { mapBounded } from '../../../../scripts/shared/bounded-map.ts';
+import { mapBounded } from '#shared/platform/bounded-map.ts';
 import { portableFile } from './archive-path.ts';
 import { readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { exactKeys, object } from './configuration.ts';
 import { exists, hash, readBounded, readJson } from './files.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { OperationError, requireThat } from './contracts.ts';
 
 export interface KitFile { path: string; hash: string; bytes: number }

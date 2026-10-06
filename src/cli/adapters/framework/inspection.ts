@@ -1,10 +1,10 @@
-import { parseDesignData } from '../../../../scripts/contracts/json-data.ts';
+import { parseDesignData } from '#shared/contracts/json-data.ts';
 import { join, dirname, resolve } from 'node:path';
 import { exists, readJson, readConfiguration, readBounded, hash } from './files.ts';
 import { object } from './configuration.ts';
 import { requireThat, result, type Context, type Diagnostic } from './contracts.ts';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { projectHosting } from '../../../../scripts/companion/schema/hosting.mjs';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { projectHosting } from '#shared/companion/schema/hosting.mjs';
 import { azureDiagnostics, probeAzureCli, type AzureProbe } from './hosting-cli.ts';
 /** A generated project continues with its own npm scripts, not the shell's setup flow. */
 function generatedNext(dependencies: boolean, designStale: boolean | null): string {
@@ -94,7 +94,7 @@ async function buildDiagnostics(context: Context): Promise<Diagnostic[]> {
 async function releasePlan(context: Context, input: string) {
   const path = resolve(context.root, input), request = object(await readJson(path));
   requireThat(typeof request.candidateDirectory === 'string', 'CANDIDATE_REQUIRED', 'Supply a retained candidate directory in the release-plan input.');
-  const { planReleaseOperation } = await import('../../../../scripts/release/promotion-plan.mjs');
+  const { planReleaseOperation } = await import('../../tooling/release/promotion-plan.mjs');
   return planReleaseOperation({ candidateDirectory: resolve(dirname(path), request.candidateDirectory), commit: request.commit, version: request.version, mode: request.mode, remote: request.remote, acceptance: request.acceptance, review: request.review, platforms: request.platforms, now: new Date() });
 }
 export async function releaseCheck(context: Context, input?: string) {

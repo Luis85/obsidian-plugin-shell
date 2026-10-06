@@ -1,9 +1,9 @@
-import { mapBounded } from '../../../../scripts/shared/bounded-map.ts';
+import { mapBounded } from '#shared/platform/bounded-map.ts';
 import { readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { readBounded, hash } from '../../adapters/framework/files.ts';
 import { maintainerOnly, relocatedPath } from '../emitters/framework-docs.ts';
-import { statIfPresent } from '../../../../scripts/shared/fs-presence.ts';
+import { statIfPresent } from '#shared/platform/fs-presence.ts';
 import { prototypeSkillFiles } from '../../adapters/framework/prototype-skill.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';

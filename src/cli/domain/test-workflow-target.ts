@@ -1,6 +1,6 @@
-import { hasPortableProjectSegments } from '../../../scripts/shared/project-path.ts';
+import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
 import { keys, object, text } from './data.ts';
-import { hasControls, requireSketch } from './errors.ts';
+import { hasControls, requireSketch } from '#shared/contracts/sketch-errors.ts';
 /**
  * Where a workflow's app lives. Every target is offline or loopback-only:
  * - static: a project folder with index.html, served read-only by the runner on an ephemeral 127.0.0.1 port;

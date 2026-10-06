@@ -22,19 +22,19 @@ import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stdin, stdout, stderr } from 'node:process';
 import type { Readable, Writable } from 'node:stream';
-import { ask } from '../../scripts/shared/input.ts';
+import { ask } from '#shared/platform/input.ts';
 import { failure } from './adapters/framework/contracts.ts';
-import { result as operationResult, type ResultStatus } from '../../scripts/contracts/result.ts';
-import { SketchError } from './domain/errors.ts';
+import { result as operationResult, type ResultStatus } from '#shared/contracts/result.ts';
+import { SketchError } from '#shared/contracts/sketch-errors.ts';
 import { parseArguments, execute, option, type Arguments, type CommandContext } from './adapters/commands.ts';
 import { studio, prototypeWizard } from './presentation/studio.ts';
-import { TerminalSession } from './presentation/tui/session.ts';
-import { useTerminal, useColor } from './presentation/tui/mode.ts';
-import { safe, Back, type Prompts } from './presentation/prompts.ts';
+import { TerminalSession } from '#tui/engine/session.ts';
+import { useTerminal, useColor } from '#tui/engine/mode.ts';
+import { safe, Back, type Prompts } from '#tui/prompts.ts';
 import { routeArguments } from './adapters/router.ts';
 import { commands as frameworkCommands } from './adapters/framework/catalog.ts';
-import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
-import { pluginRegistry } from '../../plugins/registry.ts';
+import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } from './sdk/runtime.ts';
+import { pluginRegistry } from './sdk/registry.ts';
 import { communityInventory, communityRoutes, openCommunityPlugins } from './adapters/community-plugins/inventory.ts';
 import type { CommunityPluginHost } from './adapters/community-plugins/loader.ts';
 import { defineDeclaredEvents, invocationEventBus, observeCommand } from './adapters/community-plugins/app-events.ts';
@@ -141,7 +141,7 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
     return frameworkMain(routed.args, frameworkRoot);
   }
   if (routed.surface === 'memory') {
-    const { main: memoryMain } = await import('../../scripts/hindsight/cli.ts');
+    const { main: memoryMain } = await import('./tooling/hindsight/cli.ts');
     return memoryMain(routed.args);
   }
   return makerMain(routed.args, frameworkRoot, io);

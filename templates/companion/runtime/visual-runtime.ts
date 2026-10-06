@@ -1,7 +1,7 @@
-import type { PageDefinition, ComponentDefinition, ComponentNode, UiNode, Mapping, ValueExpression } from '../../../scripts/companion/visual/visual-ir.mjs';
+import type { PageDefinition, ComponentDefinition, ComponentNode, UiNode, Mapping, ValueExpression } from '../../../src/shared/companion/visual/visual-ir.mjs';
 import { copyDetailData, type DetailData, type DetailControl } from './detail-controls.ts';
 import type { DetailMapping } from './detail-actions.ts';
-export type { VisualState } from '../../../scripts/companion/visual/visual-ir.mjs';
+export type { VisualState } from '../../../src/shared/companion/visual/visual-ir.mjs';
 /** Data-only contracts shared by generated visual SFCs, their runtime and extension-owned adapters. */
 export type VisualPageSpec = PageDefinition & { kind: 'page'; designSystem?: unknown };
 export type VisualComponentSpec = ComponentDefinition & { kind: 'component'; designSystem?: unknown };

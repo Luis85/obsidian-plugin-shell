@@ -1,8 +1,8 @@
 import { isAbsolute, relative, resolve, sep } from 'node:path';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { parseDesignData } from '../../../../scripts/contracts/json-data.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { parseDesignData } from '#shared/contracts/json-data.ts';
 import { exists, hash, readBounded, readConfiguration, readJson } from './files.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { componentTemplateDocumentation } from '../../application/component-template-docs.ts';
 import {
   componentTemplateCoverage,
@@ -19,7 +19,7 @@ import {
 import { documentText, openDocument } from '../../domain/document.ts';
 import { instantiateComponentTemplate } from '../../domain/template-instantiation.ts';
 import { loadComponentTemplates } from '../component-template-repository.ts';
-import { pluginComponentTemplates } from '../../../../plugins/template-contributions.ts';
+import { pluginComponentTemplates } from '../../sdk/template-contributions.ts';
 import { result, requireThat, stringOption, type Context, type Request } from './contracts.ts';
 
 async function library(context: Context) {

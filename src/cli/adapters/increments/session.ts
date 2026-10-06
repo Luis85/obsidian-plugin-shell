@@ -3,7 +3,7 @@
  * every edited Increment gets its generated pull-request and issue lists recomputed from the documents as they
  * will be after the plan. The result is one reviewed file plan; nothing is written here.
  */
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { OperationError, type Context } from '../framework/contracts.ts';
 import { parseIncrement } from '../../domain/increments/increment-document.ts';
 import { parsePullRequest } from '../../domain/increments/pull-request-document.ts';

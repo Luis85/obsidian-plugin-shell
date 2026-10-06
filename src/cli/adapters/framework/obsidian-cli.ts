@@ -6,7 +6,7 @@ import { isAbsolute, join } from 'node:path';
 import { readConfiguration } from './files.ts';
 import { readDocumentationSettings } from '../../documentation/adapters/settings.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
-import { hasControls } from '../../domain/errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 
 const minimum = [1, 12, 7] as const;
 const outputLimit = 4 * 1024 * 1024;

@@ -5,7 +5,7 @@ import { result, requireThat, stringOption, type Context, type Request, type Res
 import { exists, readBounded } from './files.ts';
 import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
-import { projectConfigs } from '../../../../scripts/shared/project-configs.mjs';
+import { projectConfigs } from '#shared/platform/project-configs.mjs';
 
 export interface ProcessOperationDependencies {
   dependencyReadiness?: typeof dependencyReadiness;

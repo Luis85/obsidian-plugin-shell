@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createFaultLedger } from '../../scripts/testing/fault-ledger.mjs';
+import { createFaultLedger } from '../../tooling/testing/fault-ledger.mjs';
 test('[ERR-01] normal scenarios permit zero unexpected contained faults', () => {
   const ledger = createFaultLedger(); ledger.assertExpected();
   ledger.record('RENDER_FAILURE', 'view-1');

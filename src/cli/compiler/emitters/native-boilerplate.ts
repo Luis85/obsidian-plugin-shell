@@ -1,4 +1,4 @@
-import { validateNativeIntegrations, type NativeProjectIntegrations } from '../../../../scripts/companion/native-contract.mjs';
+import { validateNativeIntegrations, type NativeProjectIntegrations } from '#shared/companion/native-contract.mjs';
 
 type FileType = NativeProjectIntegrations['fileTypes'][number];
 type ContextMenu = NativeProjectIntegrations['contextMenus'][number];

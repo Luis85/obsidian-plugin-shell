@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@playwright/test';
-import { resolveBrowserExecutable } from '../../scripts/testing/browser-executable.mjs';
+import { resolveBrowserExecutable } from '../../src/cli/tooling/testing/browser-executable.mjs';
 // Paths resolve from the project root, not from this config's folder.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // SHELL_CHROMIUM is the only browser override. A mismatched Chromium revision is reported, never picked up silently.

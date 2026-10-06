@@ -1,4 +1,4 @@
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { posix } from 'node:path';
 import { object } from './configuration.ts';
 import { hash } from './files.ts';

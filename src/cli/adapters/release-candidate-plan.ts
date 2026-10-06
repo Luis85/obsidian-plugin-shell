@@ -1,5 +1,5 @@
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { mergeCollectionBlock } from '../domain/collection-register.ts';
 import { collectionManagedUpdate, type CollectionChange, type CollectionManagedChange } from '../domain/collection-record.ts';
 import { candidateCreate, candidateEditable, candidateFrontmatter, candidateOptionalKeys, candidateStatus, candidateTransition, readCandidateRecord,

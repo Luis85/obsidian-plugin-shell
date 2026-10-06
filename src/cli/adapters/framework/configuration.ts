@@ -1,8 +1,8 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { OperationError, requireThat } from './contracts.ts';
-import { hasControls } from '../../domain/errors.ts';
-import { PROTECTED_PROJECT_SEGMENTS, isProtectedSegment, RESERVED_FOLDER_NAMES } from '../../../../scripts/shared/protected-directories.ts';
-import { companionRelativeFolder, type AuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
+import { PROTECTED_PROJECT_SEGMENTS, isProtectedSegment, RESERVED_FOLDER_NAMES } from '#shared/platform/protected-directories.ts';
+import { companionRelativeFolder, type AuthoringDocument } from '#shared/companion/authoring-contract.ts';
 export interface Identity { id: string; name: string; author: string; version: string; description: string }
 export interface Configuration {
   schemaVersion: 1;

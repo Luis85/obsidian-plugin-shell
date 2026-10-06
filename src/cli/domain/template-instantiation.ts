@@ -6,11 +6,11 @@ import {
   visualProject,
   visualText,
   type UiNode,
-} from '../../../scripts/companion/visual/visual-ir.mjs';
-import { visualCatalogEntry, visualExpand } from '../../../scripts/companion/visual/visual-catalog.mjs';
+} from '#shared/companion/visual/visual-ir.mjs';
+import { visualCatalogEntry, visualExpand } from '#shared/companion/visual/visual-catalog.mjs';
 import { addComponent } from './components.ts';
 import { addPage, pageFor, surfaceFor } from './pages.ts';
-import { requireSketch, title } from './errors.ts';
+import { requireSketch, title } from '#shared/contracts/sketch-errors.ts';
 import { validateComponentTemplateCatalog, type ComponentTemplate } from './component-template.ts';
 import type { SketchDocument } from './document.ts';
 

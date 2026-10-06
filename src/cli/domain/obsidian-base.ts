@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { parseExpression, type BaseNode } from './base-expression-parse.ts';
 import { evaluateExpression, expressionIssues, formulaNames, truthy, type BaseNote, type BaseValue } from './base-expression.ts';
 
