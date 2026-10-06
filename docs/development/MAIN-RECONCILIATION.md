@@ -14,7 +14,12 @@ results below. Ten compatible PRs (#97, #88, #90, #86, #85, #84, #87, #89, #92 a
 merging. The combined implementation at `4c375dc3`, including main `36ffeab1`,
 passed the complete `npm run verify -- --json --keep-going`: **32 passed, zero
 failed, skipped or not-run stages**. The full agent check passed all six stages.
-Later changes only synchronize delivery metadata and record the owner decisions.
+Later changes synchronize delivery metadata and record the owner decisions.
+Hosted Integration also exposed missing CLI builds in the documentation and
+starter jobs, plus a Companion fixture that still copied development code from
+`bin`. Those jobs now build the CLI explicitly, and the fixture copies `src/cli`.
+The repaired assembly suite passed 18 tests and documentation contracts passed
+125 tests; these are additional checks outside the earlier full verification.
 The final copied-bin acceptance also passed after the metadata synchronization.
 Evidence is retained in `reports/reconciliation/integrated-verification.json`,
 `integrated-full-verify.log`, `integrated-check.log` and `final-copied-bin.log`.

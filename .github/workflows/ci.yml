@@ -615,6 +615,10 @@ jobs:
       - *setup-node
       - *npm-cache
       - *select-npm
+      - name: Install and build the framework used by the starter compiler
+        run: |
+          node "$QUALIFIED_NPM" ci --no-fund
+          node scripts/bundling/build-cli.mjs
       - name: Generate and independently install, build, typecheck and test each starter
         env:
           STARTER_IDS: ${{ matrix.ids }}

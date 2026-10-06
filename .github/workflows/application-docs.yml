@@ -86,6 +86,8 @@ jobs:
           if-no-files-found: error
       - name: Install the committed dependency lock without lifecycle scripts
         run: node "$QUALIFIED_NPM" ci --ignore-scripts --no-audit --no-fund
+      - name: Build the standalone CLI for documentation and setup contracts
+        run: node "$QUALIFIED_NPM" run build:cli
       - name: Record exact toolchain
         run: |
           node -p 'JSON.stringify({node:process.version,yaml:require("yaml/package.json").version,typescript:require("typescript/package.json").version},null,2)' > reports/application-docs/toolchain.json

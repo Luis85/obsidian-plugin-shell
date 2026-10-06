@@ -20,9 +20,9 @@ class AssemblyContract(unittest.TestCase):
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
         # The schema 6 project contract is bundled from the copied sources with the pinned local toolchain;
-        # its browser starter model lives with the starter adapters in bin/.
+        # its browser starter model lives with the development sources in src/cli.
         shutil.copytree(ROOT / 'scripts', self.root / 'scripts', ignore=shutil.ignore_patterns('__pycache__'))
-        shutil.copytree(ROOT / 'bin', self.root / 'bin', ignore=shutil.ignore_patterns('__pycache__'))
+        shutil.copytree(ROOT / 'src/cli', self.root / 'src/cli', ignore=shutil.ignore_patterns('__pycache__'))
         (self.root / 'node_modules').symlink_to(ROOT / 'node_modules', target_is_directory=True)
         shutil.copy(ROOT / 'package.json', self.root / 'package.json')
         (self.root / 'configs/quality').mkdir(parents=True, exist_ok=True)
