@@ -1,5 +1,7 @@
 # Main reconciliation review
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 Review date: 2026-10-06. Starting main: `963a0ec599c90dc8db75f1cb1351e2c2673df383`.
 The review covers the Workbench source, CLI distribution, generated-project contracts,
 Vue lifecycle, dependency updates, test boundaries and GitHub workflows.

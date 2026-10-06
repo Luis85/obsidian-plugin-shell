@@ -195,6 +195,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Upstream lint dependency exception](development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion (normative). |
 | [Moment advisory exception](development/MOMENT-ADVISORY-EXCEPTION.md) | The open `moment` advisory through the Obsidian API package and why `check:security` still fails. |
 | [Hindsight and Git/GitHub](development/HINDSIGHT-GIT-GITHUB.md) | Research and decisions behind the optional memory integration. |
+| [Main reconciliation review](development/MAIN-RECONCILIATION.md) | findings, dependency decisions and measured verification limits. |
 
 ## Delivery and CI
 
