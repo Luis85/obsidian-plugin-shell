@@ -108,6 +108,7 @@ test('reviewed style removal preserves tokens across checkout line endings', asy
   const panels = report.plan.changes.find(change => change.path === 'src/styles/panels.css');
   assert.match(shell.content, /var\(--plugin-shell-surface\)/);
   assert.match(panels.content, /var\(--plugin-shell-control-radius\)/);
+  assert.ok(panels.content.includes('.shell-field input:not([type="checkbox"])'), 'removing examples must preserve the checkbox sizing fix');
   assert.ok(!shell.content.includes('.shell-sidebar'));
   const path = join(folder, 'src/styles/shell.css');
   const canonical = await readFile(path, 'utf8');
