@@ -20,6 +20,11 @@ starter jobs, plus a Companion fixture that still copied development code from
 `bin`. Those jobs now build the CLI explicitly, and the fixture copies `src/cli`.
 The repaired assembly suite passed 18 tests and documentation contracts passed
 125 tests; these are additional checks outside the earlier full verification.
+Maker qualification now enables and restores the standalone CLI's editable
+`bin/plugins/example-extension/config.json`, rather than changing the source
+default. The React starter passed discovery, reviewed generation, exact-lock
+installation, typechecking, tests, production build and offline prototype build;
+browser smoke was explicitly not run.
 The final copied-bin acceptance also passed after the metadata synchronization.
 Evidence is retained in `reports/reconciliation/integrated-verification.json`,
 `integrated-full-verify.log`, `integrated-check.log` and `final-copied-bin.log`.

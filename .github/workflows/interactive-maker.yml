@@ -68,10 +68,11 @@ jobs:
         id: extension
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: |
-          cp plugins/example-extension/config.json "$RUNNER_TEMP/example-extension-config.json"
+          cp bin/plugins/example-extension/config.json "$RUNNER_TEMP/example-extension-config.json"
           node --input-type=module - <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
-          const path = 'plugins/example-extension/config.json';
+          // The standalone CLI reads its editable runtime configuration beside the bundle.
+          const path = 'bin/plugins/example-extension/config.json';
           const config = JSON.parse(await readFile(path, 'utf8'));
           await writeFile(path, JSON.stringify({ ...config, enabled: true }, null, 2) + '\n');
           NODE
@@ -96,7 +97,7 @@ jobs:
           node scripts/compiler/qualify-project-starters.mjs --starter webapp-react --execute
       - name: Restore the example extension configuration
         if: ${{ always() && steps.extension.outcome != 'skipped' }}
-        run: cp "$RUNNER_TEMP/example-extension-config.json" plugins/example-extension/config.json
+        run: cp "$RUNNER_TEMP/example-extension-config.json" bin/plugins/example-extension/config.json
       - name: Actual pseudo-terminal authoring and restoration
         if: ${{ !cancelled() && runner.os != 'Windows' }}
         run: node "$QUALIFIED_NPM" run test:maker:pty
