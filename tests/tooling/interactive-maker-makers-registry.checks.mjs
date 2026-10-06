@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { createMakerContext } from '../../bin/adapters/makers/engine.ts';
-import { readRegistry, extendRegistry, validateRegistrySource } from '../../bin/adapters/makers/registry.ts';
+import { createMakerContext } from '../../src/cli/adapters/makers/engine.ts';
+import { readRegistry, extendRegistry, validateRegistrySource } from '../../src/cli/adapters/makers/registry.ts';
 
 // Drives the guarded maker planning context and the explicit feature registry editor
-// (bin/adapters/makers/{engine,registry}.ts) under the maker floors, without executing recipes.
+// (src/cli/adapters/makers/{engine,registry}.ts) under the maker floors, without executing recipes.
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 async function project(t, files) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'maker-registry-')));

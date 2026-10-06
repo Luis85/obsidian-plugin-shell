@@ -3,7 +3,7 @@
 ## Start here
 
 **What this repo is.** Workbench is a reusable Obsidian plugin shell with three
-parts: the plugin runtime in `src/` (Vue, Pinia, Nuxt UI), the `node bin/app` CLI
+parts: development sources in `src/` (plugin runtime and `src/cli`), the built `node bin/app` CLI
 that sets up, checks and extends projects (`new`, `setup`, `make`, `generate`,
 `check`, `ci`, `ui`, `memory`, `adopt`, `design`, `increment`, `pr`, `issue`), and the authoring path from the browser companion
 concept through the dedicated compiler to independent generated projects (project
@@ -17,8 +17,9 @@ qualification and release authorization are separate. Milestone background is in
 | --- | --- |
 | `src/` | The shell's plugin runtime: domain, application, features, infrastructure, presentation, bootstrap, styles, locales; `main.ts` is lifecycle composition only. |
 | `projects/<name>/` | Standalone projects built from concepts (first: `companion`). Each has its own lock, `AGENTS.md`, gates and workflows, and a `workbench.project.json` linking its prototypes. Opt-in Astro websites from `templates/sites` render Bases collections (`node bin/app site`; Astro is a site-only dependency). Shell gates and workflows ignore `projects/`. Work inside a project as its own repository, and run `npm run projects:sync` after changing its workflows. See `projects/README.md`. |
-| `bin/` | The `bin/app` CLI: adapters, application, domain, presentation, guides, examples. |
-| `bin/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
+| `src/cli/` | Workbench CLI development: adapters, application, domain, presentation, compiler, guides and examples. `npm run app:dev -- <args>` runs current source. |
+| `bin/` | Generated standalone CLI product, built with `npm run build:cli`. Keep the whole folder together: launcher, runtime, authoring tools, templates, plugin defaults, licenses and integrity metadata. Never edit generated files here. |
+| `src/cli/compiler/` | Dedicated project compiler: companion project JSON to generated source. |
 | `templates/` | Templates for generated projects (companion runtime, developer kit, examples) and, in `templates/sites`, the opt-in Astro site templates. |
 | `scripts/` | Repo tooling: `quality/` gates, `testing/` suites and evidence, `agent/` hooks, `companion/` authoring contracts, makers, styles, release, security, setup. |
 | `configs/` | Lint, types, testing, bundling and quality configuration; `configs/starters/` holds the project starters; `configs/wizards/`, `configs/forms/` and `configs/guides/` define every guided CLI process ([wizards and forms](docs/development/WIZARDS-AND-FORMS.md)). |
@@ -32,7 +33,7 @@ qualification and release authorization are separate. Milestone background is in
 | `docs/design/<prototype>/` | Per-prototype Claude Design folders (`node bin/app design status\|prepare\|sync`); see [Claude Design folders](docs/development/CLAUDE-DESIGN-HANDOFF.md). Generated files there are owned by sync, including `ENGINEERING_HANDOFF_GUIDE.md`, which is built only from facts read from the project's files; `prototypes/`, `assets/`, `notes/` and `handoff/implementation-map.md` are design work. |
 
 **Setup.** Use the qualified Node 24.21.0/npm 11.19.1 (`.nvmrc`) and `npm ci` with
-the exact lock; do not run `npm install`. In Claude Code, `scripts/agent/session-start.mjs`
+the exact lock; do not run `npm install`. Run `npm run build:cli` before using `node bin/app` from a fresh checkout. In Claude Code, `scripts/agent/session-start.mjs`
 runs automatically at session start (cloud and local). Browser runs use the
 provisioned Playwright Chromium; `SHELL_CHROMIUM=/absolute/chromium` overrides it.
 `npm run setup` is the guided local setup described below. Cloud sessions provision the
@@ -124,7 +125,7 @@ Typed-note collections (configs/collections, e.g. risk) are data; code adds only
 
 Release candidates (`node bin/app candidate`) document release items (`node bin/app release-item`) only; they never run release:cut/publish, tag, push or edit CHANGELOG.md.
 
-`node bin/app fake-data` generates seeded sample notes only through reviewed, hash-approved plans; it never overwrites notes, writes only relative non-hidden folders inside the root, and calls only the allowlisted Faker methods in bin/domain/fake-data-generators.ts.
+`node bin/app fake-data` generates seeded sample notes only through reviewed, hash-approved plans; it never overwrites notes, writes only relative non-hidden folders inside the root, and calls only the allowlisted Faker methods in src/cli/domain/fake-data-generators.ts.
 
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.
 

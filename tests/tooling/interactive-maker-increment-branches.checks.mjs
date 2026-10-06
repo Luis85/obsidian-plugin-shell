@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { branchNames, checkPullRequestBase, isBranchName, pullRequestBranches, requireBranchName } from '../../bin/domain/increments/branches.ts';
-import { defaultDeliverySchema } from '../../bin/domain/increments/model.ts';
+import { branchNames, checkPullRequestBase, isBranchName, pullRequestBranches, requireBranchName } from '../../src/cli/domain/increments/branches.ts';
+import { defaultDeliverySchema } from '../../src/cli/domain/increments/model.ts';
 
 const code = expected => error => { assert.equal(error.code, expected, error.message); assert.ok(error.message.startsWith(`${expected}: `)); return true; };
 const config = defaultDeliverySchema.branches;

@@ -31,8 +31,8 @@ test('explicit undefined or null source providers are refused rather than fallin
  for(const invalid of [{items:undefined},{items:null},{items:'provider'}])assert.throws(()=>validateSourceOverrides(invalid,contracts),/SOURCE_OVERRIDE_INVALID/);
 });
 test('duplicate relationship ids stop generation instead of producing ambiguous write guards',async()=>{
- const { readFile }=await import('node:fs/promises');const { projectModel }=await import('../../bin/compiler/emitters/model.ts');
- const { relationshipDefinitions }=await import('../../bin/compiler/emitters/relationship-model.ts');
+ const { readFile }=await import('node:fs/promises');const { projectModel }=await import('../../src/cli/compiler/emitters/model.ts');
+ const { relationshipDefinitions }=await import('../../src/cli/compiler/emitters/relationship-model.ts');
  const seed=selfProject();const relations=seed.design.semantic.relationships;
  assert.ok(relations.length>0);assert.equal(relationshipDefinitions(projectModel(seed)).length,relations.length);
  relations.push({...structuredClone(relations[0]),key:'duplicate_identity_ref'});assert.throws(()=>relationshipDefinitions(projectModel(seed)),/Duplicate relationship id/);

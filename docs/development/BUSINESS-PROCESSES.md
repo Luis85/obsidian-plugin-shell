@@ -59,7 +59,7 @@ The generated page for this example is [docs/processes/release-approval.md](../p
 ## Format reference
 
 `configs/schemas/business-process.schema.json` gives editor completion only. The authoritative validators are
-`readProcess` (`bin/domain/process.ts`) and `process check`. The file name must equal the `id`.
+`readProcess` (`src/cli/domain/process.ts`) and `process check`. The file name must equal the `id`.
 
 | Key | Meaning |
 | --- | --- |

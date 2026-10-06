@@ -458,7 +458,9 @@ jobs:
       - *npm-cache
       - *select-npm
       - name: Install locked build dependencies
-        run: node "$QUALIFIED_NPM" ci --no-fund
+        run: |
+          node "$QUALIFIED_NPM" ci --no-fund
+          node scripts/bundling/build-cli.mjs
       - name: Verify real framework reporters and candidate-bound evidence transport
         run: |
           mkdir -p reports/framework-cli
@@ -502,7 +504,9 @@ jobs:
       - *npm-cache
       - *select-npm
       - name: Install exact dependencies
-        run: node "$QUALIFIED_NPM" ci --no-fund
+        run: |
+          node "$QUALIFIED_NPM" ci --no-fund
+          node scripts/bundling/build-cli.mjs
       - name: Install Electron system libraries (no browser download)
         run: node node_modules/@playwright/test/cli.js install-deps chromium
       - name: Restore the pinned Obsidian host download
@@ -542,7 +546,9 @@ jobs:
       - *npm-cache
       - *select-npm
       - name: Install the framework
-        run: node "$QUALIFIED_NPM" ci --no-fund
+        run: |
+          node "$QUALIFIED_NPM" ci --no-fund
+          node scripts/bundling/build-cli.mjs
       - name: Verify generator integration with unchanged repository gates
         run: |
           node scripts/bundling/build.mjs
@@ -609,6 +615,10 @@ jobs:
       - *setup-node
       - *npm-cache
       - *select-npm
+      - name: Install and build the framework used by the starter compiler
+        run: |
+          node "$QUALIFIED_NPM" ci --no-fund
+          node scripts/bundling/build-cli.mjs
       - name: Generate and independently install, build, typecheck and test each starter
         env:
           STARTER_IDS: ${{ matrix.ids }}

@@ -38,7 +38,7 @@ test('explicit changed-file arguments narrow Oxlint to those owned inputs and st
     await writeFile(join(root, 'src/bad.ts'), 'export function invalid(value: boolean) { if (value) return 1; else if (value) return 2; return 0; }\n');
     assert.equal((await lintOwnedSource(root, tool, ['src/good.ts'])).files, 1, 'the defective file is not linted when it is not requested');
     await rejectsWithoutAnnotations(() => lintOwnedSource(root, tool, ['src/bad.ts']));
-    assert.deepEqual(await lintOwnedSource(root, tool, ['docs/other.ts']), { status: 'passed', files: 0, scope: 'none of the requested files is an owned src/bin/plugins/templates/companion/runtime input' });
+    assert.deepEqual(await lintOwnedSource(root, tool, ['docs/other.ts']), { status: 'passed', files: 0, scope: 'none of the requested files is an owned src/plugins/templates/companion/runtime input' });
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
@@ -50,8 +50,9 @@ test('the bundled framework distribution under a kit bin/ is not linted as proje
     const tool = resolve('node_modules/oxlint/bin/oxlint');
     await writeFile(join(root, 'src/probe.ts'), 'export const value = 1;\n');
     await writeFile(join(root, 'bin/app.js'), 'export function bundled(value) { if (value) return 1; else if (value) return 2; return 0; }\n');
+    assert.equal((await lintOwnedSource(root, tool)).files, 1, 'bin is compiled output');
+    await mkdir(join(root, 'src/cli'));
+    await writeFile(join(root, 'src/cli/probe.ts'), 'export function bad(value: boolean) { if (value) return 1; else if (value) return 2; return 0; }\n');
     await rejectsWithoutAnnotations(() => lintOwnedSource(root, tool));
-    await writeFile(join(root, 'bin/kit.json'), '{}');
-    assert.equal((await lintOwnedSource(root, tool)).files, 1, 'only the project src is linted next to a kit distribution');
   } finally { await rm(root, { recursive: true, force: true }); }
 });

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { learningPrerequisiteIssues, learningLine, readLearningPath } from '../../bin/domain/learning-path.ts';
-import { learningDocLink, learningDocTargets, learningHeadings, readLearningContentFile, readLearningDocTarget, readLearningMarkdown, renderLearningMarkdown } from '../../bin/domain/learning-markdown.ts';
-import { completeLearningStep, learningProgressPath, learningStep, learningStepOpen, learningSummary, newLearningProgress, readLearningProgress, readLearningStepInput } from '../../bin/domain/learning-progress.ts';
-import { learningAnswered, learningAnswersAt, learningConditionLabel, learningFile, learningProgressCheck, learningStepForm, learningWizardId } from '../../bin/domain/learning-conditions.ts';
-import { readForm } from '../../bin/domain/form.ts';
+import { learningPrerequisiteIssues, learningLine, readLearningPath } from '../../src/cli/domain/learning-path.ts';
+import { learningDocLink, learningDocTargets, learningHeadings, readLearningContentFile, readLearningDocTarget, readLearningMarkdown, renderLearningMarkdown } from '../../src/cli/domain/learning-markdown.ts';
+import { completeLearningStep, learningProgressPath, learningStep, learningStepOpen, learningSummary, newLearningProgress, readLearningProgress, readLearningStepInput } from '../../src/cli/domain/learning-progress.ts';
+import { learningAnswered, learningAnswersAt, learningConditionLabel, learningFile, learningProgressCheck, learningStepForm, learningWizardId } from '../../src/cli/domain/learning-conditions.ts';
+import { readForm } from '../../src/cli/domain/form.ts';
 const step = (id, extra = {}) => ({ id, title: `Step ${id}`, goal: 'Learn something.', ...extra });
 const path = (steps, extra = {}) => ({ schemaVersion: 1, id: 'course', version: 1, title: 'Course', summary: 'Learn it.', skill: 'Skill', audience: 'Everyone', estimatedMinutes: 5, steps, ...extra });
 const now = '2026-10-04T10:00:00.000Z';
@@ -66,7 +66,8 @@ test('learning path validation fails closed for unknown, unsafe, duplicate or un
     [[step('a', { markdown: '[x](javascript:alert(1))' })], /executable markup/],
     [[step('a', { markdown: '<img src=x onerror=alert(1)>' })], /executable markup/],
     [[step('a', { markdown: 'Escape \u001b[31m' })], /control characters/],
-    [[step('a', { markdown: 'See [[src/main]]' })], /under docs\/, bin\/ or the repository root/],
+    [[step('a', { markdown: 'See [[src/main]]' })], /under docs\/, src\/cli\/, bin\/ or the repository root/],
+    [[step('a', { markdown: 'See [[src/cli-other/README]]' })], /under docs\//],
     [[step('a', { markdown: 'See [[docs/../secret]]' })], /under docs\//],
     [[step('a', { markdown: { file: '../escape.md' } })], /below configs\/learning\/content/],
     [[step('a', { markdown: { file: 'notes.txt' } })], /below configs\/learning\/content/],
@@ -95,9 +96,10 @@ test('prerequisites must exist and be acyclic', () => {
 test('Markdown links resolve to documentation files and render as plain terminal text', () => {
   assert.deepEqual(learningDocLink('docs/guide#Start'), { target: 'docs/guide#Start', file: 'docs/guide.md', heading: 'Start' });
   assert.deepEqual(learningDocLink('README.md'), { target: 'README.md', file: 'README.md' });
+  assert.equal(readLearningDocTarget('src/cli/README', 'guide'), 'src/cli/README');
   assert.deepEqual(learningDocTargets('See [[docs/a]] and [[docs/b#X|b]] and [[docs/a]].', ['docs/c', 'docs/a']), ['docs/a', 'docs/b#X', 'docs/c']);
   assert.deepEqual(learningDocTargets(undefined), []);
-  assert.equal(renderLearningMarkdown('Read [[docs/a#Forms|the forms]] or [[bin/TUI]].'), 'Read the forms (docs/a.md#Forms) or bin/TUI.md.');
+  assert.equal(renderLearningMarkdown('Read [[docs/a#Forms|the forms]] or [[src/cli/TUI]].'), 'Read the forms (docs/a.md#Forms) or src/cli/TUI.md.');
   assert.deepEqual([...learningHeadings('# Title\ntext\n## Run, inspect and check ##\n####### not\n')], ['title', 'run, inspect and check']);
   assert.equal(readLearningMarkdown('Use `<id>` placeholders and <b>bold</b>.', 'x', 100), 'Use `<id>` placeholders and <b>bold</b>.');
   assert.throws(() => readLearningMarkdown('x'.repeat(11), 'x', 10), /1–10 characters/);

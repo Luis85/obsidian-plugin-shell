@@ -4,9 +4,9 @@ import { createHash } from 'node:crypto';
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { result } from '../../bin/adapters/framework/contracts.ts';
-import { processPlan, starterProcessOperation, completeDefinition } from '../../bin/adapters/starters/processes.ts';
-import { definitionProjectPlan, receiptFile } from '../../bin/adapters/starters/project.ts';
+import { result } from '../../src/cli/adapters/framework/contracts.ts';
+import { processPlan, starterProcessOperation, completeDefinition } from '../../src/cli/adapters/starters/processes.ts';
+import { definitionProjectPlan, receiptFile } from '../../src/cli/adapters/starters/project.ts';
 import { code, fileStarter, request, workspace } from './starters-fixture.mjs';
 
 // Reviewed starter processes (processes.ts): the receipt-bound plan, explicit trust, ordered execution and first-run completion.

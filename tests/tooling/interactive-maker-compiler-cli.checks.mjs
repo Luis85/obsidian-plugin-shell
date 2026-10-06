@@ -5,16 +5,16 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { compilerOperation } from '../../bin/compiler/adapters/cli.ts';
-import { createRecorder, formatDiagnostics, writeReports } from '../../bin/compiler/adapters/reporting.ts';
-import { dependencyReadiness } from '../../bin/compiler/adapters/dependencies.ts';
-import { loadTemplateSnapshot } from '../../bin/compiler/adapters/template-snapshot.ts';
-import { diagnostic } from '../../bin/compiler/domain/diagnostics.ts';
+import { compilerOperation } from '../../src/cli/compiler/adapters/cli.ts';
+import { createRecorder, formatDiagnostics, writeReports } from '../../src/cli/compiler/adapters/reporting.ts';
+import { dependencyReadiness } from '../../src/cli/compiler/adapters/dependencies.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/adapters/template-snapshot.ts';
+import { diagnostic } from '../../src/cli/compiler/domain/diagnostics.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
-import { templateRootFiles as templateFiles, templateRoots } from '../../bin/compiler/domain/template-inputs.ts';
+import { templateRootFiles as templateFiles, templateRoots } from '../../src/cli/compiler/domain/template-inputs.ts';
 import { fileSymlink } from './file-symlink.mjs';
 
-// Drives the compiler host CLI adapters (bin/compiler/adapters/{cli,reporting,dependencies,template-snapshot}.ts).
+// Drives the compiler host CLI adapters (src/cli/compiler/adapters/{cli,reporting,dependencies,template-snapshot}.ts).
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const source = starterDocumentText('blank');
@@ -25,7 +25,10 @@ const request = (command, options = {}, args = []) => ({ command, args, options:
 /** The smallest tree the template loader accepts: every root folder and root file, no generator templates. */
 async function templateTree(folder) {
   for (const name of templateRoots) await mkdir(join(folder, name), { recursive: true });
-  for (const name of templateFiles) await writeFile(join(folder, name), name.endsWith('.json') ? '{}\n' : name + '\n');
+  for (const name of templateFiles) {
+    await mkdir(join(folder, name, '..'), { recursive: true });
+    await writeFile(join(folder, name), name.endsWith('.json') ? '{}\n' : name + '\n');
+  }
 }
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 /** A verifiable kit around that tree: every bin-owned file and bootstrap file is fingerprinted in bin/kit.json. */
@@ -42,10 +45,10 @@ async function kitTree(folder) {
   }
   await walk('bin');
   const bootstrap = [];
-  for (const path of ['bin/app', 'package.json', 'README.md', 'LICENSE']) {
+  for (const path of ['bin/app', 'bin/package.json', 'bin/README.md', 'bin/LICENSE', 'package.json', 'README.md', 'LICENSE']) {
     await writeFile(join(folder, path), path + '\n'); bootstrap.push({ path, hash: sha(Buffer.from(path + '\n')) });
   }
-  await writeFile(join(folder, 'bin/kit.json'), JSON.stringify({ schemaVersion: 2, version: '1.0.0', compilerVersion: 'fixture',
+  await writeFile(join(folder, 'bin/kit.json'), JSON.stringify({ schemaVersion: 3, version: '1.0.0', compilerVersion: 'fixture',
     sourceHash: sha('fixture'), files, bootstrap }));
 }
 const scratch = async (t, prefix) => {

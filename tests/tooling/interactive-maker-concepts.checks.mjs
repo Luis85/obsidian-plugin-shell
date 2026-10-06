@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { inspectConcept as relocatedInspect, conceptImportPlan as relocatedImport } from '../../bin/adapters/framework/concepts.ts';
+import { inspectConcept as relocatedInspect, conceptImportPlan as relocatedImport } from '../../src/cli/adapters/framework/concepts.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */

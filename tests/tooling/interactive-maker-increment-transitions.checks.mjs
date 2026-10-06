@@ -3,9 +3,9 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import {
   allowedIncrementTransitions, checkIncrementTransition, incrementTransitions, pullRequestLocks, checkPullRequestTransition, incrementEditable, incrementStatus, pullRequestEdits, pullRequestPhase,
   pullRequestStatus, requireIncrementEditable, requireIncrementStatus, requirePullRequestEdit,
-} from '../../bin/domain/increments/transitions.ts';
-import { incrementStatuses, pullRequestStatuses } from '../../bin/domain/increments/model.ts';
-import { DeliveryDocumentError } from '../../bin/domain/increments/errors.ts';
+} from '../../src/cli/domain/increments/transitions.ts';
+import { incrementStatuses, pullRequestStatuses } from '../../src/cli/domain/increments/model.ts';
+import { DeliveryDocumentError } from '../../src/cli/domain/increments/errors.ts';
 
 const code = expected => error => { assert.ok(error instanceof DeliveryDocumentError); assert.equal(error.code, expected, error.message); assert.ok(error.message.startsWith(`${expected}: `)); return true; };
 const allowed = {

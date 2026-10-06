@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { runCheckSteps, checkSteps, checkOperation, outputTail } from '../../bin/adapters/framework/check.ts';
+import { runCheckSteps, checkSteps, checkOperation, outputTail } from '../../src/cli/adapters/framework/check.ts';
 import { codeRoots, sourceRoots } from '../../scripts/shared/project-roots.mjs';
 import { projectConfigPath } from '../../scripts/shared/project-configs.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));

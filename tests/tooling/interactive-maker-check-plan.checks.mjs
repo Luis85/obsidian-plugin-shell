@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { renderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
-import { checkPlanOperation } from '../../bin/adapters/framework/check-plan.ts';
-import { ruleHits } from '../../bin/adapters/framework/check-selection.ts';
-import { loadToolkit, loadWorkflows, parseDurations, parseGateRules, parseWorkflow, workflowTrigger } from '../../bin/adapters/framework/gate-sources.ts';
+import { renderHuman } from '../../src/cli/presentation/terminal/terminal-render.ts';
+import { checkPlanOperation } from '../../src/cli/adapters/framework/check-plan.ts';
+import { ruleHits } from '../../src/cli/adapters/framework/check-selection.ts';
+import { loadToolkit, loadWorkflows, parseDurations, parseGateRules, parseWorkflow, workflowTrigger } from '../../src/cli/adapters/framework/gate-sources.ts';
 import { withRepo, git, repoRoot, write } from './check-plan-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 

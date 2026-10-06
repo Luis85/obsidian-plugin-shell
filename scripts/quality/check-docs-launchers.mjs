@@ -54,7 +54,10 @@ export async function checkDocsLaunchers(root = process.cwd(), allowlistText) {
   for (const file of (await collect(root)).sort()) {
     scanned++;
     for (const { rule, line } of findReferences(await readFile(join(root, ...file.split('/')), 'utf8'))) {
-      const entry = entries.find(item => item.rules.includes(rule) && item.matcher.test(file));
+      // A compiled kit carries the same source documents and negative fixtures under template/.
+      // Validate those copies under their source identity; an unapproved reference still fails.
+      const source = file.startsWith('bin/template/') ? file.slice('bin/template/'.length) : file;
+      const entry = entries.find(item => item.rules.includes(rule) && item.matcher.test(source));
       if (entry) { entry.used = true; allowed++; } else failures.push(`${file}:${line}: ${rule}`);
     }
   }

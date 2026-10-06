@@ -3,11 +3,11 @@ import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { testWorkflowCommand } from '../../bin/adapters/test-workflow-command.ts';
-import { testWorkflowNote, testWorkflowOrphans } from '../../bin/adapters/test-workflow-docs-plan.ts';
-import { readTestWorkflow, testWorkflowJson } from '../../bin/domain/test-workflow.ts';
-import { describeTestWorkflowStep, renderTestWorkflowDocs, testWorkflowFrontmatter } from '../../bin/domain/test-workflow-docs.ts';
-import { hash } from '../../bin/adapters/framework/files.ts';
+import { testWorkflowCommand } from '../../src/cli/adapters/test-workflow-command.ts';
+import { testWorkflowNote, testWorkflowOrphans } from '../../src/cli/adapters/test-workflow-docs-plan.ts';
+import { readTestWorkflow, testWorkflowJson } from '../../src/cli/domain/test-workflow.ts';
+import { describeTestWorkflowStep, renderTestWorkflowDocs, testWorkflowFrontmatter } from '../../src/cli/domain/test-workflow-docs.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'workflow-docs-'));
   try { await fn(root); } finally { await rm(root, { recursive: true, force: true }); }

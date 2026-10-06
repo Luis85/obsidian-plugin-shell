@@ -1,7 +1,7 @@
-import { newDocument } from '../../../bin/domain/document.ts';
-import { addPage } from '../../../bin/domain/pages.ts';
-import { addComponent, attachComponents } from '../../../bin/domain/components.ts';
-import { addInteraction, setInteractionAction } from '../../../bin/domain/interactions.ts';
+import { newDocument } from '../../../src/cli/domain/document.ts';
+import { addPage } from '../../../src/cli/domain/pages.ts';
+import { addComponent, attachComponents } from '../../../src/cli/domain/components.ts';
+import { addInteraction, setInteractionAction } from '../../../src/cli/domain/interactions.ts';
 import { validateAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 /** Real v6 authoring commands construct a linked fixture; no mock project validator. */
 export function projectFixture() {

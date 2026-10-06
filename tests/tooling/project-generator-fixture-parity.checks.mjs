@@ -9,8 +9,8 @@ import { buildCompanionFixtureManifest } from '../../scripts/companion/test-data
 import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engine.mjs';
 import { createFixtureAdapter } from '../../docs/concepts/companion/test-kit/adapters.mjs';
 import { projectFiles } from '../support/project-render.mjs';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
+import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
 import { providerProject } from '../fixtures/generator-provider-project.mjs';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 import { selfProject } from '../support/starter-documents.mjs';

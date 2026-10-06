@@ -74,7 +74,7 @@
       "title": "Write the design brief in a new prototype folder",
       "goal": "Turn the brainstorm into an agreed design brief and a prototype package in prototypes/<slug>.",
       "markdown": { "file": "idea-to-prototype/04-design-brief.md" },
-      "docs": ["bin/README#Prepare a prototype", "bin/PROJECT-STARTERS#Prepared package and generation", "docs/user-manual/shell-cli/automation-and-safety#The repeatable reviewed-plan pattern"],
+      "docs": ["src/cli/README#Prepare a prototype", "src/cli/PROJECT-STARTERS#Prepared package and generation", "docs/user-manual/shell-cli/automation-and-safety#The repeatable reviewed-plan pattern"],
       "checklist": [
         { "id": "agreed", "label": "I reviewed the brief's defaults before agreeing" },
         { "id": "folder", "label": "I entered prototypes/<slug> as the package output folder" }
@@ -98,7 +98,7 @@
       "title": "Create the docs/design folder",
       "goal": "Answer the design-folder question and prepare docs/design/<slug> for Claude Design through a reviewed plan.",
       "markdown": { "file": "idea-to-prototype/05-design-folder.md" },
-      "docs": ["docs/development/CLAUDE-DESIGN-HANDOFF", "bin/README#Prepare a Claude Design folder"],
+      "docs": ["docs/development/CLAUDE-DESIGN-HANDOFF", "src/cli/README#Prepare a Claude Design folder"],
       "actions": [
         { "id": "prepare", "kind": "command", "label": "Plan the design folder (then repeat with --apply <planHash>)", "command": "node bin/app design prepare --name <slug> --project prototypes/<slug>/companion.project.json --package prototypes/<slug> --json" },
         { "id": "status", "kind": "command", "label": "Check the folder", "command": "node bin/app design status --name <slug> --json" }
@@ -167,7 +167,7 @@
       "title": "Implement the ready screens in the prototype",
       "goal": "Have Claude Code build the ready rows in the prototype package, following HANDOFF.md and the execution prompt, and record them as implemented.",
       "markdown": { "file": "idea-to-prototype/09-implement.md" },
-      "docs": ["docs/development/PROTOTYPE-TOOLING", "docs/development/COMPANION-CLICKDUMMY", "docs/user-manual/shell-cli/design-and-generation#Build and review a clickdummy", "bin/ANGULAR-BRICKS", "AGENTS"],
+      "docs": ["docs/development/PROTOTYPE-TOOLING", "docs/development/COMPANION-CLICKDUMMY", "docs/user-manual/shell-cli/design-and-generation#Build and review a clickdummy", "src/cli/ANGULAR-BRICKS", "AGENTS"],
       "checklist": [
         { "id": "prompt", "label": "I gave Claude Code the implementation request with HANDOFF.md and execution-prompt.md" },
         { "id": "model", "label": "Screens, components or interactions the design added went into the project model first, then design sync", "required": false },

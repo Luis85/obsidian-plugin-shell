@@ -3,12 +3,12 @@ import {mkdtemp,mkdir,writeFile,readFile,rm,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 const {test}=await(process.env.VITEST?import('vitest'):import('node:test'));
-import {parsePrdMarkdown as decodePrd} from '../../bin/adapters/prd-yaml.ts';
-import {intakePrds} from '../../bin/adapters/prd-intake.ts';
-import {defaultSettings,readSettings} from '../../bin/domain/user-settings.ts';
-import {PRD_LIMITS} from '../../bin/domain/prd-markdown.ts';
-import {newDocument,documentText,openDocument} from '../../bin/domain/document.ts';
-import {runOperations} from '../../bin/application/operations.ts';
+import {parsePrdMarkdown as decodePrd} from '../../src/cli/adapters/prd-yaml.ts';
+import {intakePrds} from '../../src/cli/adapters/prd-intake.ts';
+import {defaultSettings,readSettings} from '../../src/cli/domain/user-settings.ts';
+import {PRD_LIMITS} from '../../src/cli/domain/prd-markdown.ts';
+import {newDocument,documentText,openDocument} from '../../src/cli/domain/document.ts';
+import {runOperations} from '../../src/cli/application/operations.ts';
 async function scratch(work){const root=await mkdtemp(join(await realpath(tmpdir()),'wb-prds-'));try{await work(root);}finally{await rm(root,{recursive:true,force:true});}}
 test('YAML intake supports folded identity, comments and inert rich metadata without changing Markdown bytes',async()=>{
  const source='\uFEFF---\r\ntype: PRD\r\nid: PRD-ONE\r\ntitle: >-\r\n  Customer\r\n  service\r\nowners: [Alice, Bob]\r\nmetadata:\r\n  milestone: 1\r\n---\r\n# Original\r\nDo not execute this text.\r\n';

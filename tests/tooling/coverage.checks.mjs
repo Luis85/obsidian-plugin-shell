@@ -1,16 +1,30 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { assertCoverageInventory, assertCoverageGates, assertSelectedCoreGate } from '../../scripts/quality/coverage-inventory.mjs';
+import { assertCoverageInventory, assertCoverageGates, assertSelectedCoreGate, runtimeCoverageInputs } from '../../scripts/quality/coverage-inventory.mjs';
 test('[COV-02-01] silently omitted production input makes the coverage inventory fail', () => {
   const source = resolve('src/bootstrap/mount-ui.ts');
   assert.throws(() => assertCoverageInventory({ total: {}, [source]: {} }, [source, 'src/main.ts']), /INCOMPLETE_PRODUCTION_COVERAGE/);
   assert.throws(() => assertCoverageInventory({ [source]: {} }, [source]), /MISSING_COVERAGE_TOTAL/);
   assert.equal(assertCoverageInventory({ total: {}, [source]: {} }, [source]).productionInputs, 1);
+});
+test('runtime coverage discovers all runtime sources while CLI inputs retain their separate gate', t => {
+  const root = mkdtempSync(join(tmpdir(), 'shell-runtime-inventory-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const runtime = ['src/main.ts', 'src/domain/value.ts', 'src/presentation/view.vue', 'src/new-area/new.ts', 'src/features/cli/value.ts'];
+  for (const file of [...runtime, 'src/cli/application/command.ts', 'src/cli/compiler/output.ts']) {
+    const path = join(root, file); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '');
+  }
+  const inputs = runtimeCoverageInputs(root);
+  assert.deepEqual(inputs.sort(), runtime.map(file => join(root, file)).sort());
+  const report = Object.fromEntries([['total', {}], ...inputs.map(file => [file, {}])]);
+  assert.equal(assertCoverageInventory(report, inputs).productionInputs, runtime.length);
+  delete report[join(root, 'src/new-area/new.ts')];
+  assert.throws(() => assertCoverageInventory(report, inputs), /INCOMPLETE_PRODUCTION_COVERAGE/);
 });
 test('[COV-03-02] the actual CLI fails closed for deficient, omitted and malformed production reports', () => {
   const root = mkdtempSync(join(tmpdir(), 'shell-coverage-')); const script = resolve('scripts/quality/coverage-inventory.mjs');

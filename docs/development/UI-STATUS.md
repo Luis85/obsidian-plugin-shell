@@ -56,11 +56,11 @@ Journey titles must be literal; interpolated template titles cannot be matched s
 
 ## Code layout
 
-- `bin/domain/ui-status*.ts`: pure computation, source scanners, input readers and evidence summaries.
-- `bin/application/ui-status.ts`: the read port and use case.
-- `bin/adapters/framework/ui-status.ts`: bounded file-system port and the operation.
-- `bin/adapters/framework/ui-operation.ts`: the `ui` group dispatch. Add a subcommand with one handler entry here and one catalog row.
-- `bin/presentation/terminal/ui-status-view.ts`: the human table.
+- `src/cli/domain/ui-status*.ts`: pure computation, source scanners, input readers and evidence summaries.
+- `src/cli/application/ui-status.ts`: the read port and use case.
+- `src/cli/adapters/framework/ui-status.ts`: bounded file-system port and the operation.
+- `src/cli/adapters/framework/ui-operation.ts`: the `ui` group dispatch. Add a subcommand with one handler entry here and one catalog row.
+- `src/cli/presentation/terminal/ui-status-view.ts`: the human table.
 - Tests: `tests/tooling/interactive-maker-ui-status-domain.checks.mjs` and `...-adapter.checks.mjs` (maker suite, so they count toward the CLI coverage gate).
 
 No generator output changed, so generated-project snapshots and the kit inventory only change through

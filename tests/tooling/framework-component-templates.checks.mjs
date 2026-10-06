@@ -4,12 +4,12 @@ import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { loadComponentTemplates } from '../../bin/adapters/component-template-repository.ts';
-import { componentTemplateCoverage, componentTemplateTree } from '../../bin/application/component-template-catalog.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { documentText, newDocument, openDocument } from '../../bin/domain/document.ts';
+import { loadComponentTemplates } from '../../src/cli/adapters/component-template-repository.ts';
+import { componentTemplateCoverage, componentTemplateTree } from '../../src/cli/application/component-template-catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { documentText, newDocument, openDocument } from '../../src/cli/domain/document.ts';
 import { pluginComponentTemplates } from '../../plugins/template-contributions.ts';
-import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
+import { defaults, identity } from '../../src/cli/adapters/framework/configuration.ts';
 import { extractKit } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 

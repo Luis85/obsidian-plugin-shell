@@ -3,8 +3,8 @@ import { readdir, writeFile, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { parseArguments, execute } from '../../bin/adapters/commands.ts';
-import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
+import { parseArguments, execute } from '../../src/cli/adapters/commands.ts';
+import { brainstormFeaturePlan } from '../../src/cli/adapters/brainstorm.ts';
 import { brainstormScratch, captureRequest, readText, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 const cli = (options, argv, stdin = '') => execute(parseArguments(argv), { ...options, input: Readable.from([stdin]) });

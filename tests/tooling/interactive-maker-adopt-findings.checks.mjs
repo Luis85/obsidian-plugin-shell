@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { analyzeInventory } from '../../bin/application/adoption/analyze.ts';
-import { AdoptionError } from '../../bin/domain/adoption/contracts.ts';
-import { sortFindings, finding } from '../../bin/domain/adoption/findings.ts';
-import { parseReport } from '../../bin/domain/adoption/report-codec.ts';
-import { recommend, stackOf } from '../../bin/domain/adoption/strategy.ts';
+import { analyzeInventory } from '../../src/cli/application/adoption/analyze.ts';
+import { AdoptionError } from '../../src/cli/domain/adoption/contracts.ts';
+import { sortFindings, finding } from '../../src/cli/domain/adoption/findings.ts';
+import { parseReport } from '../../src/cli/domain/adoption/report-codec.ts';
+import { recommend, stackOf } from '../../src/cli/domain/adoption/strategy.ts';
 import { inventoryOf, noTargets, targets } from './interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 

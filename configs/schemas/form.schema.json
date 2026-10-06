@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "configs/schemas/form.schema.json",
   "title": "Workbench data-driven form",
-  "description": "Editor support only. bin/domain/form.ts is the authoritative validator (per-kind keys, references and limits); run node bin/app wizard check --json.",
+  "description": "Editor support only. src/cli/domain/form.ts is the authoritative validator (per-kind keys, references and limits); run node bin/app wizard check --json.",
   "type": "object",
   "additionalProperties": false,
   "required": [

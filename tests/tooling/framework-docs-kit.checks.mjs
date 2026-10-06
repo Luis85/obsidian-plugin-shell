@@ -5,17 +5,17 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
-import { verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
+import { assembleKit, installedCompiler } from '../../src/cli/adapters/framework/kit.ts';
+import { verifyKit } from '../../src/cli/adapters/framework/kit-integrity.ts';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { projectFiles } from '../support/project-render.mjs';
-import { withBanner, rewriteDocReferences } from '../../bin/compiler/emitters/framework-scope.ts';
+import { withBanner, rewriteDocReferences } from '../../src/cli/compiler/emitters/framework-scope.ts';
 /** What relocation adds to a kept framework document: the reference banner and relocated mentions of other kept docs. */
 const referenceDocument = text => withBanner(rewriteDocReferences(text));
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { rebaseMarkdown } from '../../bin/compiler/emitters/framework-docs.ts';
-import { documentationDigest as digest } from '../../bin/documentation/adapters/filesystem.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
+import { rebaseMarkdown } from '../../src/cli/compiler/emitters/framework-docs.ts';
+import { documentationDigest as digest } from '../../src/cli/documentation/adapters/filesystem.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 test('packaged CLI ships the pinned parser and supports docs import then existing generation without root dependencies', { timeout: 300000 }, async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('Kit packaging requires the reviewed framework sources, not an example-removed consumer.'); return; }

@@ -5,10 +5,10 @@ import { join, posix } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler, kitScripts } from '../../bin/adapters/framework/kit.ts';
-import { kitRootReadme } from '../../bin/adapters/framework/distribution.ts';
+import { assembleKit, installedCompiler, kitScripts } from '../../src/cli/adapters/framework/kit.ts';
+import { kitRootReadme } from '../../src/cli/adapters/framework/distribution.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
-import { zip } from '../../bin/adapters/framework/zip.ts';
+import { zip } from '../../src/cli/adapters/framework/zip.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

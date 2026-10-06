@@ -58,5 +58,5 @@ your approval (see [[docs/user-manual/shell-cli/automation-and-safety#The repeat
 | `docs/releases/items/` | Release item notes | `node bin/app release-item new` |
 | `docs/releases/candidates/<version>/README.md` | The release candidate | `node bin/app candidate new` and `candidate add` |
 
-The repository skills live under `.claude/skills/`; learning paths can only link pages under `docs/`, `bin/`
+The repository skills live under `.claude/skills/`; learning paths can only link pages under `docs/`, `src/cli/`, `bin/`
 and the repository root, so open those skill files directly.

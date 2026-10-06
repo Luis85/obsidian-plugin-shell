@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { parseMarkdown, renderMarkdown, generatedSource } from '../../bin/documentation/adapters/markdown.ts';
+import { parseMarkdown, renderMarkdown, generatedSource } from '../../src/cli/documentation/adapters/markdown.ts';
 
-// Drives the typed Markdown codec (bin/documentation/adapters/markdown.ts) through its refusal paths under the maker floors.
+// Drives the typed Markdown codec (src/cli/documentation/adapters/markdown.ts) through its refusal paths under the maker floors.
 const header = (extra = '') => `---\ndoc_schema: 1\ntype: page\nid: node-1\nproject: demo\ntitle: Overview\nsurface_kind: view\n${extra}---\n`;
 const dataBlock = (body = 'surface:\n  goal: a\n', info = 'yaml shell-data', fence = '```') => `${fence}${info}\n${body}${fence}\n`;
 const page = (overrides = {}) => ({ type: 'page', id: 'node-1', project: 'demo', title: 'Overview', fields: { surface_kind: 'view' }, data: { surface: { goal: 'a' } }, ...overrides });

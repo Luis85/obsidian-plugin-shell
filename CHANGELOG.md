@@ -36,21 +36,38 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Changed
 
+- Move Workbench CLI development to `src/cli`; `npm run build:cli` creates the portable `bin` product with compiled authoring tools, templates, plugin defaults, notices and verified inventories.
+- Group companion Vitest updates with their coverage provider and synchronize Actions updates across project workflow directories.
 - Test files now run 4 at a time where it was measured safe: the maker suite (Vitest, 47-57 min serial to 14-15 min on Windows) and nine node --test tooling suites through a new per-suite `runner.concurrency` in `tests/suites.json` (for example generator 1723 to 936 s). Suites still run one after another, and suites that write into the shared checkout or time out under load stay serial.
 - This changelog now follows Keep a Changelog 1.1.0, and release candidates carry only the released version's section as release notes.
 - End-to-end tests (served UI in Chromium, browser suites, real Obsidian, browser and native candidate evidence) are opt-in in workflows and processes and mandatory in the Release tier: a pull request opts in with the `e2e` label (adding it runs only the end-to-end jobs, reported as "E2E result"), a manual run with the `e2e` input. Pushes to `main` no longer run them. `npm run check:repository` rejects an end-to-end step that runs without the opt-in or that the Release tier could skip. Generated projects follow the same rule with `main` as their Release tier: the GitHub `ui` job runs on `main` or with the `e2e` label or input, real Obsidian also accepts the `e2e` label, and Azure Pipelines gains a `runE2E` parameter.
 - `node bin/app new <dir>` now runs its interview on the shared wizard engine (`configs/wizards/new-starter.json`). Starter inputs are asked as a generated form: choices and booleans are numbered menus, invalid answers are re-asked instead of ending the interview, and `:back` revisits earlier questions. Number form fields accept `required: false`.
-- Prototype guides moved from `bin/guides` to `configs/guides`; their content, ids and versions are unchanged.
+- Prototype guides moved from `src/cli/guides` to `configs/guides`; their content, ids and versions are unchanged.
 - CI runs fewer duplicate gates. "Template authoring / example removal" replaces its two complete verify runs with a cheap gate after removal and one targeted verify plus the `native`, `makers` and `generator` suites after the new feature, and drops the runtime evidence session that coverage evidence repeats; "source archive" defers setup's verify to the archive-relevant steps; an `e2e` label run builds only what the browser steps serve; a push to `main` skips the template-authoring jobs and the Ubuntu showcase leg; the Windows Node 24.15.0 / npm 12 setup-compatibility leg runs targeted gates and the `setup` suite instead of the complete verify (the Ubuntu leg keeps it). Installing jobs restore the npm download cache (never `node_modules`; fresh-install qualification, install-policy rows and release workflows stay cold), and four more opted-in Chromium installs use the shared browser cache.
 - `npm run setup` asks its identity, MCP and hosting-platform questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
 - `npm run verify` and the interactive-maker workflow run the 174 maker test files once, under coverage (`maker-coverage-run`), instead of a second time in the node --test tooling step; the `maker` suite now uses Vitest, and `suites.mjs --check` fails if a tooling file stops running in verify.
+- Develop the Workbench CLI under src/cli and build a portable standalone bin distribution.
 
 ### Fixed
 
+- Candidate qualification gives the complete tooling evidence inventory a bounded 60-minute execution budget after measured runs exceeded the previous 30-minute cap. Individual test deadlines and other producer limits remain unchanged, and timed-out process trees still produce failed evidence.
+- Candidate runtime evidence uses the same complete runtime inventory as its coverage gate after CLI sources moved to `src/cli`; CLI coverage remains independently checked.
+
+- Keep uncertain Task note edits blocked until a successful reload, preserve selection during pending writes, and report preference feedback failures without mislabeling committed saves.
+- Restore native checkbox sizing in runtime forms, connect choice errors and list instructions to controls, and allow clearing optional selections without resetting other fields.
+- Exercise clean-checkout CLI builds and strict typecheck regressions in draft Dev CI, retaining revision-bound check results for diagnosis.
+- Build the standalone CLI from fresh checkouts without tracked partial artifacts in `bin`; run both strict runtime and CLI checks through `npm run typecheck`.
+- Prevent disposed settings views from persisting changes through retained callbacks.
+- Wait for actual project CI before reporting required checks on project-only pull requests, and avoid regenerating the CLI manual for dependency-only changes.
 - Candidate qualification's tooling evidence credits the prototype skill's portable tests to `tests/tooling/prototype-helpers.checks.mjs`, the file that registers them, instead of failing with `EVIDENCE_SUITE_INVENTORY`; all six Windows-only tooling tests are now expected skips off Windows, guarded by a test that keeps that list equal to the declarations.
 - The companion project's Real Obsidian workflow runs the host from a bind mount of the project at `/wc`, so its singleton socket fits the Linux 107-byte path budget inside the shell repository (124 bytes before); temporary data stays in the project.
 - Prepared clickdummy prototype packages no longer tell agents to read `source/.claude/skills/companion-prototype-design` or run its `prototype.mjs`; generated source never ships that skill. The prompt and package README now point at `source/AGENTS.md` and the shipped offline builder `source/scripts/clickdummy/lib/build-worker.mjs`.
 - `node bin/app check` no longer times out its node --test suite steps (`maker-tests` and fast-mode `suites`) at the 10-minute step default; they get a 60-minute budget. An explicit `--timeout` still bounds every step.
+- Reconcile dependency checks and disposed Vue settings actions after the main merge.
+
+### Security
+
+- Update the transitive `source-map-js` dependency to 1.2.2 to address GHSA-68fv-2mgg-jv7q without changing direct dependency constraints.
 
 ## [0.4.0] - 2026-09-23
 

@@ -5,11 +5,11 @@ import { dirname, join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import {
   defaultIncrementsRoot, defaultIssuesRoot, defaultPullRequestsRoot, defaultSettings, effectivePaths, incrementsRoot, issuesRoot, pullRequestsRoot, readSettings, settingsSchema,
-} from '../../bin/domain/user-settings.ts';
-import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { loadSettings, settingsPlan } from '../../bin/adapters/user-settings.ts';
-import { settingsForm } from '../../bin/presentation/settings.ts';
+} from '../../src/cli/domain/user-settings.ts';
+import { settingsMigrationPlan } from '../../src/cli/adapters/settings-migration.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { loadSettings, settingsPlan } from '../../src/cli/adapters/user-settings.ts';
+import { settingsForm } from '../../src/cli/presentation/settings.ts';
 
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'increment-settings-'));

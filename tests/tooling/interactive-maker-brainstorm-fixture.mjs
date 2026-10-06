@@ -3,13 +3,13 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, rm } from 'node:fs/promi
 import { Readable } from 'node:stream';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { hash } from '../../bin/adapters/framework/files.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
 import { mapBounded } from '../../scripts/shared/bounded-map.ts';
-import { loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { newDocument, documentText } from '../../bin/domain/document.ts';
-import { runOperations } from '../../bin/application/operations.ts';
-import { applyOperation, planOperation } from '../../bin/adapters/framework/planning.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
+import { loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
+import { newDocument, documentText } from '../../src/cli/domain/document.ts';
+import { runOperations } from '../../src/cli/application/operations.ts';
+import { applyOperation, planOperation } from '../../src/cli/adapters/framework/planning.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
 
 export const frameworkRoot = resolve(import.meta.dirname, '../..');
 export const BACK = Symbol('back');

@@ -34,15 +34,15 @@ test('complete interactive and agent sessions produce byte-identical sketch and 
 test('full and fast daily gates include maker types and tests when the CLI is present', async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-gates-'));
   try {
-    await mkdir(join(root, 'bin'));
-    await writeFile(join(root, 'bin/app.ts'), 'export {};');
+    await mkdir(join(root, 'src/cli'), { recursive: true });
+    await writeFile(join(root, 'src/cli/app.ts'), 'export {};');
     await mkdir(join(root, 'configs/types'), { recursive: true }); await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
     const full = await checkSteps(root, false), fast = await checkSteps(root, true, async () => null);
     for (const plan of [full, fast]) {
       assert.ok(plan.steps.some(step => step.id === 'maker-types'));
       assert.ok(plan.steps.some(step => step.id === 'maker-tests'));
     }
-    assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'bin', '--max-warnings', '0']);
+    assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', 'src', '--max-warnings', '0']);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
@@ -321,9 +321,9 @@ test('relocated daily check gate preserves compatibility and execution semantics
 
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-check-gate-'));
   try {
-    await mkdir(join(root, 'bin'), { recursive: true });
+    await mkdir(join(root, 'src/cli'), { recursive: true });
     await mkdir(join(root, 'src'), { recursive: true });
-    await writeFile(join(root, 'bin/app.ts'), 'export {};');
+    await writeFile(join(root, 'src/cli/app.ts'), 'export {};');
     await mkdir(join(root, 'configs/types'), { recursive: true }); await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
     await writeFile(join(root, 'src/a.ts'), 'export const a = 1;');
 

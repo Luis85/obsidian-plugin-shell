@@ -3,10 +3,10 @@ import { mkdtemp, realpath, rm, readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { projectWizard } from '../../bin/presentation/project-wizard.ts';
-import { projectPlan } from '../../bin/adapters/projects.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
-import { initialState } from '../../bin/presentation/tui/state.ts';
+import { projectWizard } from '../../src/cli/presentation/project-wizard.ts';
+import { projectPlan } from '../../src/cli/adapters/projects.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
+import { initialState } from '../../src/cli/presentation/tui/state.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(fn) { const root = await mkdtemp(join(await realpath(tmpdir()), 'project-ui-')); try { await fn(root); } finally { await rm(root, { recursive: true, force: true }); } }
 function richUI(options = {}) {

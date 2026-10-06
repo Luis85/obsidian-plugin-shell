@@ -4,10 +4,10 @@ import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { commandHelp } from '../../bin/adapters/framework/help-text.ts';
-import { descriptor } from '../../bin/adapters/framework/catalog.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { commandHelp } from '../../src/cli/adapters/framework/help-text.ts';
+import { descriptor } from '../../src/cli/adapters/framework/catalog.ts';
 
 test('clickdummy dry run has zero writes and never needs or launches executable project config', async t=> {
   const root=await mkdtemp(join(tmpdir(),'clickdummy-plan-'));t.after(()=>rm(root,{recursive:true,force:true}));

@@ -3,8 +3,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { main } from '../../bin/app.ts';
-import { learningCommand } from '../../bin/adapters/learning-command.ts';
+import { main } from '../../src/cli/app.ts';
+import { learningCommand } from '../../src/cli/adapters/learning-command.ts';
 import { contactForm, greetWizard, learningPath, project, put, scratch, step } from './interactive-maker-learning-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 /** The real CLI entry with captured streams; machine output is one JSON document. */

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-import { setupSource as relocated } from '../../bin/adapters/framework/setup-source.ts';
-import { companionStarterSet } from '../../bin/adapters/framework/starter-project.ts';
-import { defaults, identity } from '../../bin/adapters/framework/configuration.ts';
+import { setupSource as relocated } from '../../src/cli/adapters/framework/setup-source.ts';
+import { companionStarterSet } from '../../src/cli/adapters/framework/starter-project.ts';
+import { defaults, identity } from '../../src/cli/adapters/framework/configuration.ts';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const frameworkRoot = resolve(import.meta.dirname, '../..');

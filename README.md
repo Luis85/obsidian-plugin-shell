@@ -8,7 +8,7 @@ The three promises are **saving time without sacrificing quality**, **documentin
 
 Start with the [product vision](docs/product/PRODUCT-VISION.md), [product principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md). The [product and delivery overview](SHELL-FIRST-OVERVIEW.md) connects the available entry points; the [2026-09-29 vision review](docs/_archive/product/PR5-VISION-REVIEW.md) distinguishes inspected implementation from intended direction.
 
-**Developers:** the [developer guide](DEVELOPER_GUIDE.md) lists every requirement first, then setup and everyday workflows for improving or extending the project.
+**Developers:** the [developer guide](DEVELOPER_GUIDE.md) lists every requirement first, then setup and everyday workflows for improving or extending the project. CLI development lives in `src/cli`; `npm run app:dev -- <command>` runs that source. `npm run build:cli` builds the complete, portable `bin` folder. Keep the whole folder together and run `node bin/app` with a compatible Node.js.
 
 **Implementation boundary:** Workbench builds on the reusable shell, CLI, compiler and authoring concept in PR #5. A generated scaffold is not a finished application, and the browser authoring concept is not the fully accepted native product. The supported CLI entry is `node bin/app`; package/manifest IDs, schema names and `companion` paths remain unchanged. Generated projects retain the user's chosen identity.
 
@@ -34,7 +34,7 @@ The guide below retains the existing framework checkout workflow and its milesto
 
 ## Start a new plugin
 
-From this checkout (after `npm ci`), create an independent project from one of
+From this checkout (after `npm ci` and `npm run build:cli`), create an independent project from one of
 the reviewed starters. The target must be a new or empty folder outside this checkout.
 
 ```sh

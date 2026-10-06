@@ -1,9 +1,9 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { capabilityCatalog, validateCatalog, validateCatalogParity, catalogDigest } from '../../bin/adapters/operations/catalog.ts';
-import { handleRequest, validateMessage, protocolHandlers } from '../../bin/adapters/operations/protocol.ts';
+import { capabilityCatalog, validateCatalog, validateCatalogParity, catalogDigest } from '../../src/cli/adapters/operations/catalog.ts';
+import { handleRequest, validateMessage, protocolHandlers } from '../../src/cli/adapters/operations/protocol.ts';
 
-// Drives the data-only capability catalog and discovery protocol (bin/adapters/operations) under the maker floors.
+// Drives the data-only capability catalog and discovery protocol (src/cli/adapters/operations) under the maker floors.
 const request = (operation = 'capabilities.read', extra = {}) => ({ protocolVersion: 1, type: 'request', requestId: 'probe-1', operation, input: {}, ...extra });
 const mutated = mutate => { const value = structuredClone(capabilityCatalog()); mutate(value); return value; };
 const rejects = (mutate, code) => assert.throws(() => validateCatalog(mutated(mutate)), { message: code });

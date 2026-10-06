@@ -207,9 +207,9 @@ Re-run `site collections` after you change the notes a site shows, and commit th
 
 Code:
 
-- Framework-free logic: `bin/domain/site-template.ts` and `bin/domain/site-collections.ts`.
-- File access: `bin/adapters/site-templates.ts`.
-- Commands: `bin/adapters/framework/site-command.ts`.
+- Framework-free logic: `src/cli/domain/site-template.ts` and `src/cli/domain/site-collections.ts`.
+- File access: `src/cli/adapters/site-templates.ts`.
+- Commands: `src/cli/adapters/framework/site-command.ts`.
 
 Tests:
 

@@ -2,10 +2,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
-import { visualSpecs, visualContractTypes, visualDefinitions } from '../../bin/compiler/emitters/visual-model.ts';
-import { visualSfc } from '../../bin/compiler/emitters/visual-code.ts';
-import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
+import { visualSpecs, visualContractTypes, visualDefinitions } from '../../src/cli/compiler/emitters/visual-model.ts';
+import { visualSfc } from '../../src/cli/compiler/emitters/visual-code.ts';
+import { visualSources } from '../../src/cli/compiler/emitters/visual-ports.ts';
 import { detailValue } from '../../templates/companion/runtime/detail-actions.ts';
 import { visualTextValue, visualIndex } from '../../templates/companion/runtime/visual-runtime.ts';
 import { visualSession, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';

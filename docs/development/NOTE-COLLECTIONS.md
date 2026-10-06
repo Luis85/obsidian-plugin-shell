@@ -17,22 +17,22 @@ All names are prefixed `collection*`/`Collection*`. Domain modules are framework
 
 | Module | Exports | Responsibility |
 | --- | --- | --- |
-| `bin/domain/collection-definition.ts` | `readCollectionDefinition`, `collectionField`, `collectionStatus`, `collectionInputName`, `CollectionDefinition`, `CollectionField`, `CollectionStatus`, … | Fail-closed validation of a definition |
-| `bin/domain/collection-record.ts` | `readCollectionRecord`, `collectionCreate`, `collectionUpdate`, `collectionManagedUpdate`, `collectionValue`, `nextCollectionId`, `collectionOverdue`, `isCollectionDate`, `CollectionHook`, `CollectionRecord`, `CollectionIssue` | Reading stored frontmatter into a record plus issues; new and changed frontmatter; transitions, stamps, derived values; managed changes by other modules; id allocation |
-| `bin/domain/collection-reference.ts` | `readCollectionAccepts`, `collectionReferenceOk`, `collectionAcceptsText`, `collectionReleaseVersion` | The `accepts` reference kinds: project paths, release versions and id prefixes |
-| `bin/domain/collection-query.ts` | `sortCollection`, `filterCollection`, `collectionReviewQueue`, `collectionCheck`, `collectionRow`, `collectionCell`, `CollectionEntry` | Report order, filters, review queue, duplicate and overdue checks, list rows |
-| `bin/domain/collection-register.ts` | `collectionRegister`, `mergeCollectionRegister`, `mergeCollectionBlock`, `collectionBlock`, `collectionBase`, `collectionTableText` | The generated register, marker/hash preservation of any named block (registers, release candidate READMEs), the `.base` data |
-| `bin/domain/collection-hooks.ts` | `collectionHooks` | The explicit hook registry (`risk.scoring`) |
-| `bin/adapters/collection-catalog.ts` | `loadCollection`, `LoadedCollection` | Built-in or project definition, its hook and model validation |
-| `bin/adapters/collection-notes.ts` | `parseCollectionNote`, `patchCollectionNote`, `renderCollectionNote`, `scanCollectionFolder` | Safe YAML reading, in-place patching with candidate verification, rendering (the fake-data serializer), folder scanning |
-| `bin/adapters/collection-store.ts` | `openCollection`, `readCollection`, `collectionNote`, `collectionCreatePlan`, `collectionUpdatePlan`, `collectionDate` | Folder from settings, snapshots, reviewed create/update plans with hash and inventory guards |
-| `bin/adapters/collection-report.ts` | `collectionReportPlan` | Reviewed register (and `.base`) plan |
-| `bin/adapters/collection-command.ts` | `collectionCommand`, `collectionInteractiveActions` | `list`, `show`, `check`, `model`, `new`, `update`, `report` for any command root |
-| `bin/presentation/collection.ts` | `collectionWizard` | Runs the definition's `new`/`edit`/`review` wizard |
-| `bin/presentation/wizards/collection.ts` | `collectionModule` | Wizard actions `collection.load`, `collection.open`, `collection.plan-new`, `collection.plan-update`, `collection.review-load`, `collection.review-walk`; choice providers `collection.choices`, `collection.statuses`, `collection.notes` |
+| `src/cli/domain/collection-definition.ts` | `readCollectionDefinition`, `collectionField`, `collectionStatus`, `collectionInputName`, `CollectionDefinition`, `CollectionField`, `CollectionStatus`, … | Fail-closed validation of a definition |
+| `src/cli/domain/collection-record.ts` | `readCollectionRecord`, `collectionCreate`, `collectionUpdate`, `collectionManagedUpdate`, `collectionValue`, `nextCollectionId`, `collectionOverdue`, `isCollectionDate`, `CollectionHook`, `CollectionRecord`, `CollectionIssue` | Reading stored frontmatter into a record plus issues; new and changed frontmatter; transitions, stamps, derived values; managed changes by other modules; id allocation |
+| `src/cli/domain/collection-reference.ts` | `readCollectionAccepts`, `collectionReferenceOk`, `collectionAcceptsText`, `collectionReleaseVersion` | The `accepts` reference kinds: project paths, release versions and id prefixes |
+| `src/cli/domain/collection-query.ts` | `sortCollection`, `filterCollection`, `collectionReviewQueue`, `collectionCheck`, `collectionRow`, `collectionCell`, `CollectionEntry` | Report order, filters, review queue, duplicate and overdue checks, list rows |
+| `src/cli/domain/collection-register.ts` | `collectionRegister`, `mergeCollectionRegister`, `mergeCollectionBlock`, `collectionBlock`, `collectionBase`, `collectionTableText` | The generated register, marker/hash preservation of any named block (registers, release candidate READMEs), the `.base` data |
+| `src/cli/domain/collection-hooks.ts` | `collectionHooks` | The explicit hook registry (`risk.scoring`) |
+| `src/cli/adapters/collection-catalog.ts` | `loadCollection`, `LoadedCollection` | Built-in or project definition, its hook and model validation |
+| `src/cli/adapters/collection-notes.ts` | `parseCollectionNote`, `patchCollectionNote`, `renderCollectionNote`, `scanCollectionFolder` | Safe YAML reading, in-place patching with candidate verification, rendering (the fake-data serializer), folder scanning |
+| `src/cli/adapters/collection-store.ts` | `openCollection`, `readCollection`, `collectionNote`, `collectionCreatePlan`, `collectionUpdatePlan`, `collectionDate` | Folder from settings, snapshots, reviewed create/update plans with hash and inventory guards |
+| `src/cli/adapters/collection-report.ts` | `collectionReportPlan` | Reviewed register (and `.base`) plan |
+| `src/cli/adapters/collection-command.ts` | `collectionCommand`, `collectionInteractiveActions` | `list`, `show`, `check`, `model`, `new`, `update`, `report` for any command root |
+| `src/cli/presentation/collection.ts` | `collectionWizard` | Runs the definition's `new`/`edit`/`review` wizard |
+| `src/cli/presentation/wizards/collection.ts` | `collectionModule` | Wizard actions `collection.load`, `collection.open`, `collection.plan-new`, `collection.plan-update`, `collection.review-load`, `collection.review-walk`; choice providers `collection.choices`, `collection.statuses`, `collection.notes` |
 
-Wiring that stays data-like: `collectionCommandRoots` (`bin/domain/command-options.ts`, root → collection id) feeds
-the parser, router, help and the interactive launcher; `collectionPathDefaults` (`bin/domain/user-settings.ts`, path
+Wiring that stays data-like: `collectionCommandRoots` (`src/cli/domain/command-options.ts`, root → collection id) feeds
+the parser, router, help and the interactive launcher; `collectionPathDefaults` (`src/cli/domain/user-settings.ts`, path
 key → default folder) feeds settings validation, the settings schema, documentation-path protection and migrations.
 
 `collection.choices` serves any select field: it looks up the definition field whose input name equals the form
@@ -97,7 +97,7 @@ This is how lessons learned (`learning`, notes `type: Learning`, ids `LRN-0001`,
 `docs/learnings`) were added; see [learnings](LEARNINGS.md). The only engine change it needed was the generic `idPrefix`
 field option for its `related-risks` references. Otherwise no engine file changes:
 
-1. **Settings path.** In `bin/domain/user-settings.ts` add the default:
+1. **Settings path.** In `src/cli/domain/user-settings.ts` add the default:
    `export const collectionPathDefaults = { risks: 'docs/risks', learnings: 'docs/learnings' } as const;`
    Validation, the settings schema, effective paths, documentation-path protection, `withoutImplicitPaths` and
    `settings migrate` pick it up.
@@ -113,12 +113,12 @@ field option for its `related-risks` references. Otherwise no engine file change
    `configs/wizards/risk-new.json`, `risk-edit.json` and `risk-review.json` to `learning-*.json`, change their ids and
    texts, and set `"with": { "collection": "learning" }` on the `collection.load` step. Run
    `node bin/app wizard check --json`.
-5. **Command root.** In `bin/domain/command-options.ts` add `learning: 'learning'` to `collectionCommandRoots`. To
+5. **Command root.** In `src/cli/domain/command-options.ts` add `learning: 'learning'` to `collectionCommandRoots`. To
    filter lists by a new choice field (`--<key> <id>`), add the key to `makerValueOptions` if it is not there yet.
-   Add help lines to `makerHelp` in `bin/adapters/commands.ts`. Routing, parsing, `helpResult`, the interactive
+   Add help lines to `makerHelp` in `src/cli/adapters/commands.ts`. Routing, parsing, `helpResult`, the interactive
    launcher and `canInteract` follow from the map.
-6. **Hook (only if needed).** Add a pure `CollectionHook` in `bin/domain/` and register it in
-   `bin/domain/collection-hooks.ts`.
+6. **Hook (only if needed).** Add a pure `CollectionHook` in `src/cli/domain/` and register it in
+   `src/cli/domain/collection-hooks.ts`.
 7. **Tests.** Add the new wizard and form ids to `shippedWizards`/`shippedForms` in
    `tests/tooling/interactive-maker-wizard-catalog.checks.mjs`, and add `tests/tooling/interactive-maker-<plural>-*.checks.mjs`
    (they run in the `maker` suite; learnings use `learnings-` because `interactive-maker-learning-*` belongs to the

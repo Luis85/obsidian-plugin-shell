@@ -1,39 +1,40 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "frameworkVersion": "0.4.0",
   "commandCount": 173,
   "sources": [
     {
       "path": "package.json",
-      "sha256": "4713c03d6045a121d27825df4fd281f2d8f493f4e6d35d8c32d89c60811f824b"
+      "selector": "/version",
+      "sha256": "c91900ac02d27b8170631f66c9c2433e2aa66d4771dbff78ec27416ef551e4ed"
     },
     {
-      "path": "bin/adapters/framework/catalog.ts",
-      "sha256": "f29bd0038726bdcbbeb88ca5ce3bab4bd511e08708b244e0a85719775fcca93d"
+      "path": "src/cli/adapters/framework/catalog.ts",
+      "sha256": "19a41e1358c604c30334bbb4ba68f12ccd05a70a8370defeecc4fe24ed822cd7"
     },
     {
-      "path": "bin/adapters/framework/help-text.ts",
+      "path": "src/cli/adapters/framework/help-text.ts",
       "sha256": "3c779211fff3dd3ca098d2697b05a0b01b628faa609ea3e76b6e452c5eee8fce"
     },
     {
-      "path": "bin/adapters/framework/increment-catalog.ts",
+      "path": "src/cli/adapters/framework/increment-catalog.ts",
       "sha256": "155c674d71f58aeed5bce9ac4c7f7166838f03b7dbd9fef72f2983cbb6203ffd"
     },
     {
-      "path": "bin/adapters/framework/increment-help.ts",
+      "path": "src/cli/adapters/framework/increment-help.ts",
       "sha256": "4482f64b12eefff667822a6fe13cc0f6c0a524cb424b4f722456121ac22063a0"
     },
     {
-      "path": "bin/compiler/domain/diagnostics.ts",
+      "path": "src/cli/compiler/domain/diagnostics.ts",
       "sha256": "8cf40898f461b38aa39a7d5399a1e4108e65279611c6067831236270e9e364b6"
     },
     {
       "path": "scripts/documentation/render.mjs",
-      "sha256": "0be40ac240d9f023f8da14e9999a6d27a80563511e293517030ff9243ddaa417"
+      "sha256": "1a0ec13785ff7dc640be5747d166f1d3cab35a7e009bcb2955b77b5e698703fc"
     },
     {
       "path": "scripts/documentation/manual.mjs",
-      "sha256": "1935b2e601e6a233718c68243edd42cca165abcdc32f4e3e95f5d1196af438cb"
+      "sha256": "6eb7decc69eeb9b64ee4d31f0f1527fd465e1dad296b986845f63758fa430ab1"
     }
   ],
   "outputs": [
@@ -47,7 +48,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "658eb85ebf03082834b3676a69c64251bf2b36b3864c813036c8799ab2e09341"
+      "sha256": "b40e9845aa14320ca53475844d90d87263bee0896488dd5617dba71efac2bbd4"
     }
   ]
 }

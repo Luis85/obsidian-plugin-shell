@@ -6,8 +6,8 @@ import { validateTooling, airshipOptions, toolingSchema } from '../../scripts/co
 import { withStorybookOptions, storybookOptions } from '../../scripts/companion/tooling-contract.ts';
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
 import { selfProject } from '../support/starter-documents.mjs';
-import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
+import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const template = await loadTemplateSnapshot(root);
 const source = selfProject();

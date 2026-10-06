@@ -1,11 +1,11 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { persistenceCode, noteEntity } from '../../bin/compiler/emitters/persistence-code.ts';
-import { relationshipCode } from '../../bin/compiler/emitters/relationship-code.ts';
-import { relationshipDefinitions, relationshipScope } from '../../bin/compiler/emitters/relationship-model.ts';
-import { httpCode } from '../../bin/compiler/emitters/http-code.ts';
-import { fixtureNoteTests } from '../../bin/compiler/emitters/fixture-notes-code.ts';
-import { nativeCode } from '../../bin/compiler/emitters/native-code.ts';
+import { persistenceCode, noteEntity } from '../../src/cli/compiler/emitters/persistence-code.ts';
+import { relationshipCode } from '../../src/cli/compiler/emitters/relationship-code.ts';
+import { relationshipDefinitions, relationshipScope } from '../../src/cli/compiler/emitters/relationship-model.ts';
+import { httpCode } from '../../src/cli/compiler/emitters/http-code.ts';
+import { fixtureNoteTests } from '../../src/cli/compiler/emitters/fixture-notes-code.ts';
+import { nativeCode } from '../../src/cli/compiler/emitters/native-code.ts';
 import { dataDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
 
@@ -48,8 +48,8 @@ test('a project with only a title-only entity and no required optional fields im
   const document = await dataDocument(); const task = document.design.semantic.entities[0];
   task.properties = task.properties.filter(p => p.key === 'title'); document.design.semantic.relationships = [];
   document.design.dataSources.sources[0].operations.pop();
-  const m = model(document), wire = (await import('../../bin/compiler/emitters/note-contracts.ts')).noteWireSchemas(m.entities[0], 'create');
-  for (const op of m.sources[1].operations) Object.assign(op, (await import('../../bin/compiler/emitters/note-contracts.ts')).noteWireSchemas(m.entities[0], op.slug.replace('-tasks', '')));
+  const m = model(document), wire = (await import('../../src/cli/compiler/emitters/note-contracts.ts')).noteWireSchemas(m.entities[0], 'create');
+  for (const op of m.sources[1].operations) Object.assign(op, (await import('../../src/cli/compiler/emitters/note-contracts.ts')).noteWireSchemas(m.entities[0], op.slug.replace('-tasks', '')));
   assert.ok(wire.input);
   const out = await persist(m);
   assert.equal(out.text('src/generated/application/documents/starter-task.ts').split('\n')[0], 'import { defineEntity } from "../../../domain/entity.ts";');

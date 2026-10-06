@@ -5,15 +5,15 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { upgradePlan } from '../../bin/adapters/framework/kit.ts';
+import { upgradePlan } from '../../src/cli/adapters/framework/kit.ts';
 import { extractArchive, extractKit, kitFiles } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { zip } from '../../bin/adapters/framework/zip.ts';
-import { hash } from '../../bin/adapters/framework/files.ts';
+import { zip } from '../../src/cli/adapters/framework/zip.ts';
+import { hash } from '../../src/cli/adapters/framework/files.ts';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { kitManifest, verifyKit } from '../../bin/adapters/framework/kit-integrity.ts';
+import { kitManifest, verifyKit } from '../../src/cli/adapters/framework/kit-integrity.ts';
 import { selfProject } from '../support/starter-documents.mjs';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {
   return spawnSync(process.execPath, [join(dir, 'bin/app'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
@@ -82,7 +82,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok((await verifyKit(dir)).files.length > 100, 'restored plugin config keeps the extracted kit valid');
   output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
-  assert.deepEqual(files.filter(file => file.path.startsWith('bin/') && !file.path.startsWith('bin/template/') && file.path.endsWith('.js')).map(file => file.path), ['bin/app.js']);
+  assert.deepEqual(files.filter(file => file.path.startsWith('bin/') && !file.path.startsWith('bin/template/') && file.path.endsWith('.js')).map(file => file.path), ['bin/app.js', 'bin/tools/typescript.js']);
   const templateOwnership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json');
   const manifestRecord = JSON.parse(files.find(file => file.path === 'bin/kit.json').bytes)
     .files.find(file => file.path === templateOwnership.path);
@@ -164,8 +164,8 @@ test('compiled kit preserves Storybook overrides and intake ownership across rep
   output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stdout);
 });
 test('kit manifest rejects traversal and duplicate case aliases', () => {
-  const bootstrap = ['bin/app', 'package.json', 'README.md', 'LICENSE'].map(path => ({ path, hash: 'b'.repeat(64) }));
-  const base = { schemaVersion: 2, version: '0.4.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64),
+  const bootstrap = ['bin/app', 'bin/package.json', 'bin/README.md', 'bin/LICENSE', 'package.json', 'README.md', 'LICENSE'].map(path => ({ path, hash: 'b'.repeat(64) }));
+  const base = { schemaVersion: 3, version: '0.4.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64),
     files: [{ path: 'bin/template/LICENSE', hash: 'a'.repeat(64), bytes: 1 }], bootstrap };
   assert.equal(kitManifest(base).version, '0.4.0');
   for (const paths of [
@@ -198,11 +198,11 @@ test('kit verification reopens bytes on every call and rejects source links and 
   await writeFile(join(root, 'bin/app.js'), 'bundle');
   files.push({ path: 'bin/app.js', bytes: 6, hash: hash('bundle') });
   const bootstrap = [];
-  for (const path of ['bin/app', 'package.json', 'README.md', 'LICENSE']) {
+  for (const path of ['bin/app', 'bin/package.json', 'bin/README.md', 'bin/LICENSE', 'package.json', 'README.md', 'LICENSE']) {
     await mkdir(dirname(join(root, path)), { recursive: true });
     await writeFile(join(root, path), path); bootstrap.push({ path, hash: hash(path) });
   }
-  const kit = { schemaVersion:2, version:'0.4.0', compilerVersion:'fixture', sourceHash:'a'.repeat(64), files, bootstrap };
+  const kit = { schemaVersion:3, version:'0.4.0', compilerVersion:'fixture', sourceHash:'a'.repeat(64), files, bootstrap };
   await writeFile(join(root, 'bin/kit.json'), JSON.stringify(kit));
   assert.deepEqual(await verifyKit(root), kit);
   const target = join(root, files[0].path);
@@ -212,7 +212,7 @@ test('kit verification reopens bytes on every call and rejects source links and 
   await rm(target); await symlink(join(root, files[1].path), target, 'file');
   await assert.rejects(verifyKit(root), /links/);
 });
-const kitBootstrap = { 'bin/app': 'launcher', 'package.json': '{}', 'README.md': 'README', LICENSE: 'license' };
+const kitBootstrap = { 'bin/app': 'launcher', 'bin/package.json': '{}', 'bin/README.md': 'README', 'bin/LICENSE': 'license', 'package.json': '{}', 'README.md': 'README', LICENSE: 'license' };
 /** A minimal verified bin-owned kit; `configs` are runtime plugin configs whose shipped default is the template copy. */
 async function kitFixture(root, version, files, configs = {}) {
   const entries = [];
@@ -234,7 +234,7 @@ async function kitFixture(root, version, files, configs = {}) {
     await writeFile(join(root, path), content);
     initial.push({ path, hash: hash(content) });
   }
-  const manifest = { schemaVersion: 2, version, compilerVersion: 'fixture', sourceHash: hash(version), files: entries, bootstrap: initial };
+  const manifest = { schemaVersion: 3, version, compilerVersion: 'fixture', sourceHash: hash(version), files: entries, bootstrap: initial };
   await writeFile(join(root, 'bin/kit.json'), JSON.stringify(manifest));
   assert.deepEqual(await verifyKit(root), manifest);
   return manifest;
@@ -299,7 +299,7 @@ test('kit upgrade preserves an edited plugin config, follows unedited defaults a
 });
 test('installed app plugins and the plugin guide are user data: verified around and upgraded only when unedited', async t => {
   const [old, next] = await kitRoots(t, 2);
-  const shippedGuide = 'bin/template/bin/plugins/DEVELOPER-GUIDE.md', guide = 'bin/plugins/DEVELOPER-GUIDE.md';
+  const shippedGuide = 'bin/template/src/cli/plugins/DEVELOPER-GUIDE.md', guide = 'bin/plugins/DEVELOPER-GUIDE.md';
   await kitFixture(old, '0.4.0', { 'bin/app.js': 'app', [shippedGuide]: 'guide v1' });
   await kitFixture(next, '0.4.1', { 'bin/app.js': 'app 2', [shippedGuide]: 'guide v2' });
   await mkdir(join(old, 'bin/plugins/team-tool'), { recursive: true });
@@ -341,12 +341,13 @@ test('a bootstrap failure reports the canonical envelope from the one module its
   await writeFile(join(kit, 'bin/app.js'), "throw new Error('kit bundle probe');\n");
   const packaged = cli(kit, ['capabilities', '--json']);
   assert.equal(packaged.status, 1); assert.deepEqual(JSON.parse(packaged.stdout), expected('kit bundle probe'));
-  const checkout = join(dir, 'checkout'); await mkdir(join(checkout, 'bin'), { recursive: true }); await mkdir(join(checkout, 'scripts/contracts'), { recursive: true });
+  const checkout = join(dir, 'checkout'); await mkdir(join(checkout, 'bin'), { recursive: true }); await mkdir(join(checkout, 'src/cli'), { recursive: true });
   await writeFile(join(checkout, 'bin/app'), await readFile(join(root, 'bin/app')));
-  await writeFile(join(checkout, 'bin/app.ts'), "throw new Error('checkout probe');\n");
-  await writeFile(join(checkout, 'scripts/contracts/result-runtime.mjs'), await readFile(join(root, 'scripts/contracts/result-runtime.mjs')));
+  await writeFile(join(checkout, 'src/cli/app.ts'), "throw new Error('checkout probe');\n");
+  await writeFile(join(checkout, 'bin/package.json'), '{"type":"module"}');
+  await writeFile(join(checkout, 'bin/app.js'), "throw new Error('compiled checkout probe');\n");
   const source = cli(checkout, ['capabilities', '--json']);
-  assert.equal(source.status, 1); assert.deepEqual(JSON.parse(source.stdout), expected('checkout probe'));
+  assert.equal(source.status, 1); assert.deepEqual(JSON.parse(source.stdout), expected('compiled checkout probe'));
   const plain = cli(checkout, ['capabilities']);
-  assert.equal(plain.status, 1); assert.equal(plain.stdout, ''); assert.equal(plain.stderr, 'checkout probe\n');
+  assert.equal(plain.status, 1); assert.equal(plain.stdout, ''); assert.equal(plain.stderr, 'compiled checkout probe\n');
 });

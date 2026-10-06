@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { readCompanionInput, readCompanionProject } from '../../bin/adapters/framework/read-project.ts';
+import { readCompanionInput, readCompanionProject } from '../../src/cli/adapters/framework/read-project.ts';
 
 // Bounded companion-project reads (read-project.ts): contained vault targets, regular files only, 4 MB, UTF-8, no writes.
 const windows = process.platform === 'win32';

@@ -233,7 +233,7 @@ test('[SETUP-06] deferred verification skips only the verify stage, reports it a
   const result = run(f.root, f.launcher, [...flags, '--id', 'deferred-plugin', '--defer-verify']); assert.equal(result.status, 0, result.stdout + result.stderr);
   const output = JSON.parse(result.stdout); assert.equal(output.identity.id, 'deferred-plugin');
   assert.equal(output.scope.staticServiceArtifactChecks, 'deferred: run npm run verify');
-  assert.deepEqual(output.stages.map(stage => [stage.id, stage.status]), [['install', 'verified'], ['browser-provision', 'skipped'], ['verify', 'skipped'], ['native-install', 'skipped']]);
+  assert.deepEqual(output.stages.map(stage => [stage.id, stage.status]), [['install', 'verified'], ['cli-build', 'verified'], ['browser-provision', 'skipped'], ['verify', 'skipped'], ['native-install', 'skipped']]);
   await assert.rejects(readFile(join(f.root, 'verify-count')), { code: 'ENOENT' }); assert.doesNotMatch(result.stderr, /Synthetic verify boundary/);
   assert.equal((await parsed(f.root, '.template-state/setup.json')).options['defer-verify'], true);
   const resumed = run(f.root, f.launcher, [...flags, '--resume']); assert.equal(resumed.status, 0, resumed.stdout + resumed.stderr);

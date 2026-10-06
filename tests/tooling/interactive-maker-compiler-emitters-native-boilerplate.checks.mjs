@@ -1,6 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { nativeDeclarationSource, nativeDeclarationTest } from '../../bin/compiler/emitters/native-boilerplate.ts';
+import { nativeDeclarationSource, nativeDeclarationTest } from '../../src/cli/compiler/emitters/native-boilerplate.ts';
 
 // Native declaration boilerplate (native-boilerplate.ts), shared by project compilation and the reviewed maker.
 const file = { id: 'board', name: 'Board </script>', extension: 'board', format: 'json', initialContent: '{"a":"\u2028\u2029"}\n' };

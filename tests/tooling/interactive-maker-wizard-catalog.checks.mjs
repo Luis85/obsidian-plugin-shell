@@ -3,13 +3,13 @@ import { mkdtemp, mkdir, readdir, readFile, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve, sep } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { catalogIssues, catalogSummary, checkedCatalog, definitionsRoot, loadCatalog } from '../../bin/adapters/wizard-catalog.ts';
-import { definitionCommand } from '../../bin/adapters/wizard-command.ts';
-import { readForm } from '../../bin/domain/form.ts';
-import { readWizard } from '../../bin/domain/wizard.ts';
-import { formValueIssues } from '../../bin/domain/form-values.ts';
-import { getPath, renderText, setPath } from '../../bin/domain/form-model.ts';
-import { composeRegistry, hookNames, wizardModules, wizardRegistry } from '../../bin/presentation/wizards/registry.ts';
+import { catalogIssues, catalogSummary, checkedCatalog, definitionsRoot, loadCatalog } from '../../src/cli/adapters/wizard-catalog.ts';
+import { definitionCommand } from '../../src/cli/adapters/wizard-command.ts';
+import { readForm } from '../../src/cli/domain/form.ts';
+import { readWizard } from '../../src/cli/domain/wizard.ts';
+import { formValueIssues } from '../../src/cli/domain/form-values.ts';
+import { getPath, renderText, setPath } from '../../src/cli/domain/form-model.ts';
+import { composeRegistry, hookNames, wizardModules, wizardRegistry } from '../../src/cli/presentation/wizards/registry.ts';
 const repository = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'wizard-catalog-'));

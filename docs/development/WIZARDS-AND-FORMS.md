@@ -36,7 +36,7 @@ TypeScript keeps only what data cannot express: named **actions** (load, plan, r
 Prompt labels, defaults and order are unchanged from the former hand-written flows (the framework `setup`
 confirmations now use the shared `(y/N)` prompt, which asks again on an unclear answer). The existing plain
 and terminal-UI journey tests run against the definitions without modification. The prototype briefs
-keep their published guide contract (`guideId`/`guideVersion`) and moved from `bin/guides/` to
+keep their published guide contract (`guideId`/`guideVersion`) and moved from `src/cli/guides/` to
 `configs/guides/`.
 
 ## Run, inspect and check
@@ -94,9 +94,9 @@ other write.
 
 A wizard that only collects, reviews and saves needs no code. It uses the built-in actions
 `wizard.review`, `wizard.agree` and `wizard.save-json`. When it needs a service, add a module in
-`bin/presentation/wizards/` exporting `{ actions, hooks }` and list it once in `wizardModules`
-(`bin/presentation/wizards/registry.ts`). Then give it a command entry like the existing ones in
-`bin/app.ts`. Names are global and duplicates fail at startup. Each module's actions are tested
+`src/cli/presentation/wizards/` exporting `{ actions, hooks }` and list it once in `wizardModules`
+(`src/cli/presentation/wizards/registry.ts`). Then give it a command entry like the existing ones in
+`src/cli/app.ts`. Names are global and duplicates fail at startup. Each module's actions are tested
 through real services (see `tests/tooling/interactive-maker-wizard-*.checks.mjs`).
 
 ## Forms
@@ -179,13 +179,13 @@ and `:back` at the first question cancels. The remaining flows below are deliber
 
 ## Validation and safety
 
-- `readForm` and `readWizard` (`bin/domain/`) validate structure and fail closed:
+- `readForm` and `readWizard` (`src/cli/domain/`) validate structure and fail closed:
   - unknown keys, kinds or versions;
   - unsafe or prototype paths;
   - duplicate ids;
   - conditions on later fields;
   - control characters.
-- The catalog (`bin/adapters/wizard-catalog.ts`) then checks every referenced form, action and hook,
+- The catalog (`src/cli/adapters/wizard-catalog.ts`) then checks every referenced form, action and hook,
   rejects recursive section includes, and requires each file to be named after its id.
 - `configs/schemas/*.schema.json` gives editor completion only. The TypeScript readers are authoritative.
 - Definitions are read when a wizard starts, so an edited file applies to the next run, and a broken

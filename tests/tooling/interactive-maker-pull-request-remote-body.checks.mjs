@@ -1,7 +1,7 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { bodySize, composeRemoteBody, parseRemoteBody, remoteMarker, renderManagedBlock, requireBodyFits } from '../../bin/domain/increments/remote-body.ts';
-import { blobUrl, canonicalWikilinks, remoteToWikilinks, wikilinksToRemote } from '../../bin/domain/increments/remote-links.ts';
+import { bodySize, composeRemoteBody, parseRemoteBody, remoteMarker, renderManagedBlock, requireBodyFits } from '../../src/cli/domain/increments/remote-body.ts';
+import { blobUrl, canonicalWikilinks, remoteToWikilinks, wikilinksToRemote } from '../../src/cli/domain/increments/remote-links.ts';
 import { samplePullRequestView } from '../support/fake-hosting-remote.mjs';
 
 const github = { platform: 'github', web: 'https://github.com/octo/demo', ref: 'feature/hosting-set' };

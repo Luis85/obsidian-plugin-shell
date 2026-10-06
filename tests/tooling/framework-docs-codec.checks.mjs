@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
-import { projectEntities } from '../../bin/documentation/adapters/model.ts';
-import { parseMarkdown, renderMarkdown, generatedSource } from '../../bin/documentation/adapters/markdown.ts';
+import { projectEntities } from '../../src/cli/documentation/adapters/model.ts';
+import { parseMarkdown, renderMarkdown, generatedSource } from '../../src/cli/documentation/adapters/markdown.ts';
 const page = () => projectEntities(projectFixture().project).find(entity => entity.type === 'page');
 const header = '---\ndoc_schema: 1\ntype: page\nid: node-1\nproject: documentation-demo\ntitle: Overview\n---\n';
 test('every real projected type survives YAML serialization and parsing', () => {

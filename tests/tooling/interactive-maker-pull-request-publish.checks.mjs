@@ -3,9 +3,9 @@ import { mkdirSync } from 'node:fs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { createWorkspace, planThenApply, readyFragment } from '../support/increment-workspace.mjs';
 import { createFakeHostingRemote } from '../support/fake-hosting-remote.mjs';
-import { parseSyncRecord } from '../../bin/domain/increments/sync-record.ts';
-import { remoteLockPath } from '../../bin/adapters/increments/remote-lock.ts';
-import { exitCode } from '../../bin/adapters/framework-cli.ts';
+import { parseSyncRecord } from '../../src/cli/domain/increments/sync-record.ts';
+import { remoteLockPath } from '../../src/cli/adapters/increments/remote-lock.ts';
+import { exitCode } from '../../src/cli/adapters/framework-cli.ts';
 
 const fails = (outcome, code) => { assert.equal(outcome.status, 'failed', JSON.stringify(outcome)); assert.equal(outcome.diagnostics[0].code, code, outcome.diagnostics[0].message); return outcome; };
 /** A Ready increment with its kick-off pull request, an origin naming octo/demo (pushes go to a local bare repository) and the fake platform. */

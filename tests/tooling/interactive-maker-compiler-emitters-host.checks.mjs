@@ -1,11 +1,11 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { hostCode } from '../../bin/compiler/emitters/host-code.ts';
-import { uiCode } from '../../bin/compiler/emitters/ui-code.ts';
-import { navigationCode } from '../../bin/compiler/emitters/navigation-code.ts';
-import { clickdummyCode } from '../../bin/compiler/emitters/clickdummy-code.ts';
-import { previewCode, previewScripts } from '../../bin/compiler/emitters/preview-code.ts';
-import { styleCode } from '../../bin/compiler/emitters/style-code.ts';
+import { hostCode } from '../../src/cli/compiler/emitters/host-code.ts';
+import { uiCode } from '../../src/cli/compiler/emitters/ui-code.ts';
+import { navigationCode } from '../../src/cli/compiler/emitters/navigation-code.ts';
+import { clickdummyCode } from '../../src/cli/compiler/emitters/clickdummy-code.ts';
+import { previewCode, previewScripts } from '../../src/cli/compiler/emitters/preview-code.ts';
+import { styleCode } from '../../src/cli/compiler/emitters/style-code.ts';
 import { journeyDocument, dataDocument, richVisualDocument, model, recorder } from './compiler-emitters-fixture.mjs';
 import { starterDocument } from '../support/starter-documents.mjs';
 

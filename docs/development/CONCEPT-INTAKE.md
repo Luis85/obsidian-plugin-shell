@@ -125,7 +125,7 @@ subsequent generation uses its existing conflict and preservation rules.
 ## Implementation and verification
 
 `scripts/companion/concepts/` owns framework-free data contracts and candidate
-transformation. `bin/adapters/framework/concept-input.ts` owns bounded local file and
+transformation. `src/cli/adapters/framework/concept-input.ts` owns bounded local file and
 HTML decoding; `concepts.ts` composes the shared import/file-plan infrastructure.
 CLI catalog, help and programmatic operations expose the same three commands.
 No second generator, storage writer or process execution path is introduced.

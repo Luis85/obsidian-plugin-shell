@@ -3,13 +3,13 @@ import { mkdtemp, mkdir, readdir, readFile, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { checkedCatalog, loadCatalog } from '../../bin/adapters/wizard-catalog.ts';
-import { runFields, runForm } from '../../bin/presentation/form-runner.ts';
-import { runWizard } from '../../bin/presentation/wizard-runner.ts';
-import { composeRegistry, hookNames, startForm, wizardModules, wizardRegistry } from '../../bin/presentation/wizards/registry.ts';
-import { launchDefinition } from '../../bin/presentation/wizards/launch.ts';
-import { Back } from '../../bin/presentation/prompts.ts';
-import { readForm } from '../../bin/domain/form.ts';
+import { checkedCatalog, loadCatalog } from '../../src/cli/adapters/wizard-catalog.ts';
+import { runFields, runForm } from '../../src/cli/presentation/form-runner.ts';
+import { runWizard } from '../../src/cli/presentation/wizard-runner.ts';
+import { composeRegistry, hookNames, startForm, wizardModules, wizardRegistry } from '../../src/cli/presentation/wizards/registry.ts';
+import { launchDefinition } from '../../src/cli/presentation/wizards/launch.ts';
+import { Back } from '../../src/cli/presentation/prompts.ts';
+import { readForm } from '../../src/cli/domain/form.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const BACK = Symbol('back');
 async function scratch(fn) {
@@ -78,7 +78,7 @@ test('rich forms validate in place, use custom messages and revisit the previous
 });
 
 test('documentation settings reset folders only for a changed root and commit through the owner validator', async () => {
-  const { defaultSettings } = await import('../../bin/domain/user-settings.ts');
+  const { defaultSettings } = await import('../../src/cli/domain/user-settings.ts');
   // Five paths, the risk register, learnings, release items and release candidates folders and the author keep their defaults.
   const f = plain(['', '', '', '', '', '', '', '', '', '', 'auto', 'yes', 'y', '', '', '', '', '', '', '', '', '', '', '', 'y', 'manual', 'y', '', '', '', '', '', 'n']);
   const result = await startForm(f.ui, 'user-settings', structuredClone(defaultSettings));

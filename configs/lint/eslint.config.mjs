@@ -22,14 +22,14 @@ export default ts.config(
     plugins: { obsidianmd: obsidian },
     rules: pluginRules,
   },
-  { files: ['bin/**/*.ts', 'plugins/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
+  { files: ['src/cli/**/*.ts', 'plugins/**/*.ts'], languageOptions: { parserOptions: { projectService: false, project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
   // Companion runtime templates are copied verbatim into generated plugins; lint them as the plugin code they become.
   { files: ['templates/companion/runtime/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.generator.json'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
-  // Extensionless launcher: lint it as an ES module (the package "type" decides how Node loads it).
-  { files: ['bin/app'], languageOptions: { sourceType: 'module' } },
-  { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts', 'bin/compiler/domain/**/*.ts', 'bin/compiler/application/**/*.ts', 'bin/documentation/domain/**/*.ts', 'bin/documentation/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
+  // The launcher is maintained as an ES module; bin/app is its built copy.
+  { files: ['src/cli/launcher.mjs'], languageOptions: { sourceType: 'module' } },
+  { files: ['src/cli/domain/**/*.ts', 'src/cli/application/**/*.ts', 'src/cli/compiler/domain/**/*.ts', 'src/cli/compiler/application/**/*.ts', 'src/cli/documentation/domain/**/*.ts', 'src/cli/documentation/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
   // The click-dummy harness runs in a plain browser outside Obsidian, so the host-API rules do not apply to it.
   ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
     languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },

@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
-import { projectEntities, applyEntities } from '../../bin/documentation/adapters/model.ts';
+import { projectEntities, applyEntities } from '../../src/cli/documentation/adapters/model.ts';
 import { companionStarterIds, selfProject, starterDocument } from '../support/starter-documents.mjs';
 import { retiredProject } from '../support/retired-projects.mjs';
-import { newDocument } from '../../bin/domain/document.ts';
-import { mergeEntity } from '../../bin/documentation/domain/merge.ts';
-import { keyOf, normalizePayload } from '../../bin/documentation/domain/contracts.ts';
-import { reconcile } from '../../bin/documentation/application/reconcile.ts';
+import { newDocument } from '../../src/cli/domain/document.ts';
+import { mergeEntity } from '../../src/cli/documentation/domain/merge.ts';
+import { keyOf, normalizePayload } from '../../src/cli/documentation/domain/contracts.ts';
+import { reconcile } from '../../src/cli/documentation/application/reconcile.ts';
 const selected = () => projectEntities(projectFixture().project).find(entity => entity.type === 'page');
 const changed = (entity, patch) => ({ ...structuredClone(entity), ...patch });
 test('real pages, component, owner-bound event, route, transition and journey round-trip', () => {

@@ -94,6 +94,6 @@ Everything else is refused for the whole view, with the reason, instead of being
 A website can render collections too: `node bin/app site collections` snapshots the views a site
 project lists into its Astro content collections. See [Astro website projects](ASTRO-SITES.md).
 
-Code: the framework-free reader and evaluator are in `bin/domain/obsidian-base.ts`,
-`base-expression*.ts` and `base-collection.ts`. File access is in `bin/adapters/obsidian-base.ts`.
+Code: the framework-free reader and evaluator are in `src/cli/domain/obsidian-base.ts`,
+`base-expression*.ts` and `base-collection.ts`. File access is in `src/cli/adapters/obsidian-base.ts`.
 Tests: `tests/tooling/interactive-maker-obsidian-bases*.checks.mjs`.

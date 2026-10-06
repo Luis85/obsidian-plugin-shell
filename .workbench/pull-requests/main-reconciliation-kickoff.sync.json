@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "main-reconciliation-kickoff",
+  "platform": "github",
+  "repository": "Luis85/obsidian-plugin-shell",
+  "number": 95,
+  "remoteRevision": "1b433f1853607bdd1b272df828fa0ba16e5041577a7803e764861e4f20588e62",
+  "bodySha256": "789833353fc1eda0b1fef431518d2d47880bafd47d1e27f563455beafb364877",
+  "derived": "eb66d3df5e7c559e11b402508f6d0399d5bfad8dae5a283dfb14a9a438a673ed",
+  "title": "24fddced3a40b6de16f999ac33bb94f074dde2977ba71111da8fb25e246c226a",
+  "regions": {
+    "summary": "22848ac2ebb63da8986311f1443afa7c9485660d8094850b789ddfb22cf51d54",
+    "scope": "8a76bd7891f2fef3463dad836ec8a395dcd4bb37b79c785c6107b97e6d1690d0",
+    "documents": "f85475ed42d0254120b19dfaee0e8506e7bd267dd46357a6eb6acc7517491c3d",
+    "notes": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tasks": {
+    "T-1": {
+      "text": "0c2d4ed0d705600f806fa931748acfe4b3bc7c0e36a511f27a6858750a68b8a2",
+      "checked": true
+    },
+    "T-2": {
+      "text": "1909b44edbb949f17e99dcc7422af9a4ecbb340b9732a6f93ba871b80a9e202d",
+      "checked": true
+    }
+  },
+  "taskOrder": [
+    "T-1",
+    "T-2"
+  ],
+  "amendments": {},
+  "state": "Ready",
+  "head": "increment/main-reconciliation",
+  "base": "main",
+  "syncedAt": "2026-10-06T18:27:13Z"
+}

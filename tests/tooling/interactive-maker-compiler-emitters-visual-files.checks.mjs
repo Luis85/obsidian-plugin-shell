@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { visualCode, visualVerification, visualAcceptanceTodo } from '../../bin/compiler/emitters/visual-files.ts';
-import { visualDefinitions, visualSpecs } from '../../bin/compiler/emitters/visual-model.ts';
-import { visualRuntimeTests } from '../../bin/compiler/emitters/visual-runtime-tests.ts';
+import { visualCode, visualVerification, visualAcceptanceTodo } from '../../src/cli/compiler/emitters/visual-files.ts';
+import { visualDefinitions, visualSpecs } from '../../src/cli/compiler/emitters/visual-model.ts';
+import { visualRuntimeTests } from '../../src/cli/compiler/emitters/visual-runtime-tests.ts';
 import { richVisualDocument, detailDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
 
 // Visual file emission (visual-files.ts) and the generated runtime, binding and adapter suites (visual-runtime-tests.ts).

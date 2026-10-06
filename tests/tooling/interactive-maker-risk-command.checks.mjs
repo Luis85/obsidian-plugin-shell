@@ -3,12 +3,12 @@ import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { routeArguments } from '../../bin/adapters/router.ts';
-import { parseCollectionNote, patchCollectionNote } from '../../bin/adapters/collection-notes.ts';
-import { collectionDate, openCollection } from '../../bin/adapters/collection-store.ts';
-import { collectionCreatePlan } from '../../bin/adapters/collection-store.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { routeArguments } from '../../src/cli/adapters/router.ts';
+import { parseCollectionNote, patchCollectionNote } from '../../src/cli/adapters/collection-notes.ts';
+import { collectionDate, openCollection } from '../../src/cli/adapters/collection-store.ts';
+import { collectionCreatePlan } from '../../src/cli/adapters/collection-store.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
 const repository = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'risk-command-'));
@@ -88,7 +88,7 @@ test('a note edited after review is never overwritten', async () => scratch(asyn
   await assert.rejects(() => cli(root, 'update', '--id', 'RISK-0001', '--input', changes, '--apply', plan.planHash), /plan changed/);
   assert.equal(await read(root, path), edited);
   const context = await openCollection(root, 'risk', '2026-10-04');
-  const { collectionUpdatePlan } = await import('../../bin/adapters/collection-store.ts');
+  const { collectionUpdatePlan } = await import('../../src/cli/adapters/collection-store.ts');
   const prepared = await collectionUpdatePlan(context, 'RISK-0001', { impact: 2 });
   await writeFile(join(root, path), edited + 'Again.\n');
   await assert.rejects(() => applyPrepared(prepared, prepared.planHash), /PLAN_STALE/);

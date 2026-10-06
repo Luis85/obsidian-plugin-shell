@@ -101,7 +101,7 @@ with sync_playwright() as pw:
         with page.expect_download() as event:act('download-text',scope='#modal')
         download=event.value;download.save_as(str(OUT/'configured-project.json'));exported=(OUT/'configured-project.json').read_text()
         check('Actual project download is the complete configured schema 6 project',json.loads(exported)==json.loads(js('companionJson()')) and json.loads(exported)['schemaVersion']==6 and download.suggested_filename=='capture-tools.companion.json')
-        model="import {projectModel} from './bin/compiler/emitters/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"
+        model="import {projectModel} from './src/cli/compiler/emitters/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"
         probe=subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',model],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=20)
         check('Actual browser download is consumed by the real compiler',probe.returncode==0 and json.loads(probe.stdout)=={'id':'capture-tools','source':'plugin/src/generated','tests':'plugin/tests/project'},'Actual Node compiler subprocess on downloaded bytes')
         with tempfile.TemporaryDirectory(prefix='companion-handoff-') as scratch:

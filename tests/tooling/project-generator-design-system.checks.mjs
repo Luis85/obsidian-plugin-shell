@@ -7,10 +7,10 @@ import { compileDesignSystem } from '../../scripts/companion/design-system-css.m
 import { DESIGN_SYSTEM_ROLES } from '../../scripts/companion/design-system-roles.mjs';
 import { resolveDesignSystemFrontend, validateDesignSystem } from '../../scripts/companion/design-system-contract.mjs';
 import { validateAuthoringDocument as validateCompanionDocument } from '../../scripts/companion/authoring-contract.ts';
-import { projectModel } from '../../bin/compiler/emitters/model.ts';
+import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
 import { compositionDefaultUI, compositionStyle, validateCompositionDesignSystem } from '../../scripts/companion/composition-contract.mjs';
-import { styleCode } from '../../bin/compiler/emitters/style-code.ts';
-import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { styleCode } from '../../src/cli/compiler/emitters/style-code.ts';
+import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
 import { selfProject } from '../support/starter-documents.mjs';
 const fixture = selfProject();
 const system = () => structuredClone(fixture.design.designSystem);

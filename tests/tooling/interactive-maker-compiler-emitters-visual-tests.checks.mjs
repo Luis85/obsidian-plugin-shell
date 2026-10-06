@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { visualTests, visualRendered, visualFixtureProps } from '../../bin/compiler/emitters/visual-tests.ts';
-import { visualSpecs } from '../../bin/compiler/emitters/visual-model.ts';
-import { visualSources } from '../../bin/compiler/emitters/visual-ports.ts';
+import { visualTests, visualRendered, visualFixtureProps } from '../../src/cli/compiler/emitters/visual-tests.ts';
+import { visualSpecs } from '../../src/cli/compiler/emitters/visual-model.ts';
+import { visualSources } from '../../src/cli/compiler/emitters/visual-ports.ts';
 import { richVisualDocument, model, recorder } from './compiler-emitters-fixture.mjs';
 
 // Generated UI suites (visual-tests.ts) and the source/mapping checks of visual-ports.ts.

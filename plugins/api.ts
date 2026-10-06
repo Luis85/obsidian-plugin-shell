@@ -1,9 +1,9 @@
 import type { Readable } from 'node:stream';
-import type { Workspace } from '../bin/application/workspace.ts';
-import type { Prompts } from '../bin/presentation/prompts.ts';
-import type { FrameworkAdapter } from '../bin/compiler/adapters/project/framework-adapter.ts';
-import type { StarterDefinition } from '../bin/adapters/starters/types.ts';
-import type { ComponentTemplate } from '../bin/domain/component-template.ts';
+import type { Workspace } from '../src/cli/application/workspace.ts';
+import type { Prompts } from '../src/cli/presentation/prompts.ts';
+import type { FrameworkAdapter } from '../src/cli/compiler/adapters/project/framework-adapter.ts';
+import type { StarterDefinition } from '../src/cli/adapters/starters/types.ts';
+import type { ComponentTemplate } from '../src/cli/domain/component-template.ts';
 
 export interface PluginManifest {
   readonly id: string;

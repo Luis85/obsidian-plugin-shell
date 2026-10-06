@@ -60,7 +60,7 @@ node bin/app new starters --json
 node bin/app new guide --starter plugin-angular --json
 ```
 
-See [project starters](../../../bin/PROJECT-STARTERS.md) for the agent request format and generated package.
+See [project starters](../../../src/cli/PROJECT-STARTERS.md) for the agent request format and generated package.
 
 ## 2B. Start from an extracted framework kit
 

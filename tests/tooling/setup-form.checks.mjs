@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import { askSetupForm, confirmKeys, hostingFieldKeys, identityKeys, loadSetupForm, readSetupForm } from '../../scripts/setup/form.mjs';
 import { setupOptions } from '../../scripts/setup/options.mjs';
-import { readForm } from '../../bin/domain/form.ts';
+import { readForm } from '../../src/cli/domain/form.ts';
 
 const root = resolve(import.meta.dirname, '../..');
 const formPath = join(root, 'configs/forms/setup-identity.json');

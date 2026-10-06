@@ -4,10 +4,10 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { makerMain } from '../../bin/app.ts';
-import { routeArguments } from '../../bin/adapters/router.ts';
-import { parseArguments } from '../../bin/adapters/commands.ts';
-import { interactiveProcess, processCommand } from '../../bin/adapters/process-command.ts';
+import { makerMain } from '../../src/cli/app.ts';
+import { routeArguments } from '../../src/cli/adapters/router.ts';
+import { parseArguments } from '../../src/cli/adapters/commands.ts';
+import { interactiveProcess, processCommand } from '../../src/cli/adapters/process-command.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'process-command-'));

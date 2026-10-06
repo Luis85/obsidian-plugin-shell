@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   handoutPath, loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout,
-} from '../../bin/adapters/framework/handout-workspace.ts';
-import { HANDOUT_PATH, readSnapshot } from '../../bin/adapters/framework/handout-model.ts';
+} from '../../src/cli/adapters/framework/handout-workspace.ts';
+import { HANDOUT_PATH, readSnapshot } from '../../src/cli/adapters/framework/handout-model.ts';
 import { fileSymlink } from './file-symlink.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */

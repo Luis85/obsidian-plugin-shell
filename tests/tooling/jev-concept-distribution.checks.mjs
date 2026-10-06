@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { included } from '../../bin/adapters/framework/distribution.ts';
-import { maintainerOnly } from '../../bin/compiler/emitters/framework-docs.ts';
+import { included } from '../../src/cli/adapters/framework/distribution.ts';
+import { maintainerOnly } from '../../src/cli/compiler/emitters/framework-docs.ts';
 
 const root = 'docs/concepts/jev-prompt-editor/';
 const files = ['jev-studio.html', 'src/domain/context.ts', 'vendor/vue.global.prod.js', 'dist/app.js', 'schema/jev-prompt.schema.json', 'docs/RESEARCH.html'];

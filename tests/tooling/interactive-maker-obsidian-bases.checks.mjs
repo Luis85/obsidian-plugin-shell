@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { parseExpression, tokenize, EXPRESSION_LIMITS } from '../../bin/domain/base-expression-parse.ts';
-import { evaluateExpression, expressionIssues, formulaNames, truthy } from '../../bin/domain/base-expression.ts';
-import { NoteScope, propertyId, readBase, requiredFolder, selectView, viewIssues } from '../../bin/domain/obsidian-base.ts';
-import { collectRecords, compareValues, fieldType } from '../../bin/domain/base-collection.ts';
+import { parseExpression, tokenize, EXPRESSION_LIMITS } from '../../src/cli/domain/base-expression-parse.ts';
+import { evaluateExpression, expressionIssues, formulaNames, truthy } from '../../src/cli/domain/base-expression.ts';
+import { NoteScope, propertyId, readBase, requiredFolder, selectView, viewIssues } from '../../src/cli/domain/obsidian-base.ts';
+import { collectRecords, compareValues, fieldType } from '../../src/cli/domain/base-collection.ts';
 
 const note = (path, properties = {}, tags = [], size = 10) => ({ path, properties, tags, size });
 const code = run => { try { run(); return 'ok'; } catch (error) { return error.code; } };

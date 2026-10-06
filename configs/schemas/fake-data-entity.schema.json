@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "configs/schemas/fake-data-entity.schema.json",
   "title": "Workbench fake-data entity",
-  "description": "Editor support only. bin/domain/fake-data-entity.ts is the authoritative validator (allowlisted generators, bounded arguments, references); run node bin/app fake-data validate --input <file> --json.",
+  "description": "Editor support only. src/cli/domain/fake-data-entity.ts is the authoritative validator (allowlisted generators, bounded arguments, references); run node bin/app fake-data validate --input <file> --json.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "title", "folder", "titleProperty", "properties"],

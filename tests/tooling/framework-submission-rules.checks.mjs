@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { manifestRules, versionsRule, lintRule } from '../../bin/adapters/framework/submission.ts';
+import { manifestRules, versionsRule, lintRule } from '../../src/cli/adapters/framework/submission.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const valid = { id: 'quick-capture', name: 'Quick Capture', version: '1.0.0', minAppVersion: '1.5.0', description: 'Capture a thought into today\'s note with one command.', author: 'Example Author', isDesktopOnly: false };
 const status = (rules, id) => rules.find(item => item.id === id)?.status;

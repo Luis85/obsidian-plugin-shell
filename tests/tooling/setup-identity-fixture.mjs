@@ -30,6 +30,8 @@ mkdirSync('node_modules/sample',{recursive:true});writeFileSync('node_modules/sa
 writeFileSync('node_modules/.package-lock.json',JSON.stringify({lockfileVersion:3,packages:{'node_modules/sample':{version:'1.2.3'}}}));
 writeFileSync('install-count',String(Number(existsSync('install-count')?readFileSync('install-count','utf8'):0)+1));
 console.log('Synthetic install boundary; not real dependency qualification');`);
+  await mkdir(join(root, 'scripts/bundling'), { recursive: true });
+  await writeFile(join(root, 'scripts/bundling/build-cli.mjs'), "console.log('Synthetic CLI build boundary; portable execution qualified by acceptance tests');\n");
   await mkdir(join(root, 'scripts/quality'), { recursive: true });
   await mkdir(join(root, 'scripts/dev'), { recursive: true });
   await cp(join(source, 'scripts/dev/install-local.mjs'), join(root, 'scripts/dev/install-local.mjs'));

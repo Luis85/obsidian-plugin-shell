@@ -1,13 +1,13 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
-import { projectEntities, applyEntities, coverage } from '../../bin/documentation/adapters/model.ts';
-import { restoreProject } from '../../bin/documentation/adapters/restore.ts';
+import { projectEntities, applyEntities, coverage } from '../../src/cli/documentation/adapters/model.ts';
+import { restoreProject } from '../../src/cli/documentation/adapters/restore.ts';
 import { companionStarterIds, selfProject, starterDocument } from '../support/starter-documents.mjs';
 import { retiredProject } from '../support/retired-projects.mjs';
-import { newDocument } from '../../bin/domain/document.ts';
+import { newDocument } from '../../src/cli/domain/document.ts';
 
-// Drives the lossless project projection and restore (bin/documentation/adapters/{model,restore}.ts) under the maker floors.
+// Drives the lossless project projection and restore (src/cli/documentation/adapters/{model,restore}.ts) under the maker floors.
 const companion = async () => selfProject();
 const of = (entities, type) => entities.filter(entity => entity.type === type);
 function rich() {

@@ -33,6 +33,14 @@ declarations and the lint preset. The host provides `moment` at runtime, and the
 plugin bundle does not ship this copy. That limits exposure, but it does not satisfy
 the audit or make the finding acceptable to ignore.
 
+## Owner decision — 2026-10-06
+
+The owner approved the reconciliation review records and explicitly declined the
+Moment override. Keep the pinned dependency unchanged. The isolated override
+qualification does not close this advisory: the live audit and main candidate
+security gate continue to report the three moderate findings. No audit ignore,
+threshold change or security-gate exception was approved.
+
 ## Closure condition
 
 Recheck `npm view obsidian dependencies` and

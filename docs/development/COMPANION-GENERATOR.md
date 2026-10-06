@@ -35,7 +35,7 @@ Starter shortcut: `node bin/app new ../my-plugin --starter quick-capture --autho
 
 ## What the generated project contains
 
-Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `templates/companion/devkit/*.tmpl` by `bin/compiler/emitters/devkit-files.ts`:
+Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `templates/companion/devkit/*.tmpl` by `src/cli/compiler/emitters/devkit-files.ts`:
 
 | Path | Purpose |
 | --- | --- |
@@ -139,7 +139,7 @@ The output is a development shell. Components without detail designs remain impl
 ## Visual page and component generation (project schema 6)
 
 The compiler reads validated `design.visualDesigns` of a project schema 6 document; schema 1–5 inputs (including the
-v3/v4 detail designs) are rejected and never migrated, so the detail-schema sections below are historical. `bin/compiler/emitters/visual-*.ts` lower each page to
+v3/v4 detail designs) are rejected and never migrated, so the detail-schema sections below are historical. `src/cli/compiler/emitters/visual-*.ts` lower each page to
 `presentation/components/details/<pageId>.vue` and each component to its library SFC with `defineProps`/`defineEmits`/
 `defineSlots` from the typed contract. Elements become their tags, text becomes escaped interpolation or a typed
 binding, slots become `<slot>`, project components are imported by export name and Nuxt UI entries become explicitly

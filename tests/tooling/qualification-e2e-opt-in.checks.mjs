@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { parseDocument } from 'yaml';
 import { checkRepository, e2eFacts, syncedProjectWorkflow } from '../../scripts/quality/check-repository.mjs';
 import { checkName, e2eKinds, e2eOptIn, e2eScenarios, gateValue } from '../../scripts/quality/e2e-policy.mjs';
-import { ciOperation } from '../../bin/adapters/framework/ci.ts';
+import { ciOperation } from '../../src/cli/adapters/framework/ci.ts';
 
 // Owner request: end-to-end tests are opt-in in workflows and processes in general, and mandatory in the Release tier.
 const root = fileURLToPath(new URL('../../', import.meta.url));

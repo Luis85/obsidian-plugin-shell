@@ -195,6 +195,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Upstream lint dependency exception](development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion (normative). |
 | [Moment advisory exception](development/MOMENT-ADVISORY-EXCEPTION.md) | The open `moment` advisory through the Obsidian API package and why `check:security` still fails. |
 | [Hindsight and Git/GitHub](development/HINDSIGHT-GIT-GITHUB.md) | Research and decisions behind the optional memory integration. |
+| [Main reconciliation review](development/MAIN-RECONCILIATION.md) | findings, dependency decisions and measured verification limits. |
 
 ## Delivery and CI
 
@@ -232,7 +233,7 @@ These record intended work and acceptance; they are not implementation evidence.
 Docs next to the code: [`src/features`](../src/features/README.md),
 [`plugins`](../plugins/README.md), [`scripts`](../scripts/README.md),
 [`harness/styles`](../harness/styles/README.md) and the CLI guides in
-[`bin/`](../bin/README.md) (for example [project starters](../bin/PROJECT-STARTERS.md)).
+[`bin/`](../src/cli/README.md) (for example [project starters](../src/cli/PROJECT-STARTERS.md)).
 
 ## Skills
 
@@ -268,7 +269,7 @@ maintained and not normative unless a current page links them as such.
   pages under `architecture/`, `development/`, `testing/`, `tooling/`, `security/`,
   `design/`, `project-setup/` and `user-manual/` ship to generated projects as
   framework reference; plans, records and maintainer pages do not. The exact rule
-  is `bin/compiler/emitters/framework-scope.ts`.
+  is `src/cli/compiler/emitters/framework-scope.ts`.
 - **Status headers only when needed.** Add a status line only for a page whose
   authority is limited (a proposed contract, a plan, a retained target). Describe
   the current state, not the iteration or pull request that produced it.

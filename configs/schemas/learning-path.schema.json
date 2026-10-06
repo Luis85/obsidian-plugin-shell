@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "configs/schemas/learning-path.schema.json",
   "title": "Workbench learning path",
-  "description": "Editor support only. bin/domain/learning-path.ts is the authoritative validator; run node bin/app learn check --json.",
+  "description": "Editor support only. src/cli/domain/learning-path.ts is the authoritative validator; run node bin/app learn check --json.",
   "type": "object",
   "additionalProperties": false,
   "required": [

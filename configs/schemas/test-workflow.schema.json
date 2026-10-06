@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "configs/schemas/test-workflow.schema.json",
   "title": "Workbench browser test workflow",
-  "description": "Editor support only. bin/domain/test-workflow.ts is the authoritative validator; run node bin/app workflow check --json. See docs/development/TEST-WORKFLOWS.md.",
+  "description": "Editor support only. src/cli/domain/test-workflow.ts is the authoritative validator; run node bin/app workflow check --json. See docs/development/TEST-WORKFLOWS.md.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "title", "purpose", "status", "target", "steps"],

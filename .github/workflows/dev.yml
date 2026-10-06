@@ -18,8 +18,8 @@ jobs:
   fast:
     name: Dev checks
     runs-on: ubuntu-24.04
-    # Targets about ten minutes: the locked install plus diff-scoped checks without
-    # the node --test suites. A configuration or dependency manifest change widens
+    # Targets about ten minutes: the locked install, diff-scoped checks and the
+    # clean-checkout regression. A configuration or dependency manifest change widens
     # lint and tests to the full roots; 20 is a job budget, not a test deadline.
     timeout-minutes: 20
     env:
@@ -41,7 +41,16 @@ jobs:
       # skipped (--skip-suites): they take minutes each and run in the Integration
       # tier (ci.yml verify and the path-filtered workflows), not here.
       - name: Agent fast gate on the diff against the base branch
-        run: node bin/app check --fast --skip-suites --base "origin/$BASE_REF"
+        run: |
+          mkdir -p reports/dev
+          git rev-parse HEAD > reports/dev/source-commit.txt
+          node bin/app check --fast --skip-suites --base "origin/$BASE_REF" --json > reports/dev/check.json
+      - name: Fresh-checkout build, portability and strict typecheck regressions
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p reports/dev
+          set -o pipefail
+          node --test tests/tooling/framework-checkout-build.checks.mjs 2>&1 | tee reports/dev/checkout-build.txt
       - name: Test suite registration and documentation
         if: ${{ !cancelled() }}
         run: node scripts/testing/suites.mjs --check
@@ -54,3 +63,11 @@ jobs:
       - name: Self-review guard (advisory here, blocking in CI)
         if: ${{ !cancelled() }}
         run: node "$QUALIFIED_NPM" run check:self-review -- --base "origin/$BASE_REF" --warn-only
+      - name: Retain Dev check results for this revision
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dev-check-results
+          path: reports/dev/
+          retention-days: 7
+          if-no-files-found: warn

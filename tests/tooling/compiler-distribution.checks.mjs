@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { assembleKit, installedCompiler } from '../../bin/adapters/framework/kit.ts';
+import { assembleKit, installedCompiler } from '../../src/cli/adapters/framework/kit.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 test('packed compiled CLI and source CLI return equivalent analysis and errors without installed dependencies',async t=>{

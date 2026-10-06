@@ -1,4 +1,4 @@
-import { readCompanionProject } from '../../bin/adapters/framework/read-project.ts';
+import { readCompanionProject } from '../../src/cli/adapters/framework/read-project.ts';
 
 const help = `Companion project handoff — v1 is READ ONLY
 Usage: node scripts/companion-tools/generate.mjs --input <project.json> --target <vault-relative-path> [--vault <vault-root>]

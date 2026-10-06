@@ -77,7 +77,7 @@ The CLI ZIP is independently runnable. The starter ZIP adds only `configs/starte
 The owner's target is a single release ZIP that extracts to `bin/`, `docs/`,
 `configs/`, `src/`, `tests/`, `prototypes/`, `package.json` and `README.md`; running a
 starter writes the project's `configs/<project-id>-config.json` (see
-[project configuration](../../bin/PROJECT-STARTERS.md#project-configuration)). Observed
+[project configuration](../../src/cli/PROJECT-STARTERS.md#project-configuration)). Observed
 from a kit packed with `node bin/app framework pack` and extracted, then the starters ZIP
 extracted on top, and checked by `tests/tooling/framework-journey.mjs`
 (`project-starter-layout.json` in its evidence):

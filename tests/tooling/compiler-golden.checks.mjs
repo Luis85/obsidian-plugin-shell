@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
-import { compileProject, loadTemplateSnapshot } from '../../bin/compiler/index.ts';
+import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
 import { artifactDigests, goldenDifferences, goldenDocument, productPath, readGolden, starterCases } from '../../scripts/compiler/golden.mjs';
 import { companionStarterIds, starterDocumentText } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));

@@ -2,11 +2,11 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import assert from 'node:assert/strict';
 import {
   insist, docsObject, array, text, jsonData, stable, equal, keyOf, validateEntity, normalizePayload, fieldNames, DOC_TYPES,
-} from '../../bin/documentation/domain/contracts.ts';
-import { mergeEntity } from '../../bin/documentation/domain/merge.ts';
-import { reconcile } from '../../bin/documentation/application/reconcile.ts';
+} from '../../src/cli/documentation/domain/contracts.ts';
+import { mergeEntity } from '../../src/cli/documentation/domain/merge.ts';
+import { reconcile } from '../../src/cli/documentation/application/reconcile.ts';
 
-// Drives the inward-only documentation core (bin/documentation/{domain,application}) to the maker core floors.
+// Drives the inward-only documentation core (src/cli/documentation/{domain,application}) to the maker core floors.
 const page = (overrides = {}) => ({ type: 'page', id: 'node-1', project: 'demo', title: 'Overview', fields: { surface_kind: 'view' }, data: { surface: { goal: 'a' } }, ...overrides });
 const index = (entries = {}) => ({ schemaVersion: 1, project: 'demo', entries });
 const bound = entity => ({ [keyOf(entity)]: { path: 'docs/page.md', baseline: entity, generatedHash: null } });

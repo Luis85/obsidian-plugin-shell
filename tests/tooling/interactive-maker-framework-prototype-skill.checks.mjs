@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../bin/adapters/framework/prototype-skill.ts';
+import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../src/cli/adapters/framework/prototype-skill.ts';
 
 // The shipped prototype skill reader (prototype-skill.ts): one integrity-locked package plus one allowlisted adapter.
 const windows = process.platform === 'win32';

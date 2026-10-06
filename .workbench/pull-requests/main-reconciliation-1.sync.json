@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "main-reconciliation-1",
+  "platform": "github",
+  "repository": "Luis85/obsidian-plugin-shell",
+  "number": 96,
+  "remoteRevision": "9098de30eb93651a7806677a4901e3237fb1746f538dc33b66c478dc3204e2ab",
+  "bodySha256": "4e3e4ab1c5069055aecaa9569f2891458c1c9de6d616c84ffd9c6c7fb37860ff",
+  "derived": "311ec2ef9431a1d0382db7b7c6e71b7012f682951a2b4cdd7ba55a770896ed29",
+  "title": "8dd0b9c0a6a1983d55ead2f6c570c2261979a2405423a881612b94f84fc9f2a9",
+  "regions": {
+    "summary": "59dfcf584c38162c285883d406c76c6a74dc03e4d2b3e23b81cb166ad58e9ee4",
+    "scope": "121a8d66dec59c3193c6acb49b0e74cda6fd2340bd870821674ea852dda7223d",
+    "documents": "aa31a12747913d6faea9faf8f35b12635b0e2d4f5170c89dea365f35ca9ef9cf",
+    "notes": "a191d3a385b414d9e0bbfb7def78fe7aeb12c715d275c4848a4df77ddc1a27f1"
+  },
+  "tasks": {
+    "T-1": {
+      "text": "ab4282af12d2ea99be4ffb6c233e5efe2a1eeefb66a9c777615fbe4e0c6e9307",
+      "checked": true
+    }
+  },
+  "taskOrder": [
+    "T-1"
+  ],
+  "amendments": {},
+  "state": "Merged",
+  "head": "pr/main-reconciliation/main-reconciliation-1",
+  "base": "increment/main-reconciliation",
+  "syncedAt": "2026-10-06T21:38:36Z"
+}

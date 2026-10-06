@@ -59,7 +59,7 @@ Cloud and agent sessions provision the qualified Node automatically. See
    - `--provision-browser` downloads the pinned Chromium.
    - `--skip-install`, `--defer-verify` and `--resume` handle partial reruns.
    - `--mcp` / `--no-mcp` opt in to or out of the project-local agent MCP.
-5. **Build and test.** Run `npm run build`, which writes `dist/`, then `npm test`
+5. **Build and test.** Run `npm run build:cli` for the standalone CLI. Run `npm run build`, which writes `dist/`, then `npm test`
    (the runtime Vitest suite) and `node bin/app check`.
 6. **Develop.** Use one of these:
    - `npm run dev:ui` opens a browser harness with the real components and
@@ -84,8 +84,8 @@ If something fails, see [section 8](#8-troubleshooting-and-known-exceptions).
 | `src/presentation` | `components/` (every `.vue` file, kept thin), `composables/` (behavior), `stores/` (per-view Pinia state) and `context/` (injection and types). |
 | `src/styles`, `src/locales` | Scoped plugin CSS modules, and the `en`/`de` message catalogs. |
 | `src/main.ts` | Lifecycle composition only, at most 100 code lines. |
-| `bin/app` | The single CLI entry. Run it as `node bin/app …`. |
-| `bin/compiler`, `bin/domain`, `bin/application`, `bin/adapters` | The project compiler and generator, plus the CLI's domain, application and adapter layers. |
+| `bin/` | Generated standalone CLI artifact (`npm run build:cli`), including its authoring tools, templates and licenses. Copy the whole folder and run `node bin/app …`; compatible Node.js is required. |
+| `src/cli/` | All CLI development source: compiler, domain, application, adapters and terminal presentation. `npm run app:dev -- <command>` runs source; rebuild `bin` to test the product. |
 | `templates/` | Generator inputs (companion devkit and runtime, adoption, design folder, examples). |
 | `configs/<concern>/` | `bundling`, `lint`, `quality` (thresholds, analyzer), `starters` (schema-6 JSON starters), `templates`, `testing`, `types`. |
 | `scripts/` | Node tooling by concern: setup, bundling, quality, testing, makers, events, release and more. See [scripts/README.md](scripts/README.md). |
@@ -205,7 +205,7 @@ must be listed in `tests/suites.json`.
   `project-setup`) records its starter selection at `configs/<project-id>-config.json`.
   Commands read the single such file directly in `configs/`, or the one named by
   `--config`; the retired root `project.config.json` is never read. See
-  [project configuration](bin/PROJECT-STARTERS.md#project-configuration).
+  [project configuration](src/cli/PROJECT-STARTERS.md#project-configuration).
 - **Companion build**: `npm run companion:build`, then
   `npm run test:companion`.
 - **Framework kit**: `node bin/app framework pack --out <zip> --yes` builds the

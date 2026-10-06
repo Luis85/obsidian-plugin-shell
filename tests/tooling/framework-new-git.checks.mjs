@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { initializeRepository } from '../../bin/adapters/framework/git-init.ts';
+import { initializeRepository } from '../../src/cli/adapters/framework/git-init.ts';
 
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 /** A git with no user, system or global configuration, as on a fresh machine or CI runner. */

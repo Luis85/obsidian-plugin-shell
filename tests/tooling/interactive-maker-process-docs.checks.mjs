@@ -3,12 +3,12 @@ import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { processCommand } from '../../bin/adapters/process-command.ts';
-import { processCatalogContext, processEntry } from '../../bin/adapters/process-catalog.ts';
-import { processDocsPlan } from '../../bin/adapters/process-docs-plan.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { processWikilinks, renderProcessDocs } from '../../bin/domain/process-docs.ts';
-import { readProcess } from '../../bin/domain/process.ts';
+import { processCommand } from '../../src/cli/adapters/process-command.ts';
+import { processCatalogContext, processEntry } from '../../src/cli/adapters/process-catalog.ts';
+import { processDocsPlan } from '../../src/cli/adapters/process-docs-plan.ts';
+import { applyPrepared } from '../../src/cli/adapters/storage.ts';
+import { processWikilinks, renderProcessDocs } from '../../src/cli/domain/process-docs.ts';
+import { readProcess } from '../../src/cli/domain/process.ts';
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'process-docs-'));
   try { await fn(root); } finally { await rm(root, { recursive: true, force: true }); }

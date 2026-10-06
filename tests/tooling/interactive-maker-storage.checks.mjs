@@ -4,11 +4,11 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { newDocument } from '../../bin/domain/document.ts';
-import { readSnapshot, savePlan, applyPrepared, readData } from '../../bin/adapters/storage.ts';
-import { packagePlan, outputBoundary } from '../../bin/adapters/package-plan.ts';
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/app.ts';
+import { newDocument } from '../../src/cli/domain/document.ts';
+import { readSnapshot, savePlan, applyPrepared, readData } from '../../src/cli/adapters/storage.ts';
+import { packagePlan, outputBoundary } from '../../src/cli/adapters/package-plan.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { main } from '../../src/cli/app.ts';
 import { fileSymlink } from './file-symlink.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(work) { const root = await mkdtemp(join(await realpath(tmpdir()), 'shell-maker-')); try { await work(root); } finally { await rm(root, { recursive: true, force: true }); } }

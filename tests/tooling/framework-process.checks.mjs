@@ -5,11 +5,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { runNode, npmEntry } from '../../bin/adapters/framework/process.ts';
+import { runNode, npmEntry } from '../../src/cli/adapters/framework/process.ts';
 import { NodeProcessFailure, runNodeProcess } from '../../scripts/shared/process.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { failure } from '../../bin/adapters/framework/contracts.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
+import { parseCliArguments } from '../../src/cli/adapters/framework/catalog.ts';
+import { failure } from '../../src/cli/adapters/framework/contracts.ts';
 import { fixtureManifest } from './test-data-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t, code = '') {
@@ -99,7 +99,7 @@ test('typed shared process runner preserves successful and failed child exits', 
 
 test('framework process adapter uses the shared Node spawn lifecycle', async t => {
   await assert.rejects(readFile(join(root, 'scripts/framework/process.ts')), { code: 'ENOENT' });
-  const source = await readFile(join(root, 'bin/adapters/framework/process.ts'), 'utf8');
+  const source = await readFile(join(root, 'src/cli/adapters/framework/process.ts'), 'utf8');
   assert.doesNotMatch(source, /node:child_process|StringDecoder/);
   assert.match(source, /runNodeProcess/);
 

@@ -6,8 +6,8 @@ import { createHash, randomUUID } from 'node:crypto';
 import { buildModel, renderReference, renderDiagnostics } from './render.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const destination = 'docs/user-manual/shell-cli/generated';
-const inputs = ['package.json', 'bin/adapters/framework/catalog.ts', 'bin/adapters/framework/help-text.ts', 'bin/adapters/framework/increment-catalog.ts', 'bin/adapters/framework/increment-help.ts',
-  'bin/compiler/domain/diagnostics.ts', 'scripts/documentation/render.mjs', 'scripts/documentation/manual.mjs'];
+const inputs = [ 'src/cli/adapters/framework/catalog.ts', 'src/cli/adapters/framework/help-text.ts', 'src/cli/adapters/framework/increment-catalog.ts', 'src/cli/adapters/framework/increment-help.ts',
+  'src/cli/compiler/domain/diagnostics.ts', 'scripts/documentation/render.mjs', 'scripts/documentation/manual.mjs'];
 const owned = ['reference.md', 'diagnostics.md', 'commands.json', 'manifest.json'];
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
@@ -33,15 +33,16 @@ async function safeDirectory(base, relative, create) {
 }
 export async function outputs(base = root) {
   const [{ commands, parameterKinds }, { commandHelp, groups }, { diagnosticCatalog }] = await Promise.all([
-    import(pathToFileURL(join(base, 'bin/adapters/framework/catalog.ts')).href),
-    import(pathToFileURL(join(base, 'bin/adapters/framework/help-text.ts')).href),
-    import(pathToFileURL(join(base, 'bin/compiler/domain/diagnostics.ts')).href),
+    import(pathToFileURL(join(base, 'src/cli/adapters/framework/catalog.ts')).href),
+    import(pathToFileURL(join(base, 'src/cli/adapters/framework/help-text.ts')).href),
+    import(pathToFileURL(join(base, 'src/cli/compiler/domain/diagnostics.ts')).href),
   ]);
   const pkg = JSON.parse(await readFile(join(base, 'package.json'), 'utf8'));
   const model = buildModel(commands, commandHelp, parameterKinds, groups, pkg.version, diagnosticCatalog);
   const files = { 'reference.md': renderReference(model), 'diagnostics.md': renderDiagnostics(model), 'commands.json': json(model) };
   const sources = await Promise.all(inputs.map(async path => ({ path, sha256: hash(await readFile(join(base, path))) })));
-  files['manifest.json'] = json({ schemaVersion: 1, frameworkVersion: pkg.version, commandCount: model.commands.length, sources,
+  sources.unshift({ path: 'package.json', selector: '/version', sha256: hash(json(pkg.version)) });
+  files['manifest.json'] = json({ schemaVersion: 2, frameworkVersion: pkg.version, commandCount: model.commands.length, sources,
     outputs: Object.entries(files).map(([path, content]) => ({ path, sha256: hash(content) })) });
   return files;
 }

@@ -3,13 +3,13 @@ import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve, sep } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { fakeDataCommand } from '../../bin/adapters/fake-data-command.ts';
-import { builtinFakeData, insideRoot, loadFakeCatalog } from '../../bin/adapters/fake-data-catalog.ts';
-import { routeArguments } from '../../bin/adapters/router.ts';
-import { readData } from '../../bin/adapters/storage.ts';
-import { newDocument, documentText } from '../../bin/domain/document.ts';
-import { runOperations } from '../../bin/application/operations.ts';
+import { execute, parseArguments } from '../../src/cli/adapters/commands.ts';
+import { fakeDataCommand } from '../../src/cli/adapters/fake-data-command.ts';
+import { builtinFakeData, insideRoot, loadFakeCatalog } from '../../src/cli/adapters/fake-data-catalog.ts';
+import { routeArguments } from '../../src/cli/adapters/router.ts';
+import { readData } from '../../src/cli/adapters/storage.ts';
+import { newDocument, documentText } from '../../src/cli/domain/document.ts';
+import { runOperations } from '../../src/cli/application/operations.ts';
 const repository = resolve(import.meta.dirname, '../..');
 async function scratch(fn) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'fake-data-command-'));

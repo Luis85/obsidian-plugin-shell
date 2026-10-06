@@ -5,15 +5,15 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.ts';
-import { parseArguments } from '../../bin/adapters/makers/arguments.ts';
-import { planMaker } from '../../bin/adapters/makers/plan.ts';
-import { createMakerContext } from '../../bin/adapters/makers/engine.ts';
-import { action } from '../../bin/adapters/makers/primitives.ts';
-import { localRecipeContext } from '../../bin/adapters/makers/custom-contract.ts';
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
+import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
+import { createMakerContext } from '../../src/cli/adapters/makers/engine.ts';
+import { action } from '../../src/cli/adapters/makers/primitives.ts';
+import { localRecipeContext } from '../../src/cli/adapters/makers/custom-contract.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 
 // The runner-injected local recipe context and the read-only `make locale <name> --check` boundary that
-// generated consumer checks use instead of importing framework internals (bin/adapters/makers, framework operations).
+// generated consumer checks use instead of importing framework internals (src/cli/adapters/makers, framework operations).
 const outputs = async context => (await context.finish()).changes.map(change => [change.path, change.status, change.afterHash]);
 
 test('a local recipe receives a frozen context whose only primitive composes the same bytes as the built-in action', () => makerFixture(async root => {

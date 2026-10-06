@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { checkNativeRegistration } from '../../bin/adapters/makers/native-registrations.ts';
-import { localeSkeleton } from '../../bin/adapters/makers/pending-locale.ts';
-import { pluginRecipe } from '../../bin/adapters/makers/plugin-recipe.ts';
-import { runCustom, styleRecipe } from '../../bin/adapters/makers/extra-recipes.ts';
-import { createMakerContext } from '../../bin/adapters/makers/engine.ts';
+import { checkNativeRegistration } from '../../src/cli/adapters/makers/native-registrations.ts';
+import { localeSkeleton } from '../../src/cli/adapters/makers/pending-locale.ts';
+import { pluginRecipe } from '../../src/cli/adapters/makers/plugin-recipe.ts';
+import { runCustom, styleRecipe } from '../../src/cli/adapters/makers/extra-recipes.ts';
+import { createMakerContext } from '../../src/cli/adapters/makers/engine.ts';
 
 // Drives the static source readers behind the native, locale, plugin, style and custom recipes
-// (bin/adapters/makers) under the maker floors: every unsupported shape fails with its stable code.
+// (src/cli/adapters/makers) under the maker floors: every unsupported shape fails with its stable code.
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 const missing = path => Object.assign(new Error(`ENOENT: ${path}`), { code: 'ENOENT' });
 const reader = files => ({ async read(path) { if (!Object.hasOwn(files, path)) throw missing(path); return files[path]; } });

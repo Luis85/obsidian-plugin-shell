@@ -6,7 +6,7 @@ import {
   loadPrototypeWorkspace as relocatedLoad,
   readPrototypeDocument as relocatedReadDocument,
   readPrototypeBundle as relocatedReadBundle,
-} from '../../bin/adapters/framework/prototype-workspace.ts';
+} from '../../src/cli/adapters/framework/prototype-workspace.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */

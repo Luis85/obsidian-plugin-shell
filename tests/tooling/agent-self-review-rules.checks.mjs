@@ -39,9 +39,9 @@ test('[SELF-REVIEW-RULES-02] code-pattern rules ignore string and template liter
     "  const sample = \"test.only('focused', () => {});\";",
   ];
   assert.deepEqual(flagged('tests/tooling/sample.checks.mjs', quoted), []);
-  assert.deepEqual(flagged('bin/adapters/sample.ts', quoted), []);
+  assert.deepEqual(flagged('src/cli/adapters/sample.ts', quoted), []);
   const real = [`  ${directive.lint}`, `  ${directive.ts}`, '  const root = node as unknown as HTMLElement;', `  call('text'); ${directive.lint}`];
-  assert.deepEqual(flagged('bin/adapters/sample.ts', real), ['SR-LINT-DISABLE:1', 'SR-TS-SUPPRESSION:2', 'SR-UNSAFE-CAST:3', 'SR-LINT-DISABLE:4']);
+  assert.deepEqual(flagged('src/cli/adapters/sample.ts', real), ['SR-LINT-DISABLE:1', 'SR-TS-SUPPRESSION:2', 'SR-UNSAFE-CAST:3', 'SR-LINT-DISABLE:4']);
 });
 
 test('[SELF-REVIEW-RULES-03] the docs/concepts design workspace is outside the code-pattern rules, but not outside config rules', () => {

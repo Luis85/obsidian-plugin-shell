@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { executeOperation } from '../../bin/adapters/framework/operations.ts';
+import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 import { fileSymlink } from './file-symlink.mjs';
 

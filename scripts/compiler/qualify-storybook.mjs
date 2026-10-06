@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { planProject, applyProject } from '../../bin/compiler/adapters/project-plan.ts';
+import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url)), npm = process.env.QUALIFIED_NPM;
 // --no-browser (CI without the e2e opt-in) keeps install, typecheck and static build and skips the browser preview and axe audit.

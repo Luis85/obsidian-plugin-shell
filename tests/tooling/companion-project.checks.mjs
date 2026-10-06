@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 import { parseAuthoringDocument as parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, authoringDesignKey } from '../../scripts/companion/authoring-contract.ts';
 import { starterDocumentText } from '../support/starter-documents.mjs';
 import { retiredProjectText } from '../support/retired-projects.mjs';
-import { readCompanionProject } from '../../bin/adapters/framework/read-project.ts';
+import { readCompanionProject } from '../../src/cli/adapters/framework/read-project.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = join(root, 'scripts/companion-tools/generate.mjs');

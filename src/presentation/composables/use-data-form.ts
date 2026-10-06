@@ -79,7 +79,7 @@ export function useDataForm(props: DataFormProps, emit: SubmitEmit) {
     if (selected) current.add(id); else current.delete(id);
     draft.picks.set(node.path, (node.field.choices ?? []).map(choice => choice.id).filter(choice => current.has(choice)));
   }
-  const describe = (path: string, part: 'help' | 'error') => `${uid}-${path}-${part}`;
+  const describe = (path: string, part: 'help' | 'error' | 'hint') => `${uid}-${path}-${part}`;
   const setText = (path: string, input: unknown) => { draft.texts.set(path, scalarText(input)); };
   return {
     t, uid, form, nodes, issues, issue, submit, describe, setText,
@@ -87,7 +87,7 @@ export function useDataForm(props: DataFormProps, emit: SubmitEmit) {
     submitText: computed(() => props.submitLabel ?? t('form.submit')),
     control: (path: string) => `${uid}-${path}`,
     invalid: (path: string) => issue(path) === undefined ? undefined : 'true',
-    describedBy: (node: DataFormNode) => [node.field.help && describe(node.path, 'help'), issue(node.path) && describe(node.path, 'error')].filter(Boolean).join(' ') || undefined,
+    describedBy: (node: DataFormNode) => [node.field.help && describe(node.path, 'help'), node.field.kind === 'list' && describe(node.path, 'hint'), issue(node.path) && describe(node.path, 'error')].filter(Boolean).join(' ') || undefined,
     required: (field: DataFormField) => field.required === true || field.kind === 'title',
     text: (path: string) => draft.texts.get(path) ?? '',
     flag: (path: string) => draft.flags.get(path) === true,

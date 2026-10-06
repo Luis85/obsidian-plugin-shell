@@ -1,7 +1,7 @@
 name: Offline qualification inputs
 # Produces downloadable offline inputs (Node, npm, dependency and Angular
 # caches); it gates nothing, so it runs on demand and weekly instead of on every
-# pull request that touches bin/**.
+# pull request that touches src/cli/**.
 on:
   workflow_dispatch:
   schedule:
