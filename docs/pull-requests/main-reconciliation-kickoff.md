@@ -4,9 +4,15 @@ id: main-reconciliation-kickoff
 title: "Kick-off: Reconcile main quality gates and Vue lifecycle behavior"
 kind: kickoff
 increment: main-reconciliation
-status: New
+status: Draft
 head: "increment/main-reconciliation"
 base: main
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 95
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/95"
+publishedAt: 2026-10-06T16:03:56Z
+lastSyncedAt: 2026-10-06T16:03:56Z
 ---
 
 # Kick-off: Reconcile main quality gates and Vue lifecycle behavior

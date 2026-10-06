@@ -4,10 +4,16 @@ id: main-reconciliation-1
 title: "Reconcile standalone CLI and harden runtime workflows"
 kind: change
 increment: main-reconciliation
-status: New
+status: Draft
 delivers: [AC-1, AC-2]
 head: "pr/main-reconciliation/main-reconciliation-1"
 base: increment/main-reconciliation
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 96
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/96"
+publishedAt: 2026-10-06T16:01:19Z
+lastSyncedAt: 2026-10-06T16:01:19Z
 ---
 
 # Reconcile standalone CLI and harden runtime workflows
