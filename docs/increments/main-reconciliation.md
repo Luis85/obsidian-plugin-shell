@@ -45,8 +45,10 @@ Maintainers develop all Workbench CLI modules under src/cli. A built bin directo
 <!-- One `- [ ] AC-n: text` per criterion. At completion tick it and add
 `Evidence: \`path\`` (a test file, doc or report that exists). -->
 
-- [ ] AC-1: Workbench CLI sources live under src/cli and a built bin copy runs without the source checkout or installed framework dependencies. Evidence: `tests/acceptance/main-reconciliation/ac-1.checks.mjs`
-- [ ] AC-2: Targeted lifecycle and dependency workflow regressions have behavioral coverage and existing architecture, lint and coverage gates retain their thresholds. Evidence: `tests/acceptance/main-reconciliation/ac-2.checks.mjs`
+- [x] AC-1: Workbench CLI sources live under src/cli and a built bin copy runs without the source checkout or installed framework dependencies.
+  Evidence: `tests/acceptance/main-reconciliation/ac-1.checks.mjs`, `docs/development/MAIN-RECONCILIATION.md`
+- [x] AC-2: Targeted lifecycle and dependency workflow regressions have behavioral coverage and existing architecture, lint and coverage gates retain their thresholds.
+  Evidence: `tests/acceptance/main-reconciliation/ac-2.checks.mjs`, `docs/development/MAIN-RECONCILIATION.md`
 
 ## Affected areas
 

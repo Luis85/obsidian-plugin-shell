@@ -10,7 +10,7 @@ import { verifyKit } from '../../../src/cli/adapters/framework/kit-integrity.ts'
 import { starterDocument } from '../../support/starter-documents.mjs';
 const source = fileURLToPath(new URL('../../../', import.meta.url));
 
-test('a copied bin runs, generates a project and authors a feature without source checkout or node_modules', { timeout: 180000 }, async t => {
+test('[AC-1] a copied bin runs, generates a project and authors a feature without source checkout or node_modules', { timeout: 180000 }, async t => {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'portable-workbench-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   await cp(join(source, 'bin'), join(root, 'bin'), { recursive: true });

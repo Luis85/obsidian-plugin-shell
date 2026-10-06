@@ -121,6 +121,14 @@ separately qualified override. The security gate remains visible and blocking.
 - Add browser/native evidence when a change affects rendered behavior or host
   integration. This review does not constitute Windows, macOS, native-host or
   release qualification.
+- Reduce the remaining tooling complexity in focused changes. The final
+  maintainability report has zero gated findings across 635 production inputs
+  and 47 template inputs, but records 258 advisory findings in tooling and 48 in
+  fixtures. Highest-priority tooling functions include `dispatch` in
+  `scripts/hindsight/cli.ts` (cognitive complexity 92), `compileDesignSystem` in
+  `scripts/companion/design-system-css.mjs` (74), and `executeSetup` in
+  `scripts/setup/execute.mjs` (66). Extract dispatch handlers and stage operations
+  with their existing behavioral tests; keep parser and failure-path fixtures.
 
 ## Verification and open decisions
 
@@ -136,6 +144,32 @@ portability, exact unchanged starter goldens, generated-source verification,
 runtime artifact tamper detection and stable template-preserving rebuilds.
 Detailed local output is retained under `reports/reconciliation/`.
 
+Final validation of implementation commit `02d79da2`, reconciled with main at
+`151e2f64`, used Node 24.21.0, npm 11.19.1 and the exact lockfile:
+
+| Check | Actual result |
+| --- | --- |
+| Repaired packaging/generator/workflow regressions, including both increment acceptance tests | 60 passed, zero failures |
+| Blank starter generation and replay | 3 passed |
+| Reviewed starter golden contracts | 11 passed; all 14 starter baselines unchanged |
+| Complete maker suite with coverage | 176 files passed; 1,142 tests passed, one existing skip |
+| Maker coverage, 529 CLI/shared inputs | Passed: 93.35% statements, 87.91% branches, 93.57% functions, 94.90% lines; independent core gate passed |
+| Final selected verification | 11/11 passed: suite inventory, plugin build, source lint, ESLint, maker types, maker coverage and gate, repository checks, analyzer, maintainability, legacy baseline |
+| Full analyzer | Zero findings; every input parsed |
+| Legacy baseline | 53 tests passed in each of three runs; existing release block retained |
+| Fast agent check with suites delegated | Four passed, root typecheck failed, expensive suites explicitly skipped |
+| Live dependency audit after the narrow fix | Zero high/critical and three moderate reports; security gate failed |
+| Self-review guard | Seven findings requiring review of source/configuration ownership changes |
+
+The selected verification is explicitly a **partial run**. It does not supersede
+the failed full-run verdict or imply that the root typecheck passed. Logs and the
+machine-readable result are `reports/reconciliation/final-verification.log` and
+`reports/reconciliation/final-verification.json`. The copied-bin acceptance test
+used kit source hash
+`f027674b5c12e810cc63ba50bcf83eba1c8c350ff5d591c7bcff9f317f4f4912`.
+Browser, real Obsidian, Windows and macOS checks were not run in this review;
+the served UI did not change and native hosts were not provisioned.
+
 The root Vue TypeScript project now discovers the newly moved CLI through its
 existing `src/**/*.ts` include. The CLI imports JavaScript tooling modules and
 already has a separate strict compiler configuration with JavaScript resolution.
@@ -145,6 +179,25 @@ command execute both. Automatic approval review rejected the Vue exclusion as a
 possible coverage reduction, so this configuration change is pending the owner's
 decision. The root typecheck must not be reported as passing meanwhile.
 
+The concrete pending change is to exclude `../../src/cli/**` from the Vue project
+and make `npm run typecheck` run both Vue checking and the existing strict maker
+configuration. The read-only inventory proof in
+`reports/reconciliation/type-scope-proof.json` records zero missing runtime inputs,
+zero missing relocated CLI modules and zero maker configuration diagnostics.
+
+The seven self-review flags cover five files: ESLint's existing error-severity
+rules moved with the CLI; Fallow entries/zones moved and its generated
+`bin/template/package.json` copy is ignored; gate-selection paths moved; maker
+coverage moved to `src/cli`; runtime coverage names its original runtime folders.
+Both coverage configurations still load the reviewed thresholds and have empty
+exclusion lists. These findings have not been waived or entered into the
+owner-only approval file.
+
 No numeric threshold, owner approval record, golden baseline or intentional
 negative test has been relaxed. The self-review guard requires owner review of
 the configuration/path changes; its flags remain visible.
+
+The implementation is committed on the local review branch
+`pr/main-reconciliation/main-reconciliation-1`; it has not been pushed or published
+as a pull request. The Dependabot merge is already on main. This change does not
+authorize a release, tag, listing submission or publication.
