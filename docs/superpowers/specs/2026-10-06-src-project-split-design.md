@@ -1,4 +1,4 @@
-# Split `src/` into separate TypeScript projects
+# Split `src/` into self-contained TypeScript projects and tidy the repository by concern
 
 Date: 2026-10-06. Base: PR #96 (`pr/main-reconciliation/main-reconciliation-1`, head `50760a72`).
 
@@ -32,7 +32,30 @@ No project imports `cli`, `companion` or `plugin`. Nothing remains loose at the
    New projects and starters emit a manifest and `src/plugin`.
 5. Approach A: TypeScript project references plus `#` subpath imports.
 6. One draft pull request stacked on PR #96 (restructure and management
-   commands together), one commit per phase.
+   commands together). Implementation is parallelized with sub-agents. When
+   everything passes, push and open the pull request (owner request).
+7. Every source project is self-contained: its code, its own `tests/` folder,
+   its `tsconfig.json` (and a test tsconfig), its test fixtures and support.
+8. The repository is organized by concern:
+
+```
+src/          source projects, each self-contained
+  shared/     library: platform helpers, contracts, companion schema/contracts
+  tui/        library: terminal UI engine and generic terminal helpers
+  cli/        application: Workbench CLI, compiler, documentation, sdk/ (was plugins/)
+  companion/  application: browser companion editor and app
+  plugin/     application: Obsidian plugin runtime, harness/ (was harness/)
+tooling/      repository machinery (was scripts/): quality, testing, release,
+              delivery, agent, bundling, styles, ... plus tooling/tests/
+configs/      lint, types, testing, bundling, quality, starters, wizards, ...
+templates/    generation templates
+tests/        cross-project suites only (acceptance, journeys, verification)
+projects/     standalone projects (unchanged)
+docs/         documentation
+```
+
+   Direction rule: `tooling/` and root `tests/` may import source projects;
+   source projects never import `tooling/` or root `tests/`.
 
 ## Project mechanics
 
@@ -70,15 +93,45 @@ No project imports `cli`, `companion` or `plugin`. Nothing remains loose at the
 | generic `src/cli/presentation/{prompts.ts,terminal/terminal-render.ts,terminal/terminal-style.ts}` and the error type tui needs from `src/cli/domain/errors.ts` | `src/tui/**` (error type to `src/shared/contracts` if CLI-wide) |
 | `docs/concepts/companion/{editor,src}/**` | `src/companion/{editor,app}/**` |
 | `src/{application,bootstrap,domain,features,infrastructure,presentation,styles,locales}`, `src/main.ts` | `src/plugin/**` |
+| `harness/**` | `src/plugin/harness/**` |
+| `plugins/**` (Workbench extension SDK, example extension) | `src/cli/sdk/**` |
+| tooling modules the CLI imports (`scripts/release/{prepare,promotion-plan}`, `scripts/delivery/{acceptance-stubs,handoff,config,repository,run}`, `scripts/testing/{suite-manifest,browser-executable}`, `scripts/agent/mcp-config`, `scripts/ui/gallery-options`, and their transitive imports) | `src/cli/**` (CLI-specific) or `src/shared/**` (also used by companion/plugin); `tooling/` imports them from there |
+| `scripts/**` (rest) | `tooling/**` (same subfolder names; existing `tooling/documentation` kept) |
 | `src/cli/**` (rest) | unchanged |
+
+Template strings that name paths inside a *generated* project (for example
+`../scripts/bundling/vite-shared.mjs` in compiler emitters, `scripts/makers/custom`)
+describe the generated project's layout and are not rewritten by the move.
 
 `npm run companion:build` keeps writing `docs/concepts/companion/index.html`; only
 its inputs move. Companion concept documents stay in `docs/concepts/companion`.
 
-`scripts/`, `tests/`, `harness/`, `plugins/` and `templates/` stay outside `src/`.
-They import moved code through `#shared/*`, `#tui/*` or the moved relative path.
-Test code gets `tests/tsconfig.*.json` projects that reference what they cover,
-replacing the coverage-by-include in today's root config.
+### Tests
+
+Each source project owns `src/<name>/tests/` with its own fixtures and support
+and a `tests/tsconfig.json` that references the project. Assignment rule per test
+file: the single source project it exercises; a test exercising a project plus
+`shared` belongs to that project; a test of `tooling/` modules goes to
+`tooling/tests/`; a test that drives several applications end to end stays in
+root `tests/`.
+
+| From | To |
+| --- | --- |
+| `tests/runtime/**` | `src/plugin/tests/unit/**` |
+| `tests/e2e/**`, `tests/obsidian/**`, `tests/harness-styles/**`, `tests/support/obsidian/**` | `src/plugin/tests/{e2e,obsidian,harness-styles,support}/**` |
+| `tests/tooling/**` exercising the CLI (incl. compiler, documentation, sdk) | `src/cli/tests/**` |
+| `tests/tooling/**` exercising companion editor/app | `src/companion/tests/**` |
+| `tests/tooling/**` exercising only tui or only shared | `src/{tui,shared}/tests/**` |
+| `tests/tooling/**` exercising `scripts/*`, `tests/hindsight/**` | `tooling/tests/**` |
+| `tests/concepts/**` | `src/companion/tests/concepts/**` when it tests companion concept inputs, else `tooling/tests/concepts/**` |
+| `tests/fixtures/**`, `tests/support/**` (rest) | next to the tests that use them; fixtures used by several projects stay in root `tests/fixtures` |
+| `tests/acceptance/**`, `tests/verification/**`, `tests/browser-*/**` | root `tests/` (cross-project) |
+
+The classification is produced by a scratch script (imports resolved per file),
+reviewed, and recorded as the move map; files the rule cannot place are listed
+and decided individually. `tests/suites.json` keeps every suite name and its
+test-pyramid level; only globs change. Per-suite test counts are recorded before
+and after and must match.
 
 ## Source projects as a managed concept
 
@@ -131,7 +184,7 @@ edited files, hash-guarded removal that retains edited files.
 | `graph [--json]` | Dependency graph (text tree; JSON adjacency), reverse dependents. |
 | `check [--json]` | Validates: manifest schema, DAG (no cycles), every path exists with a matching `tsconfig.json`, tsconfig `references` and `#` aliases match the manifest, no source import crosses into an unreferenced project, every project is in scope of lint, line-limit, coverage and analyzer gates. Exit non-zero on findings; each fixable finding names the plan that fixes it. |
 | `check --fix` | Reviewed plan regenerating derived files (tsconfigs, solution, imports, JSON gate configs) from the manifest. |
-| `add <name> --kind <kind> [--platform node\|browser] [--references a,b]` | Scaffolds `src/<name>` from the kind template, adds the manifest entry and derived files. Refuses an existing path. |
+| `add <name> --kind <kind> [--platform node\|browser] [--references a,b]` | Scaffolds self-contained `src/<name>` (code, `tests/` with one passing test, both tsconfigs) from the kind template, adds the manifest entry, derived files and suite entry. Refuses an existing path. |
 | `link <from> <to>` / `unlink <from> <to>` | Adds/removes a reference; `link` refuses cycles, `unlink` refuses while `from` still imports `to`. |
 | `rename <old> <new>` | Moves the folder (`git mv` when tracked), rewrites the manifest, references, aliases and every import specifier of the alias or path across the project. |
 | `remove <name>` | Refuses while other projects reference it; otherwise removes the folder only when every file still matches its template hash, else retains edited files and reports them; removes manifest entry and derived wiring. |
@@ -156,7 +209,7 @@ project at `src/` (or `src/plugin`), report `SOURCE_MANIFEST_MISSING` from
 
 ## Tooling updated to new paths
 
-esbuild/Vite entries (`scripts/bundling/*`, `configs/bundling/*`), ESLint and
+esbuild/Vite entries (`tooling/bundling/*`, `configs/bundling/*`), ESLint and
 oxlint scopes, fallow config, Vitest includes and both coverage gates
 (`test:coverage`, `test:coverage:production`, domain/application/features 95%/90%
 floors now under `src/plugin`), `check:presentation`, `check:source`, line-limit
@@ -169,30 +222,45 @@ Path-keyed hashes (hash-guarded style modules, golden baselines, evidence
 inventories) are re-recorded only when the content is byte-identical and the
 key is the only change; any other drift stops and is reported.
 
-## Phases (one commit each, `node bin/app check --fast --base origin/pr/main-reconciliation/main-reconciliation-1` green before the next)
+## Phases
 
-1. Solution scaffolding and `src/shared` (bases, `#shared/*`, moves from
-   `scripts/shared|contracts|companion`, codemod of importers).
-2. `src/tui` (engine + generic terminal helpers, `#tui/*`, CLI importers).
-3. `src/companion` (editor/app sources, companion build and verification inputs).
-4. `src/plugin` (runtime move, plugin build/lint/coverage/presentation gates).
-5. Manifest, schema, shared reader; gates derive scopes from it; `source list`,
-   `graph`, `check [--fix]`.
-6. `source add|link|unlink|rename|remove`, kind templates, makers by named
-   source project, starters/`new`/adopt write the manifest, regression tests.
-7. Docs (CLI help, guide, AGENTS.md table), workflows, `projects:sync`, changelog;
-   full `npm run verify -- --json --keep-going`.
-
-Moves use `git mv` driven by a scratch script; import rewrites use a scratch
-codemod that resolves every specifier against the old tree and rewrites it to the
-new location. Neither script is committed.
+1. **Baseline** (orchestrator): record per-suite test counts, plugin bundle
+   hashes, `build:cli` output listing, current gate results.
+2. **Mechanical move** (orchestrator, one commit): one move map covering every
+   table above; `git mv` driven by a scratch script; a scratch codemod resolves
+   every relative specifier (static imports, `import()`, `new URL(..., import.meta.url)`,
+   path literals in configs, `package.json` scripts and workflows) against the old
+   tree and rewrites it to the new location. Cross-project specifiers become
+   `#<name>/...`. Neither script is committed. This commit need not be green.
+3. **Parallel repair** (sub-agents, disjoint file ownership, each ends with its
+   area's gates green):
+   - A. Type projects: per-project and test tsconfigs, solution, bases,
+     `typecheck*` scripts, TS6307 negative fixture.
+   - B. Test runners: Vitest configs, Playwright config, `tests/suites.json`,
+     suite runner, coverage includes and floors at new paths, count parity.
+   - C. Build and bundling: plugin build (byte-identical `main.js`/`styles.css`/
+     `manifest.json`), `build:cli` + copied-`bin` check, harness, companion build,
+     style hash guards.
+   - D. Quality gates: ESLint/oxlint scopes, fallow, line limits, presentation,
+     source, boundary, events, entities, docs-launchers, repository policy,
+     self-review guard.
+   - E. Workflows, `package.json` scripts, agent hooks (`.claude/settings`,
+     session-start/stop-check), `projects:sync`, AGENTS.md, README,
+     DEVELOPER_GUIDE, live docs and skills.
+   - F. Source manifest + `node bin/app source` commands + kind templates (new
+     code, isolated worktree, merged after A–E).
+   - G. Makers target named source projects; starters/`new`/adopt emit manifest
+     and `src/plugin`; regression fixtures (after F's domain lands).
+4. **Integration** (orchestrator): merge F/G, `source check` on this repo,
+   changelog, Definition of Done, full `npm run verify -- --json --keep-going`,
+   self-review, push, draft PR via `node bin/app pr` plan stacked on PR #96.
 
 ## Delivery
 
 Change pull request `main-reconciliation-2` in increment `main-reconciliation`
 (planned via `node bin/app pr` reviewed plan), stacked on PR #96, draft, with a
-`CHANGELOG.md` `## [Unreleased]` entry. No push, `pr publish` or `pr sync`
-without explicit owner request.
+`CHANGELOG.md` `## [Unreleased]` entry. The owner requested push and pull
+request creation once everything passes; no release, tag or merge.
 
 ## Testing
 
@@ -216,6 +284,6 @@ without explicit owner request.
 
 Runtime behavior changes of the plugin, CLI commands other than `source` and
 the maker target option, dependency or lockfile changes, npm workspaces,
-per-source-project dependencies, moving
-`scripts/`, `tests/`, `harness/`, `plugins/` into `src/`, and changes to
-`projects/*` beyond `projects:sync` output.
+per-source-project dependencies, rewriting paths inside historical evidence
+records and archived docs (they keep the paths they were recorded with), and
+changes to `projects/*` beyond `projects:sync` output.
