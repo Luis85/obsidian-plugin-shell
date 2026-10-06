@@ -5,7 +5,7 @@
   "sources": [
     {
       "path": "package.json",
-      "sha256": "c83edd4e77e98a42d3a2c1f72e7f883b63765ad2b9b208c17ad145d955915b52"
+      "sha256": "4713c03d6045a121d27825df4fd281f2d8f493f4e6d35d8c32d89c60811f824b"
     },
     {
       "path": "bin/adapters/framework/catalog.ts",
