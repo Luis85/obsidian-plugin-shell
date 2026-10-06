@@ -8,7 +8,7 @@ import { validateRetained } from '../release/candidate.mjs';
 
 const protocol = 'executable-evidence/2';
 const producerNames = ['runtime', 'browser', 'tooling', 'coverage', 'artifact', 'native'];
-export async function filesUnder(root, directory, pattern) {
+async function filesUnder(root, directory, pattern) {
   const files = [];
   async function visit(path) {
     for (const item of await readdir(path, { withFileTypes: true })) {
