@@ -4,8 +4,8 @@
   "platform": "github",
   "repository": "Luis85/obsidian-plugin-shell",
   "number": 95,
-  "remoteRevision": "e173ff96dc11bb5408d85176826ac010f7688b2b87faa204d1b763b74cab0c74",
-  "bodySha256": "399e4c235f8ec3b166793e7c537c011fbb4cf0bd0a8d300132488ff327fd62e6",
+  "remoteRevision": "8c3d37c0d76c75a6d2cdd82a25b9d527ed97b5a3a8747753ca50442904ae035b",
+  "bodySha256": "034510d24218804f5d89077c64b60a8f6b2d90c974faefbbc029d5c6d8f7d41f",
   "derived": "eb66d3df5e7c559e11b402508f6d0399d5bfad8dae5a283dfb14a9a438a673ed",
   "title": "24fddced3a40b6de16f999ac33bb94f074dde2977ba71111da8fb25e246c226a",
   "regions": {
@@ -17,7 +17,7 @@
   "tasks": {
     "T-1": {
       "text": "0c2d4ed0d705600f806fa931748acfe4b3bc7c0e36a511f27a6858750a68b8a2",
-      "checked": false
+      "checked": true
     },
     "T-2": {
       "text": "1909b44edbb949f17e99dcc7422af9a4ecbb340b9732a6f93ba871b80a9e202d",
@@ -29,8 +29,8 @@
     "T-2"
   ],
   "amendments": {},
-  "state": "Draft",
+  "state": "Ready",
   "head": "increment/main-reconciliation",
   "base": "main",
-  "syncedAt": "2026-10-06T16:03:56Z"
+  "syncedAt": "2026-10-06T18:23:44Z"
 }
