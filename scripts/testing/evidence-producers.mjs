@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { vitestReport, playwrightReport, toolingReport, artifactReport, nativeReport, completeResult, object } from './evidence-adapters.mjs';
 import { assertCoverageGates } from '../quality/coverage-inventory.mjs';
-import { filesUnder } from './evidence-identity.mjs';
+import { filesUnder, toolingRegistrations } from './evidence-identity.mjs';
 import { performanceProtocol, summarizePerformance, candidateSizes } from './performance-report.mjs';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
 
@@ -82,7 +82,7 @@ export async function adaptProducer(producer, raw, root, files, exitCode, versio
     if (typeof text !== 'string' || !text.length) throw new Error('EVIDENCE_REPORT_MISSING');
     result = playwrightReport(JSON.parse(text), root);
   }
-  else if (producer === 'tooling') result = toolingReport(raw.stdout, root);
+  else if (producer === 'tooling') result = toolingReport(raw.stdout, root, await toolingRegistrations(root, files));
   else if (producer === 'artifact') result = artifactReport(JSON.parse(raw.stdout));
   else if (producer === 'native') {
     const expected = JSON.parse(await readFile(join(root, 'docs/testing/native-evidence-checks.json'), 'utf8'));
