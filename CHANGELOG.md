@@ -55,6 +55,8 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Build the standalone CLI from fresh checkouts without tracked partial artifacts in `bin`; run both strict runtime and CLI checks through `npm run typecheck`.
 - Prevent disposed settings views from persisting changes through retained callbacks.
 - Wait for actual project CI before reporting required checks on project-only pull requests, and avoid regenerating the CLI manual for dependency-only changes.
+- Candidate qualification's tooling evidence credits the prototype skill's portable tests to `tests/tooling/prototype-helpers.checks.mjs`, the file that registers them, instead of failing with `EVIDENCE_SUITE_INVENTORY`; all six Windows-only tooling tests are now expected skips off Windows, guarded by a test that keeps that list equal to the declarations.
+- The companion project's Real Obsidian workflow runs the host from a bind mount of the project at `/wc`, so its singleton socket fits the Linux 107-byte path budget inside the shell repository (124 bytes before); temporary data stays in the project.
 - Prepared clickdummy prototype packages no longer tell agents to read `source/.claude/skills/companion-prototype-design` or run its `prototype.mjs`; generated source never ships that skill. The prompt and package README now point at `source/AGENTS.md` and the shipped offline builder `source/scripts/clickdummy/lib/build-worker.mjs`.
 - `node bin/app check` no longer times out its node --test suite steps (`maker-tests` and fast-mode `suites`) at the 10-minute step default; they get a 60-minute budget. An explicit `--timeout` still bounds every step.
 
