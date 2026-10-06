@@ -37,7 +37,7 @@
     "@nuxt/ui": "4.11.2",
     "pinia": "4.0.3",
     "vue": "3.5.43",
-    "vue-i18n": "11.4.12",
+    "vue-i18n": "11.4.13",
     "yaml": "2.9.1"
   },
   "description": "Developer workbench for declarative UI authoring, project setup, source generation and fixture-backed review.",
