@@ -24,7 +24,7 @@ import { createGitHub } from './publish-github.mjs';
 import { discoverRelease, onDefaultBranch, releaseState, tagCommit } from './publish-discovery.mjs';
 
 const coded = (code, message) => Object.assign(new Error(message ? `${code}: ${message}` : code), { code });
-export const publishLockPath = (repository, version) => join(tmpdir(), `plugin-publish-${sha256(`${repository.toLowerCase()}/${version}`)}.lock`);
+export const publishLockPath = (repository, version, directory = tmpdir()) => join(directory, `plugin-publish-${sha256(`${repository.toLowerCase()}/${version}`)}.lock`);
 
 export function planSteps(state) {
   const done = (id, condition, pending, finished) => ({ id, status: condition ? 'done' : 'pending', detail: condition ? finished : pending });
@@ -83,14 +83,14 @@ const steps = {
   },
 };
 
-export async function publishRelease({ repository, version, execute = false, run = createRunner() }) {
+export async function publishRelease({ repository, version, execute = false, run = createRunner(), lockDirectory = tmpdir() }) {
   stableVersion(version);
   const gh = createGitHub({ run, repository });
   const workdir = await mkdtemp(join(tmpdir(), 'release-publish-'));
   let lock = null;
   try {
     if (execute) {
-      const path = publishLockPath(repository, version);
+      const path = publishLockPath(repository, version, lockDirectory);
       try { await mkdir(path, { mode: 0o700 }); lock = path; }
       catch (error) { throw error.code === 'EEXIST' ? Object.assign(coded('PUBLISH_LOCKED', `Another publish holds ${path}; remove it only after confirming no run is active.`), { lockPath: path }) : error; }
     }

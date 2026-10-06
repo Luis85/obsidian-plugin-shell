@@ -5,7 +5,7 @@ import { publishRelease, parsePublishArguments, publishLockPath } from '../../sc
 import { createGitHub } from '../../scripts/release/publish-github.mjs';
 import { publishFixture, repository, version, head, notes } from './release-publish-fixture.mjs';
 
-const publish = (fixture, execute = false) => publishRelease({ repository, version, execute, run: fixture.run });
+const publish = (fixture, execute = false) => publishRelease({ repository, version, execute, run: fixture.run, lockDirectory: fixture.folder });
 const fullWrites = ['pr ready', 'PUT /pulls/12/merge', 'POST /git/refs', 'POST /releases', 'POST upload', 'POST upload', 'POST upload', 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`];
 const statuses = result => result.steps.map(step => `${step.id}:${step.status}`);
 
@@ -85,7 +85,7 @@ test('an existing draft release with some assets is completed, a published ident
 
 test('a held lock refuses a concurrent execution and is not removed by the refused run', async t => {
   const fixture = await publishFixture(t);
-  const path = publishLockPath(repository, version);
+  const path = publishLockPath(repository, version, fixture.folder);
   await mkdir(path); t.after(() => rm(path, { recursive: true, force: true }));
   await assert.rejects(publish(fixture, true), error => error.code === 'PUBLISH_LOCKED' && error.lockPath === path);
   assert.ok((await lstat(path)).isDirectory(), 'the refused run leaves the other holder\'s lock');

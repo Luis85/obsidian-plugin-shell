@@ -8,7 +8,7 @@ import { publishFixture, candidateFiles, repository, version, head, other, chang
 async function refuses(t, mutate, expected, { execute = true } = {}) {
   const fixture = await publishFixture(t);
   mutate(fixture.state, fixture);
-  await assert.rejects(publishRelease({ repository, version, execute, run: fixture.run }), expected);
+  await assert.rejects(publishRelease({ repository, version, execute, run: fixture.run, lockDirectory: fixture.folder }), expected);
   assert.deepEqual(fixture.state.writes, []);
 }
 const asset = (name, bytes) => ({ id: 1, name, state: 'uploaded', size: bytes.length, digest: `sha256:${sha256(bytes)}` });
@@ -32,7 +32,7 @@ test('a missing, expired or misplaced candidate artifact blocks publication; ret
   await refuses(t, state => { state.artifactFiles = { dist: {} }; }, /CANDIDATE_ARTIFACT_MISSING: qualified-candidate has no reports\/release\/0\.5\.0-a{40}/);
   const fixture = await publishFixture(t);
   fixture.state.artifacts = [{ id: 2, name: 'retained-build', expired: false }, { id: 3, name: 'unrelated', expired: false }];
-  const plan = await publishRelease({ repository, version, run: fixture.run });
+  const plan = await publishRelease({ repository, version, run: fixture.run, lockDirectory: fixture.folder });
   assert.equal(plan.candidate.artifact, 'retained-build'); assert.deepEqual(fixture.state.writes, []);
 });
 
@@ -71,7 +71,7 @@ test('a token without push permission may plan but not execute', async t => {
   await refuses(t, state => { state.repo.permissions.push = false; }, /PUSH_PERMISSION_REQUIRED/);
   const fixture = await publishFixture(t);
   fixture.state.repo.permissions.push = false;
-  assert.equal((await publishRelease({ repository, version, run: fixture.run })).status, 'planned');
+  assert.equal((await publishRelease({ repository, version, run: fixture.run, lockDirectory: fixture.folder })).status, 'planned');
   delete fixture.state.repo.permissions;
-  assert.equal((await publishRelease({ repository, version, execute: true, run: fixture.run })).status, 'published');
+  assert.equal((await publishRelease({ repository, version, execute: true, run: fixture.run, lockDirectory: fixture.folder })).status, 'published');
 });
