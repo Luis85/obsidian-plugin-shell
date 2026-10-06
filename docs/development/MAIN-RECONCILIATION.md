@@ -6,6 +6,30 @@ Review date: 2026-10-06. Starting main: `963a0ec599c90dc8db75f1cb1351e2c2673df38
 The review covers the Workbench source, CLI distribution, generated-project contracts,
 Vue lifecycle, dependency updates, test boundaries and GitHub workflows.
 
+## Current reconciliation result — 2026-10-06
+
+This section supersedes the historical hold decisions and partial verification
+results below. Ten compatible PRs (#97, #88, #90, #86, #85, #84, #87, #89, #92 and
+#94) merged after green checks; incompatible TypeScript 7 PR #93 is closed without
+merging. The combined implementation at `4c375dc3`, including main `36ffeab1`,
+passed the complete `npm run verify -- --json --keep-going`: **32 passed, zero
+failed, skipped or not-run stages**. The full agent check passed all six stages.
+Later changes only synchronize delivery metadata and record the owner decisions.
+The final copied-bin acceptance also passed after the metadata synchronization.
+Evidence is retained in `reports/reconciliation/integrated-verification.json`,
+`integrated-full-verify.log`, `integrated-check.log` and `final-copied-bin.log`.
+
+The owner explicitly approved the five prepared approval records for the seven
+source-migration configuration findings, including their entry in
+`configs/quality/self-review-approvals.json`. The records name exact changed lines;
+no lint rule, numeric threshold, runtime input or CLI module is removed from its
+gate. The earlier strict TypeScript-project approval remains in effect.
+
+The owner declined the Moment override. The advisory remains open under
+[MOMENT-ADVISORY-EXCEPTION](MOMENT-ADVISORY-EXCEPTION.md), with the live security
+gate unchanged. Main candidate qualification cannot be called green while those
+findings remain. No release or publication is authorized.
+
 ## Source and product ownership
 
 Develop the plugin runtime under `src/` and the Workbench CLI under `src/cli/`.

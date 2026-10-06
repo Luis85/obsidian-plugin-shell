@@ -2611,6 +2611,116 @@
         "  // @ts-expect-error plugin event names must remain literal so payload types stay correlated."
       ],
       "removed": []
+    },
+    {
+      "rule": "SR-LINT-CONFIG",
+      "file": "configs/lint/eslint.config.mjs",
+      "approvedBy": "@Luis85",
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-06, including recording these five owner-only approvals: PR #96 source relocation bin -> src/cli and separate strict runtime/CLI projects. Same lint rules and numeric coverage thresholds; all 120 runtime inputs and 514 CLI modules retained; only the generated bin/template/package.json is excluded from source analysis.",
+      "added": [],
+      "removed": [
+        "  { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts', 'bin/compiler/domain/**/*.ts', 'bin/compiler/application/**/*.ts', 'bin/documentation/domain/**/*.ts', 'bin/documentation/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },"
+      ],
+      "pullRequest": 96
+    },
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "configs/quality/fallow.json",
+      "approvedBy": "@Luis85",
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-06, including recording these five owner-only approvals: PR #96 source relocation bin -> src/cli and separate strict runtime/CLI projects. Same lint rules and numeric coverage thresholds; all 120 runtime inputs and 514 CLI modules retained; only the generated bin/template/package.json is excluded from source analysis.",
+      "added": [
+        "    \"src/cli/launcher.mjs\",",
+        "    \"src/cli/compiler/index.ts\",",
+        "    \"src/cli/app.ts\",",
+        "    \"projects/**\",",
+        "    \"bin/template/package.json\"",
+        "          \"src/cli/domain/**\",",
+        "          \"src/cli/documentation/domain/**\"",
+        "          \"src/cli/application/**\",",
+        "          \"src/cli/documentation/application/**\"",
+        "          \"src/cli/adapters/**\",",
+        "          \"src/cli/documentation/adapters/**\",",
+        "          \"src/cli/presentation/**\",",
+        "          \"src/cli/app.ts\",",
+        "          \"src/cli/launcher.mjs\",",
+        "          \"src/cli/compiler/domain/**\"",
+        "          \"src/cli/compiler/application/**\"",
+        "          \"src/cli/compiler/adapters/**\",",
+        "          \"src/cli/compiler/index.ts\"",
+        "          \"src/cli/compiler/emitters/**\""
+      ],
+      "removed": [
+        "    \"bin/compiler/index.ts\",",
+        "    \"bin/app.ts\",",
+        "    \"projects/**\"",
+        "          \"bin/domain/**\",",
+        "          \"bin/documentation/domain/**\"",
+        "          \"bin/application/**\",",
+        "          \"bin/documentation/application/**\"",
+        "          \"bin/adapters/**\",",
+        "          \"bin/documentation/adapters/**\",",
+        "          \"bin/presentation/**\",",
+        "          \"bin/app.ts\",",
+        "          \"bin/compiler/domain/**\"",
+        "          \"bin/compiler/application/**\"",
+        "          \"bin/compiler/adapters/**\",",
+        "          \"bin/compiler/index.ts\"",
+        "          \"bin/compiler/emitters/**\""
+      ],
+      "pullRequest": 96
+    },
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "configs/quality/gate-rules.json",
+      "approvedBy": "@Luis85",
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-06, including recording these five owner-only approvals: PR #96 source relocation bin -> src/cli and separate strict runtime/CLI projects. Same lint rules and numeric coverage thresholds; all 120 runtime inputs and 514 CLI modules retained; only the generated bin/template/package.json is excluded from source analysis.",
+      "added": [
+        "    \"maker\": [\"src/cli/adapters/makers/**\", \"scripts/makers/**\", \"src/cli/adapters/framework/check*.ts\", \"src/cli/adapters/framework/gate-*.ts\", \"src/cli/adapters/framework/adopt-*.ts\", \"src/cli/domain/adoption/**\", \"src/cli/application/adoption/**\", \"src/cli/presentation/terminal/adopt-view.ts\", \"configs/quality/gate-rules.json\"],",
+        "    \"makers\": [\"src/cli/adapters/makers/**\", \"scripts/makers/**\", \"scripts/events/**\", \"scripts/examples/**\"],",
+        "    \"cli\": [\"src/cli/launcher.mjs\", \"scripts/bundling/build-cli.mjs\", \"src/cli/app.ts\", \"src/cli/adapters/framework/**\", \"src/cli/adapters/framework-cli.ts\", \"src/cli/presentation/terminal/**\", \"scripts/framework/**\", \"scripts/operations/**\", \"scripts/contracts/**\", \"src/cli/adapters/community-plugins/**\", \"src/cli/domain/community-plugin.ts\", \"plugins/**\", \"configs/quality/gate-rules.json\"],",
+        "    \"generator\": [\"templates/**\", \"configs/templates/**\", \"src/cli/compiler/**\", \"scripts/compiler/**\", \"scripts/starters/**\", \"src/cli/adapters/starters/**\", \"configs/starters/**\", \"scripts/shared/file-plan*\"],",
+        "    \"compiler\": [\"src/cli/compiler/**\", \"scripts/compiler/**\"],",
+        "    \"airship\": [\"scripts/airship/**\", \"src/cli/adapters/framework/airship*.ts\"],",
+        "    \"prototypes\": [\"scripts/companion/prototypes/**\", \"src/cli/adapters/prototype*.ts\", \"src/cli/adapters/framework/prototype*.ts\"],",
+        "    { \"id\": \"shell-tooling\", \"label\": \"Shell CLI and tooling sources\", \"paths\": [\"src/cli/**\", \"scripts/**\", \"plugins/**\"], \"gates\": [\"check\"] },",
+        "      \"paths\": [\"templates/**\", \"configs/templates/**\", \"src/cli/compiler/**\", \"scripts/companion/**\", \"scripts/compiler/**\"],"
+      ],
+      "removed": [
+        "    \"maker\": [\"bin/adapters/makers/**\", \"scripts/makers/**\", \"bin/adapters/framework/check*.ts\", \"bin/adapters/framework/gate-*.ts\", \"bin/adapters/framework/adopt-*.ts\", \"bin/domain/adoption/**\", \"bin/application/adoption/**\", \"bin/presentation/terminal/adopt-view.ts\", \"configs/quality/gate-rules.json\"],",
+        "    \"makers\": [\"bin/adapters/makers/**\", \"scripts/makers/**\", \"scripts/events/**\", \"scripts/examples/**\"],",
+        "    \"cli\": [\"bin/app\", \"bin/app.ts\", \"bin/adapters/framework/**\", \"bin/adapters/framework-cli.ts\", \"bin/presentation/terminal/**\", \"scripts/framework/**\", \"scripts/operations/**\", \"scripts/contracts/**\", \"bin/adapters/community-plugins/**\", \"bin/domain/community-plugin.ts\", \"plugins/**\", \"configs/quality/gate-rules.json\"],",
+        "    \"generator\": [\"templates/**\", \"configs/templates/**\", \"bin/compiler/**\", \"scripts/compiler/**\", \"scripts/starters/**\", \"bin/adapters/starters/**\", \"configs/starters/**\", \"scripts/shared/file-plan*\"],",
+        "    \"compiler\": [\"bin/compiler/**\", \"scripts/compiler/**\"],",
+        "    \"airship\": [\"scripts/airship/**\", \"bin/adapters/framework/airship*.ts\"],",
+        "    \"prototypes\": [\"scripts/companion/prototypes/**\", \"bin/adapters/prototype*.ts\", \"bin/adapters/framework/prototype*.ts\"],",
+        "    { \"id\": \"shell-tooling\", \"label\": \"Shell CLI and tooling sources\", \"paths\": [\"bin/**\", \"scripts/**\", \"plugins/**\"], \"gates\": [\"check\"] },",
+        "      \"paths\": [\"templates/**\", \"configs/templates/**\", \"bin/compiler/**\", \"scripts/companion/**\", \"scripts/compiler/**\"],"
+      ],
+      "pullRequest": 96
+    },
+    {
+      "rule": "SR-COVERAGE-THRESHOLD",
+      "file": "configs/testing/vitest.maker.config.mjs",
+      "approvedBy": "@Luis85",
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-06, including recording these five owner-only approvals: PR #96 source relocation bin -> src/cli and separate strict runtime/CLI projects. Same lint rules and numeric coverage thresholds; all 120 runtime inputs and 514 CLI modules retained; only the generated bin/template/package.json is excluded from source analysis.",
+      "added": [
+        "  coverage: { provider: 'v8', include: ['src/cli/**/*.ts', 'scripts/contracts/json-data.ts', 'scripts/contracts/serialization.ts', 'scripts/contracts/result.ts', 'scripts/contracts/errors.ts', 'scripts/contracts/result-runtime.mjs', 'scripts/shared/process.ts', 'scripts/shared/file-plan.ts', 'scripts/shared/file-plan-runtime.ts', 'scripts/shared/bounded-map.ts', 'scripts/shared/confirmation.ts', 'scripts/shared/input.ts', 'scripts/shared/hash.ts', 'scripts/shared/fs-presence.ts', 'scripts/shared/project-path.ts', 'scripts/shared/protected-directories.ts'], exclude: [],"
+      ],
+      "removed": [],
+      "pullRequest": 96
+    },
+    {
+      "rule": "SR-COVERAGE-THRESHOLD",
+      "file": "configs/testing/vitest.production.config.mjs",
+      "approvedBy": "@Luis85",
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-06, including recording these five owner-only approvals: PR #96 source relocation bin -> src/cli and separate strict runtime/CLI projects. Same lint rules and numeric coverage thresholds; all 120 runtime inputs and 514 CLI modules retained; only the generated bin/template/package.json is excluded from source analysis.",
+      "added": [
+        "  coverage: { provider: 'v8', thresholds: { ...loadThresholds().coverage.production }, include: ['src/main.ts', 'src/{application,bootstrap,domain,features,infrastructure,presentation}/**/*.{ts,vue}'], exclude: [],"
+      ],
+      "removed": [
+        "  coverage: { provider: 'v8', thresholds: { ...loadThresholds().coverage.production }, include: ['src/**/*.ts', 'src/**/*.vue'], exclude: [],"
+      ],
+      "pullRequest": 96
     }
   ]
 }
