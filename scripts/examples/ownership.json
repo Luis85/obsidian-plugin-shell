@@ -63,7 +63,7 @@
     },
     {
       "path": "src/presentation/components/panels/TaskRepositoryPanel.vue",
-      "sha256": "974bff1c7d6d3fa5b017ea16607f3bd9094b0a6fa31b9fd2bc702d6867e686fb"
+      "sha256": "89aca8dcb1560c3d268f77507e06cfb96517790b99248d8febb604d4525d51b2"
     },
     {
       "path": "src/presentation/stores/showcase.ts",
@@ -83,7 +83,7 @@
     },
     {
       "path": "src/presentation/composables/use-task-repository.ts",
-      "sha256": "d2ea3754345d4e1ca767ebb16be3f9536c742e218e087fb48643ff63f38b42ab"
+      "sha256": "00d9b045a66debca0e1e5f1a624144660cc4290c164294c927941b1bc8d286d2"
     },
     {
       "path": "tests/runtime/view-state.test.ts",
@@ -91,7 +91,7 @@
     },
     {
       "path": "tests/runtime/repository-panel.test.ts",
-      "sha256": "b8fd7d066a3f9f64f4296cc9421e91617353eb025304fd96007421954581398f"
+      "sha256": "0d85453a30ecff6af8c65ca0a87d877a333a36dd1e0c81be4bd593b47f022ea5"
     },
     {
       "path": "tests/runtime/components.test.ts",
@@ -99,11 +99,11 @@
     },
     {
       "path": "tests/runtime/presentation-composables.test.ts",
-      "sha256": "04aa934f5f1a7309b3c5a26754928ca9cd130382036a984defa72b7d7bf191c8"
+      "sha256": "dc396d1db040352bd8abbd80d2079e180975d99004c8330ba1522573491a6146"
     },
     {
       "path": "tests/e2e/layout-and-header.spec.ts",
-      "sha256": "82b0c0ab20ad3eab0bc014b3423f6491c965ea59c3d11ec7d14331815763eb18"
+      "sha256": "b63743434ba678f4b9fd98206a299da8a3abfa47964476e0182691ceda1f1c44"
     },
     {
       "path": "tests/e2e/modals.spec.ts",
@@ -123,7 +123,7 @@
     },
     {
       "path": "tests/e2e/accessibility.spec.ts",
-      "sha256": "924570c60cbeeb2571ab3dd0fa9da84dad4427e2bbe7aa373f883c6563a572eb"
+      "sha256": "ab04a066c2b9ed17e3bdea636345a8ca0ceaa6578c04f55b921b9de52db28e34"
     },
     {
       "path": "src/bootstrap/services.ts",
