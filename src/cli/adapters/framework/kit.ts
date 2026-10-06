@@ -17,7 +17,7 @@ import { templateRootFiles as templateFiles, templateRoots } from '../../compile
 import { communityPluginsFolder } from '../../domain/community-plugin.ts';
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
-  const ts = await import('typescript');
+  const ts = (await import('typescript')).default;
   return { version: ts.version, compile(source, fileName) {
     const output = ts.transpileModule(source, { fileName, reportDiagnostics: true, compilerOptions: {
       target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, rewriteRelativeImportExtensions: true,

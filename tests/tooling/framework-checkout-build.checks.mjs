@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cp, mkdir, mkdtemp, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { npmEntry } from '../../src/cli/adapters/framework/process.ts';
+import { verifyKit } from '../../src/cli/adapters/framework/kit-integrity.ts';
+import { extractArchive } from './framework-archive-fixture.mjs';
 
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -31,6 +33,17 @@ test('a fresh tracked checkout builds a complete CLI that runs outside the check
   execFileSync(process.execPath, ['scripts/bundling/build-cli.mjs'], {
     cwd: checkout, encoding: 'utf8', timeout: 120000, maxBuffer: 4_000_000,
   });
+  // Packaging through the compiled CLI must retain the shipped compiler's identity.
+  // Direct source calls alone cannot detect a broken bundled TypeScript import.
+  const archive = join(scratch, 'framework.zip'), repacked = join(scratch, 'repacked');
+  execFileSync(process.execPath, ['bin/app', 'framework', 'pack', '--out', archive, '--yes', '--json'], {
+    cwd: checkout, encoding: 'utf8', timeout: 120000, maxBuffer: 4_000_000,
+  });
+  await mkdir(repacked);
+  await extractArchive(await readFile(archive), repacked);
+  const kit = await verifyKit(repacked);
+  const pkg = JSON.parse(await readFile(join(checkout, 'package.json'), 'utf8'));
+  assert.equal(kit.compilerVersion, pkg.devDependencies.typescript);
   await cp(join(checkout, 'bin'), join(portable, 'bin'), { recursive: true });
   assert.deepEqual(await readdir(portable), ['bin']);
   for (const args of [['version'], ['framework', 'status']]) {

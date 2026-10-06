@@ -25,6 +25,14 @@ Maker qualification now enables and restores the standalone CLI's editable
 default. The React starter passed discovery, reviewed generation, exact-lock
 installation, typechecking, tests, production build and offline prototype build;
 browser smoke was explicitly not run.
+The compiled packager now reads TypeScript's default API export, preserving the
+compiler version in the ZIP's kit manifest. The clean-checkout regression also
+packs through the built CLI, extracts the archive and verifies that manifest.
+The full ZIP journey passed 31 command checks across three independent consumers,
+including custom source paths, regeneration, unchanged lockfiles and the expected
+release-readiness refusals; native execution and publication were not run.
+Lifecycle acceptance reads an owned Vitest JSON report and rejects empty or
+partially passing runs, so CI's ANSI colors cannot turn successful tests red.
 The final copied-bin acceptance also passed after the metadata synchronization.
 Evidence is retained in `reports/reconciliation/integrated-verification.json`,
 `integrated-full-verify.log`, `integrated-check.log` and `final-copied-bin.log`.
