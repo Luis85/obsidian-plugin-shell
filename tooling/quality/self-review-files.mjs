@@ -3,7 +3,7 @@ import { checkSuites } from '../../src/cli/tooling/testing/suite-manifest.mjs';
 import { sourceInputs } from '../testing/source-inputs.mjs';
 
 /** Where the repository's own check:source gate measures code lines; limits elsewhere are not enforced. */
-const limitScope = [/^(?:src|harness|scripts|tests|configs|bin|templates|plugins)\//, /^\.github\/workflows\//, /^(?:package|tsconfig)\.json$/,
+const limitScope = [/^(?:src|tooling|harness|scripts|tests|configs|bin|templates|plugins)\//, /^\.github\/workflows\//, /^(?:package|tsconfig)\.json$/,
   /^\.claude\/skills\/companion-prototype-design\//];
 const classificationFailure = /^(UNCLASSIFIED_TEST_FILE|AMBIGUOUS_TEST_FILE): (\S+) (.*)$/;
 const present = file => file.status !== 'D';
@@ -20,7 +20,7 @@ export async function unclassifiedTests(root, files) {
     const match = classificationFailure.exec(failure);
     if (!match || !added.has(match[2])) continue;
     found.push({ rule: 'SR-UNCLASSIFIED-TEST', file: match[2], line: 1,
-      message: `${match[1] === 'AMBIGUOUS_TEST_FILE' ? 'claimed by more than one suite' : 'not classified in tests/suites.json'}; add it to exactly one suite (node scripts/testing/suites.mjs --check)` });
+      message: `${match[1] === 'AMBIGUOUS_TEST_FILE' ? 'claimed by more than one suite' : 'not classified in tests/suites.json'}; add it to exactly one suite (node tooling/testing/suites.mjs --check)` });
   }
   return found;
 }

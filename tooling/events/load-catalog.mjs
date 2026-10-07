@@ -67,7 +67,7 @@ export async function loadEventCatalog(root = process.cwd()) {
     const specifier = (path) => JSON.stringify(resolve(root, path).replaceAll('\\', '/'));
     await writeFile(
       entry,
-      `export { runtimeEventDefinitions } from ${specifier('src/bootstrap/events.ts')};\nexport { eventCatalog } from ${specifier('src/bootstrap/event-catalog.ts')};\n`,
+      `export { runtimeEventDefinitions } from ${specifier('src/plugin/bootstrap/events.ts')};\nexport { eventCatalog } from ${specifier('src/plugin/bootstrap/event-catalog.ts')};\n`,
     );
     const { build } = await import('vite');
     const output = await build({
@@ -106,7 +106,7 @@ export async function loadEventCatalog(root = process.cwd()) {
         !Array.isArray(metadata.subscribers) ||
         !metadata.subscribers.length ||
         metadata.subscribers.some((value) => typeof value !== 'string' || !value.trim()) ||
-        !['application', 'obsidian', 'src/plugin/harness'].includes(metadata.origin) ||
+        !['application', 'obsidian', 'harness'].includes(metadata.origin) ||
         !['none', 'identifiers', 'vault-paths'].includes(metadata.sensitivity)
       )
         throw new Error('EVENT_CATALOG_METADATA');

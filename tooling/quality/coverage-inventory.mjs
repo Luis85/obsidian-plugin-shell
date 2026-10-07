@@ -27,9 +27,9 @@ export function assertCoverageGates(summary, files) {
   const inventory = assertCoverageInventory(summary, files);
   const inputs = new Set(files.map(file => resolve(file)));
   const records = Object.entries(summary).filter(([file]) => file !== 'total' && inputs.has(resolve(file)));
-  const domainRoot = `${resolve('src/domain')}/`.replaceAll('\\', '/');
-  const applicationRoot = `${resolve('src/application')}/`.replaceAll('\\', '/');
-  const featuresRoot = `${resolve('src/features')}/`.replaceAll('\\', '/');
+  const domainRoot = `${resolve('src/plugin/domain')}/`.replaceAll('\\', '/');
+  const applicationRoot = `${resolve('src/plugin/application')}/`.replaceAll('\\', '/');
+  const featuresRoot = `${resolve('src/plugin/features')}/`.replaceAll('\\', '/');
   const core = records.filter(([file]) => { const path = resolve(file).replaceAll('\\', '/'); return path.startsWith(domainRoot) || path.startsWith(applicationRoot) || path.startsWith(featuresRoot); });
   if (!records.length || !core.length) throw new Error('EMPTY_COVERAGE_SCOPE');
   const scopes = { production: aggregate(records.map(([, entry]) => entry)), domainApplicationFeatures: aggregate(core.map(([, entry]) => entry)) };
@@ -67,14 +67,17 @@ async function selectedCoreScope() {
   const { include, thresholds } = config.test.coverage;
   return { files: include.flatMap(pattern => globSync(pattern)), thresholds };
 }
-function sources(directory, cliRoot) {
+function sources(directory, skipped) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
-    return path === cliRoot ? [] : entry.isDirectory() ? sources(path, cliRoot) : /\.(ts|vue)$/.test(entry.name) ? [path] : [];
+    return skipped.has(path) ? [] : entry.isDirectory() ? sources(path, skipped) : /\.(ts|vue)$/.test(entry.name) ? [path] : [];
   });
 }
+/** The plugin runtime under src/plugin, as src (without src/cli) was before the split. The browser harness and the
+ * project's tests are not production inputs, just as the root harness/ and tests/ folders never were. */
 export function runtimeCoverageInputs(root = process.cwd()) {
-  return sources(join(root, 'src'), join(root, 'src', 'cli'));
+  const plugin = join(root, 'src', 'plugin');
+  return sources(plugin, new Set([join(plugin, 'tests'), join(plugin, 'harness')]));
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const report = JSON.parse(readFileSync('reports/production-coverage/coverage-summary.json', 'utf8'));

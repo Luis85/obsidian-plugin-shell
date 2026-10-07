@@ -3,6 +3,7 @@ import { readdir, lstat } from 'node:fs/promises';
 import { resolve, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runNodeProcess } from '../../src/shared/platform/process.ts';
+import { lintExcluded } from '../../configs/lint/lint-scope.mjs';
 
 /** The reviewed rules of the repository that owns this script; a project runs its own copy, so both always match. */
 const config = fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url));
@@ -16,11 +17,16 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
     if (stat.isSymbolicLink()) throw new Error('LINT_SOURCE_SYMLINK');
     if (stat.isDirectory()) {
       for (const entry of await readdir(path)) await visit(join(path, entry));
-    } else if (stat.isFile() && /\.(?:[cm]?[jt]sx?|vue)$/.test(path)) files.push(relative(root, path));
+    } else if (stat.isFile() && /\.(?:[cm]?[jt]sx?|vue)$/.test(path)) {
+      const name = relative(root, path).split(sep).join('/');
+      // The shell repository's own exclusions (shared with configs/lint/eslint.config.mjs); a generated project has none.
+      if (!lintExcluded(root, name)) files.push(relative(root, path));
+    }
   }
   await visit(resolve(root, 'src'));
   // CLI development lives under src/cli, already included above; build:cli verifies the generated bin inventory.
-  if ((await readdir(root)).includes('src/cli/sdk')) await visit(resolve(root, 'src/cli/sdk'));
+  // A generated project may keep its own plugins folder at its root; this repository's SDK is src/cli/sdk, covered by src.
+  if ((await readdir(root)).includes('plugins')) await visit(resolve(root, 'plugins'));
   // Companion runtime templates become generated plugin source; a generated project may not carry them.
   if (existsSync(resolve(root, 'templates/companion/runtime'))) await visit(resolve(root, 'templates/companion/runtime'));
   files.sort();
