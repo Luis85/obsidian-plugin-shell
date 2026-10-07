@@ -105,6 +105,8 @@ export async function installMakerFoundation(root) {
     const target = join(root, path);
     await mkdir(dirname(target), { recursive: true });
     await cp(makerSource(path), target, { recursive: true });
+    // src/plugin/tests/unit reaches the runtime at ../../<layer>; the fixture's tests/runtime reaches it at ../../src/<layer>.
+    if (path.startsWith('tests/runtime/')) await writeFile(target, (await readFile(target, 'utf8')).replaceAll("from '../../", "from '../../src/"));
   }
   const files = []; const registrations = [];
   for (const [owner, name] of [

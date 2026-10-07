@@ -10,7 +10,6 @@ import { checkSteps, type CheckSelection } from './check.ts';
 import { runGit, type BaseInfo, type Git } from './check-changes.ts';
 import { fastRunnable, ruleHits, selectSuiteReasons, type Reason } from './check-selection.ts';
 import { loadDurations, loadGateRules, loadToolkit, loadWorkflows, workflowTrigger, type GateDef, type GateRules, type SuiteDef, type SuiteManifest, type Toolkit, type TriggerResult, type Workflow } from './gate-sources.ts';
-import { testingTool } from './testing-tools.ts';
 
 interface Why { kind: Reason['kind'] | 'change-type'; detail: string; paths: string[]; count: number }
 interface PlanCi { workflow: string; runs: boolean; event: string; via: TriggerResult['via'] | 'unknown-workflow'; path?: string }
@@ -20,7 +19,7 @@ interface PlanGate {
   /** Suite gates: the test-pyramid levels of the suite's files (its `level`, then any override levels). */
   levels?: string[];
 }
-interface Sources { rules: GateRules; toolkit: Toolkit; manifest: SuiteManifest | null; workflows: Workflow[]; durations: Record<string, number>; scripts: Set<string>; suiteRunner: string }
+interface Sources { rules: GateRules; toolkit: Toolkit; manifest: SuiteManifest | null; workflows: Workflow[]; durations: Record<string, number>; scripts: Set<string> }
 const sample = 5;
 const mergeWhy = (list: Why[], extra: Why): Why[] => [...list, extra];
 function needsOf(names: string[]): string[] {
@@ -63,7 +62,7 @@ function suiteGate(sources: Sources, suite: SuiteDef, reasons: Reason[], paths: 
   const prerequisites = suite.prerequisites ?? [];
   const covered = direct && (fastRunnable(suite) || suite.runner.type === 'vitest');
   const levels = [...new Set([suite.level, ...Object.keys(suite.levels ?? {})].filter((level): level is string => typeof level === 'string'))];
-  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node ${sources.suiteRunner} ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered, levels,
+  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node scripts/testing/suites.mjs ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered, levels,
     why: reasons.map(reason => ({ kind: reason.kind, detail: reason.detail, paths: reason.paths, count: reason.count })),
     estimateSeconds: sources.durations[suite.name] ?? null, prerequisites, needs: needsOf(prerequisites), ci: ciFor(sources, suite.workflows ?? [], paths) };
 }
@@ -109,8 +108,7 @@ async function loadSources(root: string): Promise<Sources | null> {
   const toolkit = await loadToolkit(root), rules = await loadGateRules(root);
   if (!toolkit || !rules) return null;
   const manifest = await toolkit.manifest().catch(() => null);
-  return { rules, toolkit, manifest, workflows: await loadWorkflows(root), durations: await loadDurations(root), scripts: await readScripts(root),
-    suiteRunner: await testingTool(root, 'suites.mjs') };
+  return { rules, toolkit, manifest, workflows: await loadWorkflows(root), durations: await loadDurations(root), scripts: await readScripts(root) };
 }
 function estimate(gates: PlanGate[]) {
   const needed = gates.filter(gate => gate.required && gate.kind === 'suite');

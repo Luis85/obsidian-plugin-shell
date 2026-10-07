@@ -39,7 +39,7 @@ test('suites join test includes, rule sources and path-filtered workflows, with 
   await write(dir, { 'templates/companion/page.ts': 'x\n', 'tests/e2e/shop.spec.ts': 'x\n', 'tests/tooling/gates.checks.mjs': 'x\n' });
   const data = await plan(dir);
   const generator = gateOf(data, 'suite:generator');
-  assert.equal(generator.command, 'node scripts/testing/suites.mjs generator');
+  assert.equal(generator.command, 'node tooling/testing/suites.mjs generator');
   assert.deepEqual(generator.why.map(why => [why.kind, why.detail]), [['suite-source', 'templates/**'], ['rule', 'rule generator-inputs'], ['workflow-paths', 'starter-flow pull_request paths: templates/**']]);
   assert.equal(generator.estimateSeconds, 187, 'measured value from docs/testing/TEST-SUITES.md');
   assert.deepEqual(generator.ci.map(ci => [ci.workflow, ci.runs, ci.via]), [['ci', true, 'always'], ['starter-flow', true, 'paths']]);

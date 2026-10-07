@@ -8,7 +8,6 @@ import type { CheckStep } from './check.ts';
 import type { Changes } from './check-changes.ts';
 import type { GateRules, Rule, SuiteDef, SuiteManifest, Toolkit, Workflow } from './gate-sources.ts';
 import { loadGateRules, loadToolkit, workflowTrigger } from './gate-sources.ts';
-import { shellSuiteRunner } from './testing-tools.ts';
 /** Suite steps (the maker suite alone runs ~25 minutes in CI) outlive the 10-minute check step default. */
 export const suiteTimeoutMs = 3_600_000;
 
@@ -127,8 +126,8 @@ function testStep(ctx: FastContext): CheckStep {
 function suiteStep(ctx: FastContext): CheckStep[] {
   if (ctx.project) return [];
   const names = ctx.suites.map(suite => suite.name);
-  const base: CheckStep = { id: 'suites', display: `node ${shellSuiteRunner}`, entry: shellSuiteRunner, args: names, timeoutMs: suiteTimeoutMs };
-  if (!names.length) return [{ ...base, display: `node ${shellSuiteRunner} (no matching suites)`, skip: 'No changed path selects a node --test or maker suite.' }];
+  const base: CheckStep = { id: 'suites', display: 'node scripts/testing/suites.mjs', entry: 'scripts/testing/suites.mjs', args: names, timeoutMs: suiteTimeoutMs };
+  if (!names.length) return [{ ...base, display: 'node scripts/testing/suites.mjs (no matching suites)', skip: 'No changed path selects a node --test or maker suite.' }];
   if (ctx.skipSuites) return [{ ...base, display: `${base.display} ${names.join(' ')} (left to CI)`, skip: `--skip-suites: ${names.join(', ')} run in CI's Integration tier, not here.` }];
   return [{ ...base, display: `${base.display} ${names.join(' ')}` }];
 }
