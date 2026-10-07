@@ -1,3 +1,19 @@
 {
-  "extends": "./configs/types/tsconfig.base.json"
+  "files": [],
+  "references": [
+    { "path": "./src/shared" },
+    { "path": "./src/tui" },
+    { "path": "./src/cli" },
+    { "path": "./src/companion" },
+    { "path": "./src/plugin" },
+    { "path": "./configs/types/tsconfig.templates.json" },
+    { "path": "./configs/types/tsconfig.test-kit.json" },
+    { "path": "./src/tui/tests" },
+    { "path": "./src/cli/tests" },
+    { "path": "./src/companion/tests" },
+    { "path": "./src/plugin/tests" },
+    { "path": "./tooling" },
+    { "path": "./tests" },
+    { "path": "./configs/types/tsconfig.configs.json" }
+  ]
 }

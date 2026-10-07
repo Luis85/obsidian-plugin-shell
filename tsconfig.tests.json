@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./src/shared/tests" },
+    { "path": "./src/tui/tests" },
+    { "path": "./src/cli/tests" },
+    { "path": "./src/companion/tests" },
+    { "path": "./src/plugin/tests" }
+  ]
+}

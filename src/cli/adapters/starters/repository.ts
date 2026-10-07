@@ -3,10 +3,10 @@ import { lstat, readdir } from 'node:fs/promises';
 import { parseDesignData } from '#shared/contracts/json-data.ts';
 import { exists, hash, readBounded, readJson } from '../framework/files.ts';
 import { requireThat } from '../framework/contracts.ts';
-import { portablePath, record, validateDefinition } from './validation.ts';
-import type { CompanionStarter, LoadedStarter, StarterDefinition } from './types.ts';
+import { portablePath, record, validateDefinition } from '#shared/companion/starters/validation.ts';
+import type { CompanionStarter, LoadedStarter, StarterDefinition } from '#shared/companion/starters/types.ts';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
-import { STARTER_MAX_BYTES } from './browser.ts';
+import { STARTER_MAX_BYTES } from '#shared/companion/starters/browser.ts';
 import { pluginStarterDefinitions } from '../../sdk/runtime.ts';
 const defaultStarterFolder = 'configs/starters';
 /** Only the invocation project's explicit preferences; never a fallback into the installed shell. */

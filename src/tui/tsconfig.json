@@ -1,0 +1,19 @@
+{
+  "extends": "../../configs/types/tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "declarationDir": "../../.cache/tsbuild/tui",
+    "tsBuildInfoFile": "../../.cache/tsbuild/tui.tsbuildinfo"
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "tests/**"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { loadDefinitions } from './starters/repository.ts';
-import { projectSelection, type ProjectSelection } from '../compiler/domain/project-starter.ts';
+import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
+import { projectSelection } from '../compiler/adapters/project/selection.ts';
 import { frameworkAdapter, requireFrameworkAdapter } from '../compiler/adapters/project/framework-registry.ts';
 import { pluginFrameworkAdapters } from '../sdk/runtime.ts';
 import { object, keys } from '../domain/data.ts';

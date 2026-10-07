@@ -4,7 +4,7 @@ import { assertJson, record } from '../sitemap/safety.ts';
 import { conceptRequire, type Concept, type ConceptCollection, type ConceptChange } from './contract.ts';
 
 interface CurrentProject { document: AuthoringDocument; sha256: string }
-interface ConceptDelta { collection: ConceptCollection; op: 'add' | 'replace' | 'remove'; id: string }
+export interface ConceptDelta { collection: ConceptCollection; op: 'add' | 'replace' | 'remove'; id: string }
 /** References expose IDs only; records remain in the single canonical authoring model. */
 function collection(document: AuthoringDocument, key: ConceptCollection, create = false): Array<Record<string, unknown>> {
   const [group, name] = key.split('.');

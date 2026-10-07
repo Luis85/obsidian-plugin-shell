@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "composite": false,
+    "declaration": false,
+    "emitDeclarationOnly": false,
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "../../.cache/tsbuild/configs.tsbuildinfo"
+  },
+  "include": [
+    "../testing/playwright.config.ts"
+  ],
+  "references": [
+    {
+      "path": "../../src/cli"
+    }
+  ]
+}

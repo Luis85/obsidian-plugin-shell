@@ -67,7 +67,7 @@ export class ShowcaseView extends ItemView {
 }
 
 /** ItemView calls virtual identity methods inside super(), before instance fields exist. */
-export function nativeViewClass(definition: { readonly type: string; readonly title: () => string }) {
+export function nativeViewClass(definition: { readonly type: string; readonly title: () => string }): typeof ShowcaseView {
   const type = definition.type; const title = definition.title;
   return class RegisteredView extends ShowcaseView {
     override getViewType(): string { return type; }

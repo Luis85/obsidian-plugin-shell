@@ -5,4 +5,4 @@ export { validateProjectTooling } from '../../src/shared/companion/tooling-contr
 export { validateSitemapModel } from '../../src/shared/companion/sitemap/validate.ts';
 export { canonicalKey } from '../../src/shared/companion/sitemap/safety.ts';
 export { validateStarterCatalog } from '../../src/shared/companion/starter-contract.mjs';
-export { parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '../../src/cli/adapters/starters/browser.ts';
+export { parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '../../src/shared/companion/starters/browser.ts';

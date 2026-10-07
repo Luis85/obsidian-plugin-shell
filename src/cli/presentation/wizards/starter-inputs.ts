@@ -1,8 +1,8 @@
 import { readForm, type FormDefinition } from '../../domain/form.ts';
 import type { FormValues } from '../../domain/form-model.ts';
 import { derivedId } from '../../adapters/framework/starter-project.ts';
-import { inputValue, record } from '../../adapters/starters/validation.ts';
-import type { InputValue, StarterDefinition, StarterInput } from '../../adapters/starters/types.ts';
+import { inputValue, record } from '#shared/companion/starters/validation.ts';
+import type { InputValue, StarterDefinition, StarterInput } from '#shared/companion/starters/types.ts';
 /** The choice that leaves an optional input without a default unset. Positional ids never collide with it. */
 const skip = 'skip';
 /** Form label and choice-id limits (src/cli/domain/form.ts); starter text may be longer. */

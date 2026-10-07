@@ -1,0 +1,30 @@
+{
+  "extends": "../../configs/types/tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "declarationDir": "../../.cache/tsbuild/cli",
+    "tsBuildInfoFile": "../../.cache/tsbuild/cli.tsbuildinfo"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.mjs",
+    "**/*.d.mts"
+  ],
+  "exclude": [
+    "tests/**"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    },
+    {
+      "path": "../tui"
+    },
+    {
+      "path": "../../configs/types/tsconfig.templates.json"
+    },
+    {
+      "path": "../../configs/types/tsconfig.test-kit.json"
+    }
+  ]
+}

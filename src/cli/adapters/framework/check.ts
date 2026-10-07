@@ -34,7 +34,8 @@ async function makerSteps(root: string, project: boolean): Promise<CheckStep[]> 
   return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'], timeoutMs: suiteTimeoutMs }];
 }
 function typecheckStep(root: string, project: boolean): CheckStep {
-  if (!project) return { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
+  // The shell repository root is a solution of TypeScript project references; only build mode checks its projects.
+  if (!project) return { id: 'typecheck', display: 'vue-tsc -b', entry: vueTsc, args: ['-b'] };
   const tsconfig = projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path;
   return { id: 'typecheck', display: `vue-tsc --noEmit --project ${tsconfig}`, entry: vueTsc, args: ['--noEmit', '--project', tsconfig] };
 }

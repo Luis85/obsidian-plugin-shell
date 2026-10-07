@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": "../../docs/concepts/companion/test-kit",
+    "declarationDir": "../../.cache/tsbuild/test-kit",
+    "tsBuildInfoFile": "../../.cache/tsbuild/test-kit.tsbuildinfo"
+  },
+  "include": [
+    "../../docs/concepts/companion/test-kit/**/*.mjs"
+  ]
+}

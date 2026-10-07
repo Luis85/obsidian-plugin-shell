@@ -1,0 +1,22 @@
+{
+  "extends": "../../configs/types/tsconfig.browser.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "declarationDir": "../../.cache/tsbuild/companion",
+    "tsBuildInfoFile": "../../.cache/tsbuild/companion.tsbuildinfo",
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.vue"
+  ],
+  "exclude": [
+    "tests/**"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
+}

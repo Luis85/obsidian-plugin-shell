@@ -11,7 +11,7 @@ import { compileProject, loadTemplateSnapshot } from '../../../compiler/index.ts
 import { packageFiles } from '../../../compiler/adapters/project/configuration.ts';
 import { defineFrameworkAdapter } from '../../../compiler/adapters/project/framework-adapter.ts';
 import { renderStarterProject } from '../../../compiler/adapters/project/emitter.ts';
-import { projectSelection } from '../../../compiler/domain/project-starter.ts';
+import { projectSelection } from '../../../compiler/adapters/project/selection.ts';
 import { loadDefinitions } from '../../../adapters/starters/repository.ts';
 import { definePluginEvent, type PluginCliCommand, type WorkbenchPluginObject } from '../../api.ts';
 import { createPluginRuntime, pluginFrameworkAdapters, pluginStarterDefinitions } from '../../runtime.ts';

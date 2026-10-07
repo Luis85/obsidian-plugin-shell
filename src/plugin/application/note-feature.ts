@@ -9,7 +9,7 @@ import type { PluginDataStore } from './plugin-data-store';
 import type { DocumentStorage, ErrorReporter } from './ports';
 import type { EventPublisher, ShellEvents } from './events';
 
-interface NoteFeature<I, V> {
+export interface NoteFeature<I, V> {
   readonly document: DocumentRecipe<I, V>;
   readonly defaultFolder: string;
 }

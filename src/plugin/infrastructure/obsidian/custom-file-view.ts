@@ -78,7 +78,7 @@ export abstract class CustomFileView extends TextFileView {
 }
 
 /** Obsidian calls identity methods in its base constructor, before subclass fields exist. */
-export function customFileViewClass(definition: NativeFileDefinition, viewType: string) {
+export function customFileViewClass(definition: NativeFileDefinition, viewType: string): new (leaf: WorkspaceLeaf, report: (code: string) => void) => CustomFileView {
   return class RegisteredCustomFileView extends CustomFileView {
     constructor(leaf: WorkspaceLeaf, report: (code: string) => void) {
       super(leaf, definition, report);
