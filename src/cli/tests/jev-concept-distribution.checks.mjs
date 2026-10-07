@@ -27,7 +27,7 @@ test('exclusions do not match similarly named unrelated paths', () => {
   assert.equal(maintainerOnly(path), false);
 });
 test('this maintainer-only regression test is not shipped without its concept', () => {
-  const path = 'tests/tooling/jev-concept-distribution.checks.mjs';
+  const path = 'src/cli/tests/jev-concept-distribution.checks.mjs';
   assert.equal(included(path), false);
   assert.equal(maintainerOnly(path), true);
 });
@@ -49,6 +49,6 @@ test('every root typecheck script invokes its workspace tool, not a PATH compile
   const pkg = JSON.parse(readFileSync(new URL('../../../package.json', import.meta.url), 'utf8'));
   assert.match(pkg.devDependencies.typescript, /^6\.\d+\.\d+$/);
   for (const [name, command] of Object.entries(pkg.scripts).filter(([name]) => name.startsWith('typecheck'))) {
-    assert.match(command, /^node node_modules\/(?:typescript\/bin\/tsc|vue-tsc\/bin\/vue-tsc\.js) --noEmit(?: |$)/, name);
+    assert.match(command, /^node node_modules\/(?:typescript\/bin\/tsc|vue-tsc\/bin\/vue-tsc\.js) (?:--noEmit|-b)(?: |$)/, name);
   }
 });

@@ -17,7 +17,8 @@ test('actual runtime and browser declarations contain no focused or skipped test
   assert.ok((await checkTestQuality()).files > 0);
 });
 test('configured typed ESLint rejects missing Playwright await and accepts handled operations', async () => {
-  const eslint = new ESLint({ overrideConfigFile: 'configs/lint/eslint.config.mjs' });
+  // Like the verify eslint-tests step (--no-ignore): the shell lints its test files with this config outside the global ignores.
+  const eslint = new ESLint({ overrideConfigFile: 'configs/lint/eslint.config.mjs', ignore: false });
   // lintText uses an existing tsconfig-included filename without changing source.
   const filePath = 'src/plugin/tests/unit/types.ts'; // Retained in both showcase and foundation profiles.
   const source = 'import { test } from "@playwright/test"; test("await probe", async ({ page }) => { page.goto("/"); });';

@@ -74,6 +74,9 @@ test('actual event checker rejects duplicate descriptors, invalid references and
   const root = await mkdtemp(join(tmpdir(), 'event-catalog-'));
   try {
     await cp(join(sourceRoot, 'src/plugin'), join(root, 'src/plugin'), { recursive: true });
+    // The bundler transform reads src/plugin/tsconfig.json, its browser base and its referenced shared project config.
+    for (const path of ['configs/types/tsconfig.browser.json', 'configs/types/tsconfig.node.json', 'src/shared/tsconfig.json'])
+      await cp(join(sourceRoot, path), join(root, path));
     const runtimePath = join(root, 'src/plugin/bootstrap/events.ts');
     const catalogPath = join(root, 'src/plugin/bootstrap/event-catalog.ts');
     const runtime = await readFile(runtimePath, 'utf8');

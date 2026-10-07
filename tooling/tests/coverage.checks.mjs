@@ -7,30 +7,30 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { assertCoverageInventory, assertCoverageGates, assertSelectedCoreGate, runtimeCoverageInputs } from '../quality/coverage-inventory.mjs';
 test('[COV-02-01] silently omitted production input makes the coverage inventory fail', () => {
-  const source = resolve('src/bootstrap/mount-ui.ts');
-  assert.throws(() => assertCoverageInventory({ total: {}, [source]: {} }, [source, 'src/main.ts']), /INCOMPLETE_PRODUCTION_COVERAGE/);
+  const source = resolve('src/plugin/bootstrap/mount-ui.ts');
+  assert.throws(() => assertCoverageInventory({ total: {}, [source]: {} }, [source, 'src/plugin/main.ts']), /INCOMPLETE_PRODUCTION_COVERAGE/);
   assert.throws(() => assertCoverageInventory({ [source]: {} }, [source]), /MISSING_COVERAGE_TOTAL/);
   assert.equal(assertCoverageInventory({ total: {}, [source]: {} }, [source]).productionInputs, 1);
 });
 test('runtime coverage discovers all runtime sources while CLI inputs retain their separate gate', t => {
   const root = mkdtempSync(join(tmpdir(), 'shell-runtime-inventory-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  const runtime = ['src/main.ts', 'src/domain/value.ts', 'src/presentation/view.vue', 'src/new-area/new.ts', 'src/features/cli/value.ts'];
-  for (const file of [...runtime, 'src/cli/application/command.ts', 'src/cli/compiler/output.ts']) {
+  const runtime = ['src/plugin/main.ts', 'src/plugin/domain/value.ts', 'src/plugin/presentation/view.vue', 'src/plugin/new-area/new.ts', 'src/plugin/features/cli/value.ts'];
+  for (const file of [...runtime, 'src/cli/application/command.ts', 'src/cli/compiler/output.ts', 'src/plugin/tests/unit/probe.test.ts', 'src/plugin/harness/app/main.ts']) {
     const path = join(root, file); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '');
   }
   const inputs = runtimeCoverageInputs(root);
   assert.deepEqual(inputs.sort(), runtime.map(file => join(root, file)).sort());
   const report = Object.fromEntries([['total', {}], ...inputs.map(file => [file, {}])]);
   assert.equal(assertCoverageInventory(report, inputs).productionInputs, runtime.length);
-  delete report[join(root, 'src/new-area/new.ts')];
+  delete report[join(root, 'src/plugin/new-area/new.ts')];
   assert.throws(() => assertCoverageInventory(report, inputs), /INCOMPLETE_PRODUCTION_COVERAGE/);
 });
 test('[COV-03-02] the actual CLI fails closed for deficient, omitted and malformed production reports', () => {
   const root = mkdtempSync(join(tmpdir(), 'shell-coverage-')); const script = resolve('tooling/quality/coverage-inventory.mjs');
   try {
-    mkdirSync(join(root, 'src/domain'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
-    const source = join(root, 'src/domain/value.ts'); writeFileSync(source, 'export const value = 1;');
+    mkdirSync(join(root, 'src/plugin/domain'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
+    const source = join(root, 'src/plugin/domain/value.ts'); writeFileSync(source, 'export const value = 1;');
     const report = join(root, 'reports/production-coverage/coverage-summary.json');
     const run = () => spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8', timeout: 10000 });
     writeFileSync(report, JSON.stringify({ total: counts(), [source]: counts() })); assert.equal(run().status, 0);
@@ -38,11 +38,11 @@ test('[COV-03-02] the actual CLI fails closed for deficient, omitted and malform
       { total: counts(0, 0), [source]: counts(0, 0) }, { total: counts(), [source]: counts(1e308, 1e308) }, { total: {}, [source]: counts() }]) {
       writeFileSync(report, JSON.stringify(value)); const result = run(); assert.equal(result.status, 1); assert.match(result.stderr, /COVERAGE/);
     }
-    const second = join(root, 'src/domain/second.ts'); writeFileSync(second, 'export const second = 2;');
+    const second = join(root, 'src/plugin/domain/second.ts'); writeFileSync(second, 'export const second = 2;');
     writeFileSync(report, JSON.stringify({ total: counts(), [source]: counts(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER), [second]: counts() }));
     const overflow = run(); assert.equal(overflow.status, 1); assert.match(overflow.stderr, /INVALID_COVERAGE_SUM/);
-    mkdirSync(join(root, 'src/features/tasks'), { recursive: true }); mkdirSync(join(root, 'src/presentation'), { recursive: true });
-    const feature = join(root, 'src/features/tasks/entity.ts'); const view = join(root, 'src/presentation/view.vue');
+    mkdirSync(join(root, 'src/plugin/features/tasks'), { recursive: true }); mkdirSync(join(root, 'src/plugin/presentation'), { recursive: true });
+    const feature = join(root, 'src/plugin/features/tasks/entity.ts'); const view = join(root, 'src/plugin/presentation/view.vue');
     writeFileSync(feature, 'export const task = 1;'); writeFileSync(view, '<template>View</template>');
     // Global coverage is 95%, but business coverage is 93.33%; moving code to a
     // feature must not silently remove it from the stricter denominator.
@@ -55,7 +55,7 @@ test('[COV-03-02] the actual CLI fails closed for deficient, omitted and malform
 });
 const counts = (covered = 100, total = 100) => Object.fromEntries(['lines', 'statements', 'functions', 'branches'].map(key => [key, { total, covered, pct: total ? 100 * covered / total : 100 }]));
 test('[COV-03-01] production and domain/application/features thresholds are independent and validate raw counts', () => {
-  const domain = resolve('src/domain/example.ts'); const view = resolve('src/presentation/example.vue');
+  const domain = resolve('src/plugin/domain/example.ts'); const view = resolve('src/plugin/presentation/example.vue');
   const report = { total: counts(200, 200), [domain]: counts(), [view]: counts() };
   assert.equal(assertCoverageGates(report, [domain, view]).scopes.production.lines.pct, 100);
   assert.throws(() => assertCoverageGates({ ...report, [domain]: counts(94) }, [domain, view]), /domainApplicationFeatures.lines/);
@@ -73,14 +73,14 @@ test('[COV-03-01] production and domain/application/features thresholds are inde
   assert.throws(() => assertCoverageGates({ ...report, total: counts(199, 200) }, [domain, view]), /INCONSISTENT_COVERAGE_TOTAL/);
 });
 test('[COV-04-01] the selected-core gate reads its own scope and thresholds from the shared production run', () => {
-  const domain = resolve('src/domain/example.ts'); const view = resolve('src/presentation/example.vue');
+  const domain = resolve('src/plugin/domain/example.ts'); const view = resolve('src/plugin/presentation/example.vue');
   const floors = { lines: 95, statements: 90, functions: 90, branches: 90 };
   const report = { total: counts(200, 200), [domain]: counts(), [view]: counts(10) };
   const result = assertSelectedCoreGate(report, [domain], floors);
   assert.equal(result.selectedCoreInputs, 1); assert.equal(result.totals.lines.pct, 100);
   assert.throws(() => assertSelectedCoreGate({ ...report, [domain]: counts(94) }, [domain], floors), /selectedCore.lines/);
   assert.throws(() => assertSelectedCoreGate({ ...report, [domain]: { ...counts(), branches: { total: 100, covered: 89, pct: 89 } } }, [domain], floors), /selectedCore.branches/);
-  assert.throws(() => assertSelectedCoreGate(report, [domain, resolve('src/domain/omitted.ts')], floors), /INCOMPLETE_SELECTED_CORE_COVERAGE/);
+  assert.throws(() => assertSelectedCoreGate(report, [domain, resolve('src/plugin/domain/omitted.ts')], floors), /INCOMPLETE_SELECTED_CORE_COVERAGE/);
   assert.throws(() => assertSelectedCoreGate(report, [], floors), /EMPTY_COVERAGE_SCOPE: selectedCore/);
   assert.throws(() => assertSelectedCoreGate({ ...report, [domain]: counts(0, 0) }, [domain], floors), /EMPTY_COVERAGE_SCOPE: selectedCore.lines/);
   assert.throws(() => assertSelectedCoreGate(report, [domain], { ...floors, branches: undefined }), /INVALID_SELECTED_CORE_THRESHOLDS/);
@@ -89,10 +89,10 @@ test('[COV-04-01] the selected-core gate reads its own scope and thresholds from
 test('[COV-04-02] the CLI applies the selected-core config only when requested and fails closed below its floor', () => {
   const root = mkdtempSync(join(tmpdir(), 'shell-core-coverage-')); const script = resolve('tooling/quality/coverage-inventory.mjs');
   try {
-    mkdirSync(join(root, 'src/domain'), { recursive: true }); mkdirSync(join(root, 'src/presentation'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
-    const domain = join(root, 'src/domain/value.ts'); const view = join(root, 'src/presentation/view.vue');
+    mkdirSync(join(root, 'src/plugin/domain'), { recursive: true }); mkdirSync(join(root, 'src/plugin/presentation'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
+    const domain = join(root, 'src/plugin/domain/value.ts'); const view = join(root, 'src/plugin/presentation/view.vue');
     writeFileSync(domain, 'export const value = 1;'); writeFileSync(view, '<template>View</template>');
-    mkdirSync(join(root, 'configs/testing'), { recursive: true }); writeFileSync(join(root, 'configs/testing/vitest.config.mjs'), "export default { test: { coverage: { include: ['src/domain/**/*.ts'], thresholds: { lines: 99, statements: 90, functions: 90, branches: 90 } } } };");
+    mkdirSync(join(root, 'configs/testing'), { recursive: true }); writeFileSync(join(root, 'configs/testing/vitest.config.mjs'), "export default { test: { coverage: { include: ['src/plugin/domain/**/*.ts'], thresholds: { lines: 99, statements: 90, functions: 90, branches: 90 } } } };");
     const report = join(root, 'reports/production-coverage/coverage-summary.json');
     const run = (...args) => spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', timeout: 10000 });
     // Production (90%) and business (95%) floors pass at 97%; only the selected-core 99% line floor fails.

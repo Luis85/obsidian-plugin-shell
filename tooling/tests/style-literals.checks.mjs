@@ -133,7 +133,9 @@ test('[STYLE-09] the repository CLI passes on the real sources and exits non-zer
   const run = spawnSync(process.execPath, ['tooling/styles/check-style-literals.mjs', '--json'], { cwd: root, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr); const result = JSON.parse(run.stdout);
   // Counted independently, so a consumer that removed the example features (fewer SFCs) is still checked exactly.
-  const sources = (await readdir(join(root, 'src'), { recursive: true })).filter(path => /\.(?:vue|css)$/.test(path));
+  // The checker's scope: src without the companion concept and the plugin harness (both outside src before the project split).
+  const sources = (await readdir(join(root, 'src'), { recursive: true })).map(path => path.replaceAll('\\', '/'))
+    .filter(path => /\.(?:vue|css)$/.test(path) && !path.startsWith('companion/') && !path.startsWith('plugin/harness/'));
   assert.equal(result.status, 'passed'); assert.ok(sources.length > 0); assert.equal(result.files, sources.length); assert.deepEqual(result.findings, []);
   assert.equal(spawnSync(process.execPath, ['tooling/styles/check-style-literals.mjs', '--bogus'], { cwd: root, encoding: 'utf8' }).status, 1);
 });

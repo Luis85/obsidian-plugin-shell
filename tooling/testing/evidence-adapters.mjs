@@ -75,8 +75,8 @@ export function playwrightReport(raw, root) {
 /** Tooling tests declared Windows-only: off Windows their skip is expected, not a gap. A test keeps this list
  * equal to every such declaration in the evidence tooling homes (tests/tooling, tooling/tests, src/<name>/tests). */
 export const windowsOnlyCases = Object.freeze([
-  ['[PLAN-03-09] Windows root case aliases support setup while destination case collisions still fail', 'src/shared/tests/file-plan.checks.mjs'],
-  ['[PLAN-03-10] real Windows 8.3 aliases support safe plans and dependency-free setup dry run', 'src/shared/tests/file-plan.checks.mjs'],
+  ['[PLAN-03-09] Windows root case aliases support setup while destination case collisions still fail', 'tooling/tests/file-plan-setup-aliases.checks.mjs'],
+  ['[PLAN-03-10] real Windows 8.3 aliases support safe plans and dependency-free setup dry run', 'tooling/tests/file-plan-setup-aliases.checks.mjs'],
   ['Windows existing vault accepts case and 8.3 path spellings returned by the host', 'src/cli/tests/interactive-maker-vault-root.checks.mjs'],
   ['[MAKER-SHORT-PATH] generated DOM tests run when the temporary parent uses a real Windows 8.3 alias', 'src/cli/tests/maker-paths.checks.mjs'],
   ['[NATIVE-ISOLATION-03] Windows case aliases produce canonical requested vault paths', 'tooling/tests/native-isolation.checks.mjs'],

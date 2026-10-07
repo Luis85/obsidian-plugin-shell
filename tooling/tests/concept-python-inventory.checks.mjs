@@ -9,7 +9,7 @@ import { sha256 } from '../../src/shared/platform/hash.ts';
 async function fixture(run) {
   const root = await mkdtemp(join(tmpdir(), 'python-inventory-'));
   try {
-    for (const name of ['src', 'src/cli/tooling/hindsight', 'tooling/tests/hindsight', 'src/plugin/harness']) await mkdir(join(root, name), { recursive: true });
+    for (const name of ['src', 'src/cli/tooling/hindsight', 'tests', 'tooling/tests/hindsight', 'src/plugin/harness']) await mkdir(join(root, name), { recursive: true });
     for (const name of ['package.json', 'package-lock.json', '.fallowrc.json']) await writeFile(join(root, name), '{}\n');
     await writeFile(join(root, 'src/plugin/main.ts'), 'export const value = 1;\n');
     await run(root);

@@ -11,7 +11,7 @@ export async function inlineSpecimen(root, profile = 'extracted') {
   const js = await readFile(resolve(root,'src/plugin/harness/style-fixture/fixture.js'),'utf8');
   const entry = profile === 'extracted' ? 'obsidian' : 'simulated';
   html = html.replace(`<link rel="stylesheet" href="../styles/${entry}.css">`, `<style data-host-fixture>${css}</style>`)
-    .replace('<link rel="stylesheet" href="../../src/styles/index.css">', `<style data-plugin-tokens>${plugin}</style>`)
+    .replace('<link rel="stylesheet" href="../../styles/index.css">', `<style data-plugin-tokens>${plugin}</style>`)
     .replace('<link rel="stylesheet" href="fixture.css">', `<style>${gallery}</style>`)
     .replace('<script src="fixture.js" defer></script>', '')
     .replace('</body>', `<script>${js}</script></body>`);

@@ -145,6 +145,6 @@ test('native qualification declares the same explicit short scratch root that it
   const native=workflow.slice(workflow.indexOf('  journey-native:'),workflow.indexOf('  jev-typescript6:'));
   assert.match(native,/COMPANION_QUALIFICATION_ROOT: \/tmp/);assert.doesNotMatch(native,/RUNNER_TEMP: \/tmp/);
   assert.match(native,/set -o pipefail/);assert.match(native,/install --with-deps chromium/);
-  const driver=await readFile(join(root,'scripts/companion-tools/qualify-project.mjs'),'utf8');
+  const driver=await readFile(join(root,'tooling/companion-tools/qualify-project.mjs'),'utf8');
   assert.match(driver,/process\.env\.COMPANION_QUALIFICATION_ROOT \?\? process\.env\.RUNNER_TEMP \?\? tmpdir\(\)/);
 });

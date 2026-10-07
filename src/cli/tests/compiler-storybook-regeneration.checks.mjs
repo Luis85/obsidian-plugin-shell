@@ -23,7 +23,7 @@ async function sourceFixture(directory) {
     await mkdir(dirname(join(directory, file.path)), { recursive: true });
     await writeFile(join(directory, file.path), file.bytes, { flag: 'wx' });
     // Editable plugin configs start from the fingerprinted template defaults and stay outside kit.files.
-    const plugin = /^bin\/template\/plugins\/([^/]+)\/config\.json$/.exec(file.path);
+    const plugin = /^bin\/template\/src\/cli\/sdk\/([^/]+)\/config\.json$/.exec(file.path);
     if (plugin) {
       await mkdir(join(directory, 'bin/plugins', plugin[1]), { recursive: true });
       await writeFile(join(directory, 'bin/plugins', plugin[1], 'config.json'), file.bytes, { flag: 'wx' });

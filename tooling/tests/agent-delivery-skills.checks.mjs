@@ -21,12 +21,13 @@ const SKILLS = [
  * test and the citation test report exactly these paths as missing, and nothing else.
  */
 export const DOR_DOD = Object.freeze({
-  scripts: ['scripts/delivery/increment.mjs', 'scripts/delivery/ready.mjs', 'scripts/delivery/done.mjs'],
+  scripts: ['tooling/delivery/increment.mjs', 'tooling/delivery/ready.mjs', 'tooling/delivery/done.mjs'],
   configs: ['configs/delivery/increment-handoff.template.md', 'configs/delivery/definition-of-ready.json', 'configs/delivery/definition-of-done.json'],
   jobs: [['definition-of-ready.yml', 'Definition of Ready'], ['definition-of-done.yml', 'Definition of Done'],
     ['release.yml', 'Definition of Ready'], ['release.yml', 'Definition of Done']],
 });
-const DELIVERY_SCRIPT = /node (scripts\/delivery\/[\w.-]+\.mjs)/g;
+// This repository keeps its delivery scripts in tooling/; a generated project keeps them in scripts/.
+const DELIVERY_SCRIPT = /node ((?:scripts|tooling)\/delivery\/[\w.-]+\.mjs)/g;
 
 /** Repository facts the citations are checked against: files on disk, npm scripts and workflow jobs (ids and names). */
 function loadFacts() {
@@ -40,7 +41,7 @@ function loadFacts() {
 /** Failures of one skill file's repository citations (beyond the shared checkFile rules). */
 export function checkCitations({ path, text }, facts) {
   const failures = [];
-  for (const [, file] of text.matchAll(/node (scripts\/[\w./-]+\.mjs)/g))
+  for (const [, file] of text.matchAll(/node ((?:scripts|tooling)\/[\w./-]+\.mjs)/g))
     if (!facts.exists(file)) failures.push(`${path}: missing ${file}`);
   for (const [, file] of text.matchAll(/(?<![\w/-])((?:docs|\.github|configs)\/[\w./-]*\.(?:md|yml|json))/g))
     if (!facts.exists(file)) failures.push(`${path}: missing ${file}`);
@@ -66,11 +67,11 @@ export function checkDeliveryContract({ corpus, toolMap, contract, facts }) {
   }
   for (const file of [...contract.scripts, ...contract.configs]) if (!facts.exists(file)) failures.push(`missing ${file}`);
   for (const [workflow, name] of contract.jobs) if (!facts.jobNames(workflow).includes(name)) failures.push(`${workflow}: no job named "${name}"`);
-  const rows = (toolMap.split('\n## ').find(part => part.startsWith('Increment handoff')) ?? '').split('\n').filter(line => line.startsWith('| `node scripts/delivery/'));
+  const rows = (toolMap.split('\n## ').find(part => part.startsWith('Increment handoff')) ?? '').split('\n').filter(line => /^\| `node (?:scripts|tooling)\/delivery\//.test(line));
   for (const script of contract.scripts) if (!rows.some(row => row.includes(`node ${script}`))) failures.push(`tool map: no row for ${script}`);
   for (const row of rows) {
     const [command, skills = ''] = row.split(' | ');
-    const script = /node (scripts\/delivery\/[\w.-]+\.mjs)/.exec(command)?.[1];
+    const script = /node ((?:scripts|tooling)\/delivery\/[\w.-]+\.mjs)/.exec(command)?.[1];
     for (const [, skill] of skills.matchAll(/`([a-z][a-z-]*)`/g)) if (!cites.get(skill)?.has(script)) failures.push(`tool map: ${skill} does not cite node ${script}`);
   }
   return failures;
@@ -104,7 +105,7 @@ test('every cited references file, link, skill path, node bin/app command, scrip
   assert.ok(files.length >= 7, 'each skill keeps its references');
   assert.deepEqual(files.flatMap(file => [...checkFile(file, catalog()), ...checkCitations(file, facts)]), []);
   const text = files.map(file => file.text).join('\n');
-  for (const cited of ['release-cut.yml', 'publish.yml', 'scripts/release/cut.mjs', 'scripts/release/publish.mjs', 'scripts/release/changelog.mjs',
+  for (const cited of ['release-cut.yml', 'publish.yml', 'tooling/release/cut.mjs', 'tooling/release/publish.mjs', 'tooling/release/changelog.mjs',
     ...DOR_DOD.scripts, ...DOR_DOD.configs, 'definition-of-ready.yml', 'definition-of-done.yml'])
     assert.ok(text.includes(cited), `the skills cite ${cited}`);
 });

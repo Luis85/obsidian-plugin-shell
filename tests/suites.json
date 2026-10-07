@@ -1132,7 +1132,7 @@
         "integration": [
           "tests/verification/runner.test.mjs",
           "tests/verification/source.test.mjs",
-          "tooling/tests/harness-styles/server.test.mjs"
+          "tests/verification/harness-style-server.test.mjs"
         ]
       },
       "runner": {
@@ -1147,8 +1147,7 @@
         ]
       },
       "include": [
-        "tests/verification/*.test.mjs",
-        "tooling/tests/harness-styles/server.test.mjs"
+        "tests/verification/*.test.mjs"
       ],
       "verify": "own-step",
       "verifyStep": "verify-baseline --repeat 3",

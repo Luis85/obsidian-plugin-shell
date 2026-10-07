@@ -9,7 +9,7 @@ import { companionStarters, loadDefinitions } from '../adapters/starters/reposit
 const repository = fileURLToPath(new URL('../../../', import.meta.url));
 
 test('this maintainer regression reads the starter pack and is not copied into kits or consumer projects', () => {
-  const path = 'tests/tooling/project-generator-native-starters.checks.mjs';
+  const path = 'src/cli/tests/project-generator-native-starters.checks.mjs';
   assert.equal(included(path), false);
   assert.equal(maintainerOnly(path), true);
   for (const path of ['src/domain/native-integrations.ts', 'docs/development/native-file-integrations.md']) {

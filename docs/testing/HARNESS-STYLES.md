@@ -88,7 +88,7 @@ The standalone page deliberately does not implement those runtime scenarios. It 
 The focused delivered test command is:
 
 ```sh
-node --test tooling/tests/harness-styles/server.test.mjs
+node --test tests/verification/harness-style-server.test.mjs
 ```
 
 The standalone visual inspection command is:

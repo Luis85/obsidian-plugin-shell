@@ -17,10 +17,10 @@ test('[AC-2] closed settings views cannot persist, and dependency/workflow guard
   const folder = await mkdtemp(join(tmpdir(), 'reconciliation-runtime-'));
   t.after(() => rm(folder, { recursive: true, force: true }));
   const report = join(folder, 'runtime.json');
-  run(['node_modules/vitest/vitest.mjs', 'run', '--reporter=json', '--outputFile', report, '--config', 'configs/testing/vitest.config.mjs', 'tests/runtime/presentation-composables.test.ts']);
+  run(['node_modules/vitest/vitest.mjs', 'run', '--reporter=json', '--outputFile', report, '--config', 'configs/testing/vitest.config.mjs', 'src/plugin/tests/unit/presentation-composables.test.ts']);
   const runtime = JSON.parse(await readFile(report, 'utf8'));
   assert.equal(runtime.success, true);
   assert.ok(runtime.numTotalTests > 0, 'the lifecycle suite must execute tests');
   assert.equal(runtime.numPassedTests, runtime.numTotalTests, 'every lifecycle test must pass without skips');
-  run(['--test', 'tests/tooling/framework-manual.checks.mjs', 'tests/tooling/projects-boundary.checks.mjs']);
+  run(['--test', 'tooling/tests/framework-manual.checks.mjs', 'tooling/tests/projects-boundary.checks.mjs']);
 });

@@ -107,7 +107,7 @@ export async function toolingRegistrations(root, files) {
   return owners;
 }
 /** Top-level node:test modules of every test home: cross-project tests/tooling, tooling/tests and each source project's
- * src/<name>/tests. Nested folders (support, fixtures, tooling/tests/hindsight, tooling/tests/harness-styles) run elsewhere. */
+ * src/<name>/tests. Nested folders (support, fixtures, tooling/tests/hindsight) run elsewhere. */
 async function toolingTestFiles(root) {
   const absent = error => { if (['ENOENT', 'ENOTDIR'].includes(error.code)) return []; throw error; };
   const projects = (await readdir(join(root, 'src'), { withFileTypes: true }).catch(absent)).filter(item => item.isDirectory());
