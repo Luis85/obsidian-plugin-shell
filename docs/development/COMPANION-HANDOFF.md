@@ -16,7 +16,7 @@ terminal or to a coding agent.
 - Format: `kind: "obsidian-companion-project"`, `schemaVersion` 6 (the only current
   schema; 1–5 are refused with `COMPANION_VERSION`, never migrated), `executable: false`,
   `project` identity, `settings` folders, `design`, `notes` and optional `tooling`. It is
-  defined once in `scripts/companion/authoring-contract.ts` and bundled unchanged into
+  defined once in `src/shared/companion/authoring-contract.ts` and bundled unchanged into
   the concept, so the browser and the CLI validate with the same code. See
   [Companion project JSON](COMPANION-PROJECT-JSON.md).
 - It is data. It carries no approvals, trust, credentials, machine paths, test
@@ -97,14 +97,14 @@ publish, enable or install into a personal vault.
 
 ### Verification
 
-`tests/concepts/companion-project-starters.browser.py` opens the dialog after a
+`src/companion/tests/concepts/companion-project-starters.browser.py` opens the dialog after a
 confirmed starter and checks the following. The command list contains the project
 ID. Every command has a labelled copy button. The prompt is read-only, labelled and
 names the plugin and every requirement ID. The copy buttons copy exact text and run
 nothing. The layout does not overflow at 390 px. It also runs the displayed
 `node bin/app new … --from …` argument vector on the actual downloaded bytes in a
 temporary folder and confirms a `planned` result that writes nothing.
-`tests/tooling/framework-new-from-project.checks.mjs` covers the CLI: preview,
+`src/shared/tests/framework-new-from-project.checks.mjs` covers the CLI: preview,
 identity overrides, apply, stale input, and refusal of malformed, future, invalid,
 linked, oversized or conflicting sources.
 

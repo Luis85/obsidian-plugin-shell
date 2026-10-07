@@ -103,13 +103,13 @@ remain. This is a template-foundation milestone, not completion of the full PRD.
 
 ## Build on the template
 
-Start in [src/features](src/features/README.md). Define business data and actions;
+Start in [src/plugin/features](src/plugin/features/README.md). Define business data and actions;
 the shared services own persistence, native integration, feedback and cleanup.
 
 | Concern | Author-facing entry point |
 | --- | --- |
-| Entities and repositories | [Build a feature](docs/development/BUILD-A-FEATURE.md), `src/features/api.ts`, and `src/bootstrap/features.ts` |
-| Obsidian commands and ribbon icons | [Commands and ribbon](docs/development/COMMANDS-AND-RIBBON.md), feature command factories, and `src/bootstrap/commands.ts` |
+| Entities and repositories | [Build a feature](docs/development/BUILD-A-FEATURE.md), `src/plugin/features/api.ts`, and `src/plugin/bootstrap/features.ts` |
+| Obsidian commands and ribbon icons | [Commands and ribbon](docs/development/COMMANDS-AND-RIBBON.md), feature command factories, and `src/plugin/bootstrap/commands.ts` |
 | Native dialogs and notices | [Modal and notice services](docs/development/MODALS-AND-NOTICES.md): `services.modals` and `services.notices` |
 | Logging and debugging | [Logging and debugging](docs/development/LOGGING-AND-DEBUGGING.md): `services.logger`, typed catalogs and explicit debug commands |
 | Vue markup and TypeScript behavior | [Presentation structure](docs/development/PRESENTATION-STRUCTURE.md): components, composables, stores and context |
@@ -204,7 +204,7 @@ uncertain outcomes are never blindly retried. Native trash is reversible but has
 cross-process compare-and-delete transaction. Views own drafts and cleanup;
 repositories/events are runtime-scoped.
 
-Start building in [src/features](src/features/README.md): define business fields,
+Start building in [src/plugin/features](src/plugin/features/README.md): define business fields,
 an optional document recipe, and add one typed registration entry. The template
 wires repositories and lifecycle for you. See [Build a feature](docs/development/BUILD-A-FEATURE.md),
 the [API/compatibility guide](docs/_archive/development/ITERATION-THREE.md)

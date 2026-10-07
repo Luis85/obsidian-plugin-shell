@@ -16,7 +16,7 @@
 Each line needs a link to the run or job, or "not run" with the reason.
 
 - [ ] **Release result** is green on the release head commit: <!-- run link -->
-- [ ] Release metadata (`node scripts/release/branch.mjs verify --version {{version}}`): branch, package/lock/manifest versions, versions.json, changelog section, absent tag
+- [ ] Release metadata (`node tooling/release/branch.mjs verify --version {{version}}`): branch, package/lock/manifest versions, versions.json, changelog section, absent tag
 - [ ] Candidate qualification: fixed-source rehearsal, repeated runtime suites, coverage, served browser
 - [ ] Native host: three fresh real-Obsidian sessions on the unchanged candidate
 - [ ] Cross-OS: every Windows and macOS matrix leg of the called workflows

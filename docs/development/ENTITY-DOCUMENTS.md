@@ -193,7 +193,7 @@ npm run entities:catalog
 npm run verify
 ```
 
-The first command scaffolds source only. The check validates definitions/mappings/defaults/type conflicts; the catalog is derived documentation, not a second editable schema. All implementations live in `scripts/` and share existing maker/quality infrastructure.
+The first command scaffolds source only. The check validates definitions/mappings/defaults/type conflicts; the catalog is derived documentation, not a second editable schema. All implementations live in `tooling/` and share existing maker/quality infrastructure.
 
 Task form/preview CSS follows the existing modular source pipeline. A generated style module is registered once and composes into `styles.css`, including any Vue scoped styles. No extra stylesheet assembler or event bus is needed for this feature.
 

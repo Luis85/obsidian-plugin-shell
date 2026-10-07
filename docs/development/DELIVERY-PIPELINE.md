@@ -154,14 +154,14 @@ branch-protection check; once the label is set, every later full run includes th
 e2e steps in its "CI result". When a task handoff says `e2e: required`, the
 `feature-delivery` skill adds the label before the pull request is marked ready.
 
-`npm run check:repository` enforces this with `scripts/quality/e2e-policy.mjs`:
+`npm run check:repository` enforces this with `tooling/quality/e2e-policy.mjs`:
 each e2e step must be false for a ready pull request, a push to `main` and a
 dispatch without `e2e`, true for the `e2e` label or input, and true for
 `tier: release`, evaluated with the same three-valued evaluator as
 `node bin/app ci`, so an undecidable gate fails too. `release.yml` must call every
 workflow that holds e2e work with an effective tier of release (Candidate
 qualification is called without inputs, so its call tier defaults to release).
-Negative fixtures are in `tests/tooling/qualification-e2e-opt-in.checks.mjs`.
+Negative fixtures are in `tooling/tests/qualification-e2e-opt-in.checks.mjs`.
 
 ## Release pull requests and the alias checks
 
@@ -224,7 +224,7 @@ is not `X.Y.Z`.
 
 Until this pipeline, every workflow was read-only and `npm run check:repository`
 rejected any write scope. The owner-requested exception is narrow and checked in
-code (`scripts/quality/workflow-policy.mjs`):
+code (`tooling/quality/workflow-policy.mjs`):
 
 - only `release-cut.yml` and `publish.yml` may grant job-level write scopes;
 - both must be `workflow_dispatch`-only, keep read-only top-level permissions and
@@ -233,7 +233,7 @@ code (`scripts/quality/workflow-policy.mjs`):
 - every other workflow, including `starter-distribution.yml`, stays read-only, and
   reusable calls must target an existing callable workflow and pass no secrets.
 
-Negative fixtures in `tests/tooling/repository.checks.mjs` prove each rule fails.
+Negative fixtures in `tooling/tests/repository.checks.mjs` prove each rule fails.
 The full rule list is in [GitHub Actions workflows](WORKFLOWS.md#repository-policy-npm-run-checkrepository).
 
 ## Why publish merges before it tags

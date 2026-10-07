@@ -2,12 +2,12 @@
 
 > Type: explanation · Part of the [docs index](../README.md)
 
-Start with a feature, keep its business rules in `src/features/<name>`, and import
-the public building blocks from `src/features/api.ts`. Generated source is ordinary
+Start with a feature, keep its business rules in `src/plugin/features/<name>`, and import
+the public building blocks from `src/plugin/features/api.ts`. Generated source is ordinary
 editable TypeScript/Vue. Bootstrap supplies host adapters and runtime ownership;
 feature code does not import Obsidian or create another persistence path.
 
-`src/features/api.ts` is an explicit public library entry for static analysis.
+`src/plugin/features/api.ts` is an explicit public library entry for static analysis.
 Its reviewed exports remain available when all demonstrations are removed and
 before a consumer uses each contract. Add only intentional developer contracts
 to this surface. Implementation exports and unrelated feature files remain
@@ -106,7 +106,7 @@ action. The public authoring capabilities include info/success/warning/error/pro
 notices and deliberate invocation, with the shared timing and ownership policy.
 
 With the optional showcase installed, **Events & feedback → Try owned recovery**
-is an executable recipe in `src/presentation/composables/use-recovery-example.ts`
+is an executable recipe in `src/plugin/presentation/composables/use-recovery-example.ts`
 (removed with the showcase by the reviewed example-removal flow).
 It opens a real confirmation dialog, delays progress feedback and offers a recovery
 action whose availability awaits that existing dialog outcome. Confirm, then review

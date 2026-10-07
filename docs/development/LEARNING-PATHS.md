@@ -199,4 +199,4 @@ the fixed action and condition kinds above, show commands without running them, 
 reviewed progress plan. Any write a launched wizard makes keeps that wizard's own reviewed plan and approval.
 
 `configs/schemas/learning-path.schema.json` provides editor completion only; the TypeScript reader is authoritative.
-The tests are `tests/tooling/interactive-maker-learning-*.checks.mjs`.
+The tests are `src/cli/tests/interactive-maker-learning-*.checks.mjs`.

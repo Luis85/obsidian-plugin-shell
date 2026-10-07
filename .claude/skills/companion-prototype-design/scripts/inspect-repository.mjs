@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { args, need, readBytes, readJson, readText, sha256, noLinks, isMain, cli } from './lib/io.mjs';
+import { args, need, layoutPath, readBytes, readJson, readText, sha256, noLinks, isMain, cli } from './lib/io.mjs';
 
 const FILES = [
   'AGENTS.md', 'package.json', 'package-lock.json', '.nvmrc', 'bin/app',
-  'scripts/companion/authoring-contract.ts', 'src/cli/adapters/framework/read-project.ts',
-  'scripts/companion-tools/generate.mjs', 'scripts/companion/visual/visual-validate.mjs',
+  ['src/shared/companion/authoring-contract.ts', 'scripts/companion/authoring-contract.ts'], 'src/cli/adapters/framework/read-project.ts',
+  ['tooling/companion-tools/generate.mjs', 'scripts/companion-tools/generate.mjs'],
+  ['src/shared/companion/visual/visual-validate.mjs', 'scripts/companion/visual/visual-validate.mjs'],
   'docs/development/COMPANION-PROJECT-JSON.md', 'docs/development/COMPANION-GENERATOR.md',
   'docs/concepts/companion/VISUAL-EDITORS.md',
 ];
@@ -21,9 +22,10 @@ export function inspectRepository(directory) {
   if (!fs.statSync(repo).isDirectory()) throw new Error('Repository must be a directory');
   const pkg = readJson(path.join(repo, 'package.json'));
   const lock = readJson(path.join(repo, 'package-lock.json'));
-  const source = readText(path.join(repo, 'scripts/companion/authoring-contract.ts'));
+  const source = readText(path.join(repo, layoutPath(repo, 'src/shared/companion/authoring-contract.ts', 'scripts/companion/authoring-contract.ts')));
   const dependencies = { ...pkg.dependencies, ...pkg.devDependencies };
-  const files = FILES.map(file => {
+  const files = FILES.map(entry => {
+    const file = Array.isArray(entry) ? layoutPath(repo, ...entry) : entry;
     try { return { path: file, sha256: sha256(readBytes(path.join(repo, file))) }; }
     catch (error) { return { path: file, error: error.message }; }
   });

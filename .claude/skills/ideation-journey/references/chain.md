@@ -18,7 +18,7 @@ The delivery tiers are explained in `docs/development/DELIVERY-PIPELINE.md`; `.c
 
 ## How to start
 
-Ask Claude Code to "start the ideation journey" or invoke `/ideation-journey`. The router runs read-only signals (`node bin/app status --json`, `node bin/app design status --json`, `node bin/app handout validate --json`, file listings and, for an existing handoff, the read-only `node scripts/delivery/ready.mjs`) and recommends one step. Any step can also be invoked directly; it will ask for missing inputs.
+Ask Claude Code to "start the ideation journey" or invoke `/ideation-journey`. The router runs read-only signals (`node bin/app status --json`, `node bin/app design status --json`, `node bin/app handout validate --json`, file listings and, for an existing handoff, the read-only `node tooling/delivery/ready.mjs`) and recommends one step. Any step can also be invoked directly; it will ask for missing inputs.
 
 ## Guarantees shared by every step
 
@@ -32,4 +32,4 @@ Ask Claude Code to "start the ideation journey" or invoke `/ideation-journey`. T
 
 - Command coverage per skill: [tool-map.md](tool-map.md)
 - Stage signals: [stage-detection.md](stage-detection.md)
-- Structural tests: `tests/tooling/agent-ideation-skills.checks.mjs` and, for the handoff and delivery skills, `tests/tooling/agent-delivery-skills.checks.mjs` (quality suite)
+- Structural tests: `tooling/tests/agent-ideation-skills.checks.mjs` and, for the handoff and delivery skills, `tooling/tests/agent-delivery-skills.checks.mjs` (quality suite)

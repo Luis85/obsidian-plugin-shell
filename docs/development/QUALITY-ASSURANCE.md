@@ -17,7 +17,7 @@ source, an extra `dist` source file, and restored controls. The template maintai
 must review these exact names if the artifact layout changes; no maintained source
 directory or unknown analyzer diagnostic is suppressed.
 
-The analyzer and architecture checks share `scripts/quality/fallow-contract.mjs`,
+The analyzer and architecture checks share `tooling/quality/fallow-contract.mjs`,
 the one reviewed Fallow version and report-schema contract. Each run must be the
 qualified version and carry Fallow's enforced `error-severity-findings` and
 `parse-error` gate verdicts; every enforced verdict must agree with the process
@@ -62,8 +62,8 @@ prototypes select component themes the plugin never renders. Measured on `6178b1
 assume `src/` holds only owned source. New component mentions anywhere in the repository, including `docs/`, can
 still grow the stylesheet.
 
-`npm run check:test-quality` parses every TypeScript file in `tests/runtime` and
-`tests/e2e` with the installed TypeScript AST. It rejects focused/skipped/todo/
+`npm run check:test-quality` parses every TypeScript file in `src/plugin/tests/unit` and
+`src/plugin/tests/e2e` with the installed TypeScript AST. It rejects focused/skipped/todo/
 conditional declarations from imported Vitest/Playwright test, suite, describe and
 it bindings, including named aliases, namespace imports and literal property
 access. String/comment examples do not trigger it. It does not claim whole-program
@@ -72,7 +72,7 @@ platform-provisioning skips and remain outside this runtime/E2E declaration poli
 
 The existing ESLint configuration now applies type-aware promise handling to
 runtime tests, browser tests and harness TypeScript. Run
-`node node_modules/eslint/bin/eslint.js tests/runtime tests/e2e harness/app --max-warnings 0`.
+`node node_modules/eslint/bin/eslint.js src/plugin/tests/unit src/plugin/tests/e2e src/plugin/harness/app --max-warnings 0`.
 It uses `no-floating-promises` and `no-misused-promises` through the real project
 types, so browser operations are checked as promises rather than by guessing method
 names. Deliberately unused fixture parameters may begin with `_`; other unused
@@ -81,7 +81,7 @@ The negative control runs actual ESLint with the repository config against a
 missing Playwright `await`; the corrected operation passes.
 
 `npm run check:repository` inventories current `.github/workflows` YAML, owned
-`src/styles/**/*.css` and root README/AGENTS/changelog (their links into `docs/` must resolve). Markdown under
+`src/plugin/styles/**/*.css` and root README/AGENTS/changelog (their links into `docs/` must resolve). Markdown under
 `docs/` is not walked: `docs/` is a design working directory outside the repository quality gates.
 Its YAML parser rejects malformed or duplicate mappings. The repository policy
 requires job/step structure, full action SHA pins, explicit read-only permissions,
@@ -91,7 +91,7 @@ not a substitute for the complete GitHub Actions schema or actionlint. A job may
 call a repository-local reusable workflow (`uses: ./.github/workflows/<name>.yml`)
 only when that file exists and declares `on.workflow_call`, and never passes
 `secrets` (including `secrets: inherit`). The owner-requested, scoped release allowance
-(`scripts/quality/workflow-policy.mjs`) lets only `release-cut.yml` and
+(`tooling/quality/workflow-policy.mjs`) lets only `release-cut.yml` and
 `publish.yml` grant job write scopes: both must be `workflow_dispatch`-only, keep
 read-only top-level permissions, and every write job must target the protected
 `release` environment. Every other workflow, including `starter-distribution.yml`,
@@ -124,7 +124,7 @@ alter permissions or certify those unprovisioned scanners.
 
 ## `npm run verify`: steps, partial runs and reports
 
-`npm run verify` runs the explicit step table in `scripts/quality/verify-steps.mjs`
+`npm run verify` runs the explicit step table in `tooling/quality/verify-steps.mjs`
 (ids, order, commands and genuine `needs` dependencies; `--list` prints it). The
 default is fail-fast: the first failing step stops the run and every later step is
 reported `not-run`. Options after `--`:
@@ -174,7 +174,7 @@ The flow, also written for agents in `.claude/skills/self-review/SKILL.md`
 (mirrored for Codex in `.agents/skills/self-review/SKILL.md`):
 
 1. `node bin/app check --plan --base origin/main`, then `node bin/app check`,
-   `npm run verify -- --json` and the relevant `node scripts/testing/suites.mjs <suite>`
+   `npm run verify -- --json` and the relevant `node tooling/testing/suites.mjs <suite>`
    runs; browser and native runs only when provisioned. End-to-end is opt-in until
    the Release tier ([why](DELIVERY-PIPELINE.md#end-to-end-tests-opt-in-mandatory-in-release));
    in CI the pull request label `e2e` opts in.
@@ -182,7 +182,7 @@ The flow, also written for agents in `.claude/skills/self-review/SKILL.md`
 3. An adversarial re-read of the diff against `AGENTS.md`, then the template
    filled with real output and the untested scope.
 
-`scripts/quality/self-review.mjs` compares the working tree (including untracked
+`tooling/quality/self-review.mjs` compares the working tree (including untracked
 files) with the merge-base of `HEAD` and `origin/main`, falling back to `main` and
 `origin/HEAD`, or with `--base`. It parses the unified diff and inspects only added
 lines (plus removed lines where a deletion loosens a gate). Findings print as
@@ -243,6 +243,6 @@ still print as `approved [RULE] file:line by @owner` and appear under
 `approved[]` in `--json`. A malformed record fails the guard; it never approves
 anything. CODEOWNERS assigns the record to the owner, and `.claude/settings.json`
 denies agents any edit to it, so agents cannot approve their own changes. Remove
-entries once their change has merged. Fixtures in `tests/tooling/agent-self-review*.checks.mjs`
+entries once their change has merged. Fixtures in `src/cli/tests/agent-self-review*.checks.mjs tooling/tests/agent-self-review*.checks.mjs`
 run each rule against real temporary Git repositories, including a clean change, and
 prove that removed and context lines never trigger findings.

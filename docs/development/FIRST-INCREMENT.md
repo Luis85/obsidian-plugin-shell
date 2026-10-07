@@ -171,8 +171,8 @@ increment branch:
 node bin/app pr task set export-notes-1 T-1 --status done --yes
 node bin/app increment ac set export-notes AC-1 --status done --yes
 node bin/app increment ac set export-notes AC-2 --status done --yes
-node scripts/delivery/done.mjs --base origin/increment/export-notes
-node scripts/delivery/done.mjs --base origin/increment/export-notes --write
+node tooling/delivery/done.mjs --base origin/increment/export-notes
+node tooling/delivery/done.mjs --base origin/increment/export-notes --write
 ```
 
 A change pull request is checked against its PullRequest document: its tasks are
@@ -199,7 +199,7 @@ of Done against `main`:
 git switch increment/export-notes
 git pull
 node bin/app increment check export-notes --gate done --base origin/main
-node scripts/delivery/done.mjs --base origin/main --write
+node tooling/delivery/done.mjs --base origin/main --write
 ```
 
 On the kick-off, the whole increment must be complete: every criterion ticked with

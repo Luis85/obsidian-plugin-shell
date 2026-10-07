@@ -234,8 +234,8 @@
       "Bash(node bin/app dev --profile obsidian*)",
       "Bash(node bin/app framework upgrade*)",
       "Bash(node bin/app framework pack*)",
-      "Bash(node scripts/release/* --execute*)",
-      "Bash(node scripts/release/* --remote*)",
+      "Bash(node tooling/release/* --execute*)",
+      "Bash(node tooling/release/* --remote*)",
       "Bash(npm install *)",
       "Bash(npm install)",
       "Bash(npm i *)",
@@ -264,7 +264,7 @@
       "Bash(gh workflow run *)",
       "Bash(gh run cancel *)",
       "Bash(rm *)",
-      "PowerShell(node scripts/release/* --execute*)",
+      "PowerShell(node tooling/release/* --execute*)",
       "PowerShell(Remove-Item *)",
       "Edit(/node_modules/**)",
       "Bash(*--allow-download*)",
@@ -361,7 +361,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/session-start.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tooling/agent/session-start.mjs\"",
             "timeout": 600
           }
         ]
@@ -372,7 +372,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent/stop-check.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tooling/agent/stop-check.mjs\"",
             "timeout": 330
           }
         ]

@@ -8,7 +8,7 @@ panels. Application services remain responsible for canonical data, validation,
 persistence and committed outcomes.
 
 ```text
-src/presentation/
+src/plugin/presentation/
   components/
     ShowcaseApp.vue
     panels/
@@ -62,7 +62,7 @@ earlier initialization failure. This is not a guarantee of recovery from arbitra
 internal Vue renderer corruption.
 
 For a new feature, start with its framework-free entity/document definition under
-`src/features/<name>`. Add a composable only when presentation behavior is needed,
+`src/plugin/features/<name>`. Add a composable only when presentation behavior is needed,
 then a small SFC under `components` (or `components/panels`). Do not move business
 validation into a screen controller. Current note makers generate definitions,
 repository registration and tests; they do not silently generate a new UI tree.

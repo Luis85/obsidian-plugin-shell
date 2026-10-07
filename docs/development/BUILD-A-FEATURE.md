@@ -2,7 +2,7 @@
 
 > Type: tutorial · Part of the [docs index](../README.md)
 
-Start in `src/features`, not in the persistence adapters. For a generated starting
+Start in `src/plugin/features`, not in the persistence adapters. For a generated starting
 point, run `npm run make -- feature bookmarks --entity bookmark --dry-run`, review,
 then apply with `--yes --no-interaction`. See [Authoring tools](AUTHORING-TOOLS.md).
 The manual steps below explain the same ordinary editable source. The template provides
@@ -17,7 +17,7 @@ operations so closing a view during preflight cannot start a later mutation.
 
 ## Define the business data
 
-Create `src/features/bookmarks/entity.ts`:
+Create `src/plugin/features/bookmarks/entity.ts`:
 
 ```ts
 import { defineEntity, fields } from '../api';
@@ -34,7 +34,7 @@ are rejected. An entity does not need a Markdown representation.
 
 ## Add an optional document recipe
 
-Create `src/features/bookmarks/definition.ts`:
+Create `src/plugin/features/bookmarks/definition.ts`:
 
 ```ts
 import { defineDocument, defineNoteFeature, heading } from '../api';
@@ -61,7 +61,7 @@ content and unrelated frontmatter rather than regenerating that body.
 
 ## Register once
 
-Import the feature in `src/bootstrap/features.ts` and add one entry to the existing
+Import the feature in `src/plugin/bootstrap/features.ts` and add one entry to the existing
 registration callback:
 
 ```ts

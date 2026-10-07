@@ -20,7 +20,7 @@ Scenario-only controls and stress overrides (explicit test mode)
 
 The host simulation is not included in the released plugin. The plugin still composes its own one-file styles.css. Using both does not authorize a second harness-only copy of plugin styles.
 
-**HSS-01 — Original, owned, versioned source.** The canonical entry is `harness/styles/obsidian.css`, composed from `obsidian/tokens.css`, `base.css`, `controls.css`, `overlays.css`, and `accessibility.css`. Its implementation is original work under the repository license. Public class/variable concepts guide the interface, but values and layouts are approximations. No Obsidian app.css, fonts, application binaries, themes, or unreviewed third-party assets are vendored or downloaded automatically.
+**HSS-01 — Original, owned, versioned source.** The canonical entry is `src/plugin/harness/styles/obsidian.css`, composed from `obsidian/tokens.css`, `base.css`, `controls.css`, `overlays.css`, and `accessibility.css`. Its implementation is original work under the repository license. Public class/variable concepts guide the interface, but values and layouts are approximations. No Obsidian app.css, fonts, application binaries, themes, or unreviewed third-party assets are vendored or downloaded automatically.
 
 Provide provenance, supported surfaces, fixture version, last native comparison, source references, and known limitations. A file called obsidian.css is not an official-host identity or fidelity guarantee. The current fixture has no completed native comparison; record that explicitly instead of assigning a guessed host release to it.
 
@@ -83,23 +83,23 @@ The standalone page deliberately does not implement those runtime scenarios. It 
 
 ## 5. Tooling and packaging
 
-**HSS-11 — Script boundary.** The delivered standalone server is `scripts/harness/serve-style-fixture.mjs`. It uses Node built-ins, a loopback binding, an exact asset allowlist, non-mutating GET/HEAD routes, no-store responses, and a restrictive CSP. It serves neither arbitrary repository files nor a vault. It has explicit port/help options and closes owned connections on termination.
+**HSS-11 — Script boundary.** The delivered standalone server is `tooling/harness/serve-style-fixture.mjs`. It uses Node built-ins, a loopback binding, an exact asset allowlist, non-mutating GET/HEAD routes, no-store responses, and a restrictive CSP. It serves neither arbitrary repository files nor a vault. It has explicit port/help options and closes owned connections on termination.
 
 The focused delivered test command is:
 
 ```sh
-node --test tests/harness-styles/server.test.mjs
+node --test src/plugin/tests/harness-styles/server.test.mjs
 ```
 
 The standalone visual inspection command is:
 
 ```sh
-node scripts/harness/serve-style-fixture.mjs --port 4174
+node tooling/harness/serve-style-fixture.mjs --port 4174
 ```
 
 These commands exist independently of the future package.json/setup/Vite/Playwright configuration. They do not make `npm run setup`, `npm run verify`, or the full harness available. On implementation, integrate this fixture into the existing scripts and Vitest/Playwright entrypoints rather than maintain a competing permanent test stack.
 
-Generated releases exclude all `harness/**`, fixture helpers/styles, server code, screenshots, reports and original host simulation. Production imports may reference only plugin-owned source styles. Never deploy the host shim as a user's plugin stylesheet.
+Generated releases exclude all `src/plugin/harness/**`, fixture helpers/styles, server code, screenshots, reports and original host simulation. Production imports may reference only plugin-owned source styles. Never deploy the host shim as a user's plugin stylesheet.
 
 **HSS-12 — Qualification and limits.** All handwritten fixture CSS/JS/scripts obey
 400 code lines, tests/helpers 450, excluding comments/blanks under the owner's

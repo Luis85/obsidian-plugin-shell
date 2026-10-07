@@ -1,6 +1,6 @@
 # Tool map
 
-Every `node bin/app` command group, and which chain skill uses it. Discover the installed set with `node bin/app capabilities --json` and details with `node bin/app help <command>`; the installed CLI wins over this table. `tests/tooling/agent-ideation-skills.checks.mjs` fails when a listed skill stops citing its command, a cited command no longer exists, or a command group is missing here.
+Every `node bin/app` command group, and which chain skill uses it. Discover the installed set with `node bin/app capabilities --json` and details with `node bin/app help <command>`; the installed CLI wins over this table. `tooling/tests/agent-ideation-skills.checks.mjs` fails when a listed skill stops citing its command, a cited command no longer exists, or a command group is missing here.
 
 Effect legend: **read** writes nothing; **plan** previews and writes only with `--apply <planHash>` (or `plan apply <file> --yes`); **process** runs trusted project tools after approval.
 
@@ -93,13 +93,13 @@ Effect legend: **read** writes nothing; **plan** previews and writes only with `
 
 ## Increment handoff and delivery checks
 
-Dependency-free repository scripts (not `node bin/app` commands) that bridge the chain to delivery. They exist in the framework repository only. `tests/tooling/agent-delivery-skills.checks.mjs` fails when a row's script is missing or a listed skill stops citing it. Exit codes: 0 pass, 1 not ready or not done, 2 usage or configuration error.
+Dependency-free repository scripts (not `node bin/app` commands) that bridge the chain to delivery. They exist in the framework repository only. `tooling/tests/agent-delivery-skills.checks.mjs` fails when a row's script is missing or a listed skill stops citing it. Exit codes: 0 pass, 1 not ready or not done, 2 usage or configuration error.
 
 | Command | Skills | Effect | Purpose |
 | --- | --- | --- | --- |
-| `node scripts/delivery/increment.mjs new <slug> --from <source>` | `increment-handoff` | plan | preview a `docs/increments/<slug>.md` handoff from the template; `--write` creates it, never overwrites |
-| `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md` | `increment-handoff`, `feature-delivery`, `ideation-journey` | read | Definition of Ready report and refinement brief; `--write` only adds missing section scaffolds |
-| `node scripts/delivery/done.mjs --base origin/main` | `feature-delivery` | read | Definition of Done report; `--write` generates the completion record, Unreleased entry and docs index rows |
+| `node tooling/delivery/increment.mjs new <slug> --from <source>` | `increment-handoff` | plan | preview a `docs/increments/<slug>.md` handoff from the template; `--write` creates it, never overwrites |
+| `node tooling/delivery/ready.mjs --handoff docs/increments/<slug>.md` | `increment-handoff`, `feature-delivery`, `ideation-journey` | read | Definition of Ready report and refinement brief; `--write` only adds missing section scaffolds |
+| `node tooling/delivery/done.mjs --base origin/main` | `feature-delivery` | read | Definition of Done report; `--write` generates the completion record, Unreleased entry and docs index rows |
 
 ## Outside the chain
 

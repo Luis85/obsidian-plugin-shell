@@ -9,7 +9,7 @@ only contained vaults inside this checkout; they never open a personal vault.
 | --- | --- |
 | `npm run dev:obsidian` | Build, watch, hot-reload and stream logs from a persistent sandbox vault |
 | `npm run -s dev:obsidian -- --json` | One agent/CI iteration: build, launch, reload once, JSON summary, exit |
-| `npm run test:obsidian` | Vitest suite in `tests/obsidian/**/*.obsidian.ts`, a fresh vault copy per case |
+| `npm run test:obsidian` | Vitest suite in `src/plugin/tests/obsidian/**/*.obsidian.ts`, a fresh vault copy per case |
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ only contained vaults inside this checkout; they never open a personal vault.
 
 ## Inner loop: `dev:obsidian`
 
-The first run copies `tests/obsidian/vault` to `.obsidian-sandbox/vault`. Later
+The first run copies `src/plugin/tests/obsidian/vault` to `.obsidian-sandbox/vault`. Later
 runs reuse it unchanged, so notes, settings and plugin `data.json` persist. Delete
 `.obsidian-sandbox/` to start over. The plugin is installed and enabled in that
 vault only.
@@ -40,7 +40,7 @@ successful rebuild the assets are installed atomically, and the plugin is
 hot-reloaded over the DevTools protocol. The loop disables the plugin, re-reads
 its manifest and enables it again. A status line reports build, reload and total
 time. A failed build keeps the last good build installed. The watchers cover `src/`,
-`scripts/bundling/`, the product roots a generated project names in
+`tooling/bundling/`, the product roots a generated project names in
 `configs/types/tsconfig.project.json` (for example a custom `<codebaseFolder>/generated`) and the
 build configuration; a watched folder that is deleted and recreated is watched again.
 
@@ -114,7 +114,7 @@ its use against launcher sandboxes is unverified.
 
 ## Writing a real-Obsidian test
 
-Create `tests/obsidian/<behavior>.obsidian.ts` and use the fixture:
+Create `src/plugin/tests/obsidian/<behavior>.obsidian.ts` and use the fixture:
 
 ```ts
 import { describe, expect } from 'vitest';
@@ -131,7 +131,7 @@ describe('my feature in real Obsidian', () => {
 ```
 
 Each case gets a new Obsidian process, a new profile and a fresh copy of
-`tests/obsidian/vault` under `.nq/`. The built plugin is installed there and
+`src/plugin/tests/obsidian/vault` under `.nq/`. The built plugin is installed there and
 enabled after the console recorder attaches, so its whole `onload` is observed.
 The fixture provides these members:
 

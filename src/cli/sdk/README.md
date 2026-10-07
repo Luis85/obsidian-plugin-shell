@@ -1,6 +1,6 @@
 # Workbench plugins
 
-This folder is the trusted, statically registered extension surface for **Workbench itself**. Plugins that users drop into an installed or compiled app live in `bin/plugins/` instead; see [the app plugin developer guide](../src/cli/plugins/DEVELOPER-GUIDE.md).
+This folder is the trusted, statically registered extension surface for **Workbench itself**. Plugins that users drop into an installed or compiled app live in `bin/plugins/` instead; see [the app plugin developer guide](../plugins/DEVELOPER-GUIDE.md).
 
 Infrastructure lives at the root:
 
@@ -17,7 +17,7 @@ npm run make -- plugin my-extension --yes
 
 The generated plugin is explicitly registered and starts disabled until its source/configuration is reviewed.
 
-Every actual plugin lives completely under `plugins/<plugin-name>/`:
+Every actual plugin lives completely under `src/cli/sdk/<plugin-name>/`:
 
 ```text
 plugins/my-plugin/
@@ -33,7 +33,7 @@ The repository guard `npm run check:plugins` requires that structure, matching m
 
 `example-extension` is deliberately disabled in its `config.json`. It is an executable reference showing typed events, a CLI command, a Studio/TUI action, a custom React framework adapter and a `webapp-react` starter. Set `enabled` to `true` only when intentionally exercising the example.
 
-See [Workbench plugin development](../docs/development/WORKBENCH-PLUGINS.md). Generated applications have a separate plugin composition root documented in [generated project plugins](../docs/development/GENERATED-PROJECT-PLUGINS.md).
+See [Workbench plugin development](../../../docs/development/WORKBENCH-PLUGINS.md). Generated applications have a separate plugin composition root documented in [generated project plugins](../../../docs/development/GENERATED-PROJECT-PLUGINS.md).
 
 ## Component templates
 

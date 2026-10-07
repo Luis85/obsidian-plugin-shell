@@ -222,6 +222,6 @@ Inside the framework checkout `docs/` is a template input folder; generate into 
 
 | File | Covers |
 | --- | --- |
-| `tests/tooling/interactive-maker-risk-domain.checks.mjs` | Definition and model validation, scoring, reading, create/update rules, transitions, id allocation, queries, register merging |
-| `tests/tooling/interactive-maker-risk-command.checks.mjs` | CLI routing, plan/apply, id reservation, preserving updates, hash guards, check/list/show, report preservation, project definitions, YAML safety |
-| `tests/tooling/interactive-maker-risk-wizard.checks.mjs` | The real `risk-new`, `risk-edit` and `risk-review` wizards with scripted plain prompts, the `paths.risks` setting and migration, and the fake-data preset passing `risk check` |
+| `src/cli/tests/interactive-maker-risk-domain.checks.mjs` | Definition and model validation, scoring, reading, create/update rules, transitions, id allocation, queries, register merging |
+| `src/cli/tests/interactive-maker-risk-command.checks.mjs` | CLI routing, plan/apply, id reservation, preserving updates, hash guards, check/list/show, report preservation, project definitions, YAML safety |
+| `src/cli/tests/interactive-maker-risk-wizard.checks.mjs` | The real `risk-new`, `risk-edit` and `risk-review` wizards with scripted plain prompts, the `paths.risks` setting and migration, and the fake-data preset passing `risk check` |

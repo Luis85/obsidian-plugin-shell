@@ -174,8 +174,8 @@ existing generation/qualification tooling, derive it explicitly:
 
 ```sh
 npm run companion:build
-node scripts/concepts/export-golden-project.mjs
-node scripts/concepts/export-golden-project.mjs --check
+node tooling/concepts/export-golden-project.mjs
+node tooling/concepts/export-golden-project.mjs --check
 ```
 
 The receipt binds the actual canonical starter bytes, exported project bytes and
@@ -193,8 +193,8 @@ It is an execution recipe, not evidence of a run until CI has actually completed
 For direct replay after generation and build:
 
 ```sh
-node tests/concepts/starter-workspace.browser.mjs
-node tests/concepts/feature-showcase.browser.mjs --html ../visual-feature-demo/clickdummy.html
+node src/companion/tests/concepts/starter-workspace.browser.mjs
+node src/companion/tests/concepts/feature-showcase.browser.mjs --html ../visual-feature-demo/clickdummy.html
 ```
 
 When an environment does not permit file-origin navigation, the explicit

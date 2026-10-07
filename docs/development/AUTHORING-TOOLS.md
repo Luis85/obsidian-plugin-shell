@@ -3,8 +3,8 @@
 > Type: reference · Part of the [docs index](../README.md)
 
 The maker catalog generates ordinary, registered source through one reviewed file
-planner. Feature authors keep domain rules in `src/features/<owner>`; Vue markup
-stays in `src/presentation/components`, with behavior in composables and per-view
+planner. Feature authors keep domain rules in `src/plugin/features/<owner>`; Vue markup
+stays in `src/plugin/presentation/components`, with behavior in composables and per-view
 Pinia stores. The recipes use the existing services and exact installed toolchain.
 They never install dependencies, fetch templates, create user notes or publish.
 
@@ -45,8 +45,8 @@ All child recipes take `<name> --feature <existing-owner>` unless stated otherwi
 | `listener` | Requires `--event <existing-name>` in the same feature. Subscribes to that typed event through the shared runtime bus, displays localized feedback and unsubscribes on disposal. |
 | `style` | Requires `--view <existing-generated-view>`. Adds an owned CSS module and an actual SFC stylesheet import. No unused CSS output or global host reset. |
 | `locale` | Takes only a locale name. Copies every base and explicitly registered feature key into a pending translation skeleton, with nonselectable status metadata and a completeness test. Review and translate before deliberately enabling a language. Later added keys make the test fail until the draft is updated. |
-| `maker` | Takes only a recipe name. Creates a trusted local recipe in `scripts/makers/custom`, explicitly registers it and generates a composition test. The default custom recipe composes a real localized command. Running the new recipe needs `--trust-custom`. |
-| `plugin` | Takes only a plugin name. Creates and registers a self-contained Workbench TypeScript plugin under `plugins/<name>` with manifest, config, source, tests and event/CLI/TUI examples. Its checks add the plugin registry check, the maker type check (`configs/types/tsconfig.maker.json`) and the `workbench-plugins` suite. |
+| `maker` | Takes only a recipe name. Creates a trusted local recipe in `tooling/makers/custom`, explicitly registers it and generates a composition test. The default custom recipe composes a real localized command. Running the new recipe needs `--trust-custom`. |
+| `plugin` | Takes only a plugin name. Creates and registers a self-contained Workbench TypeScript plugin under `src/cli/sdk/<name>` with manifest, config, source, tests and event/CLI/TUI examples. Its checks add the plugin registry check, the maker type check (`configs/types/tsconfig.maker.json`) and the `workbench-plugins` suite. |
 | `file-extension` | Requires `--extension <ext>` (optional `--format json\|text`). Registers a custom text/JSON file extension with a dedicated native editor, a create command and file/folder menu entries, owned by the feature and tested. |
 | `context-menu` | Requires `--extensions <a,b>`. Registers a file-explorer action filtered by those extensions, with an editable domain handler and tests. |
 
@@ -82,10 +82,10 @@ IDs remain in frontmatter. Changing an existing entity title preserves its path.
 
 ## Registries and ownership
 
-`src/bootstrap/features.ts` constructs typed repositories once. Domain-only schemas
-join `src/bootstrap/authoring-domains.ts`. Runtime action factories and static Vue
-panel imports join `src/bootstrap/authoring.ts`; locale modules join
-`src/bootstrap/authoring-locales.ts`. No business code enters `main.ts` and no source
+`src/plugin/bootstrap/features.ts` constructs typed repositories once. Domain-only schemas
+join `src/plugin/bootstrap/authoring-domains.ts`. Runtime action factories and static Vue
+panel imports join `src/plugin/bootstrap/authoring.ts`; locale modules join
+`src/plugin/bootstrap/authoring-locales.ts`. No business code enters `main.ts` and no source
 scan discovers features at runtime.
 
 Each registered panel has an exact identity-derived native view type and an open

@@ -191,9 +191,9 @@ Use the relevant constraint IDs in PRDs, design reviews, architecture decisions,
 | ID / basis | Constraint | Verification |
 | --- | --- | --- |
 | DC-ARC-01 · C | Domain/application depend on framework-free contracts, not Obsidian/Vue/Pinia/browser/Node or concrete adapters. Infrastructure implements ports; bootstrap wires the runtime. | Import-boundary and negative mutation checks. |
-| DC-ARC-02 · C | `main.ts` is lifecycle composition, not business logic. Register features explicitly; keep business code in `src/features/<name>` behind the small `src/features/api.ts` surface. | Composition review and distinct extension fixture. |
+| DC-ARC-02 · C | `main.ts` is lifecycle composition, not business logic. Register features explicitly; keep business code in `src/plugin/features/<name>` behind the small `src/plugin/features/api.ts` surface. | Composition review and distinct extension fixture. |
 | DC-ARC-03 · C | Task/Project and Workbench itself are consumers, not special branches in generic services. New business features do not require editing generic persistence or `main.ts`. | Second-entity and independent-feature tests. |
-| DC-ARC-04 · C | In the shell/native Vue composition, SFCs live under `src/presentation/components`; behavior belongs in TypeScript composables, per-view stores and context. Presentation TypeScript does not import Vue components. | `check:presentation` and boundary checks. |
+| DC-ARC-04 · C | In the shell/native Vue composition, SFCs live under `src/plugin/presentation/components`; behavior belongs in TypeScript composables, per-view stores and context. Presentation TypeScript does not import Vue components. | `check:presentation` and boundary checks. |
 | DC-ARC-05 · C | Native modals/notices are adapters behind shared services; feature commands/ribbons join the explicit registry. Availability checks are side-effect free and execution shares the same policy. | Real service, palette/ribbon and cleanup tests. |
 | DC-ARC-06 · C | CLI, authoring and native Workbench reuse public operations, persistence, planner and generator seams. Do not create a second installer/writer or private framework copy for self-hosting. | Cross-entry-point parity and standalone consumer tests. |
 

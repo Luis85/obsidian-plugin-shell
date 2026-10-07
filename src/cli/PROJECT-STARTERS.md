@@ -195,8 +195,8 @@ Project starters are data: a new combination of existing target/framework adapte
 Tests live in `interactive-maker-project-*.checks.mjs` and `interactive-maker-starters-ui.checks.mjs` and remain included in the existing maker suite/coverage; `starter-definitions.checks.mjs` covers the `project` generator contract. The compiler architecture traversal includes the pure emitter. `project-starter-qualification.yml` uses the existing exact toolchain and qualifies every shipped project starter (the eight former presets, the two additional hybrid frameworks and `webapp-angular`) with explicit dependency resolution, clean install, typecheck, tests, builds and exact-artifact browser/CLI smoke checks. It does not activate Obsidian. Run its disposable driver explicitly:
 
 ```sh
-node scripts/compiler/qualify-project-starters.mjs --starter hybrid-angular
-node scripts/compiler/qualify-project-starters.mjs --starter hybrid-angular --execute
+node tooling/compiler/qualify-project-starters.mjs --starter hybrid-angular
+node tooling/compiler/qualify-project-starters.mjs --starter hybrid-angular --execute
 ```
 
 The first command only describes the planned qualification. Execution requires the qualified toolchain and `QUALIFIED_NPM`. Reports separate source/build/browser success from native and business acceptance. Existing quality thresholds are unchanged.

@@ -24,6 +24,10 @@ export function need(options, key) {
   if (!options[key]) throw new Error(`Required --${key}`);
   return options[key];
 }
+/** First existing candidate under root (the shell repository layout first, then an extracted kit or generated project); the last candidate when none exists. */
+export function layoutPath(root, ...candidates) {
+  return candidates.find(candidate => fs.existsSync(path.join(root, candidate))) ?? candidates[candidates.length - 1];
+}
 export function sha256(value) { return crypto.createHash('sha256').update(value).digest('hex'); }
 export function noLinks(value) {
   const full = path.resolve(value);

@@ -112,7 +112,7 @@ they must not impersonate the editor's real state or authored dataset.
 
 ## Implementation and verification
 
-The maintained interface stays in `docs/concepts/companion/editor/`. The generator
+The maintained interface stays in `src/companion/editor/`. The generator
 relocates its imports into the consumer, provides the same Vue Flow runtime through
 an explicit injection, and creates native and memory-only composition roots. It
 preserves reviewed vendor notices and exact runtime/CSS hashes; no second Vue,

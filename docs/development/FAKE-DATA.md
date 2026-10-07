@@ -306,8 +306,8 @@ display name. Open the file in Obsidian 1.9 or later, where Bases is a core plug
 
 | File | Covers |
 | --- | --- |
-| `tests/tooling/interactive-maker-fake-data-domain.checks.mjs` | Allowlist parity, validation, determinism, YAML round-trip, file names, bounds, Bases data, inference |
-| `tests/tooling/interactive-maker-fake-data-command.checks.mjs` | Plan and apply, reruns, conflicts, folder boundaries, configs, overrides, custom and semantic entities |
-| `tests/tooling/interactive-maker-fake-data-wizard.checks.mjs` | The real wizard with scripted plain prompts: default-No review, approved writes, saving and re-running configs, defining entities, Back |
+| `src/cli/tests/interactive-maker-fake-data-domain.checks.mjs` | Allowlist parity, validation, determinism, YAML round-trip, file names, bounds, Bases data, inference |
+| `src/cli/tests/interactive-maker-fake-data-command.checks.mjs` | Plan and apply, reruns, conflicts, folder boundaries, configs, overrides, custom and semantic entities |
+| `src/cli/tests/interactive-maker-fake-data-wizard.checks.mjs` | The real wizard with scripted plain prompts: default-No review, approved writes, saving and re-running configs, defining entities, Back |
 
 All three run in the `maker` suite.

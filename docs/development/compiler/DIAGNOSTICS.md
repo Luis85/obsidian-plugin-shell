@@ -17,7 +17,7 @@ Human diagnostics neutralize control sequences. JSON mode writes one final docum
 For breakpoints, open `compiler.code-workspace` in this folder or run:
 
 ```sh
-node --inspect-brk --experimental-strip-types scripts/compiler/debug-fixture.mjs
+node --inspect-brk --experimental-strip-types tooling/compiler/debug-fixture.mjs
 ```
 
 Set a breakpoint in `application/pipeline.ts`, the frontend or a specific emitter. The fixture uses analysis only. To inspect emitted source, use `compiler inspect --stage artifacts` or call `compileProject` with a captured template snapshot in a test.

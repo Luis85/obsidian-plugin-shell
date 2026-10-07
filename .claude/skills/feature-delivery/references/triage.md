@@ -4,7 +4,7 @@ A red check is information about the change until proven otherwise.
 
 1. **Find the failing job.** Read the check runs of the head commit. "CI result" only aggregates: open the job it names (`CI gate jobs did not succeed: <job>=failure`).
 2. **Read the evidence.** The job log's failing step and its uploaded artifact (`reports/` evidence, verify `summary.md`, coverage or e2e reports). For a verify failure, `reports/verify/summary.md` lists the failing step and its output tail.
-3. **Reproduce locally.** `node bin/app ci --job <workflow>/<job>` prints the exact commands; a computed matrix needs `--matrix os=ubuntu-24.04`. Run the failing command itself, or the narrower suite (`node scripts/testing/suites.mjs <suite>`). Windows and macOS legs can only be inspected here; say so.
+3. **Reproduce locally.** `node bin/app ci --job <workflow>/<job>` prints the exact commands; a computed matrix needs `--matrix os=ubuntu-24.04`. Run the failing command itself, or the narrower suite (`node tooling/testing/suites.mjs <suite>`). Windows and macOS legs can only be inspected here; say so.
 4. **Fix the cause** in the change and push. Rerun the narrowest local gate first.
 5. **Report what you saw.** Paste the failing output and the fix into the pull request conversation or body.
 
@@ -20,7 +20,7 @@ A runner outage, an upstream registry error in the informational live audit, or 
 
 ## Definition of Ready or Done
 
-These checks are deterministic and dependency-free: a red result is a finding about the handoff or the diff, never a flake. Reproduce it with `node scripts/delivery/ready.mjs --base origin/<base>` or `node scripts/delivery/done.mjs --base origin/<base>` and follow [ready-and-done.md](ready-and-done.md). Never edit `configs/delivery/**` to get green.
+These checks are deterministic and dependency-free: a red result is a finding about the handoff or the diff, never a flake. Reproduce it with `node tooling/delivery/ready.mjs --base origin/<base>` or `node tooling/delivery/done.mjs --base origin/<base>` and follow [ready-and-done.md](ready-and-done.md). Never edit `configs/delivery/**` to get green.
 
 ## Release pull requests
 

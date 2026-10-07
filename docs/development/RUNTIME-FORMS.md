@@ -9,14 +9,14 @@ The component validates the draft and emits typed values. It never saves anythin
 what happens with the value.
 
 The showcase **Forms** page is the working example. The definition is
-`src/features/showcase/forms/feature-brief.json`, and `src/features/showcase/feature-brief.ts` declares it.
+`src/plugin/features/showcase/forms/feature-brief.json`, and `src/plugin/features/showcase/feature-brief.ts` declares it.
 The Forms page is an optional example: `npm run examples:remove` deletes it together with the other
 showcase pages ([remove optional examples](EXAMPLE-REMOVAL.md)). `DataForm`, the `form.*` messages and
-`src/styles/forms.css` are shared and stay.
+`src/plugin/styles/forms.css` are shared and stay.
 
 ## Add a form to a feature
 
-1. Add the definition next to your feature, named after its id: `src/features/<feature>/forms/<id>.json`.
+1. Add the definition next to your feature, named after its id: `src/plugin/features/<feature>/forms/<id>.json`.
 
    ```json
    {
@@ -42,24 +42,24 @@ showcase pages ([remove optional examples](EXAMPLE-REMOVAL.md)). `DataForm`, the
    `FORM_DEFINITION: <reason> at <location>`, for example `form.cliOnly at fields[2].choicesFrom`.
 
 3. Render it from a panel. Keep the Vue script to imports and bindings, and put the behavior that handles
-   the submitted value in a composable or store (see `src/presentation/components/panels/FormsPanel.vue`
-   and `src/presentation/stores/forms-showcase.ts`):
+   the submitted value in a composable or store (see `src/plugin/presentation/components/panels/FormsPanel.vue`
+   and `src/plugin/presentation/stores/forms-showcase.ts`):
 
    ```vue
    <DataForm :definition="definition" :initial="saved" submit-label="Save contact" @submit="page.accept" />
    ```
 
 4. Test it with real services. Use the example tests as a template:
-   - `tests/runtime/data-form-components.test.ts` mounts the real showcase. It is example-owned and
+   - `src/plugin/tests/unit/data-form-components.test.ts` mounts the real showcase. It is example-owned and
      removed with the showcase.
-   - `tests/runtime/data-form-standalone.test.ts` mounts `DataForm` with a feature-owned definition.
+   - `src/plugin/tests/unit/data-form-standalone.test.ts` mounts `DataForm` with a feature-owned definition.
    - The domain tests read the test-owned copy `tests/fixtures/forms/feature-brief.json`, so they keep
      running after example removal.
 
-   Run `node scripts/testing/suites.mjs --check` after adding a test file.
+   Run `node tooling/testing/suites.mjs --check` after adding a test file.
 
-5. Run `node --test tests/tooling/interactive-maker-runtime-form-format.checks.mjs`. It reads every
-   `src/features/*/forms/*.json` with the CLI's authoritative reader, so a runtime form stays valid in the
+5. Run `node --test src/cli/tests/interactive-maker-runtime-form-format.checks.mjs`. It reads every
+   `src/plugin/features/*/forms/*.json` with the CLI's authoritative reader, so a runtime form stays valid in the
    shared format. It proves discovery and the CLI value check on the test-owned fixture.
 
 To persist the value, handle `submit` in a feature action, for example a repository from
@@ -67,7 +67,7 @@ To persist the value, handle `submit` in a feature action, for example a reposit
 
 ## Where definitions live
 
-Runtime definitions live in `src/features/<feature>/forms/`, not in `configs/forms/`.
+Runtime definitions live in `src/plugin/features/<feature>/forms/`, not in `configs/forms/`.
 
 - `configs/**` is the tooling zone. The architecture boundaries allow features to import only feature,
   application and domain code, so a feature cannot import `configs/forms/*.json`.
@@ -78,7 +78,7 @@ Runtime definitions live in `src/features/<feature>/forms/`, not in `configs/for
 
 ## Format reference
 
-The runtime reader is `readDataForm` in `src/domain/forms/definition.ts`. It accepts a strict subset of
+The runtime reader is `readDataForm` in `src/plugin/domain/forms/definition.ts`. It accepts a strict subset of
 `configs/schemas/form.schema.json` and fails closed on everything else.
 
 | Kind | Control | Value | Keys |
@@ -134,7 +134,7 @@ Every runtime form is still valid for the CLI.
 
 ## Authoring API
 
-Import these from `src/features/api.ts`:
+Import these from `src/plugin/features/api.ts`:
 
 | Export | Purpose |
 | --- | --- |
@@ -143,7 +143,7 @@ Import these from `src/features/api.ts`:
 | `readDataFormValue(definition, value)` | Validates a complete value, for example one loaded from storage, without rendering. |
 | `DataFormDefinition`, `DataFormField`, `DataFormValue`, `DataFormValues`, `DataFormIssue`, `DataFormOutcome` | Types. |
 
-`DataForm` (`src/presentation/components/forms/DataForm.vue`) takes these props and emits one event:
+`DataForm` (`src/plugin/presentation/components/forms/DataForm.vue`) takes these props and emits one event:
 
 | Prop or event | Type | Meaning |
 | --- | --- | --- |
@@ -163,7 +163,7 @@ Import these from `src/features/api.ts`:
   - Invalid controls carry `aria-invalid="true"`.
   - A summary is announced with `role="alert"`.
 - **Controls** follow the existing panels: Nuxt UI `UInput`, `UTextarea` and `UButton`, plus native
-  `select` and checkbox controls styled with shell tokens in `src/styles/forms.css`. Measured on this
+  `select` and checkbox controls styled with shell tokens in `src/plugin/styles/forms.css`. Measured on this
   branch, `USelect` would add about 89 kB to `main.js`, and `UCheckbox` with `USwitch` about 76 kB more.
   The chosen set adds about 31 kB, and `styles.css` grows by about 1 kB. No global styles or Preflight
   are added. All selectors are scoped by the shared pipeline.

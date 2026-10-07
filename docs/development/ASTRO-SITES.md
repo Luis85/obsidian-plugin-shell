@@ -44,7 +44,7 @@ node bin/app site collections projects/acme-docs --yes            # write them
 After it, finish the project as any other project in `projects/`. Its `next` steps depend on the
 checkout:
 
-- In the Workbench checkout, which has `scripts/projects/projects.mjs`:
+- In the Workbench checkout, which has `tooling/projects/projects.mjs`:
   1. Add an npm entry for `/projects/<name>` to `.github/dependabot.yml`.
   2. Run `npm run projects:sync`, which copies the site's CI workflow into the root.
   3. Run `npm run check:projects`.
@@ -164,7 +164,7 @@ treat it as shell source:
   1. Change the version in `package.json.tmpl` and `catalog.json`.
   2. Regenerate the lock with `npm install --package-lock-only` in a scratch folder.
   3. Copy it back with the name fields set to `__SITE_NAME__`.
-  4. Rebuild all three templates: `node scripts/testing/qualify-site-templates.mjs`.
+  4. Rebuild all three templates: `node tooling/testing/qualify-site-templates.mjs`.
 
 ## Limits
 
@@ -177,7 +177,7 @@ treat it as shell source:
 - The shell never installs Astro. Each site's own CI runs its build, and `check:projects`
   validates its manifest, workflow, Dependabot entry and collection snapshots (below).
 - The maintainer-only `.github/workflows/site-templates.yml` builds the templates themselves. It
-  runs `node scripts/testing/qualify-site-templates.mjs`, which:
+  runs `node tooling/testing/qualify-site-templates.mjs`, which:
   1. Renders each template with `site new` into a scratch shell root, twice: with zero
      collections, and with one snapshot of the `tests/fixtures/sites` vault.
   2. Runs `npm ci` and `npm run build` in each rendered site.
@@ -213,6 +213,6 @@ Code:
 
 Tests:
 
-- `tests/tooling/interactive-maker-sites*.checks.mjs`
-- `tests/tooling/projects-boundary.checks.mjs` (`PROJECTS-12` to `PROJECTS-15`)
-- `tests/tooling/site-templates-qualification.checks.mjs` (maintainer-only)
+- `src/cli/tests/interactive-maker-sites*.checks.mjs tooling/tests/interactive-maker-sites*.checks.mjs`
+- `tooling/tests/projects-boundary.checks.mjs` (`PROJECTS-12` to `PROJECTS-15`)
+- `tooling/tests/site-templates-qualification.checks.mjs` (maintainer-only)

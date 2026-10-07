@@ -80,7 +80,7 @@
     "check:presentation": "node tooling/quality/check-presentation.mjs",
     "check:self-review": "node tooling/quality/self-review.mjs",
     "check:artifacts": "node tooling/quality/check-artifacts.mjs",
-    "lint": "node tooling/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src plugins templates/companion/runtime",
+    "lint": "node tooling/quality/lint-source.mjs && eslint -c configs/lint/eslint.config.mjs src templates/companion/runtime",
     "analyze": "fallow dead-code -c configs/quality/fallow.json",
     "verify": "node tooling/quality/verify.mjs",
     "help": "node tooling/help.mjs",

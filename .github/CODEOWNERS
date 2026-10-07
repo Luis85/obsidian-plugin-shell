@@ -8,8 +8,10 @@
 /.github/workflows/ @Luis85
 /.github/actions/ @Luis85
 /.github/PULL_REQUEST_TEMPLATE/ @Luis85
-/scripts/release/ @Luis85
-/scripts/delivery/ @Luis85
+/tooling/release/ @Luis85
+/src/cli/tooling/release/ @Luis85
+/tooling/delivery/ @Luis85
+/src/cli/tooling/delivery/ @Luis85
 /configs/delivery/ @Luis85
 /package.json @Luis85
 /package-lock.json @Luis85

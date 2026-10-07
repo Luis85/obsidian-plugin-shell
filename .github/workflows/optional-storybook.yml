@@ -32,8 +32,10 @@ on:
       - 'src/cli/adapters/framework/**'
       - 'src/cli/adapters/framework-cli.ts'
       - 'src/cli/presentation/terminal/**'
+      - 'src/tui/**'
       - 'tooling/bundling/**'
-      - 'tests/tooling/compiler-storybook*.checks.mjs'
+      - 'src/cli/tests/compiler-storybook*.checks.mjs'
+      - 'tooling/tests/compiler-storybook*.checks.mjs'
       - 'package*.json'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/optional-storybook.yml'
@@ -58,7 +60,7 @@ jobs:
           install-flags: --no-fund
       - name: Check contracts on the unchanged root toolchain
         run: |
-          node --test --test-concurrency=1 tests/tooling/compiler-storybook*.checks.mjs
+          node --test --test-concurrency=1 src/cli/tests/compiler-storybook*.checks.mjs tooling/tests/compiler-storybook*.checks.mjs
       - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
         run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
       - name: Qualify explicitly opted-in generated workspace without the browser preview

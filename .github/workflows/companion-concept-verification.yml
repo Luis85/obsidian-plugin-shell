@@ -7,6 +7,7 @@ on:
       - 'tooling/starters/**'
       - 'src/cli/adapters/starters/**'
       - 'docs/concepts/companion/**'
+      - 'src/companion/**'
       - 'tooling/concepts/**'
       - 'src/shared/companion/**'
       - 'tooling/companion-tools/**'
@@ -14,24 +15,30 @@ on:
       - 'src/cli/adapters/framework/**'
       - 'src/cli/adapters/framework-cli.ts'
       - 'src/cli/presentation/terminal/**'
-      - 'tests/tooling/*prototypes*.checks.mjs'
+      - 'src/tui/**'
+      - 'src/cli/tests/*prototypes*.checks.mjs'
+      - 'src/companion/tests/*prototypes*.checks.mjs'
+      - 'src/shared/tests/*prototypes*.checks.mjs'
+      - 'tooling/tests/*prototypes*.checks.mjs'
       - 'tests/support/prototype-fixture.mjs'
       - 'tooling/compiler/**'
       - 'src/cli/compiler/**'
       - 'tooling/bundling/**'
-      - 'tests/tooling/compiler-journey*.checks.mjs'
+      - 'src/cli/tests/compiler-journey*.checks.mjs'
+      - 'tooling/tests/compiler-journey*.checks.mjs'
       - 'src/cli/tests/companion-project.checks.mjs'
       - 'src/shared/tests/companion-composition-contract.checks.mjs'
       - 'tooling/tests/support/concept-realm.mjs'
-      - 'tests/tooling/companion-visual-*.checks.mjs'
-      - 'tests/tooling/visual-*.checks.mjs'
+      - 'tooling/tests/companion-visual-*.checks.mjs'
+      - 'src/shared/tests/visual-*.checks.mjs'
+      - 'src/cli/tests/fixtures/companion/**'
       - 'tests/fixtures/companion/**'
       - 'package.json'
       - 'package-lock.json'
       - 'docs/concepts/jev-prompt-editor/**'
       - 'src/cli/tests/jev-concept-distribution.checks.mjs'
       - 'src/companion/tests/concepts/**'
-      - 'tests/tooling/test-data-*'
+      - 'tooling/tests/test-data-*'
       - 'configs/quality/fallow.json'
       - 'tooling/quality/maintainability-inventory.mjs'
       - 'tooling/tests/maintainability.checks.mjs'
@@ -115,13 +122,13 @@ jobs:
           test "$count" -gt 0
           echo "Syntax checked $count concept modules. Browser and native evidence are separate."
       - name: Exercise real test-data generators, file safety and loopback adapters
-        run: node --test tests/tooling/test-data-*.checks.mjs
+        run: node --test tooling/tests/test-data-*.checks.mjs
       - name: Exercise full-project JSON and read-only shell handoff
         run: |
           node --test src/cli/tests/companion-project.checks.mjs src/shared/tests/companion-storymaps.checks.mjs src/shared/tests/companion-composition-contract.checks.mjs tooling/tests/companion-visual-state.checks.mjs tooling/tests/companion-visual-canvas.checks.mjs tooling/tests/companion-visual-page-editor.checks.mjs tooling/tests/companion-visual-inspector.checks.mjs tooling/tests/companion-visual-component-editor.checks.mjs tooling/tests/companion-visual-entry.checks.mjs
           node "$QUALIFIED_NPM" run test:visual
       - name: Exercise prototype lifecycle, safe persistence and pinned generation
-        run: node --test tests/tooling/companion-prototypes*.checks.mjs src/cli/tests/framework-prototypes.checks.mjs
+        run: node --test src/cli/tests/companion-prototypes*.checks.mjs src/companion/tests/companion-prototypes*.checks.mjs src/shared/tests/companion-prototypes*.checks.mjs tooling/tests/companion-prototypes*.checks.mjs src/cli/tests/framework-prototypes.checks.mjs
       - name: Validate the published project schema with an independent implementation
         shell: bash
         run: |
@@ -230,7 +237,7 @@ jobs:
           set -o pipefail
           mkdir -p reports/companion-mvp
           node "$QUALIFIED_NPM" run typecheck:authoring 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
-          node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
+          node --test src/shared/tests/companion-authoring-*.checks.mjs tooling/tests/companion-authoring-*.checks.mjs src/cli/tests/companion-sitemap-*.checks.mjs src/shared/tests/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
       - name: Build the empty companion and explicitly derive golden qualification input
         run: |
           node tooling/concepts/build-mvp.mjs

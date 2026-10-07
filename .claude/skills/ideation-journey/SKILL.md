@@ -36,7 +36,7 @@ node bin/app prototypes list --json
 node bin/app capabilities --json
 ```
 
-Then list, without opening file contents yet: `design/project.json`, `project.config.json`, the PRD folder from `settings show` (`paths.prds`, default `docs/prds`), `brainstorms/*/feature.definition.json`, `prototypes/*/prototype-answers.json`, `docs/concepts/*`, `docs/design/*/design.manifest.json`, `PROJECT-SETUP-HANDOUT.md`, `docs/increments/*.md`. For an increment handoff that belongs to the current work, `node scripts/delivery/ready.mjs --handoff docs/increments/<slug>.md --json` (read-only without `--write`) says whether it is Ready. A failed command is a signal, not an error to fix here: `handout validate` returns `blocked` until a meeting is complete, and `ui status` fails outside a generated project.
+Then list, without opening file contents yet: `design/project.json`, `project.config.json`, the PRD folder from `settings show` (`paths.prds`, default `docs/prds`), `brainstorms/*/feature.definition.json`, `prototypes/*/prototype-answers.json`, `docs/concepts/*`, `docs/design/*/design.manifest.json`, `PROJECT-SETUP-HANDOUT.md`, `docs/increments/*.md`. For an increment handoff that belongs to the current work, `node tooling/delivery/ready.mjs --handoff docs/increments/<slug>.md --json` (read-only without `--write`) says whether it is Ready. A failed command is a signal, not an error to fix here: `handout validate` returns `blocked` until a meeting is complete, and `ui status` fails outside a generated project.
 
 ## Detect the stage
 

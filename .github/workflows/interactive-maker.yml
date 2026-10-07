@@ -55,8 +55,8 @@ jobs:
       - name: TypeScript and both source linters
         run: |
           node "$QUALIFIED_NPM" run typecheck:maker
-          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs src/cli plugins --max-warnings 0
-          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json src/cli plugins --no-ignore --deny-warnings
+          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs src/cli src/tui --max-warnings 0
+          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json src/cli src/tui --no-ignore --deny-warnings
           node "$QUALIFIED_NPM" run check:plugins
       - name: Workbench plugin contracts
         if: ${{ !cancelled() }}

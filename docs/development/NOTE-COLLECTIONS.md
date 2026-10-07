@@ -104,7 +104,7 @@ field option for its `related-risks` references. Otherwise no engine file change
 2. **Settings form.** In `configs/forms/user-settings.json` add, after the risks field:
    `{ "id": "learnings", "kind": "text", "label": "Learnings folder (one Markdown note per learning)", "bind": "paths.learnings", "default": "docs/learnings" }`.
    Scripted plain-prompt tests that walk this form need one more answer (for example the answers list in
-   `tests/tooling/interactive-maker-setup-ui.checks.mjs`).
+   `src/cli/tests/interactive-maker-setup-ui.checks.mjs`).
 3. **Definition.** Add `configs/collections/learning.json` with `"pathKey": "learnings"`, `"type": "Learning"`,
    `"idPrefix": "LRN-"`, its statuses, vocabularies, fields, `body`, `list`, `report` (for example
    `"file": "learnings.md"`, `"base": "learnings.base"`), `forms` and `wizards`. Omit `hook` when nothing is derived.
@@ -120,6 +120,6 @@ field option for its `related-risks` references. Otherwise no engine file change
 6. **Hook (only if needed).** Add a pure `CollectionHook` in `src/cli/domain/` and register it in
    `src/cli/domain/collection-hooks.ts`.
 7. **Tests.** Add the new wizard and form ids to `shippedWizards`/`shippedForms` in
-   `tests/tooling/interactive-maker-wizard-catalog.checks.mjs`, and add `tests/tooling/interactive-maker-<plural>-*.checks.mjs`
+   `src/cli/tests/interactive-maker-wizard-catalog.checks.mjs`, and add `src/cli/tests/interactive-maker-<plural>-*.checks.mjs`
    (they run in the `maker` suite; learnings use `learnings-` because `interactive-maker-learning-*` belongs to the
    `learn` courses). A fake-data preset in `configs/fake-data/entities/` shows the format.

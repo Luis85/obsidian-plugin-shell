@@ -4,8 +4,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 4723,
-      "sha256": "05c05971016e14424c7f4b36266e02ebbd98a651480bccac519e46e07f344856"
+      "bytes": 4726,
+      "sha256": "546e6767a7c3cb05ed5fbf8264f93a499a91ff5f99ec03bdb1c2c4ea4d0eeaea"
     },
     {
       "path": "SKILL.md",
@@ -104,8 +104,8 @@
     },
     {
       "path": "references/repository-contract.md",
-      "bytes": 9673,
-      "sha256": "c7c49a79e793c614a47ba2a9ac1462360575f36f0515aa2228b05a3fb5996dda"
+      "bytes": 9711,
+      "sha256": "da3a698ed0cfb5fd40dc07879c69b85caa7a3882aa1cf0fd820fe9bc380c7a94"
     },
     {
       "path": "references/subagents.md",
@@ -114,8 +114,8 @@
     },
     {
       "path": "references/tooling-integration.md",
-      "bytes": 9835,
-      "sha256": "7f6f5a3ee124591937cd81d44e071059382276ea905f0f0f99b7d0f27c6c7725"
+      "bytes": 9842,
+      "sha256": "b12c022237415ebc2d092919623aab3ccd074d2c21625ae7ebefb372d6668edc"
     },
     {
       "path": "references/tooling-verification.md",
@@ -154,8 +154,8 @@
     },
     {
       "path": "scripts/inspect-repository.mjs",
-      "bytes": 3419,
-      "sha256": "e14d86441b915841f1d1a444ba216a4757ec4a0871cc63651428636618df91bb"
+      "bytes": 3717,
+      "sha256": "b0dda919175659eb513ebc50e4c4d4eeb9579f134828776a8d744838c18457d3"
     },
     {
       "path": "scripts/lib/build-output.mjs",
@@ -164,8 +164,8 @@
     },
     {
       "path": "scripts/lib/build-worker.mjs",
-      "bytes": 4566,
-      "sha256": "90995330a0b5d34d1567a4eaa7d1de27c0b205d551dcf3255eaf558f8bcbb50e"
+      "bytes": 4690,
+      "sha256": "2ea0dff4990eb62aeda515c24e7495140ecfeea51fccbd014febe110e947d747"
     },
     {
       "path": "scripts/lib/framework.mjs",
@@ -174,8 +174,8 @@
     },
     {
       "path": "scripts/lib/io.mjs",
-      "bytes": 3703,
-      "sha256": "c3778d5d2c8b7da9f00e1df8143c7928cbcfe432c574560517640e7f8dc3b27a"
+      "bytes": 4035,
+      "sha256": "cadf107367ba1fbf7467348226dd5a0799dad6e0255832ed424a8aeaccdb535b"
     },
     {
       "path": "scripts/lib/offline.mjs",
@@ -199,13 +199,13 @@
     },
     {
       "path": "scripts/save-concept.mjs",
-      "bytes": 3925,
-      "sha256": "61f5fdc3af1121f459f1f20eef0809a2e7b0227a33ff95d3c4cfd35a027bfed6"
+      "bytes": 4001,
+      "sha256": "2855610e7391f2b1ff134cb22320fbf294cad51248d7d79018016f60b7e392c2"
     },
     {
       "path": "scripts/validate-project.mjs",
-      "bytes": 4715,
-      "sha256": "1767a2739893de66c569d076335340e9b9eebb755fa3b179850a16e1e043fd41"
+      "bytes": 4785,
+      "sha256": "3257e66a7533fcb92ac37108665cbfc0ec6ce13c33914bbbf4dc17d63070c474"
     },
     {
       "path": "scripts/verify-browser.mjs",
