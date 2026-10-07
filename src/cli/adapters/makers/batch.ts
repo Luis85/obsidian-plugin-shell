@@ -53,6 +53,17 @@ function parseBatch(input: unknown): BatchStep[] {
   if (!input.steps.length || input.steps.length > maxSteps) throw new Error(`A batch has 1 to ${maxSteps} steps`);
   return input.steps.map(parseStep);
 }
+/** A feature step must create a new feature; a child step needs one from an earlier step or on disk. */
+async function claimOwner(root: string, owners: Set<string>, maker: string, owner: string | undefined): Promise<void> {
+  if (!owner) return;
+  const exists = owners.has(owner) || await ownerDirectoryExists(root, owner);
+  if (maker !== 'feature') {
+    if (!exists) throw new Error(`Feature ${owner} does not exist. Add a { "recipe": "feature", "name": "${owner}", "bare": true } step before it.`);
+    return;
+  }
+  if (exists) throw new Error(`Feature ${owner} already exists. Use a child recipe to extend it.`);
+  owners.add(owner);
+}
 /**
  * Plan every step in one shared maker context: later steps see earlier outputs (a feature
  * created in step 1 owns the file extension of step 2), and the result is one reviewed file
@@ -65,13 +76,7 @@ export async function planMakerBatch(root: string, input: unknown): Promise<Plan
   for (const [index, step] of steps.entries()) {
     try {
       const request = resolveRequest(step.arguments);
-      const { maker, owner } = request;
-      if (owner) {
-        const exists = owners.has(owner) || await ownerDirectoryExists(root, owner);
-        if (maker === 'feature' && exists) throw new Error(`Feature ${owner} already exists. Use a child recipe to extend it.`);
-        if (maker !== 'feature' && !exists) throw new Error(`Feature ${owner} does not exist. Add a { "recipe": "feature", "name": "${owner}", "bare": true } step before it.`);
-        if (maker === 'feature') owners.add(owner);
-      }
+      await claimOwner(root, owners, request.maker, request.owner);
       await dispatchMaker(context, request);
     } catch (error) {
       throw new Error(`steps[${index}] (${step.recipe} ${step.name}): ${error instanceof Error ? error.message : String(error)}`);
