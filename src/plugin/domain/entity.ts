@@ -1,6 +1,6 @@
 import { failure, success, type Result } from './outcome';
 
-interface Field<T, Required extends boolean = boolean> {
+export interface Field<T, Required extends boolean = boolean> {
   readonly required: Required;
   readonly kind: 'text' | 'number' | 'boolean' | 'date' | 'list';
   readonly optional?: boolean;

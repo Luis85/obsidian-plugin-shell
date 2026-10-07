@@ -1,5 +1,5 @@
 import { companionStarterSet } from './starter-project.ts';
-import { customizeStarter } from '../starters/customize.ts';
+import { customizeStarter } from '#shared/companion/starters/customize.ts';
 import { serializeJson } from '#shared/contracts/serialization.ts';
 import { requireThat, stringOption, type Request, type Context } from './contracts.ts';
 import type { Configuration } from './configuration.ts';

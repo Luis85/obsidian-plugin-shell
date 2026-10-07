@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { companionStarters, loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
-import { customizeStarter } from '../../src/cli/adapters/starters/customize.ts';
+import { customizeStarter } from '../../src/shared/companion/starters/customize.ts';
 import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),id=process.argv[2];
 const entry=companionStarters(await loadDefinitions(root)).find(s=>s.definition.id===id);

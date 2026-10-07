@@ -2,7 +2,7 @@ import type { Readable } from 'node:stream';
 import type { Workspace } from '../application/workspace.ts';
 import type { Prompts } from '#tui/prompts.ts';
 import type { FrameworkAdapter } from '../compiler/adapters/project/framework-adapter.ts';
-import type { StarterDefinition } from '../adapters/starters/types.ts';
+import type { StarterDefinition } from '#shared/companion/starters/types.ts';
 import type { ComponentTemplate } from '../domain/component-template.ts';
 
 export interface PluginManifest {

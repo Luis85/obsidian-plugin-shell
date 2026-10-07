@@ -1,7 +1,7 @@
 import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { projectConfigPath, retiredProjectConfigPath } from '../compiler/domain/project-config.ts';
-import { validateProjectSelection } from '../compiler/domain/project-starter.ts';
+import { validateProjectSelection } from '../compiler/adapters/project/selection.ts';
 import { openDocument } from '../domain/document.ts';
 import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { prepared, type Prepared } from './storage.ts';

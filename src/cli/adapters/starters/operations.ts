@@ -5,7 +5,7 @@ import { createFilePlan, applyFilePlan } from '#shared/platform/file-plan.ts';
 import { hash, readBounded, exists } from '../framework/files.ts';
 import { zip } from '../framework/zip.ts';
 import { result, requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
-import { STARTER_MAX_BYTES } from './browser.ts';
+import { STARTER_MAX_BYTES } from '#shared/companion/starters/browser.ts';
 import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts';
 import { pluginStarterDefinitions } from '../../sdk/runtime.ts';
 import { parseJsonData } from '#shared/contracts/json-data.ts';

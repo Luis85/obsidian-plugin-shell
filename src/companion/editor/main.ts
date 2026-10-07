@@ -1,4 +1,4 @@
-export { parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '../../cli/adapters/starters/browser.ts';
+export { parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '#shared/companion/starters/browser.ts';
 export { prototypeApi } from '#shared/companion/prototypes/api.ts';
 export { mountPrototypes } from './prototype-manager.ts';
 import './prototypes.css';

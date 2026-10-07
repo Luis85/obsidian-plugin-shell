@@ -1,0 +1,17 @@
+{
+  "extends": "../../configs/types/tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "declarationDir": "../../.cache/tsbuild/shared",
+    "tsBuildInfoFile": "../../.cache/tsbuild/shared.tsbuildinfo"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.mjs",
+    "**/*.d.mts"
+  ],
+  "exclude": [
+    "tests/**"
+  ],
+  "references": []
+}

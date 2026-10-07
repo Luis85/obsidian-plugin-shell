@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { lstat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
@@ -97,15 +98,28 @@ const pluginChecks: readonly MakerCheck[] = [
   { id: 'plugin-types', command: 'node', args: ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'configs/types/tsconfig.maker.json'] },
   { id: 'plugin-tests', command: 'node', args: ['scripts/testing/suites.mjs', 'workbench-plugins'] },
 ];
+/** A root `tsconfig.json` that is a solution (`files: []` plus `references`) checks no file with `--noEmit`. */
+function solutionRoot(root: string): boolean {
+  let config: unknown;
+  try { config = JSON.parse(readFileSync(resolve(root, 'tsconfig.json'), 'utf8')); } catch { return false; }
+  if (config === null || typeof config !== 'object' || Array.isArray(config)) return false;
+  const { files, references } = config as { files?: unknown; references?: unknown };
+  return Array.isArray(files) && files.length === 0 && Array.isArray(references) && references.length > 0;
+}
+/** Type-check step: a generated project's own config, a solution root in build mode, otherwise the root config. */
+export function makerTypecheck(root: string): MakerCheck {
+  const tsconfig = projectConfigPath(root, 'typescript');
+  const args = tsconfig ? ['--noEmit', '--project', tsconfig] : solutionRoot(root) ? ['-b'] : ['--noEmit'];
+  return { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', ...args] };
+}
 /** A generated project checks its own project-scoped TypeScript and Vitest configuration, the same ones `check` uses. */
 function planChecks(root: string, maker: string, tests: ReadonlySet<string>): MakerCheck[] {
   const runtimeTests = [...tests].filter((path) => path.endsWith('.test.ts'));
   const toolingTests = [...tests].filter((path) => path.endsWith('.checks.mjs'));
-  const tsconfig = projectConfigPath(root, 'typescript');
   const vitestConfig = projectConfigPath(root, 'vitest') ?? 'configs/testing/vitest.config.mjs';
   return [
     ...(maker === 'plugin' ? pluginChecks : []),
-    { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit', ...(tsconfig ? ['--project', tsconfig] : [])] },
+    makerTypecheck(root),
     ...(runtimeTests.length
       ? [{ id: 'generated-tests', command: 'node' as const, args: ['node_modules/vitest/vitest.mjs', 'run', '--config', vitestConfig, ...runtimeTests] }]
       : []),

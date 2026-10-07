@@ -5,8 +5,8 @@ import { VISUAL_CONTROL_KINDS } from '#shared/companion/visual/visual-mapping.mj
 import { VISUAL_ACTION_KINDS, VISUAL_STATES, VISUAL_LAYOUT_MODES, visualNodes, visualRoot, type VisualDesigns } from '#shared/companion/visual/visual-ir.mjs';
 import { validateVisualDesigns } from '#shared/companion/visual/visual-validate.mjs';
 import { editorBindings, SHIPPED_EDITORS } from '#shared/companion/sitemap/editor-bindings.ts';
-import { validateDefinition } from './validation.ts';
-import type { StarterDefinition } from './types.ts';
+import { validateDefinition } from '#shared/companion/starters/validation.ts';
+import type { StarterDefinition } from '#shared/companion/starters/types.ts';
 function inventory(expected: readonly string[], used: Set<string>) {
   return { expected: [...expected], used: [...used].sort(), missing: expected.filter(id => !used.has(id)) };
 }

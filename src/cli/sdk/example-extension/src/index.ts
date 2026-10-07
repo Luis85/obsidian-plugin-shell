@@ -2,7 +2,7 @@ import manifest from '../manifest.json' with { type: 'json' };
 import config from '../config.json' with { type: 'json' };
 import { definePluginEvent, type WorkbenchPluginObject } from '../../api.ts';
 import { defineFrameworkAdapter } from '../../../compiler/adapters/project/framework-adapter.ts';
-import type { StarterDefinition } from '../../../adapters/starters/types.ts';
+import type { StarterDefinition } from '#shared/companion/starters/types.ts';
 
 export const exampleNotice = definePluginEvent('example-extension.notice',
   (value): value is { message: string } => Boolean(value && typeof value === 'object'

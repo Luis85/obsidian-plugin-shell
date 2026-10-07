@@ -30,7 +30,7 @@ export function verifySteps(env = process.env) {
     toolingStep(env),
     script('workbench-suite', 'tooling/testing/suites.mjs', ['workbench-plugins'], ['suites-check']),
     script('workbench-check', 'tooling/quality/check-workbench-plugins.mjs'),
-    script('typecheck', vueTsc, ['--noEmit'], ['build']),
+    script('typecheck', vueTsc, ['-b'], ['build']),
     script('lint-source', 'tooling/quality/lint-source.mjs'),
     script('eslint-source', eslint, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'src/cli/sdk', '--max-warnings', '0'], ['build']),
     script('maker-types', 'node_modules/typescript/bin/tsc', ['--noEmit', '--project', 'configs/types/tsconfig.maker.json']),

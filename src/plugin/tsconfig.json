@@ -1,0 +1,25 @@
+{
+  "extends": "../../configs/types/tsconfig.browser.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "declarationDir": "../../.cache/tsbuild/plugin",
+    "tsBuildInfoFile": "../../.cache/tsbuild/plugin.tsbuildinfo",
+    "paths": {
+      "#build/*": [
+        "../../node_modules/.nuxt-ui/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.vue"
+  ],
+  "exclude": [
+    "tests/**"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
+}
