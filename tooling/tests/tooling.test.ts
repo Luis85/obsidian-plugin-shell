@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { mkdtemp, mkdir, writeFile, readFile, rm, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 // @ts-expect-error The dependency-free .mjs CLI helper has no emitted declarations.
-import { installLocal } from '../../../../tooling/dev/install-local.mjs';
+import { installLocal } from '../dev/install-local.mjs';
 const root = process.cwd();
 async function workspace() {
   const dir = await mkdtemp(join(tmpdir(), 'shell-iteration-'));
@@ -41,36 +41,36 @@ describe('Real tooling boundaries', () => {
   it('[TOOL-I03] setup help and dry run execute without node_modules', async () => {
     const dir = await workspace();
     try {
-      await cp(join(root, 'scripts/setup.mjs'), join(dir, 'setup.mjs'));
-      await cp(join(root, 'scripts/setup'), join(dir, 'setup'), { recursive: true });
-      await cp(join(root, 'scripts/shared'), join(dir, 'shared'), { recursive: true });
-      await cp(join(root, 'scripts/agent/mcp-config.mjs'), join(dir, 'agent/mcp-config.mjs'));
-      await cp(join(root, 'scripts/companion/schema/hosting.mjs'), join(dir, 'companion/schema/hosting.mjs'));
+      // The dependency-free setup entry plus its complete relative import closure, kept at the repository layout.
+      for (const path of ['tooling/setup.mjs', 'tooling/setup', 'src/shared/platform', 'src/cli/tooling/agent/mcp-config.mjs', 'src/shared/companion/schema/hosting.mjs', 'configs/forms/setup-identity.json']) {
+        await mkdir(dirname(join(dir, path)), { recursive: true });
+        await cp(join(root, path), join(dir, path), { recursive: true });
+      }
       for (const name of ['manifest.json', 'package-lock.json', 'versions.json']) await cp(join(root, name), join(dir, name));
       await cp(join(root, 'package.json'), join(dir, 'package.json'));
       for (const args of [['--help'], ['--dry-run']]) {
-        const result = spawnSync(process.execPath, [join(dir, 'setup.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 5000 });
+        const result = spawnSync(process.execPath, [join(dir, 'tooling/setup.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 5000 });
         expect(result.status, result.stderr).toBe(0);
       }
-      const bad = spawnSync(process.execPath, [join(dir, 'setup.mjs'), '--unknown'], { cwd: dir, encoding: 'utf8', timeout: 5000 }); expect(bad.status).not.toBe(0);
+      const bad = spawnSync(process.execPath, [join(dir, 'tooling/setup.mjs'), '--unknown'], { cwd: dir, encoding: 'utf8', timeout: 5000 }); expect(bad.status).not.toBe(0);
     } finally { await rm(dir, { recursive: true, force: true }); }
   });
   it('[TOOL-I04] the real fallow analyzer rejects forbidden edges and unclassified files', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'shell-boundary-'));
     try {
-      await mkdir(join(dir, 'src/application'), { recursive: true }); await mkdir(join(dir, 'src/infrastructure'), { recursive: true });
-      await mkdir(join(dir, 'src/features'), { recursive: true });
+      await mkdir(join(dir, 'src/plugin/application'), { recursive: true }); await mkdir(join(dir, 'src/plugin/infrastructure'), { recursive: true });
+      await mkdir(join(dir, 'src/plugin/features'), { recursive: true });
       await mkdir(join(dir, 'tests'), { recursive: true });
       await cp(join(root, 'configs/quality/fallow.json'), join(dir, '.fallowrc.json'));
-      await mkdir(join(dir, 'scripts/quality'), { recursive: true });
-      await cp(join(root, 'scripts/quality/fallow-node-tests.json'), join(dir, 'scripts/quality/fallow-node-tests.json'));
+      await mkdir(join(dir, 'tooling/quality'), { recursive: true });
+      await cp(join(root, 'tooling/quality/fallow-node-tests.json'), join(dir, 'tooling/quality/fallow-node-tests.json'));
       await writeFile(join(dir, 'package.json'), '{"name":"boundary-fixture","type":"module"}');
-      await writeFile(join(dir, 'src/main.ts'), "import './application/bad'; import './features/bad'; import './unclassified'; import '../tests/production-leak';");
+      await writeFile(join(dir, 'src/plugin/main.ts'), "import './application/bad'; import './features/bad'; import './unclassified'; import '../../tests/production-leak';");
       await writeFile(join(dir, 'tests/production-leak.ts'), 'export const testOnly = true;');
-      await writeFile(join(dir, 'src/application/bad.ts'), "import { leak } from '../infrastructure/leak'; export const value = leak;");
-      await writeFile(join(dir, 'src/infrastructure/leak.ts'), 'export const leak = 1;');
-      await writeFile(join(dir, 'src/features/bad.ts'), "import { leak } from '../infrastructure/leak'; export const value = leak;");
-      await writeFile(join(dir, 'src/unclassified.ts'), 'export const unknown = 1;');
+      await writeFile(join(dir, 'src/plugin/application/bad.ts'), "import { leak } from '../infrastructure/leak'; export const value = leak;");
+      await writeFile(join(dir, 'src/plugin/infrastructure/leak.ts'), 'export const leak = 1;');
+      await writeFile(join(dir, 'src/plugin/features/bad.ts'), "import { leak } from '../infrastructure/leak'; export const value = leak;");
+      await writeFile(join(dir, 'src/plugin/unclassified.ts'), 'export const unknown = 1;');
       const result = spawnSync(process.execPath, [resolve('node_modules/fallow/bin/fallow'), '--format', 'json', 'dead-code', '--boundary-violations'], { cwd: dir, encoding: 'utf8', timeout: 15000 });
       const report = JSON.parse(result.stdout); expect(result.status).not.toBe(0);
       expect(report.summary.boundary_violations).toBeGreaterThan(0); expect(report.summary.boundary_coverage_violations).toBeGreaterThan(0);

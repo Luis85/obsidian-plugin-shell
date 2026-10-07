@@ -8,7 +8,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
+PREFIX = 'docs/concepts/companion/'
+
+
+def ignore_tests(directory, names):
+    """Skip bytecode and each project's own tests folder; the assembly never reads either."""
+    return [name for name in names if name == '__pycache__' or (name == 'tests' and Path(directory).name in {'tooling', 'cli', 'shared', 'companion', 'plugin', 'tui'})]
 
 
 class AssemblyContract(unittest.TestCase):
@@ -16,18 +22,19 @@ class AssemblyContract(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory(prefix='companion-assembly-')
         self.root = Path(self.tmp.name)
         self.concept = self.root / 'docs/concepts/companion'
-        shutil.copytree(ROOT / 'docs/concepts/companion/src', self.concept / 'src')
+        self.app = self.root / 'src/companion/app'
+        shutil.copytree(ROOT / 'src/companion/app', self.app)
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
         # The schema 6 project contract is bundled from the copied sources with the pinned local toolchain;
-        # its browser starter model lives with the development sources in src/cli.
-        shutil.copytree(ROOT / 'scripts', self.root / 'scripts', ignore=shutil.ignore_patterns('__pycache__'))
-        shutil.copytree(ROOT / 'src/cli', self.root / 'src/cli', ignore=shutil.ignore_patterns('__pycache__'))
+        # the repository layout is mirrored so the assembly finds every input where it does in the checkout.
+        for folder in ['tooling', 'src/shared', 'src/cli']:
+            shutil.copytree(ROOT / folder, self.root / folder, ignore=ignore_tests)
         (self.root / 'node_modules').symlink_to(ROOT / 'node_modules', target_is_directory=True)
         shutil.copy(ROOT / 'package.json', self.root / 'package.json')
         (self.root / 'configs/quality').mkdir(parents=True, exist_ok=True)
         shutil.copy(ROOT / 'configs/quality/fallow.json', self.root / 'configs/quality/fallow.json')
-        spec = importlib.util.spec_from_file_location('companion_assembly', ROOT / 'scripts/concepts/build-companion.py')
+        spec = importlib.util.spec_from_file_location('companion_assembly', ROOT / 'tooling/concepts/build-companion.py')
         self.builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.builder)
         self.builder.ROOT = self.concept
@@ -53,7 +60,7 @@ class AssemblyContract(unittest.TestCase):
         self.assertLess(html.index('const PRD_LIMITS'), html.index('const COMPANION_FORMAT = CompanionContract.COMPANION_FORMAT'))
         config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
-        value['entry'].remove('scripts/companion/prd-limits.mjs')
+        value['entry'].remove('src/shared/companion/prd-limits.mjs')
         config.write_text(json.dumps(value))
         with self.assertRaisesRegex(ValueError, 'Shared PRD limits missing from inventory'):
             self.build()
@@ -61,7 +68,7 @@ class AssemblyContract(unittest.TestCase):
     def test_bundled_project_contract_requires_explicit_inventory(self):
         config = self.root / 'configs/quality/fallow.json'
         original = config.read_text()
-        for path in ['scripts/concepts/concept-contract.ts', 'scripts/concepts/contract-bundle.mjs']:
+        for path in ['tooling/concepts/concept-contract.ts', 'tooling/concepts/contract-bundle.mjs']:
             with self.subTest(path=path):
                 value = json.loads(original)
                 value['entry'].remove(path)
@@ -76,7 +83,7 @@ class AssemblyContract(unittest.TestCase):
         for name in ['design-system-roles.mjs', 'design-system-contract.mjs', 'design-system-css.mjs']:
             with self.subTest(name=name):
                 value = json.loads(original)
-                value['entry'].remove('scripts/companion/' + name)
+                value['entry'].remove('src/shared/companion/' + name)
                 config.write_text(json.dumps(value))
                 with self.assertRaisesRegex(ValueError, 'design-system module missing'):
                     self.build()
@@ -88,9 +95,9 @@ class AssemblyContract(unittest.TestCase):
         for name in ['visual-ir.mjs', 'visual-validate.mjs', 'visual-session.mjs']:
             with self.subTest(name=name):
                 value = json.loads(original)
-                value['entry'].remove('scripts/companion/visual/' + name)
+                value['entry'].remove('src/shared/companion/visual/' + name)
                 config.write_text(json.dumps(value))
-                with self.assertRaisesRegex(ValueError, 'Visual contract missing from analyzer inventory: scripts/companion/visual/' + name):
+                with self.assertRaisesRegex(ValueError, 'Visual contract missing from analyzer inventory: src/shared/companion/visual/' + name):
                     self.build()
         config.write_text(original)
 
@@ -121,14 +128,14 @@ class AssemblyContract(unittest.TestCase):
         self.assertNotIn('dtDestroy();smDestroy()', html)
 
     def test_unassembled_source_is_not_hidden(self):
-        (self.concept / 'src/unregistered.js').write_text('console.log("unused fixture");\n')
+        (self.app / 'unregistered.js').write_text('console.log("unused fixture");\n')
         with self.assertRaisesRegex(ValueError, 'inventory differs'):
             self.build()
 
     def test_missing_analyzer_entry_is_rejected(self):
         config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
-        value['entry'].remove('docs/concepts/companion/src/state-safety.js')
+        value['entry'].remove('src/companion/app/state-safety.js')
         config.write_text(json.dumps(value))
         with self.assertRaisesRegex(ValueError, 'inventory differs'):
             self.build()
@@ -142,19 +149,19 @@ class AssemblyContract(unittest.TestCase):
     def test_missing_asset_entries_are_rejected(self):
         config = self.root / 'configs/quality/fallow.json'
         original = config.read_text()
-        for entry in ['src/surface.css', 'vendor/vue-flow.css', 'vendor/vue.runtime.global.prod.js']:
+        for entry in ['src/companion/app/surface.css', PREFIX + 'vendor/vue-flow.css', PREFIX + 'vendor/vue.runtime.global.prod.js']:
             with self.subTest(entry=entry):
                 edited = json.loads(original)
-                edited['entry'].remove('docs/concepts/companion/' + entry)
+                edited['entry'].remove(entry)
                 config.write_text(json.dumps(edited))
                 with self.assertRaisesRegex(ValueError, 'inventory differs'):
                     self.build()
         config.write_text(original)
 
     def test_unassembled_styles_and_vendor_sources_are_not_hidden(self):
-        for name in ['src/orphan.css', 'vendor/orphan.js', 'src/nested/orphan.js']:
+        for name, base in [('orphan.css', self.app), ('vendor/orphan.js', self.concept), ('nested/orphan.js', self.app)]:
             with self.subTest(name=name):
-                target = self.concept / name
+                target = base / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text('/* unassembled fixture */\n')
                 with self.assertRaisesRegex(ValueError, 'inventory differs'):
@@ -182,7 +189,7 @@ class AssemblyContract(unittest.TestCase):
     def test_duplicate_analyzer_entries_are_rejected(self):
         config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
-        value['entry'].append('docs/concepts/companion/src/state-safety.js')
+        value['entry'].append('src/companion/app/state-safety.js')
         config.write_text(json.dumps(value))
         with self.assertRaisesRegex(ValueError, 'inventory differs'):
             self.build()
@@ -190,7 +197,7 @@ class AssemblyContract(unittest.TestCase):
     def test_shared_project_contract_changes_the_generated_artifact(self):
         self.build()
         before = self.output.read_bytes()
-        shared = self.root / 'scripts/companion/authoring-contract.ts'
+        shared = self.root / 'src/shared/companion/authoring-contract.ts'
         original = shared.read_text()
         marker = 'only schema 6 is supported.'
         self.assertEqual(original.count(marker), 1)
@@ -202,7 +209,7 @@ class AssemblyContract(unittest.TestCase):
     def test_unbundleable_project_contract_fails_closed(self):
         self.build()
         before = self.output.read_bytes()
-        shared = self.root / 'scripts/companion/authoring-contract.ts'
+        shared = self.root / 'src/shared/companion/authoring-contract.ts'
         shared.write_text(shared.read_text() + '\nexport const broken = ;\n')
         with self.assertRaisesRegex(ValueError, 'Project contract bundle failed'):
             self.build()

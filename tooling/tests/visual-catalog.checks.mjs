@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { emptyVisualDesigns, visualNodes, visualWalk } from '../companion/visual/visual-ir.mjs';
-import { visualCatalog, visualRecipes, visualBuiltinLayouts, visualCatalogEntry, visualExpand, VISUAL_NUXT_UI_VERSION, VISUAL_CONTROL_ENTRIES } from '../companion/visual/visual-catalog.mjs';
+import { emptyVisualDesigns, visualNodes, visualWalk } from '#shared/companion/visual/visual-ir.mjs';
+import { visualCatalog, visualRecipes, visualBuiltinLayouts, visualCatalogEntry, visualExpand, VISUAL_NUXT_UI_VERSION, VISUAL_CONTROL_ENTRIES } from '#shared/companion/visual/visual-catalog.mjs';
 
 test('catalog pins the Nuxt UI version installed by generated projects', async () => {
   const pkg = JSON.parse(await readFile('package.json', 'utf8'));
@@ -36,7 +36,7 @@ test('every recipe and built-in layout expands deterministically with fresh IDs 
   assert.throws(() => visualExpand(s, 'recipe-missing'), /VISUAL_INVALID/);
 });
 test('the generated runtime control list mirrors the contract control entries exactly (drift guard)', async () => {
-  const { VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE } = await import('../../../templates/companion/runtime/visual-runtime.ts');
+  const { VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE } = await import('../../templates/companion/runtime/visual-runtime.ts');
   assert.deepEqual([...VISUAL_RUNTIME_CONTROLS], [...VISUAL_CONTROL_ENTRIES]);
   assert.deepEqual([...VISUAL_RUNTIME_INTERACTIVE], [...VISUAL_CONTROL_ENTRIES, 'u-button']);
 });

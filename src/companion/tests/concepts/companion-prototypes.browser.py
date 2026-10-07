@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 parser = argparse.ArgumentParser()
 parser.add_argument('--html', type=Path, default=ROOT / 'reports/companion-mvp/index.html')
 parser.add_argument('--output', type=Path, default=ROOT / 'reports/companion-mvp')

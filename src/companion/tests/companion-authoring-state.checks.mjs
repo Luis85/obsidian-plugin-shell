@@ -1,21 +1,21 @@
-import * as maintenance from '../companion/sitemap/maintenance.ts';
+import * as maintenance from '#shared/companion/sitemap/maintenance.ts';
 /** Execute the actual composable with the pinned Vue/Pinia runtime. No browser host or stubbed store actions. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
-import { SitemapSession } from '../companion/sitemap/session.ts';
-import * as commands from '../companion/sitemap/commands.ts';
-import * as projection from '../companion/sitemap/projection.ts';
-import * as layout from '../companion/sitemap/layout.ts';
-import * as arrangement from '../companion/sitemap/arrangement.ts';
-import * as create from '../companion/sitemap/create.ts';
-import * as journeyDraft from '../companion/sitemap/journey-draft.ts';
-import * as validate from '../companion/sitemap/validate.ts';
-import * as safety from '../companion/sitemap/safety.ts';
-import { canonicalKey, assertJson } from '../companion/sitemap/safety.ts';
-import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
+import { SitemapSession } from '#shared/companion/sitemap/session.ts';
+import * as commands from '#shared/companion/sitemap/commands.ts';
+import * as projection from '#shared/companion/sitemap/projection.ts';
+import * as layout from '#shared/companion/sitemap/layout.ts';
+import * as arrangement from '#shared/companion/sitemap/arrangement.ts';
+import * as create from '#shared/companion/sitemap/create.ts';
+import * as journeyDraft from '#shared/companion/sitemap/journey-draft.ts';
+import * as validate from '#shared/companion/sitemap/validate.ts';
+import * as safety from '#shared/companion/sitemap/safety.ts';
+import { canonicalKey, assertJson } from '#shared/companion/sitemap/safety.ts';
+import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { selfProject } from '../../../tests/support/starter-documents.mjs';
 const root = new URL('../../../', import.meta.url);
 // These are the same maintained runtime files used by the concept, not arbitrary imported project scripts.
@@ -23,7 +23,7 @@ const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/ve
 const Pinia = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/pinia.iife.prod.js', root), 'utf8') + ';Pinia;');
 const dependencies = { vue: Vue, pinia: Pinia, 'session.ts': { SitemapSession }, 'maintenance.ts': maintenance, 'safety.ts': safety, 'commands.ts': commands,
   'journey-draft.ts': journeyDraft, 'layout.ts': layout, 'arrangement.ts': arrangement, 'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
-const source = readFileSync(new URL('docs/concepts/companion/editor/composables/use-editor.ts', root), 'utf8');
+const source = readFileSync(new URL('src/companion/editor/composables/use-editor.ts', root), 'utf8');
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
 const exports = {};
 vm.runInThisContext('(function(require,exports){' + javascript + '\n})')(name => {

@@ -2,15 +2,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
-import { emptyStorymaps, validateStorymaps } from '../companion/storymap-contract.mjs';
-import { parseAuthoringDocument, validateAuthoringDocument, AUTHORING_VERSION } from '../companion/authoring-contract.ts';
+import { emptyStorymaps, validateStorymaps } from '#shared/companion/storymap-contract.mjs';
+import { parseAuthoringDocument, validateAuthoringDocument, AUTHORING_VERSION } from '#shared/companion/authoring-contract.ts';
 import { selfProject } from '../../../tests/support/starter-documents.mjs';
 import { retiredProject } from '../../../tests/support/retired-projects.mjs';
 
 const seed = selfProject();
-const source = await readFile('docs/concepts/companion/src/storymap-model.js', 'utf8');
+const source = await readFile('src/companion/app/storymap-model.js', 'utf8');
 const ctx = vm.createContext({ emptyStorymaps, validateStorymaps });
-vm.runInContext(source + '\n' + await readFile('docs/concepts/companion/src/storymap-export.js', 'utf8'), ctx);
+vm.runInContext(source + '\n' + await readFile('src/companion/app/storymap-export.js', 'utf8'), ctx);
 const copy = value => JSON.parse(JSON.stringify(value));
 const fixture = () => copy(seed.design.storymaps);
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -132,7 +132,7 @@ test('[STORYMAP-MARKDOWN-IDS] unresolved reference identities cannot inject Mark
   assert.ok(!out.includes(attack)); assert.ok(!out.includes('[unsafe](javascript:bad)'));
 });
 
-vm.runInContext(await readFile('docs/concepts/companion/src/storymap-review.js', 'utf8'), ctx);
+vm.runInContext(await readFile('src/companion/app/storymap-review.js', 'utf8'), ctx);
 test('[STORYMAP-REVIEW] findings are deterministic, actionable and read-only', () => {
   const d = copy(seed.design), m = d.storymaps.maps[0], before = JSON.stringify(d);
   const findings = plain(ctx.smReviewFindings(m, d));

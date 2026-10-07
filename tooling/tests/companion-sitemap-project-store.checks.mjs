@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { JourneyProjectStore, importJourneyProject, projectFilePath } from '../companion/journey/project-store.ts';
-import { SitemapSession } from '../companion/sitemap/session.ts';
-import { canonicalKey } from '../companion/sitemap/safety.ts';
-import { editorBindings } from '../companion/sitemap/editor-bindings.ts';
-import { journeyVaultFiles } from '../../../templates/companion/runtime/journey-vault.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { JourneyProjectStore, importJourneyProject, projectFilePath } from '#shared/companion/journey/project-store.ts';
+import { SitemapSession } from '#shared/companion/sitemap/session.ts';
+import { canonicalKey } from '#shared/companion/sitemap/safety.ts';
+import { editorBindings } from '#shared/companion/sitemap/editor-bindings.ts';
+import { journeyVaultFiles } from '../../templates/companion/runtime/journey-vault.ts';
+import { starterDocumentText } from '../../tests/support/starter-documents.mjs';
 const seed = starterDocumentText('quick-capture');
 function fixture(t) {
   let raw = seed, writes = 0, outcome = null, release = null;

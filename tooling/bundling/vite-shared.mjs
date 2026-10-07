@@ -19,7 +19,7 @@ function staticVendor() {
     },
     resolveId(id) {
       const replacement = replacements.get(id.replaceAll('\\', '/'));
-      if (replacement !== undefined) return `${resolve(root, 'src/infrastructure/ui/static-plugin.ts')}?qualified-ui=${replacement}`;
+      if (replacement !== undefined) return `${resolve(root, 'src/plugin/infrastructure/ui/static-plugin.ts')}?qualified-ui=${replacement}`;
     },
   };
 }

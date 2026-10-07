@@ -6,7 +6,7 @@ import os
 import hashlib,json,traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).resolve().parents[4]
 HTML=ROOT/'docs/concepts/companion/index.html'
 REPORT=ROOT/'reports/concepts/containers';REPORT.mkdir(parents=True,exist_ok=True)
 checks,errors,requests=[],[],[]

@@ -3,7 +3,7 @@ import os
 import argparse,hashlib,json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).resolve().parents[4]
 H=ROOT/'docs/concepts/companion/index.html'
 R=ROOT/'reports/concepts/reference/graph-checks.json'
 checks=[];errors=[];requests=[];fatal=None

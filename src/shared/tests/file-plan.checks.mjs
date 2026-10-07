@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import { mapBounded } from '../platform/bounded-map.ts';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, readFile, mkdir, readdir, rm, symlink, access, realpath, rename, cp } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -89,12 +89,13 @@ test('[PLAN-03-08] apply rejects an ancestor replaced by a junction after review
 }));
 
 async function setupDryRun(alias, canonical) {
-  const source = fileURLToPath(new URL('../../../', import.meta.url)); await mkdir(join(canonical, 'scripts'));
-  for (const path of ['setup.mjs', 'setup', 'shared']) await cp(join(source, 'scripts', path), join(canonical, 'scripts', path), { recursive: true });
-  await cp(join(source, 'scripts/agent/mcp-config.mjs'), join(canonical, 'scripts/agent/mcp-config.mjs'));
-  await cp(join(source, 'scripts/companion/schema/hosting.mjs'), join(canonical, 'scripts/companion/schema/hosting.mjs'));
+  const source = fileURLToPath(new URL('../../../', import.meta.url));
+  // The dependency-free setup entry plus its complete relative import closure, kept at the repository layout.
+  for (const path of ['tooling/setup.mjs', 'tooling/setup', 'src/shared/platform', 'src/cli/tooling/agent/mcp-config.mjs', 'src/shared/companion/schema/hosting.mjs', 'configs/forms/setup-identity.json']) {
+    await mkdir(dirname(join(canonical, path)), { recursive: true }); await cp(join(source, path), join(canonical, path), { recursive: true });
+  }
   for (const name of ['manifest.json', 'package.json', 'package-lock.json', 'versions.json']) await cp(join(source, name), join(canonical, name));
-  const result = spawnSync(process.execPath, [join(alias, 'scripts/setup.mjs'), '--dry-run', '--json'], { cwd: alias, encoding: 'utf8', timeout: 15000 });
+  const result = spawnSync(process.execPath, [join(alias, 'tooling/setup.mjs'), '--dry-run', '--json'], { cwd: alias, encoding: 'utf8', timeout: 15000 });
   assert.equal(result.status, 0, result.stdout + result.stderr); assert.equal(JSON.parse(result.stdout).dryRun, true);
   await assert.rejects(access(join(canonical, '.template-state')));
 }
