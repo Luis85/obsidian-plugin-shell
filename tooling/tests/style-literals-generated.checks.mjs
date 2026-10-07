@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
-import { parseBrowserStarter } from '../../src/cli/adapters/starters/browser.ts';
+import { parseBrowserStarter } from '../../src/shared/companion/starters/browser.ts';
 import { evaluateStyleFiles, validateAllowlist, formatFindings } from '../styles/check-style-literals.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);
 const catalog = JSON.parse(await readFile(new URL('docs/design/obsidian-tokens.json', `file://${root}`), 'utf8'));

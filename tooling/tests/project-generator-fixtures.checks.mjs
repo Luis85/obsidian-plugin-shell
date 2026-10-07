@@ -9,7 +9,7 @@ import { loadTemplateSnapshot } from '../../src/cli/compiler/adapters/template-s
 import { validateSourceOverrides } from '../../templates/companion/runtime/source-overrides.ts';
 import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engine.mjs';
 import { planFixtures, applyFixtures } from '../../docs/concepts/companion/test-kit/storage.mjs';
-import { selfProject } from '../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const root=process.cwd();
 const template=await loadTemplateSnapshot(root);
 const seed=selfProject();

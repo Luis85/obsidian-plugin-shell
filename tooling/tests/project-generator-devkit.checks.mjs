@@ -10,7 +10,7 @@ import { planProject, applyProject } from '../../src/cli/compiler/adapters/proje
 import { renderTemplate } from '../../src/cli/compiler/emitters/devkit-files.ts';
 import { rebaseMarkdown, relocatedPath } from '../../src/cli/compiler/emitters/framework-docs.ts';
 import { inspectWorkflow, markdownLinks } from '../quality/check-repository.mjs';
-import { starterDocument } from '../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 import { permission } from './support/claude-permissions.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));

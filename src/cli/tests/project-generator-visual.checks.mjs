@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import { createApp, effectScope, nextTick, reactive } from 'vue';
 import { Window } from 'happy-dom';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 
 // Resolves through ancestor node_modules so the check also runs inside git worktrees.
 const tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
@@ -295,7 +295,7 @@ const { visualNodes } = await import('#shared/companion/visual/visual-ir.mjs');
 const { parse: parseSfc, compileTemplate } = await import('vue/compiler-sfc');
 /** Golden fixture: the reviewed visual store fixture on the current self-project plus an editor wrapping a declared package and a placeholder component. */
 function goldenFixture() {
-  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-store.json', 'utf8'));
+  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('src/shared/testing/fixtures/companion/visual-store.json', 'utf8'));
   const [page] = design.nodes.filter(n => n.kind === 'page'), view = design.nodes.find(n => n.kind === 'view');
   // Internal pages belong to the native view (the v6 sitemap contract).
   design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: view.id, components: [], bricks: [] })));

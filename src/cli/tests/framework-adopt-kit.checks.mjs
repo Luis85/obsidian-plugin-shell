@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { included } from '../adapters/framework/distribution.ts';
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
 import { listFiles } from '../adapters/framework/kit-integrity.ts';
-import { materialize } from './interactive-maker-adopt-fixture.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { materialize } from './support/interactive-maker-adopt-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const templates = ['templates/adoption/claude-skill/SKILL.md', 'templates/adoption/agents-skill/SKILL.md'];

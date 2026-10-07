@@ -19,7 +19,7 @@ The separate historical style specimen is still available:
 
 ```sh
 node tooling/harness/serve-style-fixture.mjs --port 4174
-node --test src/plugin/tests/harness-styles/server.test.mjs
+node --test tooling/tests/harness-styles/server.test.mjs
 ```
 
 Inspect light/dark controls, settings, notices and a modal in the printed loopback URL. These are isolated appearance/interaction specimens; they create no notes and do not run Vue or native Obsidian. See [host-style documentation](../testing/HARNESS-STYLES.md) and the [review evidence](../_archive/reviews/2026-09-22-product-review.md).

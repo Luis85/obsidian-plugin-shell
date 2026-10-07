@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
-import { api, document as projectDocument, workspace, activate, main } from '../../tests/support/prototype-fixture.mjs';
+import { api, document as projectDocument, workspace, activate, main } from '#shared/testing/prototype-fixture.mjs';
 const bridge=readFileSync(new URL('../concepts/prototype-bridge.js',import.meta.url),'utf8');
 // The trusted adapter executes unchanged. Only host ports are injected to exercise failure boundaries.
 function host({remember=true,commit=true,valid=true,conflict=false}={}) {

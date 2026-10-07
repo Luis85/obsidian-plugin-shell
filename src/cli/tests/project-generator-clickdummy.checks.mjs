@@ -9,7 +9,7 @@ import { projectModel } from '../compiler/emitters/model.ts';
 import { projectFiles } from './support/project-render.mjs';
 import { clickdummyCode } from '../compiler/emitters/clickdummy-code.ts';
 import { matches } from '#shared/companion/runtime-contract.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../../',import.meta.url));
 const document = selfProject();
 const model = projectModel(document);

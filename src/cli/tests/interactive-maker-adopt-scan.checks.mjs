@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { readGit, remoteHost } from '../adapters/framework/adopt-git.ts';
 import { defaultLimits, scanProject } from '../adapters/framework/adopt-scan.ts';
 import { readTargets } from '../adapters/framework/adopt-targets.ts';
-import { fileSymlink } from './file-symlink.mjs';
-import { frameworkRoot, git, initRepository, withProject } from './interactive-maker-adopt-fixture.mjs';
+import { fileSymlink } from './support/file-symlink.mjs';
+import { frameworkRoot, git, initRepository, withProject } from './support/interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const put = async (root, path, content = 'x') => { await mkdir(join(root, path, '..'), { recursive: true }); await writeFile(join(root, path), content); };

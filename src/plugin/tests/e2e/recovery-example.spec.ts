@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { instrument, ready, ledger, writes } from './persistence-lifecycle-fixture';
-import { retainNativeAction } from '../../../../tooling/testing/native-recovery-handles.mjs';
+import { retainNativeAction } from '../../../shared/testing/native-recovery-handles.mjs';
 
 test('[RECOVERY-BROWSER] owned recovery completes, cancels and rejects a retained actual action after owner close', async ({ page }) => {
   const errors: string[] = [];

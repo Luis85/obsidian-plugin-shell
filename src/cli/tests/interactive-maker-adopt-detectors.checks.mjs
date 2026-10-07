@@ -3,7 +3,7 @@ import { analyzeInventory } from '../application/adoption/analyze.ts';
 import { builderClass } from '../domain/adoption/angular.ts';
 import { InventoryView, parseLooseJson } from '../domain/adoption/source.ts';
 import { majorOf, rangeAdmitsMajor, versionOf } from '../domain/adoption/version.ts';
-import { inventoryOf, noTargets, targets } from './interactive-maker-adopt-fixture.mjs';
+import { inventoryOf, noTargets, targets } from './support/interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const analyze = (files, options = {}, target = targets) => analyzeInventory(inventoryOf(files, options), target, null);

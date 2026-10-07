@@ -5,7 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } f
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { parseDocument } from 'yaml';
-import { changelog, docsIndex, handoffPath, readyHandoff, repositoryRoot } from '../../src/cli/tests/delivery-fixture.mjs';
+import { changelog, docsIndex, handoffPath, readyHandoff, repositoryRoot } from '../../src/cli/tests/support/delivery-fixture.mjs';
 import { inspectWorkflow } from '../quality/check-repository.mjs';
 import { validateChangelog } from '../../src/cli/tooling/release/changelog.mjs';
 

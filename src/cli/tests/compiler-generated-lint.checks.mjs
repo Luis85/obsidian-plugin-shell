@@ -6,7 +6,7 @@ import { dirname, isAbsolute, join, relative, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
-import { parseBrowserStarter } from '../adapters/starters/browser.ts';
+import { parseBrowserStarter } from '#shared/companion/starters/browser.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url)), template = await loadTemplateSnapshot(root);
 const eslint = join(root, 'node_modules/eslint/bin/eslint.js'), oxlint = join(root, 'node_modules/oxlint/bin/oxlint');

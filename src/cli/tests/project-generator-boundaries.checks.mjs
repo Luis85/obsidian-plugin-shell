@@ -12,7 +12,7 @@ import { projectFiles } from './support/project-render.mjs';
 import { visualSpecs } from '../compiler/emitters/visual-model.ts';
 import { visualSources } from '../compiler/emitters/visual-ports.ts';
 import { noteEntity } from '../compiler/emitters/persistence-code.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 import { visualSession, visualVisible } from '#shared/companion/visual/visual-session.mjs';
 import { visualLocate } from '#shared/companion/visual/visual-ir.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url));

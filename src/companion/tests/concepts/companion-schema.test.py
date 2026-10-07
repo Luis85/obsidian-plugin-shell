@@ -7,7 +7,7 @@ import jsonschema
 
 ROOT = Path(__file__).resolve().parents[4]
 COMMAND = [os.environ.get('NODE', 'node'), '--experimental-strip-types', '--input-type=module', '-e',
-           "import {schemaCorpus} from './src/shared/tests/companion-schema-fixture.mjs'; "
+           "import {schemaCorpus} from '#shared/testing/companion-schema-fixture.mjs'; "
            "process.stdout.write(JSON.stringify(schemaCorpus()));"]
 
 

@@ -10,7 +10,7 @@ import { detailValue } from '../../../templates/companion/runtime/detail-actions
 import { visualTextValue, visualIndex } from '../../../templates/companion/runtime/visual-runtime.ts';
 import { visualSession, visualVisible } from '#shared/companion/visual/visual-session.mjs';
 import { visualNodes } from '#shared/companion/visual/visual-ir.mjs';
-const fixture = JSON.parse(await readFile(new URL('./fixtures/companion/visual-project.json', import.meta.url), 'utf8'));
+const fixture = JSON.parse(await readFile(new URL('../../shared/testing/fixtures/companion/visual-project.json', import.meta.url), 'utf8'));
 const clone = () => structuredClone(fixture);
 const compile = d => { const m = projectModel(d), specs = visualSpecs(m); visualSources(m, specs); return specs; };
 const lit = value => ({ kind: 'literal', value });

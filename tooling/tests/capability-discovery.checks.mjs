@@ -6,12 +6,12 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertJsonData, parseJsonData } from '#shared/contracts/json-data.ts';
 import { spawnSync } from 'node:child_process';
-import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../adapters/operations/catalog.ts';
-import { builtinRecipes, parseArguments } from '../adapters/makers/arguments.ts';
-import { builtinHandlers } from '../adapters/makers/dispatch.ts';
-import { handleRequest, validateMessage, protocolHandlers } from '../adapters/operations/protocol.ts';
+import { capabilityCatalog, validateCatalog, validateCatalogParity } from '../../src/cli/adapters/operations/catalog.ts';
+import { builtinRecipes, parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
+import { builtinHandlers } from '../../src/cli/adapters/makers/dispatch.ts';
+import { handleRequest, validateMessage, protocolHandlers } from '../../src/cli/adapters/operations/protocol.ts';
 
-const root = fileURLToPath(new URL('../../../', import.meta.url));
+const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = resolve(root, 'tooling/operations/cli.mjs');
 const request = (operation = 'capabilities.read', input = {}) => ({
   protocolVersion: 1, type: 'request', requestId: 'probe-001', operation, input,

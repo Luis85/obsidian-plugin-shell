@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { projectModel } from '../../compiler/emitters/model.ts';
 import { noteWireSchemas } from '../../compiler/emitters/note-contracts.ts';
 // Reviewed visual page (IDs vp-5993, vn-5994..vn-6008, vi-6009) with typed controls, a mapped save and a slotted component.
-const boundaryPage = JSON.parse(readFileSync(new URL('../../../../tests/fixtures/companion/boundary-page.json', import.meta.url), 'utf8'));
+const boundaryPage = JSON.parse(readFileSync(new URL('./companion/boundary-page.json', import.meta.url), 'utf8'));
 export function boundaryProject(original) {
   const project = structuredClone(original), design = project.design;
   const entity = structuredClone(design.semantic.entities[0]);

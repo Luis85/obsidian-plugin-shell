@@ -6,7 +6,7 @@ import { validateAuthoringDocument } from '#shared/companion/authoring-contract.
 import { prototypeNavigation } from '../editor/prototype-navigation.ts';
 import { prototypeComparisonView } from '../editor/prototype-comparison-view.ts';
 import { prototypeView } from '../editor/prototype-view.ts';
-import { api, document, workspace, main, alternate, activate, fork } from '../../../tests/support/prototype-fixture.mjs';
+import { api, document, workspace, main, alternate, activate, fork } from '#shared/testing/prototype-fixture.mjs';
 const hash = text => createHash('sha256').update(text).digest('hex');
 const lab = () => api.change(fork(activate(workspace())),{type:'save',selection:alternate,document:document('Sitemap B')});
 const restore = {type:'restore-snapshot',selection:alternate,source:main,recoveryId:'recovery-1'};

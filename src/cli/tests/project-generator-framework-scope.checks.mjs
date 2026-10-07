@@ -11,8 +11,8 @@ import { maintainerOnly } from '../compiler/emitters/framework-docs.ts';
 import { frameworkOnlyPath, referenceDocPath, withBanner, rewriteDocReferences, maintainerScript, frameworkBanner } from '../compiler/emitters/framework-scope.ts';
 import { clickdummyBuilderFiles } from '../compiler/emitters/clickdummy-builder-files.ts';
 import { buildClickdummy } from '../adapters/framework/clickdummy.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 import { evaluateCondition } from '../domain/ci-expression.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));

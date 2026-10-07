@@ -4,7 +4,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { hash } from '../adapters/framework/files.ts';
 import { brainstormWizard } from '../presentation/brainstorm.ts';
 import { brainstormFeaturePlan } from '../adapters/brainstorm.ts';
-import { BACK, brainstormScratch, scriptedRich, quickNote, readText, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { BACK, brainstormScratch, scriptedRich, quickNote, readText, readScratchJson } from './support/interactive-maker-brainstorm-fixture.mjs';
 
 const completionFor = (slug, imported) => 'Brainstorm saved to brainstorms/' + slug + '. Concept: docs/concepts/brainstorms/' + slug +
   '.json. ' + (imported ? 'The feature is imported in the canonical project. ' :

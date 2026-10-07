@@ -6,7 +6,7 @@ import { azureRemoteDetails, classifyRemote, hostingPlatforms, hostingProfile, h
 import { toolingSchema, validateTooling } from '../companion/tooling-contract.mjs';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import { withHostingOption } from '../companion/tooling-options.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 
 const azure = { platform: 'azure-devops', azureDevOps: { organization: 'https://dev.azure.com/contoso', project: 'Quick Capture', repository: 'quick-capture' } };
 const invalid = /^Error: COMPANION_TOOLING_INVALID: /;

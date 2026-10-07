@@ -57,7 +57,7 @@ test('check without installed tools fails every step honestly and points to inst
   assert.equal(result.diagnostics[0].code, 'CHECK_FAILED'); assert.equal(result.diagnostics[0].next, 'node bin/app install --yes');
   const human = spawnSync(process.execPath, [join(root, 'bin/app'), 'check', '--root', dir], { encoding: 'utf8', timeout: 60000 });
   assert.equal(human.status, 1);
-  assert.match(human.stdout, /^ {2}\[FAIL\] typecheck {2}vue-tsc --noEmit +\d+ms$/m);
+  assert.match(human.stdout, /^ {2}\[FAIL\] typecheck {2}vue-tsc -b +\d+ms$/m);
   assert.match(human.stdout, /^ {2}Summary {2}0 passed, 4 failed, 0 skipped in /m);
   assert.match(human.stdout, /^Next: node bin\/app install --yes$/m);
 });
@@ -65,7 +65,7 @@ test('scope detection selects project-suite steps in a generated project', async
   const dir = await scratch(t);
   const shell = await checkSteps(dir, false);
   assert.deepEqual(shell.steps.map(step => [step.id, step.entry, step.args.join(' ')]), [
-    ['typecheck', 'node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'], ['lint', 'scripts/quality/lint-source.mjs', ''],
+    ['typecheck', 'node_modules/vue-tsc/bin/vue-tsc.js', '-b'], ['lint', 'tooling/quality/lint-source.mjs', ''],
     ['eslint', 'node_modules/eslint/bin/eslint.js', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'node_modules/vitest/vitest.mjs', 'run --config configs/testing/vitest.config.mjs']]);
   await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
   await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');

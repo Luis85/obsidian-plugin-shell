@@ -6,7 +6,7 @@ import ts from 'typescript';
 import { projectModel } from '../compiler/emitters/model.ts';
 import { authoredJourneyCode } from '../compiler/emitters/authored-journey-code.ts';
 import { projectFiles } from './support/project-render.mjs';
-import { parseBrowserStarter } from '../adapters/starters/browser.ts';
+import { parseBrowserStarter } from '#shared/companion/starters/browser.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const starter = async name => parseBrowserStarter(await readFile(`${root}configs/starters/${name}.json`, 'utf8')).generator.document;

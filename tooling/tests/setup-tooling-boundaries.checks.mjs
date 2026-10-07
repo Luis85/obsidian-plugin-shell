@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, rm, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-// @ts-expect-error The dependency-free .mjs CLI helper has no emitted declarations.
 import { installLocal } from '../dev/install-local.mjs';
 const root = process.cwd();
 async function workspace() {
@@ -14,31 +14,31 @@ async function workspace() {
   return dir;
 }
 describe('Real tooling boundaries', () => {
-  it('[TOOL-I01] staged installation preserves data, notes and security configuration', async () => {
+  it('[TOOL-I01] staged installation preserves data, notes and security configuration', { timeout: 20000 }, async () => {
     const dir = await workspace();
     try {
       const target = join(dir, '.dev-vault/.obsidian/plugins/plugin-shell'); await mkdir(target, { recursive: true });
       await writeFile(join(target, 'data.json'), 'existing data'); await writeFile(join(dir, '.dev-vault/Note.md'), 'user note');
       await writeFile(join(dir, '.dev-vault/.obsidian/community-plugins.json'), '["other"]');
       await installLocal({ root: dir });
-      expect(await readFile(join(target, 'data.json'), 'utf8')).toBe('existing data');
-      expect(await readFile(join(dir, '.dev-vault/Note.md'), 'utf8')).toBe('user note');
-      expect(await readFile(join(dir, '.dev-vault/.obsidian/community-plugins.json'), 'utf8')).toBe('["other"]');
-      expect(await readFile(join(target, 'main.js'), 'utf8')).toContain('module.exports');
-      await installLocal({ root: dir }); expect(await readFile(join(target, 'data.json'), 'utf8')).toBe('existing data');
+      assert.equal(await readFile(join(target, 'data.json'), 'utf8'), 'existing data');
+      assert.equal(await readFile(join(dir, '.dev-vault/Note.md'), 'utf8'), 'user note');
+      assert.equal(await readFile(join(dir, '.dev-vault/.obsidian/community-plugins.json'), 'utf8'), '["other"]');
+      assert.ok((await readFile(join(target, 'main.js'), 'utf8')).includes('module.exports'));
+      await installLocal({ root: dir }); assert.equal(await readFile(join(target, 'data.json'), 'utf8'), 'existing data');
     } finally { await rm(dir, { recursive: true, force: true }); }
-  }, 20000);
-  it('[TOOL-I02] dry run, unsafe target and overlapping install never overwrite data', async () => {
+  });
+  it('[TOOL-I02] dry run, unsafe target and overlapping install never overwrite data', { timeout: 20000 }, async () => {
     const dir = await workspace();
     try {
-      const result = await installLocal({ root: dir, dryRun: true }); expect(result.written).toBe(false);
-      await expect(readFile(join(dir, '.dev-vault/.obsidian/plugins/plugin-shell/main.js'))).rejects.toThrow();
-      await expect(installLocal({ root: dir, vault: '../escape' })).rejects.toThrow('UNSAFE_TARGET');
+      const result = await installLocal({ root: dir, dryRun: true }); assert.equal(result.written, false);
+      await assert.rejects(readFile(join(dir, '.dev-vault/.obsidian/plugins/plugin-shell/main.js')));
+      await assert.rejects(installLocal({ root: dir, vault: '../escape' }), error => error.message.includes('UNSAFE_TARGET'));
       const target = join(dir, '.dev-vault/.obsidian/plugins/plugin-shell'); await mkdir(join(target, '.shell-install-lock'), { recursive: true });
-      await expect(installLocal({ root: dir })).rejects.toThrow();
+      await assert.rejects(installLocal({ root: dir }));
     } finally { await rm(dir, { recursive: true, force: true }); }
-  }, 20000);
-  it('[TOOL-I03] setup help and dry run execute without node_modules', async () => {
+  });
+  it('[TOOL-I03] setup help and dry run execute without node_modules', { timeout: 5000 }, async () => {
     const dir = await workspace();
     try {
       // The dependency-free setup entry plus its complete relative import closure, kept at the repository layout.
@@ -50,12 +50,12 @@ describe('Real tooling boundaries', () => {
       await cp(join(root, 'package.json'), join(dir, 'package.json'));
       for (const args of [['--help'], ['--dry-run']]) {
         const result = spawnSync(process.execPath, [join(dir, 'tooling/setup.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 5000 });
-        expect(result.status, result.stderr).toBe(0);
+        assert.equal(result.status, 0, result.stderr);
       }
-      const bad = spawnSync(process.execPath, [join(dir, 'tooling/setup.mjs'), '--unknown'], { cwd: dir, encoding: 'utf8', timeout: 5000 }); expect(bad.status).not.toBe(0);
+      const bad = spawnSync(process.execPath, [join(dir, 'tooling/setup.mjs'), '--unknown'], { cwd: dir, encoding: 'utf8', timeout: 5000 }); assert.notEqual(bad.status, 0);
     } finally { await rm(dir, { recursive: true, force: true }); }
   });
-  it('[TOOL-I04] the real fallow analyzer rejects forbidden edges and unclassified files', async () => {
+  it('[TOOL-I04] the real fallow analyzer rejects forbidden edges and unclassified files', { timeout: 20000 }, async () => {
     const dir = await mkdtemp(join(tmpdir(), 'shell-boundary-'));
     try {
       await mkdir(join(dir, 'src/plugin/application'), { recursive: true }); await mkdir(join(dir, 'src/plugin/infrastructure'), { recursive: true });
@@ -72,10 +72,10 @@ describe('Real tooling boundaries', () => {
       await writeFile(join(dir, 'src/plugin/features/bad.ts'), "import { leak } from '../infrastructure/leak'; export const value = leak;");
       await writeFile(join(dir, 'src/plugin/unclassified.ts'), 'export const unknown = 1;');
       const result = spawnSync(process.execPath, [resolve('node_modules/fallow/bin/fallow'), '--format', 'json', 'dead-code', '--boundary-violations'], { cwd: dir, encoding: 'utf8', timeout: 15000 });
-      const report = JSON.parse(result.stdout); expect(result.status).not.toBe(0);
-      expect(report.summary.boundary_violations).toBeGreaterThan(0); expect(report.summary.boundary_coverage_violations).toBeGreaterThan(0);
-      expect(report.boundary_violations).toEqual(expect.arrayContaining([expect.objectContaining({ from_zone: 'features', to_zone: 'infrastructure' })]));
-      expect(report.boundary_violations).toEqual(expect.arrayContaining([expect.objectContaining({ from_zone: 'bootstrap', to_zone: 'test' })]));
+      const report = JSON.parse(result.stdout); assert.notEqual(result.status, 0);
+      assert.ok(report.summary.boundary_violations > 0); assert.ok(report.summary.boundary_coverage_violations > 0);
+      assert.ok(report.boundary_violations.some(item => item.from_zone === 'features' && item.to_zone === 'infrastructure'));
+      assert.ok(report.boundary_violations.some(item => item.from_zone === 'bootstrap' && item.to_zone === 'test'));
     } finally { await rm(dir, { recursive: true, force: true }); }
-  }, 20000);
+  });
 });

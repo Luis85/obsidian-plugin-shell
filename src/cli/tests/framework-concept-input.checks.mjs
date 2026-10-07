@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import { decodeConceptInput } from '../adapters/framework/concept-input.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const project = starterDocumentText('blank');
 const direct = `<script type="application/json" id="companion-project">${project}</script>`;
 const digest = value => createHash('sha256').update(value).digest('hex');

@@ -4,8 +4,8 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { definitionProjectPlan, receiptFile } from '../adapters/starters/project.ts';
-import { validateDefinition } from '../adapters/starters/validation.ts';
-import { code, fileStarter, request, shipped, workspace } from './starters-fixture.mjs';
+import { validateDefinition } from '#shared/companion/starters/validation.ts';
+import { code, fileStarter, request, shipped, workspace } from './support/starters-fixture.mjs';
 
 // Definition-driven project plans (project.ts): starter selection, input values, process selection and the receipt.
 // Companion plans read the live template snapshot, so their checks assert only starter-owned values, never template bytes.

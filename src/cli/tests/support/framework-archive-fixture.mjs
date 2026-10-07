@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { crc32 } from 'node:zlib';
-import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
-import { zip } from '../adapters/framework/zip.ts';
+import { assembleKit, installedCompiler } from '../../adapters/framework/kit.ts';
+import { zip } from '../../adapters/framework/zip.ts';
 /** Independent central-directory reader used only by qualification, not by the ZIP writer. */
 export async function extractArchive(bytes, root) {
   const end = bytes.length - 22;

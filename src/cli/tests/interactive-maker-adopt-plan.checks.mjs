@@ -4,7 +4,7 @@ import { analyzeInventory } from '../application/adoption/analyze.ts';
 import { renderPlan } from '../domain/adoption/plan-render.ts';
 import { screensRequest } from '../domain/adoption/plan-phases.ts';
 import { bullets, code, document, fence, plain, table } from '../domain/adoption/plan-markdown.ts';
-import { inventoryOf, targets } from './interactive-maker-adopt-fixture.mjs';
+import { inventoryOf, targets } from './support/interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const repo = { present: true, dirty: false, remoteHost: null, dirtyNote: null };

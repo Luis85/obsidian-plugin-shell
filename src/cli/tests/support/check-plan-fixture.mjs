@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
+export const repoRoot = fileURLToPath(new URL('../../../../', import.meta.url));
 const suite = (name, include, extra = {}) => ({ name, purpose: name, include, verify: 'tooling', runner: { type: 'node-test' }, ...extra });
 const manifest = {
   schemaVersion: 1, roots: [{ path: 'tests/tooling' }, { path: 'tests/e2e', optional: true }, { path: 'tests/runtime', optional: true }],

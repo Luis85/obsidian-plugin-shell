@@ -10,7 +10,7 @@ import { planOperation } from '../adapters/framework/planning.ts';
 import { status } from '../adapters/framework/inspection.ts';
 import { parseAzureVersion } from '../adapters/framework/hosting-cli.ts';
 import { hash } from '../adapters/framework/files.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const frameworkRoot = await realpath(fileURLToPath(new URL('../../../', import.meta.url)));
 const azure = ['--azure-organization', 'https://dev.azure.com/contoso', '--azure-project', 'Demo'];
 /** A folder set up from quick-capture JSON: design, intake receipt and configuration, no generated files yet. */

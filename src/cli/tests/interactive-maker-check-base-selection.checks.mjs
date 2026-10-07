@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { checkSteps, checkOperation } from '../adapters/framework/check.ts';
-import { withRepo, git, repoRoot, write } from './check-plan-fixture.mjs';
+import { withRepo, git, repoRoot, write } from './support/check-plan-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const stepOf = (plan, id) => plan.steps.find(step => step.id === id);

@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../src/cli/adapters/framework/prototype-skill.ts';
 import { shellOperation, npmOperation } from '../../.claude/skills/companion-prototype-design/scripts/lib/framework.mjs';
-import { starterDocumentText } from '../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = path.join(root, prototypeSkillRoot, 'scripts/prototype.mjs');
 function scratch(t) {

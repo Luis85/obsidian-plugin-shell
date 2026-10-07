@@ -9,7 +9,7 @@ import { executeOperation } from '../adapters/framework/operations.ts';
 import { formatDiagnostics, createRecorder, writeReports } from '../compiler/adapters/reporting.ts';
 import { diagnostic } from '../compiler/domain/diagnostics.ts';
 import { operationSchemas } from '../adapters/framework/schema.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const source=starterDocumentText('blank');
 const context={root,frameworkRoot:root,inputText:source};

@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { projectFixture } from './fixtures/application-docs/fixture.mjs';
 import { projectEntities, applyEntities, coverage } from '../documentation/adapters/model.ts';
 import { restoreProject } from '../documentation/adapters/restore.ts';
-import { companionStarterIds, selfProject, starterDocument } from '../../../tests/support/starter-documents.mjs';
-import { retiredProject } from '../../../tests/support/retired-projects.mjs';
+import { companionStarterIds, selfProject, starterDocument } from '#shared/testing/starter-documents.mjs';
+import { retiredProject } from '#shared/testing/retired-projects.mjs';
 import { newDocument } from '../domain/document.ts';
 
 // Drives the lossless project projection and restore (src/cli/documentation/adapters/{model,restore}.ts) under the maker floors.

@@ -6,7 +6,7 @@ import { renderHuman } from '../presentation/terminal/terminal-render.ts';
 import { checkPlanOperation } from '../adapters/framework/check-plan.ts';
 import { ruleHits } from '../adapters/framework/check-selection.ts';
 import { loadToolkit, loadWorkflows, parseDurations, parseGateRules, parseWorkflow, workflowTrigger } from '../adapters/framework/gate-sources.ts';
-import { withRepo, git, repoRoot, write } from './check-plan-fixture.mjs';
+import { withRepo, git, repoRoot, write } from './support/check-plan-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const plan = async (dir, options = {}) => (await checkPlanOperation({ command: 'check', args: [], options: { plan: true, ...options } }, { root: dir, frameworkRoot: repoRoot })).data;

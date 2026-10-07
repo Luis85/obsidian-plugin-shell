@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { executeReleaseOperation, authorizationDigest } from '../release/execute.mjs';
 import { createGitHubRemote } from '../release/github-remote.mjs';
 import { sha256 } from '../../src/cli/tooling/release/candidate.mjs';
-import { executionFixture } from '../../src/cli/tests/release-execution-fixture.mjs';
+import { executionFixture } from '../../src/cli/tests/support/release-execution-fixture.mjs';
 
 test('default operation authenticates discovery and returns exact bound plan without mutation', async t => {
   const f = await executionFixture(t);

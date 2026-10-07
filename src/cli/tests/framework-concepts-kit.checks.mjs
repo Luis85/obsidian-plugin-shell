@@ -7,10 +7,10 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
-import { extractArchive } from './framework-archive-fixture.mjs';
+import { extractArchive } from './support/framework-archive-fixture.mjs';
 import { zip } from '../adapters/framework/zip.ts';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const hash = value => createHash('sha256').update(value).digest('hex');
 function cli(dir, args) {

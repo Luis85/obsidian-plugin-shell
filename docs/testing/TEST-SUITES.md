@@ -79,7 +79,7 @@ or split after that run.
 `npm run test:generator` and `npm run test:framework-cli` remain as aliases of
 the `generator` and `cli` suites (both now include their whole responsibility:
 starters and file plans, capability discovery). `npm run test:setup-policy` still
-runs only the npm install policy file of the `setup` suite.
+runs only the npm install policy files of the `setup` suite.
 
 ### Why these boundaries
 
@@ -126,7 +126,7 @@ files differ adds `levels`, a map from level to file patterns of that suite:
 
 ```json
 "level": "unit",
-"levels": { "component": ["src/plugin/tests/unit/*-components.test.ts"], "integration": ["src/plugin/tests/unit/tooling.test.ts"] }
+"levels": { "component": ["src/plugin/tests/unit/*-components.test.ts"] }
 ```
 
 `npm run test:suites -- --pyramid` counts files per level and adds the measured

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { noteOperations } from '../../../templates/companion/runtime/note-operations.ts';
 import { matches } from '#shared/companion/runtime-contract.ts';
 import { validateSourceOverrides } from '../../../templates/companion/runtime/source-overrides.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const repository=()=>{const calls=[];return {calls,list:async()=>({ok:true,value:[]}),create:async(...args)=>{calls.push(args);return {ok:false,error:{code:'refused'}};},update:async()=>{throw Error('MUST_NOT_WRITE');},delete:async()=>{throw Error('MUST_NOT_WRITE');}};};
 test('native note input with hidden accessors or symbols is rejected before parsing or repository calls',async()=>{
  let accessed=0;const hidden={requestId:'request'};Object.defineProperty(hidden,'values',{get(){accessed++;return {title:'Hidden'};}});

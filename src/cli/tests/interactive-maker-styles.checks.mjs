@@ -3,7 +3,7 @@ import { mkdtemp, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { inspectStyles as relocatedInspect, styleExportPlan as relocatedPlan } from '../adapters/framework/styles.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

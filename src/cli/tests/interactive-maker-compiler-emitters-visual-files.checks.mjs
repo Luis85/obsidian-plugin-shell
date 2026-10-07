@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { visualCode, visualVerification, visualAcceptanceTodo } from '../compiler/emitters/visual-files.ts';
 import { visualDefinitions, visualSpecs } from '../compiler/emitters/visual-model.ts';
 import { visualRuntimeTests } from '../compiler/emitters/visual-runtime-tests.ts';
-import { richVisualDocument, detailDocument, model, recorder, template } from './compiler-emitters-fixture.mjs';
+import { richVisualDocument, detailDocument, model, recorder, template } from './support/compiler-emitters-fixture.mjs';
 
 // Visual file emission (visual-files.ts) and the generated runtime, binding and adapter suites (visual-runtime-tests.ts).
 const emit = async (m = model(richVisualDocument())) => { const out = recorder(); await visualCode(template, m, out.add); return { m, out }; };

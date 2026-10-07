@@ -4,9 +4,9 @@ import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, posix, resolve, win32 } from 'node:path';
-import { BROWSER_ENV, browsersDirectory, chromiumLaunchOptions, main, resolveBrowserExecutable } from '../tooling/testing/browser-executable.mjs';
+import { BROWSER_ENV, browsersDirectory, chromiumLaunchOptions, main, resolveBrowserExecutable } from '../../src/cli/tooling/testing/browser-executable.mjs';
 
-const repository = resolve(import.meta.dirname, '../../..');
+const repository = resolve(import.meta.dirname, '../..');
 const suitesCli = join(repository, 'tooling/testing/suites.mjs');
 const resolverCli = join(repository, 'src/cli/tooling/testing/browser-executable.mjs');
 /** The pinned and the older executable layouts of the host platform: tests that use the real file system resolve for the host. */

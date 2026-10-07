@@ -104,7 +104,7 @@ names the plugin and every requirement ID. The copy buttons copy exact text and 
 nothing. The layout does not overflow at 390 px. It also runs the displayed
 `node bin/app new … --from …` argument vector on the actual downloaded bytes in a
 temporary folder and confirms a `planned` result that writes nothing.
-`src/shared/tests/framework-new-from-project.checks.mjs` covers the CLI: preview,
+`src/cli/tests/framework-new-from-project.checks.mjs` covers the CLI: preview,
 identity overrides, apply, stale input, and refusal of malformed, future, invalid,
 linked, oversized or conflicting sources.
 

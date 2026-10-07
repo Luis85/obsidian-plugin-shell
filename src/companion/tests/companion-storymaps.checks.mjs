@@ -4,8 +4,8 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { emptyStorymaps, validateStorymaps } from '#shared/companion/storymap-contract.mjs';
 import { parseAuthoringDocument, validateAuthoringDocument, AUTHORING_VERSION } from '#shared/companion/authoring-contract.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
-import { retiredProject } from '../../../tests/support/retired-projects.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
+import { retiredProject } from '#shared/testing/retired-projects.mjs';
 
 const seed = selfProject();
 const source = await readFile('src/companion/app/storymap-model.js', 'utf8');

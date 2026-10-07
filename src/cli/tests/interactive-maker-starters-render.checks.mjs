@@ -1,8 +1,8 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { resolveValues, interpolate, renderFiles, renderProcesses } from '../adapters/starters/render.ts';
-import { validateDefinition } from '../adapters/starters/validation.ts';
-import { fileStarter } from './starters-fixture.mjs';
+import { resolveValues, interpolate, renderFiles, renderProcesses } from '#shared/companion/starters/render.ts';
+import { validateDefinition } from '#shared/companion/starters/validation.ts';
+import { fileStarter } from './support/starters-fixture.mjs';
 
 // Starter rendering (render.ts): input resolution, the three placeholder filters, JSON payloads and process arguments.
 const definition = validateDefinition(fileStarter());

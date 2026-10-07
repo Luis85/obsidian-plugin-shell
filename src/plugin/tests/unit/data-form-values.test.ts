@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { defineForm, readDataFormValue } from '../../features/api';
-import featureBrief from '../../../../tests/fixtures/forms/feature-brief.json';
+import featureBrief from '#shared/testing/fixtures/forms/feature-brief.json';
 import { allDataFormNodes, visibleDataFormNodes, type DataFormNode } from '../../domain/forms/values';
 import { assignAt, valueAt, type DataFormValues } from '../../domain/forms/model';
 

@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { AUTHORING_VERSION } from '#shared/companion/authoring-contract.ts';
-import { selfProject, starterDocument, starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { selfProject, starterDocument, starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root = await realpath(fileURLToPath(new URL('../../../', import.meta.url)));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-new-from-')));

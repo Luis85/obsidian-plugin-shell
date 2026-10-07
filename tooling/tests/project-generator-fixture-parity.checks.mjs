@@ -13,7 +13,7 @@ import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
 import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
 import { providerProject } from '../../src/cli/tests/fixtures/generator-provider-project.mjs';
 import { boundaryProject } from '../../src/cli/tests/fixtures/generator-boundaries.mjs';
-import { selfProject } from '../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const original=selfProject();
 function cli(cwd, command, ...args) {

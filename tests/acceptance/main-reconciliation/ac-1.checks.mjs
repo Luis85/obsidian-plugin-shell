@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { verifyKit } from '../../../src/cli/adapters/framework/kit-integrity.ts';
-import { starterDocument } from '../../support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const source = fileURLToPath(new URL('../../../', import.meta.url));
 
 test('[AC-1] a copied bin runs, generates a project and authors a feature without source checkout or node_modules', { timeout: 180000 }, async t => {

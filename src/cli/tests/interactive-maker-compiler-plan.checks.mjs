@@ -11,7 +11,7 @@ import { renderProjectFiles } from '../compiler/adapters/plugin-emitter.ts';
 import { loadTemplateSnapshot } from '../compiler/adapters/template-snapshot.ts';
 import { compileProject, analyzeProject } from '../compiler/index.ts';
 import { projectModel, digest } from '../compiler/emitters/model.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 
 // Drives workspace planning, project planning, scoped selection and the plugin emitter (src/cli/compiler) under the maker floors.
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

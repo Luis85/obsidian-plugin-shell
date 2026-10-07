@@ -10,7 +10,7 @@ import { planProject, applyProject } from '../../src/cli/compiler/adapters/proje
 import { markdownLinks } from '../quality/check-repository.mjs';
 import { withHostingOption } from '../../src/shared/companion/tooling-options.ts';
 import { permission } from './support/claude-permissions.mjs';
-import { starterDocument } from '../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 
 // The hosting platform (tooling.hosting) decides which CI, pull-request and agent files a generated project receives.
 // Absent means GitHub; every GitHub expectation lives in project-generator-devkit/-framework-scope and stays unchanged.

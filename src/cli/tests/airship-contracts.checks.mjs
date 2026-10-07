@@ -13,7 +13,7 @@ import { parseCliArguments } from '../adapters/framework/catalog.ts';
 import { executeOperation } from '../adapters/framework/operations.ts';
 import { planOperation, applyOperation } from '../adapters/framework/planning.ts';
 import { airshipEnvironment } from '../adapters/framework/airship.ts';
-import { exampleStarterIds, starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { exampleStarterIds, starterDocument } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const source = starterDocument('quick-capture');
 const enabled = () => withAirshipOption(structuredClone(source), { airship: true });

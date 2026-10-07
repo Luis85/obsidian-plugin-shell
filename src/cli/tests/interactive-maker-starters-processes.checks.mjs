@@ -7,7 +7,7 @@ import { applyFilePlan } from '#shared/platform/file-plan.ts';
 import { result } from '../adapters/framework/contracts.ts';
 import { processPlan, starterProcessOperation, completeDefinition } from '../adapters/starters/processes.ts';
 import { definitionProjectPlan, receiptFile } from '../adapters/starters/project.ts';
-import { code, fileStarter, request, workspace } from './starters-fixture.mjs';
+import { code, fileStarter, request, workspace } from './support/starters-fixture.mjs';
 
 // Reviewed starter processes (processes.ts): the receipt-bound plan, explicit trust, ordered execution and first-run completion.
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');

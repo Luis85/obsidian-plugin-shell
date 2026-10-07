@@ -1,4 +1,4 @@
-import { prototypeApi as api } from '../../src/shared/companion/prototypes/api.ts';
+import { prototypeApi as api } from '../companion/prototypes/api.ts';
 import { starterDocument } from './starter-documents.mjs';
 export function document(label = 'Sitemap A') {
   const doc = starterDocument('quick-capture');

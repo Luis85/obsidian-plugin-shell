@@ -9,7 +9,7 @@ import { readSnapshot, savePlan, applyPrepared, readData } from '../adapters/sto
 import { packagePlan, outputBoundary } from '../adapters/package-plan.ts';
 import { execute, parseArguments } from '../adapters/commands.ts';
 import { main } from '../app.ts';
-import { fileSymlink } from './file-symlink.mjs';
+import { fileSymlink } from './support/file-symlink.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../../..');
 async function scratch(work) { const root = await mkdtemp(join(await realpath(tmpdir()), 'shell-maker-')); try { await work(root); } finally { await rm(root, { recursive: true, force: true }); } }
 const context = root => ({ root, frameworkRoot, input: Readable.from([]) });

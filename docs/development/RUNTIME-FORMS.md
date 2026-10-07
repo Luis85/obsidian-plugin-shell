@@ -53,7 +53,7 @@ showcase pages ([remove optional examples](EXAMPLE-REMOVAL.md)). `DataForm`, the
    - `src/plugin/tests/unit/data-form-components.test.ts` mounts the real showcase. It is example-owned and
      removed with the showcase.
    - `src/plugin/tests/unit/data-form-standalone.test.ts` mounts `DataForm` with a feature-owned definition.
-   - The domain tests read the test-owned copy `tests/fixtures/forms/feature-brief.json`, so they keep
+   - The domain tests read the test-owned copy `src/shared/testing/fixtures/forms/feature-brief.json`, so they keep
      running after example removal.
 
    Run `node tooling/testing/suites.mjs --check` after adding a test file.

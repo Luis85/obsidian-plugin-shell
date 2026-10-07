@@ -3,7 +3,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { brainstormWizard } from '../presentation/brainstorm.ts';
 import { brainstormVerifyPlan } from '../adapters/brainstorm.ts';
 import { brainstormScratch, scriptedRich, scriptedPlain, quickNote, fakeNpm, pinnedFramework, readScratchJson, readText }
-  from './interactive-maker-brainstorm-fixture.mjs';
+  from './support/interactive-maker-brainstorm-fixture.mjs';
 
 const sourceCompletion = 'Brainstorm saved to brainstorms/quick-note. Concept: docs/concepts/brainstorms/quick-note.json. ' +
   'The canonical project was not changed; import remains a separate reviewed action. Generated source is under brainstorms/quick-note/source/.\n';

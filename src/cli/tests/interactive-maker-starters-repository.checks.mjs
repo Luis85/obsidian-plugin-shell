@@ -4,9 +4,9 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { starterFolder, checkDirectoryChain, parseDefinition, loadDefinitions, companionStarters } from '../adapters/starters/repository.ts';
-import { validateDefinition } from '../adapters/starters/validation.ts';
-import { code, fileStarter, shipped, workspace } from './starters-fixture.mjs';
-import { retiredProject } from '../../../tests/support/retired-projects.mjs';
+import { validateDefinition } from '#shared/companion/starters/validation.ts';
+import { code, fileStarter, shipped, workspace } from './support/starters-fixture.mjs';
+import { retiredProject } from '#shared/testing/retired-projects.mjs';
 
 // The local starter repository (repository.ts): the configured folder, the directory chain, bounded loading and the Companion starter set.
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');

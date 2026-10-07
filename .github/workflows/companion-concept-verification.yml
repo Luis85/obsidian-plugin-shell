@@ -20,19 +20,19 @@ on:
       - 'src/companion/tests/*prototypes*.checks.mjs'
       - 'src/shared/tests/*prototypes*.checks.mjs'
       - 'tooling/tests/*prototypes*.checks.mjs'
-      - 'tests/support/prototype-fixture.mjs'
+      - 'src/shared/testing/prototype-fixture.mjs'
       - 'tooling/compiler/**'
       - 'src/cli/compiler/**'
       - 'tooling/bundling/**'
       - 'src/cli/tests/compiler-journey*.checks.mjs'
       - 'tooling/tests/compiler-journey*.checks.mjs'
-      - 'src/cli/tests/companion-project.checks.mjs'
+      - 'tooling/tests/companion-project.checks.mjs'
       - 'src/shared/tests/companion-composition-contract.checks.mjs'
       - 'tooling/tests/support/concept-realm.mjs'
       - 'tooling/tests/companion-visual-*.checks.mjs'
       - 'src/shared/tests/visual-*.checks.mjs'
       - 'src/cli/tests/fixtures/companion/**'
-      - 'tests/fixtures/companion/**'
+      - 'src/shared/testing/fixtures/companion/**'
       - 'package.json'
       - 'package-lock.json'
       - 'docs/concepts/jev-prompt-editor/**'
@@ -125,7 +125,7 @@ jobs:
         run: node --test tooling/tests/test-data-*.checks.mjs
       - name: Exercise full-project JSON and read-only shell handoff
         run: |
-          node --test src/cli/tests/companion-project.checks.mjs src/shared/tests/companion-storymaps.checks.mjs src/shared/tests/companion-composition-contract.checks.mjs tooling/tests/companion-visual-state.checks.mjs tooling/tests/companion-visual-canvas.checks.mjs tooling/tests/companion-visual-page-editor.checks.mjs tooling/tests/companion-visual-inspector.checks.mjs tooling/tests/companion-visual-component-editor.checks.mjs tooling/tests/companion-visual-entry.checks.mjs
+          node --test tooling/tests/companion-project.checks.mjs src/companion/tests/companion-storymaps.checks.mjs src/shared/tests/companion-composition-contract.checks.mjs tooling/tests/companion-visual-state.checks.mjs tooling/tests/companion-visual-canvas.checks.mjs tooling/tests/companion-visual-page-editor.checks.mjs tooling/tests/companion-visual-inspector.checks.mjs tooling/tests/companion-visual-component-editor.checks.mjs tooling/tests/companion-visual-entry.checks.mjs
           node "$QUALIFIED_NPM" run test:visual
       - name: Exercise prototype lifecycle, safe persistence and pinned generation
         run: node --test src/cli/tests/companion-prototypes*.checks.mjs src/companion/tests/companion-prototypes*.checks.mjs src/shared/tests/companion-prototypes*.checks.mjs tooling/tests/companion-prototypes*.checks.mjs src/cli/tests/framework-prototypes.checks.mjs

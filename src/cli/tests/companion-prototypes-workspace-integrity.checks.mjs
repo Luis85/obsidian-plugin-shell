@@ -8,7 +8,7 @@ import { executeOperation } from '../adapters/framework/operations.ts';
 import { parseCliArguments } from '../adapters/framework/catalog.ts';
 import { loadPrototypeWorkspace } from '../adapters/framework/prototype-workspace.ts';
 import { managedGenerationPlan } from '../adapters/framework/prototype-generation.ts';
-import { document } from '../../../tests/support/prototype-fixture.mjs';
+import { document } from '#shared/testing/prototype-fixture.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../../', import.meta.url));
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'prototype-integrity-')));

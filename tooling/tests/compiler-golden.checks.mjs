@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { compileProject, loadTemplateSnapshot } from '../../src/cli/compiler/index.ts';
 import { artifactDigests, goldenDifferences, goldenDocument, productPath, readGolden, starterCases } from '../compiler/golden.mjs';
-import { companionStarterIds, starterDocumentText } from '../../tests/support/starter-documents.mjs';
+import { companionStarterIds, starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const template = await loadTemplateSnapshot(root);
 const golden = await readGolden(root), cases = await starterCases(root, template);

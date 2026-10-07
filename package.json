@@ -89,7 +89,7 @@
     "test:native": "node tooling/testing/check-native.mjs",
     "test:obsidian": "node tooling/testing/run-obsidian-tests.mjs",
     "dev:obsidian": "node tooling/dev/obsidian-dev.mjs",
-    "test:setup-policy": "node --test src/shared/tests/npm-install.checks.mjs",
+    "test:setup-policy": "node --test src/shared/tests/npm-install.checks.mjs tooling/tests/setup-npm-install.checks.mjs",
     "check:analyzer": "node tooling/quality/check-analyzer.mjs",
     "check:maintainability": "node tooling/quality/check-maintainability.mjs",
     "evidence": "node tooling/testing/evidence-cli.mjs",

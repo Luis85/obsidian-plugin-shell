@@ -8,7 +8,7 @@
       "id": "http-specimen",
       "mode": "http-specimen",
       "state": "executable",
-      "file": "tests/harness-styles/server.test.mjs",
+      "file": "tooling/tests/harness-styles/server.test.mjs",
       "testIds": [
         "HTTP-01",
         "HTTP-02",

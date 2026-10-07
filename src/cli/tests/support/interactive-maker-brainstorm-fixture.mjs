@@ -3,15 +3,15 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, rm } from 'node:fs/promi
 import { Readable } from 'node:stream';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { hash } from '../adapters/framework/files.ts';
+import { hash } from '../../adapters/framework/files.ts';
 import { mapBounded } from '#shared/platform/bounded-map.ts';
-import { loadTemplateSnapshot } from '../compiler/index.ts';
-import { newDocument, documentText } from '../domain/document.ts';
-import { runOperations } from '../application/operations.ts';
-import { applyOperation, planOperation } from '../adapters/framework/planning.ts';
+import { loadTemplateSnapshot } from '../../compiler/index.ts';
+import { newDocument, documentText } from '../../domain/document.ts';
+import { runOperations } from '../../application/operations.ts';
+import { applyOperation, planOperation } from '../../adapters/framework/planning.ts';
 import { Back } from '#tui/prompts.ts';
 
-export const frameworkRoot = resolve(import.meta.dirname, '../../..');
+export const frameworkRoot = resolve(import.meta.dirname, '../../../..');
 export const BACK = Symbol('back');
 export const captureRequest = { schemaVersion: 1, name: 'Capture inbox', purpose: 'Quickly capture and inspect ideas',
   actors: ['Member'], entities: ['Capture'], acceptance: ['A saved capture can be reopened'],

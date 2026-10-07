@@ -17,7 +17,7 @@
     "src/*/tests/*.test.mjs",
     "tooling/tests/hindsight/*.checks.mjs",
     "tests/verification/*.test.mjs",
-    "src/plugin/tests/harness-styles/*.test.mjs",
+    "tooling/tests/harness-styles/*.test.mjs",
     "tests/browser-specimen/specimen.checks.mjs",
     "src/companion/tests/concepts/*.browser.mjs",
     "tests/browser-workflows/*.browser.mjs",

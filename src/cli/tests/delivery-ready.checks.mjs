@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { baseContext, configs, handoffPath, readyHandoff, results } from './delivery-fixture.mjs';
+import { baseContext, configs, handoffPath, readyHandoff, results } from './support/delivery-fixture.mjs';
 import { evaluate, exemption, runReady, selectHandoff } from '../tooling/delivery/run.mjs';
 import { readyRules, resolveWikilink } from '../tooling/delivery/rules-ready.mjs';
 import { humanReport, jsonReport, refinementBrief, refinementMarkdown, summaryMarkdown } from '../tooling/delivery/report.mjs';

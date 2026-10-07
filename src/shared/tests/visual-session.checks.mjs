@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { visualNodes } from '../companion/visual/visual-ir.mjs';
 import { visualSession, visualVisible, visualTransition, visualValue, visualRead, visualTestSource } from '../companion/visual/visual-session.mjs';
-const s = JSON.parse(await readFile('tests/fixtures/companion/visual-store.json', 'utf8'));
+const s = JSON.parse(await readFile('src/shared/testing/fixtures/companion/visual-store.json', 'utf8'));
 const page = s.pages[0], byName = n => visualNodes(page.root).find(x => x.name === n);
 test('visibility follows state, ancestors, toggles and narrow hiding', () => {
   const session = visualSession();

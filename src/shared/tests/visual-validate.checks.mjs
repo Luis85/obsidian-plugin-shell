@@ -5,7 +5,7 @@ import { validateVisualDesigns } from '../companion/visual/visual-validate.mjs';
 import { visualWouldCycle, visualUsages, visualDependencies } from '../companion/visual/visual-composition.mjs';
 import { visualProject, emptyVisualDesigns } from '../companion/visual/visual-ir.mjs';
 import { visualRemoveDefinition, visualSetContract } from '../companion/visual/visual-commands.mjs';
-const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-store.json', 'utf8'));
+const seed = JSON.parse(await readFile('src/shared/testing/fixtures/companion/visual-store.json', 'utf8'));
 const copy = () => structuredClone(seed);
 const context = { surfaces: new Set(['node-customers', 'node-settings']), library: new Set(['library-search']), sources: new Map([['customers', new Set(['list'])]]) };
 const page = s => s.pages[0], comp = s => s.components[0];

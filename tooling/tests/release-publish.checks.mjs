@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { lstat, mkdir, rm } from 'node:fs/promises';
 import { publishRelease, parsePublishArguments, publishLockPath } from '../release/publish.mjs';
 import { createGitHub } from '../release/publish-github.mjs';
-import { publishFixture, repository, version, head, notes } from '../../src/cli/tests/release-publish-fixture.mjs';
+import { publishFixture, repository, version, head, notes } from '../../src/cli/tests/support/release-publish-fixture.mjs';
 
 const publish = (fixture, execute = false) => publishRelease({ repository, version, execute, run: fixture.run, lockDirectory: fixture.folder });
 const fullWrites = ['pr ready', 'PUT /pulls/12/merge', 'POST /git/refs', 'POST /releases', 'POST upload', 'POST upload', 'POST upload', 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`];

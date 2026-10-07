@@ -4,10 +4,10 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { listStarters, readStarterOperation, editStarterPlan, assembleStarterPack, packStarterOperation } from '../adapters/starters/operations.ts';
-import { validateDefinition } from '../adapters/starters/validation.ts';
-import { code, fileStarter, request, shipped, workspace } from './starters-fixture.mjs';
-import { extractKit } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { validateDefinition } from '#shared/companion/starters/validation.ts';
+import { code, fileStarter, request, shipped, workspace } from './support/starters-fixture.mjs';
+import { extractKit } from './support/framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 
 // Starter operations (operations.ts): listing, schema/show/validate/coverage reads, add/edit plans and the standalone pack.
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');

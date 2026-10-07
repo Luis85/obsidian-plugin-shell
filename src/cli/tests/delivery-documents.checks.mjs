@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { baseContext, changelog, configs, handoffPath, issueDoc, linkedHandoff, pullRequestDoc, readyHandoff, results } from './delivery-fixture.mjs';
+import { baseContext, changelog, configs, handoffPath, issueDoc, linkedHandoff, pullRequestDoc, readyHandoff, results } from './support/delivery-fixture.mjs';
 import { branchName, parseBranch, pullRequestScope, referencePath } from '../tooling/delivery/documents.mjs';
 import { branchOf } from '../tooling/delivery/repository.mjs';
 import { runDone, selectHandoff } from '../tooling/delivery/run.mjs';

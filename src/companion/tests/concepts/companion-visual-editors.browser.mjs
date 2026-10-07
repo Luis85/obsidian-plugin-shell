@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { savedSelfProject, previousWorkspaceAdoption, surfaceRemovalAndOrphans, revisionSurfaceAndBlueprint } from './companion-visual-recovery-phases.mjs';
 
 const ROOT = fileURLToPath(new URL('../../../../', import.meta.url));
-const HTML = ROOT + 'docs/concepts/companion/index.html', OUT = ROOT + 'reports/concepts/visual-editors', FIXTURES = ROOT + 'tests/fixtures/companion/';
+const HTML = ROOT + 'docs/concepts/companion/index.html', OUT = ROOT + 'reports/concepts/visual-editors', FIXTURES = ROOT + 'src/shared/testing/fixtures/companion/';
 const SCOPE = 'Actual browser controls and canonical model readback', HOSTILE = '<i id="ve-hostile"></i>"\'&';
 mkdirSync(OUT, { recursive: true });
 const html = readFileSync(HTML, 'utf8');

@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPrototype } from '../../.claude/skills/companion-prototype-design/scripts/build-prototype.mjs';
 import { checkHtml } from '../../.claude/skills/companion-prototype-design/scripts/lib/offline.mjs';
-import { starterDocument } from '../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const available = ['vite', 'typescript', 'vue', 'pinia', '@nuxt/ui'].every(name => fs.existsSync(path.join(root, 'node_modules', name, 'package.json')));
 test('real shared pipeline compiles a Nuxt UI button backed by Pinia into one offline HTML', {

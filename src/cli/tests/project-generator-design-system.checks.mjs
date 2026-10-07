@@ -11,7 +11,7 @@ import { projectModel } from '../compiler/emitters/model.ts';
 import { compositionDefaultUI, compositionStyle, validateCompositionDesignSystem } from '#shared/companion/composition-contract.mjs';
 import { styleCode } from '../compiler/emitters/style-code.ts';
 import { planProject, applyProject } from '../compiler/adapters/project-plan.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const fixture = selfProject();
 const system = () => structuredClone(fixture.design.designSystem);
 const declaration = (colorPolicy='declared',bindings={}) => ({schema:1,target:'nuxt-ui',colorPolicy,bindings});

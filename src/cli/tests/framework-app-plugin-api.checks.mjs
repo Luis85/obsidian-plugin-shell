@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { enable, frameworkRoot, install, manifestFor, run } from './app-plugins-fixture.mjs';
+import { enable, frameworkRoot, install, manifestFor, run } from './support/app-plugins-fixture.mjs';
 import { definePluginEvent } from '../sdk/api.ts';
 import { WorkbenchEventBus } from '../sdk/runtime.ts';
 

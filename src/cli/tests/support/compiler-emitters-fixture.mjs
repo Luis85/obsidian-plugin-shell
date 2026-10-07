@@ -3,14 +3,14 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { projectModel } from '../compiler/emitters/model.ts';
+import { projectModel } from '../../compiler/emitters/model.ts';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
-import { loadTemplateSnapshot } from '../compiler/adapters/template-snapshot.ts';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
+import { loadTemplateSnapshot } from '../../compiler/adapters/template-snapshot.ts';
 
-const root = fileURLToPath(new URL('../../../', import.meta.url));
+const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const json = async path => JSON.parse(await readFile(join(root, path), 'utf8'));
-const detail = validateAuthoringDocument(await json('tests/fixtures/companion/visual-project.json'));
+const detail = validateAuthoringDocument(await json('src/shared/testing/fixtures/companion/visual-project.json'));
 export const template = await loadTemplateSnapshot(root);
 
 /** The visual-design fixture (two pages, one authored component and the authoring vault source). */
@@ -56,7 +56,7 @@ export async function dataDocument(properties = []) {
   design.dataSources.sources[0].operations.push({ id: 'ds-operation-9', slug: 'archive', name: 'Archive', direction: 'write', method: 'adapter', resource: 'Starter/Task',
     description: 'Unimplemented write', input: { mode: 'fields', entity: null, many: false, fields: [{ name: 'id', type: 'string', required: true }, { name: 'tags', type: 'array', required: false }], schema: null }, output: none });
   const entity = projectModel(document).entities.find(item => item.id === task.id);
-  const { noteWireSchemas } = await import('../compiler/emitters/note-contracts.ts');
+  const { noteWireSchemas } = await import('../../compiler/emitters/note-contracts.ts');
   design.dataSources.sources.push({ id: 'ds-source-10', slug: 'task-notes', name: 'Task notes', kind: 'vault', status: 'active', description: 'Native task notes', locator: 'vault://active', auth: 'none', credentialRef: '',
     operations: ['list', 'create', 'update', 'delete'].map((kind, index) => {
       const wire = noteWireSchemas(entity, kind), shape = schema => schema ? schemaShape(schema) : none;

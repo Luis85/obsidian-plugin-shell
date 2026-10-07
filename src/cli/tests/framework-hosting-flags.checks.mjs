@@ -10,7 +10,7 @@ import { planOperation } from '../adapters/framework/planning.ts';
 import { routeArguments } from '../adapters/router.ts';
 import { guidedSetup } from '../presentation/terminal/setup-terminal.ts';
 import { starterText } from '../presentation/terminal/starter-terminal.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const frameworkRoot = await realpath(fileURLToPath(new URL('../../../', import.meta.url)));
 const azure = ['--hosting', 'azure-devops', '--azure-organization', 'https://dev.azure.com/contoso', '--azure-project', 'Demo'];
 async function scratch(t) {

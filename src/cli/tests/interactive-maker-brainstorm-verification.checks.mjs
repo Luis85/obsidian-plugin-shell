@@ -6,7 +6,7 @@ const { test, after } = await (process.env.VITEST ? import('vitest').then(module
 import { parseArguments, execute } from '../adapters/commands.ts';
 import { brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification } from '../adapters/brainstorm.ts';
 import { applyPrepared } from '../adapters/storage.ts';
-import { brainstormScratch, captureRequest, fakeNpm, pinGeneratedNode, resign, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, captureRequest, fakeNpm, pinGeneratedNode, resign, readScratchJson, writeJson } from './support/interactive-maker-brainstorm-fixture.mjs';
 import { copyTree, pristineFixtures } from './support/pristine-fixture.mjs';
 
 const out = 'brainstorms/capture-inbox', source = out + '/source';

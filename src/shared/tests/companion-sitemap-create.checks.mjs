@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { newSitemapSurface } from '../companion/sitemap/create.ts';
 import { applySitemapCommand } from '../companion/sitemap/commands.ts';
 import { validateAuthoringDocument as validateCompanionDocument } from '../companion/authoring-contract.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const original=selfProject();
 const owner=original.design.nodes.find(n=>n.kind==='view');
 

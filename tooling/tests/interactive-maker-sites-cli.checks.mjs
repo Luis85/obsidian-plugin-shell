@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';
 import { inspectWorkflow } from '../quality/check-repository.mjs';
-import { fileSymlink } from '../../src/cli/tests/file-symlink.mjs';
+import { fileSymlink } from '../../src/cli/tests/support/file-symlink.mjs';
 
 const repository = resolve(import.meta.dirname, '../..');
 const FEATURES = `filters: file.inFolder("Features")

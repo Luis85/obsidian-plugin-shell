@@ -15,7 +15,7 @@ const root = fileURLToPath(new URL('../../../', import.meta.url));
 const vitest = join(dirname(createRequire(import.meta.url).resolve('vitest/package.json')), 'vitest.mjs');
 const modules = dirname(dirname(vitest));
 // Compact project v6 generator fixture (two visual pages, one reusable component, one bound list source).
-const fixture = JSON.parse(await readFile(new URL('./fixtures/companion/visual-project.json', import.meta.url), 'utf8'));
+const fixture = JSON.parse(await readFile(new URL('../../shared/testing/fixtures/companion/visual-project.json', import.meta.url), 'utf8'));
 const source = (field = '') => ({ kind: 'source', sourceId: 'ds-source-1', operationId: 'ds-operation-6', field });
 /** The component library page gains a data table and a badge bound to the same list operation as its bound text. */
 function bindingFixture() {

@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { changelog, configs, docsIndex, handoffPath, readyHandoff, repositoryRoot } from '../../src/cli/tests/delivery-fixture.mjs';
+import { changelog, configs, docsIndex, handoffPath, readyHandoff, repositoryRoot } from '../../src/cli/tests/support/delivery-fixture.mjs';
 import { criterionSlug, planStubs, renderStub, stubPath, stubsOf, withEvidence } from '../../src/cli/tooling/delivery/acceptance-stubs.mjs';
 import { pendingAllowed, pendingStubAllowance, stubIncrement } from '../delivery/acceptance-guard.mjs';
 import { parseHandoff } from '../../src/cli/tooling/delivery/handoff.mjs';

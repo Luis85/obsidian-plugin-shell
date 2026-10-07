@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { sha256 } from '../tooling/release/candidate.mjs';
+import { sha256 } from '../../tooling/release/candidate.mjs';
 
 export const repository = 'Example/plugin';
 export const version = '0.5.0';

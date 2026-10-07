@@ -5,14 +5,14 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createFilePlan } from '#shared/platform/file-plan.ts';
 
-export const makerSourceRoot = fileURLToPath(new URL('../../../', import.meta.url));
+export const makerSourceRoot = fileURLToPath(new URL('../../../../', import.meta.url));
 // The fixture keeps the generated-project layout; its inputs come from where this repository keeps them.
 const sourceLocations = [
   ['src/bootstrap/', 'src/plugin/bootstrap/'], ['src/application', 'src/plugin/application'], ['src/domain', 'src/plugin/domain'],
   ['src/infrastructure/', 'src/plugin/infrastructure/'], ['src/features/', 'src/plugin/features/'], ['tests/runtime/', 'src/plugin/tests/unit/'],
   ['scripts/makers', 'tooling/makers'], ['scripts/companion/', 'src/shared/companion/'], ['scripts/events', 'tooling/events'],
   ['scripts/examples/', 'tooling/examples/'], ['scripts/shared', 'src/shared/platform'],
-  ['tests/tooling/makers.checks.mjs', 'tooling/tests/makers.checks.mjs'], ['tests/tooling/maker-fixture.mjs', 'src/cli/tests/maker-fixture.mjs'],
+  ['tests/tooling/makers.checks.mjs', 'tooling/tests/makers.checks.mjs'], ['tests/tooling/maker-fixture.mjs', 'src/cli/tests/support/maker-fixture.mjs'],
 ];
 /** This repository's location of a file the fixture places at `path`. */
 export function makerSource(path) {

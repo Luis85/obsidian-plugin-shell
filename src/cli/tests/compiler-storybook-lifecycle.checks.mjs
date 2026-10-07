@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { storybookOperation } from '../adapters/framework/storybook.ts';
 import { executeOperation } from '../adapters/framework/operations.ts';
 import { planProject, applyProject } from '../compiler/adapters/project-plan.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const source = starterDocumentText('quick-capture');
 async function scratch(t) {

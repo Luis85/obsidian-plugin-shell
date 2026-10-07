@@ -93,7 +93,7 @@ Import and folder changes refuse observed stale storage, modified owned Project.
 - `docs/concepts/companion/src/companion-project.js`: declarative self-project seed, not an implemented native plugin.
 
 ```sh
-node --test src/cli/tests/companion-project.checks.mjs src/shared/tests/companion-storymaps.checks.mjs
+node --test tooling/tests/companion-project.checks.mjs src/companion/tests/companion-storymaps.checks.mjs
 python -B tooling/concepts/build-companion.py --check
 python -B src/companion/tests/concepts/companion-assembly.test.py
 SHELL_CHROMIUM=/path/to/chromium python -B tooling/concepts/run-browser-checks.py --real-storage

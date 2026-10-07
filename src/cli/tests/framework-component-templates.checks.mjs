@@ -10,8 +10,8 @@ import { executeOperation } from '../adapters/framework/operations.ts';
 import { documentText, newDocument, openDocument } from '../domain/document.ts';
 import { pluginComponentTemplates } from '../sdk/template-contributions.ts';
 import { defaults, identity } from '../adapters/framework/configuration.ts';
-import { extractKit } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { extractKit } from './support/framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 
 const frameworkRoot = fileURLToPath(new URL('../../../', import.meta.url));
 

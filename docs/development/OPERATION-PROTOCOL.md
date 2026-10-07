@@ -117,7 +117,7 @@ forms cannot qualify them. Imported receipts never authorize machine-local work.
 
 ## Verification
 
-Run `node --test src/cli/tests/capability-discovery.checks.mjs` for actual CLI and
+Run `node --test tooling/tests/capability-discovery.checks.mjs` for actual CLI and
 independent-copy probes, handler/catalog parity, hostile consumer scripts, malformed
 JSON/versions, output tampering and existing maker help/list compatibility. Existing
 maker and consumer suites must additionally qualify actual source generation after

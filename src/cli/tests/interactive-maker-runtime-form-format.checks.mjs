@@ -8,7 +8,7 @@ import { formValueIssues } from '../domain/form-values.ts';
 
 const features = resolve(import.meta.dirname, '../../plugin/features');
 // Test-owned copy of the showcase example: these checks must survive `examples:remove`.
-const fixture = resolve(import.meta.dirname, '../../../tests/fixtures/forms/feature-brief.json');
+const fixture = resolve(import.meta.dirname, '../../shared/testing/fixtures/forms/feature-brief.json');
 /** Runtime form definitions live beside their feature: src/features/<feature>/forms/*.json. */
 async function runtimeForms(root = features) {
   const found = [];

@@ -9,8 +9,8 @@ import { projectModel, schema, literal } from '../compiler/emitters/model.ts';
 import { sample, typeCode } from '../compiler/emitters/schema-code.ts';
 import { matches } from '#shared/companion/runtime-contract.ts';
 import { planProject, applyProject, reviewProject } from '../compiler/adapters/project-plan.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
-import { retiredProjectText } from '../../../tests/support/retired-projects.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
+import { retiredProjectText } from '#shared/testing/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 // The current self-project, including its managed Markdown Collection (full CRUD ports).
 const fixture = selfProject();

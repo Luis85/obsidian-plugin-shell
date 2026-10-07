@@ -8,7 +8,7 @@ import { makerMain as main } from '../app.ts';
 import { brainstormWizard } from '../presentation/brainstorm.ts';
 import { brainstormFeaturePlan } from '../adapters/brainstorm.ts';
 import { terminalFixture } from '#tui/tests/interactive-maker-tui-fixture.mjs';
-import { brainstormScratch, frameworkRoot, scriptedPlain, readText, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, frameworkRoot, scriptedPlain, readText, readScratchJson } from './support/interactive-maker-brainstorm-fixture.mjs';
 
 async function respond(f, current, keys, next) {
   await f.until(current); const from = f.chunks.length; f.send(keys);

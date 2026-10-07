@@ -7,11 +7,11 @@ import { reservedFileExtensions } from '../../src/plugin/domain/native-integrati
 import { nativeCode } from '../../src/cli/compiler/emitters/native-code.ts';
 import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
 import { companionStarters, loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
-import { customizeStarter as customizeLoaded } from '../../src/cli/adapters/starters/customize.ts';
+import { customizeStarter as customizeLoaded } from '../../src/shared/companion/starters/customize.ts';
 import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
 import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
 import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
-import { makerFixture, makerSourceRoot } from '../../src/cli/tests/maker-fixture.mjs';
+import { makerFixture, makerSourceRoot } from '../../src/cli/tests/support/maker-fixture.mjs';
 const file = {
   id: 'folio',
   name: 'Folio',

@@ -5,7 +5,7 @@ import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { main } from '../app.ts';
 import { learningCommand } from '../adapters/learning-command.ts';
-import { contactForm, greetWizard, learningPath, project, put, scratch, step } from './interactive-maker-learning-fixture.mjs';
+import { contactForm, greetWizard, learningPath, project, put, scratch, step } from './support/interactive-maker-learning-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../../..');
 /** The real CLI entry with captured streams; machine output is one JSON document. */
 async function run(root, ...argv) {

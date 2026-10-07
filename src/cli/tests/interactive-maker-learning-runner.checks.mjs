@@ -6,7 +6,7 @@ import { launchLearning } from '../presentation/learning-runner.ts';
 import { runLearningWizard } from '../presentation/learning-actions.ts';
 import { Back } from '#tui/prompts.ts';
 import { wizardCatalog } from '../presentation/wizards/registry.ts';
-import { contactForm, greetWizard, learningPath, plainPrompts, project, put, scratch, step, wizard } from './interactive-maker-learning-fixture.mjs';
+import { contactForm, greetWizard, learningPath, plainPrompts, project, put, scratch, step, wizard } from './support/interactive-maker-learning-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../../..');
 const BACK = Symbol('back');
 const tour = learningPath('tour', [

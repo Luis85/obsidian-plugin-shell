@@ -7,7 +7,7 @@ import vm from 'node:vm';
 import { visualNodes, visualRoot } from '#shared/companion/visual/visual-ir.mjs';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
-import { selfProject, starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { selfProject, starterDocumentText } from '#shared/testing/starter-documents.mjs';
 import { withStorybookOptions, projectToolingSchema } from '#shared/companion/tooling-contract.ts';
 import { storybookFlags } from '../adapters/framework/storybook-options.ts';
 import { parseCliArguments } from '../adapters/framework/catalog.ts';

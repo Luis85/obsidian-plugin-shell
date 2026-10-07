@@ -1,7 +1,7 @@
 /** Current (project v6) Companion documents from the canonical starter definitions. Tests never read retired formats. */
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-const root = new URL('../../', import.meta.url);
+const root = new URL('../../../', import.meta.url);
 const startersFolder = 'configs/starters';
 export const starterPath = id => `${startersFolder}/${id}.json`;
 function definition(id) {

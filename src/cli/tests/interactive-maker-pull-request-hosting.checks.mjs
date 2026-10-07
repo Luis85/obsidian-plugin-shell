@@ -10,7 +10,7 @@ import { remoteLockPath, withRemoteLock } from '../adapters/increments/remote-lo
 import { remoteMarker, renderManagedBlock } from '../domain/increments/remote-body.ts';
 import { planPublish } from '../domain/increments/remote-state.ts';
 import { createFakeHostingRemote, samplePullRequestView } from './support/fake-hosting-remote.mjs';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 
 const throwsCode = code => error => error.code === code;
 const githubOrigin = { origin: 'https://github.com/octo/demo.git', hosting: null };

@@ -8,7 +8,7 @@ import { projectModel } from '../compiler/emitters/model.ts';
 import { visualSpecs } from '../compiler/emitters/visual-model.ts';
 import { clickdummyCode } from '../compiler/emitters/clickdummy-code.ts';
 import { clickdummyScenariosCode } from '../compiler/emitters/clickdummy-scenarios-code.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const document = starterDocument('quick-capture');
 const model = projectModel(document);
 function emit(m = model) { let source; clickdummyScenariosCode(m, (path, content) => { assert.equal(path, 'harness/prototype/clickdummy-scenarios.ts'); source = content; }); return source; }

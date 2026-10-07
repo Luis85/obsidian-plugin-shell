@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { planProject, applyProject } from '../compiler/adapters/project-plan.ts';
 import { status } from '../adapters/framework/inspection.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');

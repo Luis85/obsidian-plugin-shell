@@ -7,7 +7,7 @@ import { frameworkAdapter, requireFrameworkAdapter } from '../compiler/adapters/
 import { packageFiles, typecheckFiles } from '../compiler/adapters/project/configuration.ts';
 import { renderStarterProject } from '../compiler/adapters/project/emitter.ts';
 import { companionFrontend } from '../compiler/adapters/frontend.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 
 // Drives the project-starter host adapters (src/cli/compiler/adapters/project/*) through their refusal paths.
 const root = fileURLToPath(new URL('../../../', import.meta.url));

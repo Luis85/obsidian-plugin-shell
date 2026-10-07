@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { parseConcept, conceptSchema } from '../companion/concepts/contract.ts';
 import { applyConcept } from '../companion/concepts/apply.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const fixture = starterDocument('blank');
 const baseHash = 'a'.repeat(64);
 function feature() {

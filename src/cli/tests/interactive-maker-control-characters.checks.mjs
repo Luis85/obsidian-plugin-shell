@@ -11,7 +11,7 @@ import { parseArguments } from '../adapters/makers/arguments.ts';
 import { planMaker } from '../adapters/makers/plan.ts';
 import { portable } from '../documentation/adapters/filesystem.ts';
 import { text } from '../documentation/domain/contracts.ts';
-import { makerFixture } from './maker-fixture.mjs';
+import { makerFixture } from './support/maker-fixture.mjs';
 
 // The CLI's single-line identity and path boundaries share hasControls(): C0 controls, DEL and the C1 range
 // (U+0080-U+009F) are refused, while printable Unicode beyond them still passes.

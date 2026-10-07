@@ -16,7 +16,7 @@ import * as validate from '#shared/companion/sitemap/validate.ts';
 import * as safety from '#shared/companion/sitemap/safety.ts';
 import { canonicalKey, assertJson } from '#shared/companion/sitemap/safety.ts';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const root = new URL('../../../', import.meta.url);
 // These are the same maintained runtime files used by the concept, not arbitrary imported project scripts.
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js', root), 'utf8') + ';Vue;');

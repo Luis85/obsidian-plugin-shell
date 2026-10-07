@@ -11,8 +11,8 @@ import { guidedSetup, continueSetup } from '../presentation/terminal/setup-termi
 import { result } from '../adapters/framework/contracts.ts';
 import { assembleStarterPack } from '../adapters/starters/operations.ts';
 import { zip } from '../adapters/framework/zip.ts';
-import { extractArchive } from './framework-archive-fixture.mjs';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { extractArchive } from './support/framework-archive-fixture.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../../', import.meta.url));
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'setup-journey-')));

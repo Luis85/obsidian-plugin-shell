@@ -12,7 +12,7 @@ import { projectModel, digest } from '../compiler/emitters/model.ts';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { projectFiles } from './support/project-render.mjs';
 import { descriptor } from '../adapters/framework/catalog.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const starter = structuredClone(starterDocument('quick-capture'));

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { FILE_PLAN_PROTECTED_ROOTS, PROTECTED_PROJECT_SEGMENTS, RESERVED_FOLDER_NAMES, isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { hasProtectedProjectRoot } from '#shared/platform/project-path.ts';
 import { createFilePlan } from '#shared/platform/file-plan.ts';
-import { portablePath as starterPath } from '../adapters/starters/validation.ts';
+import { portablePath as starterPath } from '#shared/companion/starters/validation.ts';
 import { loadHandoutWorkspace } from '../adapters/framework/handout-workspace.ts';
 import { packStarterOperation } from '../adapters/starters/operations.ts';
 import { packKit } from '../adapters/framework/kit.ts';

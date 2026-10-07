@@ -4,7 +4,7 @@ import { newDocument, documentText } from '../domain/document.ts';
 import { runOperations } from '../application/operations.ts';
 import { hash } from '../adapters/framework/files.ts';
 import { readFeatureBrainstorm, featureConcept, brainstormGuide, brainstormSchema } from '../domain/brainstorm.ts';
-import { captureRequest } from './interactive-maker-brainstorm-fixture.mjs';
+import { captureRequest } from './support/interactive-maker-brainstorm-fixture.mjs';
 
 const view = { title: 'Inbox', purpose: 'Review captured ideas' };
 const rejects = (patch, code) => assert.throws(() => readFeatureBrainstorm({ ...captureRequest, ...patch }),

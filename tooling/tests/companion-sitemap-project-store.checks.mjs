@@ -5,7 +5,7 @@ import { SitemapSession } from '#shared/companion/sitemap/session.ts';
 import { canonicalKey } from '#shared/companion/sitemap/safety.ts';
 import { editorBindings } from '#shared/companion/sitemap/editor-bindings.ts';
 import { journeyVaultFiles } from '../../templates/companion/runtime/journey-vault.ts';
-import { starterDocumentText } from '../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const seed = starterDocumentText('quick-capture');
 function fixture(t) {
   let raw = seed, writes = 0, outcome = null, release = null;

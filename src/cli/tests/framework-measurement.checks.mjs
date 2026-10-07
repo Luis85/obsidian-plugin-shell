@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { sampleSummary, measureOperation } from '../adapters/framework/measurement.ts';
 import { executeOperation } from '../adapters/framework/operations.ts';
 import { parseCliArguments } from '../adapters/framework/catalog.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const source=starterDocumentText('quick-capture');
 const request=(...args)=>parseCliArguments(args);

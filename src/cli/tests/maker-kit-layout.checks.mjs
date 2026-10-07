@@ -6,9 +6,9 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { extractKit } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { extractKit } from './support/framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 
 // A real extracted developer kit: bundled bin/app.js, editable sources only under bin/template and no
 // project-level src/cli/adapters. Generated custom-maker and locale checks must pass there without path probing.

@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p reports/dev
           set -o pipefail
-          node --test src/cli/tests/framework-checkout-build.checks.mjs 2>&1 | tee reports/dev/checkout-build.txt
+          node --test tooling/tests/framework-checkout-build.checks.mjs 2>&1 | tee reports/dev/checkout-build.txt
       - name: Test suite registration and documentation
         if: ${{ !cancelled() }}
         run: node tooling/testing/suites.mjs --check

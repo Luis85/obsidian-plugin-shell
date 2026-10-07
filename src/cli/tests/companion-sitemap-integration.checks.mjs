@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { validateAuthoringDocument as validateCompanionDocument } from '#shared/companion/authoring-contract.ts';
-import { companionStarterIds, starterDocument, starterDocumentText, starterPath } from '../../../tests/support/starter-documents.mjs';
+import { companionStarterIds, starterDocument, starterDocumentText, starterPath } from '#shared/testing/starter-documents.mjs';
 import { executeOperation } from '../adapters/framework/operations.ts';
 import { inspectSitemapSummary } from '#shared/companion/sitemap/summary.ts';
 import { applySitemapCommand } from '#shared/companion/sitemap/commands.ts';

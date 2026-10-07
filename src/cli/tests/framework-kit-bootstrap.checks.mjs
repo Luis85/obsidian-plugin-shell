@@ -7,9 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { assembleKit, installedCompiler, kitScripts } from '../adapters/framework/kit.ts';
 import { kitRootReadme } from '../adapters/framework/distribution.ts';
-import { extractArchive } from './framework-archive-fixture.mjs';
+import { extractArchive } from './support/framework-archive-fixture.mjs';
 import { zip } from '../adapters/framework/zip.ts';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const exists = path => stat(path).then(() => true, () => false);

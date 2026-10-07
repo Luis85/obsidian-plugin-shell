@@ -4,7 +4,7 @@ import { storybookStories } from '../compiler/emitters/storybook-stories.ts';
 import { storybookHost } from '../compiler/emitters/storybook-host.ts';
 import { storybookWorkspace, storybookVersion } from '../compiler/emitters/storybook-workspace.ts';
 import { storybookCode } from '../compiler/emitters/storybook-code.ts';
-import { detailDocument, richComponentDocument, model, template } from './compiler-emitters-fixture.mjs';
+import { detailDocument, richComponentDocument, model, template } from './support/compiler-emitters-fixture.mjs';
 
 // Optional Storybook emission (storybook-{stories,host,workspace,code}.ts): exact CSF files, inventory and opt-in gates.
 const byEntity = (rendered, id) => {

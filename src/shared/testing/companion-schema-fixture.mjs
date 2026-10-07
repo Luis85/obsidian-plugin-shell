@@ -1,6 +1,6 @@
 import { companionProjectSchema } from '#shared/companion/schema/project.mjs';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
-import { companionStarterIds, starterDocument, starterPath } from '../../../tests/support/starter-documents.mjs';
+import { companionStarterIds, starterDocument, starterPath } from './starter-documents.mjs';
 /** Shared inert corpus; an independent Draft 2020-12 implementation also consumes these bytes. */
 export function schemaCorpus() {
   const ids = companionStarterIds();

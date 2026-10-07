@@ -1,20 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile, writeFile, rm, readdir, mkdir, cp } from 'node:fs/promises';
-import { fileSymlink } from './file-symlink.mjs';
+import { fileSymlink } from './support/file-symlink.mjs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { companionStarters, loadDefinitions } from '../adapters/starters/repository.ts';
-import { customizeStarter } from '../adapters/starters/customize.ts';
-import { starterProjection } from '../adapters/starters/browser.ts';
+import { customizeStarter } from '#shared/companion/starters/customize.ts';
+import { starterProjection } from '#shared/companion/starters/browser.ts';
 import { validateStarterCatalog } from '#shared/companion/starter-contract.mjs';
 import { projectModel, symbol } from '../compiler/emitters/model.ts';
 import { planProject, applyProject } from '../compiler/adapters/project-plan.ts';
 import { AUTHORING_VERSION as COMPANION_VERSION } from '#shared/companion/authoring-contract.ts';
 import { validateVisualDesigns } from '#shared/companion/visual/visual-validate.mjs';
-import { exampleStarterIds } from '../../../tests/support/starter-documents.mjs';
-import { retiredProject } from '../../../tests/support/retired-projects.mjs';
+import { exampleStarterIds } from '#shared/testing/starter-documents.mjs';
+import { retiredProject } from '#shared/testing/retired-projects.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),examples=new Set(exampleStarterIds());
 // The twelve focused example starters: eleven converted once from their v5 models, plus the agent-ready tooling preset, all project v6.
 const starters=companionStarters(await loadDefinitions(root)).filter(entry=>examples.has(entry.definition.id));

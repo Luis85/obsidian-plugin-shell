@@ -6,7 +6,7 @@ import { configFiles, loadConfig, validateDeliveryConfig, validateRulesConfig } 
 import { readyRules } from '../tooling/delivery/rules-ready.mjs';
 import { doneRules } from '../tooling/delivery/rules-done.mjs';
 import { categories } from '../tooling/release/changelog.mjs';
-import { read, readyHandoff, repositoryRoot } from './delivery-fixture.mjs';
+import { read, readyHandoff, repositoryRoot } from './support/delivery-fixture.mjs';
 
 const clone = value => JSON.parse(JSON.stringify(value));
 

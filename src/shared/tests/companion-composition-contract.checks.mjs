@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compositionDefaultUI, compositionLiteral, compositionSession, compositionStyle, compositionTestSource, compositionTheme, compositionTransition,
   compositionVisible, validateCompositionDesignSystem, validateCompositionEffect, validateCompositionNode, validateCompositionScenarios, validateCompositionUI } from '../companion/composition-contract.mjs';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 
 const system = selfProject().design.designSystem;
 const states = ['default', 'loading', 'empty', 'error', 'disabled'];

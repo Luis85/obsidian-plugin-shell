@@ -306,7 +306,8 @@
           "tooling/tests/compiler-storybook-a11y.checks.mjs",
           "src/cli/tests/compiler-storybook-consolidation.checks.mjs",
           "src/cli/tests/compiler-storybook.checks.mjs",
-          "tooling/tests/compiler-template-layout.checks.mjs"
+          "tooling/tests/compiler-template-layout.checks.mjs",
+          "tooling/tests/project-boundaries.checks.mjs"
         ]
       },
       "runner": {
@@ -314,7 +315,8 @@
       },
       "include": [
         "src/cli/tests/compiler-*.checks.mjs",
-        "tooling/tests/compiler-*.checks.mjs"
+        "tooling/tests/compiler-*.checks.mjs",
+        "tooling/tests/project-boundaries.checks.mjs"
       ],
       "exclude": [
         "src/cli/tests/compiler-properties.checks.mjs"
@@ -472,9 +474,6 @@
           "src/plugin/tests/unit/settings-storage.test.ts",
           "src/plugin/tests/unit/shell-entry-lifecycle.test.ts",
           "src/plugin/tests/unit/view-state.test.ts"
-        ],
-        "integration": [
-          "src/plugin/tests/unit/tooling.test.ts"
         ]
       },
       "runner": {"type": "vitest", "config": "configs/testing/vitest.config.mjs"},
@@ -500,7 +499,8 @@
           "src/cli/tests/framework-docs-model.checks.mjs",
           "src/cli/tests/framework-documents.checks.mjs",
           "tooling/tests/starter-catalog-docs.checks.mjs",
-          "src/cli/tests/starter-submission-identity.checks.mjs"
+          "src/cli/tests/starter-submission-identity.checks.mjs",
+          "src/cli/tests/gate-scope.checks.mjs"
         ]
       },
       "runner": {
@@ -510,7 +510,8 @@
         "src/cli/tests/framework-*.checks.mjs",
         "src/shared/tests/framework-*.checks.mjs",
         "tooling/tests/framework-*.checks.mjs",
-        "src/cli/tests/capability-discovery.checks.mjs",
+        "tooling/tests/capability-discovery.checks.mjs",
+        "src/cli/tests/gate-scope.checks.mjs",
         "src/cli/tests/starter-*.checks.mjs",
         "src/shared/tests/starter-*.checks.mjs",
         "tooling/tests/starter-*.checks.mjs"
@@ -575,7 +576,8 @@
         "src/cli/tests/project-generator*.checks.mjs",
         "tooling/tests/project-generator*.checks.mjs",
         "src/cli/tests/project-starters.checks.mjs",
-        "src/shared/tests/file-plan*.checks.mjs"
+        "src/shared/tests/file-plan*.checks.mjs",
+        "tooling/tests/file-plan*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:generator",
@@ -597,7 +599,8 @@
         "concurrency": 4
       },
       "include": [
-        "src/shared/tests/visual-*.checks.mjs"
+        "src/shared/tests/visual-*.checks.mjs",
+        "tooling/tests/visual-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:visual",
@@ -612,16 +615,16 @@
       "level": "unit",
       "levels": {
         "component": [
-          "src/shared/tests/companion-authoring-state.checks.mjs",
-          "src/shared/tests/companion-sitemap-project-store.checks.mjs",
-          "src/shared/tests/companion-sitemap-workspace.checks.mjs",
+          "src/companion/tests/companion-authoring-state.checks.mjs",
+          "tooling/tests/companion-sitemap-project-store.checks.mjs",
+          "src/companion/tests/companion-sitemap-workspace.checks.mjs",
           "tooling/tests/companion-visual-*.checks.mjs"
         ],
         "integration": [
           "tooling/tests/companion-authoring-evidence.checks.mjs",
           "tooling/tests/companion-boundaries.checks.mjs",
           "src/shared/tests/companion-composition-contract.checks.mjs",
-          "src/cli/tests/companion-project.checks.mjs",
+          "tooling/tests/companion-project.checks.mjs",
           "src/cli/tests/companion-prototypes-workspace-integrity.checks.mjs",
           "src/cli/tests/companion-schema.checks.mjs",
           "tooling/tests/concept-metrics.checks.mjs",
@@ -1129,7 +1132,7 @@
         "integration": [
           "tests/verification/runner.test.mjs",
           "tests/verification/source.test.mjs",
-          "src/plugin/tests/harness-styles/server.test.mjs"
+          "tooling/tests/harness-styles/server.test.mjs"
         ]
       },
       "runner": {
@@ -1145,7 +1148,7 @@
       },
       "include": [
         "tests/verification/*.test.mjs",
-        "src/plugin/tests/harness-styles/*.test.mjs"
+        "tooling/tests/harness-styles/server.test.mjs"
       ],
       "verify": "own-step",
       "verifyStep": "verify-baseline --repeat 3",
@@ -1292,10 +1295,14 @@
     {
       "purpose": "Tooling fixtures and shared helpers",
       "include": [
-        "src/cli/tests/*-fixture.mjs",
         "src/tui/tests/*-fixture.mjs",
-        "tooling/tests/*-fixture.mjs",
-        "src/cli/tests/file-symlink.mjs"
+        "tooling/tests/*-fixture.mjs"
+      ]
+    },
+    {
+      "purpose": "TypeScript project configuration of a source project test root",
+      "include": [
+        "src/*/tests/tsconfig.json"
       ]
     },
     {

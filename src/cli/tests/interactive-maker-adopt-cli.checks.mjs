@@ -4,8 +4,8 @@ import { mkdir, readFile, readdir, symlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { adoptInvocation } from '../adapters/framework/adopt-invocation.ts';
 import { executeOperation } from '../adapters/framework/operations.ts';
-import { fileSymlink } from './file-symlink.mjs';
-import { fixtureNames, frameworkRoot, run, runJson, withProject } from './interactive-maker-adopt-fixture.mjs';
+import { fileSymlink } from './support/file-symlink.mjs';
+import { fixtureNames, frameworkRoot, run, runJson, withProject } from './support/interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const sha = value => createHash('sha256').update(value).digest('hex');

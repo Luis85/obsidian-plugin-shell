@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { loadTemplateSnapshot } from '../compiler/index.ts';
 import { executeOperation } from '../adapters/framework/operations.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 /** Source-only fixture, not a compiled distribution. Works with showcase and example-removed templates. */

@@ -6,8 +6,8 @@ import { navigationCode } from '../../src/cli/compiler/emitters/navigation-code.
 import { clickdummyCode } from '../../src/cli/compiler/emitters/clickdummy-code.ts';
 import { previewCode, previewScripts } from '../../src/cli/compiler/emitters/preview-code.ts';
 import { styleCode } from '../../src/cli/compiler/emitters/style-code.ts';
-import { journeyDocument, dataDocument, richVisualDocument, model, recorder } from '../../src/cli/tests/compiler-emitters-fixture.mjs';
-import { starterDocument } from '../../tests/support/starter-documents.mjs';
+import { journeyDocument, dataDocument, richVisualDocument, model, recorder } from '../../src/cli/tests/support/compiler-emitters-fixture.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 
 // Plugin host, workbench UI, navigation, browser clickdummy, source preview and style emission.
 const run = (emitter, m) => { const out = recorder(); emitter(m, out.add); return out; };

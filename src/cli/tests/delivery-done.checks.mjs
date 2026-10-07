@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { baseContext, changelog, configs, docsIndex, handoffPath, readyHandoff, results } from './delivery-fixture.mjs';
+import { baseContext, changelog, configs, docsIndex, handoffPath, readyHandoff, results } from './support/delivery-fixture.mjs';
 import { changelogWithEntries, completionRecord, indexWithRows, setFrontmatterValue, upsertSection } from '../tooling/delivery/generate.mjs';
 import { missingChangelogEntries } from '../tooling/delivery/rules-done.mjs';
 import { runDone } from '../tooling/delivery/run.mjs';

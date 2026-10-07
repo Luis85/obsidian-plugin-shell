@@ -428,7 +428,7 @@
       "sha256": "bc14a79325b8b00504d408db4215cdc403fdc5ceaabfd0a345ecf4d4c1976e99"
     },
     {
-      "path": "tooling/testing/native-recovery-handles.mjs",
+      "path": "src/shared/testing/native-recovery-handles.mjs",
       "sha256": "f6006b6886088f05193e1d842df494f94dc58dcc4412be8e2f18cfb28e714450"
     },
     {
@@ -444,7 +444,7 @@
       "sha256": "db353e2ed82b24134388f3c00687a560b7b8055695061ff8d4024d75f144cf4a"
     },
     {
-      "path": "tooling/testing/native-recovery-handles.d.mts",
+      "path": "src/shared/testing/native-recovery-handles.d.mts",
       "sha256": "265e3f8efaa4baface8bc325afe2a3e54c5f7663f70240e3fd20d8ece9b21c82"
     },
     {

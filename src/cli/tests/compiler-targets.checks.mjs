@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import ts from 'typescript';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),template=await loadTemplateSnapshot(root);
 const source=starterDocumentText('quick-capture');
 test('browser output shares generated product code and packages an explicit offline build entry',async()=>{

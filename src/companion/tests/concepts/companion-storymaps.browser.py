@@ -201,7 +201,7 @@ with sync_playwright() as pw:
         check('Reviewed import preserves the full semantic document', json.loads(js('companionJson()')) == json.loads(document))
         check('Current stored project validates after import', js('validState(JSON.parse(__saved[STORAGE_KEY]))'))
         # A genuine retired-format document (the shared synthetic schema 1 sample), not a relabeled current export.
-        retired=subprocess.run(['node','--input-type=module','-e',"import {retiredProjectText} from './tests/support/retired-projects.mjs';process.stdout.write(retiredProjectText(1))"],cwd=ROOT,capture_output=True,text=True,timeout=15,check=True).stdout
+        retired=subprocess.run(['node','--input-type=module','-e',"import {retiredProjectText} from '#shared/testing/retired-projects.mjs';process.stdout.write(retiredProjectText(1))"],cwd=ROOT,capture_output=True,text=True,timeout=15,check=True).stdout
         check('A retired version-one import is refused, never migrated', js('text=>{try{companionCandidate(text);return false;}catch(error){return /only schema 6 is supported/.test(error.message);}}',retired), 'Retired format contract fixture')
         nav('storymaps');act('sm-open',original_id);act('sm-mode','map')
         for width,theme,mode in [(1440,'dark','map'),(1440,'light','map'),(960,'dark','map'),(390,'dark','outline')]:

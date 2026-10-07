@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { mountPrototypes } from '../../src/companion/editor/prototype-manager.ts';
 import { prototypeView } from '../../src/companion/editor/prototype-view.ts';
-import { api, document, workspace, main, alternate, activate, fork } from '../../tests/support/prototype-fixture.mjs';
+import { api, document, workspace, main, alternate, activate, fork } from '#shared/testing/prototype-fixture.mjs';
 
 // Minimal render port, not a browser substitute. Exercise the actual manager's initial
 // selection and pure view; browser-origin/style behavior remains in the browser suite.

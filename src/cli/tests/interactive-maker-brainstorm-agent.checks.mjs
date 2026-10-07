@@ -5,7 +5,7 @@ import { join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { parseArguments, execute } from '../adapters/commands.ts';
 import { brainstormFeaturePlan } from '../adapters/brainstorm.ts';
-import { brainstormScratch, captureRequest, readText, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, captureRequest, readText, readScratchJson, writeJson } from './support/interactive-maker-brainstorm-fixture.mjs';
 
 const cli = (options, argv, stdin = '') => execute(parseArguments(argv), { ...options, input: Readable.from([stdin]) });
 async function snapshot(root) {

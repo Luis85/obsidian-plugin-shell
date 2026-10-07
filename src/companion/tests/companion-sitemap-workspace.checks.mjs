@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import * as storage from '#shared/companion/journey/project-store.ts';
 import { SitemapSession } from '#shared/companion/sitemap/session.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 const root = new URL('../../../', import.meta.url);
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js',root),'utf8')+';Vue;');
 const source=readFileSync(new URL('src/companion/editor/workspace/use-workspace.ts',root),'utf8');

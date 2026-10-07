@@ -5,11 +5,11 @@ import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { npmEntry } from '../adapters/framework/process.ts';
-import { verifyKit } from '../adapters/framework/kit-integrity.ts';
-import { extractArchive } from './framework-archive-fixture.mjs';
+import { npmEntry } from '../../src/cli/adapters/framework/process.ts';
+import { verifyKit } from '../../src/cli/adapters/framework/kit-integrity.ts';
+import { extractArchive } from '../../src/cli/tests/support/framework-archive-fixture.mjs';
 
-const repository = fileURLToPath(new URL('../../../', import.meta.url));
+const repository = fileURLToPath(new URL('../../', import.meta.url));
 
 test('a clean source snapshot builds a complete CLI that runs outside the checkout', { timeout: 180000 }, async t => {
   const scratch = await realpath(await mkdtemp(join(tmpdir(), 'workbench-checkout-')));

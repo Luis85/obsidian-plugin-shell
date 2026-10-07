@@ -9,7 +9,7 @@ import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
 import { loadCatalog } from '../../src/cli/adapters/makers/load-catalog.ts';
 import { loadEventCatalog } from '../events/load-catalog.mjs';
 import { planExampleRemoval } from '../examples/plan.mjs';
-import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, copyMakerSuite } from '../../src/cli/tests/maker-fixture.mjs';
+import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, copyMakerSuite } from '../../src/cli/tests/support/maker-fixture.mjs';
 
 /** Example removal is tooling (tooling/examples), so it stays with this tooling test rather than the CLI fixture. */
 async function removeMakerExamples(root) {

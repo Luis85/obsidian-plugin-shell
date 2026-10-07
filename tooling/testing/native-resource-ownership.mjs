@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { nativeCommand } from './native-command.mjs';
 import { attachRuntimeObservation, assertIndependentObservation, observedResources } from './native-runtime-observation.mjs';
-import { retainNativeAction, startAndCloseRecovery } from './native-recovery-handles.mjs';
+import { retainNativeAction, startAndCloseRecovery } from '../../src/shared/testing/native-recovery-handles.mjs';
 import { foreignNoticeCommands } from './native-foreign-notice.mjs';
 
 /** Exact installed plugin bytes; public UI/native resources, no global resource sweeps. */

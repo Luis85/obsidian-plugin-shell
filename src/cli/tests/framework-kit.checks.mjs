@@ -6,13 +6,13 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { upgradePlan } from '../adapters/framework/kit.ts';
-import { extractArchive, extractKit, kitFiles } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { extractArchive, extractKit, kitFiles } from './support/framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 import { zip } from '../adapters/framework/zip.ts';
 import { hash } from '../adapters/framework/files.ts';
 import { applyFilePlan } from '#shared/platform/file-plan.ts';
 import { kitManifest, verifyKit } from '../adapters/framework/kit-integrity.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 import { executeOperation } from '../adapters/framework/operations.ts';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 function cli(dir, args) {

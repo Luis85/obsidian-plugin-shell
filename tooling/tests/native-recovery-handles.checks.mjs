@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { retainNativeAction, startAndCloseRecovery } from '../testing/native-recovery-handles.mjs';
+import { retainNativeAction, startAndCloseRecovery } from '../../src/shared/testing/native-recovery-handles.mjs';
 
 function fixture(handlers = 1, throws = false, options = {}) {
   const calls = []; let detached = 0; let objectGroup;

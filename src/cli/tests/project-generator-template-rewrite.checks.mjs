@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { loadTemplateSnapshot } from '../compiler/index.ts';
 import { boundaryProject } from './fixtures/generator-boundaries.mjs';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 import { projectModel } from '../compiler/emitters/model.ts';
 import { copiedTemplateMarker, rewriteTemplate } from '../compiler/emitters/file-code.ts';
 import { relationshipCode } from '../compiler/emitters/relationship-code.ts';

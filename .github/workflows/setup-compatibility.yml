@@ -11,6 +11,7 @@ on:
       - 'tooling/testing/check-npm-install-policy.mjs'
       - 'tooling/testing/local-npm-registry.mjs'
       - 'src/shared/tests/npm-install.checks.mjs'
+      - 'tooling/tests/setup-npm-install.checks.mjs'
       - 'tooling/tests/setup-identity*.mjs'
       - '.gitattributes'
       - '.nvmrc'

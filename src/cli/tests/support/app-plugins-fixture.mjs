@@ -3,8 +3,8 @@ import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { PassThrough, Writable } from 'node:stream';
-import { main } from '../app.ts';
-import { executeOperation } from '../adapters/framework/operations.ts';
+import { main } from '../../app.ts';
+import { executeOperation } from '../../adapters/framework/operations.ts';
 
 export const manifestFor = (id, extra = {}) => ({ id, name: 'Hello World', version: '1.0.0', minAppVersion: '0.4.0', apiVersion: 1,
   description: 'Greets.', author: 'Tester', category: 'tool', tags: ['greeting'], ...extra });

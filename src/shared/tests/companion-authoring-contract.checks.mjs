@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { validateAuthoringDocument, parseAuthoringDocument, authoringDesignKey, validateCompanionFolders, companionRelativeFolder } from '../companion/authoring-contract.ts';
-import { selfProject, companionStarterIds, starterDocument } from '../../../tests/support/starter-documents.mjs';
-import { retiredProjectText } from '../../../tests/support/retired-projects.mjs';
+import { selfProject, companionStarterIds, starterDocument } from '#shared/testing/starter-documents.mjs';
+import { retiredProjectText } from '#shared/testing/retired-projects.mjs';
 
 const original = selfProject();
 const copy = () => structuredClone(original);

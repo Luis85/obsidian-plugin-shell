@@ -5,7 +5,7 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { sourceInputs } from '../testing/source-inputs.mjs';
-import { fixtureManifest } from '../../src/cli/tests/test-data-fixture.mjs';
+import { fixtureManifest } from '../../src/cli/tests/support/test-data-fixture.mjs';
 
 const sidecar = 'docs/concepts/companion/test-kit';
 const starters = 'configs/starters';

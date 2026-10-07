@@ -7,14 +7,14 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../compiler/emitters/model.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 import { projectFiles } from './support/project-render.mjs';
 import { visualDefinitions, visualSpecs } from '../compiler/emitters/visual-model.ts';
 import { visualTestSource } from '#shared/companion/visual/visual-session.mjs';
 import { visualNodes, visualRoot } from '#shared/companion/visual/visual-ir.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 // Compact project v6 generator fixture plus the current self-project for the large-model bound.
-const fixture = JSON.parse(await readFile(new URL('./fixtures/companion/visual-project.json', import.meta.url), 'utf8')), self = selfProject();
+const fixture = JSON.parse(await readFile(new URL('../../shared/testing/fixtures/companion/visual-project.json', import.meta.url), 'utf8')), self = selfProject();
 const clone = () => structuredClone(fixture);
 const files = async d => new Map((await projectFiles(root, projectModel(d))).map(e => [e.path, e.content]));
 const generatedVisualTests = entries => [...entries].filter(([path]) => /\/visual\/definitions(?:-\d+)?\.test\.ts$/.test(path)).map(([, text]) => text).join('\n');

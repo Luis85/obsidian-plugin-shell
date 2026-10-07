@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { authoringEvidence } from '../companion-tools/authoring-evidence.mjs';
-import { selfProject } from '../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 async function fixture(t) {
   const root=await mkdtemp(join(tmpdir(),'authoring-evidence-')); t.after(()=>rm(root,{recursive:true,force:true}));

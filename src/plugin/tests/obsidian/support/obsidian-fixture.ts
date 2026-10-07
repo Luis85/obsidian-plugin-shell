@@ -6,7 +6,7 @@ import {
   closeOnAbort, createConsoleRecorder, createObsidianSession, disablePlugin, enablePlugin, executeCommand, formatEntry,
   loadErrors, provisionHost, reloadPlugin, requestedAppVersion, withSession,
   type ConsoleEntry, type ObsidianHost, type PluginState,
-} from '../../../../../tooling/testing/obsidian-harness.mjs';
+} from '@test/obsidian-host';
 import { capturePage, caseDirectory, sourceCommit, writeEvidence } from './evidence';
 import type { HostContext } from './host';
 

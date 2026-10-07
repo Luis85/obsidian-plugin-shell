@@ -4,7 +4,7 @@ import { mkdtemp, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative, isAbsolute } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { makerFixture, installMakerFoundation, makerSourceRoot } from './maker-fixture.mjs';
+import { makerFixture, installMakerFoundation, makerSourceRoot } from './support/maker-fixture.mjs';
 import { planMaker } from '../adapters/makers/plan.ts';
 import { parseArguments } from '../adapters/makers/arguments.ts';
 import { applyFilePlan } from '#shared/platform/file-plan.ts';

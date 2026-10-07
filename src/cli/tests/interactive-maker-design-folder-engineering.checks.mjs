@@ -10,7 +10,7 @@ import { documentTitle, libraryUsage, lineLimits, originFacts, packageFacts, tok
 import { sha256 } from '#shared/platform/hash.ts';
 import { newDocument, documentText } from '../domain/document.ts';
 import { runOperations } from '../application/operations.ts';
-import { fileSymlink } from './file-symlink.mjs';
+import { fileSymlink } from './support/file-symlink.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../../..');
 const folder = 'docs/design/field-notes', guidePath = `${folder}/ENGINEERING_HANDOFF_GUIDE.md`;
 async function scratch(fn) {

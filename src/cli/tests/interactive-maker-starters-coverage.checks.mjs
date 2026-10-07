@@ -1,7 +1,7 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { starterCoverage } from '../adapters/starters/coverage.ts';
-import { fileStarter, shipped } from './starters-fixture.mjs';
+import { fileStarter, shipped } from './support/starters-fixture.mjs';
 
 // Source-derived starter model coverage (coverage.ts), kept separate from executed or native acceptance.
 const notRun = { behaviorAcceptance: 'not-run', nativeAcceptance: 'not-run' };

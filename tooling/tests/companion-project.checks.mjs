@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, symlink, realpath, rm } from 'node:fs/promises';
-import { fileSymlink } from './file-symlink.mjs';
+import { fileSymlink } from '../../src/cli/tests/support/file-symlink.mjs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 // The read-only reader and CLI use the one current (schema 6) contract; retired formats are refused, never migrated.
 import { parseAuthoringDocument as parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, authoringDesignKey } from '#shared/companion/authoring-contract.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
-import { retiredProjectText } from '../../../tests/support/retired-projects.mjs';
-import { readCompanionProject } from '../adapters/framework/read-project.ts';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
+import { retiredProjectText } from '#shared/testing/retired-projects.mjs';
+import { readCompanionProject } from '../../src/cli/adapters/framework/read-project.ts';
 
-const root = fileURLToPath(new URL('../../../', import.meta.url));
+const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = join(root, 'tooling/companion-tools/generate.mjs');
 const seed = starterDocumentText('companion-plugin');
 const document = JSON.parse(seed);

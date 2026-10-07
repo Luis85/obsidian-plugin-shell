@@ -4,7 +4,7 @@ import { AdoptionError } from '../domain/adoption/contracts.ts';
 import { sortFindings, finding } from '../domain/adoption/findings.ts';
 import { parseReport } from '../domain/adoption/report-codec.ts';
 import { recommend, stackOf } from '../domain/adoption/strategy.ts';
-import { inventoryOf, noTargets, targets } from './interactive-maker-adopt-fixture.mjs';
+import { inventoryOf, noTargets, targets } from './support/interactive-maker-adopt-fixture.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 const repo = { present: true, dirty: false, remoteHost: null, dirtyNote: null };

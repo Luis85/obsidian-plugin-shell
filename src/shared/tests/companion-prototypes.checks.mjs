@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { readWorkspaceFiles } from '../companion/prototypes/files.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import { prototypeJson, slug } from '../companion/prototypes/safety.ts';
-import { api, document, workspace, main, alternate, activate, fork } from '../../../tests/support/prototype-fixture.mjs';
+import { api, document, workspace, main, alternate, activate, fork } from '#shared/testing/prototype-fixture.mjs';
 const hash = text => createHash('sha256').update(text).digest('hex');
 const fail = (fn,code) => assert.throws(fn,error=>error.code===code || error.message.includes(code));
 test('capture owns a complete independent project snapshot and preserves fixtures and notes',()=>{

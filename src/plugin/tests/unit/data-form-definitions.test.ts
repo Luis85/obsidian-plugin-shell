@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { defineForm, readDataForm } from '../../features/api';
-import featureBrief from '../../../../tests/fixtures/forms/feature-brief.json';
+import featureBrief from '#shared/testing/fixtures/forms/feature-brief.json';
 
 /** Test-owned definition, independent of the removable showcase example. */
 const featureBriefForm = defineForm(featureBrief);

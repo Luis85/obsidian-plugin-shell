@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { planFixtures, applyFixtures } from '../../docs/concepts/companion/test-kit/storage.mjs';
 import { runTestData } from '../../docs/concepts/companion/test-kit/cli.mjs';
-import { fixtureManifest } from '../../src/cli/tests/test-data-fixture.mjs';
+import { fixtureManifest } from '../../src/cli/tests/support/test-data-fixture.mjs';
 async function sandbox(t) { const root = await realpath(await mkdtemp(join(tmpdir(), 'fixture-kit-'))); t.after(() => rm(root, { recursive: true, force: true })); return root; }
 async function put(root, path, value) { const parts = path.split('/'); await mkdir(join(root, ...parts.slice(0, -1)), { recursive: true }); await writeFile(join(root, ...parts), value); }
 

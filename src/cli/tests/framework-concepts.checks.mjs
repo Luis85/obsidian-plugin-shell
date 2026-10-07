@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { executeOperation } from '../adapters/framework/operations.ts';
 import { parseCliArguments } from '../adapters/framework/catalog.ts';
 import { planOperation, applyOperation } from '../adapters/framework/planning.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const template = starterDocument('blank');
 const hash = value => createHash('sha256').update(value).digest('hex');

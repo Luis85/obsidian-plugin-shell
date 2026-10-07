@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { enable, frameworkRoot, install, manifestFor, operation, run } from './app-plugins-fixture.mjs';
+import { enable, frameworkRoot, install, manifestFor, operation, run } from './support/app-plugins-fixture.mjs';
 import { communityInventory } from '../adapters/community-plugins/inventory.ts';
 import { bindPlugin, Plugin } from '../adapters/community-plugins/plugin.ts';
 import { compareVersions, validateCommunityManifest, validateEnabledList, withEnabled } from '../domain/community-plugin.ts';

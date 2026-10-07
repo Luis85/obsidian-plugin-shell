@@ -10,9 +10,9 @@ import { createRecorder, formatDiagnostics, writeReports } from '../compiler/ada
 import { dependencyReadiness } from '../compiler/adapters/dependencies.ts';
 import { loadTemplateSnapshot } from '../compiler/adapters/template-snapshot.ts';
 import { diagnostic } from '../compiler/domain/diagnostics.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 import { templateRootFiles as templateFiles, templateRoots } from '../compiler/domain/template-inputs.ts';
-import { fileSymlink } from './file-symlink.mjs';
+import { fileSymlink } from './support/file-symlink.mjs';
 
 // Drives the compiler host CLI adapters (src/cli/compiler/adapters/{cli,reporting,dependencies,template-snapshot}.ts).
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishRelease } from '../release/publish.mjs';
 import { sha256 } from '../../src/cli/tooling/release/candidate.mjs';
-import { publishFixture, candidateFiles, repository, version, head, other, changelog } from '../../src/cli/tests/release-publish-fixture.mjs';
+import { publishFixture, candidateFiles, repository, version, head, other, changelog } from '../../src/cli/tests/support/release-publish-fixture.mjs';
 
 /** Every refusal happens during read-only discovery: no write is attempted, in plan or execute mode. */
 async function refuses(t, mutate, expected, { execute = true } = {}) {

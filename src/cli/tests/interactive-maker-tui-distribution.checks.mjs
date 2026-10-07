@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
 import { assembleStarterPack } from '../adapters/starters/operations.ts';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../../..');
 let compilerVersion;
 try { compilerVersion = JSON.parse(await readFile(join(frameworkRoot, 'node_modules/typescript/package.json'), 'utf8')).version; }

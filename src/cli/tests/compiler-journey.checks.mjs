@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { stripTypeScriptTypes } from 'node:module';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
 import { planProject, applyProject } from '../compiler/adapters/project-plan.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const template=await loadTemplateSnapshot(root);
 const seed=starterDocument('quick-capture');

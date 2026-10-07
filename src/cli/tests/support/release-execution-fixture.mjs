@@ -1,8 +1,8 @@
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { sha256 } from '../tooling/release/candidate.mjs';
-import { nativeScenarios } from '../tooling/release/promotion-plan.mjs';
+import { sha256 } from '../../tooling/release/candidate.mjs';
+import { nativeScenarios } from '../../tooling/release/promotion-plan.mjs';
 
 export async function executionFixture(t) {
   const candidateDirectory = await mkdtemp(join(tmpdir(), 'release-execution-test-'));

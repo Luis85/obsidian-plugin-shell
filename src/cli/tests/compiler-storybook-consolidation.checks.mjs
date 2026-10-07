@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { validateTooling, airshipOptions, toolingSchema } from '#shared/companion/tooling-contract.mjs';
 import { withStorybookOptions, storybookOptions } from '#shared/companion/tooling-contract.ts';
 import { withAirshipOption } from '#shared/companion/tooling-options.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
 import { parseCliArguments } from '../adapters/framework/catalog.ts';
 const root = fileURLToPath(new URL('../../../', import.meta.url));

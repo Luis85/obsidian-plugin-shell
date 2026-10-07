@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
-import { customizeStarter } from '../../src/cli/adapters/starters/customize.ts';
+import { customizeStarter } from '../../src/shared/companion/starters/customize.ts';
 import { planProject, applyProject } from '../../src/cli/compiler/adapters/project-plan.ts';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { planExampleRemoval } from '../examples/plan.mjs';
-import { reviewedExamplesRemoved } from '../../src/cli/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from '../../src/cli/tests/support/example-sources-fixture.mjs';
 import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
 
 const reviewed = '# Reviewed template\n';

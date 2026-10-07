@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { derivedId, derivedName, enclosingVault, invocationDirectory, pluginIdProblem } from '../adapters/framework/starter-project.ts';
 import { pluginIdWordProblem } from '../adapters/framework/plugin-id.ts';
-import { starterDocument } from '../../../tests/support/starter-documents.mjs';
+import { starterDocument } from '#shared/testing/starter-documents.mjs';
 const root = await realpath(fileURLToPath(new URL('../../../', import.meta.url)));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-new-project-')));

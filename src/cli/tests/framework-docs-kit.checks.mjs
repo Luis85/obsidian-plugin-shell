@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
 import { verifyKit } from '../adapters/framework/kit-integrity.ts';
 import { projectFixture } from './fixtures/application-docs/fixture.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './support/example-sources-fixture.mjs';
 import { projectFiles } from './support/project-render.mjs';
 import { withBanner, rewriteDocReferences } from '../compiler/emitters/framework-scope.ts';
 /** What relocation adds to a kept framework document: the reference banner and relocated mentions of other kept docs. */

@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { main } from '../adapters/framework-cli.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 
 const frameworkRoot = resolve(import.meta.dirname, '../../..');
 function capture(isTTY = false) {

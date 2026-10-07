@@ -12,7 +12,7 @@ import { parseCliArguments, validateRequest, descriptor } from '../adapters/fram
 import { executeOperation } from '../adapters/framework/operations.ts';
 import { exportDesignSystem } from '../adapters/framework/style-export.ts';
 import { compileDesignSystem } from '#shared/companion/design-system-css.mjs';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const seed = selfProject();
 async function fixture(t) {

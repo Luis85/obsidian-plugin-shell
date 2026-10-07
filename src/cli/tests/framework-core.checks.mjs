@@ -20,8 +20,8 @@ import { mapBounded as typedMapBounded } from '#shared/platform/bounded-map.ts';
 import { exists as typedExists, statIfPresent as typedStatIfPresent } from '#shared/platform/fs-presence.ts';
 import { capabilityCatalog, catalogDigest } from '../adapters/operations/catalog.ts';
 import * as typedJsonData from '#shared/contracts/json-data.ts';
-import { selfProject } from '../../../tests/support/starter-documents.mjs';
-import { retiredProject } from '../../../tests/support/retired-projects.mjs';
+import { selfProject } from '#shared/testing/starter-documents.mjs';
+import { retiredProject } from '#shared/testing/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const seed = selfProject();
 // A synthetic retired v4 project, used only as a rejected input.

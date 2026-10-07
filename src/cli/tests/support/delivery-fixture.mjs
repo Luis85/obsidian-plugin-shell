@@ -1,15 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadConfig } from '../tooling/delivery/config.mjs';
-import { readyRules } from '../tooling/delivery/rules-ready.mjs';
-import { doneRules } from '../tooling/delivery/rules-done.mjs';
-import { evaluate } from '../tooling/delivery/run.mjs';
-import { parseHandoff } from '../tooling/delivery/handoff.mjs';
-import { documentState } from '../tooling/delivery/documents.mjs';
-import { categories } from '../tooling/release/changelog.mjs';
+import { loadConfig } from '../../tooling/delivery/config.mjs';
+import { readyRules } from '../../tooling/delivery/rules-ready.mjs';
+import { doneRules } from '../../tooling/delivery/rules-done.mjs';
+import { evaluate } from '../../tooling/delivery/run.mjs';
+import { parseHandoff } from '../../tooling/delivery/handoff.mjs';
+import { documentState } from '../../tooling/delivery/documents.mjs';
+import { categories } from '../../tooling/release/changelog.mjs';
 
-export const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
+export const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '../../../..');
 export const handoffPath = 'docs/increments/sample-increment.md';
 
 /** A handoff that passes every Definition of Ready rule against `baseContext`. */

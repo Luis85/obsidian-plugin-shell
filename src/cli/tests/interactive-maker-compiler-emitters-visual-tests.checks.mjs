@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { visualTests, visualRendered, visualFixtureProps } from '../compiler/emitters/visual-tests.ts';
 import { visualSpecs } from '../compiler/emitters/visual-model.ts';
 import { visualSources } from '../compiler/emitters/visual-ports.ts';
-import { richVisualDocument, model, recorder } from './compiler-emitters-fixture.mjs';
+import { richVisualDocument, model, recorder } from './support/compiler-emitters-fixture.mjs';
 
 // Generated UI suites (visual-tests.ts) and the source/mapping checks of visual-ports.ts.
 const rich = () => { const m = model(richVisualDocument()); return { m, specs: visualSpecs(m) }; };

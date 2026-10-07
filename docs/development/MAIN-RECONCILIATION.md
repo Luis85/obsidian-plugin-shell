@@ -239,7 +239,7 @@ passes. This preserves all 108 runtime TypeScript inputs, 12 Vue components and
 514 CLI modules. No compiler strictness flag changed. The inventory proof remains
 in `reports/reconciliation/type-scope-proof.json`.
 
-`src/cli/tests/framework-checkout-build.checks.mjs` copies only Git-tracked files
+`tooling/tests/framework-checkout-build.checks.mjs` copies only Git-tracked files
 into a fresh directory, builds the complete CLI, and verifies that a copied `bin`
 runs independently. It also runs the public typecheck against that checkout and
 injects a real assignment error into each source tree to prove both checks fail

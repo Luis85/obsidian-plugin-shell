@@ -80,7 +80,7 @@ test('node suite steps get the long suite budget by default; an explicit --timeo
   };
   const defaults = await budgets({});
   assert.equal(defaults['tooling/testing/suites.mjs maker'], 3_600_000, 'the maker suite outlives the 10-minute step default');
-  assert.equal(defaults['node_modules/vue-tsc/bin/vue-tsc.js --noEmit'], 600_000);
+  assert.equal(defaults['node_modules/vue-tsc/bin/vue-tsc.js -b'], 600_000);
   assert.ok(Object.values(await budgets({ timeout: '1000' })).every(timeout => timeout === 1000));
   const fast = await checkSteps(frameworkRoot, true, git([['M', 'tests/tooling/interactive-maker-guide.checks.mjs']]));
   assert.equal(fast.steps.find(step => step.id === 'suites').timeoutMs, 3_600_000);

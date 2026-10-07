@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 const { test, after } = await (process.env.VITEST ? import('vitest').then(module => ({ test: module.test, after: module.afterAll })) : import('node:test'));
 import { prototypesRead, prototypesCompare, prototypesPlan } from '../adapters/framework/prototypes.ts';
 import { applyFilePlan } from '#shared/platform/file-plan.ts';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
 import { pristineFixtures } from './support/pristine-fixture.mjs';
 
 const frameworkRoot = resolve(import.meta.dirname, '../../..');

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { sourceInputs } from '../testing/source-inputs.mjs';
 import { standaloneSource, updateOwnership } from '../../src/cli/adapters/framework/distribution.ts';
 import { hash } from '../../src/cli/adapters/framework/files.ts';
-import { reviewedExamplesRemoved } from '../../src/cli/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from '../../src/cli/tests/support/example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // The concept editor moved into src/companion/editor (the src root); the concept test kit stays an optional docs input.
 const optionalFixture = 'docs/concepts/companion/test-kit/inventory-probe.ts';
