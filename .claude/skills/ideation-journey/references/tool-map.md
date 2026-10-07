@@ -108,6 +108,7 @@ Dependency-free repository scripts (not `node bin/app` commands) that bridge the
 | `node bin/app ci --list` | `feature-delivery` reproduces CI jobs |
 | `node bin/app check submission` | publication readiness; not part of prototyping |
 | `node bin/app entities catalog` | registered entity definitions in a built project; not needed before a boilerplate exists |
+| `node bin/app source list`, `node bin/app source check` | source projects under `src/` declared in `workbench.sources.json` (add, link, rename, remove); repository structure, not part of prototyping (src/cli/README.md) |
 | `node bin/app hosting show`, `node bin/app hosting set` | GitHub, Azure DevOps or no hosting for an existing project; `new` and `setup` take `--hosting` directly (docs/development/HOSTING-PLATFORMS.md) |
 | `node bin/app increment new`, `node bin/app pr new`, `node bin/app issue new` | increments, their pull-request plans and issues after the chain: `increment-handoff` plans and refines the increment, `feature-delivery` plans, publishes and syncs its pull requests (remote writes only on request); `ideation-boilerplate` hands off to them |
 | `node bin/app plugins list`, `node bin/app plugins enable` | app plugins that extend `bin/app` itself (`bin/plugins`, bin/plugins/DEVELOPER-GUIDE.md); not part of a generated project |
