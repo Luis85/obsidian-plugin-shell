@@ -151,6 +151,8 @@ test('a file claimed twice, an undeclared directory or a stray top-level file fa
   assert.match(directory.stderr, /UNDECLARED_TEST_DIRECTORY: tests\/newcomer/);
   const stray = run(await fixture(t, { 'tests/loose.checks.mjs': passing }), ['--check']);
   assert.match(stray.stderr, /UNDECLARED_TEST_FILE: tests\/loose\.checks\.mjs/);
+  const project = run(await fixture(t, { 'tests/tsconfig.json': '{}\n' }), ['--check']);
+  assert.equal(project.status, 0, project.stderr);
 });
 
 test('empty suites, missing required roots and tooling outside verify fail; optional roots may be absent', async t => {

@@ -8,6 +8,7 @@
     { "path": "./src/plugin" },
     { "path": "./configs/types/tsconfig.templates.json" },
     { "path": "./configs/types/tsconfig.test-kit.json" },
+    { "path": "./src/shared/tests" },
     { "path": "./src/tui/tests" },
     { "path": "./src/cli/tests" },
     { "path": "./src/companion/tests" },

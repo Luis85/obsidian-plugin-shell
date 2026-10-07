@@ -3,6 +3,8 @@ import { readFile, readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const manifestPath = 'tests/suites.json';
+/** Non-test files the tests/ top level may hold: the manifest and the TypeScript project of the cross-project tests. */
+const topLevelFiles = new Set([manifestPath, 'tests/tsconfig.json']);
 const runnerTypes = ['node-test', 'vitest', 'playwright', 'command', 'npm-script', 'manual'];
 const verifyModes = ['tooling', 'own-step', 'opt-in'];
 const ignoredDirectories = new Set(['__pycache__', 'node_modules']);
@@ -142,7 +144,7 @@ async function scanTopLevel(root, manifest, failures) {
     const path = `tests/${entry.name}`;
     if (entry.isDirectory() && !declared.some(pattern => pattern.test(path)))
       failures.push(`UNDECLARED_TEST_DIRECTORY: ${path} is neither a scanned root nor a helper root. ${edit} "roots" or "helperRoots".`);
-    else if (!entry.isDirectory() && path !== manifestPath)
+    else if (!entry.isDirectory() && !topLevelFiles.has(path))
       failures.push(`UNDECLARED_TEST_FILE: ${path} sits at the tests/ top level. Move it into a declared root.`);
   }
 }
