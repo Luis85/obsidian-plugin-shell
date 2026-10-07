@@ -36,7 +36,7 @@ export function verifySteps(env = process.env) {
     script('maker-types', 'node_modules/typescript/bin/tsc', ['--noEmit', '--project', 'configs/types/tsconfig.maker.json']),
     script('maker-coverage-run', vitest, ['run', '--coverage', '--config', 'configs/testing/vitest.maker.config.mjs']),
     script('maker-coverage-gate', 'tooling/quality/maker-coverage.mjs', [], ['maker-coverage-run']),
-    script('eslint-tests', eslint, ['-c', 'configs/lint/eslint.config.mjs', '--no-ignore', 'src/plugin/tests/unit', 'src/plugin/tests/support', 'src/cli/tests/support', 'tooling/tests/support', 'tests/support', 'src/plugin/tests/e2e', 'src/plugin/tests/obsidian', 'src/plugin/harness/app', '--max-warnings', '0'], ['build']),
+    script('eslint-tests', eslint, ['-c', 'configs/lint/eslint.config.mjs', '--no-ignore', '--no-error-on-unmatched-pattern', 'src/*/tests/**/*.ts', 'tooling/tests/**/*.ts', 'src/*/tests/support/**/*.{ts,mjs}', 'tooling/tests/support/**/*.{ts,mjs}', 'tests/support', 'src/plugin/harness/app', '--max-warnings', '0'], ['build']),
     script('test-quality', 'tooling/quality/check-test-quality.mjs'),
     script('repository', 'tooling/quality/check-repository.mjs'),
     script('projects', 'tooling/projects/projects.mjs', ['check']),

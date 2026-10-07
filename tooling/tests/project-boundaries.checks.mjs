@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
+import { verifySteps } from '../quality/verify-steps.mjs';
 import { checkProjectBoundaries, moduleSpecifiers, projectDependencies, resolveSpecifier } from '../quality/check-project-boundaries.mjs';
 
 const gate = resolve(import.meta.dirname, '../quality/check-project-boundaries.mjs');
@@ -48,8 +49,22 @@ test('only real module references count, not strings or comments', () => {
   assert.equal(resolveSpecifier('src/plugin/a/b.ts', 'vue'), null);
 });
 
-test('a directory under src that is not a declared project fails closed', () => {
+test('a directory under src that is not a declared project, or a code file directly under src, fails closed', () => {
   assert.deepEqual(codes({ 'src/extra/main.ts': 'export {};' }), ['UNDECLARED_PROJECT']);
+  assert.deepEqual(codes({ 'src/stray.ts': 'export {};' }), ['UNDECLARED_PROJECT']);
+  assert.deepEqual(codes({ 'src/stray.mjs': "import { x } from '../tooling/quality/thresholds.mjs';" }), ['UNDECLARED_PROJECT']);
+  assert.deepEqual(codes({ 'src/README.md': '# not code' }), []);
+});
+
+test('check:architecture really runs the project boundary scan and fails on its violations', async () => {
+  const gate = await readFile(resolve(import.meta.dirname, '../quality/check-architecture.mjs'), 'utf8');
+  assert.match(gate, /import \{ scanProjectBoundaries \} from '\.\/check-project-boundaries\.mjs';/);
+  assert.match(gate, /await scanProjectBoundaries\(\)/);
+  assert.match(gate, /projects\.violations\.length[\s\S]*throw new Error\(`PROJECT_BOUNDARIES_FAILED/);
+  // The script and the verify step are what npm run check:architecture and verify execute.
+  const manifest = JSON.parse(await readFile(resolve(import.meta.dirname, '../../package.json'), 'utf8'));
+  assert.equal(manifest.scripts['check:architecture'], 'node tooling/quality/check-architecture.mjs');
+  assert.ok(verifySteps().some(step => step.id === 'architecture' && step.entry === 'tooling/quality/check-architecture.mjs'));
 });
 
 test('the gate command exits 1 on a src/plugin file importing tooling/ and 0 on a clean tree', async () => {

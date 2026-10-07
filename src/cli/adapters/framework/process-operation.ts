@@ -6,6 +6,7 @@ import { exists, readBounded } from './files.ts';
 import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
 import { projectConfigs } from '#shared/platform/project-configs.mjs';
+import { repositoryScope, toolingFolder } from './repository-scope.ts';
 
 export interface ProcessOperationDependencies {
   dependencyReadiness?: typeof dependencyReadiness;
@@ -65,9 +66,11 @@ async function testInvocation(request: Request, context: Context, host: Host, pr
   if (profile && Object.hasOwn(testEntries, profile)) return { ...testEntries[profile]!, args: [...(testEntries[profile]!.args ?? [])] };
   return { entry: 'node_modules/vitest/vitest.mjs', args: await vitestArguments(context.root, profile, host.existsPath) };
 }
-async function verifyInvocation(request: Request, _context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
+async function verifyInvocation(request: Request, context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
   acceptProfile(request.command, profile);
-  return profile === 'project' ? { entry: await host.npm(), args: ['run', 'verify:project'] } : { entry: 'tooling/quality/verify.mjs' };
+  if (profile === 'project') return { entry: await host.npm(), args: ['run', 'verify:project'] };
+  // The shell repository verifies through tooling/quality; a generated project carries its own copy under scripts/quality.
+  return { entry: `${toolingFolder(await repositoryScope(context.root, host.existsPath))}/quality/verify.mjs` };
 }
 const devEntries: Record<string, { entry: string; args: string[] }> = {
   ui: { entry: 'node_modules/vite/bin/vite.js', args: ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1'] },

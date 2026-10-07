@@ -3,17 +3,10 @@ import { readdir, lstat } from 'node:fs/promises';
 import { resolve, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runNodeProcess } from '../../src/shared/platform/process.ts';
+import { lintExcluded } from '../../configs/lint/lint-scope.mjs';
 
 /** The reviewed rules of the repository that owns this script; a project runs its own copy, so both always match. */
 const config = fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url));
-
-/** Inputs under src that stay outside this linter, exactly as before the split: each project's tests (the
- * eslint-tests step), the browser harness, the companion concept sources (the former docs/concepts, which the
- * repository linters ignore) and the former scripts/ code, which neither linter ever covered: src/cli/tooling and
- * src/shared, except the two modules that were linted as src/cli/domain/errors.ts and templates/companion/runtime.
- * Keep in sync with `ignores` in configs/lint/eslint.config.mjs. */
-const excluded = [/^src\/[^/]+\/tests\//, /^src\/plugin\/harness\//, /^src\/companion\//, /^src\/cli\/tooling\//,
-  /^src\/shared\/(?!contracts\/sketch-errors\.ts$|companion\/runtime-contract\.ts$)/];
 
 /** Explicit file arguments prevent an ignored archive ancestor from hiding its src tree. `only` (repository-relative
  * paths) narrows the run to those owned inputs, as `check --fast` does for changed files; the default is every input. */
@@ -26,7 +19,8 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
       for (const entry of await readdir(path)) await visit(join(path, entry));
     } else if (stat.isFile() && /\.(?:[cm]?[jt]sx?|vue)$/.test(path)) {
       const name = relative(root, path).split(sep).join('/');
-      if (!excluded.some(pattern => pattern.test(name))) files.push(relative(root, path));
+      // The shell repository's own exclusions (shared with configs/lint/eslint.config.mjs); a generated project has none.
+      if (!lintExcluded(root, name)) files.push(relative(root, path));
     }
   }
   await visit(resolve(root, 'src'));

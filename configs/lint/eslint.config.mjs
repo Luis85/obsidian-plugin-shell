@@ -4,10 +4,12 @@ import obsidian from 'eslint-plugin-obsidianmd';
 import { fileURLToPath } from 'node:url';
 import { sourceRoots } from '../../src/shared/platform/project-roots.mjs';
 import { projectConfigPath, projectConfigs } from '../../src/shared/platform/project-configs.mjs';
+import { isShellRepository, lintExclusionGlobs } from './lint-scope.mjs';
 // This file lives in configs/lint; every path and tsconfig resolves from the project root.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 /** A generated project may keep product code outside src (its codebase folder, named in
  * configs/types/tsconfig.project.json); that code gets the same rules, type-checked through that project file. */
+const shell = isShellRepository(root);
 const productRoots = sourceRoots(root).filter(path => path !== 'src');
 const projectTsconfig = './' + (projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path);
 const pluginRules = { ...obsidian.ruleConfigs.recommended, ...obsidian.ruleConfigs.recommendedTypeChecked,
@@ -15,16 +17,14 @@ const pluginRules = { ...obsidian.ruleConfigs.recommended, ...obsidian.ruleConfi
 };
 export default ts.config(
   { ignores: ['node_modules/**', 'dist/**', 'dist-harness/**', 'reports/**'] },
-  // Inputs that stay outside the source lint, exactly as before the split: each project's tests and the browser harness
-  // (linted by the explicit eslint-tests step, which passes --no-ignore), the companion concept sources (the former
-  // docs/concepts) and the former scripts/ code (src/cli/tooling, src/shared except the two modules that were linted
-  // as src/cli/domain/errors.ts and templates/companion/runtime). Keep in sync with tooling/quality/lint-source.mjs.
-  { ignores: ['src/*/tests/**', 'src/plugin/harness/**', 'src/companion/**', 'src/cli/tooling/**', 'src/shared/**/*.{ts,mts,cts,mjs,cjs,js,vue}', '!src/shared/contracts/sketch-errors.ts', '!src/shared/companion/runtime-contract.ts'] },
+  // The shell repository's own exclusions (tests, harness, companion, former scripts/ code); a generated project has none.
+  // One list, shared with tooling/quality/lint-source.mjs; the eslint-tests step lints the test folders with --no-ignore.
+  { ignores: lintExclusionGlobs(root) },
   ...ts.configs.recommended,
   ...vue.configs['flat/essential'],
   { files: ['src/plugin/domain/**/*.ts', 'src/plugin/application/**/*.ts', 'src/plugin/features/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
   // The plugin-code rules never covered tests or the harness (they lived outside src): those files take only the test block below.
-  { files: ['src/**/*.{ts,vue}'], ignores: ['src/*/tests/**', 'src/plugin/harness/**'], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
+  { files: ['src/**/*.{ts,vue}'], ignores: shell ? ['src/*/tests/**', 'src/plugin/harness/**'] : [], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian },
     rules: pluginRules,
   },
@@ -39,8 +39,9 @@ export default ts.config(
   // The click-dummy harness runs in a plain browser outside Obsidian, so the host-API rules do not apply to it.
   ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
     languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
-    ...(folder === 'src/plugin/harness' || folder.startsWith('src/plugin/harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
-  { files: ['src/plugin/tests/unit/**/*.ts', 'tests/support/**/*.ts', 'src/plugin/tests/support/**/*.ts', 'src/plugin/tests/e2e/**/*.ts', 'src/plugin/tests/obsidian/**/*.ts', 'src/plugin/harness/app/**/*.ts'],
+    ...(folder === 'harness' || folder.startsWith('harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
+    // Every test folder (tests/ and harness/app in a generated project; each source project's tests, tooling/tests and the harness app in the shell).
+  { files: ['tests/**/*.ts', 'harness/app/**/*.ts', 'src/*/tests/**/*.ts', 'tooling/tests/**/*.ts', 'src/plugin/harness/app/**/*.ts'],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },
     rules: { '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],

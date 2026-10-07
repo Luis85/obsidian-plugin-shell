@@ -62,8 +62,10 @@ const projectOf = path => /^src\/([^/]+)\//.exec(path)?.[1] ?? null;
 export function checkProjectBoundaries(files, dependencies = projectDependencies) {
   const violations = [];
   for (const [path, text] of files) {
+    if (!path.startsWith('src/') || !codeFile.test(path)) continue;
     const project = projectOf(path);
-    if (!project || !codeFile.test(path)) continue;
+    // A code file directly under src/ belongs to no project, which is as undeclared as an unknown folder.
+    if (!project) { violations.push({ path, line: 1, code: 'UNDECLARED_PROJECT', detail: 'code directly under src/ belongs to no source project' }); continue; }
     if (!Object.hasOwn(dependencies, project)) { violations.push({ path, line: 1, code: 'UNDECLARED_PROJECT', detail: `src/${project} is not a declared source project` }); continue; }
     for (const { specifier, line } of moduleSpecifiers(path, text)) {
       const target = resolveSpecifier(path, specifier);

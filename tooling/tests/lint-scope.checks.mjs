@@ -1,0 +1,58 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { ESLint } from 'eslint';
+import { lintOwnedSource } from '../quality/lint-source.mjs';
+import { isShellRepository, lintExcluded, lintExclusionGlobs, shellLintExclusions } from '../../configs/lint/lint-scope.mjs';
+
+const repositoryRoot = resolve(import.meta.dirname, '../..');
+const sources = [
+  'src/cli/app.ts', 'src/plugin/main.ts', 'src/tui/prompts.ts', 'src/shared/contracts/sketch-errors.ts', 'src/shared/companion/runtime-contract.ts',
+  'src/shared/platform/hash.ts', 'src/shared/companion/journey/project-store.ts', 'src/cli/tooling/delivery/run.mjs', 'src/companion/editor/main.ts',
+  'src/companion/app/catalog.js', 'src/plugin/tests/unit/entity.test.ts', 'src/cli/tests/check.checks.mjs', 'src/plugin/harness/app/main.ts',
+];
+const shellLinted = ['src/cli/app.ts', 'src/plugin/main.ts', 'src/tui/prompts.ts', 'src/shared/contracts/sketch-errors.ts', 'src/shared/companion/runtime-contract.ts'];
+
+async function project(t, kind) {
+  const root = await realpath(await mkdtemp(join(tmpdir(), `lint-scope-${kind}-`)));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const path of sources) { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), 'export {};\n'); }
+  if (kind === 'generated') { await mkdir(join(root, '.companion'), { recursive: true }); await writeFile(join(root, '.companion/generation.json'), '{}'); }
+  return root;
+}
+/** A stand-in for oxlint that records the files it was asked to lint. */
+async function recorder(root) {
+  const tool = join(root, 'record-oxlint.mjs');
+  await writeFile(tool, "import { writeFileSync } from 'node:fs'; writeFileSync('linted.json', JSON.stringify(process.argv.slice(2).map(argument => argument.split(String.fromCharCode(92)).join('/')).filter(argument => argument.startsWith('src/'))));");
+  return tool;
+}
+async function linted(root) {
+  const tool = await recorder(root);
+  await lintOwnedSource(root, tool);
+  return JSON.parse(await readFile(join(root, 'linted.json'), 'utf8')).map(path => path.replaceAll('\\', '/')).sort();
+}
+
+test('the shell repository excludes tests, harness, companion and the former scripts code; a generated project excludes nothing', async t => {
+  const shell = await project(t, 'shell'), generated = await project(t, 'generated');
+  assert.equal(isShellRepository(shell), true);
+  assert.equal(isShellRepository(generated), false);
+  assert.deepEqual(await linted(shell), [...shellLinted].sort());
+  // A generated project's src/shared, src/companion, src/cli/tooling and src/<x>/tests are product code and stay linted.
+  assert.deepEqual(await linted(generated), [...sources].sort());
+  assert.deepEqual(lintExclusionGlobs(generated), []);
+  assert.deepEqual(lintExclusionGlobs(shell), [...shellLintExclusions]);
+  for (const path of sources) assert.equal(lintExcluded(generated, path), false, path);
+});
+
+test('oxlint and ESLint share one exclusion list and agree on every path', async () => {
+  const eslint = new ESLint({ cwd: repositoryRoot, overrideConfigFile: join(repositoryRoot, 'configs/lint/eslint.config.mjs') });
+  assert.equal(isShellRepository(repositoryRoot), true);
+  for (const path of sources) assert.equal(await eslint.isPathIgnored(join(repositoryRoot, path)), lintExcluded(repositoryRoot, path), path);
+  for (const file of ['configs/lint/eslint.config.mjs', 'tooling/quality/lint-source.mjs']) {
+    const text = await readFile(join(repositoryRoot, file), 'utf8');
+    assert.match(text, /lint-scope\.mjs/, file);
+    assert.doesNotMatch(text, /src\/companion\/\*\*|src\/cli\/tooling\/\*\*|src\/shared\/\*\*/, `${file} must not carry its own copy of the exclusions`);
+  }
+});
