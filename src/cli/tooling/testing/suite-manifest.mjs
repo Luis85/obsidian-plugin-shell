@@ -103,11 +103,28 @@ export async function loadManifest(root, path = manifestPath) {
 async function exists(path) {
   try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
 }
-async function walk(root, directory, files) {
+/** Directories a root or helper-root path names; a `*` segment (`src/*\/tests`) matches every directory at that level. */
+export async function expandDirectories(root, pattern) {
+  let found = [''];
+  for (const segment of pattern.split('/')) {
+    const next = [];
+    for (const base of found) {
+      const path = base ? `${base}/${segment}` : segment;
+      if (!/[*?{]/.test(segment)) { if ((await exists(join(root, path)))?.isDirectory()) next.push(path); continue; }
+      const regex = globToRegExp(segment);
+      const entries = await readdir(join(root, base || '.'), { withFileTypes: true }).catch(error => { if (error.code === 'ENOENT') return []; throw error; });
+      for (const entry of entries) if (entry.isDirectory() && regex.test(entry.name)) next.push(base ? `${base}/${entry.name}` : entry.name);
+    }
+    found = next;
+  }
+  return found.sort();
+}
+/** Helper roots hold support and fixtures, not tests: a scanned root that contains one (`src/*\/tests/support`) skips it. */
+async function walk(root, directory, files, skipped = new Set()) {
   for (const entry of (await readdir(join(root, directory), { withFileTypes: true })).sort((a, b) => a.name < b.name ? -1 : 1)) {
     const path = `${directory}/${entry.name}`;
     if (entry.isSymbolicLink()) throw new Error(`SUITE_INPUT_SYMLINK: ${path}`);
-    if (entry.isDirectory()) { if (!ignoredDirectories.has(entry.name)) await walk(root, path, files); }
+    if (entry.isDirectory()) { if (!ignoredDirectories.has(entry.name) && !skipped.has(path)) await walk(root, path, files, skipped); }
     else if (entry.isFile()) files.push(path);
   }
   return files;
@@ -120,10 +137,10 @@ export function matcher(entry) {
 }
 
 async function scanTopLevel(root, manifest, failures) {
-  const declared = new Set([...manifest.roots.map(item => item.path), ...(manifest.helperRoots ?? [])]);
+  const declared = [...manifest.roots.map(item => item.path), ...(manifest.helperRoots ?? [])].map(globToRegExp);
   for (const entry of await readdir(join(root, 'tests'), { withFileTypes: true })) {
     const path = `tests/${entry.name}`;
-    if (entry.isDirectory() && !declared.has(path))
+    if (entry.isDirectory() && !declared.some(pattern => pattern.test(path)))
       failures.push(`UNDECLARED_TEST_DIRECTORY: ${path} is neither a scanned root nor a helper root. ${edit} "roots" or "helperRoots".`);
     else if (!entry.isDirectory() && path !== manifestPath)
       failures.push(`UNDECLARED_TEST_FILE: ${path} sits at the tests/ top level. Move it into a declared root.`);
@@ -154,10 +171,15 @@ async function classify(root, manifest) {
   await scanTopLevel(root, manifest, failures);
   const suites = manifest.suites.map(suite => ({ suite, match: matcher(suite), files: [] }));
   const helpers = (manifest.helpers ?? []).map(helper => ({ helper, match: matcher(helper), files: [] }));
+  const skipped = new Set((await Promise.all((manifest.helperRoots ?? []).map(path => expandDirectories(root, path)))).flat());
+  // Overlapping roots (`src/*/tests` and `src/cli/tests`) classify each file once.
+  const seen = new Set();
   for (const declared of manifest.roots) {
-    const stat = await exists(join(root, declared.path));
-    if (!stat) { if (!declared.optional) failures.push(`TEST_ROOT_MISSING: ${declared.path}`); continue; }
-    for (const path of await walk(root, declared.path, [])) {
+    const directories = await expandDirectories(root, declared.path);
+    if (!directories.length) { if (!declared.optional) failures.push(`TEST_ROOT_MISSING: ${declared.path}`); continue; }
+    const walked = (await Promise.all(directories.map(directory => walk(root, directory, [], skipped)))).flat();
+    for (const path of walked.filter(path => !seen.has(path))) {
+      seen.add(path);
       const owners = [...suites.filter(entry => entry.match(path)).map(entry => ({ entry, label: `suite "${entry.suite.name}"` })),
         ...helpers.filter(entry => entry.match(path)).map(entry => ({ entry, label: `helper "${entry.helper.purpose ?? entry.helper.include[0]}"` }))];
       if (owners.length === 1) owners[0].entry.files.push(path);
@@ -231,7 +253,7 @@ function ownStepFiles(suites, steps) {
   const failures = [], files = [];
   for (const suite of suites.filter(item => item.verifyStepId)) {
     const step = steps?.find(item => item.id === suite.verifyStepId);
-    if (!step) failures.push(`SUITE_VERIFY_STEP_UNKNOWN: suite "${suite.name}" names verify step "${suite.verifyStepId}", which the verify step table (scripts/quality/verify-steps.mjs) does not define. ${edit}.`);
+    if (!step) failures.push(`SUITE_VERIFY_STEP_UNKNOWN: suite "${suite.name}" names verify step "${suite.verifyStepId}", which the verify step table (tooling/quality/verify-steps.mjs) does not define. ${edit}.`);
     else if (!step.entry.endsWith('vitest/vitest.mjs') || step.args[0] !== 'run' || step.args[step.args.indexOf('--config') + 1] !== suite.runner.config)
       failures.push(`SUITE_VERIFY_STEP_MISMATCH: verify step "${step.id}" is not \`vitest run --config ${suite.runner.config}\`, so it does not run suite "${suite.name}". ${edit}.`);
     else files.push(...suite.files);
@@ -256,7 +278,7 @@ export async function checkSuites(root, { evidenceInventory, verifySteps } = {})
         failures.push(`TOOLING_NOT_IN_VERIFY: ${path} runs in evidence tooling but belongs to no verify "tooling" suite and no suite whose "verifyStepId" names the verify step that runs it. ${edit}.`);
       verifyTooling.delete(path);
     }
-    for (const path of verifyTooling) failures.push(`TOOLING_NOT_IN_EVIDENCE: ${path} is a verify tooling file outside the evidence tooling inventory (tests/tooling/**/*.{checks,test}.mjs).`);
+    for (const path of verifyTooling) failures.push(`TOOLING_NOT_IN_EVIDENCE: ${path} is a verify tooling file outside the evidence tooling inventory (top-level *.{checks,test}.mjs of tests/tooling, tooling/tests and every src/*/tests, plus tests/acceptance).`);
   }
   return { manifest, ...result, failures };
 }

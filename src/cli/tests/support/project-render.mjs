@@ -1,8 +1,8 @@
 import { resolve } from 'node:path';
-import { loadTemplateSnapshot } from '../../src/cli/compiler/adapters/template-snapshot.ts';
-import { renderProjectFiles } from '../../src/cli/compiler/adapters/plugin-emitter.ts';
+import { loadTemplateSnapshot } from '../../compiler/adapters/template-snapshot.ts';
+import { renderProjectFiles } from '../../compiler/adapters/plugin-emitter.ts';
 
-const repositoryRoot = resolve(import.meta.dirname, '../..');
+const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 let repositorySnapshot;
 /**
  * Test convenience: snapshot a template root once, then render the plugin project from the immutable (frozen)

@@ -86,7 +86,7 @@ async function repository(t) {
   git('init', '--quiet', '--initial-branch=main'); git('config', 'user.name', 'Fixture'); git('config', 'user.email', 'fixture@example.invalid'); git('config', 'commit.gpgsign', 'false');
   git('add', '.'); git('commit', '--quiet', '-m', 'Base'); git('checkout', '--quiet', '-b', 'increment/sample-increment');
   const run = (name, args) => {
-    const result = spawnSync(process.execPath, [join(repositoryRoot, 'scripts/delivery', name), ...args], { cwd: root, encoding: 'utf8', env: cleanEnv });
+    const result = spawnSync(process.execPath, [join(repositoryRoot, 'tooling/delivery', name), ...args], { cwd: root, encoding: 'utf8', env: cleanEnv });
     return { exit: result.status, stdout: result.stdout, stderr: result.stderr, json: () => JSON.parse(result.stdout) };
   };
   return { root, git, write, run, read: path => readFile(join(root, path), 'utf8') };

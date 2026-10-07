@@ -12,6 +12,7 @@ import { runNode } from './process.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { changedFiles, runGit, type Changes, type Git } from './check-changes.ts';
 import { fastSteps, fastSuites, suiteTimeoutMs, type Reason } from './check-selection.ts';
+import { shellSuiteRunner } from './testing-tools.ts';
 /** `timeoutMs` is a step's default budget; an explicit `check --timeout` overrides it for every step. */
 export interface CheckStep { id: string; display: string; entry: string; args: string[]; skip?: string; timeoutMs?: number }
 export interface StepOutcome {
@@ -31,7 +32,7 @@ async function makerSteps(root: string, project: boolean): Promise<CheckStep[]> 
   if (!await exists(join(root, 'src/cli/app.ts')) || !await exists(join(root, 'configs/types/tsconfig.maker.json'))) return [];
   const types: CheckStep = { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] };
   if (project) return [types];
-  return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'], timeoutMs: suiteTimeoutMs }];
+  return [types, { id: 'maker-tests', display: `node ${shellSuiteRunner} maker`, entry: shellSuiteRunner, args: ['maker'], timeoutMs: suiteTimeoutMs }];
 }
 function typecheckStep(root: string, project: boolean): CheckStep {
   if (!project) return { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };

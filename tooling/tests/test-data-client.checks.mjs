@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createTestHttpPort } from '../../docs/concepts/companion/test-kit/client.mjs';
 import { startFixtureServer } from '../../docs/concepts/companion/test-kit/server.mjs';
-import { fixtureManifest } from './test-data-fixture.mjs';
+import { fixtureManifest } from '../../src/cli/tests/test-data-fixture.mjs';
 
 test('[TD-CLIENT] exported application port consumes the real loopback server and validates writes', async t => {
   const manifest = fixtureManifest(), server = await startFixtureServer(manifest);

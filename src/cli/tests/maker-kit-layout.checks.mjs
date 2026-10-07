@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { extractKit } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
 
 // A real extracted developer kit: bundled bin/app.js, editable sources only under bin/template and no

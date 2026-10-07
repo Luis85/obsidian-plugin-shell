@@ -9,7 +9,7 @@ import { included } from '../adapters/framework/distribution.ts';
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
 import { listFiles } from '../adapters/framework/kit-integrity.ts';
 import { materialize } from './interactive-maker-adopt-fixture.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const templates = ['templates/adoption/claude-skill/SKILL.md', 'templates/adoption/agents-skill/SKILL.md'];

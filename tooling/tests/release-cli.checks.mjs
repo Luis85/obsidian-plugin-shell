@@ -37,10 +37,10 @@ test('operation JSON cannot provide authorization, clock or remote snapshots', a
 });
 
 test('CLI help and invalid authorization terminate without invoking gh', () => {
-  const help = spawnSync(process.execPath, ['scripts/release/cli.mjs', '--help'], { encoding: 'utf8', windowsHide: true });
+  const help = spawnSync(process.execPath, ['tooling/release/cli.mjs', '--help'], { encoding: 'utf8', windowsHide: true });
   assert.equal(help.status, 0, help.stderr);
   assert.match(help.stdout, /authenticated read-only/);
-  const bad = spawnSync(process.execPath, ['scripts/release/cli.mjs', '--input', 'absent.json', '--execute'], { encoding: 'utf8', windowsHide: true });
+  const bad = spawnSync(process.execPath, ['tooling/release/cli.mjs', '--input', 'absent.json', '--execute'], { encoding: 'utf8', windowsHide: true });
   assert.equal(bad.status, 1);
   assert.equal(JSON.parse(bad.stderr).error, 'EXECUTION_REQUIRES_EXPLICIT_AUTHORIZATION_DIGEST');
 });

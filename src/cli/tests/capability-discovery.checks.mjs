@@ -12,7 +12,7 @@ import { builtinHandlers } from '../adapters/makers/dispatch.ts';
 import { handleRequest, validateMessage, protocolHandlers } from '../adapters/operations/protocol.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
-const cli = resolve(root, 'scripts/operations/cli.mjs');
+const cli = resolve(root, 'tooling/operations/cli.mjs');
 const request = (operation = 'capabilities.read', input = {}) => ({
   protocolVersion: 1, type: 'request', requestId: 'probe-001', operation, input,
 });
@@ -78,7 +78,7 @@ test('[CAP-03] data-only CLI discovery never imports custom recipes or executes 
 }));
 
 test('[CAP-04] fresh Git-free copy discovers capabilities without installed packages or concept assets', () => fixture(async folder => {
-  for (const path of ['scripts/operations', 'scripts/contracts', 'src/cli/adapters/operations']) {
+  for (const path of ['tooling/operations', 'src/shared/contracts', 'src/cli/adapters/operations']) {
     await mkdir(join(folder, path), { recursive: true });
     await cp(join(root, path), join(folder, path), { recursive: true });
   }
@@ -86,9 +86,11 @@ test('[CAP-04] fresh Git-free copy discovers capabilities without installed pack
   await mkdir(join(folder, 'src/cli/adapters/makers'), { recursive: true });
   await cp(join(root, 'src/cli/adapters/makers/recipes.json'), join(folder, 'src/cli/adapters/makers/recipes.json'));
   // The dependency-free canonical digest is part of the discovery surface.
-  await mkdir(join(folder, 'scripts/shared'), { recursive: true });
-  for (const file of ['hash.ts']) await cp(join(root, 'scripts/shared', file), join(folder, 'scripts/shared', file));
-  const run = spawnSync(process.execPath, ['scripts/operations/cli.mjs', 'catalog'], { cwd: folder, encoding: 'utf8', timeout: 10000 });
+  await mkdir(join(folder, 'src/shared/platform'), { recursive: true });
+  for (const file of ['hash.ts']) await cp(join(root, 'src/shared/platform', file), join(folder, 'src/shared/platform', file));
+  // Source projects resolve their shared modules through the root package imports map.
+  await writeFile(join(folder, 'package.json'), JSON.stringify({ type: 'module', imports: { '#shared/*': './src/shared/*' } }));
+  const run = spawnSync(process.execPath, ['tooling/operations/cli.mjs', 'catalog'], { cwd: folder, encoding: 'utf8', timeout: 10000 });
   assert.equal(run.status, 0, run.stderr);
   assert.deepEqual(JSON.parse(run.stdout), capabilityCatalog());
   assert.equal((await readdir(folder)).includes('node_modules'), false);

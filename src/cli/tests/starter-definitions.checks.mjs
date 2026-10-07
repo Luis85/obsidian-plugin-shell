@@ -1,4 +1,4 @@
-import { fileSymlink } from '../../../tests/support/file-symlink.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, realpath, mkdir, writeFile, readFile, rm, symlink, readdir } from 'node:fs/promises';
@@ -102,7 +102,7 @@ test('project generator kind is strict data: no identity inputs, payloads or pro
   }
 });
 test('the editor schema declares the same project generator vocabulary as the runtime validator', async () => {
-  const schema = JSON.parse(await readFile(join(root, 'scripts/starters/starter.schema.json'), 'utf8'));
+  const schema = JSON.parse(await readFile(join(root, 'tooling/starters/starter.schema.json'), 'utf8'));
   const variant = schema.properties.generator.oneOf.find(item => item.properties.kind.const === 'project');
   assert.equal(variant.additionalProperties, false); assert.deepEqual(variant.required, ['kind', 'projectType', 'framework', 'targets']);
   assert.deepEqual(variant.properties.framework, { type: 'string', maxLength: 64, pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$' });

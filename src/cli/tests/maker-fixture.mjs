@@ -3,10 +3,22 @@ import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createFilePlan, applyFilePlan } from '../../src/shared/platform/file-plan.ts';
-import { planExampleRemoval } from '../examples/plan.mjs';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 
-export const makerSourceRoot = fileURLToPath(new URL('../../', import.meta.url));
+export const makerSourceRoot = fileURLToPath(new URL('../../../', import.meta.url));
+// The fixture keeps the generated-project layout; its inputs come from where this repository keeps them.
+const sourceLocations = [
+  ['src/bootstrap/', 'src/plugin/bootstrap/'], ['src/application', 'src/plugin/application'], ['src/domain', 'src/plugin/domain'],
+  ['src/infrastructure/', 'src/plugin/infrastructure/'], ['src/features/', 'src/plugin/features/'], ['tests/runtime/', 'src/plugin/tests/unit/'],
+  ['scripts/makers', 'tooling/makers'], ['scripts/companion/', 'src/shared/companion/'], ['scripts/events', 'tooling/events'],
+  ['scripts/examples/', 'tooling/examples/'], ['scripts/shared', 'src/shared/platform'],
+  ['tests/tooling/makers.checks.mjs', 'tooling/tests/makers.checks.mjs'], ['tests/tooling/maker-fixture.mjs', 'src/cli/tests/maker-fixture.mjs'],
+];
+/** This repository's location of a file the fixture places at `path`. */
+export function makerSource(path) {
+  const entry = sourceLocations.find(([fixture]) => path === fixture || path.startsWith(fixture));
+  return resolve(makerSourceRoot, entry ? entry[1] + path.slice(entry[0].length) : path);
+}
 // Representative syntax belongs to the tooling test, never to a consumer's live registry.
 const registry = `import { createNoteFeatures } from '../application/note-feature';
 import { taskFeature } from '../features/tasks/definition';
@@ -66,9 +78,9 @@ export async function makerFixture(work, { temporaryRoot } = {}) {
     await mkdir(join(root, 'src/bootstrap'), { recursive: true });
     await writeFile(join(root, 'src/bootstrap/features.ts'), registry);
     await writeFile(join(root, 'src/bootstrap/authoring.ts'), authoring);
-    await cp(join(makerSourceRoot, 'src/bootstrap/native-integrations.ts'), join(root, 'src/bootstrap/native-integrations.ts'));
+    await cp(makerSource('src/bootstrap/native-integrations.ts'), join(root, 'src/bootstrap/native-integrations.ts'));
     for (const [file, source] of Object.entries(eventRegistries)) await writeFile(join(root, 'src/bootstrap', file), source);
-    await cp(join(makerSourceRoot, 'src/bootstrap/core-event-catalog.ts'), join(root, 'src/bootstrap/core-event-catalog.ts'));
+    await cp(makerSource('src/bootstrap/core-event-catalog.ts'), join(root, 'src/bootstrap/core-event-catalog.ts'));
     await writeFile(join(root, 'src/bootstrap/authoring-locales.ts'), 'export const authoringLocaleModules = [\n];\n');
     await writeFile(join(root, 'src/bootstrap/authoring-domains.ts'), 'export const authoringDomains = [\n];\n');
     await work(root);
@@ -92,7 +104,7 @@ export async function installMakerFoundation(root) {
   for (const path of paths) {
     const target = join(root, path);
     await mkdir(dirname(target), { recursive: true });
-    await cp(resolve(makerSourceRoot, path), target, { recursive: true });
+    await cp(makerSource(path), target, { recursive: true });
   }
   const files = []; const registrations = [];
   for (const [owner, name] of [
@@ -130,10 +142,6 @@ export const ${name}Feature = defineNoteFeature({ defaultFolder: 'Fixture', docu
   );
 }
 
-export async function removeMakerExamples(root) {
-  await applyFilePlan((await planExampleRemoval(root)).plan);
-}
-
 export async function copyMakerSuite(root) {
   for (const path of [
     'scripts/makers',
@@ -146,7 +154,7 @@ export async function copyMakerSuite(root) {
   ]) {
     const target = join(root, path);
     await mkdir(dirname(target), { recursive: true });
-    await cp(resolve(makerSourceRoot, path), target, { recursive: true });
+    await cp(makerSource(path), target, { recursive: true });
   }
   // A source checkout carries the whole CLI: generated locale checks run the project's own bin/app.
   await symlink(resolve(makerSourceRoot, 'bin'), join(root, 'bin'), process.platform === 'win32' ? 'junction' : 'dir');

@@ -16,7 +16,7 @@ test('real shared pipeline compiles a Nuxt UI button backed by Pinia into one of
   const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'prototype-real-build-'));
   const suffix = path.basename(scratch).replace(/[^a-z0-9]/gi, '');
   const harness = path.join(root, 'harness/prototype', suffix);
-  const component = path.join(root, `src/presentation/components/PrototypeFixture${suffix}.vue`);
+  const component = path.join(root, `src/plugin/presentation/components/PrototypeFixture${suffix}.vue`);
   fs.mkdirSync(harness, { recursive: true });
   t.after(() => { fs.rmSync(scratch, { recursive: true, force: true }); fs.rmSync(harness, { recursive: true, force: true }); fs.rmSync(component, { force: true }); });
   fs.writeFileSync(component, `<script setup lang="ts">\nimport UButton from '@nuxt/ui/components/Button.vue';\nimport { defineStore } from 'pinia';\nconst useCounter = defineStore('prototype-check', { state: () => ({ count: 0 }), actions: { increment() { this.count++; } } });\nconst counter = useCounter();\n</script>\n<template><section><h1>Prototype pipeline fixture</h1><UButton @click="counter.increment">Increment</UButton><output>{{ counter.count }}</output></section></template>\n`, { flag: 'wx' });

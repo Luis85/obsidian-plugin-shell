@@ -34,10 +34,10 @@ async function probe(sources, transform = value => value, { full = false, entry 
 }
 
 test('[CONCEPT-ZONE] maintained concept code has a covered isolated zone', async () => {
-  const result = await probe({ 'docs/concepts/companion/src/entry.js': 'console.log("concept");\n' });
+  const result = await probe({ 'src/companion/app/entry.js': 'console.log("concept");\n' });
   assert.equal(result.status, 0, result.diagnostic);
   assert.equal(result.summary.boundary_coverage_violations, 0);
-  const broken = await probe({ 'docs/concepts/companion/src/entry.js': 'console.log("concept");\n' }, boundaries => {
+  const broken = await probe({ 'src/companion/app/entry.js': 'console.log("concept");\n' }, boundaries => {
     boundaries.zones = boundaries.zones.filter(zone => zone.name !== 'companion-concept');
     boundaries.rules = boundaries.rules.filter(rule => rule.from !== 'companion-concept');
     return boundaries;
@@ -48,8 +48,8 @@ test('[CONCEPT-ZONE] maintained concept code has a covered isolated zone', async
 
 test('[CONCEPT-INBOUND] production cannot import concept implementation', async () => {
   const result = await probe({
-    'src/domain/probe.ts': 'import { value } from "../../docs/concepts/companion/src/entry.js"; console.log(value);\n',
-    'docs/concepts/companion/src/entry.js': 'export const value = 1;\n',
+    'src/plugin/domain/probe.ts': 'import { value } from "../../companion/app/entry.js"; console.log(value);\n',
+    'src/companion/app/entry.js': 'export const value = 1;\n',
   });
   assert.notEqual(result.status, 0, result.diagnostic);
   assert.ok(result.summary.boundary_violations > 0, result.diagnostic);
@@ -57,8 +57,8 @@ test('[CONCEPT-INBOUND] production cannot import concept implementation', async 
 
 test('[CONCEPT-OUTBOUND] concept implementation cannot become a runtime adapter', async () => {
   const result = await probe({
-    'docs/concepts/companion/src/entry.js': 'import { value } from "../../../../src/domain/probe.ts"; console.log(value);\n',
-    'src/domain/probe.ts': 'export const value = 1;\n',
+    'src/companion/app/entry.js': 'import { value } from "../../plugin/domain/probe.ts"; console.log(value);\n',
+    'src/plugin/domain/probe.ts': 'export const value = 1;\n',
   });
   assert.notEqual(result.status, 0, result.diagnostic);
   assert.ok(result.summary.boundary_violations > 0, result.diagnostic);
@@ -68,18 +68,18 @@ test('[CONCEPT-OUTBOUND] concept implementation cannot become a runtime adapter'
 test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still rejects extra files', async () => {
   const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   // Same owned assembly roots as build-companion.py; editor TypeScript is a separately registered test-import entry.
-  const owned = ['src/', 'vendor/', 'test-kit/'].map(root => 'docs/concepts/companion/' + root);
+  const owned = ['src/companion/app/', ...['vendor/', 'test-kit/'].map(root => 'docs/concepts/companion/' + root)];
   const entry = config.entry.filter(path => owned.some(root => path.startsWith(root)));
-  const editor = config.entry.filter(path => path.startsWith('docs/concepts/companion/editor/'));
-  assert.deepEqual(config.entry.filter(path => path.startsWith('docs/concepts/companion/')).sort(), [...entry, ...editor].sort(), 'Only assembly roots and editor sources are registered');
-  assert.ok(editor.includes('docs/concepts/companion/editor/prototype-manager.ts') && editor.includes('docs/concepts/companion/editor/prototypes.css'), 'Prototype editor sources imported by checks stay registered');
+  const editor = config.entry.filter(path => path.startsWith('src/companion/editor/'));
+  assert.deepEqual(config.entry.filter(path => ['docs/concepts/companion/', 'src/companion/'].some(root => path.startsWith(root))).sort(), [...entry, ...editor].sort(), 'Only assembly roots and editor sources are registered');
+  assert.ok(editor.includes('src/companion/editor/prototype-manager.ts') && editor.includes('src/companion/editor/prototypes.css'), 'Prototype editor sources imported by checks stay registered');
   const sources = Object.fromEntries(await Promise.all(entry.map(async path => [path, await readFile(path, 'utf8')])));
   assert.equal(entry.length, 138, 'Exact authored, vendor and test-kit assembly inventory');
-  assert.ok(entry.includes('docs/concepts/companion/src/companion-contract.js'), 'Concept names for the bundled project contract must remain inventoried');
-  assert.ok(config.entry.includes('scripts/concepts/concept-contract.ts') && config.entry.includes('scripts/concepts/contract-bundle.mjs'), 'Bundled schema 6 project contract must remain an analyzer entry');
-  assert.ok(config.entry.includes('scripts/companion/storymap-contract.mjs'), 'Shared storymap validator must remain an analyzer entry');
+  assert.ok(entry.includes('src/companion/app/companion-contract.js'), 'Concept names for the bundled project contract must remain inventoried');
+  assert.ok(config.entry.includes('tooling/concepts/concept-contract.ts') && config.entry.includes('tooling/concepts/contract-bundle.mjs'), 'Bundled schema 6 project contract must remain an analyzer entry');
+  assert.ok(config.entry.includes('src/shared/companion/storymap-contract.mjs'), 'Shared storymap validator must remain an analyzer entry');
   for (const retired of ['scripts/companion/project-contract.mjs', 'scripts/companion/detail-contract.mjs', 'scripts/companion/visual/visual-migrate.mjs']) assert.ok(!config.entry.includes(retired), 'Retired v5 contract stays removed: ' + retired);
-  assert.ok(entry.includes('docs/concepts/companion/src/style-guide-frontend.js'), 'Concurrent Design System frontend must remain inventoried');
+  assert.ok(entry.includes('src/companion/app/style-guide-frontend.js'), 'Concurrent Design System frontend must remain inventoried');
   const valid = await probe(sources, value => value, { full: true, entry });
   assert.equal(valid.status, 0, valid.diagnostic);
   assert.equal(valid.summary.total_issues, 0, valid.diagnostic);

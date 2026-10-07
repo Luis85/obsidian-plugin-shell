@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { planExampleRemoval } from '../examples/plan.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from '../../src/cli/tests/example-sources-fixture.mjs';
 import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
 
 const reviewed = '# Reviewed template\n';

@@ -7,7 +7,7 @@ import { listStarters, readStarterOperation, editStarterPlan, assembleStarterPac
 import { validateDefinition } from '../adapters/starters/validation.ts';
 import { code, fileStarter, request, shipped, workspace } from './starters-fixture.mjs';
 import { extractKit } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 
 // Starter operations (operations.ts): listing, schema/show/validate/coverage reads, add/edit plans and the standalone pack.
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');

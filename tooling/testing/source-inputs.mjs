@@ -7,7 +7,7 @@ import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
 import { codeLines } from './code-lines.mjs';
 import { loadThresholds } from '../quality/thresholds.mjs';
 
-const inputRoots = ['src', 'src/plugin/harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'configs'];
+const inputRoots = ['src', 'tooling', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'configs'];
 export function physicalLines(text) {
   if (!text) return 0;
   const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -18,7 +18,8 @@ export function lineLimit(path) {
   if (!/\.(?:[cm]?[jt]sx?|vue|css|html)$/.test(path)) return null;
   limits ??= loadThresholds().codeLines;
   if (path === 'src/plugin/main.ts') return limits.mainTs;
-  return path.startsWith('tests/') ? limits.tests : limits.source;
+  // Test files live in root tests/, tooling/tests/ and each source project's src/<name>/tests/.
+  return /^(?:tests|tooling[/]tests|src[/][^/]+[/]tests)[/]/.test(path) ? limits.tests : limits.source;
 }
 // This optional executable sidecar is present with the companion concept. It
 // must participate in archive transport and evidence freshness when installed.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createFixtureEngine } from '../../docs/concepts/companion/test-kit/engine.mjs';
 import { createFixtureAdapter } from '../../docs/concepts/companion/test-kit/adapters.mjs';
 import { createFakerProvider } from '../../docs/concepts/companion/test-kit/faker-provider.mjs';
-import { fixtureManifest, entityManifest } from './test-data-fixture.mjs';
+import { fixtureManifest, entityManifest } from '../../src/cli/tests/test-data-fixture.mjs';
 const engine = createFixtureEngine();
 
 test('[TD-REPEAT] generation is repeatable, seeded, versioned and input-immutable', () => {

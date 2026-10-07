@@ -11,7 +11,7 @@ import { learningIssues, learningStepMarkdown, loadLearningCatalog } from '../ad
 import { evaluateLearningStep } from '../adapters/learning-checks.ts';
 import { loadCatalog } from '../adapters/wizard-catalog.ts';
 import { completeLearningStep, newLearningProgress } from '../domain/learning-progress.ts';
-import { put, scratch } from '#tui/tests/interactive-maker-learning-fixture.mjs';
+import { put, scratch } from './interactive-maker-learning-fixture.mjs';
 const repository = resolve(import.meta.dirname, '../../..');
 const id = 'idea-to-prototype-with-claude-design';
 const now = '2026-10-04T10:00:00.000Z';

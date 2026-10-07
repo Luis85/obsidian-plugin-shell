@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { zip } from '../adapters/framework/zip.ts';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { starterDocument } from '../../../tests/support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const hash = value => createHash('sha256').update(value).digest('hex');

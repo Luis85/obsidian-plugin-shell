@@ -158,11 +158,11 @@ test('generated preview entry points are analyzed and inert tooling stays inside
   const config = JSON.parse(await readFile(join(root, 'configs/quality/fallow.json'), 'utf8'));
   const tools = config.framework.find(item => item.name === 'airship-source-preview-tools');
   assert.equal(tools.entryPointRole, 'support', 'preview/build tools are not plugin production roots');
-  for (const entry of ['scripts/airship/preview-config.mjs', 'scripts/airship/qualify.mjs']) {
+  for (const entry of ['tooling/airship/preview-config.mjs', 'tooling/airship/qualify.mjs']) {
     assert.ok(tools.entryPoints.includes(entry)); assert.equal(config.entry.includes(entry), false);
   }
   const zone = config.boundaries.zones.find(zone => zone.name === 'companion-authoring-contract');
-  for (const file of ['scripts/companion/tooling-contract.mjs', 'scripts/companion/tooling-options.ts']) assert.ok(zone.patterns.includes(file));
+  for (const file of ['src/shared/companion/tooling-contract.mjs', 'src/shared/companion/tooling-options.ts']) assert.ok(zone.patterns.includes(file));
   assert.deepEqual(config.boundaries.rules.find(rule => rule.from === zone.name).allow, [zone.name, 'cli-data-contract']);
   assert.ok(!config.ignorePatterns.some(pattern => pattern.includes('airship')));
 });

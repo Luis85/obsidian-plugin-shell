@@ -77,7 +77,7 @@ export async function evidenceIdentity(root, producer) {
     if (actual !== (pkg.devDependencies?.[name] ?? pkg.dependencies?.[name])) throw new Error('EVIDENCE_TOOL_VERSION');
     tools[name] = actual;
   }
-  const policyFiles = source.files.filter(file => file.path.startsWith('scripts/testing/evidence-'));
+  const policyFiles = source.files.filter(file => file.path.startsWith('tooling/testing/evidence-'));
   if (!policyFiles.length) throw new Error('EVIDENCE_PROTOCOL_MISSING');
   let browser = null;
   if (producer === 'browser') {
@@ -106,13 +106,27 @@ export async function toolingRegistrations(root, files) {
   }
   return owners;
 }
+/** Top-level node:test modules of every test home: cross-project tests/tooling, tooling/tests and each source project's
+ * src/<name>/tests. Nested folders (support, fixtures, tooling/tests/hindsight, src/plugin/tests/harness-styles) run elsewhere. */
+async function toolingTestFiles(root) {
+  const absent = error => { if (['ENOENT', 'ENOTDIR'].includes(error.code)) return []; throw error; };
+  const projects = (await readdir(join(root, 'src'), { withFileTypes: true }).catch(absent)).filter(item => item.isDirectory());
+  const files = [];
+  for (const home of ['tests/tooling', 'tooling/tests', ...projects.map(item => `src/${item.name}/tests`)]) {
+    for (const item of await readdir(join(root, home), { withFileTypes: true }).catch(absent)) {
+      if (item.isSymbolicLink()) throw new Error('EVIDENCE_SYMLINK');
+      if (item.isFile() && /\.(checks|test)\.mjs$/.test(item.name)) files.push(`${home}/${item.name}`);
+    }
+  }
+  return files;
+}
 export async function suiteInventory(root, producer) {
   if (['runtime', 'coverage'].includes(producer)) return filesUnder(root, 'src/plugin/tests/unit', /\.test\.ts$/);
   if (producer === 'browser') return filesUnder(root, 'src/plugin/tests/e2e', /\.spec\.ts$/);
   // Acceptance criterion tests (tests/acceptance, configs/delivery/delivery.json `acceptance`) run with the tooling suites; the folder is absent until an increment generates stubs.
   if (producer === 'tooling') {
     const acceptance = await lstat(join(root, 'tests/acceptance')).then(() => filesUnder(root, 'tests/acceptance', /\.checks\.mjs$/), () => []);
-    return [...await filesUnder(root, 'tests/tooling', /\.(checks|test)\.mjs$/), ...acceptance].sort();
+    return [...await toolingTestFiles(root), ...acceptance].sort();
   }
   return [producer === 'native' ? 'tooling/testing/check-native.mjs' : 'tooling/quality/check-artifacts.mjs'];
 }

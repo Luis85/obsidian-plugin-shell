@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { upgradePlan } from '../adapters/framework/kit.ts';
 import { extractArchive, extractKit, kitFiles } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../adapters/framework/zip.ts';
 import { hash } from '../adapters/framework/files.ts';
 import { applyFilePlan } from '#shared/platform/file-plan.ts';

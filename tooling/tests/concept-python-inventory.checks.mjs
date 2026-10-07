@@ -9,9 +9,9 @@ import { sha256 } from '../../src/shared/platform/hash.ts';
 async function fixture(run) {
   const root = await mkdtemp(join(tmpdir(), 'python-inventory-'));
   try {
-    for (const name of ['src', 'scripts/hindsight', 'tests/hindsight', 'harness']) await mkdir(join(root, name), { recursive: true });
+    for (const name of ['src', 'src/cli/tooling/hindsight', 'tooling/tests/hindsight', 'src/plugin/harness']) await mkdir(join(root, name), { recursive: true });
     for (const name of ['package.json', 'package-lock.json', '.fallowrc.json']) await writeFile(join(root, name), '{}\n');
-    await writeFile(join(root, 'src/main.ts'), 'export const value = 1;\n');
+    await writeFile(join(root, 'src/plugin/main.ts'), 'export const value = 1;\n');
     await run(root);
   } finally { await rm(root, { recursive: true, force: true }); }
 }
@@ -19,7 +19,7 @@ async function fixture(run) {
 test('optional memory Python is fingerprinted, but never dilutes measured production', async () => {
   await fixture(async root => {
     const baseline = await maintainabilityInventory(root);
-    const paths = ['scripts/hindsight/embedded.py', 'tests/hindsight/test_embedded.py', 'tests/hindsight/test_providers.py'];
+    const paths = ['src/cli/tooling/hindsight/embedded.py', 'tooling/tests/hindsight/test_embedded.py', 'tooling/tests/hindsight/test_providers.py'];
     const bytes = 'value = "synthetic"\n';
     for (const path of paths) await writeFile(join(root, path), bytes);
     const inventory = await maintainabilityInventory(root);
@@ -41,7 +41,7 @@ test('optional memory Python is fingerprinted, but never dilutes measured produc
   });
 });
 
-for (const path of ['src/embedded.py', 'scripts/hindsight/unreviewed.py', 'tests/hindsight/unreviewed.py', 'scripts/hindsight/embedded.rb']) {
+for (const path of ['src/embedded.py', 'src/cli/tooling/hindsight/unreviewed.py', 'tooling/tests/hindsight/unreviewed.py', 'src/cli/tooling/hindsight/embedded.rb']) {
   test(`unreviewed language input is still rejected: ${path}`, async () => {
     await fixture(async root => {
       await writeFile(join(root, path), '# must not be exempted\n');

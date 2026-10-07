@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { sourceInputs } from '../testing/source-inputs.mjs';
 import { standaloneSource, updateOwnership } from '../../src/cli/adapters/framework/distribution.ts';
 import { hash } from '../../src/cli/adapters/framework/files.ts';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from '../../src/cli/tests/example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const optionalFixture = 'docs/concepts/companion/editor/inventory-probe.ts';
 // A synthetic reviewed README keeps these ownership checks independent of whether

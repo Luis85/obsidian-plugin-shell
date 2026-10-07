@@ -12,7 +12,7 @@ import { loadTemplateSnapshot } from '../compiler/adapters/template-snapshot.ts'
 import { diagnostic } from '../compiler/domain/diagnostics.ts';
 import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
 import { templateRootFiles as templateFiles, templateRoots } from '../compiler/domain/template-inputs.ts';
-import { fileSymlink } from '../../../tests/support/file-symlink.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 
 // Drives the compiler host CLI adapters (src/cli/compiler/adapters/{cli,reporting,dependencies,template-snapshot}.ts).
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

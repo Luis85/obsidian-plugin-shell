@@ -7,7 +7,7 @@ import { buildModel } from '../documentation/render.mjs';
 import { exitCode } from '../../src/cli/adapters/framework-cli.ts';
 import { interactiveRun } from '../../src/cli/presentation/terminal/cli-interactive.ts';
 import { guidedIncrement } from '../../src/cli/presentation/terminal/increment-terminal.ts';
-import { createWorkspace, planThenApply, readyFragment } from '../../tests/support/increment-workspace.mjs';
+import { createWorkspace, planThenApply, readyFragment } from '../../src/cli/tests/support/increment-workspace.mjs';
 
 const fails = (outcome, code) => { assert.equal(outcome.status, 'failed', JSON.stringify(outcome)); assert.equal(outcome.diagnostics[0].code, code, outcome.diagnostics[0].message); return outcome; };
 async function inWorkspace(options, body) {

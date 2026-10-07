@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../src/cli/adapters/framework/prototype-skill.ts';
 import { sourceInputs } from '../testing/source-inputs.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from '../../src/cli/tests/example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function copySkill(t) {
   const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'prototype-inventory-'));

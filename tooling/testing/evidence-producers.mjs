@@ -52,7 +52,7 @@ export function producerCommand(root, producer, files, output) {
     case 'runtime': return ['node_modules/vitest/vitest.mjs', 'run', '--retry=0', '--allowOnly=false', '--config', 'configs/testing/vitest.config.mjs', '--reporter=json', '--reporter=./scripts/testing/evidence-vitest-reporter.mjs', `--outputFile=${join(output, 'framework.json')}`];
     case 'coverage': return ['node_modules/vitest/vitest.mjs', 'run', '--retry=0', '--allowOnly=false', '--coverage', '--config', 'configs/testing/vitest.production.config.mjs', '--reporter=json', '--reporter=./scripts/testing/evidence-vitest-reporter.mjs', `--outputFile=${join(output, 'framework.json')}`];
     case 'browser': return ['node_modules/@playwright/test/cli.js', 'test', '--config', 'configs/testing/playwright.config.ts', '--retries=0', '--repeat-each=1', '--forbid-only', '--reporter=json'];
-    case 'tooling': return ['--unhandled-rejections=strict', '--test', '--test-concurrency=1', `--test-reporter=${pathToFileURL(join(root, 'scripts/testing/node-reporter.mjs')).href}`, ...files];
+    case 'tooling': return ['--unhandled-rejections=strict', '--test', '--test-concurrency=1', `--test-reporter=${pathToFileURL(join(root, 'tooling/testing/node-reporter.mjs')).href}`, ...files];
     case 'artifact': return ['tooling/quality/check-artifacts.mjs'];
     case 'native': return ['tooling/testing/check-native.mjs', '--allow-download'];
     default: throw new Error('EVIDENCE_PRODUCER');

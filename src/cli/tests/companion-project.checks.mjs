@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, symlink, realpath, rm } from 'node:fs/promises';
-import { fileSymlink } from '../../../tests/support/file-symlink.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +13,7 @@ import { retiredProjectText } from '../../../tests/support/retired-projects.mjs'
 import { readCompanionProject } from '../adapters/framework/read-project.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
-const cli = join(root, 'scripts/companion-tools/generate.mjs');
+const cli = join(root, 'tooling/companion-tools/generate.mjs');
 const seed = starterDocumentText('companion-plugin');
 const document = JSON.parse(seed);
 // Build an own JSON property, not an object-literal prototype or a newline-dependent splice.

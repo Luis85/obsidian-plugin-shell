@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { createWorkspace, planThenApply, readyFragment } from '../../../tests/support/increment-workspace.mjs';
+import { createWorkspace, planThenApply, readyFragment } from './support/increment-workspace.mjs';
 import { editPullRequest, parsePullRequest, renderPullRequest, validatePullRequest } from '../domain/increments/pull-request-document.ts';
 
 const fails = (outcome, code) => { assert.equal(outcome.status, 'failed', JSON.stringify(outcome)); assert.equal(outcome.diagnostics[0].code, code, outcome.diagnostics[0].message); };

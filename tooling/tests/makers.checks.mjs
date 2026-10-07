@@ -8,7 +8,13 @@ import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
 import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
 import { loadCatalog } from '../../src/cli/adapters/makers/load-catalog.ts';
 import { loadEventCatalog } from '../events/load-catalog.mjs';
-import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, removeMakerExamples, copyMakerSuite } from './maker-fixture.mjs';
+import { planExampleRemoval } from '../examples/plan.mjs';
+import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, copyMakerSuite } from '../../src/cli/tests/maker-fixture.mjs';
+
+/** Example removal is tooling (tooling/examples), so it stays with this tooling test rather than the CLI fixture. */
+async function removeMakerExamples(root) {
+  await applyFilePlan((await planExampleRemoval(root)).plan);
+}
 
 // A consumer copy (MAKE-03-08) carries only the maker suite; it plans through the source repository's CLI.
 const cliRoot = process.env.MAKER_CLI_ROOT ?? sourceRoot;

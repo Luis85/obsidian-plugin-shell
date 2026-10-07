@@ -61,7 +61,7 @@ export function playwrightReport(raw, root) {
       if (!Array.isArray(spec.tests) || !spec.tests.length) throw new Error('EVIDENCE_EMPTY');
       for (const test of spec.tests) {
         if (!Array.isArray(test.results) || !test.results.length) throw new Error('EVIDENCE_EMPTY');
-        for (const result of test.results) cases.push(item(fileName(root, spec.file.startsWith('tests/') ? spec.file : `tests/e2e/${spec.file}`), [...parents, spec.title, test.projectName ?? ''].filter(Boolean).join(' > '), 'browser-integrated', result.status, result.retry, test.repeatEachIndex ?? 0));
+        for (const result of test.results) cases.push(item(fileName(root, spec.file.startsWith('src/') ? spec.file : `src/plugin/tests/e2e/${spec.file}`), [...parents, spec.title, test.projectName ?? ''].filter(Boolean).join(' > '), 'browser-integrated', result.status, result.retry, test.repeatEachIndex ?? 0));
         if (test.expectedStatus !== 'passed' || test.status !== 'expected') cases.at(-1).status = 'failed';
       }
     }
@@ -94,7 +94,7 @@ export function toolingReport(text, root, registrations = new Map()) {
   const cases = rows.filter(row => row.kind === 'case' && row.type === 'test').map(row => {
     if (resolve(root, row.name) === resolve(root, row.file)) throw new Error('EVIDENCE_EMPTY_SUITE');
     const defined = fileName(root, row.file), file = registrations.get(defined) ?? defined;
-    return item(file, row.name, file.startsWith('tests/tooling/evidence-') ? 'node-baseline' : 'tooling-generated', row.status);
+    return item(file, row.name, file.startsWith('tooling/tests/evidence-') ? 'node-baseline' : 'tooling-generated', row.status);
   });
   if (integer(summary.counts.tests) !== cases.length || integer(summary.counts.passed) !== cases.filter(test => test.status === 'passed').length) throw new Error('EVIDENCE_COUNTS');
   const windowsOnly = new Map(windowsOnlyCases);
@@ -105,7 +105,7 @@ export function artifactReport(raw) {
   object(raw, ['mode', 'nativeHostTested', 'assets']);
   if (raw.mode !== 'artifact-static' || raw.nativeHostTested !== false || !Array.isArray(raw.assets) || raw.assets.length !== 3) throw new Error('EVIDENCE_ARTIFACT');
   const assets = assetRecords(raw.assets, true);
-  return { cases: [item('scripts/quality/check-artifacts.mjs', 'complete artifact ownership, provenance and size gate', 'artifact', 'passed')], frameworkPassed: true, assets: assets.map(asset => ({ ...asset, file: `dist/${asset.file}` })) };
+  return { cases: [item('tooling/quality/check-artifacts.mjs', 'complete artifact ownership, provenance and size gate', 'artifact', 'passed')], frameworkPassed: true, assets: assets.map(asset => ({ ...asset, file: `dist/${asset.file}` })) };
 }
 function assetRecords(assets, requireBytes = false) {
   if (!Array.isArray(assets) || JSON.stringify(assets.map(asset => asset?.file).sort()) !== JSON.stringify(['main.js', 'manifest.json', 'styles.css'])) throw new Error('EVIDENCE_ASSET_INVENTORY');

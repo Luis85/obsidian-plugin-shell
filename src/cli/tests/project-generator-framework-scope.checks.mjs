@@ -6,13 +6,13 @@ import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { projectModel } from '../compiler/emitters/model.ts';
-import { projectFiles } from '../../../tests/support/project-render.mjs';
+import { projectFiles } from './support/project-render.mjs';
 import { maintainerOnly } from '../compiler/emitters/framework-docs.ts';
 import { frameworkOnlyPath, referenceDocPath, withBanner, rewriteDocReferences, maintainerScript, frameworkBanner } from '../compiler/emitters/framework-scope.ts';
 import { clickdummyBuilderFiles } from '../compiler/emitters/clickdummy-builder-files.ts';
 import { buildClickdummy } from '../adapters/framework/clickdummy.ts';
 import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { evaluateCondition } from '../domain/ci-expression.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));

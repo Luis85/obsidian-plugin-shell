@@ -16,7 +16,7 @@ import { newDocument, documentText } from '../domain/document.ts';
 import { runOperations } from '../application/operations.ts';
 import { execute, parseArguments } from '../adapters/commands.ts';
 import { commands, parameterKinds, parseCliArguments } from '../adapters/framework/catalog.ts';
-import { fileSymlink } from '../../../tests/support/file-symlink.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../../..');
 const { selection: cli } = await projectStarter(frameworkRoot, 'cli');
 const json = value => JSON.stringify(value, null, 2) + '\n';

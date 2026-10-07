@@ -12,8 +12,8 @@ import { retiredProject } from '../../tests/support/retired-projects.mjs';
 const root = new URL('../../', import.meta.url);
 const base = await readFile(new URL('docs/concepts/companion/index.html', root), 'utf8');
 const graphStyle = await readFile(new URL('docs/concepts/companion/vendor/vue-flow.scoped.css', root), 'utf8');
-const bridge = await readFile(new URL('scripts/concepts/mvp-bridge.js', root), 'utf8');
-const names = await readFile(new URL('docs/concepts/companion/src/companion-contract.js', root), 'utf8');
+const bridge = await readFile(new URL('tooling/concepts/mvp-bridge.js', root), 'utf8');
+const names = await readFile(new URL('src/companion/app/companion-contract.js', root), 'utf8');
 function program(html) { return [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].find(m => m[1].includes('function render()'))[1]; }
 function contractScript(html) {
   const blocks = [...html.matchAll(/<script data-contract="CompanionContract">([\s\S]*?)<\/script>/g)];

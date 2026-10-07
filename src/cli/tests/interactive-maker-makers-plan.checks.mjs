@@ -2,7 +2,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
-import { makerFixture, installMakerFoundation } from '../../../tooling/tests/maker-fixture.mjs';
+import { makerFixture, installMakerFoundation } from './maker-fixture.mjs';
 import { applyFilePlan } from '#shared/platform/file-plan.ts';
 import { parseArguments, recipeOptions, builtinRecipes, slug, title, makerSymbol } from '../adapters/makers/arguments.ts';
 import { planMaker } from '../adapters/makers/plan.ts';

@@ -5,6 +5,7 @@ import { result, requireThat, stringOption, type Context, type Request, type Res
 import { exists, readBounded } from './files.ts';
 import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
+import { testingTool } from './testing-tools.ts';
 import { projectConfigs } from '#shared/platform/project-configs.mjs';
 
 export interface ProcessOperationDependencies {
@@ -55,14 +56,18 @@ async function installInvocation(request: Request, context: Context, host: Host)
   } };
   return { entry: await host.npm(), args: ['ci', '--no-fund'] };
 }
-const testEntries: Record<string, { entry: string; args?: string[] }> = {
-  native: { entry: 'scripts/testing/check-native.mjs' },
-  obsidian: { entry: 'scripts/testing/run-obsidian-tests.mjs' },
+/** `driver` entries name a test driver that testingTool locates (tooling/testing here, scripts/testing in a generated project). */
+const testEntries: Record<string, { entry: string; args?: string[]; driver?: boolean }> = {
+  native: { entry: 'check-native.mjs', driver: true },
+  obsidian: { entry: 'run-obsidian-tests.mjs', driver: true },
   browser: { entry: 'node_modules/@playwright/test/cli.js', args: ['test', '--config', 'configs/testing/playwright.config.ts'] },
 };
 async function testInvocation(request: Request, context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
   acceptProfile(request.command, profile);
-  if (profile && Object.hasOwn(testEntries, profile)) return { ...testEntries[profile]!, args: [...(testEntries[profile]!.args ?? [])] };
+  if (profile && Object.hasOwn(testEntries, profile)) {
+    const { entry, args = [], driver } = testEntries[profile]!;
+    return { entry: driver ? await testingTool(context.root, entry, host.existsPath) : entry, args: [...args] };
+  }
   return { entry: 'node_modules/vitest/vitest.mjs', args: await vitestArguments(context.root, profile, host.existsPath) };
 }
 async function verifyInvocation(request: Request, _context: Context, host: Host, profile: string | undefined): Promise<Invocation> {

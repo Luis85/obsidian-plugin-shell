@@ -11,7 +11,7 @@ import { customizeStarter as customizeLoaded } from '../../src/cli/adapters/star
 import { planMaker } from '../../src/cli/adapters/makers/plan.ts';
 import { parseArguments } from '../../src/cli/adapters/makers/arguments.ts';
 import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
-import { makerFixture, makerSourceRoot } from '../../tooling/tests/maker-fixture.mjs';
+import { makerFixture, makerSourceRoot } from '../../src/cli/tests/maker-fixture.mjs';
 const file = {
   id: 'folio',
   name: 'Folio',

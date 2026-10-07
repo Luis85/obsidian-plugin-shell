@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../compiler/emitters/model.ts';
-import { projectFiles } from '../../../tests/support/project-render.mjs';
+import { projectFiles } from './support/project-render.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
-const starter = async name => JSON.parse(await readFile(new URL(`../../configs/starters/${name}.json`, import.meta.url), 'utf8')).generator.document;
+const starter = async name => JSON.parse(await readFile(new URL(`../../../configs/starters/${name}.json`, import.meta.url), 'utf8')).generator.document;
 const render = async document => new Map((await projectFiles(root, projectModel(document))).map(entry => [entry.path, entry.content]));
 const traceOf = files => JSON.parse(files.get('design/visual-traceability.json'));
 const ux = files => [...files.keys()].filter(path => path.startsWith('tests/project/ux-acceptance/'));

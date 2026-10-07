@@ -48,7 +48,7 @@ test('size budgets, missing sections and the template placeholders are reported 
 });
 
 test('the e2e decision is a warning when UI areas are affected, and quiet otherwise', () => {
-  const ui = replace('`docs/guide.md`: the usage page.', '`src/presentation/view.vue`: the view.');
+  const ui = replace('`docs/guide.md`: the usage page.', '`src/plugin/presentation/view.vue`: the view.');
   assert.equal(ready(ui)['DOR-14'].status, 'pass');
   const none = ready(ui.replace('e2e: optional', 'e2e: none'));
   assert.equal(none['DOR-14'].status, 'warn'); assert.equal(none['DOR-14'].severity, 'warning'); assert.match(none['DOR-14'].hint, /e2e: optional/);
