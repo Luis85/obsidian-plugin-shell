@@ -4,7 +4,8 @@
 
 > **Contract:** PRD 0.3 extension; requirements CSS-01–12.  
 > **Status:** Normative target; the shared pipeline exists. `src/styles/index.css` and Vue SFC styles compose through the shared Vite configuration (`scripts/bundling/vite-shared.mjs`) and selector scoping (`scripts/bundling/css-ownership.mjs`) into one `dist/styles.css`; `npm run check:tokens` and `npm run check:style-literals` guard token use. File layouts below are illustrative; CSS-01–12 remain in force.  
-> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
+> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).  
+> **Style-literal scope:** `check:style-literals` (`tooling/styles/check-style-literals.mjs`) scans handwritten CSS and Vue style blocks under `src/` except `src/companion/` and `src/plugin/harness/`. That is the scope it had before the src project split, when both were outside `src/` (`docs/concepts/companion/` and `harness/`): the companion concept keeps its own assembly and browser verification, and the harness carries the simulated host palette.
 
 ## 1. The intended result
 

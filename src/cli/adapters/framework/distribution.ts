@@ -16,7 +16,7 @@ const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/wo
   '.github/workflows/site-templates.yml', 'tooling/testing/qualify-site-templates.mjs', 'tooling/tests/site-templates-qualification.checks.mjs',
   // Starter-pack qualification reads canonical definitions and concept builders that only the maintainer checkout carries.
   '.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles, 'tooling/tests/starter-golden.checks.mjs', 'src/cli/tests/starter-definitions.checks.mjs', 'src/cli/tests/starter-lifecycle.checks.mjs',
-  'src/shared/tests/starter-classic-assembly.checks.mjs', 'tooling/tests/starter-distribution.checks.mjs']);
+  'tooling/tests/starter-classic-assembly.checks.mjs', 'tooling/tests/starter-distribution.checks.mjs']);
 /** These reviewed runtime libraries are compiler dependencies, not starter content. */
 const runtimeAssets = new Set(['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt'].map(name => 'docs/concepts/companion/vendor/' + name));
 export function included(path: string): boolean {
