@@ -20,7 +20,8 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   }
   await visit(resolve(root, 'src'));
   // CLI development lives under src/cli, already included above; build:cli verifies the generated bin inventory.
-  if ((await readdir(root)).includes('src/cli/sdk')) await visit(resolve(root, 'src/cli/sdk'));
+  // A generated project may keep its own plugins folder at its root; this repository's SDK is src/cli/sdk, covered by src.
+  if ((await readdir(root)).includes('plugins')) await visit(resolve(root, 'plugins'));
   // Companion runtime templates become generated plugin source; a generated project may not carry them.
   if (existsSync(resolve(root, 'templates/companion/runtime'))) await visit(resolve(root, 'templates/companion/runtime'));
   files.sort();
