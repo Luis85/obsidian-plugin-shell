@@ -17,7 +17,7 @@ export function inspectPresentation(path, source) {
   const errors = [];
   const vue = path.endsWith('.vue');
   if (vue && !path.startsWith('src/plugin/presentation/components/')) errors.push('VUE_COMPONENT_LOCATION');
-  if (!vue && !/^src\/presentation\/(?:composables|stores|context)\/.+\.ts$/.test(path)) errors.push('TYPESCRIPT_CONCERN_LOCATION');
+  if (!vue && !/^src\/plugin\/presentation\/(?:composables|stores|context)\/.+\.ts$/.test(path)) errors.push('TYPESCRIPT_CONCERN_LOCATION');
   let script = source;
   if (vue) {
     const result = parse(source, { filename: path });

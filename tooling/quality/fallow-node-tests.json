@@ -2,20 +2,25 @@
   "name": "template-node-qualification",
   "detection": {
     "type": "fileExists",
-    "pattern": "tests/tooling/*.{checks,test}.mjs"
+    "pattern": "tooling/tests/*.{checks,test}.mjs"
   },
   "entryPointRole": "test",
   "entryPoints": [
     "tooling/compiler/verify-preview-host.mjs",
     "src/plugin/tests/unit/types.ts",
     "tests/tooling/*.checks.mjs",
+    "tooling/tests/*.checks.mjs",
+    "src/*/tests/*.checks.mjs",
     "tests/acceptance/**/*.checks.mjs",
     "tests/tooling/*.test.mjs",
+    "tooling/tests/*.test.mjs",
+    "src/*/tests/*.test.mjs",
     "tooling/tests/hindsight/*.checks.mjs",
     "tests/verification/*.test.mjs",
     "src/plugin/tests/harness-styles/*.test.mjs",
     "tests/browser-specimen/specimen.checks.mjs",
     "src/companion/tests/concepts/*.browser.mjs",
-    "tests/browser-workflows/*.browser.mjs"
+    "tests/browser-workflows/*.browser.mjs",
+    "src/*/tests/**/*.ts"
   ]
 }

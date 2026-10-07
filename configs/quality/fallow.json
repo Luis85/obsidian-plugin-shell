@@ -208,6 +208,8 @@
     "dist-harness/**",
     "reports/**",
     "docs/**",
+    "src/companion/app/**",
+    "src/companion/editor/**",
     "projects/**",
     "bin/template/package.json"
   ],
@@ -293,7 +295,8 @@
       {
         "name": "project-templates",
         "patterns": [
-          "templates/**"
+          "templates/**",
+          "src/shared/companion/runtime-contract.ts"
         ]
       },
       {
@@ -336,11 +339,13 @@
       {
         "name": "test",
         "patterns": [
-          "tests/**"
+          "tests/**",
+          "src/*/tests/**",
+          "tooling/tests/**"
         ]
       },
       {
-        "name": "src/plugin/harness",
+        "name": "harness",
         "patterns": [
           "src/plugin/harness/**"
         ]
@@ -412,10 +417,34 @@
         ]
       },
       {
+        "name": "sketch-errors-contract",
+        "patterns": [
+          "src/shared/contracts/sketch-errors.ts"
+        ]
+      },
+      {
         "name": "tooling",
         "patterns": [
-          "scripts/**",
+          "tooling/**",
           "configs/**"
+        ]
+      },
+      {
+        "name": "cli-tooling",
+        "patterns": [
+          "src/cli/tooling/**"
+        ]
+      },
+      {
+        "name": "tui",
+        "patterns": [
+          "src/tui/**"
+        ]
+      },
+      {
+        "name": "shared",
+        "patterns": [
+          "src/shared/**"
         ]
       },
       {
@@ -512,7 +541,7 @@
           "presentation",
           "bootstrap",
           "test",
-          "src/plugin/harness",
+          "harness",
           "tooling",
           "styles",
           "companion-test-kit",
@@ -535,11 +564,15 @@
           "cli-input-contract",
           "cli-files-contract",
           "cli-bounded-map-contract",
-          "cli-serialization-contract"
+          "cli-serialization-contract",
+          "cli-tooling",
+          "shared",
+          "tui",
+          "sketch-errors-contract"
         ]
       },
       {
-        "from": "src/plugin/harness",
+        "from": "harness",
         "allow": [
           "features",
           "domain",
@@ -548,10 +581,10 @@
           "presentation",
           "bootstrap",
           "test",
-          "src/plugin/harness",
-          "tooling",
+          "harness",
           "styles",
-          "companion-authoring-contract"
+          "companion-authoring-contract",
+          "shared"
         ]
       },
       {
@@ -564,7 +597,7 @@
           "presentation",
           "bootstrap",
           "test",
-          "src/plugin/harness",
+          "harness",
           "tooling",
           "styles",
           "companion-test-kit",
@@ -586,7 +619,11 @@
           "cli-input-contract",
           "cli-files-contract",
           "cli-bounded-map-contract",
-          "cli-serialization-contract"
+          "cli-serialization-contract",
+          "cli-tooling",
+          "shared",
+          "tui",
+          "sketch-errors-contract"
         ]
       },
       {
@@ -637,14 +674,16 @@
         "allow": [
           "maker-domain",
           "companion-authoring-contract",
-          "project-path-contract"
+          "project-path-contract",
+          "sketch-errors-contract"
         ]
       },
       {
         "from": "maker-application",
         "allow": [
           "maker-application",
-          "maker-domain"
+          "maker-domain",
+          "sketch-errors-contract"
         ]
       },
       {
@@ -657,7 +696,6 @@
           "compiler-emitters",
           "maker-application",
           "maker-domain",
-          "tooling",
           "companion-authoring-contract",
           "prototype-skill",
           "project-path-contract",
@@ -670,7 +708,11 @@
           "cli-files-contract",
           "cli-bounded-map-contract",
           "cli-serialization-contract",
-          "companion-test-kit"
+          "companion-test-kit",
+          "cli-tooling",
+          "shared",
+          "tui",
+          "sketch-errors-contract"
         ]
       },
       {
@@ -777,6 +819,76 @@
         "from": "project-path-contract",
         "allow": [
           "project-path-contract"
+        ]
+      },
+      {
+        "from": "cli-tooling",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "styles",
+          "companion-test-kit",
+          "companion-authoring-contract",
+          "project-templates",
+          "maker-domain",
+          "maker-application",
+          "maker-host",
+          "compiler-domain",
+          "compiler-application",
+          "compiler-host",
+          "compiler-emitters",
+          "project-path-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-confirmation-contract",
+          "cli-file-plan-contract",
+          "cli-input-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract",
+          "cli-serialization-contract",
+          "cli-tooling",
+          "shared",
+          "tui",
+          "sketch-errors-contract"
+        ]
+      },
+      {
+        "from": "tui",
+        "allow": [
+          "tui",
+          "sketch-errors-contract",
+          "cli-confirmation-contract"
+        ]
+      },
+      {
+        "from": "shared",
+        "allow": [
+          "shared",
+          "sketch-errors-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-file-plan-contract",
+          "cli-confirmation-contract",
+          "cli-input-contract",
+          "cli-files-contract",
+          "cli-bounded-map-contract",
+          "project-path-contract",
+          "cli-serialization-contract",
+          "companion-authoring-contract"
+        ]
+      },
+      {
+        "from": "sketch-errors-contract",
+        "allow": [
+          "sketch-errors-contract"
         ]
       }
     ]
