@@ -180,7 +180,7 @@ with `BASE_NOT_FOUND`. `data.changes.base` reports the `source` (`option`,
 | Fast step | Narrowed to | Falls back to |
 |---|---|---|
 | `typecheck`, `maker-types` | unchanged | unchanged |
-| `lint` (`tooling/quality/lint-source.mjs`) | changed `src`, `bin`, `plugins`, `templates/companion/runtime` files | every owned input |
+| `lint` (`tooling/quality/lint-source.mjs`) | changed `src`, `bin`, `templates/companion/runtime` files | every owned input |
 | `eslint` | changed code files under the eslint roots (`--no-warn-ignored`) | the full roots |
 | `test` | `vitest related --run --passWithNoTests` over changed code files; skipped when none | `vitest run` |
 | `suites` | `node tooling/testing/suites.mjs <names>` for the node `--test` suites a changed path selects (below); skipped when none | none |
