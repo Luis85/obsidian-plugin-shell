@@ -31,7 +31,7 @@ test('a clean source snapshot builds a complete CLI that runs outside the checko
   }
   assert.ok(!(await readdir(checkout)).includes('bin'));
   await symlink(join(repository, 'node_modules'), join(checkout, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  execFileSync(process.execPath, ['scripts/bundling/build-cli.mjs'], {
+  execFileSync(process.execPath, ['tooling/bundling/build-cli.mjs'], {
     cwd: checkout, encoding: 'utf8', timeout: 120000, maxBuffer: 4_000_000,
   });
   // Packaging through the compiled CLI must retain the shipped compiler's identity.
@@ -71,7 +71,7 @@ test('a clean source snapshot builds a complete CLI that runs outside the checko
   const valid = typecheck();
   assert.equal(valid.error, undefined, valid.error?.message);
   assert.equal(valid.status, 0, valid.stdout + valid.stderr);
-  for (const folder of ['src/domain', 'src/cli/domain']) {
+  for (const folder of ['src/plugin/domain', 'src/cli/domain']) {
     await t.test(`the public typecheck rejects a real error under ${folder}`, async () => {
       const probe = join(checkout, folder, 'ci-type-probe.ts');
       try {

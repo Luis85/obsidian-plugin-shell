@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { makerFixture, makerSourceRoot } from '../../../tooling/tests/maker-fixture.mjs';
+import { makerFixture, makerSourceRoot } from './maker-fixture.mjs';
 import { parseArguments } from '../adapters/makers/arguments.ts';
 import { planMaker } from '../adapters/makers/plan.ts';
 import { applyFilePlan } from '#shared/platform/file-plan.ts';

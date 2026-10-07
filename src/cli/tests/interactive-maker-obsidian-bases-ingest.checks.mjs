@@ -177,7 +177,7 @@ function collectionDocument(base) {
   return document;
 }
 async function conceptValidator() {
-  const files = ['vault-project.js', 'data-source-model.js'].map(name => readFile(join(repository, 'docs/concepts/companion/src', name), 'utf8'));
+  const files = ['vault-project.js', 'data-source-model.js'].map(name => readFile(join(repository, 'src/companion/app', name), 'utf8'));
   const [vaultProject, model] = await Promise.all(files);
   const helper = vaultProject.split('\n').find(line => line.startsWith('function validVaultRelativePath('));
   const context = vm.createContext({});

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from '../../../tooling/tests/maker-fixture.mjs';
+import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from './maker-fixture.mjs';
 import { parseArguments } from '../adapters/makers/arguments.ts';
 import { planMaker } from '../adapters/makers/plan.ts';
 import { applyFilePlan } from '#shared/platform/file-plan.ts';

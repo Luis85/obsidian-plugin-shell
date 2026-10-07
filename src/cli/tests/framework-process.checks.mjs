@@ -10,7 +10,7 @@ import { NodeProcessFailure, runNodeProcess } from '#shared/platform/process.ts'
 import { executeOperation } from '../adapters/framework/operations.ts';
 import { parseCliArguments } from '../adapters/framework/catalog.ts';
 import { failure } from '../adapters/framework/contracts.ts';
-import { fixtureManifest } from '../../../tooling/tests/test-data-fixture.mjs';
+import { fixtureManifest } from './test-data-fixture.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 async function fixture(t, code = '') {
   const directory = await realpath(await mkdtemp(join(tmpdir(), 'framework-process-'))); t.after(() => rm(directory, {recursive: true, force: true}));

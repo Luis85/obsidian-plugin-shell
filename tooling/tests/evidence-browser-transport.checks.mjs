@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import * as producers from '../testing/evidence-producers.mjs';
 
 // Synthetic parser input only: these tests do not claim a browser or Playwright run.
-const root = process.cwd(), files = ['tests/e2e/probe.spec.ts'];
+const root = process.cwd(), files = ['src/plugin/tests/e2e/probe.spec.ts'];
 const report = () => ({ config: {}, errors: [], stats: { expected: 1, unexpected: 0, flaky: 0, skipped: 0 },
   suites: [{ specs: [{ file: files[0], title: 'parser fixture', tests: [{ expectedStatus: 'passed', status: 'expected',
     results: [{ status: 'passed', retry: 0 }], repeatEachIndex: 0 }] }] }] });

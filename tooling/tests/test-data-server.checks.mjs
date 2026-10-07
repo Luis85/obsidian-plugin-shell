@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { startFixtureServer } from '../../docs/concepts/companion/test-kit/server.mjs';
-import { fixtureManifest } from './test-data-fixture.mjs';
+import { fixtureManifest } from '../../src/cli/tests/test-data-fixture.mjs';
 function request(server, path, { method = 'GET', data, headers = {} } = {}) {
   const content = data === undefined ? null : typeof data === 'string' ? data : JSON.stringify(data);
   return new Promise((resolve, reject) => {

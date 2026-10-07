@@ -6,16 +6,16 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { sha256 } from '../testing/source-inputs.mjs';
 
-const cli = resolve('scripts/quality/check-maintainability.mjs');
+const cli = resolve('tooling/quality/check-maintainability.mjs');
 const composition = 'export function present(values: readonly number[]) {\n  return values.map(value => value * 2);\n}\n';
 async function fixture(action) {
   const root = await mkdtemp(join(tmpdir(), 'maintainability-fixture-'));
   try {
-    for (const directory of ['src', 'scripts', 'tests', 'harness']) await mkdir(join(root, directory));
+    for (const directory of ['src', 'tooling', 'tests', 'src/plugin/harness']) await mkdir(join(root, directory), { recursive: true });
     await mkdir(join(root, 'configs/quality'), { recursive: true });
     for (const file of ['package.json', 'package-lock.json', 'configs/quality/fallow.json']) await writeFile(join(root, file), await readFile(resolve(file)));
     await symlink(resolve('node_modules'), join(root, 'node_modules'), 'junction');
-    await writeFile(join(root, 'src/main.ts'), composition);
+    await writeFile(join(root, 'src/plugin/main.ts'), composition);
     await action(root);
   } finally {
     assert.ok(resolve(root).startsWith(resolve(tmpdir()) + '\\') || resolve(root).startsWith(resolve(tmpdir()) + '/'));
@@ -35,7 +35,7 @@ test('maintainability inventories every concept Python source without diluting p
     const before = run(root); assert.equal(before.status, 0, before.stderr);
     const baseline = JSON.parse(await readFile(join(packet(before).output, 'report.json'), 'utf8'));
     const sources = [];
-    for (const directory of ['scripts/concepts', 'tests/concepts']) {
+    for (const directory of ['tooling/concepts', 'src/companion/tests/concepts']) {
       await mkdir(join(root, directory), { recursive: true });
       for (const name of (await readdir(resolve(directory))).filter(name => name.endsWith('.py')).sort()) {
         const path = `${directory}/${name}`;
@@ -44,8 +44,8 @@ test('maintainability inventories every concept Python source without diluting p
         sources.push({ path, bytes });
       }
     }
-    assert.ok(sources.some(file => file.path === 'scripts/concepts/build-companion.py'));
-    assert.ok(sources.some(file => file.path === 'tests/concepts/companion-storage.browser.py'));
+    assert.ok(sources.some(file => file.path === 'tooling/concepts/build-companion.py'));
+    assert.ok(sources.some(file => file.path === 'src/companion/tests/concepts/companion-storage.browser.py'));
     const result = run(root); assert.equal(result.status, 0, result.stderr);
     const output = packet(result).output;
     const reportPath = join(output, 'report.json');

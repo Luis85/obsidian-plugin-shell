@@ -10,7 +10,7 @@ import { executeOperation } from '../adapters/framework/operations.ts';
 import { planOperation, applyOperation } from '../adapters/framework/planning.ts';
 import { loadPrototypeWorkspace } from '../adapters/framework/prototype-workspace.ts';
 import { extractKit } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { api, document, main, alternate } from '../../../tests/support/prototype-fixture.mjs';
 const frameworkRoot=fileURLToPath(new URL('../../../',import.meta.url));
 async function fixture(t) {

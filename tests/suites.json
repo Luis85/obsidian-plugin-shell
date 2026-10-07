@@ -50,6 +50,15 @@
   },
   "roots": [
     {
+      "path": "src/*/tests"
+    },
+    {
+      "path": "src/cli/sdk"
+    },
+    {
+      "path": "tooling/tests"
+    },
+    {
       "path": "tests/tooling"
     },
     {
@@ -57,44 +66,21 @@
       "optional": true
     },
     {
-      "path": "src/plugin/tests/unit"
-    },
-    {
       "path": "tests/verification"
     },
     {
-      "path": "src/plugin/tests/harness-styles"
-    },
-    {
-      "path": "tests/browser-specimen"
-    },
-    {
-      "path": "tests/browser-workflows"
-    },
-    {
-      "path": "src/companion/tests/concepts",
-      "optional": true
-    },
-    {
-      "path": "src/plugin/tests/e2e"
-    },
-    {
-      "path": "src/plugin/tests/obsidian",
-      "optional": true
+      "path": "tests/browser-*"
     },
     {
       "path": "tests/project",
       "optional": true
-    },
-    {
-      "path": "tooling/tests/hindsight",
-      "optional": true
-    },
-    {
-      "path": "src/cli/sdk"
     }
   ],
   "helperRoots": [
+    "src/*/tests/support",
+    "src/*/tests/fixtures",
+    "tooling/tests/support",
+    "tooling/tests/fixtures",
     "tests/support",
     "tests/fixtures"
   ],
@@ -251,7 +237,10 @@
         "config": "configs/testing/vitest.maker.config.mjs"
       },
       "include": [
-        "tests/tooling/interactive-maker-*.checks.mjs"
+        "src/cli/tests/interactive-maker-*.checks.mjs",
+        "src/shared/tests/interactive-maker-*.checks.mjs",
+        "src/tui/tests/interactive-maker-*.checks.mjs",
+        "tooling/tests/interactive-maker-*.checks.mjs"
       ],
       "verify": "own-step",
       "verifyStep": "maker-coverage-run executes every maker file once, under coverage, and maker-coverage-gate gates it; the tooling step leaves them out",
@@ -293,7 +282,8 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/airship-*.checks.mjs"
+        "src/cli/tests/airship-*.checks.mjs",
+        "tooling/tests/airship-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:airship",
@@ -323,7 +313,8 @@
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/compiler-*.checks.mjs"
+        "src/cli/tests/compiler-*.checks.mjs",
+        "tooling/tests/compiler-*.checks.mjs"
       ],
       "exclude": [
         "src/cli/tests/compiler-properties.checks.mjs"
@@ -364,7 +355,7 @@
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/prototype-*.checks.mjs",
+        "tooling/tests/prototype-*.checks.mjs",
         "src/cli/tests/jev-concept-distribution.checks.mjs"
       ],
       "verify": "tooling",
@@ -516,9 +507,13 @@
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/framework-*.checks.mjs",
+        "src/cli/tests/framework-*.checks.mjs",
+        "src/shared/tests/framework-*.checks.mjs",
+        "tooling/tests/framework-*.checks.mjs",
         "src/cli/tests/capability-discovery.checks.mjs",
-        "tests/tooling/starter-*.checks.mjs"
+        "src/cli/tests/starter-*.checks.mjs",
+        "src/shared/tests/starter-*.checks.mjs",
+        "tooling/tests/starter-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:cli",
@@ -577,9 +572,10 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/project-generator*.checks.mjs",
+        "src/cli/tests/project-generator*.checks.mjs",
+        "tooling/tests/project-generator*.checks.mjs",
         "src/cli/tests/project-starters.checks.mjs",
-        "tests/tooling/file-plan*.checks.mjs"
+        "src/shared/tests/file-plan*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:generator",
@@ -601,7 +597,7 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/visual-*.checks.mjs"
+        "src/shared/tests/visual-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:visual",
@@ -619,7 +615,7 @@
           "src/shared/tests/companion-authoring-state.checks.mjs",
           "src/shared/tests/companion-sitemap-project-store.checks.mjs",
           "src/shared/tests/companion-sitemap-workspace.checks.mjs",
-          "tests/tooling/companion-visual-*.checks.mjs"
+          "tooling/tests/companion-visual-*.checks.mjs"
         ],
         "integration": [
           "tooling/tests/companion-authoring-evidence.checks.mjs",
@@ -637,8 +633,11 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/companion-*.checks.mjs",
-        "tests/tooling/concept-*.checks.mjs"
+        "src/cli/tests/companion-*.checks.mjs",
+        "src/companion/tests/companion-*.checks.mjs",
+        "src/shared/tests/companion-*.checks.mjs",
+        "tooling/tests/companion-*.checks.mjs",
+        "tooling/tests/concept-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:companion",
@@ -869,7 +868,7 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/test-data-*.checks.mjs"
+        "tooling/tests/test-data-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:test-data",
@@ -891,13 +890,14 @@
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/maker-*.checks.mjs",
+        "src/cli/tests/maker-*.checks.mjs",
+        "tooling/tests/maker-*.checks.mjs",
         "tooling/tests/makers.checks.mjs",
         "tests/tooling/custom-*.checks.mjs",
         "tests/tooling/locale-*.checks.mjs",
-        "tests/tooling/event-*.checks.mjs",
-        "tests/tooling/example-*.checks.mjs",
-        "tests/tooling/readme-*.checks.mjs",
+        "tooling/tests/event-*.checks.mjs",
+        "tooling/tests/example-*.checks.mjs",
+        "tooling/tests/readme-*.checks.mjs",
         "src/cli/tests/formatting.checks.mjs"
       ],
       "verify": "tooling",
@@ -990,8 +990,9 @@
       },
       "include": [
         "tests/tooling/native-*.checks.mjs",
-        "tests/tooling/obsidian-*.checks.mjs",
-        "tests/tooling/performance-*.checks.mjs"
+        "tooling/tests/native-*.checks.mjs",
+        "tooling/tests/obsidian-*.checks.mjs",
+        "tooling/tests/performance-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:native-tooling",
@@ -1039,11 +1040,11 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/setup-*.checks.mjs",
-        "tests/tooling/npm-*.checks.mjs",
+        "tooling/tests/setup-*.checks.mjs",
+        "src/shared/tests/npm-*.checks.mjs",
         "tooling/tests/build.checks.mjs",
-        "tests/tooling/identity-*.checks.mjs",
-        "tests/tooling/harness-*.checks.mjs"
+        "tooling/tests/identity-*.checks.mjs",
+        "tooling/tests/harness-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:setup",
@@ -1074,11 +1075,13 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/release*.checks.mjs",
-        "tests/tooling/delivery-*.checks.mjs",
+        "src/cli/tests/release*.checks.mjs",
+        "tooling/tests/release*.checks.mjs",
+        "src/cli/tests/delivery-*.checks.mjs",
+        "tooling/tests/delivery-*.checks.mjs",
         "tooling/tests/security.checks.mjs",
         "tooling/tests/maintenance.checks.mjs",
-        "tests/tooling/qualification-*.checks.mjs"
+        "tooling/tests/qualification-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:release",
@@ -1110,7 +1113,7 @@
         ]
       },
       "runner": {"type": "node-test"},
-      "include": ["tooling/tests/gates.checks.mjs", "tooling/tests/coverage.checks.mjs", "tooling/tests/maintainability.checks.mjs", "tooling/tests/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tooling/tests/repository.checks.mjs", "tooling/tests/projects-boundary.checks.mjs", "tooling/tests/types-boundary.checks.mjs", "tooling/tests/site-templates-qualification.checks.mjs", "tooling/tests/docs-launchers.checks.mjs", "tooling/tests/test-quality.checks.mjs", "tests/tooling/style-literals*.checks.mjs", "tooling/tests/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs", "tests/tooling/verify-*.checks.mjs"],
+      "include": ["tooling/tests/gates.checks.mjs", "tooling/tests/coverage.checks.mjs", "tooling/tests/maintainability.checks.mjs", "tooling/tests/quality-thresholds.checks.mjs", "tooling/tests/lint-*.checks.mjs", "tooling/tests/repository.checks.mjs", "tooling/tests/projects-boundary.checks.mjs", "tooling/tests/types-boundary.checks.mjs", "tooling/tests/site-templates-qualification.checks.mjs", "tooling/tests/docs-launchers.checks.mjs", "tooling/tests/test-quality.checks.mjs", "tooling/tests/style-literals*.checks.mjs", "tooling/tests/presentation.checks.mjs", "tooling/tests/evidence-*.checks.mjs", "tooling/tests/archive-*.checks.mjs", "tooling/tests/public-api-*.checks.mjs", "src/cli/tests/dependency-*.checks.mjs", "tooling/tests/dependency-*.checks.mjs", "tooling/tests/suite-*.checks.mjs", "src/cli/tests/agent-*.checks.mjs", "tooling/tests/agent-*.checks.mjs", "tooling/tests/verify-*.checks.mjs"],
       "prerequisites": ["build"],
       "verify": "tooling",
       "npmScript": "test:quality",
@@ -1289,8 +1292,10 @@
     {
       "purpose": "Tooling fixtures and shared helpers",
       "include": [
-        "tests/tooling/*-fixture.mjs",
-        "tests/support/file-symlink.mjs"
+        "src/cli/tests/*-fixture.mjs",
+        "src/tui/tests/*-fixture.mjs",
+        "tooling/tests/*-fixture.mjs",
+        "src/cli/tests/file-symlink.mjs"
       ]
     },
     {

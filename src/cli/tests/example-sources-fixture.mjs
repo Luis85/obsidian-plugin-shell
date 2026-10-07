@@ -8,7 +8,7 @@ import { join } from 'node:path';
  * showcase still counts as present so those checks fail rather than skip.
  */
 export async function reviewedExamplesRemoved(root) {
-  const ownership = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8'));
+  const ownership = JSON.parse(await readFile(join(root, 'tooling/examples/ownership.json'), 'utf8'));
   const deleted = ownership.files.filter(file => typeof file.sha256 === 'string' && !Object.hasOwn(file, 'template'));
   if (!deleted.length) return false;
   for (const file of deleted) {

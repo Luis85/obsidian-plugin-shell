@@ -30,10 +30,10 @@ test('[SETUP-FORM-01] the shipped setup interview is one shared-format form that
   assert.deepEqual(form.fields.map(field => [field.id, field.kind]), shared.fields.map(field => [field.id, field.kind]));
   assert.deepEqual(form.fields.filter(field => field.kind === 'text').map(field => field.id), [...identityKeys, ...hostingFieldKeys]);
   assert.deepEqual(form.fields.filter(field => field.kind === 'confirm').map(field => field.id), [...confirmKeys]);
-  const entry = await readFile(join(root, 'scripts/setup.mjs'), 'utf8');
+  const entry = await readFile(join(root, 'tooling/setup.mjs'), 'utf8');
   assert.match(entry, /new URL\('\.\.\/configs\/forms\/setup-identity\.json', import\.meta\.url\)/);
-  assert.equal(new URL('../configs/forms/setup-identity.json', pathToFileURL(join(root, 'scripts/setup.mjs'))).pathname, pathToFileURL(formPath).pathname);
-  const reader = await readFile(join(root, 'scripts/setup/form.mjs'), 'utf8');
+  assert.equal(new URL('../configs/forms/setup-identity.json', pathToFileURL(join(root, 'tooling/setup.mjs'))).pathname, pathToFileURL(formPath).pathname);
+  const reader = await readFile(join(root, 'tooling/setup/form.mjs'), 'utf8');
   const imports = [...reader.matchAll(/^import\s.*?from\s+'([^']+)'/gm)].map(match => match[1]);
   assert.ok(imports.length > 0 && imports.every(name => name.startsWith('node:')), `form.mjs must import only Node builtins: ${imports}`);
 });

@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import { readyRules } from '../tooling/delivery/rules-ready.mjs';
 import { doneRules } from '../tooling/delivery/rules-done.mjs';
 
-const read = path => readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+const read = path => readFileSync(new URL(`../../../${path}`, import.meta.url), 'utf8');
 const page = 'docs/development/DEFINITION-OF-READY-AND-DONE.md';
 /** `| DOR-01 | Title | severity | …` rows of a Markdown page, by rule id. */
 function ruleRows(markdown) {

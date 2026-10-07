@@ -8,8 +8,8 @@ import { learningProgressPlan, learningProgressSummary, loadLearningProgress, re
 import { applyPrepared } from '../adapters/storage.ts';
 import { definitionsRoot, loadCatalog } from '../adapters/wizard-catalog.ts';
 import { completeLearningStep, newLearningProgress } from '../domain/learning-progress.ts';
-import { contactForm, greetWizard, learningPath, project, put, scratch, step, wizard } from '#tui/tests/interactive-maker-learning-fixture.mjs';
-import { fileSymlink } from '../../../tests/support/file-symlink.mjs';
+import { contactForm, greetWizard, learningPath, project, put, scratch, step, wizard } from './interactive-maker-learning-fixture.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 const repository = resolve(import.meta.dirname, '../../..');
 const now = '2026-10-04T10:00:00.000Z';
 const guide = '# Guide\n\n## Start here\n\nText.\n';

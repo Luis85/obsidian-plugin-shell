@@ -123,7 +123,7 @@ export function baseContext(config, text = readyHandoff(), overrides = {}) {
     { path: 'tests/greeting.checks.mjs', status: 'A', added: [{ line: 1, text: 'test("greets", () => {});' }] },
     { path: 'CHANGELOG.md', status: 'M', added: [{ line: 7, text: '- A greeting command in the palette.' }] },
     { path: 'docs/guide.md', status: 'A', added: [] }, { path: 'docs/README.md', status: 'M', added: [] }];
-  const files = [...new Set(['docs/prds/MVP.md', 'docs/requirements/WB-PBI-001.md', 'scripts/tool.mjs', 'src/features/existing.ts', 'src/presentation/view.vue', 'tests/greeting.checks.mjs', 'docs/guide.md',
+  const files = [...new Set(['docs/prds/MVP.md', 'docs/requirements/WB-PBI-001.md', 'scripts/tool.mjs', 'src/features/existing.ts', 'src/plugin/presentation/view.vue', 'tests/greeting.checks.mjs', 'docs/guide.md',
     ...diff.filter(file => file.status !== 'D').map(file => file.path), ...Object.keys(overrides.texts ?? {}).filter(path => !['CHANGELOG.md', 'docs/README.md'].includes(path))])].sort();
   const readText = path => texts[path] ?? null;
   const handoff = { path: handoffPath, source: 'diff', text, model: parseHandoff(text) };

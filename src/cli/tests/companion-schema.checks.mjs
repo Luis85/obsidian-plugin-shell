@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import { companionProjectSchema } from '#shared/companion/schema/project.mjs';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { parseCliArguments } from '../adapters/framework/catalog.ts';
-import { schemaCorpus } from '#shared/tests/companion-schema-fixture.mjs';
+import { schemaCorpus } from './companion-schema-fixture.mjs';
 import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
 import { retiredProjectText } from '../../../tests/support/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../../', import.meta.url));

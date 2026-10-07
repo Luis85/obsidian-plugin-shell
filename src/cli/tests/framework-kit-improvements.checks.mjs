@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../adapters/framework/zip.ts';
 import { assembleStarterPack } from '../adapters/starters/operations.ts';
 const root = fileURLToPath(new URL('../../../', import.meta.url));

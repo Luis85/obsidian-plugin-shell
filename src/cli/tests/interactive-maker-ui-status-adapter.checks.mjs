@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 import { main } from '../adapters/framework-cli.ts';
 import { uiOperation } from '../adapters/framework/ui-operation.ts';
-import { fileSymlink } from '../../../tests/support/file-symlink.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 

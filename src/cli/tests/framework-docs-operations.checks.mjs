@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { projectFixture } from './fixtures/application-docs/fixture.mjs';
 import { extractKit } from './framework-archive-fixture.mjs';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { newDocument } from '../domain/document.ts';
 import { savePlan, applyPrepared } from '../adapters/storage.ts';
 import { openDocument } from '../domain/document.ts';

@@ -8,10 +8,10 @@ import vm from 'node:vm';
 import { conceptShared, visualModules } from './support/concept-realm.mjs';
 
 const shared = await conceptShared(['native-contract.mjs', 'composition-contract.mjs', ...visualModules]);
-const base = await readFile('docs/concepts/companion/src/base.html', 'utf8');
+const base = await readFile('src/companion/app/base.html', 'utf8');
 const escStart = base.indexOf('function esc(v){'), escSource = base.slice(escStart, base.indexOf('[c]));}', escStart) + 7);
 assert.match(escSource, /^function esc\(v\)\{.*\}$/, 'the page escape helper is extracted whole');
-const concept = (await Promise.all(['ve-state.js', 've-catalog-preview.js', 've-canvas.js'].map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
+const concept = (await Promise.all(['ve-state.js', 've-catalog-preview.js', 've-canvas.js'].map(name => readFile('src/companion/app/' + name, 'utf8')))).join('\n');
 const stubs = 'const state = { settings: { theme: "light" } }; function design() { return host.design; } function realm(v) { return JSON.parse(JSON.stringify(v)); }';
 
 function load() {

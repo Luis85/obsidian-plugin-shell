@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { projectModel } from '../compiler/emitters/model.ts';
 import { authoredJourneyCode } from '../compiler/emitters/authored-journey-code.ts';
-import { projectFiles } from '../../../tests/support/project-render.mjs';
+import { projectFiles } from './support/project-render.mjs';
 import { parseBrowserStarter } from '../adapters/starters/browser.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));

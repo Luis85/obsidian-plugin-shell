@@ -13,7 +13,7 @@ type Data = Record<string, unknown>;
 const SLUG = /^[a-z][a-z0-9]*(?:[-.][a-z0-9]+)*$/;
 const SCHEMA_TYPES = ['object', 'array', 'string', 'integer', 'number', 'boolean'];
 const SCHEMA_KEYS = ['type', 'properties', 'required', 'additionalProperties', 'items', 'enum', 'maxLength', 'maxItems', 'pattern'];
-const CLI_SOURCE = /^(?:scripts|src\/cli)\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.(?:mjs|ts)$/;
+const CLI_SOURCE = /^(?:scripts|tooling|src\/cli)\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.(?:mjs|ts)$/;
 function requireThat(condition: unknown, code = 'CATALOG_INVALID'): asserts condition { if (!condition) throw new Error(code); }
 const isData = (value: unknown): value is Data => typeof value === 'object' && value !== null && !Array.isArray(value);
 const strings = (value: unknown): value is string[] => Array.isArray(value) && value.every(item => typeof item === 'string');

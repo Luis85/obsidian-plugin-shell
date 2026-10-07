@@ -2,7 +2,7 @@
 // hosting platform): new, check, status Ready, publish preview and apply, a sync conflict and an uncertain write.
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { createWorkspace, planThenApply, readyFragment } from '../../../tests/support/increment-workspace.mjs';
+import { createWorkspace, planThenApply, readyFragment } from './support/increment-workspace.mjs';
 import { createFakeHostingRemote } from './support/fake-hosting-remote.mjs';
 import { renderHuman } from '../presentation/terminal/terminal-render.ts';
 

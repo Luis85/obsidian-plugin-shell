@@ -7,7 +7,7 @@ export const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'valida
 const bundle = conceptContractScript();
 /** `contracts` are scripts/companion module paths, inlined in the given order after the project contract. */
 export async function conceptShared(contracts) {
-  const plain = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
+  const plain = (await Promise.all(contracts.map(name => readFile('src/shared/companion/' + name, 'utf8')))).join('\n').split('\n')
     .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
-  return [await bundle, await readFile('docs/concepts/companion/src/companion-contract.js', 'utf8'), plain].join('\n');
+  return [await bundle, await readFile('src/companion/app/companion-contract.js', 'utf8'), plain].join('\n');
 }

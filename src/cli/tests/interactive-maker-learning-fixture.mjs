@@ -37,7 +37,7 @@ export function plainPrompts(lines, back) {
     questions.push(question);
     if (!lines.length) throw new Error('No scripted line left for: ' + question);
     const line = lines.shift(), value = typeof line === 'function' ? await line() : line;
-    if (value === back) { const { Back } = await import('../prompts.ts'); throw new Back(); }
+    if (value === back) { const { Back } = await import('#tui/prompts.ts'); throw new Back(); }
     return value;
   } } };
 }

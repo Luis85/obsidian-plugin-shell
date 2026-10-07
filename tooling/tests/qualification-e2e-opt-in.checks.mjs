@@ -121,8 +121,8 @@ test('negative: the checker fails each way e2e could run unasked, be skipped by 
 
 test('negative: a workflow with e2e work that release.yml does not call with tier release fails the repository check', async t => {
   const fixture = await mkdtemp(join(tmpdir(), 'e2e-release-')); t.after(() => rm(fixture, { recursive: true, force: true }));
-  for (const path of ['.github/workflows', 'src/styles']) await mkdir(join(fixture, path), { recursive: true });
-  await writeFile(join(fixture, 'src/styles/owned.css'), '.owned { color: red; }');
+  for (const path of ['.github/workflows', 'src/plugin/styles']) await mkdir(join(fixture, path), { recursive: true });
+  await writeFile(join(fixture, 'src/plugin/styles/owned.css'), '.owned { color: red; }');
   await writeFile(join(fixture, 'README.md'), '# Readme\n');
   await writeFile(join(fixture, '.github/workflows/fixture.yml'), compliant);
   const release = tier => `name: Release\non: workflow_dispatch\npermissions:\n  contents: read\njobs:\n  fixture:\n    uses: ./.github/workflows/fixture.yml\n${tier}`;

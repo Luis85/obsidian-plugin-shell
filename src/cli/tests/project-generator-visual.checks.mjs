@@ -326,7 +326,7 @@ test('SFC lowering matches reviewed golden files', async () => {
   const m = projectModel(goldenFixture()), store = visualDefinitions(m), specs = visualSpecs(m).filter(s => golden.has(s.id));
   assert.deepEqual(specs.map(s => s.id).sort(), [...golden].sort());
   for (const spec of specs) {
-    const actual = visualSfc(m, spec, store), path = 'tests/fixtures/companion/visual-golden/' + spec.id + '.vue.txt';
+    const actual = visualSfc(m, spec, store), path = 'src/cli/tests/fixtures/companion/visual-golden/' + spec.id + '.vue.txt';
     if (process.env.UPDATE_GOLDEN) await writeFile(path, actual);
     assert.equal(actual, await readFile(path, 'utf8'), spec.id);
     assert.doesNotMatch(actual, /v-html|innerHTML|\beval\b|evil|alert/);
@@ -390,7 +390,7 @@ test('names and identifiers that could escape template syntax stop lowering', ()
   assert.ok(scripted.includes(`case "${lt}/script${gt}${lt}script${gt}x": if (typeof payload === "string")`));
 });
 
-const { projectFiles } = await import('../../../tests/support/project-render.mjs');
+const { projectFiles } = await import('./support/project-render.mjs');
 test('self-project generates visual files and no detail artifacts', async () => {
   const files = await projectFiles(process.cwd(), projectModel(self)); const paths = files.map(f => f.path);
   assert.ok(paths.some(p => /presentation\/components\/details\/vp-\d+\.vue$/.test(p)));

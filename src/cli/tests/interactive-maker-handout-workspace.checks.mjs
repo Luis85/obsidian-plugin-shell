@@ -6,7 +6,7 @@ import {
   handoutPath, loadHandoutWorkspace, prepareHandout, prepareHandoutRefresh, inspectHandout,
 } from '../adapters/framework/handout-workspace.ts';
 import { HANDOUT_PATH, readSnapshot } from '../adapters/framework/handout-model.ts';
-import { fileSymlink } from '../../../tests/support/file-symlink.mjs';
+import { fileSymlink } from './file-symlink.mjs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);

@@ -27,7 +27,7 @@ test('runtime coverage discovers all runtime sources while CLI inputs retain the
   assert.throws(() => assertCoverageInventory(report, inputs), /INCOMPLETE_PRODUCTION_COVERAGE/);
 });
 test('[COV-03-02] the actual CLI fails closed for deficient, omitted and malformed production reports', () => {
-  const root = mkdtempSync(join(tmpdir(), 'shell-coverage-')); const script = resolve('scripts/quality/coverage-inventory.mjs');
+  const root = mkdtempSync(join(tmpdir(), 'shell-coverage-')); const script = resolve('tooling/quality/coverage-inventory.mjs');
   try {
     mkdirSync(join(root, 'src/domain'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
     const source = join(root, 'src/domain/value.ts'); writeFileSync(source, 'export const value = 1;');
@@ -87,7 +87,7 @@ test('[COV-04-01] the selected-core gate reads its own scope and thresholds from
   assert.throws(() => assertSelectedCoreGate(null, [domain], floors), /INVALID_COVERAGE_REPORT/);
 });
 test('[COV-04-02] the CLI applies the selected-core config only when requested and fails closed below its floor', () => {
-  const root = mkdtempSync(join(tmpdir(), 'shell-core-coverage-')); const script = resolve('scripts/quality/coverage-inventory.mjs');
+  const root = mkdtempSync(join(tmpdir(), 'shell-core-coverage-')); const script = resolve('tooling/quality/coverage-inventory.mjs');
   try {
     mkdirSync(join(root, 'src/domain'), { recursive: true }); mkdirSync(join(root, 'src/presentation'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
     const domain = join(root, 'src/domain/value.ts'); const view = join(root, 'src/presentation/view.vue');

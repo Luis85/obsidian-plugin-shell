@@ -67,7 +67,7 @@ test('framework adapters reject mode substitution, malformed shapes, empty and i
   assert.throws(() => playwrightReport({ schemaVersion: 99 }, process.cwd()), /SCHEMA/);
   assert.throws(() => nativeReport({ mode: 'unit', checks: [], errors: [], assets: [] }, []), /NATIVE/);
   assert.throws(() => artifactReport({ mode: 'native', nativeHostTested: true, assets: [] }), /ARTIFACT/);
-  assert.throws(() => completeResult({ cases: [], frameworkPassed: true }, ['tests/runtime/missing.test.ts'], 0), /EMPTY/);
+  assert.throws(() => completeResult({ cases: [], frameworkPassed: true }, ['src/plugin/tests/unit/missing.test.ts'], 0), /EMPTY/);
 });
 
 test('real Playwright JSON records passing assertions, first-failure retries and asset drift without claiming browser UI coverage', async t => {
@@ -117,7 +117,7 @@ test('native performance adapter rejects crafted classification, budget, size, g
   const root = await evidenceFixture(t); await mkdir(join(root, 'dist')); await mkdir(join(root, 'reports/bundling'), { recursive: true });
   // Reproduce the removed-consumer context regardless of this checkout's profile.
   // Only this isolated fixture may select the profile for its crafted report.
-  const profilePath = join(root, 'scripts/testing/native-profile.json');
+  const profilePath = join(root, 'tooling/testing/native-profile.json');
   await writeFile(profilePath, JSON.stringify({ profile: 'foundation' }));
   const assets = [];
   for (const [file, bytes] of [['main.js', 'module.exports = {};\n'], ['styles.css', '.fixture{}'], ['manifest.json', '{}']]) {
@@ -138,7 +138,7 @@ test('native performance adapter rejects crafted classification, budget, size, g
       sourceInputsDigest: (await sourceInputs(root)).digest, dependencyLockSha256: sha256(await readFile(join(root, 'package-lock.json'))),
       protocol: performanceProtocol, protocolSha256: sha256(JSON.stringify(performanceProtocol)), assets, samples,
       summary: summarizePerformance(samples), budgetStatus: 'within-proposed-budgets', sizes: await candidateSizes(join(root, 'dist'), join(root, 'reports/bundling')) } };
-  const parse = value => adaptProducer('native', { native: JSON.stringify(value) }, root, ['scripts/testing/check-native.mjs'], 0);
+  const parse = value => adaptProducer('native', { native: JSON.stringify(value) }, root, ['tooling/testing/check-native.mjs'], 0);
   await assert.rejects(parse(report), /EVIDENCE_NATIVE_PROFILE/);
   await writeFile(profilePath, JSON.stringify({ profile: 'showcase' }));
   report.performance.sourceInputsDigest = (await sourceInputs(root)).digest;
@@ -190,8 +190,12 @@ test('[EVIDENCE-REGISTRATION] a tooling wrapper owns the cases of the portable .
 test('[EVIDENCE-PLATFORM-SKIPS] every tooling test declared Windows-only is an expected skip off Windows, and nothing else is', async () => {
   const { readdir } = await import('node:fs/promises');
   const declared = [];
-  for (const name of (await readdir('tests/tooling')).filter(name => name.endsWith('.checks.mjs')).sort()) {
-    const file = `tests/tooling/${name}`, text = await readFile(file, 'utf8');
+  // Every evidence tooling home: cross-project tests/tooling, tooling/tests and each source project's src/<name>/tests.
+  const projects = (await readdir('src', { withFileTypes: true })).filter(entry => entry.isDirectory()).map(entry => `src/${entry.name}/tests`);
+  const homes = [];
+  for (const home of ['tests/tooling', 'tooling/tests', ...projects]) homes.push(...(await readdir(home).catch(() => [])).map(name => `${home}/${name}`));
+  for (const file of homes.filter(path => path.endsWith('.checks.mjs')).sort()) {
+    const text = await readFile(file, 'utf8');
     for (const match of text.matchAll(/^test\('([^']+)',\s*\{\s*skip:\s*process\.platform !== 'win32'/gm)) declared.push([match[1], file]);
     for (const [, alias] of text.matchAll(/^const (\w+) = process\.platform === 'win32' \? test : test\.skip;/gm)) {
       for (const match of text.matchAll(new RegExp(`^${alias}\\('([^']+)'`, 'gm'))) declared.push([match[1], file]);

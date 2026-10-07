@@ -14,7 +14,7 @@ async function safeRead(root, path) {
 export async function planMigration(root, { from, to, previousId, profile, expectedManifest, previousManifest, receipt }) {
   const vault = join(root, '.dev-vault');
   const config = join(vault, '.obsidian');
-  const plugins = join(config, 'src/cli/sdk');
+  const plugins = join(config, 'plugins');
   if (!await optional(vault)) { if (from) throw new Error('Migration source vault is missing'); return null; }
   if (!await optional(config)) { if (from) throw new Error('Migration source configuration is missing'); return null; }
   await createFilePlan(config, []); // Root realpath validation blocks symlink ancestors before any vault read.

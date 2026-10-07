@@ -21,7 +21,7 @@ test('every gate reads its values from the thresholds file', async () => {
     .map(async name => (await import(new URL(`../../${name}`, import.meta.url).href)).default.test.coverage.thresholds));
   assert.deepEqual(configs, [t.coverage.selectedCore, t.coverage.production, t.coverage.maker]);
   const { lineLimit } = await import('../testing/source-inputs.mjs');
-  assert.deepEqual([lineLimit('src/main.ts'), lineLimit('tests/a.test.mjs'), lineLimit('src/a.ts')], [t.codeLines.mainTs, t.codeLines.tests, t.codeLines.source]);
+  assert.deepEqual([lineLimit('src/plugin/main.ts'), lineLimit('tests/a.test.mjs'), lineLimit('src/a.ts')], [t.codeLines.mainTs, t.codeLines.tests, t.codeLines.source]);
   const { duplicateArguments } = await import('../quality/maintainability-corpus.mjs');
   const flag = name => duplicateArguments[duplicateArguments.indexOf(name) + 1];
   assert.deepEqual([flag('--min-tokens'), flag('--min-lines'), flag('--threshold')].map(Number),
@@ -61,7 +61,7 @@ test('gates in a copied project read that project file and reject a loosened or 
   const project = await mkdtemp(join(tmpdir(), 'thresholds-project-'));
   t.after(() => rm(project, { recursive: true, force: true }));
   await mkdir(join(project, 'scripts/quality'), { recursive: true });
-  await copyFile(join(root, 'scripts/quality/thresholds.mjs'), join(project, 'scripts/quality/thresholds.mjs'));
+  await copyFile(join(root, 'tooling/quality/thresholds.mjs'), join(project, 'scripts/quality/thresholds.mjs'));
   const load = () => spawnSync(process.execPath, ['--input-type=module', '-e',
     `const m = await import(${JSON.stringify(new URL('scripts/quality/thresholds.mjs', `file://${project}/`).href)}); console.log(m.loadThresholds().codeLines.source);`], { encoding: 'utf8' });
   assert.match(load().stderr, /THRESHOLDS_MISSING/);

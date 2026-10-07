@@ -8,8 +8,9 @@ import test from 'node:test';
 test('foundation native driver retains separate failed attempts and their original bytes before any host launch', async () => {
   const root = await mkdtemp(join(tmpdir(), 'native-attempt-retention-'));
   try {
-    await cp(resolve('scripts/testing'), join(root, 'scripts/testing'), { recursive: true });
-    await cp(resolve('scripts/shared'), join(root, 'scripts/shared'), { recursive: true });
+    await cp(resolve('tooling/testing'), join(root, 'scripts/testing'), { recursive: true });
+    // The copied drivers import the shared platform modules at their repository path (../../src/shared/platform).
+    await cp(resolve('src/shared/platform'), join(root, 'src/shared/platform'), { recursive: true });
     await copyFile(resolve('templates/examples/scripts__testing__check-native.mjs.txt'), join(root, 'scripts/testing/check-native.mjs'));
     await copyFile(resolve('templates/examples/scripts__testing__native-profile.json.txt'), join(root, 'scripts/testing/native-profile.json'));
     await writeFile(join(root, 'package.json'), JSON.stringify({ type: 'module' }));

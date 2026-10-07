@@ -11,7 +11,7 @@ import { included } from '../../src/cli/adapters/framework/distribution.ts';
 import { maintainerOnly } from '../../src/cli/compiler/emitters/framework-docs.ts';
 import { zip } from '../../src/cli/adapters/framework/zip.ts';
 import { inspectWorkflow } from '../quality/check-repository.mjs';
-import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from '../../src/cli/tests/example-sources-fixture.mjs';
 import { assembleStarterPack } from '../../src/cli/adapters/starters/operations.ts';
 import { loadDefinitions } from '../../src/cli/adapters/starters/repository.ts';
 import { executeOperation } from '../../src/cli/adapters/framework/operations.ts';

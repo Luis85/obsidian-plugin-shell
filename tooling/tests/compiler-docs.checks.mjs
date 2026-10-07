@@ -16,7 +16,7 @@ test('documented read commands are accepted by the real CLI catalog',()=>{
 
 test('compiler coverage includes selection and project starter contracts without lowering any gate',async()=>{
   const pkg=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
-  assert.equal(pkg.scripts['test:compiler:coverage'],'node scripts/compiler/coverage.mjs');
+  assert.equal(pkg.scripts['test:compiler:coverage'],'node tooling/compiler/coverage.mjs');
   const { compilerCoverageArguments } = await import('../compiler/coverage.mjs');
   const command=compilerCoverageArguments();
   for(const token of ['--test-coverage-lines=95','--test-coverage-branches=90','--test-coverage-functions=90',

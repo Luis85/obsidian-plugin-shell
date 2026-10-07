@@ -70,7 +70,7 @@ test('fast mode selects node --test and maker suites from manifest includes and 
   assert.ok(ids(dev).filter(id => id !== 'suites').every(id => !stepOf(dev, id).skip || stepOf(generator, id).skip));
   const run = [];
   const outcome = await checkOperation({ command: 'check', args: [], options: { fast: true, 'skip-suites': true } }, { root: dir, frameworkRoot: repoRoot }, async (_context, entry, args) => { run.push([entry, ...args].join(' ')); return { exitCode: 0 }; });
-  assert.ok(!run.some(command => command.startsWith('scripts/testing/suites.mjs')), 'no suite process is launched');
+  assert.ok(!run.some(command => command.startsWith('tooling/testing/suites.mjs')), 'no suite process is launched');
   assert.equal(outcome.data.steps.find(step => step.id === 'suites').status, 'skipped');
   await assert.rejects(checkOperation({ command: 'check', args: [], options: { 'skip-suites': true } }, { root: dir, frameworkRoot: repoRoot }), { code: 'INVALID_OPTION', message: /requires --fast/ });
 }));

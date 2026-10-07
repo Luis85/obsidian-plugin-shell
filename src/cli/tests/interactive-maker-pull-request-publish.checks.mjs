@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdirSync } from 'node:fs';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { createWorkspace, planThenApply, readyFragment } from '../../../tests/support/increment-workspace.mjs';
+import { createWorkspace, planThenApply, readyFragment } from './support/increment-workspace.mjs';
 import { createFakeHostingRemote } from './support/fake-hosting-remote.mjs';
 import { parseSyncRecord } from '../domain/increments/sync-record.ts';
 import { remoteLockPath } from '../adapters/increments/remote-lock.ts';

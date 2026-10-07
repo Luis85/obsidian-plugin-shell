@@ -12,9 +12,9 @@ test('actual compiler rejects publication and observation rights and widened mis
   try {
     const source = join(root, 'types.ts');
     const from = (path) => JSON.stringify(resolve(sourceRoot, path).replaceAll('\\', '/'));
-    const prefix = `import { defineEvent, type EventDefinition } from ${from('src/application/event-definition')};
-import type { EventInput, EventObserver, EventPublisher, EventSubscriber } from ${from('src/application/events')};
-import { TypedEventBus } from ${from('src/infrastructure/events/typed-event-bus')};
+    const prefix = `import { defineEvent, type EventDefinition } from ${from('src/plugin/application/event-definition')};
+import type { EventInput, EventObserver, EventPublisher, EventSubscriber } from ${from('src/plugin/application/events')};
+import { TypedEventBus } from ${from('src/plugin/infrastructure/events/typed-event-bus')};
 type Facts = { 'one.count': { readonly count: number }; 'two.label': { readonly label: string } };
 declare const observer: EventObserver<Pick<Facts, 'one.count'>>;
 declare const allObservers: EventObserver<Facts>;
@@ -73,9 +73,9 @@ const scoped = bus.publisher(descriptor);
 test('actual event checker rejects duplicate descriptors, invalid references and catalog drift', async () => {
   const root = await mkdtemp(join(tmpdir(), 'event-catalog-'));
   try {
-    await cp(join(sourceRoot, 'src'), join(root, 'src'), { recursive: true });
-    const runtimePath = join(root, 'src/bootstrap/events.ts');
-    const catalogPath = join(root, 'src/bootstrap/event-catalog.ts');
+    await cp(join(sourceRoot, 'src/plugin'), join(root, 'src/plugin'), { recursive: true });
+    const runtimePath = join(root, 'src/plugin/bootstrap/events.ts');
+    const catalogPath = join(root, 'src/plugin/bootstrap/event-catalog.ts');
     const runtime = await readFile(runtimePath, 'utf8');
     const catalog = await readFile(catalogPath, 'utf8');
     const mutate = (source, pattern, replacement) => {
@@ -84,7 +84,7 @@ test('actual event checker rejects duplicate descriptors, invalid references and
       return changed;
     };
     const run = () =>
-      spawnSync(process.execPath, [join(sourceRoot, 'scripts/events/catalog.mjs'), '--check'], {
+      spawnSync(process.execPath, [join(sourceRoot, 'tooling/events/catalog.mjs'), '--check'], {
         cwd: root,
         encoding: 'utf8',
         timeout: 60_000,
@@ -139,7 +139,7 @@ test('actual event checker rejects duplicate descriptors, invalid references and
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /EVENT_CATALOG_AMBIGUOUS_CONTRACT/);
     await writeFile(catalogPath, catalog);
-    const corePath = join(root, 'src/application/event-definitions/core.ts');
+    const corePath = join(root, 'src/plugin/application/event-definitions/core.ts');
     const core = await readFile(corePath, 'utf8');
     await writeFile(
       corePath,

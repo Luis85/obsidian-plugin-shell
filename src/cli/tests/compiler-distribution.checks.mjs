@@ -5,7 +5,7 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { reviewedExamplesRemoved } from '../../../tooling/tests/example-sources-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { assembleKit, installedCompiler } from '../adapters/framework/kit.ts';
 import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url));

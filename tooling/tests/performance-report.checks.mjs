@@ -40,7 +40,7 @@ test('candidate diagnostics compress existing bytes without rewriting and enforc
       { ...attribution, serializer: { ...attribution.serializer, modules: [] } }, { ...attribution, serializer: { ...attribution.serializer, renderedLength: 0 } }]) {
       await writeFile(graphPath, JSON.stringify(invalid)); await assert.rejects(candidateSizes(directory, directory), /PERFORMANCE_ATTRIBUTION_INVALID/);
     }
-    const cli = () => spawnSync(process.execPath, ['scripts/testing/asset-sizes.mjs', directory], { encoding: 'utf8' });
+    const cli = () => spawnSync(process.execPath, ['tooling/testing/asset-sizes.mjs', directory], { encoding: 'utf8' });
     const success = cli(); assert.equal(success.status, 0, success.stderr); assert.equal(JSON.parse(success.stdout).status, 'passed');
     await writeFile(join(directory, 'styles.css'), Buffer.alloc(160 * 1024));
     assert.equal((await candidateSizes(directory)).status, 'passed', 'The reviewed 160 KiB stylesheet budget is inclusive');

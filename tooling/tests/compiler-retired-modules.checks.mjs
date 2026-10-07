@@ -29,7 +29,7 @@ async function sources() {
       else if (entry.isFile() && /\.(?:[cm]?js|[cm]?ts)$/.test(entry.name)) entries.set(path, await readFile(resolve(root, path), 'utf8'));
     }
   }
-  for (const folder of ['scripts', 'configs', 'plugins', 'src', 'tests']) await walk(folder);
+  for (const folder of ['tooling', 'configs', 'src', 'tests']) await walk(folder);
   return entries;
 }
 test('executable source imports only canonical modules, never deleted compatibility entries', async () => {
@@ -69,7 +69,8 @@ function retiredLayoutLiterals(source, file) {
 }
 test('runtime discovery never probes retired distribution layouts', async () => {
   for (const [file, source] of await sources()) {
-    if (!/^(?:src\/cli|scripts)\//.test(file)) continue;
+    // CLI and repository tooling runtime (the former scripts/ now in tooling/ and src/{shared,tui}); tests hold negative fixtures.
+    if (!/^(?:src\/(?:cli|shared|tui)|tooling)\//.test(file) || /^(?:src\/[^/]+|tooling)\/tests\//.test(file)) continue;
     assert.deepEqual(retiredLayoutLiterals(source, file), [], file);
   }
   assert.deepEqual(retiredLayoutLiterals("const root = join(base, '.framework/template');", 'example.ts'), ['.framework/template']);

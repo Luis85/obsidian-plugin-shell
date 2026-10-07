@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { projectModel } from '../compiler/emitters/model.ts';
-import { projectFiles } from '../../../tests/support/project-render.mjs';
+import { projectFiles } from './support/project-render.mjs';
 import { clickdummyCode } from '../compiler/emitters/clickdummy-code.ts';
 import { matches } from '#shared/companion/runtime-contract.ts';
 import { selfProject } from '../../../tests/support/starter-documents.mjs';

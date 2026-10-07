@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../compiler/emitters/model.ts';
 import { selfProject } from '../../../tests/support/starter-documents.mjs';
-import { projectFiles } from '../../../tests/support/project-render.mjs';
+import { projectFiles } from './support/project-render.mjs';
 import { visualDefinitions, visualSpecs } from '../compiler/emitters/visual-model.ts';
 import { visualTestSource } from '#shared/companion/visual/visual-session.mjs';
 import { visualNodes, visualRoot } from '#shared/companion/visual/visual-ir.mjs';

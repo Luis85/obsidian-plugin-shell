@@ -9,7 +9,7 @@ import { changelog, docsIndex, handoffPath, readyHandoff, repositoryRoot } from 
 import { inspectWorkflow } from '../quality/check-repository.mjs';
 import { validateChangelog } from '../../src/cli/tooling/release/changelog.mjs';
 
-const script = name => join(repositoryRoot, 'scripts/delivery', name);
+const script = name => join(repositoryRoot, 'tooling/delivery', name);
 const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(?:DELIVERY_|PR_LABELS$|GIT_)/.test(key)));
 
 /** A real repository: main with the delivery configuration, then a feature branch carrying one increment. */
@@ -129,7 +129,7 @@ test('the Definition of Ready and Done workflows are read-only, dependency-free 
     assert.deepEqual(job.steps[0].with, { 'fetch-depth': 0, 'persist-credentials': false });
     assert.equal(job.steps[1].with['node-version-file'], '.nvmrc');
     const run = job.steps.find(step => step.run).run;
-    assert.match(run, new RegExp(`node scripts/delivery/${id === 'ready' ? 'ready' : 'done'}\\.mjs --base "origin/\\$DELIVERY_BASE_REF" --summary "\\$GITHUB_STEP_SUMMARY" --out`));
+    assert.match(run, new RegExp(`node tooling/delivery/${id === 'ready' ? 'ready' : 'done'}\\.mjs --base "origin/\\$DELIVERY_BASE_REF" --summary "\\$GITHUB_STEP_SUMMARY" --out`));
     assert.doesNotMatch(run, /--write|\$\{\{/, 'CI never writes and never interpolates');
     const upload = job.steps.find(step => step.uses?.startsWith('actions/upload-artifact@'));
     assert.equal(upload.with['retention-days'], 7); assert.equal(upload.if, '${{ !cancelled() }}');

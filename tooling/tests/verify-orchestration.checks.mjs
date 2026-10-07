@@ -226,17 +226,17 @@ test('[VERIFY-ONCE] default verify runs every tooling test file exactly once; th
   for (const { name, files } of await toolingGroups(process.cwd())) for (const file of files) runs.get(file)?.push(`tooling:${name}`);
   for (const step of await vitestRunSteps()) for (const [file, owners] of runs) if (step.match(file)) owners.push(step.id);
   assert.deepEqual([...runs].filter(([, owners]) => owners.length !== 1), [], 'a tooling file runs zero or several times in one verify');
-  const maker = [...runs].filter(([file]) => /^tests\/tooling\/interactive-maker-[^/]*\.checks\.mjs$/.test(file));
+  const maker = [...runs].filter(([file]) => /^(?:src\/cli|tooling)\/tests\/interactive-maker-[^/]*\.checks\.mjs$/.test(file));
   assert.ok(maker.length > 100, `maker files: ${maker.length}`);
   assert.deepEqual([...new Set(maker.flatMap(([, owners]) => owners))], ['maker-coverage-run']);
 });
 
 test('[VERIFY-ENTRY] the real npm entry lists steps and rejects unknown ids without running any gate', () => {
-  const list = spawnSync(process.execPath, ['scripts/quality/verify.mjs', '--list', '--json'], { encoding: 'utf8', timeout: 20000 });
+  const list = spawnSync(process.execPath, ['tooling/quality/verify.mjs', '--list', '--json'], { encoding: 'utf8', timeout: 20000 });
   assert.equal(list.status, 0, list.stderr);
   const steps = JSON.parse(list.stdout).data.steps.map(step => step.id);
   assert.deepEqual(steps, verifySteps().map(step => step.id));
-  const bad = spawnSync(process.execPath, ['scripts/quality/verify.mjs', '--only', 'nope'], { encoding: 'utf8', timeout: 20000 });
+  const bad = spawnSync(process.execPath, ['tooling/quality/verify.mjs', '--only', 'nope'], { encoding: 'utf8', timeout: 20000 });
   assert.equal(bad.status, 2);
   assert.match(bad.stderr, /Valid ids: suites-check, /);
 });

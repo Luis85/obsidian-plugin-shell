@@ -10,7 +10,7 @@ import { planArtifacts, applyProject } from '../compiler/adapters/workspace-plan
 import { planProject } from '../compiler/adapters/project-plan.ts';
 import { projectModel, digest } from '../compiler/emitters/model.ts';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
-import { projectFiles } from '../../../tests/support/project-render.mjs';
+import { projectFiles } from './support/project-render.mjs';
 import { descriptor } from '../adapters/framework/catalog.ts';
 import { starterDocument } from '../../../tests/support/starter-documents.mjs';
 
