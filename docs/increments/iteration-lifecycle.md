@@ -6,7 +6,7 @@ owner: "Luis85"
 size: M
 status: In progress
 e2e: optional
-refs: [https://github.com/Luis85/obsidian-plugin-shell/pull/103]
+refs: [https://github.com/Luis85/obsidian-plugin-shell/pull/103, https://github.com/Luis85/obsidian-plugin-shell/pull/104]
 pullRequests: [iteration-lifecycle-kickoff]
 issues: [iteration-lifecycle]
 branch: "increment/iteration-lifecycle"
