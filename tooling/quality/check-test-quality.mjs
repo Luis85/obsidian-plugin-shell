@@ -47,7 +47,8 @@ export async function checkTestQuality(root = process.cwd()) {
       else if (entry.name.endsWith('.ts')) files.push(path);
     }
   }
-  for (const path of ['src/plugin/tests/unit', 'src/plugin/tests/e2e', 'src/plugin/tests/obsidian']) await walk(resolve(root, path));
+  // Vitest/Playwright declarations live in the plugin project's tests; tooling/tests holds the few Vitest suites that also need tooling modules.
+  for (const path of ['src/plugin/tests/unit', 'src/plugin/tests/e2e', 'src/plugin/tests/obsidian', 'tooling/tests']) await walk(resolve(root, path));
   if (!files.length) throw new Error('NO_TEST_INPUTS');
   const failures = [];
   for (const file of files) failures.push(...inspectTestQuality(await readFile(file, 'utf8'), relative(root, file)));
