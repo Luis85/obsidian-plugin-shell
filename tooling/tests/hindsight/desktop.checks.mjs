@@ -10,7 +10,7 @@ import { readConfig, saveConfig } from '../../../src/cli/tooling/hindsight/io.ts
 import { connection, applyConnection, mcpEntry, replaceToml, parseToml, connectionStatus } from '../../../src/cli/tooling/hindsight/desktop.ts';
 import { discoverTools, nativeServer, launchMcp } from '../../../src/cli/tooling/hindsight/mcp.ts';
 import { fixture, fakeNative, fakeServer } from '../support/hindsight-fixture.mjs';
-import { launcherPlan, stageLauncher } from '../../../src/cli/tooling/hindsight/launcher.ts';
+import { launcherPlan, launcherSource, stageLauncher } from '../../../src/cli/tooling/hindsight/launcher.ts';
 const fails = (callback, code) => assert.throws(callback, e => e.code === code);
 for (const provider of ['none', 'openai-codex', 'claude-code', 'ollama', 'lmstudio']) {
   test(`keyless ${provider} persists no API key`, () => {
@@ -151,9 +151,10 @@ test('shell memory and help memory work without framework dependencies, Git or P
 });
 
 function launcherFixture(f) {
-  const source = join(f.root, 'tooling'); mkdirSync(source);
-  for (const file of launcherPlan(f.p).files.filter(file => file.name !== 'package.json')) {
-    const path = join(source, file.name); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '// reviewed fixture\n');
+  // The checkout layout: hindsight sources under src/cli/tooling/hindsight, the shared modules they import under src/shared.
+  const source = join(f.root, 'src/cli/tooling/hindsight'); mkdirSync(source, { recursive: true });
+  for (const file of launcherPlan(f.p).files.filter(file => file.name !== '../package.json')) {
+    const path = launcherSource(source, file.name); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '// reviewed fixture\n');
   }
   return source;
 }
@@ -161,8 +162,8 @@ test('launcher plan is pure and staged snapshots are reusable without checkout p
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source);
   assert.deepEqual(readdirSync(f.home), []); stageLauncher(f.p, plan);
   assert.equal(readFileSync(join(plan.directory, 'cli.ts'), 'utf8'), '// reviewed fixture\n');
-  assert.equal(readFileSync(join(plan.directory, '../shared/hash.ts'), 'utf8'), '// reviewed fixture\n');
-  stageLauncher(f.p, plan); assert.deepEqual(readdirSync(dirname(plan.directory)).sort(), ['companion', 'hindsight', 'shared']);
+  assert.equal(readFileSync(join(plan.directory, '../shared/platform/hash.ts'), 'utf8'), '// reviewed fixture\n');
+  stageLauncher(f.p, plan); assert.deepEqual(readdirSync(dirname(plan.directory)).sort(), ['hindsight', 'package.json', 'shared']);
   const entry = mcpEntry(f.repo, 'claude-code', f.p); assert.ok(entry.args[1].startsWith(join(f.state, 'launchers')));
 });
 test('changed launcher source invalidates its plan before creating a snapshot', t => {
@@ -170,13 +171,25 @@ test('changed launcher source invalidates its plan before creating a snapshot', 
   writeFileSync(join(source, 'cli.ts'), '// changed\n'); fails(() => stageLauncher(f.p, plan), 'PLAN_CHANGED');
   assert.equal(existsSync(plan.directory), false); assert.deepEqual(readdirSync(f.home), []);
 });
-test('the staged launcher is self-contained: every relative import resolves to a staged file', t => {
+test('the staged launcher is self-contained: every relative and #shared import resolves to a staged file', t => {
   const f = fixture(t); const plan = launcherPlan(f.p); const staged = new Set(plan.files.map(file => file.name));
+  let shared = 0;
   for (const file of plan.files.filter(file => /\.(?:ts|mjs)$/.test(file.name))) {
-    const text = readFileSync(join(plan.source, file.name), 'utf8');
-    for (const [, specifier] of text.matchAll(/(?:from|import)\s*\(?\s*'(\.{1,2}\/[^']+)'/g))
-      assert.ok(staged.has(posix.normalize(posix.join(posix.dirname(file.name), specifier))), `${file.name} imports ${specifier}, which the launcher snapshot does not stage`);
+    const text = readFileSync(launcherSource(plan.source, file.name), 'utf8');
+    for (const [, specifier] of text.matchAll(/(?:from|import)\s*\(?\s*'((?:\.{1,2}|#shared)\/[^']+)'/g)) {
+      // The staged package.json maps #shared/* to ./shared/*, which is ../shared/* seen from the staged hindsight folder.
+      const target = specifier.startsWith('#shared/') ? (shared++, '../shared/' + specifier.slice('#shared/'.length)) : posix.normalize(posix.join(posix.dirname(file.name), specifier));
+      assert.ok(staged.has(target), `${file.name} imports ${specifier}, which the launcher snapshot does not stage`);
+    }
   }
+  assert.ok(shared > 0, 'the launcher sources use #shared imports');
+});
+test('a staged launcher snapshot runs from outside the checkout and resolves its #shared imports', t => {
+  const f = fixture(t); const plan = launcherPlan(f.p); stageLauncher(f.p, plan);
+  const probe = join(plan.directory, 'probe.mjs');
+  writeFileSync(probe, "import { digest } from './policy.ts'; console.log(digest('x').length);\n");
+  const run = spawnSync(process.execPath, [probe], { cwd: dirname(plan.directory), encoding: 'utf8', timeout: 20000 });
+  assert.equal(run.status, 0, run.stderr); assert.equal(run.stdout.trim(), '64');
 });
 test('modified existing snapshot is preserved and rejected instead of silently overwritten', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source); stageLauncher(f.p, plan);

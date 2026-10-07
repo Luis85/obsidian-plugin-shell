@@ -4,17 +4,22 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { digest, requireThat } from './policy.ts';
 import { noSymlink, readText, type Paths } from './io.ts';
+/** Names are relative to the staged hindsight folder. The snapshot mirrors the checkout: ../shared/* is src/shared/*, and the
+ * snapshot's own package.json maps #shared/* there, so the staged copy resolves every import inside itself. */
 const FILES = ['cli.ts', 'desktop.ts', 'embedded.py', 'install.ts', 'io.ts', 'launcher.ts', 'mcp.ts', 'policy.ts', 'provider.ts', 'sources.ts',
-  '../../../shared/companion/tooling-contract.mjs', '../../../shared/companion/schema/hosting.mjs', '../../../shared/platform/hash.ts'];
-const PACKAGE = '{"type":"module","private":true}\n';
+  '../shared/companion/tooling-contract.mjs', '../shared/companion/schema/hosting.mjs', '../shared/platform/hash.ts'];
+const PACKAGE_NAME = '../package.json';
+const PACKAGE = '{"type":"module","private":true,"imports":{"#shared/*":"./shared/*"}}\n';
+/** Checkout location of a staged file: hindsight files sit beside this module, ../shared/* under src/shared. */
+export const launcherSource = (source: string, name: string): string => name.startsWith('../') ? join(source, '../..', name) : join(source, name);
 export interface LauncherPlan { source: string; directory: string; digest: string; files: { name: string; sha256: string }[] }
 export function launcherPlan(p: Paths, source = dirname(fileURLToPath(import.meta.url))): LauncherPlan {
   const files = FILES.map(name => {
-    const text = readText(join(source, name));
+    const text = readText(launcherSource(source, name));
     requireThat(text !== null, 'LAUNCHER_SOURCE_MISSING', 'The reviewed launcher source is incomplete. Restore the checkout before connecting.');
     return { name, sha256: digest(text) };
   });
-  files.push({ name: 'package.json', sha256: digest(PACKAGE) });
+  files.push({ name: PACKAGE_NAME, sha256: digest(PACKAGE) });
   const hash = digest(JSON.stringify(files));
   return { source, directory: join(p.state, 'launchers', hash, 'hindsight'), digest: hash, files };
 }
@@ -34,7 +39,7 @@ export function stageLauncher(p: Paths, plan: LauncherPlan): void {
   const temporary = mkdtempSync(join(parent, '.stage-'));
   try {
     for (const file of current.files) {
-      const text = file.name === 'package.json' ? PACKAGE : readText(join(current.source, file.name));
+      const text = file.name === PACKAGE_NAME ? PACKAGE : readText(launcherSource(current.source, file.name));
       requireThat(text !== null && digest(text) === file.sha256, 'PLAN_CHANGED', 'Launcher source changed during staging. No desktop configuration was written.');
       const target = join(temporary, 'hindsight', file.name);
       mkdirSync(dirname(target), { recursive: true, mode: 0o700 });
