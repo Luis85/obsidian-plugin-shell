@@ -5,7 +5,6 @@ import { result, requireThat, stringOption, type Context, type Request, type Res
 import { exists, readBounded } from './files.ts';
 import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
-import { testingTool } from './testing-tools.ts';
 import { projectConfigs } from '#shared/platform/project-configs.mjs';
 import { repositoryScope, toolingFolder } from './repository-scope.ts';
 
@@ -57,17 +56,19 @@ async function installInvocation(request: Request, context: Context, host: Host)
   } };
   return { entry: await host.npm(), args: ['ci', '--no-fund'] };
 }
-/** `driver` entries name a test driver that testingTool locates (tooling/testing here, scripts/testing in a generated project). */
+/** Repository tooling path: tooling/ in the shell repository, scripts/ in a generated project (one scope rule, repository-scope.ts). */
+const tool = (context: Context, path: string): string => `${toolingFolder(repositoryScope(context.root))}/${path}`;
+/** `driver` entries name a test driver under the repository tooling folder. */
 const testEntries: Record<string, { entry: string; args?: string[]; driver?: boolean }> = {
-  native: { entry: 'check-native.mjs', driver: true },
-  obsidian: { entry: 'run-obsidian-tests.mjs', driver: true },
+  native: { entry: 'testing/check-native.mjs', driver: true },
+  obsidian: { entry: 'testing/run-obsidian-tests.mjs', driver: true },
   browser: { entry: 'node_modules/@playwright/test/cli.js', args: ['test', '--config', 'configs/testing/playwright.config.ts'] },
 };
 async function testInvocation(request: Request, context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
   acceptProfile(request.command, profile);
   if (profile && Object.hasOwn(testEntries, profile)) {
     const { entry, args = [], driver } = testEntries[profile]!;
-    return { entry: driver ? await testingTool(context.root, entry, host.existsPath) : entry, args: [...args] };
+    return { entry: driver ? tool(context, entry) : entry, args: [...args] };
   }
   return { entry: 'node_modules/vitest/vitest.mjs', args: await vitestArguments(context.root, profile, host.existsPath) };
 }
@@ -75,11 +76,11 @@ async function verifyInvocation(request: Request, context: Context, host: Host, 
   acceptProfile(request.command, profile);
   if (profile === 'project') return { entry: await host.npm(), args: ['run', 'verify:project'] };
   // The shell repository verifies through tooling/quality; a generated project carries its own copy under scripts/quality.
-  return { entry: `${toolingFolder(repositoryScope(context.root))}/quality/verify.mjs` };
+  return { entry: tool(context, 'quality/verify.mjs') };
 }
-const devEntries: Record<string, { entry: string; args: string[] }> = {
+const devEntries: Record<string, { entry: string; args: string[]; tool?: boolean }> = {
   ui: { entry: 'node_modules/vite/bin/vite.js', args: ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1'] },
-  obsidian: { entry: 'scripts/dev/obsidian-dev.mjs', args: [] },
+  obsidian: { entry: 'dev/obsidian-dev.mjs', args: [], tool: true },
 };
 async function devInvocation(request: Request, context: Context, host: Host, profile: string | undefined, timeout: number): Promise<Invocation> {
   acceptProfile(request.command, profile);
@@ -87,18 +88,21 @@ async function devInvocation(request: Request, context: Context, host: Host, pro
     const config = await projectConfig(context.root, 'preview', host.existsPath) ?? projectConfigs.preview.path;
     return { done: result(request.command, { execution: await host.run(context, 'node_modules/vite/bin/vite.js', ['--config', config], timeout), productAcceptance: 'not-inferred' }) };
   }
-  if (profile && Object.hasOwn(devEntries, profile)) return { ...devEntries[profile]!, args: [...devEntries[profile]!.args] };
-  return { entry: 'scripts/dev/watch-local.mjs', args: ['--no-local'] };
+  if (profile && Object.hasOwn(devEntries, profile)) {
+    const { entry, args, tool: owned } = devEntries[profile]!;
+    return { entry: owned ? tool(context, entry) : entry, args: [...args] };
+  }
+  return { entry: tool(context, 'dev/watch-local.mjs'), args: ['--no-local'] };
 }
-async function rehearseInvocation(request: Request, _context: Context, host: Host): Promise<Invocation> {
+async function rehearseInvocation(request: Request, context: Context, host: Host): Promise<Invocation> {
   const commit = stringOption(request.options, 'commit');
   const version = stringOption(request.options, 'version');
   requireThat(commit && version, 'RELEASE_INPUT_REQUIRED', 'Supply --commit and --version for fixed-source rehearsal.');
-  return { entry: 'scripts/release/rehearse.mjs', args: ['--commit', commit, '--version', version], environment: { npm_execpath: await host.npm() } };
+  return { entry: tool(context, 'release/rehearse.mjs'), args: ['--commit', commit, '--version', version], environment: { npm_execpath: await host.npm() } };
 }
 const invocations: Record<string, Resolve> = {
   install: installInvocation,
-  build: async () => ({ entry: 'scripts/bundling/build.mjs' }),
+  build: async (_request, context) => ({ entry: tool(context, 'bundling/build.mjs') }),
   test: testInvocation,
   verify: verifyInvocation,
   dev: devInvocation,

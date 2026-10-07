@@ -50,6 +50,20 @@ test('verify without a profile runs the repository scope\'s own verify entry, in
   assert.deepEqual(calls.at(-1), { entry: '/qualified/npm-cli.js', args: ['run', 'verify:project'] });
 });
 
+test('build, dev, release rehearsal and the native/obsidian test drivers run the repository scope\'s own tooling, in both scopes', async t => {
+  const shell = await repository(t, 'shell'), generated = await repository(t, 'generated');
+  const entries = async root => {
+    const calls = [];
+    const dependencies = { runNode: async (_context, entry) => { calls.push(entry); return { exitCode: 0, signal: null, truncated: false, stdout: '{}' }; }, npmEntry: async () => '/qualified/npm-cli.js' };
+    for (const [command, options] of [['build'], ['dev'], ['dev', { profile: 'obsidian' }], ['release rehearse', { commit: 'abc123', version: '1.2.3' }],
+      ['test', { profile: 'native' }], ['test', { profile: 'obsidian' }]]) await processOperation(request(command, options), { root, frameworkRoot: root }, dependencies);
+    return calls;
+  };
+  const paths = ['bundling/build.mjs', 'dev/watch-local.mjs', 'dev/obsidian-dev.mjs', 'release/rehearse.mjs', 'testing/check-native.mjs', 'testing/run-obsidian-tests.mjs'];
+  assert.deepEqual(await entries(shell.root), paths.map(path => `tooling/${path}`));
+  assert.deepEqual(await entries(generated.root), paths.map(path => `scripts/${path}`));
+});
+
 test('check runs the repository scope\'s own oxlint wrapper and prints its path, in both scopes', async t => {
   const shell = await repository(t, 'shell'), generated = await repository(t, 'generated');
   const lint = async root => (await checkSteps(root, false)).steps.find(step => step.id === 'lint');

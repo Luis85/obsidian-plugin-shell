@@ -1,6 +1,6 @@
 import { assert, realpath, mkdtemp, writeFile, mkdir, rm, tmpdir, join, PassThrough, Readable, studio, prototypeWizard, loadGuide, execute, parseArguments, checkSteps, assertJsonData, parseJsonData, operationResult, ask, readInput, routeArguments, renderCliResult, interactiveRun, frameworkMain, processOperation, frameworkOperation, frameworkDescriptor, frameworkParameterKinds, parseFrameworkArguments, frameworkSuggestions, frameworkDidYouMean, prototypeCommands, operationSchemas, frameworkFailure, frameworkStringOption, FrameworkOperationError, frameworkRequireThat, CompilerError, CompilationFailure, compilerDiagnostic, relocatedHash, relocatedReadBounded, relocatedProjectRoot, relocatedExists, relocatedConfiguration, relocatedDefaults, relocatedIdentity, relocatedResolveImport, relocatedNpmEntry, relocatedRunNode, relocatedHandoutPlan, relocatedHandoutRead, applySharedFilePlan, relocatedProjectContractOperation, relocatedMeasureProject, relocatedSampleSummary, relocatedMeasureOperation, relocatedSupportSnapshot, relocatedSupportReport, relocatedUnavailableSupport, relocatedStatus, relocatedReleaseCheck, relocatedPortableFile, relocatedZip, relocatedPluginIdWordProblem, relocatedDerivedPluginId, relocatedPluginIdProblem, relocatedExportedIdProblem, relocatedExportedIdWarning, relocatedStorybookFlags, relocatedTerminalStyle, relocatedMarker, relocatedBold, relocatedRows, relocatedDuration, relocatedRunnable, relocatedNextLine, relocatedCommandHelp, relocatedHelpIndex, relocatedHelpText, relocatedSetupDocumentation, relocatedBundledNoticeFiles, relocatedExportedProject, relocatedStorybookOperation, relocatedAirshipPlan, relocatedAirshipEnvironment, relocatedAirshipOperation, relocatedBuildClickdummy, relocatedDocsRead, relocatedDocsPlan, relocatedFixtureOperation, relocatedGuidedSetup, relocatedContinueSetup, relocatedGuidedStarter, relocatedStarterText, relocatedRenderHuman, relocatedSetupSnapshot, test, frameworkRoot, scripted, contents } from './support/interactive-maker-parity-support.mjs';
-import { starterDocumentText } from '../../../tests/support/starter-documents.mjs';
-import { retiredProject } from '../../../tests/support/retired-projects.mjs';
+import { starterDocumentText } from '#shared/testing/starter-documents.mjs';
+import { retiredProject } from '#shared/testing/retired-projects.mjs';
 
 test('relocated process-operation adapter selects trusted commands without launching real tools', async () => {
   const context = { root: frameworkRoot, frameworkRoot };
@@ -25,7 +25,7 @@ test('relocated process-operation adapter selects trusted commands without launc
 
   const build = await processOperation(request('build'), context, dependencies);
   assert.equal(build.status, 'ok');
-  assert.equal(calls.at(-1).entry, 'scripts/bundling/build.mjs');
+  assert.equal(calls.at(-1).entry, 'tooling/bundling/build.mjs');
 
   await processOperation(request('test', { profile: 'browser' }), context, dependencies);
   assert.deepEqual(calls.at(-1).args, ['test', '--config', 'configs/testing/playwright.config.ts']);
@@ -40,7 +40,7 @@ test('relocated process-operation adapter selects trusted commands without launc
   assert.deepEqual(calls.at(-1).args, ['--config', 'configs/bundling/vite.preview.config.mjs']);
 
   await processOperation(request('release rehearse', { commit: 'abc123', version: '1.2.3' }), context, dependencies);
-  assert.equal(calls.at(-1).entry, 'scripts/release/rehearse.mjs');
+  assert.equal(calls.at(-1).entry, 'tooling/release/rehearse.mjs');
   assert.equal(calls.at(-1).environment.npm_execpath, '/qualified/npm-cli.js');
 
   const install = await processOperation(request('install', { yes: true }), context, dependencies);

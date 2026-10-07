@@ -188,6 +188,9 @@ test('help for new documents --from as a companion project export, not the kit-u
 });
 test('the obsidian profiles run the real-Obsidian test suite and dev loop scripts of the project', async t => {
   const dir = await scratch(t);
+  // A generated project (its generation record and project tsconfig) keeps its repository tooling under scripts/.
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');
   await mkdir(join(dir, 'scripts/testing'), { recursive: true }); await mkdir(join(dir, 'scripts/dev'), { recursive: true });
   const fake = name => `console.log(${JSON.stringify(name)} + ' ran with [' + process.argv.slice(2).join(' ') + ']');\n`;
   await writeFile(join(dir, 'scripts/testing/run-obsidian-tests.mjs'), fake('real-obsidian tests'));
