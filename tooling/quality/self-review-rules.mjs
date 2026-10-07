@@ -36,11 +36,12 @@ function focusedTest(code) {
   return [...code.matchAll(skipCall)].some(match => declarationReceivers.has(match[1]) || !match[2]);
 }
 
-const designWorkspace = path => path.startsWith('docs/concepts/');
+// The companion concept sources moved from docs/concepts/companion/{src,editor} to src/companion/{app,editor}.
+const designWorkspace = path => path.startsWith('docs/concepts/') || path.startsWith('src/companion/app/') || path.startsWith('src/companion/editor/');
 const codePath = path => /\.(?:[cm]?[jt]sx?|vue)$/.test(path);
 const testPath = path => /(?:^|\/)(?:tests|__tests__)\//.test(path) || /\.(?:test|spec|checks)\.[cm]?[jt]sx?$/.test(path);
 const generatedPath = path => /(?:^|\/)(?:fixtures|__generated__|generated)\//.test(path) || /\.generated\./.test(path);
-// docs/concepts is the design working directory: repository gates ignore it and each concept keeps its own verification.
+// docs/concepts and the companion concept sources are the design working directory: repository gates ignore it and each concept keeps its own verification.
 const reviewedCode = path => codePath(path) && !designWorkspace(path);
 const reviewedTest = path => testPath(path) && !generatedPath(path) && !designWorkspace(path);
 const vitestConfigPath = path => /(?:^|\/)vitest[^/]*\.config\.[cm]?[jt]s$/.test(path);

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const thresholdsPath = 'configs/quality/thresholds.json';
-// tooling/quality -> project root; every project ships tooling/ and configs/ together.
+// scripts/quality -> project root; every project ships scripts/ and configs/ together.
 const defaultRoot = fileURLToPath(new URL('../../', import.meta.url));
 const coverage = (lines, statements, functions, branches) => ({ lines, statements, functions, branches });
 /** The loosest values any project may use: the framework's reviewed gates. */
