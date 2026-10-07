@@ -1,4 +1,5 @@
 /** `pr publish`: preview the remote, then push a missing head, create or adopt the draft and record it locally. */
+import { requireIterationBranch } from './iteration-branch.ts';
 import { hash } from '../framework/files.ts';
 import { OperationError, result, type Context, type Request, type Result } from '../framework/contracts.ts';
 import { setPullRequestBinding, validatePullRequest } from '../../domain/increments/pull-request-document.ts';
@@ -30,6 +31,7 @@ function publishData(loaded: Loaded, preview: PublishPreview, hashValue: string,
 async function publishPlan(request: Request, context: Context) {
   const loaded = await load(request, context);
   requireLinks(loaded);
+  await requireIterationBranch(loaded.session, loaded.increment.id, loaded.increment.model, loaded.pull.model);
   const preview = await previewPublish(loaded.remote, { view: loaded.view, status: knownStatus(loaded.pull.model.status), push: !flag(request, 'no-push'), resolve: linkResolver(loaded.files) });
   const before = await localBefore(loaded);
   const hashValue = planHash(context, request, { localBefore: before, remote: { platform: loaded.target.platform, repository: loaded.target.repository,

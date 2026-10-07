@@ -14,6 +14,7 @@ import { invocationDirectory, starterInvocation } from './framework/starter-proj
 import { guidedStarter } from '../presentation/terminal/starter-terminal.ts';
 import { guidedIncrement } from '../presentation/terminal/increment-terminal.ts';
 import { renderCliResult, type CliOutputStream } from '../presentation/terminal/cli-output.ts';
+import { continueIteration } from './increments/iteration-terminal-flow.ts';
 import { interactiveRun } from '../presentation/terminal/cli-interactive.ts';
 
 export interface FrameworkCliIO {
@@ -93,7 +94,11 @@ async function runOperation(argv: string[], frameworkRoot: string, io: Framework
     confirm: (message, signal) => interactivePlanConfirm(io, message, signal),
     render: value => renderCliResult(value, false, io),
   });
-  return continueInteractiveSetup(request, outcome, context, io, controller.signal);
+  const continued = await continueIteration(request, outcome, context, {
+    confirm: (message, signal) => interactivePlanConfirm(io, message, signal),
+    render: value => renderCliResult(value, false, io),
+  });
+  return continueInteractiveSetup(request, continued, context, io, controller.signal);
 }
 
 /** Framework command composition root. Prompts/progress are isolated from the machine stdout result channel. */

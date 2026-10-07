@@ -28,8 +28,8 @@ import { pendingChecks } from './maker-checks.ts';
 import { didYouMean, suggestions } from './suggest.ts';
 import type { MakerCheck } from '../makers/plan.ts';
 import { incrementPlanners } from '../increments/planners.ts';
-/** `steps` are reviewed non-file steps bound into the plan hash; `prepare` runs them right before the file write. */
-interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[]; steps?: readonly unknown[]; prepare?: () => Promise<unknown> }
+/** `steps` are reviewed non-file steps bound into the plan hash; `prepare` runs before saving and `finalize` runs after saving (for example, a reviewed Git commit). */
+interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[]; steps?: readonly unknown[]; prepare?: () => Promise<unknown>; finalize?: () => Promise<unknown> }
 /** Built-in and registered custom recipes are resolved before trust: only a real custom recipe needs --trust-custom. */
 async function resolveRecipe(request: Request, context: Context, recipe: string): Promise<void> {
   if (builtinRecipes.includes(recipe)) return;
@@ -140,7 +140,8 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
     await journal?.();
   } });
-  return { ...report, ...prepared };
+  const finalized = fresh.finalize ? { finalized: await fresh.finalize() } : {};
+  return { ...report, ...prepared, ...finalized };
 }
 export async function saveOperationPlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
   requireThat(planned.request.options.input !== '-', 'STDIN_PLAN_NOT_REPLAYABLE', 'Save the input to a file before exporting a replayable plan.');

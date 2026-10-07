@@ -176,7 +176,7 @@ export function deliveryPlanDetails(style: Style, value: Result): string {
   const edits = list(summary.edits).map(edit => `${text(edit.section)} ${text(edit.action)}${edit.itemId ? ` ${text(edit.itemId)}` : ''}`);
   return rows([['Document', `${text(document.kind)} ${text(document.id)}`], ['Status', statusChange(summary.statusBefore, summary.statusAfter)], ['Kind', text(summary.kind) || null],
     ['Branches', summary.head || summary.base ? branches(summary.head, summary.base) : null], ['Delivers', words(summary.delivers).join(', ') || null],
-    ['Edits', edits.join('; ') || null], ['Creates', createdLine(record(summary.created))], ['Branch step', branchStep(record(summary.branch))]])
+    ['Edits', edits.join('; ') || null], ['Creates', createdLine(record(summary.created))], ['Branch step', branchStep(record(summary.branch))], ['Next', text(summary.next) || null]])
     + section(style, 'Warnings', problemLines(style, list(summary.warnings)));
 }
 /** True for a reviewed plan of the increment, pr or issue families (not the remote `pr publish`/`pr sync`). */

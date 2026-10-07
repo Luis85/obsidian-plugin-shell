@@ -39,6 +39,21 @@ export function createGitPort(root: string, run: GitRunner = gitRunner): GitPort
       availability ??= git(['rev-parse', '--is-inside-work-tree']).then(result => result.code === 0 && result.stdout.trim() === 'true');
       return availability;
     },
+    async contains(ancestor, descendant) { return (await git(['merge-base', '--is-ancestor', safeRef(ancestor), safeRef(descendant)])).code === 0; },
+    async currentBranch() {
+      const result = await git(['symbolic-ref', '--quiet', '--short', 'HEAD']);
+      return result.code === 0 ? result.stdout.trim() : null;
+    },
+    async indexClean() { return (await git(['diff', '--cached', '--quiet'])).code === 0; },
+    async commitPaths(paths, message) {
+      if (!await this.indexClean()) throw new OperationError('GIT_INDEX_NOT_CLEAN', 'Unrelated staged changes must be committed or unstaged before committing the iteration records.');
+      await write(['--literal-pathspecs', 'add', '--', ...paths], 'ITERATION_COMMIT_FAILED', 'stage the reviewed iteration records', 'Inspect the index and iteration records before retrying.');
+      if ((await git(['--literal-pathspecs', 'commit', '--only', '-m', message, '--', ...paths], writeTimeout)).code !== 0) throw new OperationError('ITERATION_COMMIT_FAILED', 'The iteration records were saved but their Git commit failed; the branch and index may already have changed.', 'Inspect git status and commit the saved iteration records before publishing.');
+    },
+    async clean() {
+      const result = await git(['status', '--porcelain']);
+      return result.code === 0 && !result.stdout.trim();
+    },
     async resolve(ref) {
       const result = await git(['rev-parse', '--verify', '--quiet', `${safeRef(ref)}^{commit}`]);
       return result.code === 0 && /^[0-9a-f]{40,64}$/.test(result.stdout.trim()) ? result.stdout.trim() : null;

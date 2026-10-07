@@ -174,6 +174,7 @@ export function commandGroup(word: string): string[] {
 }
 export function parseCliArguments(argv: string[]): Request {
   argv = argv.map(arg => aliases.get(arg) ?? arg);
+  if (argv[0] === 'iteration') argv = ['increment', ...argv.slice(1)];
   if (argv[0] === '--version') argv = ['version', ...argv.slice(1)];
   requireThat(argv.length <= 100 && argv.every(safeArgument), 'ARGUMENT_LIMIT', 'Too many or oversized arguments.');
   const { positional, options } = scanArguments(argv);
