@@ -11,7 +11,7 @@ import { conceptShared, visualModules } from './support/concept-realm.mjs';
 const plain = value => JSON.parse(JSON.stringify(value));
 const shared = await conceptShared(['native-contract.mjs', 'design-system-roles.mjs', 'design-system-contract.mjs', 'composition-contract.mjs', ...visualModules, 'storymap-contract.mjs', 'prd-limits.mjs']);
 const sources = ['design-model.js', 'storymap-model.js', 'storymap-actions.js', 've-state.js', 'project-transfer.js'];
-const concept = (await Promise.all(sources.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
+const concept = (await Promise.all(sources.map(name => readFile('src/companion/app/' + name, 'utf8')))).join('\n');
 const stubs = `const DESIGN_LIMITS = { history: 20, importBytes: 4000000 };
 function designCopy(v) { return JSON.parse(JSON.stringify(v)); }
 const state = { activeRun: null }, tdUi = { busy: false }, storageWarning = '', STORAGE_KEY = 'k', persistenceSnapshot = null, modalType = '', innerWidth = 1200;

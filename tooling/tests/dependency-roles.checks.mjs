@@ -13,10 +13,10 @@ test('[GATE-03-04] build/check parsing remains development-only while direct and
     await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'dependency-role-fixture', type: 'module', devDependencies: { 'postcss-selector-parser': '7.1.6' }, scripts: { 'check:artifacts': 'node scripts/quality/check-artifacts.mjs' } }));
     const config = { entry: ['src/main.ts'], plugins: ['scripts/quality/fallow-node-tests.json'], rules: { 'policy-violation': 'off', 'dev-dependencies-in-production': 'error' } };
     await writeFile(join(root, '.fallowrc.json'), JSON.stringify(config));
-    await writeFile(join(root, 'scripts/quality/fallow-node-tests.json'), await readFile('scripts/quality/fallow-node-tests.json', 'utf8'));
+    await writeFile(join(root, 'scripts/quality/fallow-node-tests.json'), await readFile('tooling/quality/fallow-node-tests.json', 'utf8'));
     await writeFile(join(root, 'src/main.ts'), 'console.log("plugin runtime");');
-    await writeFile(join(root, 'scripts/bundling/css-identity.mjs'), await readFile('scripts/bundling/css-identity.mjs', 'utf8'));
-    await writeFile(join(root, 'scripts/bundling/css-ownership.mjs'), await readFile('scripts/bundling/css-ownership.mjs', 'utf8'));
+    await writeFile(join(root, 'scripts/bundling/css-identity.mjs'), await readFile('tooling/bundling/css-identity.mjs', 'utf8'));
+    await writeFile(join(root, 'scripts/bundling/css-ownership.mjs'), await readFile('tooling/bundling/css-ownership.mjs', 'utf8'));
     await writeFile(join(root, 'tests/tooling/styles.test.mjs'), 'import { test } from "node:test"; import { cssOwnership } from "../../scripts/bundling/css-ownership.mjs"; test("actual build adapter", () => { cssOwnership("fixture"); });');
     await writeFile(join(root, 'scripts/quality/check-artifacts.mjs'), 'import parser from "postcss-selector-parser"; import { assertCssOwnership, ownsSelector } from "../bundling/css-identity.mjs"; console.log(parser, assertCssOwnership, ownsSelector);');
     function analyze() {

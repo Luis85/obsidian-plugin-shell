@@ -3,16 +3,16 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { sha256 } from '../testing/source-inputs.mjs';
 import { vendorArchive } from '../styles/vendor-policy.mjs';
 
-const cli = resolve('scripts/quality/check-maintainability.mjs');
+const cli = resolve('tooling/quality/check-maintainability.mjs');
 const composition = 'export function present(values: readonly number[]) {\n  return values.map(value => value * 2);\n}\n';
 async function fixture(action) {
   const root = await mkdtemp(join(tmpdir(), 'maintainability-fixture-'));
   try {
-    for (const directory of ['src', 'scripts', 'tests', 'harness']) await mkdir(join(root, directory));
+    for (const directory of ['src', 'scripts', 'tests', 'src/plugin/harness']) await mkdir(join(root, directory), { recursive: true });
     await mkdir(join(root, 'configs/quality'), { recursive: true });
     for (const file of ['package.json', 'package-lock.json', 'configs/quality/fallow.json']) await writeFile(join(root, file), await readFile(resolve(file)));
     await symlink(resolve('node_modules'), join(root, 'node_modules'), 'junction');
@@ -143,7 +143,7 @@ test('maintainability CLI rejects omitted inventory, changed source, malformed r
 
 test('maintainability inventories exact immutable vendor data and refuses changed vendor bytes', async () => {
   await fixture(async root => {
-    await mkdir(join(root, 'harness/styles/vendor'), { recursive: true });
+    await mkdir(dirname(join(root, vendorArchive)), { recursive: true });
     await writeFile(join(root, vendorArchive), await readFile(resolve(vendorArchive)));
     const valid = run(root); assert.equal(valid.status, 0, valid.stderr);
     const report = JSON.parse(await readFile(join(packet(valid).output, 'report.json'), 'utf8'));
@@ -197,7 +197,7 @@ test('maintainability inventories unsupported Python fixtures without diluting p
 
 test('maintainability rejects unknown languages, production Python and unclassified concept inputs', async () => {
   await fixture(async root => {
-    for (const path of ['src/probe.py', 'scripts/probe.py', 'tests/probe.py', 'harness/probe.py',
+    for (const path of ['src/probe.py', 'scripts/probe.py', 'tests/probe.py', 'src/plugin/harness/probe.py',
       'scripts/concepts/probe.svelte', 'scripts/concepts/probe.pyc', 'scripts/concepts/nested/probe.py']) {
       await mkdir(join(root, path, '..'), { recursive: true });
       await writeFile(join(root, path), 'not an approved metric input');
@@ -213,7 +213,7 @@ test('maintainability rejects unknown languages, production Python and unclassif
 test('shared composition declarations retain exact measured bytes without ambient parse degradation', async () => {
   await fixture(async root => {
     const path = 'scripts/companion/composition-contract.d.mts';
-    const source = await readFile(resolve(path), 'utf8');
+    const source = await readFile(resolve('src/shared/companion/composition-contract.d.mts'), 'utf8');
     await mkdir(join(root, 'scripts/companion'), { recursive: true });
     await writeFile(join(root, path), source);
     const valid = run(root); assert.equal(valid.status, 0, valid.stderr);

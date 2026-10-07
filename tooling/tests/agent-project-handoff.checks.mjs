@@ -147,7 +147,7 @@ test('[PROJECT-HANDOFF-07] the simulated session starts from a clean environment
 
 test('[PROJECT-HANDOFF-08] the command line prints usage for --help and exits 2 for bad options without generating anything', () => {
   const help = spawnSync(process.execPath, [script, '--help'], { encoding: 'utf8' });
-  assert.equal(help.status, 0); assert.match(help.stdout, /^Usage: node scripts\/testing\/qualify-project-handoff\.mjs/);
+  assert.equal(help.status, 0); assert.match(help.stdout, /^Usage: node tooling\/testing\/qualify-project-handoff\.mjs/);
   const bad = spawnSync(process.execPath, [script, '--starter'], { encoding: 'utf8' });
   assert.equal(bad.status, 2); assert.match(bad.stdout, /--starter needs a value\nUsage:/);
 });

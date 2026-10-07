@@ -75,10 +75,10 @@ test('checker passes clean trees and allowlisted historical references, and reje
 });
 
 test('the repository itself is clean under the committed allowlist, via the npm-facing CLI', () => {
-  const result = spawnSync(process.execPath, ['scripts/quality/check-docs-launchers.mjs'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['tooling/quality/check-docs-launchers.mjs'], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(JSON.parse(result.stdout).status, 'passed');
-  const rejected = spawnSync(process.execPath, ['scripts/quality/check-docs-launchers.mjs', '--extra'], { encoding: 'utf8' });
+  const rejected = spawnSync(process.execPath, ['tooling/quality/check-docs-launchers.mjs', '--extra'], { encoding: 'utf8' });
   assert.equal(rejected.status, 1);
   assert.match(rejected.stderr, /NO_ARGUMENTS_SUPPORTED/);
 });

@@ -24,7 +24,7 @@ const baseFiles = {
   'tests/e2e/ui.spec.ts': "import { test } from '@playwright/test';\ntest('ui', async () => {});\n",
   'configs/quality/thresholds.json': '{\n  "coverage": { "lines": 95 }\n}\n', 'configs/testing/vitest.config.mjs': 'export default { test: { coverage: { reporter: [] } } };\n',
   'configs/lint/eslint.config.mjs': "export default [{ rules: { 'no-console': 'error' } }];\n",
-  'src/a.ts': `export const a = 1;\n${directive.lint}\nexport const b = 2;\n`, 'src/main.ts': 'export {};\n', 'docs/guide.md': 'Guide\n', 'CHANGELOG.md': 'Changes\n',
+  'src/a.ts': `export const a = 1;\n${directive.lint}\nexport const b = 2;\n`, 'src/plugin/main.ts': 'export {};\n', 'docs/guide.md': 'Guide\n', 'CHANGELOG.md': 'Changes\n',
 };
 const git = (root, ...args) => execFileSync('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', ...args], { cwd: root, encoding: 'utf8' });
 async function put(root, files) {
@@ -144,10 +144,10 @@ test('[SELF-REVIEW-06] focused, skipped and todo tests fail in tests but not in 
 test('[SELF-REVIEW-07] files over the code-line limit fail; comments, blanks and exact-limit files do not', async t => {
   const comments = Array.from({ length: 1000 }, (_, index) => `// note ${index}`).join('\n');
   const found = await review(t, {
-    'src/over.ts': lines(401), 'src/exact.ts': lines(400), 'src/commented.ts': `${comments}\n\n${lines(10)}`, 'src/main.ts': lines(101),
+    'src/over.ts': lines(401), 'src/exact.ts': lines(400), 'src/commented.ts': `${comments}\n\n${lines(10)}`, 'src/plugin/main.ts': lines(101),
     'tests/tooling/known-big.checks.mjs': lines(451), 'tests/tooling/known-fits.checks.mjs': lines(450), 'docs/long.md': lines(2000),
   });
-  assert.deepEqual(found, ['SR-LINE-LIMIT src/main.ts:1', 'SR-LINE-LIMIT src/over.ts:1', 'SR-LINE-LIMIT tests/tooling/known-big.checks.mjs:1']);
+  assert.deepEqual(found, ['SR-LINE-LIMIT src/over.ts:1', 'SR-LINE-LIMIT src/plugin/main.ts:1', 'SR-LINE-LIMIT tests/tooling/known-big.checks.mjs:1']);
 });
 
 test('[SELF-REVIEW-08] retired launcher references fail in added lines, with a changelog and path-qualified exemption', async t => {
@@ -160,7 +160,7 @@ test('[SELF-REVIEW-08] retired launcher references fail in added lines, with a c
 test('[SELF-REVIEW-08b] the reviewed docs-launchers allowlist exempts its historical records, and only for retired launchers', async t => {
   const allowlist = JSON.stringify({ entries: [{ glob: 'docs/history/**', rules: ['retired-launcher'], reason: 'dated record' }, { glob: 'docs/kit.md', rules: ['kit-layout-path'], reason: 'kit layout' }] });
   const found = await review(t, {
-    'scripts/quality/docs-launchers-allowlist.json': allowlist,
+    'tooling/quality/docs-launchers-allowlist.json': allowlist,
     'docs/history/stage-a.md': `Stage A\n${directive.launcher}\n`, 'docs/kit.md': `Kit\n${directive.launcher}\n`, 'docs/guide.md': `Guide\n${directive.launcher}\n`,
   });
   assert.deepEqual(found.filter(item => item.startsWith('SR-RETIRED-LAUNCHER')), ['SR-RETIRED-LAUNCHER docs/guide.md:2', 'SR-RETIRED-LAUNCHER docs/kit.md:2']);

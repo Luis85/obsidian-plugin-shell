@@ -18,7 +18,7 @@ test('real producer retains exact source, cases and whole-session acceptance wit
 });
 
 test('a deliberately faulty real assertion and a skipped real assertion cannot produce passing evidence', async t => {
-  for (const body of ['test("actual fault", () => assert.equal(2 + 2, 5));', 'test.skip("actual skip", () => {});', 'import { createFaultLedger } from "../../scripts/testing/fault-ledger.mjs"; test("overflow", () => { const ledger = createFaultLedger(1); ledger.record("FAULT", "fixture"); ledger.record("FAULT", "fixture"); ledger.assertExpected([{code:"FAULT",scope:"fixture",count:1}]); });']) {
+  for (const body of ['test("actual fault", () => assert.equal(2 + 2, 5));', 'test.skip("actual skip", () => {});', 'import { createFaultLedger } from "../../tooling/testing/fault-ledger.mjs"; test("overflow", () => { const ledger = createFaultLedger(1); ledger.record("FAULT", "fixture"); ledger.record("FAULT", "fixture"); ledger.assertExpected([{code:"FAULT",scope:"fixture",count:1}]); });']) {
     const root = await evidenceFixture(t, body); const result = await producedPacket(root);
     assert.notEqual(result.run.status, 0); assert.equal(result.packet.status, 'failed');
     assert.notEqual(evidenceCli(root, 'check', result.path).status, 0);
@@ -148,7 +148,7 @@ test('actual evidence launcher runs through a linked parent path and remains ine
   const { spawnSync } = await import('node:child_process');
   const { pathToFileURL } = await import('node:url');
   const imported = spawnSync(process.execPath, ['--input-type=module', '-e',
-    `await import(${JSON.stringify(pathToFileURL(join(alias, 'scripts/testing/evidence-cli.mjs')).href)}); console.log("imported-only")`],
+    `await import(${JSON.stringify(pathToFileURL(join(alias, 'tooling/testing/evidence-cli.mjs')).href)}); console.log("imported-only")`],
     { cwd: canonical, encoding: 'utf8', env: { ...process.env, NODE_OPTIONS: '' } });
   assert.equal(imported.status, 0, imported.stderr); assert.equal(imported.stdout.trim(), 'imported-only');
 });

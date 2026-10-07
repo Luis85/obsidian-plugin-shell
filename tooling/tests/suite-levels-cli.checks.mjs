@@ -1,5 +1,5 @@
 // The suites CLI fails closed on unlabeled, mislabeled or e2e-policy-inconsistent test levels, reports the pyramid
-// and runs suites by level, all in throwaway repositories through the real scripts/testing/suites.mjs process.
+// and runs suites by level, all in throwaway repositories through the real tooling/testing/suites.mjs process.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -7,7 +7,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
-const cli = resolve('scripts/testing/suites.mjs');
+const cli = resolve('tooling/testing/suites.mjs');
 const passing = 'import { test } from "node:test"; test("passes", () => {});\n';
 const levels = [{ name: 'unit', summary: 'u' }, { name: 'integration', summary: 'i' }, { name: 'e2e', summary: 'e', paths: ['tests/e2e/**'] },
   { name: 'acceptance', summary: 'a', paths: ['tests/acceptance/**'] }];

@@ -83,7 +83,7 @@ test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still 
   const valid = await probe(sources, value => value, { full: true, entry });
   assert.equal(valid.status, 0, valid.diagnostic);
   assert.equal(valid.summary.total_issues, 0, valid.diagnostic);
-  const orphan = 'docs/concepts/companion/src/unassembled.css';
+  const orphan = 'src/companion/app/unassembled.css';
   const invalid = await probe({ ...sources, [orphan]: '.unassembled-fixture { display: block; }\n' }, value => value, { full: true, entry });
   assert.notEqual(invalid.status, 0, invalid.diagnostic);
   assert.ok(invalid.unusedFiles.some(file => file.path === orphan), invalid.diagnostic);

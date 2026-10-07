@@ -8,14 +8,14 @@ import vm from 'node:vm';
 import { conceptShared, visualModules } from './support/concept-realm.mjs';
 
 const shared = await conceptShared(['native-contract.mjs', 'composition-contract.mjs', ...visualModules]);
-const base = (await readFile('docs/concepts/companion/src/base.html', 'utf8')).split('\n');
+const base = (await readFile('src/companion/app/base.html', 'utf8')).split('\n');
 const helpers = ['function esc(', 'function icon(', 'function button(', 'function badge(', 'function modalHeader(', 'function dialogBody('].map(prefix => {
   const lines = base.filter(line => line.startsWith(prefix));
   assert.equal(lines.length, 1, prefix + ' is one line of base.html');
   return lines[0];
 }).join('\n');
 const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalog-preview.js', 've-canvas.js', 've-outline.js', 've-insert.js', 've-layouts.js', 've-fields.js', 've-review.js', 've-interactions.js', 've-page-inspector.js', 've-contract.js', 've-child-inspector.js', 've-publish.js', 've-component-views.js', 've-page-views.js', 've-structure.js', 've-entry.js', 've-actions.js'];
-const concept = (await Promise.all(files.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
+const concept = (await Promise.all(files.map(name => readFile('src/companion/app/' + name, 'utf8')))).join('\n');
 const stubs = `const ICONS = {}; const state = { settings: { theme: 'light' }, view: 'page-editor', activeRun: false };
 let storageWarning = '', persistenceSnapshot = null, modalType = '', modalOriginal = 'unsaved';
 const STORAGE_KEY = 'concept', DESIGN_LIMITS = { history: 50 }, designUi = {}, tdUi = { busy: false };

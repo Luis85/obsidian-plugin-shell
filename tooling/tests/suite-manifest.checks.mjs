@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { globToRegExp, toolingGroups, validateManifest } from '../../src/cli/tooling/testing/suite-manifest.mjs';
 import { suiteInventory } from '../testing/evidence-identity.mjs';
 
-const cli = resolve('scripts/testing/suites.mjs');
+const cli = resolve('tooling/testing/suites.mjs');
 function run(cwd, args, env = {}) {
   const environment = { ...process.env, ...env };
   delete environment.NODE_TEST_CONTEXT;
@@ -33,7 +33,7 @@ const passing = 'import { test } from "node:test"; test("passes", () => {});\n';
 async function fixture(t, files, data = manifest()) {
   const root = await mkdtemp(join(tmpdir(), 'suite-manifest-'));
   t.after(() => rm(root, { recursive: true, force: true }));
-  const all = { 'package.json': JSON.stringify({ type: 'module', scripts: { 'test:alpha': 'node scripts/testing/suites.mjs alpha' } }),
+  const all = { 'package.json': JSON.stringify({ type: 'module', scripts: { 'test:alpha': 'node tooling/testing/suites.mjs alpha' } }),
     'tests/suites.json': JSON.stringify(data), 'tests/tooling/alpha-one.checks.mjs': passing, 'tests/tooling/beta-one.checks.mjs': passing,
     'tests/tooling/shared-fixture.mjs': 'export const value = 1;\n', 'tests/support/helper.ts': 'export {};\n', ...files };
   for (const [path, content] of Object.entries(all)) {
@@ -185,7 +185,7 @@ test('a tooling file outside the tooling step is accounted for only by a real ve
 });
 
 test('npm scripts must exist and run the suite they are declared for', async t => {
-  const wrong = JSON.stringify({ type: 'module', scripts: { 'test:alpha': 'node scripts/testing/suites.mjs beta' } });
+  const wrong = JSON.stringify({ type: 'module', scripts: { 'test:alpha': 'node tooling/testing/suites.mjs beta' } });
   assert.match(run(await fixture(t, { 'package.json': wrong }), ['--check']).stderr, /SUITE_SCRIPT_MISMATCH: package.json "test:alpha" does not run suite "alpha"/);
   const absent = JSON.stringify({ type: 'module', scripts: {} });
   assert.match(run(await fixture(t, { 'package.json': absent }), ['--check']).stderr, /SUITE_SCRIPT_MISSING: package.json has no "test:alpha" script/);
