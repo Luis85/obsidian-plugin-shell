@@ -83,11 +83,11 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
   assert.deepEqual(files.filter(file => file.path.startsWith('bin/') && !file.path.startsWith('bin/template/') && file.path.endsWith('.js')).map(file => file.path), ['bin/app.js', 'bin/tools/typescript.js']);
-  const templateOwnership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json');
+  const templateOwnership = files.find(file => file.path === 'bin/template/tooling/examples/ownership.json');
   const manifestRecord = JSON.parse(files.find(file => file.path === 'bin/kit.json').bytes)
     .files.find(file => file.path === templateOwnership.path);
   assert.equal(manifestRecord.hash, hash(templateOwnership.bytes), 'adapted template ownership must match kit integrity metadata');
-  assert.ok(!files.some(file => file.path === 'bin/scripts/examples/ownership.json'), 'no stale per-file runtime metadata');
+  assert.ok(!files.some(file => file.path === 'bin/tooling/examples/ownership.json'), 'no stale per-file runtime metadata');
   assert.ok(!files.some(file => file.path.startsWith('bin/node_modules/')), 'vendor runtime is bundled, not copied');
   assert.ok((await readFile(join(dir, 'bin/app.js'), 'utf8')).length > 1000);
   for (const name of ['configs/types/tsconfig.sitemap.json', 'configs/types/tsconfig.authoring.json', 'configs/templates/atoms/button.json']) {
@@ -222,11 +222,11 @@ async function kitFixture(root, version, files, configs = {}) {
     entries.push({ path, hash: hash(content), bytes: Buffer.byteLength(content) });
   }
   for (const [id, content] of Object.entries(configs)) {
-    for (const path of [`bin/template/plugins/${id}/config.json`, `bin/plugins/${id}/config.json`]) {
+    for (const path of [`bin/template/src/cli/sdk/${id}/config.json`, `bin/plugins/${id}/config.json`]) {
       await mkdir(dirname(join(root, path)), { recursive: true });
       await writeFile(join(root, path), content);
     }
-    entries.push({ path: `bin/template/plugins/${id}/config.json`, hash: hash(content), bytes: Buffer.byteLength(content) });
+    entries.push({ path: `bin/template/src/cli/sdk/${id}/config.json`, hash: hash(content), bytes: Buffer.byteLength(content) });
   }
   const initial = [];
   for (const [path, content] of Object.entries(kitBootstrap)) {

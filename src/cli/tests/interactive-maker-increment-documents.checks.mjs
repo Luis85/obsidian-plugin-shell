@@ -13,7 +13,7 @@ import { incrementLinkDrift, issueTableIds, pullRequestRow, pullRequestTableIds,
 import { parseInputFragment } from '../domain/increments/input-fragment.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
-const deliveryFile = resolve(root, 'configs/delivery/delivery.json'), handoffScript = resolve(root, 'scripts/delivery/handoff.mjs');
+const deliveryFile = resolve(root, 'configs/delivery/delivery.json'), handoffScript = resolve(root, 'src/cli/tooling/delivery/handoff.mjs');
 const noDelivery = existsSync(deliveryFile) ? false : 'configs/delivery is not on this branch yet; the DoR contract is compared once it lands';
 const noScripts = existsSync(handoffScript) ? false : 'scripts/delivery is not on this branch yet; the DoR parser is compared once it lands';
 const path = 'docs/increments/delivery-pipeline.md';
@@ -289,8 +289,8 @@ test('the built-in schema and template equal configs/delivery, except the extens
 });
 
 test('CLI-written increments parse through the DoR parser and pass DOR-02', { skip: noScripts }, async () => {
-  const handoff = await import(pathToFileURL(handoffScript).href), { renderHandoff } = await import(pathToFileURL(resolve(root, 'scripts/delivery/increment.mjs')).href);
-  const { readyRules, resolveWikilink: dorResolve } = await import(pathToFileURL(resolve(root, 'scripts/delivery/rules-ready.mjs')).href);
+  const handoff = await import(pathToFileURL(handoffScript).href), { renderHandoff } = await import(pathToFileURL(resolve(root, 'tooling/delivery/increment.mjs')).href);
+  const { readyRules, resolveWikilink: dorResolve } = await import(pathToFileURL(resolve(root, 'src/cli/tooling/delivery/rules-ready.mjs')).href);
   assert.equal(fresh(), renderHandoff(incrementTemplate, { slug: 'delivery-pipeline', title: 'Delivery pipeline', owner: 'Luis' }));
   const text = apply(ready(), { kind: 'field', key: 'title', value: 'Quote "and" \\ colon: [x]' }, { kind: 'ref-add', ref: '[[docs/prds/a, b]]' },
     { kind: 'ac-set', id: 'AC-1', checked: true, evidence: ['tests/x.checks.mjs'] }, { kind: 'pull-requests', ids: ['delivery-pipeline-1'], rows: [{ id: 'delivery-pipeline-1', title: 'One', status: 'New', path: 'docs/pull-requests/delivery-pipeline-1.md' }] });

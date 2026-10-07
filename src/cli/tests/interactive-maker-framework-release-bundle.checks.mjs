@@ -11,15 +11,15 @@ import { bundledNoticeFiles } from '../adapters/framework/docs-vendor.ts';
 const banner = "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(import.meta.url);\nimport { existsSync as __kitExists } from 'node:fs';\nconst __kitTemplateRoot = new URL(__kitExists(new URL('./template/package.json', import.meta.url)) ? './template/' : '../', import.meta.url);\n";
 const sources = {
   'src/cli/app.ts': "import { here, dir } from './data.ts';\nimport plain from './plain.js';\nimport js from './meta.mjs';\n" +
-    "import config from '../../plugins/demo/config.json';\nimport nested from '../../nested/plugins/demo/config.json';\n" +
+    "import config from './sdk/demo/config.json';\nimport nested from '../../nested/src/cli/sdk/demo/config.json';\n" +
     "import { outside } from '../../../outside.mjs';\nimport fake from 'fake';\n" +
     'console.log(here, dir, plain, js, config, nested, outside, fake, import.meta.env);\n',
   'src/cli/data.ts': "export const here: string = import.meta.url;\nexport const dir = import.meta.dirname;\n" +
     "export const text = 'import.meta.url';\n// import.meta.dirname in a comment\n",
   'src/cli/plain.js': 'export default 1;\n',
   'src/cli/meta.mjs': 'export default `${import.meta.url}` + "import.meta.dirname";\n',
-  'plugins/demo/config.json': '{"enabled":true}\n',
-  'nested/plugins/demo/config.json': '{"nested":true}\n',
+  'src/cli/sdk/demo/config.json': '{"enabled":true}\n',
+  'nested/src/cli/sdk/demo/config.json': '{"nested":true}\n',
   'node_modules/fake/package.json': '{"name":"fake","type":"module","main":"index.js"}\n',
   'node_modules/fake/index.js': 'export default import.meta.url;\n',
 };

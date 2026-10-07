@@ -22,7 +22,7 @@ export async function readStarterOperation(request: Request, context: Context) {
   if (request.command === 'starters list') return listStarters(context);
   if (request.command === 'starters schema') {
     // A verified release kit keeps the schema as template data beside its bundled CLI; a checkout reads its own source.
-    const schema = join(await resolveTemplateRoot(context.frameworkRoot), 'scripts/starters/starter.schema.json');
+    const schema = join(await resolveTemplateRoot(context.frameworkRoot), 'tooling/starters/starter.schema.json');
     return result(request.command, parseJsonData(new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(schema))));
   }
   const definitions = await loadDefinitions(context.root);

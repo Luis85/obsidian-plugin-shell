@@ -6,10 +6,10 @@ import { PassThrough, Readable } from 'node:stream';
 import { main } from '../../adapters/framework-cli.ts';
 
 export const frameworkRoot = resolve(import.meta.dirname, '../../../..');
-const fixtureRoot = join(frameworkRoot, 'tests/fixtures/adoption');
+const fixtureRoot = resolve(import.meta.dirname, '../fixtures/adoption');
 const text = value => Array.isArray(value) ? value.join('\n') + '\n' : JSON.stringify(value, null, 2) + '\n';
 
-/** Writes one adoption fixture tree (tests/fixtures/adoption/<name>.tree.json) into an empty directory. */
+/** Writes one adoption fixture tree (src/cli/tests/fixtures/adoption/<name>.tree.json) into an empty directory. */
 export async function materialize(name, directory) {
   const tree = JSON.parse(await readFile(join(fixtureRoot, `${name}.tree.json`), 'utf8'));
   for (const [path, content] of Object.entries(tree.files)) {

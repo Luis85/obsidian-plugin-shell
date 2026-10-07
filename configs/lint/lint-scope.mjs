@@ -13,6 +13,8 @@ export const shellLintExclusions = Object.freeze([
   // The former scripts/ code. Two modules were linted before under another name (src/cli/domain/errors.ts and
   // templates/companion/runtime/contract.ts). The pattern ends in `.*` so it matches files, never directories.
   'src/shared/**/*.*', '!src/shared/contracts/sketch-errors.ts', '!src/shared/companion/runtime-contract.ts',
+  // The starter rules the companion editor shares with the CLI were linted as src/cli/adapters/starters before they moved.
+  '!src/shared/companion/starters/*.ts',
 ]);
 
 function globToRegExp(glob) {

@@ -36,14 +36,14 @@ test('an empty project lists no starters and names the separate starters ZIP', (
 }, []));
 
 test('the schema comes from the checkout and a stray template copy is never probed without a verified kit', () => workspace(async context => {
-  const source = JSON.parse(await readFile(join(context.frameworkRoot, 'scripts/starters/starter.schema.json'), 'utf8'));
+  const source = JSON.parse(await readFile(join(context.frameworkRoot, 'tooling/starters/starter.schema.json'), 'utf8'));
   assert.deepEqual((await read(context, 'starters schema')).data, source);
   // Without bin/kit.json a root is a checkout: its own schema wins and a stray bin/template copy is never probed.
-  const checkout = join(context.root, 'checkout'); await mkdir(join(checkout, 'bin/template/scripts/starters'), { recursive: true }); await mkdir(join(checkout, 'scripts/starters'), { recursive: true });
-  await writeFile(join(checkout, 'bin/template/scripts/starters/starter.schema.json'), '{"title":"stray copy"}');
-  await writeFile(join(checkout, 'scripts/starters/starter.schema.json'), '{"title":"checkout"}');
+  const checkout = join(context.root, 'checkout'); await mkdir(join(checkout, 'bin/template/tooling/starters'), { recursive: true }); await mkdir(join(checkout, 'tooling/starters'), { recursive: true });
+  await writeFile(join(checkout, 'bin/template/tooling/starters/starter.schema.json'), '{"title":"stray copy"}');
+  await writeFile(join(checkout, 'tooling/starters/starter.schema.json'), '{"title":"checkout"}');
   assert.deepEqual((await read({ ...context, frameworkRoot: checkout }, 'starters schema')).data, { title: 'checkout' });
-  await writeFile(join(checkout, 'scripts/starters/starter.schema.json'), '{"__proto__":{"polluted":true}}');
+  await writeFile(join(checkout, 'tooling/starters/starter.schema.json'), '{"__proto__":{"polluted":true}}');
   assert.equal(await code(read({ ...context, frameworkRoot: checkout }, 'starters schema')), 'JSON_DATA_INVALID');
   await writeFile(join(checkout, 'bin/kit.json'), '{}');
   assert.match(await code(read({ ...context, frameworkRoot: checkout }, 'starters schema')), /^KIT_/);

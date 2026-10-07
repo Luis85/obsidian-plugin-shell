@@ -76,8 +76,8 @@ test('shared fixture commands require hash-bound approval and preserve unrelated
 });
 test('dry-run dominates public execution flags and never launches a release adapter', async t => {
   const ctx = await fixture(t);
-  await mkdir(join(ctx.root, 'scripts/release'), { recursive: true });
-  await writeFile(join(ctx.root, 'scripts/release/cli.mjs'), `import {writeFileSync} from 'node:fs'; writeFileSync('release-adapter-started', 'unexpected'); console.log('{}');`);
+  await mkdir(join(ctx.root, 'tooling/release'), { recursive: true });
+  await writeFile(join(ctx.root, 'tooling/release/cli.mjs'), `import {writeFileSync} from 'node:fs'; writeFileSync('release-adapter-started', 'unexpected'); console.log('{}');`);
   const response = await run(ctx, ['release', 'operate', '--input', 'request.json', '--execute', '--authorize', 'reviewed-candidate', '--yes', '--dry-run']);
   assert.equal(response.status, 'planned');
   assert.equal(response.data.execution, 'not-run');

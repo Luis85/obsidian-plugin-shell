@@ -52,7 +52,7 @@ export function siteNewPlan(request: Request, context: Context): Promise<Planned
     return { plan: await createFilePlan(context.root, entries), conflicts: [], summary: {
       site: name, title: site.title, template: template.id, astro: templates.catalog.astro, files: entries.map(entry => entry.path),
       // Only the maintainer checkout carries the projects tooling; kits and generated projects wire the site's CI by hand.
-      next: siteNextSteps(target, await exists(join(context.root, 'scripts/projects/projects.mjs'))),
+      next: siteNextSteps(target, await exists(join(context.root, 'tooling/projects/projects.mjs'))),
       notPerformed: 'Nothing is installed or built: Astro is a dependency of the generated site only.',
     } };
   });

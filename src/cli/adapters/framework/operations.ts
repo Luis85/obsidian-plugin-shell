@@ -25,6 +25,7 @@ import { suggestions, didYouMean } from './suggest.ts';
 import { capabilityCatalog } from '../operations/catalog.ts';
 import { result, failure, requireThat, stringOption, OperationError, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
+import { repositoryScope, toolingFolder } from './repository-scope.ts';
 import { fileOperation } from './file-operation.ts';
 import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';
@@ -125,7 +126,8 @@ async function releaseOperate(request: Request, context: Context): Promise<Resul
       publication: 'not-authorized',
     }, 'planned');
   }
-  const exit = await runNode(context, 'scripts/release/cli.mjs', releaseArgs(request, context, path));
+  // tooling/ in the shell repository, scripts/ in a generated project (repository-scope.ts).
+  const exit = await runNode(context, `${toolingFolder(repositoryScope(context.root))}/release/cli.mjs`, releaseArgs(request, context, path));
   requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT', 'Release output exceeded its bound; do not infer success or retry writes automatically.');
   return result(request.command, { execution: exit, receipt: JSON.parse(exit.stdout) });
 }

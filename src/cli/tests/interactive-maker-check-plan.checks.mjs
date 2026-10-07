@@ -27,7 +27,7 @@ test('a runtime change requires check, production coverage and the final verify,
 }));
 
 test('presentation and event changes add their own gates; an explicit base is repeated in the check command', () => withRepo({}, async dir => {
-  await write(dir, { 'src/presentation/components/Panel.vue': '<template />\n', 'src/application/events.ts': 'export {};\n' });
+  await write(dir, { 'src/plugin/presentation/components/Panel.vue': '<template />\n', 'src/plugin/application/events.ts': 'export {};\n' });
   const data = await plan(dir, { base: 'HEAD' });
   assert.deepEqual(gateIds(data), ['check', 'coverage-production', 'check-presentation', 'events-check', 'verify']);
   assert.equal(gateOf(data, 'check').command, 'node bin/app check --fast --base HEAD');
@@ -54,7 +54,7 @@ test('suites join test includes, rule sources and path-filtered workflows, with 
 }));
 
 test('a suite selected only by a workflow filter is optional locally; a clean tree needs only the final gate', () => withRepo({}, async dir => {
-  await write(dir, { 'scripts/starters/render.ts': 'x\n' });
+  await write(dir, { 'src/shared/companion/starters/render.ts': 'x\n' });
   const data = await plan(dir);
   assert.equal(gateOf(data, 'suite:e2e').required, false, 'CI runs it through starter-flow, but nothing local selected it');
   assert.equal(gateOf(data, 'suite:generator').required, true);

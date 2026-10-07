@@ -189,7 +189,7 @@ test('[SITES-CLI-06] site new names the projects tooling as next steps only in a
   const elsewhere = await next();
   assert.doesNotMatch(elsewhere, /projects:sync|check:projects/, 'a kit or generated project has no projects tooling');
   assert.match(elsewhere, /copy projects\/acme\/\.github\/workflows\/ci\.yml/);
-  await put('scripts/projects/projects.mjs', '');
+  await put('tooling/projects/projects.mjs', '');
   const maintainer = await next();
   assert.match(maintainer, /npm run projects:sync\nnpm run check:projects/);
 }));

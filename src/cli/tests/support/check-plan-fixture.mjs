@@ -24,7 +24,7 @@ const manifest = {
 const workflows = {
   'ci.yml': 'name: CI\non:\n  pull_request:\n  push:\n    branches: [main]\njobs: {}\n',
   'interactive-maker.yml': 'name: Interactive maker\non:\n  pull_request:\njobs: {}\n',
-  'starter-flow.yml': 'name: Starter flow\non:\n  pull_request:\n    paths: &inputs\n      - templates/**\n      - "!templates/docs/**"\n      - scripts/starters/**\n  push:\n    paths: *inputs\njobs: {}\n',
+  'starter-flow.yml': 'name: Starter flow\non:\n  pull_request:\n    paths: &inputs\n      - templates/**\n      - "!templates/docs/**"\n      - src/shared/companion/starters/**\n  push:\n    paths: *inputs\njobs: {}\n',
 };
 const durations = '| Suite | Purpose | Command | Runner | Prerequisites | In `verify` | Measured |\n| --- | --- | --- | --- | --- | --- | --- |\n| `generator` | g | `npm run test:generator` | `node --test` | none | tooling | 187 s |\n| `maker` | m | `npm run test:maker` | Vitest `configs/testing/vitest.maker.config.mjs` | none | own step | not measured |\n';
 const baseline = { 'src/a.ts': 'export const a = 1;\n', 'README.md': 'readme\n', 'src/cli/app.ts': 'export {};\n', 'configs/types/tsconfig.maker.json': '{}\n', 'docs/testing/TEST-SUITES.md': durations,

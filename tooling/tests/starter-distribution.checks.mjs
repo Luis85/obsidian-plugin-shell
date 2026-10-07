@@ -61,7 +61,9 @@ test('extracted compiled shell contains no starter data; a separate pack enables
   if (await reviewedExamplesRemoved(root)) { t.skip('Examples removed; kit packing requires the reviewed framework source preimages.'); return; }
   const directory = await temp(t), shellRoot = join(directory, 'shell'); await mkdir(shellRoot);
   const files = await assembleKit({ root, frameworkRoot: root }, await compiler());
-  assert.ok(!files.some(file => /(?:^|\/)configs\/starters\//.test(file.path) || file.path.includes('/companion/starters/')));
+  // src/shared/companion/starters holds the starter rule modules (code the CLI and the companion editor share), not starter data.
+  const starterCode = path => /\/src\/shared\/companion\/starters\/[\w-]+\.ts$/.test(path);
+  assert.ok(!files.some(file => /(?:^|\/)configs\/starters\//.test(file.path) || (file.path.includes('/companion/starters/') && !starterCode(file.path))));
   assert.ok(!files.some(file => file.path.endsWith('/companion/companion-project.json') || file.path.includes('/companion/seeds/')));
   for (const asset of ['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt']) assert.ok(files.some(file => file.path === 'bin/template/docs/concepts/companion/vendor/' + asset), asset);
   const archive = zip(files); await extractArchive(archive, shellRoot);

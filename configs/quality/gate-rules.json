@@ -6,7 +6,7 @@
     "maker": ["src/cli/adapters/makers/**", "tooling/makers/**", "src/cli/adapters/framework/check*.ts", "src/cli/adapters/framework/gate-*.ts", "src/cli/adapters/framework/adopt-*.ts", "src/cli/domain/adoption/**", "src/cli/application/adoption/**", "src/cli/presentation/terminal/adopt-view.ts", "configs/quality/gate-rules.json"],
     "makers": ["src/cli/adapters/makers/**", "tooling/makers/**", "tooling/events/**", "tooling/examples/**"],
     "cli": ["src/cli/launcher.mjs", "tooling/bundling/build-cli.mjs", "src/cli/app.ts", "src/cli/adapters/framework/**", "src/cli/adapters/framework-cli.ts", "src/cli/presentation/terminal/**", "tooling/framework/**", "tooling/operations/**", "src/shared/contracts/**", "src/cli/adapters/community-plugins/**", "src/cli/domain/community-plugin.ts", "src/cli/sdk/**", "configs/quality/gate-rules.json"],
-    "generator": ["templates/**", "configs/templates/**", "src/cli/compiler/**", "tooling/compiler/**", "tooling/starters/**", "src/cli/adapters/starters/**", "configs/starters/**", "src/shared/platform/file-plan*"],
+    "generator": ["templates/**", "configs/templates/**", "src/cli/compiler/**", "tooling/compiler/**", "tooling/starters/**", "src/cli/adapters/starters/**", "src/shared/companion/starters/**", "configs/starters/**", "src/shared/platform/file-plan*"],
     "compiler": ["src/cli/compiler/**", "tooling/compiler/**"],
     "companion": ["src/shared/companion/**", "tooling/concepts/**", "templates/**"],
     "visual": ["src/shared/companion/visual/**"],

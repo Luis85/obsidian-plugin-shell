@@ -197,7 +197,7 @@ for (const boundary of [0, 1, 3]) test(`terminated writer recovers at destinatio
   const original = await snapshot(root);
   const entries = [{path:'docs/page.md',content:'After page'}, {path:'docs/added.md',content:'New document'},
     {path:'design/project.json',content:'{"after":true}\n'}, {path:'design/docs-index.json',content:'{"baseline":"after"}\n'}];
-  const writer = new URL('#shared/platform/file-plan.ts', import.meta.url).href;
+  const writer = new URL('../../shared/platform/file-plan.ts', import.meta.url).href;
   const journal = new URL('../documentation/adapters/recovery.ts', import.meta.url).href;
   const code = `import {createFilePlan,applyFilePlan} from ${JSON.stringify(writer)}; import {journalHook} from ${JSON.stringify(journal)};
     const plan=await createFilePlan(${JSON.stringify(root)},${JSON.stringify(entries)}), record=journalHook(plan);

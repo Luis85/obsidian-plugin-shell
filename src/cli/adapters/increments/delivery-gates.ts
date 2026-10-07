@@ -1,5 +1,5 @@
 /**
- * The Definition of Ready and Done from scripts/delivery, run in-process over the repository snapshot with an
+ * The Definition of Ready and Done from src/cli/tooling/delivery, run in-process over the repository snapshot with an
  * explicit handoff. They load lazily (dependency-free scripts of the framework checkout); without them, or without
  * delivery.json or a commit to diff against, the Ready gate falls back to the domain's structural readiness and the
  * Done gate is unavailable (INCREMENT_GATES_UNAVAILABLE).
@@ -26,7 +26,8 @@ async function gateBase(ws: DeliveryWorkspace, explicit?: string): Promise<strin
   return null;
 }
 async function available(ws: DeliveryWorkspace): Promise<boolean> {
-  return ws.configured && await exists(join(ws.context.frameworkRoot, 'scripts/delivery/run.mjs')) && await ws.git.available();
+  // The checkout location of the delivery rules this module imports (bundled into the CLI; absent from kits).
+  return ws.configured && await exists(join(ws.context.frameworkRoot, 'src/cli/tooling/delivery/run.mjs')) && await ws.git.available();
 }
 /** Runs one gate without writing; null when the delivery scripts, configuration or a base commit are missing. */
 export async function runGate(ws: DeliveryWorkspace, path: string, gate: Gate, explicitBase?: string): Promise<GateReport | null> {
@@ -58,6 +59,6 @@ export async function readiness(ws: DeliveryWorkspace, path: string, text: strin
 /** The Done gate or a coded refusal when it cannot run. */
 export async function requireGate(ws: DeliveryWorkspace, path: string, gate: Gate, base?: string): Promise<GateReport> {
   const report = await runGate(ws, path, gate, base);
-  if (!report) throw new OperationError('INCREMENT_GATES_UNAVAILABLE', 'The Definition of Done needs configs/delivery/delivery.json, scripts/delivery and a git work tree with a commit to diff against.', 'npm run dod -- --handoff <path>');
+  if (!report) throw new OperationError('INCREMENT_GATES_UNAVAILABLE', 'The Definition of Done needs configs/delivery/delivery.json, the delivery rules (src/cli/tooling/delivery) and a git work tree with a commit to diff against.', 'npm run dod -- --handoff <path>');
   return report;
 }

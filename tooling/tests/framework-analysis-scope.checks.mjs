@@ -150,6 +150,12 @@ test('src/shared/companion holds only the companion contract library; its toolin
   const inZone = path => patterns.some(pattern => pattern.endsWith('/**') ? path.startsWith(pattern.slice(0, -2)) : pattern === path);
   const sources = (await readdir(new URL('src/shared/companion/', root), { recursive: true }))
     .map(name => 'src/shared/companion/' + name.replaceAll('\\', '/')).filter(path => /\.(?:mjs|ts)$/.test(path) && !path.endsWith('.d.mts'));
-  assert.deepEqual(sources.filter(path => !inZone(path)), []);
+  // Two parts joined it with the src project split, each in its own declared zone: the generated-project runtime
+  // contract (project-templates, formerly templates/companion/runtime/contract.ts) and the starter rules the companion
+  // editor shares with the CLI (src/shared/companion/starters, formerly src/cli/adapters/starters).
+  const zoned = name => config.boundaries.zones.find(zone => zone.name === name).patterns;
+  assert.ok(zoned('project-templates').includes('src/shared/companion/runtime-contract.ts'));
+  assert.ok(zoned('project-starter-contract').includes('src/shared/companion/starters/project-generator.ts'));
+  assert.deepEqual(sources.filter(path => !inZone(path) && path !== 'src/shared/companion/runtime-contract.ts' && !path.startsWith('src/shared/companion/starters/')), []);
   for (const path of sources) assert.doesNotMatch(await readFile(new URL(path, root), 'utf8'), /from\s*['"](?:\.\.\/)+(?:bin|cli)\//, path);
 });

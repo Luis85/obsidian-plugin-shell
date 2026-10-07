@@ -117,8 +117,8 @@ test('manual provenance tracks package version while dependency-only updates lea
     'src/cli/adapters/framework/increment-catalog.ts': '// catalog input',
     'src/cli/adapters/framework/increment-help.ts': '// help input',
     'src/cli/compiler/domain/diagnostics.ts': 'export const diagnosticCatalog = { EXAMPLE: "Example." };',
-    'scripts/documentation/render.mjs': '// renderer input',
-    'scripts/documentation/manual.mjs': '// generator input',
+    'tooling/documentation/render.mjs': '// renderer input',
+    'tooling/documentation/manual.mjs': '// generator input',
   };
   for (const [path, content] of Object.entries(fixtures)) {
     await mkdir(join(base, path, '..'), { recursive: true });
