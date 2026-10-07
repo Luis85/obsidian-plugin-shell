@@ -15,7 +15,7 @@ const flagFields: Readonly<Record<string, string>> = { document: '--document', b
 /** Recipes that execute project code or replace whole projects are never batched. */
 const excluded = new Set(['maker', 'plugin', 'locale']);
 const maxSteps = 40;
-export interface BatchStep { readonly recipe: string; readonly name: string; readonly arguments: MakerArguments }
+interface BatchStep { readonly recipe: string; readonly name: string; readonly arguments: MakerArguments }
 export interface PlannedBatch {
   readonly maker: 'batch'; readonly steps: readonly { readonly recipe: string; readonly name: string }[];
   readonly plan: FilePlan; readonly checks: readonly MakerCheck[]; readonly next: string;
@@ -45,7 +45,7 @@ function parseStep(value: unknown, index: number): BatchStep {
   return { recipe, name, arguments: parseArguments(args) };
 }
 /** `{ "schemaVersion": 1, "steps": [{ "recipe": "feature", "name": "boards", "bare": true }, ...] }` */
-export function parseBatch(input: unknown): BatchStep[] {
+function parseBatch(input: unknown): BatchStep[] {
   if (!record(input) || input.schemaVersion !== 1 || !Array.isArray(input.steps))
     throw new Error('Batch input must be { "schemaVersion": 1, "steps": [...] }');
   const keys = Object.keys(input).filter(key => !['schemaVersion', 'steps', 'description'].includes(key));

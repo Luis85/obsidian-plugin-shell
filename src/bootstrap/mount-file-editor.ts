@@ -4,14 +4,10 @@ import { createNativeFileModel, nativeFileKey } from '../presentation/context/na
 import type { MountNativeFileEditor } from '../infrastructure/obsidian/custom-file-view';
 import type { NativeFileEditorMounts } from '../infrastructure/obsidian/native-integrations';
 import type { Services } from './services';
-import { mountVueSurface } from './vue-surface';
+import type { NativeFileEditorRegistration } from './native-integrations';
+import { mountVueSurface } from './mount-ui';
 
-/** A Vue editor for one registered file type (`id` is the file type's id). */
-export interface NativeFileEditorRegistration {
-  readonly id: string;
-  readonly component: Component;
-}
-export function mountFileEditor(services: Services, editor: Component): MountNativeFileEditor {
+function mountFileEditor(services: Services, editor: Component): MountNativeFileEditor {
   return (root, session) => {
     const { model, release } = createNativeFileModel(session);
     return mountVueSurface(root, services, {

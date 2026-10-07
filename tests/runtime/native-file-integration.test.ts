@@ -135,10 +135,9 @@ it('filters native menu actions, passes only a file snapshot and safely displays
   expect(kit.openFileMenu(kit.file('b.folio')).items).toHaveLength(0);
   await kit.openFileMenu(kit.file('note.md')).item('Inspect file')!.click();
   await kit.flush();
-  expect(run).toHaveBeenCalledTimes(1);
-  const [snapshot, files] = run.mock.calls[0] as unknown as [unknown, Record<string, unknown>];
-  expect(snapshot).toEqual({ path: 'note.md', name: 'note.md', extension: 'md' });
-  expect(Object.keys(files).sort()).toEqual(['create', 'open', 'read']);
+  // The handler gets a plain snapshot and exactly the three file operations.
+  expect(run).toHaveBeenCalledExactlyOnceWith({ path: 'note.md', name: 'note.md', extension: 'md' },
+    { create: expect.any(Function), open: expect.any(Function), read: expect.any(Function) });
   expect(kit.modals[0]?.contentEl.textContent).toBe('<script>never execute</script>');
   expect(kit.modals[0]?.contentEl.querySelector('script')).toBeNull();
   expect(kit.read('note.md')).toBe('# Note');

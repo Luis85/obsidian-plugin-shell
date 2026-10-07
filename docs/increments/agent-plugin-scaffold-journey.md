@@ -35,29 +35,30 @@ An AI agent with a short plugin brief (a custom file extension with its own view
 
 ## Acceptance criteria
 
-- [ ] AC-1: `make batch` plans a bare feature, a custom file type with a Vue editor and a context-menu action as one reviewed plan; applying it writes every file once and a replay is unchanged. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-1.checks.mjs`
-- [ ] AC-2: A batch with an unknown field, an excluded recipe or a child step before its feature is refused before any write. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-2.checks.mjs`
-- [ ] AC-3: `new --extension kanban` on the `custom-file-view` starter renames the sample format (file type id and name, goals, acceptance, pages and notes) without touching other words. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-3.checks.mjs`
-- [ ] AC-4: An unapproved `new` preview writes nothing and names the exact `--apply <planHash>` rerun. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-4.checks.mjs`
+- [x] AC-1: `make batch` plans a bare feature, a custom file type with a Vue editor and a context-menu action as one reviewed plan; applying it writes every file once and a replay is unchanged. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-1.checks.mjs`
+- [x] AC-2: A batch with an unknown field, an excluded recipe or a child step before its feature is refused before any write. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-2.checks.mjs`
+- [x] AC-3: `new --extension kanban` on the `custom-file-view` starter renames the sample format (file type id and name, goals, acceptance, pages and notes) without touching other words. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-3.checks.mjs`
+- [x] AC-4: An unapproved `new` preview writes nothing and names the exact `--apply <planHash>` rerun. Evidence: `tests/acceptance/agent-plugin-scaffold-journey/ac-4.checks.mjs`
 
 ## Affected areas
 
-- `src/cli/adapters/makers/**`: batch planning, the file-editor recipe, `--bare` and `--editor`.
-- `src/cli/adapters/framework/**`: maker options, help text, batch dispatch and `core.longpaths`.
-- `src/cli/adapters/starters/**`: the `--extension` rename and the preview apply hint.
-- `src/cli/adapters/commands.ts`: the focused `new --help` page.
-- `src/cli/compiler/emitters/**`: generated projects wire the file editor registry.
+- `src/cli/**`: batch planning, the file-editor recipe, `--bare`, `--editor`, `new --help`, the apply hint, the `--extension` rename, `core.longpaths` and generated editor wiring.
 - `src/application/native-file-editor.ts`: the host-independent editor session contract.
 - `src/domain/native-integrations.ts`: editor registration contracts.
-- `src/bootstrap/**`: the Vue surface and file editor mount.
+- `src/bootstrap/**`: the shared Vue surface and the file editor mount.
 - `src/features/api.ts`: the feature-author editor API.
 - `src/infrastructure/obsidian/**`: the custom file view and file operations.
 - `src/presentation/components/NativeFileEditorHost.vue`: the editor host component.
 - `src/presentation/context/native-file-context.ts`: the editor injection context.
+- `scripts/examples/ownership.json`: the reviewed hash of the reshaped `mount-ui.ts`.
+- `templates/examples/src__bootstrap__mount-ui.ts.txt`: the example-removal replacement keeps the shared Vue surface.
 - `tests/runtime/**`: file editor and file operation runtime tests.
 - `tests/tooling/**`: CLI and maker checks.
+- `tests/fixtures/compiler/starter-golden.json`: reviewed generated-output baseline for the new emitter output.
 - `tests/acceptance/agent-plugin-scaffold-journey/**`: acceptance checks of this increment.
 - `tests/suites.json`: test levels for the new runtime tests.
+- `docs/concepts/companion/index.html`: the rebuilt concept embeds the starter customization.
+- `docs/user-manual/shell-cli/generated/**`: the regenerated command manual.
 - `docs/development/native-file-integrations.md`: the agent scaffolding how-to.
 - `docs/increments/agent-plugin-scaffold-journey.md`: this handoff.
 - `CHANGELOG.md`: the Unreleased entry.
@@ -77,7 +78,7 @@ An AI agent with a short plugin brief (a custom file extension with its own view
 
 ## Changelog
 
-- Added: Agent plugin scaffolding with `make batch`, `make feature --bare`, `make file-extension --editor vue` and `make file-editor`, plus a focused `new --help`, an exact apply hint after a `new` preview, full format renaming with `new --extension` and `core.longpaths` in generated repositories.
+- Added: Agent plugin scaffolding: `make batch --input <skeleton.json>` plans a whole skeleton (feature, file extension, editor, context menu) as one reviewed plan with one check run; `make feature --bare` creates only the feature folder; `make file-extension --editor vue` and the new `make file-editor` recipe give a custom file type a generated Vue editor that reads and saves through the native `TextFileView`. `new --help` shows the directory-creation options, a `new` preview prints the exact `--apply <planHash>` rerun, `new --extension <ext>` renames the starter's sample format throughout the project, and `new` enables `core.longpaths` in the new repository so deep generated paths commit on Windows.
 
 ## Risks and rollback
 

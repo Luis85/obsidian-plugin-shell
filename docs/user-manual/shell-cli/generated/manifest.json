@@ -10,11 +10,11 @@
     },
     {
       "path": "src/cli/adapters/framework/catalog.ts",
-      "sha256": "19a41e1358c604c30334bbb4ba68f12ccd05a70a8370defeecc4fe24ed822cd7"
+      "sha256": "546c8b79714a6d58f84286a4aad5f1fd8ed17dcbe9feacb8819dd5c9c11ef977"
     },
     {
       "path": "src/cli/adapters/framework/help-text.ts",
-      "sha256": "3c779211fff3dd3ca098d2697b05a0b01b628faa609ea3e76b6e452c5eee8fce"
+      "sha256": "d7a18b495cf76f03bb3617ca547481ea7706c2a7ad43487d27f9995198d7fb68"
     },
     {
       "path": "src/cli/adapters/framework/increment-catalog.ts",
@@ -40,7 +40,7 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "a9ef65a7ff56c41de5e0fd37a2ed352af11190328f7e25db543fa547d2819dab"
+      "sha256": "7206b139180f0be11786e39a7917314a61c4575d6cfaf1bb72ceabf756858d57"
     },
     {
       "path": "diagnostics.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "b40e9845aa14320ca53475844d90d87263bee0896488dd5617dba71efac2bbd4"
+      "sha256": "5366b30d8a905819d8cc633eac7baa9ae2f22c48c68ff85ffac5412ecdb29303"
     }
   ]
 }

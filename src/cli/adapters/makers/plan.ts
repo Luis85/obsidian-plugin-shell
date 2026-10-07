@@ -88,7 +88,7 @@ async function checkOwner(root: string, maker: string, owner: string | undefined
     throw new Error(`Feature ${owner} does not exist. Create it first with make feature ${owner}.`);
   return exists;
 }
-export function planMetadata({ maker, name, options, owner, entity, preset, backend, folder }: MakerInput): Partial<PlannedMaker> {
+function planMetadata({ maker, name, options, owner, entity, preset, backend, folder }: MakerInput): Partial<PlannedMaker> {
   if (['feature', 'entity'].includes(maker)) return { entity, preset, backend, ...(backend === 'markdown' ? { folder } : {}) };
   if (maker !== 'setting') return {};
   const preference = options['--preference'];

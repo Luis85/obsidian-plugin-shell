@@ -8721,11 +8721,13 @@
       "effect": "plan",
       "maxArgs": 2,
       "group": "develop",
-      "usage": "node bin/app make <recipe> <name> [options] | make list | make describe <recipe>",
+      "usage": "node bin/app make <recipe> <name> [options] | make batch --input <skeleton.json> | make list | make describe <recipe>",
       "examples": [
         "node bin/app make list",
-        "node bin/app make file-extension board --feature documents --extension board",
+        "node bin/app make file-extension board --feature documents --extension board --editor vue",
+        "node bin/app make file-editor board --feature documents --file-type documents-board",
         "node bin/app make context-menu inspect --feature documents --extensions md,board",
+        "node bin/app make batch --input skeleton.json",
         "node bin/app make feature bookmarks --entity bookmark --dry-run"
       ],
       "options": [
@@ -8802,9 +8804,34 @@
           "description": "Comma-separated lowercase, dotless file-menu filters, for example md,txt."
         },
         {
+          "name": "editor",
+          "kind": "value",
+          "description": "Dedicated file view UI: raw text editor, or a generated Vue editor (composable, component, test).",
+          "values": [
+            "text",
+            "vue"
+          ],
+          "default": "text"
+        },
+        {
+          "name": "file-type",
+          "kind": "value",
+          "description": "Registered custom file type id that receives the editor, for example documents-board (make file-extension prints it)."
+        },
+        {
+          "name": "input",
+          "kind": "value",
+          "description": "Input JSON file (use - for stdin where supported)."
+        },
+        {
           "name": "document",
           "kind": "flag",
           "description": "Note-backed entity (requires the markdown backend)."
+        },
+        {
+          "name": "bare",
+          "kind": "flag",
+          "description": "make feature: create only the feature folder (README), without the example entity, workspace and command."
         },
         {
           "name": "list",

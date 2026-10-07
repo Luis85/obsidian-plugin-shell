@@ -4575,7 +4575,7 @@ npm run entities:catalog
 Use the shared maker registry and file planner.
 
 ```sh
-node bin/app make <recipe> <name> [options] | make list | make describe <recipe>
+node bin/app make <recipe> <name> [options] | make batch --input <skeleton.json> | make list | make describe <recipe>
 ```
 
 **Effect:** plan. Reviewed file plan. Preview first; application requires explicit approval. Saving --plan-out itself writes a plan file.
@@ -4595,7 +4595,11 @@ node bin/app make <recipe> <name> [options] | make list | make describe <recipe>
 | --extension | value | Custom file suffix without a dot (lowercase, 1–16 letters/digits). Core Obsidian extensions are refused. | See command semantics |
 | --format | value | Custom file content format (file-extension recipe). | Values: json, text; Default: json |
 | --extensions | value | Comma-separated lowercase, dotless file-menu filters, for example md,txt. | See command semantics |
+| --editor | value | Dedicated file view UI: raw text editor, or a generated Vue editor (composable, component, test). | Values: text, vue; Default: text |
+| --file-type | value | Registered custom file type id that receives the editor, for example documents-board (make file-extension prints it). | See command semantics |
+| --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --document | flag | Note-backed entity (requires the markdown backend). | See command semantics |
+| --bare | flag | make feature: create only the feature folder (README), without the example entity, workspace and command. | See command semantics |
 | --list | flag | List the available entries instead of creating one. | See command semantics |
 | --trust-custom | flag | Run a registered local custom recipe (scripts/makers/custom/&lt;name&gt;.mjs); it executes trusted project code, so review it first. Built-in recipes never need it. | See command semantics |
 | --check | flag | Read-only: compare the pending locale draft (make locale &lt;name&gt; --check) with the current base keys; plans and writes nothing. | See command semantics |
@@ -4615,8 +4619,10 @@ Parser-accepted common flags without documented semantics here: `--timeout`. Do 
 
 ```sh
 node bin/app make list
-node bin/app make file-extension board --feature documents --extension board
+node bin/app make file-extension board --feature documents --extension board --editor vue
+node bin/app make file-editor board --feature documents --file-type documents-board
 node bin/app make context-menu inspect --feature documents --extensions md,board
+node bin/app make batch --input skeleton.json
 node bin/app make feature bookmarks --entity bookmark --dry-run
 ```
 
