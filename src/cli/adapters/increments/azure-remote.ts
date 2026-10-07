@@ -49,6 +49,10 @@ function requireText(title: string, body: string | undefined, step: Step): void 
   if (size && !size.fits) throw definite('PR_BODY_TOO_LARGE', `The description has ${size.size} characters; Azure DevOps accepts at most ${size.limit}. It is never truncated.`, step);
 }
 
+function sourceCommit(value: unknown): string | undefined {
+  return isObject(value) && typeof value.commitId === 'string' ? value.commitId : undefined;
+}
+
 export function createAzureRemote(options: AzureRemoteOptions): HostingRemote {
   const { organization, project, repository } = options, run = options.run ?? commandRunner, windows = options.windows ?? process.platform === 'win32';
   try { validateHosting({ platform: 'azure-devops', azureDevOps: { organization, project, repository } }); }
@@ -81,7 +85,7 @@ export function createAzureRemote(options: AzureRemoteOptions): HostingRemote {
     const state = azureRemoteState({ status: value.status, isDraft: value.isDraft });
     const head = branchOf(value.sourceRefName), base = branchOf(value.targetRefName), description = value.description ?? '';
     if (!Number.isSafeInteger(value.pullRequestId) || state === null || head === null || base === null || typeof value.title !== 'string' || typeof description !== 'string') throw invalid(step);
-    const headCommit = isObject(value.lastMergeSourceCommit) && typeof value.lastMergeSourceCommit.commitId === 'string' ? value.lastMergeSourceCommit.commitId : undefined;
+    const headCommit = sourceCommit(value.lastMergeSourceCommit);
     return { ...(headCommit ? { headCommit } : {}), ...pullRequest({ number: value.pullRequestId as number, url: `${web}/pullrequest/${value.pullRequestId}`, title: value.title, body: description, state, head, base }) };
   }
   const get = async (number: number) => toPullRequest(await json(['repos', 'pr', 'show', '--id', String(requireNumber(number)), ...scope], 'read'), 'read');

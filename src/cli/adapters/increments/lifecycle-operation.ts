@@ -22,6 +22,12 @@ async function done(loaded: Loaded, headCommit: string): Promise<void> {
   if (loaded.pull.model.kind === 'kickoff') requireThat(loaded.increment.model.sections.some(section => section.name === 'Iteration review'),
     'ITERATION_PRESENTATION_REQUIRED', 'Save and commit the work presentation with increment present before requesting review.');
 }
+async function requireClosedChildren(loaded: Loaded, action: PullRequestAction): Promise<void> {
+  if (action === 'close' && loaded.pull.model.kind === 'kickoff') {
+    const children = (await loaded.session.all('pullRequest')).filter(item => item.model.increment === loaded.increment.id && item.id !== loaded.pull.id);
+    requireThat(!children.some(item => ['Draft', 'Ready'].includes(item.model.status)), 'INCREMENT_OPEN_PULL_REQUESTS', 'Close or merge and sync the iteration’s open change pull requests first.');
+  }
+}
 async function plan(request: Request, context: Context) {
   const action = actions[request.command];
   requireThat(action, 'INVALID_COMMAND', 'Unknown pull-request lifecycle action.');
@@ -37,10 +43,7 @@ async function plan(request: Request, context: Context) {
     requireThat(allowed, 'PR_STATUS_TRANSITION', `Cannot ${action} a pull request in state ${pull.state}.`);
     if (action !== 'close') await done(loaded, pull.headCommit);
   }
-  if (action === 'close' && loaded.pull.model.kind === 'kickoff') {
-    const children = (await loaded.session.all('pullRequest')).filter(item => item.model.increment === loaded.increment.id && item.id !== loaded.pull.id);
-    requireThat(!children.some(item => ['Draft', 'Ready'].includes(item.model.status)), 'INCREMENT_OPEN_PULL_REQUESTS', 'Close or merge and sync the iteration’s open change pull requests first.');
-  }
+  await requireClosedChildren(loaded, action);
   const before = await localBefore(loaded);
   const data = { planHash: planHash(context, request, { before, action, revision: pull.revision, headCommit: pull.headCommit }),
     action, completed, remote: { platform: loaded.target.platform, repository: loaded.target.repository, head: pull.head, base: pull.base, number: pull.number, url: pull.url, before: pull.state, after: states[action], headCommit: pull.headCommit },

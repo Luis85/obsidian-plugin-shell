@@ -10,8 +10,12 @@ export async function requireIterationBranch(session: Session, id: string, incre
   if (pull.base !== expected || !pull.head || pull.head === expected || pull.head === (increment.base ?? names.base)) {
     throw new OperationError('PR_BASE_MISMATCH', 'All work for a committed iteration must use a separate head branch and target its iteration branch.');
   }
-  if (await session.ws.git.branchExists(pull.head)) {
+  await requireBranchAncestry(session, expected, pull.head);
+}
+
+async function requireBranchAncestry(session: Session, expected: string, head: string): Promise<void> {
+  if (await session.ws.git.branchExists(head)) {
     const start = await session.ws.git.resolve(expected) ? expected : `origin/${expected}`;
-    if (!await session.ws.git.contains(start, pull.head)) throw new OperationError('PR_BRANCH_MISMATCH', `Rebase or merge ${expected} into ${pull.head} before using that existing branch for this iteration.`);
+    if (!await session.ws.git.contains(start, head)) throw new OperationError('PR_BRANCH_MISMATCH', `Rebase or merge ${expected} into ${head} before using that existing branch for this iteration.`);
   }
 }

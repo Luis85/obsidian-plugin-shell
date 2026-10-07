@@ -29,11 +29,7 @@ async function askFlag(options: Options, key: string, prompt: Prompt, question: 
 /** The guided request; any other command is returned unchanged. */
 export async function guidedIncrement(request: Request, prompt: Prompt): Promise<Request> {
   if (request.options['dry-run']) return request;
-  if (request.command === 'increment commit') {
-    if (request.options.branch || request.options['no-branch']) return request;
-    const create = parseConfirmation(await prompt('Create the iteration branch and commit its planning records? [y/N] ')) === true;
-    return { ...request, options: { ...request.options, [create ? 'branch' : 'no-branch']: true } };
-  }
+  if (request.command === 'increment commit') return guidedCommit(request, prompt);
   if (!['increment new', 'increment plan', 'pr new'].includes(request.command)) return request;
   const options: Options = { ...request.options };
   const subject = request.command.startsWith('increment ') ? `increment ${request.args[0] ?? ''}`.trim() : `pull request of ${request.args[0] ?? 'the increment'}`;
@@ -46,4 +42,10 @@ export async function guidedIncrement(request: Request, prompt: Prompt): Promise
   }
   if (request.command !== 'increment plan') await askFlag(options, 'branch', prompt, 'Create the branch when git is available and it does not exist yet?');
   return { ...request, options };
+}
+
+async function guidedCommit(request: Request, prompt: Prompt): Promise<Request> {
+  if (request.options.branch || request.options['no-branch']) return request;
+  const create = parseConfirmation(await prompt('Create the iteration branch and commit its planning records? [y/N] ')) === true;
+  return { ...request, options: { ...request.options, [create ? 'branch' : 'no-branch']: true } };
 }
