@@ -62,7 +62,7 @@ function suiteGate(sources: Sources, suite: SuiteDef, reasons: Reason[], paths: 
   const prerequisites = suite.prerequisites ?? [];
   const covered = direct && (fastRunnable(suite) || suite.runner.type === 'vitest');
   const levels = [...new Set([suite.level, ...Object.keys(suite.levels ?? {})].filter((level): level is string => typeof level === 'string'))];
-  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node scripts/testing/suites.mjs ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered, levels,
+  return { id: `suite:${suite.name}`, label: `Suite ${suite.name}`, command: `node tooling/testing/suites.mjs ${suite.name}`, kind: 'suite', required: direct, viaCheck: covered, levels,
     why: reasons.map(reason => ({ kind: reason.kind, detail: reason.detail, paths: reason.paths, count: reason.count })),
     estimateSeconds: sources.durations[suite.name] ?? null, prerequisites, needs: needsOf(prerequisites), ci: ciFor(sources, suite.workflows ?? [], paths) };
 }

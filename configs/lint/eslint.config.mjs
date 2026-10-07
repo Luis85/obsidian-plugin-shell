@@ -15,6 +15,11 @@ const pluginRules = { ...obsidian.ruleConfigs.recommended, ...obsidian.ruleConfi
 };
 export default ts.config(
   { ignores: ['node_modules/**', 'dist/**', 'dist-harness/**', 'reports/**'] },
+  // Inputs that stay outside the source lint, exactly as before the split: each project's tests and the browser harness
+  // (linted by the explicit eslint-tests step, which passes --no-ignore), the companion concept sources (the former
+  // docs/concepts) and the former scripts/ code (src/cli/tooling, src/shared except the two modules that were linted
+  // as src/cli/domain/errors.ts and templates/companion/runtime). Keep in sync with tooling/quality/lint-source.mjs.
+  { ignores: ['src/*/tests/**', 'src/plugin/harness/**', 'src/companion/**', 'src/cli/tooling/**', 'src/shared/**/*', '!src/shared/contracts/sketch-errors.ts', '!src/shared/companion/runtime-contract.ts'] },
   ...ts.configs.recommended,
   ...vue.configs['flat/essential'],
   { files: ['src/plugin/domain/**/*.ts', 'src/plugin/application/**/*.ts', 'src/plugin/features/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
@@ -34,7 +39,7 @@ export default ts.config(
   ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
     languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     ...(folder === 'src/plugin/harness' || folder.startsWith('src/plugin/harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
-  { files: ['src/plugin/tests/unit/**/*.ts', 'tests/support/**/*.ts', 'src/plugin/tests/e2e/**/*.ts', 'src/plugin/tests/obsidian/**/*.ts', 'src/plugin/harness/app/**/*.ts'],
+  { files: ['src/plugin/tests/unit/**/*.ts', 'tests/support/**/*.ts', 'src/plugin/tests/support/**/*.ts', 'src/plugin/tests/e2e/**/*.ts', 'src/plugin/tests/obsidian/**/*.ts', 'src/plugin/harness/app/**/*.ts'],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },
     rules: { '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],

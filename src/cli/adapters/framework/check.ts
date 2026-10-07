@@ -31,7 +31,7 @@ async function makerSteps(root: string, project: boolean): Promise<CheckStep[]> 
   if (!await exists(join(root, 'src/cli/app.ts')) || !await exists(join(root, 'configs/types/tsconfig.maker.json'))) return [];
   const types: CheckStep = { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] };
   if (project) return [types];
-  return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'], timeoutMs: suiteTimeoutMs }];
+  return [types, { id: 'maker-tests', display: 'node tooling/testing/suites.mjs maker', entry: 'tooling/testing/suites.mjs', args: ['maker'], timeoutMs: suiteTimeoutMs }];
 }
 function typecheckStep(root: string, project: boolean): CheckStep {
   if (!project) return { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
@@ -49,9 +49,11 @@ async function authoringSteps(root: string): Promise<CheckStep[]> {
   const names = (await readdir(join(root, 'tests/tooling'))).filter(name => authoringTest.test(name)).sort();
   return names.map(name => ({ id: `tooling:${name.slice(0, -'.checks.mjs'.length)}`, display: `node tests/tooling/${name}`, entry: `tests/tooling/${name}`, args: [] }));
 }
-const oxlintEntry = 'scripts/quality/lint-source.mjs';
+/** The shell repository keeps its tooling in tooling/; a generated project carries the same wrapper under scripts/. */
+const oxlintEntryFor = (project: boolean): string => project ? 'scripts/quality/lint-source.mjs' : 'tooling/quality/lint-source.mjs';
 /** The same two linters as `npm run lint`: oxlint over owned source, then ESLint over the configured roots. */
 function stepParts(root: string, project: boolean, makers: CheckStep[], config: string[], extra: { oxlint: boolean; authoring: CheckStep[] }): Parts {
+  const oxlintEntry = oxlintEntryFor(project);
   const lint: CheckStep | null = extra.oxlint ? { id: 'lint', display: `node ${oxlintEntry}`, entry: oxlintEntry, args: [] } : null;
   // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
   const eslintRoots = project ? lintRoots(root) : ['src'];
@@ -66,7 +68,7 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit,
   const scope = await checkScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root, project), config = vitestConfig(root, project);
   // A generated project without the shell's oxlint wrapper keeps ESLint only; the shell always runs both.
-  const oxlint = !project || await exists(join(root, oxlintEntry));
+  const oxlint = !project || await exists(join(root, oxlintEntryFor(project)));
   const parts = stepParts(root, project, makers, config, { oxlint, authoring: await authoringSteps(root) });
   if (!fast) return { scope, steps: fullSteps(parts) };
   const changes = await changedFiles(root, git, base);

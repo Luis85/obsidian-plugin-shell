@@ -12,7 +12,7 @@ export interface SuiteDef {
   runner: { type: string }; prerequisites?: string[]; optional?: boolean;
   /** The verify step that runs a Vitest suite's files (the maker suite runs in maker-coverage-run). */
   verifyStepId?: string;
-  /** Test-pyramid level and per-level file-pattern overrides (scripts/testing/test-levels.mjs validates them). */
+  /** Test-pyramid level and per-level file-pattern overrides (tooling/testing/test-levels.mjs validates them). */
   level?: string; levels?: Record<string, string[]>;
 }
 export interface SuiteManifest { suites: SuiteDef[]; prerequisites?: Record<string, { hint?: string }> }
@@ -23,7 +23,7 @@ export interface GateRules {
   docsOnly: { gates: string[]; note: string }; final: string[];
 }
 type PathMatcher = (path: string) => boolean;
-/** Glob helpers and the manifest loader come from scripts/testing; absent in distributed kits. */
+/** Glob helpers and the manifest loader come from src/cli/tooling/testing; absent in distributed kits. */
 export interface Toolkit { glob: (patterns: string[]) => PathMatcher; matchSuite: (suite: SuiteDef) => PathMatcher; manifest: () => Promise<SuiteManifest> }
 
 export async function loadToolkit(root: string): Promise<Toolkit | null> {

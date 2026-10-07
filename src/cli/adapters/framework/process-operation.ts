@@ -67,7 +67,7 @@ async function testInvocation(request: Request, context: Context, host: Host, pr
 }
 async function verifyInvocation(request: Request, _context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
   acceptProfile(request.command, profile);
-  return profile === 'project' ? { entry: await host.npm(), args: ['run', 'verify:project'] } : { entry: 'scripts/quality/verify.mjs' };
+  return profile === 'project' ? { entry: await host.npm(), args: ['run', 'verify:project'] } : { entry: 'tooling/quality/verify.mjs' };
 }
 const devEntries: Record<string, { entry: string; args: string[] }> = {
   ui: { entry: 'node_modules/vite/bin/vite.js', args: ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1'] },
