@@ -21,4 +21,11 @@ export type { LifecycleObservation, Diagnostic } from '../application/ports';
 export type { EventDefinition, EventPayload, EventMapOf } from '../application/event-definition';
 export type { EventObserver, EventPublisher, EventSubscriber, EventInput } from '../application/events';
 
-export type { NativeFileDefinition, NativeMenuDefinition, NativeFileContext, NativeMenuResult } from '../domain/native-integrations';
+export type {
+  NativeFileDefinition,
+  NativeMenuDefinition,
+  NativeFileContext,
+  NativeFileOperations,
+  NativeMenuResult,
+  NativeMenuOutcome,
+} from '../domain/native-integrations';

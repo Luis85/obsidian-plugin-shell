@@ -37,7 +37,17 @@ async function resolveRecipe(request: Request, context: Context, recipe: string)
   if (!custom.includes(recipe)) throw new OperationError('MAKER_UNKNOWN', `Unknown recipe: ${recipe}.${didYouMean(suggestions(recipe, [...builtinRecipes, ...custom]), value => `"${value}"`)}`, 'node bin/app make list');
   requireThat(request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', `${recipe} is a local custom recipe that executes trusted project code; review scripts/makers/custom/${recipe}.mjs, then pass --trust-custom.`);
 }
+/** `make batch --input skeleton.json`: every step in one reviewed plan with one check run. */
+async function makerBatchPlan(request: Request, context: Context): Promise<Planned> {
+  const input = stringOption(request.options, 'input');
+  requireThat(input && request.args.length === 1, 'MAKER_BATCH_INPUT', 'Supply make batch --input <skeleton.json> with { "schemaVersion": 1, "steps": [{ "recipe": "feature", "name": "boards", "bare": true }, ...] }.');
+  const { planMakerBatch } = await import('../makers/batch.ts');
+  const planned = await planMakerBatch(context.root, await readJson(resolve(context.root, input)));
+  return { plan: planned.plan, checks: planned.checks, summary: { maker: planned.maker, steps: planned.steps, checks: pendingChecks(planned.checks), next: planned.next }, conflicts: [] };
+}
 async function makerPlan(request: Request, context: Context): Promise<Planned> {
+  if (request.args[0] === 'batch') return makerBatchPlan(request, context);
+  requireThat(request.options.input === undefined, 'MAKER_INPUT_UNSUPPORTED', '--input belongs to make batch.');
   const [recipe, name] = request.args;
   requireThat(recipe && name, 'MAKER_INPUT_REQUIRED', 'Supply a recipe and name; use make list for discovery.');
   await resolveRecipe(request, context, recipe);

@@ -60,7 +60,11 @@ test('starter customization edits only native configuration and is round-trip po
   const before = JSON.stringify(catalog);
   const source = customizeStarter(catalog, 'custom-file-view', { extension: 'board' });
   assert.equal(source.design.nativeIntegrations.fileTypes[0].extension, 'board');
-  assert.equal(source.design.blueprint, 'blank');
+  assert.deepEqual([source.design.nativeIntegrations.fileTypes[0].id, source.design.nativeIntegrations.fileTypes[0].name], ['board', 'Board document']);
+  const text = JSON.stringify([source.design, source.notes]);
+  assert.doesNotMatch(text, /\.folio\b|\bFolio\b/, 'the sample format is renamed in goals, acceptance, pages and notes');
+  assert.match(text, /Create, open, edit and save \.board documents/);
+  assert.match(JSON.stringify(customizeStarter(catalog, 'companion-plugin', {})), /portfolio/, 'other words are untouched');
   assert.equal(projectModel(source).screens.length, 3);
   const menu = customizeStarter(catalog, 'context-menu', { extensions: 'md,txt' });
   assert.deepEqual(menu.design.nativeIntegrations.contextMenus[0].extensions, ['md', 'txt']);

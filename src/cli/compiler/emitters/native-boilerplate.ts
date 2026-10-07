@@ -35,10 +35,14 @@ export function nativeDeclarationSource(kind: NativeKind, definition: NativeDecl
 /** Developer-owned file contract. Add domain validation without rewriting raw input. */
 export const definition: NativeFileDefinition = ${codeLiteral(value.definition)};
 `;
-  return `import type { NativeMenuDefinition, NativeFileContext, NativeMenuResult } from ${codeLiteral(contractImport)};
-/** Developer-owned action. Receive a file snapshot, not mutable host objects. No IO by default. */
-export function inspectFile(file: NativeFileContext): NativeMenuResult {
-  return { title: ${codeLiteral(value.definition.name)}, message: 'File: ' + file.name + '\\nExtension: .' + file.extension + '\\nVault path: ' + file.path };
+  return `import type { NativeMenuDefinition, NativeFileContext, NativeFileOperations, NativeMenuOutcome } from ${codeLiteral(contractImport)};
+/**
+ * Developer-owned action. \`file\` is a plain snapshot, never a host object; \`files\` reads,
+ * creates (never overwrites) and opens vault files. Return null to show nothing.
+ */
+export async function inspectFile(file: NativeFileContext, files: NativeFileOperations): Promise<NativeMenuOutcome> {
+  const text = await files.read(file.path);
+  return { title: ${codeLiteral(value.definition.name)}, message: 'File: ' + file.name + '\\nExtension: .' + file.extension + '\\nVault path: ' + file.path + '\\nCharacters: ' + text.length };
 }
 export const definition: NativeMenuDefinition = { ${objectMembers(value.definition)}, run: inspectFile };
 `;
@@ -48,7 +52,8 @@ function declarationExpectations(value: Declared): string {
     return `expect(definition.extension).toBe(${codeLiteral(value.definition.extension)});
   expect(definition.initialContent).toBe(${codeLiteral(value.definition.initialContent)});`;
   return `expect(definition.extensions).toEqual(${codeLiteral(value.definition.extensions)});
-  expect(await definition.run({ path: 'Notes/Example.md', name: 'Example.md', extension: 'md' })).toEqual({ title: ${codeLiteral(value.definition.name)}, message: 'File: Example.md\\nExtension: .md\\nVault path: Notes/Example.md' });`;
+  const files = { read: async () => '# Example', create: async () => 'created' as const, open: async () => undefined };
+  expect(await definition.run({ path: 'Notes/Example.md', name: 'Example.md', extension: 'md' }, files)).toEqual({ title: ${codeLiteral(value.definition.name)}, message: 'File: Example.md\\nExtension: .md\\nVault path: Notes/Example.md\\nCharacters: 9' });`;
 }
 export function nativeDeclarationTest(kind: NativeKind, definition: NativeDeclaration, sourceImport: string): string {
   const value = declared(kind, definition);

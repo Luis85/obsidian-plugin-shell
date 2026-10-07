@@ -14,7 +14,9 @@ node bin/app new ../folio-tools --starter custom-file-view --extension folio --y
 node bin/app new ../file-tools --starter context-menu --extensions md,txt --yes
 ```
 
-Without `--yes`, inspect the dry-run/review first. Interactive `new` asks for the native suffix or filters when omitted. The companion starter dialog offers the same choices. The full project JSON retains declarations through export/import, blueprint transfer, replacement, undo and redo. Its browser preview does not claim to register an Obsidian file type.
+`--extension kanban` renames the sample format everywhere the starter names it: the file type id and name, the create command, goals, acceptance criteria, pages and notes then say `.kanban` and **Kanban** instead of `.folio` and **Folio**.
+
+Without `--yes`, inspect the dry-run/review first; the preview prints the exact `--apply <planHash>` rerun. Interactive `new` asks for the native suffix or filters when omitted. The companion starter dialog offers the same choices. The full project JSON retains declarations through export/import, blueprint transfer, replacement, undo and redo. Its browser preview does not claim to register an Obsidian file type.
 
 ## Add capabilities to an existing plugin
 
@@ -26,6 +28,25 @@ node bin/app make file-extension board --feature documents --extension board --f
 node bin/app make file-extension board --feature documents --extension board --format json --yes
 node bin/app make context-menu inspect --feature documents --extensions md,board --yes
 ```
+
+`make feature <name> --bare` creates only the feature folder, without the example entity, workspace and command. `--editor vue` (or a later `make file-editor board --feature documents --file-type documents-board`) replaces the raw text editor with a generated Vue editor: a composable, a component in `src/presentation/components/generated`, styles, messages and a test. The editor reads and writes through the shared file editor context, so the native view still owns saving.
+
+### One plan for a whole skeleton
+
+`make batch --input skeleton.json` plans several recipes as one reviewed file plan with one targeted check run. Later steps see earlier outputs, so a feature created in step 1 owns the file type of step 2:
+
+```json
+{
+  "schemaVersion": 1,
+  "steps": [
+    { "recipe": "feature", "name": "documents", "bare": true },
+    { "recipe": "file-extension", "name": "board", "feature": "documents", "extension": "board", "format": "json", "editor": "vue" },
+    { "recipe": "context-menu", "name": "inspect", "feature": "documents", "extensions": ["md", "board"] }
+  ]
+}
+```
+
+Step fields map one-to-one to maker options (`fileType` is `--file-type`; arrays join with commas). `maker`, `plugin` and `locale` are never batched, and a batch has at most 40 steps. Preview first, then apply with `--apply <planHash>` or `--yes`.
 
 Use `--format text` for plain text with an empty initial file. JSON starts with a valid versioned object. Edit `src/features/documents/board.file-extension.ts` or `inspect.context-menu.ts` to define your format, domain validation, and behavior. Matching generated unit tests live in `tests/runtime/generated`. Makers update the explicit arrays in `src/bootstrap/native-integrations.ts`; they do not patch `main.ts` or register arbitrary strings as executable code.
 
