@@ -4,7 +4,8 @@ import obsidian from 'eslint-plugin-obsidianmd';
 import { fileURLToPath } from 'node:url';
 import { sourceRoots } from '../../src/shared/platform/project-roots.mjs';
 import { projectConfigPath, projectConfigs } from '../../src/shared/platform/project-configs.mjs';
-import { isShellRepository, lintExclusionGlobs } from './lint-scope.mjs';
+import { isShellRepository } from '../../src/shared/platform/repository-kind.mjs';
+import { lintExclusionGlobs } from './lint-scope.mjs';
 // This file lives in configs/lint; every path and tsconfig resolves from the project root.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 /** A generated project may keep product code outside src (its codebase folder, named in
@@ -40,8 +41,10 @@ export default ts.config(
   ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
     languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     ...(folder === 'harness' || folder.startsWith('harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
-    // Every test folder (tests/ and harness/app in a generated project; each source project's tests, tooling/tests and the harness app in the shell).
-  { files: ['tests/**/*.ts', 'harness/app/**/*.ts', 'src/*/tests/**/*.ts', 'tooling/tests/**/*.ts', 'src/plugin/harness/app/**/*.ts'],
+  // The test folders: a generated project keeps its tests/{runtime,support,e2e,obsidian} and harness/app; the shell lints every
+  // source project's tests plus the harness app (tooling/tests/**/*.ts is added here and to the eslint-tests step once a .ts test exists there).
+  { files: shell ? ['tests/support/**/*.ts', 'src/*/tests/**/*.ts', 'src/plugin/harness/app/**/*.ts']
+      : ['tests/runtime/**/*.ts', 'tests/support/**/*.ts', 'tests/e2e/**/*.ts', 'tests/obsidian/**/*.ts', 'harness/app/**/*.ts'],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },
     rules: { '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],

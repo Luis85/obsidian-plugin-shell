@@ -61,7 +61,7 @@ const fullSteps = (parts: Parts): CheckStep[] => [parts.typecheck, ...(parts.lin
 export interface CheckSelection { scope: string; steps: CheckStep[]; changes?: Changes; suites?: Array<{ name: string; reasons: Reason[] }> }
 /** `base` (fast mode only) is the ref whose merge-base with HEAD starts the diff; default origin/main, else HEAD. */
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit, base?: string, skipSuites = false): Promise<CheckSelection> {
-  const scope = await repositoryScope(root), project = scope === 'generated-project';
+  const scope = repositoryScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root, project), config = vitestConfig(root, project);
   // A generated project without the shell's oxlint wrapper keeps ESLint only; the shell always runs both.
   const oxlint = !project || await exists(join(root, oxlintEntryFor(project)));

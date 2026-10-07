@@ -5,7 +5,9 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { ESLint } from 'eslint';
 import { lintOwnedSource } from '../quality/lint-source.mjs';
-import { isShellRepository, lintExcluded, lintExclusionGlobs, shellLintExclusions } from '../../configs/lint/lint-scope.mjs';
+import { lintExcluded, lintExclusionGlobs, shellLintExclusions } from '../../configs/lint/lint-scope.mjs';
+import { isShellRepository } from '../../src/shared/platform/repository-kind.mjs';
+import { repositoryScope } from '../../src/cli/adapters/framework/repository-scope.ts';
 
 const repositoryRoot = resolve(import.meta.dirname, '../..');
 const sources = [
@@ -19,7 +21,9 @@ async function project(t, kind) {
   const root = await realpath(await mkdtemp(join(tmpdir(), `lint-scope-${kind}-`)));
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const path of sources) { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), 'export {};\n'); }
-  if (kind === 'generated') { await mkdir(join(root, '.companion'), { recursive: true }); await writeFile(join(root, '.companion/generation.json'), '{}'); }
+  if (kind === 'generated') {
+    for (const path of ['.companion/generation.json', 'configs/types/tsconfig.project.json']) { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), '{}'); }
+  }
   return root;
 }
 /** A stand-in for oxlint that records the files it was asked to lint. */
@@ -38,6 +42,8 @@ test('the shell repository excludes tests, harness, companion and the former scr
   const shell = await project(t, 'shell'), generated = await project(t, 'generated');
   assert.equal(isShellRepository(shell), true);
   assert.equal(isShellRepository(generated), false);
+  // `check`, `verify` and the lint scope share one definition of a shell repository.
+  for (const root of [shell, generated, repositoryRoot]) assert.equal(isShellRepository(root), repositoryScope(root) === 'shell-repository', root);
   assert.deepEqual(await linted(shell), [...shellLinted].sort());
   // A generated project's src/shared, src/companion, src/cli/tooling and src/<x>/tests are product code and stay linted.
   assert.deepEqual(await linted(generated), [...sources].sort());

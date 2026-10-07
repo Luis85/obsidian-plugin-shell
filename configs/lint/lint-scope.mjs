@@ -1,5 +1,4 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { isShellRepository } from '../../src/shared/platform/repository-kind.mjs';
 
 /**
  * Lint scope of the Workbench shell repository. Before the src project split the shell's tests, browser harness,
@@ -15,11 +14,6 @@ export const shellLintExclusions = Object.freeze([
   // templates/companion/runtime/contract.ts). The pattern ends in `.*` so it matches files, never directories.
   'src/shared/**/*.*', '!src/shared/contracts/sketch-errors.ts', '!src/shared/companion/runtime-contract.ts',
 ]);
-
-/** The shell repository, as `check` decides it: the CLI sources are present and the folder is not a generated project. */
-export function isShellRepository(root) {
-  return existsSync(join(root, 'src/cli/app.ts')) && !existsSync(join(root, '.companion/generation.json'));
-}
 
 function globToRegExp(glob) {
   let source = '';

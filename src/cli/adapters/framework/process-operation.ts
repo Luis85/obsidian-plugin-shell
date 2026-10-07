@@ -70,7 +70,7 @@ async function verifyInvocation(request: Request, context: Context, host: Host, 
   acceptProfile(request.command, profile);
   if (profile === 'project') return { entry: await host.npm(), args: ['run', 'verify:project'] };
   // The shell repository verifies through tooling/quality; a generated project carries its own copy under scripts/quality.
-  return { entry: `${toolingFolder(await repositoryScope(context.root, host.existsPath))}/quality/verify.mjs` };
+  return { entry: `${toolingFolder(repositoryScope(context.root))}/quality/verify.mjs` };
 }
 const devEntries: Record<string, { entry: string; args: string[] }> = {
   ui: { entry: 'node_modules/vite/bin/vite.js', args: ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1'] },
