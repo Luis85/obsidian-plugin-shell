@@ -68,10 +68,11 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     // Templates stay editable source data; runtime code is shipped only in the bundled CLI.
     // The bundle reads each Workbench plugin's config.json beside app.js, so enabling a plugin stays a data edit:
     // that copy is schema-checked editable data, not inventory; its fingerprinted default is the template copy.
-    if (/^plugins\/[^/]+\/config\.json$/.test(path)) files.push({ path: 'bin/' + path, bytes });
+    const pluginConfig = /^src\/cli\/sdk\/([^/]+)\/config\.json$/.exec(path);
+    if (pluginConfig) files.push({ path: `bin/plugins/${pluginConfig[1]}/config.json`, bytes });
     if (path === pluginGuideSource) files.push({ path: pluginGuide, bytes });
   }
-  const ownership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json')!;
+  const ownership = files.find(file => file.path === 'bin/template/tooling/examples/ownership.json')!;
   const shipped = new Map(files.filter(file => file.path.startsWith('bin/template/')).map(file => [file.path.slice('bin/template/'.length), file.bytes]));
   ownership.bytes = updateOwnership(originals, shipped, ownership.bytes);
   // The runtime is now a single bundle. Only the editable template copy of

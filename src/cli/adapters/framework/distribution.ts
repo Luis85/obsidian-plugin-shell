@@ -6,14 +6,17 @@ import { requireThat } from './contracts.ts';
 import { deliveryPipelineFiles, deliveryPipelineFolder } from '../../compiler/domain/template-inputs.ts';
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies; so are the projects/<name>
  * tooling and the workflows it syncs from those standalone projects. */
-const excludedRoots = [deliveryPipelineFolder, '.github/workflows/projects--', 'scripts/projects/', 'configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/agents-prototype-0.15/', 'scripts/concepts/', 'tests/concepts/', 'tests/fixtures/sites/'];
-const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tests/tooling/projects-boundary.checks.mjs', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
+const excludedRoots = [deliveryPipelineFolder, '.github/workflows/projects--', 'tooling/projects/', 'configs/starters/', 'src/companion/app/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/agents-prototype-0.15/', 'tooling/concepts/', 'src/companion/tests/concepts/', 'tests/fixtures/sites/'];
+const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tooling/tests/projects-boundary.checks.mjs', 'tooling/tests/companion-boundaries.checks.mjs', 'tooling/tests/concept-metrics.checks.mjs', 'src/cli/tests/jev-concept-distribution.checks.mjs', 'src/cli/tests/project-generator-native-starters.checks.mjs',
   // The developer guide describes working in the framework checkout, not an extracted kit.
   'DEVELOPER_GUIDE.md',
+  // The isolated manual renderer's own npm package (tooling/documentation) was never a template root.
+  ...['.gitignore', 'package.json', 'package-lock.json'].map(name => `tooling/documentation/${name}`),
   // Site template qualification builds the framework's own templates/sites; kits carry the templates, not this tooling.
-  '.github/workflows/site-templates.yml', 'scripts/testing/qualify-site-templates.mjs', 'tests/tooling/site-templates-qualification.checks.mjs',
+  '.github/workflows/site-templates.yml', 'tooling/testing/qualify-site-templates.mjs', 'tooling/tests/site-templates-qualification.checks.mjs',
   // Starter-pack qualification reads canonical definitions and concept builders that only the maintainer checkout carries.
-  '.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles, ...['golden', 'definitions', 'lifecycle', 'classic-assembly', 'distribution'].map(name => `tests/tooling/starter-${name}.checks.mjs`)]);
+  '.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles, 'tooling/tests/starter-golden.checks.mjs', 'src/cli/tests/starter-definitions.checks.mjs', 'src/cli/tests/starter-lifecycle.checks.mjs',
+  'src/shared/tests/starter-classic-assembly.checks.mjs', 'tooling/tests/starter-distribution.checks.mjs']);
 /** These reviewed runtime libraries are compiler dependencies, not starter content. */
 const runtimeAssets = new Set(['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt'].map(name => 'docs/concepts/companion/vendor/' + name));
 export function included(path: string): boolean {

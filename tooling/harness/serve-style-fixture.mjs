@@ -6,23 +6,19 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 
 const root = new URL('../../', import.meta.url);
+// URLs are rooted at the plugin project (src/plugin), so the fixture pages' relative links resolve as on disk.
+const project = 'src/plugin/';
 const routes = new Map([
-  ['/', ['src/plugin/harness/style-fixture/index.html', 'text/html; charset=utf-8']],
-  ['/harness/style-fixture/', ['src/plugin/harness/style-fixture/index.html', 'text/html; charset=utf-8']],
-  ['/harness/style-fixture/index.html', ['src/plugin/harness/style-fixture/index.html', 'text/html; charset=utf-8']],
-  ['/harness/style-fixture/fixture.css', ['src/plugin/harness/style-fixture/fixture.css', 'text/css; charset=utf-8']],
-  ['/harness/style-fixture/fixture.js', ['src/plugin/harness/style-fixture/fixture.js', 'text/javascript; charset=utf-8']],
-  ['/harness/styles/obsidian.css', ['src/plugin/harness/styles/obsidian.css', 'text/css; charset=utf-8']],
+  ['/', [project + 'harness/style-fixture/index.html', 'text/html; charset=utf-8']],
+  ['/harness/style-fixture/', [project + 'harness/style-fixture/index.html', 'text/html; charset=utf-8']],
 ]);
-for (const module of ['tokens', 'base', 'controls', 'overlays', 'accessibility']) {
-  routes.set(`/harness/styles/obsidian/${module}.css`, [`harness/styles/obsidian/${module}.css`, 'text/css; charset=utf-8']);
+for (const [path, type] of [['harness/style-fixture/index.html', 'text/html'], ['harness/style-fixture/simulated.html', 'text/html'],
+  ['harness/style-fixture/fixture.css', 'text/css'], ['harness/style-fixture/fixture.js', 'text/javascript'],
+  ['harness/styles/obsidian.css', 'text/css'], ['harness/styles/vendor/obsidian.css', 'text/css'], ['harness/styles/host-adapter.css', 'text/css'],
+  ['harness/styles/simulated.css', 'text/css'], ['styles/index.css', 'text/css'], ['styles/tokens.css', 'text/css'],
+  ...['tokens', 'base', 'controls', 'overlays', 'accessibility'].map(module => [`harness/styles/obsidian/${module}.css`, 'text/css'])]) {
+  routes.set(`/${path}`, [project + path, `${type}; charset=utf-8`]);
 }
-
-for (const path of ['src/plugin/harness/styles/vendor/obsidian.css', 'src/plugin/harness/styles/host-adapter.css',
-  'src/plugin/harness/styles/simulated.css', 'src/plugin/styles/index.css', 'src/plugin/styles/tokens.css']) {
-  routes.set(`/${path}`, [path, 'text/css; charset=utf-8']);
-}
-routes.set('/harness/style-fixture/simulated.html', ['src/plugin/harness/style-fixture/simulated.html', 'text/html; charset=utf-8']);
 
 export function createFixtureServer() {
   return createServer(async (request, response) => {

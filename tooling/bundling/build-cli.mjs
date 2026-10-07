@@ -37,7 +37,7 @@ export async function buildCli(root = process.cwd()) {
     }
     await chmod(join(scratch, 'bin/app'), 0o755);
     // Installed app plugins, enabled lists and edited plugin settings are user data.
-    if (await present(join(destination, 'src/cli/sdk'))) await cp(join(destination, 'src/cli/sdk'), join(scratch, 'bin/plugins'), { recursive: true });
+    if (await present(join(destination, 'plugins'))) await cp(join(destination, 'plugins'), join(scratch, 'bin/plugins'), { recursive: true });
     const candidate = generatedProject && !previousKit ? (await verifyCliArtifact(scratch), null) : await verifyKit(scratch);
     const previous = join(scratch, 'previous-bin');
     if (existing) await rename(destination, previous);

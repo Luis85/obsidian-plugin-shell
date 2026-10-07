@@ -1,7 +1,7 @@
 /** Explicit document-local host profile, shared by HTTP and inline test adapters. */
 export const hostFiles = {
   extracted: ['src/plugin/harness/styles/vendor/obsidian.css', 'src/plugin/harness/styles/host-adapter.css'],
-  simulated: ['tokens','base','controls','overlays','accessibility'].map((n) => `harness/styles/obsidian/${n}.css`),
+  simulated: ['tokens','base','controls','overlays','accessibility'].map((n) => `src/plugin/harness/styles/obsidian/${n}.css`),
 };
 export const pluginStyleFiles = ['src/plugin/styles/tokens.css'];
 export function assertProfile(profile) {
