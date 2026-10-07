@@ -7,6 +7,7 @@
   "entryPointRole": "test",
   "entryPoints": [
     "tooling/compiler/verify-preview-host.mjs",
+    "tooling/testing/obsidian-harness.mjs",
     "src/plugin/tests/unit/types.ts",
     "tests/tooling/*.checks.mjs",
     "tooling/tests/*.checks.mjs",

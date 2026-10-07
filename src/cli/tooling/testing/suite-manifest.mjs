@@ -106,7 +106,7 @@ async function exists(path) {
   try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
 }
 /** Directories a root or helper-root path names; a `*` segment (`src/*\/tests`) matches every directory at that level. */
-export async function expandDirectories(root, pattern) {
+async function expandDirectories(root, pattern) {
   let found = [''];
   for (const segment of pattern.split('/')) {
     const next = [];

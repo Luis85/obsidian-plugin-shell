@@ -15,7 +15,7 @@ const sourceLocations = [
   ['tests/tooling/makers.checks.mjs', 'tooling/tests/makers.checks.mjs'], ['tests/tooling/maker-fixture.mjs', 'src/cli/tests/support/maker-fixture.mjs'],
 ];
 /** This repository's location of a file the fixture places at `path`. */
-export function makerSource(path) {
+function makerSource(path) {
   const entry = sourceLocations.find(([fixture]) => path === fixture || path.startsWith(fixture));
   return resolve(makerSourceRoot, entry ? entry[1] + path.slice(entry[0].length) : path);
 }

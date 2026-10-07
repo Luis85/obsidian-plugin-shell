@@ -423,6 +423,12 @@
         ]
       },
       {
+        "name": "project-starter-contract",
+        "patterns": [
+          "src/shared/companion/starters/project-generator.ts"
+        ]
+      },
+      {
         "name": "tooling",
         "patterns": [
           "tooling/**",
@@ -567,6 +573,7 @@
           "cli-serialization-contract",
           "cli-tooling",
           "shared",
+          "project-starter-contract",
           "tui",
           "sketch-errors-contract"
         ]
@@ -584,7 +591,8 @@
           "harness",
           "styles",
           "companion-authoring-contract",
-          "shared"
+          "shared",
+          "project-starter-contract"
         ]
       },
       {
@@ -622,6 +630,7 @@
           "cli-serialization-contract",
           "cli-tooling",
           "shared",
+          "project-starter-contract",
           "tui",
           "sketch-errors-contract"
         ]
@@ -711,6 +720,7 @@
           "companion-test-kit",
           "cli-tooling",
           "shared",
+          "project-starter-contract",
           "tui",
           "sketch-errors-contract"
         ]
@@ -744,7 +754,8 @@
           "cli-file-plan-contract",
           "cli-files-contract",
           "cli-bounded-map-contract",
-          "project-path-contract"
+          "project-path-contract",
+          "project-starter-contract"
         ]
       },
       {
@@ -855,6 +866,7 @@
           "cli-serialization-contract",
           "cli-tooling",
           "shared",
+          "project-starter-contract",
           "tui",
           "sketch-errors-contract"
         ]
@@ -871,6 +883,7 @@
         "from": "shared",
         "allow": [
           "shared",
+          "project-starter-contract",
           "sketch-errors-contract",
           "cli-data-contract",
           "cli-result-contract",
@@ -889,6 +902,12 @@
         "from": "sketch-errors-contract",
         "allow": [
           "sketch-errors-contract"
+        ]
+      },
+      {
+        "from": "project-starter-contract",
+        "allow": [
+          "project-starter-contract"
         ]
       }
     ]
@@ -918,6 +937,36 @@
         "getControlValue",
         "setControlValue",
         "hide"
+      ]
+    }
+  ],
+  "ignoreExports": [
+    {
+      "file": "src/plugin/domain/entity.ts",
+      "exports": [
+        "Field"
+      ]
+    },
+    {
+      "file": "src/shared/companion/concepts/apply.ts",
+      "exports": [
+        "ConceptDelta"
+      ]
+    },
+    {
+      "file": "src/cli/compiler/domain/project-starter.ts",
+      "exports": [
+        "ProjectFramework",
+        "ProjectGenerator",
+        "ProjectSelection"
+      ]
+    },
+    {
+      "file": "src/cli/compiler/adapters/project/selection.ts",
+      "exports": [
+        "readProjectGenerator",
+        "projectSelection",
+        "validateProjectSelection"
       ]
     }
   ],
