@@ -19,11 +19,12 @@ export default ts.config(
   // (linted by the explicit eslint-tests step, which passes --no-ignore), the companion concept sources (the former
   // docs/concepts) and the former scripts/ code (src/cli/tooling, src/shared except the two modules that were linted
   // as src/cli/domain/errors.ts and templates/companion/runtime). Keep in sync with tooling/quality/lint-source.mjs.
-  { ignores: ['src/*/tests/**', 'src/plugin/harness/**', 'src/companion/**', 'src/cli/tooling/**', 'src/shared/**/*', '!src/shared/contracts/sketch-errors.ts', '!src/shared/companion/runtime-contract.ts'] },
+  { ignores: ['src/*/tests/**', 'src/plugin/harness/**', 'src/companion/**', 'src/cli/tooling/**', 'src/shared/**/*.{ts,mts,cts,mjs,cjs,js,vue}', '!src/shared/contracts/sketch-errors.ts', '!src/shared/companion/runtime-contract.ts'] },
   ...ts.configs.recommended,
   ...vue.configs['flat/essential'],
   { files: ['src/plugin/domain/**/*.ts', 'src/plugin/application/**/*.ts', 'src/plugin/features/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
-  { files: ['src/**/*.{ts,vue}'], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
+  // The plugin-code rules never covered tests or the harness (they lived outside src): those files take only the test block below.
+  { files: ['src/**/*.{ts,vue}'], ignores: ['src/*/tests/**', 'src/plugin/harness/**'], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian },
     rules: pluginRules,
   },
