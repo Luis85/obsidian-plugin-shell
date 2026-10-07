@@ -8,7 +8,7 @@ import { mkdtemp, writeFile, rm, lstat, readdir, realpath } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { companionStarters, loadDefinitions } from '../starters/repository.ts';
-import type { CompanionStarter } from '#shared/companion/starters/types.ts';
+import type { CompanionStarter } from '../starters/types.ts';
 import { listStarters } from '../starters/operations.ts';
 import { definitionProjectPlan } from '../starters/project.ts';
 import { completeDefinition } from '../starters/processes.ts';

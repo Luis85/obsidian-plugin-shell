@@ -151,3 +151,21 @@ test('generated formatting and syntax diagnostics stay explicit', async () => {
   assert.throws(() => hasSyntaxErrors({}), { message: 'TYPESCRIPT_PARSER_UNSUPPORTED' });
   assert.equal(hasSyntaxErrors({ parseDiagnostics: [] }), false);
 });
+
+test('the maker type check builds a solution root, checks a plain root and keeps a generated project config', async () => {
+  const { makerTypecheck } = await import('../adapters/makers/plan.ts');
+  const { mkdtemp, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const root = await mkdtemp(join(tmpdir(), 'maker-typecheck-'));
+  const args = () => makerTypecheck(root).args.slice(1);
+  try {
+    assert.deepEqual(makerTypecheck(root), { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'] });
+    await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ extends: './configs/types/tsconfig.base.json' }));
+    assert.deepEqual(args(), ['--noEmit']);
+    await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ files: [], references: [{ path: './src/plugin' }] }));
+    assert.deepEqual(args(), ['-b'], 'a solution root checks no file with --noEmit');
+    await mkdir(join(root, 'configs/types'), { recursive: true });
+    await writeFile(join(root, 'configs/types/tsconfig.project.json'), '{}');
+    assert.deepEqual(args(), ['--noEmit', '--project', 'configs/types/tsconfig.project.json']);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});

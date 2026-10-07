@@ -14,7 +14,8 @@ import { requireThat, stringOption, type Context, type Request } from '../framew
 import { loadDefinitions } from './repository.ts';
 import { renderFiles, renderProcesses, resolveValues, interpolate } from '#shared/companion/starters/render.ts';
 import { record, readProcesses } from '#shared/companion/starters/validation.ts';
-import type { InputValue, StarterReceipt, LoadedStarter, StarterDefinition, StarterProcess } from '#shared/companion/starters/types.ts';
+import type { InputValue, StarterDefinition, StarterProcess } from '#shared/companion/starters/types.ts';
+import type { StarterReceipt, LoadedStarter } from './types.ts';
 import type { FilePlan } from '#shared/platform/file-plan.ts';
 export const receiptFile = '.workbench/starter.json';
 export interface Placement { directory: string; vault: string; target: string }
