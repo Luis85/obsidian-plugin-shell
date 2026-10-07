@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, cp, readFile, writeFile, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -54,13 +54,12 @@ test('[NPM-03] reviewed pins cover the lockfile hooks without blanket approvals'
 
 async function fixture() {
   const dir = await mkdtemp(join(tmpdir(), 'shell npm spaces ü-'));
-  await mkdir(join(dir, 'scripts/bundling'), { recursive: true });
-  await writeFile(join(dir, 'scripts/bundling/build-cli.mjs'), "console.log('Synthetic CLI build boundary; portable CLI has separate acceptance tests');\n");
-  await cp(join(root, 'scripts/setup.mjs'), join(dir, 'scripts/setup.mjs'));
-  await cp(join(root, 'scripts/setup'), join(dir, 'scripts/setup'), { recursive: true });
-  await cp(join(root, 'scripts/shared'), join(dir, 'scripts/shared'), { recursive: true });
-  await cp(join(root, 'scripts/agent/mcp-config.mjs'), join(dir, 'scripts/agent/mcp-config.mjs'));
-  await cp(join(root, 'scripts/companion/schema/hosting.mjs'), join(dir, 'scripts/companion/schema/hosting.mjs'));
+  await mkdir(join(dir, 'tooling/bundling'), { recursive: true });
+  await writeFile(join(dir, 'tooling/bundling/build-cli.mjs'), "console.log('Synthetic CLI build boundary; portable CLI has separate acceptance tests');\n");
+  // The dependency-free setup entry plus its complete relative import closure, kept at the repository layout.
+  for (const path of ['tooling/setup.mjs', 'tooling/setup', 'src/shared/platform', 'src/cli/tooling/agent/mcp-config.mjs', 'src/shared/companion/schema/hosting.mjs', 'configs/forms/setup-identity.json']) {
+    await mkdir(dirname(join(dir, path)), { recursive: true }); await cp(join(root, path), join(dir, path), { recursive: true });
+  }
   await cp(join(root, 'package.json'), join(dir, 'package.json'));
   for (const name of ['manifest.json', 'package-lock.json', 'versions.json']) await cp(join(root, name), join(dir, name));
   return dir;
@@ -78,14 +77,14 @@ test('[NPM-04] real setup CLI isolates npm env with stub tools and preserves str
       mkdirSync('node_modules', {recursive:true});writeFileSync('node_modules/.package-lock.json', JSON.stringify({packages:{}}));
       writeFileSync('probe.json', JSON.stringify({args:process.argv.slice(2),
         ignore:process.env.npm_config_ignore_scripts, strict:process.env.npm_config_strict_allow_scripts}));`);
-    for (const path of ['scripts/quality/verify.mjs']) {
+    for (const path of ['tooling/quality/verify.mjs']) {
       const target = join(dir, path);
       await mkdir(join(target, '..'), { recursive: true });
       await writeFile(target, `// Stub: this test asserts the CLI boundary, not build or Vitest behavior.
 import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
 mkdirSync('dist',{recursive:true});writeFileSync('dist/main.js','fixture');writeFileSync('dist/styles.css','.fixture{}');writeFileSync('dist/manifest.json',readFileSync('manifest.json'));`);
     }
-    const result = spawnSync(process.execPath, [join(dir, 'scripts/setup.mjs'), '--yes', '--no-interaction', '--no-local'], {
+    const result = spawnSync(process.execPath, [join(dir, 'tooling/setup.mjs'), '--yes', '--no-interaction', '--no-local'], {
       cwd: dir, encoding: 'utf8', timeout: 10000,
       env: { ...process.env, npm_execpath: launcher, npm_config_allow_scripts: 'not-approved',
         npm_config_ignore_scripts: 'true', npm_config_strict_allow_scripts: 'true' },
@@ -101,7 +100,7 @@ mkdirSync('dist',{recursive:true});writeFileSync('dist/main.js','fixture');write
 test('[NPM-05] dry-run needs no dependency installation and does not launch npm', async () => {
   const dir = await fixture();
   try {
-    const result = spawnSync(process.execPath, [join(dir, 'scripts/setup.mjs'), '--dry-run'], {
+    const result = spawnSync(process.execPath, [join(dir, 'tooling/setup.mjs'), '--dry-run'], {
       cwd: dir, encoding: 'utf8', timeout: 5000,
       env: { ...process.env, npm_execpath: join(dir, 'does-not-exist.mjs'), npm_config_allow_scripts: 'fixture-only' },
     });

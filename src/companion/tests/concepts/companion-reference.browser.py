@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).resolve().parents[4]
 parser=argparse.ArgumentParser()
 parser.add_argument('--browser',default=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'))
 parser.add_argument('--report',default=str(ROOT/'reports/concepts/reference/checks.json'))

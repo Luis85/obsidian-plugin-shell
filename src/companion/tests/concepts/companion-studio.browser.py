@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import argparse, json, time, hashlib
 from playwright.sync_api import sync_playwright
-R=Path(__file__).resolve().parents[2]
+R=Path(__file__).resolve().parents[4]
 a=argparse.ArgumentParser();a.add_argument('--html',default=str(R/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(R/'reports/concepts/companion-studio'));a.add_argument('--browser',default=os.environ.get('SHELL_CHROMIUM', '/usr/bin/chromium'));args=a.parse_args()
 HTML=Path(args.html);OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];requests=[];started=time.time()

@@ -7,7 +7,7 @@ import traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts/er-polish'
 OUT.mkdir(parents=True, exist_ok=True)
@@ -241,7 +241,7 @@ with sync_playwright() as pw:
         js('handleSemanticAction("er-add","")')
         ok('Programmatic editing cannot bypass the run guard', before==js('JSON.stringify(semanticModel())') and not page.locator('#modal').is_visible(), 'Controlled busy-state boundary through actual action')
         js('state.activeRun=null;render()')
-        tokens=sorted(set(re.findall(r'var\((--[a-zA-Z0-9-]+)',(ROOT/'docs/concepts/companion/src/semantic.css').read_text())))
+        tokens=sorted(set(re.findall(r'var\((--[a-zA-Z0-9-]+)',(ROOT/'src/companion/app/semantic.css').read_text())))
         ok('Every semantic interaction color resolves to an existing theme token', page.evaluate('(keys)=>keys.every(k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim())',tokens), 'Computed source-token inventory')
         ok('No browser errors or runtime network requests', not errors and not requests, 'Captured page/console error and request events')
     except Exception:

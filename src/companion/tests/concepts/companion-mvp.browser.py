@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 OUT = ROOT / 'reports/companion-mvp'
 CLICKDUMMY = sys.argv[1:] == ['--clickdummy']
 if sys.argv[1:] and not CLICKDUMMY:

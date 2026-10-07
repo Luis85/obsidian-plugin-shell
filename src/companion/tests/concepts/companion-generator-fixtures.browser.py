@@ -8,7 +8,7 @@ import traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 GOLDEN = ROOT / 'configs/starters/companion-plugin.json'
 OUT = ROOT / 'reports/concepts/generator-fixtures'

@@ -6,7 +6,7 @@ import subprocess
 import traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts/design-styles'
 OUT.mkdir(parents=True, exist_ok=True)
@@ -62,7 +62,7 @@ with sync_playwright() as pw:
         css=(OUT/'design-system.css').read_text()
         check('Actual CSS download matches the saved compiler output',download.suggested_filename=='design-system.css' and css==js('compileDesignSystem(styleGuide(),project().id).css'))
         exported=js('companionJson()');(OUT/'project.companion.json').write_text(exported)
-        run=subprocess.run(['node','--input-type=module','-e',"import {compileDesignSystem} from './scripts/companion/design-system-css.mjs';let s='';for await(const c of process.stdin)s+=c;const d=JSON.parse(s);process.stdout.write(compileDesignSystem(d.design.designSystem,d.project.id).css);"],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=15)
+        run=subprocess.run(['node','--input-type=module','-e',"import {compileDesignSystem} from './src/shared/companion/design-system-css.mjs';let s='';for await(const c of process.stdin)s+=c;const d=JSON.parse(s);process.stdout.write(compileDesignSystem(d.design.designSystem,d.project.id).css);"],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=15)
         check('CLI and browser compilation are byte-identical from the actual exported JSON',run.returncode==0 and run.stdout==css and not run.stderr)
         check('Full-project round trip retains palette policy and mappings',js('JSON.parse(companionJson()).design.designSystem.frontend.colorPolicy==="declared"'))
         act('sg-edit','frontend');page.locator('#sg-binding-primary').select_option('text')
