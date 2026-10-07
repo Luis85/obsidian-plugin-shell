@@ -8,7 +8,7 @@ const args=process.argv.slice(2);
 if(args.some(arg=>arg!=='--replace') || new Set(args).size!==args.length) throw new Error('CLICKDUMMY_USAGE: only --replace is supported');
 const root=process.cwd();
 const project=JSON.parse((await readBounded(resolve(root,'design/project.json'),4_000_000)).toString('utf8'));
-const options={entry:'src/plugin/harness/prototype/main.ts',project:'design/project.json',out:resolve(root,'clickdummy.html'),title:project.project.name,replace:args.includes('--replace')};
+const options={entry:'harness/prototype/main.ts',project:'design/project.json',out:resolve(root,'clickdummy.html'),title:project.project.name,replace:args.includes('--replace')};
 // A framework checkout builds through its prototype skill; a generated project ships only the skill's worker under scripts/clickdummy/.
 const skillBuilder=resolve(root,'.claude/skills/companion-prototype-design/scripts/build-prototype.mjs');
 const result=existsSync(skillBuilder) ? await (await import(pathToFileURL(skillBuilder).href)).buildPrototype({repo:root,...options}) : shippedWorker(options);

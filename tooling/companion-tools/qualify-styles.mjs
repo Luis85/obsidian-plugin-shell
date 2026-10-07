@@ -4,9 +4,9 @@ import { join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 const target = (await readFile('reports/project-generator/target.txt','utf8')).trim();
 const project = JSON.parse(await readFile(join(target,'design/project.json'),'utf8'));
-const main = join(target,'src/plugin/harness/app/main.ts');
+const main = join(target,'harness/app/main.ts');
 const styles = join(target,project.settings.codebaseFolder,'generated/styles/project.css');
-const path = relative(join(target,'src/plugin/harness/app'),styles).replaceAll('\\','/');
+const path = relative(join(target,'harness/app'),styles).replaceAll('\\','/');
 // Only the disposable generated fixture is altered. Production still uses its existing entrypoint.
 await appendFile(main,`\nimport ${JSON.stringify(path)};\n`);
 const checks = [];

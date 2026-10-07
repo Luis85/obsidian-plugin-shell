@@ -45,7 +45,7 @@ export async function inputFingerprint(root, toolchain, options) {
     if (stat.isDirectory()) for (const name of (await readdir(absolute)).sort()) await visit(`${path}/${name}`);
     else if (stat.isFile()) files.push([path, digest(await readFile(absolute))]);
   }
-  for (const path of ['src', 'scripts', 'templates', 'src/plugin/harness', 'tests', '.github', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'docs/testing/test-plan.json', 'docs/design/obsidian-tokens.json', 'tsconfig.json', 'configs', '.azuredevops', 'azure-pipelines.yml']) await visit(path);
+  for (const path of ['src', 'scripts', 'tooling', 'templates', 'harness', 'tests', '.github', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'docs/testing/test-plan.json', 'docs/design/obsidian-tokens.json', 'tsconfig.json', 'configs', '.azuredevops', 'azure-pipelines.yml']) await visit(path);
   return digest(JSON.stringify({ files, toolchain, profile: options.profile, skipInstall: Boolean(options['skip-install']), deferVerify: Boolean(options['defer-verify']),
     browser: Boolean(options['provision-browser']), mcp: Boolean(options.mcp) }));
 }
