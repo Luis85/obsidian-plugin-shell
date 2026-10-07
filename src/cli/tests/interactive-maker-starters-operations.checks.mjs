@@ -51,10 +51,10 @@ test('the schema comes from the checkout and a stray template copy is never prob
 
 test('an extracted kit reads the starters schema from its verified template copy', { timeout: 300000 }, async t => workspace(async context => {
   if (await reviewedExamplesRemoved(context.frameworkRoot)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
-  const source = JSON.parse(await readFile(join(context.frameworkRoot, 'scripts/starters/starter.schema.json'), 'utf8'));
+  const source = JSON.parse(await readFile(join(context.frameworkRoot, 'tooling/starters/starter.schema.json'), 'utf8'));
   const kit = join(context.root, 'kit'); await extractKit(context.frameworkRoot, kit);
   assert.deepEqual((await read({ ...context, frameworkRoot: kit }, 'starters schema')).data, source);
-  await writeFile(join(kit, 'bin/template/scripts/starters/starter.schema.json'), '{"title":"tampered"}');
+  await writeFile(join(kit, 'bin/template/tooling/starters/starter.schema.json'), '{"title":"tampered"}');
   assert.equal(await code(read({ ...context, frameworkRoot: kit }, 'starters schema')), 'KIT_MODIFIED');
 }));
 
