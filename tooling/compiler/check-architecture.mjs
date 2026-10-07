@@ -48,7 +48,11 @@ export function inspectModule(path, text) {
 /** Input map allows negative tests without creating invalid production modules. */
 export function checkCompilerBoundaries(sources) {
   const failures = [], modules = new Map([...sources].map(([path, text]) => [path, inspectModule(path, text)]));
+  // package.json "imports": #shared/* and #tui/* name files of the shared and tui source projects.
+  const aliases = { '#shared/': 'src/shared/', '#tui/': 'src/tui/' };
   function resolveImport(from, specifier) {
+    const alias = Object.keys(aliases).find(prefix => specifier.startsWith(prefix));
+    if (alias) { const target = aliases[alias] + specifier.slice(alias.length); return modules.has(target) ? target : null; }
     if (!specifier.startsWith('.')) return null;
     const path = posix.normalize(posix.join(posix.dirname(from), specifier));
     return modules.has(path) ? path : null;
